@@ -149,14 +149,23 @@ public class DataDrivenImportJob {
         colNames = mgr.getColumnNames(tableName);
       }
 
+      String [] sqlColNames = null;
+      if (null != colNames) {
+        sqlColNames = new String[colNames.length];
+        for (int i = 0; i < colNames.length; i++) {
+          sqlColNames[i] = mgr.escapeColName(colNames[i]);
+        }
+      }
+
       // It's ok if the where clause is null in DBInputFormat.setInput.
       String whereClause = options.getWhereClause();
 
       // We can't set the class properly in here, because we may not have the
       // jar loaded in this JVM. So we start by calling setInput() with DBWritable,
       // and then overriding the string manually.
-      DataDrivenDBInputFormat.setInput(job, DBWritable.class, tableName, whereClause,
-          splitByCol, colNames);
+      DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+          mgr.escapeTableName(tableName), whereClause,
+          mgr.escapeColName(splitByCol), sqlColNames);
       job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY, tableClassName);
 
       PerfCounters counters = new PerfCounters();

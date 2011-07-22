@@ -68,7 +68,7 @@ public abstract class SqlManager extends ConnManager {
    */
   protected String getColNamesQuery(String tableName) {
     // adding where clause to prevent loading a big table
-    return "SELECT t.* FROM " + tableName + " AS t WHERE 1=0";
+    return "SELECT t.* FROM " + escapeTableName(tableName) + " AS t WHERE 1=0";
   }
 
   @Override
@@ -170,13 +170,13 @@ public abstract class SqlManager extends ConnManager {
       if (!first) {
         sb.append(", ");
       }
-      sb.append(col);
+      sb.append(escapeColName(col));
       first = false;
     }
     sb.append(" FROM ");
-    sb.append(tableName);
+    sb.append(escapeTableName(tableName));
     sb.append(" AS ");   // needed for hsqldb; doesn't hurt anyone else.
-    sb.append(tableName);
+    sb.append(escapeTableName(tableName));
 
     return execute(sb.toString());
   }

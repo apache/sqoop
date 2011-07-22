@@ -67,7 +67,7 @@ public class PostgresqlManager extends GenericJdbcManager {
   @Override
   protected String getColNamesQuery(String tableName) {
     // Use LIMIT to return fast
-    return "SELECT t.* FROM " + tableName + " AS t LIMIT 1";
+    return "SELECT t.* FROM " + escapeTableName(tableName) + " AS t LIMIT 1";
   }
 
   @Override

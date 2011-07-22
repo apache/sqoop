@@ -56,7 +56,7 @@ public class MySQLManager extends GenericJdbcManager {
   @Override
   protected String getColNamesQuery(String tableName) {
     // Use mysql-specific hints and LIMIT to return fast
-    return "SELECT t.* FROM " + tableName + " AS t LIMIT 1";
+    return "SELECT t.* FROM " + escapeTableName(tableName) + " AS t LIMIT 1";
   }
 
   @Override
@@ -140,6 +140,36 @@ public class MySQLManager extends GenericJdbcManager {
 
     LOG.info("Executing SQL statement: " + stmt);
     return statement.executeQuery();
+  }
+
+  /**
+   * When using a column name in a generated SQL query, how (if at all)
+   * should we escape that column name? e.g., a column named "table"
+   * may need to be quoted with backtiks: "`table`".
+   *
+   * @param colName the column name as provided by the user, etc.
+   * @return how the column name should be rendered in the sql text.
+   */
+  public String escapeColName(String colName) {
+    if (null == colName) {
+      return null;
+    }
+    return "`" + colName + "`";
+  }
+
+  /**
+   * When using a table name in a generated SQL query, how (if at all)
+   * should we escape that column name? e.g., a table named "table"
+   * may need to be quoted with backtiks: "`table`".
+   *
+   * @param tableName the table name as provided by the user, etc.
+   * @return how the table name should be rendered in the sql text.
+   */
+  public String escapeTableName(String tableName) {
+    if (null == tableName) {
+      return null;
+    }
+    return "`" + tableName + "`";
   }
 }
 
