@@ -54,6 +54,12 @@ The table name used in Hive is, by default, the same as that of the
 source table. You can control the output table name with the +--hive-table+
 option.
 
+If Hive import commands are used in conjunction with the +--generate-only+
+option, then a Hive import will not occur. Instead, the DDL commands to
+perform the import from HDFS to Hive are written to a file named +_tableName_.q+
+which you can then execute with +hive -f+ after the data is brought into
+HDFS.
+
 Hive's Type System
 ~~~~~~~~~~~~~~~~~~
 

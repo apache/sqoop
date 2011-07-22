@@ -129,11 +129,14 @@ public class Sqoop extends Configured implements Tool {
         ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
         manager.importTable(context);
       }
+    }
 
-      // If the user wants this table to be in Hive, perform that post-load.
-      if (options.doHiveImport()) {
-        hiveImport.importTable(tableName, options.getHiveTableName());
-      }
+    // If the user wants this table to be in Hive, perform that post-load.
+    // If the user is in gen-only mode, this code will generate a Hive DDL
+    // statement and write it to a file, but will not actually perform the
+    // import.
+    if (options.doHiveImport()) {
+      hiveImport.importTable(tableName, options.getHiveTableName());
     }
   }
 

@@ -162,7 +162,7 @@
       </fileset>
     </copy>
 
-    <!-- copy the dependency libraries from ivy into the contrib/lib dir -->
+    <!-- copy the dependency libraries from ivy into the output lib dir -->
     <mkdir dir="${dist.dir}/lib"/>
     <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
       <fileset dir="${redist.ivy.lib.dir}">
@@ -248,7 +248,7 @@
 
       <!-- requires fork=yes for:
         relative File paths to use the specified user.dir
-        classpath to use build/contrib/*.jar
+        classpath to use build/*.jar
       -->
       <sysproperty key="user.dir" value="${build.test}/data"/>
 
@@ -303,7 +303,7 @@
 
   <target name="checkfailure" if="tests.failed">
     <touch file="${build.dir}/testsfailed"/>
-    <fail unless="continueOnFailure">Contrib Tests failed!</fail>
+    <fail unless="continueOnFailure">Unit tests failed!</fail>
   </target>
 
   <target name="clean" description="Clean build target files">

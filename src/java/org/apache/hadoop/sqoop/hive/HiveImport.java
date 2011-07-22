@@ -105,6 +105,31 @@ public class HiveImport {
   }
 
   /**
+   * @return true if we're just generating the DDL for the import, but
+   * not actually running it (i.e., --generate-only mode). If so, don't
+   * do any side-effecting actions in Hive.
+   */
+  private boolean isGenerateOnly() {
+    return options.getAction() == SqoopOptions.ControlAction.GenerateOnly;
+  }
+
+  /**
+   * @return a File object that can be used to write the DDL statement.
+   * If we're in gen-only mode, this should be a file in the outdir, named
+   * after the Hive table we're creating. If we're in import mode, this should
+   * be a one-off temporary file.
+   */
+  private File getScriptFile(String outputTableName) throws IOException {
+    if (!isGenerateOnly()) {
+      return File.createTempFile("hive-script-",".txt",
+          new File(options.getTempDir()));
+    } else {
+      return new File(new File(options.getCodeOutputDir()),
+          outputTableName + ".q");
+    }
+  }
+
+  /**
    * Perform the import of data from an HDFS path to a Hive table.
    *
    * @param inputTableName the name of the table as loaded into HDFS
@@ -112,9 +137,11 @@ public class HiveImport {
    */
   public void importTable(String inputTableName, String outputTableName)
       throws IOException {
-    removeTempLogs(inputTableName);
 
-    LOG.info("Loading uploaded data into Hive");
+    if (!isGenerateOnly()) {
+      removeTempLogs(inputTableName);
+      LOG.info("Loading uploaded data into Hive");
+    }
 
     if (null == outputTableName) {
       outputTableName = inputTableName;
@@ -142,12 +169,12 @@ public class HiveImport {
     String loadDataStmtStr = tableWriter.getLoadDataStmt() + ";\n";
 
     // write them to a script file.
-    File tempFile = File.createTempFile("hive-script-",".txt", new File(options.getTempDir()));
+    File scriptFile = getScriptFile(outputTableName);
     try {
-      String tmpFilename = tempFile.toString();
+      String filename = scriptFile.toString();
       BufferedWriter w = null;
       try {
-        FileOutputStream fos = new FileOutputStream(tempFile);
+        FileOutputStream fos = new FileOutputStream(scriptFile);
         w = new BufferedWriter(new OutputStreamWriter(fos));
         w.write(createTableStr, 0, createTableStr.length());
         if (!options.doCreateHiveTableOnly()) {
@@ -167,26 +194,31 @@ public class HiveImport {
         }
       }
 
-      // run Hive on the script and note the return code.
-      String hiveExec = getHiveBinPath();
-      ArrayList<String> args = new ArrayList<String>();
-      args.add(hiveExec);
-      args.add("-f");
-      args.add(tmpFilename);
+      if (!isGenerateOnly()) {
+        // run Hive on the script and note the return code.
+        String hiveExec = getHiveBinPath();
+        ArrayList<String> args = new ArrayList<String>();
+        args.add(hiveExec);
+        args.add("-f");
+        args.add(filename);
 
-      LoggingAsyncSink logSink = new LoggingAsyncSink(LOG);
-      int ret = Executor.exec(args.toArray(new String[0]),
-          env.toArray(new String[0]), logSink, logSink);
-      if (0 != ret) {
-        throw new IOException("Hive exited with status " + ret);
+        LoggingAsyncSink logSink = new LoggingAsyncSink(LOG);
+        int ret = Executor.exec(args.toArray(new String[0]),
+            env.toArray(new String[0]), logSink, logSink);
+        if (0 != ret) {
+          throw new IOException("Hive exited with status " + ret);
+        }
+
+        LOG.info("Hive import complete.");
       }
-
-      LOG.info("Hive import complete.");
     } finally {
-      if (!tempFile.delete()) {
-        LOG.warn("Could not remove temporary file: " + tempFile.toString());
-        // try to delete the file later.
-        tempFile.deleteOnExit();
+      if (!isGenerateOnly()) {
+        // User isn't interested in saving the DDL. Remove the file.
+        if (!scriptFile.delete()) {
+          LOG.warn("Could not remove temporary file: " + scriptFile.toString());
+          // try to delete the file later.
+          scriptFile.deleteOnExit();
+        }
       }
     }
   }
