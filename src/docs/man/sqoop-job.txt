@@ -1,0 +1,94 @@
+sqoop-job(1)
+============
+
+NAME
+----
+sqoop-job - Define, execute, and manipulate saved Sqoop jobs.
+
+SYNOPSIS
+--------
+'sqoop-job' <generic-options> <tool-options> [-- [<subtool-name>]
+<subtool-options>]
+
+'sqoop job' <generic-options> <tool-options> [-- [<subtool-name>]
+<subtool-options>]
+
+
+DESCRIPTION
+-----------
+
+include::../user/job-purpose.txt[]
+
+OPTIONS
+-------
+
+One of the job operation arguments is required. 
+
+Job management options
+~~~~~~~~~~~~~~~~~~~~~~
+
+--create (job-id)::
+  Define a new saved job with the specified job-id (name). A
+  second Sqoop command-line, separated by a +--+ should be specified;
+  this defines the saved job.
+
+--delete (job-id)::
+  Delete a saved job. (This deletes the job definition, but does not
+  remove any data from HDFS.)
+
+--exec (job-id)::
+  Given a job id defined with +--create+, run the saved job. Any arguments
+  following a +--+ are applied on top of the saved job, overriding the saved
+  parameters.
+
+--show (job-id)::
+  Shows the parameters for a saved job
+
+--list::
+  List all saved jobs
+
+
+Metastore connection options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, Sqoop will use a private, local embedded database to store saved
+jobs. An alternate metastore can be configured in +conf/sqoop-site.xml+. You
+can also specify the metastore connect string here:
+
+--meta-connect (jdbc-uri)::
+  Specifies the JDBC connect string used to connect to the metastore
+
+
+Common options
+~~~~~~~~~~~~~~
+
+--help::
+  Print usage instructions
+
+--verbose::
+  Print more information while working
+
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+

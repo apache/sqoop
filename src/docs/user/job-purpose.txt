@@ -16,43 +16,12 @@
    limitations under the License.
 ////
 
-Sqoop User Guide (v{revnumber})
-===============================
+The job tool allows you to create and work with saved jobs. Saved jobs
+remember the parameters used to specify a job, so they can be
+re-executed by invoking the job by its handle.
 
-
-
-include::intro.txt[]
-
-include::preface.txt[]
-
-include::basics.txt[]
-
-include::tools.txt[]
-
-include::import.txt[]
-
-include::import-all-tables.txt[]
-
-include::export.txt[]
-
-include::saved-jobs.txt[]
-
-include::codegen.txt[]
-
-include::create-hive-table.txt[]
-
-include::eval.txt[]
-
-include::list-databases.txt[]
-
-include::list-tables.txt[]
-
-include::help.txt[]
-
-include::version.txt[]
-
-include::compatibility.txt[]
-
-include::support.txt[]
+If a saved job is configured to perform an incremental import, state regarding
+the most recently imported rows is updated in the saved job to allow the job
+to continually import only the newest rows.
 
 

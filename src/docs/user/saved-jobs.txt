@@ -1,0 +1,233 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Saved Jobs
+----------
+
+Imports and exports can be repeatedly performed by issuing the same command
+multiple times. Especially when using the incremental import capability,
+this is an expected scenario.
+
+Sqoop allows you to define _saved jobs_ which make this process easier. A
+saved job records the configuration information required to execute a
+Sqoop command at a later time. The section on the +sqoop-job+ tool
+describes how to create and work with saved jobs.
+
+By default, job descriptions are saved to a private repository stored
+in +$HOME/.sqoop/+. You can configure Sqoop to instead use a shared
+_metastore_, which makes saved jobs available to multiple users across a
+shared cluster. Starting the metastore is covered by the section on the
++sqoop-metastore+ tool.
+
+
++sqoop-job+
+-----------
+
+Purpose
+~~~~~~~
+
+include::job-purpose.txt[]
+
+Syntax
+~~~~~~
+
+----
+$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]
+$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]
+----
+
+Although the Hadoop generic arguments must preceed any export arguments,
+the job arguments can be entered in any order with respect to one
+another.
+
+.Job management options:
+[grid="all"]
+`---------------------------`------------------------------------------
+Argument                    Description
+-----------------------------------------------------------------------
++\--create <job-id>+        Define a new saved job with the specified \
+                            job-id (name). A second Sqoop \
+                            command-line, separated by a +\--+ should \
+                            be specified; this defines the saved job.
++\--delete <job-id>+        Delete a saved job.
++\--exec <job-id>+          Given a job defined with +\--create+, run \
+                            the saved job.
++\--show <job-id>+          Show the parameters for a saved job.
++\--list+                   List all saved jobs
+-----------------------------------------------------------------------
+
+Creating saved jobs is done with the +\--create+ action. This operation
+requires a +\--+ followed by a tool name and its arguments. The tool and
+its arguments will form the basis of the saved job. Consider:
+
+----
+$ sqoop job --create myjob -- import --connect jdbc:mysql://example.com/db \
+    --table mytable
+----
+
+This creates a job named +myjob+ which can be executed later. The job is not
+run. This job is now available in the list of saved jobs:
+
+----
+$ sqoop job --list
+Available jobs:
+  myjob
+----
+
+We can inspect the configuration of a job with the +show+ action:
+
+----
+ $ sqoop job --show myjob
+ Job: myjob
+ Tool: import
+ Options:
+ ----------------------------
+ direct.import = false
+ codegen.input.delimiters.record = 0
+ hdfs.append.dir = false
+ db.table = mytable
+ ...
+----
+
+And if we are satisfied with it, we can run the job with +exec+:
+
+----
+$ sqoop job --exec myjob
+10/08/19 13:08:45 INFO tool.CodeGenTool: Beginning code generation
+...
+----
+
+The +exec+ action allows you to override arguments of the saved job
+by supplying them after a +\--+. For example, if the database were
+changed to require a username, we could specify the username and
+password with:
+
+----
+$ sqoop job --exec myjob -- --username someuser -P
+Enter password:
+...
+----
+
+.Metastore connection options:
+[grid="all"]
+`----------------------------`-----------------------------------------
+Argument                     Description
+-----------------------------------------------------------------------
++\--meta-connect <jdbc-uri>+ Specifies the JDBC connect string used \
+                             to connect to the metastore
+-----------------------------------------------------------------------
+
+By default, a private metastore is instantiated in +$HOME/.sqoop+. If
+you have configured a hosted metastore with the +sqoop-metastore+
+tool, you can connect to it by specifying the +\--meta-connect+
+argument. This is a JDBC connect string just like the ones used to
+connect to databases for import.
+
+In +conf/sqoop-site.xml+, you can configure
++sqoop.metastore.client.autoconnect.url+ with this address, so you do not have
+to supply +\--meta-connect+ to use a remote metastore. This parameter can
+also be modified to move the private metastore to a location on your
+filesystem other than your home directory.
+
+If you configure +sqoop.metastore.client.enable.autoconnect+ with the
+value +false+, then you must explicitly supply +\--meta-connect+.
+
+.Common options:
+[grid="all"]
+`---------------------------`------------------------------------------
+Argument                    Description
+-----------------------------------------------------------------------
++\--help+                   Print usage instructions
++\--verbose+                Print more information while working
+-----------------------------------------------------------------------
+
+Saved jobs and passwords
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Sqoop metastore is not a secure resource. Multiple users can access
+its contents. For this reason, Sqoop does not store passwords in the
+metastore. If you create a job that requires a password, you will be
+prompted for that password each time you execute the job.
+
+You can enable passwords in the metastore by setting
++sqoop.metastore.client.record.password+ to +true+ in the configuration.
+
+
+Saved jobs and incremental imports
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Incremental imports are performed by comparing the values in a _check column_
+against a reference value for the most recent import. For example, if the
++\--incremental append+ argument was specified, along with +\--check-column
+id+ and +\--last-value 100+, all rows with +id > 100+ will be imported.
+If an incremental import is run from the command line, the value which
+should be specified as +\--last-value+ in a subsequent incremental import
+will be printed to the screen for your reference. If an incremental import is
+run from a saved job, this value will be retained in the saved job. Subsequent
+runs of +sqoop job \--exec someIncrementalJob+ will continue to import only
+newer rows than those previously imported.
+
+
++sqoop-metastore+
+-----------------
+
+Purpose
+~~~~~~~
+
+include::metastore-purpose.txt[]
+
+Syntax
+~~~~~~
+
+----
+$ sqoop metastore (generic-args) (metastore-args)
+$ sqoop-metastore (generic-args) (metastore-args)
+----
+
+Although the Hadoop generic arguments must preceed any metastore arguments,
+the metastore arguments can be entered in any order with respect to one
+another.
+
+.Metastore management options:
+[grid="all"]
+`---------------------------`------------------------------------------
+Argument                    Description
+-----------------------------------------------------------------------
++\--shutdown+               Shuts down a running metastore instance \
+                            on the same machine.
+-----------------------------------------------------------------------
+
+Running +sqoop-metastore+ launches a shared HSQLDB database instance on
+the current machine. Clients can connect to this metastore and create jobs
+which can be shared between users for execution.
+
+The location of the metastore's files on disk is controlled by the
++sqoop.metastore.server.location+ property in +conf/sqoop-site.xml+.
+This should point to a directory on the local filesystem.
+
+The metastore is available over TCP/IP. The port is controlled by the
++sqoop.metastore.server.port+ configuration parameter, and defaults to 16000.
+
+Clients should connect to the metastore by specifying
++sqoop.metastore.client.autoconnect.url+ or +\--meta-connect+ with the
+value +jdbc:hsqldb:hsql://<server-name>:<port>/sqoop+. For example,
++jdbc:hsqldb:hsql://metaserver.example.com:16000/sqoop+.
+
+This metastore may be hosted on a machine within the Hadoop cluster, or
+elsewhere on the network.
+

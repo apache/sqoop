@@ -86,6 +86,32 @@ include::hbase-args.txt[]
 
 include::codegen-args.txt[]
 
+
+Incremental import options
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sqoop can be configured to import only "new" data from the source database
+using the arguments in this section. While any import job can make use of
+these arguments, they are most powerful when used to initialize a recurring
+job with +sqoop job --create ...+. After executing a saved job, the last
+observed value of the check column is updated in the saved job.
+
+--incremental (mode)::
+  Specifies that this is an incremental import. Determines how Sqoop should
+  discover new data. "mode" may be +append+, in which case new rows are
+  expected to be added with increasing id values, or +lastmodified+, in which
+  case new data is discovered by comparing a timestamp column with the
+  timestamp at which the last import was performed.
+
+--check-column (col)::
+  Specifies a column whose value should be compared to the last imported
+  id or the last import timestamp to determine rows to import.
+
+--last-value (value)::
+  Specifies the most recent id imported, or the timestamp of the most recent
+  id. This argument is unnecessary for an initial import.
+
+
 Database-specific options
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

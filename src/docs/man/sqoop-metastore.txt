@@ -1,3 +1,36 @@
+sqoop-metastore(1)
+==================
+
+NAME
+----
+sqoop-metastore - Host a shared repository for saved Sqoop jobs.
+
+SYNOPSIS
+--------
+'sqoop-metastore' <generic-options> <tool-options>
+
+'sqoop metastore' <generic-options> <tool-options>
+
+
+DESCRIPTION
+-----------
+
+include::../user/metastore-purpose.txt[]
+
+OPTIONS
+-------
+
+Metastore management options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--shutdown::
+  Shuts down a running metastore instance on the same machine
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+
 
 ////
    Licensed to Cloudera, Inc. under one or more
@@ -15,44 +48,4 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ////
-
-Sqoop User Guide (v{revnumber})
-===============================
-
-
-
-include::intro.txt[]
-
-include::preface.txt[]
-
-include::basics.txt[]
-
-include::tools.txt[]
-
-include::import.txt[]
-
-include::import-all-tables.txt[]
-
-include::export.txt[]
-
-include::saved-jobs.txt[]
-
-include::codegen.txt[]
-
-include::create-hive-table.txt[]
-
-include::eval.txt[]
-
-include::list-databases.txt[]
-
-include::list-tables.txt[]
-
-include::help.txt[]
-
-include::version.txt[]
-
-include::compatibility.txt[]
-
-include::support.txt[]
-
 

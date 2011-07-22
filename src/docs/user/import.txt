@@ -234,6 +234,55 @@ data to a temporary directory and then rename the files into the normal
 target directory in a manner that does not conflict with existing filenames
 in that directory.
 
+Incremental Imports
+^^^^^^^^^^^^^^^^^^^
+
+Sqoop provides an incremental import mode which can be used to retrieve
+only rows newer than some previously-imported set of rows.
+
+The following arguments control incremental imports:
+
+
+.Incremental import arguments:
+[grid="all"]
+`-----------------------------`--------------------------------------
+Argument                      Description
+---------------------------------------------------------------------
++\--check-column (col)+       Specifies the column to be examined \
+                              when determining which rows to import.
++\--incremental (mode)+       Specifies how Sqoop determines which \
+                              rows are new. Legal values for +mode+\
+                              include +append+ and +lastmodified+.
++\--last-value (value)+       Specifies the maximum value of the \
+                              check column from the previous import.
+---------------------------------------------------------------------
+
+
+Sqoop supports two types of incremental imports: +append+ and +lastmodified+.
+You can use the +\--incremental+ argument to specify the type of incremental
+import to perform.
+
+You should specify +append+ mode when importing a table where new rows are
+continually being added with increasing row id values. You specify the column
+containing the row's id with +\--check-column+. Sqoop imports rows where the
+check column has a value greater than the one specified with +\--last-value+.
+
+An alternate table update strategy supported by Sqoop is called +lastmodified+
+mode. You should use this when rows of the source table may be updated, and
+each such update will set the value of a last-modified column to the current
+timestamp.  Rows where the check column holds a timestamp more recent than the
+timestamp specified with +\--last-value+ are imported.
+
+At the end of an incremental import, the value which should be specified as
++\--last-value+ for a subsequent import is printed to the screen. When running
+a subsequent import, you should specify +\--last-value+ in this way to ensure
+you import only the new or updated data. This is handled automatically by
+creating an incremental import as a saved job, which is the preferred
+mechanism for performing a recurring incremental import. See the section on
+saved jobs later in this document for more information.
+
+
+
 File Formats
 ^^^^^^^^^^^^
 
