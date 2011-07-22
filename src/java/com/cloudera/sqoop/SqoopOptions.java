@@ -114,6 +114,12 @@ public class SqoopOptions implements Cloneable {
   // used. If so, it is stored as 'db.password'.
   private String password;
 
+  @StoredAsProperty("null.string") private String nullStringValue;
+  @StoredAsProperty("input.null.string") private String inNullStringValue;
+  @StoredAsProperty("null.non-string") private String nullNonStringValue;
+  @StoredAsProperty("input.null.non-string")
+      private String inNullNonStringValue;
+
   @StoredAsProperty("codegen.output.dir") private String codeOutputDir;
   @StoredAsProperty("codegen.compile.dir") private String jarOutputDir;
   // Boolean specifying whether jarOutputDir is a nonce tmpdir (true), or
@@ -1596,6 +1602,38 @@ public class SqoopOptions implements Cloneable {
   public String getConnManagerClassName() {
     return connManagerClassName;
   }
+
+  public void setNullStringValue(String nullString) {
+    this.nullStringValue = nullString;
+  }
+
+  public String getNullStringValue() {
+    return nullStringValue;
+  }
+
+  public void setInNullStringValue(String inNullString) {
+    this.inNullStringValue = inNullString;
+  }
+
+  public String getInNullStringValue() {
+    return inNullStringValue;
+  }
+
+public void setNullNonStringValue(String nullNonString) {
+    this.nullNonStringValue = nullNonString;
+}
+
+public String getNullNonStringValue() {
+    return nullNonStringValue;
+}
+
+public void setInNullNonStringValue(String inNullNonString) {
+    this.inNullNonStringValue = inNullNonString;
+}
+
+public String getInNullNonStringValue() {
+    return inNullNonStringValue;
+}
 
 }
 

@@ -76,7 +76,11 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_HOME_ARG = "hive-home";
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
   public static final String TARGET_DIR_ARG = "target-dir";
-  public static final String APPEND_ARG = "append";
+  public static final String APPEND_ARG = "append";  
+  public static final String NULL_STRING = "null-string";
+  public static final String INPUT_NULL_STRING = "input-null-string";
+  public static final String NULL_NON_STRING = "null-non-string";
+  public static final String INPUT_NULL_NON_STRING = "input-null-non-string";
 
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
@@ -493,6 +497,26 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withDescription("Put auto-generated classes in this package")
         .withLongOpt(PACKAGE_NAME_ARG)
         .create());
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-string")
+            .hasArg()
+            .withDescription("Null string representation")
+            .withLongOpt(NULL_STRING)
+            .create());
+    codeGenOpts.addOption(OptionBuilder.withArgName("input-null-string")
+            .hasArg()
+            .withDescription("Input null string representation")
+            .withLongOpt(INPUT_NULL_STRING)
+            .create());
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-non-string")
+            .hasArg()
+            .withDescription("Null non-string representation")
+            .withLongOpt(NULL_NON_STRING)
+            .create());
+    codeGenOpts.addOption(OptionBuilder.withArgName("input-null-non-string")
+            .hasArg()
+            .withDescription("Input null non-string representation")
+            .withLongOpt(INPUT_NULL_NON_STRING)
+            .create());
     if (!multiTable) {
       codeGenOpts.addOption(OptionBuilder.withArgName("name")
           .hasArg()
@@ -561,6 +585,22 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(CONN_MANAGER_CLASS_NAME)) {
         out.setConnManagerClassName(in.getOptionValue(CONN_MANAGER_CLASS_NAME));
+    }
+
+    if (in.hasOption(NULL_STRING)) {
+        out.setNullStringValue(in.getOptionValue(NULL_STRING));
+    }
+
+    if (in.hasOption(INPUT_NULL_STRING)) {
+        out.setInNullStringValue(in.getOptionValue(INPUT_NULL_STRING));
+    }
+
+    if (in.hasOption(NULL_NON_STRING)) {
+        out.setNullNonStringValue(in.getOptionValue(NULL_NON_STRING));
+    }
+
+    if (in.hasOption(INPUT_NULL_NON_STRING)) {
+        out.setInNullNonStringValue(in.getOptionValue(INPUT_NULL_NON_STRING));
     }
 
     if (in.hasOption(DRIVER_ARG)) {

@@ -272,10 +272,17 @@ public class ClassWriter {
 
   private String stringifierForType(String javaType, String colName) {
     if (javaType.equals("String")) {
-      return colName;
+      // Check if it is null, and write the null representation in such case
+      String r = colName  + "==null?\"" + this.options.getNullStringValue()
+          + "\":" + colName;
+      return r;
     } else {
       // This is an object type -- just call its toString() in a null-safe way.
-      return "\"\" + " + colName;
+      // Also check if it is null, and instead write the null representation
+      // in such case
+      String r = colName  + "==null?\"" + this.options.getNullNonStringValue()
+          + "\":" + "\"\" + " + colName;
+      return r;
     }
   }
 
@@ -731,17 +738,19 @@ public class ClassWriter {
   }
 
   /**
-   * Helper method for parseColumn(). Interpret the string 'null' as a null
+   * Helper method for parseColumn(). Interpret the string null representation
    * for a particular column.
    */
   private void parseNullVal(String javaType, String colName, StringBuilder sb) {
     if (javaType.equals("String")) {
-      sb.append("    if (__cur_str.equals(\"null\")) { this.");
+      sb.append("    if (__cur_str.equals(\""
+         + this.options.getInNullStringValue() + "\")) { this.");
       sb.append(colName);
       sb.append(" = null; } else {\n");
     } else {
-      sb.append("    if (__cur_str.equals(\"null\")");
-      sb.append(" || __cur_str.length() == 0) { this.");
+      sb.append("    if (__cur_str.equals(\""
+         + this.options.getInNullNonStringValue());
+      sb.append("\") || __cur_str.length() == 0) { this.");
       sb.append(colName);
       sb.append(" = null; } else {\n");
     }

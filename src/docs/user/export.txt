@@ -43,15 +43,20 @@ include::common-args.txt[]
 
 .Export control arguments:
 [grid="all"]
-`---------------------------`------------------------------------------
-Argument                    Description
------------------------------------------------------------------------
-+\--direct+                 Use direct export fast path
-+\--export-dir <dir>+       HDFS source path for the export
-+-m,\--num-mappers <n>+     Use 'n' map tasks to export in parallel
-+\--table <table-name>+     Table to populate
-+\--update-key <col-name>+  Anchor column to use for updates
------------------------------------------------------------------------
+`----------------------------------------`------------------------------
+Argument                                 Description
+------------------------------------------------------------------------
++\--direct+                              Use direct export fast path
++\--export-dir <dir>+                    HDFS source path for the export
++-m,\--num-mappers <n>+                  Use 'n' map tasks to export in\
+                                         parallel
++\--table <table-name>+                  Table to populate
++\--update-key <col-name>+               Anchor column to use for updates
++\--input-null-string <null-string>+     The string to be interpreted as\
+                                         null for string columns
++\--input-null-non-string <null-string>+ The string to be interpreted as\
+                                         null for non-string columns
+------------------------------------------------------------------------
 
 The +\--table+ and +\--export-dir+ arguments are required. These
 specify the table to populate in the database, and the
@@ -73,6 +78,14 @@ MySQL provides a direct mode for exports as well, using the
 to specify this codepath. This may be
 higher-performance than the standard JDBC codepath. 
 
+The +\--input-null-string+ and +\--input-null-non-string+ arguments are
+optional. If +\--input-null-string+ is not specified, then the string
+"null" will be interpreted as null for string-type columns.
+If +\--input-null-non-string+ is not specified, then both the string
+"null" and the empty string will be interpreted as null for non-string
+columns. Note that, the empty string will be always interpreted as null
+for non-string columns, in addition to other string if specified by
++\--input-null-non-string+.
 
 Inserts vs. Updates
 ~~~~~~~~~~~~~~~~~~~

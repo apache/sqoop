@@ -75,6 +75,11 @@ Import control options
 -z::
   Uses gzip to compress data as it is written to HDFS
 
+--null-string::
+  The string to be written for a null value for string columns
+
+--null-non-string::
+  The string to be written for a null value for non-string columns
 
 include::output-args.txt[]
 

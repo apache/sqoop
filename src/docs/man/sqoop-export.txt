@@ -43,6 +43,12 @@ Export control options
 --update-key (col-name)::
   Anchor column to use for updates
 
+--input-null-string::
+  The string to be interpreted as null for string columns
+
+--input-null-non-string::
+  The string to be interpreted as null for non-string columns
+
 include::input-args.txt[]
 
 include::output-args.txt[]
