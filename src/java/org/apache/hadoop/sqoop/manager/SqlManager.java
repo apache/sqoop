@@ -45,7 +45,7 @@ import org.apache.hadoop.conf.Configuration;
  * This is an abstract class; it requires a database-specific
  * ConnManager implementation to actually create the connection.
  */
-public abstract class SqlManager implements ConnManager {
+public abstract class SqlManager extends ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 
@@ -260,8 +260,11 @@ public abstract class SqlManager implements ConnManager {
    * Default implementation of importTable() is to launch a MapReduce job
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
-  public void importTable(String tableName, String jarFile, Configuration conf)
+  public void importTable(ImportJobContext context)
       throws IOException, ImportError {
+    String tableName = context.getTableName();
+    String jarFile = context.getJarFile();
+    ImportOptions options = context.getOptions();
     DataDrivenImportJob importer = new DataDrivenImportJob(options);
     String splitCol = options.getSplitByCol();
     if (null == splitCol) {
@@ -275,7 +278,7 @@ public abstract class SqlManager implements ConnManager {
           + ". Please specify one with --split-by.");
     }
 
-    importer.runImport(tableName, jarFile, splitCol, conf);
+    importer.runImport(tableName, jarFile, splitCol, options.getConf());
   }
 
   /**

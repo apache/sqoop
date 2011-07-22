@@ -37,7 +37,8 @@ import org.apache.hadoop.util.Shell;
  */
 public final class DirectImportUtils {
 
-  public static final Log LOG = LogFactory.getLog(DirectImportUtils.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      DirectImportUtils.class.getName());
 
   private DirectImportUtils() {
   }
@@ -47,7 +48,8 @@ public final class DirectImportUtils {
    * which may be e.g. "a+x" or "0600", etc.
    * @throws IOException if chmod failed.
    */
-  public static void setFilePermissions(File file, String modstr) throws IOException {
+  public static void setFilePermissions(File file, String modstr)
+      throws IOException {
     // Set this file to be 0600. Java doesn't have a built-in mechanism for this
     // so we need to go out to the shell to execute chmod.
     try {
@@ -61,9 +63,9 @@ public final class DirectImportUtils {
 
   /**
    * Open a file in HDFS for write to hold the data associated with a table.
-   * Creates any necessary directories, and returns the OutputStream to write to.
-   * The caller is responsible for calling the close() method on the returned
-   * stream.
+   * Creates any necessary directories, and returns the OutputStream to write
+   * to. The caller is responsible for calling the close() method on the
+   * returned stream.
    */
   public static SplittableBufferedWriter createHdfsSink(Configuration conf,
       ImportOptions options, String tableName) throws IOException {
@@ -83,8 +85,8 @@ public final class DirectImportUtils {
 
     // This Writer will be closed by the caller.
     return new SplittableBufferedWriter(
-        new SplittingOutputStream(conf, destDir, "data-", options.getDirectSplitSize(),
-        options.shouldUseCompression()));
+        new SplittingOutputStream(conf, destDir, "data-",
+        options.getDirectSplitSize(), options.shouldUseCompression()));
   }
 }
 

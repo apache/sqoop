@@ -28,8 +28,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +39,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.ImportOptions;
 import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
+import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
+import org.apache.hadoop.sqoop.util.ErrorableThread;
 import org.apache.hadoop.sqoop.util.Executor;
 import org.apache.hadoop.sqoop.util.ImportError;
 import org.apache.hadoop.sqoop.util.JdbcUrl;
 import org.apache.hadoop.sqoop.util.PerfCounters;
-import org.apache.hadoop.sqoop.util.StreamHandlerFactory;
+import org.apache.hadoop.sqoop.util.AsyncSink;
 
 /**
  * Manages direct dumps from Postgresql databases via psql COPY TO STDOUT
@@ -64,35 +64,24 @@ public class DirectPostgresqlManager extends PostgresqlManager {
   /** Copies data directly into HDFS, adding the user's chosen line terminator
       char to each record.
     */
-  static class PostgresqlStreamHandlerFactory implements StreamHandlerFactory {
+  static class PostgresqlAsyncSink extends ErrorableAsyncSink {
     private final SplittableBufferedWriter writer;
     private final PerfCounters counters;
     private final ImportOptions options;
 
-    PostgresqlStreamHandlerFactory(final SplittableBufferedWriter w, final ImportOptions opts,
+    PostgresqlAsyncSink(final SplittableBufferedWriter w, final ImportOptions opts,
         final PerfCounters ctrs) {
       this.writer = w;
       this.options = opts;
       this.counters = ctrs;
     }
 
-    private PostgresqlStreamThread child;
-
     public void processStream(InputStream is) {
       child = new PostgresqlStreamThread(is, writer, options, counters);
       child.start();
     }
 
-    public int join() throws InterruptedException {
-      child.join();
-      if (child.isErrored()) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-
-    private static class PostgresqlStreamThread extends Thread {
+    private static class PostgresqlStreamThread extends ErrorableThread {
       public static final Log LOG = LogFactory.getLog(PostgresqlStreamThread.class.getName());
 
       private final SplittableBufferedWriter writer;
@@ -100,18 +89,12 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       private final ImportOptions options;
       private final PerfCounters counters;
 
-      private boolean error;
-
       PostgresqlStreamThread(final InputStream is, final SplittableBufferedWriter w,
           final ImportOptions opts, final PerfCounters ctrs) {
         this.stream = is;
         this.writer = w;
         this.options = opts;
         this.counters = ctrs;
-      }
-
-      public boolean isErrored() {
-        return error;
       }
 
       public void run() {
@@ -138,7 +121,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         } catch (IOException ioe) {
           LOG.error("IOException reading from psql: " + ioe.toString());
           // set the error bit so our caller can see that something went wrong.
-          error = true;
+          setError();
         } finally {
           if (null != r) {
             try {
@@ -312,8 +295,12 @@ public class DirectPostgresqlManager extends PostgresqlManager {
    * Import the table into HDFS by using psql to pull the data out of the db
    * via COPY FILE TO STDOUT.
    */
-  public void importTable(String tableName, String jarFile, Configuration conf)
+  public void importTable(ImportJobContext context)
     throws IOException, ImportError {
+
+    String tableName = context.getTableName();
+    String jarFile = context.getJarFile();
+    ImportOptions options = context.getOptions();
 
     LOG.info("Beginning psql fast path import");
 
@@ -327,7 +314,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     String commandFilename = null;
     String passwordFilename = null;
     Process p = null;
-    StreamHandlerFactory streamHandler = null;
+    AsyncSink sink = null;
     PerfCounters counters = new PerfCounters();
 
     try {
@@ -395,19 +382,21 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         LOG.debug("  " + arg);
       }
 
-      // This writer will be closed by StreamHandlerFactory.
-      SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(conf, options, tableName);
+      // This writer will be closed by AsyncSink.
+      SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(
+          options.getConf(), options, tableName);
 
       // Actually start the psql dump.
-      p = Runtime.getRuntime().exec(args.toArray(new String[0]), envp.toArray(new String[0]));
+      p = Runtime.getRuntime().exec(args.toArray(new String[0]),
+          envp.toArray(new String[0]));
 
       // read from the stdout pipe into the HDFS writer.
       InputStream is = p.getInputStream();
-      streamHandler = new PostgresqlStreamHandlerFactory(w, options, counters);
+      sink = new PostgresqlAsyncSink(w, options, counters);
 
-      LOG.debug("Starting stream handler");
+      LOG.debug("Starting stream sink");
       counters.startClock();
-      streamHandler.processStream(is);
+      sink.processStream(is);
     } finally {
       // block until the process is done.
       LOG.debug("Waiting for process completion");
@@ -440,12 +429,12 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         }
       }
 
-      // block until the stream handler is done too.
+      // block until the stream sink is done too.
       int streamResult = 0;
-      if (null != streamHandler) {
+      if (null != sink) {
         while (true) {
           try {
-            streamResult = streamHandler.join();
+            streamResult = sink.join();
           } catch (InterruptedException ie) {
             // interrupted; loop around.
             continue;
@@ -463,7 +452,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       }
 
       if (0 != streamResult) {
-        throw new IOException("Encountered exception in stream handler");
+        throw new IOException("Encountered exception in stream sink");
       }
 
       counters.stopClock();

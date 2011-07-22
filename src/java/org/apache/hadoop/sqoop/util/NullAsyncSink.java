@@ -27,12 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A StreamHandlerFactory that takes the contents of a stream and ignores it.
- *
+ * An AsyncSink that takes the contents of a stream and ignores it.
  */
-public class NullStreamHandlerFactory implements StreamHandlerFactory {
+public class NullAsyncSink extends AsyncSink {
 
-  public static final Log LOG = LogFactory.getLog(NullStreamHandlerFactory.class.getName());
+  public static final Log LOG = LogFactory.getLog(NullAsyncSink.class.getName());
 
   private Thread child;
 
@@ -76,7 +75,7 @@ public class NullStreamHandlerFactory implements StreamHandlerFactory {
       try {
         r.close();
       } catch (IOException ioe) {
-        LOG.warn("Error closing stream in NullStreamHandler: " + ioe.toString());
+        LOG.warn("Error closing stream in NullAsyncSink: " + ioe.toString());
       }
     }
   }

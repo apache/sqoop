@@ -90,8 +90,12 @@ public class OracleManager extends GenericJdbcManager {
    * This importTable() implementation continues to use the older DBInputFormat
    * because DataDrivenDBInputFormat does not currently work with Oracle.
    */
-  public void importTable(String tableName, String jarFile, Configuration conf)
+  public void importTable(ImportJobContext context)
       throws IOException, ImportError {
+
+    String tableName = context.getTableName();
+    String jarFile = context.getJarFile();
+    ImportOptions options = context.getOptions();
     ImportJob importer = new ImportJob(options);
     String splitCol = options.getSplitByCol();
     if (null == splitCol) {
@@ -105,7 +109,7 @@ public class OracleManager extends GenericJdbcManager {
           + ". Please specify one with --split-by.");
     }
 
-    importer.runImport(tableName, jarFile, splitCol, conf);
+    importer.runImport(tableName, jarFile, splitCol, options.getConf());
   }
 }
 

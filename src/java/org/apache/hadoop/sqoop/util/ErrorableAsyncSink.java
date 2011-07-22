@@ -21,25 +21,20 @@ package org.apache.hadoop.sqoop.util;
 import java.io.InputStream;
 
 /**
- * An interface describing a factory class for a Thread class that handles
- * input from some sort of stream.
- *
- * When the stream is closed, the thread should terminate.
- *
+ * Partial implementation of AsyncSink that relies on ErrorableThread to
+ * provide a status bit for the join() method.
  */
-public interface StreamHandlerFactory {
-  
-  /**
-   * Create and run a thread to handle input from the provided InputStream.
-   * When processStream returns, the thread should be running; it should
-   * continue to run until the InputStream is exhausted.
-   */
-  void processStream(InputStream is);
+public abstract class ErrorableAsyncSink extends AsyncSink {
 
-  /**
-   * Wait until the stream has been processed.
-   * @return a status code indicating success or failure. 0 is typical for success.
-   */
-  int join() throws InterruptedException;
+  protected ErrorableThread child;
+
+  public int join() throws InterruptedException {
+    child.join();
+    if (child.isErrored()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
 

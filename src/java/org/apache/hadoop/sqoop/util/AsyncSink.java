@@ -16,18 +16,29 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop.manager;
+package org.apache.hadoop.sqoop.util;
 
-import org.apache.hadoop.sqoop.ImportOptions;
+import java.io.InputStream;
 
 /**
- * Interface for factory classes for ConnManager implementations.
- * ManagerFactories are instantiated by o.a.h.s.ConnFactory and
- * stored in an ordered list. The ConnFactory.getManager() implementation
- * calls the accept() method of each ManagerFactory, in order until
- * one such call returns a non-null ConnManager instance.
+ * An interface describing a factory class for a Thread class that handles
+ * input from some sort of stream.
+ *
+ * When the stream is closed, the thread should terminate.
  */
-public abstract class ManagerFactory {
-  public abstract ConnManager accept(ImportOptions options);
+public abstract class AsyncSink {
+  
+  /**
+   * Create and run a thread to handle input from the provided InputStream.
+   * When processStream returns, the thread should be running; it should
+   * continue to run until the InputStream is exhausted.
+   */
+  public abstract void processStream(InputStream is);
+
+  /**
+   * Wait until the stream has been processed.
+   * @return a status code indicating success or failure. 0 is typical for success.
+   */
+  public abstract int join() throws InterruptedException;
 }
 

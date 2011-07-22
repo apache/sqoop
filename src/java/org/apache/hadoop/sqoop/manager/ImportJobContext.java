@@ -18,36 +18,39 @@
 
 package org.apache.hadoop.sqoop.manager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.sqoop.ImportOptions;
 
 /**
- * Manages connections to hsqldb databases.
- * Extends generic SQL manager.
+ * A set of parameters describing an import operation; this is passed to
+ * ConnManager.importTable() as its argument.
  */
-public class HsqldbManager extends GenericJdbcManager {
+public class ImportJobContext {
 
-  public static final Log LOG = LogFactory.getLog(HsqldbManager.class.getName());
+  private String tableName;
+  private String jarFile;
+  private ImportOptions options;
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
-
-  // HsqlDb doesn't have a notion of multiple "databases"; the user's database is always called
-  // "PUBLIC";
-  private static final String HSQL_SCHEMA_NAME = "PUBLIC";
-
-  public HsqldbManager(final ImportOptions opts) {
-    super(DRIVER_CLASS, opts);
+  public ImportJobContext(final String table, final String jar, final ImportOptions opts) {
+    this.tableName = table;
+    this.jarFile = jar;
+    this.options = opts;
   }
 
-  /**
-   * Note: HSqldb only supports a single schema named "PUBLIC"
+  /** @return the name of the table to import. */
+  public String getTableName() {
+    return tableName;
+  }
+
+  /** @return the name of the jar file containing the user's compiled
+   * ORM classes to use during the import.
    */
-  @Override
-  public String[] listDatabases() {
-    String [] databases = {HSQL_SCHEMA_NAME};
-    return databases;
+  public String getJarFile() {
+    return jarFile;
+  }
+
+  /** @return the ImportOptions configured by the user */
+  public ImportOptions getOptions() {
+    return options;
   }
 }
+

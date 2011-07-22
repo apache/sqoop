@@ -20,6 +20,7 @@ package org.apache.hadoop.sqoop;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.manager.ConnManager;
+import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.manager.ManagerFactory;
 
 import junit.framework.TestCase;
@@ -75,14 +76,14 @@ public class TestConnFactory extends TestCase {
 
   ////// mock classes used for test cases above //////
 
-  public static class AlwaysDummyFactory implements ManagerFactory {
+  public static class AlwaysDummyFactory extends ManagerFactory {
     public ConnManager accept(ImportOptions opts) {
       // Always return a new DummyManager
       return new DummyManager();
     }
   }
 
-  public static class EmptyFactory implements ManagerFactory {
+  public static class EmptyFactory extends ManagerFactory {
     public ConnManager accept(ImportOptions opts) {
       // Never instantiate a proper ConnManager;
       return null;
@@ -92,7 +93,7 @@ public class TestConnFactory extends TestCase {
   /**
    * This implementation doesn't do anything special.
    */
-  public static class DummyManager implements ConnManager {
+  public static class DummyManager extends ConnManager {
     public void close() {
     }
 
@@ -131,7 +132,7 @@ public class TestConnFactory extends TestCase {
     public void execAndPrint(String s) {
     }
 
-    public void importTable(String tableName, String jarFile, Configuration conf) {
+    public void importTable(ImportJobContext context) {
     }
   }
 }

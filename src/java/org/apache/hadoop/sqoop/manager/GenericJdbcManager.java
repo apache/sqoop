@@ -30,9 +30,6 @@ import org.apache.hadoop.sqoop.ImportOptions;
  * Database manager that is connects to a generic JDBC-compliant
  * database; its constructor is parameterized on the JDBC Driver
  * class to load.
- *
- * 
- *
  */
 public class GenericJdbcManager extends SqlManager {
 

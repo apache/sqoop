@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ToolRunner;
 
 /**
@@ -116,6 +117,8 @@ public class ImportOptions {
   private boolean outputMustBeEnclosed;
 
   private boolean areDelimsManuallySet;
+
+  private Configuration conf;
 
   public static final int DEFAULT_NUM_MAPPERS = 4;
 
@@ -248,6 +251,8 @@ public class ImportOptions {
     this.numMappers = DEFAULT_NUM_MAPPERS;
     this.useCompression = false;
     this.directSplitSize = 0;
+
+    this.conf = new Configuration();
 
     loadFromProperties();
   }
@@ -868,5 +873,13 @@ public class ImportOptions {
    */
   public long getDirectSplitSize() {
     return this.directSplitSize;
+  }
+
+  public Configuration getConf() {
+    return conf;
+  }
+
+  public void setConf(Configuration config) {
+    this.conf = config;
   }
 }

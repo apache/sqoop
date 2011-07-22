@@ -71,13 +71,13 @@ public class PostgresqlManager extends GenericJdbcManager {
   }
 
   @Override
-  public void importTable(String tableName, String jarFile, Configuration conf)
+  public void importTable(ImportJobContext context)
         throws IOException, ImportError {
 
     // The user probably should have requested --direct to invoke pg_dump.
     // Display a warning informing them of this fact.
     if (!PostgresqlManager.warningPrinted) {
-      String connectString = options.getConnectString();
+      String connectString = context.getOptions().getConnectString();
 
       LOG.warn("It looks like you are importing from postgresql.");
       LOG.warn("This transfer can be faster! Use the --direct");
@@ -87,7 +87,7 @@ public class PostgresqlManager extends GenericJdbcManager {
     }
 
     // Then run the normal importTable() method.
-    super.importTable(tableName, jarFile, conf);
+    super.importTable(context);
   }
 
   @Override

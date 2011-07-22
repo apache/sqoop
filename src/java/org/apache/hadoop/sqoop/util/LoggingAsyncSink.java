@@ -27,17 +27,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A StreamHandlerFactory that takes the contents of a stream and writes
+ * An AsyncSink that takes the contents of a stream and writes
  * it to log4j.
- *
  */
-public class LoggingStreamHandlerFactory implements StreamHandlerFactory {
+public class LoggingAsyncSink extends AsyncSink {
 
-  public static final Log LOG = LogFactory.getLog(LoggingStreamHandlerFactory.class.getName());
+  public static final Log LOG = LogFactory.getLog(LoggingAsyncSink.class.getName());
 
   private Log contextLog;
 
-  public LoggingStreamHandlerFactory(final Log context) {
+  public LoggingAsyncSink(final Log context) {
     if (null == context) {
       this.contextLog = LOG;
     } else {
@@ -80,7 +79,7 @@ public class LoggingStreamHandlerFactory implements StreamHandlerFactory {
             break; // stream was closed by remote end.
           }
 
-          LoggingStreamHandlerFactory.this.contextLog.info(line);
+          LoggingAsyncSink.this.contextLog.info(line);
         }
       } catch (IOException ioe) {
         LOG.error("IOException reading from stream: " + ioe.toString());
@@ -89,7 +88,7 @@ public class LoggingStreamHandlerFactory implements StreamHandlerFactory {
       try {
         r.close();
       } catch (IOException ioe) {
-        LOG.warn("Error closing stream in LoggingStreamHandler: " + ioe.toString());
+        LOG.warn("Error closing stream in LoggingAsyncSink: " + ioe.toString());
       }
     }
   }

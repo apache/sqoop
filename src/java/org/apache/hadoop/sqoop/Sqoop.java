@@ -29,6 +29,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 import org.apache.hadoop.sqoop.hive.HiveImport;
 import org.apache.hadoop.sqoop.manager.ConnManager;
+import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.orm.ClassWriter;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.util.ImportError;
@@ -88,7 +89,8 @@ public class Sqoop extends Configured implements Tool {
 
     if (options.getAction() == ImportOptions.ControlAction.FullImport) {
       // Proceed onward to do the import.
-      manager.importTable(tableName, jarFile, getConf());
+      ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
+      manager.importTable(context);
 
       // If the user wants this table to be in Hive, perform that post-load.
       if (options.doHiveImport()) {
@@ -103,6 +105,7 @@ public class Sqoop extends Configured implements Tool {
    */
   public int run(String [] args) {
     options = new ImportOptions();
+    options.setConf(getConf());
     try {
       options.parse(args);
       options.validate();

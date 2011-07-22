@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * Contains instantiation code for all ConnManager implementations
  * shipped and enabled by default in Sqoop.
  */
-public final class DefaultManagerFactory implements ManagerFactory {
+public final class DefaultManagerFactory extends ManagerFactory {
 
   public static final Log LOG = LogFactory.getLog(DefaultManagerFactory.class.getName());
 

@@ -16,18 +16,25 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop.manager;
-
-import org.apache.hadoop.sqoop.ImportOptions;
+package org.apache.hadoop.sqoop.util;
 
 /**
- * Interface for factory classes for ConnManager implementations.
- * ManagerFactories are instantiated by o.a.h.s.ConnFactory and
- * stored in an ordered list. The ConnFactory.getManager() implementation
- * calls the accept() method of each ManagerFactory, in order until
- * one such call returns a non-null ConnManager instance.
+ * A thread which has an error bit which can be set from within the thread.
  */
-public abstract class ManagerFactory {
-  public abstract ConnManager accept(ImportOptions options);
+public abstract class ErrorableThread extends Thread {
+
+  private volatile boolean error;
+
+  public ErrorableThread() {
+    this.error = false;
+  }
+
+  protected void setError() {
+    this.error = true;
+  }
+
+  public boolean isErrored() {
+    return this.error;
+  }
 }
 
