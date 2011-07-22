@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,6 +42,26 @@ public final class DefaultManagerFactory extends ManagerFactory {
       // User has manually specified JDBC implementation with --driver.
       // Just use GenericJdbcManager.
       return new GenericJdbcManager(manualDriver, options);
+    }
+
+    if (null != options.getConnManagerClassName()){
+      String className = options.getConnManagerClassName();
+      ConnManager connManager = null;
+      try {
+        Class<ConnManager> cls = (Class<ConnManager>) Class.forName(className);
+        Constructor<ConnManager> constructor =
+          cls.getDeclaredConstructor(SqoopOptions.class);
+        connManager = constructor.newInstance(options);
+      } catch (Exception e) {
+        System.err
+          .println("problem finding the connection manager for class name :"
+            + className);
+        // Log the stack trace for this exception
+        LOG.debug(e.getMessage(), e);
+        // Print exception message.
+        System.err.println(e.getMessage());
+      }
+      return connManager;
     }
 
     String connectStr = options.getConnectString();

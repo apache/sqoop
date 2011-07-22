@@ -22,6 +22,7 @@
 Argument                  Description
 ---------------------------------------------------------------------
 +\--connect <jdbc-uri>+   Specify JDBC connect string
++\--connect-manager <class-name>+   Specify connection manager class to use
 +\--driver <class-name>+  Manually specify JDBC driver class to use
 +\--hadoop-home <dir>+    Override $HADOOP_HOME
 +\--help+                 Print usage instructions

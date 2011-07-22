@@ -23,6 +23,9 @@ Database connection and common options
 --connect (jdbc-uri)::
   Specify JDBC connect string (required)
 
+--connect-manager (class-name)::
+  Specify connection manager class name (optional)
+
 --driver (class-name)::
   Manually specify JDBC driver class to use
 

@@ -224,6 +224,9 @@ public class SqoopOptions implements Cloneable {
   // a temporary holding area for compilation work done by this process.
   private static String curNonce;
 
+  // the connection manager fully qualified class name
+  private String connManagerClassName;
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -1584,6 +1587,14 @@ public class SqoopOptions implements Cloneable {
    */
   public String getMergeKeyCol() {
     return this.mergeKeyCol;
+  }
+
+  public void setConnManagerClassName(String connManagerClass) {
+    this.connManagerClassName = connManagerClass;
+  }
+
+  public String getConnManagerClassName() {
+    return connManagerClassName;
   }
 
 }

@@ -123,6 +123,7 @@ usage: sqoop import [GENERIC-ARGS] [TOOL-ARGS]
 
 Common arguments:
    --connect <jdbc-uri>     Specify JDBC connect string
+   --connect-manager <jdbc-uri>     Specify connection manager class to use
    --driver <class-name>    Manually specify JDBC driver class to use
    --hadoop-home <dir>      Override $HADOOP_HOME
    --help                   Print usage instructions

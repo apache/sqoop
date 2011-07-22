@@ -62,6 +62,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   // use consistently. The argument parser applies the leading '--' to each
   // string.
   public static final String CONNECT_STRING_ARG = "connect";
+  public static final String CONN_MANAGER_CLASS_NAME =
+      "connection-manager";
   public static final String DRIVER_ARG = "driver";
   public static final String USERNAME_ARG = "username";
   public static final String PASSWORD_ARG = "password";
@@ -329,6 +331,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .hasArg().withDescription("Specify JDBC connect string")
         .withLongOpt(CONNECT_STRING_ARG)
         .create());
+    commonOpts.addOption(OptionBuilder.withArgName("conn-manager-class-name")
+            .hasArg().withDescription("Specify connection manager class name")
+            .withLongOpt(CONN_MANAGER_CLASS_NAME)
+            .create());
     commonOpts.addOption(OptionBuilder.withArgName("class-name")
         .hasArg().withDescription("Manually specify JDBC driver class to use")
         .withLongOpt(DRIVER_ARG)
@@ -556,6 +562,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(CONNECT_STRING_ARG)) {
       out.setConnectString(in.getOptionValue(CONNECT_STRING_ARG));
+    }
+
+    if (in.hasOption(CONN_MANAGER_CLASS_NAME)) {
+        out.setConnManagerClassName(in.getOptionValue(CONN_MANAGER_CLASS_NAME));
     }
 
     if (in.hasOption(DRIVER_ARG)) {
