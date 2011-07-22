@@ -115,10 +115,10 @@ public class TableDefWriter {
       sb.append("COMMENT 'Imported by sqoop on " + curDateStr + "' ");
     }
 
-    sb.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\0");
-    sb.append(Integer.toOctalString((int) options.getOutputFieldDelim()));
-    sb.append("' LINES TERMINATED BY '\\0");
-    sb.append(Integer.toOctalString((int) options.getOutputRecordDelim()));
+    sb.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '");
+    sb.append(getHiveOctalCharCode((int) options.getOutputFieldDelim()));
+    sb.append("' LINES TERMINATED BY '");
+    sb.append(getHiveOctalCharCode((int) options.getOutputRecordDelim()));
     sb.append("' STORED AS TEXTFILE");
 
     LOG.debug("Create statement: " + sb.toString());
@@ -169,6 +169,29 @@ public class TableDefWriter {
 
     LOG.debug("Load statement: " + sb.toString());
     return sb.toString();
+  }
+
+  /**
+   * Return a string identifying the character to use as a delimiter
+   * in Hive, in octal representation.
+   * Hive can specify delimiter characters in the form '\ooo' where
+   * ooo is a three-digit octal number between 000 and 177. Values
+   * may not be truncated ('\12' is wrong; '\012' is ok) nor may they
+   * be zero-prefixed (e.g., '\0177' is wrong).
+   *
+   * @param charNum the character to use as a delimiter
+   * @return a string of the form "\ooo" where ooo is an octal number
+   * in [000, 177].
+   * @throws IllegalArgumentException if charNum &gt;> 0177.
+   */
+  static String getHiveOctalCharCode(int charNum)
+      throws IllegalArgumentException {
+    if (charNum > 0177) {
+      throw new IllegalArgumentException(
+          "Character " + charNum + " is an out-of-range delimiter");
+    }
+
+    return String.format("\\%03o", charNum);
   }
 }
 

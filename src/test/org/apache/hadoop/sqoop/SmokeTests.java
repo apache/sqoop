@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop;
 
 import org.apache.hadoop.sqoop.hive.TestHiveImport;
+import org.apache.hadoop.sqoop.hive.TestTableDefWriter;
 import org.apache.hadoop.sqoop.io.TestSplittableBufferedWriter;
 import org.apache.hadoop.sqoop.lib.TestFieldFormatter;
 import org.apache.hadoop.sqoop.lib.TestRecordParser;
@@ -59,6 +60,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestParseMethods.class);
     suite.addTestSuite(TestConnFactory.class);
     suite.addTestSuite(TestSplittableBufferedWriter.class);
+    suite.addTestSuite(TestTableDefWriter.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;
