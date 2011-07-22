@@ -51,6 +51,23 @@ public class PostgresqlManager extends GenericJdbcManager {
   }
 
   @Override
+  public String escapeColName(String colName) {
+    return escapeIdentifier(colName);
+  }
+
+  @Override
+  public String escapeTableName(String tableName) {
+    return escapeIdentifier(tableName);
+  }
+
+  protected String escapeIdentifier(String identifier) {
+    if (identifier == null) {
+      return null;
+    }
+    return "\"" + identifier.replace("\"", "\"\"") + "\"";
+  }
+
+  @Override
   public void close() throws SQLException {
     if (this.hasOpenConnection()) {
       this.getConnection().commit(); // Commit any changes made thus far.

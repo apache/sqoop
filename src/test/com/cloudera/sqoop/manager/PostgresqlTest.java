@@ -121,7 +121,7 @@ public class PostgresqlTest extends ImportJobTestCase {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
         // get added until pg 8.3, so we just use "DROP TABLE" and ignore
         // any exception here if one occurs.
-        st.executeUpdate("DROP TABLE " + TABLE_NAME);
+        st.executeUpdate("DROP TABLE " + manager.escapeTableName(TABLE_NAME));
       } catch (SQLException e) {
         LOG.info("Couldn't drop table " + TABLE_NAME + " (ok)");
         LOG.info(e.toString());
@@ -129,19 +129,20 @@ public class PostgresqlTest extends ImportJobTestCase {
         connection.rollback();
       }
 
-      st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
-          + "id INT NOT NULL PRIMARY KEY, "
-          + "name VARCHAR(24) NOT NULL, "
-          + "start_date DATE, "
-          + "salary FLOAT, "
-          + "dept VARCHAR(32))");
+      st.executeUpdate("CREATE TABLE " + manager.escapeTableName(TABLE_NAME)
+          + " ("
+          + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
+          + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
+          + manager.escapeColName("start_date") + " DATE, "
+          + manager.escapeColName("salary") + " FLOAT, "
+          + manager.escapeColName("dept") + " VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "1,'Aaron','2009-05-14',1000000.00,'engineering')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "2,'Bob','2009-04-20',400.00,'sales')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "3,'Fred','2009-01-23',15.00,'marketing')");
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+          + " VALUES(1,'Aaron','2009-05-14',1000000.00,'engineering')");
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+          + " VALUES(2,'Bob','2009-04-20',400.00,'sales')");
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+          + " VALUES(3,'Fred','2009-01-23',15.00,'marketing')");
       connection.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: " + sqlE);
