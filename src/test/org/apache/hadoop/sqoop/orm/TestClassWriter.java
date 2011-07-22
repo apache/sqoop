@@ -297,11 +297,16 @@ public class TestClassWriter extends TestCase {
     String tableName = HsqldbTestServer.getTableName();
     Connection connection = testServer.getConnection();
     Statement st = connection.createStatement();
-    st.executeUpdate("DROP TABLE " + tableName + " IF EXISTS");
-    st.executeUpdate("CREATE TABLE " + tableName + " (class INT, \"9field\" INT)");
-    st.executeUpdate("INSERT INTO " + tableName + " VALUES(42, 41)");
-    connection.commit();
-    connection.close();
+    try {
+      st.executeUpdate("DROP TABLE " + tableName + " IF EXISTS");
+      st.executeUpdate("CREATE TABLE " + tableName
+          + " (class INT, \"9field\" INT)");
+      st.executeUpdate("INSERT INTO " + tableName + " VALUES(42, 41)");
+      connection.commit();
+    } finally {
+      st.close();
+      connection.close();
+    }
 
     String [] argv = {
         "--bindir",

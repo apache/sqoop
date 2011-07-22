@@ -49,7 +49,7 @@ public class NullAsyncSink extends AsyncSink {
    * Run a background thread that reads and ignores the
    * contents of the stream.
    */
-  private class IgnoringThread extends Thread {
+  private static class IgnoringThread extends Thread {
 
     private InputStream stream;
 

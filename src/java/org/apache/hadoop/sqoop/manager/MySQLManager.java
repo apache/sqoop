@@ -45,7 +45,7 @@ public class MySQLManager extends GenericJdbcManager {
   private static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
   // set to true after we warn the user that we can use direct fastpath.
-  protected static boolean warningPrinted = false;
+  private static boolean warningPrinted = false;
 
   private Statement lastStatement;
 
@@ -114,7 +114,7 @@ public class MySQLManager extends GenericJdbcManager {
         LOG.warn("This transfer can be faster! Use the --direct");
         LOG.warn("option to exercise a MySQL-specific fast path.");
 
-        MySQLManager.warningPrinted = true; // don't display this twice.
+        MySQLManager.markWarningPrinted(); // don't display this twice.
       }
     }
 
@@ -122,6 +122,13 @@ public class MySQLManager extends GenericJdbcManager {
 
     // Then run the normal importTable() method.
     super.importTable(context);
+  }
+
+  /**
+   * Set a flag to prevent printing the --direct warning twice.
+   */
+  protected static void markWarningPrinted() {
+    MySQLManager.warningPrinted = true;
   }
 
   /**
@@ -191,6 +198,7 @@ public class MySQLManager extends GenericJdbcManager {
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    this.lastStatement = statement;
     statement.setFetchSize(Integer.MIN_VALUE); // MySQL: read row-at-a-time.
     if (null != args) {
       for (int i = 0; i < args.length; i++) {
@@ -199,7 +207,6 @@ public class MySQLManager extends GenericJdbcManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
-    this.lastStatement = statement;
     return statement.executeQuery();
   }
 

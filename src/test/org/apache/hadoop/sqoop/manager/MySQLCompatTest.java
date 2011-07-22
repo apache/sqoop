@@ -66,9 +66,12 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "DROP TABLE IF EXISTS " + table,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    statement.executeUpdate();
-    statement.close();
-    conn.commit();
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
   }
 
   @Override

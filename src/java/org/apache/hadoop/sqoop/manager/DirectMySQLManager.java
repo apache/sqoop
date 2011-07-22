@@ -61,7 +61,7 @@ public class DirectMySQLManager extends MySQLManager {
       LOG.warn("Direct-mode import from MySQL does not support column");
       LOG.warn("selection. Falling back to JDBC-based import.");
       // Don't warn them "This could go faster..."
-      MySQLManager.warningPrinted = true;
+      MySQLManager.markWarningPrinted();
       // Use JDBC-based importTable() method.
       super.importTable(context);
       return;

@@ -326,6 +326,7 @@ public abstract class SqlManager extends ConnManager {
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    this.lastStatement = statement;
     if (null != args) {
       for (int i = 0; i < args.length; i++) {
         statement.setObject(i + 1, args[i]);
@@ -333,7 +334,6 @@ public abstract class SqlManager extends ConnManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
-    this.lastStatement = statement;
     return statement.executeQuery();
   }
 

@@ -38,6 +38,7 @@
   <property name="build.dir" location="${basedir}/build" />
   <property name="build.classes" location="${build.dir}/classes"/>
   <property name="build.test" location="${build.dir}/test"/>
+  <property name="build.test.classes" location="${build.test}/classes" />
   <property name="test.log.dir" location="${build.dir}/test/logs"/>
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
@@ -51,6 +52,15 @@
   <property name="test.junit.output.format" value="plain"/>
   <property name="test.output" value="no"/>
   <property name="test.timeout" value="300000"/>
+
+  <!-- static analysis -->
+  <property name="findbugs.out.dir" value="${build.dir}/findbugs" />
+  <property name="findbugs.output.xml.file"
+      value="${findbugs.out.dir}/report.xml" />
+  <property name="findbugs.output.html.file"
+      value="${findbugs.out.dir}/report.html" />
+  <property name="findbugs.excludes"
+      location="${test.dir}/findbugsExcludeFile.xml" />
 
   <!-- When testing with non-free JDBC drivers, override this parameter
        to contain the path to the driver library dir.
@@ -93,7 +103,7 @@
 
   <!-- Classpath for unit tests (superset of compile.classpath) -->
   <path id="test.classpath">
-    <pathelement location="${build.test}" />
+    <pathelement location="${build.test.classes}" />
     <path refid="${name}.test.classpath"/>
     <path refid="compile.classpath"/>
   </path>
@@ -118,12 +128,12 @@
 
   <target name="compile-test" depends="compile, ivy-retrieve-test"
       description="Compile test classes">
-    <mkdir dir="${build.test}" />
+    <mkdir dir="${build.test.classes}" />
     <javac
         encoding="${build.encoding}"
         srcdir="${test.dir}"
         includes="**/*.java"
-        destdir="${build.test}"
+        destdir="${build.test.classes}"
         debug="${javac.debug}">
       <classpath>
         <path refid="test.classpath"/>
@@ -228,6 +238,9 @@
       timeout="${test.timeout}"
       dir="${build.test}/data">
 
+      <!-- enable asserts in tests -->
+      <jvmarg value="-ea" />
+
       <!-- uncomment this if you want to attach a debugger -->
       <!--
       <jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=2601" />
@@ -308,6 +321,36 @@
 
   <target name="clean" description="Clean build target files">
     <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="findbugs" depends="check-for-findbugs,jar,compile-test"
+      if="findbugs.present" description="Run FindBugs">
+    <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+        classpath="${findbugs.home}/lib/findbugs-ant.jar" />
+    <mkdir dir="${findbugs.out.dir}"/>
+    <findbugs home="${findbugs.home}" output="xml:withMessages"
+        outputFile="${findbugs.output.xml.file}" effort="max"
+        excludeFilter="${findbugs.excludes}">
+      <auxClasspath>
+        <path refid="compile.classpath"/>
+      </auxClasspath>
+      <sourcePath path="${src.dir}" />
+      <sourcePath path="${test.dir}" />
+      <class location="${build.dir}/${dest.jar}" />
+      <class location="${build.test.classes}" />
+    </findbugs>
+    <xslt style="${findbugs.home}/src/xsl/default.xsl"
+        in="${findbugs.output.xml.file}"
+        out="${findbugs.output.html.file}" />
+  </target>
+
+  <target name="warn-findbugs-unset" unless="findbugs.home">
+    <fail message="You need to set -Dfindbugs.home=/path/to/findbugs" />
+  </target>
+
+  <target name="check-for-findbugs" depends="warn-findbugs-unset">
+    <available property="findbugs.present"
+        file="${findbugs.home}/lib/findbugs.jar" />
   </target>
 
   <target name="ivy-probe-antlib" >

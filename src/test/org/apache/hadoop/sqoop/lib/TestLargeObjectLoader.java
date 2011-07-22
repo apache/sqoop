@@ -135,9 +135,10 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(blob);
     assertFalse(blob.isExternal());
     byte [] data = blob.getData();
-    assertEquals(MockResultSet.BLOB_DATA.length, data.length);
+    byte [] blobData = MockResultSet.BLOB_DATA();
+    assertEquals(blobData.length, data.length);
     for (int i = 0; i < data.length; i++) {
-      assertEquals(MockResultSet.BLOB_DATA[i], data[i]);
+      assertEquals(blobData[i], data[i]);
     }
 
     // LOBs bigger than 4 bytes are now external.
@@ -151,9 +152,9 @@ public class TestLargeObjectLoader extends TestCase {
     int bytes = is.read(buf, 0, 4096);
     is.close();
 
-    assertEquals(MockResultSet.BLOB_DATA.length, bytes);
+    assertEquals(blobData.length, bytes);
     for (int i = 0; i < bytes; i++) {
-      assertEquals(MockResultSet.BLOB_DATA[i], buf[i]);
+      assertEquals(blobData[i], buf[i]);
     }
   }
 }

@@ -52,7 +52,7 @@ public class TestConnFactory extends TestCase {
 
     ConnFactory factory = new ConnFactory(conf);
     try {
-      ConnManager manager = factory.getManager(new SqoopOptions());
+      factory.getManager(new SqoopOptions());
       fail("factory.getManager() expected to throw IOException");
     } catch (IOException ioe) {
       // Expected this. Test passes.

@@ -271,7 +271,9 @@ public class MySQLDumpMapper
             try {
               fields = MYSQLDUMP_PARSER.parseRecord(charbuf);
             } catch (RecordParser.ParseError pe) {
-              LOG.warn("ParseError reading from mysqldump: " + pe.toString() + "; record skipped");
+              LOG.warn("ParseError reading from mysqldump: "
+                  + pe.toString() + "; record skipped");
+              continue; // Skip emitting this row.
             }
 
             // For all of the output fields, emit them using the delimiters the user chooses.

@@ -77,8 +77,14 @@ public class MySQLAuthTest extends ImportJobTestCase {
   // instance variables populated during setUp, used during tests
   private DirectMySQLManager manager;
 
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
   @Before
   public void setUp() {
+    super.setUp();
     SqoopOptions options = new SqoopOptions(AUTH_CONNECT_STRING, AUTH_TABLE_NAME);
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
@@ -123,6 +129,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
 
   @After
   public void tearDown() {
+    super.tearDown();
     try {
       manager.close();
     } catch (SQLException sqlE) {
@@ -242,15 +249,18 @@ public class MySQLAuthTest extends ImportJobTestCase {
     connection.setAutoCommit(false);
     st = connection.createStatement();
 
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable0");
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable1");
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable2");
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable3");
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable4");
-    st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable5");
-    connection.commit();
-    st.close();
-    connection.close();
+    try {
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable0");
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable1");
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable2");
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable3");
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable4");
+      st.executeUpdate("DROP TABLE IF EXISTS mysqlTimestampTable5");
+      connection.commit();
+    } finally {
+      st.close();
+      connection.close();
+    }
   }
 
   public void doZeroTimestampTest(int testNum, boolean expectSuccess,

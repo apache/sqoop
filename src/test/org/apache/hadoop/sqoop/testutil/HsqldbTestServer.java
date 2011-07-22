@@ -209,9 +209,12 @@ public class HsqldbTestServer {
       Connection conn = mgr.getConnection();
       for (String table : tables) {
         Statement s = conn.createStatement();
-        s.executeUpdate("DROP TABLE " + table);
-        conn.commit();
-        s.close();
+        try {
+          s.executeUpdate("DROP TABLE " + table);
+          conn.commit();
+        } finally {
+          s.close();
+        }
       }
     }
   }

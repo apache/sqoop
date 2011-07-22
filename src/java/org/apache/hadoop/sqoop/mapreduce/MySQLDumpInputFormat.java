@@ -72,8 +72,6 @@ public class MySQLDumpInputFormat extends DataDrivenDBInputFormat {
   public static class MySQLDumpRecordReader
       extends RecordReader<String, NullWritable> {
 
-    private InputSplit split;
-
     private boolean delivered;
     private String clause;
 
@@ -109,7 +107,6 @@ public class MySQLDumpInputFormat extends DataDrivenDBInputFormat {
 
     @Override
     public void initialize(InputSplit split, TaskAttemptContext context) {
-      this.split = split;
       DataDrivenDBInputFormat.DataDrivenDBInputSplit dbSplit =
           (DataDrivenDBInputFormat.DataDrivenDBInputSplit) split;
 

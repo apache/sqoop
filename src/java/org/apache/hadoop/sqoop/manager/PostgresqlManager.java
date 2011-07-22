@@ -80,8 +80,6 @@ public class PostgresqlManager extends GenericJdbcManager {
     // The user probably should have requested --direct to invoke pg_dump.
     // Display a warning informing them of this fact.
     if (!PostgresqlManager.warningPrinted) {
-      String connectString = context.getOptions().getConnectString();
-
       LOG.warn("It looks like you are importing from postgresql.");
       LOG.warn("This transfer can be faster! Use the --direct");
       LOG.warn("option to exercise a postgresql-specific fast path.");
@@ -117,6 +115,7 @@ public class PostgresqlManager extends GenericJdbcManager {
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    this.lastStatement = statement;
     statement.setFetchSize(POSTGRESQL_FETCH_SIZE);
     if (null != args) {
       for (int i = 0; i < args.length; i++) {
@@ -125,7 +124,6 @@ public class PostgresqlManager extends GenericJdbcManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
-    this.lastStatement = statement;
     return statement.executeQuery();
   }
 

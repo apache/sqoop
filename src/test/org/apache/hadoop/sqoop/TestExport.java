@@ -238,9 +238,12 @@ public class TestExport extends ExportJobTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "DROP TABLE " + getTableName() + " IF EXISTS",
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    statement.executeUpdate();
-    conn.commit();
-    statement.close();
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
 
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
@@ -254,9 +257,12 @@ public class TestExport extends ExportJobTestCase {
 
     statement = conn.prepareStatement(sb.toString(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    statement.executeUpdate();
-    conn.commit();
-    statement.close();
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally { 
+      statement.close();
+    }
   }
 
   /** Removing an existing table directory from the filesystem */
@@ -278,12 +284,18 @@ public class TestExport extends ExportJobTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT " + colName + " FROM " + getTableName() + " WHERE id = " + id,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    ResultSet rs = statement.executeQuery();
-    rs.next();
-
-    String actualVal = rs.getString(1);
-    rs.close();
-    statement.close();
+    String actualVal = null;
+    try {
+      ResultSet rs = statement.executeQuery();
+      try {
+        rs.next();
+        actualVal = rs.getString(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     assertEquals("Got unexpected column value", expectedVal, actualVal);
   }

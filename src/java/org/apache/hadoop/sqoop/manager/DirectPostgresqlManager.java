@@ -281,7 +281,6 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     throws IOException, ImportException {
 
     String tableName = context.getTableName();
-    String jarFile = context.getJarFile();
     SqoopOptions options = context.getOptions();
 
     LOG.info("Beginning psql fast path import");

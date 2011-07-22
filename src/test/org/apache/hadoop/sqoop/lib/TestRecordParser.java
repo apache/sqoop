@@ -41,18 +41,20 @@ public class TestRecordParser extends TestCase {
       }
 
       fail(msg);
-    }
-
-    if (expected == null && actual == null) {
+    } else if (expected == null && actual == null) {
       return; // ok. Both null; nothing to do.
     }
+
+    assert(null != expected);
+    assert(null != actual);
 
     int expectedLen = expected.size();
     int actualLen = actual.size();
 
     if (expectedLen != actualLen) {
       if (null == msg) {
-        msg = "Expected list of length " + expectedLen + "; got " + actualLen;
+        msg = "Expected list of length " + expectedLen
+            + "; got " + actualLen;
       }
 
       fail(msg);
@@ -63,17 +65,19 @@ public class TestRecordParser extends TestCase {
       String expectedElem = expected.get(i);
       String actualElem = actual.get(i);
 
-      if (expectedElem == null && actualElem != null) {
-        if (null == msg) {
-          msg = "Expected null element at position " + i + "; got [" + actualElem + "]";
+      if (expectedElem == null) {
+        if (actualElem != null) {
+          if (null == msg) {
+            msg = "Expected null element at position " + i
+                + "; got [" + actualElem + "]";
+          }
+
+          fail(msg);
         }
-
-        fail(msg);
-      }
-
-      if (!expectedElem.equals(actualElem)) {
+      } else if (!expectedElem.equals(actualElem)) {
         if (null == msg) {
-          msg = "Expected [" + expectedElem + "] at position " + i + "; got [" + actualElem + "]";
+          msg = "Expected [" + expectedElem + "] at position " + i
+              + "; got [" + actualElem + "]";
         }
 
         fail(msg);
@@ -235,7 +239,6 @@ public class TestRecordParser extends TestCase {
 
   public void testRequiredQuotes2() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', true);
-    String [] strings = { "field1", "field2" };
     try {
       parser.parseRecord("\"field1\",field2");
       fail("Expected parse error for required quotes");
@@ -246,7 +249,6 @@ public class TestRecordParser extends TestCase {
 
   public void testRequiredQuotes3() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', true);
-    String [] strings = { "field1", "field2" };
     try {
       parser.parseRecord("field1,\"field2\"");
       fail("Expected parse error for required quotes");
@@ -257,7 +259,6 @@ public class TestRecordParser extends TestCase {
 
   public void testRequiredQuotes4() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', true);
-    String [] strings = { "field1", "field2" };
     try {
       parser.parseRecord("field1,\"field2\"\n");
       fail("Expected parse error for required quotes");

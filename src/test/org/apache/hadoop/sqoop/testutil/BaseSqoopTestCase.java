@@ -217,9 +217,12 @@ public class BaseSqoopTestCase extends TestCase {
     PreparedStatement statement = conn.prepareStatement(
         "DROP TABLE " + table + " IF EXISTS",
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    statement.executeUpdate();
-    statement.close();
-    conn.commit();
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
   }
 
   /**

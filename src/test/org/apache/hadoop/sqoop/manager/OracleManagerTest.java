@@ -89,9 +89,16 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   // instance variables populated during setUp, used during tests
   private OracleManager manager;
+  
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
 
   @Before
   public void setUp() {
+    super.setUp();
+
     SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
         TABLE_NAME);
     OracleUtils.setOracleAuth(options);
@@ -152,6 +159,7 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   @After
   public void tearDown() {
+    super.tearDown();
     try {
       manager.close();
     } catch (SQLException sqlE) {

@@ -81,8 +81,15 @@ public class PostgresqlTest extends ImportJobTestCase {
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
   @Before
   public void setUp() {
+    super.setUp();
+
     LOG.debug("Setting up another postgresql test...");
 
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);

@@ -112,6 +112,11 @@ public class TestSplittableBufferedWriter extends TestCase {
           r.readLine());
     } finally {
       r.close();
+      try {
+        is.close();
+      } catch (IOException ioe) {
+        // ignore IOE; may be closed by reader.
+      }
     }
   }
 
@@ -128,15 +133,23 @@ public class TestSplittableBufferedWriter extends TestCase {
   public void testNonSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
         getWritePath(), "nonsplit-", 0, false);
-    SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
     try {
-      w.allowSplit();
-      w.write("This is a string!");
-      w.newLine();
-      w.write("This is another string!");
-      w.allowSplit();
+      SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
+      try {
+        w.allowSplit();
+        w.write("This is a string!");
+        w.newLine();
+        w.write("This is another string!");
+        w.allowSplit();
+      } finally {
+        w.close();
+      }
     } finally {
-      w.close();
+      try {
+        os.close();
+      } catch (IOException ioe) {
+        // Ignored; may be thrown because w is already closed.
+      }
     }
 
     // Ensure we made exactly one file.
@@ -150,8 +163,18 @@ public class TestSplittableBufferedWriter extends TestCase {
       "This is a string!",
       "This is another string!",
     };
-    verifyFileContents(new FileInputStream(new File(getWriteDir(),
-        "nonsplit-00000")), expectedLines);
+
+    InputStream fis = new FileInputStream(new File(getWriteDir(),
+          "nonsplit-00000"));
+    try {
+      verifyFileContents(fis, expectedLines);
+    } finally {
+      try {
+        fis.close();
+      } catch (IOException ioe) {
+        // Ignored; may be closed by verifyFileContents().
+      }
+    }
   }
 
   public void testNonSplittingGzipFile() throws IOException {
@@ -187,14 +210,22 @@ public class TestSplittableBufferedWriter extends TestCase {
   public void testSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
         getWritePath(), "split-", 10, false);
-    SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
     try {
-      w.allowSplit();
-      w.write("This is a string!");
-      w.newLine();
-      w.write("This is another string!");
+      SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
+      try {
+        w.allowSplit();
+        w.write("This is a string!");
+        w.newLine();
+        w.write("This is another string!");
+      } finally {
+        w.close();
+      }
     } finally {
-      w.close();
+      try {
+        os.close();
+      } catch (IOException ioe) {
+        // Ignored; may be thrown because w is already closed.
+      }
     }
 
     // Ensure we made exactly two files.
@@ -209,14 +240,31 @@ public class TestSplittableBufferedWriter extends TestCase {
     String [] expectedLines0 = {
       "This is a string!"
     };
-    verifyFileContents(new FileInputStream(new File(getWriteDir(),
-        "split-00000")), expectedLines0);
+    InputStream fis = new FileInputStream(new File(getWriteDir(),
+        "split-00000"));
+    try {
+      verifyFileContents(fis, expectedLines0);
+    } finally {
+      try {
+        fis.close();
+      } catch (IOException ioe) {
+        // ignored; may be generated because fis closed in verifyFileContents. 
+      }
+    }
 
     String [] expectedLines1 = {
       "This is another string!",
     };
-    verifyFileContents(new FileInputStream(new File(getWriteDir(),
-        "split-00001")), expectedLines1);
+    fis = new FileInputStream(new File(getWriteDir(), "split-00001"));
+    try {
+      verifyFileContents(fis, expectedLines1);
+    } finally {
+      try {
+        fis.close();
+      } catch (IOException ioe) {
+        // Ignored; may be thrown because it's closed in verifyFileContents.
+      }
+    }
   }
 
   public void testSplittingGzipFile() throws IOException {

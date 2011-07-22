@@ -50,8 +50,10 @@ import java.util.Map;
  */
 public class MockResultSet implements ResultSet {
 
-  public static final byte [] BLOB_DATA = { 0x0, 0x1, 0x2, 0x3,
-      0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+  public static final byte [] BLOB_DATA() {
+    return new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9,
+        0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+  }
 
   public static final String CLOB_DATA = "This is the mock clob data!";
 
@@ -60,7 +62,7 @@ public class MockResultSet implements ResultSet {
    */
   public static class MockBlob implements Blob {
     public InputStream getBinaryStream() {
-      return new ByteArrayInputStream(BLOB_DATA);
+      return new ByteArrayInputStream(BLOB_DATA());
     }
 
     public InputStream getBinaryStream(long pos, long len) {
@@ -71,14 +73,15 @@ public class MockResultSet implements ResultSet {
       byte [] bytes = new byte[length];
 
       int start = (int) pos - 1; // SQL uses 1-based arrays!!
+      byte [] blobData = BLOB_DATA();
       for (int i = 0; i < length; i++) {
-        bytes[i] = BLOB_DATA[i + start];
+        bytes[i] = blobData[i + start];
       }
       return bytes;
     }
 
     public long length() {
-      return BLOB_DATA.length;
+      return BLOB_DATA().length;
     }
 
 

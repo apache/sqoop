@@ -91,11 +91,18 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MIN(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    ResultSet rs = statement.executeQuery();
-    rs.next();
-    int minVal = rs.getInt(1);
-    rs.close();
-    statement.close();
+    int minVal = 0;
+    try {
+      ResultSet rs = statement.executeQuery();
+      try {
+        rs.next();
+        minVal = rs.getInt(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     return minVal;
   }
@@ -106,11 +113,18 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MAX(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    ResultSet rs = statement.executeQuery();
-    rs.next();
-    int maxVal = rs.getInt(1);
-    rs.close();
-    statement.close();
+    int maxVal = 0;
+    try {
+      ResultSet rs = statement.executeQuery();
+      try {
+        rs.next();
+        maxVal = rs.getInt(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     return maxVal;
   }
@@ -128,11 +142,19 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT COUNT(*) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    ResultSet rs = statement.executeQuery();
-    rs.next();
-    int actualNumRecords = rs.getInt(1);
-    rs.close();
-    statement.close();
+    int actualNumRecords = 0;
+    ResultSet rs = null;
+    try { 
+      rs = statement.executeQuery();
+      try {
+        rs.next();
+        actualNumRecords = rs.getInt(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     assertEquals("Got back unexpected row count", expectedNumRecords,
         actualNumRecords);
@@ -149,22 +171,36 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     statement = conn.prepareStatement("SELECT msg FROM " + getTableName()
         + " WHERE id = " + minVal,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    rs = statement.executeQuery();
-    rs.next();
-    String minMsg = rs.getString(1);
-    rs.close();
-    statement.close();
+    String minMsg = "";
+    try {
+      rs = statement.executeQuery();
+      try {
+        rs.next();
+        minMsg = rs.getString(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     assertEquals("Invalid msg field for min value", getMsgPrefix() + minVal, minMsg);
 
     statement = conn.prepareStatement("SELECT msg FROM " + getTableName()
         + " WHERE id = " + maxVal,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    rs = statement.executeQuery();
-    rs.next();
-    String maxMsg = rs.getString(1);
-    rs.close();
-    statement.close();
+    String maxMsg = "";
+    try {
+      rs = statement.executeQuery();
+      try {
+        rs.next();
+        maxMsg = rs.getString(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
 
     assertEquals("Invalid msg field for min value", getMsgPrefix() + maxVal, maxMsg);
   }
