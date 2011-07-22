@@ -33,7 +33,8 @@ to call at top-level: ant deploy-contrib compile-core-test
   <!-- Override with our own version so we can enforce build dependencies -->
   <!-- on compile-mapred-test for MiniMRCluster, and MRUnit.              -->
   <!-- ================================================================== -->
-  <target name="compile-test" depends="compile-examples" if="test.available">
+  <target name="compile-test" depends="compile-examples, ivy-retrieve-test"
+      if="test.available">
     <echo message="Compiling ${name} dependencies" />
     <!-- need top-level compile-mapred-test for MiniMRCluster -->
     <subant target="compile-mapred-test">
