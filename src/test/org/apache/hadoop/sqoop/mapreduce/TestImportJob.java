@@ -19,30 +19,39 @@
 package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.junit.Before;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.Sqoop;
+import org.apache.hadoop.sqoop.manager.ManagerFactory;
 import org.apache.hadoop.sqoop.mapreduce.AutoProgressMapper;
+import org.apache.hadoop.sqoop.mapreduce.ImportJobBase;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
+import org.apache.hadoop.sqoop.testutil.InjectableManagerFactory;
+import org.apache.hadoop.sqoop.testutil.InjectableConnManager;
 import org.apache.hadoop.util.ToolRunner;
 
 /**
@@ -80,12 +89,38 @@ public class TestImportJob extends ImportJobTestCase {
 
   // A mapper that is guaranteed to cause the task to fail.
   public static class NullDereferenceMapper
-      extends AutoProgressMapper<LongWritable, DBWritable, Text, NullWritable> {
+      extends AutoProgressMapper<Object, Object, Text, NullWritable> {
 
-    public void map(LongWritable key, DBWritable val, Context c)
+    public void map(Object key, Object val, Context c)
         throws IOException, InterruptedException {
       String s = null;
       s.length(); // This will throw a NullPointerException.
+    }
+  }
+
+  // Run a "job" that just delivers a record to the mapper.
+  public static class DummyImportJob extends ImportJobBase {
+    public void configureInputFormat(Job job, String tableName,
+        String tableClassName, String splitByCol) throws IOException {
+
+      // Write a line of text into a file so that we can get
+      // a record to the map task.
+      Path dir = new Path(this.options.getTempDir());
+      Path p = new Path(dir, "sqoop-dummy-import-job-file.txt");
+      FileSystem fs = FileSystem.getLocal(this.options.getConf());
+      if (fs.exists(p)) {
+        boolean result = fs.delete(p, false);
+        assertTrue("Couldn't delete temp file!", result);
+      }
+
+      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fs.create(p)));
+      w.append("This is a line!");
+      w.close();
+
+      FileInputFormat.addInputPath(job, p);
+
+      // And set the InputFormat itself.
+      super.configureInputFormat(job, tableName, tableClassName, splitByCol);
     }
   }
 
@@ -94,16 +129,26 @@ public class TestImportJob extends ImportJobTestCase {
     // the user.
 
     // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+    createTableForColType("VARCHAR(32)", "'meep2'");
 
     Configuration conf = new Configuration();
+
+    // Use the dependency-injection manager.
+    conf.setClass(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+        InjectableManagerFactory.class,
+        ManagerFactory.class);
+
     String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
 
     // Use dependency injection to specify a mapper that we know
     // will fail.
-    conf.setClass(DataDrivenImportJob.DATA_DRIVEN_MAPPER_KEY,
+    conf.setClass(InjectableConnManager.MAPPER_KEY,
         NullDereferenceMapper.class,
         Mapper.class);
+
+    conf.setClass(InjectableConnManager.IMPORT_JOB_KEY,
+        DummyImportJob.class,
+        ImportJobBase.class);
 
     Sqoop importer = new Sqoop(conf);
     try {

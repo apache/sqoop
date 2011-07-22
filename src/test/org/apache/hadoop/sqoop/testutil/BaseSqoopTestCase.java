@@ -197,6 +197,7 @@ public class BaseSqoopTestCase extends TestCase {
     try {
       if (null != manager) {
         manager.close();
+        manager = null;
       }
     } catch (SQLException sqlE) {
       LOG.error("Got SQLException: " + sqlE.toString());

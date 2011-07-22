@@ -43,13 +43,13 @@ import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.util.FileListing;
 
 /**
- * Test the LocalMySQLManager implementation.
+ * Test the DirectMySQLManager implementation.
  * This differs from MySQLManager only in its importTable() method, which
  * uses mysqldump instead of mapreduce+DBInputFormat.
  *
  * Since this requires a MySQL installation on your local machine to use, this
  * class is named in such a way that Hadoop's default QA process does not run
- * it. You need to run this manually with -Dtestcase=LocalMySQLTest.
+ * it. You need to run this manually with -Dtestcase=DirectMySQLTest.
  *
  * You need to put MySQL's Connector/J JDBC driver library into a location
  * where Hadoop will be able to access it (since this library cannot be checked
@@ -63,24 +63,31 @@ import org.apache.hadoop.sqoop.util.FileListing;
  * flush privileges;
  *
  */
-public class LocalMySQLTest extends ImportJobTestCase {
+public class DirectMySQLTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(LocalMySQLTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(DirectMySQLTest.class.getName());
 
   static final String HOST_URL = "jdbc:mysql://localhost/";
 
   static final String MYSQL_DATABASE_NAME = "sqooptestdb";
-  static final String TABLE_NAME = "EMPLOYEES_MYSQL";
+  static final String TABLE_PREFIX = "EMPLOYEES_MYSQL_";
   static final String CONNECT_STRING = HOST_URL + MYSQL_DATABASE_NAME;
 
   // instance variables populated during setUp, used during tests
-  private LocalMySQLManager manager;
+  private DirectMySQLManager manager;
+
+  @Override
+  protected String getTablePrefix() {
+    return TABLE_PREFIX;
+  }
 
   @Before
   public void setUp() {
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
+    super.setUp();
+
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, getTableName());
     options.setUsername(MySQLUtils.getCurrentUser());
-    manager = new LocalMySQLManager(options);
+    manager = new DirectMySQLManager(options);
 
     Connection connection = null;
     Statement st = null;
@@ -91,19 +98,19 @@ public class LocalMySQLTest extends ImportJobTestCase {
       st = connection.createStatement();
 
       // create the database table and populate it with data. 
-      st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
-      st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
+      st.executeUpdate("DROP TABLE IF EXISTS " + getTableName());
+      st.executeUpdate("CREATE TABLE " + getTableName() + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
           + "name VARCHAR(24) NOT NULL, "
           + "start_date DATE, "
           + "salary FLOAT, "
           + "dept VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "NULL,'Aaron','2009-05-14',1000000.00,'engineering')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "NULL,'Bob','2009-04-20',400.00,'sales')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "NULL,'Fred','2009-01-23',15.00,'marketing')");
       connection.commit();
     } catch (SQLException sqlE) {
@@ -127,11 +134,16 @@ public class LocalMySQLTest extends ImportJobTestCase {
 
   @After
   public void tearDown() {
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
+    super.tearDown();
+
+    if (null != manager) {
+      try {
+        manager.close();
+        manager = null;
+      } catch (SQLException sqlE) {
+        LOG.error("Got SQLException: " + sqlE.toString());
+        fail("Got SQLException: " + sqlE.toString());
+      }
     }
   }
 
@@ -177,12 +189,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, tableName);
 
-    Path filePath;
-    if (isDirect) {
-      filePath = new Path(tablePath, "data-00000");
-    } else {
-      filePath = new Path(tablePath, "part-m-00000");
-    }
+    Path filePath = new Path(tablePath, "part-m-00000");
 
     File tableFile = new File(tablePath.toString());
     if (tableFile.exists() && tableFile.isDirectory()) {
@@ -218,14 +225,14 @@ public class LocalMySQLTest extends ImportJobTestCase {
   }
 
   @Test
-  public void testLocalBulkImportWithDefaultDelims() throws IOException {
+  public void testDirectBulkImportWithDefaultDelims() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
         "2,Bob,2009-04-20,400,sales",
         "3,Fred,2009-01-23,15,marketing"
     };
 
-    doImport(false, true, TABLE_NAME, expectedResults, null);
+    doImport(false, true, getTableName(), expectedResults, null);
   }
 
   @Test
@@ -238,18 +245,60 @@ public class LocalMySQLTest extends ImportJobTestCase {
 
     String [] extraArgs = { "-", "--lock-tables" };
 
-    doImport(false, true, TABLE_NAME, expectedResults, extraArgs);
+    doImport(false, true, getTableName(), expectedResults, extraArgs);
   }
 
   @Test
-  public void testLocalBulkImportWithMySQLQuotes() throws IOException {
+  public void testMultiMappers() throws IOException {
+    // no quoting of strings allowed.
+    String [] expectedResults = {
+        "2,Bob,2009-04-20,400,sales",
+        "3,Fred,2009-01-23,15,marketing"
+    };
+
+    String [] extraArgs = { "-m", "2" };
+
+    doImport(false, true, getTableName(), expectedResults, extraArgs);
+  }
+
+  @Test
+  public void testJdbcColumnSubset() throws IOException {
+    // Test that column subsets work in JDBC mode.
+    LOG.info("Starting JDBC Column Subset test.");
+
+    String [] expectedResults = {
+        "2,Bob,400.0",
+        "3,Fred,15.0"
+    };
+
+    String [] extraArgs = { "--columns", "id,name,salary" };
+    doImport(false, false, getTableName(), expectedResults, extraArgs);
+  }
+
+  @Test
+  public void testDirectColumnSubset() throws IOException {
+    // Using a column subset should actually force direct mode off, but this
+    // should just warn the user and do a normal import.
+    LOG.info("Starting Direct Column Subset test.");
+
+    String [] expectedResults = {
+        "2,Bob,400.0",
+        "3,Fred,15.0"
+    };
+
+    String [] extraArgs = { "--columns", "id,name,salary" };
+    doImport(false, true, getTableName(), expectedResults, extraArgs);
+  }
+
+  @Test
+  public void testDirectBulkImportWithMySQLQuotes() throws IOException {
     // mysql quotes all string-based output.
     String [] expectedResults = {
         "2,'Bob','2009-04-20',400,'sales'",
         "3,'Fred','2009-01-23',15,'marketing'"
     };
 
-    doImport(true, true, TABLE_NAME, expectedResults, null);
+    doImport(true, true, getTableName(), expectedResults, null);
   }
 
   @Test
@@ -259,7 +308,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
         "3,Fred,2009-01-23,15.0,marketing"
     };
 
-    doImport(false, false, TABLE_NAME, expectedResults, null);
+    doImport(false, false, getTableName(), expectedResults, null);
   }
 
   @Test
@@ -314,6 +363,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
     // Test a JDBC-based import of a table with a column whose name is
     // a reserved sql keyword (and is thus `quoted`)
     final String tableName = "mysql_escaped_col_table";
+    setCurTableName(tableName);
     SqoopOptions options = new SqoopOptions(CONNECT_STRING,
         tableName);
     options.setUsername(MySQLUtils.getCurrentUser());

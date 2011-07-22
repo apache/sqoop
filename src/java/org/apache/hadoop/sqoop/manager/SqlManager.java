@@ -273,6 +273,23 @@ public abstract class SqlManager extends ConnManager {
   public abstract Connection getConnection() throws SQLException;
 
   /**
+   * Determine what column to use to split the table.
+   * @param options the SqoopOptions controlling this import.
+   * @param tableName the table to import.
+   * @return the splitting column, if one is set or inferrable, or null
+   * otherwise.
+   */
+  protected String getSplitColumn(SqoopOptions options, String tableName) {
+    String splitCol = options.getSplitByCol();
+    if (null == splitCol) {
+      // If the user didn't specify a splitting column, try to infer one.
+      splitCol = getPrimaryKey(tableName);
+    }
+
+    return splitCol;
+  }
+
+  /**
    * Default implementation of importTable() is to launch a MapReduce job
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
@@ -281,18 +298,16 @@ public abstract class SqlManager extends ConnManager {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
     SqoopOptions options = context.getOptions();
+
     DataDrivenImportJob importer =
         new DataDrivenImportJob(options, context.getInputFormat());
-    String splitCol = options.getSplitByCol();
-    if (null == splitCol) {
-      // If the user didn't specify a splitting column, try to infer one.
-      splitCol = getPrimaryKey(tableName);
-    }
 
-    if (null == splitCol) {
+    String splitCol = getSplitColumn(options, tableName);
+    if (null == splitCol && options.getNumMappers() > 1) {
       // Can't infer a primary key.
-      throw new ImportException("No primary key could be found for table " + tableName
-          + ". Please specify one with --split-by.");
+      throw new ImportException("No primary key could be found for table "
+          + tableName + ". Please specify one with --split-by or perform "
+          + "a sequential import with '-m 1'.");
     }
 
     importer.runImport(tableName, jarFile, splitCol, options.getConf());

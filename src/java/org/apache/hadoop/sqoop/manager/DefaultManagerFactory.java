@@ -77,7 +77,7 @@ public final class DefaultManagerFactory extends ManagerFactory {
 
     if (scheme.equals("jdbc:mysql:")) {
       if (options.isDirect()) {
-        return new LocalMySQLManager(options);
+        return new DirectMySQLManager(options);
       } else {
         return new MySQLManager(options);
       }

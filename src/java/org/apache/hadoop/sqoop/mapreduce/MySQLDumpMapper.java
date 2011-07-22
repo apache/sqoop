@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop.manager;
+package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,8 +34,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
 import org.apache.hadoop.sqoop.util.AsyncSink;
@@ -48,12 +51,35 @@ import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
 import org.apache.hadoop.sqoop.util.PerfCounters;
 
 /**
- * Manages direct connections to MySQL databases
- * so we can use mysqldump to get really fast dumps.
+ * Mapper that opens up a pipe to mysqldump and pulls data directly.
  */
-public class LocalMySQLManager extends MySQLManager {
+public class MySQLDumpMapper
+    extends Mapper<String, NullWritable, String, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(LocalMySQLManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(MySQLDumpMapper.class.getName());
+
+  public static final String OUTPUT_FIELD_DELIM_KEY =
+      "sqoop.output.field.delim";
+  public static final String OUTPUT_RECORD_DELIM_KEY =
+      "sqoop.output.record.delim";
+  public static final String OUTPUT_ENCLOSED_BY_KEY =
+      "sqoop.output.enclosed.by";
+  public static final String OUTPUT_ESCAPED_BY_KEY =
+      "sqoop.output.escaped.by";
+  public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
+      "sqoop.output.enclose.required";
+  public static final String TABLE_NAME_KEY =
+      DBConfiguration.INPUT_TABLE_NAME_PROPERTY;
+  public static final String CONNECT_STRING_KEY = DBConfiguration.URL_PROPERTY;
+  public static final String USERNAME_KEY = DBConfiguration.USERNAME_PROPERTY;
+  public static final String PASSWORD_KEY = DBConfiguration.PASSWORD_PROPERTY;
+  public static final String WHERE_CLAUSE_KEY =
+      DBConfiguration.INPUT_CONDITIONS_PROPERTY;
+  public static final String EXTRA_ARGS_KEY =
+      "sqoop.mysqldump.extra.args";
+
+
+  private Configuration conf;
 
   // AsyncSinks used to import data from mysqldump directly into HDFS.
 
@@ -62,17 +88,17 @@ public class LocalMySQLManager extends MySQLManager {
    * header and footer characters that are attached to each line in mysqldump.
    */
   static class CopyingAsyncSink extends ErrorableAsyncSink {
-    private final SplittableBufferedWriter writer;
+    private final MySQLDumpMapper.Context context;
     private final PerfCounters counters;
 
-    CopyingAsyncSink(final SplittableBufferedWriter w,
+    CopyingAsyncSink(final MySQLDumpMapper.Context context,
         final PerfCounters ctrs) {
-      this.writer = w;
+      this.context = context;
       this.counters = ctrs;
     }
 
     public void processStream(InputStream is) {
-      child = new CopyingStreamThread(is, writer, counters);
+      child = new CopyingStreamThread(is, context, counters);
       child.start();
     }
 
@@ -80,20 +106,19 @@ public class LocalMySQLManager extends MySQLManager {
       public static final Log LOG = LogFactory.getLog(
           CopyingStreamThread.class.getName());
 
-      private final SplittableBufferedWriter writer;
+      private final MySQLDumpMapper.Context context;
       private final InputStream stream;
       private final PerfCounters counters;
 
       CopyingStreamThread(final InputStream is,
-          final SplittableBufferedWriter w, final PerfCounters ctrs) {
-        this.writer = w;
+          final Context c, final PerfCounters ctrs) {
+        this.context = c;
         this.stream = is;
         this.counters = ctrs;
       }
 
       public void run() {
         BufferedReader r = null;
-        SplittableBufferedWriter w = this.writer;
 
         try {
           r = new BufferedReader(new InputStreamReader(this.stream));
@@ -118,12 +143,17 @@ public class LocalMySQLManager extends MySQLManager {
             // chop off the leading and trailing text as we write the
             // output to HDFS.
             int len = inLine.length() - 2 - preambleLen;
-            w.write(inLine, preambleLen, len);
-            w.newLine();
+            context.write(inLine.substring(preambleLen, inLine.length() - 2), null);
+            context.write("\n", null);
             counters.addBytes(1 + len);
           }
         } catch (IOException ioe) {
           LOG.error("IOException reading from mysqldump: " + ioe.toString());
+          // flag this error so we get an error status back in the caller.
+          setError();
+        } catch (InterruptedException ie) {
+          LOG.error("InterruptedException reading from mysqldump: "
+              + ie.toString());
           // flag this error so we get an error status back in the caller.
           setError();
         } finally {
@@ -132,14 +162,6 @@ public class LocalMySQLManager extends MySQLManager {
               r.close();
             } catch (IOException ioe) {
               LOG.info("Error closing FIFO stream: " + ioe.toString());
-            }
-          }
-
-          if (null != w) {
-            try {
-              w.close();
-            } catch (IOException ioe) {
-              LOG.info("Error closing HDFS stream: " + ioe.toString());
             }
           }
         }
@@ -153,19 +175,19 @@ public class LocalMySQLManager extends MySQLManager {
    * output, and re-emit the text in the user's specified output format.
    */
   static class ReparsingAsyncSink extends ErrorableAsyncSink {
-    private final SplittableBufferedWriter writer;
-    private final SqoopOptions options;
+    private final MySQLDumpMapper.Context context;
+    private final Configuration conf;
     private final PerfCounters counters;
 
-    ReparsingAsyncSink(final SplittableBufferedWriter w,
-        final SqoopOptions opts, final PerfCounters ctrs) {
-      this.writer = w;
-      this.options = opts;
+    ReparsingAsyncSink(final MySQLDumpMapper.Context c,
+        final Configuration conf, final PerfCounters ctrs) {
+      this.context = c;
+      this.conf = conf;
       this.counters = ctrs;
     }
 
     public void processStream(InputStream is) {
-      child = new ReparsingStreamThread(is, writer, options, counters);
+      child = new ReparsingStreamThread(is, context, conf, counters);
       child.start();
     }
 
@@ -173,16 +195,16 @@ public class LocalMySQLManager extends MySQLManager {
       public static final Log LOG = LogFactory.getLog(
           ReparsingStreamThread.class.getName());
 
-      private final SplittableBufferedWriter writer;
-      private final SqoopOptions options;
+      private final MySQLDumpMapper.Context context;
+      private final Configuration conf;
       private final InputStream stream;
       private final PerfCounters counters;
 
       ReparsingStreamThread(final InputStream is,
-          final SplittableBufferedWriter w, final SqoopOptions opts,
+          final MySQLDumpMapper.Context c, Configuration conf,
           final PerfCounters ctrs) {
-        this.writer = w;
-        this.options = opts;
+        this.context = c;
+        this.conf = conf;
         this.stream = is;
         this.counters = ctrs;
       }
@@ -204,16 +226,23 @@ public class LocalMySQLManager extends MySQLManager {
 
       public void run() {
         BufferedReader r = null;
-        SplittableBufferedWriter w = this.writer;
 
         try {
           r = new BufferedReader(new InputStreamReader(this.stream));
 
-          char outputFieldDelim = options.getOutputFieldDelim();
-          char outputRecordDelim = options.getOutputRecordDelim();
-          String outputEnclose = "" + options.getOutputEnclosedBy();
-          String outputEscape = "" + options.getOutputEscapedBy();
-          boolean outputEncloseRequired = options.isOutputEncloseRequired(); 
+          char outputFieldDelim = (char) conf.getInt(
+              OUTPUT_FIELD_DELIM_KEY, '\000');
+          String outputFieldDelimStr = "" + outputFieldDelim;
+          char outputRecordDelim = (char) conf.getInt(
+              OUTPUT_RECORD_DELIM_KEY, '\000');
+          String outputRecordDelimStr = "" + outputRecordDelim;
+          char outputEnclose = (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY,
+              '\000');
+          String outputEncloseStr = "" + outputEnclose;
+          char outputEscape = (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, '\000');
+          String outputEscapeStr = "" + outputEscape;
+          boolean outputEncloseRequired = conf.getBoolean(
+              OUTPUT_ENCLOSE_REQUIRED_KEY, false);
           char [] encloseFor = { outputFieldDelim, outputRecordDelim };
 
           // Actually do the read/write transfer loop here.
@@ -250,24 +279,29 @@ public class LocalMySQLManager extends MySQLManager {
             int recordLen = 1; // for the delimiter.
             for (String field : fields) {
               if (!first) {
-                w.write(outputFieldDelim);
+                context.write(outputFieldDelimStr, null);
               } else {
                 first = false;
               }
 
-              String fieldStr = FieldFormatter.escapeAndEnclose(field, outputEscape, outputEnclose,
+              String fieldStr = FieldFormatter.escapeAndEnclose(field,
+                  outputEscapeStr, outputEncloseStr,
                   encloseFor, outputEncloseRequired);
-              w.write(fieldStr);
+              context.write(fieldStr, null);
               recordLen += fieldStr.length();
             }
 
-            w.write(outputRecordDelim);
-            w.allowSplit();
+            context.write(outputRecordDelimStr, null);
             counters.addBytes(recordLen);
           }
         } catch (IOException ioe) {
           LOG.error("IOException reading from mysqldump: " + ioe.toString());
           // flag this error so the parent can handle it appropriately.
+          setError();
+        } catch (InterruptedException ie) {
+          LOG.error("InterruptedException reading from mysqldump: "
+              + ie.toString());
+          // flag this error so we get an error status back in the caller.
           setError();
         } finally {
           if (null != r) {
@@ -277,22 +311,9 @@ public class LocalMySQLManager extends MySQLManager {
               LOG.info("Error closing FIFO stream: " + ioe.toString());
             }
           }
-
-          if (null != w) {
-            try {
-              w.close();
-            } catch (IOException ioe) {
-              LOG.info("Error closing HDFS stream: " + ioe.toString());
-            }
-          }
         }
       }
     }
-  }
-
-
-  public LocalMySQLManager(final SqoopOptions options) {
-    super(options, false);
   }
 
   private static final String MYSQL_DUMP_CMD = "mysqldump";
@@ -304,21 +325,21 @@ public class LocalMySQLManager extends MySQLManager {
    * optional-enclose: \'
    * escape: \\
    */
-  private boolean outputDelimsAreMySQL() {
-    return options.getOutputFieldDelim() == ','
-        && options.getOutputRecordDelim() == '\n'
-        && options.getOutputEnclosedBy() == '\''
-        && options.getOutputEscapedBy() == '\\'
-        && !options.isOutputEncloseRequired(); // encloser is optional
+  private boolean outputDelimsAreMySQL(Configuration conf) {
+    return ',' == (char) conf.getInt(OUTPUT_FIELD_DELIM_KEY, '\000')
+        && '\n' == (char) conf.getInt(OUTPUT_RECORD_DELIM_KEY, '\000')
+        && '\'' == (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY, '\000')
+        && '\\' == (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, '\000')
+        && !conf.getBoolean(OUTPUT_ENCLOSE_REQUIRED_KEY, false);
   }
-  
+
   /**
    * Writes the user's password to a tmp file with 0600 permissions.
    * @return the filename used.
    */
   private String writePasswordFile() throws IOException {
     // Create the temp file to hold the user's password.
-    String tmpDir = options.getTempDir();
+    String tmpDir = conf.get(JobContext.JOB_LOCAL_DIR, "/tmp/");
     File tempFile = File.createTempFile("mysql-cnf",".cnf", new File(tmpDir));
 
     // Make the password file only private readable.
@@ -329,7 +350,7 @@ public class LocalMySQLManager extends MySQLManager {
     // that the external 'chmod' program in the path does the right thing, and returns
     // the correct exit status. But given our inability to re-read the permissions
     // associated with a file, we'll have to make do with this.
-    String password = options.getPassword();
+    String password = conf.get(PASSWORD_KEY);
     BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile)));
     w.write("[client]\n");
     w.write("password=" + password + "\n");
@@ -342,41 +363,33 @@ public class LocalMySQLManager extends MySQLManager {
    * Import the table into HDFS by using mysqldump to pull out the data from
    * the database and upload the files directly to HDFS.
    */
-  public void importTable(ImportJobContext context)
-      throws IOException, ImportException {
+  public void map(String splitConditions, NullWritable val, Context context)
+      throws IOException, InterruptedException {
 
-    String tableName = context.getTableName();
-    String jarFile = context.getJarFile();
-    SqoopOptions options = context.getOptions();
 
     LOG.info("Beginning mysqldump fast path import");
 
-    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
-      // TODO(aaron): Support SequenceFile-based load-in
-      LOG.warn("File import layout " + options.getFileLayout()
-          + " is not supported by");
-      LOG.warn("MySQL direct import; import will proceed as text files.");
-    }
-
     ArrayList<String> args = new ArrayList<String>();
+    String tableName = conf.get(TABLE_NAME_KEY);
 
     // We need to parse the connect string URI to determine the database
     // name. Using java.net.URL directly on the connect string will fail because
     // Java doesn't respect arbitrary JDBC-based schemes. So we chop off the scheme
     // (everything before '://') and replace it with 'http', which we know will work.
-    String connectString = options.getConnectString();
+    String connectString = conf.get(CONNECT_STRING_KEY);
     String databaseName = JdbcUrl.getDatabaseName(connectString);
     String hostname = JdbcUrl.getHostName(connectString);
     int port = JdbcUrl.getPort(connectString);
 
     if (null == databaseName) {
-      throw new ImportException("Could not determine database name");
+      throw new IOException("Could not determine database name");
     }
 
     LOG.info("Performing import of table " + tableName + " from database " + databaseName);
+
     args.add(MYSQL_DUMP_CMD); // requires that this is on the path.
 
-    String password = options.getPassword();
+    String password = conf.get(PASSWORD_KEY);
     String passwordFile = null;
 
     Process p = null;
@@ -390,33 +403,31 @@ public class LocalMySQLManager extends MySQLManager {
         args.add("--defaults-file=" + passwordFile);
       }
 
-      String whereClause = options.getWhereClause();
-      if (null != whereClause) {
-        // Don't use the --where="<whereClause>" version because spaces in it can confuse
-        // Java, and adding in surrounding quotes confuses Java as well.
-        args.add("-w");
-        args.add(whereClause);
-      }
+      // Don't use the --where="<whereClause>" version because spaces in it can
+      // confuse Java, and adding in surrounding quotes confuses Java as well.
+      String whereClause = conf.get(WHERE_CLAUSE_KEY, "(1=1)") + " AND ("
+          + splitConditions + ")";
+      args.add("-w");
+      args.add(whereClause);
 
-      if (!DirectImportUtils.isLocalhost(hostname) || port != -1) {
-        args.add("--host=" + hostname);
+      args.add("--host=" + hostname);
+      if (-1 != port) {
         args.add("--port=" + Integer.toString(port));
       }
-
       args.add("--skip-opt");
       args.add("--compact");
       args.add("--no-create-db");
       args.add("--no-create-info");
       args.add("--quick"); // no buffering
-      args.add("--single-transaction"); 
+      args.add("--single-transaction");
 
-      String username = options.getUsername();
+      String username = conf.get(USERNAME_KEY);
       if (null != username) {
         args.add("--user=" + username);
       }
 
       // If the user supplied extra args, add them here.
-      String [] extra = options.getExtraArgs();
+      String [] extra = conf.getStrings(EXTRA_ARGS_KEY);
       if (null != extra) {
         for (String arg : extra) {
           args.add(arg);
@@ -432,26 +443,22 @@ public class LocalMySQLManager extends MySQLManager {
         LOG.debug("  " + arg);
       }
 
-      // This writer will be closed by AsyncSink.
-      SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(
-          options.getConf(), options, tableName);
-
       // Actually start the mysqldump.
       p = Runtime.getRuntime().exec(args.toArray(new String[0]));
 
       // read from the stdout pipe into the HDFS writer.
       InputStream is = p.getInputStream();
 
-      if (outputDelimsAreMySQL()) {
+      if (outputDelimsAreMySQL(conf)) {
         LOG.debug("Output delimiters conform to mysqldump; using straight copy"); 
-        sink = new CopyingAsyncSink(w, counters);
+        sink = new CopyingAsyncSink(context, counters);
       } else {
         LOG.debug("User-specified delimiters; using reparsing import");
         LOG.info("Converting data to use specified delimiters.");
         LOG.info("(For the fastest possible import, use");
         LOG.info("--mysql-delimiters to specify the same field");
         LOG.info("delimiters as are used by mysqldump.)");
-        sink = new ReparsingAsyncSink(w, options, counters);
+        sink = new ReparsingAsyncSink(context, conf, counters);
       }
 
       // Start an async thread to read and upload the whole stream.
@@ -527,6 +534,11 @@ public class LocalMySQLManager extends MySQLManager {
       counters.stopClock();
       LOG.info("Transferred " + counters.toString());
     }
+  }
+
+  @Override
+  protected void setup(Context context) {
+    this.conf = context.getConfiguration();
   }
 }
 

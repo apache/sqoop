@@ -75,7 +75,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
   static final String AUTH_CONNECT_STRING = HOST_URL + AUTH_TEST_DATABASE;
 
   // instance variables populated during setUp, used during tests
-  private LocalMySQLManager manager;
+  private DirectMySQLManager manager;
 
   @Before
   public void setUp() {
@@ -83,7 +83,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
 
-    manager = new LocalMySQLManager(options);
+    manager = new DirectMySQLManager(options);
 
     Connection connection = null;
     Statement st = null;
@@ -176,7 +176,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, AUTH_TABLE_NAME);
-    Path filePath = new Path(tablePath, "data-00000");
+    Path filePath = new Path(tablePath, "part-m-00000");
 
     File f = new File(filePath.toString());
     assertTrue("Could not find imported data file", f.exists());
@@ -233,7 +233,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
 
-    manager = new LocalMySQLManager(options);
+    manager = new DirectMySQLManager(options);
 
     Connection connection = null;
     Statement st = null;
@@ -266,7 +266,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
       options.setUsername(AUTH_TEST_USER);
       options.setPassword(AUTH_TEST_PASS);
 
-      manager = new LocalMySQLManager(options);
+      manager = new DirectMySQLManager(options);
 
       Connection connection = null;
       Statement st = null;

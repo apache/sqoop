@@ -45,7 +45,7 @@ public class MySQLManager extends GenericJdbcManager {
   private static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
   // set to true after we warn the user that we can use direct fastpath.
-  private static boolean warningPrinted = false;
+  protected static boolean warningPrinted = false;
 
   private Statement lastStatement;
 
@@ -108,14 +108,11 @@ public class MySQLManager extends GenericJdbcManager {
     if (!MySQLManager.warningPrinted) {
       String connectString = context.getOptions().getConnectString();
 
-      if (null != connectString && connectString.indexOf("//localhost") != -1) {
-        // if we're not doing a remote connection, they should have a LocalMySQLManager.
-        // TODO(aaron): After LocalMySQLManager supports --host/--port, this should
-        // always be issued.
-        LOG.warn("It looks like you are importing from mysql on");
-        LOG.warn("localhost. This transfer can be faster! Use the");
-        LOG.warn("--direct option to exercise a MySQL-specific fast");
-        LOG.warn("path.");
+      if (null != connectString) {
+        // DirectMySQLManager will probably be faster.
+        LOG.warn("It looks like you are importing from mysql.");
+        LOG.warn("This transfer can be faster! Use the --direct");
+        LOG.warn("option to exercise a MySQL-specific fast path.");
 
         MySQLManager.warningPrinted = true; // don't display this twice.
       }

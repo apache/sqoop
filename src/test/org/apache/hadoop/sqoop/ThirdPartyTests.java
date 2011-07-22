@@ -22,7 +22,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.apache.hadoop.sqoop.manager.LocalMySQLTest;
+import org.apache.hadoop.sqoop.manager.DirectMySQLTest;
 import org.apache.hadoop.sqoop.manager.MySQLAuthTest;
 import org.apache.hadoop.sqoop.manager.MySQLCompatTest;
 import org.apache.hadoop.sqoop.manager.OracleManagerTest;
@@ -41,7 +41,7 @@ public final class ThirdPartyTests extends TestCase {
   public static Test suite() {
     TestSuite suite = new TestSuite("Tests vendor-specific ConnManager "
       + "implementations in Sqoop");
-    suite.addTestSuite(LocalMySQLTest.class);
+    suite.addTestSuite(DirectMySQLTest.class);
     suite.addTestSuite(MySQLAuthTest.class);
     suite.addTestSuite(MySQLCompatTest.class);
     suite.addTestSuite(OracleManagerTest.class);
