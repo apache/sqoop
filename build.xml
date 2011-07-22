@@ -87,6 +87,18 @@
   <property name="findbugs.excludes"
       location="${test.dir}/findbugsExcludeFile.xml" />
 
+  <!-- maven -->
+  <property name="mvn.build.dir" value="${build.dir}/m2" />
+  <property name="mvn.repo" value="snapshots" />
+  <property name="mvn.repo.id" value="cloudera.${mvn.repo}.repo" />
+  <property name="mvn.deploy.url"
+      value="https://repository.cloudera.com/content/repositories/${mvn.repo}"/>
+  <property name="sqoop.pom" value="${mvn.build.dir}/sqoop.pom" />
+  <property name="apache.shim.pom"
+      value="${mvn.build.dir}/sqoop-shim-apache.pom" />
+  <property name="cloudera.shim.pom"
+      value="${mvn.build.dir}/sqoop-shim-cloudera.pom" />
+
   <!-- code coverage -->
   <property name="cobertura.dir" value="${build.dir}/cobertura" />
   <property name="cobertura.home" value="${cobertura.dir}" />
@@ -115,6 +127,10 @@
   <property name="ivy.jar" location="${lib.dir}/ivy-${ivy.version}.jar"/>
   <property name="ivy_repo_url" 
 	value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
+  <property name="mvn_repo_url"
+  value="http://repo2.maven.org/maven2/org/apache/maven/maven-ant-tasks/${mvn.version}/maven-ant-tasks-${mvn.version}.jar"/>
+  <property name="mvn.jar"
+      location="${build.dir}/maven-ant-tasks-${mvn.version}.jar" />
   <property name="build.ivy.dir" location="${build.dir}/ivy" />
   <property name="build.ivy.lib.dir" location="${build.ivy.dir}/lib" />
   <property name="build.ivy.report.dir" location="${build.ivy.dir}/report" />
@@ -216,7 +232,7 @@
 
   <!-- Compile one shim and fetch it into a jar file. -->
   <target name="jar-one-shim" depends="init,compile-one-shim">
-    <jar jarfile="${build.shim.dir}/${name}-${version}-shim-${hadoop.shim}.jar"
+    <jar jarfile="${build.shim.dir}/${name}-shim-${hadoop.shim}-${version}.jar"
         basedir="${build.shim.classes}/${hadoop.shim}" />
   </target>
 
@@ -610,6 +626,77 @@
     <echo message="Binary tar: ${tar.file}" />
     <echo message="Web docs: ${build.dir}/webdocs" />
     <echo message="Release audit report: ${build.dir}/rat.log" />
+  </target>
+
+  <target name="mvn-prep" depends="init,ivy-resolve-common">
+    <!-- prepare for mvn tasks. -->
+
+    <!-- Download maven -->
+    <mkdir dir="${build.dir}" />
+    <get src="${mvn_repo_url}" dest="${mvn.jar}" usetimestamp="true" />
+
+    <!-- Register mvn tasks -->
+    <path id="mvn-ant-task.classpath" path="${mvn.jar}" />
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" 
+        uri="urn:maven-artifact-ant"
+        classpathref="mvn-ant-task.classpath"/>
+
+    <!-- generate our poms from our ivy files. -->
+    <mkdir dir="${mvn.build.dir}" />
+    <ivy:makepom ivyfile="ivy.xml" pomfile="${sqoop.pom}"
+        settingsRef="${name}.ivy.settings">
+      <mapping conf="default" scope="compile" />
+      <mapping conf="runtime" scope="runtime" />
+    </ivy:makepom>
+
+    <ivy:makepom ivyfile="ivy/apache-shim.xml" pomfile="${apache.shim.pom}"
+        settingsRef="${name}.ivy.settings">
+      <mapping conf="default" scope="compile" />
+      <mapping conf="runtime" scope="runtime" />
+    </ivy:makepom>
+    <ivy:makepom ivyfile="ivy/cloudera-shim.xml" pomfile="${cloudera.shim.pom}"
+        settingsRef="${name}.ivy.settings">
+      <mapping conf="default" scope="compile" />
+      <mapping conf="runtime" scope="runtime" />
+    </ivy:makepom>
+
+    <!-- Change the version in the pom file to reflect our claimed version. -->
+    <replaceregexp>
+      <regexp pattern="&lt;version&gt;.*&lt;/version&gt;" />
+      <substitution expression="&lt;version&gt;${version}&lt;/version&gt;" />
+      <fileset dir="${mvn.build.dir}">
+        <include name="*.pom" />
+      </fileset>
+    </replaceregexp>
+  </target>
+
+  <target name="mvn-install" depends="init,mvn-prep,jar,jar-all-shims"
+      description="Install Sqoop in local m2 repository">
+    <artifact:pom file="${sqoop.pom}" id="sqoop" />
+    <artifact:install file="${build.dir}/${dest.jar}">
+      <pom refid="sqoop" />
+    </artifact:install>
+
+    <artifact:pom file="${apache.shim.pom}" id="sqoop-apache-shim" />
+    <artifact:install
+        file="${build.shim.dir}/${name}-shim-apache-${version}.jar">
+      <pom refid="sqoop-apache-shim" />
+    </artifact:install>
+
+    <artifact:pom file="${cloudera.shim.pom}" id="sqoop-cloudera-shim" />
+    <artifact:install
+        file="${build.shim.dir}/${name}-shim-cloudera-${version}.jar">
+      <pom refid="sqoop-cloudera-shim" />
+    </artifact:install>
+  </target>
+
+  <target name="mvn-deploy" depends="mvn-prep,jar,jar-all-shims"
+      description="Deploy Sqoop to public maven repository">
+    <artifact:pom file="${sqoop.pom}" id="sqoop" />
+    <artifact:deploy file="${build.dir}/${dest.jar}">
+      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
+      <pom refid="sqoop" />
+    </artifact:deploy>
   </target>
 
   <target name="webdocs" depends="webdocs-uptodate" unless="webdocs.uptodate"

@@ -166,3 +166,43 @@ ant checkstyle
 A report will be generated as +build/checkstyle-errors.html+
 
 
+== Deploying to Maven
+
+To use Sqoop as a dependency in other projects, you can pull Sqoop into your
+dependency management system through Maven.
+
+To install Sqoop in your local +.m2+ cache, run:
+
+++++
+ant mvn-install
+++++
+
+This will install a pom and the Sqoop jar.
+
+To deploy Sqoop to a public repository, use:
+
+++++
+ant mvn-deploy
+++++
+
+By default, this deploys to repository.cloudera.com. You can choose
+the complete URL to deploy to with the +mvn.deploy.url+ property.
+By default, this deploys to the "snapshots" repository. To deploy to
+"staging" or "releases" on repository.cloudera.com, set the
++mvn.repo+ property accordingly.
+
+== Releasing Sqoop
+
+To build a full release of Sqoop, run +ant release -Dversion=(somever)+.
+This will build a binary release tarball and the web-based documentation
+as well as run a release audit which flags any source files which may
+be missing license headers.
+
+(The release audit can be run standalone with the +ant releaseaudit+
+target.)
+
+You must set the +version+ property explicitly; you cannot release a
+snapshot. To simultaneously deploy this to a maven repository, include
+the +mvn-install+ or +mvn-deploy+ targets as well.
+
+

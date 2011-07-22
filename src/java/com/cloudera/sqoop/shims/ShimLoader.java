@@ -72,29 +72,29 @@ public abstract class ShimLoader {
     // nnn is a build number.
     HADOOP_SHIM_MATCHES.add("0.20.2\\+[0-9]+");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.CDH3Shim");
-    HADOOP_SHIM_JARS.add("sqoop-.*-cloudera.jar");
+    HADOOP_SHIM_JARS.add("sqoop-shim-cloudera-.*.jar");
 
     // Apache 0.22 trunk.
     // Version may have the form  "0.22-SNAPSHOT"
     HADOOP_SHIM_MATCHES.add("0.22-.*");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.Apache22HadoopShim");
-    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+    HADOOP_SHIM_JARS.add("sqoop-shim-apache-.*.jar");
 
     // ... or "0.22.n-SNAPSHOT"
     HADOOP_SHIM_MATCHES.add("0.22.\\d+-.*");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.Apache22HadoopShim");
-    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+    HADOOP_SHIM_JARS.add("sqoop-shim-apache-.*.jar");
 
     // Apache 0.22 trunk snapshots often compile with "Unknown" version,
     // so we default to guessing Apache in this case.
     HADOOP_SHIM_MATCHES.add("Unknown");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.Apache22HadoopShim");
-    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+    HADOOP_SHIM_JARS.add("sqoop-shim-apache-.*.jar");
 
     // Apache 0.21 uses the same shim jars as 0.22
     HADOOP_SHIM_MATCHES.add("0.21.\\d+(-.*)?");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.Apache22HadoopShim");
-    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+    HADOOP_SHIM_JARS.add("sqoop-shim-apache-.*.jar");
 
   }
 

@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <ivy-module version="1.0">
-  <info organisation="org.sqoop" module="${name}">
+  <info organisation="com.cloudera.sqoop" module="${name}">
     <license name="Apache 2.0"/>
     <ivyauthor name="Sqoop Team" url="http://github.com/cloudera/sqoop" />
     <description>
@@ -58,6 +58,10 @@
          Things we actually need to ship are marked with a 'redist'
          configuration. -->
     <conf name="redist" visibility="private" extends="master" />
+
+    <!-- This configuration is used to identify dependencies on our own
+         shim targets required by clients of Sqoop who use maven. -->
+    <conf name="mvndeploy" visibility="private" extends="master" />
 
     <!-- configuration for running checkstyle -->
     <conf name="checkstyle" visibility="private" />
@@ -111,7 +115,7 @@
     <dependency org="commons-logging" name="commons-logging"
       rev="${commons-logging.version}" conf="common->default"/>
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
-      conf="common->master"/>
+      conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="common->default"/>
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
@@ -130,5 +134,10 @@
     <dependency org="commons-collections" name="commons-collections"
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
+    <!-- dependencies on the shim jars we generate, for release poms -->
+    <dependency org="com.cloudera.sqoop" name="sqoop-shim-apache"
+      rev="${version}" conf="mvndeploy->default" />
+    <dependency org="com.cloudera.sqoop" name="sqoop-shim-cloudera"
+      rev="${version}" conf="mvndeploy->default" />
   </dependencies>
 </ivy-module>
