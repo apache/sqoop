@@ -73,6 +73,8 @@ public abstract class SqoopTool {
         "List available databases on a server");
     registerTool("list-tables", ListTablesTool.class,
         "List available tables in a database");
+    registerTool("version", VersionTool.class,
+        "Display version information");
   }
 
   /**

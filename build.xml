@@ -46,6 +46,7 @@
 
   <property name="build.dir" location="${basedir}/build" />
   <property name="build.bin.dir" location="${build.dir}/bin" />
+  <property name="build.src.dir" location="${build.dir}/src" />
   <property name="build.classes" location="${build.dir}/classes"/>
   <property name="build.shim.dir" location="${build.dir}/shims"/>
   <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
@@ -183,15 +184,37 @@
       <param name="hadoop.dist" value="cloudera" />
     </antcall>
   </target>
+
+  <!-- generate the version information class. -->
+  <target name="gen-version" depends="init">
+    <exec executable="${script.src.dir}/write-version-info.sh"
+        dir="${basedir}" failonerror="true">
+      <arg value="${build.dir}" />
+      <arg value="${version}" />
+    </exec>
+  </target>
   
   <!-- Compile core classes for the project -->
   <target name="compile"
-      depends="init, ivy-retrieve-hadoop"
+      depends="init, gen-version, ivy-retrieve-hadoop"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
     <!-- ensure normal build target dir exists -->
     <mkdir dir="${build.classes}" />
+
+    <!-- Compile generated code first. -->
+    <javac
+        encoding="${build.encoding}"
+        srcdir="${build.src.dir}"
+        includes="**/*.java"
+        destdir="${build.classes}"
+        debug="${javac.debug}"
+        deprecation="${javac.deprecation}">
+      <classpath refid="compile.classpath"/>
+    </javac>
+
+    <!-- Compile the main code. -->
     <javac
         encoding="${build.encoding}"
         srcdir="${src.dir}"
