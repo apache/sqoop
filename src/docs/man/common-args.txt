@@ -29,6 +29,9 @@ Database connection and common options
 --driver (class-name)::
   Manually specify JDBC driver class to use
 
+--connection-param-file (filename)::
+  Optional properties file that provides connection parameters
+
 --hadoop-home (dir)::
   Override $HADOOP_HOME
 
@@ -47,4 +50,3 @@ Database connection and common options
 
 --verbose::
   Print more information while working
-

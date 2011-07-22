@@ -18,8 +18,13 @@
 
 package com.cloudera.sqoop.tool;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -63,6 +68,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String CONNECT_STRING_ARG = "connect";
   public static final String CONN_MANAGER_CLASS_NAME =
       "connection-manager";
+  public static final String CONNECT_PARAM_FILE = "connection-param-file";
   public static final String DRIVER_ARG = "driver";
   public static final String USERNAME_ARG = "username";
   public static final String PASSWORD_ARG = "password";
@@ -341,9 +347,13 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withLongOpt(CONNECT_STRING_ARG)
         .create());
     commonOpts.addOption(OptionBuilder.withArgName("class-name")
-            .hasArg().withDescription("Specify connection manager class name")
-            .withLongOpt(CONN_MANAGER_CLASS_NAME)
-            .create());
+        .hasArg().withDescription("Specify connection manager class name")
+        .withLongOpt(CONN_MANAGER_CLASS_NAME)
+        .create());
+    commonOpts.addOption(OptionBuilder.withArgName("properties-file")
+        .hasArg().withDescription("Specify connection parameters file")
+        .withLongOpt(CONNECT_PARAM_FILE)
+        .create());
     commonOpts.addOption(OptionBuilder.withArgName("class-name")
         .hasArg().withDescription("Manually specify JDBC driver class to use")
         .withLongOpt(DRIVER_ARG)
@@ -614,6 +624,36 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(CONN_MANAGER_CLASS_NAME)) {
         out.setConnManagerClassName(in.getOptionValue(CONN_MANAGER_CLASS_NAME));
+    }
+
+    if (in.hasOption(CONNECT_PARAM_FILE)) {
+      File paramFile = new File(in.getOptionValue(CONNECT_PARAM_FILE));
+      if (!paramFile.exists()) {
+        throw new InvalidOptionsException(
+                "Specified connection parameter file not found: " + paramFile);
+      }
+      InputStream inStream = null;
+      Properties connectionParams = new Properties();
+      try {
+        inStream = new FileInputStream(
+                      new File(in.getOptionValue(CONNECT_PARAM_FILE)));
+        connectionParams.load(inStream);
+      } catch (IOException ex) {
+        LOG.warn("Failed to load connection parameter file", ex);
+        throw new InvalidOptionsException(
+                "Error while loading connection parameter file: "
+                + ex.getMessage());
+      } finally {
+        if (inStream != null) {
+          try {
+            inStream.close();
+          } catch (IOException ex) {
+            LOG.warn("Failed to close input stream", ex);
+          }
+        }
+      }
+      LOG.debug("Loaded connection parameters: " + connectionParams);
+      out.setConnectionParams(connectionParams);
     }
 
     if (in.hasOption(NULL_STRING)) {

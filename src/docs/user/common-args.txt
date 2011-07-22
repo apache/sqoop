@@ -32,5 +32,7 @@ Argument                                  Description
 +\--password <password>+                  Set authentication password
 +\--username <username>+                  Set authentication username
 +\--verbose+                              Print more information while working
++\--connection-param-file <filename>+     Optional properties file that\
+                                          provides connection parameters
 -------------------------------------------------------------------------------
 

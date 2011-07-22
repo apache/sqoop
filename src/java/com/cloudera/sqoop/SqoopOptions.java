@@ -23,6 +23,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,7 +33,6 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
-
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
@@ -113,6 +113,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("db.username") private String username;
   @StoredAsProperty("db.export.staging.table") private String stagingTableName;
   @StoredAsProperty("db.clear.staging.table") private boolean clearStagingTable;
+  private Properties connectionParams; //Properties stored as db.connect.params
 
 
   // May not be serialized, based on configuration.
@@ -419,6 +420,69 @@ public class SqoopOptions implements Cloneable {
     }
   }
 
+  /**
+   * This method encodes the property key values found in the provided
+   * properties instance <tt>values</tt> into another properties instance
+   * <tt>props</tt>. The specified <tt>prefix</tt> is used as a namespace
+   * qualifier for keys when inserting. This allows easy introspection of the
+   * property key values in <tt>props</tt> instance to later separate out all
+   * the properties that belong to the <tt>values</tt> instance.
+   * @param props the container properties instance
+   * @param prefix the prefix for qualifying contained property keys.
+   * @param values the contained properties instance, all of whose elements will
+   *               be added to the container properties instance.
+   *
+   * @see #getPropertiesAsNetstedProperties(Properties, String)
+   */
+  private void setPropertiesAsNestedProperties(Properties props,
+          String prefix, Properties values) {
+    String nestedPropertyPrefix = prefix + ".";
+    if (null == values || values.size() == 0) {
+      Iterator<String> it = props.stringPropertyNames().iterator();
+      while (it.hasNext()) {
+        String name = it.next();
+        if (name.startsWith(nestedPropertyPrefix)) {
+          props.remove(name);
+        }
+      }
+    } else {
+      Iterator<String> it = values.stringPropertyNames().iterator();
+      while (it.hasNext()) {
+        String name = it.next();
+        putProperty(props,
+                nestedPropertyPrefix + name, values.getProperty(name));
+      }
+    }
+  }
+
+  /**
+   * This method decodes the property key values found in the provided
+   * properties instance <tt>props</tt> that have keys beginning with the
+   * given prefix. Matching elements from this properties instance are modified
+   * so that their prefix is dropped.
+   * @param props the properties container
+   * @param prefix the prefix qualifying properties that need to be removed
+   * @return a new properties instance that contains all matching elements from
+   * the container properties.
+   */
+  private Properties getPropertiesAsNetstedProperties(
+          Properties props, String prefix) {
+    Properties nestedProps = new Properties();
+    String nestedPropertyPrefix = prefix + ".";
+    int index = nestedPropertyPrefix.length();
+    if (props != null && props.size() > 0) {
+      Iterator<String> it = props.stringPropertyNames().iterator();
+      while (it.hasNext()) {
+        String name = it.next();
+        if (name.startsWith(nestedPropertyPrefix)){
+          String shortName = name.substring(index);
+          nestedProps.put(shortName, props.get(name));
+        }
+      }
+    }
+    return nestedProps;
+  }
+
   @SuppressWarnings("unchecked")
   /**
    * Given a set of properties, load this into the current SqoopOptions
@@ -496,6 +560,9 @@ public class SqoopOptions implements Cloneable {
     this.extraArgs = getArgArrayProperty(props, "tool.arguments",
         this.extraArgs);
 
+    this.connectionParams =
+        getPropertiesAsNetstedProperties(props, "db.connect.params");
+
     // Delimiters were previously memoized; don't let the tool override
     // them with defaults.
     this.areDelimsManuallySet = true;
@@ -565,6 +632,9 @@ public class SqoopOptions implements Cloneable {
         this.outputDelimiters);
     setArgArrayProperties(props, "tool.arguments", this.extraArgs);
 
+    setPropertiesAsNestedProperties(props,
+            "db.connect.params", this.connectionParams);
+
     return props;
   }
 
@@ -594,6 +664,10 @@ public class SqoopOptions implements Cloneable {
 
       if (null != extraArgs) {
         other.extraArgs = Arrays.copyOf(extraArgs, extraArgs.length);
+      }
+
+      if (null != connectionParams) {
+        other.setConnectionParams(this.connectionParams);
       }
 
       return other;
@@ -1755,5 +1829,13 @@ public class SqoopOptions implements Cloneable {
     return inNullNonStringValue;
   }
 
+  public void setConnectionParams(Properties params) {
+    connectionParams = new Properties();
+    connectionParams.putAll(params);
+  }
+
+  public Properties getConnectionParams() {
+    return connectionParams;
+  }
 }
 

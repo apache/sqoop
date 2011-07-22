@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -268,12 +269,32 @@ public class OracleManager extends GenericJdbcManager {
     if (null == connection) {
       // Couldn't pull one from the cache. Get a new one.
       LOG.debug("Creating a new connection for "
-          + connectStr + "/" + username);
-      if (null == username) {
-        connection = DriverManager.getConnection(connectStr);
+              + connectStr + ", using username: " + username);
+      Properties connectionParams = options.getConnectionParams();
+      if (connectionParams != null && connectionParams.size() > 0) {
+        LOG.debug("User specified connection params. "
+                  + "Using properties specific API for making connection.");
+
+        Properties props = new Properties();
+        if (username != null) {
+          props.put("user", username);
+        }
+
+        if (password != null) {
+          props.put("password", password);
+        }
+
+        props.putAll(connectionParams);
+        connection = DriverManager.getConnection(connectStr, props);
       } else {
-        connection = DriverManager.getConnection(connectStr, username,
-            password);
+        LOG.debug("No connection paramenters specified. "
+                + "Using regular API for making connection.");
+        if (username == null) {
+          connection = DriverManager.getConnection(connectStr);
+        } else {
+          connection = DriverManager.getConnection(
+                              connectStr, username, password);
+        }
       }
     }
 

@@ -26,13 +26,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -176,7 +170,7 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
     String [] expectedResults = {
       "1,Aaron,1000000.0,engineering",
       "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing"
+      "3,Fred,15.0,marketing",
     };
 
     runSQLServerTest(expectedResults);

@@ -48,6 +48,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -191,7 +192,7 @@ public abstract class SqlManager extends ConnManager {
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString());
+      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
       release();
       return null;
     }
@@ -637,11 +638,32 @@ public abstract class SqlManager extends ConnManager {
 
     String username = options.getUsername();
     String password = options.getPassword();
-    if (null == username) {
-      connection = DriverManager.getConnection(options.getConnectString());
+    String connectString = options.getConnectString();
+    Properties connectionParams = options.getConnectionParams();
+    if (connectionParams != null && connectionParams.size() > 0) {
+      LOG.debug("User specified connection params. "
+              + "Using properties specific API for making connection.");
+
+      Properties props = new Properties();
+      if (username != null) {
+        props.put("user", username);
+      }
+
+      if (password != null) {
+        props.put("password", password);
+      }
+
+      props.putAll(connectionParams);
+      connection = DriverManager.getConnection(connectString, props);
     } else {
-      connection = DriverManager.getConnection(options.getConnectString(),
-          username, password);
+      LOG.debug("No connection paramenters specified. "
+              + "Using regular API for making connection.");
+      if (username == null) {
+        connection = DriverManager.getConnection(connectString);
+      } else {
+        connection = DriverManager.getConnection(
+                        connectString, username, password);
+      }
     }
 
     // We only use this for metadata queries. Loosest semantics are okay.

@@ -84,4 +84,11 @@ $ sqoop import --driver com.microsoft.jdbc.sqlserver.SQLServerDriver \
     --connect <connect-string> ...
 ----
 
+When connecting to a database using JDBC, you can optionally specify extra
+JDBC parameters via a property file using the option
++\--connection-param-file+. The contents of this file are parsed as standard
+Java properties and passed into the driver while creating a connection.
 
+NOTE: The parameters specified via the optional property file are only
+applicable to JDBC connections. Any fastpath connectors that use connections
+other than JDBC will ignore these parameters.
