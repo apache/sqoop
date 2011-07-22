@@ -68,13 +68,19 @@ public abstract class ShimLoader {
   static {
     // These regular expressions will be evaluated in order until one matches.
 
-    // Check 
+    // CDH3 (based on 0.20.2)
     HADOOP_SHIM_MATCHES.add("0.20.2-[cC][dD][hH]3.*");
     HADOOP_SHIM_CLASSES.add("org.apache.hadoop.sqoop.shims.CDH3Shim");
     HADOOP_SHIM_JARS.add("sqoop-.*-cloudera.jar");
 
-    // Apache 0.22 trunk
+    // Apache 0.22 trunk.
+    // Version may have the form  "0.22-SNAPSHOT"
     HADOOP_SHIM_MATCHES.add("0.22-.*");
+    HADOOP_SHIM_CLASSES.add("org.apache.hadoop.sqoop.shims.Apache22HadoopShim");
+    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+
+    // ... or "0.22.n-SNAPSHOT"
+    HADOOP_SHIM_MATCHES.add("0.22.\\d+-.*");
     HADOOP_SHIM_CLASSES.add("org.apache.hadoop.sqoop.shims.Apache22HadoopShim");
     HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
 
@@ -133,6 +139,7 @@ public abstract class ShimLoader {
     LOG.debug("Hadoop version: " + version);
 
     for (int i = 0; i < matchExprs.size(); i++) {
+      LOG.debug("Checking: " + matchExprs.get(i));
       if (version.matches(matchExprs.get(i))) {
         String className = classNames.get(i);
         String jarPattern = jarPatterns.get(i);
