@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.IOUtils;
@@ -109,9 +114,14 @@ public class CompilationManager {
 
     // ensure that the jar output dir exists.
     String jarOutDir = options.getJarOutputDir();
-    boolean mkdirSuccess = new File(jarOutDir).mkdirs();
-    if (!mkdirSuccess) {
-      LOG.debug("Warning: Could not make directories for " + jarOutDir);
+    File jarOutDirObj = new File(jarOutDir);
+    if (!jarOutDirObj.exists()) {
+      boolean mkdirSuccess = jarOutDirObj.mkdirs();
+      if (!mkdirSuccess) {
+        LOG.debug("Warning: Could not make directories for " + jarOutDir);
+      }
+    } else if (LOG.isDebugEnabled()) {
+      LOG.debug("Found existing " + jarOutDir);
     }
 
     // find hadoop-*-core.jar for classpath.
@@ -141,8 +151,12 @@ public class CompilationManager {
 
     String curClasspath = System.getProperty("java.class.path");
 
+    String srcOutDir = new File(options.getCodeOutputDir()).getAbsolutePath();
+    if (!srcOutDir.endsWith(File.separator)) {
+      srcOutDir = srcOutDir + File.separator;
+    }
+
     args.add("-sourcepath");
-    String srcOutDir = options.getCodeOutputDir();
     args.add(srcOutDir);
 
     args.add("-d");
@@ -151,21 +165,36 @@ public class CompilationManager {
     args.add("-classpath");
     args.add(curClasspath + File.pathSeparator + coreJar + sqoopJar);
 
-    // add all the source files
+    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    StandardJavaFileManager fileManager =
+        compiler.getStandardFileManager(null, null, null);
+
+    ArrayList<String> srcFileNames = new ArrayList<String>();
     for (String srcfile : sources) {
-      args.add(srcOutDir + srcfile);
+      srcFileNames.add(srcOutDir + srcfile);
+      LOG.debug("Adding source file: " + srcOutDir + srcfile);
     }
 
-    StringBuilder sb = new StringBuilder();
-    for (String arg : args) {
-      sb.append(arg + " ");
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Invoking javac with args:");
+      for (String arg : args) {
+        LOG.debug("  " + arg);
+      }
     }
 
-    // NOTE(aaron): Usage is at http://java.sun.com/j2se/1.5.0/docs/tooldocs/solaris/javac.html
-    LOG.debug("Invoking javac with args: " + sb.toString());
-    int javacRet = com.sun.tools.javac.Main.compile(args.toArray(new String[0]));
-    if (javacRet != 0) {
-      throw new IOException("javac exited with status " + javacRet);
+    Iterable<? extends JavaFileObject> srcFileObjs =
+        fileManager.getJavaFileObjectsFromStrings(srcFileNames);
+    JavaCompiler.CompilationTask task = compiler.getTask(
+        null, // Write to stderr
+        fileManager,
+        null, // No special diagnostic handling
+        args,
+        null, // Compile all classes in the source compilation units
+        srcFileObjs);
+
+    boolean result = task.call();
+    if (!result) {
+      throw new IOException("Error returned by javac");
     }
   }
 
