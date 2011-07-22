@@ -21,6 +21,9 @@ package com.cloudera.sqoop.hbase;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -30,7 +33,9 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import org.junit.AfterClass;
+import org.apache.hadoop.util.StringUtils;
+
+import org.junit.After;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
@@ -41,6 +46,9 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
  * Utility methods that facilitate HBase import tests.
  */
 public class HBaseTestCase extends ImportJobTestCase {
+
+  public static final Log LOG = LogFactory.getLog(
+      HBaseTestCase.class.getName());
 
   /**
    * Create the argv to pass to Sqoop.
@@ -104,7 +112,6 @@ public class HBaseTestCase extends ImportJobTestCase {
   }
 
 
-  @AfterClass
   public void shutdown() throws Exception {
     LOG.info("In shutdown() method");
     if (null != hbaseTestUtil) {
@@ -112,6 +119,20 @@ public class HBaseTestCase extends ImportJobTestCase {
       hbaseTestUtil.shutdownMiniCluster();
       this.hbaseTestUtil = null;
     }
+    LOG.info("shutdown() method returning."); 
+  }
+
+  @Override
+  @After
+  public void tearDown() {
+    try {
+      shutdown();
+    } catch (Exception e) {
+      LOG.warn("Error shutting down HBase minicluster: "
+          + StringUtils.stringifyException(e));
+    }
+
+    super.tearDown();
   }
 
   protected void verifyHBaseCell(String tableName, String rowKey,
