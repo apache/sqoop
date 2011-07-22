@@ -108,6 +108,9 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("db.table") private String tableName;
   private String [] columns; // Array stored as db.column.list.
   @StoredAsProperty("db.username") private String username;
+  @StoredAsProperty("db.export.staging.table") private String stagingTableName;
+  @StoredAsProperty("db.clear.staging.table") private boolean clearStagingTable;
+
 
   // May not be serialized, based on configuration.
   // db.require.password is used to determine whether 'some' password is
@@ -292,7 +295,7 @@ public class SqoopOptions implements Cloneable {
       defaults = new DelimiterSet();
     }
 
-    char field = getCharProperty(props, prefix + ".field", 
+    char field = getCharProperty(props, prefix + ".field",
         defaults.getFieldsTerminatedBy());
     char record = getCharProperty(props, prefix + ".record",
         defaults.getLinesTerminatedBy());
@@ -364,7 +367,7 @@ public class SqoopOptions implements Cloneable {
    * "foo.1", "foo.2", and so on as an array. If no such properties
    * exist, return 'defaults'.
    */
-  private String [] getArgArrayProperty(Properties props, String prefix, 
+  private String [] getArgArrayProperty(Properties props, String prefix,
       String [] defaults) {
     int cur = 0;
     ArrayList<String> al = new ArrayList<String>();
@@ -581,7 +584,7 @@ public class SqoopOptions implements Cloneable {
   }
 
   /**
-   * Return the name of a directory that does not exist before 
+   * Return the name of a directory that does not exist before
    * calling this method, and does exist afterward. We should be
    * the only client of this directory. If this directory is not
    * used during the lifetime of the JVM, schedule it to be removed
@@ -595,7 +598,7 @@ public class SqoopOptions implements Cloneable {
     if (null != curNonce) {
       return curNonce;
     }
-   
+
     File baseDir = new File(tmpBase);
     File hashDir = null;
 
@@ -702,7 +705,7 @@ public class SqoopOptions implements Cloneable {
    */
   public static char toChar(String charish) throws InvalidOptionsException {
     if (null == charish || charish.length() == 0) {
-      throw new InvalidOptionsException("Character argument expected." 
+      throw new InvalidOptionsException("Character argument expected."
           + "\nTry --help for usage instructions.");
     }
 
@@ -731,7 +734,7 @@ public class SqoopOptions implements Cloneable {
         // it's just a '\'. Keep it literal.
         return '\\';
       } else if (charish.length() > 2) {
-        // we don't have any 3+ char escape strings. 
+        // we don't have any 3+ char escape strings.
         throw new InvalidOptionsException(
             "Cannot understand character argument: " + charish
             + "\nTry --help for usage instructions.");
@@ -798,6 +801,22 @@ public class SqoopOptions implements Cloneable {
     this.tableName = table;
   }
 
+  public String getStagingTableName() {
+    return stagingTableName;
+  }
+
+  public void setStagingTableName(String stagingTable) {
+    this.stagingTableName = stagingTable;
+  }
+
+  public boolean doClearStagingTable() {
+    return clearStagingTable;
+  }
+
+  public void setClearStagingTable(boolean clear) {
+    clearStagingTable = clear;
+  }
+
   public String getExportDir() {
     return exportDir;
   }
@@ -837,7 +856,7 @@ public class SqoopOptions implements Cloneable {
   public void setSplitByCol(String splitBy) {
     this.splitByCol = splitBy;
   }
-  
+
   public String getWhereClause() {
     return whereClause;
   }
@@ -924,7 +943,7 @@ public class SqoopOptions implements Cloneable {
   public String getHiveHome() {
     return hiveHome;
   }
-  
+
   public void setHiveHome(String home) {
     this.hiveHome = home;
   }
@@ -1028,7 +1047,7 @@ public class SqoopOptions implements Cloneable {
 
   public String getTargetDir() {
     return this.targetDir;
-  } 
+  }
 
   public void setTargetDir(String dir) {
     this.targetDir = dir;
@@ -1040,7 +1059,7 @@ public class SqoopOptions implements Cloneable {
 
   public boolean isAppendMode() {
     return this.append;
-  }  
+  }
 
   /**
    * @return the destination file format
@@ -1139,7 +1158,7 @@ public class SqoopOptions implements Cloneable {
    * used.
    */
   public boolean isInputEncloseRequired() {
-    char c = this.inputDelimiters.getEnclosedBy(); 
+    char c = this.inputDelimiters.getEnclosedBy();
     if (c == DelimiterSet.NULL_CHAR) {
       return this.outputDelimiters.isEncloseRequired();
     } else {
@@ -1487,7 +1506,7 @@ public class SqoopOptions implements Cloneable {
   /**
    * Get the incremental import mode to use.
    */
-  public IncrementalMode getIncrementalMode() { 
+  public IncrementalMode getIncrementalMode() {
     return this.incrementalMode;
   }
 
@@ -1581,14 +1600,14 @@ public class SqoopOptions implements Cloneable {
     return this.mergeNewPath;
   }
 
-  /** 
+  /**
    * Set the name of the column used to merge an old and new dataset.
    */
   public void setMergeKeyCol(String col) {
     this.mergeKeyCol = col;
   }
 
-  /** 
+  /**
    * Return the name of the column used to merge an old and new dataset.
    */
   public String getMergeKeyCol() {

@@ -29,12 +29,12 @@ import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
 
 /**
  * A container for configuration property names for jobs with DB input/output.
- *  
- * The job can be configured using the static methods in this class, 
- * {@link DBInputFormat}, and {@link DBOutputFormat}. 
+ *
+ * The job can be configured using the static methods in this class,
+ * {@link DBInputFormat}, and {@link DBOutputFormat}.
  * Alternatively, the properties can be set in the configuration with proper
- * values. 
- *   
+ * values.
+ *
  * @see DBConfiguration#configureDB(Configuration, String, String, String,
  * String)
  * @see DBInputFormat#setInput(Job, Class, String, String)
@@ -44,70 +44,70 @@ import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
 public class DBConfiguration {
 
   /** The JDBC Driver class name. */
-  public static final String DRIVER_CLASS_PROPERTY = 
+  public static final String DRIVER_CLASS_PROPERTY =
     "mapreduce.jdbc.driver.class";
-  
+
   /** JDBC Database access URL. */
   public static final String URL_PROPERTY = "mapreduce.jdbc.url";
 
   /** User name to access the database. */
   public static final String USERNAME_PROPERTY = "mapreduce.jdbc.username";
-  
+
   /** Password to access the database. */
   public static final String PASSWORD_PROPERTY = "mapreduce.jdbc.password";
 
   /** Input table name. */
-  public static final String INPUT_TABLE_NAME_PROPERTY = 
+  public static final String INPUT_TABLE_NAME_PROPERTY =
     "mapreduce.jdbc.input.table.name";
 
   /** Field names in the Input table. */
-  public static final String INPUT_FIELD_NAMES_PROPERTY = 
+  public static final String INPUT_FIELD_NAMES_PROPERTY =
     "mapreduce.jdbc.input.field.names";
 
   /** WHERE clause in the input SELECT statement. */
-  public static final String INPUT_CONDITIONS_PROPERTY = 
+  public static final String INPUT_CONDITIONS_PROPERTY =
     "mapreduce.jdbc.input.conditions";
-  
+
   /** ORDER BY clause in the input SELECT statement. */
-  public static final String INPUT_ORDER_BY_PROPERTY = 
+  public static final String INPUT_ORDER_BY_PROPERTY =
     "mapreduce.jdbc.input.orderby";
-  
+
   /** Whole input query, exluding LIMIT...OFFSET. */
   public static final String INPUT_QUERY = "mapreduce.jdbc.input.query";
-  
+
   /** Input query to get the count of records. */
-  public static final String INPUT_COUNT_QUERY = 
+  public static final String INPUT_COUNT_QUERY =
     "mapreduce.jdbc.input.count.query";
-  
+
   /** Input query to get the max and min values of the jdbc.input.query. */
   public static final String INPUT_BOUNDING_QUERY =
       "mapred.jdbc.input.bounding.query";
-  
+
   /** Class name implementing DBWritable which will hold input tuples. */
-  public static final String INPUT_CLASS_PROPERTY = 
+  public static final String INPUT_CLASS_PROPERTY =
     "mapreduce.jdbc.input.class";
 
   /** Output table name. */
-  public static final String OUTPUT_TABLE_NAME_PROPERTY = 
+  public static final String OUTPUT_TABLE_NAME_PROPERTY =
     "mapreduce.jdbc.output.table.name";
 
   /** Field names in the Output table. */
-  public static final String OUTPUT_FIELD_NAMES_PROPERTY = 
-    "mapreduce.jdbc.output.field.names";  
+  public static final String OUTPUT_FIELD_NAMES_PROPERTY =
+    "mapreduce.jdbc.output.field.names";
 
   /** Number of fields in the Output table. */
-  public static final String OUTPUT_FIELD_COUNT_PROPERTY = 
-    "mapreduce.jdbc.output.field.count";  
-  
+  public static final String OUTPUT_FIELD_COUNT_PROPERTY =
+    "mapreduce.jdbc.output.field.count";
+
   /**
-   * Sets the DB access related fields in the {@link Configuration}.  
+   * Sets the DB access related fields in the {@link Configuration}.
    * @param conf the configuration
    * @param driverClass JDBC Driver class name
-   * @param dbUrl JDBC DB access URL. 
-   * @param userName DB access username 
+   * @param dbUrl JDBC DB access URL.
+   * @param userName DB access username
    * @param passwd DB access passwd
    */
-  public static void configureDB(Configuration conf, String driverClass, 
+  public static void configureDB(Configuration conf, String driverClass,
       String dbUrl, String userName, String passwd) {
 
     conf.set(DRIVER_CLASS_PROPERTY, driverClass);
@@ -121,10 +121,10 @@ public class DBConfiguration {
   }
 
   /**
-   * Sets the DB access related fields in the JobConf.  
+   * Sets the DB access related fields in the JobConf.
    * @param job the job
    * @param driverClass JDBC Driver class name
-   * @param dbUrl JDBC DB access URL. 
+   * @param dbUrl JDBC DB access URL.
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl) {
@@ -138,9 +138,9 @@ public class DBConfiguration {
   }
 
   /** Returns a connection object to the DB.
-   * @throws ClassNotFoundException 
+   * @throws ClassNotFoundException
    * @throws SQLException */
-  public Connection getConnection() 
+  public Connection getConnection()
       throws ClassNotFoundException, SQLException {
 
     Class.forName(conf.get(DBConfiguration.DRIVER_CLASS_PROPERTY));
@@ -150,8 +150,8 @@ public class DBConfiguration {
                conf.get(DBConfiguration.URL_PROPERTY));
     } else {
       return DriverManager.getConnection(
-          conf.get(DBConfiguration.URL_PROPERTY), 
-          conf.get(DBConfiguration.USERNAME_PROPERTY), 
+          conf.get(DBConfiguration.URL_PROPERTY),
+          conf.get(DBConfiguration.USERNAME_PROPERTY),
           conf.get(DBConfiguration.PASSWORD_PROPERTY));
     }
   }
@@ -159,7 +159,7 @@ public class DBConfiguration {
   public Configuration getConf() {
     return conf;
   }
-  
+
   public String getInputTableName() {
     return conf.get(DBConfiguration.INPUT_TABLE_NAME_PROPERTY);
   }
@@ -189,27 +189,27 @@ public class DBConfiguration {
   public String getInputOrderBy() {
     return conf.get(DBConfiguration.INPUT_ORDER_BY_PROPERTY);
   }
-  
+
   public void setInputOrderBy(String orderby) {
     if(orderby != null && orderby.length() >0) {
       conf.set(DBConfiguration.INPUT_ORDER_BY_PROPERTY, orderby);
     }
   }
-  
+
   public String getInputQuery() {
     return conf.get(DBConfiguration.INPUT_QUERY);
   }
-  
+
   public void setInputQuery(String query) {
     if(query != null && query.length() >0) {
       conf.set(DBConfiguration.INPUT_QUERY, query);
     }
   }
-  
+
   public String getInputCountQuery() {
     return conf.get(DBConfiguration.INPUT_COUNT_QUERY);
   }
-  
+
   public void setInputCountQuery(String query) {
     if(query != null && query.length() > 0) {
       conf.set(DBConfiguration.INPUT_COUNT_QUERY, query);
@@ -255,10 +255,10 @@ public class DBConfiguration {
   public void setOutputFieldCount(int fieldCount) {
     conf.setInt(DBConfiguration.OUTPUT_FIELD_COUNT_PROPERTY, fieldCount);
   }
-  
+
   public int getOutputFieldCount() {
     return conf.getInt(OUTPUT_FIELD_COUNT_PROPERTY, 0);
   }
-  
+
 }
 

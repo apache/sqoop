@@ -174,7 +174,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
 
     // Format of this command is:
     //
-    //     COPY table(col, col....) TO STDOUT 
+    //     COPY table(col, col....) TO STDOUT
     // or  COPY ( query ) TO STDOUT
     //   WITH DELIMITER 'fieldsep'
     //   CSV
@@ -464,6 +464,11 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       counters.stopClock();
       LOG.info("Transferred " + counters.toString());
     }
+  }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return false;
   }
   // CHECKSTYLE:ON
 }

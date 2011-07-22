@@ -20,14 +20,14 @@ package com.cloudera.sqoop.mapreduce;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Counters;
@@ -40,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ExportException;
@@ -255,21 +256,71 @@ public class ExportJobBase extends JobBase {
 
 
   /**
-   * Run an export job to dump a table from HDFS to a database.
+   * Run an export job to dump a table from HDFS to a database. If a staging
+   * table is specified and the connection manager supports staging of data,
+   * the export will first populate the staging table and then migrate the
+   * data to the target table.
    * @throws IOException if the export job encounters an IO error
    * @throws ExportException if the job fails unexpectedly or is misconfigured.
    */
   public void runExport() throws ExportException, IOException {
 
+    ConnManager cmgr = context.getConnManager();
     SqoopOptions options = context.getOptions();
     Configuration conf = options.getConf();
-    String tableName = context.getTableName();
+
+    String outputTableName = context.getTableName();
+    String stagingTableName = context.getOptions().getStagingTableName();
+
+    String tableName = outputTableName;
+    boolean stagingEnabled = false;
+    if (stagingTableName != null) { // user has specified the staging table
+      if (cmgr.supportsStagingForExport()) {
+        LOG.info("Data will be staged in the table: " + stagingTableName);
+        tableName = stagingTableName;
+        stagingEnabled = true;
+      } else {
+        throw new ExportException("The active connection manager ("
+            + cmgr.getClass().getCanonicalName()
+            + ") does not support staging of data for export. "
+            + "Please retry without specifying the --staging-table option.");
+      }
+    }
+
     String tableClassName =
-        new TableClassName(options).getClassForTable(tableName);
+        new TableClassName(options).getClassForTable(outputTableName);
     String ormJarFile = context.getJarFile();
 
-    LOG.info("Beginning export of " + tableName);
+    LOG.info("Beginning export of " + outputTableName);
     loadJars(conf, ormJarFile, tableClassName);
+
+    if (stagingEnabled) {
+      // Prepare the staging table
+      if (options.doClearStagingTable()) {
+        try {
+          // Delete all records from staging table
+          cmgr.deleteAllRecords(stagingTableName);
+        } catch (SQLException ex) {
+          throw new ExportException(
+              "Failed to empty staging table before export run", ex);
+        }
+      } else {
+        // User has not explicitly specified the clear staging table option.
+        // Assert that the staging table is empty.
+        try {
+          long rowCount = cmgr.getTableRowCount(stagingTableName);
+          if (rowCount != 0L) {
+            throw new ExportException("The specified staging table ("
+                + stagingTableName + ") is not empty. To force deletion of "
+                + "its data, please retry with --clear-staging-table option.");
+          }
+        } catch (SQLException ex) {
+          throw new ExportException(
+              "Failed to count data rows in staging table: "
+                  + stagingTableName, ex);
+        }
+      }
+    }
 
     try {
       Job job = new Job(conf);
@@ -293,6 +344,21 @@ public class ExportJobBase extends JobBase {
       throw new IOException(cnfe);
     } finally {
       unloadJars();
+    }
+
+    // Unstage the data if needed
+    if (stagingEnabled) {
+      // Migrate data from staging table to the output table
+      try {
+        LOG.info("Starting to migrate data from staging table to destination.");
+        cmgr.migrateData(stagingTableName, outputTableName);
+      } catch (SQLException ex) {
+        LOG.error("Failed to move data from staging table ("
+            + stagingTableName + ") to target table ("
+            + outputTableName + ")", ex);
+        throw new ExportException(
+            "Failed to move data from staging table", ex);
+      }
     }
   }
 

@@ -38,7 +38,7 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 /**
  * Insert the emitted keys as records into a database table.
  * This supports a configurable "spill threshold" at which
- * point intermediate transactions are committed. 
+ * point intermediate transactions are committed.
  *
  * Record objects are buffered before actually performing the INSERT
  * statements; this requires that the key implement the
@@ -46,14 +46,14 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  *
  * Uses DBOutputFormat/DBConfiguration for configuring the output.
  */
-public class ExportOutputFormat<K extends SqoopRecord, V> 
+public class ExportOutputFormat<K extends SqoopRecord, V>
     extends AsyncSqlOutputFormat<K, V> {
 
   private static final Log LOG = LogFactory.getLog(ExportOutputFormat.class);
 
   @Override
   /** {@inheritDoc} */
-  public void checkOutputSpecs(JobContext context) 
+  public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     DBConfiguration dbConf = new DBConfiguration(conf);
@@ -72,7 +72,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
 
   @Override
   /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
       return new ExportRecordWriter(context);
@@ -98,9 +98,9 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
       Configuration conf = getConf();
 
       DBConfiguration dbConf = new DBConfiguration(conf);
-      this.tableName = dbConf.getOutputTableName();
-      this.columnNames = dbConf.getOutputFieldNames();
-      this.columnCount = dbConf.getOutputFieldCount();
+      tableName = dbConf.getOutputTableName();
+      columnNames = dbConf.getOutputFieldNames();
+      columnCount = dbConf.getOutputFieldCount();
     }
 
     /**

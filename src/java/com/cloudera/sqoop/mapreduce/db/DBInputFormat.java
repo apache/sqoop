@@ -184,7 +184,7 @@ public class DBInputFormat<T extends DBWritable>
         this.connection = dbConf.getConnection();
         this.connection.setAutoCommit(false);
         this.connection.setTransactionIsolation(
-            Connection.TRANSACTION_SERIALIZABLE);
+            Connection.TRANSACTION_READ_COMMITTED);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

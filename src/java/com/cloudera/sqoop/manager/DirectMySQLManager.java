@@ -102,5 +102,10 @@ public class DirectMySQLManager extends MySQLManager {
     MySQLExportJob exportJob = new MySQLExportJob(context);
     exportJob.runExport();
   }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return false;
+  }
 }
 

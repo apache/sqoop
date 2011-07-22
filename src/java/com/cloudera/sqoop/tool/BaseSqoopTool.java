@@ -69,6 +69,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String PASSWORD_PROMPT_ARG = "P";
   public static final String DIRECT_ARG = "direct";
   public static final String TABLE_ARG = "table";
+  public static final String STAGING_TABLE_ARG = "staging-table";
+  public static final String CLEAR_STAGING_TABLE_ARG = "clear-staging-table";
   public static final String COLUMNS_ARG = "columns";
   public static final String SPLIT_BY_ARG = "split-by";
   public static final String WHERE_ARG = "where";
@@ -76,7 +78,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_HOME_ARG = "hive-home";
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
   public static final String TARGET_DIR_ARG = "target-dir";
-  public static final String APPEND_ARG = "append";  
+  public static final String APPEND_ARG = "append";
   public static final String NULL_STRING = "null-string";
   public static final String INPUT_NULL_STRING = "input-null-string";
   public static final String NULL_NON_STRING = "null-non-string";

@@ -91,6 +91,60 @@ public abstract class ConnManager {
   public abstract Map<String, Integer> getColumnTypes(String tableName);
 
   /**
+   * This method allows various connection managers to indicate if they support
+   * staging data for export jobs. The managers that do support this must
+   * override this method and return <tt>true</tt>.
+   *
+   * @return true if the connection manager supports staging data for export
+   * use-case.
+   */
+  public boolean supportsStagingForExport() {
+    return false;
+  }
+
+  /**
+   * Returns the count of all rows that exist in the given table.
+   * @param tableName the name of the table which will be queried.
+   * @return the number of rows present in the given table.
+   * @throws SQLException if an error occurs during execution
+   * @throws UnsupportedOperationException if the connection manager does not
+   * support this operation.
+   */
+  public long getTableRowCount(String tableName) throws SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Deletes all records from the given table. This method is invoked during
+   * and export run when a staging table is specified. The staging table is
+   * cleaned before the commencement of export job, and after the data has
+   * been moved to the target table.
+   * @param tableName name of the table which will be emptied.
+   * @throws SQLException if an error occurs during execution
+   * @throws UnsupportedOperationException if the connection manager does not
+   * support this operation.
+   */
+  public void deleteAllRecords(String tableName) throws SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Migrates all records from the given <tt>fromTable</tt> to the target
+   * <tt>toTable</tt>. This method is invoked as a last step of an export
+   * run where the staging is used to collect data before pushing it into the
+   * target table.
+   * @param fromTable the name of the staging table
+   * @param toTable the name of the target table
+   * @throws SQLException if an error occurs during execution
+   * @throws UnsupportedOperationException if the connection manager does not
+   * support this operation.
+   */
+  public void migrateData(String fromTable, String toTable)
+    throws SQLException {
+      throw new UnsupportedOperationException();
+  }
+
+  /**
    * Return an unordered mapping from colname to sqltype for
    * all columns in a query.
    *

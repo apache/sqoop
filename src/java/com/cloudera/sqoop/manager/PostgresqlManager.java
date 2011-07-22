@@ -138,5 +138,10 @@ public class PostgresqlManager extends GenericJdbcManager {
       this.lastStatement = null;
     }
   }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return true;
+  }
 }
 

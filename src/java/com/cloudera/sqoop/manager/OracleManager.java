@@ -460,5 +460,10 @@ public class OracleManager extends GenericJdbcManager {
   public String timestampToQueryString(Timestamp ts) {
     return "TO_TIMESTAMP('" + ts + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
   }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return true;
+  }
 }
 

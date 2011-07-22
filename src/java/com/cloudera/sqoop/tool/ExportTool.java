@@ -160,6 +160,15 @@ public class ExportTool extends BaseSqoopTool {
         .withDescription("Update records by specified key column")
         .withLongOpt(UPDATE_KEY_ARG)
         .create());
+    exportOpts.addOption(OptionBuilder.withArgName("table-name")
+        .hasArg().withDescription("Intermediate staging table")
+        .withLongOpt(STAGING_TABLE_ARG)
+        .create());
+    exportOpts.addOption(OptionBuilder
+        .withDescription("Indicates that any data in "
+        + "staging table can be deleted")
+        .withLongOpt(CLEAR_STAGING_TABLE_ARG)
+        .create());
 
     return exportOpts;
   }
@@ -231,6 +240,14 @@ public class ExportTool extends BaseSqoopTool {
         out.setUpdateKeyCol(in.getOptionValue(UPDATE_KEY_ARG));
       }
 
+      if (in.hasOption(STAGING_TABLE_ARG)) {
+        out.setStagingTableName(in.getOptionValue(STAGING_TABLE_ARG));
+      }
+
+      if (in.hasOption(CLEAR_STAGING_TABLE_ARG)) {
+        out.setClearStagingTable(true);
+      }
+
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
@@ -265,6 +282,22 @@ public class ExportTool extends BaseSqoopTool {
       // class.
       throw new InvalidOptionsException("Jar cannot be specified with "
           + "--jar-file when export is running in update mode.");
+    } else if (options.getStagingTableName() != null
+        && options.getUpdateKeyCol() != null) {
+      // Staging table may not be used when export is running in update mode
+      throw new InvalidOptionsException("Staging table cannot be used when "
+          + "export is running in update mode.");
+    } else if (options.getStagingTableName() != null
+        && options.getStagingTableName().equalsIgnoreCase(
+            options.getTableName())) {
+      // Name of staging table and destination table cannot be the same
+      throw new InvalidOptionsException("Staging table cannot be the same as "
+          + "the destination table. Name comparison used is case-insensitive.");
+    } else if (options.doClearStagingTable()
+        && options.getStagingTableName() == null) {
+      // Option to clear staging table specified but not the staging table name
+      throw new InvalidOptionsException("Option to clear the staging table is "
+          + "specified but the staging table name is not.");
     }
   }
 

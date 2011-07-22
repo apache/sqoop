@@ -215,7 +215,7 @@ public class MySQLManager extends GenericJdbcManager {
   @Override
   public void execAndPrint(String s) {
     // Override default execAndPrint() with a special version that forces
-    // use of fully-buffered ResultSets (MySQLManager uses streaming ResultSets 
+    // use of fully-buffered ResultSets (MySQLManager uses streaming ResultSets
     // in the default execute() method; but the execAndPrint() method needs to
     // issue overlapped queries for metadata.)
 
@@ -279,6 +279,11 @@ public class MySQLManager extends GenericJdbcManager {
       return null;
     }
     return "`" + tableName + "`";
+  }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return true;
   }
 }
 

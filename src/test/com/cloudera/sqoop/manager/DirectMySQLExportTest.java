@@ -220,6 +220,18 @@ public class DirectMySQLExportTest extends TestExport {
         LOG.warn("Got SQLException when closing connection: " + sqlE);
       }
     }
+  }
 
+
+  @Override
+  public void testMultiMapTextExportWithStaging()
+    throws IOException, SQLException {
+    // disable this test as staging is not supported in direct mode
+  }
+
+  @Override
+  public void testMultiTransactionWithStaging()
+    throws IOException, SQLException {
+    // disable this test as staging is not supported in direct mode
   }
 }

@@ -62,4 +62,9 @@ public class HsqldbManager extends GenericJdbcManager {
     // guaranteed to exist.
     return "SELECT CURRENT_TIMESTAMP FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
   }
+
+  @Override
+  public boolean supportsStagingForExport() {
+    return true;
+  }
 }

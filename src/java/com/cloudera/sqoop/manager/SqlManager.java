@@ -111,7 +111,7 @@ public abstract class SqlManager extends ConnManager {
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString());
+      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
       release();
       return null;
     }
@@ -132,14 +132,15 @@ public abstract class SqlManager extends ConnManager {
       }
       return columns.toArray(new String[0]);
     } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: " + sqlException.toString());
+      LOG.error("Error reading from database: "
+          + sqlException.toString(), sqlException);
       return null;
     } finally {
       try {
         results.close();
         getConnection().commit();
       } catch (SQLException sqlE) {
-        LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
+        LOG.warn("SQLException closing ResultSet: " + sqlE.toString(), sqlE);
       }
 
       release();
@@ -153,7 +154,7 @@ public abstract class SqlManager extends ConnManager {
   protected String getColTypesQuery(String tableName) {
     return getColNamesQuery(tableName);
   }
-  
+
   @Override
   public Map<String, Integer> getColumnTypes(String tableName) {
     String stmt = getColTypesQuery(tableName);
@@ -170,7 +171,7 @@ public abstract class SqlManager extends ConnManager {
   /**
    * Get column types for a query statement that we do not modify further.
    */
-  protected Map<String, Integer> getColumnTypesForRawQuery(String stmt) { 
+  protected Map<String, Integer> getColumnTypesForRawQuery(String stmt) {
     ResultSet results;
     try {
       results = execute(stmt);
@@ -295,7 +296,7 @@ public abstract class SqlManager extends ConnManager {
       if (null == results) {
         return null;
       }
-      
+
       try {
         if (results.next()) {
           return results.getString("COLUMN_NAME");
@@ -618,7 +619,7 @@ public abstract class SqlManager extends ConnManager {
    * (queries executed by the ConnManager itself).
    */
   protected int getMetadataIsolationLevel() {
-    return Connection.TRANSACTION_READ_UNCOMMITTED;
+    return Connection.TRANSACTION_READ_COMMITTED;
   }
 
   /**
@@ -697,6 +698,108 @@ public abstract class SqlManager extends ConnManager {
         }
       } catch (SQLException sqlE) {
         LOG.warn("SQL Exception closing statement: " + sqlE);
+      }
+    }
+  }
+
+  @Override
+  public long getTableRowCount(String tableName) throws SQLException {
+    release(); // Release any previous ResultSet
+    long result = -1;
+    String countQuery = "SELECT COUNT(*) FROM " + tableName;
+    Statement stmt = null;
+    ResultSet rset = null;
+    try {
+      Connection conn = getConnection();
+      stmt = conn.createStatement();
+      rset = stmt.executeQuery(countQuery);
+      rset.next();
+      result = rset.getLong(1);
+    } catch (SQLException ex) {
+      LOG.error("Unable to query count * for table " + tableName, ex);
+      throw ex;
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LOG.error("Unable to close result set", ex);
+        }
+      }
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LOG.error("Unable to close statement", ex);
+        }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public void deleteAllRecords(String tableName) throws SQLException {
+    release(); // Release any previous ResultSet
+    String deleteQuery = "DELETE FROM " + tableName;
+    Statement stmt = null;
+    try {
+      Connection conn = getConnection();
+      stmt = conn.createStatement();
+      int updateCount = stmt.executeUpdate(deleteQuery);
+      conn.commit();
+      LOG.info("Deleted " + updateCount + " records from " + tableName);
+    } catch (SQLException ex) {
+      LOG.error("Unable to execute delete query: "  + deleteQuery, ex);
+      throw ex;
+    } finally {
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LOG.error("Unable to close statement", ex);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void migrateData(String fromTable, String toTable)
+    throws SQLException {
+    release(); // Release any previous ResultSet
+    String updateQuery = "INSERT INTO " + toTable
+          + " ( SELECT * FROM " + fromTable + " )";
+
+    String deleteQuery = "DELETE FROM " + fromTable;
+    Statement stmt = null;
+    try {
+      Connection conn = getConnection();
+      stmt = conn.createStatement();
+
+      // Insert data from the fromTable to the toTable
+      int updateCount = stmt.executeUpdate(updateQuery);
+      LOG.info("Migrated " + updateCount + " records from " + fromTable
+                  + " to " + toTable);
+
+      // Delete the records from the fromTable
+      int deleteCount = stmt.executeUpdate(deleteQuery);
+
+      // If the counts do not match, fail the transaction
+      if (updateCount != deleteCount) {
+        conn.rollback();
+        throw new RuntimeException("Inconsistent record counts");
+      }
+      conn.commit();
+    } catch (SQLException ex) {
+      LOG.error("Unable to migrate data from "
+          + fromTable + " to " + toTable, ex);
+      throw ex;
+    } finally {
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LOG.error("Unable to close statement", ex);
+        }
       }
     }
   }

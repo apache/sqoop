@@ -56,6 +56,11 @@ Argument                                 Description
                                          null for string columns
 +\--input-null-non-string <null-string>+ The string to be interpreted as\
                                          null for non-string columns
++\--staging-table <staging-table-name>+  The table in which data will be\
+                                         staged before being inserted into\
+                                         the destination table.
++\--clear-staging-table+                 Indicates that any data present in\
+                                         the staging table can be deleted.
 ------------------------------------------------------------------------
 
 The +\--table+ and +\--export-dir+ arguments are required. These
@@ -76,7 +81,7 @@ parallelism used.
 MySQL provides a direct mode for exports as well, using the
 +mysqlimport+ tool. When exporting to MySQL, use the +\--direct+ argument
 to specify this codepath. This may be
-higher-performance than the standard JDBC codepath. 
+higher-performance than the standard JDBC codepath.
 
 The +\--input-null-string+ and +\--input-null-non-string+ arguments are
 optional. If +\--input-null-string+ is not specified, then the string
@@ -86,6 +91,27 @@ If +\--input-null-non-string+ is not specified, then both the string
 columns. Note that, the empty string will be always interpreted as null
 for non-string columns, in addition to other string if specified by
 +\--input-null-non-string+.
+
+Since Sqoop breaks down export process into multiple transactions, it
+is possible that a failed export job may result in partial data being
+committed to the database. This can further lead to subsequent jobs
+failing due to insert collisions in some cases, or lead to duplicated data
+in others. You can overcome this problem by specifying a staging table via
+the +\--staging-table+ option which acts as an auxiliary table that is used
+to stage exported data. The staged data is finally moved to the destination
+table in a single transaction.
+
+In order to use the staging facility, you must create the staging table
+prior to running the export job. This table must be structurally
+identical to the target table. This table should either be empty before
+the export job runs, or the +\--clear-staging-table+ option must be specified.
+If the staging table contains data and the +\--clear-staging-table+ option is
+specified, Sqoop will delete all of the data before starting the export job.
+
+NOTE: Support for staging data prior to pushing it into the destination
+table is not available for +--direct+ exports. It is also not available when
+export is invoked using the +--update-key+ option for updating existing data.
+
 
 Inserts vs. Updates
 ~~~~~~~~~~~~~~~~~~~

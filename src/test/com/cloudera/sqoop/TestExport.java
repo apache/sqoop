@@ -217,7 +217,7 @@ public class TestExport extends ExportJobTestCase {
       throws IOException {
 
     try {
-      // Instantiate the value record object via reflection. 
+      // Instantiate the value record object via reflection.
       Class cls = Class.forName(className, true,
           Thread.currentThread().getContextClassLoader());
       SqoopRecord record = (SqoopRecord) ReflectionUtils.newInstance(
@@ -300,9 +300,56 @@ public class TestExport extends ExportJobTestCase {
     try {
       statement.executeUpdate();
       conn.commit();
-    } finally { 
+    } finally {
       statement.close();
     }
+  }
+
+  /**
+   * @return the name of the staging table to be used for testing.
+   */
+  public String getStagingTableName() {
+    return getTableName() + "_STAGE";
+  }
+
+  /**
+   * Creates the staging table.
+   * @param extraColumns extra columns that go in the staging table
+   * @throws SQLException if an error occurs during export
+   */
+  public void createStagingTable(ColumnGenerator... extraColumns)
+    throws SQLException {
+    String stageTableName = getStagingTableName();
+    Connection conn = getConnection();
+    PreparedStatement statement = conn.prepareStatement(
+        getDropTableStatement(stageTableName),
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("CREATE TABLE ");
+    sb.append(stageTableName);
+    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    int colNum = 0;
+    for (ColumnGenerator gen : extraColumns) {
+      sb.append(", " + forIdx(colNum++) + " " + gen.getType());
+    }
+    sb.append(")");
+
+    statement = conn.prepareStatement(sb.toString(),
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
+
   }
 
   /** Removing an existing table directory from the filesystem. */
@@ -474,6 +521,21 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /**
+   * Exercises the testMultiTransaction test with staging table specified.
+   * @throws IOException
+   * @throws SQLException
+   */
+  public void testMultiTransactionWithStaging()
+    throws IOException, SQLException {
+    final int TOTAL_RECORDS = 20;
+    createTextFile(0, TOTAL_RECORDS, true);
+    createTable();
+    createStagingTable();
+    runExport(getArgv(true, 5, 2, "--staging-table", getStagingTableName()));
+    verifyExport(TOTAL_RECORDS);
+  }
+
+  /**
    * Ensure that when we don't force a commit with a statement cap,
    * it happens anyway.
    */
@@ -500,6 +562,26 @@ public class TestExport extends ExportJobTestCase {
     verifyExport(RECORDS_PER_MAP * NUM_FILES);
   }
 
+  /**
+   * Run 2 mappers with staging enabled,
+   * make sure all records load in correctly.
+   */
+  public void testMultiMapTextExportWithStaging()
+  throws IOException, SQLException {
+
+    final int RECORDS_PER_MAP = 10;
+    final int NUM_FILES = 2;
+
+    for (int f = 0; f < NUM_FILES; f++) {
+      createTextFile(f, RECORDS_PER_MAP, false);
+    }
+
+    createTable();
+    createStagingTable();
+    runExport(getArgv(true, 10, 10, "--staging-table", getStagingTableName()));
+    verifyExport(RECORDS_PER_MAP * NUM_FILES);
+  }
+
   /** Export some rows from a SequenceFile, make sure they import correctly. */
   public void testSequenceFileExport() throws Exception {
 
@@ -509,7 +591,7 @@ public class TestExport extends ExportJobTestCase {
     // we're exporting to.
     LOG.info("Creating initial schema for SeqFile test");
     createTable();
-    LOG.info("Generating code..."); 
+    LOG.info("Generating code...");
     CodeGenTool codeGen = new CodeGenTool();
     String [] codeGenArgs = getCodeGenArgv();
     SqoopOptions options = codeGen.parseArguments(

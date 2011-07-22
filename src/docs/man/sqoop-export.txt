@@ -49,6 +49,12 @@ Export control options
 --input-null-non-string::
   The string to be interpreted as null for non-string columns
 
+--staging-table::
+  The table in which data will be staged before being inserted in destination table.
+
+--clear-staging-table::
+  Will result in deletion of any data that exists in the staging table.
+
 include::input-args.txt[]
 
 include::output-args.txt[]
