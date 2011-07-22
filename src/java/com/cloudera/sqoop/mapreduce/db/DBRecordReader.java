@@ -37,8 +37,8 @@ import org.apache.hadoop.conf.Configuration;
 
 /**
  * A RecordReader that reads records from a SQL table.
- * Emits LongWritables containing the record number as 
- * key and DBWritables as value.  
+ * Emits LongWritables containing the record number as
+ * key and DBWritables as value.
  */
 public class DBRecordReader<T extends DBWritable> extends
     RecordReader<LongWritable, T> {
@@ -54,9 +54,9 @@ public class DBRecordReader<T extends DBWritable> extends
   private DBInputFormat.DBInputSplit split;
 
   private long pos = 0;
-  
+
   private LongWritable key = null;
-  
+
   private T value = null;
 
   private Connection connection;
@@ -73,11 +73,11 @@ public class DBRecordReader<T extends DBWritable> extends
 
   /**
    * @param split The InputSplit to read data for
-   * @throws SQLException 
+   * @throws SQLException
    */
   // CHECKSTYLE:OFF
   // TODO (aaron): Refactor constructor to take fewer arguments
-  public DBRecordReader(DBInputFormat.DBInputSplit split, 
+  public DBRecordReader(DBInputFormat.DBInputSplit split,
       Class<T> inputClass, Configuration conf, Connection conn,
       DBConfiguration dbConfig, String cond, String [] fields, String table)
       throws SQLException {
@@ -97,10 +97,18 @@ public class DBRecordReader<T extends DBWritable> extends
   protected ResultSet executeQuery(String query) throws SQLException {
     this.statement = connection.prepareStatement(query,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+    Integer fetchSize = dbConf.getFetchSize();
+    if (fetchSize != null) {
+      LOG.debug("Using fetchSize for next query: " + fetchSize);
+      statement.setFetchSize(fetchSize);
+    }
+
+    LOG.debug("Executing query: " + query);
     return statement.executeQuery();
   }
 
-  /** Returns the query for selecting the records, 
+  /** Returns the query for selecting the records,
    * subclasses can override this for custom behaviour.*/
   protected String getSelectQuery() {
     StringBuilder query = new StringBuilder();
@@ -109,7 +117,7 @@ public class DBRecordReader<T extends DBWritable> extends
     // Relies on LIMIT/OFFSET for splits.
     if(dbConf.getInputQuery() == null) {
       query.append("SELECT ");
-  
+
       for (int i = 0; i < fieldNames.length; i++) {
         query.append(fieldNames[i]);
         if (i != fieldNames.length -1) {
@@ -131,7 +139,7 @@ public class DBRecordReader<T extends DBWritable> extends
       //PREBUILT QUERY
       query.append(dbConf.getInputQuery());
     }
-        
+
     try {
       query.append(" LIMIT ").append(split.getLength());
       query.append(" OFFSET ").append(split.getStart());
@@ -161,7 +169,7 @@ public class DBRecordReader<T extends DBWritable> extends
     }
   }
 
-  public void initialize(InputSplit inputSplit, TaskAttemptContext context) 
+  public void initialize(InputSplit inputSplit, TaskAttemptContext context)
       throws IOException, InterruptedException {
     //do nothing
   }
@@ -169,7 +177,7 @@ public class DBRecordReader<T extends DBWritable> extends
   @Override
   /** {@inheritDoc} */
   public LongWritable getCurrentKey() {
-    return key;  
+    return key;
   }
 
   @Override
@@ -179,7 +187,7 @@ public class DBRecordReader<T extends DBWritable> extends
   }
 
   /**
-   * @deprecated 
+   * @deprecated
    */
   @Deprecated
   public T createValue() {
@@ -187,7 +195,7 @@ public class DBRecordReader<T extends DBWritable> extends
   }
 
   /**
-   * @deprecated 
+   * @deprecated
    */
   @Deprecated
   public long getPos() throws IOException {

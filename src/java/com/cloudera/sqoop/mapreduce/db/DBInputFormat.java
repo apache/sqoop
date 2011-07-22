@@ -208,11 +208,6 @@ public class DBInputFormat<T extends DBWritable>
         return new OracleDBRecordReader<T>(split, inputClass,
             conf, getConnection(), getDBConf(), conditions, fieldNames,
             tableName);
-      } else if (dbProductName.startsWith("MYSQL")) {
-        // use MySQL-specific db reader.
-        return new MySQLDBRecordReader<T>(split, inputClass,
-            conf, getConnection(), getDBConf(), conditions, fieldNames,
-            tableName);
       } else {
         // Generic reader.
         return new DBRecordReader<T>(split, inputClass,

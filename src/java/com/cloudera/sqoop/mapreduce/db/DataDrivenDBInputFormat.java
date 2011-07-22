@@ -288,19 +288,10 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     LOG.debug("Creating db record reader for db product: " + dbProductName);
 
     try {
-      // use database product name to determine appropriate record reader.
-      if (dbProductName.startsWith("MYSQL")) {
-        // use MySQL-specific db reader.
-        return new MySQLDataDrivenDBRecordReader<T>(split, inputClass,
-            conf, getConnection(), dbConf, dbConf.getInputConditions(),
-            dbConf.getInputFieldNames(), dbConf.getInputTableName());
-      } else {
-        // Generic reader.
-        return new DataDrivenDBRecordReader<T>(split, inputClass,
-            conf, getConnection(), dbConf, dbConf.getInputConditions(),
-            dbConf.getInputFieldNames(), dbConf.getInputTableName(),
-            dbProductName);
-      }
+      return new DataDrivenDBRecordReader<T>(split, inputClass,
+          conf, getConnection(), dbConf, dbConf.getInputConditions(),
+          dbConf.getInputFieldNames(), dbConf.getInputTableName(),
+          dbProductName);
     } catch (SQLException ex) {
       throw new IOException(ex.getMessage());
     }

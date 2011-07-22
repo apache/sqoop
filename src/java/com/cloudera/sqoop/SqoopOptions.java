@@ -171,6 +171,10 @@ public class SqoopOptions implements Cloneable {
   // to external files on disk.
   @StoredAsProperty("import.max.inline.lob.size") private long maxInlineLobSize;
 
+  // Max number 'n' of rows to fetch from the
+  // database when more rows are needed.
+  @StoredAsProperty("import.fetch.size") private Integer fetchSize;
+
   // HDFS path to read from when performing an export
   @StoredAsProperty("export.source.dir") private String exportDir;
 
@@ -427,6 +431,11 @@ public class SqoopOptions implements Cloneable {
                 getLongProperty(props, propName, f.getLong(this)));
           } else if (typ.equals(String.class)) {
             f.set(this, props.getProperty(propName, (String) f.get(this)));
+          } else if (typ.equals(Integer.class)) {
+            String value = props.getProperty(
+                propName,
+                f.get(this) == null ? "null" : f.get(this).toString());
+            f.set(this, value.equals("null") ? null : new Integer(value));
           } else if (typ.isEnum()) {
             f.set(this, Enum.valueOf(typ,
                 props.getProperty(propName, f.get(this).toString())));
@@ -502,6 +511,11 @@ public class SqoopOptions implements Cloneable {
             putProperty(props, propName, Long.toString(f.getLong(this)));
           } else if (typ.equals(String.class)) {
             putProperty(props, propName, (String) f.get(this));
+          } else if (typ.equals(Integer.class)) {
+            putProperty(
+                props,
+                propName,
+                f.get(this) == null ? "null" : f.get(this).toString());
           } else if (typ.isEnum()) {
             putProperty(props, propName, f.get(this).toString());
           } else {
@@ -674,6 +688,11 @@ public class SqoopOptions implements Cloneable {
     this.directSplitSize = 0;
 
     this.maxInlineLobSize = LargeObjectLoader.DEFAULT_MAX_LOB_LENGTH;
+
+    // Don't set a default value for fetchsize. This allows a JDBCManager to
+    // provide a database-specific default, if no value is provided by the
+    // user.
+    this.fetchSize = null;
 
     if (null == baseConfiguration) {
       this.conf = new Configuration();
@@ -1325,6 +1344,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setInlineLobLimit(long limit) {
     this.maxInlineLobSize = limit;
+  }
+
+  public Integer getFetchSize() {
+    return this.fetchSize;
+  }
+
+  public void setFetchSize(Integer size) {
+    this.fetchSize = size;
   }
 
   /**

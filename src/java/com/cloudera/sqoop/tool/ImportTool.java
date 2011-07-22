@@ -97,7 +97,7 @@ public class ImportTool extends BaseSqoopTool {
     return !options.getIncrementalMode().equals(
         SqoopOptions.IncrementalMode.None);
   }
-  
+
   /**
    * If this is an incremental import, then we should save the
    * user's state back to the metastore (if this job was run
@@ -339,19 +339,19 @@ public class ImportTool extends BaseSqoopTool {
     // Do the actual import.
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
         options, getOutputPath(options, tableName));
-    
+
     // If we're doing an incremental import, set up the
     // filtering conditions used to get the latest records.
     if (!initIncrementalConstraints(options, context)) {
       return false;
     }
-    
+
     if (null != tableName) {
       manager.importTable(context);
     } else {
       manager.importQuery(context);
     }
-    
+
     if (options.isAppendMode()) {
       AppendUtils app = new AppendUtils(context);
       app.append();
@@ -366,8 +366,8 @@ public class ImportTool extends BaseSqoopTool {
 
     return true;
   }
-  
-  /**   
+
+  /**
    * @return the output path for the imported files;
    * in append mode this will point to a temporary folder.
    * if importing to hbase, this may return null.
@@ -382,7 +382,7 @@ public class ImportTool extends BaseSqoopTool {
       outputPath = AppendUtils.getTempAppendDir(tableName);
       LOG.debug("Using temporary folder: " + outputPath.getName());
     } else {
-      // Try in this order: target-dir or warehouse-dir 
+      // Try in this order: target-dir or warehouse-dir
       if (hdfsTargetDir != null) {
         outputPath = new Path(hdfsTargetDir);
       } else if (hdfsWarehouseDir != null) {
@@ -392,9 +392,9 @@ public class ImportTool extends BaseSqoopTool {
       }
     }
 
-    return outputPath; 
+    return outputPath;
   }
-   
+
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
@@ -479,11 +479,11 @@ public class ImportTool extends BaseSqoopTool {
       importOpts.addOption(OptionBuilder
           .withDescription("Imports data in append mode")
           .withLongOpt(APPEND_ARG)
-          .create());        
+          .create());
       importOpts.addOption(OptionBuilder.withArgName("dir")
           .hasArg().withDescription("HDFS plain table destination")
           .withLongOpt(TARGET_DIR_ARG)
-          .create());    
+          .create());
       importOpts.addOption(OptionBuilder.withArgName("statement")
           .hasArg()
           .withDescription("Import results of SQL 'statement'")
@@ -521,6 +521,12 @@ public class ImportTool extends BaseSqoopTool {
         .hasArg()
         .withDescription("Set the maximum size for an inline LOB")
         .withLongOpt(INLINE_LOB_LIMIT_ARG)
+        .create());
+    importOpts.addOption(OptionBuilder.withArgName("n")
+        .hasArg()
+        .withDescription("Set number 'n' of rows to fetch from the "
+        + "database when more rows are needed")
+        .withLongOpt(FETCH_SIZE_ARG)
         .create());
 
     return importOpts;
@@ -590,7 +596,7 @@ public class ImportTool extends BaseSqoopTool {
     } else {
       System.out.println(
           "At minimum, you must specify --connect and --table");
-    } 
+    }
 
     System.out.println(
         "Arguments to mysqldump and other subprograms may be supplied");
@@ -656,7 +662,7 @@ public class ImportTool extends BaseSqoopTool {
         if (in.hasOption(TARGET_DIR_ARG)) {
           out.setTargetDir(in.getOptionValue(TARGET_DIR_ARG));
         }
-        
+
         if (in.hasOption(APPEND_ARG)) {
           out.setAppendMode(true);
         }
@@ -694,6 +700,10 @@ public class ImportTool extends BaseSqoopTool {
       if (in.hasOption(INLINE_LOB_LIMIT_ARG)) {
         out.setInlineLobLimit(Long.parseLong(in.getOptionValue(
             INLINE_LOB_LIMIT_ARG)));
+      }
+
+      if (in.hasOption(FETCH_SIZE_ARG)) {
+        out.setFetchSize(new Integer(in.getOptionValue(FETCH_SIZE_ARG)));
       }
 
       if (in.hasOption(JAR_FILE_NAME_ARG)) {

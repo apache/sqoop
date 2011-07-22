@@ -56,6 +56,9 @@ public class DBConfiguration {
   /** Password to access the database. */
   public static final String PASSWORD_PROPERTY = "mapreduce.jdbc.password";
 
+  /** Fetch size. */
+  public static final String FETCH_SIZE = "mapreduce.jdbc.fetchsize";
+
   /** Input table name. */
   public static final String INPUT_TABLE_NAME_PROPERTY =
     "mapreduce.jdbc.input.table.name";
@@ -103,12 +106,13 @@ public class DBConfiguration {
    * Sets the DB access related fields in the {@link Configuration}.
    * @param conf the configuration
    * @param driverClass JDBC Driver class name
-   * @param dbUrl JDBC DB access URL.
+   * @param dbUrl JDBC DB access URL
    * @param userName DB access username
    * @param passwd DB access passwd
+   * @param fetchSize DB fetch size
    */
   public static void configureDB(Configuration conf, String driverClass,
-      String dbUrl, String userName, String passwd) {
+      String dbUrl, String userName, String passwd, Integer fetchSize) {
 
     conf.set(DRIVER_CLASS_PROPERTY, driverClass);
     conf.set(URL_PROPERTY, dbUrl);
@@ -118,6 +122,34 @@ public class DBConfiguration {
     if (passwd != null) {
       conf.set(PASSWORD_PROPERTY, passwd);
     }
+    if (fetchSize != null) {
+      conf.setInt(FETCH_SIZE, fetchSize);
+    }
+  }
+
+  /**
+   * Sets the DB access related fields in the JobConf.
+   * @param job the job
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL
+   * @param fetchSize DB fetch size
+   */
+  public static void configureDB(Configuration job, String driverClass,
+      String dbUrl, Integer fetchSize) {
+    configureDB(job, driverClass, dbUrl, null, null, fetchSize);
+  }
+
+  /**
+   * Sets the DB access related fields in the {@link Configuration}.
+   * @param conf the configuration
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL
+   * @param userName DB access username
+   * @param passwd DB access passwd
+   */
+  public static void configureDB(Configuration conf, String driverClass,
+      String dbUrl, String userName, String passwd) {
+    configureDB(conf, driverClass, dbUrl, userName, passwd, null);
   }
 
   /**
@@ -128,7 +160,7 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl) {
-    configureDB(job, driverClass, dbUrl, null, null);
+    configureDB(job, driverClass, dbUrl, null);
   }
 
   private Configuration conf;
@@ -160,6 +192,20 @@ public class DBConfiguration {
     return conf;
   }
 
+  public Integer getFetchSize() {
+    if (conf.get(DBConfiguration.FETCH_SIZE) == null) {
+      return null;
+    }
+    return conf.getInt(DBConfiguration.FETCH_SIZE, 0);
+  }
+
+  public void setFetchSize(Integer fetchSize) {
+    if (fetchSize != null) {
+      conf.setInt(DBConfiguration.FETCH_SIZE, fetchSize);
+    } else {
+      conf.set(FETCH_SIZE, null);
+    }
+  }
   public String getInputTableName() {
     return conf.get(DBConfiguration.INPUT_TABLE_NAME_PROPERTY);
   }

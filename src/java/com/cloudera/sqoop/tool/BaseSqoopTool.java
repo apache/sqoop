@@ -95,6 +95,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String COMPRESS_SHORT_ARG = "z";
   public static final String DIRECT_SPLIT_SIZE_ARG = "direct-split-size";
   public static final String INLINE_LOB_LIMIT_ARG = "inline-lob-limit";
+  public static final String FETCH_SIZE_ARG = "fetch-size";
   public static final String EXPORT_PATH_ARG = "export-dir";
   public static final String FIELDS_TERMINATED_BY_ARG = "fields-terminated-by";
   public static final String LINES_TERMINATED_BY_ARG = "lines-terminated-by";

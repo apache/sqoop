@@ -157,7 +157,7 @@ public class TestSqoopOptions extends TestCase {
     return importTool.parseArguments(argv, null, null, false);
   }
 
-  // test that setting output delimiters also sets input delimiters 
+  // test that setting output delimiters also sets input delimiters
   public void testDelimitersInherit() throws Exception {
     String [] args = {
       "--fields-terminated-by",
@@ -236,7 +236,7 @@ public class TestSqoopOptions extends TestCase {
     assertEquals(4, opts.getNumMappers());
   }
 
-  public void testPropertySerialization() {
+  public void testPropertySerialization1() {
     // Test that if we write a SqoopOptions out to a Properties,
     // and then read it back in, we get all the same results.
     SqoopOptions out = new SqoopOptions();
@@ -251,6 +251,7 @@ public class TestSqoopOptions extends TestCase {
     out.setSqlQuery("the query");
     out.setPackageName("a.package");
     out.setHiveImport(true);
+    out.setFetchSize(null);
 
     Properties outProps = out.writeProperties();
 
@@ -261,4 +262,32 @@ public class TestSqoopOptions extends TestCase {
 
     assertEquals("properties don't match", outProps, inProps);
   }
+
+  public void testPropertySerialization2() {
+    // Test that if we write a SqoopOptions out to a Properties,
+    // and then read it back in, we get all the same results.
+    SqoopOptions out = new SqoopOptions();
+    out.setUsername("user");
+    out.setConnectString("bla");
+    out.setNumMappers(4);
+    out.setAppendMode(true);
+    out.setHBaseTable("hbasetable");
+    out.setWarehouseDir("Warehouse");
+    out.setClassName("someclass");
+    out.setSplitByCol("somecol");
+    out.setSqlQuery("the query");
+    out.setPackageName("a.package");
+    out.setHiveImport(true);
+    out.setFetchSize(42);
+
+    Properties outProps = out.writeProperties();
+
+    SqoopOptions in = new SqoopOptions();
+    in.loadProperties(outProps);
+
+    Properties inProps = in.writeProperties();
+
+    assertEquals("properties don't match", outProps, inProps);
+  }
+
 }

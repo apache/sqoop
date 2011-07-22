@@ -69,6 +69,8 @@ public abstract class SqlManager extends ConnManager {
   public static final String SUBSTITUTE_TOKEN =
       DataDrivenDBInputFormat.SUBSTITUTE_TOKEN;
 
+  protected static final int DEFAULT_FETCH_SIZE = 1000;
+
   protected SqoopOptions options;
   private Statement lastStatement;
 
@@ -78,6 +80,18 @@ public abstract class SqlManager extends ConnManager {
    */
   public SqlManager(final SqoopOptions opts) {
     this.options = opts;
+    initOptionDefaults();
+  }
+
+  /**
+   * Sets default values for values that were not provided by the user.
+   * Only options with database-specific defaults should be configured here.
+   */
+  protected void initOptionDefaults() {
+    if (options.getFetchSize() == null) {
+      LOG.info("Using default fetchSize of " + DEFAULT_FETCH_SIZE);
+      options.setFetchSize(DEFAULT_FETCH_SIZE);
+    }
   }
 
   /**
@@ -422,15 +436,21 @@ public abstract class SqlManager extends ConnManager {
   /**
    * Executes an arbitrary SQL statement.
    * @param stmt The SQL statement to execute
+   * @param fetchSize Overrides default or parameterized fetch size
    * @return A ResultSet encapsulating the results or null on error
    */
-  protected ResultSet execute(String stmt, Object... args) throws SQLException {
+  protected ResultSet execute(String stmt, Integer fetchSize, Object... args)
+      throws SQLException {
     // Release any previously-open statement.
     release();
 
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    if (fetchSize != null) {
+      LOG.debug("Using fetchSize for next query: " + fetchSize);
+      statement.setFetchSize(fetchSize);
+    }
     this.lastStatement = statement;
     if (null != args) {
       for (int i = 0; i < args.length; i++) {
@@ -440,6 +460,15 @@ public abstract class SqlManager extends ConnManager {
 
     LOG.info("Executing SQL statement: " + stmt);
     return statement.executeQuery();
+  }
+
+  /**
+   * Executes an arbitrary SQL Statement.
+   * @param stmt The SQL statement to execute
+   * @return A ResultSet encapsulating the results or null on error
+   */
+  protected ResultSet execute(String stmt, Object... args) throws SQLException {
+    return execute(stmt, options.getFetchSize(), args);
   }
 
   /**

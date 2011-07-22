@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -48,15 +46,24 @@ public class MySQLManager extends GenericJdbcManager {
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
 
-  private Statement lastStatement;
-
   public MySQLManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
   }
 
-  protected MySQLManager(final SqoopOptions opts, boolean ignored) {
-    // constructor used by subclasses to avoid the --direct warning.
-    super(DRIVER_CLASS, opts);
+  @Override
+  protected void initOptionDefaults() {
+    if (options.getFetchSize() == null) {
+      LOG.info("Preparing to use a MySQL streaming resultset.");
+      options.setFetchSize(Integer.MIN_VALUE);
+    } else if (
+        !options.getFetchSize().equals(Integer.MIN_VALUE)
+        && !options.getFetchSize().equals(0)) {
+      LOG.info("Argument '--fetch-size " + options.getFetchSize()
+          + "' will probably get ignored by MySQL JDBC driver.");
+      // see also
+      // http://dev.mysql.com/doc/refman/5.5/en
+      //                       /connector-j-reference-implementation-notes.html
+    }
   }
 
   @Override
@@ -182,36 +189,6 @@ public class MySQLManager extends GenericJdbcManager {
     }
   }
 
-  /**
-   * Executes an arbitrary SQL statement. Sets mysql-specific parameter
-   * to ensure the entire table is not buffered in RAM before reading
-   * any rows. A consequence of this is that every ResultSet returned
-   * by this method *MUST* be close()'d, or read to exhaustion before
-   * another query can be executed from this ConnManager instance.
-   *
-   * @param stmt The SQL statement to execute
-   * @return A ResultSet encapsulating the results or null on error
-   */
-  protected ResultSet execute(String stmt, Object... args)
-      throws SQLException {
-    // Free any previous resources.
-    release();
-
-    PreparedStatement statement = null;
-    statement = this.getConnection().prepareStatement(stmt,
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    this.lastStatement = statement;
-    statement.setFetchSize(Integer.MIN_VALUE); // MySQL: read row-at-a-time.
-    if (null != args) {
-      for (int i = 0; i < args.length; i++) {
-        statement.setObject(i + 1, args[i]);
-      }
-    }
-
-    LOG.info("Executing SQL statement: " + stmt);
-    return statement.executeQuery();
-  }
-
   @Override
   public void execAndPrint(String s) {
     // Override default execAndPrint() with a special version that forces
@@ -221,9 +198,8 @@ public class MySQLManager extends GenericJdbcManager {
 
     ResultSet results = null;
     try {
-      // Use default execute() statement which does not issue the
-      // MySQL-specific setFetchSize() command.
-      results = super.execute(s);
+      // Explicitly setting fetchSize to zero disables streaming.
+      results = super.execute(s, 0);
     } catch (SQLException sqlE) {
       LOG.error("Error executing statement: "
           + StringUtils.stringifyException(sqlE));
@@ -236,18 +212,6 @@ public class MySQLManager extends GenericJdbcManager {
       formatAndPrintResultSet(results, pw);
     } finally {
       pw.close();
-    }
-  }
-
-  public void release() {
-    if (null != this.lastStatement) {
-      try {
-        this.lastStatement.close();
-      } catch (SQLException e) {
-        LOG.warn("Exception closing executed Statement: " + e);
-      }
-
-      this.lastStatement = null;
     }
   }
 

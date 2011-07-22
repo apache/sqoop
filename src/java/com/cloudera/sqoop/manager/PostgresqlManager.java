@@ -19,9 +19,6 @@
 package com.cloudera.sqoop.manager;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
@@ -41,13 +38,8 @@ public class PostgresqlManager extends GenericJdbcManager {
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "org.postgresql.Driver";
 
-  // Fetch 50 rows at a time.
-  private static final int POSTGRESQL_FETCH_SIZE = 50;
-
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
-
-  private Statement lastStatement;
 
   public PostgresqlManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
@@ -96,47 +88,6 @@ public class PostgresqlManager extends GenericJdbcManager {
     // Postgresql stores table names using lower-case internally; need
     // to always convert to lowercase before querying the metadata dictionary.
     return super.getPrimaryKey(tableName.toLowerCase());
-  }
-
-  /**
-   * Executes an arbitrary SQL statement. Sets the cursor fetch size
-   * to ensure the entire table is not buffered in RAM before reading
-   * any rows. A consequence of this is that every ResultSet returned
-   * by this method *MUST* be close()'d, or read to exhaustion before
-   * another query can be executed from this ConnManager instance.
-   *
-   * @param stmt The SQL statement to execute
-   * @return A ResultSet encapsulating the results or null on error
-   */
-  protected ResultSet execute(String stmt, Object... args) throws SQLException {
-    // Free any previous resources used.
-    release();
-
-    PreparedStatement statement = null;
-    statement = this.getConnection().prepareStatement(stmt,
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    this.lastStatement = statement;
-    statement.setFetchSize(POSTGRESQL_FETCH_SIZE);
-    if (null != args) {
-      for (int i = 0; i < args.length; i++) {
-        statement.setObject(i + 1, args[i]);
-      }
-    }
-
-    LOG.info("Executing SQL statement: " + stmt);
-    return statement.executeQuery();
-  }
-
-  public void release() {
-    if (null != this.lastStatement) {
-      try {
-        this.lastStatement.close();
-      } catch (SQLException e) {
-        LOG.warn("Exception closing executed Statement: " + e);
-      }
-
-      this.lastStatement = null;
-    }
   }
 
   @Override

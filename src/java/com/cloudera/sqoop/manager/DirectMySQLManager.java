@@ -38,7 +38,7 @@ public class DirectMySQLManager extends MySQLManager {
       DirectMySQLManager.class.getName());
 
   public DirectMySQLManager(final SqoopOptions options) {
-    super(options, false);
+    super(options);
   }
 
   /**
