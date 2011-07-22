@@ -43,7 +43,6 @@ ${ANT} clean jar-all-shims findbugs javadoc cobertura checkstyle \
     -Divy.home=$IVY_HOME -Dhadoop.dist=${COMPILE_HADOOP_DIST} \
     -Dcobertura.home=${COBERTURA_HOME} -Dcobertura.format=xml \
     -Dfindbugs.home=${FINDBUGS_HOME} \
-    -Dhbase.home=${HBASE_HOME} -Dzookeeper.home=${ZOOKEEPER_HOME} \
     -Dtest.junit.output.format=xml ${ANT_ARGUMENTS}
 
 if [ "$?" != "0" ]; then
@@ -57,7 +56,6 @@ ${ANT} cobertura \
     -Dhadoop.dist=${COMPILE_HADOOP_DIST} \
     -Dcobertura.home=${COBERTURA_HOME} -Dcobertura.format=xml \
     -Dsqoop.thirdparty.lib.dir=${THIRDPARTY_LIBS} \
-    -Dhbase.home=${HBASE_HOME} -Dzookeeper.home=${ZOOKEEPER_HOME} \
     -Dtestcase=ThirdPartyTests ${ANT_ARGUMENTS}
 
 if [ "$?" != "0" ]; then
