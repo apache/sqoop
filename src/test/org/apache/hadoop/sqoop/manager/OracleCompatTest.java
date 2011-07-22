@@ -98,6 +98,11 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     return "DOUBLE PRECISION";
   }
 
+  @Override
+  protected String getVarBinaryType() {
+    return "RAW(12)";
+  }
+
   // Oracle does not provide a BOOLEAN type.
   @Override
   protected boolean supportsBoolean() {
@@ -190,6 +195,11 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  protected String getVarBinarySeqOutput(String asInserted) {
+    return toLowerHexString(asInserted);
+  }
+
+  @Override
   protected String getBlobInsertStr(String blobData) {
     // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
 
@@ -240,6 +250,11 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     } finally {
       LOG.debug("End testTimestamp2");
     }
+  }
+
+  public void testRawVal() {
+    verifyType("RAW(8)", "'12ABCD'", "12ABCD",
+        getVarBinarySeqOutput("12ABCD"), true);
   }
 }
 

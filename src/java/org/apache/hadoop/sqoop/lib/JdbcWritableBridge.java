@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.sqoop.lib;
 
+import org.apache.hadoop.io.BytesWritable;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -107,6 +108,12 @@ public final class JdbcWritableBridge {
 
   public static Date readDate(int colNum, ResultSet r) throws SQLException {
     return r.getDate(colNum);
+  }
+
+  public static BytesWritable readBytesWritable(int colNum, ResultSet r)
+      throws SQLException {
+    byte [] bytes = r.getBytes(colNum);
+    return new BytesWritable(bytes);
   }
 
   public static BigDecimal readBigDecimal(int colNum, ResultSet r) throws SQLException {
@@ -205,6 +212,21 @@ public final class JdbcWritableBridge {
       s.setDate(paramIdx, val);
     }
   }
+
+  public static void writeBytesWritable(BytesWritable val, int paramIdx,
+      int sqlType, PreparedStatement s) throws SQLException {
+    if (null == val) {
+      s.setNull(paramIdx, sqlType);
+    } else {
+      // val.getBytes() is only valid in [0, len)
+      byte [] rawBytes = val.getBytes();
+      int len = val.getLength();
+      byte [] outBytes = new byte[len];
+      System.arraycopy(rawBytes, 0, outBytes, 0, len);
+      s.setBytes(paramIdx, outBytes);
+    }
+  }
+
 
   public static void writeBigDecimal(BigDecimal val, int paramIdx, int sqlType, PreparedStatement s)
       throws SQLException {

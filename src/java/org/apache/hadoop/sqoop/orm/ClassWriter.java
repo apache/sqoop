@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.sqoop.orm;
 
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.SqlManager;
@@ -301,6 +302,9 @@ public class ClassWriter {
     } else if (javaType.equals(BlobRef.class.getName())) {
       return "    this." + colName + " = " + LobSerializer.class.getCanonicalName()
           + ".readBlobFields(" + inputObj + ");\n";
+    } else if (javaType.equals(BytesWritable.class.getName())) {
+      return "    this." + colName + " = new BytesWritable();\n"
+          + "    this." + colName + ".readFields(" + inputObj + ");\n";
     } else {
       LOG.error("No ResultSet method for Java type " + javaType);
       return null;
@@ -349,6 +353,8 @@ public class ClassWriter {
     } else if (javaType.equals("java.sql.Timestamp")) {
       return "    " + outputObj + ".writeLong(this." + colName + ".getTime());\n"
           + "    " + outputObj + ".writeInt(this." + colName + ".getNanos());\n";
+    } else if (javaType.equals(BytesWritable.class.getName())) {
+      return "    this." + colName + ".write(" + outputObj + ");\n";
     } else if (javaType.equals("java.math.BigDecimal")) {
       return "    " + BigDecimalSerializer.class.getCanonicalName()
           + ".write(this." + colName + ", " + outputObj + ");\n";
@@ -876,6 +882,7 @@ public class ClassWriter {
       sb.append(";\n");
     }
 
+    sb.append("import org.apache.hadoop.io.BytesWritable;\n");
     sb.append("import org.apache.hadoop.io.Text;\n");
     sb.append("import org.apache.hadoop.io.Writable;\n");
     sb.append("import org.apache.hadoop.mapred.lib.db.DBWritable;\n");

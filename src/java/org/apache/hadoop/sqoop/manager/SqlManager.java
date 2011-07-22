@@ -45,6 +45,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -377,12 +378,13 @@ public abstract class SqlManager extends ConnManager {
       return "java.sql.Time";
     } else if (sqlType == Types.TIMESTAMP) {
       return "java.sql.Timestamp";
+    } else if (sqlType == Types.BINARY
+        || sqlType == Types.VARBINARY) {
+      return BytesWritable.class.getName();
     } else if (sqlType == Types.CLOB) {
       return ClobRef.class.getName();
     } else if (sqlType == Types.BLOB
-        || sqlType == Types.LONGVARBINARY
-        || sqlType == Types.VARBINARY
-        || sqlType == Types.BINARY) {
+        || sqlType == Types.LONGVARBINARY) {
       return BlobRef.class.getName();
     } else {
       // TODO(aaron): Support DISTINCT, ARRAY, STRUCT, REF, JAVA_OBJECT.

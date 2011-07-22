@@ -243,6 +243,13 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return "BLOB";
   }
 
+  /**
+   * Define a VARBINARY column that can contain up to 12 bytes of data.
+   */
+  protected String getVarBinaryType() {
+    return "VARBINARY(12)";
+  }
+
   //////// These methods indicate how databases respond to various datatypes.
   //////// Since our comparisons are all string-based, these return strings.
 
@@ -485,6 +492,49 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return new BytesWritable(getBlobDbOutput(asInserted)).toString();
   }
 
+  /**
+   * @return A String declaring how an inserted VARBINARY will be
+   * returned to us via the database.
+   */
+  protected String getVarBinaryDbOutput(String asInserted) {
+    return asInserted;
+  }
+
+  /**
+   * @return A String declaring how an inserted VARBINARY will be
+   * returned to us via the sequencefile.
+   */
+  protected String getVarBinarySeqOutput(String asInserted) {
+    return new BytesWritable(getBlobDbOutput(asInserted)).toString();
+  }
+
+  /**
+   * Given a string of characters which represent hex values
+   * (e.g., 'ABF00F1238'), return the string as a set of separated
+   * octets, in lower case (e.g., 'ab f0 0f 12 38').
+   *
+   * @param str the input string of hex digits
+   * @return the input string as space-separated lower-case octets. 
+   */
+  protected String toLowerHexString(String str) {
+    // The inserted text is a hex string of the form 'ABABABAB'.
+    // We return it in the form 'ab ab ab ab'.
+    StringBuilder sb = new StringBuilder();
+    boolean isOdd = false;
+    boolean first = true;
+    for (char c : str.toCharArray()) {
+      if (!isOdd && !first) {
+        sb.append(' ');
+      }
+
+      sb.append(Character.toLowerCase(c));
+      isOdd = !isOdd;
+      first = false;
+    }
+
+    return sb.toString();
+  }
+
   //////// The actual tests occur below here. ////////
 
   /**
@@ -513,9 +563,28 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    */
   protected void verifyType(String colType, String insertVal, String returnVal,
       String seqFileVal) {
-    createTableForColType(colType, insertVal);
-    verifyReadback(1, returnVal);
-    verifyImport(seqFileVal, null);
+    verifyType(colType, insertVal, returnVal, seqFileVal, false);
+  }
+
+  protected void verifyType(String colType, String insertVal, String returnVal,
+      String seqFileVal, boolean useIntPrimaryKey) {
+
+    int readBackCol;
+    String readbackPrepend = "";
+
+    if (useIntPrimaryKey) {
+      String [] types = { "INTEGER", colType };
+      String [] vals = { "0", insertVal };
+      createTableWithColTypes(types, vals);
+      readBackCol = 2;
+      readbackPrepend = "0,"; // verifyImport will verify the entire row.
+    } else {
+      createTableForColType(colType, insertVal);
+      readBackCol = 1;
+    }
+
+    verifyReadback(readBackCol, returnVal);
+    verifyImport(readbackPrepend + seqFileVal, null);
   }
 
   static final String STRING_VAL_IN = "'this is a short string'";
@@ -936,5 +1005,11 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
         getBlobSeqOutput("This is short BLOB data"));
   }
 
+  @Test
+  public void testVarBinary() {
+    verifyType(getVarBinaryType(), "'F00FABCD'",
+        getVarBinaryDbOutput("F00FABCD"),
+        getVarBinarySeqOutput("F00FABCD"), true);
+  }
 }
 

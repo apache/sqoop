@@ -70,5 +70,15 @@ public class TestColumnTypes extends ManagerCompatTestCase {
   protected boolean supportsBlob() {
     return false;
   }
+
+  @Override
+  protected String getVarBinaryDbOutput(String asInserted) {
+    return asInserted.toLowerCase();
+  }
+
+  @Override
+  protected String getVarBinarySeqOutput(String asInserted) {
+    return toLowerHexString(asInserted);
+  }
 }
 
