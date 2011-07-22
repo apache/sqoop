@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Licensed to Cloudera, Inc. under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -21,16 +21,22 @@
 # Arguments are:
 #    path to the root of the build directory
 #    the version number
+#    the git hash of the current checkout. If empty, auto-detect.
 #
 # e.g., $ write-version-info.sh ./build/ 1.0.0
 
 buildroot=$1
 version=$2
+specifiedgithash=$3
 
 outputdir=${buildroot}/src/com.cloudera.sqoop
 outputfile=${outputdir}/SqoopVersion.java
 
-signature=`git log -1 --pretty=format:%H`
+signature=$specifiedgithash
+if [ -z "$signature" ]; then
+  signature=`git log -1 --pretty=format:%H`
+fi
+
 host=`hostname`
 compiledate=`date`
 

@@ -32,7 +32,8 @@
   <property name="Name" value="Sqoop" />
   <property name="version" value="1.1.0-SNAPSHOT" />
   <property name="artifact.name" value="${name}-${version}" />
-  <property name="dest.jar" value="${artifact.name}.jar"/>
+  <property name="dest.jar" value="${artifact.name}.jar" />
+  <property name="git.hash" value="" />
   
   <!-- locations in the source tree -->
   <property name="base.src.dir" location="${basedir}/src" />
@@ -252,6 +253,7 @@
         dir="${basedir}" failonerror="true">
       <arg value="${build.dir}" />
       <arg value="${version}" />
+      <arg value="${git.hash}" />
     </exec>
   </target>
   
