@@ -161,6 +161,81 @@ arguments are not typically used with Sqoop, but they are included as
 part of Hadoop's internal argument-parsing system.
 
 
+Using Options Files to Pass Arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When using Sqoop, the command line options that do not change from
+invocation to invocation can be put in an options file for convenience.
+An options file is a text file where each line identifies an option in
+the order that it appears otherwise on the command line. Option files
+allow specifying a single option on multiple lines by using the
+back-slash character at the end of intermediate lines. Also supported
+are comments within option files that begin with the hash character.
+Comments must be specified on a new line and may not be mixed with
+option text. All comments and empty lines are ignored when option
+files are expanded. Unless options appear as quoted strings, any
+leading or trailing spaces are ignored. Quoted strings if used must
+not extend beyond the line on which they are specified.
+
+Option files can be specified anywhere in the command line as long as
+the options within them follow the otherwise prescribed rules of
+options ordering. For instance, regardless of where the options are
+loaded from, they must follow the ordering such that generic options
+appear first, tool specific options next, finally followed by options
+that are intended to be passed to child programs.
+
+To specify an options file, simply create an options file in a
+convenient location and pass it to the command line via
++\--options-file+ argument.
+
+Whenever an options file is specified, it is expanded on the
+command line before the tool is invoked. You can specify more than
+one option files within the same invocation if needed.
+
+For example, the following Sqoop invocation for import can
+be specified alternatively as shown below:
+
+----
+$ sqoop import --connect jdbc:mysql://localhost/db --username foo --table TEST
+
+$ sqoop --options-file /users/homer/work/import.txt --table TEST
+----
+
+where the options file +/users/homer/work/import.txt+ contains the following:
+
+----
+import
+--connect
+jdbc:mysql://localhost/db
+--username
+foo
+----
+
+The options file can have empty lines and comments for readability purposes.
+So the above example would work exactly the same if the options file
++/users/homer/work/import.txt+ contained the following:
+
+----
+#
+# Options file for Sqoop import
+#
+
+# Specifies the tool being invoked
+import
+
+# Connect parameter and value
+--connect
+jdbc:mysql://localhost/db
+
+# Username parameter and value
+--username
+foo
+
+#
+# Remaining options should be specified in the command line.
+#
+----
+
 Using Tools
 ~~~~~~~~~~~
 

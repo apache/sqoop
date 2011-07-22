@@ -29,6 +29,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
+import com.cloudera.sqoop.util.OptionsFileUtil;
 
 /**
  * Main entry-point for Sqoop
@@ -37,13 +38,20 @@ import com.cloudera.sqoop.tool.SqoopTool;
  */
 public class Sqoop extends Configured implements Tool {
 
-  public static final Log SQOOP_LOG = LogFactory.getLog("com.cloudera.sqoop"); 
+  public static final Log SQOOP_LOG = LogFactory.getLog("com.cloudera.sqoop");
   public static final Log LOG = LogFactory.getLog(Sqoop.class.getName());
 
-  /** If this System property is set, always throw an exception, do not just
-      exit with status 1.
-    */
+  /**
+   * If this System property is set, always throw an exception, do not just
+   * exit with status 1.
+   */
   public static final String SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError";
+
+  /**
+   * The option to specify an options file from which other options to the
+   * tool are read.
+   */
+  public static final String SQOOP_OPTIONS_FILE_SPECIFIER = "--options-file";
 
   static {
     Configuration.addDefaultResource("sqoop-site.xml");
@@ -121,7 +129,7 @@ public class Sqoop extends Configured implements Tool {
       tool.appendArgs(this.childPrgmArgs);
       tool.validateOptions(options);
     } catch (Exception e) {
-      // Couldn't parse arguments. 
+      // Couldn't parse arguments.
       // Log the stack trace for this exception
       LOG.debug(e.getMessage(), e);
       // Print exception message.
@@ -144,7 +152,7 @@ public class Sqoop extends Configured implements Tool {
    * the child-program arguments in advance, and store them to be readded
    * later.
    * @param argv the argv in to the SqoopTool
-   * @return the argv with a "--" and any subsequent arguments removed. 
+   * @return the argv with a "--" and any subsequent arguments removed.
    */
   private String [] stashChildPrgmArgs(String [] argv) {
     for (int i = 0; i < argv.length; i++) {
@@ -159,7 +167,7 @@ public class Sqoop extends Configured implements Tool {
   }
 
   /**
-   * Given a Sqoop object and a set of arguments to deliver to 
+   * Given a Sqoop object and a set of arguments to deliver to
    * its embedded SqoopTool, run the tool, wrapping the call to
    * ToolRunner.
    * This entry-point is preferred to ToolRunner.run() because
@@ -186,7 +194,18 @@ public class Sqoop extends Configured implements Tool {
    * but does not call System.exit() as main() will.
    */
   public static int runTool(String [] args) {
-    String toolName = args[0];
+    // Expand the options
+    String[] expandedArgs = null;
+    try {
+      expandedArgs = OptionsFileUtil.expandArguments(args);
+    } catch (Exception ex) {
+      LOG.error("Error while expanding arguments", ex);
+      System.err.println(ex.getMessage());
+      System.err.println("Try 'sqoop help' for usage.");
+      return 1;
+    }
+
+    String toolName = expandedArgs[0];
     SqoopTool tool = SqoopTool.getTool(toolName);
     if (null == tool) {
       System.err.println("No such sqoop tool: " + toolName
@@ -194,8 +213,10 @@ public class Sqoop extends Configured implements Tool {
       return 1;
     }
 
+
     Sqoop sqoop = new Sqoop(tool);
-    return runSqoop(sqoop, Arrays.copyOfRange(args, 1, args.length));
+    return runSqoop(sqoop,
+        Arrays.copyOfRange(expandedArgs, 1, expandedArgs.length));
   }
 
   public static void main(String [] args) {
