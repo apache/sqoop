@@ -29,6 +29,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -104,11 +105,17 @@ public class DataDrivenImportJob {
         job.setMapperClass(TextImportMapper.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(NullWritable.class);
+        if (options.shouldUseCompression()) {
+          FileOutputFormat.setCompressOutput(job, true);
+          FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+        }
       } else if (options.getFileLayout() == ImportOptions.FileLayout.SequenceFile) {
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
         job.setMapperClass(AutoProgressMapper.class);
-        SequenceFileOutputFormat.setCompressOutput(job, true);
-        SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
+        if (options.shouldUseCompression()) {
+          SequenceFileOutputFormat.setCompressOutput(job, true);
+          SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
+        }
         job.getConfiguration().set("mapred.output.value.class", tableClassName);
       } else {
         LOG.warn("Unknown file layout specified: " + options.getFileLayout() + "; using text.");

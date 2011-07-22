@@ -100,6 +100,8 @@ public class ImportOptions {
   private String packageName; // package to prepend to auto-named classes.
   private String className; // package+class to apply to individual table import.
   private int numMappers;
+  private boolean useCompression;
+  private long directSplitSize; // In direct mode, open a new stream every X bytes.
 
   private char inputFieldDelim;
   private char inputRecordDelim;
@@ -136,6 +138,23 @@ public class ImportOptions {
     this.tableName = table;
   }
 
+  private boolean getBooleanProperty(Properties props, String propName, boolean defaultValue) {
+    String str = props.getProperty(propName,
+        Boolean.toString(defaultValue)).toLowerCase();
+    return "true".equals(str) || "yes".equals(str) || "1".equals(str);
+  }
+
+  private long getLongProperty(Properties props, String propName, long defaultValue) {
+    String str = props.getProperty(propName,
+        Long.toString(defaultValue)).toLowerCase();
+    try {
+      return Long.parseLong(str);
+    } catch (NumberFormatException nfe) {
+      LOG.warn("Could not parse integer value for config parameter " + propName);
+      return defaultValue;
+    }
+  }
+
   private void loadFromProperties() {
     File configFile = new File(DEFAULT_CONFIG_FILE);
     if (!configFile.canRead()) {
@@ -164,15 +183,11 @@ public class ImportOptions {
       this.className = props.getProperty("java.classname", this.className);
       this.packageName = props.getProperty("java.packagename", this.packageName);
 
-      String directImport = props.getProperty("direct.import",
-          Boolean.toString(this.direct)).toLowerCase();
-      this.direct = "true".equals(directImport) || "yes".equals(directImport)
-          || "1".equals(directImport);
-
-      String hiveImportStr = props.getProperty("hive.import",
-          Boolean.toString(this.hiveImport)).toLowerCase();
-      this.hiveImport = "true".equals(hiveImportStr) || "yes".equals(hiveImportStr)
-          || "1".equals(hiveImportStr);
+      this.direct = getBooleanProperty(props, "direct.import", this.direct);
+      this.hiveImport = getBooleanProperty(props, "hive.import", this.hiveImport);
+      this.useCompression = getBooleanProperty(props, "compression", this.useCompression);
+      this.directSplitSize = getLongProperty(props, "direct.split.size",
+          this.directSplitSize);
     } catch (IOException ioe) {
       LOG.error("Could not read properties file " + DEFAULT_CONFIG_FILE + ": " + ioe.toString());
     } finally {
@@ -231,6 +246,8 @@ public class ImportOptions {
     this.areDelimsManuallySet = false;
 
     this.numMappers = DEFAULT_NUM_MAPPERS;
+    this.useCompression = false;
+    this.directSplitSize = 0;
 
     loadFromProperties();
   }
@@ -272,6 +289,9 @@ public class ImportOptions {
     System.out.println("--hive-import                If set, then import the table into Hive.");
     System.out.println("                    (Uses Hive's default delimiters if none are set.)");
     System.out.println("-m, --num-mappers (n)        Use 'n' map tasks to import in parallel");
+    System.out.println("-z, --compress               Enable compression");
+    System.out.println("--direct-split-size (n)      Split the input stream every 'n' bytes");
+    System.out.println("                             when importing in direct mode.");
     System.out.println("");
     System.out.println("Output line formatting options:");
     System.out.println("--fields-terminated-by (char)    Sets the field separator character");
@@ -437,7 +457,8 @@ public class ImportOptions {
             this.password = "";
           }
         } else if (args[i].equals("--password")) {
-          LOG.warn("Setting your password on the command-line is insecure. Consider using -P instead.");
+          LOG.warn("Setting your password on the command-line is insecure. "
+              + "Consider using -P instead.");
           this.password = args[++i];
         } else if (args[i].equals("-P")) {
           this.password = securePasswordEntry();
@@ -449,12 +470,7 @@ public class ImportOptions {
           this.hiveImport = true;
         } else if (args[i].equals("--num-mappers") || args[i].equals("-m")) {
           String numMappersStr = args[++i];
-          try {
-            this.numMappers = Integer.valueOf(numMappersStr);
-          } catch (NumberFormatException nfe) {
-            throw new InvalidOptionsException("Invalid argument; expected "
-                + args[i - 1] + " (number).");
-          }
+          this.numMappers = Integer.valueOf(numMappersStr);
         } else if (args[i].equals("--fields-terminated-by")) {
           this.outputFieldDelim = ImportOptions.toChar(args[++i]);
           this.areDelimsManuallySet = true;
@@ -505,6 +521,10 @@ public class ImportOptions {
           this.packageName = args[++i];
         } else if (args[i].equals("--class-name")) {
           this.className = args[++i];
+        } else if (args[i].equals("-z") || args[i].equals("--compress")) {
+          this.useCompression = true;
+        } else if (args[i].equals("--direct-split-size")) {
+          this.directSplitSize = Long.parseLong(args[++i]);
         } else if (args[i].equals("--list-databases")) {
           this.action = ControlAction.ListDatabases;
         } else if (args[i].equals("--generate-only")) {
@@ -528,6 +548,9 @@ public class ImportOptions {
       }
     } catch (ArrayIndexOutOfBoundsException oob) {
       throw new InvalidOptionsException("Error: " + args[--i] + " expected argument.\n"
+          + "Try --help for usage.");
+    } catch (NumberFormatException nfe) {
+      throw new InvalidOptionsException("Error: " + args[--i] + " expected numeric argument.\n"
           + "Try --help for usage.");
     }
   }
@@ -831,5 +854,19 @@ public class ImportOptions {
    */
   public boolean isOutputEncloseRequired() {
     return this.outputMustBeEnclosed;
+  }
+
+  /**
+   * @return true if the user wants imported results to be compressed.
+   */
+  public boolean shouldUseCompression() {
+    return this.useCompression;
+  }
+
+  /**
+   * @return the file size to split by when using --direct mode.
+   */
+  public long getDirectSplitSize() {
+    return this.directSplitSize;
   }
 }

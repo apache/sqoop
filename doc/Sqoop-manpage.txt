@@ -77,7 +77,7 @@ Import control options
 --columns (col,col,col...)::
   Columns to export from table
 
---split-by (column-name)
+--split-by (column-name)::
   Column of the table used to split the table for parallel import
 
 --hadoop-home (dir)::
@@ -101,9 +101,17 @@ Import control options
 --table (table-name)::
   The table to import
 
---where (clause)
-Import only the rows for which _clause_ is true.
-e.g.: `--where "user_id > 400 AND hidden == 0"`
+--where (clause)::
+  Import only the rows for which _clause_ is true.
+  e.g.: `--where "user_id > 400 AND hidden == 0"`
+
+--compress::
+-z::
+  Uses gzip to compress data as it is written to HDFS
+
+--direct-split-size (size)::
+  When using direct mode, write to multiple files of
+  approximately _size_ bytes each.
 
 
 Output line formatting options

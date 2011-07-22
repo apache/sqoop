@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -104,10 +105,16 @@ public class ImportJob {
         job.setMapperClass(TextImportMapper.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(NullWritable.class);
+        if (options.shouldUseCompression()) {
+          FileOutputFormat.setCompressOutput(job, true);
+          FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+        }
       } else if (options.getFileLayout() == ImportOptions.FileLayout.SequenceFile) {
         job.setOutputFormat(SequenceFileOutputFormat.class);
-        SequenceFileOutputFormat.setCompressOutput(job, true);
-        SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
+        if (options.shouldUseCompression()) {
+          SequenceFileOutputFormat.setCompressOutput(job, true);
+          SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
+        }
         job.set(JobContext.OUTPUT_VALUE_CLASS, tableClassName);
       } else {
         LOG.warn("Unknown file layout specified: " + options.getFileLayout() + "; using text.");

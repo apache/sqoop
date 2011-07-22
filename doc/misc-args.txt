@@ -30,3 +30,7 @@ You can override the +$HADOOP_HOME+ environment variable within Sqoop
 with the +--hadoop-home+ argument. You can override the +$HIVE_HOME+
 environment variable with +--hive-home+.
 
+Data emitted to HDFS is by default uncompressed. You can instruct
+Sqoop to use gzip to compress your data by providing either the
++--compress+ or +-z+ argument (both are equivalent).
+

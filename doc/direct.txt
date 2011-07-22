@@ -49,3 +49,13 @@ better performance; Sqoop will forward delimiter control arguments to
 The "Supported Databases" section provides a full list of database vendors
 which have direct-mode support from Sqoop.
 
+When writing to HDFS, direct mode will open a single output file to receive
+the results of the import. You can instruct Sqoop to use multiple output
+files by using the +--direct-split-size+ argument which takes a size in
+bytes. Sqoop will generate files of approximately this size. e.g.,
++--direct-split-size 1000000+ will generate files of approximately 1 MB
+each. If compressing the HDFS files with +--compress+, this will allow
+subsequent MapReduce programs to use multiple mappers across your data
+in parallel.
+
+

@@ -48,6 +48,10 @@
       name="commons-httpclient"
       rev="${commons-httpclient.version}"
       conf="common->default"/>
+    <dependency org="commons-io"
+      name="commons-io"
+      rev="${commons-io.version}"
+      conf="common->default"/>
     <dependency org="commons-cli"
       name="commons-cli"
       rev="${commons-cli.version}"

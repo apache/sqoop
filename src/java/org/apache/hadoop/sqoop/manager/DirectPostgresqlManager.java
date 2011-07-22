@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.Executor;
 import org.apache.hadoop.sqoop.util.ImportError;
@@ -64,11 +65,11 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       char to each record.
     */
   static class PostgresqlStreamHandlerFactory implements StreamHandlerFactory {
-    private final BufferedWriter writer;
+    private final SplittableBufferedWriter writer;
     private final PerfCounters counters;
     private final ImportOptions options;
 
-    PostgresqlStreamHandlerFactory(final BufferedWriter w, final ImportOptions opts,
+    PostgresqlStreamHandlerFactory(final SplittableBufferedWriter w, final ImportOptions opts,
         final PerfCounters ctrs) {
       this.writer = w;
       this.options = opts;
@@ -94,14 +95,14 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     private static class PostgresqlStreamThread extends Thread {
       public static final Log LOG = LogFactory.getLog(PostgresqlStreamThread.class.getName());
 
-      private final BufferedWriter writer;
+      private final SplittableBufferedWriter writer;
       private final InputStream stream;
       private final ImportOptions options;
       private final PerfCounters counters;
 
       private boolean error;
 
-      PostgresqlStreamThread(final InputStream is, final BufferedWriter w,
+      PostgresqlStreamThread(final InputStream is, final SplittableBufferedWriter w,
           final ImportOptions opts, final PerfCounters ctrs) {
         this.stream = is;
         this.writer = w;
@@ -115,7 +116,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
 
       public void run() {
         BufferedReader r = null;
-        BufferedWriter w = this.writer;
+        SplittableBufferedWriter w = this.writer;
 
         char recordDelim = this.options.getOutputRecordDelim();
 
@@ -131,6 +132,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
 
             w.write(inLine);
             w.write(recordDelim);
+            w.allowSplit();
             counters.addBytes(1 + inLine.length());
           }
         } catch (IOException ioe) {
@@ -394,8 +396,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       }
 
       // This writer will be closed by StreamHandlerFactory.
-      OutputStream os = DirectImportUtils.createHdfsSink(conf, options, tableName);
-      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+      SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(conf, options, tableName);
 
       // Actually start the psql dump.
       p = Runtime.getRuntime().exec(args.toArray(new String[0]), envp.toArray(new String[0]));

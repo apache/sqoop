@@ -40,6 +40,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
@@ -64,10 +65,10 @@ public class LocalMySQLManager extends MySQLManager {
    * header and footer characters that are attached to each line in mysqldump.
    */
   static class CopyingStreamHandlerFactory implements StreamHandlerFactory {
-    private final BufferedWriter writer;
+    private final SplittableBufferedWriter writer;
     private final PerfCounters counters;
 
-    CopyingStreamHandlerFactory(final BufferedWriter w, final PerfCounters ctrs) {
+    CopyingStreamHandlerFactory(final SplittableBufferedWriter w, final PerfCounters ctrs) {
       this.writer = w;
       this.counters = ctrs;
     }
@@ -91,13 +92,14 @@ public class LocalMySQLManager extends MySQLManager {
     private static class CopyingStreamThread extends Thread {
       public static final Log LOG = LogFactory.getLog(CopyingStreamThread.class.getName());
 
-      private final BufferedWriter writer;
+      private final SplittableBufferedWriter writer;
       private final InputStream stream;
       private final PerfCounters counters;
 
       private boolean error;
 
-      CopyingStreamThread(final InputStream is, final BufferedWriter w, final PerfCounters ctrs) {
+      CopyingStreamThread(final InputStream is, final SplittableBufferedWriter w,
+          final PerfCounters ctrs) {
         this.writer = w;
         this.stream = is;
         this.counters = ctrs;
@@ -109,7 +111,7 @@ public class LocalMySQLManager extends MySQLManager {
 
       public void run() {
         BufferedReader r = null;
-        BufferedWriter w = this.writer;
+        SplittableBufferedWriter w = this.writer;
 
         try {
           r = new BufferedReader(new InputStreamReader(this.stream));
@@ -169,11 +171,11 @@ public class LocalMySQLManager extends MySQLManager {
    * output, and re-emit the text in the user's specified output format.
    */
   static class ReparsingStreamHandlerFactory implements StreamHandlerFactory {
-    private final BufferedWriter writer;
+    private final SplittableBufferedWriter writer;
     private final ImportOptions options;
     private final PerfCounters counters;
 
-    ReparsingStreamHandlerFactory(final BufferedWriter w, final ImportOptions opts, 
+    ReparsingStreamHandlerFactory(final SplittableBufferedWriter w, final ImportOptions opts,
         final PerfCounters ctrs) {
       this.writer = w;
       this.options = opts;
@@ -199,14 +201,14 @@ public class LocalMySQLManager extends MySQLManager {
     private static class ReparsingStreamThread extends Thread {
       public static final Log LOG = LogFactory.getLog(ReparsingStreamThread.class.getName());
 
-      private final BufferedWriter writer;
+      private final SplittableBufferedWriter writer;
       private final ImportOptions options;
       private final InputStream stream;
       private final PerfCounters counters;
 
       private boolean error;
 
-      ReparsingStreamThread(final InputStream is, final BufferedWriter w,
+      ReparsingStreamThread(final InputStream is, final SplittableBufferedWriter w,
           final ImportOptions opts, final PerfCounters ctrs) {
         this.writer = w;
         this.options = opts;
@@ -234,7 +236,7 @@ public class LocalMySQLManager extends MySQLManager {
 
       public void run() {
         BufferedReader r = null;
-        BufferedWriter w = this.writer;
+        SplittableBufferedWriter w = this.writer;
 
         try {
           r = new BufferedReader(new InputStreamReader(this.stream));
@@ -292,6 +294,7 @@ public class LocalMySQLManager extends MySQLManager {
             }
 
             w.write(outputRecordDelim);
+            w.allowSplit();
             counters.addBytes(recordLen);
           }
         } catch (IOException ioe) {
@@ -444,8 +447,7 @@ public class LocalMySQLManager extends MySQLManager {
       }
 
       // This writer will be closed by StreamHandlerFactory.
-      OutputStream os = DirectImportUtils.createHdfsSink(conf, options, tableName);
-      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+      SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(conf, options, tableName);
 
       // Actually start the mysqldump.
       p = Runtime.getRuntime().exec(args.toArray(new String[0]));

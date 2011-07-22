@@ -20,7 +20,6 @@ package org.apache.hadoop.sqoop.util;
 
 import java.io.IOException;
 import java.io.File;
-import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +28,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.io.SplittingOutputStream;
+import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.util.Shell;
 
 /**
@@ -64,8 +65,8 @@ public final class DirectImportUtils {
    * The caller is responsible for calling the close() method on the returned
    * stream.
    */
-  public static OutputStream createHdfsSink(Configuration conf, ImportOptions options,
-      String tableName) throws IOException {
+  public static SplittableBufferedWriter createHdfsSink(Configuration conf,
+      ImportOptions options, String tableName) throws IOException {
 
     FileSystem fs = FileSystem.get(conf);
     String warehouseDir = options.getWarehouseDir();
@@ -79,15 +80,11 @@ public final class DirectImportUtils {
     LOG.debug("Writing to filesystem: " + conf.get("fs.default.name"));
     LOG.debug("Creating destination directory " + destDir);
     fs.mkdirs(destDir);
-    Path destFile = new Path(destDir, "data-00000");
-    LOG.debug("Opening output file: " + destFile);
-    if (fs.exists(destFile)) {
-      Path canonicalDest = destFile.makeQualified(fs);
-      throw new IOException("Destination file " + canonicalDest + " already exists");
-    }
 
-    // This OutputStream will be clsoed by the caller.
-    return fs.create(destFile);
+    // This Writer will be closed by the caller.
+    return new SplittableBufferedWriter(
+        new SplittingOutputStream(conf, destDir, "data-", options.getDirectSplitSize(),
+        options.shouldUseCompression()));
   }
 }
 
