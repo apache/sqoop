@@ -97,9 +97,9 @@
       rev="${hadoop-mapred.apache21.version}" conf="apache21test->default"/>
 
     <!-- Dependencies for Cloudera's Distribution for Hadoop -->
-    <dependency org="org.apache.hadoop" name="hadoop-core"
+    <dependency org="com.cloudera.hadoop" name="hadoop-core"
       rev="${hadoop-core.cloudera.version}" conf="cloudera->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-test"
+    <dependency org="com.cloudera.hadoop" name="hadoop-test"
       rev="${hadoop-core.cloudera.version}" conf="clouderatest->default"/>
 
     <!-- Common dependencies for Sqoop -->
