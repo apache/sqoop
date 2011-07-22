@@ -113,6 +113,24 @@ public class TestConnFactory extends TestCase {
       return null;
     }
 
+    /**
+    * Default implementation
+    * @param sqlType     sql data type
+    * @return            java data type
+    */
+    public String toJavaType(int sqlType) {
+      return null;
+    }
+
+    /**
+    * Default implementation
+    * @param sqlType     sql data type
+    * @return            hive data type
+    */
+    public String toHiveType(int sqlType) {
+      return null;
+    }
+
     public Map<String, Integer> getColumnTypes(String tableName) {
       return null;
     }

@@ -376,7 +376,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("Cannot resolve SQL type " + sqlType);
         continue;
@@ -406,7 +406,7 @@ public class ClassWriter {
       fieldNum++;
 
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType);
         continue;
@@ -443,7 +443,7 @@ public class ClassWriter {
       fieldNum++;
 
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType);
         continue;
@@ -476,7 +476,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType);
         continue;
@@ -532,7 +532,7 @@ public class ClassWriter {
     boolean first = true;
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType);
         continue;
@@ -597,7 +597,7 @@ public class ClassWriter {
   private void parseColumn(String colName, int colType, StringBuilder sb) {
     // assume that we have __it and __cur_str vars, based on __loadFromFields() code.
     sb.append("    __cur_str = __it.next();\n");
-    String javaType = SqlManager.toJavaType(colType);
+    String javaType = connManager.toJavaType(colType);
 
     parseNullVal(colName, sb);
     if (javaType.equals("String")) {
@@ -690,7 +690,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = SqlManager.toJavaType(sqlType);
+      String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType);
         continue;

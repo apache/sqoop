@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.Path;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
-import org.apache.hadoop.sqoop.hive.HiveTypes;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,9 +94,9 @@ public class TableDefWriter {
       first = false;
 
       Integer colType = columnTypes.get(col);
-      String hiveColType = HiveTypes.toHiveType(colType);
+      String hiveColType = connManager.toHiveType(colType);
       if (null == hiveColType) {
-        throw new IOException("Hive does not support the SQL type for column " + col);  
+        throw new IOException("Hive does not support the SQL type for column " + col);
       }
 
       sb.append(col + " " + hiveColType);

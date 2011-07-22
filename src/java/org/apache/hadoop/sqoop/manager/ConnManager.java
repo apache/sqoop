@@ -57,6 +57,20 @@ public abstract class ConnManager {
   public abstract String getPrimaryKey(String tableName);
 
   /**
+   * Return java type for SQL type
+   * @param sqlType     sql type
+   * @return            java type
+   */
+  public abstract String toJavaType(int sqlType);
+
+    /**
+     * Return hive type for SQL type
+     * @param sqlType   sql type
+     * @return          hive type
+     */
+  public abstract String toHiveType(int sqlType);
+
+  /**
    * Return an unordered mapping from colname to sqltype for
    * all columns in a table.
    *

@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop.manager;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
+import org.apache.hadoop.sqoop.hive.HiveTypes;
 import org.apache.hadoop.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.hadoop.sqoop.mapreduce.ExportJob;
 import org.apache.hadoop.sqoop.util.ExportException;
@@ -308,7 +309,7 @@ public abstract class SqlManager extends ConnManager {
    * @param sqlType
    * @return the name of a Java type to hold the sql datatype, or null if none.
    */
-  public static String toJavaType(int sqlType) {
+  public String toJavaType(int sqlType) {
     // mappings from http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html
     if (sqlType == Types.INTEGER) {
       return "Integer";
@@ -347,10 +348,19 @@ public abstract class SqlManager extends ConnManager {
     } else {
       // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT, CLOB, BLOB, ARRAY,
       // STRUCT, REF, JAVA_OBJECT.
+      // return database specific java data type
       return null;
     }
   }
 
+  /**
+   * Resolve a database-specific type to Hive data type
+   * @param sqlType     sql type
+   * @return            hive type
+   */
+  public String toHiveType(int sqlType) {
+    return HiveTypes.toHiveType(sqlType);
+  }
 
   public void close() throws SQLException {
   }
