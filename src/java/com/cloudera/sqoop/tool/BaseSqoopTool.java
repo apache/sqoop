@@ -40,7 +40,7 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.shims.ShimLoader;
 
 /**
@@ -127,13 +127,13 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
 
-  // Arguments for the session management system.
-  public static final String SESSION_METASTORE_ARG = "meta-connect";
-  public static final String SESSION_CMD_CREATE_ARG = "create";
-  public static final String SESSION_CMD_DELETE_ARG = "delete";
-  public static final String SESSION_CMD_EXEC_ARG = "exec";
-  public static final String SESSION_CMD_LIST_ARG = "list";
-  public static final String SESSION_CMD_SHOW_ARG = "show";
+  // Arguments for the saved job management system.
+  public static final String STORAGE_METASTORE_ARG = "meta-connect";
+  public static final String JOB_CMD_CREATE_ARG = "create";
+  public static final String JOB_CMD_DELETE_ARG = "delete";
+  public static final String JOB_CMD_EXEC_ARG = "exec";
+  public static final String JOB_CMD_LIST_ARG = "list";
+  public static final String JOB_CMD_SHOW_ARG = "show";
 
   // Arguments for the metastore.
   public static final String METASTORE_SHUTDOWN_ARG = "shutdown";
@@ -168,7 +168,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     // Get the connection to the database.
     try {
-      SessionData data = new SessionData(sqoopOpts, this);
+      JobData data = new JobData(sqoopOpts, this);
       this.manager = new ConnFactory(sqoopOpts.getConf()).getManager(data);
       return true;
     } catch (Exception e) {
@@ -255,51 +255,51 @@ public abstract class BaseSqoopTool extends SqoopTool {
   }
 
   /**
-   * @return RelatedOptions used by session management tools.
+   * @return RelatedOptions used by job management tools.
    */
-  protected RelatedOptions getSessionOptions() {
+  protected RelatedOptions getJobOptions() {
     RelatedOptions relatedOpts = new RelatedOptions(
-        "Session management arguments");
+        "Job management arguments");
     relatedOpts.addOption(OptionBuilder.withArgName("jdbc-uri")
         .hasArg()
         .withDescription("Specify JDBC connect string for the metastore")
-        .withLongOpt(SESSION_METASTORE_ARG)
+        .withLongOpt(STORAGE_METASTORE_ARG)
         .create());
 
     // Create an option-group surrounding the operations a user
-    // can perform on sessions.
+    // can perform on jobs.
     OptionGroup group = new OptionGroup();
-    group.addOption(OptionBuilder.withArgName("session-id")
+    group.addOption(OptionBuilder.withArgName("job-id")
         .hasArg()
-        .withDescription("Create a new session")
-        .withLongOpt(SESSION_CMD_CREATE_ARG)
+        .withDescription("Create a new saved job")
+        .withLongOpt(JOB_CMD_CREATE_ARG)
         .create());
-    group.addOption(OptionBuilder.withArgName("session-id")
+    group.addOption(OptionBuilder.withArgName("job-id")
         .hasArg()
-        .withDescription("Delete a saved session")
-        .withLongOpt(SESSION_CMD_DELETE_ARG)
+        .withDescription("Delete a saved job")
+        .withLongOpt(JOB_CMD_DELETE_ARG)
         .create());
-    group.addOption(OptionBuilder.withArgName("session-id")
+    group.addOption(OptionBuilder.withArgName("job-id")
         .hasArg()
-        .withDescription("Show the parameters for a saved session")
-        .withLongOpt(SESSION_CMD_SHOW_ARG)
+        .withDescription("Show the parameters for a saved job")
+        .withLongOpt(JOB_CMD_SHOW_ARG)
         .create());
 
-    Option execOption = OptionBuilder.withArgName("session-id")
+    Option execOption = OptionBuilder.withArgName("job-id")
         .hasArg()
-        .withDescription("Run a saved session")
-        .withLongOpt(SESSION_CMD_EXEC_ARG)
+        .withDescription("Run a saved job")
+        .withLongOpt(JOB_CMD_EXEC_ARG)
         .create();
     group.addOption(execOption);
 
     group.addOption(OptionBuilder
-        .withDescription("List saved sessions")
-        .withLongOpt(SESSION_CMD_LIST_ARG)
+        .withDescription("List saved jobs")
+        .withLongOpt(JOB_CMD_LIST_ARG)
         .create());
 
     relatedOpts.addOptionGroup(group);
 
-    // Since the "common" options aren't used in the session tool,
+    // Since the "common" options aren't used in the job tool,
     // add these settings here.
     relatedOpts.addOption(OptionBuilder
         .withDescription("Print more information while working")

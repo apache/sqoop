@@ -29,10 +29,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 /**
- * SessionStorage implementation that auto-configures an HSQLDB
- * local-file-based instance to hold sessions.
+ * JobStorage implementation that auto-configures an HSQLDB
+ * local-file-based instance to hold jobs.
  */
-public class AutoHsqldbStorage extends HsqldbSessionStorage {
+public class AutoHsqldbStorage extends HsqldbJobStorage {
 
   public static final Log LOG = LogFactory.getLog(
       AutoHsqldbStorage.class.getName());

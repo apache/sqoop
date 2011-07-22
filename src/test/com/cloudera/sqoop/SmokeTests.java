@@ -32,7 +32,7 @@ import com.cloudera.sqoop.lib.TestLargeObjectLoader;
 import com.cloudera.sqoop.manager.TestHsqldbManager;
 import com.cloudera.sqoop.manager.TestSqlManager;
 import com.cloudera.sqoop.mapreduce.MapreduceTests;
-import com.cloudera.sqoop.metastore.TestSessions;
+import com.cloudera.sqoop.metastore.TestSavedJobs;
 import com.cloudera.sqoop.orm.TestClassWriter;
 import com.cloudera.sqoop.orm.TestParseMethods;
 import com.cloudera.sqoop.util.TestDirectImportUtils;
@@ -77,7 +77,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestDirectImportUtils.class);
     suite.addTestSuite(TestLobFile.class);
     suite.addTestSuite(TestExportUpdate.class);
-    suite.addTestSuite(TestSessions.class);
+    suite.addTestSuite(TestSavedJobs.class);
     suite.addTestSuite(TestNamedFifo.class);
     suite.addTestSuite(TestBooleanParser.class);
     suite.addTest(MapreduceTests.suite());

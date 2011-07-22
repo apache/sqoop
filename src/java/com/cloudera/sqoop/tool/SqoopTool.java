@@ -75,8 +75,8 @@ public abstract class SqoopTool {
         "List available tables in a database");
     registerTool("metastore", MetastoreTool.class,
         "Run a standalone Sqoop metastore");
-    registerTool("session", SessionTool.class,
-        "Work with saved sessions");
+    registerTool("job", JobTool.class,
+        "Work with saved jobs");
     registerTool("version", VersionTool.class,
         "Display version information");
   }

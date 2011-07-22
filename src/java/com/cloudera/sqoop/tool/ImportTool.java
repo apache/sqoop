@@ -45,9 +45,9 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
-import com.cloudera.sqoop.metastore.SessionData;
-import com.cloudera.sqoop.metastore.SessionStorage;
-import com.cloudera.sqoop.metastore.SessionStorageFactory;
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.metastore.JobStorage;
+import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
 import org.apache.hadoop.fs.Path;
@@ -100,7 +100,7 @@ public class ImportTool extends BaseSqoopTool {
   
   /**
    * If this is an incremental import, then we should save the
-   * user's state back to the metastore (if this session was run
+   * user's state back to the metastore (if this job was run
    * from the metastore). Otherwise, log to the user what data
    * they need to supply next time.
    */
@@ -111,22 +111,22 @@ public class ImportTool extends BaseSqoopTool {
     }
 
     Map<String, String> descriptor = options.getStorageDescriptor();
-    String sessionName = options.getSessionName();
+    String jobName = options.getJobName();
 
-    if (null != sessionName && null != descriptor) {
+    if (null != jobName && null != descriptor) {
       // Actually save it back to the metastore.
       LOG.info("Saving incremental import state to the metastore");
-      SessionStorageFactory ssf = new SessionStorageFactory(options.getConf());
-      SessionStorage storage = ssf.getSessionStorage(descriptor);
+      JobStorageFactory ssf = new JobStorageFactory(options.getConf());
+      JobStorage storage = ssf.getJobStorage(descriptor);
       storage.open(descriptor);
       try {
         // Save the 'parent' SqoopOptions; this does not contain the mutations
         // to the SqoopOptions state that occurred over the course of this
         // execution, except for the one we specifically want to memorize:
         // the latest value of the check column.
-        SessionData data = new SessionData(options.getParent(), this);
-        storage.update(sessionName, data);
-        LOG.info("Updated data for session: " + sessionName);
+        JobData data = new JobData(options.getParent(), this);
+        storage.update(jobName, data);
+        LOG.info("Updated data for job: " + jobName);
       } finally {
         storage.close();
       }
@@ -151,7 +151,7 @@ public class ImportTool extends BaseSqoopTool {
       }
       LOG.info("  --check-column " + options.getIncrementalTestColumn());
       LOG.info("  --last-value " + options.getIncrementalLastValue());
-      LOG.info("(Consider saving this with 'sqoop session --create')");
+      LOG.info("(Consider saving this with 'sqoop job --create')");
     }
   }
 

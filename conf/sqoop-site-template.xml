@@ -54,7 +54,7 @@
     <name>sqoop.metastore.client.enable.autoconnect</name>
     <value>false</value>
     <description>If true, Sqoop will connect to a local metastore
-      for session management when no other metastore arguments are
+      for job management when no other metastore arguments are
       provided.
     </description>
   </property>
@@ -70,7 +70,7 @@
     <name>sqoop.metastore.client.autoconnect.url</name>
     <value>jdbc:hsqldb:file:/tmp/sqoop-meta/meta.db;shutdown=true</value>
     <description>The connect string to use when connecting to a
-      session-management metastore. If unspecified, uses ~/.sqoop/.
+      job-management metastore. If unspecified, uses ~/.sqoop/.
       You can specify a different path here.
     </description>
   </property>
@@ -90,7 +90,7 @@
 
   <!--
     For security reasons, by default your database password will not be stored in
-    the Sqoop metastore. When executing a saved session, you will need to
+    the Sqoop metastore. When executing a saved job, you will need to
     reenter the database password. Uncomment this setting to enable saved
     password storage. (INSECURE!)
   -->

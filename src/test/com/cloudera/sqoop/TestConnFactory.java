@@ -22,7 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
 
 import junit.framework.TestCase;
@@ -45,7 +45,7 @@ public class TestConnFactory extends TestCase {
 
     ConnFactory factory = new ConnFactory(conf);
     ConnManager manager = factory.getManager(
-        new SessionData(new SqoopOptions(), new ImportTool()));
+        new JobData(new SqoopOptions(), new ImportTool()));
     assertNotNull("No manager returned", manager);
     assertTrue("Expected a DummyManager", manager instanceof DummyManager);
   }
@@ -57,7 +57,7 @@ public class TestConnFactory extends TestCase {
     ConnFactory factory = new ConnFactory(conf);
     try {
       factory.getManager(
-          new SessionData(new SqoopOptions(), new ImportTool()));
+          new JobData(new SqoopOptions(), new ImportTool()));
       fail("factory.getManager() expected to throw IOException");
     } catch (IOException ioe) {
       // Expected this. Test passes.
@@ -75,7 +75,7 @@ public class TestConnFactory extends TestCase {
 
     ConnFactory factory = new ConnFactory(conf);
     ConnManager manager = factory.getManager(
-        new SessionData(new SqoopOptions(), new ImportTool()));
+        new JobData(new SqoopOptions(), new ImportTool()));
     assertNotNull("No manager returned", manager);
     assertTrue("Expected a DummyManager", manager instanceof DummyManager);
   }
@@ -87,7 +87,7 @@ public class TestConnFactory extends TestCase {
    * configuration.
    */
   public static class AlwaysDummyFactory extends ManagerFactory {
-    public ConnManager accept(SessionData data) {
+    public ConnManager accept(JobData data) {
       // Always return a new DummyManager
       return new DummyManager();
     }
@@ -97,7 +97,7 @@ public class TestConnFactory extends TestCase {
    * ManagerFactory that accepts no configurations.
    */
   public static class EmptyFactory extends ManagerFactory {
-    public ConnManager accept(SessionData data) {
+    public ConnManager accept(JobData data) {
       // Never instantiate a proper ConnManager;
       return null;
     }

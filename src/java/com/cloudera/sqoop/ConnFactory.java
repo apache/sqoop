@@ -38,7 +38,7 @@ import org.apache.hadoop.util.StringUtils;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.DefaultManagerFactory;
 import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
@@ -105,7 +105,7 @@ public class ConnFactory {
    * @return a ConnManager instance for the appropriate database.
    * @throws IOException if it cannot find a ConnManager for this schema.
    */
-  public ConnManager getManager(SessionData data) throws IOException {
+  public ConnManager getManager(JobData data) throws IOException {
     // Try all the available manager factories.
     for (ManagerFactory factory : factories) {
       LOG.debug("Trying ManagerFactory: " + factory.getClass().getName());

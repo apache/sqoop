@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 
 /**
  * Contains instantiation code for all ConnManager implementations
@@ -33,7 +33,7 @@ public final class DefaultManagerFactory extends ManagerFactory {
   public static final Log LOG = LogFactory.getLog(
       DefaultManagerFactory.class.getName());
 
-  public ConnManager accept(SessionData data) {
+  public ConnManager accept(JobData data) {
     SqoopOptions options = data.getSqoopOptions();
     String manualDriver = options.getDriverClassName();
     if (manualDriver != null) {

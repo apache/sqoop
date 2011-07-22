@@ -42,12 +42,12 @@ import org.apache.hadoop.util.StringUtils;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.SessionData;
-import com.cloudera.sqoop.metastore.TestSessions;
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.metastore.TestSavedJobs;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.tool.SessionTool;
+import com.cloudera.sqoop.tool.JobTool;
 
 import junit.framework.TestCase;
 
@@ -71,18 +71,18 @@ public class TestIncrementalImport extends TestCase {
   @Override
   public void setUp() throws Exception {
     // Delete db state between tests.
-    TestSessions.resetSessionSchema();
+    TestSavedJobs.resetJobSchema();
     resetSourceDataSchema();
   }
 
   public static void resetSourceDataSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
     options.setConnectString(SOURCE_DB_URL);
-    TestSessions.resetSchema(options);
+    TestSavedJobs.resetSchema(options);
   }
 
   public static Configuration newConf() {
-    return TestSessions.newConf();
+    return TestSavedJobs.newConf();
   }
 
   /**
@@ -379,65 +379,65 @@ public class TestIncrementalImport extends TestCase {
   }
 
   /**
-   * Create a session with the specified name, where the session performs
-   * an import configured with 'sessionArgs'.
+   * Create a job with the specified name, where the job performs
+   * an import configured with 'jobArgs'.
    */
-  private void createSession(String sessionName, List<String> sessionArgs) {
-    createSession(sessionName, sessionArgs, newConf());
+  private void createJob(String jobName, List<String> jobArgs) {
+    createJob(jobName, jobArgs, newConf());
   }
 
   /**
-   * Create a session with the specified name, where the session performs
-   * an import configured with 'sessionArgs', using the provided configuration
+   * Create a job with the specified name, where the job performs
+   * an import configured with 'jobArgs', using the provided configuration
    * as defaults.
    */
-  private void createSession(String sessionName, List<String> sessionArgs,
+  private void createJob(String jobName, List<String> jobArgs,
       Configuration conf) {
     try {
       SqoopOptions options = new SqoopOptions();
       options.setConf(conf);
-      Sqoop makeSession = new Sqoop(new SessionTool(), conf, options);
+      Sqoop makeJob = new Sqoop(new JobTool(), conf, options);
       
       List<String> args = new ArrayList<String>();
       args.add("--create");
-      args.add(sessionName);
+      args.add(jobName);
       args.add("--");
       args.add("import");
-      args.addAll(sessionArgs);
+      args.addAll(jobArgs);
 
-      int ret = Sqoop.runSqoop(makeSession, args.toArray(new String[0]));
-      assertEquals("Failure during job to create session", 0, ret);
+      int ret = Sqoop.runSqoop(makeJob, args.toArray(new String[0]));
+      assertEquals("Failure to create job", 0, ret);
     } catch (Exception e) {
-      LOG.error("Got exception running Sqoop to create session: "
+      LOG.error("Got exception running Sqoop to create job: "
           + StringUtils.stringifyException(e));
       throw new RuntimeException(e);
     }
   }
 
   /**
-   * Run the specified session.
+   * Run the specified job.
    */
-  private void runSession(String sessionName) {
-    runSession(sessionName, newConf());
+  private void runJob(String jobName) {
+    runJob(jobName, newConf());
   }
 
   /**
-   * Run the specified session.
+   * Run the specified job.
    */
-  private void runSession(String sessionName, Configuration conf) {
+  private void runJob(String jobName, Configuration conf) {
     try {
       SqoopOptions options = new SqoopOptions();
       options.setConf(conf);
-      Sqoop runSession = new Sqoop(new SessionTool(), conf, options);
+      Sqoop runJob = new Sqoop(new JobTool(), conf, options);
       
       List<String> args = new ArrayList<String>();
       args.add("--exec");
-      args.add(sessionName);
+      args.add(jobName);
 
-      int ret = Sqoop.runSqoop(runSession, args.toArray(new String[0]));
-      assertEquals("Failure during job to run session", 0, ret);
+      int ret = Sqoop.runSqoop(runJob, args.toArray(new String[0]));
+      assertEquals("Failure to run job", 0, ret);
     } catch (Exception e) {
-      LOG.error("Got exception running Sqoop to run session: "
+      LOG.error("Got exception running Sqoop to run job: "
           + StringUtils.stringifyException(e));
       throw new RuntimeException(e);
     }
@@ -471,25 +471,25 @@ public class TestIncrementalImport extends TestCase {
     assertDirOfNumbers(TABLE_NAME, 10);
   }
 
-  public void testEmptySessionAppend() throws Exception {
-    // Create a session and run an import on an empty table.
+  public void testEmptyJobAppend() throws Exception {
+    // Create a job and run an import on an empty table.
     // Nothing should happen.
 
-    final String TABLE_NAME = "emptySession";
+    final String TABLE_NAME = "emptyJob";
     createIdTable(TABLE_NAME, 0);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, true);
-    createSession("emptySession", args);
-    runSession("emptySession");
+    createJob("emptyJob", args);
+    runJob("emptyJob");
     assertDirOfNumbers(TABLE_NAME, 0);
 
-    // Running the session a second time should result in
+    // Running the job a second time should result in
     // nothing happening, it's still empty.
-    runSession("emptySession");
+    runJob("emptyJob");
     assertDirOfNumbers(TABLE_NAME, 0);
   }
 
-  public void testEmptyThenFullSessionAppend() throws Exception {
+  public void testEmptyThenFullJobAppend() throws Exception {
     // Create an empty table. Import it; nothing happens.
     // Add some rows. Verify they are appended.
 
@@ -497,22 +497,22 @@ public class TestIncrementalImport extends TestCase {
     createIdTable(TABLE_NAME, 0);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, true);
-    createSession(TABLE_NAME, args);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 0);
 
     // Now add some rows.
     insertIdRows(TABLE_NAME, 0, 10);
 
-    // Running the session a second time should import 10 rows.
-    runSession(TABLE_NAME);
+    // Running the job a second time should import 10 rows.
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Add some more rows.
     insertIdRows(TABLE_NAME, 10, 20);
 
     // Import only those rows.
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
 
@@ -524,15 +524,15 @@ public class TestIncrementalImport extends TestCase {
     createIdTable(TABLE_NAME, 10);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, true);
-    createSession(TABLE_NAME, args);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Add some more rows.
     insertIdRows(TABLE_NAME, 10, 20);
 
     // Import only those rows.
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
 
@@ -584,26 +584,26 @@ public class TestIncrementalImport extends TestCase {
     assertDirOfNumbers(TABLE_NAME, 0);
   }
 
-  public void testEmptySessionLastMod() throws Exception {
-    // Create a session and run an import on an empty table.
+  public void testEmptyJobLastMod() throws Exception {
+    // Create a job and run an import on an empty table.
     // Nothing should happen.
 
-    final String TABLE_NAME = "emptySessionLastMod";
+    final String TABLE_NAME = "emptyJobLastMod";
     createTimestampTable(TABLE_NAME, 0, null);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
     args.add("--append");
-    createSession("emptySessionLastMod", args);
-    runSession("emptySessionLastMod");
+    createJob("emptyJobLastMod", args);
+    runJob("emptyJobLastMod");
     assertDirOfNumbers(TABLE_NAME, 0);
 
-    // Running the session a second time should result in
+    // Running the job a second time should result in
     // nothing happening, it's still empty.
-    runSession("emptySessionLastMod");
+    runJob("emptyJobLastMod");
     assertDirOfNumbers(TABLE_NAME, 0);
   }
 
-  public void testEmptyThenFullSessionLastMod() throws Exception {
+  public void testEmptyThenFullJobLastMod() throws Exception {
     // Create an empty table. Import it; nothing happens.
     // Add some rows. Verify they are appended.
 
@@ -612,8 +612,8 @@ public class TestIncrementalImport extends TestCase {
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
     args.add("--append");
-    createSession(TABLE_NAME, args);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 0);
 
     long importWasBefore = System.currentTimeMillis();
@@ -630,8 +630,8 @@ public class TestIncrementalImport extends TestCase {
 
     insertIdTimestampRows(TABLE_NAME, 0, 10, new Timestamp(rowsAddedTime));
 
-    // Running the session a second time should import 10 rows.
-    runSession(TABLE_NAME);
+    // Running the job a second time should import 10 rows.
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Add some more rows.
@@ -643,7 +643,7 @@ public class TestIncrementalImport extends TestCase {
     insertIdTimestampRows(TABLE_NAME, 10, 20, new Timestamp(rowsAddedTime));
 
     // Import only those rows.
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
 
@@ -657,8 +657,8 @@ public class TestIncrementalImport extends TestCase {
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
     args.add("--append");
-    createSession(TABLE_NAME, args);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Add some more rows.
@@ -670,7 +670,7 @@ public class TestIncrementalImport extends TestCase {
     insertIdTimestampRows(TABLE_NAME, 10, 20, new Timestamp(rowsAddedTime));
 
     // Import only those rows.
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
 
@@ -684,8 +684,8 @@ public class TestIncrementalImport extends TestCase {
     createTimestampTable(TABLE_NAME, 10, thePast);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
-    createSession(TABLE_NAME, args);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Modify a row.
@@ -713,7 +713,7 @@ public class TestIncrementalImport extends TestCase {
 
     // Import only the new row.
     clearDir(TABLE_NAME);
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertSpecificNumber(TABLE_NAME, 4000);
   }
 
@@ -723,7 +723,7 @@ public class TestIncrementalImport extends TestCase {
    */
   public static class InstrumentHsqldbManagerFactory extends ManagerFactory {
     @Override
-    public ConnManager accept(SessionData data) {
+    public ConnManager accept(JobData data) {
       LOG.info("Using instrumented manager");
       return new InstrumentHsqldbManager(data.getSqoopOptions());
     }
@@ -771,8 +771,8 @@ public class TestIncrementalImport extends TestCase {
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
     args.add("--append");
-    createSession(TABLE_NAME, args, conf);
-    runSession(TABLE_NAME);
+    createJob(TABLE_NAME, args, conf);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);
 
     // Add some more rows with the timestamp equal to the job run timestamp.
@@ -784,7 +784,7 @@ public class TestIncrementalImport extends TestCase {
     InstrumentHsqldbManager.setCurrentDbTimestamp(secondJobTime);
 
     // Import only those rows.
-    runSession(TABLE_NAME);
+    runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
 }

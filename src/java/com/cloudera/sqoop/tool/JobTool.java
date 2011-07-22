@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -44,35 +43,34 @@ import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
-
-import com.cloudera.sqoop.metastore.hsqldb.HsqldbSessionStorage;
-import com.cloudera.sqoop.metastore.SessionData;
-import com.cloudera.sqoop.metastore.SessionStorage;
-import com.cloudera.sqoop.metastore.SessionStorageFactory;
+import com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage;
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.metastore.JobStorage;
+import com.cloudera.sqoop.metastore.JobStorageFactory;
 
 /**
- * Tool that creates and executes saved sessions.
+ * Tool that creates and executes saved jobs.
  */
-public class SessionTool extends BaseSqoopTool {
+public class JobTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
-      SessionTool.class.getName());
+      JobTool.class.getName());
 
-  private enum SessionOp {
-    SessionCreate,
-    SessionDelete,
-    SessionExecute,
-    SessionList,
-    SessionShow,
+  private enum JobOp {
+    JobCreate,
+    JobDelete,
+    JobExecute,
+    JobList,
+    JobShow,
   };
 
-  private Map<String, String> sessionDescriptor;
-  private String sessionName;
-  private SessionOp operation;
-  private SessionStorage storage;
+  private Map<String, String> storageDescriptor;
+  private String jobName;
+  private JobOp operation;
+  private JobStorage storage;
 
-  public SessionTool() {
-    super("session");
+  public JobTool() {
+    super("job");
   }
 
   /**
@@ -131,7 +129,7 @@ public class SessionTool extends BaseSqoopTool {
       childTool.appendArgs(extraChildArgv);
       childTool.validateOptions(childOptions);
     } catch (ParseException pe) {
-      LOG.error("Error parsing arguments to the session-specific tool.");
+      LOG.error("Error parsing arguments to the job-specific tool.");
       LOG.error("See 'sqoop help <tool>' for usage.");
       return 1;
     } catch (SqoopOptions.InvalidOptionsException e) {
@@ -142,67 +140,67 @@ public class SessionTool extends BaseSqoopTool {
     return 0; // Success.
   }
 
-  private int createSession(SqoopOptions options) throws IOException {
+  private int createJob(SqoopOptions options) throws IOException {
     // In our extraArguments array, we should have a '--' followed by
     // a tool name, and any tool-specific arguments.
     // Create an instance of the named tool and then configure it to
-    // get a SqoopOptions out which we will serialize into a session.
+    // get a SqoopOptions out which we will serialize into a job.
     int dashPos = getDashPosition(extraArguments);
     int toolArgPos = dashPos + 1;
     if (null == extraArguments || toolArgPos < 0
         || toolArgPos >= extraArguments.length) {
-      LOG.error("No tool specified; cannot create a session.");
-      LOG.error("Use: sqoop create-session [session-args] "
+      LOG.error("No tool specified; cannot create a job.");
+      LOG.error("Use: sqoop job --create <job-name> "
           + "-- <tool-name> [tool-args]");
       return 1;
     }
 
-    String sessionToolName = extraArguments[toolArgPos];
-    SqoopTool sessionTool = SqoopTool.getTool(sessionToolName);
-    if (null == sessionTool) {
-      LOG.error("No such tool available: " + sessionToolName);
+    String jobToolName = extraArguments[toolArgPos];
+    SqoopTool jobTool = SqoopTool.getTool(jobToolName);
+    if (null == jobTool) {
+      LOG.error("No such tool available: " + jobToolName);
       return 1;
     }
 
     // Create a SqoopOptions and Configuration based on the current one,
-    // but deep-copied. This will be populated within the session.
-    SqoopOptions sessionOptions = new SqoopOptions();
-    sessionOptions.setConf(new Configuration(options.getConf()));
+    // but deep-copied. This will be populated within the job.
+    SqoopOptions jobOptions = new SqoopOptions();
+    jobOptions.setConf(new Configuration(options.getConf()));
 
     // Get the arguments to feed to the child tool.
     String [] childArgs = Arrays.copyOfRange(extraArguments, toolArgPos + 1,
         extraArguments.length);
 
-    int confRet = configureChildTool(sessionOptions, sessionTool, childArgs);
+    int confRet = configureChildTool(jobOptions, jobTool, childArgs);
     if (0 != confRet) {
       // Error.
       return confRet;
     }
 
-    // Now that the tool is fully configured, materialize the session.
-    SessionData sessionData = new SessionData(sessionOptions, sessionTool);
-    this.storage.create(sessionName, sessionData);
+    // Now that the tool is fully configured, materialize the job.
+    JobData jobData = new JobData(jobOptions, jobTool);
+    this.storage.create(jobName, jobData);
     return 0; // Success.
   }
 
-  private int listSessions(SqoopOptions opts) throws IOException {
-    List<String> sessionNames = storage.list();
-    System.out.println("Available sessions:");
-    for (String name : sessionNames) {
+  private int listJobs(SqoopOptions opts) throws IOException {
+    List<String> jobNames = storage.list();
+    System.out.println("Available jobs:");
+    for (String name : jobNames) {
       System.out.println("  " + name);
     }
     return 0;
   }
 
-  private int deleteSession(SqoopOptions opts) throws IOException {
-    this.storage.delete(sessionName);
+  private int deleteJob(SqoopOptions opts) throws IOException {
+    this.storage.delete(jobName);
     return 0;
   }
 
-  private int execSession(SqoopOptions opts) throws IOException {
-    SessionData data = this.storage.read(sessionName);
+  private int execJob(SqoopOptions opts) throws IOException {
+    JobData data = this.storage.read(jobName);
     if (null == data) {
-      LOG.error("No such session: " + sessionName);
+      LOG.error("No such job: " + jobName);
       return 1;
     }
 
@@ -233,17 +231,17 @@ public class SessionTool extends BaseSqoopTool {
     return childTool.run(clonedOpts);
   }
 
-  private int showSession(SqoopOptions opts) throws IOException {
-    SessionData data = this.storage.read(sessionName);
+  private int showJob(SqoopOptions opts) throws IOException {
+    JobData data = this.storage.read(jobName);
     if (null == data) {
-      LOG.error("No such session: " + sessionName);
+      LOG.error("No such job: " + jobName);
       return 1;
     }
 
     SqoopOptions childOpts = data.getSqoopOptions();
     SqoopTool childTool = data.getSqoopTool();
 
-    System.out.println("Session: " + sessionName);
+    System.out.println("Job: " + jobName);
     System.out.println("Tool: " + childTool.getToolName());
 
     System.out.println("Options:");
@@ -263,39 +261,39 @@ public class SessionTool extends BaseSqoopTool {
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
-    // Get a SessionStorage instance to use to materialize this session.
-    SessionStorageFactory ssf = new SessionStorageFactory(options.getConf());
-    this.storage = ssf.getSessionStorage(sessionDescriptor);
+    // Get a JobStorage instance to use to materialize this job.
+    JobStorageFactory ssf = new JobStorageFactory(options.getConf());
+    this.storage = ssf.getJobStorage(storageDescriptor);
     if (null == this.storage) {
-      LOG.error("There is no SessionStorage implementation available");
-      LOG.error("that can read your specified session descriptor.");
-      LOG.error("Don't know where to save this session info! You may");
+      LOG.error("There is no JobStorage implementation available");
+      LOG.error("that can read your specified storage descriptor.");
+      LOG.error("Don't know where to save this job info! You may");
       LOG.error("need to specify the connect string with --meta-connect.");
       return 1;
     }
 
     try {
       // Open the storage layer.
-      this.storage.open(this.sessionDescriptor);
+      this.storage.open(this.storageDescriptor);
 
       // And now determine what operation to perform with it.
       switch (operation) {
-      case SessionCreate:
-        return createSession(options);
-      case SessionDelete:
-        return deleteSession(options);
-      case SessionExecute:
-        return execSession(options);
-      case SessionList:
-        return listSessions(options);
-      case SessionShow:
-        return showSession(options);
+      case JobCreate:
+        return createJob(options);
+      case JobDelete:
+        return deleteJob(options);
+      case JobExecute:
+        return execJob(options);
+      case JobList:
+        return listJobs(options);
+      case JobShow:
+        return showJob(options);
       default:
-        LOG.error("Undefined session operation: " + operation);
+        LOG.error("Undefined job operation: " + operation);
         return 1;
       }
     } catch (IOException ioe) {
-      LOG.error("I/O error performing session operation: "
+      LOG.error("I/O error performing job operation: "
           + StringUtils.stringifyException(ioe));
       return 1;
     } finally {
@@ -303,7 +301,7 @@ public class SessionTool extends BaseSqoopTool {
         try {
           storage.close();
         } catch (IOException ioe) {
-          LOG.warn("IOException closing SessionStorage: "
+          LOG.warn("IOException closing JobStorage: "
               + StringUtils.stringifyException(ioe));
         }
       }
@@ -313,7 +311,7 @@ public class SessionTool extends BaseSqoopTool {
   @Override
   /** Configure the command-line arguments we expect to receive */
   public void configureOptions(ToolOptions toolOptions) {
-    toolOptions.addUniqueOptions(getSessionOptions());
+    toolOptions.addUniqueOptions(getJobOptions());
   }
 
   @Override
@@ -336,29 +334,29 @@ public class SessionTool extends BaseSqoopTool {
       throw new InvalidOptionsException("");
     }
 
-    this.sessionDescriptor = new TreeMap<String, String>();
+    this.storageDescriptor = new TreeMap<String, String>();
 
-    if (in.hasOption(SESSION_METASTORE_ARG)) {
-      this.sessionDescriptor.put(HsqldbSessionStorage.META_CONNECT_KEY,
-          in.getOptionValue(SESSION_METASTORE_ARG));
+    if (in.hasOption(STORAGE_METASTORE_ARG)) {
+      this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY,
+          in.getOptionValue(STORAGE_METASTORE_ARG));
     }
 
     // These are generated via an option group; exactly one
     // of this exhaustive list will always be selected.
-    if (in.hasOption(SESSION_CMD_CREATE_ARG)) {
-      this.operation = SessionOp.SessionCreate;
-      this.sessionName = in.getOptionValue(SESSION_CMD_CREATE_ARG);
-    } else if (in.hasOption(SESSION_CMD_DELETE_ARG)) {
-      this.operation = SessionOp.SessionDelete;
-      this.sessionName = in.getOptionValue(SESSION_CMD_DELETE_ARG);
-    } else if (in.hasOption(SESSION_CMD_EXEC_ARG)) {
-      this.operation = SessionOp.SessionExecute;
-      this.sessionName = in.getOptionValue(SESSION_CMD_EXEC_ARG);
-    } else if (in.hasOption(SESSION_CMD_LIST_ARG)) {
-      this.operation = SessionOp.SessionList;
-    } else if (in.hasOption(SESSION_CMD_SHOW_ARG)) {
-      this.operation = SessionOp.SessionShow;
-      this.sessionName = in.getOptionValue(SESSION_CMD_SHOW_ARG);
+    if (in.hasOption(JOB_CMD_CREATE_ARG)) {
+      this.operation = JobOp.JobCreate;
+      this.jobName = in.getOptionValue(JOB_CMD_CREATE_ARG);
+    } else if (in.hasOption(JOB_CMD_DELETE_ARG)) {
+      this.operation = JobOp.JobDelete;
+      this.jobName = in.getOptionValue(JOB_CMD_DELETE_ARG);
+    } else if (in.hasOption(JOB_CMD_EXEC_ARG)) {
+      this.operation = JobOp.JobExecute;
+      this.jobName = in.getOptionValue(JOB_CMD_EXEC_ARG);
+    } else if (in.hasOption(JOB_CMD_LIST_ARG)) {
+      this.operation = JobOp.JobList;
+    } else if (in.hasOption(JOB_CMD_SHOW_ARG)) {
+      this.operation = JobOp.JobShow;
+      this.jobName = in.getOptionValue(JOB_CMD_SHOW_ARG);
     }
   }
 
@@ -368,12 +366,12 @@ public class SessionTool extends BaseSqoopTool {
       throws InvalidOptionsException {
 
     if (null == operation
-        || (null == this.sessionName && operation != SessionOp.SessionList)) {
-      throw new InvalidOptionsException("No session operation specified"
+        || (null == this.jobName && operation != JobOp.JobList)) {
+      throw new InvalidOptionsException("No job operation specified"
           + HELP_STR);
     }
 
-    if (operation == SessionOp.SessionCreate) {
+    if (operation == JobOp.JobCreate) {
       // Check that we have a '--' followed by at least a tool name.
       if (extraArguments == null || extraArguments.length == 0) {
         throw new InvalidOptionsException(
@@ -392,7 +390,7 @@ public class SessionTool extends BaseSqoopTool {
   /** {@inheritDoc} */
   public void printHelp(ToolOptions opts) {
     System.out.println("usage: sqoop " + getToolName()
-        + " [GENERIC-ARGS] [SESSION-ARGS] [-- [<tool-name>] [TOOL-ARGS]]");
+        + " [GENERIC-ARGS] [JOB-ARGS] [-- [<tool-name>] [TOOL-ARGS]]");
     System.out.println("");
     
     opts.printHelp();

@@ -26,21 +26,21 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configured;
 
 /**
- * API that defines how sessions are saved, restored, and manipulated.
+ * API that defines how jobs are saved, restored, and manipulated.
  *
  * <p>
- * SessionStorage instances may be created and then not used; the
- * SessionStorage factory may create additional SessionStorage instances
+ * JobStorage instances may be created and then not used; the
+ * JobStorage factory may create additional JobStorage instances
  * that return false from accept() and then discard them. The close()
- * method will only be triggered for a SessionStorage if the connect()
+ * method will only be triggered for a JobStorage if the connect()
  * method is called. Connection should not be triggered by a call to
  * accept().</p>
  */
-public abstract class SessionStorage extends Configured implements Closeable {
+public abstract class JobStorage extends Configured implements Closeable {
 
   /**
-   * Returns true if the SessionStorage system can use the metadata in
-   * the descriptor to connect to an underlying session resource.
+   * Returns true if the JobStorage system can use the metadata in
+   * the descriptor to connect to an underlying storage resource.
    */
   public abstract boolean canAccept(Map<String, String> descriptor);
 
@@ -53,41 +53,40 @@ public abstract class SessionStorage extends Configured implements Closeable {
       throws IOException;
 
   /**
-   * Given a session name, reconstitute a SessionData that contains all
-   * configuration information required for the session. Returns null if the
-   * session name does not match an available session.
+   * Given a job name, reconstitute a JobData that contains all
+   * configuration information required for the job. Returns null if the
+   * job name does not match an available job.
    */
-  public abstract SessionData read(String sessionName)
+  public abstract JobData read(String jobName)
       throws IOException;
 
   /**
-   * Forget about a saved session.
+   * Forget about a saved job.
    */
-  public abstract void delete(String sessionName) throws IOException;
+  public abstract void delete(String jobName) throws IOException;
 
   /**
-   * Given a session name and the data describing a configured
-   * session, record the session information to the storage medium.
+   * Given a job name and the data describing a configured job, record the job
+   * information to the storage medium.
    */
-  public abstract void create(String sessionName, SessionData data)
+  public abstract void create(String jobName, JobData data)
       throws IOException;
 
   /**
-   * Given a session descriptor and a configured session
-   * update the underlying resource to match the current session
-   * configuration.
+   * Given a job name and configured job data, update the underlying resource
+   * to match the current job configuration.
    */
-  public abstract void update(String sessionName, SessionData data)
+  public abstract void update(String jobName, JobData data)
       throws IOException;
   
   /**
-   * Close any resources opened by the SessionStorage system.
+   * Close any resources opened by the JobStorage system.
    */
   public void close() throws IOException {
   }
 
   /**
-   * Enumerate all sessions held in the connected resource.
+   * Enumerate all jobs held in the connected resource.
    */
   public abstract List<String> list() throws IOException;
 }

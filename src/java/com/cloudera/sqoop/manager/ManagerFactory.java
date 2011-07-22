@@ -19,7 +19,7 @@
 package com.cloudera.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 
 /**
  * Interface for factory classes for ConnManager implementations.
@@ -30,23 +30,23 @@ import com.cloudera.sqoop.metastore.SessionData;
  */
 public abstract class ManagerFactory {
   @Deprecated
-  /** Do not use accept(SqoopOptions). Use accept(SessionData) instead. */
+  /** Do not use accept(SqoopOptions). Use accept(JobData) instead. */
   public ConnManager accept(SqoopOptions options) {
     throw new RuntimeException(
-        "Deprecated method; override ManagerFactory.accept(SessionData)");
+        "Deprecated method; override ManagerFactory.accept(JobData)");
   }
 
   /**
    * Instantiate a ConnManager that can fulfill the database connection
-   * requirements of the task specified in the SessionData.
-   * @param sessionData the user-provided arguments that configure this
+   * requirements of the task specified in the JobData.
+   * @param jobData the user-provided arguments that configure this
    * Sqoop job.
    * @return a ConnManager that can connect to the specified database
    * and perform the operations required, or null if this factory cannot
    * find a suitable ConnManager implementation.
    */
-  public ConnManager accept(SessionData sessionData) {
-    return accept(sessionData.getSqoopOptions());
+  public ConnManager accept(JobData jobData) {
+    return accept(jobData.getSqoopOptions());
   }
 }
 

@@ -39,20 +39,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.SqoopOptions;
-
-import com.cloudera.sqoop.metastore.SessionData;
-import com.cloudera.sqoop.metastore.SessionStorage;
-
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
- * SessionStorage implementation that uses an HSQLDB-backed database to
- * hold session information.
+ * JobStorage implementation that uses an HSQLDB-backed database to
+ * hold job information.
  */
-public class HsqldbSessionStorage extends SessionStorage {
+public class HsqldbJobStorage extends JobStorage {
 
   public static final Log LOG = LogFactory.getLog(
-      HsqldbSessionStorage.class.getName());
+      HsqldbJobStorage.class.getName());
   
   /** descriptor key identifying the connect string for the metastore. */
   public static final String META_CONNECT_KEY = "metastore.connect.string"; 
@@ -77,20 +75,20 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   /** root metadata table key used to define the current schema version. */
   private static final String STORAGE_VERSION_KEY =
-      "sqoop.hsqldb.session.storage.version";
+      "sqoop.hsqldb.job.storage.version";
 
   /** The current version number for the schema edition. */
   private static final int CUR_STORAGE_VERSION = 0;
 
-  /** root metadata table key used to define the session table name. */
+  /** root metadata table key used to define the job table name. */
   private static final String SESSION_TABLE_KEY =
-      "sqoop.hsqldb.session.info.table";
+      "sqoop.hsqldb.job.info.table";
 
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
       "SQOOP_SESSIONS";
 
-  /** Per-session key with propClass 'schema' that defines the set of
+  /** Per-job key with propClass 'schema' that defines the set of
    * properties valid to be defined for propClass 'SqoopOptions'. */
   private static final String PROPERTY_SET_KEY =
       "sqoop.property.set.id";
@@ -111,7 +109,7 @@ public class HsqldbSessionStorage extends SessionStorage {
   private static final String PROPERTY_CLASS_CONFIG = "config";
 
   /**
-   * Per-session key with propClass 'schema' that specifies the SqoopTool
+   * Per-job key with propClass 'schema' that specifies the SqoopTool
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
@@ -128,8 +126,8 @@ public class HsqldbSessionStorage extends SessionStorage {
   }
 
   // After connection to the database and initialization of the
-  // schema, this holds the name of the session table.
-  private String sessionTableName;
+  // schema, this holds the name of the job table.
+  private String jobTableName;
 
   protected void setMetastoreConnectStr(String connectStr) {
     this.metastoreConnectStr = connectStr;
@@ -252,23 +250,23 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   @Override
   /** {@inheritDoc} */
-  public SessionData read(String sessionName) throws IOException {
+  public JobData read(String jobName) throws IOException {
     try {
-      if (!sessionExists(sessionName)) {
-        LOG.error("Cannot restore session: " + sessionName);
-        LOG.error("(No such session)");
-        throw new IOException("Cannot restore missing session " + sessionName);
+      if (!jobExists(jobName)) {
+        LOG.error("Cannot restore job: " + jobName);
+        LOG.error("(No such job)");
+        throw new IOException("Cannot restore missing job " + jobName);
       }
 
-      LOG.debug("Restoring session: " + sessionName);
-      Properties schemaProps = getV0Properties(sessionName,
+      LOG.debug("Restoring job: " + jobName);
+      Properties schemaProps = getV0Properties(jobName,
           PROPERTY_CLASS_SCHEMA);
-      Properties sqoopOptProps = getV0Properties(sessionName,
+      Properties sqoopOptProps = getV0Properties(jobName,
           PROPERTY_CLASS_SQOOP_OPTIONS);
-      Properties configProps = getV0Properties(sessionName,
+      Properties configProps = getV0Properties(jobName,
           PROPERTY_CLASS_CONFIG);
 
-      // Check that we're not using a saved session from a previous
+      // Check that we're not using a saved job from a previous
       // version whose functionality has been deprecated.
       String thisPropSetId = schemaProps.getProperty(PROPERTY_SET_KEY);
       LOG.debug("System property set: " + CUR_PROPERTY_SET_ID);
@@ -289,7 +287,7 @@ public class HsqldbSessionStorage extends SessionStorage {
 
       SqoopTool tool = SqoopTool.getTool(toolName);
       if (null == tool) {
-        throw new IOException("Error in session metadata: invalid tool "
+        throw new IOException("Error in job metadata: invalid tool "
             + toolName);
       }
 
@@ -302,26 +300,26 @@ public class HsqldbSessionStorage extends SessionStorage {
       opts.setConf(conf);
       opts.loadProperties(sqoopOptProps);
 
-      // Set the session connection information for this session.
-      opts.setSessionName(sessionName);
+      // Set the job connection information for this job.
+      opts.setJobName(jobName);
       opts.setStorageDescriptor(connectedDescriptor);
 
-      return new SessionData(opts, tool);
+      return new JobData(opts, tool);
     } catch (SQLException sqlE) {
       throw new IOException("Error communicating with database", sqlE);
     }
   }
 
-  private boolean sessionExists(String sessionName) throws SQLException {
+  private boolean jobExists(String jobName) throws SQLException {
     PreparedStatement s = connection.prepareStatement(
-        "SELECT COUNT(session_name) FROM " + this.sessionTableName
-        + " WHERE session_name = ? GROUP BY session_name");
+        "SELECT COUNT(job_name) FROM " + this.jobTableName
+        + " WHERE job_name = ? GROUP BY job_name");
     ResultSet rs = null;
     try {
-      s.setString(1, sessionName);
+      s.setString(1, jobName);
       rs = s.executeQuery();
       if (rs.next()) {
-        return true; // We got a result, meaning the session exists.
+        return true; // We got a result, meaning the job exists.
       }
     } finally {
       if (null != rs) {
@@ -340,16 +338,16 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   @Override
   /** {@inheritDoc} */
-  public void delete(String sessionName) throws IOException {
+  public void delete(String jobName) throws IOException {
     try {
-      if (!sessionExists(sessionName)) {
-        LOG.error("No such session: " + sessionName);
+      if (!jobExists(jobName)) {
+        LOG.error("No such job: " + jobName);
       } else {
-        LOG.debug("Deleting session: " + sessionName);
+        LOG.debug("Deleting job: " + jobName);
         PreparedStatement s = connection.prepareStatement("DELETE FROM "
-            + this.sessionTableName + " WHERE session_name = ?");
+            + this.jobTableName + " WHERE job_name = ?");
         try {
-          s.setString(1, sessionName);
+          s.setString(1, jobName);
           s.executeUpdate();
         } finally {
           s.close();
@@ -368,40 +366,40 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   @Override
   /** {@inheritDoc} */
-  public void create(String sessionName, SessionData data)
+  public void create(String jobName, JobData data)
       throws IOException {
     try {
-      if (sessionExists(sessionName)) {
-        LOG.error("Cannot create session " + sessionName
+      if (jobExists(jobName)) {
+        LOG.error("Cannot create job " + jobName
             + ": it already exists");
-        throw new IOException("Session " + sessionName + " already exists");
+        throw new IOException("Job " + jobName + " already exists");
       }
     } catch (SQLException sqlE) {
       throw new IOException("Error communicating with database", sqlE);
     }
 
-    createInternal(sessionName, data);
+    createInternal(jobName, data);
   }
 
   /**
-   * Actually insert/update the resources for this session.
+   * Actually insert/update the resources for this job.
    */
-  private void createInternal(String sessionName, SessionData data)
+  private void createInternal(String jobName, JobData data)
       throws IOException {
     try {
-      LOG.debug("Creating session: " + sessionName);
+      LOG.debug("Creating job: " + jobName);
 
       // Save the name of the Sqoop tool.
-      setV0Property(sessionName, PROPERTY_CLASS_SCHEMA, SQOOP_TOOL_KEY,
+      setV0Property(jobName, PROPERTY_CLASS_SCHEMA, SQOOP_TOOL_KEY,
           data.getSqoopTool().getToolName());
 
       // Save the property set id.
-      setV0Property(sessionName, PROPERTY_CLASS_SCHEMA, PROPERTY_SET_KEY,
+      setV0Property(jobName, PROPERTY_CLASS_SCHEMA, PROPERTY_SET_KEY,
           CUR_PROPERTY_SET_ID);
 
       // Save all properties of the SqoopOptions.
       Properties props = data.getSqoopOptions().writeProperties();
-      setV0Properties(sessionName, PROPERTY_CLASS_SQOOP_OPTIONS, props);
+      setV0Properties(jobName, PROPERTY_CLASS_SQOOP_OPTIONS, props);
 
       // And save all unique properties of the configuration.
       Configuration saveConf = data.getSqoopOptions().getConf();
@@ -416,7 +414,7 @@ public class HsqldbSessionStorage extends SessionStorage {
         }
 
         LOG.debug("Saving " + key + " => " + rawVal + " / " + baseVal);
-        setV0Property(sessionName, PROPERTY_CLASS_CONFIG, key, rawVal);
+        setV0Property(jobName, PROPERTY_CLASS_CONFIG, key, rawVal);
       }
 
       connection.commit();
@@ -433,12 +431,12 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   @Override
   /** {@inheritDoc} */
-  public void update(String sessionName, SessionData data)
+  public void update(String jobName, JobData data)
       throws IOException {
     try {
-      if (!sessionExists(sessionName)) {
-        LOG.error("Cannot update session " + sessionName + ": not found");
-        throw new IOException("Session " + sessionName + " does not exist");
+      if (!jobExists(jobName)) {
+        LOG.error("Cannot update job " + jobName + ": not found");
+        throw new IOException("Job " + jobName + " does not exist");
       }
     } catch (SQLException sqlE) {
       throw new IOException("Error communicating with database", sqlE);
@@ -446,7 +444,7 @@ public class HsqldbSessionStorage extends SessionStorage {
 
     // Since we set properties with update-or-insert, this is the same
     // as create on this system.
-    createInternal(sessionName, data);
+    createInternal(jobName, data);
   }
 
   @Override
@@ -455,15 +453,15 @@ public class HsqldbSessionStorage extends SessionStorage {
     ResultSet rs = null;
     try {
       PreparedStatement s = connection.prepareStatement(
-          "SELECT DISTINCT session_name FROM " + this.sessionTableName);
+          "SELECT DISTINCT job_name FROM " + this.jobTableName);
       try {
         rs = s.executeQuery();
-        ArrayList<String> sessions = new ArrayList<String>();
+        ArrayList<String> jobs = new ArrayList<String>();
         while (rs.next()) {
-          sessions.add(rs.getString(1));
+          jobs.add(rs.getString(1));
         }
 
-        return sessions;
+        return jobs;
       } finally {
         if (null != rs) {
           try {
@@ -626,9 +624,9 @@ public class HsqldbSessionStorage extends SessionStorage {
   }
 
   /**
-   * Create the sessions table in the V0 schema.
+   * Create the jobs table in the V0 schema.
    */
-  private void createSessionTable() throws SQLException {
+  private void createJobTable() throws SQLException {
     String curTableName = DEFAULT_SESSION_TABLE_NAME;
     int tableNum = -1;
     while (true) {
@@ -642,16 +640,16 @@ public class HsqldbSessionStorage extends SessionStorage {
 
     // curTableName contains a table name that does not exist.
     // Create this table.
-    LOG.debug("Creating session storage table: " + curTableName);
+    LOG.debug("Creating job storage table: " + curTableName);
     Statement s = connection.createStatement();
     try {
       s.executeUpdate("CREATE TABLE " + curTableName + " ("
-          + "session_name VARCHAR(64) NOT NULL, "
+          + "job_name VARCHAR(64) NOT NULL, "
           + "propname VARCHAR(128) NOT NULL, "
           + "propval VARCHAR(1024), "
           + "propclass VARCHAR(32) NOT NULL, "
           + "CONSTRAINT " + curTableName + "_unq UNIQUE "
-          + "(session_name, propname, propclass))");
+          + "(job_name, propname, propclass))");
 
       // Then set a property in the root table pointing to it.
       setRootProperty(SESSION_TABLE_KEY, 0, curTableName);
@@ -660,7 +658,7 @@ public class HsqldbSessionStorage extends SessionStorage {
       s.close();
     }
 
-    this.sessionTableName = curTableName;
+    this.jobTableName = curTableName;
   }
 
   /**
@@ -669,42 +667,42 @@ public class HsqldbSessionStorage extends SessionStorage {
    * if it does not already exist.
    */
   private void initV0Schema() throws SQLException {
-    this.sessionTableName = getRootProperty(SESSION_TABLE_KEY, 0);
-    if (null == this.sessionTableName) {
-      createSessionTable();
+    this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
+    if (null == this.jobTableName) {
+      createJobTable();
     }
-    if (!tableExists(this.sessionTableName)) {
-      LOG.debug("Could not find session table: " + sessionTableName);
-      createSessionTable();
+    if (!tableExists(this.jobTableName)) {
+      LOG.debug("Could not find job table: " + jobTableName);
+      createJobTable();
     }
   }
 
   /**
-   * INSERT or UPDATE a single (session, propname, class) to point
+   * INSERT or UPDATE a single (job, propname, class) to point
    * to the specified property value.
    */
-  private void setV0Property(String sessionName, String propClass,
+  private void setV0Property(String jobName, String propClass,
       String propName, String propVal) throws SQLException {
-    LOG.debug("Session: " + sessionName + "; Setting property "
+    LOG.debug("Job: " + jobName + "; Setting property "
         + propName + " with class " + propClass + " => " + propVal);
 
     PreparedStatement s = null;
     try {
-      String curValue = getV0Property(sessionName, propClass, propName);
+      String curValue = getV0Property(jobName, propClass, propName);
       if (null == curValue) {
         // Property is not yet set.
-        s = connection.prepareStatement("INSERT INTO " + this.sessionTableName
-            + " (propval, session_name, propclass, propname) "
+        s = connection.prepareStatement("INSERT INTO " + this.jobTableName
+            + " (propval, job_name, propclass, propname) "
             + "VALUES (?, ?, ?, ?)");
       } else {
         // Overwrite existing property.
-        s = connection.prepareStatement("UPDATE " + this.sessionTableName
-            + " SET propval = ? WHERE session_name = ? AND propclass = ? "
+        s = connection.prepareStatement("UPDATE " + this.jobTableName
+            + " SET propval = ? WHERE job_name = ? AND propclass = ? "
             + "AND propname = ?");
       }
 
       s.setString(1, propVal);
-      s.setString(2, sessionName);
+      s.setString(2, jobName);
       s.setString(3, propClass);
       s.setString(4, propName);
 
@@ -720,18 +718,18 @@ public class HsqldbSessionStorage extends SessionStorage {
    * Return a string containing the value of a specified property,
    * or null if it is not set.
    */
-  private String getV0Property(String sessionName, String propClass,
+  private String getV0Property(String jobName, String propClass,
       String propertyName) throws SQLException {
-    LOG.debug("Session: " + sessionName + "; Getting property "
+    LOG.debug("Job: " + jobName + "; Getting property "
         + propertyName + " with class " + propClass);
 
     ResultSet rs = null;
     PreparedStatement s = connection.prepareStatement(
-        "SELECT propval FROM " + this.sessionTableName
-        + " WHERE session_name = ? AND propclass = ? AND propname = ?");
+        "SELECT propval FROM " + this.jobTableName
+        + " WHERE job_name = ? AND propclass = ? AND propname = ?");
 
     try {
-      s.setString(1, sessionName);
+      s.setString(1, jobName);
       s.setString(2, propClass);
       s.setString(3, propertyName);
       rs = s.executeQuery();
@@ -759,19 +757,19 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   /**
    * Get a java.util.Properties containing all propName -&gt; propVal
-   * bindings for a given (sessionName, propClass).
+   * bindings for a given (jobName, propClass).
    */
-  private Properties getV0Properties(String sessionName, String propClass)
+  private Properties getV0Properties(String jobName, String propClass)
       throws SQLException {
-    LOG.debug("Session: " + sessionName
+    LOG.debug("Job: " + jobName
         + "; Getting properties with class " + propClass);
 
     ResultSet rs = null;
     PreparedStatement s = connection.prepareStatement(
-        "SELECT propname, propval FROM " + this.sessionTableName
-        + " WHERE session_name = ? AND propclass = ?");
+        "SELECT propname, propval FROM " + this.jobTableName
+        + " WHERE job_name = ? AND propclass = ?");
     try {
-      s.setString(1, sessionName);
+      s.setString(1, jobName);
       s.setString(2, propClass);
       rs = s.executeQuery();
 
@@ -794,15 +792,15 @@ public class HsqldbSessionStorage extends SessionStorage {
     }
   }
 
-  private void setV0Properties(String sessionName, String propClass,
+  private void setV0Properties(String jobName, String propClass,
       Properties properties) throws SQLException {
-    LOG.debug("Session: " + sessionName
+    LOG.debug("Job: " + jobName
         + "; Setting bulk properties for class " + propClass);
 
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
       String key = entry.getKey().toString();
       String val = entry.getValue().toString();
-      setV0Property(sessionName, propClass, key, val);
+      setV0Property(jobName, propClass, key, val);
     }
   }
 }

@@ -38,7 +38,7 @@ import org.junit.Before;
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.tool.ImportTool;
 
@@ -199,7 +199,7 @@ public class BaseSqoopTestCase extends TestCase {
       opts.setTableName(getTableName());
       ConnFactory f = new ConnFactory(conf);
       try {
-        this.manager = f.getManager(new SessionData(opts, new ImportTool()));
+        this.manager = f.getManager(new JobData(opts, new ImportTool()));
       } catch (IOException ioe) {
         fail("IOException instantiating manager: "
             + StringUtils.stringifyException(ioe));

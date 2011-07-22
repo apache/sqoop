@@ -38,13 +38,13 @@ import java.io.IOException;
 import java.sql.Connection;
 
 /**
- * Test the metastore and session-handling features.
+ * Test the metastore and job-handling features.
  *
  * These all make use of the auto-connect hsqldb-based metastore.
  * The metastore URL is configured to be in-memory, and drop all
  * state between individual tests.
  */
-public class TestSessions extends TestCase {
+public class TestSavedJobs extends TestCase {
 
   public static final String TEST_AUTOCONNECT_URL =
       "jdbc:hsqldb:mem:sqoopmetastore";
@@ -54,10 +54,10 @@ public class TestSessions extends TestCase {
   @Override
   public void setUp() throws Exception {
     // Delete db state between tests.
-    resetSessionSchema();
+    resetJobSchema();
   }
 
-  public static void resetSessionSchema() throws SQLException {
+  public static void resetJobSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
     options.setConnectString(TEST_AUTOCONNECT_URL);
     options.setUsername(TEST_AUTOCONNECT_USER);
@@ -98,58 +98,58 @@ public class TestSessions extends TestCase {
   public void testAutoConnect() throws IOException {
     // By default, we should be able to auto-connect with an
     // empty connection descriptor. We should see an empty
-    // session set.
+    // job set.
 
     Configuration conf = newConf();
-    SessionStorageFactory ssf = new SessionStorageFactory(conf);
+    JobStorageFactory ssf = new JobStorageFactory(conf);
 
     Map<String, String> descriptor = new TreeMap<String, String>();
-    SessionStorage storage = ssf.getSessionStorage(descriptor);
+    JobStorage storage = ssf.getJobStorage(descriptor);
 
     storage.open(descriptor);
-    List<String> sessions = storage.list();
-    assertEquals(0, sessions.size());
+    List<String> jobs = storage.list();
+    assertEquals(0, jobs.size());
     storage.close();
   }
 
-  public void testCreateDeleteSession() throws IOException {
+  public void testCreateDeleteJob() throws IOException {
     Configuration conf = newConf();
-    SessionStorageFactory ssf = new SessionStorageFactory(conf);
+    JobStorageFactory ssf = new JobStorageFactory(conf);
 
     Map<String, String> descriptor = new TreeMap<String, String>();
-    SessionStorage storage = ssf.getSessionStorage(descriptor);
+    JobStorage storage = ssf.getJobStorage(descriptor);
 
     storage.open(descriptor);
 
-    // Session list should start out empty.
-    List<String> sessions = storage.list();
-    assertEquals(0, sessions.size());
+    // Job list should start out empty.
+    List<String> jobs = storage.list();
+    assertEquals(0, jobs.size());
 
-    // Create a session that displays the version.
-    SessionData data = new SessionData(new SqoopOptions(), new VersionTool());
-    storage.create("versionSession", data);
+    // Create a job that displays the version.
+    JobData data = new JobData(new SqoopOptions(), new VersionTool());
+    storage.create("versionJob", data);
 
-    sessions = storage.list();
-    assertEquals(1, sessions.size());
-    assertEquals("versionSession", sessions.get(0));
+    jobs = storage.list();
+    assertEquals(1, jobs.size());
+    assertEquals("versionJob", jobs.get(0));
 
-    // Try to create that same session name again. This should fail.
+    // Try to create that same job name again. This should fail.
     try {
-      storage.create("versionSession", data);
-      fail("Expected IOException; this session already exists.");
+      storage.create("versionJob", data);
+      fail("Expected IOException; this job already exists.");
     } catch (IOException ioe) {
       // This is expected; continue operation.
     }
 
-    sessions = storage.list();
-    assertEquals(1, sessions.size());
+    jobs = storage.list();
+    assertEquals(1, jobs.size());
 
-    // Restore our session, check that it exists.
-    SessionData outData = storage.read("versionSession");
+    // Restore our job, check that it exists.
+    JobData outData = storage.read("versionJob");
     assertEquals(new VersionTool().getToolName(),
         outData.getSqoopTool().getToolName());
 
-    // Try to restore a session that doesn't exist. Watch it fail.
+    // Try to restore a job that doesn't exist. Watch it fail.
     try {
       storage.read("DoesNotExist");
       fail("Expected IOException");
@@ -157,53 +157,53 @@ public class TestSessions extends TestCase {
       // This is expected. Continue.
     }
   
-    // Now delete the session.
-    storage.delete("versionSession");
+    // Now delete the job.
+    storage.delete("versionJob");
 
-    // After delete, we should have no sessions.
-    sessions = storage.list();
-    assertEquals(0, sessions.size());
+    // After delete, we should have no jobs.
+    jobs = storage.list();
+    assertEquals(0, jobs.size());
 
     storage.close();
   }
 
   public void testMultiConnections() throws IOException {
-    // Ensure that a session can be retrieved when the storage is
+    // Ensure that a job can be retrieved when the storage is
     // closed and reopened.
 
     Configuration conf = newConf();
-    SessionStorageFactory ssf = new SessionStorageFactory(conf);
+    JobStorageFactory ssf = new JobStorageFactory(conf);
 
     Map<String, String> descriptor = new TreeMap<String, String>();
-    SessionStorage storage = ssf.getSessionStorage(descriptor);
+    JobStorage storage = ssf.getJobStorage(descriptor);
 
     storage.open(descriptor);
 
-    // Session list should start out empty.
-    List<String> sessions = storage.list();
-    assertEquals(0, sessions.size());
+    // Job list should start out empty.
+    List<String> jobs = storage.list();
+    assertEquals(0, jobs.size());
 
-    // Create a session that displays the version.
-    SessionData data = new SessionData(new SqoopOptions(), new VersionTool());
-    storage.create("versionSession", data);
+    // Create a job that displays the version.
+    JobData data = new JobData(new SqoopOptions(), new VersionTool());
+    storage.create("versionJob", data);
 
-    sessions = storage.list();
-    assertEquals(1, sessions.size());
-    assertEquals("versionSession", sessions.get(0));
+    jobs = storage.list();
+    assertEquals(1, jobs.size());
+    assertEquals("versionJob", jobs.get(0));
 
     storage.close(); // Close the existing connection
 
     // Now re-open the storage.
-    ssf = new SessionStorageFactory(newConf());
-    storage = ssf.getSessionStorage(descriptor);
+    ssf = new JobStorageFactory(newConf());
+    storage = ssf.getJobStorage(descriptor);
     storage.open(descriptor);
 
-    sessions = storage.list();
-    assertEquals(1, sessions.size());
-    assertEquals("versionSession", sessions.get(0));
+    jobs = storage.list();
+    assertEquals(1, jobs.size());
+    assertEquals("versionJob", jobs.get(0));
 
-    // Restore our session, check that it exists.
-    SessionData outData = storage.read("versionSession");
+    // Restore our job, check that it exists.
+    JobData outData = storage.read("versionJob");
     assertEquals(new VersionTool().getToolName(),
         outData.getSqoopTool().getToolName());
 

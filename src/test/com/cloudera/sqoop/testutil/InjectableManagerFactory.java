@@ -20,7 +20,7 @@ package com.cloudera.sqoop.testutil;
 
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.JobData;
 
 /**
  * ManagerFactory that is used for testing; this accepts any
@@ -28,7 +28,7 @@ import com.cloudera.sqoop.metastore.SessionData;
  */
 public class InjectableManagerFactory extends ManagerFactory {
 
-  public ConnManager accept(SessionData data) {
+  public ConnManager accept(JobData data) {
     // Always accept and use the injectable manager.
     return new InjectableConnManager(data.getSqoopOptions());
   }

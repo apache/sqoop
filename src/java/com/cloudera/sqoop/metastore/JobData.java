@@ -22,17 +22,17 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
- * Container for all session data that should be stored to a
+ * Container for all job data that should be stored to a
  * permanent resource.
  */
-public class SessionData {
+public class JobData {
   private SqoopOptions opts;
   private SqoopTool tool;
 
-  public SessionData() {
+  public JobData() {
   }
 
-  public SessionData(SqoopOptions options, SqoopTool sqoopTool) {
+  public JobData(SqoopOptions options, SqoopTool sqoopTool) {
     this.opts = options;
     this.tool = sqoopTool;
   }

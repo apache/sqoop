@@ -196,13 +196,13 @@ public class SqoopOptions implements Cloneable {
   private String incrementalLastValue;
 
   // These next two fields are not serialized to the metastore.
-  // If this SqoopOptions is created by reading a saved session, these will
-  // be populated by the SessionStorage to facilitate updating the same
-  // session.
-  private String sessionName;
-  private Map<String, String> sessionStorageDescriptor;
+  // If this SqoopOptions is created by reading a saved job, these will
+  // be populated by the JobStorage to facilitate updating the same
+  // job.
+  private String jobName;
+  private Map<String, String> jobStorageDescriptor;
 
-  // If we restore a session and then allow the user to apply arguments on
+  // If we restore a job and then allow the user to apply arguments on
   // top, we retain the version without the arguments in a reference to the
   // 'parent' SqoopOptions instance, here.
   private SqoopOptions parent;
@@ -449,7 +449,7 @@ public class SqoopOptions implements Cloneable {
   /**
    * Return a Properties instance that encapsulates all the "sticky"
    * state of this SqoopOptions that should be written to a metastore
-   * to restore the session later.
+   * to restore the job later.
    */
   public Properties writeProperties() {
     Properties props = new Properties();
@@ -1468,33 +1468,33 @@ public class SqoopOptions implements Cloneable {
   }
 
   /**
-   * Set the name of the saved session this SqoopOptions belongs to.
+   * Set the name of the saved job this SqoopOptions belongs to.
    */
-  public void setSessionName(String session) {
-    this.sessionName = session;
+  public void setJobName(String job) {
+    this.jobName = job;
   }
 
   /**
-   * Get the name of the saved session this SqoopOptions belongs to.
+   * Get the name of the saved job this SqoopOptions belongs to.
    */
-  public String getSessionName() {
-    return this.sessionName;
+  public String getJobName() {
+    return this.jobName;
   }
 
   /**
-   * Set the SessionStorage descriptor used to open the saved session
+   * Set the JobStorage descriptor used to open the saved job
    * this SqoopOptions belongs to.
    */
   public void setStorageDescriptor(Map<String, String> descriptor) {
-    this.sessionStorageDescriptor = descriptor;
+    this.jobStorageDescriptor = descriptor;
   }
 
   /**
-   * Get the SessionStorage descriptor used to open the saved session
+   * Get the JobStorage descriptor used to open the saved job
    * this SqoopOptions belongs to.
    */
   public Map<String, String> getStorageDescriptor() {
-    return this.sessionStorageDescriptor;
+    return this.jobStorageDescriptor;
   }
 
   /**
