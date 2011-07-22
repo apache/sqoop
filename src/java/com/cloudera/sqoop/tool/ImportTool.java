@@ -33,7 +33,9 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
+import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.hadoop.fs.Path;
 
 /**
  * Tool that performs database imports to HDFS.
@@ -72,7 +74,7 @@ public class ImportTool extends BaseSqoopTool {
   public List<String> getGeneratedJarFiles() {
     return this.codeGenerator.getGeneratedJarFiles();
   }
-
+  
   protected void importTable(SqoopOptions options, String tableName,
       HiveImport hiveImport) throws IOException, ImportException {
     String jarFile = null;
@@ -82,15 +84,48 @@ public class ImportTool extends BaseSqoopTool {
 
     // Do the actual import.
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
-        options);
+        options, getOutputPath(options, tableName));
+    
     manager.importTable(context);
+    
+    if (options.isAppendMode()) {
+      AppendUtils app = new AppendUtils(context);
+      app.append();
+    }
 
     // If the user wants this table to be in Hive, perform that post-load.
     if (options.doHiveImport()) {
       hiveImport.importTable(tableName, options.getHiveTableName(), false);
     }
   }
+  
+  /**   
+   * @return the output path for the imported files;
+   * in append mode this will point to a temporary folder.
+   */
+  private Path getOutputPath(SqoopOptions options, String tableName) {
+    // Get output directory
+    String hdfsWarehouseDir = options.getWarehouseDir();
+    String hdfsTargetDir = options.getTargetDir();
+    Path outputPath = null;
+    if (options.isAppendMode()) {
+      // Use temporary path, later removed when appending
+      outputPath = AppendUtils.getTempAppendDir(tableName);
+      LOG.debug("Using temporary folder: " + outputPath.getName());
+    } else {
+      // Try in this order: target-dir or warehouse-dir 
+      if (hdfsTargetDir != null) {
+        outputPath = new Path(hdfsTargetDir);
+      } else if (hdfsWarehouseDir != null) {
+        outputPath = new Path(hdfsWarehouseDir, tableName);
+      } else {
+        outputPath = new Path(tableName);
+      }
+    }
 
+    return outputPath; 
+  }
+   
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
@@ -172,6 +207,14 @@ public class ImportTool extends BaseSqoopTool {
           .hasArg().withDescription("WHERE clause to use during import")
           .withLongOpt(WHERE_ARG)
           .create());
+      importOpts.addOption(OptionBuilder
+          .withDescription("Imports data in append mode")
+          .withLongOpt(APPEND_ARG)
+          .create());        
+      importOpts.addOption(OptionBuilder.withArgName("dir")
+          .hasArg().withDescription("HDFS plain table destination")
+          .withLongOpt(TARGET_DIR_ARG)
+          .create());    
     }
 
     importOpts.addOption(OptionBuilder.withArgName("dir")
@@ -278,11 +321,20 @@ public class ImportTool extends BaseSqoopTool {
         if (in.hasOption(WHERE_ARG)) {
           out.setWhereClause(in.getOptionValue(WHERE_ARG));
         }
+
+        if (in.hasOption(TARGET_DIR_ARG)) {
+          out.setTargetDir(in.getOptionValue(TARGET_DIR_ARG));
+        }
+        
+        if (in.hasOption(APPEND_ARG)) {
+          out.setAppendMode(true);
+        }
       }
 
       if (in.hasOption(WAREHOUSE_DIR_ARG)) {
         out.setWarehouseDir(in.getOptionValue(WAREHOUSE_DIR_ARG));
       }
+
 
       if (in.hasOption(FMT_SEQUENCEFILE_ARG)) {
         out.setFileLayout(SqoopOptions.FileLayout.SequenceFile);
@@ -338,6 +390,11 @@ public class ImportTool extends BaseSqoopTool {
         && options.getClassName() == null) {
       throw new InvalidOptionsException("Jar specified with --jar-file, but no "
           + "class specified with --class-name." + HELP_STR);
+    } else if (options.getTargetDir() != null
+        && options.getWarehouseDir() != null) {
+      throw new InvalidOptionsException(
+          "--target-dir with --warehouse-dir are incompatible options"
+          + HELP_STR);
     }
   }
 

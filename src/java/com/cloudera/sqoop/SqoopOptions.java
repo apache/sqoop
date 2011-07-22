@@ -86,6 +86,8 @@ public class SqoopOptions {
   private String debugSqlCmd;
   private String driverClassName;
   private String warehouseDir;
+  private String targetDir;
+  private boolean append;   
   private FileLayout layout;
   private boolean direct; // if true and conn is mysql, use mysqldump.
   private String tmpDir; // where temp data goes; usually /tmp
@@ -618,6 +620,22 @@ public class SqoopOptions {
   public void setWarehouseDir(String warehouse) {
     this.warehouseDir = warehouse;
   }
+
+  public String getTargetDir() {
+    return this.targetDir;
+  } 
+
+  public void setTargetDir(String dir) {
+    this.targetDir = dir;
+  }
+
+  public void setAppendMode(boolean doAppend) {
+    this.append = doAppend;
+  }
+
+  public boolean isAppendMode() {
+    return this.append;
+  }  
 
   /**
    * @return the destination file format

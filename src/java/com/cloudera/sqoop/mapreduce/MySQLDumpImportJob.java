@@ -38,6 +38,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.shims.ShimLoader;
+import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
  * Class that runs an import job using mysqldump in the mapper.
@@ -47,13 +48,13 @@ public class MySQLDumpImportJob extends ImportJobBase {
   public static final Log LOG =
       LogFactory.getLog(MySQLDumpImportJob.class.getName());
 
-  public MySQLDumpImportJob(final SqoopOptions opts)
+  public MySQLDumpImportJob(final SqoopOptions opts, ImportJobContext context)
       throws ClassNotFoundException {
     super(opts, MySQLDumpMapper.class,
         (Class<? extends InputFormat>) ShimLoader.getShimClass(
             "com.cloudera.sqoop.mapreduce.MySQLDumpInputFormat"),
         (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-            "com.cloudera.sqoop.mapreduce.RawKeyTextOutputFormat"));
+            "com.cloudera.sqoop.mapreduce.RawKeyTextOutputFormat"), context);
   }
 
   /**

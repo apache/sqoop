@@ -21,6 +21,7 @@ package com.cloudera.sqoop.manager;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.SqoopOptions;
+import org.apache.hadoop.fs.Path;
 
 /**
  * A set of parameters describing an import operation; this is passed to
@@ -32,13 +33,15 @@ public class ImportJobContext {
   private String jarFile;
   private SqoopOptions options;
   private Class<? extends InputFormat> inputFormatClass;
+  private Path destination;
 
   public ImportJobContext(final String table, final String jar,
-      final SqoopOptions opts) {
+      final SqoopOptions opts, final Path destination) {
     this.tableName = table;
     this.jarFile = jar;
     this.options = opts;
     this.inputFormatClass = DataDrivenDBInputFormat.class;
+    this.destination = destination;
   }
 
   /** @return the name of the table to import. */
@@ -67,5 +70,14 @@ public class ImportJobContext {
   public Class<? extends InputFormat> getInputFormat() {
     return this.inputFormatClass;
   }
+
+  /**
+   * @return the destination path to where the output files will
+   * be first saved.
+   */
+  public Path getDestination() {
+    return this.destination;
+  }
+
 }
 

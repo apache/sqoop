@@ -71,6 +71,9 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HADOOP_HOME_ARG = "hadoop-home";
   public static final String HIVE_HOME_ARG = "hive-home";
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
+  public static final String TARGET_DIR_ARG = "target-dir";
+  public static final String APPEND_ARG = "append";  
+  
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
   public static final String HIVE_IMPORT_ARG = "hive-import";

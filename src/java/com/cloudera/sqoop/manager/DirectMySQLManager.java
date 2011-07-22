@@ -65,7 +65,7 @@ public class DirectMySQLManager extends MySQLManager {
 
     MySQLDumpImportJob importer = null;
     try {
-      importer = new MySQLDumpImportJob(options);
+      importer = new MySQLDumpImportJob(options, context);
     } catch (ClassNotFoundException cnfe) {
       throw new IOException("Could not load required classes", cnfe);
     }

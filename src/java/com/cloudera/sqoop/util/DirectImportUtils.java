@@ -33,6 +33,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.io.SplittingOutputStream;
 import com.cloudera.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.util.Shell;
+import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
  * Utility methods that are common to various the direct import managers.
@@ -70,16 +71,10 @@ public final class DirectImportUtils {
    * returned stream.
    */
   public static SplittableBufferedWriter createHdfsSink(Configuration conf,
-      SqoopOptions options, String tableName) throws IOException {
+      SqoopOptions options, ImportJobContext context) throws IOException {
 
     FileSystem fs = FileSystem.get(conf);
-    String warehouseDir = options.getWarehouseDir();
-    Path destDir = null;
-    if (null != warehouseDir) {
-      destDir = new Path(new Path(warehouseDir), tableName);
-    } else {
-      destDir = new Path(tableName);
-    }
+    Path destDir = context.getDestination();
 
     LOG.debug("Writing to filesystem: " + conf.get("fs.default.name"));
     LOG.debug("Creating destination directory " + destDir);

@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -40,6 +39,7 @@ import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.PerfCounters;
+import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
  * Base class for running an import MapReduce job.
@@ -47,6 +47,8 @@ import com.cloudera.sqoop.util.PerfCounters;
  */
 public class ImportJobBase extends JobBase {
 
+  private ImportJobContext context;
+  
   public static final Log LOG = LogFactory.getLog(
       ImportJobBase.class.getName());
 
@@ -55,14 +57,16 @@ public class ImportJobBase extends JobBase {
   }
 
   public ImportJobBase(final SqoopOptions opts) {
-    this(opts, null, null, null);
+    this(opts, null, null, null, null);
   }
 
   public ImportJobBase(final SqoopOptions opts,
       final Class<? extends Mapper> mapperClass,
       final Class<? extends InputFormat> inputFormatClass,
-      final Class<? extends OutputFormat> outputFormatClass) {
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ImportJobContext context) {
     super(opts, mapperClass, inputFormatClass, outputFormatClass);
+    this.context = context;
   }
 
   /**
@@ -71,17 +75,7 @@ public class ImportJobBase extends JobBase {
   @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
-    String hdfsWarehouseDir = options.getWarehouseDir();
-    Path outputPath;
-
-    if (null != hdfsWarehouseDir) {
-      Path hdfsWarehousePath = new Path(hdfsWarehouseDir);
-      hdfsWarehousePath.makeQualified(FileSystem.get(job.getConfiguration()));
-      outputPath = new Path(hdfsWarehousePath, tableName);
-    } else {
-      outputPath = new Path(tableName);
-    }
-
+ 
     job.setOutputFormatClass(getOutputFormatClass());
 
     if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
@@ -95,6 +89,7 @@ public class ImportJobBase extends JobBase {
           CompressionType.BLOCK);
     }
 
+    Path outputPath = context.getDestination();
     FileOutputFormat.setOutputPath(job, outputPath);
   }
 

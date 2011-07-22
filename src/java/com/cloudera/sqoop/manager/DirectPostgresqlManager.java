@@ -372,7 +372,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
 
       // This writer will be closed by AsyncSink.
       SplittableBufferedWriter w = DirectImportUtils.createHdfsSink(
-          options.getConf(), options, tableName);
+          options.getConf(), options, context);
 
       // Actually start the psql dump.
       p = Runtime.getRuntime().exec(args.toArray(new String[0]),
