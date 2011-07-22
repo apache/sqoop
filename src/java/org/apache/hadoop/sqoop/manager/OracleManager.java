@@ -23,8 +23,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.Method;
@@ -32,7 +30,6 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.OracleDataDrivenDBInputFormat;
 import org.apache.hadoop.sqoop.SqoopOptions;
@@ -299,7 +296,7 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Export data stored in HDFS into a table in a database
+   * Export data stored in HDFS into a table in a database.
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
@@ -350,7 +347,7 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Attempt to map sql type to java type
+   * Attempt to map sql type to java type.
    * @param sqlType     sql type
    * @return            java type
    */
@@ -377,7 +374,7 @@ public class OracleManager extends GenericJdbcManager {
   }
     
   /**
-   * Attempt to map sql type to hive type
+   * Attempt to map sql type to hive type.
    * @param sqlType     sql data type
    * @return            hive data type
    */
@@ -387,7 +384,7 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Resolve a database-specific type to Hive type
+   * Resolve a database-specific type to Hive type.
    * @param sqlType     sql type
    * @return            hive type
    */

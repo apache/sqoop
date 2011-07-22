@@ -29,13 +29,11 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.SqoopParser;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 import org.apache.hadoop.sqoop.shims.ShimLoader;

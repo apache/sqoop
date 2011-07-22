@@ -34,10 +34,8 @@ import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 import org.apache.hadoop.sqoop.hive.HiveImport;
-import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.orm.ClassWriter;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
-import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
  * Tool that generates code from a database schema.

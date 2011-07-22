@@ -24,17 +24,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.log4j.Category;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
  * Command-line arguments used by Sqoop.
@@ -409,16 +404,16 @@ public class SqoopOptions {
     return tableName;
   }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+  public void setTableName(String table) {
+    this.tableName = table;
   }
 
   public String getExportDir() {
     return exportDir;
   }
 
-  public void setExportDir(String exportDir) {
-    this.exportDir = exportDir;
+  public void setExportDir(String dir) {
+    this.exportDir = dir;
   }
 
   public String getExistingJarName() {
@@ -509,8 +504,8 @@ public class SqoopOptions {
     return this.numMappers;
   }
 
-  public void setNumMappers(int numMappers) {
-    this.numMappers = numMappers;
+  public void setNumMappers(int m) {
+    this.numMappers = m;
   }
 
   /**
@@ -520,8 +515,8 @@ public class SqoopOptions {
     return className;
   }
 
-  public void setClassName(String className) {
-    this.className = className;
+  public void setClassName(String name) {
+    this.className = name;
   }
 
   /**
@@ -532,16 +527,16 @@ public class SqoopOptions {
     return packageName;
   }
 
-  public void setPackageName(String packageName) {
-    this.packageName = packageName;
+  public void setPackageName(String name) {
+    this.packageName = name;
   }
 
   public String getHiveHome() {
     return hiveHome;
   }
   
-  public void setHiveHome(String hiveHome) {
-    this.hiveHome = hiveHome;
+  public void setHiveHome(String home) {
+    this.hiveHome = home;
   }
 
   /** @return true if we should import the table into Hive. */
@@ -549,8 +544,8 @@ public class SqoopOptions {
     return hiveImport;
   }
 
-  public void setHiveImport(boolean hiveImport) {
-    this.hiveImport = hiveImport;
+  public void setHiveImport(boolean doImport) {
+    this.hiveImport = doImport;
   }
 
   /**
@@ -603,8 +598,8 @@ public class SqoopOptions {
     return hadoopHome;
   }
 
-  public void setHadoopHome(String hadoopHome) {
-    this.hadoopHome = hadoopHome;
+  public void setHadoopHome(String home) {
+    this.hadoopHome = home;
   }
 
   /**
@@ -647,8 +642,8 @@ public class SqoopOptions {
     return this.layout;
   }
 
-  public void setFileLayout(FileLayout layout) {
-    this.layout = layout;
+  public void setFileLayout(FileLayout fileLayout) {
+    this.layout = fileLayout;
   }
 
   /**
@@ -801,8 +796,8 @@ public class SqoopOptions {
     return this.useCompression;
   }
 
-  public void setUseCompression(boolean useCompression) {
-    this.useCompression = useCompression;
+  public void setUseCompression(boolean compress) {
+    this.useCompression = compress;
   }
 
   /**
@@ -816,8 +811,8 @@ public class SqoopOptions {
     }
   }
 
-  public void setHiveTableName(String tableName) {
-    this.hiveTableName = tableName;
+  public void setHiveTableName(String name) {
+    this.hiveTableName = name;
   }
 
   /**

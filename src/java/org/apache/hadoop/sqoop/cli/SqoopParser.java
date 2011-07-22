@@ -18,12 +18,7 @@
 
 package org.apache.hadoop.sqoop.cli;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
-import java.util.Properties;
 
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;

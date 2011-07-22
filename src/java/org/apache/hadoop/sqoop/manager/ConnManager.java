@@ -24,8 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
-
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 

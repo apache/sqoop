@@ -317,6 +317,9 @@ public final class RecordParser {
         sb.append(curChar);
         state = ParseState.UNENCLOSED_FIELD;
         break;
+
+      default:
+        throw new ParseError("Unexpected parser state: " + state);
       }
     }
 

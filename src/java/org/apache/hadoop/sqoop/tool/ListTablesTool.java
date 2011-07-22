@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 
 /**

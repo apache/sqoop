@@ -20,12 +20,8 @@ package org.apache.hadoop.sqoop.tool;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.util.ImportException;
@@ -140,8 +139,8 @@ public class MySQLManager extends GenericJdbcManager {
    * the type to null.
    */
   private void checkDateTimeBehavior(ImportJobContext context) {
-    final String zeroBehaviorStr = "zeroDateTimeBehavior";
-    final String convertToNull = "=convertToNull";
+    final String ZERO_BEHAVIOR_STR = "zeroDateTimeBehavior";
+    final String CONVERT_TO_NULL = "=convertToNull";
 
     String connectStr = context.getOptions().getConnectString();
     if (connectStr.indexOf("jdbc:") != 0) {
@@ -160,16 +159,16 @@ public class MySQLManager extends GenericJdbcManager {
       // If they haven't set the zeroBehavior option, set it to
       // squash-null for them.
       if (null == query) {
-        connectStr = connectStr + "?" + zeroBehaviorStr + convertToNull;
+        connectStr = connectStr + "?" + ZERO_BEHAVIOR_STR + CONVERT_TO_NULL;
         LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
       } else if (query.length() == 0) {
-        connectStr = connectStr + zeroBehaviorStr + convertToNull;
+        connectStr = connectStr + ZERO_BEHAVIOR_STR + CONVERT_TO_NULL;
         LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
-      } else if (query.indexOf(zeroBehaviorStr) == -1) {
+      } else if (query.indexOf(ZERO_BEHAVIOR_STR) == -1) {
         if (!connectStr.endsWith("&")) {
           connectStr = connectStr + "&";
         }
-        connectStr = connectStr + zeroBehaviorStr + convertToNull;
+        connectStr = connectStr + ZERO_BEHAVIOR_STR + CONVERT_TO_NULL;
         LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
       }
 

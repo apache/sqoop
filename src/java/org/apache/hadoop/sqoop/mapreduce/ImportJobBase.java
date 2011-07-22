@@ -26,28 +26,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
-import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
-import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
 

@@ -45,7 +45,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.util.StringUtils;
 
@@ -302,24 +301,24 @@ public abstract class SqlManager extends ConnManager {
       throws IOException, ImportException {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
-    SqoopOptions options = context.getOptions();
+    SqoopOptions opts = context.getOptions();
 
     DataDrivenImportJob importer =
-        new DataDrivenImportJob(options, context.getInputFormat());
+        new DataDrivenImportJob(opts, context.getInputFormat());
 
-    String splitCol = getSplitColumn(options, tableName);
-    if (null == splitCol && options.getNumMappers() > 1) {
+    String splitCol = getSplitColumn(opts, tableName);
+    if (null == splitCol && opts.getNumMappers() > 1) {
       // Can't infer a primary key.
       throw new ImportException("No primary key could be found for table "
           + tableName + ". Please specify one with --split-by or perform "
           + "a sequential import with '-m 1'.");
     }
 
-    importer.runImport(tableName, jarFile, splitCol, options.getConf());
+    importer.runImport(tableName, jarFile, splitCol, opts.getConf());
   }
 
   /**
-   * executes an arbitrary SQL statement
+   * Executes an arbitrary SQL statement.
    * @param stmt The SQL statement to execute
    * @return A ResultSet encapsulating the results or null on error
    */

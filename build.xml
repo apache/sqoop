@@ -605,7 +605,7 @@
         file="${cobertura.home}/cobertura.jar" />
   </target>
 
-  <target name="checkstyle" depends="ivy-retrieve-checkstyle"
+  <target name="checkstyle" depends="ivy-retrieve-checkstyle, compile-all"
       description="Check source code conventions">
     <taskdef resource="checkstyletask.properties">
       <classpath refid="${name}.checkstyle.classpath" />
@@ -614,6 +614,7 @@
     <mkdir dir="${checkstyle.report.dir}" />
     <checkstyle config="${checkstyle.xml}" failOnViolation="false">
       <fileset dir="${base.src.dir}" includes="**/*.java" />
+      <classpath refid="test.classpath"/>
       <formatter type="xml"
           toFile="${checkstyle.report.dir}/checkstyle-errors.xml" />
     </checkstyle>

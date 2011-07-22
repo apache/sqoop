@@ -20,7 +20,6 @@ package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,25 +30,18 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 
-import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
-import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.ExportJobContext;
 import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.shims.ShimLoader;
-import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
 

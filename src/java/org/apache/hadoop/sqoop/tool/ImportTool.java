@@ -19,7 +19,6 @@
 package org.apache.hadoop.sqoop.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -34,8 +33,6 @@ import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 import org.apache.hadoop.sqoop.hive.HiveImport;
 import org.apache.hadoop.sqoop.manager.ImportJobContext;
-import org.apache.hadoop.sqoop.orm.ClassWriter;
-import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
