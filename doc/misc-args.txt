@@ -34,3 +34,7 @@ Data emitted to HDFS is by default uncompressed. You can instruct
 Sqoop to use gzip to compress your data by providing either the
 +--compress+ or +-z+ argument (both are equivalent).
 
+Using +--verbose+ will instruct Sqoop to print more details about its
+operation; this is particularly handy if Sqoop appears to be misbehaving.
+
+

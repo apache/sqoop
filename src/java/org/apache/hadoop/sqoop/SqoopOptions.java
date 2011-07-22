@@ -31,6 +31,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Category;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * Command-line arguments used by Sqoop
@@ -363,6 +366,7 @@ public class SqoopOptions {
     System.out.println("--list-tables                List tables in database and exit");
     System.out.println("--list-databases             List all databases available and exit");
     System.out.println("--debug-sql (statement)      Execute 'statement' in SQL and exit");
+    System.out.println("--verbose                    Print more information while working");
     System.out.println("");
     System.out.println("Database-specific options:");
     System.out.println("Arguments may be passed to the database manager after a lone '-':");
@@ -595,6 +599,12 @@ public class SqoopOptions {
           for (i++; i < args.length; i++) {
             this.debugSqlCmd = this.debugSqlCmd + args[i] + " ";
           }
+        } else if (args[i].equals("--verbose")) {
+          // Immediately switch into DEBUG logging.
+          Category sqoopLogger =
+              Logger.getLogger(SqoopOptions.class.getName()).getParent();
+          sqoopLogger.setLevel(Level.DEBUG);
+
         } else if (args[i].equals("--help")) {
           printUsage();
           throw new InvalidOptionsException("");
