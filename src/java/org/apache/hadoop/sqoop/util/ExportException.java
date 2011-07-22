@@ -39,4 +39,10 @@ public class ExportException extends Exception {
   public ExportException(final String message, final Throwable cause) {
     super(message, cause);
   }
+
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ExportException" : msg;
+  }
 }

@@ -43,7 +43,7 @@ public class TestHiveImport extends ImportJobTestCase {
    * Create the argv to pass to Sqoop
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] moreArgs) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] moreArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {

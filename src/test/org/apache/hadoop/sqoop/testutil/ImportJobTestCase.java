@@ -51,7 +51,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
    * @param colNames the columns to import. If null, all columns are used.
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] colNames) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames) {
     if (null == colNames) {
       colNames = getColNames();
     }

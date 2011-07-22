@@ -256,52 +256,68 @@ public class MySQLAuthTest extends ImportJobTestCase {
   public void doZeroTimestampTest(int testNum, boolean expectSuccess,
       String connectString) throws IOException, SQLException {
 
-    final String tableName = "mysqlTimestampTable" + Integer.toString(testNum);
+    LOG.info("Beginning zero-timestamp test #" + testNum);
 
-    // Create a table containing a full-zeros timestamp.
-    SqoopOptions options = new SqoopOptions(connectString, tableName);
-    options.setUsername(AUTH_TEST_USER);
-    options.setPassword(AUTH_TEST_PASS);
+    try {
+      final String tableName = "mysqlTimestampTable" + Integer.toString(testNum);
 
-    manager = new LocalMySQLManager(options);
+      // Create a table containing a full-zeros timestamp.
+      SqoopOptions options = new SqoopOptions(connectString, tableName);
+      options.setUsername(AUTH_TEST_USER);
+      options.setPassword(AUTH_TEST_PASS);
 
-    Connection connection = null;
-    Statement st = null;
+      manager = new LocalMySQLManager(options);
 
-    connection = manager.getConnection();
-    connection.setAutoCommit(false);
-    st = connection.createStatement();
+      Connection connection = null;
+      Statement st = null;
 
-    // create the database table and populate it with data. 
-    st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
-    st.executeUpdate("CREATE TABLE " + tableName + " ("
-        + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-        + "ts TIMESTAMP NOT NULL)");
+      connection = manager.getConnection();
+      connection.setAutoCommit(false);
+      st = connection.createStatement();
 
-    st.executeUpdate("INSERT INTO " + tableName + " VALUES("
-        + "NULL,'0000-00-00 00:00:00.0')");
-    connection.commit();
-    st.close();
-    connection.close();
+      // create the database table and populate it with data. 
+      st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+      st.executeUpdate("CREATE TABLE " + tableName + " ("
+          + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+          + "ts TIMESTAMP NOT NULL)");
 
-    // Run the import.
-    String [] argv = getArgv(true, false, connectString, tableName);
-    runImport(argv);
+      st.executeUpdate("INSERT INTO " + tableName + " VALUES("
+          + "NULL,'0000-00-00 00:00:00.0')");
+      connection.commit();
+      st.close();
+      connection.close();
 
-    // Make sure the result file is there.
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, tableName);
-    Path filePath = new Path(tablePath, "part-m-00000");
+      // Run the import.
+      String [] argv = getArgv(true, false, connectString, tableName);
+      try {
+        runImport(argv);
+      } catch (Exception e) {
+        if (expectSuccess) {
+          // This is unexpected. rethrow.
+          throw new RuntimeException(e);
+        } else {
+          // We expected an error.
+          LOG.info("Got exception running import (expected). msg: " + e);
+        }
+      }
 
-    File f = new File(filePath.toString());
-    if (expectSuccess) {
-      assertTrue("Could not find imported data file", f.exists());
-      BufferedReader r = new BufferedReader(new InputStreamReader(
-          new FileInputStream(f)));
-      assertEquals("1,null", r.readLine());
-      IOUtils.closeStream(r);
-    } else {
-      assertFalse("Imported data when expected failure", f.exists());
+      // Make sure the result file is there.
+      Path warehousePath = new Path(this.getWarehouseDir());
+      Path tablePath = new Path(warehousePath, tableName);
+      Path filePath = new Path(tablePath, "part-m-00000");
+
+      File f = new File(filePath.toString());
+      if (expectSuccess) {
+        assertTrue("Could not find imported data file", f.exists());
+        BufferedReader r = new BufferedReader(new InputStreamReader(
+            new FileInputStream(f)));
+        assertEquals("1,null", r.readLine());
+        IOUtils.closeStream(r);
+      } else {
+        assertFalse("Imported data when expected failure", f.exists());
+      }
+    } finally {
+      LOG.info("Finished zero timestamp test #" + testNum);
     }
   }
 }

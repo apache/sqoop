@@ -41,4 +41,10 @@ public class ImportException extends Exception {
   public ImportException(final String message, final Throwable cause) {
     super(message, cause);
   }
+
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ImportException" : msg;
+  }
 }

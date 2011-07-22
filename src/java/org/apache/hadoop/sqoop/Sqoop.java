@@ -63,6 +63,15 @@ public class Sqoop extends Configured implements Tool {
   private List<String> generatedJarFiles;
 
   public Sqoop() {
+    init();
+  }
+
+  public Sqoop(Configuration conf) {
+    init();
+    setConf(conf);
+  }
+
+  private void init() {
     generatedJarFiles = new ArrayList<String>();
   }
 

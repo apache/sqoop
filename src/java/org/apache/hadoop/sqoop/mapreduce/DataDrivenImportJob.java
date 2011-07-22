@@ -32,6 +32,7 @@ import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
@@ -43,6 +44,7 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
+import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
 
 /**
@@ -53,11 +55,21 @@ public class DataDrivenImportJob {
 
   public static final Log LOG = LogFactory.getLog(DataDrivenImportJob.class.getName());
 
-  private SqoopOptions options;
+  private final SqoopOptions options;
+  private final Class<Mapper> mapperClass;
 
+  // For dependency-injection purposes, we can specify a mapper class
+  // to use during tests.
+  public final static String DATA_DRIVEN_MAPPER_KEY =
+      "sqoop.data.driven.mapper.class";
+
+  @SuppressWarnings("unchecked")
   public DataDrivenImportJob(final SqoopOptions opts) {
     this.options = opts;
+    this.mapperClass = (Class<Mapper>) opts.getConf().getClass(
+        DATA_DRIVEN_MAPPER_KEY, null);
   }
+
 
   /**
    * Run an import job to read a table in to HDFS
@@ -66,9 +78,11 @@ public class DataDrivenImportJob {
    * @param ormJarFile the Jar file to insert into the dcache classpath. (may be null)
    * @param splitByCol the column of the database table to use to split the import
    * @param conf A fresh Hadoop Configuration to use to build an MR job.
+   * @throws IOException if the job encountered an IO problem
+   * @throws ImportException if the job failed unexpectedly or was misconfigured.
    */
   public void runImport(String tableName, String ormJarFile, String splitByCol,
-      Configuration conf) throws IOException {
+      Configuration conf) throws IOException, ImportException {
 
     LOG.info("Beginning data-driven import of " + tableName);
 
@@ -103,7 +117,11 @@ public class DataDrivenImportJob {
 
       if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
         job.setOutputFormatClass(RawKeyTextOutputFormat.class);
-        job.setMapperClass(TextImportMapper.class);
+        if (null == mapperClass) {
+          job.setMapperClass(TextImportMapper.class);
+        } else {
+          job.setMapperClass(mapperClass);
+        }
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(NullWritable.class);
         if (options.shouldUseCompression()) {
@@ -112,7 +130,11 @@ public class DataDrivenImportJob {
         }
       } else if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
-        job.setMapperClass(AutoProgressMapper.class);
+        if (null == mapperClass) {
+          job.setMapperClass(AutoProgressMapper.class);
+        } else {
+          job.setMapperClass(mapperClass);
+        }
         if (options.shouldUseCompression()) {
           SequenceFileOutputFormat.setCompressOutput(job, true);
           SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
@@ -172,11 +194,14 @@ public class DataDrivenImportJob {
       counters.startClock();
 
       try {
-        job.waitForCompletion(false);
+        boolean success = job.waitForCompletion(false);
         counters.stopClock();
         counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
           .findCounter("HDFS_BYTES_WRITTEN").getValue());
         LOG.info("Transferred " + counters.toString());
+        if (!success) {
+          throw new ImportException("Import job failed!");
+        }
       } catch (InterruptedException ie) {
         throw new IOException(ie);
       } catch (ClassNotFoundException cnfe) {

@@ -134,7 +134,11 @@ public class SqoopOptions {
   private String [] extraArgs;
 
   public SqoopOptions() {
-    initDefaults();
+    initDefaults(null);
+  }
+
+  public SqoopOptions(Configuration conf) {
+    initDefaults(conf);
   }
 
   /**
@@ -144,7 +148,7 @@ public class SqoopOptions {
    * @param table Table to read
    */
   public SqoopOptions(final String connect, final String table) {
-    initDefaults();
+    initDefaults(null);
 
     this.connectString = connect;
     this.tableName = table;
@@ -223,7 +227,7 @@ public class SqoopOptions {
     return this.tmpDir;
   }
 
-  private void initDefaults() {
+  private void initDefaults(Configuration baseConfiguration) {
     // first, set the true defaults if nothing else happens.
     // default action is to run the full pipeline.
     this.action = ControlAction.FullImport;
@@ -263,7 +267,11 @@ public class SqoopOptions {
     this.useCompression = false;
     this.directSplitSize = 0;
 
-    this.conf = new Configuration();
+    if (null == baseConfiguration) {
+      this.conf = new Configuration();
+    } else {
+      this.conf = new Configuration(baseConfiguration);
+    }
 
     this.extraArgs = null;
 

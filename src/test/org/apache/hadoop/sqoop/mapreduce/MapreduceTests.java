@@ -31,6 +31,7 @@ public final class MapreduceTests {
   public static Test suite() {
     TestSuite suite = new TestSuite("Tests for org.apache.hadoop.sqoop.mapreduce");
     suite.addTestSuite(TestTextImportMapper.class);
+    suite.addTestSuite(TestImportJob.class);
     return suite;
   }
 }
