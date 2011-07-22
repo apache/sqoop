@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
@@ -170,11 +171,13 @@ public class BaseSqoopTestCase extends TestCase {
       try {
         testServer.resetServer();
       } catch (SQLException sqlE) {
-        LOG.error("Got SQLException: " + sqlE.toString());
-        fail("Got SQLException: " + sqlE.toString());
+        LOG.error("Got SQLException: " + StringUtils.stringifyException(sqlE));
+        fail("Got SQLException: " + StringUtils.stringifyException(sqlE));
       } catch (ClassNotFoundException cnfe) {
-        LOG.error("Could not find class for db driver: " + cnfe.toString());
-        fail("Could not find class for db driver: " + cnfe.toString());
+        LOG.error("Could not find class for db driver: "
+            + StringUtils.stringifyException(cnfe));
+        fail("Could not find class for db driver: "
+            + StringUtils.stringifyException(cnfe));
       }
 
       manager = testServer.getManager();
@@ -187,7 +190,8 @@ public class BaseSqoopTestCase extends TestCase {
       try {
         this.manager = f.getManager(opts);
       } catch (IOException ioe) {
-        fail("IOException instantiating manager: " + ioe);
+        fail("IOException instantiating manager: " +
+            StringUtils.stringifyException(ioe));
       }
     }
   }
@@ -202,8 +206,8 @@ public class BaseSqoopTestCase extends TestCase {
         manager = null;
       }
     } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
+      LOG.error("Got SQLException: " + StringUtils.stringifyException(sqlE));
+      fail("Got SQLException: " + StringUtils.stringifyException(sqlE));
     }
   }
 
@@ -268,7 +272,8 @@ public class BaseSqoopTestCase extends TestCase {
             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.executeUpdate();
       } catch (SQLException sqlException) {
-        fail("Could not create table: " + sqlException.toString());
+        fail("Could not create table: "
+            + StringUtils.stringifyException(sqlException));
       } finally {
         if (null != statement) {
           try {
@@ -291,7 +296,8 @@ public class BaseSqoopTestCase extends TestCase {
         statement.executeUpdate();
         statement.close();
       } catch (SQLException sqlException) {
-        fail("Could not create table: " + sqlException.toString());
+        fail("Could not create table: "
+            + StringUtils.stringifyException(sqlException));
       } finally {
         if (null != statement) {
           try {
@@ -312,7 +318,7 @@ public class BaseSqoopTestCase extends TestCase {
         } catch (SQLException connSE) {
         }
       }
-      fail("Could not create table: " + se.toString());
+      fail("Could not create table: " + StringUtils.stringifyException(se));
     }
   }
 
@@ -369,13 +375,14 @@ public class BaseSqoopTestCase extends TestCase {
       assertEquals("Error reading inserted value back from db", expectedVal, resultVal);
       assertFalse("Expected at most one row returned", results.next());
     } catch (SQLException sqlE) {
-      fail("Got SQLException: " + sqlE.toString());
+      fail("Got SQLException: " + StringUtils.stringifyException(sqlE));
     } finally {
       if (null != results) {
         try {
           results.close();
         } catch (SQLException sqlE) {
-          fail("Got SQLException in resultset.close(): " + sqlE.toString());
+          fail("Got SQLException in resultset.close(): "
+              + StringUtils.stringifyException(sqlE));
         }
       }
 
