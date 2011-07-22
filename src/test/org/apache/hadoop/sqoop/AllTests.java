@@ -54,6 +54,7 @@ public final class AllTests  {
     suite.addTestSuite(TestFieldFormatter.class);
     suite.addTestSuite(TestImportOptions.class);
     suite.addTestSuite(TestParseMethods.class);
+    suite.addTestSuite(TestConnFactory.class);
     suite.addTest(ThirdPartyTests.suite());
 
     return suite;

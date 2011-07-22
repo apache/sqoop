@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -40,6 +41,11 @@ import org.apache.hadoop.sqoop.util.ImportError;
 public class Sqoop extends Configured implements Tool {
 
   public static final Log LOG = LogFactory.getLog(Sqoop.class.getName());
+
+  static {
+    Configuration.addDefaultResource("sqoop-default.xml");
+    Configuration.addDefaultResource("sqoop-site.xml");
+  }
 
   private ImportOptions options;
   private ConnManager manager;
@@ -103,7 +109,7 @@ public class Sqoop extends Configured implements Tool {
 
     // Get the connection to the database
     try {
-      manager = ConnFactory.getManager(options);
+      manager = new ConnFactory(getConf()).getManager(options);
     } catch (Exception e) {
       LOG.error("Got error creating database manager: " + e.toString());
       return 1;

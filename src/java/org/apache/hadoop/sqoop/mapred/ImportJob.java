@@ -117,7 +117,7 @@ public class ImportJob {
 
       FileOutputFormat.setOutputPath(job, outputPath);
 
-      ConnManager mgr = ConnFactory.getManager(options);
+      ConnManager mgr = new ConnFactory(conf).getManager(options);
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
         DBConfiguration.configureDB(job, mgr.getDriverClass(), options.getConnectString());
