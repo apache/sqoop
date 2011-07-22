@@ -1,0 +1,134 @@
+== <!--
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+    
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+--> ==
+
+|SIP            | 1                                          |
+|Title          | Providing multiple entry-points into Sqoop |
+|Author         | Aaron Kimball (aaron at cloudera dot com)  |
+|Created        | April 16, 2010                             |
+|Status         | Accepted                                   |
+|Discussion     | "http://github.com/cloudera/sqoop/issues/issue/7":http://github.com/cloudera/sqoop/issues/issue/7 |
+|Implementation | "kimballa/sqoop@faf04bc4":http://github.com/kimballa/sqoop/commit/faf04bc472426f47f9a77febdc6ca0439bda90cc |
+
+h2. Abstract
+
+This SIP proposes breaking the monolithic "sqoop" program entry point into a number of separate programs (e.g., sqoop-import and sqoop-export), to provide users with a clearer set of arguments that affect each operation.
+
+h2. Problem statement
+
+The single "sqoop" program takes a large number of arguments which control all aspects of its operation. This has now grown into several different operations. This single program can:
+
+* generate code
+* import from an RDBMS to HDFS
+* export from HDFS to an RDBMS
+* manipulate Hive metadata and interact with HDFS files
+* query databases for metadata (e.g., @--list-tables@)
+
+As the number of different operations supported by sqoop grows, additional arguments will be required to handle each of these new operations. Furthermore, as each operation provides the user with more fine-grained control, the number of operation-specific arguments will increase. It is growing difficult to know which arguments one should set to effect a particular operation.
+
+Therefore, I propose that we break out operations into separate program entry points (e.g., sqoop-import, sqoop-export, sqoop-codegen, etc).
+
+h2. Specification
+
+h3. User-facing changes
+
+An abstract class called @SqoopTool@ represents a single operation that can be performed. It has a @run()@ method that returns a status integer, where 0 is success and non-zero is a failure code. A static, global mapping from strings to @SqoopTool@ instances determines what "subprogram" to run.
+
+The main @bin/sqoop@ program will accept as its first positional argument the name of the subprogram to run. e.g., @bin/sqoop import --table ... --connect ...@. This will dispatch to the @SqoopTool@ implementation bound to the string @"import"@.
+
+A @help@ subprogram will list all available tools.
+
+For convenience, users will be provided with git-style @bin/sqoop-tool@ programs (e.g., @bin/sqoop-import@, @bin/sqoop-export@, etc).
+
+h3. API changes
+
+Currently the entire set of arguments passed to Sqoop are manually processed in the @SqoopOptions@ class. This class also validates the arguments, prints the usage message for Sqoop, as well as stores the argument values.
+
+Different subprograms will require different (but overlapping) sets of arguments. Rather than create several different @FooOptions@ classes which redundantly store argument values, the single @SqoopOptions@ should remain as the store for all program initialization state. However, configuration of the @SqoopOptions@ will be left to the @SqoopTool@ implementations. Each @SqoopTool@ should expose a @configureOptions()@ method which configures a Commons-CLI @Options@ object to retrieve arguments from the command line. It then generates the appropriate @SqoopOptions@ based on the actual arguments in its @applyOptions()@ method. Finally, these values are validated in the @validateOptions()@ method; mutually exclusive arguments, arguments with out-of-range values, etc. are signalled here.
+
+Common methods from an abstract base class (@BaseSqoopTool@) will configure, apply and verify all options which are common to all Sqoop programs (e.g., the connect string, username, and password for the database).
+
+
+h3. Clarifications
+
+* The current Sqoop program will perform possibly multiple operations in series. e.g., the default control-flow will both generate code as well as perform an import. By splitting Sqoop into multiple subprograms, it should still be possible for one subprogram to invoke another.
+* Options are also currently extracted using Hadoop's @GenericOptionsParser@ as applied through @ToolRunner@. Sqoop will still use  @ToolRunner@ to process all generic options before yielding to the internal options parsing logic. Due to subtleties in how @ToolRunner@ interacts with some argument parsing, it is recommended to run Sqoop through the @public static int Sqoop.runSqoop(Sqoop sqoop, String [] argv)@ method which captures some arguments which @ToolRunner@ and @GenericOptionsParser@ would inadvertently strip out (specifically, the @"--"@ argument which separates normal arguments from subprogram arguments would be lost).  @runSqoop()@ then uses @ToolRunner.run()@ in the usual way. If subprogram arguments are not required, then @ToolRunner@ can be used directly.
+
+
+h3. Listings
+
+The proposed SqoopTool API can be summarized thusly:
+
+bc.. import org.apache.hadoop.sqoop.cli.ToolOptions;
+
+public abstract class SqoopTool {
+
+  /** Main body of code to run the tool. */  
+  public abstract int run(SqoopOptions options);
+
+  /** Configure the command-line arguments we expect to receive.
+   * ToolOptions is a wrapper around org.apache.commons.cli.Options
+   * that contains some additional information about option families.
+   */
+  public void configureOptions(ToolOptions opts);
+
+  /** Generate the SqoopOptions containing actual argument values from
+   * the Options extracted into a CommandLine. 
+   * @param in the CLI CommandLine that contain the user's arguments.
+   * @param out the SqoopOptions with all fields applied.
+   */
+  public void applyOptions(CommandLine in, SqoopOptions out);
+
+  /** Print a usage message for this tool to the console.
+   * @param options the configured options for this tool.
+   */
+  public void printHelp(ToolOptions options);
+
+  /**
+   * Validates options and ensures that any required options are
+   * present and that any mutually-exclusive options are not selected.
+   * @throws InvalidOptionsException if there's a problem.
+   */
+  public void validateOptions(SqoopOptions options)
+      throws InvalidOptionsException;
+}
+
+p. This uses the Apache Commons CLI argument parsing library. The plan is to use v1.2 (the current stable release), as this is already included with and used by Hadoop.
+
+h2. Compatibility Issues
+
+This is an incompatible change. Existing program arguments to Sqoop will cease to function as expected. For example, we currently run imports and exports like this:
+
+bc.. bin/sqoop --connect jdbc://someserver/db --table sometable # import
+bin/sqoop --connect jdbc://someserver/db --table othertable --export-dir /otherdata # export
+
+p. Both of these commands will return an error after this change, because we have not specified the subprogram to run. After the conversion, these operations would be effected with:
+
+bc.. bin/sqoop import --connect jdbc://someserver/db --table sometable
+bin/sqoop export --connect jdbc://someserver/db --table othertable --export-dir /otherdata
+
+p. As Sqoop has not had a formal "release," I believe this incompatibility to be acceptable. As this proposes to restructure the argument-parsing semantics of Sqoop, I do not believe it would be in the best interest of the project to maintain the existing argument structure for backwards-compatibility reasons.
+
+Unversioned releases of Sqoop have been bundled with releases of Cloudera's Distribution for Hadoop. The version of Sqoop packaged in the still-beta CDH3 would be affected by this change. The version of Sqoop packaged in the now-stable CDH2 would not see this backported.
+
+h2. Test Plan
+
+A large number of the presently-available unit tests are end-to-end tests of a Sqoop subprogram; they actually pass an array of arguments to the @Sqoop.main()@ method to control its execution. These existing tests cover all functionality. The functionality of Sqoop is not expected to change as a result of this refactoring. Therefore, the existing tests will have their argument lists updated to the new argument sets; when all tests pass, then all currently-available functionality should be preserved.
+
+h2. Discussion
+
+Please provide feedback and comments at "http://github.com/cloudera/sqoop/issues/issue/7":http://github.com/cloudera/sqoop/issues/issue/7
+
