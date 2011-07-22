@@ -17,18 +17,14 @@
 ////
 
 
-Introduction
-------------
 
-Sqoop is a tool designed to help users of large data import
-existing relational databases into their Hadoop clusters. Sqoop uses
-JDBC to connect to a database, examine each table's schema, and
-auto-generate the necessary classes to import data into HDFS. It
-then instantiates a MapReduce job to read tables from the database
-via the DBInputFormat (JDBC-based InputFormat). Tables are read
-into a set of files loaded into HDFS. Both SequenceFile and
-text-based targets are supported. Sqoop also supports high-performance
-imports from select databases including MySQL.
+Schema Definition in Hive
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This document describes how to get started using Sqoop to import
-your data into Hadoop.
+Hive users will note that there is not a one-to-one mapping between
+SQL types and Hive types. In general, SQL types that do not have a
+direct mapping (for example, +DATE+, +TIME+, and +TIMESTAMP+) will be coerced to
++STRING+ in Hive. The +NUMERIC+ and +DECIMAL+ SQL types will be coerced to
++DOUBLE+. In these cases, Sqoop will emit a warning in its log messages
+informing you of the loss of precision.
+

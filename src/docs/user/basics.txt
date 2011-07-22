@@ -1,0 +1,63 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Basic Usage
+-----------
+
+With Sqoop, you can _import_ data from a relational database system into
+HDFS. The input to the import process is a database table. Sqoop
+will read the table row-by-row into HDFS. The output of this import
+process is a set of files containing a copy of the imported table.
+The import process is performed in parallel. For this reason, the
+output will be in multiple files. These files may be delimited text
+files (for example, with commas or tabs separating each field), or
+binary SequenceFiles containing serialized record data.
+
+A by-product of the import process is a generated Java class which
+can encapsulate one row of the imported table. This class is used
+during the import process by Sqoop itself. The Java source code for
+this class is also provided to you, for use in subsequent MapReduce
+processing of the data. This class can serialize and deserialize data
+to and from the SequenceFile format. It can also parse the
+delimited-text form of a record. These abilities allow you to quickly
+develop MapReduce applications that use the HDFS-stored records in
+your processing pipeline. You are also free to parse the delimiteds
+record data yourself, using any other tools you prefer.
+
+After manipulating the imported records (for example, with MapReduce
+or Hive) you may have a result data set which you can then _export_
+back to the relational database. Sqoop's export process will read
+a set of delimited text files from HDFS in parallel, parse them into
+records, and insert them as new rows in a target database table, for
+consumption by external applications or users.
+
+Sqoop includes some other commands which allow you to inspect the
+database you are working with. For example, you can list the available
+database schemas (with the +sqoop-list-databases+ tool) and tables
+within a schema (with the +sqoop-list-tables+ tool). Sqoop also
+includes a primitive SQL execution shell (the +sqoop-eval+ tool).
+
+Most aspects of the import, code generation, and export processes can
+be customized. You can control the specific row range or columns imported.
+You can specify particular delimiters and escape characters for the
+file-based representation of the data, as well as the file format
+used.  You can also control the class or package names used in
+generated code. Subsequent sections of this document explain how to
+specify these and other arguments to Sqoop.
+
+

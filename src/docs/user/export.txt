@@ -1,0 +1,153 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
++sqoop-export+
+--------------
+
+
+Purpose
+~~~~~~~
+
+The +export+ tool exports a set of files from HDFS back to an RDBMS.
+The target table must already exist in the database. The input files
+are read and parsed into a set of records according to the
+user-specified delimiters. These are then transformed into a set of
++INSERT+ statements that inject the records into the database.
+
+Syntax
+~~~~~~
+
+----
+$ sqoop export (generic-args) (import-args)
+$ sqoop-export (generic-args) (import-args)
+----
+
+Although the Hadoop generic arguments must preceed any export arguments,
+the export arguments can be entered in any order with respect to one
+another.
+
+
+include::common-args.txt[]
+
+.Export control arguments:
+[grid="all"]
+`-------------------------`------------------------------------------
+Argument                  Description
+---------------------------------------------------------------------
++\--direct+               Use direct export fast path
++\--export-dir <dir>+     HDFS source path for the export
++-m,\--num-mappers <n>+   Use 'n' map tasks to export in parallel
++\--table <table-name>+   Table to populate
+---------------------------------------------------------------------
+
+The +\--table+ and +\--export-dir+ arguments are required. These
+specify the table to populate in the database, and the
+directory in HDFS that contains the source data.
+
+You can control the number of mappers independently from the number of
+files present in the directory. Export performance depends on the
+degree of parallelism. By default, Sqoop will use four tasks in
+parallel for the export process. This may not be optimal; you will
+need to experiment with your own particular setup. Additional tasks
+may offer better concurrency, but if the database is already
+bottlenecked on updating indices, invoking triggers, and so on, then
+additional load may decrease performance. The +\--num-mappers+ or +-m+
+arguments control the number of map tasks, which is the degree of
+parallelism used.
+
+MySQL provides a direct mode for exports as well, using the
++mysqlimport+ tool. When exporting to MySQL, use the +\--direct+ argument
+to specify this codepath. This may be
+higher-performance than the standard JDBC codepath. 
+
+include::input-args.txt[]
+
+include::output-args.txt[]
+
+Sqoop automatically generates code to parse and interpret records of the
+files containing the data to be exported back to the database. If
+these files were created with non-default delimiters (comma-separated
+fields with newline-separated records), you should specify
+the same delimiters again so that Sqoop can parse your files.
+
+If you specify incorrect delimiters, Sqoop will fail to find enough
+columns per line. This will cause export map tasks to fail by throwing
++ParseExceptions+.
+
+include::codegen-args.txt[]
+
+If the records to be exported were generated as the result of a
+previous import, then the original generated class can be used to read
+the data back. Specifying +\--jar-file+ and +\--class-name+ obviate
+the need to specify delimiters in this case.
+
+Exports and Transactions
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Exports are performed by multiple writers in parallel. Each writer
+uses a separate connection to the database; these have separate
+transactions from one another. Sqoop uses the multi-row +INSERT+
+syntax to insert up to 100 records per statement. Every 100
+statements, the current transaction within a writer task is committed,
+causing a commit every 10,000 rows. This ensures that transaction
+buffers do not grow without bound, and cause out-of-memory conditions.
+Therefore, an export is not an atomic process. Partial results from
+the export will become visible before the export is complete.
+
+Failed Exports
+~~~~~~~~~~~~~~
+
+Exports may fail for a number of reasons:
+
+- Loss of connectivity from the Hadoop cluster to the database (either
+  due to hardware fault, or server software crashes)
+- Attempting to +INSERT+ a row which violates a consistency constraint
+  (for example, inserting a duplicate primary key value)
+- Attempting to parse an incomplete or malformed record from the HDFS
+  source data
+- Attempting to parse records using incorrect delimiters
+- Capacity issues (such as insufficient RAM or disk space)
+
+If an export map task fails due to these or other reasons, it will
+cause the export job to fail. The results of a failed export are
+undefined. Each export map task operates in a separate transaction.
+Furthermore, individual map tasks +commit+ their current transaction
+periodically. If a task fails, the current transaction will be rolled
+back. Any previously-committed transactions will remain durable in the
+database, leading to a partially-complete export.
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+A basic export to populate a table named +bar+:
+
+----
+$ sqoop export --connect jdbc:mysql://db.example.com/foo --table bar  \
+    --export-dir /results/bar_data
+----
+
+This example takes the files in +/results/bar_data+ and injects their
+contents in to the +bar+ table in the +foo+ database on +db.example.com+.
+The target table must already exist in the database. Sqoop performs
+a set of +INSERT INTO+ operations, without regard for existing content. If
+Sqoop attempts to insert rows which violate constraints in the database
+(for example, a particular primary key value already exists), then the export
+fails.
+
+

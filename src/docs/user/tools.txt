@@ -1,0 +1,168 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Sqoop Tools
+-----------
+
+Sqoop is a collection of related tools. To use Sqoop, you specify the
+tool you want to use and the arguments that control the tool.
+
+If Sqoop is compiled from its own source, you can run Sqoop without a formal
+installation process by running the +bin/sqoop+ program. Users
+of a packaged deployment of Sqoop (such as an RPM shipped with Cloudera's
+Distribution for Hadoop) will see this program installed as +/usr/bin/sqoop+.
+The remainder of this documentation will refer to this program as
++sqoop+. For example:
+
+----
+$ sqoop tool-name [tool-arguments]
+----
+
+NOTE: The following examples that begin with a +$+ character indicate
+that the commands must be entered at a terminal prompt (such as
++bash+). The +$+ character represents the prompt itself; you should
+not start these commands by typing a +$+. You can also enter commands
+inline in the text of a paragraph; for example, +sqoop help+. These
+examples do not show a +$+ prefix, but you should enter them the same
+way.  Don't confuse the +$+ shell prompt in the examples with the +$+
+that precedes an environment variable name. For example, the string
+literal +$HADOOP_HOME+ includes a "+$+".
+
+Sqoop ships with a help tool. To display a list of all available
+tools, type the following command:
+
+----
+$ sqoop help
+usage: sqoop COMMAND [ARGS]
+
+Available commands:
+  codegen            Generate code to interact with database records
+  create-hive-table  Import a table definition into Hive
+  eval               Evaluate a SQL statement and display the results
+  export             Export an HDFS directory to a database table
+  help               List available commands
+  import             Import a table from a database to HDFS
+  import-all-tables  Import tables from a database to HDFS
+  list-databases     List available databases on a server
+  list-tables        List available tables in a database
+  version            Display version information
+
+See 'sqoop help COMMAND' for information on a specific command.
+----
+
+You can display help for a specific tool by entering: +sqoop help
+(tool-name)+; for example, +sqoop help import+.
+
+You can also add the +\--help+ argument to any command: +sqoop import
+\--help+. 
+
+Using Command Aliases
+~~~~~~~~~~~~~~~~~~~~~
+
+In addition to typing the +sqoop (toolname)+ syntax, you can use alias
+scripts that specify the +sqoop-(toolname)+ syntax. For example, the
+scripts +sqoop-import+, +sqoop-export+, etc. each select a specific
+tool.
+
+Controlling the Hadoop Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You invoke Sqoop through the program launch capability provided by
+Hadoop. The +sqoop+ command-line program is a wrapper which runs the
++bin/hadoop+ script shipped with Hadoop. If you have multiple
+installations of Hadoop present on your machine, you can select the
+Hadoop installation by setting the +$HADOOP_HOME+ environment
+variable.
+
+For example:
+
+----
+$ HADOOP_HOME=/path/to/some/hadoop sqoop import --arguments...
+----
+
+or:
+
+----
+$ export HADOOP_HOME=/some/path/to/hadoop
+$ sqoop import --arguments...
+-----
+
+If +$HADOOP_HOME+ is not set, Sqoop will use the default installation
+location for Cloudera's Distribution for Hadoop, +/usr/lib/hadoop+.
+
+The active Hadoop configuration is loaded from +$HADOOP_HOME/conf/+,
+unless the +$HADOOP_CONF_DIR+ environment variable is set.
+
+
+Using Generic and Specific Arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To control the operation of each Sqoop tool, you use generic and
+specific arguments.
+
+For example:
+
+----
+$ sqoop help import
+usage: sqoop import [GENERIC-ARGS] [TOOL-ARGS]
+
+Common arguments:
+   --connect <jdbc-uri>     Specify JDBC connect string
+   --driver <class-name>    Manually specify JDBC driver class to use
+   --hadoop-home <dir>      Override $HADOOP_HOME
+   --help                   Print usage instructions
+-P                          Read password from console
+   --password <password>    Set authentication password
+   --username <username>    Set authentication username
+   --verbose                Print more information while working
+
+[...]
+
+Generic Hadoop command-line arguments:
+(must preceed any tool-specific arguments)
+Generic options supported are
+-conf <configuration file>     specify an application configuration file
+-D <property=value>            use value for given property
+-fs <local|namenode:port>      specify a namenode
+-jt <local|jobtracker:port>    specify a job tracker
+-files <comma separated list of files>    specify comma separated files to be copied to the map reduce cluster
+-libjars <comma separated list of jars>    specify comma separated jar files to include in the classpath.
+-archives <comma separated list of archives>    specify comma separated archives to be unarchived on the compute machines.
+
+The general command line syntax is
+bin/hadoop command [genericOptions] [commandOptions]
+----
+
+You must supply the generic arguments +-conf+, +-D+, and so on after the
+tool name but *before* any tool-specific arguments (such as
++\--connect+). Note that generic Hadoop arguments are preceeded by a
+single dash character (+-+), whereas tool-specific arguments start
+with two dashes (+\--+), unless they are single character arguments such as +-P+.
+
+The +-conf+, +-D+, +-fs+ and +-jt+ arguments control the configuration
+and Hadoop server settings. The +-files+, +-libjars+, and +-archives+
+arguments are not typically used with Sqoop, but they are included as
+part of Hadoop's internal argument-parsing system.
+
+
+Using Tools
+~~~~~~~~~~~
+
+The following sections will describe each tool's operation. The
+tools are listed in the most likely order you will find them useful.
+

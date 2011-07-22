@@ -1,0 +1,45 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
+Introduction
+------------
+
+Sqoop is a tool designed to transfer data between Hadoop and
+relational databases. You can use Sqoop to import data from a
+relational database management system (RDBMS) such as MySQL or Oracle
+into the Hadoop Distributed File System (HDFS), 
+transform the data in Hadoop MapReduce, and then export the data back
+into an RDBMS.
+
+Sqoop automates most of this process, relying on the database to
+describe the schema for the data to be imported. Sqoop uses MapReduce
+to import and export the data, which provides parallel operation as
+well as fault tolerance.
+
+This document describes how to get started using Sqoop to move data
+between databases and Hadoop and provides reference information for
+the operation of the Sqoop command-line tool suite. This document is
+intended for:
+
+- System and application programmers
+- System administrators
+- Database administrators
+- Data analysts
+- Data engineers
+

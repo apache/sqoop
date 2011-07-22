@@ -102,7 +102,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String PACKAGE_NAME_ARG = "package-name";
   public static final String CLASS_NAME_ARG = "class-name";
   public static final String JAR_FILE_NAME_ARG = "jar-file";
-  public static final String DEBUG_SQL_ARG = "expr";
+  public static final String DEBUG_SQL_ARG = "query";
   public static final String DEBUG_SQL_SHORT_ARG = "e";
   public static final String VERBOSE_ARG = "verbose";
   public static final String HELP_ARG = "help";
@@ -399,7 +399,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
     if (!multiTable) {
       codeGenOpts.addOption(OptionBuilder.withArgName("name")
           .hasArg()
-          .withDescription("Sets the generated class name."
+          .withDescription("Sets the generated class name. "
           + "This overrides --" + PACKAGE_NAME_ARG + ". When combined "
           + "with --" + JAR_FILE_NAME_ARG + ", sets the input class.")
           .withLongOpt(CLASS_NAME_ARG)

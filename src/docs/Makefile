@@ -16,28 +16,40 @@
 BUILDROOT=../../build
 BUILD_DIR=$(BUILDROOT)/docs
 
-all: man userguide
+all: man userguide devguide
 
 man: $(BUILD_DIR)/sqoop.1.gz
 
 userguide: $(BUILD_DIR)/SqoopUserGuide.html
 
-$(BUILD_DIR)/sqoop.1.gz: Sqoop-manpage.txt *formatting*.txt
-	asciidoc -b docbook -d manpage Sqoop-manpage.txt
+devguide: $(BUILD_DIR)/SqoopDevGuide.html
+
+$(BUILD_DIR)/sqoop.1.gz: user/Sqoop-manpage.txt user/*formatting*.txt
+	asciidoc -b docbook -d manpage user/Sqoop-manpage.txt
 	xmlto man Sqoop-manpage.xml
 	gzip sqoop.1
 	rm Sqoop-manpage.xml
 	mkdir -p $(BUILD_DIR)
 	mv sqoop.1.gz $(BUILD_DIR)
 
-$(BUILD_DIR)/SqoopUserGuide.html: SqoopUserGuide.txt *.txt
-	asciidoc SqoopUserGuide.txt
+$(BUILD_DIR)/SqoopUserGuide.html: user/*.txt
+	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
+		user/SqoopUserGuide.txt
 	mkdir -p $(BUILD_DIR)
-	mv SqoopUserGuide.html $(BUILD_DIR)
+	mv user/SqoopUserGuide.html $(BUILD_DIR)
+
+$(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
+	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
+		dev/SqoopDevGuide.txt
+	mkdir -p $(BUILD_DIR)
+	mv dev/SqoopDevGuide.html $(BUILD_DIR)
 
 clean:
 	-rm $(BUILD_DIR)/sqoop.1.gz
 	-rm $(BUILD_DIR)/SqoopUserGuide.html
+	-rm $(BUILD_DIR)/SqoopUserGuide.pdf
+	-rm user/SqoopUserGuide.html
+	-rm dev/SqoopDevGuide.html
 
-.PHONY: all man userguide clean
+.PHONY: all man userguide devguide clean
 

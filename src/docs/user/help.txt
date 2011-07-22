@@ -1,0 +1,82 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
++sqoop-help+
+------------
+
+Purpose
+~~~~~~~
+
+List tools available in Sqoop and explain their usage.
+
+Syntax
+~~~~~~
+
+----
+$ sqoop help [tool-name]
+$ sqoop-help [tool-name]
+----
+
+If no tool name is provided (for example, the user runs +sqoop help+), then
+the available tools are listed. With a tool name, the usage
+instructions for that specific tool are presented on the console.
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+List available tools:
+
+----
+$ sqoop help
+usage: sqoop COMMAND [ARGS]
+
+Available commands:
+  codegen            Generate code to interact with database records
+  create-hive-table  Import a table definition into Hive
+  eval               Evaluate a SQL statement and display the results
+  export             Export an HDFS directory to a database table
+
+...
+
+See 'sqoop help COMMAND' for information on a specific command.
+----
+
+Display usage instructions for the +import+ tool:
+
+----
+$ bin/sqoop help import
+usage: sqoop import [GENERIC-ARGS] [TOOL-ARGS]
+
+Common arguments:
+   --connect <jdbc-uri>     Specify JDBC connect string
+   --driver <class-name>    Manually specify JDBC driver class to use
+   --hadoop-home <dir>      Override $HADOOP_HOME
+   --help                   Print usage instructions
+-P                          Read password from console
+   --password <password>    Set authentication password
+   --username <username>    Set authentication username
+   --verbose                Print more information while working
+
+Import control arguments:
+   --as-sequencefile             Imports data to SequenceFiles
+   --as-textfile                 Imports data as plain text (default)
+...
+----
+
+

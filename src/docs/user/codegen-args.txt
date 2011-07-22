@@ -17,18 +17,17 @@
 ////
 
 
-Listing Available Tables
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Within a database, you can list the tables available for import with
-the +--list-tables+ command. The following example shows four tables available
-within the "employees" example database:
-
-----
-$ sqoop --connect jdbc:mysql://database.example.com/employees --list-tables
-employee_names
-payroll_checks
-job_descriptions
-office_supplies
-----
+.Code generation arguments:
+[grid="all"]
+`------------------------`-----------------------------------------------
+Argument                 Description
+-------------------------------------------------------------------------
++\--bindir <dir>+        Output directory for compiled objects
++\--class-name <name>+   Sets the generated class name. This overrides\
+                         +\--package-name+. When combined with \
+                         +\--jar-file+, sets the input class.
++\--jar-file <file>+     Disable code generation; use specified jar
++\--outdir <dir>+        Output directory for generated code
++\--package-name <name>+ Put auto-generated classes in this package
+-------------------------------------------------------------------------
 

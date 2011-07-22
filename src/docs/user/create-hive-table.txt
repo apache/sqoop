@@ -1,0 +1,82 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
++sqoop-create-hive-table+
+-------------------------
+
+
+Purpose
+~~~~~~~
+
+The +create-hive-table+ tool populates a Hive metastore with a
+definition for a table based on a database table previously imported
+to HDFS, or one planned to be imported. This effectively performs the
+"+\--hive-import+" step of +sqoop-import+ without running the
+preceeding import.
+
+If data was already loaded to HDFS, you can use this tool to finish
+the pipeline of importing the data to Hive. You can also create Hive tables
+with this tool; data then can be imported and populated into
+the target after a preprocessing step run by the user.
+
+Syntax
+~~~~~~
+
+----
+$ sqoop create-hive-table (generic-args) (create-hive-table-args)
+$ sqoop-create-hive-table (generic-args) (create-hive-table-args)
+----
+
+Although the Hadoop generic arguments must preceed any create-hive-table
+arguments, the create-hive-table arguments can be entered in any order
+with respect to one another.
+
+
+include::common-args.txt[]
+
+.Hive arguments:
+[grid="all"]
+`-----------------------------`-------------------------------------------
+Argument                      Description
+--------------------------------------------------------------------------
++\--hive-home <dir>+          Override +$HIVE_HOME+
++\--hive-overwrite+           Overwrite existing data in the Hive table.
++\--hive-table <table-name>+  Sets the table name to use when importing \
+                              to Hive.
++\--table+                    The database table to read the \
+                              definition from.                             
+--------------------------------------------------------------------------
+
+include::output-args.txt[]
+
+Do not use enclosed-by or escaped-by delimiters with output formatting
+arguments used to import to Hive. Hive cannot currently parse them.
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+Define in Hive a table named +emps+ with a definition based on a
+database table named +employees+:
+
+----
+$ sqoop create-hive-table --connect jdbc:mysql://db.example.com/corp \
+    --table employees --hive-table emps
+----
+
+

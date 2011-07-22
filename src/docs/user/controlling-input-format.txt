@@ -29,14 +29,14 @@ include::input-formatting-args.txt[]
 
 If you have already imported data into HDFS in a text-based
 representation and want to change the delimiters being used, you
-should regenerate the class via `sqoop --generate-only`, specifying
-the new delimiters with +--fields-terminated-by+, etc., and the old
-delimiters with +--input-fields-terminated-by+, etc. Then run a
+should regenerate the class via `sqoop \--generate-only`, specifying
+the new delimiters with +\--fields-terminated-by+, etc., and the old
+delimiters with +\--input-fields-terminated-by+, etc. Then run a
 MapReduce job where your mapper creates an instance of your record
 class, uses its +parse()+ method to read the fields using the old
 delimiters, and emits a new +Text+ output value via the record's
 +toString()+ method, which will use the new delimiters. You'll then
 want to regenerate the class another time without the
-+--input-fields-terminated-by+ specified so that the new delimiters
++\--input-fields-terminated-by+ specified so that the new delimiters
 are used for both input and output.
 

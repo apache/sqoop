@@ -1092,7 +1092,11 @@ public final class LobFile {
     public abstract Path getPath();
 
     /**
-     * Report the current position in the file.
+     * Report the current position in the file. Note that the internal
+     * cursor may move in an unpredictable fashion; e.g., to fetch
+     * additional data from the index stored at the end of the file.
+     * Clients may be more interested in the getRecordOffset() method
+     * which returns the starting offset of the current record.
      * @return the current offset from the start of the file in bytes.
      */
     public abstract long tell() throws IOException;

@@ -1,0 +1,112 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
++sqoop-import-all-tables+
+-------------------------
+
+Purpose
+~~~~~~~
+
+The +import-all-tables+ tool imports a set of tables from an RDBMS to HDFS.
+Data from each table is stored in a separate directory in HDFS.
+
+For the +import-all-tables+ tool to be useful, the following conditions
+must be met:
+
+- Each table must have a single-column primary key.
+- You must intend to import all columns of each table.
+- You must not intend to use non-default splitting column, nor impose
+  any conditions via a +WHERE+ clause.
+
+Syntax
+~~~~~~
+
+----
+$ sqoop import-all-tables (generic-args) (import-args)
+$ sqoop-import-all-tables (generic-args) (import-args)
+----
+
+Although the Hadoop generic arguments must preceed any import arguments,
+the import arguments can be entered in any order with respect to one
+another.
+
+include::common-args.txt[]
+
+.Import control arguments:
+[grid="all"]
+`----------------------------`---------------------------------------
+Argument                     Description
+---------------------------------------------------------------------
++\--as-sequencefile+         Imports data to SequenceFiles
++\--as-textfile+             Imports data as plain text (default)
++\--direct+                  Use direct import fast path
++\--direct-split-size <n>+   Split the input stream every 'n' bytes when\
+                             importing in direct mode
++\--inline-lob-limit <n>+    Set the maximum size for an inline LOB
++-m,\--num-mappers <n>+      Use 'n' map tasks to import in parallel
++\--warehouse-dir <dir>+     HDFS parent for table destination
++-z,\--compress+             Enable compression
+---------------------------------------------------------------------
+
+These arguments behave in the same manner as they do when used for the
++sqoop-import+ tool, but the +\--table+, +\--split-by+, +\--columns+,
+and +\--where+ arguments are invalid for +sqoop-import-all-tables+.
+
+include::output-args.txt[]
+
+include::input-args.txt[]
+
+include::hive-args.txt[]
+
+.Code generation arguments:
+[grid="all"]
+`------------------------`-----------------------------------------------
+Argument                 Description
+-------------------------------------------------------------------------
++\--bindir <dir>+        Output directory for compiled objects
++\--jar-file <file>+     Disable code generation; use specified jar
++\--outdir <dir>+        Output directory for generated code
++\--package-name <name>+ Put auto-generated classes in this package
+-------------------------------------------------------------------------
+
+The +import-all-tables+ tool does not support the +\--class-name+ argument.
+You may, however, specify a package with +\--package-name+ in which all
+generated classes will be placed.
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+Import all tables from the +corp+ database:
+
+----
+$ sqoop import-all-tables --connect jdbc:mysql://db.foo.com/corp
+----
+
+Verifying that it worked:
+
+----
+$ hadoop fs -ls
+Found 4 items
+drwxr-xr-x   - someuser somegrp       0 2010-04-27 17:15 /user/someuser/EMPLOYEES
+drwxr-xr-x   - someuser somegrp       0 2010-04-27 17:15 /user/someuser/PAYCHECKS
+drwxr-xr-x   - someuser somegrp       0 2010-04-27 17:15 /user/someuser/DEPARTMENTS
+drwxr-xr-x   - someuser somegrp       0 2010-04-27 17:15 /user/someuser/OFFICE_SUPPLIES
+----
+
+

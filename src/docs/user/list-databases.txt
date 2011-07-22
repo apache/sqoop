@@ -17,19 +17,39 @@
 ////
 
 
-Listing Available Databases
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
++sqoop-list-databases+
+----------------------
 
-Once connected to a database server, you can list the available
-databases with the +--list-databases+ parameter. This currently is supported
-only by HSQLDB and MySQL. Note that in this case, the connect string does
-not include a database name, just a server address.
+Purpose
+~~~~~~~
+
+List database schemas present on a server.
+
+Syntax
+~~~~~~
 
 ----
-$ sqoop --connect jdbc:mysql://database.example.com/ --list-databases
+$ sqoop list-databases (generic-args) (list-databases-args)
+$ sqoop-list-databases (generic-args) (list-databases-args)
+----
+
+Although the Hadoop generic arguments must preceed any list-databases
+arguments, the list-databases arguments can be entered in any order
+with respect to one another.
+
+include::common-args.txt[]
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+List database schemas available on a MySQL server:
+
+----
+$ sqoop list-databases --connect jdbc:mysql://database.example.com/
 information_schema
 employees
 ----
-_This only works with HSQLDB and MySQL. A vendor-agnostic implementation of
-this function has not yet been implemented._
+
+NOTE: This only works with HSQLDB and MySQL. A vendor-agnostic implementation
+of this function has not yet been implemented.
 

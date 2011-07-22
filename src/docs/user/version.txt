@@ -17,27 +17,32 @@
 ////
 
 
-Generated Class Names
-~~~~~~~~~~~~~~~~~~~~~
++sqoop-version+
+---------------
 
-By default, classes are named after the table they represent. e.g.,
-+sqoop --table foo+ will generate a file named +foo.java+. You can
-override the generated class name with the +--class-name+ argument.
+Purpose
+~~~~~~~
 
-----
-$ sqoop --connect jdbc:mysql://database.example.com/employees \
-  --table employee_names --class-name com.example.EmployeeNames
-----
-_This generates a file named +com/example/EmployeeNames.java+_
+Display version information for Sqoop.
 
-If you want to specify a package name for generated classes, but
-still want them to be named after the table they represent, you
-can instead use the argument +--package-name+:
+Syntax
+~~~~~~
 
 ----
-$ sqoop --connect jdbc:mysql://database.example.com/employees \
-  --table employee_names --package-name com.example
+$ sqoop version
+$ sqoop-version
 ----
-_This generates a file named +com/example/employee_names.java+_
 
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+Display the version:
+
+----
+$ sqoop version
+Sqoop 1.0.0
+git commit id 46b3e06b79a8411320d77c984c3030db47dd1c22
+Compiled by aaron@jargon on Mon May 17 13:43:22 PDT 2010
+----
 

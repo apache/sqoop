@@ -1,0 +1,55 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
+
+Supported Releases
+------------------
+
+This documentation applies to Sqoop v1.0.0 (June 2010).
+
+Sqoop Releases
+--------------
+
+Sqoop is an open source software product of Cloudera, Inc. Software
+development for Sqoop occurs at http://github.com/cloudera/sqoop.  At
+that site, you can obtain:
+
+- New releases of Sqoop as well as its most recent source code
+- An issue tracker 
+- A wiki that contains Sqoop documentation 
+
+
+Prerequisites
+-------------
+
+The following prerequisite knowledge is required for Sqoop:
+
+- Software development in Java
+* Familiarity with JDBC
+* Familiarity with Hadoop's APIs (including the "new" MapReduce API of
+  0.20+)
+- Relational database management systems and SQL
+
+This document assumes you are using a Linux or Linux-like environment.
+If you are using Windows, you may be able to use cygwin to accomplish
+most of the following tasks. If you are using Mac OS X, you should see
+few (if any) compatibility errors. Sqoop is predominantly operated and
+tested on Linux. 
+
+

@@ -1,0 +1,184 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Compatibility Notes
+-------------------
+
+Sqoop uses JDBC to connect to databases and adheres to
+published standards as much as possible. For databases which do not
+support standards-compliant SQL, Sqoop uses alternate codepaths to
+provide functionality. In general, Sqoop is believed to be compatible
+with a large number of databases, but it is tested with only a few.
+
+Nonetheless, several database-specific decisions were made in the
+implementation of Sqoop, and some databases offer additional settings
+which are extensions to the standard.
+
+This section describes the databases tested with Sqoop, any
+exceptions in Sqoop's handling of each database relative to the
+norm, and any database-specific settings available in Sqoop.
+
+Supported Databases
+~~~~~~~~~~~~~~~~~~~
+
+While JDBC is a compatibility layer that allows a program to access
+many different databases through a common API, slight differences in
+the SQL language spoken by each database may mean that Sqoop can't use
+every database out of the box, or that some databases may be used in
+an inefficient manner.
+
+When you provide a connect string to Sqoop, it inspects the protocol scheme to
+determine appropriate vendor-specific logic to use. If Sqoop knows about
+a given database, it will work automatically. If not, you may need to
+specify the driver class to load via +\--driver+. This will use a generic
+code path which will use standard SQL to access the database. Sqoop provides
+some databases with faster, non-JDBC-based access mechanisms. These can be
+enabled by specfying the +\--direct+ parameter.
+
+Sqoop includes vendor-specific support for the following databases:
+
+[grid="all"]
+`-----------`--------`--------------------`---------------------
+Database    version  +\--direct+ support? connect string matches
+----------------------------------------------------------------
+HSQLDB      1.8.0+   No                   +jdbc:hsqldb:*//+
+MySQL       5.0+     Yes                  +jdbc:mysql://+
+Oracle      10.2.0+  No                   +jdbc:oracle:*//+
+PostgreSQL  8.3+     Yes (import only)    +jdbc:postgresql://+
+----------------------------------------------------------------
+
+Sqoop may work with older versions of the databases listed, but we have
+only tested it with the versions specified above.
+
+Even if Sqoop supports a database internally, you may still need to
+install the database vendor's JDBC driver in your +$HADOOP_HOME/lib+
+path.
+
+MySQL
+~~~~~
+
+JDBC Driver: http://www.mysql.com/downloads/connector/j/[MySQL
+Connector/J]
+
+MySQL v5.0 and above offers very thorough coverage by Sqoop. In builds
+of Sqoop included with Cloudera's Distribution for Hadoop, the
+Connector/J JDBC driver is included with the installation. 
+
+zeroDateTimeBehavior
+^^^^^^^^^^^^^^^^^^^^
+
+MySQL allows values of +'0000-00-00'+ for +DATE+ columns, which is a
+non-standard extension to SQL. When communicated via JDBC, these
+values are handled in one of three different ways:
+
+- Convert to +NULL+.
+- Throw an exception in the client.
+- Round to the nearest legal date (+'0001-01-01'+).
+
+You specify the behavior by using the +zeroDateTimeBehavior+
+property of the connect string. If a +zeroDateTimeBehavior+ property
+is not specified, Sqoop uses the +convertToNull+ behavior.
+
+You can override this behavior. For example:
+
+----
+$ sqoop import --table foo \
+    --connect jdbc:mysql://db.example.com/someDb?zeroDateTimeBehavior=round
+----
+
++UNSIGNED+ columns
+^^^^^^^^^^^^^^^^^^
+
+Columns with type +UNSIGNED+ in MySQL can hold values between 0 and
+2^32 (+4294967295+), but the database will report the data type to Sqoop
+as +INTEGER+, which will can hold values between +-2147483648+ and
++\+2147483647+. Sqoop cannot currently import +UNSIGNED+ values above
++2147483647+.
+
++BLOB+ and +CLOB+ columns
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop's direct mode does not support imports of +BLOB+, +CLOB+, or
++LONGVARBINARY+ columns. Use JDBC-based imports for these
+columns; do not supply the +\--direct+ argument to the import tool.
+
+
+Direct-mode Transactions
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+For performance, each writer will commit the current transaction
+approximately every 32 MB of exported data. You can control this
+by specifying the following argument _before_ any tool-specific arguments: +-D
+sqoop.mysql.export.checkpoint.bytes=size+, where _size_ is a value in
+bytes. Set _size_ to 0 to disable intermediate checkpoints,
+but individual files being exported will continue to be committed
+independently of one another.
+
+IMPORTANT: Note that any arguments to Sqoop that are of the form +-D
+parameter=value+ are Hadoop _generic arguments_ and must appear before
+any tool-specific arguments (for example, +\--connect+, +\--table+, etc).
+
+
+Oracle
+~~~~~~
+
+JDBC Driver:
+http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/jdbc_112010.html[Oracle
+JDBC Thin Driver] - Sqoop is compatible with +ojdbc6.jar+.
+
+Sqoop has been tested with Oracle 10.2.0 Express Edition. Oracle is
+notable in its different approach to SQL from the ANSI standard, and
+its non-standard JDBC driver. Therefore, several features work
+differently.
+
+Dates and Times
+^^^^^^^^^^^^^^^
+
+Oracle JDBC represents +DATE+ and +TIME+ SQL types as +TIMESTAMP+
+values. Any +DATE+ columns in an Oracle database will be imported as a
++TIMESTAMP+ in Sqoop, and Sqoop-generated code will store these values
+in +java.sql.Timestamp+ fields.
+
+When exporting data back to a database, Sqoop parses text fields as
++TIMESTAMP+ types (with the form +yyyy-mm-dd HH:MM:SS.ffffffff+) even
+if you expect these fields to be formatted with the JDBC date escape
+format of +yyyy-mm-dd+. Dates exported to Oracle should be formatted
+as full timestamps.
+
+Oracle also includes the additional date/time types +TIMESTAMP WITH
+TIMEZONE+ and +TIMESTAMP WITH LOCAL TIMEZONE+. To support these types,
+the user's session timezone must be specified. By default, Sqoop will
+specify the timezone +"GMT"+ to Oracle. You can override this setting
+by specifying a Hadoop property +oracle.sessionTimeZone+ on the
+command-line when running a Sqoop job. For example:
+
+----
+$ sqoop import -D oracle.sessionTimeZone=America/Los_Angeles \
+    --connect jdbc:oracle:thin:@//db.example.com/foo --table bar
+----
+
+Note that Hadoop parameters (+-D ...+) are _generic arguments_ and
+must appear before the tool-specific arguments (+\--connect+,
++\--table+, and so on).
+
+Legal values for the session timezone string are enumerated at
+http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14225/applocaledata.htm#i637736[].
+
+
+include::hive-notes.txt[]
+

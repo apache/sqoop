@@ -1,0 +1,500 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
++sqoop-import+
+--------------
+
+Purpose
+~~~~~~~
+
+The +import+ tool imports an individual table from an RDBMS to HDFS.
+Each row from a table is represented as a separate record in HDFS.
+Records can be stored as text files (one record per line), or in
+binary representation in SequenceFiles.
+
+Syntax
+~~~~~~
+
+----
+$ sqoop import (generic-args) (import-args)
+$ sqoop-import (generic-args) (import-args)
+----
+
+While the Hadoop generic arguments must preceed any import arguments,
+you can type the import arguments in any order with respect to one
+another.
+
+NOTE: In this document, arguments are grouped into collections
+organized by function. Some collections are present in several tools
+(for example, the "common" arguments). An extended description of their
+functionality is given only on the first presentation in this
+document.
+
+include::common-args.txt[]
+
+include::connecting.txt[]
+
+.Import control arguments:
+[grid="all"]
+`-----------------------------`--------------------------------------
+Argument                      Description
+---------------------------------------------------------------------
++\--as-sequencefile+          Imports data to SequenceFiles
++\--as-textfile+              Imports data as plain text (default)
++\--columns <col,col,col...>+ Columns to import from table
++\--direct+                   Use direct import fast path
++\--direct-split-size <n>+    Split the input stream every 'n' bytes\
+                              when importing in direct mode
++\--inline-lob-limit <n>+     Set the maximum size for an inline LOB
++-m,\--num-mappers <n>+       Use 'n' map tasks to import in parallel
++\--split-by <column-name>+   Column of the table used to split work\
+                              units
++\--table <table-name>+       Table to read
++\--warehouse-dir <dir>+      HDFS parent for table destination
++\--where <where clause>+     WHERE clause to use during import
++-z,\--compress+              Enable compression
+---------------------------------------------------------------------
+
+
+
+Selecting the Data to Import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop currently imports data in a table-centric fashion. Use the
++\--table+ argument to select the table to import. For example, +\--table
+employees+. This argument can also identify a +VIEW+ or other table-like
+entity in a database.
+
+By default, all columns within a table are selected for import.
+Imported data is written to HDFS in its "natural order;" that is, a
+table containing columns A, B, and C result in an import of data such
+as:
+
+----
+A1,B1,C1
+A2,B2,C2
+...
+----
+
+You can select a subset of columns and control their ordering by using
+the +\--columns+ argument. This should include a comma-delimited list
+of columns to import. For example: +\--columns "name,employee_id,jobtitle"+.
+
+You can control which rows are imported by adding a SQL +WHERE+ clause
+to the import statement. By default, Sqoop generates statements of the
+form +SELECT <column list> FROM <table name>+. You can append a
++WHERE+ clause to this with the +\--where+ argument. For example: +\--where
+"id > 400"+. Only rows where the +id+ column has a value greater than
+400 will be imported.
+
+Controlling Parallelism
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop imports data in parallel from most database sources. You can
+specify the number
+of map tasks (parallel processes) to use to perform the import by
+using the +-m+ or +\--num-mappers+ argument. Each of these arguments
+takes an integer value which corresponds to the degree of parallelism
+to employ. By default, four tasks are used. Some databases may see
+improved performance by increasing this value to 8 or 16. Do not
+increase the degree of parallelism greater than that available within
+your MapReduce cluster; tasks will run serially and will likely
+increase the amount of time required to perform the import. Likewise,
+do not increase the degree of parallism higher than that which your
+database can reasonably support. Connecting 100 concurrent clients to
+your database may increase the load on the database server to a point
+where performance suffers as a result.
+
+When performing parallel imports, Sqoop needs a criterion by which it
+can split the workload. Sqoop uses a _splitting column_ to split the
+workload. By default, Sqoop will identify the primary key column (if
+present) in a table and use it as the splitting column. The low and
+high values for the splitting column are retrieved from the database,
+and the map tasks operate on evenly-sized components of the total
+range. For example, if you had a table with a primary key column of
++id+ whose minimum value was 0 and maximum value was 1000, and Sqoop
+was directed to use 4 tasks, Sqoop would run four processes which each
+execute SQL statements of the form +SELECT * FROM sometable WHERE id
+>= lo AND id < hi+, with +(lo, hi)+ set to (0, 250), (250, 500),
+(500, 750), and (750, 1001) in the different tasks.
+
+If the actual values for the primary key are not uniformly distributed
+across its range, then this can result in unbalanced tasks. You should
+explicitly choose a different column with the +\--split-by+ argument.
+For example, +\--split-by employee_id+. Sqoop cannot currently split on
+multi-column indices. If your table has no index column, or has a
+multi-column key, then you must also manually choose a splitting
+column.
+
+Controlling the Import Process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, the import process will use JDBC which provides a
+reasonable cross-vendor import channel. Some databases can perform
+imports in a more high-performance fashion by using database-specific
+data movement tools. For example, MySQL provides the +mysqldump+ tool
+which can export data from MySQL to other systems very quickly. By
+supplying the +\--direct+ argument, you are specifying that Sqoop
+should attempt the direct import channel. This channel may be
+higher performance than using JDBC. Currently, direct mode does not
+support imports of large object columns.
+
+When importing from PostgreSQL in conjunction with direct mode, you
+can split the import into separate files after
+individual files reach a certain size. This size limit is controlled
+with the +\--direct-split-size+ argument. 
+
+By default, Sqoop will import a table named +foo+ to a directory named
++foo+ inside your home directory in HDFS. For example, if your
+username is +someuser+, then the import tool will write to
++/user/someuser/foo/(files)+. You can adjust the parent directory of
+the import with the +\--warehouse-dir+ argument. For example:
+
+----
+$ sqoop import --connnect <connect-str> --table foo --warehouse-dir /shared \
+    ...
+----
+
+This command would write to a set of files in the +/shared/foo/+ directory.
+
+When using direct mode, you can specify additional arguments which
+should be passed to the underlying tool. If the argument
++\--+ is given on the command-line, then subsequent arguments are sent
+directly to the underlying tool. For example, the following adjusts
+the character set used by +mysqldump+:
+
+----
+$ sqoop import --connect jdbc:mysql://server.foo.com/db --table bar \
+    --direct -- --default-character-set=latin1
+----
+
+File Formats
+^^^^^^^^^^^^
+
+You can import data in one of two file formats: delimited text or
+SequenceFiles.
+
+Delimited text is the default import format. You can also specify it
+explicitly by using the +\--as-textfile+ argument. This argument will write
+string-based representations of each record to the output files, with
+delimiter characters between individual columns and rows. These
+delimiters may be commas, tabs, or other characters. (The delimiters
+can be selected; see "Output line formatting arguments.") The
+following is the results of an example text-based import:
+
+----
+1,here is a message,2010-05-01
+2,happy new year!,2010-01-01
+3,another message,2009-11-12
+----
+
+Delimited text is appropriate for most non-binary data types. It also
+readily supports further manipulation by other tools, such as Hive.
+
+SequenceFiles are a binary format that store individual records in
+custom record-specific data types. These data types are manifested as
+Java classes. Sqoop will automatically generate these data types for
+you. This format supports exact storage of all data in binary
+representations, and is appropriate for storing binary data
+(for example, +VARBINARY+ columns), or data that will be principly
+manipulated by custom MapReduce programs (reading from SequenceFiles
+is higher-performance than reading from text files, as records do not
+need to be parsed).
+
+By default, data is not compressed. You can compress
+your data by using the deflate (gzip) algorithm with the +-z+ or
++\--compress+ argument. This applies to both SequenceFiles or text
+files.
+
+Large Objects
+^^^^^^^^^^^^^
+
+Sqoop handles large objects (+BLOB+ and +CLOB+ columns) in particular
+ways. If this data is truly large, then these columns should not be
+fully materialized in memory for manipulation, as most columns are.
+Instead, their data is handled in a streaming fashion. Large objects
+can be stored inline with the rest of the data, in which case they are
+fully materialized in memory on every access, or they can be stored in
+a secondary storage file linked to the primary data storage. By
+default, large objects less than 16 MB in size are stored inline with
+the rest of the data. At a larger size, they are stored in files in
+the +_lobs+ subdirectory of the import target directory. These files
+are stored in a separate format optimized for large record storage,
+which can accomodate records of up to 2^63 bytes each. The size at
+which lobs spill into separate files is controlled by the
++\--inline-lob-limit+ argument, which takes a parameter specifying the
+largest lob size to keep inline, in bytes. If you set the inline LOB
+limit to 0, all large objects will be placed in external
+storage.
+
+include::output-args.txt[]
+
+When importing to delimited files, the choice of delimiter is
+important. Delimiters which appear inside string-based fields may
+cause ambiguous parsing of the imported data by subsequent analysis
+passes. For example, the string +"Hello, pleased to meet you"+ should
+not be imported with the end-of-field delimiter set to a comma.
+
+Delimiters may be specified as:
+
+- a character (+\--fields-terminated-by X+)
+- an escape character (+\--fields-terminated-by \t+). Supported escape
+  characters are:
+* +\b+ (backspace)
+* +\n+ (newline)
+* +\r+ (carriage return)
+* +\t+ (tab)
+* +\"+ (double-quote)
+* +\\'+ (single-quote)
+* +\\+ (backslash)
+* +\0+ (NUL) - This will insert NUL characters between fields or lines,
+  or will disable enclosing/escaping if used for one of the +\--enclosed-by+,
+  +\--optionally-enclosed-by+, or +\--escaped-by+ arguments.
+- The octal representation of a A UTF-8 character's code point. This
+  should be of the form +\0ooo+, where _ooo_ is the octal value.
+  For example, +\--fields-terminated-by \001+ would yield the +^A+ character.
+- The hexadecimal representation of a A UTF-8 character's code point. This
+  should be of the form +\0xhhh+, where _hhh_ is the hex value.
+  For example, +\--fields-terminated-by \0x10+ would yield the carriage
+  return character.
+
+The default delimiters are a comma (+,+) for fields, a newline (+\n+) for records, no quote
+character, and no escape character. Note that this can lead to
+ambiguous/unparsible records if you import database records containing
+commas or newlines in the field data. For unambiguous parsing, both must
+be enabled. For example, via +\--mysql-delimiters+.
+
+If unambiguous delimiters cannot be presented, then use _enclosing_ and
+_escaping_ characters. The combination of (optional)
+enclosing and escaping characters will allow unambiguous parsing of
+lines. For example, suppose one column of a dataset contained the
+following values:
+
+----
+Some string, with a comma.
+Another "string with quotes"
+----
+
+The following arguments would provide delimiters which can be
+unambiguously parsed:
+
+----
+$ sqoop import --fields-terminated-by , --escaped-by \\ --enclosed-by '\"' ...
+----
+
+(Note that to prevent the shell from mangling the enclosing character,
+we have enclosed that argument itself in single-quotes.)
+
+The result of the above arguments applied to the above dataset would
+be:
+
+----
+"Some string, with a comma.","1","2","3"...
+"Another \"string with quotes\"","4","5","6"...
+----
+
+Here the imported strings are shown in the context of additional
+columns (+"1","2","3"+, etc.) to demonstrate the full effect of enclosing
+and escaping. The enclosing character is only strictly necessary when
+delimiter characters appear in the imported text. The enclosing
+character can therefore be specified as optional:
+
+----
+$ sqoop import --optionally-enclosed-by '\"' (the rest as above)...
+----
+
+Which would result in the following import:
+
+----
+"Some string, with a comma.",1,2,3...
+"Another \"string with quotes\"",4,5,6...
+----
+
+NOTE: Hive does not support enclosing and escaping characters. You
+must choose unambiguous field and record-terminating delimiters
+without the help of escaping and enclosing characters when
+working with Hive; this is a limitation of Hive's input parsing
+abilities.
+
+The +\--mysql-delimiters+ argument is a shorthand argument which uses
+the default delimiters for the +mysqldump+ program.
+If you use the +mysqldump+ delimiters in conjunction with a
+direct-mode import (with +\--direct+), very fast imports can be
+achieved.
+
+While the choice of delimiters is most important for a text-mode
+import, it is still relevant if you import to SequenceFiles with
++\--as-sequencefile+. The generated class' +toString()+ method
+will use the delimiters you specify, so subsequent formatting of
+the output data will rely on the delimiters you choose.
+
+include::input-args.txt[]
+
+When Sqoop imports data to HDFS, it generates a Java class which can
+reinterpret the text files that it creates when doing a
+delimited-format import. The delimiters are chosen with arguments such 
+as +\--fields-terminated-by+; this controls both how the data is
+written to disk, and how the generated +parse()+ method reinterprets
+this data. The delimiters used by the +parse()+ method can be chosen
+independently of the output arguments, by using
++\--input-fields-terminated-by+, and so on. This is useful, for example, to
+generate classes which can parse records created with one set of
+delimiters, and emit the records to a different set of files using a
+separate set of delimiters.
+
+include::hive-args.txt[]
+
+include::hive.txt[]
+
+include::codegen-args.txt[]
+
+As mentioned earlier, a byproduct of importing a table to HDFS is a
+class which can manipulate the imported data. If the data is stored in
+SequenceFiles, this class will be used for the data's serialization
+container. Therefore, you should use this class in your subsequent
+MapReduce processing of the data.
+
+The class is typically named after the table; a table named +foo+ will
+generate a class named +foo+. You may want to override this class
+name. For example, if your table is named +EMPLOYEES+, you may want to
+specify +\--class-name Employee+ instead. Similarly, you can specify
+just the package name with +\--package-name+. The following import
+generates a class named +com.foocorp.SomeTable+:
+
+----
+$ sqoop import --connect <connect-str> --table SomeTable --package-name com.foocorp
+----
+
+The +.java+ source file for your class will be written to the current
+working directory when you run +sqoop+. You can control the output
+directory with +\--outdir+. For example, +\--outdir src/generated/+.
+
+The import process compiles the source into +.class+ and +.jar+ files;
+these are ordinarily stored under +/tmp+. You can select an alternate
+target directory with +\--bindir+. For example, +\--bindir /scratch+.
+
+If you already have a compiled class that can be used to perform the
+import and want to suppress the code-generation aspect of the import
+process, you can use an existing jar and class by
+providing the +\--jar-file+ and +\--class-name+ options. For example:
+
+----
+$ sqoop import --table SomeTable --jar-file mydatatypes.jar \
+    --class-name SomeTableType
+----
+
+This command will load the +SomeTableType+ class out of +mydatatypes.jar+.
+
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+The following examples illustrate how to use the import tool in a variety
+of situations.
+
+A basic import of a table named +EMPLOYEES+ in the +corp+ database:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES
+----
+
+A basic import requiring a login:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --username SomeUser -P
+Enter password: (hidden)
+----
+
+Selecting specific columns from the +EMPLOYEES+ table:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --columns "employee_id,first_name,last_name,job_title"
+----
+
+Controlling the import parallelism (using 8 parallel tasks):
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    -m 8
+----
+
+Enabling the MySQL "direct mode" fast path:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --direct
+----
+
+Storing data in SequenceFiles, and setting the generated class name to
++com.foocorp.Employee+:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --class-name com.foocorp.Employee --as-sequencefile
+----
+
+Specifying the delimiters to use in a text-mode import: 
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --fields-terminated-by '\t' --lines-terminated-by '\n' \
+    --optionally-enclosed-by '\"'
+----
+
+Importing the data to Hive:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --hive-import
+----
+
+Importing only new employees:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --where "start_date > '2010-01-01'"
+----
+
+Changing the splitting column from the default:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --split-by dept_id
+----
+
+Verifying that an import was successful:
+
+----
+$ hadoop fs -ls EMPLOYEES
+Found 5 items
+drwxr-xr-x   - someuser somegrp          0 2010-04-27 16:40 /user/someuser/EMPLOYEES/_logs
+-rw-r--r--   1 someuser somegrp    2913511 2010-04-27 16:40 /user/someuser/EMPLOYEES/part-m-00000
+-rw-r--r--   1 someuser somegrp    1683938 2010-04-27 16:40 /user/someuser/EMPLOYEES/part-m-00001
+-rw-r--r--   1 someuser somegrp    7245839 2010-04-27 16:40 /user/someuser/EMPLOYEES/part-m-00002
+-rw-r--r--   1 someuser somegrp    7842523 2010-04-27 16:40 /user/someuser/EMPLOYEES/part-m-00003
+
+$ hadoop fs -cat EMPLOYEES/part-m-00000 | head -n 10
+0,joe,smith,engineering
+1,jane,doe,marketing
+...
+----
+
+
