@@ -27,7 +27,7 @@ include::common-args.txt[]
 Import control options
 ~~~~~~~~~~~~~~~~~~~~~~
 
-----as-avrodatafile::
+--as-avrodatafile::
   Imports data to Avro Data Files
 
 --as-sequencefile::

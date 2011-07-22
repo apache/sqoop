@@ -472,7 +472,7 @@
     </condition>
   </target>
 
-  <target name="test-prep-normal" unless="thirdparty_or_manual" 
+  <target name="test-prep-normal" unless="thirdparty_or_manual"
                                   depends="test-eval-condition">
     <!-- Set this to run all the "standard" tests -->
     <property name="test.pattern" value="Test*" />
