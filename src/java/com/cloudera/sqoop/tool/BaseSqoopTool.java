@@ -111,7 +111,6 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String JAR_FILE_NAME_ARG = "jar-file";
   public static final String SQL_QUERY_ARG = "query";
   public static final String SQL_QUERY_SHORT_ARG = "e";
-  public static final String SQL_QUERY_UPDATE_ARG = "update";
   public static final String VERBOSE_ARG = "verbose";
   public static final String HELP_ARG = "help";
   public static final String UPDATE_KEY_ARG = "update-key";

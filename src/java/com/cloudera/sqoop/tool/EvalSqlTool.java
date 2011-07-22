@@ -18,8 +18,12 @@
 
 package com.cloudera.sqoop.tool;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.cli.CommandLine;
@@ -33,6 +37,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
+import com.cloudera.sqoop.util.ResultSetPrinter;
 
 /**
  * Tool that evaluates a SQL statement and displays the results.
@@ -53,29 +58,65 @@ public class EvalSqlTool extends BaseSqoopTool {
     }
 
     PreparedStatement stmt = null;
+    ResultSet rs = null;
+    PrintWriter pw = null;
     try {
-      if (options.isSqlQueryUpdate()) {
-        // Run the SQL statement and commit the tx.
-        Connection c = manager.getConnection();
-        stmt = c.prepareStatement(options.getSqlQuery());
-        stmt.executeUpdate();
-        c.commit();
-      } else {
-        // Run the SQL statement and print the results.
-        manager.execAndPrint(options.getSqlQuery());
+      Connection c = manager.getConnection();
+      String query = options.getSqlQuery();
+      LOG.debug("SQL query: " + query);
+      stmt = c.prepareStatement(query);
+      boolean resultType = stmt.execute();
+      // Iterate over all the results from this statement.
+      while (true) {
+        LOG.debug("resultType=" + resultType);
+        if (!resultType) {
+          // This result was an update count.
+          int updateCount = stmt.getUpdateCount();
+          LOG.debug("updateCount=" + updateCount);
+          if (updateCount == -1) {
+            // We are done iterating over results from this statement.
+            c.commit();
+            break;
+          } else {
+            LOG.info(updateCount + " row(s) updated.");
+          }
+        } else {
+          // This yields a ResultSet.
+          rs = stmt.getResultSet();
+          pw = new PrintWriter(System.out, true);
+          new ResultSetPrinter().printResultSet(pw, rs);
+          pw.close();
+          pw = null;
+        }
+
+        resultType = stmt.getMoreResults();
       }
+    } catch (IOException ioe) {
+      LOG.warn("IOException formatting results: "
+          + StringUtils.stringifyException(ioe));
+      return 1;
     } catch (SQLException sqlE) {
       LOG.warn("SQL exception executing statement: "
           + StringUtils.stringifyException(sqlE));
       return 1;
     } finally {
+      if (null != pw) {
+        pw.close();
+      }
+      if (null != rs) {
+        try {
+          rs.close();
+        } catch (SQLException sqlE) {
+          LOG.warn("SQL exception closing ResultSet: "
+              + StringUtils.stringifyException(sqlE));
+        }
+      }
       if (null != stmt) {
         try {
           stmt.close();
         } catch (SQLException sqlE) {
           LOG.warn("SQL exception closing statement: "
               + StringUtils.stringifyException(sqlE));
-          return 1;
         }
       }
       destroy(options);
@@ -95,10 +136,6 @@ public class EvalSqlTool extends BaseSqoopTool {
         .withDescription("Execute 'statement' in SQL and exit")
         .withLongOpt(SQL_QUERY_ARG)
         .create(SQL_QUERY_SHORT_ARG));
-    evalOpts.addOption(OptionBuilder
-        .withDescription("Execute an update operation")
-        .withLongOpt(SQL_QUERY_UPDATE_ARG)
-        .create());
 
     toolOptions.addUniqueOptions(evalOpts);
   }
@@ -111,10 +148,6 @@ public class EvalSqlTool extends BaseSqoopTool {
     applyCommonOptions(in, out);
     if (in.hasOption(SQL_QUERY_ARG)) {
       out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
-    }
-
-    if (in.hasOption(SQL_QUERY_UPDATE_ARG)) {
-      out.setSqlQueryIsUpdate(true);
     }
   }
 

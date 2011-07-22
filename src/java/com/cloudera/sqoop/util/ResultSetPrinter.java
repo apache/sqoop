@@ -58,6 +58,7 @@ public class ResultSetPrinter {
   }
 
   private static final String COL_SEPARATOR = " | ";
+  private static final String LEFT_BORDER = "| ";
 
   /**
    * Format the contents of the ResultSet into something that could be printed
@@ -71,6 +72,7 @@ public class ResultSetPrinter {
 
       int [] colWidths = new int[cols];
       ResultSetMetaData metadata = results.getMetaData();
+      sbNames.append(LEFT_BORDER);
       for (int i = 1; i < cols + 1; i++) {
         String colName = metadata.getColumnName(i);
         colWidths[i - 1] = Math.min(metadata.getColumnDisplaySize(i),
@@ -89,6 +91,7 @@ public class ResultSetPrinter {
           sbPad.append('-');
         }
       }
+      sbPad.append('-');
       sbPad.append('\n');
 
       pw.print(sbPad.toString());
@@ -97,6 +100,7 @@ public class ResultSetPrinter {
 
       while (results.next())  {
         StringBuilder sb = new StringBuilder();
+        sb.append(LEFT_BORDER);
         for (int i = 1; i < cols + 1; i++) {
           printPadded(sb, results.getString(i), colWidths[i - 1]);
           sb.append(COL_SEPARATOR);

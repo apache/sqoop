@@ -120,7 +120,6 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("db.split.column") private String splitByCol;
   @StoredAsProperty("db.where.clause") private String whereClause;
   @StoredAsProperty("db.query") private String sqlQuery;
-  @StoredAsProperty("db.query.is.update") private boolean sqlQueryIsUpdate;
   @StoredAsProperty("jdbc.driver.class") private String driverClassName;
   @StoredAsProperty("hdfs.warehouse.dir") private String warehouseDir;
   @StoredAsProperty("hdfs.target.dir") private String targetDir;
@@ -1510,22 +1509,6 @@ public class SqoopOptions implements Cloneable {
    */
   public void setParent(SqoopOptions options) {
     this.parent = options;
-  }
-
-  /**
-   * @return true if the user's specified sql query is an update (DDL/DML)
-   * statement. 
-   */
-  public boolean isSqlQueryUpdate() {
-    return this.sqlQueryIsUpdate;
-  }
-
-  /**
-   * Set the flag specifying whether the user's sql query is an update
-   * (DDL/DML) or a data-retrieving query.
-   */
-  public void setSqlQueryIsUpdate(boolean isUpdate) {
-    this.sqlQueryIsUpdate = isUpdate;
   }
 }
 

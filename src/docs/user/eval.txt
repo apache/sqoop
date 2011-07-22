@@ -47,7 +47,6 @@ include::common-args.txt[]
 Argument                      Description
 --------------------------------------------------------------------------
 +-e,\--query <statement>+     Execute '+statement+' in SQL.
-+\--update+                   Specifies that this is a DDL/DML statement.
 --------------------------------------------------------------------------
 
 Example Invocations
@@ -64,8 +63,7 @@ Insert a row into the +foo+ table:
 
 ----
 $ sqoop eval --connect jdbc:mysql://db.example.com/corp \
-    --update -e "INSERT INTO foo VALUES(42, 'bar')"
+    -e "INSERT INTO foo VALUES(42, 'bar')"
 ----
-
 
 
