@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,9 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.util.Executor;
+import com.cloudera.sqoop.util.ExitSecurityException;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
+import com.cloudera.sqoop.util.SubprocessSecurityManager;
 
 /**
  * Utility to import a table into the Hive metastore. Manages the connection
@@ -50,6 +54,10 @@ public class HiveImport {
   private ConnManager connManager;
   private Configuration configuration;
   private boolean generateOnly;
+
+  /** Entry point through which Hive invocation should be attempted. */
+  private static final String HIVE_MAIN_CLASS =
+      "org.apache.hadoop.hive.cli.CliDriver";
 
   public HiveImport(final SqoopOptions opts, final ConnManager connMgr,
       final Configuration conf, final boolean generateOnly) {
@@ -202,19 +210,7 @@ public class HiveImport {
       }
 
       if (!isGenerateOnly()) {
-        // run Hive on the script and note the return code.
-        String hiveExec = getHiveBinPath();
-        ArrayList<String> args = new ArrayList<String>();
-        args.add(hiveExec);
-        args.add("-f");
-        args.add(filename);
-
-        LoggingAsyncSink logSink = new LoggingAsyncSink(LOG);
-        int ret = Executor.exec(args.toArray(new String[0]),
-            env.toArray(new String[0]), logSink, logSink);
-        if (0 != ret) {
-          throw new IOException("Hive exited with status " + ret);
-        }
+        executeScript(filename, env);
 
         LOG.info("Hive import complete.");
       }
@@ -227,6 +223,102 @@ public class HiveImport {
           scriptFile.deleteOnExit();
         }
       }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  /**
+   * Execute the script file via Hive.
+   * If Hive's jars are on the classpath, run it in the same process.
+   * Otherwise, execute the file with 'bin/hive'.
+   *
+   * @param filename The script file to run.
+   * @param env the environment strings to pass to any subprocess.
+   * @throws IOException if Hive did not exit successfully.
+   */
+  private void executeScript(String filename, List<String> env)
+      throws IOException {
+    SubprocessSecurityManager subprocessSM = null;
+
+    try {
+      Class cliDriverClass = Class.forName(HIVE_MAIN_CLASS);
+
+      // We loaded the CLI Driver in this JVM, so we will just
+      // call it in-process. The CliDriver class has a method:
+      // void main(String [] args) throws Exception.
+      //
+      // We'll call that here to invoke 'hive -f scriptfile'.
+      // Because this method will call System.exit(), we use
+      // a SecurityManager to prevent this.
+      LOG.debug("Using in-process Hive instance.");
+
+      subprocessSM = new SubprocessSecurityManager();
+      subprocessSM.install();
+
+      // Create the argv for the Hive Cli Driver.
+      String [] argArray = new String[2];
+      argArray[0] = "-f";
+      argArray[1] = filename;
+
+      // And invoke the static method on this array.
+      Method mainMethod = cliDriverClass.getMethod("main", argArray.getClass());
+      mainMethod.invoke(null, (Object) argArray);
+
+    } catch (ClassNotFoundException cnfe) {
+      // Hive is not on the classpath. Run externally.
+      // This is not an error path.
+      LOG.debug("Using external Hive process.");
+      executeExternalHiveScript(filename, env);
+    } catch (NoSuchMethodException nsme) {
+      // Could not find a handle to the main() method.
+      throw new IOException("Could not access CliDriver.main()", nsme);
+    } catch (IllegalAccessException iae) {
+      // Error getting a handle on the main() method.
+      throw new IOException("Could not access CliDriver.main()", iae);
+    } catch (InvocationTargetException ite) {
+      // We ran CliDriver.main() and an exception was thrown from within Hive.
+      // This may have been the ExitSecurityException triggered by the
+      // SubprocessSecurityManager. If so, handle it. Otherwise, wrap in
+      // an IOException and rethrow.
+
+      Throwable cause = ite.getCause();
+      if (cause instanceof ExitSecurityException) {
+        ExitSecurityException ese = (ExitSecurityException) cause;
+        int status = ese.getExitStatus();
+        if (status != 0) {
+          throw new IOException("Hive CliDriver exited with status=" + status);
+        }
+      } else {
+        throw new IOException("Exception thrown in Hive", ite);
+      }
+    } finally {
+      if (null != subprocessSM) {
+        // Uninstall the SecurityManager used to trap System.exit().
+        subprocessSM.uninstall();
+      }
+    }
+  }
+
+  /** 
+   * Execute Hive via an external 'bin/hive' process.
+   * @param filename the Script file to run.
+   * @param env the environment strings to pass to any subprocess.
+   * @throws IOException if Hive did not exit successfully.
+   */
+  private void executeExternalHiveScript(String filename, List<String> env)
+      throws IOException {
+    // run Hive on the script and note the return code.
+    String hiveExec = getHiveBinPath();
+    ArrayList<String> args = new ArrayList<String>();
+    args.add(hiveExec);
+    args.add("-f");
+    args.add(filename);
+
+    LoggingAsyncSink logSink = new LoggingAsyncSink(LOG);
+    int ret = Executor.exec(args.toArray(new String[0]),
+        env.toArray(new String[0]), logSink, logSink);
+    if (0 != ret) {
+      throw new IOException("Hive exited with status " + ret);
     }
   }
 }
