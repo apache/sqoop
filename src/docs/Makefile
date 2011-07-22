@@ -42,15 +42,18 @@ website:
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 		-b docbook \
 		user/SqoopUserGuide.txt
-	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks user/SqoopUserGuide.xml
+	xmlto $(VALIDATION) -o $(WEBSITE_DIR) -m web/html.xsl \
+		html-nochunks user/SqoopUserGuide.xml
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 		-b docbook \
 		dev/SqoopDevGuide.txt
-	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks dev/SqoopDevGuide.xml
+	xmlto $(VALIDATION) -o $(WEBSITE_DIR) -m web/html.xsl \
+		html-nochunks dev/SqoopDevGuide.xml
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 	  -b docbook \
 		web/index.txt
-	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks web/index.xml
+	xmlto $(VALIDATION) -o $(WEBSITE_DIR) -m web/html.xsl \
+		html-nochunks web/index.xml
 	cp web/docbook.css $(WEBSITE_DIR)
 	rsync -a web/images $(WEBSITE_DIR)/
 
@@ -69,7 +72,8 @@ $(BUILD_DIR)/SqoopUserGuide.html: user/*.txt
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 		-b docbook \
 		user/SqoopUserGuide.txt
-	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks user/SqoopUserGuide.xml
+	xmlto $(VALIDATION) -o $(BUILD_DIR) -m web/html.xsl \
+		html-nochunks user/SqoopUserGuide.xml
 	rm user/SqoopUserGuide.xml
 
 $(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
@@ -77,7 +81,8 @@ $(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 		-b docbook \
 		dev/SqoopDevGuide.txt
-	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks dev/SqoopDevGuide.xml
+	xmlto $(VALIDATION) -o $(BUILD_DIR) -m web/html.xsl \
+		html-nochunks dev/SqoopDevGuide.xml
 	rm dev/SqoopDevGuide.xml
 
 $(BUILD_DIR)/index.html: web/index.txt
@@ -85,7 +90,8 @@ $(BUILD_DIR)/index.html: web/index.txt
 	asciidoc --unsafe -a revnumber=$(VERSION) \
 	  -b docbook \
 		web/index.txt
-	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks web/index.xml
+	xmlto $(VALIDATION) -o $(BUILD_DIR) -m web/html.xsl \
+		html-nochunks web/index.xml
 	rm web/index.xml
 
 supportfiles:
