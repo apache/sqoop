@@ -55,10 +55,4 @@ fi
 
 # Remove the pidfile lock.
 
-if [ ! -e "$pidfilename" ]; then
-  echo "No pid file $pidfilename"
-  exit 0
-fi
-
-rm "$pidfilename"
-
+rm -f "$pidfilename"
