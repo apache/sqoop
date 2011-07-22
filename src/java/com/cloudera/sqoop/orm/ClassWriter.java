@@ -625,8 +625,8 @@ public class ClassWriter {
           || javaType.equals("java.sql.Timestamp")
           || javaType.equals(ClobRef.class.getName())
           || javaType.equals(BlobRef.class.getName())) {
-        sb.append("    o." + colName + " = (" + javaType
-            + ") o." + colName + ".clone();\n");
+        sb.append("    o." + colName + " = (o." + colName + " != null) ? ("
+                + javaType + ") o." + colName + ".clone() : null;\n");
       } else if (javaType.equals(BytesWritable.class.getName())) {
         sb.append("    o." + colName + " = new BytesWritable("
             + "Arrays.copyOf(" + colName + ".getBytes(), "
@@ -703,7 +703,7 @@ public class ClassWriter {
         continue;
       }
 
-      sb.append("    __sb.append(FieldFormatter.escapeAndEnclose(" + stringExpr 
+      sb.append("    __sb.append(FieldFormatter.escapeAndEnclose(" + stringExpr
           + ", delimiters));\n");
     }
 
@@ -734,10 +734,17 @@ public class ClassWriter {
    * Helper method for parseColumn(). Interpret the string 'null' as a null
    * for a particular column.
    */
-  private void parseNullVal(String colName, StringBuilder sb) {
-    sb.append("    if (__cur_str.equals(\"null\")) { this.");
-    sb.append(colName);
-    sb.append(" = null; } else {\n");
+  private void parseNullVal(String javaType, String colName, StringBuilder sb) {
+    if (javaType.equals("String")) {
+      sb.append("    if (__cur_str.equals(\"null\")) { this.");
+      sb.append(colName);
+      sb.append(" = null; } else {\n");
+    } else {
+      sb.append("    if (__cur_str.equals(\"null\")");
+      sb.append(" || __cur_str.length() == 0) { this.");
+      sb.append(colName);
+      sb.append(" = null; } else {\n");
+    }
   }
 
   /**
@@ -751,7 +758,7 @@ public class ClassWriter {
     sb.append("    __cur_str = __it.next();\n");
     String javaType = connManager.toJavaType(colType);
 
-    parseNullVal(colName, sb);
+    parseNullVal(javaType, colName, sb);
     if (javaType.equals("String")) {
       // TODO(aaron): Distinguish between 'null' and null. Currently they both
       // set the actual object to null.
@@ -807,7 +814,7 @@ public class ClassWriter {
     sb.append(options.getInputDelimiters().formatConstructor() + ";\n");
 
     // The parser object which will do the heavy lifting for field splitting.
-    sb.append("  private RecordParser __parser;\n"); 
+    sb.append("  private RecordParser __parser;\n");
 
     // Generate wrapper methods which will invoke the parser.
     generateParseMethod("Text", sb);
@@ -886,7 +893,7 @@ public class ClassWriter {
    */
   public void generate() throws IOException {
     Map<String, Integer> columnTypes;
-    
+
     if (null != tableName) {
       // We're generating a class based on a table import.
       columnTypes = connManager.getColumnTypes(tableName);
@@ -935,7 +942,7 @@ public class ClassWriter {
     String [] cleanedColNames = cleanColNames(colNames);
 
     for (int i = 0; i < colNames.length; i++) {
-      // Make sure the col->type mapping holds for the 
+      // Make sure the col->type mapping holds for the
       // new identifier name, too.
       String identifier = cleanedColNames[i];
       String col = colNames[i];
