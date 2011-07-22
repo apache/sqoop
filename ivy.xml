@@ -69,10 +69,10 @@
   </publications>
   <dependencies>
     <!-- Dependencies for Apache Hadoop (trunk) -->
-    <dependency org="org.apache.hadoop" name="hadoop-core"
-      rev="${hadoop-core.apache.version}" conf="apache->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-core-test"
-      rev="${hadoop-core.apache.version}" conf="apachetest->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-common"
+      rev="${hadoop-common.apache.version}" conf="apache->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-common-test"
+      rev="${hadoop-common.apache.version}" conf="apachetest->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop-hdfs.apache.version}" conf="apache->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
@@ -83,10 +83,10 @@
       rev="${hadoop-mapred.apache.version}" conf="apachetest->default"/>
 
     <!-- Dependencies for Apache Hadoop (0.21) -->
-    <dependency org="org.apache.hadoop" name="hadoop-core"
-      rev="${hadoop-core.apache21.version}" conf="apache21->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-core-test"
-      rev="${hadoop-core.apache21.version}" conf="apache21test->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-common"
+      rev="${hadoop-common.apache21.version}" conf="apache21->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-common-test"
+      rev="${hadoop-common.apache21.version}" conf="apache21test->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop-hdfs.apache21.version}" conf="apache21->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
