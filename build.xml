@@ -159,7 +159,7 @@
   </target>
 
   <!-- Create jars for all shims -->
-  <target name="jar-all-shims" depends="init">
+  <target name="jar-all-shims" depends="init,compile">
     <antcall target="jar-one-shim" inheritAll="false">
       <param name="hadoop.dist" value="apache" />
     </antcall>
