@@ -17,58 +17,186 @@
    limitations under the License.
 -->
 
-<!--
-Before you can run these subtargets directly, you need
-to call at top-level: ant deploy-contrib compile-core-test
--->
-<project name="sqoop" default="jar">
+<project name="sqoop" default="jar"
+    xmlns:artifact="urn:maven-artifact-ant"
+    xmlns:ivy="antlib:org.apache.ivy.ant">
 
-  <import file="../build-contrib.xml"/>
+  <!-- some basic properties -->
   <property environment="env"/>
+  <property name="name" value="sqoop" />
+  <property name="Name" value="Sqoop" />
+  <property name="version" value="0.1-SNAPSHOT" />
+  <property name="artifact.name" value="${name}-${version}" />
+  <property name="dest.jar" value="${artifact.name}.jar"/>
+  
+  <!-- locations in the source tree -->
+  <property name="src.dir" location="${basedir}/src/java" />
+  <property name="test.dir" location="${basedir}/src/test" />
+  <property name="lib.dir" location="${basedir}/lib" />
+  <property name="docs.src.dir" location="${basedir}/src/docs" />
+
+  <property name="build.dir" location="${basedir}/build" />
+  <property name="build.classes" location="${build.dir}/classes"/>
+  <property name="build.test" location="${build.dir}/test"/>
+  <property name="test.log.dir" location="${build.dir}/test/logs"/>
+  <property name="dist.dir" location="${build.dir}/${artifact.name}" />
+  <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
+
+  <!-- compilation -->
+  <property name="javac.deprecation" value="off"/>
+  <property name="javac.debug" value="on"/>
+  <property name="build.encoding" value="ISO-8859-1"/>
+
+  <!-- testing with JUnit -->
+  <property name="test.junit.output.format" value="plain"/>
+  <property name="test.output" value="no"/>
+  <property name="test.timeout" value="300000"/>
+
+  <!-- When testing with non-free JDBC drivers, override this parameter
+       to contain the path to the driver library dir.
+    -->
   <property name="sqoop.thirdparty.lib.dir" value="" />
-  <property name="mrunit.class.dir" value="${build.dir}/../mrunit/classes" />
 
-  <!-- ================================================================== -->
-  <!-- Compile test code                                                  -->
-  <!-- Override with our own version so we can enforce build dependencies -->
-  <!-- on compile-mapred-test for MiniMRCluster, and MRUnit.              -->
-  <!-- ================================================================== -->
-  <target name="compile-test" depends="compile-examples, ivy-retrieve-test"
-      if="test.available">
-    <echo message="Compiling ${name} dependencies" />
-    <!-- need top-level compile-mapred-test for MiniMRCluster -->
-    <subant target="compile-mapred-test">
-      <fileset dir="../../.." includes="build.xml" />
-    </subant>
+  <!-- Ivy-based dependency resolution -->
+  <property name="ivy.dir" location="${basedir}/ivy" />
+  <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
+  <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
+  <property name="ivy.jar" location="${lib.dir}/ivy-${ivy.version}.jar"/>
+  <property name="ivy_repo_url" 
+	value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
+  <property name="build.ivy.dir" location="${build.dir}/ivy" />
+  <property name="build.ivy.lib.dir" location="${build.ivy.dir}/lib" />
+  <property name="build.ivy.report.dir" location="${build.ivy.dir}/report" />
+  <property name="redist.ivy.lib.dir"
+      location="${build.ivy.lib.dir}/${name}/redist"/> 
 
-    <!-- Need MRUnit compiled for some tests -->
-    <subant target="compile">
-      <fileset dir="../mrunit" includes="build.xml" />
-    </subant>
+  <!--this is the naming policy for artifacts we want pulled down-->
+  <property name="ivy.artifact.retrieve.pattern"
+    			value="${name}/[conf]/[artifact]-[revision].[ext]"/>
 
-    <echo message="contrib: ${name}"/>
+  <!-- Path containing third-party libraries deployed directly with Sqoop.
+       This does not include anything that Ivy can retrieve for us.
+    -->
+  <path id="lib.path">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+
+  <!-- The classpath for compiling and running Sqoop -->
+  <path id="compile.classpath">
+    <pathelement location="${build.classes}"/>
+    <path refid="lib.path"/>
+    <path refid="${name}.common.classpath"/>
+  </path>
+
+  <!-- Classpath for unit tests (superset of compile.classpath) -->
+  <path id="test.classpath">
+    <pathelement location="${build.test}" />
+    <path refid="${name}.test.classpath"/>
+    <path refid="compile.classpath"/>
+  </path>
+
+  <!-- "init" target reserved for future setup purposes. --> 
+  <target name="init" />
+
+  <!-- Compile core classes for the project -->
+  <target name="compile" depends="init, ivy-retrieve-common"
+      description="Compile core classes for the project">
+    <mkdir dir="${build.classes}" />
     <javac
-     encoding="${build.encoding}"
-     srcdir="${src.test}"
-     includes="**/*.java"
-     destdir="${build.test}"
-     debug="${javac.debug}">
-    <classpath>
-      <path refid="test.classpath"/>
-      <pathelement path="${mrunit.class.dir}" />
-    </classpath>
+        encoding="${build.encoding}"
+        srcdir="${src.dir}"
+        includes="**/*.java"
+        destdir="${build.classes}"
+        debug="${javac.debug}"
+        deprecation="${javac.deprecation}">
+      <classpath refid="compile.classpath"/>
     </javac>
   </target>
 
-  <!-- ================================================================== -->
-  <!-- Run unit tests                                                     -->
-  <!-- Override with our own version so we can set hadoop.alt.classpath   -->
-  <!-- and Hadoop logger properties                                       -->
-  <!-- ================================================================== -->
-  <target name="test" depends="compile-test, compile" if="test.available">
-    <echo message="contrib: ${name}"/>
-    <delete dir="${hadoop.log.dir}"/>
-    <mkdir dir="${hadoop.log.dir}"/>
+  <target name="compile-test" depends="compile, ivy-retrieve-test"
+      description="Compile test classes">
+    <mkdir dir="${build.test}" />
+    <javac
+        encoding="${build.encoding}"
+        srcdir="${test.dir}"
+        includes="**/*.java"
+        destdir="${build.test}"
+        debug="${javac.debug}">
+      <classpath>
+        <path refid="test.classpath"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" description="Create main jar">
+    <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
+  </target>
+
+  <!-- Ensure that all source code can be built -->
+  <target name="compile-all" depends="compile,compile-test"
+      description="Compile all sources"/>
+
+  <target name="package" depends="jar,compile-all,docs,ivy-retrieve-redist"
+      description="Create a redistributable package">
+
+    <mkdir dir="${dist.dir}"/>
+
+    <!-- copy in the build artifact -->
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.dir}">
+        <include name="${dest.jar}" />
+      </fileset>
+    </copy>
+
+    <!-- copy in various components of the initial source layout
+         so that the redistributable can bootstrap itself. -->
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="false">
+      <fileset dir="${basedir}">
+        <include name="**/*" />
+        <exclude name="build/**" />
+        <exclude name="lib/**" />
+        <exclude name=".git/**" />
+      </fileset>
+    </copy>
+
+    <!-- copy the dependency libraries from ivy into the contrib/lib dir -->
+    <mkdir dir="${dist.dir}/lib"/>
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${redist.ivy.lib.dir}">
+        <include name="**/*.jar" />
+      </fileset>
+    </copy>
+
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${lib.dir}">
+        <include name="**/*" />
+        <exclude name="ivy*" />
+      </fileset>
+    </copy>
+
+    <!-- copy in documentation build artifacts -->
+    <copy todir="${dist.dir}/docs" includeEmptyDirs="false" flatten="false">
+      <fileset dir="${build.dir}/docs">
+        <include name="**/*" />
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="tar" depends="package" description="Create release tarball">
+    <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
+      <tarfileset dir="${build.dir}" mode="664">
+        <include name="${artifact.name}/**" />
+      </tarfileset>
+    </tar>
+  </target>
+
+  <target name="test" depends="compile-test,compile"
+      description="Run unit tests">
+    <delete dir="${test.log.dir}"/>
+    <mkdir dir="${test.log.dir}"/>
     <delete dir="${build.test}/data"/>
     <mkdir dir="${build.test}/data" />
     <junit
@@ -85,19 +213,12 @@ to call at top-level: ant deploy-contrib compile-core-test
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
-      <sysproperty key="contrib.name" value="${name}"/>
 
-
-      <!-- define this property to force Sqoop to throw better exceptions on errors
-           during testing, instead of printing a short message and exiting with status 1. -->
+      <!-- define this property to force Sqoop to throw better exceptions on
+           errors during testing, instead of printing a short message and
+           exiting with status 1.
+        -->
       <sysproperty key="sqoop.throwOnError" value="" />
-
-      <!--
-           Added property needed to use the .class files for compilation
-           instead of depending on hadoop-*-core.jar
-      -->
-      <sysproperty key="hadoop.alt.classpath"
-        value="${hadoop.root}/build/classes" />
 
       <!-- we want more log4j output when running unit tests -->
       <sysproperty key="hadoop.root.logger"
@@ -121,8 +242,9 @@ to call at top-level: ant deploy-contrib compile-core-test
       <sysproperty key="hadoop.tmp.dir" value="${build.test}/hadoop"/>
 
       <sysproperty key="fs.default.name" value="${fs.default.name}"/>
-      <sysproperty key="hadoop.test.localoutputfile" value="${hadoop.test.localoutputfile}"/>
-      <sysproperty key="hadoop.log.dir" value="${hadoop.log.dir}"/>
+      <sysproperty key="hadoop.test.localoutputfile"
+          value="${hadoop.test.localoutputfile}"/>
+      <sysproperty key="hadoop.log.dir" value="${test.log.dir}"/>
 
       <!-- we have a mock "hive" shell instance in our testdata directory
            for testing hive integration. Set this property here to ensure
@@ -132,31 +254,106 @@ to call at top-level: ant deploy-contrib compile-core-test
 
       <classpath>
         <path refid="test.classpath"/>
-        <path refid="contrib-classpath"/>
         <!-- need thirdparty JDBC drivers for thirdparty tests -->
         <fileset dir="${sqoop.thirdparty.lib.dir}"
             includes="*.jar" />
-        <!-- need MRUnit for some tests -->
-        <pathelement path="${mrunit.class.dir}" />
       </classpath>
       <formatter type="${test.junit.output.format}" />
       <batchtest todir="${build.test}" unless="testcase">
-        <fileset dir="${src.test}"
+        <fileset dir="${test.dir}"
                  includes="**/Test*.java" excludes="**/${test.exclude}.java" />
       </batchtest>
       <batchtest todir="${build.test}" if="testcase">
-        <fileset dir="${src.test}" includes="**/${testcase}.java"/>
+        <fileset dir="${test.dir}" includes="**/${testcase}.java"/>
       </batchtest>
     </junit>
     <antcall target="checkfailure"/>
   </target>
 
-  <target name="doc">
+  <target name="docs" description="Build documentation">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
-      <arg value="${basedir}/doc" />
+      <arg value="${basedir}/src/docs" />
       <arg value="BUILDROOT=${build.dir}" />
     </exec>
+  </target>
+
+  <target name="checkfailure" if="tests.failed">
+    <touch file="${build.dir}/testsfailed"/>
+    <fail unless="continueOnFailure">Contrib Tests failed!</fail>
+  </target>
+
+  <target name="clean" description="Clean build target files">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="ivy-probe-antlib" >
+    <condition property="ivy.found">
+      <typefound uri="antlib:org.apache.ivy.ant" name="cleancache"/>
+    </condition>
+  </target>
+
+  <!-- Downloads the ivy jar itself. -->
+  <target name="ivy-download" unless="offline">
+    <mkdir dir="${lib.dir}" />
+    <get src="${ivy_repo_url}" dest="${ivy.jar}" usetimestamp="true"/>
+  </target>
+
+  <target name="ivy-init-antlib" depends="ivy-download,ivy-probe-antlib"
+      unless="ivy.found">
+    <typedef uri="antlib:org.apache.ivy.ant" onerror="fail"
+      loaderRef="ivyLoader">
+      <classpath>
+        <pathelement location="${ivy.jar}"/>
+      </classpath>
+    </typedef>
+    <fail >
+      <condition >
+        <not>
+          <typefound uri="antlib:org.apache.ivy.ant" name="cleancache"/>
+        </not>
+      </condition>
+      You need Apache Ivy 2.0 or later from http://ant.apache.org/
+      It could not be loaded from ${ivy_repo_url}
+    </fail>
+  </target>
+
+  <target name="ivy-init" depends="ivy-init-antlib" unless="ivy.configured">
+    <ivy:configure settingsid="${name}.ivy.settings" file="${ivysettings.xml}"/>
+    <property name="ivy.configured" value="true" />
+  </target>
+
+  <target name="ivy-resolve-common" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts for the compile configuration -->
+  <target name="ivy-retrieve-common" depends="ivy-resolve-common">
+    <ivy:retrieve settingsRef="${name}.ivy.settings" 
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.common.classpath" conf="common" />
+  </target>
+
+  <target name="ivy-resolve-test" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="test" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts for the test configuration -->
+  <target name="ivy-retrieve-test" depends="ivy-resolve-test">
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.test.classpath" conf="test" />
+  </target>
+
+  <target name="ivy-resolve-redist" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="redist" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts for the redist configuration -->
+  <target name="ivy-retrieve-redist" depends="ivy-resolve-redist">
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.redist.classpath" conf="redist" />
   </target>
 
 </project>

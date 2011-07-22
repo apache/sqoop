@@ -1,0 +1,7 @@
+/build
+*~
+.classpath
+.project
+.launches
+.settings
+

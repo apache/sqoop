@@ -13,8 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-BUILDROOT=../../../../build/contrib/sqoop
-BUILD_DIR=$(BUILDROOT)/doc
+BUILDROOT=../../build
+BUILD_DIR=$(BUILDROOT)/docs
 
 all: man userguide
 

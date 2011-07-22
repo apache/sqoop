@@ -16,11 +16,11 @@
    limitations under the License.
 -->
 <ivy-module version="1.0">
-  <info organisation="org.apache.hadoop" module="${ant.project.name}">
+  <info organisation="org.sqoop" module="${name}">
     <license name="Apache 2.0"/>
-    <ivyauthor name="Apache Hadoop Team" url="http://hadoop.apache.org"/>
+    <ivyauthor name="Sqoop Team" url="http://github.com/cloudera/sqoop" />
     <description>
-        Apache Hadoop
+        Sqoop
     </description>
   </info>
   <configurations defaultconfmapping="default">
@@ -33,6 +33,12 @@
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
     <conf name="test" visibility="private" extends="runtime"/>
+
+    <!-- We don't redistribute everything we depend on (e.g., Hadoop itself);
+         anything which Hadoop itself also depends on, we do not ship.
+         Things we actually need to ship are marked with a 'redist'
+         configuration. -->
+    <conf name="redist" visibility="private" extends="master" />
   </configurations>
 
   <publications>
@@ -40,21 +46,27 @@
     <artifact conf="master"/>
   </publications>
   <dependencies>
-     <dependency org="org.slf4j" name="slf4j-api" rev="${slf4j-api.version}" conf="common->master"/>
-     <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop-core.version}" conf="common->default"/>
-     <dependency org="org.apache.hadoop" name="hadoop-core-test" rev="${hadoop-core.version}" conf="common->default"/>
-     <dependency org="org.apache.hadoop" name="hadoop-hdfs" rev="${hadoop-hdfs.version}" conf="common->default"/>
-     <dependency org="org.apache.hadoop" name="hadoop-hdfs-test" rev="${hadoop-hdfs.version}" conf="test->default"/>
-     <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="common->default"/>
-     <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="common->master"/>
-     <dependency org="junit" name="junit" rev="${junit.version}" conf="common->default"/>
-     <dependency org="commons-httpclient" name="commons-httpclient" rev="${commons-httpclient.version}" conf="common->default"/>
-     <dependency org="commons-cli" name="commons-cli" rev="${commons-cli.version}" conf="common->default"/>
-     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}" conf="common->default"/>
-     <dependency org="org.apache.hadoop" name="avro" rev="${avro.version}" conf="common->default"/>
-     <dependency org="org.mortbay.jetty" name="servlet-api-2.5" rev="${servlet-api-2.5.version}" conf="common->master"/>
-     <dependency org="org.mortbay.jetty" name="jetty" rev="${jetty.version}" conf="common->master"/>
-     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}" conf="common->default"/>
-     <dependency org="org.mortbay.jetty" name="jetty-util" rev="${jetty-util.version}" conf="common->master"/>
+    <dependency org="org.apache.hadoop" name="hadoop-core"
+      rev="${hadoop-core.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-core-test"
+      rev="${hadoop-core.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-hdfs"
+      rev="${hadoop-hdfs.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
+      rev="${hadoop-hdfs.version}" conf="test->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapred"
+      rev="${hadoop-mapred.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapred-test"
+      rev="${hadoop-mapred.version}" conf="test->default"/>
+    <dependency org="commons-logging" name="commons-logging"
+      rev="${commons-logging.version}" conf="common->default"/>
+    <dependency org="log4j" name="log4j" rev="${log4j.version}"
+      conf="common->master"/>
+    <dependency org="junit" name="junit" rev="${junit.version}"
+      conf="common->default"/>
+    <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
+      conf="common->default"/>
+    <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
+      conf="common->default;redist->default"/>
   </dependencies>
 </ivy-module>
