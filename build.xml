@@ -152,4 +152,12 @@ to call at top-level: ant deploy-contrib compile-core-test
     <fail if="tests.failed">Tests failed!</fail>
   </target>
 
+  <target name="doc">
+    <exec executable="make" failonerror="true">
+      <arg value="-C" />
+      <arg value="${basedir}/doc" />
+      <arg value="BUILDROOT=${build.dir}" />
+    </exec>
+  </target>
+
 </project>
