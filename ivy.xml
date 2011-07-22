@@ -80,5 +80,13 @@
       name="jetty-util"
       rev="${jetty-util.version}"
       conf="common->master"/>
+    <dependency org="org.codehaus.jackson"
+      name="jackson-mapper-asl"
+      rev="${jackson.version}"
+      conf="common->default"/>
+    <dependency org="org.codehaus.jackson"
+      name="jackson-core-asl"
+      rev="${jackson.version}"
+      conf="common->default"/>
     </dependencies>
 </ivy-module>
