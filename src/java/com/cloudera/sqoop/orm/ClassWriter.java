@@ -473,7 +473,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
@@ -512,7 +513,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
@@ -555,7 +557,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
@@ -590,7 +593,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
@@ -693,7 +697,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
@@ -862,7 +867,8 @@ public class ClassWriter {
       int sqlType = columnTypes.get(col);
       String javaType = connManager.toJavaType(sqlType);
       if (null == javaType) {
-        LOG.error("No Java type for SQL type " + sqlType);
+        LOG.error("No Java type for SQL type " + sqlType
+                  + " for column " + col);
         continue;
       }
 
