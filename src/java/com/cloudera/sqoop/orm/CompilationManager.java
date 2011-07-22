@@ -169,6 +169,12 @@ public class CompilationManager {
     args.add(curClasspath + File.pathSeparator + coreJar + sqoopJar);
 
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    if (null == compiler) {
+      LOG.error("It seems as though you are running sqoop with a JRE.");
+      LOG.error("Sqoop requires a JDK that can compile Java code.");
+      LOG.error("Please install a JDK and set $JAVA_HOME to use it.");
+      throw new IOException("Could not start Java compiler.");
+    }
     StandardJavaFileManager fileManager =
         compiler.getStandardFileManager(null, null, null);
 
