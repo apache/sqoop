@@ -132,9 +132,16 @@ Alternately, the query can be executed once and imported serially, by
 specifying a single map task with +-m 1+:
 
 ----
-$ sqoop import --query 'SELECT a.*, b.* FROM a JOIN b on (a.id == b.id)' \
+$ sqoop import \
+  --query 'SELECT a.*, b.* FROM a JOIN b on (a.id == b.id) WHERE $CONDITIONS' \
   -m 1 --target-dir /user/foo/joinresults
 ----
+
+NOTE: The facility of using free-form query in the current version of Sqoop
+is limited to simple queries where there are no ambiguous projections and
+no +OR+ conditions in the +WHERE+ clause. Use of complex queries such as
+queries that have sub-queries or joins leading to ambiguous projections can
+lead to unexpected results.
 
 Controlling Parallelism
 ^^^^^^^^^^^^^^^^^^^^^^^
