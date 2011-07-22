@@ -31,6 +31,7 @@ import org.apache.hadoop.sqoop.manager.TestSqlManager;
 import org.apache.hadoop.sqoop.mapreduce.MapreduceTests;
 import org.apache.hadoop.sqoop.orm.TestClassWriter;
 import org.apache.hadoop.sqoop.orm.TestParseMethods;
+import org.apache.hadoop.sqoop.util.TestDirectImportUtils;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -66,6 +67,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestBlobRef.class);
     suite.addTestSuite(TestClobRef.class);
     suite.addTestSuite(TestLargeObjectLoader.class);
+    suite.addTestSuite(TestDirectImportUtils.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;
