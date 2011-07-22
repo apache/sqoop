@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
+import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
  * Test that the BlobRef.parse() method does the right thing.
@@ -47,13 +47,25 @@ public class TestBlobRef extends TestCase {
   }
 
   public void testEmptyFile() {
-    BlobRef r = BlobRef.parse("externalBlob()");
+    BlobRef r = BlobRef.parse("externalLob()");
+    assertFalse(r.isExternal());
+
+    r = BlobRef.parse("externalLob(lf,,0,0)");
     assertTrue(r.isExternal());
-    assertEquals("externalBlob()", r.toString());
+    assertEquals("externalLob(lf,,0,0)", r.toString());
   }
 
   public void testInlineNearMatch() {
-    BlobRef r = BlobRef.parse("externalBlob(foo)bar");
+    BlobRef r = BlobRef.parse("externalLob(foo)bar");
+    assertFalse(r.isExternal());
+
+    r = BlobRef.parse("externalLob(foo)");
+    assertFalse(r.isExternal());
+
+    r = BlobRef.parse("externalLob(lf,foo)");
+    assertFalse(r.isExternal());
+
+    r = BlobRef.parse("externalLob(lf,foo,1,2)x");
     assertFalse(r.isExternal());
   }
 
@@ -89,7 +101,6 @@ public class TestBlobRef extends TestCase {
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
 
     Path tmpPath = new Path(tmpDir);
-
     Path blobFile = new Path(tmpPath, FILENAME);
 
     // make any necessary parent dirs.
@@ -98,14 +109,20 @@ public class TestBlobRef extends TestCase {
       fs.mkdirs(blobParent);
     }
 
-    OutputStream os = fs.create(blobFile);
+    LobFile.Writer lw = LobFile.create(blobFile, conf, false);
     try {
+      long off = lw.tell();
+      long len = DATA.length;
+      OutputStream os = lw.writeBlobRecord(len);
       os.write(DATA, 0, DATA.length);
       os.close();
+      lw.close();
 
-      BlobRef blob = BlobRef.parse("externalBlob(" + FILENAME + ")");
+      String refString = "externalLob(lf," + FILENAME
+          + "," + off + "," + len + ")";
+      BlobRef blob = BlobRef.parse(refString);
       assertTrue(blob.isExternal());
-      assertEquals("externalBlob(" + FILENAME + ")", blob.toString());
+      assertEquals(refString, blob.toString());
       InputStream is = blob.getDataStream(conf, tmpPath);
       assertNotNull(is);
 

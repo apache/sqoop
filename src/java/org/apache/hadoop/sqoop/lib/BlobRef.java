@@ -35,152 +35,69 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.sqoop.io.LobFile;
+import org.apache.hadoop.sqoop.io.LobReaderCache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * BlobRef is a wrapper that holds a Blob either directly, or a
- * reference to a file that holds the blob data.
+ * BlobRef is a wrapper that holds a BLOB either directly, or a
+ * reference to a file that holds the BLOB data.
  */
-public class BlobRef implements Writable {
+public class BlobRef extends LobRef<byte[], BytesWritable, InputStream> {
 
   public static final Log LOG = LogFactory.getLog(BlobRef.class.getName());
 
-  public BlobRef(byte [] bytes) {
-    this.fileName = null;
-    this.data = new BytesWritable(bytes);
-  }
-
   public BlobRef() {
-    this.fileName = null;
-    this.data = null;
+    super();
   }
 
-  public BlobRef(String file) {
-    this.fileName = file;
-    this.data = null;
-  }
-
-  // If the data is 'small', it's held directly, here.
-  private BytesWritable data;
-
-  // If there data is too large, it's written into a file
-  // whose path (relative to the rest of the dataset) is recorded here.
-  // This takes precedence if this value is non-null.
-  private String fileName;
-
-  /**
-   * @return true if the BLOB data is in an external file; false if
-   * it materialized inline.
-   */
-  public boolean isExternal() {
-    return fileName != null;
+  public BlobRef(byte [] bytes) {
+    super(new BytesWritable(bytes));
   }
 
   /**
-   * Convenience method to access #getDataStream(Configuration, Path)
-   * from within a map task that read this BlobRef from a file-based
-   * InputSplit.
-   * @param mapContext the Mapper.Context instance that encapsulates
-   * the current map task.
-   * @return an InputStream to access the BLOB data.
-   * @throws IllegalArgumentException if it cannot find the source
-   * path for this BLOB based on the MapContext.
-   * @throws IOException if it could not read the BLOB from external storage.
+   * Initialize a BlobRef to an external BLOB.
+   * @param file the filename to the BLOB. May be relative to the job dir.
+   * @param offset the offset (in bytes) into the LobFile for this record.
+   * @param length the length of the record in bytes.
    */
-  public InputStream getDataStream(Mapper.Context mapContext)
-      throws IllegalArgumentException, IOException {
-    InputSplit split = mapContext.getInputSplit();
-    if (split instanceof FileSplit) {
-      Path basePath = ((FileSplit) split).getPath().getParent();
-      return getDataStream(mapContext.getConfiguration(),
-        basePath);
-    } else {
-      throw new IllegalArgumentException(
-          "Could not ascertain BLOB base path from MapContext.");
-    }
+  public BlobRef(String file, long offset, long length) {
+    super(file, offset, length);
   }
 
-  /**
-   * Get access to the BLOB data itself.
-   * This method returns an InputStream-based representation of the
-   * BLOB data, accessing the filesystem for external BLOB storage
-   * as necessary.
-   * @param conf the Configuration used to access the filesystem
-   * @param basePath the base directory where the table records are
-   * stored.
-   * @return an InputStream used to read the BLOB data.
-   * @throws IOException if it could not read the BLOB from external storage.
-   */
-  public InputStream getDataStream(Configuration conf, Path basePath)
+  @Override
+  protected InputStream getExternalSource(LobFile.Reader reader)
       throws IOException {
-    if (isExternal()) {
-      // use external storage.
-      FileSystem fs = FileSystem.get(conf);
-      return fs.open(new Path(basePath, fileName));
-    } else {
-      return new ByteArrayInputStream(data.getBytes());
-    }
+    return reader.readBlobRecord();
   }
 
+  @Override
+  protected InputStream getInternalSource(BytesWritable data) {
+    return new ByteArrayInputStream(data.getBytes());
+  }
 
-  public byte [] getData() {
-    if (isExternal()) {
-      throw new RuntimeException(
-          "External BLOBs must be read via getDataStream()");
-    }
-
+  @Override
+  protected byte [] getInternalData(BytesWritable data) {
     return data.getBytes();
   }
 
   @Override
-  public String toString() {
-    if (isExternal()) {
-      return "externalBlob(" + fileName + ")";
-    } else {
-      return data.toString();
+  public void readFieldsInternal(DataInput in) throws IOException {
+    // For internally-stored BLOBs, the data is a BytesWritable
+    // containing the actual data.
+
+    if (null == this.data) {
+      this.data = new BytesWritable();
     }
+    this.data.readFields(in);
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
-    // The serialization format for this object is:
-    // boolean isExternal
-    // if true, the next field is a String containing the file name.
-    // if false, the next field is a BytesWritable containing the
-    // actual data.
-
-    boolean isExternal = in.readBoolean();
-    if (isExternal) {
-      this.data = null;
-      this.fileName = Text.readString(in);
-    } else {
-      if (null == this.data) {
-        this.data = new BytesWritable();
-      }
-      this.data.readFields(in);
-      this.fileName = null;
-    }
+  public void writeInternal(DataOutput out) throws IOException {
+    data.write(out);
   }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeBoolean(isExternal());
-    if (isExternal()) {
-      Text.writeString(out, fileName);
-    } else {
-      data.write(out);
-    }
-  }
-
-  private static final ThreadLocal<Matcher> EXTERNAL_MATCHER =
-    new ThreadLocal<Matcher>() {
-      @Override protected Matcher initialValue() {
-        Pattern externalPattern = Pattern.compile("externalBlob\\((.*)\\)");
-        return externalPattern.matcher("");
-      }
-    };
 
   /**
    * Create a BlobRef based on parsed data from a line of text.
@@ -192,15 +109,18 @@ public class BlobRef implements Writable {
    * an empty BlobRef if the data to be parsed is actually inline.
    */
   public static BlobRef parse(String inputString) {
-    // If inputString is of the form 'externalBlob(%s)', then this is an
-    // external BLOB stored at the filename indicated by '%s'. Otherwise,
-    // it is an inline BLOB, which we don't support parsing of.
+    // If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
+    // an external BLOB stored at the LobFile indicated by '%s' with the next
+    // two arguments representing its offset and length in the file.
+    // Otherwise, it is an inline BLOB, which we don't support parsing of.
 
     Matcher m = EXTERNAL_MATCHER.get();
     m.reset(inputString);
     if (m.matches()) {
-      // Extract the filename component from the string.
-      return new BlobRef(m.group(1));
+      // This is a LobFile. Extract the filename, offset and len from the
+      // matcher.
+      return new BlobRef(m.group(1), Long.valueOf(m.group(2)),
+          Long.valueOf(m.group(3)));
     } else {
       // This is inline BLOB string data.
       LOG.warn(

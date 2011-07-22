@@ -19,43 +19,6 @@ prgm=`readlink -f $0`
 bin=`dirname ${prgm}`
 bin=`cd ${bin} && pwd`
 
-if [ -z "$SQOOP_HOME" ]; then
-  SQOOP_HOME=${bin}/..
-fi
-
-if [ -z "${HADOOP_HOME}" ]; then
-  # Try CDH default if the user hasn't set this.
-  HADOOP_HOME=/usr/lib/hadoop
-fi
-
-# Where to find the main Sqoop jar
-SQOOP_JAR_DIR=$SQOOP_HOME
-
-# Where to find the shim jars.
-SQOOP_SHIM_DIR=$SQOOP_HOME/shims
-
-# If there's a "build" subdir, override with this, so we use
-# the newly-compiled copy.
-if [ -d "$SQOOP_JAR_DIR/build" ]; then
-  SQOOP_JAR_DIR="${SQOOP_JAR_DIR}/build"
-
-  if [ -d "$SQOOP_JAR_DIR/shims" ]; then
-    SQOOP_SHIM_DIR="$SQOOP_JAR_DIR/shims"
-  fi
-fi
-
-# Add sqoop dependencies to classpath.
-SQOOP_CLASSPATH=""
-if [ -d "$SQOOP_HOME/lib" ]; then
-  for f in $SQOOP_HOME/lib/*.jar; do
-    SQOOP_CLASSPATH=${SQOOP_CLASSPATH}:$f;
-  done
-fi
-
-SQOOP_JAR=`ls -1 ${SQOOP_JAR_DIR}/sqoop-*.jar | head -n 1`
-
-# Invoke Hadoop
-HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}" \
-  HADOOP_OPTS="-Dsqoop.shim.jar.dir=${SQOOP_SHIM_DIR} ${HADOOP_OPTS}" \
-  ${HADOOP_HOME}/bin/hadoop jar ${SQOOP_JAR} org.apache.hadoop.sqoop.Sqoop "$@"
-
+source ${bin}/configure-sqoop
+${HADOOP_HOME}/bin/hadoop jar ${SQOOP_JAR} \
+    org.apache.hadoop.sqoop.Sqoop "$@"

@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
+import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
  * Test parsing of ClobRef objects.
@@ -45,7 +45,7 @@ public class TestClobRef extends TestCase {
     assertFalse(r.isExternal());
     assertEquals("foo", r.toString());
 
-    Reader reader = r.getDataReader(null, null);
+    Reader reader = r.getDataStream(null, null);
     assertNotNull(reader);
     char [] buf = new char[4096];
     int chars = reader.read(buf, 0, 4096);
@@ -56,15 +56,31 @@ public class TestClobRef extends TestCase {
   }
 
   public void testEmptyFile() {
-    ClobRef r = ClobRef.parse("externalClob()");
+    ClobRef r = ClobRef.parse("externalLob()");
+    assertFalse(r.isExternal());
+    assertEquals("externalLob()", r.toString());
+
+    r = ClobRef.parse("externalLob(lf,,0,0)");
     assertTrue(r.isExternal());
-    assertEquals("externalClob()", r.toString());
+    assertEquals("externalLob(lf,,0,0)", r.toString());
   }
 
   public void testInlineNearMatch() {
-    ClobRef r = ClobRef.parse("externalClob(foo)bar");
+    ClobRef r = ClobRef.parse("externalLob(foo)bar");
     assertFalse(r.isExternal());
-    assertEquals("externalClob(foo)bar", r.toString());
+    assertEquals("externalLob(foo)bar", r.toString());
+
+    r = ClobRef.parse("externalLob(foo)");
+    assertFalse(r.isExternal());
+    assertEquals("externalLob(foo)", r.getData());
+
+    r = ClobRef.parse("externalLob(lf,foo)");
+    assertFalse(r.isExternal());
+    assertEquals("externalLob(lf,foo)", r.getData());
+
+    r = ClobRef.parse("externalLob(lf,foo,1,2)x");
+    assertFalse(r.isExternal());
+    assertEquals("externalLob(lf,foo,1,2)x", r.getData());
   }
 
   public void testExternal() throws IOException {
@@ -99,7 +115,6 @@ public class TestClobRef extends TestCase {
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
 
     Path tmpPath = new Path(tmpDir);
-
     Path clobFile = new Path(tmpPath, FILENAME);
 
     // make any necessary parent dirs.
@@ -108,16 +123,21 @@ public class TestClobRef extends TestCase {
       fs.mkdirs(clobParent);
     }
 
-    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(
-        fs.create(clobFile)));
+    LobFile.Writer lw = LobFile.create(clobFile, conf, true);
     try {
+      long off = lw.tell();
+      long len = DATA.length();
+      Writer w = lw.writeClobRecord(len);
       w.append(DATA);
       w.close();
+      lw.close();
 
-      ClobRef clob = ClobRef.parse("externalClob(" + FILENAME + ")");
+      String refString = "externalLob(lf," + FILENAME 
+                + "," + off + "," + len + ")";
+      ClobRef clob = ClobRef.parse(refString);
       assertTrue(clob.isExternal());
-      assertEquals("externalClob(" + FILENAME + ")", clob.toString());
-      Reader r = clob.getDataReader(conf, tmpPath);
+      assertEquals(refString, clob.toString());
+      Reader r = clob.getDataStream(conf, tmpPath);
       assertNotNull(r);
 
       char [] buf = new char[4096];

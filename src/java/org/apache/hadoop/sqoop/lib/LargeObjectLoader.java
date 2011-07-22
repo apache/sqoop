@@ -20,6 +20,8 @@ package org.apache.hadoop.sqoop.lib;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,6 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
@@ -51,9 +54,9 @@ import org.apache.hadoop.mapreduce.JobContext;
  * However, its lifetime is limited to the current TaskInputOutputContext's
  * life.
  */
-public class LargeObjectLoader {
+public class LargeObjectLoader implements Closeable {
 
-  // Currently, cap BLOB/CLOB objects at 16 MB until we can use external storage.
+  // Spill to external storage for BLOB/CLOB objects > 16 MB.
   public final static long DEFAULT_MAX_LOB_LENGTH = 16 * 1024 * 1024;
 
   public final static String MAX_INLINE_LOB_LEN_KEY =
@@ -62,6 +65,10 @@ public class LargeObjectLoader {
   private Configuration conf;
   private Path workPath;
   private FileSystem fs;
+
+  // Handles to the open BLOB / CLOB file writers. 
+  private LobFile.Writer curBlobWriter;
+  private LobFile.Writer curClobWriter;
 
   // Counter that is used with the current task attempt id to
   // generate unique LOB file names.
@@ -77,17 +84,97 @@ public class LargeObjectLoader {
     this.conf = conf;
     this.workPath = workPath;
     this.fs = FileSystem.get(conf);
+    this.curBlobWriter = null;
+    this.curClobWriter = null;
+  }
+
+  @Override
+  protected synchronized void finalize() throws Throwable {
+    close();
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (null != curBlobWriter) {
+      curBlobWriter.close();
+      curBlobWriter = null;
+    }
+
+    if (null != curClobWriter) {
+      curClobWriter.close();
+      curClobWriter = null;
+    }
   }
 
   /**
    * @return a filename to use to put an external LOB in.
    */
   private String getNextLobFileName() {
-    String file = "_lob/obj_" + TaskId.get(conf, "unknown_task_id")
-        + nextLobFileId;
+    String file = "_lob/large_obj_" + TaskId.get(conf, "unknown_task_id")
+        + nextLobFileId + ".lob";
     nextLobFileId++;
 
     return file;
+  }
+
+  /**
+   * Calculates a path to a new LobFile object, creating any
+   * missing directories.
+   * @return a Path to a LobFile to write
+   */
+  private Path getNextLobFilePath() throws IOException {
+    Path p = new Path(workPath, getNextLobFileName());
+    Path parent = p.getParent();
+    if (!fs.exists(parent)) {
+      fs.mkdirs(parent);
+    }
+
+    return p;
+  }
+
+  /**
+   * @return the current LobFile writer for BLOBs, creating one if necessary.
+   */
+  private LobFile.Writer getBlobWriter() throws IOException {
+    if (null == this.curBlobWriter) {
+      this.curBlobWriter = LobFile.create(getNextLobFilePath(), conf, false);
+    }
+
+    return this.curBlobWriter;
+  }
+
+  /**
+   * @return the current LobFile writer for CLOBs, creating one if necessary.
+   */
+  private LobFile.Writer getClobWriter() throws IOException {
+    if (null == this.curClobWriter) {
+      this.curClobWriter = LobFile.create(getNextLobFilePath(), conf, true);
+    }
+
+    return this.curClobWriter;
+  }
+
+  /**
+   * Returns the path being written to by a given LobFile.Writer, relative
+   * to the working directory of this LargeObjectLoader.
+   * @param w the LobFile.Writer whose path should be examined.
+   * @return the path this is writing to, relative to the current working dir.
+   */
+  private String getRelativePath(LobFile.Writer w) {
+    Path writerPath = w.getPath();
+    
+    String writerPathStr = writerPath.toString();
+    String workPathStr = workPath.toString();
+    if (!workPathStr.endsWith(File.separator)) {
+      workPathStr = workPathStr + File.separator;
+    }
+
+    if (writerPathStr.startsWith(workPathStr)) {
+      return writerPathStr.substring(workPathStr.length());
+    }
+
+    // Outside the working dir; return the whole thing.
+    return writerPathStr;
   }
 
   /**
@@ -155,27 +242,16 @@ public class LargeObjectLoader {
       return null;
     } else if (b.length() > maxInlineLobLen) {
       // Deserialize very large BLOBs into separate files.
-      String fileName = getNextLobFileName();
-      Path p = new Path(workPath, fileName);
+      long len = b.length();
+      LobFile.Writer lobWriter = getBlobWriter();
 
-      Path parent = p.getParent();
-      if (!fs.exists(parent)) {
-        fs.mkdirs(parent);
-      }
-
-      BufferedOutputStream bos = null;
+      long recordOffset = lobWriter.tell();
       InputStream is = null;
-      OutputStream os = fs.create(p);
+      OutputStream os = lobWriter.writeBlobRecord(len);
       try {
-        bos = new BufferedOutputStream(os);
         is = b.getBinaryStream();
-        copyAll(is, bos);
+        copyAll(is, os);
       } finally {
-        if (null != bos) {
-          bos.close();
-          os = null; // os is now closed.
-        }
-
         if (null != os) {
           os.close();
         }
@@ -183,9 +259,12 @@ public class LargeObjectLoader {
         if (null != is) {
           is.close();
         }
+
+        // Mark the record as finished.
+        lobWriter.finishRecord();
       }
 
-      return new BlobRef(fileName);
+      return new BlobRef(getRelativePath(curBlobWriter), recordOffset, len);
     } else {
       // This is a 1-based array.
       return new BlobRef(b.getBytes(1, (int) b.length()));
@@ -215,37 +294,29 @@ public class LargeObjectLoader {
       return null;
     } else if (c.length() > maxInlineLobLen) {
       // Deserialize large CLOB into separate file.
-      String fileName = getNextLobFileName();
-      Path p = new Path(workPath, fileName);
+      long len = c.length();
+      LobFile.Writer lobWriter = getClobWriter();
 
-      Path parent = p.getParent();
-      if (!fs.exists(parent)) {
-        fs.mkdirs(parent);
-      }
-
-      BufferedWriter w = null;
+      long recordOffset = lobWriter.tell();
       Reader reader = null;
-      OutputStream os = fs.create(p);
+      Writer w = lobWriter.writeClobRecord(len);
       try {
-        w = new BufferedWriter(new OutputStreamWriter(os));
         reader = c.getCharacterStream();
         copyAll(reader, w);
       } finally {
         if (null != w) {
           w.close();
-          os = null; // os is now closed.
-        }
-
-        if (null != os) {
-          os.close();
         }
 
         if (null != reader) {
           reader.close();
         }
+
+        // Mark the record as finished.
+        lobWriter.finishRecord();
       }
 
-      return new ClobRef(fileName, true);
+      return new ClobRef(getRelativePath(lobWriter), recordOffset, len);
     } else {
       // This is a 1-based array.
       return new ClobRef(c.getSubString(1, (int) c.length()));

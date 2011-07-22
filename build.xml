@@ -39,6 +39,7 @@
   <property name="src.dir" location="${base.src.dir}/java" />
   <property name="test.dir" location="${base.src.dir}/test" />
   <property name="shim.src.dir" location="${base.src.dir}/shims" />
+  <property name="perftest.src.dir" location="${base.src.dir}/perftest" />
   <property name="lib.dir" location="${basedir}/lib" />
   <property name="docs.src.dir" location="${base.src.dir}/docs" />
   <property name="script.src.dir" location="${base.src.dir}/scripts" />
@@ -50,6 +51,8 @@
   <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
   <property name="build.test" location="${build.dir}/test"/>
   <property name="build.test.classes" location="${build.test}/classes" />
+  <property name="build.perftest" location="${build.dir}/perftest"/>
+  <property name="build.perftest.classes" location="${build.perftest}/classes"/>
   <property name="build.javadoc" location="${build.dir}/docs/api" />
   <property name="test.log.dir" location="${build.dir}/test/logs"/>
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
@@ -123,7 +126,6 @@
   <path id="compile.classpath">
     <pathelement location="${build.classes}"/>
     <path refid="lib.path"/>
-    <path refid="${name}.common.classpath"/>
     <path refid="${name}.hadoop.classpath"/>
   </path>
 
@@ -131,7 +133,6 @@
   <path id="test.classpath">
     <pathelement location="${build.test.classes}" />
     <path refid="${name}.hadooptest.classpath"/>
-    <path refid="${name}.test.classpath"/>
     <path refid="compile.classpath"/>
   </path>
 
@@ -146,7 +147,7 @@
 
   <!-- Compile a shim class so Sqoop can run with the specified hadoop.dist -->
   <target name="compile-one-shim"
-      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop">
+      depends="init, ivy-retrieve-hadoop">
     <mkdir dir="${build.shim.classes}/${hadoop.dist}" />
     <javac
         encoding="${build.encoding}"
@@ -178,7 +179,7 @@
   
   <!-- Compile core classes for the project -->
   <target name="compile"
-      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop"
+      depends="init, ivy-retrieve-hadoop"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
@@ -196,7 +197,7 @@
   </target>
 
   <target name="compile-test"
-      depends="compile, ivy-retrieve-test, ivy-retrieve-hadoop-test"
+      depends="compile, ivy-retrieve-hadoop-test"
       description="Compile test classes">
     <mkdir dir="${build.test.classes}" />
     <javac
@@ -211,12 +212,29 @@
     </javac>
   </target>
 
+  <target name="compile-perf-test"
+      depends="compile, ivy-retrieve-hadoop-test"
+      description="Compile manual performance tests">
+    <mkdir dir="${build.perftest.classes}" />
+    <javac
+        encoding="${build.encoding}"
+        srcdir="${perftest.src.dir}"
+        includes="**/*.java"
+        destdir="${build.perftest.classes}"
+        debug="${javac.debug}">
+      <classpath>
+        <path refid="test.classpath"/>
+      </classpath>
+    </javac>
+  </target>
+
   <target name="jar" depends="compile" description="Create main jar">
     <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
   </target>
 
   <!-- Ensure that all source code can be built -->
-  <target name="compile-all" depends="compile,compile-test,jar-all-shims"
+  <target name="compile-all"
+      depends="compile,compile-test,jar-all-shims,compile-perf-test"
       description="Compile all sources"/>
 
   <target name="scripts" depends="jar"
@@ -542,7 +560,7 @@
   </target>
 
   <target name="cobertura"
-      depends="check-for-cobertura,warn-cobertura-unset,jar,compile-test,test-prep"
+      depends="check-for-cobertura,warn-cobertura-unset,jar,compile-test,test-prep,jar-all-shims"
       if="cobertura.present" description="Run Cobertura (code coverage)">
     <taskdef classpathref="cobertura.classpath"
         resource="tasks.properties"/>

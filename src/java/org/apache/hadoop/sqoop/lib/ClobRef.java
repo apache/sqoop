@@ -35,149 +35,58 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
- * ClobRef is a wrapper that holds a Clob either directly, or a
- * reference to a file that holds the clob data.
+ * ClobRef is a wrapper that holds a CLOB either directly, or a
+ * reference to a file that holds the CLOB data.
  */
-public class ClobRef implements Writable {
-
-  public ClobRef(String chars) {
-    this.fileName = null;
-    this.data = chars;
-  }
+public class ClobRef extends LobRef<String, String, Reader> {
 
   public ClobRef() {
-    this.fileName = null;
-    this.data = null;
+    super();
+  }
+
+  public ClobRef(String chars) {
+    super(chars);
   }
 
   /**
    * Initialize a clobref to an external CLOB.
    * @param file the filename to the CLOB. May be relative to the job dir.
-   * @param ignored is not used; this just differentiates this constructor
-   * from ClobRef(String chars).
+   * @param offset the offset (in bytes) into the LobFile for this record.
+   * @param length the length of the record in characters.
    */
-  public ClobRef(String file, boolean ignored) {
-    this.fileName = file;
-    this.data = null;
+  public ClobRef(String file, long offset, long length) {
+    super(file, offset, length);
   }
 
-  // If the data is 'small', it's held directly, here.
-  private String data;
-
-  // If there data is too large, it's written into a file
-  // whose path (relative to the rest of the dataset) is recorded here.
-  // This takes precedence if this value is non-null.
-  private String fileName;
-
-  /**
-   * @return true if the CLOB data is in an external file; false if
-   * it is materialized inline.
-   */
-  public boolean isExternal() {
-    return fileName != null;
-  }
-
-  /**
-   * Convenience method to access #getDataReader(Configuration, Path)
-   * from within a map task that read this ClobRef from a file-based
-   * InputSplit.
-   * @param mapContext the Mapper.Context instance that encapsulates
-   * the current map task.
-   * @return a Reader to access the CLOB data.
-   * @throws IllegalArgumentException if it cannot find the source
-   * path for this CLOB based on the MapContext.
-   * @throws IOException if it could not read the CLOB from external storage.
-   */
-  public Reader getDataReader(Mapper.Context mapContext)
-      throws IllegalArgumentException, IOException {
-    InputSplit split = mapContext.getInputSplit();
-    if (split instanceof FileSplit) {
-      Path basePath = ((FileSplit) split).getPath().getParent();
-      return getDataReader(mapContext.getConfiguration(),
-        basePath);
-    } else {
-      throw new IllegalArgumentException(
-          "Could not ascertain CLOB base path from MapContext.");
-    }
-  }
-
-  /**
-   * Get access to the CLOB data itself.
-   * This method returns a Reader-based representation of the
-   * CLOB data, accessing the filesystem for external CLOB storage
-   * as necessary.
-   * @param conf the Configuration used to access the filesystem
-   * @param basePath the base directory where the table records are
-   * stored.
-   * @return a Reader used to read the CLOB data.
-   * @throws IOException if it could not read the CLOB from external storage.
-   */
-  public Reader getDataReader(Configuration conf, Path basePath)
+  @Override
+  protected Reader getExternalSource(LobFile.Reader reader)
       throws IOException {
-    if (isExternal()) {
-      // use external storage.
-      FileSystem fs = FileSystem.get(conf);
-      return new InputStreamReader(fs.open(new Path(basePath, fileName)));
-    } else {
-      return new StringReader(data);
-    }
+    return reader.readClobRecord();
   }
 
   @Override
-  /**
-   * @return a string representation of the ClobRef. If this is an
-   * inline clob (isExternal() returns false), it will contain the
-   * materialized data. Otherwise it returns a description of the
-   * reference. To ensure access to the data itself,
-   * {@see #getDataReader(Configuration,Path)}.
-   */
-  public String toString() {
-    if (isExternal()) {
-      return "externalClob(" + fileName + ")";
-    } else {
-      return data;
-    }
+  protected Reader getInternalSource(String data) {
+    return new StringReader(data);
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
-    // The serialization format for this object is:
-    // boolean isExternal
-    // if true, the next field is a String containing the external file name.
-    // if false, the next field is String containing the actual data.
-
-    boolean isIndirect = in.readBoolean();
-    if (isIndirect) {
-      this.fileName = Text.readString(in);
-      this.data = null;
-    } else {
-      this.fileName = null;
-      this.data = Text.readString(in);
-    }
+  protected String getInternalData(String data) {
+    return data;
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
-    boolean isIndirect = isExternal();
-    out.writeBoolean(isIndirect);
-    if (isIndirect) {
-      Text.writeString(out, fileName);
-    } else {
-      Text.writeString(out, data);
-    }
+  public void readFieldsInternal(DataInput in) throws IOException {
+    // For internally-stored clobs, the data is written as UTF8 Text.
+    this.data = Text.readString(in);
   }
 
-  // A pattern matcher which can recognize external CLOB data
-  // vs. an inline CLOB string.
-  private static final ThreadLocal<Matcher> EXTERNAL_MATCHER =
-    new ThreadLocal<Matcher>() {
-      @Override protected Matcher initialValue() {
-        Pattern externalPattern = Pattern.compile("externalClob\\((.*)\\)");
-        return externalPattern.matcher("");
-      }
-    };
+  @Override
+  public void writeInternal(DataOutput out) throws IOException {
+    Text.writeString(out, data);
+  }
 
   /**
    * Create a ClobRef based on parsed data from a line of text.
@@ -185,15 +94,18 @@ public class ClobRef implements Writable {
    * @return a ClobRef to the given data.
    */
   public static ClobRef parse(String inputString) {
-    // If inputString is of the form 'externalClob(%s)', then this is an
-    // external CLOB stored at the filename indicated by '%s'. Otherwise,
-    // it is an inline CLOB.
+    // If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
+    // an external CLOB stored at the LobFile indicated by '%s' with the next
+    // two arguments representing its offset and length in the file.
+    // Otherwise, it is an inline CLOB, which we read as-is.
 
     Matcher m = EXTERNAL_MATCHER.get();
     m.reset(inputString);
     if (m.matches()) {
-      // Extract the filename component from the string.
-      return new ClobRef(m.group(1), true);
+      // This is a LobFile. Extract the filename, offset and len from the
+      // matcher.
+      return new ClobRef(m.group(1), Long.valueOf(m.group(2)),
+          Long.valueOf(m.group(3)));
     } else {
       // This is inline CLOB string data.
       return new ClobRef(inputString);

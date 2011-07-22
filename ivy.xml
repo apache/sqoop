@@ -33,18 +33,18 @@
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
     <conf name="apache" visibility="private"
-      extends="runtime"
+      extends="common,runtime"
       description="artifacts from Apache for compile/test" />
     <conf name="cloudera" visibility="private"
-      extends="runtime"
+      extends="common,runtime"
       description="artifacts from Cloudera for compile/test" />
 
-    <conf name="test" visibility="private" extends="runtime"/>
+    <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="apachetest" visibility="private"
-      extends="test"
+      extends="test,apache"
       description="artifacts from Apache for testing" />
     <conf name="clouderatest" visibility="private"
-      extends="test"
+      extends="test,cloudera"
       description="artifacts from Cloudera for testing" />
 
     <!-- We don't redistribute everything we depend on (e.g., Hadoop itself);

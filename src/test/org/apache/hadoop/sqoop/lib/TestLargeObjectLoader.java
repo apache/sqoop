@@ -87,8 +87,9 @@ public class TestLargeObjectLoader extends TestCase {
     clob = loader.readClobRef(0, resultSet);
     assertNotNull(clob);
     assertTrue(clob.isExternal());
+    loader.close();
     mapContext.getOutputCommitter().commitTask(mapContext);
-    Reader r = clob.getDataReader(conf, outDir);
+    Reader r = clob.getDataStream(conf, outDir);
     char [] buf = new char[4096];
     int chars = r.read(buf, 0, 4096);
     r.close();
@@ -115,6 +116,7 @@ public class TestLargeObjectLoader extends TestCase {
     blob = loader.readBlobRef(0, resultSet);
     assertNotNull(blob);
     assertTrue(blob.isExternal());
+    loader.close();
     mapContext.getOutputCommitter().commitTask(mapContext);
     InputStream is = blob.getDataStream(conf, outDir);
     byte [] buf = new byte[4096];
