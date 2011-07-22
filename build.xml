@@ -38,6 +38,8 @@
 
   <property name="build.dir" location="${basedir}/build" />
   <property name="build.classes" location="${build.dir}/classes"/>
+  <property name="build.shim.dir" location="${build.dir}/shims"/>
+  <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
   <property name="build.test" location="${build.dir}/test"/>
   <property name="build.test.classes" location="${build.test}/classes" />
   <property name="build.javadoc" location="${build.dir}/docs/api" />
@@ -137,10 +139,10 @@
   <!-- Compile a shim class so Sqoop can run with the specified hadoop.dist -->
   <target name="compile-one-shim"
       depends="init, ivy-retrieve-common, ivy-retrieve-hadoop">
-    <mkdir dir="${build.classes}" />
+    <mkdir dir="${build.shim.classes}/${hadoop.dist}" />
     <javac
         encoding="${build.encoding}"
-        destdir="${build.classes}"
+        destdir="${build.shim.classes}/${hadoop.dist}"
         debug="${javac.debug}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
@@ -150,19 +152,25 @@
     </javac>
   </target>
 
-  <!-- Compile all shim classes (for a distribution jar) -->
-  <target name="compile-all-shims" depends="init">
-    <antcall target="compile-one-shim" inheritAll="false">
+  <!-- Compile one shim and fetch it into a jar file. -->
+  <target name="jar-one-shim" depends="init,compile-one-shim">
+    <jar jarfile="${build.shim.dir}/${name}-${version}-shim-${hadoop.dist}.jar"
+        basedir="${build.shim.classes}/${hadoop.dist}" />
+  </target>
+
+  <!-- Create jars for all shims -->
+  <target name="jar-all-shims" depends="init">
+    <antcall target="jar-one-shim" inheritAll="false">
       <param name="hadoop.dist" value="apache" />
     </antcall>
-    <antcall target="compile-one-shim" inheritAll="false">
+    <antcall target="jar-one-shim" inheritAll="false">
       <param name="hadoop.dist" value="cloudera" />
     </antcall>
   </target>
   
   <!-- Compile core classes for the project -->
   <target name="compile"
-      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop, compile-one-shim"
+      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
@@ -200,14 +208,11 @@
   </target>
 
   <!-- Ensure that all source code can be built -->
-  <target name="compile-all" depends="compile,compile-test,compile-all-shims"
+  <target name="compile-all" depends="compile,compile-test,jar-all-shims"
       description="Compile all sources"/>
 
   <target name="package" depends="jar,compile-all,docs,javadoc,ivy-retrieve-redist"
       description="Create a redistributable package">
-
-    <!-- rebuild the jar to include all shims. -->
-    <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
 
     <mkdir dir="${dist.dir}"/>
 
@@ -217,6 +222,14 @@
         <include name="${dest.jar}" />
       </fileset>
     </copy>
+
+    <!-- copy in all shim artifacts -->
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.shim.dir}">
+        <include name="*.jar" />
+      </fileset>
+    </copy>
+
 
     <!-- copy in various components of the initial source layout
          so that the redistributable can bootstrap itself. -->
@@ -284,11 +297,13 @@
   <!-- By default, we'll run the "normal" tests: Test*.java               -->
   <!-- To run third-party tests, run with -Dthirdparty=true               -->
   <!-- ================================================================== -->
-  <target name="test" depends="compile-test,compile,test-prep,run-tests"
+  <target name="test"
+      depends="compile-test,compile,jar-one-shim,test-prep,run-tests"
       description="Run unit tests" />
 
   <!-- actually run the selected unit tests -->
-  <target name="run-tests" depends="compile-test,compile,test-prep">
+  <target name="run-tests"
+      depends="compile-test,compile,jar-one-shim,test-prep">
     <antcall target="checkfailure" inheritRefs="true" />
   </target>
  
@@ -320,6 +335,8 @@
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
+
+      <sysproperty key="sqoop.shim.jar.dir" value="${build.shim.dir}" />
 
       <sysproperty key="net.sourceforge.cobertura.datafile"
           value="${cobertura.dir}/cobertura-${cobertura.testset}.ser" />

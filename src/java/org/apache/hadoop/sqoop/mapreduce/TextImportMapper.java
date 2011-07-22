@@ -25,6 +25,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
@@ -45,7 +46,8 @@ public class TextImportMapper
 
     try {
       // Loading of LOBs was delayed until we have a Context.
-      val.loadLargeObjects(new LargeObjectLoader(context));
+      val.loadLargeObjects(new LargeObjectLoader(context.getConfiguration(),
+          FileOutputFormat.getWorkOutputPath(context)));
     } catch (SQLException sqlE) {
       throw new IOException(sqlE);
     }

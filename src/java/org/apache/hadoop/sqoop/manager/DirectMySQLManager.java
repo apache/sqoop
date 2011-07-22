@@ -74,7 +74,12 @@ public class DirectMySQLManager extends MySQLManager {
     String jarFile = context.getJarFile();
     SqoopOptions options = context.getOptions();
 
-    MySQLDumpImportJob importer = new MySQLDumpImportJob(options);
+    MySQLDumpImportJob importer = null;
+    try {
+      importer = new MySQLDumpImportJob(options);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException("Could not load required classes", cnfe);
+    }
 
     String splitCol = getSplitColumn(options, tableName);
     if (null == splitCol && options.getNumMappers() > 1) {

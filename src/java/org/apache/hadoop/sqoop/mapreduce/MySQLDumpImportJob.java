@@ -48,6 +48,7 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.MySQLUtils;
 import org.apache.hadoop.sqoop.orm.TableClassName;
+import org.apache.hadoop.sqoop.shims.ShimLoader;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
@@ -60,16 +61,21 @@ public class MySQLDumpImportJob extends ImportJobBase {
   public static final Log LOG =
       LogFactory.getLog(MySQLDumpImportJob.class.getName());
 
-  public MySQLDumpImportJob(final SqoopOptions opts) {
-    super(opts, MySQLDumpMapper.class, MySQLDumpInputFormat.class,
-        RawKeyTextOutputFormat.class);
+  public MySQLDumpImportJob(final SqoopOptions opts)
+      throws ClassNotFoundException {
+    super(opts, MySQLDumpMapper.class,
+        (Class<? extends InputFormat>) ShimLoader.getShimClass(
+            "org.apache.hadoop.sqoop.mapreduce.MySQLDumpInputFormat"),
+        (Class<? extends OutputFormat>) ShimLoader.getShimClass(
+            "org.apache.hadoop.sqoop.mapreduce.RawKeyTextOutputFormat"));
   }
 
   /**
    * Configure the inputformat to use for the job.
    */
   protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws IOException {
+      String tableClassName, String splitByCol)
+      throws ClassNotFoundException, IOException {
 
     ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
 
@@ -140,7 +146,7 @@ public class MySQLDumpImportJob extends ImportJobBase {
    * as well as any related configuration (e.g., map output types).
    */
   protected void configureMapper(Job job, String tableName,
-      String tableClassName) throws IOException {
+      String tableClassName) throws ClassNotFoundException, IOException {
     job.setMapperClass(getMapperClass());
     job.setOutputKeyClass(String.class);
     job.setOutputValueClass(NullWritable.class);

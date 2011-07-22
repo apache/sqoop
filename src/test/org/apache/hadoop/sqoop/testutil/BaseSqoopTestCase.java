@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
+import org.apache.hadoop.sqoop.shims.ShimLoader;
 
 import junit.framework.TestCase;
 
@@ -155,6 +156,7 @@ public class BaseSqoopTestCase extends TestCase {
   @Before
   public void setUp() {
 
+    ShimLoader.getHadoopShim();
     incrementTableNum();
 
     if (!isLog4jConfigured) {

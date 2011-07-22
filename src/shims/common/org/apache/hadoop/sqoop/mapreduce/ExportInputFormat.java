@@ -49,77 +49,9 @@ public class ExportInputFormat
   public static final Log LOG =
      LogFactory.getLog(ExportInputFormat.class.getName());
 
-  /** How many map tasks to use for export */
-  public static final String EXPORT_MAP_TASKS_KEY =
-      "sqoop.mapreduce.export.map.tasks";
-
   public static final int DEFAULT_NUM_MAP_TASKS = 4;
 
   public ExportInputFormat() {
-  }
-
-  /**
-   * @return true if p is a SequenceFile, or a directory containing
-   * SequenceFiles.
-   */
-  public static boolean isSequenceFiles(Configuration conf, Path p)
-      throws IOException {
-    FileSystem fs = p.getFileSystem(conf);
-
-    try {
-      FileStatus stat = fs.getFileStatus(p);
-
-      if (null == stat) {
-        // Couldn't get the item.
-        LOG.warn("Input path " + p + " does not exist");
-        return false;
-      }
-
-      if (stat.isDir()) {
-        FileStatus [] subitems = fs.listStatus(p);
-        if (subitems == null || subitems.length == 0) {
-          LOG.warn("Input path " + p + " contains no files");
-          return false; // empty dir.
-        }
-
-        // Pick a random child entry to examine instead.
-        stat = subitems[0];
-      }
-
-      if (null == stat) {
-        LOG.warn("null FileStatus object in isSequenceFiles(); assuming false.");
-        return false;
-      }
-
-      Path target = stat.getPath();
-      // Test target's header to see if it contains magic numbers indicating it's
-      // a SequenceFile.
-      byte [] header = new byte[3];
-      FSDataInputStream is = null;
-      try {
-        is = fs.open(target);
-        is.readFully(header);
-      } catch (IOException ioe) {
-        // Error reading header or EOF; assume not a SequenceFile.
-        LOG.warn("IOException checking SequenceFile header: " + ioe);
-        return false;
-      } finally {
-        try {
-          if (null != is) {
-            is.close();
-          }
-        } catch (IOException ioe) {
-          // ignore; closing.
-          LOG.warn("IOException closing input stream: " + ioe + "; ignoring.");
-        }
-      }
-
-      // Return true (isSequenceFile) iff the magic number sticks.
-      return header[0] == 'S' && header[1] == 'E' && header[2] == 'Q';
-    } catch (FileNotFoundException fnfe) {
-      LOG.warn("Input path " + p + " does not exist");
-      return false; // doesn't exist!
-    }
   }
 
   /**
@@ -180,14 +112,14 @@ public class ExportInputFormat
    * export job.
    */
   public static void setNumMapTasks(JobContext job, int numTasks) {
-    job.getConfiguration().setInt(EXPORT_MAP_TASKS_KEY, numTasks);
+    job.getConfiguration().setInt(ExportJobBase.EXPORT_MAP_TASKS_KEY, numTasks);
   }
 
   /**
    * @return the number of map tasks to use in this export job.
    */
   public static int getNumMapTasks(JobContext job) {
-    return job.getConfiguration().getInt(EXPORT_MAP_TASKS_KEY,
+    return job.getConfiguration().getInt(ExportJobBase.EXPORT_MAP_TASKS_KEY,
         DEFAULT_NUM_MAP_TASKS);
   }
 

@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.testutil.MockResultSet;
@@ -44,14 +45,15 @@ import org.apache.hadoop.sqoop.testutil.MockResultSet;
 public class TestLargeObjectLoader extends TestCase {
 
   protected Configuration conf;
-  protected MapContext mapContext;
   protected LargeObjectLoader loader;
+  protected Path outDir;
+  protected MapContext mapContext;
 
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, InterruptedException {
     conf = new Configuration();
     conf.set("fs.defaultFS", "file:///");
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
-    Path outDir = new Path(new Path(tmpDir), "testLobLoader");
+    this.outDir = new Path(new Path(tmpDir), "testLobLoader");
     FileSystem fs = FileSystem.getLocal(conf);
     if (fs.exists(outDir)) {
       fs.delete(outDir, true);
@@ -67,7 +69,8 @@ public class TestLargeObjectLoader extends TestCase {
      * directory. We are repurposing the same context for both output and input.
      */
     mapContext = HadoopShim.get().getMapContextForIOPath(conf, outDir);
-    loader = new LargeObjectLoader(mapContext);
+    loader = new LargeObjectLoader(mapContext.getConfiguration(),
+        FileOutputFormat.getWorkOutputPath(mapContext));
   }
 
   public void testReadClobRef()
@@ -85,7 +88,7 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(clob);
     assertTrue(clob.isExternal());
     mapContext.getOutputCommitter().commitTask(mapContext);
-    Reader r = clob.getDataReader(mapContext);
+    Reader r = clob.getDataReader(conf, outDir);
     char [] buf = new char[4096];
     int chars = r.read(buf, 0, 4096);
     r.close();
@@ -113,7 +116,7 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(blob);
     assertTrue(blob.isExternal());
     mapContext.getOutputCommitter().commitTask(mapContext);
-    InputStream is = blob.getDataStream(mapContext);
+    InputStream is = blob.getDataStream(conf, outDir);
     byte [] buf = new byte[4096];
     int bytes = is.read(buf, 0, 4096);
     is.close();

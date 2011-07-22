@@ -47,6 +47,8 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
 import org.apache.hadoop.sqoop.orm.TableClassName;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
+import org.apache.hadoop.sqoop.shims.ShimLoader;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
@@ -94,9 +96,11 @@ public class DataDrivenImportJob extends ImportJobBase {
   }
 
   @Override
-  protected Class<? extends OutputFormat> getOutputFormatClass() {
+  protected Class<? extends OutputFormat> getOutputFormatClass()
+      throws ClassNotFoundException {
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
-      return RawKeyTextOutputFormat.class;
+      return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
+         "org.apache.hadoop.sqoop.mapreduce.RawKeyTextOutputFormat");
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
       return SequenceFileOutputFormat.class;
     }
@@ -140,7 +144,9 @@ public class DataDrivenImportJob extends ImportJobBase {
       DataDrivenDBInputFormat.setInput(job, DBWritable.class,
           mgr.escapeTableName(tableName), whereClause,
           mgr.escapeColName(splitByCol), sqlColNames);
-      job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY,
+
+      LOG.debug("Using table class: " + tableClassName);
+      job.getConfiguration().set(HadoopShim.get().getDbInputClassProperty(),
           tableClassName);
 
       job.getConfiguration().setLong(LargeObjectLoader.MAX_INLINE_LOB_LEN_KEY,

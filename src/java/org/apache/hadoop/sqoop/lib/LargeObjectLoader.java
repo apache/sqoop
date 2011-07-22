@@ -40,9 +40,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.sqoop.shims.HadoopShim;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
@@ -62,27 +59,32 @@ public class LargeObjectLoader {
   public final static String MAX_INLINE_LOB_LEN_KEY =
       "sqoop.inline.lob.length.max";
 
-  // The task context for the currently-initialized instance.
-  private TaskInputOutputContext context;
-
+  private Configuration conf;
+  private Path workPath;
   private FileSystem fs;
 
   // Counter that is used with the current task attempt id to
   // generate unique LOB file names.
   private long nextLobFileId = 0;
 
-  public LargeObjectLoader(TaskInputOutputContext context)
+  /**
+   * Create a new LargeObjectLoader
+   * @param conf the Configuration to use
+   * @param workPath the HDFS working directory for this task.
+   */
+  public LargeObjectLoader(Configuration conf, Path workPath)
       throws IOException {
-    this.context = context;
-    this.fs = FileSystem.get(context.getConfiguration());
+    this.conf = conf;
+    this.workPath = workPath;
+    this.fs = FileSystem.get(conf);
   }
 
   /**
    * @return a filename to use to put an external LOB in.
    */
   private String getNextLobFileName() {
-    String file = "_lob/obj_" + context.getConfiguration().get(
-        HadoopShim.get().getTaskIdProperty(), "unknown_task_id")
+    String file = "_lob/obj_" + conf.get("mapreduce.task.id",
+        conf.get("mapred.task.id", "unknown_task_id"))
         + nextLobFileId;
     nextLobFileId++;
 
@@ -97,7 +99,7 @@ public class LargeObjectLoader {
    * @throws IOException if an I/O error occurs either reading or writing.
    */
   private void copyAll(Reader reader, Writer writer) throws IOException {
-    int bufferSize = context.getConfiguration().getInt("io.file.buffer.size",
+    int bufferSize = conf.getInt("io.file.buffer.size",
         4096);
     char [] buf = new char[bufferSize];
 
@@ -119,7 +121,7 @@ public class LargeObjectLoader {
    */
   private void copyAll(InputStream input, OutputStream output)
       throws IOException {
-    int bufferSize = context.getConfiguration().getInt("io.file.buffer.size",
+    int bufferSize = conf.getInt("io.file.buffer.size",
         4096);
     byte [] buf = new byte[bufferSize];
 
@@ -145,7 +147,7 @@ public class LargeObjectLoader {
   public BlobRef readBlobRef(int colNum, ResultSet r)
       throws IOException, InterruptedException, SQLException {
 
-    long maxInlineLobLen = context.getConfiguration().getLong(
+    long maxInlineLobLen = conf.getLong(
         MAX_INLINE_LOB_LEN_KEY,
         DEFAULT_MAX_LOB_LENGTH);
 
@@ -155,7 +157,7 @@ public class LargeObjectLoader {
     } else if (b.length() > maxInlineLobLen) {
       // Deserialize very large BLOBs into separate files.
       String fileName = getNextLobFileName();
-      Path p = new Path(FileOutputFormat.getWorkOutputPath(context), fileName);
+      Path p = new Path(workPath, fileName);
 
       Path parent = p.getParent();
       if (!fs.exists(parent)) {
@@ -205,7 +207,7 @@ public class LargeObjectLoader {
   public ClobRef readClobRef(int colNum, ResultSet r)
       throws IOException, InterruptedException, SQLException {
 
-    long maxInlineLobLen = context.getConfiguration().getLong(
+    long maxInlineLobLen = conf.getLong(
         MAX_INLINE_LOB_LEN_KEY,
         DEFAULT_MAX_LOB_LENGTH);
 
@@ -215,7 +217,7 @@ public class LargeObjectLoader {
     } else if (c.length() > maxInlineLobLen) {
       // Deserialize large CLOB into separate file.
       String fileName = getNextLobFileName();
-      Path p = new Path(FileOutputFormat.getWorkOutputPath(context), fileName);
+      Path p = new Path(workPath, fileName);
 
       Path parent = p.getParent();
       if (!fs.exists(parent)) {

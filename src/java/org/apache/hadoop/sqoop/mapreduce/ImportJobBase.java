@@ -79,7 +79,7 @@ public class ImportJobBase extends JobBase {
    */
   @Override
   protected void configureOutputFormat(Job job, String tableName,
-      String tableClassName) throws IOException {
+      String tableClassName) throws ClassNotFoundException, IOException {
     String hdfsWarehouseDir = options.getWarehouseDir();
     Path outputPath;
 
@@ -156,16 +156,14 @@ public class ImportJobBase extends JobBase {
       configureMapper(job, tableName, tableClassName);
       configureNumTasks(job);
 
-      try {
-        boolean success = runJob(job);
-        if (!success) {
-          throw new ImportException("Import job failed!");
-        }
-      } catch (InterruptedException ie) {
-        throw new IOException(ie);
-      } catch (ClassNotFoundException cnfe) {
-        throw new IOException(cnfe);
+      boolean success = runJob(job);
+      if (!success) {
+        throw new ImportException("Import job failed!");
       }
+    } catch (InterruptedException ie) {
+      throw new IOException(ie);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException(cnfe);
     } finally {
       unloadJars();
     }

@@ -56,11 +56,13 @@ public class MySQLExportJob extends ExportJobBase {
     return NullOutputFormat.class;
   }
 
+  @Override
   /**
    * Configure the inputformat to use for the job.
    */
   protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws IOException {
+      String tableClassName, String splitByCol)
+      throws ClassNotFoundException, IOException {
 
     // Configure the delimiters, etc.
     Configuration conf = job.getConfiguration();

@@ -36,6 +36,7 @@ import org.apache.hadoop.sqoop.manager.ExportJobContext;
 import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.orm.ClassWriter;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
+import org.apache.hadoop.sqoop.shims.ShimLoader;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 
@@ -166,12 +167,14 @@ public class Sqoop extends Configured implements Tool {
       options.parse(args);
       options.validate();
     } catch (SqoopOptions.InvalidOptionsException e) {
-      // display the error msg
       System.err.println(e.getMessage());
-      return 1; // exit on exception here
+      return 1; // Exit on exception here.
     }
 
-    // Get the connection to the database
+    // Make sure shim jar is classloaded early.
+    ShimLoader.getHadoopShim(getConf());
+
+    // Get the connection to the database.
     try {
       manager = new ConnFactory(getConf()).getManager(options);
     } catch (Exception e) {
@@ -289,6 +292,9 @@ public class Sqoop extends Configured implements Tool {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
       ret = 1;
+      if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+        throw new RuntimeException(e);
+      }
     }
 
     System.exit(ret);

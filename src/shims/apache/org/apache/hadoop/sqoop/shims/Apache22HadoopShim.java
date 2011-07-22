@@ -39,7 +39,7 @@ import org.apache.hadoop.mrunit.mapreduce.mock.MockReporter;
 /**
  * Hadoop Shim for Apache 0.22.
  */
-public class Apache22HadoopShim extends HadoopShim {
+public class Apache22HadoopShim extends CommonHadoopShim {
   @Override
   public long getNumMapOutputRecords(Job job)
       throws IOException, InterruptedException {
@@ -79,7 +79,7 @@ public class Apache22HadoopShim extends HadoopShim {
     conf.set(JTConfig.JT_IPC_ADDRESS, "local");
   }
 
-  private class MockMapContextWithCommitter
+  private static class MockMapContextWithCommitter
       extends MapContextImpl<Object, Object, Object, Object> {
     private Configuration conf;
     private Path path;

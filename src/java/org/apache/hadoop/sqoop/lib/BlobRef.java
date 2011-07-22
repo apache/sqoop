@@ -33,7 +33,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.MapContext;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import org.apache.commons.logging.Log;
@@ -89,7 +89,7 @@ public class BlobRef implements Writable {
    * path for this BLOB based on the MapContext.
    * @throws IOException if it could not read the BLOB from external storage.
    */
-  public InputStream getDataStream(MapContext mapContext)
+  public InputStream getDataStream(Mapper.Context mapContext)
       throws IllegalArgumentException, IOException {
     InputSplit split = mapContext.getInputSplit();
     if (split instanceof FileSplit) {

@@ -71,21 +71,24 @@ public class JobBase {
   /**
    * @return the mapper class to use for the job.
    */
-  protected Class<? extends Mapper> getMapperClass() {
+  protected Class<? extends Mapper> getMapperClass()
+      throws ClassNotFoundException {
     return this.mapperClass;
   }
 
   /**
    * @return the inputformat class to use for the job.
    */
-  protected Class<? extends InputFormat> getInputFormatClass() {
+  protected Class<? extends InputFormat> getInputFormatClass()
+      throws ClassNotFoundException {
     return this.inputFormatClass;
   }
 
   /**
    * @return the outputformat class to use for the job.
    */
-  protected Class<? extends OutputFormat> getOutputFormatClass() {
+  protected Class<? extends OutputFormat> getOutputFormatClass()
+      throws ClassNotFoundException {
     return this.outputFormatClass;
   }
 
@@ -141,7 +144,8 @@ public class JobBase {
    * Configure the inputformat to use for the job.
    */
   protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws IOException {
+      String tableClassName, String splitByCol)
+      throws ClassNotFoundException, IOException {
     //TODO: 'splitByCol' is import-job specific; lift it out of this API.
     Class<? extends InputFormat> ifClass = getInputFormatClass();
     LOG.debug("Using InputFormat: " + ifClass);
@@ -152,7 +156,7 @@ public class JobBase {
    * Configure the output format to use for the job.
    */
   protected void configureOutputFormat(Job job, String tableName,
-      String tableClassName) throws IOException {
+      String tableClassName) throws ClassNotFoundException, IOException {
     Class<? extends OutputFormat> ofClass = getOutputFormatClass();
     LOG.debug("Using OutputFormat: " + ofClass);
     job.setOutputFormatClass(ofClass);
@@ -163,7 +167,7 @@ public class JobBase {
    * as well as any related configuration (e.g., map output types).
    */
   protected void configureMapper(Job job, String tableName,
-      String tableClassName) throws IOException {
+      String tableClassName) throws ClassNotFoundException, IOException {
     job.setMapperClass(getMapperClass());
   }
 

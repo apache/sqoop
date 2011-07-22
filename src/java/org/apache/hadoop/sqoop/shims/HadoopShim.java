@@ -75,6 +75,37 @@ public abstract class HadoopShim {
   public abstract void setJobtrackerAddr(Configuration conf, String addr);
 
   /**
+   * Returns the Configuration property identifying a DBWritable to use.
+   */
+  public abstract String getDbInputClassProperty();
+
+  /**
+   * Returns the Configuration property identifying the DB username.
+   */
+  public abstract String getDbUsernameProperty();
+
+  /**
+   * Returns the Configuration property identifying the DB password.
+   */
+  public abstract String getDbPasswordProperty();
+
+  /**
+   * Returns the Configuration property identifying the DB connect string.
+   */
+  public abstract String getDbUrlProperty();
+
+  /**
+   * Returns the Configuration property identifying the DB input table.
+   */
+  public abstract String getDbInputTableNameProperty();
+
+  /**
+   * Returns the Configuration property specifying WHERE conditions for the
+   * db table.
+   */
+  public abstract String getDbInputConditionsProperty();
+
+  /**
    * Returns a mock MapContext that has both an OutputCommitter and an
    * InputSplit wired to the specified path.
    * Used for testing LargeObjectLoader.
@@ -83,6 +114,6 @@ public abstract class HadoopShim {
       Configuration conf, Path p);
 
   public final static synchronized HadoopShim get() {
-    return ShimLoader.getHadoopShim();
+    return ShimLoader.getHadoopShim(null);
   }
 }

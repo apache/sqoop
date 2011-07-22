@@ -69,6 +69,7 @@ public final class ClassLoaderStack {
     try {
       if (null != testClassName) {
         // try to load a class from the jar to force loading now.
+        LOG.debug("Testing class in jar: " + testClassName);
         Class.forName(testClassName, true, cl);
       }
       LOG.info("Loaded jar into current JVM: " + urlPath);

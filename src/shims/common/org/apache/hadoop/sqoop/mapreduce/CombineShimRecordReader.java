@@ -121,7 +121,7 @@ public class CombineShimRecordReader
 
     // Determine the file format we're reading.
     Class rrClass;
-    if (ExportInputFormat.isSequenceFiles(conf, split.getPath(index))) {
+    if (ExportJobBase.isSequenceFiles(conf, split.getPath(index))) {
       rrClass = SequenceFileRecordReader.class;
     } else {
       rrClass = LineRecordReader.class;

@@ -33,7 +33,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.MapContext;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 /**
@@ -90,7 +90,7 @@ public class ClobRef implements Writable {
    * path for this CLOB based on the MapContext.
    * @throws IOException if it could not read the CLOB from external storage.
    */
-  public Reader getDataReader(MapContext mapContext)
+  public Reader getDataReader(Mapper.Context mapContext)
       throws IllegalArgumentException, IOException {
     InputSplit split = mapContext.getInputSplit();
     if (split instanceof FileSplit) {

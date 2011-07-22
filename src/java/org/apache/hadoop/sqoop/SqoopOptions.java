@@ -283,7 +283,7 @@ public class SqoopOptions {
     if (null == baseConfiguration) {
       this.conf = new Configuration();
     } else {
-      this.conf = new Configuration(baseConfiguration);
+      this.conf = baseConfiguration;
     }
 
     this.extraArgs = null;

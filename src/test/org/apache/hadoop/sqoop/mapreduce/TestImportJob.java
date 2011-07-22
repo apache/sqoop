@@ -100,8 +100,10 @@ public class TestImportJob extends ImportJobTestCase {
 
   // Run a "job" that just delivers a record to the mapper.
   public static class DummyImportJob extends ImportJobBase {
+    @Override
     public void configureInputFormat(Job job, String tableName,
-        String tableClassName, String splitByCol) throws IOException {
+        String tableClassName, String splitByCol)
+        throws ClassNotFoundException, IOException {
 
       // Write a line of text into a file so that we can get
       // a record to the map task.

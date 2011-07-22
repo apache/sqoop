@@ -35,7 +35,7 @@ import org.apache.hadoop.mrunit.mapreduce.mock.MockReporter;
 /**
  * Hadoop Shim for CDH3 (based on 0.20.2)
  */
-public class CDH3Shim extends HadoopShim {
+public class CDH3Shim extends CommonHadoopShim {
   @Override
   public long getNumMapOutputRecords(Job job)
       throws IOException, InterruptedException {
@@ -78,7 +78,7 @@ public class CDH3Shim extends HadoopShim {
     conf.set("mapred.job.tracker", addr);
   }
 
-  private class MockMapContextWithCommitter
+  private static class MockMapContextWithCommitter
       extends MapContext<Object, Object, Object, Object> {
     private Path path;
     private Configuration conf;

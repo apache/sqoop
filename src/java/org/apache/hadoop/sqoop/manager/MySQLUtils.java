@@ -35,7 +35,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 
@@ -63,18 +62,19 @@ public final class MySQLUtils {
   public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
       "sqoop.output.enclose.required";
   public static final String TABLE_NAME_KEY =
-      DBConfiguration.INPUT_TABLE_NAME_PROPERTY;
-  public static final String CONNECT_STRING_KEY = DBConfiguration.URL_PROPERTY;
-  public static final String USERNAME_KEY = DBConfiguration.USERNAME_PROPERTY;
-  public static final String PASSWORD_KEY = DBConfiguration.PASSWORD_PROPERTY;
+      HadoopShim.get().getDbInputTableNameProperty();
+  public static final String CONNECT_STRING_KEY =
+      HadoopShim.get().getDbUrlProperty();
+  public static final String USERNAME_KEY =
+      HadoopShim.get().getDbUsernameProperty();
+  public static final String PASSWORD_KEY =
+      HadoopShim.get().getDbPasswordProperty();
   public static final String WHERE_CLAUSE_KEY =
-      DBConfiguration.INPUT_CONDITIONS_PROPERTY;
+      HadoopShim.get().getDbInputConditionsProperty();
   public static final String EXTRA_ARGS_KEY =
       "sqoop.mysql.extra.args";
 
-
   public static final String MYSQL_DEFAULT_CHARSET = "ISO_8859_1";
-
 
   /**
    * @return true if the user's output delimiters match those used by mysqldump.
