@@ -28,9 +28,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.util.StringUtils;
 
 import org.apache.hadoop.sqoop.Sqoop;
+import org.apache.hadoop.sqoop.tool.ExportTool;
 
 /**
  * Class that implements common methods required for tests which export data
@@ -82,20 +83,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
       }
     }
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--export-dir");
-    args.add(getTablePath().toString());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--fields-terminated-by");
-    args.add("\\t");
-    args.add("--lines-terminated-by");
-    args.add("\\n");
-    args.add("-m");
-    args.add("1");
-
-    // The rest of the additional args are appended.
+    // The sqoop-specific additional args are then added.
     if (null != additionalArgv) {
       boolean prevIsFlag = false;
       for (String arg : additionalArgv) {
@@ -110,6 +98,24 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
           args.add(arg);
         }
       }
+    }
+
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--export-dir");
+    args.add(getTablePath().toString());
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("--fields-terminated-by");
+    args.add("\\t");
+    args.add("--lines-terminated-by");
+    args.add("\\n");
+    args.add("-m");
+    args.add("1");
+
+    LOG.debug("args:");
+    for (String a : args) {
+      LOG.debug("  " + a);
     }
 
     return args.toArray(new String[0]);
@@ -250,12 +256,13 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     int ret;
     List<String> generatedJars = null;
     try {
-      Sqoop exporter = new Sqoop();
-      ret = ToolRunner.run(exporter, argv);
+      ExportTool exporter = new ExportTool();
+      Sqoop sqoop = new Sqoop(exporter);
+      ret = Sqoop.runSqoop(sqoop, argv);
       generatedJars = exporter.getGeneratedJarFiles();
     } catch (Exception e) {
-      LOG.error("Got exception running Sqoop: " + e.toString());
-      e.printStackTrace();
+      LOG.error("Got exception running Sqoop: "
+          + StringUtils.stringifyException(e));
       ret = 1;
     }
 

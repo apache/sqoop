@@ -21,6 +21,7 @@ package org.apache.hadoop.sqoop;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
@@ -32,6 +33,7 @@ import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.SeqFileReader;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
@@ -104,8 +106,9 @@ public class TestWhere extends ImportJobTestCase {
     String [] argv = getArgv(true, columns, whereClause);
     runImport(argv);
     try {
-      SqoopOptions opts = new SqoopOptions();
-      opts.parse(getArgv(false, columns, whereClause));
+      SqoopOptions opts = new ImportTool().parseArguments(
+          getArgv(false, columns, whereClause),
+          null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
@@ -146,6 +149,8 @@ public class TestWhere extends ImportJobTestCase {
       assertEquals("Incorrect number of results for query", numExpectedResults, totalResults);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
+    } catch (ParseException pe) {
+      fail(pe.toString());
     } finally {
       IOUtils.closeStream(reader);
 

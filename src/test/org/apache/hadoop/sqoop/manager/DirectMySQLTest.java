@@ -240,7 +240,7 @@ public class DirectMySQLTest extends ImportJobTestCase {
         "3,Fred,2009-01-23,15,marketing"
     };
 
-    String [] extraArgs = { "-", "--lock-tables" };
+    String [] extraArgs = { "--", "--lock-tables" };
 
     doImport(false, true, getTableName(), expectedResults, extraArgs);
   }

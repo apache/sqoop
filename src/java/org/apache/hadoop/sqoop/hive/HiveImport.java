@@ -49,11 +49,14 @@ public class HiveImport {
   private SqoopOptions options;
   private ConnManager connManager;
   private Configuration configuration;
+  private boolean generateOnly;
 
-  public HiveImport(final SqoopOptions opts, final ConnManager connMgr, final Configuration conf) {
+  public HiveImport(final SqoopOptions opts, final ConnManager connMgr,
+      final Configuration conf, final boolean generateOnly) {
     this.options = opts;
     this.connManager = connMgr;
     this.configuration = conf;
+    this.generateOnly = generateOnly;
   }
 
 
@@ -110,7 +113,7 @@ public class HiveImport {
    * do any side-effecting actions in Hive.
    */
   private boolean isGenerateOnly() {
-    return options.getAction() == SqoopOptions.ControlAction.GenerateOnly;
+    return generateOnly;
   }
 
   /**
@@ -134,9 +137,11 @@ public class HiveImport {
    *
    * @param inputTableName the name of the table as loaded into HDFS
    * @param outputTableName the name of the table to create in Hive.
+   * @param createOnly if true, run the CREATE TABLE statement but not
+   * LOAD DATA.
    */
-  public void importTable(String inputTableName, String outputTableName)
-      throws IOException {
+  public void importTable(String inputTableName, String outputTableName,
+      boolean createOnly) throws IOException {
 
     if (!isGenerateOnly()) {
       removeTempLogs(inputTableName);
@@ -177,7 +182,7 @@ public class HiveImport {
         FileOutputStream fos = new FileOutputStream(scriptFile);
         w = new BufferedWriter(new OutputStreamWriter(fos));
         w.write(createTableStr, 0, createTableStr.length());
-        if (!options.doCreateHiveTableOnly()) {
+        if (!createOnly) {
           w.write(loadDataStmtStr, 0, loadDataStmtStr.length());
         }
       } catch (IOException ioe) {

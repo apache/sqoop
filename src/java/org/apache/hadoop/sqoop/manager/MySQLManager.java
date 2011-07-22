@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop.manager;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.PreparedStatement;
@@ -31,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.util.ImportException;
 
@@ -191,7 +193,8 @@ public class MySQLManager extends GenericJdbcManager {
    * @param stmt The SQL statement to execute
    * @return A ResultSet encapsulating the results or null on error
    */
-  protected ResultSet execute(String stmt, Object... args) throws SQLException {
+  protected ResultSet execute(String stmt, Object... args)
+      throws SQLException {
     // Free any previous resources.
     release();
 
@@ -208,6 +211,33 @@ public class MySQLManager extends GenericJdbcManager {
 
     LOG.info("Executing SQL statement: " + stmt);
     return statement.executeQuery();
+  }
+
+  @Override
+  public void execAndPrint(String s) {
+    // Override default execAndPrint() with a special version that forces
+    // use of fully-buffered ResultSets (MySQLManager uses streaming ResultSets 
+    // in the default execute() method; but the execAndPrint() method needs to
+    // issue overlapped queries for metadata.)
+
+    ResultSet results = null;
+    try {
+      // Use default execute() statement which does not issue the
+      // MySQL-specific setFetchSize() command.
+      results = super.execute(s);
+    } catch (SQLException sqlE) {
+      LOG.error("Error executing statement: "
+          + StringUtils.stringifyException(sqlE));
+      release();
+      return;
+    }
+
+    PrintWriter pw = new PrintWriter(System.out, true);
+    try {
+      formatAndPrintResultSet(results, pw);
+    } finally {
+      pw.close();
+    }
   }
 
   public void release() {

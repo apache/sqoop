@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,6 +104,14 @@ public class BaseSqoopTestCase extends TestCase {
   private String [] colNames;
   protected String [] getColNames() {
     return colNames;
+  }
+
+  protected void setColNames(String [] cols) {
+    if (null == cols) {
+      this.colNames = null;
+    } else {
+      this.colNames = Arrays.copyOf(cols, cols.length);
+    }
   }
 
   protected HsqldbTestServer getTestServer() {

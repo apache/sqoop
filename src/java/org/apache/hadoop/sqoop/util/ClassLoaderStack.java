@@ -44,7 +44,7 @@ public final class ClassLoaderStack {
    * Sets the classloader for the current thread
    */
   public static void setCurrentClassLoader(ClassLoader cl) {
-    LOG.info("Restoring classloader: " + cl.toString());
+    LOG.debug("Restoring classloader: " + cl.toString());
     Thread.currentThread().setContextClassLoader(cl);
   }
 
@@ -72,13 +72,13 @@ public final class ClassLoaderStack {
         LOG.debug("Testing class in jar: " + testClassName);
         Class.forName(testClassName, true, cl);
       }
-      LOG.info("Loaded jar into current JVM: " + urlPath);
+      LOG.debug("Loaded jar into current JVM: " + urlPath);
     } catch (ClassNotFoundException cnfe) {
       throw new IOException("Could not load jar " + jarFile + " into JVM. (Could not find class "
           + testClassName + ".)", cnfe);
     }
 
-    LOG.info("Added classloader for jar " + jarFile + ": " + cl);
+    LOG.debug("Added classloader for jar " + jarFile + ": " + cl);
     Thread.currentThread().setContextClassLoader(cl);
     return prevClassLoader;
   }

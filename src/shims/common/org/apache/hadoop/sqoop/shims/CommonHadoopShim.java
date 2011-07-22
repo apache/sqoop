@@ -18,7 +18,11 @@
 
 package org.apache.hadoop.sqoop.shims;
 
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
  * Contains code which belongs in all Hadoop shims which is syntactically
@@ -26,6 +30,17 @@ import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
  * Hadoop versions (e.g., references to 'final static String' fields).
  */
 public abstract class CommonHadoopShim extends HadoopShim {
+
+  @Override
+  public String [] parseGenericOptions(Configuration conf, String [] args)
+      throws IOException {
+    // This needs to be shimmed because in Apache Hadoop this can throw
+    // an IOException, but it does not do so in CDH. We just mandate in
+    // this method that an IOException is possible.
+    GenericOptionsParser genericParser = new GenericOptionsParser(
+        conf, args);
+    return genericParser.getRemainingArgs();
+  }
 
   @Override
   public String getDbInputClassProperty() {

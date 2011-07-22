@@ -46,6 +46,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.sqoop.lib.RecordParser;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.sqoop.testutil.ExportJobTestCase;
+import org.apache.hadoop.sqoop.tool.CodeGenTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 import org.junit.Before;
@@ -69,6 +70,31 @@ public class TestExport extends ExportJobTestCase {
       }
     }
   }
+
+  /**
+   * @return an argv for the CodeGenTool to use when creating tables to export.
+   */
+  protected String [] getCodeGenArgv(String... extraArgs) {
+    List<String> codeGenArgv = new ArrayList<String>();
+
+    if (null != extraArgs) {
+      for (String arg : extraArgs) {
+        codeGenArgv.add(arg);
+      }
+    }
+
+    codeGenArgv.add("--table");
+    codeGenArgv.add(getTableName());
+    codeGenArgv.add("--connect");
+    codeGenArgv.add(getConnectString());
+    codeGenArgv.add("--fields-terminated-by");
+    codeGenArgv.add("\\t");
+    codeGenArgv.add("--lines-terminated-by");
+    codeGenArgv.add("\\n");
+
+    return codeGenArgv.toArray(new String[0]);
+  }
+
 
   private String getRecordLine(int recordNum, ColumnGenerator... extraCols) {
     String idStr = Integer.toString(recordNum);
@@ -429,9 +455,8 @@ public class TestExport extends ExportJobTestCase {
     verifyExport(RECORDS_PER_MAP * NUM_FILES);
   }
 
-
   /** Export some rows from a SequenceFile, make sure they import correctly */
-  public void testSequenceFileExport() throws IOException, SQLException {
+  public void testSequenceFileExport() throws Exception {
 
     final int TOTAL_RECORDS = 10;
 
@@ -439,7 +464,14 @@ public class TestExport extends ExportJobTestCase {
     LOG.info("Creating initial schema for SeqFile test");
     createTable();
     LOG.info("Generating code..."); 
-    List<String> generatedJars = runExport(getArgv(true, "--generate-only"));
+    CodeGenTool codeGen = new CodeGenTool();
+    String [] codeGenArgs = getCodeGenArgv();
+    SqoopOptions options = codeGen.parseArguments(
+        codeGenArgs, null, null, true);
+    codeGen.validateOptions(options);
+    int ret = codeGen.run(options);
+    assertEquals(0, ret);
+    List<String> generatedJars = codeGen.getGeneratedJarFiles();
 
     // Now, wipe the created table so we can export on top of it again.
     LOG.info("Resetting schema and data...");

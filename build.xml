@@ -21,6 +21,11 @@
     xmlns:artifact="urn:maven-artifact-ant"
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
+  <!-- Load system-wide and project-wide default properties set by
+       the user, to avoid needing to override with -D. -->
+  <property file="${user.home}/build.properties" />
+  <property file="${basedir}/build.properties" />
+
   <!-- some basic properties -->
   <property environment="env"/>
   <property name="name" value="sqoop" />
@@ -30,13 +35,16 @@
   <property name="dest.jar" value="${artifact.name}.jar"/>
   
   <!-- locations in the source tree -->
-  <property name="src.dir" location="${basedir}/src/java" />
-  <property name="test.dir" location="${basedir}/src/test" />
-  <property name="shim.src.dir" location="${basedir}/src/shims" />
+  <property name="base.src.dir" location="${basedir}/src" />
+  <property name="src.dir" location="${base.src.dir}/java" />
+  <property name="test.dir" location="${base.src.dir}/test" />
+  <property name="shim.src.dir" location="${base.src.dir}/shims" />
   <property name="lib.dir" location="${basedir}/lib" />
-  <property name="docs.src.dir" location="${basedir}/src/docs" />
+  <property name="docs.src.dir" location="${base.src.dir}/docs" />
+  <property name="script.src.dir" location="${base.src.dir}/scripts" />
 
   <property name="build.dir" location="${basedir}/build" />
+  <property name="build.bin.dir" location="${build.dir}/bin" />
   <property name="build.classes" location="${build.dir}/classes"/>
   <property name="build.shim.dir" location="${build.dir}/shims"/>
   <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
@@ -211,7 +219,21 @@
   <target name="compile-all" depends="compile,compile-test,jar-all-shims"
       description="Compile all sources"/>
 
-  <target name="package" depends="jar,compile-all,docs,javadoc,ivy-retrieve-redist"
+  <target name="scripts" depends="jar"
+      description="Create tool-specific wrapper scripts">
+    <!-- Take the list of available tools from 'sqoop help' and generate
+         the wrapper scripts to invoke each of these.
+      -->
+    <mkdir dir="${build.bin.dir}" />
+    <exec executable="${script.src.dir}/create-tool-scripts.sh"
+        dir="${basedir}" failonerror="true">
+      <arg value="${build.bin.dir}" />
+      <arg value="${script.src.dir}/tool-script.sh.template" />
+    </exec>
+  </target>
+
+  <target name="package"
+      depends="jar,compile-all,docs,javadoc,ivy-retrieve-redist,scripts"
       description="Create a redistributable package">
 
     <mkdir dir="${dist.dir}"/>
@@ -230,7 +252,6 @@
         <include name="*.jar" />
       </fileset>
     </copy>
-
 
     <!-- copy in various components of the initial source layout
          so that the redistributable can bootstrap itself. -->
@@ -268,8 +289,23 @@
       </fileset>
     </copy>
 
+    <!-- copy in auto-generated bin scripts -->
+    <copy todir="${dist.dir}/bin" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.bin.dir}">
+        <include name="*" />
+      </fileset>
+    </copy>
+
+    <!-- make sure the bin scripts are executable. -->
     <chmod perm="ugo+x" type="file" parallel="false">
       <fileset dir="${dist.dir}/bin" />
+    </chmod>
+
+    <!-- make sure any scripts named *.sh are executable. -->
+    <chmod perm="ugo+x" type="file" parallel="false">
+      <fileset dir="${dist.dir}">
+        <include name="**/*.sh" />
+      </fileset>
     </chmod>
   </target>
 
@@ -277,10 +313,12 @@
     <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
       <tarfileset dir="${build.dir}" mode="664">
         <exclude name="${artifact.name}/bin/*" />
+        <exclude name="${artifact.name}/**/*.sh" />
         <include name="${artifact.name}/**" />
       </tarfileset>
       <tarfileset dir="${build.dir}" mode="755">
         <include name="${artifact.name}/bin/*" />
+        <include name="${artifact.name}/**/*.sh" />
       </tarfileset>
     </tar>
   </target>

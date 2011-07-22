@@ -29,6 +29,7 @@ import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.ResultSetPrinter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -46,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.util.StringUtils;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -407,36 +409,36 @@ public abstract class SqlManager extends ConnManager {
   }
 
   /**
-   * Poor man's SQL query interface; used for debugging.
-   * @param s
+   * Prints the contents of a ResultSet to the specified PrintWriter.
+   * The ResultSet is closed at the end of this method.
+   * @param results the ResultSet to print.
+   * @param pw the location to print the data to.
    */
-  public void execAndPrint(String s) {
-    System.out.println("Executing statement: " + s);
-    ResultSet results;
-    try {
-      results = execute(s);
-    } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString());
-      release();
-      return;
-    }
-
+  protected void formatAndPrintResultSet(ResultSet results, PrintWriter pw) {
     try {
       try {
         int cols = results.getMetaData().getColumnCount();
-        System.out.println("Got " + cols + " columns back");
+        pw.println("Got " + cols + " columns back");
         if (cols > 0) {
-          System.out.println("Schema: " + results.getMetaData().getSchemaName(1));
-          System.out.println("Table: " + results.getMetaData().getTableName(1));
+          ResultSetMetaData rsmd = results.getMetaData();
+          String schema = rsmd.getSchemaName(1);
+          String table = rsmd.getTableName(1);
+          if (null != schema) {
+            pw.println("Schema: " + schema);
+          }
+
+          if (null != table) {
+            pw.println("Table: " + table);
+          }
         }
       } catch (SQLException sqlE) {
         LOG.error("SQLException reading result metadata: " + sqlE.toString());
       }
 
       try {
-        new ResultSetPrinter().printResultSet(System.out, results);
+        new ResultSetPrinter().printResultSet(pw, results);
       } catch (IOException ioe) {
-        LOG.error("IOException writing results to stdout: " + ioe.toString());
+        LOG.error("IOException writing results: " + ioe.toString());
         return;
       }
     } finally {
@@ -448,6 +450,29 @@ public abstract class SqlManager extends ConnManager {
       }
 
       release();
+    }
+  }
+
+  /**
+   * Poor man's SQL query interface; used for debugging.
+   * @param s the SQL statement to execute.
+   */
+  public void execAndPrint(String s) {
+    ResultSet results = null;
+    try {
+      results = execute(s);
+    } catch (SQLException sqlE) {
+      LOG.error("Error executing statement: "
+          + StringUtils.stringifyException(sqlE));
+      release();
+      return;
+    }
+
+    PrintWriter pw = new PrintWriter(System.out, true);
+    try {
+      formatAndPrintResultSet(results, pw);
+    } finally {
+      pw.close();
     }
   }
 

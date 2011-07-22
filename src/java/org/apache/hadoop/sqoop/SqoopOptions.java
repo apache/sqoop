@@ -64,16 +64,6 @@ public class SqoopOptions {
     }
   }
 
-  // control-flow selector based on command-line switches.
-  public enum ControlAction {
-    ListDatabases,  // list available databases and exit.
-    ListTables,     // list available tables and exit.
-    GenerateOnly,   // generate ORM code but do not import.
-    FullImport,     // generate code (as needed) and import.
-    DebugExec,      // just execute a single sql command and print its results.
-    Export          // export a table from HDFS to a database.
-  }
-
   // selects in-HDFS destination file format
   public enum FileLayout {
     TextFile,
@@ -81,18 +71,19 @@ public class SqoopOptions {
   }
 
 
-  // TODO(aaron): Adding something here? Add a getter, a cmdline switch, and a properties file
-  // entry in loadFromProperties(). Add a default value in initDefaults() if you need one.
-  // Make sure you add the stub to the testdata/sqoop.properties.template file.
+  // TODO(aaron): Adding something here? Add a setter and a getter.
+  // Add a default value in initDefaults() if you need one.
+  // If you want to load from a properties file, add an entry in the
+  // loadFromProperties() method.
+  // Then add command-line arguments in the appropriate tools. The
+  // names of all command-line args are stored as constants in BaseSqoopTool.
   private String connectString;
   private String tableName;
   private String [] columns;
-  private boolean allTables;
   private String username;
   private String password;
   private String codeOutputDir;
   private String jarOutputDir;
-  private ControlAction action;
   private String hadoopHome;
   private String splitByCol;
   private String whereClause;
@@ -104,7 +95,6 @@ public class SqoopOptions {
   private String tmpDir; // where temp data goes; usually /tmp
   private String hiveHome;
   private boolean hiveImport;
-  private boolean createHiveTableOnly;
   private boolean overwriteHiveTable;
   private String hiveTableName;
   private String packageName; // package to prepend to auto-named classes.
@@ -212,7 +202,6 @@ public class SqoopOptions {
 
       this.direct = getBooleanProperty(props, "direct.import", this.direct);
       this.hiveImport = getBooleanProperty(props, "hive.import", this.hiveImport);
-      this.createHiveTableOnly = getBooleanProperty(props, "hive.create.table.only", this.createHiveTableOnly);
       this.overwriteHiveTable = getBooleanProperty(props, "hive.overwrite.table", this.overwriteHiveTable);
       this.useCompression = getBooleanProperty(props, "compression", this.useCompression);
       this.directSplitSize = getLongProperty(props, "direct.split.size",
@@ -241,7 +230,6 @@ public class SqoopOptions {
   private void initDefaults(Configuration baseConfiguration) {
     // first, set the true defaults if nothing else happens.
     // default action is to run the full pipeline.
-    this.action = ControlAction.FullImport;
     this.hadoopHome = System.getenv("HADOOP_HOME");
 
     // Set this with $HIVE_HOME, but -Dhive.home can override.
@@ -292,102 +280,6 @@ public class SqoopOptions {
   }
 
   /**
-   * Allow the user to enter his password on the console without printing characters.
-   * @return the password as a string
-   */
-  private String securePasswordEntry() {
-    return new String(System.console().readPassword("Enter password: "));
-  }
-
-  /**
-   * Print usage strings for the program's arguments.
-   */
-  public static void printUsage() {
-    System.out.println("Usage: hadoop sqoop.jar org.apache.hadoop.sqoop.Sqoop (options)");
-    System.out.println("");
-    System.out.println("Database connection options:");
-    System.out.println("--connect (jdbc-uri)         Specify JDBC connect string");
-    System.out.println("--driver (class-name)        Manually specify JDBC driver class to use");
-    System.out.println("--username (username)        Set authentication username");
-    System.out.println("--password (password)        Set authentication password");
-    System.out.println("-P                           Read password from console");
-    System.out.println("--direct                     Use direct import fast path (mysql only)");
-    System.out.println("");
-    System.out.println("Import control options:");
-    System.out.println("--table (tablename)          Table to read");
-    System.out.println("--columns (col,col,col...)   Columns to export from table");
-    System.out.println("--split-by (column-name)     Column of the table used to split work units");
-    System.out.println("--where (where clause)       Where clause to use during export");
-    System.out.println("--hadoop-home (dir)          Override $HADOOP_HOME");
-    System.out.println("--hive-home (dir)            Override $HIVE_HOME");
-    System.out.println("--warehouse-dir (dir)        HDFS path for table destination");
-    System.out.println("--as-sequencefile            Imports data to SequenceFiles");
-    System.out.println("--as-textfile                Imports data as plain text (default)");
-    System.out.println("--all-tables                 Import all tables in database");
-    System.out.println("                             (Ignores --table, --columns and --split-by)");
-    System.out.println("--hive-import                If set, then import the table into Hive.");
-    System.out.println("                    (Uses Hive's default delimiters if none are set.)");
-    System.out.println("--hive-table (tablename)     Sets the table name to use when importing");
-    System.out.println("                             to hive.");
-    System.out.println("-m, --num-mappers (n)        Use 'n' map tasks to import in parallel");
-    System.out.println("-z, --compress               Enable compression");
-    System.out.println("--direct-split-size (n)      Split the input stream every 'n' bytes");
-    System.out.println("                             when importing in direct mode.");
-    System.out.println("--inline-lob-limit (n)       Set the maximum size for an inline LOB");
-    System.out.println("");
-    System.out.println("Export options:");
-    System.out.println("--export-dir (dir)           Export from an HDFS path into a table");
-    System.out.println("                             (set with --table)");
-    System.out.println("");
-    System.out.println("Output line formatting options:");
-    System.out.println("--fields-terminated-by (char)    Sets the field separator character");
-    System.out.println("--lines-terminated-by (char)     Sets the end-of-line character");
-    System.out.println("--optionally-enclosed-by (char)  Sets a field enclosing character");
-    System.out.println("--enclosed-by (char)             Sets a required field enclosing char");
-    System.out.println("--escaped-by (char)              Sets the escape character");
-    System.out.println("--mysql-delimiters               Uses MySQL's default delimiter set");
-    System.out.println("  fields: ,  lines: \\n  escaped-by: \\  optionally-enclosed-by: '");
-    System.out.println("");
-    System.out.println("Input parsing options:");
-    System.out.println("--input-fields-terminated-by (char)    Sets the input field separator");
-    System.out.println("--input-lines-terminated-by (char)     Sets the input end-of-line char");
-    System.out.println("--input-optionally-enclosed-by (char)  Sets a field enclosing character");
-    System.out.println("--input-enclosed-by (char)             Sets a required field encloser");
-    System.out.println("--input-escaped-by (char)              Sets the input escape character");
-    System.out.println("");
-    System.out.println("Code generation options:");
-    System.out.println("--outdir (dir)               Output directory for generated code");
-    System.out.println("--bindir (dir)               Output directory for compiled objects");
-    System.out.println("--generate-only              Stop after code generation; do not import");
-    System.out.println("--package-name (name)        Put auto-generated classes in this package");
-    System.out.println("--class-name (name)          When generating one class, use this name.");
-    System.out.println("                             This overrides --package-name.");
-    System.out.println("");
-    System.out.println("Library loading options:");
-    System.out.println("--jar-file (file)            Disable code generation; use specified jar");
-    System.out.println("--class-name (name)          The class within the jar that represents");
-    System.out.println("                             the table to import/export");
-    System.out.println("");
-    System.out.println("Additional commands:");
-    System.out.println("--list-tables                List tables in database and exit");
-    System.out.println("--list-databases             List all databases available and exit");
-    System.out.println("--debug-sql (statement)      Execute 'statement' in SQL and exit");
-    System.out.println("--verbose                    Print more information while working");
-    System.out.println("");
-    System.out.println("Database-specific options:");
-    System.out.println("Arguments may be passed to the database manager after a lone '-':");
-    System.out.println("  MySQL direct mode: arguments passed directly to mysqldump");
-    System.out.println("");
-    System.out.println("Generic Hadoop command-line options:");
-    ToolRunner.printGenericCommandUsage(System.out);
-    System.out.println("");
-    System.out.println("At minimum, you must specify --connect "
-        + "and either --table or --all-tables.");
-    System.out.println("Alternatively, you can specify --generate-only or one of the additional");
-    System.out.println("commands.");
-  }
-
-  /**
    * Given a string containing a single character or an escape sequence representing
    * a char, return that char itself.
    *
@@ -397,12 +289,16 @@ public class SqoopOptions {
    *
    * Strings like "\0ooo" return the character specified by the octal sequence 'ooo'
    * Strings like "\0xhhh" or "\0Xhhh" return the character specified by the hex sequence 'hhh'
+   *
+   * If the input string contains leading or trailing spaces, these are ignored.
    */
-  static char toChar(String charish) throws InvalidOptionsException {
-    if (null == charish) {
+  public static char toChar(String charish) throws InvalidOptionsException {
+    if (null == charish || charish.length() == 0) {
       throw new InvalidOptionsException("Character argument expected." 
           + "\nTry --help for usage instructions.");
-    } else if (charish.startsWith("\\0x") || charish.startsWith("\\0X")) {
+    }
+
+    if (charish.startsWith("\\0x") || charish.startsWith("\\0X")) {
       if (charish.length() == 3) {
         throw new InvalidOptionsException("Base-16 value expected for character argument."
           + "\nTry --help for usage instructions.");
@@ -452,9 +348,6 @@ public class SqoopOptions {
               + "\nTry --help for usage instructions.");
         }
       }
-    } else if (charish.length() == 0) {
-      throw new InvalidOptionsException("Character argument expected." 
-          + "\nTry --help for usage instructions.");
     } else {
       // it's a normal character.
       if (charish.length() > 1) {
@@ -466,257 +359,15 @@ public class SqoopOptions {
     }
   }
 
-  /**
-   * Read args from the command-line into member fields.
-   * @throws Exception if there's a problem parsing arguments.
-   */
-  public void parse(String [] args) throws InvalidOptionsException {
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Parsing sqoop arguments:");
-      for (String arg : args) {
-        LOG.debug("  " + arg);
-      }
-    }
-
-    int i = 0;
-    try {
-      for (i = 0; i < args.length; i++) {
-        if (args[i].equals("--connect")) {
-          this.connectString = args[++i];
-        } else if (args[i].equals("--driver")) {
-          this.driverClassName = args[++i];
-        } else if (args[i].equals("--table")) {
-          this.tableName = args[++i];
-        } else if (args[i].equals("--columns")) {
-          String columnString = args[++i];
-          this.columns = columnString.split(",");
-        } else if (args[i].equals("--split-by")) {
-          this.splitByCol = args[++i];
-        } else if (args[i].equals("--where")) {
-          this.whereClause = args[++i];
-        } else if (args[i].equals("--list-tables")) {
-          this.action = ControlAction.ListTables;
-        } else if (args[i].equals("--all-tables")) {
-          this.allTables = true;
-        } else if (args[i].equals("--export-dir")) {
-          this.exportDir = args[++i];
-          this.action = ControlAction.Export;
-        } else if (args[i].equals("--local")) {
-          // TODO(aaron): Remove this after suitable deprecation time period.
-          LOG.warn("--local is deprecated; use --direct instead.");
-          this.direct = true;
-        } else if (args[i].equals("--direct")) {
-          this.direct = true;
-        } else if (args[i].equals("--username")) {
-          this.username = args[++i];
-          if (null == this.password) {
-            // Set password to empty if the username is set first,
-            // to ensure that they're either both null or neither.
-            this.password = "";
-          }
-        } else if (args[i].equals("--password")) {
-          LOG.warn("Setting your password on the command-line is insecure. "
-              + "Consider using -P instead.");
-          this.password = args[++i];
-        } else if (args[i].equals("-P")) {
-          this.password = securePasswordEntry();
-        } else if (args[i].equals("--hadoop-home")) {
-          this.hadoopHome = args[++i];
-        } else if (args[i].equals("--hive-home")) {
-          this.hiveHome = args[++i];
-        } else if (args[i].equals("--hive-import")) {
-          this.hiveImport = true;
-        } else if (args[i].equals("--hive-create-only")) {
-          this.createHiveTableOnly = true;
-        } else if (args[i].equals("--hive-overwrite")) {
-          this.overwriteHiveTable = true;
-        } else if (args[i].equals("--hive-table")) {
-          this.hiveTableName = args[++i];
-        } else if (args[i].equals("--num-mappers") || args[i].equals("-m")) {
-          String numMappersStr = args[++i];
-          this.numMappers = Integer.valueOf(numMappersStr);
-        } else if (args[i].equals("--fields-terminated-by")) {
-          this.outputFieldDelim = SqoopOptions.toChar(args[++i]);
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--lines-terminated-by")) {
-          this.outputRecordDelim = SqoopOptions.toChar(args[++i]);
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--optionally-enclosed-by")) {
-          this.outputEnclosedBy = SqoopOptions.toChar(args[++i]);
-          this.outputMustBeEnclosed = false;
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--enclosed-by")) {
-          this.outputEnclosedBy = SqoopOptions.toChar(args[++i]);
-          this.outputMustBeEnclosed = true;
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--escaped-by")) {
-          this.outputEscapedBy = SqoopOptions.toChar(args[++i]);
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--mysql-delimiters")) {
-          this.outputFieldDelim = ',';
-          this.outputRecordDelim = '\n';
-          this.outputEnclosedBy = '\'';
-          this.outputEscapedBy = '\\';
-          this.outputMustBeEnclosed = false;
-          this.areDelimsManuallySet = true;
-        } else if (args[i].equals("--input-fields-terminated-by")) {
-          this.inputFieldDelim = SqoopOptions.toChar(args[++i]);
-        } else if (args[i].equals("--input-lines-terminated-by")) {
-          this.inputRecordDelim = SqoopOptions.toChar(args[++i]);
-        } else if (args[i].equals("--input-optionally-enclosed-by")) {
-          this.inputEnclosedBy = SqoopOptions.toChar(args[++i]);
-          this.inputMustBeEnclosed = false;
-        } else if (args[i].equals("--input-enclosed-by")) {
-          this.inputEnclosedBy = SqoopOptions.toChar(args[++i]);
-          this.inputMustBeEnclosed = true;
-        } else if (args[i].equals("--input-escaped-by")) {
-          this.inputEscapedBy = SqoopOptions.toChar(args[++i]);
-        } else if (args[i].equals("--outdir")) {
-          this.codeOutputDir = args[++i];
-        } else if (args[i].equals("--as-sequencefile")) {
-          this.layout = FileLayout.SequenceFile;
-        } else if (args[i].equals("--as-textfile")) {
-          this.layout = FileLayout.TextFile;
-        } else if (args[i].equals("--bindir")) {
-          this.jarOutputDir = args[++i];
-        } else if (args[i].equals("--warehouse-dir")) {
-          this.warehouseDir = args[++i];
-        } else if (args[i].equals("--package-name")) {
-          this.packageName = args[++i];
-        } else if (args[i].equals("--class-name")) {
-          this.className = args[++i];
-        } else if (args[i].equals("-z") || args[i].equals("--compress")) {
-          this.useCompression = true;
-        } else if (args[i].equals("--direct-split-size")) {
-          this.directSplitSize = Long.parseLong(args[++i]);
-        } else if (args[i].equals("--inline-lob-limit")) {
-          this.maxInlineLobSize = Long.parseLong(args[++i]);
-        } else if (args[i].equals("--jar-file")) {
-          this.existingJarFile = args[++i];
-        } else if (args[i].equals("--list-databases")) {
-          this.action = ControlAction.ListDatabases;
-        } else if (args[i].equals("--generate-only")) {
-          this.action = ControlAction.GenerateOnly;
-        } else if (args[i].equals("--debug-sql")) {
-          this.action = ControlAction.DebugExec;
-          // read the entire remainder of the commandline into the debug sql statement.
-          if (null == this.debugSqlCmd) {
-            this.debugSqlCmd = "";
-          }
-          for (i++; i < args.length; i++) {
-            this.debugSqlCmd = this.debugSqlCmd + args[i] + " ";
-          }
-        } else if (args[i].equals("--verbose")) {
-          // Immediately switch into DEBUG logging.
-          Category sqoopLogger =
-              Logger.getLogger(SqoopOptions.class.getName()).getParent();
-          sqoopLogger.setLevel(Level.DEBUG);
-
-        } else if (args[i].equals("--help")) {
-          printUsage();
-          throw new InvalidOptionsException("");
-        } else if (args[i].equals("-")) {
-          // Everything after a '--' goes into extraArgs.
-          ArrayList<String> extra = new ArrayList<String>();
-          for (i++; i < args.length; i++) {
-            extra.add(args[i]);
-          }
-          this.extraArgs = extra.toArray(new String[0]);
-        } else {
-          throw new InvalidOptionsException("Invalid argument: " + args[i] + ".\n"
-              + "Try --help for usage.");
-        }
-      }
-    } catch (ArrayIndexOutOfBoundsException oob) {
-      throw new InvalidOptionsException("Error: " + args[--i] + " expected argument.\n"
-          + "Try --help for usage.");
-    } catch (NumberFormatException nfe) {
-      throw new InvalidOptionsException("Error: " + args[--i] + " expected numeric argument.\n"
-          + "Try --help for usage.");
-    }
-  }
-
-  private static final String HELP_STR = "\nTry --help for usage instructions.";
-
-  /**
-   * Validates options and ensures that any required options are
-   * present and that any mutually-exclusive options are not selected.
-   * @throws Exception if there's a problem.
-   */
-  public void validate() throws InvalidOptionsException {
-    if (this.allTables && this.columns != null) {
-      // If we're reading all tables in a database, can't filter column names.
-      throw new InvalidOptionsException("--columns and --all-tables are incompatible options."
-          + HELP_STR);
-    } else if (this.allTables && this.splitByCol != null) {
-      // If we're reading all tables in a database, can't set pkey
-      throw new InvalidOptionsException("--split-by and --all-tables are incompatible options."
-          + HELP_STR);
-    } else if (this.allTables && this.className != null) {
-      // If we're reading all tables, can't set individual class name
-      throw new InvalidOptionsException("--class-name and --all-tables are incompatible options."
-          + HELP_STR);
-    } else if (this.allTables && this.hiveTableName != null) {
-      // If we're reading all tables, can't set hive target table name
-      throw new InvalidOptionsException(
-          "--hive-table and --all-tables are incompatible options."
-          + HELP_STR);
-    } else if (this.hiveTableName != null && !this.hiveImport) {
-      throw new InvalidOptionsException(
-          "--hive-table is invalid without --hive-import"
-          + HELP_STR);
-    } else if (this.connectString == null) {
-      throw new InvalidOptionsException("Error: Required argument --connect is missing."
-          + HELP_STR);
-    } else if (this.className != null && this.packageName != null) {
-      throw new InvalidOptionsException(
-          "--class-name overrides --package-name. You cannot use both." + HELP_STR);
-    } else if (this.action == ControlAction.FullImport && !this.allTables
-        && this.tableName == null) {
-      throw new InvalidOptionsException(
-          "One of --table or --all-tables is required for import." + HELP_STR);
-    } else if (this.action == ControlAction.Export && this.allTables) {
-      throw new InvalidOptionsException("You cannot export with --all-tables." + HELP_STR);
-    } else if (this.action == ControlAction.Export && this.tableName == null) {
-      throw new InvalidOptionsException("Export requires a --table argument." + HELP_STR);
-    } else if (this.existingJarFile != null && this.className == null) {
-      throw new InvalidOptionsException("Jar specified with --jar-file, but no "
-          + "class specified with --class-name." + HELP_STR);
-    } else if (this.existingJarFile != null && this.action == ControlAction.GenerateOnly) {
-      throw new InvalidOptionsException("Cannot generate code using existing jar." + HELP_STR);
-    }
-
-    if (this.hiveImport) {
-      if (!areDelimsManuallySet) {
-        // user hasn't manually specified delimiters, and wants to import straight to Hive.
-        // Use Hive-style delimiters.
-        LOG.info("Using Hive-specific delimiters for output. You can override");
-        LOG.info("delimiters with --fields-terminated-by, etc.");
-        this.outputFieldDelim = (char)0x1; // ^A
-        this.outputRecordDelim = '\n';
-        this.outputEnclosedBy = '\000'; // no enclosing in Hive.
-        this.outputEscapedBy = '\000'; // no escaping in Hive
-        this.outputMustBeEnclosed = false;
-      }
-
-      if (this.getOutputEscapedBy() != '\000') {
-        LOG.warn("Hive does not support escape characters in fields;");
-        LOG.warn("parse errors in Hive may result from using --escaped-by.");
-      }
-
-      if (this.getOutputEnclosedBy() != '\000') {
-        LOG.warn("Hive does not support quoted strings; parse errors");
-        LOG.warn("in Hive may result from using --enclosed-by.");
-      }
-    }
-  }
-
   /** get the temporary directory; guaranteed to end in File.separator
    * (e.g., '/')
    */
   public String getTmpDir() {
     return tmpDir;
+  }
+
+  public void setTmpDir(String tmp) {
+    this.tmpDir = tmpDir;
   }
 
   public String getConnectString() {
@@ -739,8 +390,16 @@ public class SqoopOptions {
     return exportDir;
   }
 
+  public void setExportDir(String exportDir) {
+    this.exportDir = exportDir;
+  }
+
   public String getExistingJarName() {
     return existingJarFile;
+  }
+
+  public void setExistingJarName(String jarFile) {
+    this.existingJarFile = jarFile;
   }
 
   public String[] getColumns() {
@@ -751,32 +410,68 @@ public class SqoopOptions {
     }
   }
 
+  public void setColumns(String [] cols) {
+    if (null == cols) {
+      this.columns = null;
+    } else {
+      this.columns = Arrays.copyOf(cols, cols.length);
+    }
+  }
+
   public String getSplitByCol() {
     return splitByCol;
+  }
+
+  public void setSplitByCol(String splitBy) {
+    this.splitByCol = splitBy;
   }
   
   public String getWhereClause() {
     return whereClause;
   }
 
-  public ControlAction getAction() {
-    return action;
-  }
-
-  public boolean isAllTables() {
-    return allTables;
+  public void setWhereClause(String where) {
+    this.whereClause = where;
   }
 
   public String getUsername() {
     return username;
   }
 
+  public void setUsername(String user) {
+    this.username = user;
+  }
+
   public String getPassword() {
     return password;
   }
 
+  /**
+   * Allow the user to enter his password on the console without printing characters.
+   * @return the password as a string
+   */
+  private String securePasswordEntry() {
+    return new String(System.console().readPassword("Enter password: "));
+  }
+
+  /**
+   * Set the password in this SqoopOptions from the console without printing
+   * characters.
+   */
+  public void setPasswordFromConsole() {
+    this.password = securePasswordEntry();
+  }
+
+  public void setPassword(String pass) {
+    this.password = pass;
+  }
+
   public boolean isDirect() {
     return direct;
+  }
+
+  public void setDirectMode(boolean isDirect) {
+    this.direct = isDirect;
   }
 
   /**
@@ -786,11 +481,19 @@ public class SqoopOptions {
     return this.numMappers;
   }
 
+  public void setNumMappers(int numMappers) {
+    this.numMappers = numMappers;
+  }
+
   /**
    * @return the user-specified absolute class name for the table
    */
   public String getClassName() {
     return className;
+  }
+
+  public void setClassName(String className) {
+    this.className = className;
   }
 
   /**
@@ -800,8 +503,16 @@ public class SqoopOptions {
     return packageName;
   }
 
+  public void setPackageName(String packageName) {
+    this.packageName = packageName;
+  }
+
   public String getHiveHome() {
     return hiveHome;
+  }
+  
+  public void setHiveHome(String hiveHome) {
+    this.hiveHome = hiveHome;
   }
 
   /** @return true if we should import the table into Hive */
@@ -809,11 +520,8 @@ public class SqoopOptions {
     return hiveImport;
   }
 
-  /**
-   * @return the user-specified option to create tables in hive with no loading
-   */
-  public boolean doCreateHiveTableOnly() {
-    return createHiveTableOnly;
+  public void setHiveImport(boolean hiveImport) {
+    this.hiveImport = hiveImport;
   }
 
   /**
@@ -821,6 +529,10 @@ public class SqoopOptions {
    */
   public boolean doOverwriteHiveTable() {
     return overwriteHiveTable;
+  }
+
+  public void setOverwriteHiveTable(boolean overwrite) {
+    this.overwriteHiveTable = overwrite;
   }
 
   /**
@@ -834,6 +546,10 @@ public class SqoopOptions {
     }
   }
 
+  public void setCodeOutputDir(String outputDir) {
+    this.codeOutputDir = outputDir;
+  }
+
   /**
    * @return location where .jar and .class files go; guaranteed to end with '/'
    */
@@ -845,12 +561,20 @@ public class SqoopOptions {
     }
   }
 
+  public void setJarOutputDir(String outDir) {
+    this.jarOutputDir = outDir;
+  }
+
   /**
    * Return the value of $HADOOP_HOME
    * @return $HADOOP_HOME, or null if it's not set.
    */
   public String getHadoopHome() {
     return hadoopHome;
+  }
+
+  public void setHadoopHome(String hadoopHome) {
+    this.hadoopHome = hadoopHome;
   }
 
   /**
@@ -860,11 +584,19 @@ public class SqoopOptions {
     return debugSqlCmd;
   }
 
+  public void setDebugSqlCmd(String sqlStatement) {
+    this.debugSqlCmd = sqlStatement;
+  }
+
   /**
    * @return The JDBC driver class name specified with --driver
    */
   public String getDriverClassName() {
     return driverClassName;
+  }
+
+  public void setDriverClassName(String driverClass) {
+    this.driverClassName = driverClass;
   }
 
   /**
@@ -874,6 +606,10 @@ public class SqoopOptions {
     return warehouseDir;
   }
 
+  public void setWarehouseDir(String warehouse) {
+    this.warehouseDir = warehouse;
+  }
+
   /**
    * @return the destination file format
    */
@@ -881,12 +617,8 @@ public class SqoopOptions {
     return this.layout;
   }
 
-  public void setUsername(String name) {
-    this.username = name;
-  }
-
-  public void setPassword(String pass) {
-    this.password = pass;
+  public void setFileLayout(FileLayout layout) {
+    this.layout = layout;
   }
 
   /**
@@ -901,6 +633,10 @@ public class SqoopOptions {
     }
   }
 
+  public void setInputFieldsTerminatedBy(char c) {
+    this.inputFieldDelim = c;
+  }
+
   /**
    * @return the record delimiter to use when parsing lines. Defaults to the record delim
    * to use when printing lines.
@@ -911,6 +647,10 @@ public class SqoopOptions {
     } else {
       return this.inputRecordDelim;
     }
+  }
+
+  public void setInputLinesTerminatedBy(char c) {
+    this.inputRecordDelim = c;
   }
 
   /**
@@ -925,6 +665,10 @@ public class SqoopOptions {
     }
   }
 
+  public void setInputEnclosedBy(char c) {
+    this.inputEnclosedBy = c;
+  }
+
   /**
    * @return the escape character to use when parsing lines. Defaults to the escape
    * character used when printing lines.
@@ -935,6 +679,10 @@ public class SqoopOptions {
     } else {
       return this.inputEscapedBy;
     }
+  }
+
+  public void setInputEscapedBy(char c) {
+    this.inputEscapedBy = c;
   }
 
   /**
@@ -949,11 +697,19 @@ public class SqoopOptions {
     }
   }
 
+  public void setInputEncloseRequired(boolean required) {
+    this.inputMustBeEnclosed = required;
+  }
+
   /**
    * @return the character to print between fields when importing them to text.
    */
   public char getOutputFieldDelim() {
     return this.outputFieldDelim;
+  }
+
+  public void setFieldsTerminatedBy(char c) {
+    this.outputFieldDelim = c;
   }
 
 
@@ -964,6 +720,10 @@ public class SqoopOptions {
     return this.outputRecordDelim;
   }
 
+  public void setLinesTerminatedBy(char c) {
+    this.outputRecordDelim = c;
+  }
+
   /**
    * @return a character which may enclose the contents of fields when imported to text.
    */
@@ -971,11 +731,19 @@ public class SqoopOptions {
     return this.outputEnclosedBy;
   }
 
+  public void setEnclosedBy(char c) {
+    this.outputEnclosedBy = c;
+  }
+
   /**
    * @return a character which signifies an escape sequence when importing to text.
    */
   public char getOutputEscapedBy() {
     return this.outputEscapedBy;
+  }
+
+  public void setEscapedBy(char c) {
+    this.outputEscapedBy = c;
   }
 
   /**
@@ -986,6 +754,10 @@ public class SqoopOptions {
     return this.outputMustBeEnclosed;
   }
 
+  public void setOutputEncloseRequired(boolean required) {
+    this.outputMustBeEnclosed = required; 
+  }
+
   /**
    * @return true if the user wants imported results to be compressed.
    */
@@ -993,15 +765,23 @@ public class SqoopOptions {
     return this.useCompression;
   }
 
+  public void setUseCompression(boolean useCompression) {
+    this.useCompression = useCompression;
+  }
+
   /**
    * @return the name of the destination table when importing to Hive
    */
-  public String getHiveTableName( ) {
+  public String getHiveTableName() {
     if (null != this.hiveTableName) {
       return this.hiveTableName;
     } else {
       return this.tableName;
     }
+  }
+
+  public void setHiveTableName(String tableName) {
+    this.hiveTableName = tableName;
   }
 
   /**
@@ -1011,11 +791,33 @@ public class SqoopOptions {
     return this.directSplitSize;
   }
 
+  public void setDirectSplitSize(long splitSize) {
+    this.directSplitSize = splitSize;
+  }
+
   /**
    * @return the max size of a LOB before we spill to a separate file.
    */
   public long getInlineLobLimit() {
     return this.maxInlineLobSize;
+  }
+
+  public void setInlineLobLimit(long limit) {
+    this.maxInlineLobSize = limit;
+  }
+
+  /**
+   * @return true if the delimiters have been explicitly set by the user.
+   */
+  public boolean explicitDelims() {
+    return areDelimsManuallySet;
+  }
+
+  /**
+   * Flag the delimiter settings as explicit user settings, or implicit.
+   */
+  public void setExplicitDelims(boolean explicit) {
+    this.areDelimsManuallySet = explicit;
   }
 
   public Configuration getConf() {
@@ -1039,5 +841,17 @@ public class SqoopOptions {
       out[i] = extraArgs[i];
     }
     return out;
+  }
+
+  public void setExtraArgs(String [] args) {
+    if (null == args) {
+      this.extraArgs = null;
+      return;
+    }
+
+    this.extraArgs = new String[args.length];
+    for (int i = 0; i < args.length; i++) {
+      this.extraArgs[i] = args[i];
+    }
   }
 }

@@ -906,6 +906,7 @@ public class ClassWriter {
     sb.append("import java.sql.Timestamp;\n");
     sb.append("import java.util.Iterator;\n");
     sb.append("import java.util.List;\n");
+    sb.append("\n");
 
     String className = tableNameInfo.getShortClassForTable(tableName);
     sb.append("public class " + className

@@ -21,6 +21,7 @@ package org.apache.hadoop.sqoop;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
@@ -32,6 +33,7 @@ import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.SeqFileReader;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
@@ -99,11 +101,13 @@ public class TestSplitBy extends ImportJobTestCase {
     String [] argv = getArgv(true, columns, splitByCol);
     runImport(argv);
     try {
-      SqoopOptions opts = new SqoopOptions();
-      opts.parse(getArgv(false, columns, splitByCol));
+      SqoopOptions opts = new ImportTool().parseArguments(
+          getArgv(false, columns, splitByCol),
+          null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
+      LOG.debug("Got jar from import job: " + jarFileName);
 
       prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, getTableName());
 
@@ -130,6 +134,8 @@ public class TestSplitBy extends ImportJobTestCase {
       assertEquals("Total sum of first db column mismatch", expectedSum, curSum);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
+    } catch (ParseException pe) {
+      fail(pe.toString());
     } finally {
       IOUtils.closeStream(reader);
 

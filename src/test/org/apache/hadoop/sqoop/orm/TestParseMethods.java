@@ -21,6 +21,7 @@ package org.apache.hadoop.sqoop.orm;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
@@ -41,6 +42,7 @@ import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.ReparseMapper;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
@@ -98,12 +100,12 @@ public class TestParseMethods extends ImportJobTestCase {
         encloseRequired);
     runImport(argv);
     try {
-      SqoopOptions opts = new SqoopOptions();
-
       String tableClassName = getTableName();
 
-      opts.parse(getArgv(false, fieldTerminator, lineTerminator, encloser, escape,
-          encloseRequired));
+      argv = getArgv(false, fieldTerminator, lineTerminator, encloser, escape,
+          encloseRequired);
+      SqoopOptions opts = new ImportTool().parseArguments(argv, null, null,
+          true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
@@ -137,6 +139,8 @@ public class TestParseMethods extends ImportJobTestCase {
       JobClient.runJob(job);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
+    } catch (ParseException pe) {
+      fail(pe.toString());
     } finally {
       if (null != prevClassLoader) {
         ClassLoaderStack.setCurrentClassLoader(prevClassLoader);

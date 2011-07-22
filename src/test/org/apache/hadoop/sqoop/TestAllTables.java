@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
+import org.apache.hadoop.sqoop.tool.ImportAllTablesTool;
 
 /**
  * Test the --all-tables functionality that can import multiple tables.
@@ -51,7 +52,6 @@ public class TestAllTables extends ImportJobTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
-    args.add("--all-tables");
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
@@ -108,7 +108,7 @@ public class TestAllTables extends ImportJobTestCase {
 
   public void testMultiTableImport() throws IOException {
     String [] argv = getArgv(true);
-    runImport(argv);
+    runImport(new ImportAllTablesTool(), argv);
 
     Path warehousePath = new Path(this.getWarehouseDir());
     int i = 0;

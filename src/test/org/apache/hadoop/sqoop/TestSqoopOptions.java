@@ -20,6 +20,8 @@ package org.apache.hadoop.sqoop;
 
 import junit.framework.TestCase;
 
+import org.apache.hadoop.sqoop.tool.ImportTool;
+
 
 /**
  * Test aspects of the SqoopOptions class
@@ -27,11 +29,11 @@ import junit.framework.TestCase;
 public class TestSqoopOptions extends TestCase {
 
   // tests for the toChar() parser
-  public void testNormalChar() throws SqoopOptions.InvalidOptionsException {
+  public void testNormalChar() throws Exception {
     assertEquals('a', SqoopOptions.toChar("a"));
   }
 
-  public void testEmptyString() throws SqoopOptions.InvalidOptionsException {
+  public void testEmptyString() throws Exception {
     try {
       SqoopOptions.toChar("");
       fail("Expected exception");
@@ -40,7 +42,7 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
-  public void testNullString() throws SqoopOptions.InvalidOptionsException {
+  public void testNullString() throws Exception {
     try {
       SqoopOptions.toChar(null);
       fail("Expected exception");
@@ -49,40 +51,46 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
-  public void testTooLong() throws SqoopOptions.InvalidOptionsException {
+  public void testTooLong() throws Exception {
     // Should just use the first character and log a warning.
     assertEquals('x', SqoopOptions.toChar("xyz"));
   }
 
-  public void testHexChar1() throws SqoopOptions.InvalidOptionsException {
+  public void testHexChar1() throws Exception {
     assertEquals(0xF, SqoopOptions.toChar("\\0xf"));
   }
 
-  public void testHexChar2() throws SqoopOptions.InvalidOptionsException {
+  public void testHexChar2() throws Exception {
     assertEquals(0xF, SqoopOptions.toChar("\\0xF"));
   }
 
-  public void testHexChar3() throws SqoopOptions.InvalidOptionsException {
+  public void testHexChar3() throws Exception {
     assertEquals(0xF0, SqoopOptions.toChar("\\0xf0"));
   }
 
-  public void testHexChar4() throws SqoopOptions.InvalidOptionsException {
+  public void testHexChar4() throws Exception {
     assertEquals(0xF0, SqoopOptions.toChar("\\0Xf0"));
   }
 
-  public void testEscapeChar1() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeChar1() throws Exception {
     assertEquals('\n', SqoopOptions.toChar("\\n"));
   }
 
-  public void testEscapeChar2() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeChar2() throws Exception {
     assertEquals('\\', SqoopOptions.toChar("\\\\"));
   }
 
-  public void testEscapeChar3() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeChar3() throws Exception {
     assertEquals('\\', SqoopOptions.toChar("\\"));
   }
 
-  public void testUnknownEscape1() throws SqoopOptions.InvalidOptionsException {
+  public void testWhitespaceToChar() throws Exception {
+    assertEquals(' ', SqoopOptions.toChar(" "));
+    assertEquals(' ', SqoopOptions.toChar("   "));
+    assertEquals('\t', SqoopOptions.toChar("\t"));
+  }
+
+  public void testUnknownEscape1() throws Exception {
     try {
       SqoopOptions.toChar("\\Q");
       fail("Expected exception");
@@ -91,7 +99,7 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
-  public void testUnknownEscape2() throws SqoopOptions.InvalidOptionsException {
+  public void testUnknownEscape2() throws Exception {
     try {
       SqoopOptions.toChar("\\nn");
       fail("Expected exception");
@@ -100,31 +108,31 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
-  public void testEscapeNul1() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeNul1() throws Exception {
     assertEquals('\000', SqoopOptions.toChar("\\0"));
   }
 
-  public void testEscapeNul2() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeNul2() throws Exception {
     assertEquals('\000', SqoopOptions.toChar("\\00"));
   }
 
-  public void testEscapeNul3() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeNul3() throws Exception {
     assertEquals('\000', SqoopOptions.toChar("\\0000"));
   }
 
-  public void testEscapeNul4() throws SqoopOptions.InvalidOptionsException {
+  public void testEscapeNul4() throws Exception {
     assertEquals('\000', SqoopOptions.toChar("\\0x0"));
   }
 
-  public void testOctalChar1() throws SqoopOptions.InvalidOptionsException {
+  public void testOctalChar1() throws Exception {
     assertEquals(04, SqoopOptions.toChar("\\04"));
   }
 
-  public void testOctalChar2() throws SqoopOptions.InvalidOptionsException {
+  public void testOctalChar2() throws Exception {
     assertEquals(045, SqoopOptions.toChar("\\045"));
   }
 
-  public void testErrOctalChar() throws SqoopOptions.InvalidOptionsException {
+  public void testErrOctalChar() throws Exception {
     try {
       SqoopOptions.toChar("\\095");
       fail("Expected exception");
@@ -133,7 +141,7 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
-  public void testErrHexChar() throws SqoopOptions.InvalidOptionsException {
+  public void testErrHexChar() throws Exception {
     try {
       SqoopOptions.toChar("\\0x9K5");
       fail("Expected exception");
@@ -142,21 +150,25 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
+  private SqoopOptions parse(String [] argv) throws Exception {
+    ImportTool importTool = new ImportTool();
+    return importTool.parseArguments(argv, null, null, false);
+  }
+
   // test that setting output delimiters also sets input delimiters 
-  public void testDelimitersInherit() throws SqoopOptions.InvalidOptionsException {
+  public void testDelimitersInherit() throws Exception {
     String [] args = {
         "--fields-terminated-by",
         "|"
     };
 
-    SqoopOptions opts = new SqoopOptions();
-    opts.parse(args);
+    SqoopOptions opts = parse(args);
     assertEquals('|', opts.getInputFieldDelim());
     assertEquals('|', opts.getOutputFieldDelim());
   }
 
   // test that setting output delimiters and setting input delims separately works
-  public void testDelimOverride1() throws SqoopOptions.InvalidOptionsException {
+  public void testDelimOverride1() throws Exception {
     String [] args = {
         "--fields-terminated-by",
         "|",
@@ -164,14 +176,13 @@ public class TestSqoopOptions extends TestCase {
         "*"
     };
 
-    SqoopOptions opts = new SqoopOptions();
-    opts.parse(args);
+    SqoopOptions opts = parse(args);
     assertEquals('*', opts.getInputFieldDelim());
     assertEquals('|', opts.getOutputFieldDelim());
   }
 
   // test that the order in which delims are specified doesn't matter
-  public void testDelimOverride2() throws SqoopOptions.InvalidOptionsException {
+  public void testDelimOverride2() throws Exception {
     String [] args = {
         "--input-fields-terminated-by",
         "*",
@@ -179,50 +190,46 @@ public class TestSqoopOptions extends TestCase {
         "|"
     };
 
-    SqoopOptions opts = new SqoopOptions();
-    opts.parse(args);
+    SqoopOptions opts = parse(args);
     assertEquals('*', opts.getInputFieldDelim());
     assertEquals('|', opts.getOutputFieldDelim());
   }
 
-  public void testBadNumMappers1() {
+  public void testBadNumMappers1() throws Exception {
     String [] args = {
       "--num-mappers",
       "x"
     };
 
     try {
-      SqoopOptions opts = new SqoopOptions();
-      opts.parse(args);
+      SqoopOptions opts = parse(args);
       fail("Expected InvalidOptionsException");
     } catch (SqoopOptions.InvalidOptionsException ioe) {
       // expected.
     }
   }
 
-  public void testBadNumMappers2() {
+  public void testBadNumMappers2() throws Exception {
     String [] args = {
       "-m",
       "x"
     };
 
     try {
-      SqoopOptions opts = new SqoopOptions();
-      opts.parse(args);
+      SqoopOptions opts = parse(args);
       fail("Expected InvalidOptionsException");
     } catch (SqoopOptions.InvalidOptionsException ioe) {
       // expected.
     }
   }
 
-  public void testGoodNumMappers() throws SqoopOptions.InvalidOptionsException {
+  public void testGoodNumMappers() throws Exception {
     String [] args = {
       "-m",
       "4"
     };
 
-    SqoopOptions opts = new SqoopOptions();
-    opts.parse(args);
+    SqoopOptions opts = parse(args);
     assertEquals(4, opts.getNumMappers());
   }
 }

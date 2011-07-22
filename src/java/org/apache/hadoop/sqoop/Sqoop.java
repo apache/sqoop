@@ -20,9 +20,11 @@ package org.apache.hadoop.sqoop;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -30,6 +32,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import org.apache.hadoop.sqoop.cli.ToolOptions;
 import org.apache.hadoop.sqoop.hive.HiveImport;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.ExportJobContext;
@@ -37,6 +40,8 @@ import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.orm.ClassWriter;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.shims.ShimLoader;
+import org.apache.hadoop.sqoop.tool.HelpTool;
+import org.apache.hadoop.sqoop.tool.SqoopTool;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 
@@ -59,99 +64,62 @@ public class Sqoop extends Configured implements Tool {
     Configuration.addDefaultResource("sqoop-site.xml");
   }
 
+  private SqoopTool tool;
   private SqoopOptions options;
-  private ConnManager manager;
-  private HiveImport hiveImport;
-  private List<String> generatedJarFiles;
+  private String [] childPrgmArgs;
 
-  public Sqoop() {
-    this((Configuration) null);
+  /**
+   * Creates a new instance of Sqoop set to run the supplied SqoopTool
+   * with the default configuration.
+   * @param tool the SqoopTool to run in the main body of Sqoop.
+   */
+  public Sqoop(SqoopTool tool) {
+    this(tool, (Configuration) null);
   }
 
-  public Sqoop(Configuration conf) {
-    this(conf, new SqoopOptions());
+  /**
+   * Creates a new instance of Sqoop set to run the supplied SqoopTool
+   * with the provided configuration.
+   * @param tool the SqoopTool to run in the main body of Sqoop.
+   * @param conf the Configuration to use (e.g., from ToolRunner).
+   */
+  public Sqoop(SqoopTool tool, Configuration conf) {
+    this(tool, conf, new SqoopOptions());
   }
 
-  public Sqoop(Configuration conf, SqoopOptions opts) {
-    generatedJarFiles = new ArrayList<String>();
+  /**
+   * Creates a new instance of Sqoop set to run the supplied SqoopTool
+   * with the provided configuration and SqoopOptions.
+   * @param tool the SqoopTool to run in the main body of Sqoop.
+   * @param conf the Configuration to use (e.g., from ToolRunner).
+   * @param opts the SqoopOptions which control the tool's parameters.
+   */
+  public Sqoop(SqoopTool tool, Configuration conf, SqoopOptions opts) {
     if (null != conf) {
       setConf(conf);
     }
 
     this.options = opts;
     this.options.setConf(getConf());
+
+    this.tool = tool;
   }
 
+  /**
+   * @return the SqoopOptions used in this Sqoop instance.
+   */
   public SqoopOptions getOptions() {
-    return options;
+    return this.options;
   }
 
   /**
-   * @return a list of jar files generated as part of this im/export process
+   * @return the SqoopTool used in this Sqoop instance.
    */
-  public List<String> getGeneratedJarFiles() {
-    ArrayList<String> out = new ArrayList<String>(generatedJarFiles);
-    return out;
+  public SqoopTool getTool() {
+    return this.tool;
   }
 
-  /**
-   * Generate the .class and .jar files
-   * @return the filename of the emitted jar file.
-   * @throws IOException
-   */
-  private String generateORM(String tableName) throws IOException {
-    String existingJar = options.getExistingJarName();
-    if (existingJar != null) {
-      // The user has pre-specified a jar and class to use. Don't generate.
-      LOG.info("Using existing jar: " + existingJar);
-      return existingJar;
-    }
-
-    LOG.info("Beginning code generation");
-    CompilationManager compileMgr = new CompilationManager(options);
-    ClassWriter classWriter = new ClassWriter(options, manager, tableName, compileMgr);
-    classWriter.generate();
-    compileMgr.compile();
-    compileMgr.jar();
-    String jarFile = compileMgr.getJarFilename();
-    this.generatedJarFiles.add(jarFile);
-    return jarFile;
-  }
-
-  private void importTable(String tableName) throws IOException, ImportException {
-    String jarFile = null;
-
-    // Generate the ORM code for the tables.
-    jarFile = generateORM(tableName);
-
-    if (options.getAction() == SqoopOptions.ControlAction.FullImport) {
-      // check if data import is to be performed
-      if (!options.doCreateHiveTableOnly()) {
-        // Proceed onward to do the import.
-        ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
-        manager.importTable(context);
-      }
-    }
-
-    // If the user wants this table to be in Hive, perform that post-load.
-    // If the user is in gen-only mode, this code will generate a Hive DDL
-    // statement and write it to a file, but will not actually perform the
-    // import.
-    if (options.doHiveImport()) {
-      hiveImport.importTable(tableName, options.getHiveTableName());
-    }
-  }
-
-  private void exportTable(String tableName) throws ExportException, IOException {
-    String jarFile = null;
-
-    // Generate the ORM code for the tables.
-    jarFile = generateORM(tableName);
-
-    ExportJobContext context = new ExportJobContext(tableName, jarFile, options);
-    manager.exportTable(context);
-  }
-
+  @Override
   /**
    * Actual main entry-point for the program
    */
@@ -164,139 +132,90 @@ public class Sqoop extends Configured implements Tool {
     }
 
     try {
-      options.parse(args);
-      options.validate();
+      options = tool.parseArguments(args, null, options, false);
+      tool.appendArgs(this.childPrgmArgs);
+      tool.validateOptions(options);
+    } catch (ParseException pe) {
+      // Couldn't parse arguments. Just print a usage message and exit.
+      new HelpTool().run(new SqoopOptions(getConf()));
+      return 1;
     } catch (SqoopOptions.InvalidOptionsException e) {
+      // Error validating arguments. Print an error message and exit.
       System.err.println(e.getMessage());
       return 1; // Exit on exception here.
     }
 
-    // Make sure shim jar is classloaded early.
-    ShimLoader.getHadoopShim(getConf());
-
-    // Get the connection to the database.
-    try {
-      manager = new ConnFactory(getConf()).getManager(options);
-    } catch (Exception e) {
-      LOG.error("Got error creating database manager: " + e.toString());
-      if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(e);
-      } else {
-        return 1;
-      }
-    }
-
-    try {
-      if (options.doHiveImport()) {
-        hiveImport = new HiveImport(options, manager, getConf());
-      }
-
-      SqoopOptions.ControlAction action = options.getAction();
-      if (action == SqoopOptions.ControlAction.ListTables) {
-        String [] tables = manager.listTables();
-        if (null == tables) {
-          System.err.println("Could not retrieve tables list from server");
-          LOG.error("manager.listTables() returned null");
-          return 1;
-        } else {
-          for (String tbl : tables) {
-            System.out.println(tbl);
-          }
-        }
-      } else if (action == SqoopOptions.ControlAction.ListDatabases) {
-        String [] databases = manager.listDatabases();
-        if (null == databases) {
-          System.err.println("Could not retrieve database list from server");
-          LOG.error("manager.listDatabases() returned null");
-          return 1;
-        } else {
-          for (String db : databases) {
-            System.out.println(db);
-          }
-        }
-      } else if (action == SqoopOptions.ControlAction.DebugExec) {
-        // just run a SQL statement for debugging purposes.
-        manager.execAndPrint(options.getDebugSqlCmd());
-        return 0;
-      } else if (action == SqoopOptions.ControlAction.Export) {
-        // Export a table.
-        try {
-          exportTable(options.getTableName());
-        } catch (IOException ioe) {
-          LOG.error("Encountered IOException running export job: " + ioe.toString());
-          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-            throw new RuntimeException(ioe);
-          } else {
-            return 1;
-          }
-        } catch (ExportException ee) {
-          LOG.error("Error during export: " + ee.toString());
-          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-            throw new RuntimeException(ee);
-          } else {
-            return 1;
-          }
-        }
-      } else {
-        // This is either FullImport or GenerateOnly.
-
-        try {
-          if (options.isAllTables()) {
-            String [] tables = manager.listTables();
-            if (null == tables) {
-              System.err.println("Could not retrieve tables list from server");
-              LOG.error("manager.listTables() returned null");
-              return 1;
-            } else {
-              for (String tableName : tables) {
-                importTable(tableName);
-              }
-            }
-          } else {
-            // just import a single table the user specified.
-            importTable(options.getTableName());
-          }
-        } catch (IOException ioe) {
-          LOG.error("Encountered IOException running import job: " + ioe.toString());
-          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-            throw new RuntimeException(ioe);
-          } else {
-            return 1;
-          }
-        } catch (ImportException ie) {
-          LOG.error("Error during import: " + ie.toString());
-          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-            throw new RuntimeException(ie);
-          } else {
-            return 1;
-          }
-        }
-      }
-    } finally {
-      try {
-        manager.close();
-      } catch (SQLException sqlE) {
-        LOG.warn("Error while closing connection: " + sqlE);
-      }
-    }
-
-    return 0;
+    return tool.run(options);
   }
 
-  public static void main(String [] args) {
-    int ret;
+  /**
+   * SqoopTools sometimes pass arguments to a child program (e.g., mysqldump).
+   * Users can specify additional args to these programs by preceeding the
+   * additional arguments with a standalone '--'; but
+   * ToolRunner/GenericOptionsParser will cull out this argument. We remove
+   * the child-program arguments in advance, and store them to be readded
+   * later.
+   * @param argv the argv in to the SqoopTool
+   * @return the argv with a "--" and any subsequent arguments removed. 
+   */
+  private String [] stashChildPrgmArgs(String [] argv) {
+    for (int i = 0; i < argv.length; i++) {
+      if ("--".equals(argv[i])) {
+        this.childPrgmArgs = Arrays.copyOfRange(argv, i, argv.length);
+        return Arrays.copyOfRange(argv, 0, i);
+      }
+    }
+
+    // Didn't find child-program arguments.
+    return argv;
+  }
+
+  /**
+   * Given a Sqoop object and a set of arguments to deliver to 
+   * its embedded SqoopTool, run the tool, wrapping the call to
+   * ToolRunner.
+   * This entry-point is preferred to ToolRunner.run() because
+   * it has a chance to stash child program arguments before
+   * GenericOptionsParser would remove them.
+   */
+  public static int runSqoop(Sqoop sqoop, String [] args) {
     try {
-      Sqoop importer = new Sqoop();
-      ret = ToolRunner.run(importer, args);
+      String [] toolArgs = sqoop.stashChildPrgmArgs(args);
+      return ToolRunner.run(sqoop, toolArgs);
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
-      ret = 1;
       if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(e);
       }
+      return 1;
     }
 
+  }
+
+  /**
+   * Entry-point that parses the correct SqoopTool to use from the args,
+   * but does not call System.exit() as main() will.
+   */
+  public static int runTool(String [] args) {
+    String toolName = args[0];
+    SqoopTool tool = SqoopTool.getTool(toolName);
+    if (null == tool) {
+      System.err.println("No such sqoop tool: " + toolName + ". See 'sqoop help'.");
+      return 1;
+    }
+
+    Sqoop sqoop = new Sqoop(tool);
+    return runSqoop(sqoop, Arrays.copyOfRange(args, 1, args.length));
+  }
+
+  public static void main(String [] args) {
+    if (args.length == 0) {
+      System.err.println("Try 'sqoop help' for usage.");
+      System.exit(1);
+    }
+
+    int ret = runTool(args);
     System.exit(ret);
   }
 }

@@ -38,6 +38,16 @@ public abstract class HadoopShim {
   }
 
   /**
+   * Parse arguments in 'args' via the GenericOptionsParser and
+   * embed the results in the supplied configuration.
+   * @param conf the configuration to populate with generic options.
+   * @param args the arguments to process.
+   * @return the unused args to be passed to the application itself.
+   */
+  public abstract String [] parseGenericOptions(Configuration conf,
+      String [] args) throws IOException;
+
+  /**
    * @return the number of mapper output records from a job using its counters.
    */
   public abstract long getNumMapOutputRecords(Job job)

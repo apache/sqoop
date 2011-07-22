@@ -56,6 +56,6 @@ SQOOP_JAR=`ls -1 ${SQOOP_JAR_DIR}/sqoop-*.jar | head -n 1`
 
 # Invoke Hadoop
 HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}" \
-  HADOOP_OPTS="-Dsqoop.shim.jar.dir=${SQOOP_SHIM_DIR}" \
+  HADOOP_OPTS="-Dsqoop.shim.jar.dir=${SQOOP_SHIM_DIR} ${HADOOP_OPTS}" \
   ${HADOOP_HOME}/bin/hadoop jar ${SQOOP_JAR} org.apache.hadoop.sqoop.Sqoop "$@"
 

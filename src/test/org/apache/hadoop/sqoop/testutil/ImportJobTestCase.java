@@ -27,11 +27,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.Sqoop;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
+import org.apache.hadoop.sqoop.tool.SqoopTool;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 import org.junit.Test;
@@ -119,8 +120,8 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     // run the tool through the normal entry-point.
     int ret;
     try {
-      Sqoop importer = new Sqoop(conf, opts);
-      ret = ToolRunner.run(importer, getArgv(true, importCols, conf));
+      Sqoop importer = new Sqoop(new ImportTool(), conf, opts);
+      ret = Sqoop.runSqoop(importer, getArgv(true, importCols, conf));
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       throw new RuntimeException(e);
@@ -131,10 +132,13 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
 
     opts = getSqoopOptions(conf);
     try {
-      opts.parse(getArgv(false, importCols, conf));
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
+      ImportTool importTool = new ImportTool();
+      opts = importTool.parseArguments(getArgv(false, importCols, conf), conf,
+          opts, true);
+    } catch (Exception e) {
+      fail(e.toString());
     }
+
     CompilationManager compileMgr = new CompilationManager(opts);
     String jarFileName = compileMgr.getJarFilename();
     ClassLoader prevClassLoader = null;
@@ -166,7 +170,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
   /**
    * Run a MapReduce-based import (using the argv provided to control execution).
    */
-  protected void runImport(String [] argv) throws IOException {
+  protected void runImport(SqoopTool tool, String [] argv) throws IOException {
     removeTableDir();
 
     // run the tool through the normal entry-point.
@@ -174,8 +178,8 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     try {
       Configuration conf = getConf();
       SqoopOptions opts = getSqoopOptions(conf);
-      Sqoop importer = new Sqoop(conf, opts);
-      ret = ToolRunner.run(importer, argv);
+      Sqoop sqoop = new Sqoop(tool, conf, opts);
+      ret = Sqoop.runSqoop(sqoop, argv);
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
@@ -186,6 +190,11 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     if (0 != ret) {
       throw new IOException("Failure during job; return status " + ret);
     }
+  }
+
+  /** run an import using the default ImportTool */
+  protected void runImport(String [] argv) throws IOException {
+    runImport(new ImportTool(), argv);
   }
 
 }

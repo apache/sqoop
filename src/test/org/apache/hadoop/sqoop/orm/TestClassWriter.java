@@ -42,6 +42,7 @@ import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.testutil.DirUtil;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 
 /**
  * Test that the ClassWriter generates Java classes based on the given table,
@@ -123,9 +124,10 @@ public class TestClassWriter extends TestCase {
     File classGenDirFile = new File(JAR_GEN_DIR);
 
     try {
-      options.parse(argv);
-    } catch (InvalidOptionsException ioe) {
-      LOG.error("Could not parse options: " + ioe.toString());
+      options = new ImportTool().parseArguments(argv,
+          null, options, true);
+    } catch (Exception e) {
+      LOG.error("Could not parse options: " + e.toString());
     }
 
     CompilationManager compileMgr = new CompilationManager(options);

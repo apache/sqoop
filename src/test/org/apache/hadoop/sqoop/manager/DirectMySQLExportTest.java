@@ -136,6 +136,22 @@ public class DirectMySQLExportTest extends TestExport {
   }
 
   @Override
+  protected String [] getCodeGenArgv(String... extraArgs) {
+
+    String [] moreArgs = new String[extraArgs.length + 2];
+    int i = 0;
+    for (i = 0; i < extraArgs.length; i++) {
+      moreArgs[i] = extraArgs[i];
+    }
+
+    // Add username argument for mysql.
+    moreArgs[i++] = "--username";
+    moreArgs[i++] = MySQLTestUtils.getCurrentUser();
+
+    return super.getCodeGenArgv(moreArgs);
+  }
+
+  @Override
   protected String [] getArgv(boolean includeHadoopFlags,
       String... additionalArgv) {
 

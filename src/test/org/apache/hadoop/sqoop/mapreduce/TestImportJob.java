@@ -52,7 +52,7 @@ import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.InjectableManagerFactory;
 import org.apache.hadoop.sqoop.testutil.InjectableConnManager;
-import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.sqoop.tool.ImportTool;
 
 /**
  * Test aspects of the DataDrivenImportJob class
@@ -77,9 +77,9 @@ public class TestImportJob extends ImportJobTestCase {
 
     String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
 
-    Sqoop importer = new Sqoop();
+    Sqoop importer = new Sqoop(new ImportTool());
     try {
-      ToolRunner.run(importer, argv);
+      Sqoop.runSqoop(importer, argv);
       fail("Expected IOException running this job.");
     } catch (Exception e) {
       // In debug mode, IOException is wrapped in RuntimeException.
@@ -152,9 +152,9 @@ public class TestImportJob extends ImportJobTestCase {
         DummyImportJob.class,
         ImportJobBase.class);
 
-    Sqoop importer = new Sqoop(conf);
+    Sqoop importer = new Sqoop(new ImportTool(), conf);
     try {
-      ToolRunner.run(importer, argv);
+      Sqoop.runSqoop(importer, argv);
       fail("Expected ImportException running this job.");
     } catch (Exception e) {
       // In debug mode, ImportException is wrapped in RuntimeException.
