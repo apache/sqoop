@@ -40,6 +40,7 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.metastore.SessionData;
 import com.cloudera.sqoop.shims.ShimLoader;
 
 /**
@@ -168,7 +169,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     // Get the connection to the database.
     try {
-      this.manager = new ConnFactory(sqoopOpts.getConf()).getManager(sqoopOpts);
+      SessionData data = new SessionData(sqoopOpts, this);
+      this.manager = new ConnFactory(sqoopOpts.getConf()).getManager(data);
       return true;
     } catch (Exception e) {
       LOG.error("Got error creating database manager: "

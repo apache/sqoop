@@ -18,18 +18,19 @@
 
 package com.cloudera.sqoop;
 
-import org.apache.hadoop.conf.Configuration;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.DefaultManagerFactory;
-import com.cloudera.sqoop.manager.ManagerFactory;
-import org.apache.hadoop.util.ReflectionUtils;
-
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.util.ReflectionUtils;
+
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.DefaultManagerFactory;
+import com.cloudera.sqoop.manager.ManagerFactory;
+import com.cloudera.sqoop.metastore.SessionData;
 
 /**
  * Factory class to create the ConnManager type required
@@ -76,7 +77,8 @@ public class ConnFactory {
       try {
         className = className.trim(); // Ignore leading/trailing whitespace.
         ManagerFactory factory = ReflectionUtils.newInstance(
-            (Class<ManagerFactory>) conf.getClassByName(className), conf);
+            (Class<? extends ManagerFactory>)
+            conf.getClassByName(className), conf);
         LOG.debug("Loaded manager factory: " + className);
         factories.add(factory);
       } catch (ClassNotFoundException cnfe) {
@@ -88,23 +90,23 @@ public class ConnFactory {
 
   /**
    * Factory method to get a ConnManager for the given JDBC connect string.
-   * @param opts The parsed command-line options
-   * @return a ConnManager instance for the appropriate database
-   * @throws IOException if it cannot find a ConnManager for this schema
+   * @param data the connection and other configuration arguments.
+   * @return a ConnManager instance for the appropriate database.
+   * @throws IOException if it cannot find a ConnManager for this schema.
    */
-  public ConnManager getManager(SqoopOptions opts) throws IOException {
+  public ConnManager getManager(SessionData data) throws IOException {
     // Try all the available manager factories.
     for (ManagerFactory factory : factories) {
       LOG.debug("Trying ManagerFactory: " + factory.getClass().getName());
-      ConnManager mgr = factory.accept(opts);
+      ConnManager mgr = factory.accept(data);
       if (null != mgr) {
-        LOG.debug("Instantiated ConnManager.");
+        LOG.debug("Instantiated ConnManager " + mgr.toString());
         return mgr;
       }
     }
 
     throw new IOException("No manager for connect string: "
-        + opts.getConnectString());
+        + data.getSqoopOptions().getConnectString());
   }
 }
 

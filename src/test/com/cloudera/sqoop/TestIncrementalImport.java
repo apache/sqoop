@@ -42,6 +42,7 @@ import org.apache.hadoop.util.StringUtils;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
+import com.cloudera.sqoop.metastore.SessionData;
 import com.cloudera.sqoop.metastore.TestSessions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
@@ -722,9 +723,9 @@ public class TestIncrementalImport extends TestCase {
    */
   public static class InstrumentHsqldbManagerFactory extends ManagerFactory {
     @Override
-    public ConnManager accept(SqoopOptions options) {
+    public ConnManager accept(SessionData data) {
       LOG.info("Using instrumented manager");
-      return new InstrumentHsqldbManager(options);
+      return new InstrumentHsqldbManager(data.getSqoopOptions());
     }
   }
 

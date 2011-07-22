@@ -18,10 +18,11 @@
 
 package com.cloudera.sqoop.manager;
 
-import com.cloudera.sqoop.SqoopOptions;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.metastore.SessionData;
 
 /**
  * Contains instantiation code for all ConnManager implementations
@@ -32,7 +33,8 @@ public final class DefaultManagerFactory extends ManagerFactory {
   public static final Log LOG = LogFactory.getLog(
       DefaultManagerFactory.class.getName());
 
-  public ConnManager accept(SqoopOptions options) {
+  public ConnManager accept(SessionData data) {
+    SqoopOptions options = data.getSqoopOptions();
     String manualDriver = options.getDriverClassName();
     if (manualDriver != null) {
       // User has manually specified JDBC implementation with --driver.
