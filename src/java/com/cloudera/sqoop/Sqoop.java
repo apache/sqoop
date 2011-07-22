@@ -38,6 +38,7 @@ import com.cloudera.sqoop.tool.SqoopTool;
  */
 public class Sqoop extends Configured implements Tool {
 
+  public static final Log SQOOP_LOG = LogFactory.getLog("com.cloudera.sqoop"); 
   public static final Log LOG = LogFactory.getLog(Sqoop.class.getName());
 
   /** If this System property is set, always throw an exception, do not just
