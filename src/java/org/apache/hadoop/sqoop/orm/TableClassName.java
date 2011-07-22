@@ -90,7 +90,8 @@ public class TableClassName {
     }
 
     // no specific class; no specific package.
-    return tableName;
+    // Just make sure it's a legal identifier.
+    return ClassWriter.toIdentifier(tableName);
   }
 
   /**

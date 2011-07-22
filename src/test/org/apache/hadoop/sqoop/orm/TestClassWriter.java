@@ -21,6 +21,8 @@ package org.apache.hadoop.sqoop.orm;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -256,6 +258,51 @@ public class TestClassWriter extends TestCase {
   public void testSetPackageName() {
 
     // Set the option strings in an "argv" to redirect our srcdir and bindir
+    String [] argv = {
+        "--bindir",
+        JAR_GEN_DIR,
+        "--outdir",
+        CODE_GEN_DIR,
+        "--package-name",
+        OVERRIDE_PACKAGE_NAME
+    };
+
+    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "." + HsqldbTestServer.getTableName());
+  }
+
+
+  // Test the SQL identifier -> Java identifier conversion.
+  @Test
+  public void testIdentifierConversion() {
+    assertNull(ClassWriter.getIdentifierStrForChar(' '));
+    assertNull(ClassWriter.getIdentifierStrForChar('\t'));
+    assertNull(ClassWriter.getIdentifierStrForChar('\r'));
+    assertNull(ClassWriter.getIdentifierStrForChar('\n'));
+    assertEquals("x", ClassWriter.getIdentifierStrForChar('x'));
+    assertEquals("_", ClassWriter.getIdentifierStrForChar('-'));
+    assertEquals("_", ClassWriter.getIdentifierStrForChar('_'));
+
+    assertEquals("foo", ClassWriter.toIdentifier("foo"));
+    assertEquals("_class", ClassWriter.toIdentifier("class"));
+    assertEquals("_class", ClassWriter.toIdentifier("cla ss"));
+    assertEquals("_int", ClassWriter.toIdentifier("int"));
+    assertEquals("thisismanywords", ClassWriter.toIdentifier("this is many words"));
+    assertEquals("_9isLegalInSql", ClassWriter.toIdentifier("9isLegalInSql"));
+    assertEquals("___", ClassWriter.toIdentifier("___"));
+  }
+
+  @Test
+  public void testWeirdColumnNames() throws SQLException {
+    // Recreate the table with column names that aren't legal Java identifiers.
+    String tableName = HsqldbTestServer.getTableName();
+    Connection connection = testServer.getConnection();
+    Statement st = connection.createStatement();
+    st.executeUpdate("DROP TABLE " + tableName + " IF EXISTS");
+    st.executeUpdate("CREATE TABLE " + tableName + " (class INT, \"9field\" INT)");
+    st.executeUpdate("INSERT INTO " + tableName + " VALUES(42, 41)");
+    connection.commit();
+    connection.close();
+
     String [] argv = {
         "--bindir",
         JAR_GEN_DIR,
