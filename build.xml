@@ -333,7 +333,12 @@
     <!-- copy in documentation build artifacts -->
     <copy todir="${dist.dir}/docs" includeEmptyDirs="false" flatten="false">
       <fileset dir="${build.dir}/docs">
-        <include name="**/*" />
+        <include name="**/*.html" />
+      </fileset>
+    </copy>
+    <copy todir="${dist.dir}/docs/man" includeEmptyDirs="false" flatten="false">
+      <fileset dir="${build.dir}/docs">
+        <include name="**/*.gz" />
       </fileset>
     </copy>
 
