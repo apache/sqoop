@@ -45,22 +45,22 @@
        not need to be rigidly upheld. -->
   <Match>
     <!-- Performance warnings are ignored in test code. -->
-    <Class name="~org\.apache\.hadoop\.sqoop\..*Test.*" />
+    <Class name="~com\.cloudera\.sqoop\..*Test.*" />
     <Bug category="PERFORMANCE" />
   </Match>
   <Match>
     <!-- More performance warnings to suppress in tests. -->
-    <Class name="~org\.apache\.hadoop\.sqoop\..*Test.*" />
+    <Class name="~com\.cloudera\.sqoop\..*Test.*" />
     <Bug pattern="SBSC_USE_STRINGBUFFER_CONCATENATION" />
   </Match>
   <Match>
     <!-- Security warnings are ignored in test code. -->
-    <Class name="~org\.apache\.hadoop\.sqoop\..*Test.*" />
+    <Class name="~com\.cloudera\.sqoop\..*Test.*" />
     <Bug category="SECURITY" />
   </Match>
   <Match>
     <!-- Ok to use methods to generate SQL statements in tests. -->
-    <Class name="~org\.apache\.hadoop\.sqoop\..*Test.*" />
+    <Class name="~com\.cloudera\.sqoop\..*Test.*" />
     <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
   </Match>
 

@@ -22,6 +22,7 @@ import org.apache.hadoop.io.BytesWritable;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
+import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.JdbcWritableBridge;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
@@ -101,9 +102,11 @@ public class ClassWriter {
    * which version of the ClassWriter's output format was used to generate the
    * class.
    *
-   *  If the way that we generate classes, bump this number.
+   * If the way that we generate classes changes, bump this number.
+   * This number is retrieved by the SqoopRecord.getClassFormatVersion()
+   * method.
    */
-  public static final int CLASS_WRITER_VERSION = 2;
+  public static final int CLASS_WRITER_VERSION = 3;
 
   private SqoopOptions options;
   private ConnManager connManager;
@@ -642,31 +645,20 @@ public class ClassWriter {
   private void generateToString(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    // Embed the delimiters into the class, as characters...
-    sb.append("  private static final char __OUTPUT_FIELD_DELIM_CHAR = "
-        + (int)options.getOutputFieldDelim() + ";\n");
-    sb.append("  private static final char __OUTPUT_RECORD_DELIM_CHAR = "
-        + (int)options.getOutputRecordDelim() + ";\n");
+    // Save the delimiters to the class.
+    sb.append("  private final DelimiterSet __outputDelimiters = ");
+    sb.append(options.getOutputDelimiters().formatConstructor() + ";\n");
 
-    // as strings...
-    sb.append("  private static final String __OUTPUT_FIELD_DELIM = "
-        + "\"\" + (char) " + (int) options.getOutputFieldDelim() + ";\n");
-    sb.append("  private static final String __OUTPUT_RECORD_DELIM = "
-        + "\"\" + (char) "  + (int) options.getOutputRecordDelim() + ";\n");
-    sb.append("  private static final String __OUTPUT_ENCLOSED_BY = "
-        + "\"\" + (char) "  + (int) options.getOutputEnclosedBy() + ";\n");
-    sb.append("  private static final String __OUTPUT_ESCAPED_BY = "
-        + "\"\" + (char) " + (int) options.getOutputEscapedBy() + ";\n");
-
-    // and some more options.
-    sb.append("  private static final boolean __OUTPUT_ENCLOSE_REQUIRED = "
-        + options.isOutputEncloseRequired() + ";\n");
-    sb.append("  private static final char [] __OUTPUT_DELIMITER_LIST = { "
-        + "__OUTPUT_FIELD_DELIM_CHAR, __OUTPUT_RECORD_DELIM_CHAR };\n\n");
-
-    // The actual toString() method itself follows.
+    // The default toString() method itself follows. This just calls
+    // the delimiter-specific toString() with the default delimiters.
     sb.append("  public String toString() {\n");
+    sb.append("    return toString(__outputDelimiters);\n");
+    sb.append("  }\n");
+
+    // This toString() variant, though, accepts delimiters as arguments.
+    sb.append("  public String toString(DelimiterSet delimiters) {\n");
     sb.append("    StringBuilder __sb = new StringBuilder();\n");
+    sb.append("    char fieldDelim = delimiters.getFieldsTerminatedBy();\n");
 
     boolean first = true;
     for (String col : colNames) {
@@ -679,7 +671,7 @@ public class ClassWriter {
 
       if (!first) {
         // print inter-field tokens.
-        sb.append("    __sb.append(__OUTPUT_FIELD_DELIM);\n");
+        sb.append("    __sb.append(fieldDelim);\n");
       }
 
       first = false;
@@ -691,12 +683,10 @@ public class ClassWriter {
       }
 
       sb.append("    __sb.append(FieldFormatter.escapeAndEnclose(" + stringExpr 
-          + ", __OUTPUT_ESCAPED_BY, __OUTPUT_ENCLOSED_BY, "
-          + "__OUTPUT_DELIMITER_LIST, __OUTPUT_ENCLOSE_REQUIRED));\n");
-
+          + ", delimiters));\n");
     }
 
-    sb.append("    __sb.append(__OUTPUT_RECORD_DELIM);\n");
+    sb.append("    __sb.append(delimiters.getLinesTerminatedBy());\n");
     sb.append("    return __sb.toString();\n");
     sb.append("  }\n");
   }
@@ -711,11 +701,7 @@ public class ClassWriter {
     sb.append("  public void parse(" + typ + " __record) "
         + "throws RecordParser.ParseError {\n");
     sb.append("    if (null == this.__parser) {\n");
-    sb.append("      this.__parser = new RecordParser("
-        + "__INPUT_FIELD_DELIM_CHAR, ");
-    sb.append("__INPUT_RECORD_DELIM_CHAR, __INPUT_ENCLOSED_BY_CHAR, "
-        + "__INPUT_ESCAPED_BY_CHAR, ");
-    sb.append("__INPUT_ENCLOSE_REQUIRED);\n");
+    sb.append("      this.__parser = new RecordParser(__inputDelimiters);\n");
     sb.append("    }\n");
     sb.append("    List<String> __fields = "
         + "this.__parser.parseRecord(__record);\n");
@@ -795,17 +781,8 @@ public class ClassWriter {
     // records.  Note that these can differ from the delims to use as output
     // via toString(), if the user wants to use this class to convert one
     // format to another.
-    sb.append("  private static final char __INPUT_FIELD_DELIM_CHAR = "
-        + (int)options.getInputFieldDelim() + ";\n");
-    sb.append("  private static final char __INPUT_RECORD_DELIM_CHAR = " 
-        + (int)options.getInputRecordDelim() + ";\n");
-    sb.append("  private static final char __INPUT_ENCLOSED_BY_CHAR = " 
-        + (int)options.getInputEnclosedBy() + ";\n");
-    sb.append("  private static final char __INPUT_ESCAPED_BY_CHAR = " 
-        + (int)options.getInputEscapedBy() + ";\n");
-    sb.append("  private static final boolean __INPUT_ENCLOSE_REQUIRED = " 
-        + options.isInputEncloseRequired() + ";\n");
-
+    sb.append("  private final DelimiterSet __inputDelimiters = ");
+    sb.append(options.getInputDelimiters().formatConstructor() + ";\n");
 
     // The parser object which will do the heavy lifting for field splitting.
     sb.append("  private RecordParser __parser;\n"); 
@@ -976,6 +953,7 @@ public class ClassWriter {
     sb.append("import org.apache.hadoop.io.Writable;\n");
     sb.append("import org.apache.hadoop.mapred.lib.db.DBWritable;\n");
     sb.append("import " + JdbcWritableBridge.class.getCanonicalName() + ";\n");
+    sb.append("import " + DelimiterSet.class.getCanonicalName() + ";\n");
     sb.append("import " + FieldFormatter.class.getCanonicalName() + ";\n");
     sb.append("import " + RecordParser.class.getCanonicalName() + ";\n");
     sb.append("import " + BlobRef.class.getCanonicalName() + ";\n");
@@ -999,10 +977,12 @@ public class ClassWriter {
     sb.append("\n");
 
     String className = tableNameInfo.getShortClassForTable(tableName);
-    sb.append("public class " + className
-        + " implements DBWritable, SqoopRecord, Writable {\n");
-    sb.append("  public static final int PROTOCOL_VERSION = "
+    sb.append("public class " + className + " extends SqoopRecord "
+        + " implements DBWritable, Writable {\n");
+    sb.append("  private final int PROTOCOL_VERSION = "
         + CLASS_WRITER_VERSION + ";\n");
+    sb.append(
+        "  public int getClassFormatVersion() { return PROTOCOL_VERSION; }\n");
     sb.append("  protected ResultSet __cur_result_set;\n");
     generateFields(columnTypes, colNames, sb);
     generateDbRead(columnTypes, colNames, sb);

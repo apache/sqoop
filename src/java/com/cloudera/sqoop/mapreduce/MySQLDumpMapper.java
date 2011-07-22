@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.manager.MySQLUtils;
@@ -194,9 +195,7 @@ public class MySQLDumpMapper
 
       static {
         // build a record parser for mysqldump's format
-        MYSQLDUMP_PARSER = new RecordParser(MYSQL_FIELD_DELIM,
-            MYSQL_RECORD_DELIM, MYSQL_ENCLOSE_CHAR, MYSQL_ESCAPE_CHAR,
-            MYSQL_ENCLOSE_REQUIRED);
+        MYSQLDUMP_PARSER = new RecordParser(DelimiterSet.MYSQL_DELIMITERS);
       }
 
       public void run() {
@@ -205,22 +204,30 @@ public class MySQLDumpMapper
         try {
           r = new BufferedReader(new InputStreamReader(this.stream));
 
+          // Configure the output with the user's delimiters.
           char outputFieldDelim = (char) conf.getInt(
-              MySQLUtils.OUTPUT_FIELD_DELIM_KEY, '\000');
+              MySQLUtils.OUTPUT_FIELD_DELIM_KEY,
+              DelimiterSet.NULL_CHAR);
           String outputFieldDelimStr = "" + outputFieldDelim;
           char outputRecordDelim = (char) conf.getInt(
-              MySQLUtils.OUTPUT_RECORD_DELIM_KEY, '\000');
+              MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
+              DelimiterSet.NULL_CHAR);
           String outputRecordDelimStr = "" + outputRecordDelim;
           char outputEnclose = (char) conf.getInt(
               MySQLUtils.OUTPUT_ENCLOSED_BY_KEY,
-              '\000');
-          String outputEncloseStr = "" + outputEnclose;
+              DelimiterSet.NULL_CHAR);
           char outputEscape = (char) conf.getInt(
-              MySQLUtils.OUTPUT_ESCAPED_BY_KEY, '\000');
-          String outputEscapeStr = "" + outputEscape;
+              MySQLUtils.OUTPUT_ESCAPED_BY_KEY,
+              DelimiterSet.NULL_CHAR);
           boolean outputEncloseRequired = conf.getBoolean(
               MySQLUtils.OUTPUT_ENCLOSE_REQUIRED_KEY, false);
-          char [] encloseFor = { outputFieldDelim, outputRecordDelim };
+
+          DelimiterSet delimiters = new DelimiterSet(
+             outputFieldDelim,
+             outputRecordDelim,
+             outputEnclose,
+             outputEscape,
+             outputEncloseRequired);
 
           // Actually do the read/write transfer loop here.
           int preambleLen = -1; // set to this for "undefined"
@@ -268,8 +275,7 @@ public class MySQLDumpMapper
               }
 
               String fieldStr = FieldFormatter.escapeAndEnclose(field,
-                  outputEscapeStr, outputEncloseStr,
-                  encloseFor, outputEncloseRequired);
+                  delimiters);
               context.write(fieldStr, null);
               recordLen += fieldStr.length();
             }

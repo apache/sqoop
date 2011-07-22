@@ -36,6 +36,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
+import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.shims.ShimLoader;
 
@@ -603,19 +604,15 @@ public abstract class BaseSqoopTool extends SqoopTool {
         // straight to Hive. Use Hive-style delimiters.
         LOG.info("Using Hive-specific delimiters for output. You can override");
         LOG.info("delimiters with --fields-terminated-by, etc.");
-        options.setFieldsTerminatedBy((char) 0x1); // ^A
-        options.setLinesTerminatedBy('\n');
-        options.setEnclosedBy('\000'); // no enclosing in Hive.
-        options.setEscapedBy('\000'); // no escaping in Hive.
-        options.setOutputEncloseRequired(false);
+        options.setOutputDelimiters(DelimiterSet.HIVE_DELIMITERS);
       }
 
-      if (options.getOutputEscapedBy() != '\000') {
+      if (options.getOutputEscapedBy() != DelimiterSet.NULL_CHAR) {
         LOG.warn("Hive does not support escape characters in fields;");
         LOG.warn("parse errors in Hive may result from using --escaped-by.");
       }
 
-      if (options.getOutputEnclosedBy() != '\000') {
+      if (options.getOutputEnclosedBy() != DelimiterSet.NULL_CHAR) {
         LOG.warn("Hive does not support quoted strings; parse errors");
         LOG.warn("in Hive may result from using --enclosed-by.");
       }
@@ -627,7 +624,5 @@ public abstract class BaseSqoopTool extends SqoopTool {
     // is reserved for future constraints on Hive options.
   }
 
-
-      
 }
 

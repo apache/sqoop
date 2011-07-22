@@ -29,6 +29,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 
 /**
@@ -115,18 +116,8 @@ public class SqoopOptions {
   // HDFS path to read from when performing an export
   private String exportDir;
 
-  private char inputFieldDelim;
-  private char inputRecordDelim;
-  private char inputEnclosedBy;
-  private char inputEscapedBy;
-  private boolean inputMustBeEnclosed;
-
-  private char outputFieldDelim;
-  private char outputRecordDelim;
-  private char outputEnclosedBy;
-  private char outputEscapedBy;
-  private boolean outputMustBeEnclosed;
-
+  private DelimiterSet inputDelimiters;
+  private DelimiterSet outputDelimiters;
   private boolean areDelimsManuallySet;
 
   private Configuration conf;
@@ -252,6 +243,11 @@ public class SqoopOptions {
     this.hiveHome = System.getenv("HIVE_HOME");
     this.hiveHome = System.getProperty("hive.home", this.hiveHome);
 
+    this.inputDelimiters = new DelimiterSet(
+        DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR,
+        DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR, false);
+    this.outputDelimiters = new DelimiterSet();
+
     // Set this to cwd, but -Dsqoop.src.dir can override.
     this.codeOutputDir = System.getProperty("sqoop.src.dir", ".");
 
@@ -263,18 +259,6 @@ public class SqoopOptions {
     this.tmpDir = myTmpDir;
     this.jarOutputDir = tmpDir + "sqoop/compile";
     this.layout = FileLayout.TextFile;
-
-    this.inputFieldDelim = '\000';
-    this.inputRecordDelim = '\000';
-    this.inputEnclosedBy = '\000';
-    this.inputEscapedBy = '\000';
-    this.inputMustBeEnclosed = false;
-
-    this.outputFieldDelim = ',';
-    this.outputRecordDelim = '\n';
-    this.outputEnclosedBy = '\000';
-    this.outputEscapedBy = '\000';
-    this.outputMustBeEnclosed = false;
 
     this.areDelimsManuallySet = false;
 
@@ -329,7 +313,7 @@ public class SqoopOptions {
     } else if (charish.startsWith("\\0")) {
       if (charish.equals("\\0")) {
         // it's just '\0', which we can take as shorthand for nul.
-        return '\000';
+        return DelimiterSet.NULL_CHAR;
       } else {
         // it's an octal value.
         String valStr = charish.substring(2);
@@ -651,15 +635,19 @@ public class SqoopOptions {
    * field delim to use when printing lines.
    */
   public char getInputFieldDelim() {
-    if (inputFieldDelim == '\000') {
-      return this.outputFieldDelim;
+    char f = inputDelimiters.getFieldsTerminatedBy();
+    if (f == DelimiterSet.NULL_CHAR) {
+      return this.outputDelimiters.getFieldsTerminatedBy();
     } else {
-      return this.inputFieldDelim;
+      return f;
     }
   }
 
+  /**
+   * Set the field delimiter to use when parsing lines.
+   */
   public void setInputFieldsTerminatedBy(char c) {
-    this.inputFieldDelim = c;
+    this.inputDelimiters.setFieldsTerminatedBy(c);
   }
 
   /**
@@ -667,15 +655,19 @@ public class SqoopOptions {
    * record delim to use when printing lines.
    */
   public char getInputRecordDelim() {
-    if (inputRecordDelim == '\000') {
-      return this.outputRecordDelim;
+    char r = inputDelimiters.getLinesTerminatedBy();
+    if (r == DelimiterSet.NULL_CHAR) {
+      return this.outputDelimiters.getLinesTerminatedBy();
     } else {
-      return this.inputRecordDelim;
+      return r;
     }
   }
 
+  /**
+   * Set the record delimiter to use when parsing lines.
+   */
   public void setInputLinesTerminatedBy(char c) {
-    this.inputRecordDelim = c;
+    this.inputDelimiters.setLinesTerminatedBy(c);
   }
 
   /**
@@ -683,15 +675,19 @@ public class SqoopOptions {
    * Defaults to the enclosing-char to use when printing lines.
    */
   public char getInputEnclosedBy() {
-    if (inputEnclosedBy == '\000') {
-      return this.outputEnclosedBy;
+    char c = inputDelimiters.getEnclosedBy();
+    if (c == DelimiterSet.NULL_CHAR) {
+      return this.outputDelimiters.getEnclosedBy();
     } else {
-      return this.inputEnclosedBy;
+      return c;
     }
   }
 
+  /**
+   * Set the enclosed-by character to use when parsing lines.
+   */
   public void setInputEnclosedBy(char c) {
-    this.inputEnclosedBy = c;
+    this.inputDelimiters.setEnclosedBy(c);
   }
 
   /**
@@ -699,15 +695,19 @@ public class SqoopOptions {
    * escape character used when printing lines.
    */
   public char getInputEscapedBy() {
-    if (inputEscapedBy == '\000') {
-      return this.outputEscapedBy;
+    char c = inputDelimiters.getEscapedBy();
+    if (c == DelimiterSet.NULL_CHAR) {
+      return this.outputDelimiters.getEscapedBy();
     } else {
-      return this.inputEscapedBy;
+      return c;
     }
   }
 
+  /**
+   * Set the escaped-by character to use when parsing lines.
+   */
   public void setInputEscapedBy(char c) {
-    this.inputEscapedBy = c;
+    this.inputDelimiters.setEscapedBy(c);
   }
 
   /**
@@ -716,15 +716,20 @@ public class SqoopOptions {
    * used.
    */
   public boolean isInputEncloseRequired() {
-    if (inputEnclosedBy == '\000') {
-      return this.outputMustBeEnclosed;
+    char c = this.inputDelimiters.getEnclosedBy(); 
+    if (c == DelimiterSet.NULL_CHAR) {
+      return this.outputDelimiters.isEncloseRequired();
     } else {
-      return this.inputMustBeEnclosed;
+      return this.inputDelimiters.isEncloseRequired();
     }
   }
 
+  /**
+   * If true, then all input fields are expected to be enclosed by the
+   * enclosed-by character when parsing.
+   */
   public void setInputEncloseRequired(boolean required) {
-    this.inputMustBeEnclosed = required;
+    this.inputDelimiters.setEncloseRequired(required);
   }
 
   /**
@@ -732,11 +737,14 @@ public class SqoopOptions {
    * text.
    */
   public char getOutputFieldDelim() {
-    return this.outputFieldDelim;
+    return this.outputDelimiters.getFieldsTerminatedBy();
   }
 
+  /**
+   * Set the field delimiter to use when formatting lines.
+   */
   public void setFieldsTerminatedBy(char c) {
-    this.outputFieldDelim = c;
+    this.outputDelimiters.setFieldsTerminatedBy(c);
   }
 
 
@@ -745,11 +753,14 @@ public class SqoopOptions {
    * text.
    */
   public char getOutputRecordDelim() {
-    return this.outputRecordDelim;
+    return this.outputDelimiters.getLinesTerminatedBy();
   }
 
+  /**
+   * Set the record delimiter to use when formatting lines.
+   */
   public void setLinesTerminatedBy(char c) {
-    this.outputRecordDelim = c;
+    this.outputDelimiters.setLinesTerminatedBy(c);
   }
 
   /**
@@ -757,11 +768,14 @@ public class SqoopOptions {
    * imported to text.
    */
   public char getOutputEnclosedBy() {
-    return this.outputEnclosedBy;
+    return this.outputDelimiters.getEnclosedBy();
   }
 
+  /**
+   * Set the enclosed-by character to use when formatting lines.
+   */
   public void setEnclosedBy(char c) {
-    this.outputEnclosedBy = c;
+    this.outputDelimiters.setEnclosedBy(c);
   }
 
   /**
@@ -769,11 +783,14 @@ public class SqoopOptions {
    * text.
    */
   public char getOutputEscapedBy() {
-    return this.outputEscapedBy;
+    return this.outputDelimiters.getEscapedBy();
   }
 
+  /**
+   * Set the escaped-by character to use when formatting lines.
+   */
   public void setEscapedBy(char c) {
-    this.outputEscapedBy = c;
+    this.outputDelimiters.setEscapedBy(c);
   }
 
   /**
@@ -782,11 +799,42 @@ public class SqoopOptions {
    * instead of --optionally-enclosed-by.
    */
   public boolean isOutputEncloseRequired() {
-    return this.outputMustBeEnclosed;
+    return this.outputDelimiters.isEncloseRequired();
   }
 
+  /**
+   * If true, then the enclosed-by character will be applied to all fields,
+   * even if internal characters do not need enclosed-by protection.
+   */
   public void setOutputEncloseRequired(boolean required) {
-    this.outputMustBeEnclosed = required; 
+    this.outputDelimiters.setEncloseRequired(required);
+  }
+
+  /**
+   * @return the set of delimiters used for formatting output records.
+   */
+  public DelimiterSet getOutputDelimiters() {
+    return this.outputDelimiters.copy();
+  }
+
+  /**
+   * Set the complete set of delimiters to use for output formatting.
+   */
+  public void setOutputDelimiters(DelimiterSet delimiters) {
+    this.outputDelimiters = delimiters.copy();
+  }
+
+  /**
+   * @return the set of delimiters used for parsing the input.
+   * This may include values implicitly set by the output delimiters.
+   */
+  public DelimiterSet getInputDelimiters() {
+    return new DelimiterSet(
+        getInputFieldDelim(),
+        getInputRecordDelim(),
+        getInputEnclosedBy(),
+        getInputEscapedBy(),
+        isInputEncloseRequired());
   }
 
   /**

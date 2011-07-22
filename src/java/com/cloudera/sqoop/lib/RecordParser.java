@@ -86,21 +86,11 @@ public final class RecordParser {
     }
   }
 
-  private char fieldDelim;
-  private char recordDelim;
-  private char enclosingChar;
-  private char escapeChar;
-  private boolean enclosingRequired;
+  private DelimiterSet delimiters;
   private ArrayList<String> outputs;
 
-  public RecordParser(final char field, final char record, final char enclose,
-      final char escape, final boolean mustEnclose) {
-    this.fieldDelim = field;
-    this.recordDelim = record;
-    this.enclosingChar = enclose;
-    this.escapeChar = escape;
-    this.enclosingRequired = mustEnclose;
-
+  public RecordParser(final DelimiterSet delimitersIn) {
+    this.delimiters = delimitersIn.copy();
     this.outputs = new ArrayList<String>();
   }
 
@@ -215,12 +205,18 @@ public final class RecordParser {
         add charater literal to current string, return to UNENCLOSED_FIELD
     */
 
-    char curChar = '\000';
+    char curChar = DelimiterSet.NULL_CHAR;
     ParseState state = ParseState.FIELD_START;
     int len = input.length();
     StringBuilder sb = null;
 
     outputs.clear();
+
+    char enclosingChar = delimiters.getEnclosedBy();
+    char fieldDelim = delimiters.getFieldsTerminatedBy();
+    char recordDelim = delimiters.getLinesTerminatedBy();
+    char escapeChar = delimiters.getEscapedBy();
+    boolean enclosingRequired = delimiters.isEncloseRequired();
 
     for (int pos = 0; pos < len; pos++) {
       curChar = input.get();
@@ -233,14 +229,14 @@ public final class RecordParser {
         }
 
         sb = new StringBuilder();
-        if (this.enclosingChar == curChar) {
+        if (enclosingChar == curChar) {
           // got an opening encloser.
           state = ParseState.ENCLOSED_FIELD;
-        } else if (this.escapeChar == curChar) {
+        } else if (escapeChar == curChar) {
           state = ParseState.UNENCLOSED_ESCAPE;
-        } else if (this.fieldDelim == curChar) {
+        } else if (fieldDelim == curChar) {
           // we have a zero-length field. This is a no-op.
-        } else if (this.recordDelim == curChar) {
+        } else if (recordDelim == curChar) {
           // we have a zero-length field, that ends processing.
           pos = len;
         } else {
@@ -248,7 +244,7 @@ public final class RecordParser {
           state = ParseState.UNENCLOSED_FIELD;
           sb.append(curChar);
 
-          if (this.enclosingRequired) {
+          if (enclosingRequired) {
             throw new ParseError(
                 "Opening field-encloser expected at position " + pos);
           }
@@ -257,10 +253,10 @@ public final class RecordParser {
         break;
 
       case ENCLOSED_FIELD:
-        if (this.escapeChar == curChar) {
+        if (escapeChar == curChar) {
           // the next character is escaped. Treat it literally.
           state = ParseState.ENCLOSED_ESCAPE;
-        } else if (this.enclosingChar == curChar) {
+        } else if (enclosingChar == curChar) {
           // we're at the end of the enclosing field. Expect an EOF or EOR char.
           state = ParseState.ENCLOSED_EXPECT_DELIMITER;
         } else {
@@ -272,13 +268,13 @@ public final class RecordParser {
         break;
 
       case UNENCLOSED_FIELD:
-        if (this.escapeChar == curChar) {
+        if (escapeChar == curChar) {
           // the next character is escaped. Treat it literally.
           state = ParseState.UNENCLOSED_ESCAPE;
-        } else if (this.fieldDelim == curChar) {
+        } else if (fieldDelim == curChar) {
           // we're at the end of this field; may be the start of another one.
           state = ParseState.FIELD_START;
-        } else if (this.recordDelim == curChar) {
+        } else if (recordDelim == curChar) {
           pos = len; // terminate processing immediately.
         } else {
           // this is a regular char. Add to the current field string,
@@ -298,10 +294,10 @@ public final class RecordParser {
       case ENCLOSED_EXPECT_DELIMITER:
         // We were in an enclosed field, but got the final encloser. Now we
         // expect either an end-of-field or an end-of-record.
-        if (this.fieldDelim == curChar) {
+        if (fieldDelim == curChar) {
           // end of one field is the beginning of the next.
           state = ParseState.FIELD_START;
-        } else if (this.recordDelim == curChar) {
+        } else if (recordDelim == curChar) {
           // stop processing.
           pos = len;
         } else {
@@ -323,7 +319,7 @@ public final class RecordParser {
       }
     }
 
-    if (state == ParseState.FIELD_START && curChar == this.fieldDelim) {
+    if (state == ParseState.FIELD_START && curChar == fieldDelim) {
       // we hit an EOF/EOR as the last legal character and we need to mark
       // that string as recorded. This if block is outside the for-loop since
       // we don't have a physical 'epsilon' token in our string.
@@ -342,19 +338,17 @@ public final class RecordParser {
     return outputs;
   }
 
-
   public boolean isEnclosingRequired() { 
-    return enclosingRequired;
+    return delimiters.isEncloseRequired();
   }
 
   @Override
   public String toString() {
-    return "RecordParser[" + fieldDelim + ',' + recordDelim + ','
-        + enclosingChar + ',' + escapeChar + ',' + enclosingRequired + "]";
+    return "RecordParser[" + delimiters.toString() + "]";
   }
 
   @Override
   public int hashCode() {
-    return this.toString().hashCode();
+    return this.delimiters.hashCode();
   }
 }

@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import static com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
 import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.DirectImportUtils;
 
@@ -76,10 +77,10 @@ public final class MySQLUtils {
    * escape: \\
    */
   public static boolean outputDelimsAreMySQL(Configuration conf) {
-    return ',' == (char) conf.getInt(OUTPUT_FIELD_DELIM_KEY, '\000')
-        && '\n' == (char) conf.getInt(OUTPUT_RECORD_DELIM_KEY, '\000')
-        && '\'' == (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY, '\000')
-        && '\\' == (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, '\000')
+    return ',' == (char) conf.getInt(OUTPUT_FIELD_DELIM_KEY, NULL_CHAR)
+        && '\n' == (char) conf.getInt(OUTPUT_RECORD_DELIM_KEY, NULL_CHAR)
+        && '\'' == (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY, NULL_CHAR)
+        && '\\' == (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, NULL_CHAR)
         && !conf.getBoolean(OUTPUT_ENCLOSE_REQUIRED_KEY, false);
   }
 

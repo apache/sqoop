@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.lib;
+package com.cloudera.sqoop.util;
 
 import org.apache.hadoop.conf.Configuration;
 

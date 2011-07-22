@@ -20,6 +20,7 @@ package com.cloudera.sqoop;
 
 import junit.framework.TestCase;
 
+import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.tool.ImportTool;
 
 
@@ -109,19 +110,19 @@ public class TestSqoopOptions extends TestCase {
   }
 
   public void testEscapeNul1() throws Exception {
-    assertEquals('\000', SqoopOptions.toChar("\\0"));
+    assertEquals(DelimiterSet.NULL_CHAR, SqoopOptions.toChar("\\0"));
   }
 
   public void testEscapeNul2() throws Exception {
-    assertEquals('\000', SqoopOptions.toChar("\\00"));
+    assertEquals(DelimiterSet.NULL_CHAR, SqoopOptions.toChar("\\00"));
   }
 
   public void testEscapeNul3() throws Exception {
-    assertEquals('\000', SqoopOptions.toChar("\\0000"));
+    assertEquals(DelimiterSet.NULL_CHAR, SqoopOptions.toChar("\\0000"));
   }
 
   public void testEscapeNul4() throws Exception {
-    assertEquals('\000', SqoopOptions.toChar("\\0x0"));
+    assertEquals(DelimiterSet.NULL_CHAR, SqoopOptions.toChar("\\0x0"));
   }
 
   public void testOctalChar1() throws Exception {

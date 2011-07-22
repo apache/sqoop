@@ -32,13 +32,13 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import com.cloudera.sqoop.lib.TaskId;
 import com.cloudera.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.AsyncSink;
 import com.cloudera.sqoop.util.JdbcUrl;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
 import com.cloudera.sqoop.util.NullAsyncSink;
+import com.cloudera.sqoop.util.TaskId;
 
 /**
  * Mapper that starts a 'mysqlimport' process and uses that to export rows from
