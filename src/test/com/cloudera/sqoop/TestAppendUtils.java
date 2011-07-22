@@ -34,10 +34,13 @@ import org.apache.hadoop.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.cloudera.sqoop.manager.ImportJobContext;
+
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.cloudera.sqoop.util.AppendUtils;
 
 /**
  * Test that --append works.
@@ -259,6 +262,23 @@ public class TestAppendUtils extends ImportJobTestCase {
     // in diff. w/--warehouse-dir there will no be $tablename dir
     Path output = new Path(targetDir);
     runAppendTest(args, output);
+  }
+
+  /**
+   * If the append source does not exist, don't crash.
+   */
+  public void testAppendSrcDoesNotExist() throws IOException {
+    Configuration conf = new Configuration();
+    conf.set("fs.default.name", "file:///");
+    SqoopOptions options = new SqoopOptions(conf);
+    options.setTableName("meep");
+    Path missingPath = new Path("doesNotExistForAnyReason");
+    FileSystem local = FileSystem.getLocal(conf);
+    assertFalse(local.exists(missingPath));
+    ImportJobContext importContext = new ImportJobContext("meep", null,
+        options, missingPath);
+    AppendUtils utils = new AppendUtils(importContext);
+    utils.append();
   }
 
 }

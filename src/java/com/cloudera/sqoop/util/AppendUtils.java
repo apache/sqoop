@@ -77,7 +77,16 @@ public class AppendUtils {
 
     int nextPartition = 0;
 
-    // Create directory in case
+    if (!fs.exists(tempDir)) {
+      // This occurs if there was no source (tmp) dir. This might happen
+      // if the import was an HBase-target import, but the user specified
+      // --append anyway. This is a warning, not an error.
+      LOG.warn("Cannot append files to target dir; no such directory: "
+          + tempDir);
+      return;
+    }
+
+    // Create target directory.
     if (!fs.exists(userDestDir)) {
       LOG.info("Creating missing output directory - " + userDestDir.getName());
       fs.mkdirs(userDestDir);
@@ -92,9 +101,8 @@ public class AppendUtils {
     moveFiles(fs, tempDir, userDestDir, nextPartition);
 
     // delete temporary path
-    LOG.debug("Deleting temporary folder "
-            + context.getDestination().getName());
-    fs.delete(context.getDestination(), true);
+    LOG.debug("Deleting temporary folder " + tempDir.getName());
+    fs.delete(tempDir, true);
   }
 
   /**
@@ -141,6 +149,13 @@ public class AppendUtils {
     numpart.setGroupingUsed(false);
     Pattern patt = Pattern.compile("part.*-([0-9][0-9][0-9][0-9][0-9]).*");
     FileStatus[] tempFiles = fs.listStatus(sourceDir);
+
+    if (null == tempFiles) {
+      // If we've already checked that the dir exists, and now it can't be
+      // listed, this is a genuine error (permissions, fs integrity, or other).
+      throw new IOException("Could not list files from " + sourceDir);
+    }
+
     // Move and rename files & directories from temporary to target-dir thus
     // appending file's next partition
     for (FileStatus fileStat : tempFiles) {
