@@ -109,6 +109,24 @@ sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.clou
 If not specified, the default value used for this property is:
 jdbc:postgresql://localhost/
 
+=== SQL Server
+
+Install SQL Server Express 2008 R2 and create a database instance and
+download the appropriate JDBC driver. Instructions for configuring the
+database can be found in SQLServerManagerImportManualTest.
+
+Use the system property sqoop.test.sqlserver.connectstring.host_url to specify
+the URL for the SQL Server host used for testing. Specify this property on the
+command line or via the build.properties file. For example:
+
+sqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://sqlserverhost:1433
+
+If not specified, the default value used for this property is:
+jdbc:sqlserver://sqlserverhost:1433
+
+This can be useful if you have the hostname sqlserverhost mapped to the IP
+address of the SQL Server instance.
+
 === Running the Third-party Tests
 
 After the third-party databases are installed and configured, run:
@@ -117,6 +135,13 @@ After the third-party databases are installed and configured, run:
 ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
 ++++
 
+This command will run all thirdparty tests except for the SQL Server test.
+To run the SQL Server test, specify the property "manual" instead of "thirdparty"
+as follows:
+
+++++
+ant test -Dmanual=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
+++++
 
 Note that +sqoop.thirdparty.lib.dir+ can also be specified in
 +build.properties+.
