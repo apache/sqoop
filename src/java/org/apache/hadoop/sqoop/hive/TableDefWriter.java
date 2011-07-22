@@ -27,6 +27,7 @@ import org.apache.hadoop.sqoop.manager.ConnManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Date;
 import java.text.DateFormat;
@@ -49,7 +50,8 @@ public class TableDefWriter {
   private SqoopOptions options;
   private ConnManager connManager;
   private Configuration configuration;
-  private String tableName;
+  private String inputTableName;
+  private String outputTableName;
   private boolean commentsEnabled;
 
   /**
@@ -62,28 +64,64 @@ public class TableDefWriter {
    *        timestamp comment.
    */
   public TableDefWriter(final SqoopOptions opts, final ConnManager connMgr,
-      final String table, final Configuration config, final boolean withComments) {
+      final String inputTable, final String outputTable,
+      final Configuration config, final boolean withComments) {
     this.options = opts;
     this.connManager = connMgr;
-    this.tableName = table;
+    this.inputTableName = inputTable;
+    this.outputTableName = outputTable;
     this.configuration = config;
     this.commentsEnabled = withComments;
+  }
+
+  private Map<String, Integer> externalColTypes;
+
+  /**
+   * Set the column type map to be used.
+   * (dependency injection for testing; not used in production.)
+   */
+  void setColumnTypes(Map<String, Integer> colTypes) {
+    this.externalColTypes = colTypes;
+    LOG.debug("Using test-controlled type map");
+  }
+
+  /**
+   * Get the column names to import.
+   */
+  private String [] getColumnNames() {
+    String [] colNames = options.getColumns();
+    if (null != colNames) {
+      return colNames; // user-specified column names.
+    } else if (null != externalColTypes) {
+      // Test-injection column mapping. Extract the col names from this.
+      ArrayList<String> keyList = new ArrayList<String>();
+      for (String key : externalColTypes.keySet()) {
+        keyList.add(key);
+      }
+
+      return keyList.toArray(new String[keyList.size()]);
+    } else {
+      return connManager.getColumnNames(inputTableName);
+    }
   }
 
   /**
    * @return the CREATE TABLE statement for the table to load into hive.
    */
   public String getCreateTableStmt() throws IOException {
-    Map<String, Integer> columnTypes = connManager.getColumnTypes(tableName);
+    Map<String, Integer> columnTypes;
 
-    String [] colNames = options.getColumns();
-    if (null == colNames) {
-      colNames = connManager.getColumnNames(tableName);
+    if (externalColTypes != null) {
+      // Use pre-defined column types.
+      columnTypes = externalColTypes;
+    } else {
+      // Get these from the database.
+      columnTypes = connManager.getColumnTypes(inputTableName);
     }
 
+    String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
-
-    sb.append("CREATE TABLE " + tableName + " ( ");
+    sb.append("CREATE TABLE " + outputTableName + " ( ");
 
     boolean first = true;
     for (String col : colNames) {
@@ -138,7 +176,7 @@ public class TableDefWriter {
       warehouseDir = warehouseDir + File.separator;
     }
 
-    String tablePath = warehouseDir + tableName;
+    String tablePath = warehouseDir + inputTableName;
     FileSystem fs = FileSystem.get(configuration);
     Path finalPath = new Path(tablePath).makeQualified(fs);
     String finalPathStr = finalPath.toString();
@@ -147,7 +185,7 @@ public class TableDefWriter {
     sb.append("LOAD DATA INPATH '");
     sb.append(finalPathStr);
     sb.append("' INTO TABLE ");
-    sb.append(tableName);
+    sb.append(outputTableName);
 
     LOG.debug("Load statement: " + sb.toString());
     return sb.toString();

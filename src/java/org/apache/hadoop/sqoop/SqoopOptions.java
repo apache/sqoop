@@ -100,6 +100,7 @@ public class SqoopOptions {
   private String tmpDir; // where temp data goes; usually /tmp
   private String hiveHome;
   private boolean hiveImport;
+  private String hiveTableName;
   private String packageName; // package to prepend to auto-named classes.
   private String className; // package+class to apply to individual table import.
                             // also used as an *input* class with existingJarFile.
@@ -314,6 +315,8 @@ public class SqoopOptions {
     System.out.println("                             (Ignores --table, --columns and --split-by)");
     System.out.println("--hive-import                If set, then import the table into Hive.");
     System.out.println("                    (Uses Hive's default delimiters if none are set.)");
+    System.out.println("--hive-table (tablename)     Sets the table name to use when importing");
+    System.out.println("                             to hive.");
     System.out.println("-m, --num-mappers (n)        Use 'n' map tasks to import in parallel");
     System.out.println("-z, --compress               Enable compression");
     System.out.println("--direct-split-size (n)      Split the input stream every 'n' bytes");
@@ -510,6 +513,8 @@ public class SqoopOptions {
           this.hiveHome = args[++i];
         } else if (args[i].equals("--hive-import")) {
           this.hiveImport = true;
+        } else if (args[i].equals("--hive-table")) {
+          this.hiveTableName = args[++i];
         } else if (args[i].equals("--num-mappers") || args[i].equals("-m")) {
           String numMappersStr = args[++i];
           this.numMappers = Integer.valueOf(numMappersStr);
@@ -625,6 +630,15 @@ public class SqoopOptions {
     } else if (this.allTables && this.className != null) {
       // If we're reading all tables, can't set individual class name
       throw new InvalidOptionsException("--class-name and --all-tables are incompatible options."
+          + HELP_STR);
+    } else if (this.allTables && this.hiveTableName != null) {
+      // If we're reading all tables, can't set hive target table name
+      throw new InvalidOptionsException(
+          "--hive-table and --all-tables are incompatible options."
+          + HELP_STR);
+    } else if (this.hiveTableName != null && !this.hiveImport) {
+      throw new InvalidOptionsException(
+          "--hive-table is invalid without --hive-import"
           + HELP_STR);
     } else if (this.connectString == null) {
       throw new InvalidOptionsException("Error: Required argument --connect is missing."
@@ -933,6 +947,17 @@ public class SqoopOptions {
    */
   public boolean shouldUseCompression() {
     return this.useCompression;
+  }
+
+  /**
+   * @return the name of the destination table when importing to Hive
+   */
+  public String getHiveTableName( ) {
+    if (null != this.hiveTableName) {
+      return this.hiveTableName;
+    } else {
+      return this.tableName;
+    }
   }
 
   /**

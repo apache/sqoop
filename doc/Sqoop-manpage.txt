@@ -101,6 +101,9 @@ Import control options
 --table (table-name)::
   The table to import
 
+--hive-table (table-name)::
+  When used with --hive-import, overrides the destination table name
+
 --where (clause)::
   Import only the rows for which _clause_ is true.
   e.g.: `--where "user_id > 400 AND hidden == 0"`

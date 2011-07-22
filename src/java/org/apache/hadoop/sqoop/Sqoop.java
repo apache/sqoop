@@ -124,7 +124,7 @@ public class Sqoop extends Configured implements Tool {
 
       // If the user wants this table to be in Hive, perform that post-load.
       if (options.doHiveImport()) {
-        hiveImport.importTable(tableName);
+        hiveImport.importTable(tableName, options.getHiveTableName());
       }
     }
   }

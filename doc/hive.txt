@@ -46,6 +46,10 @@ to Hive. If you do not set any delimiters and do use +--hive-import+,
 the field delimiter will be set to +^A+ and the record delimiter will
 be set to +\n+ to be consistent with Hive's defaults.
 
+The table name used in Hive is, by default, the same as that of the
+source table. You can control the output table name with the +--hive-table+
+option.
+
 Hive's Type System
 ~~~~~~~~~~~~~~~~~~
 

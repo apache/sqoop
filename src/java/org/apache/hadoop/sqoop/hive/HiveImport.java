@@ -104,10 +104,23 @@ public class HiveImport {
     }
   }
 
-  public void importTable(String tableName) throws IOException {
-    removeTempLogs(tableName);
+  /**
+   * Perform the import of data from an HDFS path to a Hive table.
+   *
+   * @param inputTableName the name of the table as loaded into HDFS
+   * @param outputTableName the name of the table to create in Hive.
+   */
+  public void importTable(String inputTableName, String outputTableName)
+      throws IOException {
+    removeTempLogs(inputTableName);
 
     LOG.info("Loading uploaded data into Hive");
+
+    if (null == outputTableName) {
+      outputTableName = inputTableName;
+    }
+    LOG.debug("Hive.inputTable: " + inputTableName);
+    LOG.debug("Hive.outputTable: " + outputTableName);
 
     // For testing purposes against our mock hive implementation, 
     // if the sysproperty "expected.script" is set, we set the EXPECTED_SCRIPT
@@ -122,7 +135,8 @@ public class HiveImport {
     }
 
     // generate the HQL statements to run.
-    TableDefWriter tableWriter = new TableDefWriter(options, connManager, tableName,
+    TableDefWriter tableWriter = new TableDefWriter(options, connManager,
+        inputTableName, outputTableName,
         configuration, !debugMode);
     String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
     String loadDataStmtStr = tableWriter.getLoadDataStmt() + ";\n";
