@@ -109,6 +109,7 @@ public class CompilationManager {
 
   /**
    * Compile the .java files into .class files via embedded javac call.
+   * On success, move .java files to the code output dir.
    */
   public void compile() throws IOException {
     List<String> args = new ArrayList<String>();
@@ -123,6 +124,11 @@ public class CompilationManager {
       }
     } else if (LOG.isDebugEnabled()) {
       LOG.debug("Found existing " + jarOutDir);
+    }
+
+    // Make sure jarOutDir ends with a '/'.
+    if (!jarOutDir.endsWith(File.separator)) {
+      jarOutDir = jarOutDir + File.separator;
     }
 
     // find hadoop-*-core.jar for classpath.
@@ -152,13 +158,8 @@ public class CompilationManager {
 
     String curClasspath = System.getProperty("java.class.path");
 
-    String srcOutDir = new File(options.getCodeOutputDir()).getAbsolutePath();
-    if (!srcOutDir.endsWith(File.separator)) {
-      srcOutDir = srcOutDir + File.separator;
-    }
-
     args.add("-sourcepath");
-    args.add(srcOutDir);
+    args.add(jarOutDir);
 
     args.add("-d");
     args.add(jarOutDir);
@@ -178,8 +179,8 @@ public class CompilationManager {
 
     ArrayList<String> srcFileNames = new ArrayList<String>();
     for (String srcfile : sources) {
-      srcFileNames.add(srcOutDir + srcfile);
-      LOG.debug("Adding source file: " + srcOutDir + srcfile);
+      srcFileNames.add(jarOutDir + srcfile);
+      LOG.debug("Adding source file: " + jarOutDir + srcfile);
     }
 
     if (LOG.isDebugEnabled()) {
@@ -202,6 +203,30 @@ public class CompilationManager {
     boolean result = task.call();
     if (!result) {
       throw new IOException("Error returned by javac");
+    }
+
+    // Where we should move source files after compilation.
+    String srcOutDir = new File(options.getCodeOutputDir()).getAbsolutePath();
+    if (!srcOutDir.endsWith(File.separator)) {
+      srcOutDir = srcOutDir + File.separator;
+    }
+
+    // Move these files to the srcOutDir.
+    for (String srcFileName : sources) {
+      String orig = jarOutDir + srcFileName;
+      String dest = srcOutDir + srcFileName;
+      File fOrig = new File(orig);
+      File fDest = new File(dest);
+      File fDestParent = fDest.getParentFile();
+      if (null != fDestParent && !fDestParent.exists()) {
+        if (!fDestParent.mkdirs()) {
+          LOG.error("Could not make directory: " + fDestParent);
+        }
+      }
+
+      if (!fOrig.renameTo(fDest)) {
+        LOG.error("Could not rename " + orig + " to " + dest);
+      }
     }
   }
 

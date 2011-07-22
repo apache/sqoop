@@ -31,9 +31,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.rmi.server.UID;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -65,6 +62,8 @@ import org.apache.hadoop.io.compress.Compressor;
 import org.apache.hadoop.io.compress.CompressorStream;
 import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.io.compress.DecompressorStream;
+
+import com.cloudera.sqoop.util.RandomHash;
 
 /**
  * File format which stores large object records.
@@ -236,14 +235,7 @@ public final class LobFile {
      * Generate a new random RecordStartMark.
      */
     private void generateStartMark() {
-      try {
-        MessageDigest digester = MessageDigest.getInstance("MD5");
-        long time = System.currentTimeMillis();
-        digester.update((new UID() + "@" + time).getBytes());
-        this.startBytes = digester.digest();
-      } catch (NoSuchAlgorithmException e) {
-        throw new RuntimeException(e);
-      }
+      this.startBytes = RandomHash.generateMD5Bytes();
     }
   }
 

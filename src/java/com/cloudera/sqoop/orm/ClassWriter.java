@@ -972,8 +972,9 @@ public class ClassWriter {
     StringBuilder sb = generateClassForColumns(columnTypes,
         cleanedColNames, cleanedDbWriteColNames);
 
-    // Write this out to a file.
-    String codeOutDir = options.getCodeOutputDir();
+    // Write this out to a file in the jar output directory.
+    // We'll move it to the user-visible CodeOutputDir after compiling.
+    String codeOutDir = options.getJarOutputDir();
 
     // Get the class name to generate, which includes package components.
     String className = new TableClassName(options).getClassForTable(tableName);
@@ -999,11 +1000,11 @@ public class ClassWriter {
 
     // Create any missing parent directories.
     File file = new File(filename);
-    String dirname = file.getParent();
-    if (null != dirname) {
-      boolean mkdirSuccess = new File(dirname).mkdirs();
+    File dir = file.getParentFile();
+    if (null != dir && !dir.exists()) {
+      boolean mkdirSuccess = dir.mkdirs();
       if (!mkdirSuccess) {
-        LOG.debug("Could not create directory tree for " + dirname);
+        LOG.debug("Could not create directory tree for " + dir);
       }
     }
 

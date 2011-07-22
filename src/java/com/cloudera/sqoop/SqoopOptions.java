@@ -31,6 +31,8 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 
+import com.cloudera.sqoop.util.RandomHash;
+
 /**
  * Configurable state used by Sqoop tools.
  */
@@ -185,6 +187,11 @@ public class SqoopOptions implements Cloneable {
   // top, we retain the version without the arguments in a reference to the
   // 'parent' SqoopOptions instance, here.
   private SqoopOptions parent;
+
+  // Nonce directory name. Generate one per process, lazily, if
+  // getNonceJarDir() is called. Not recorded in metadata. This is used as
+  // a temporary holding area for compilation work done by this process.
+  private static String curNonce;
 
   public SqoopOptions() {
     initDefaults(null);
@@ -581,6 +588,56 @@ public class SqoopOptions implements Cloneable {
     return this.tmpDir;
   }
 
+  /**
+   * Return the name of a directory that does not exist before 
+   * calling this method, and does exist afterward. We should be
+   * the only client of this directory.
+   */
+  private static String getNonceJarDir(String tmpBase) {
+
+    // Make sure we don't loop forever in the event of a permission error.
+    final int MAX_DIR_CREATE_ATTEMPTS = 32;
+
+    if (null != curNonce) {
+      return curNonce;
+    }
+   
+    File baseDir = new File(tmpBase);
+    File hashDir = null;
+
+    for (int attempts = 0; attempts < MAX_DIR_CREATE_ATTEMPTS; attempts++) {
+      hashDir = new File(baseDir, RandomHash.generateMD5String());
+      while (hashDir.exists()) {
+        hashDir = new File(baseDir, RandomHash.generateMD5String());
+      }
+
+      if (hashDir.mkdirs()) {
+        // We created the directory. Use it.
+        break;
+      }
+    }
+
+    if (hashDir == null || !hashDir.exists()) {
+      throw new RuntimeException("Could not create temporary directory: "
+          + hashDir + "; check for a directory permissions issue on /tmp.");
+    }
+
+    LOG.debug("Generated nonce dir: " + hashDir.toString());
+    SqoopOptions.curNonce = hashDir.toString();
+    return SqoopOptions.curNonce;
+  }
+
+  /**
+   * Reset the nonce directory and force a new one to be generated. This
+   * method is intended to be used only by multiple unit tests that want
+   * to isolate themselves from one another. It should not be called
+   * during normal Sqoop execution.
+   */
+  public static void clearNonceDir() {
+    LOG.warn("Clearing nonce directory");
+    SqoopOptions.curNonce = null;
+  }
+
   private void initDefaults(Configuration baseConfiguration) {
     // first, set the true defaults if nothing else happens.
     // default action is to run the full pipeline.
@@ -604,7 +661,7 @@ public class SqoopOptions implements Cloneable {
     }
 
     this.tmpDir = myTmpDir;
-    this.jarOutputDir = tmpDir + "sqoop/compile";
+    this.jarOutputDir = getNonceJarDir(tmpDir + "sqoop/compile");
     this.layout = FileLayout.TextFile;
 
     this.areDelimsManuallySet = false;
