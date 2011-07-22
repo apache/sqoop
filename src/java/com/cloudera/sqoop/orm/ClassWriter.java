@@ -718,12 +718,29 @@ public class ClassWriter {
 
     // The default toString() method itself follows. This just calls
     // the delimiter-specific toString() with the default delimiters.
+    // Also appends an end-of-record delimiter to the line.
     sb.append("  public String toString() {\n");
-    sb.append("    return toString(__outputDelimiters);\n");
+    sb.append("    return toString(__outputDelimiters, true);\n");
     sb.append("  }\n");
 
     // This toString() variant, though, accepts delimiters as arguments.
     sb.append("  public String toString(DelimiterSet delimiters) {\n");
+    sb.append("    return toString(delimiters, true);\n");
+    sb.append("  }\n");
+
+    // This variant allows the user to specify whether or not an end-of-record
+    // delimiter should be appended.
+    sb.append("  public String toString(boolean useRecordDelim) {\n");
+    sb.append("    return toString(__outputDelimiters, useRecordDelim);\n");
+    sb.append("  }\n");
+
+
+    // This toString() variant allows the user to specify delimiters, as well
+    // as whether or not the end-of-record delimiter should be added to the
+    // string.  Use 'false' to do reasonable things with TextOutputFormat,
+    // which appends its own newline.
+    sb.append("  public String toString(DelimiterSet delimiters, ");
+    sb.append("boolean useRecordDelim) {\n");
     sb.append("    StringBuilder __sb = new StringBuilder();\n");
     sb.append("    char fieldDelim = delimiters.getFieldsTerminatedBy();\n");
 
@@ -754,12 +771,12 @@ public class ClassWriter {
           + ", delimiters));\n");
     }
 
-    sb.append("    __sb.append(delimiters.getLinesTerminatedBy());\n");
+    sb.append("    if (useRecordDelim) {\n");
+    sb.append("      __sb.append(delimiters.getLinesTerminatedBy());\n");
+    sb.append("    }\n");
     sb.append("    return __sb.toString();\n");
     sb.append("  }\n");
   }
-
-
 
   /**
    * Helper method for generateParser(). Writes out the parse() method for one

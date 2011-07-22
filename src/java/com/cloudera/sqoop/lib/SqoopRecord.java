@@ -55,7 +55,45 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
   public abstract int write(PreparedStatement stmt, int offset)
       throws SQLException;
 
+  /**
+   * Format output data according to the specified delimiters.
+   */
   public abstract String toString(DelimiterSet delimiters);
+
+  /**
+   * Use the default delimiters, but only append an end-of-record delimiter
+   * if useRecordDelim is true.
+   */
+  public String toString(boolean useRecordDelim) {
+    // Method body should be overridden by generated classes in 1.3.0+
+    if (useRecordDelim) {
+      // This is the existing functionality.
+      return toString();
+    } else {
+      // Setting this to false requires behavior in the generated class.
+      throw new RuntimeException(
+          "toString(useRecordDelim=false) requires a newer SqoopRecord. "
+          + "Please regenerate your record class to use this function.");
+    }
+  }
+
+  /**
+   * Format the record according to the specified delimiters. An end-of-record
+   * delimiter is optional, and only used if useRecordDelim is true. For
+   * use with TextOutputFormat, calling this with useRecordDelim=false may
+   * make more sense.
+   */
+  public String toString(DelimiterSet delimiters, boolean useRecordDelim) {
+    if (useRecordDelim) {
+      return toString(delimiters);
+    } else {
+      // Setting this to false requires behavior in the generated class.
+      throw new RuntimeException(
+          "toString(delimiters, useRecordDelim=false) requires a newer "
+          + "SqoopRecord. Please regenerate your record class to use this "
+          + "function.");
+    }
+  }
 
   @Override
   public Object clone() throws CloneNotSupportedException {

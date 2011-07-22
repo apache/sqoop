@@ -100,6 +100,13 @@ public class ReparseMapper extends MapReduceBase
 
     out.collect(new Text(userRecord.toString()), NullWritable.get());
 
+    if (!userRecord.toString(false).equals(val.toString())) {
+      // Could not format record w/o end-of-record delimiter.
+      throw new IOException("Returned string w/o EOR has value ["
+          + userRecord.toString(false) + "] when ["
+          + val.toString() + "] was expected.");
+    }
+
     if (!userRecord.toString().equals(val.toString() + "\n")) {
       // misparsed.
       throw new IOException("Returned string has value ["
