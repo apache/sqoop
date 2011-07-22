@@ -78,9 +78,8 @@ MySQL
 JDBC Driver: http://www.mysql.com/downloads/connector/j/[MySQL
 Connector/J]
 
-MySQL v5.0 and above offers very thorough coverage by Sqoop. In builds
-of Sqoop included with Cloudera's Distribution for Hadoop, the
-Connector/J JDBC driver is included with the installation. 
+MySQL v5.0 and above offers very thorough coverage by Sqoop. Sqoop
+has been tested with +mysql-connector-java-5.1.13-bin.jar+.
 
 zeroDateTimeBehavior
 ^^^^^^^^^^^^^^^^^^^^
