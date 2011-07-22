@@ -62,11 +62,13 @@ public class HBaseTestCase extends ImportJobTestCase {
 
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
+      args.add("-D");
+      args.add("hbase.zookeeper.property.clientPort=21818");
     }
 
     if (null != queryStr) {
       args.add("--query");
-      args.add(queryStr); 
+      args.add(queryStr);
     } else {
       args.add("--table");
       args.add(getTableName());
@@ -119,7 +121,7 @@ public class HBaseTestCase extends ImportJobTestCase {
       hbaseTestUtil.shutdownMiniCluster();
       this.hbaseTestUtil = null;
     }
-    LOG.info("shutdown() method returning."); 
+    LOG.info("shutdown() method returning.");
   }
 
   @Override
@@ -139,7 +141,8 @@ public class HBaseTestCase extends ImportJobTestCase {
       String colFamily, String colName, String val) throws IOException {
     Get get = new Get(Bytes.toBytes(rowKey));
     get.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colName));
-    HTable table = new HTable(Bytes.toBytes(tableName));
+    HTable table = new HTable(new Configuration(
+        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
     try {
       Result r = table.get(get);
       byte [] actualVal = r.getValue(Bytes.toBytes(colFamily),
