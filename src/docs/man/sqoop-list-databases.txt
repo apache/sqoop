@@ -27,7 +27,9 @@ include::common-args.txt[]
 COMPATIBILITY
 -------------
 
-This operation is only compatible with MySQL.
+This operation is only compatible with HSQLDB, MySQL and Oracle. When using
+with Oracle, it is necessary that the user connecting to the database has DBA
+privileges.
 
 ENVIRONMENT
 -----------

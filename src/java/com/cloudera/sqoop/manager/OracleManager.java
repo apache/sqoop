@@ -22,10 +22,14 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -46,6 +50,48 @@ public class OracleManager extends GenericJdbcManager {
 
   public static final Log LOG = LogFactory.getLog(
       OracleManager.class.getName());
+
+  /**
+   * ORA-00942: Table or view does not exist. Indicates that the user does
+   * not have permissions.
+   */
+  public static final int ERROR_TABLE_OR_VIEW_DOES_NOT_EXIST = 942;
+
+  /**
+   * This is a catalog view query to list the databases. For Oracle we map the
+   * concept of a database to a schema, and a schema is identified by a user.
+   * In order for the catalog view DBA_USERS be visible to the user who executes
+   * this query, they must have the DBA privilege.
+   */
+  public static final String QUERY_LIST_DATABASES =
+    "SELECT USERNAME FROM DBA_USERS";
+
+  /**
+   * Query to list all tables of the current schema. Even if the user has
+   * DBA privileges which allows other schemas to be visible, we will limit this
+   * query to only the current schema.
+   */
+  public static final String QUERY_LIST_TABLES =
+    "SELECT TABLE_NAME FROM USER_TABLES";
+
+  /**
+   * Query to list all columns of the given table. Even if the user has the
+   * privileges to access table objects from another schema, this query will
+   * limit it to explore tables only from within the active schema.
+   */
+  public static final String QUERY_COLUMNS_FOR_TABLE =
+    "SELECT COLUMN_NAME FROM USER_TAB_COLUMNS WHERE TABLE_NAME = ?";
+
+  /**
+   * Query to find the primary key column name for a given table. This query
+   * is restricted to the current schema.
+   */
+  public static final String QUERY_PRIMARY_KEY_FOR_TABLE =
+    "SELECT USER_CONS_COLUMNS.COLUMN_NAME FROM USER_CONS_COLUMNS, "
+     + "USER_CONSTRAINTS WHERE USER_CONS_COLUMNS.CONSTRAINT_NAME = "
+     + "USER_CONSTRAINTS.CONSTRAINT_NAME AND "
+     + "USER_CONSTRAINTS.CONSTRAINT_TYPE = 'P' AND "
+     + "USER_CONS_COLUMNS.TABLE_NAME = ?";
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
@@ -464,6 +510,236 @@ public class OracleManager extends GenericJdbcManager {
   @Override
   public boolean supportsStagingForExport() {
     return true;
+  }
+
+  /**
+   * The concept of database in Oracle is mapped to schemas. Each schema
+   * is identified by the corresponding username.
+   */
+  @Override
+  public String[] listDatabases() {
+    Connection conn = null;
+    Statement stmt = null;
+    ResultSet rset = null;
+    List<String> databases = new ArrayList<String>();
+
+    try {
+      conn = getConnection();
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+              ResultSet.CONCUR_READ_ONLY);
+      rset = stmt.executeQuery(QUERY_LIST_DATABASES);
+
+      while (rset.next()) {
+        databases.add(rset.getString(1));
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (Exception ex) {
+        LOG.error("Failed to rollback transaction", ex);
+      }
+
+      if (e.getErrorCode() == ERROR_TABLE_OR_VIEW_DOES_NOT_EXIST) {
+        LOG.error("The catalog view DBA_USERS was not found. "
+            + "This may happen if the user does not have DBA privileges. "
+            + "Please check privileges and try again.");
+        LOG.debug("Full trace for ORA-00942 exception", e);
+      } else {
+        LOG.error("Failed to list databases", e);
+      }
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close resultset", ex);
+        }
+      }
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (Exception ex) {
+          LOG.error("Failed to close statement", ex);
+        }
+      }
+
+      try {
+        discardConnection(false);
+      } catch (SQLException ex) {
+        LOG.error("Unable to discard connection", ex);
+      }
+    }
+
+    return databases.toArray(new String[databases.size()]);
+  }
+
+  @Override
+  public String[] listTables() {
+    Connection conn = null;
+    Statement stmt = null;
+    ResultSet rset = null;
+    List<String> tables = new ArrayList<String>();
+
+    try {
+      conn = getConnection();
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+              ResultSet.CONCUR_READ_ONLY);
+      rset = stmt.executeQuery(QUERY_LIST_TABLES);
+
+      while (rset.next()) {
+        tables.add(rset.getString(1));
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (Exception ex) {
+        LOG.error("Failed to rollback transaction", ex);
+      }
+      LOG.error("Failed to list tables", e);
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close resultset", ex);
+        }
+      }
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (Exception ex) {
+          LOG.error("Failed to close statement", ex);
+        }
+      }
+
+      try {
+        discardConnection(false);
+      } catch (SQLException ex) {
+        LOG.error("Unable to discard connection", ex);
+      }
+    }
+
+    return tables.toArray(new String[tables.size()]);
+  }
+
+  @Override
+  public String[] getColumnNames(String tableName) {
+    Connection conn = null;
+    PreparedStatement pStmt = null;
+    ResultSet rset = null;
+    List<String> columns = new ArrayList<String>();
+
+    try {
+      conn = getConnection();
+
+      pStmt = conn.prepareStatement(QUERY_COLUMNS_FOR_TABLE,
+                  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      pStmt.setString(1, tableName);
+      rset = pStmt.executeQuery();
+
+      while (rset.next()) {
+        columns.add(rset.getString(1));
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (Exception ex) {
+        LOG.error("Failed to rollback transaction", ex);
+      }
+      LOG.error("Failed to list columns", e);
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close resultset", ex);
+        }
+      }
+      if (pStmt != null) {
+        try {
+          pStmt.close();
+        } catch (Exception ex) {
+          LOG.error("Failed to close statement", ex);
+        }
+      }
+
+      try {
+        discardConnection(false);
+      } catch (SQLException ex) {
+        LOG.error("Unable to discard connection", ex);
+      }
+    }
+
+    return columns.toArray(new String[columns.size()]);
+  }
+
+  @Override
+  public String getPrimaryKey(String tableName) {
+    Connection conn = null;
+    PreparedStatement pStmt = null;
+    ResultSet rset = null;
+    List<String> columns = new ArrayList<String>();
+
+    try {
+      conn = getConnection();
+
+      pStmt = conn.prepareStatement(QUERY_PRIMARY_KEY_FOR_TABLE,
+                  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      pStmt.setString(1, tableName);
+      rset = pStmt.executeQuery();
+
+      while (rset.next()) {
+        columns.add(rset.getString(1));
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (Exception ex) {
+        LOG.error("Failed to rollback transaction", ex);
+      }
+      LOG.error("Failed to list columns", e);
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close resultset", ex);
+        }
+      }
+      if (pStmt != null) {
+        try {
+          pStmt.close();
+        } catch (Exception ex) {
+          LOG.error("Failed to close statement", ex);
+        }
+      }
+
+      try {
+        discardConnection(false);
+      } catch (SQLException ex) {
+        LOG.error("Unable to discard connection", ex);
+      }
+    }
+
+    if (columns.size() == 0) {
+      // Table has no primary key
+      return null;
+    }
+
+    if (columns.size() > 1) {
+      // The primary key is multi-column primary key. Warn the user.
+      // TODO select the appropriate column instead of the first column based
+      // on the datatype - giving preference to numerics over other types.
+      LOG.warn("The table " + tableName + " "
+          + "contains a multi-column primary key. Sqoop will default to "
+          + "the column " + columns.get(0) + " only for this job.");
+    }
+
+    return columns.get(0);
   }
 }
 

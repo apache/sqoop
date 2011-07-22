@@ -50,6 +50,6 @@ information_schema
 employees
 ----
 
-NOTE: This only works with HSQLDB and MySQL. A vendor-agnostic implementation
-of this function has not yet been implemented.
+NOTE: This only works with HSQLDB, MySQL and Oracle. When using with Oracle,
+it is necessary that the user connecting to the database has DBA privileges.
 
