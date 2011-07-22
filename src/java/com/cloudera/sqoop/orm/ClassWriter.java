@@ -1005,11 +1005,7 @@ public class ClassWriter {
     return cleanedColNames;
   }
 
-
-  /**
-   * Generate the ORM code for the class.
-   */
-  public void generate() throws IOException {
+  private Map<String, Integer> setupColumnTypes() throws IOException {
     Map<String, Integer> columnTypes;
 
     if (null != tableName) {
@@ -1025,7 +1021,10 @@ public class ClassWriter {
 
       columnTypes = connManager.getColumnTypesForQuery(query);
     }
+    return columnTypes;
+  }
 
+  private String[] setupColNames(Map<String, Integer> columnTypes) {
     String [] colNames = options.getColumns();
     if (null == colNames) {
       if (null != tableName) {
@@ -1054,7 +1053,11 @@ public class ClassWriter {
         }
       }
     }
+    return colNames;
+  }
 
+  private String[] setupCleanedColNames(Map<String, Integer> columnTypes,
+      String[] colNames) {
     // Translate all the column names into names that are safe to
     // use as identifiers.
     String [] cleanedColNames = cleanColNames(colNames);
@@ -1071,8 +1074,24 @@ public class ClassWriter {
       // Make sure the col->type mapping holds for the
       // new identifier name, too.
       String col = colNames[i];
-      columnTypes.put(identifier, columnTypes.get(col));
+      Integer type = columnTypes.get(col);
+      if (type == null) {
+        // column doesn't have a type, means that is illegal column name!
+        throw new IllegalArgumentException("Column name '" + col
+            + "' not in table");
+      }
+      columnTypes.put(identifier, type);
     }
+    return cleanedColNames;
+  }
+
+  /**
+   * Generate the ORM code for the class.
+   */
+  public void generate() throws IOException {
+    Map<String, Integer> columnTypes = setupColumnTypes();
+    String[] colNames = setupColNames(columnTypes);
+    String[] cleanedColNames = setupCleanedColNames(columnTypes, colNames);
 
     // The db write() method may use column names in a different
     // order. If this is set in the options, pull it out here and
@@ -1178,6 +1197,10 @@ public class ClassWriter {
   private StringBuilder generateClassForColumns(
       Map<String, Integer> columnTypes,
       String [] colNames, String [] dbWriteColNames) {
+    if (colNames.length ==0) {
+      throw new IllegalArgumentException("Attempted to generate class with "
+          + "no columns!");
+    }
     StringBuilder sb = new StringBuilder();
     sb.append("// ORM class for " + tableName + "\n");
     sb.append("// WARNING: This class is AUTO-GENERATED. "

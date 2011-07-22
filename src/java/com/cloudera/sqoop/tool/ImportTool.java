@@ -421,6 +421,12 @@ public class ImportTool extends BaseSqoopTool {
 
       // Import a single table (or query) the user specified.
       importTable(options, options.getTableName(), hiveImport);
+    } catch (IllegalArgumentException iea) {
+        LOG.error("Imported Failed: " + iea.getMessage());
+        if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
+          throw iea;
+        }
+        return 1;
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running import job: "
           + StringUtils.stringifyException(ioe));

@@ -40,6 +40,11 @@ import com.cloudera.sqoop.tool.ImportTool;
 
 /**
  * Test aspects of the DataDrivenImportJob class' failure reporting.
+ *
+ * These tests have strange error checking because they have different correct
+ * exit conditions when run in "debug mode" when run by ('ant test') and when
+ * run within eclipse.  Debug mode is entered by setting system property
+ * SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError".
  */
 public class TestImportJob extends ImportJobTestCase {
 
@@ -63,8 +68,8 @@ public class TestImportJob extends ImportJobTestCase {
 
     Sqoop importer = new Sqoop(new ImportTool());
     try {
-      Sqoop.runSqoop(importer, argv);
-      fail("Expected IOException running this job.");
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected ImportException running this job.", 1==ret);
     } catch (Exception e) {
       // In debug mode, IOException is wrapped in RuntimeException.
       LOG.info("Got exceptional return (expected: ok). msg is: " + e);
@@ -136,10 +141,67 @@ public class TestImportJob extends ImportJobTestCase {
 
     Sqoop importer = new Sqoop(new ImportTool(), conf);
     try {
-      Sqoop.runSqoop(importer, argv);
-      fail("Expected ImportException running this job.");
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected ImportException running this job.", 1==ret);
     } catch (Exception e) {
       // In debug mode, ImportException is wrapped in RuntimeException.
+      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+    }
+  }
+
+  public void testFailedNoColumns() throws IOException {
+    // Make sure that if a MapReduce job to do the import fails due
+    // to an IOException, we tell the user about it.
+
+    // Create a table to attempt to import.
+    createTableForColType("VARCHAR(32)", "'meep'");
+
+    Configuration conf = new Configuration();
+
+    // Make the output dir exist so we know the job will fail via IOException.
+    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.mkdirs(outputPath);
+    assertTrue(fs.exists(outputPath));
+
+    String [] argv = getArgv(true, new String [] { "" }, conf);
+
+    Sqoop importer = new Sqoop(new ImportTool());
+    try {
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to fail due to no colnames.", 1==ret);
+    } catch (Exception e) {
+      // In debug mode, IOException is wrapped in RuntimeException.
+      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+    }
+  }
+
+  public void testFailedIllegalColumns() throws IOException {
+    // Make sure that if a MapReduce job to do the import fails due
+    // to an IOException, we tell the user about it.
+
+    // Create a table to attempt to import.
+    createTableForColType("VARCHAR(32)", "'meep'");
+
+    Configuration conf = new Configuration();
+
+    // Make the output dir exist so we know the job will fail via IOException.
+    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.mkdirs(outputPath);
+
+    assertTrue(fs.exists(outputPath));
+
+    // DATA_COL0 ok, by zyzzyva not good
+    String [] argv = getArgv(true, new String [] { "DATA_COL0", "zyzzyva" },
+        conf);
+
+    Sqoop importer = new Sqoop(new ImportTool());
+    try {
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to fail due bad colname.", 1==ret);
+    } catch (Exception e) {
+      // In debug mode, IOException is wrapped in RuntimeException.
       LOG.info("Got exceptional return (expected: ok). msg is: " + e);
     }
   }
@@ -157,7 +219,6 @@ public class TestImportJob extends ImportJobTestCase {
     Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
     FileSystem fs = FileSystem.getLocal(conf);
     fs.mkdirs(outputPath);
-
     assertTrue(fs.exists(outputPath));
 
     String[] argv = getArgv(true, new String[] { "DATA_COL0,DATA_COL0" }, conf);
