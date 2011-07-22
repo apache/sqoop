@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.ImportOptions.InvalidOptionsException;
@@ -88,7 +89,9 @@ public class TestMultiMaps extends ImportJobTestCase {
     conf.set("fs.default.name", "file:///");
     FileSystem fs = FileSystem.get(conf);
 
-    FileStatus [] stats = fs.listStatus(getTablePath());
+    FileStatus [] stats = fs.listStatus(getTablePath(),
+        new Utils.OutputFileUtils.OutputFilesFilter());
+
     for (FileStatus stat : stats) {
       paths.add(stat.getPath());
     }
