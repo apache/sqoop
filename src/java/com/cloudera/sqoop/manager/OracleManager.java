@@ -191,7 +191,7 @@ public class OracleManager extends GenericJdbcManager {
 
   protected String getColNamesQuery(String tableName) {
     // SqlManager uses "tableName AS t" which doesn't work in Oracle.
-    return "SELECT t.* FROM " + escapeTableName(tableName) + " t";
+    return "SELECT t.* FROM " + escapeTableName(tableName) + " t WHERE 1=0";
   }
 
   /**
