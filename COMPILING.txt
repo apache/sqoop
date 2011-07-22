@@ -75,17 +75,17 @@ can be used as the underlying Hadoop implementation.
 
 By default, Sqoop will compile against the latest snapshot from Apache
 (retrieved through maven). You can specify the Hadoop distribution to
-retrieve with the hadoop.dist property. Valid values are "apache" or
-"cloudera":
+retrieve with the hadoop.dist property. Valid values are "apache",
+"apache21", or "cloudera":
 
 ++++
-ant jar -Dhadoop.dist=apache
+ant jar -Dhadoop.dist=apache # Uses the nightly build of "trunk"
+ant jar -Dhadoop.dist=apache21
 ant jar -Dhadoop.dist=cloudera
 ++++
 
 To switch between builds, you will need to clear Ivy's dependency
 cache: +ant veryclean+
-
 
 == Code Quality Analysis
 

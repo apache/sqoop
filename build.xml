@@ -65,7 +65,8 @@
   <property name="build.encoding" value="ISO-8859-1"/>
 
   <!-- controlling the Hadoop source -->
-  <!-- valid values for ${hadoop.dist} are 'apache' and 'cloudera' -->
+  <!-- valid values for ${hadoop.dist} are 'apache' (trunk), 'apache21',
+       and 'cloudera' -->
   <property name="hadoop.dist" value="apache" />
 
   <!-- testing with JUnit -->
@@ -118,30 +119,11 @@
   <property name="ivy.artifact.retrieve.pattern"
     			value="${name}/[conf]/[artifact]-[revision].[ext]"/>
 
-  <!-- Path containing third-party libraries deployed directly with Sqoop.
-       This does not include anything that Ivy can retrieve for us.
-    -->
-  <path id="lib.path">
-    <fileset dir="${lib.dir}">
-      <include name="*.jar" />
-      <include name="${hadoop.dist}/*.jar" />
-    </fileset>
-  </path>
-
-
   <!-- The classpath for compiling and running Sqoop -->
   <path id="compile.classpath">
     <pathelement location="${build.classes}"/>
     <path refid="lib.path"/>
     <path refid="${name}.hadoop.classpath"/>
-  </path>
-
-  <!-- Classpath for unit tests (superset of compile.classpath) -->
-  <path id="test.classpath">
-    <pathelement location="${build.test.classes}" />
-    <path refid="${name}.hadooptest.classpath" />
-    <path refid="compile.classpath" />
-    <pathelement location="${build.shim.classes}/${hadoop.dist}" />
   </path>
 
   <path id="cobertura.classpath">
@@ -150,20 +132,77 @@
     </fileset>
   </path>
 
-  <!-- "init" target reserved for future setup purposes. --> 
-  <target name="init" />
+  <!-- load ant-contrib tasks to get the "if" task. -->
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
 
-  <!-- Compile a shim class so Sqoop can run with the specified hadoop.dist -->
+  <!-- "init" target used for setup purposes. --> 
+  <target name="init">
+    <!-- The hadoop.dist property determines which version of Hadoop to
+         retrieve; this may be "cloudera", "apache", or "apache21". But
+         multiple of these versions can use the same shim. We set the
+         hadoop.shim property here, based on that one.
+    -->
+    <if>
+      <equals arg1="${hadoop.dist}" arg2="apache" />
+      <then>
+        <property name="hadoop.shim" value="apache" />
+        <echo message="Hadoop distribution: apache -> apache (trunk) " />
+      </then>
+      <elseif>
+        <equals arg1="${hadoop.dist}" arg2="apache21" />
+        <then>
+          <property name="hadoop.shim" value="apache" />
+          <echo message="Hadoop distribution: apache21 -> apache (0.21)" />
+        </then>
+      </elseif>
+      <elseif>
+        <equals arg1="${hadoop.dist}" arg2="cloudera" />
+        <then>
+          <property name="hadoop.shim" value="cloudera" />
+          <echo message="Hadoop distribution: cloudera -> cloudera (CDH3)" />
+        </then>
+      </elseif>
+      <else>
+        <fail message="Invalid value for hadoop.dist: ${hadoop.dist}"/>
+      </else>
+    </if>
+
+    <!-- Path containing third-party libraries deployed directly with Sqoop.
+         This does not include anything that Ivy can retrieve for us.
+      -->
+    <path id="lib.path">
+      <fileset dir="${lib.dir}">
+        <include name="*.jar" />
+        <include name="${hadoop.shim}/*.jar" />
+      </fileset>
+    </path>
+
+    <!-- Classpath for unit tests (superset of compile.classpath) -->
+    <path id="test.classpath">
+      <pathelement location="${build.test.classes}" />
+      <path refid="${name}.hadooptest.classpath" />
+      <path refid="compile.classpath" />
+      <pathelement location="${build.shim.classes}/${hadoop.shim}" />
+    </path>
+  </target>
+
+  <!-- Compile a shim class so Sqoop can run with the specified
+       hadoop.dist.
+  -->
   <target name="compile-one-shim"
       depends="init, ivy-retrieve-hadoop">
-    <mkdir dir="${build.shim.classes}/${hadoop.dist}" />
+    <mkdir dir="${build.shim.classes}/${hadoop.shim}" />
     <javac
         encoding="${build.encoding}"
-        destdir="${build.shim.classes}/${hadoop.dist}"
+        destdir="${build.shim.classes}/${hadoop.shim}"
         debug="${javac.debug}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
-      <src path="${shim.src.dir}/${hadoop.dist}" />
+      <src path="${shim.src.dir}/${hadoop.shim}" />
       <src path="${shim.src.dir}/common" />
       <include name="**/*.java" />
     </javac>
@@ -171,8 +210,8 @@
 
   <!-- Compile one shim and fetch it into a jar file. -->
   <target name="jar-one-shim" depends="init,compile-one-shim">
-    <jar jarfile="${build.shim.dir}/${name}-${version}-shim-${hadoop.dist}.jar"
-        basedir="${build.shim.classes}/${hadoop.dist}" />
+    <jar jarfile="${build.shim.dir}/${name}-${version}-shim-${hadoop.shim}.jar"
+        basedir="${build.shim.classes}/${hadoop.shim}" />
   </target>
 
   <!-- Create jars for all shims -->

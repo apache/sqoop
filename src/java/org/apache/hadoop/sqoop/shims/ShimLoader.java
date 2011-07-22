@@ -89,6 +89,12 @@ public abstract class ShimLoader {
     HADOOP_SHIM_MATCHES.add("Unknown");
     HADOOP_SHIM_CLASSES.add("org.apache.hadoop.sqoop.shims.Apache22HadoopShim");
     HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+
+    // Apache 0.21 uses the same shim jars as 0.22
+    HADOOP_SHIM_MATCHES.add("0.21.\\d+(-.*)?");
+    HADOOP_SHIM_CLASSES.add("org.apache.hadoop.sqoop.shims.Apache22HadoopShim");
+    HADOOP_SHIM_JARS.add("sqoop-.*-apache.jar");
+
   }
 
   /**
