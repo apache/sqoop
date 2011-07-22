@@ -83,8 +83,7 @@ public class LargeObjectLoader {
    * @return a filename to use to put an external LOB in.
    */
   private String getNextLobFileName() {
-    String file = "_lob/obj_" + conf.get("mapreduce.task.id",
-        conf.get("mapred.task.id", "unknown_task_id"))
+    String file = "_lob/obj_" + TaskId.get(conf, "unknown_task_id")
         + nextLobFileId;
     nextLobFileId++;
 

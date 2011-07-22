@@ -33,6 +33,7 @@ import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.sqoop.lib.TaskId;
 import org.apache.hadoop.sqoop.manager.MySQLUtils;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.AsyncSink;
@@ -100,7 +101,19 @@ public class MySQLExportMapper<KEYIN, VALIN>
   private void initMySQLImportProcess() throws IOException {
     String tmpDir = conf.get(HadoopShim.get().getJobLocalDirProperty(),
         "/tmp/");
-    this.fifoFile = new File(tmpDir,
+
+    // Create a local subdir specific to this task attempt.
+    String taskAttemptStr = TaskId.get(conf, "mysql_export");
+    File taskAttemptDir = new File(tmpDir, taskAttemptStr);
+    if (!taskAttemptDir.exists()) {
+      boolean createdDir = taskAttemptDir.mkdir();
+      if (!createdDir) {
+        LOG.warn("Could not create non-existent task attempt dir: "
+            + taskAttemptDir.toString());
+      }
+    }
+
+    this.fifoFile = new File(taskAttemptDir,
         conf.get(MySQLUtils.TABLE_NAME_KEY, "UNKNOWN_TABLE") + ".txt");
     String filename = fifoFile.toString();
 
@@ -280,6 +293,13 @@ public class MySQLExportMapper<KEYIN, VALIN>
       LOG.debug("Removing fifo file");
       if (!this.fifoFile.delete()) {
         LOG.error("Could not clean up named FIFO after completing mapper");
+      }
+
+      // We put the FIFO file in a one-off subdir. Remove that.
+      File fifoParentDir = this.fifoFile.getParentFile();
+      LOG.debug("Removing task attempt tmpdir");
+      if (!fifoParentDir.delete()) {
+        LOG.error("Could not clean up task dir after completing mapper");
       }
 
       this.fifoFile = null;
