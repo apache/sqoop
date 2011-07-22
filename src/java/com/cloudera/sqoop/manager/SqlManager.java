@@ -336,6 +336,28 @@ public abstract class SqlManager extends ConnManager {
   }
 
   /**
+   * Offers the ConnManager an opportunity to validate that the
+   * options specified in the ImportJobContext are valid.
+   * @throws ImportException if the import is misconfigured.
+   */
+  protected void checkTableImportOptions(ImportJobContext context)
+      throws IOException, ImportException {
+    String tableName = context.getTableName();
+    SqoopOptions opts = context.getOptions();
+
+    // Default implementation: check that the split column is set
+    // correctly.
+    String splitCol = getSplitColumn(opts, tableName);
+    if (null == splitCol && opts.getNumMappers() > 1) {
+      // Can't infer a primary key.
+      throw new ImportException("No primary key could be found for table "
+          + tableName + ". Please specify one with --split-by or perform "
+          + "a sequential import with '-m 1'.");
+    }
+
+  }
+
+  /**
    * Default implementation of importTable() is to launch a MapReduce job
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
@@ -357,14 +379,9 @@ public abstract class SqlManager extends ConnManager {
           context);
     }
 
-    String splitCol = getSplitColumn(opts, tableName);
-    if (null == splitCol && opts.getNumMappers() > 1) {
-      // Can't infer a primary key.
-      throw new ImportException("No primary key could be found for table "
-          + tableName + ". Please specify one with --split-by or perform "
-          + "a sequential import with '-m 1'.");
-    }
+    checkTableImportOptions(context);
 
+    String splitCol = getSplitColumn(opts, tableName);
     importer.runImport(tableName, jarFile, splitCol, opts.getConf());
   }
 
