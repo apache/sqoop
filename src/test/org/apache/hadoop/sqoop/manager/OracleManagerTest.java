@@ -103,6 +103,7 @@ public class OracleManagerTest extends ImportJobTestCase {
     OracleUtils.setOracleAuth(options);
 
     manager = new OracleManager(options);
+    options.getConf().set("oracle.sessionTimeZone", "US/Pacific");
 
     // Drop the existing table, if there is one.
     try {
@@ -171,6 +172,9 @@ public class OracleManagerTest extends ImportJobTestCase {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
+
+    args.add("-D");
+    args.add("oracle.sessionTimeZone=US/Pacific");
 
     args.add("--table");
     args.add(TABLE_NAME);

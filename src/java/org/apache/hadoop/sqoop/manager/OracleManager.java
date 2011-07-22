@@ -27,7 +27,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +48,8 @@ public class OracleManager extends GenericJdbcManager {
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
 
+  // Configuration key to use to set the session timezone.
+  public static final String ORACLE_TIMEZONE_KEY = "oracle.sessionTimeZone";
 
   // Oracle XE does a poor job of releasing server-side resources for
   // closed connections. So we actually want to cache connections as
@@ -255,15 +256,16 @@ public class OracleManager extends GenericJdbcManager {
     }
 
     // Need to set the time zone in order for Java
-    // to correctly access the column "TIMESTAMP WITH LOCAL TIME ZONE"
-    String clientTimeZone = TimeZone.getDefault().getID();
+    // to correctly access the column "TIMESTAMP WITH LOCAL TIME ZONE".
+    // The user may have set this in the configuration as 'oracle.sessionTimeZone'.
+    String clientTimeZoneStr = options.getConf().get(ORACLE_TIMEZONE_KEY, "GMT");
     try {
       method.setAccessible(true);
-      method.invoke(conn, clientTimeZone);
-      LOG.info("Time zone has been set");
+      method.invoke(conn, clientTimeZoneStr);
+      LOG.info("Time zone has been set to " + clientTimeZoneStr);
     } catch (Exception ex) {
-      LOG.warn("Time zone " + clientTimeZone +
-               " could not be set on oracle database.");
+      LOG.warn("Time zone " + clientTimeZoneStr +
+               " could not be set on Oracle database.");
       LOG.info("Setting default time zone: GMT");
       try {
         // Per the documentation at:
