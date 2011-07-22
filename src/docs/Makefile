@@ -15,15 +15,16 @@
 
 BUILDROOT=../../build
 BUILD_DIR=$(BUILDROOT)/docs
-WEBSITE_DIR=$(BUILDROOT)/webdocs
 
 VERSION=Unknown
 
-all: man userguide devguide
+all: man userguide devguide supportfiles index
 
 userguide: $(BUILD_DIR)/SqoopUserGuide.html
 
 devguide: $(BUILD_DIR)/SqoopDevGuide.html
+
+index: $(BUILD_DIR)/index.html
 
 MANSOURCES=$(shell echo man/sqoop*.txt)
 MANPAGES=$(MANSOURCES:.txt=.1.gz)
@@ -47,9 +48,6 @@ website:
 	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks web/index.xml
 	cp web/docbook.css $(WEBSITE_DIR)
 	rsync -a web/images $(WEBSITE_DIR)/
-	rm user/SqoopUserGuide.xml
-	rm dev/SqoopDevGuide.xml
-	rm web/index.xml
 
 man: $(MANPAGES)
 
@@ -62,18 +60,33 @@ man: $(MANPAGES)
 	mv $@ $(BUILD_DIR)
 
 $(BUILD_DIR)/SqoopUserGuide.html: user/*.txt
-	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
-		-a revnumber=$(VERSION) -a "revdate=$(REVDATE)" \
-		user/SqoopUserGuide.txt
 	mkdir -p $(BUILD_DIR)
-	mv user/SqoopUserGuide.html $(BUILD_DIR)
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+		-b docbook \
+		user/SqoopUserGuide.txt
+	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks user/SqoopUserGuide.xml
+	rm user/SqoopUserGuide.xml
 
 $(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
-	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
-		-a revnumber=$(VERSION) -a "revdate=$(REVDATE)" \
-		dev/SqoopDevGuide.txt
 	mkdir -p $(BUILD_DIR)
-	mv dev/SqoopDevGuide.html $(BUILD_DIR)
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+		-b docbook \
+		dev/SqoopDevGuide.txt
+	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks dev/SqoopDevGuide.xml
+	rm dev/SqoopDevGuide.xml
+
+$(BUILD_DIR)/index.html: web/index.txt
+	mkdir -p $(BUILD_DIR)
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+	  -b docbook \
+		web/index.txt
+	xmlto -o $(BUILD_DIR) -m web/html.xsl html-nochunks web/index.xml
+	rm web/index.xml
+
+supportfiles:
+	mkdir -p $(BUILD_DIR)
+	cp web/docbook.css $(BUILD_DIR)
+	rsync -a web/images $(BUILD_DIR)/
 
 clean:
 	-rm $(BUILD_DIR)/sqoop-*.1.gz
@@ -81,5 +94,5 @@ clean:
 	-rm user/SqoopUserGuide.html
 	-rm dev/SqoopDevGuide.html
 
-.PHONY: all man userguide devguide clean
+.PHONY: all man userguide devguide clean supportfiles index
 

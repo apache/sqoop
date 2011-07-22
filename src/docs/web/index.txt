@@ -25,4 +25,6 @@ The following pages are the documentation for Sqoop v{revnumber}:
 
 - link:SqoopUserGuide.html[Sqoop User Guide]
 - link:SqoopDevGuide.html[Sqoop Developer's Guide]
+- link:sqoop-{revnumber}.releasenotes.html[Release Notes]
+- link:api/index.html[API Documentation]
 

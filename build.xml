@@ -97,8 +97,6 @@
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
   <property name="build.docs.timestamp"
       location="${build.dir}/docs.timestamp" />
-  <property name="build.webdocs.timestamp"
-      location="${build.dir}/webdocs.timestamp" />
 
   <!-- compilation -->
   <property name="javac.deprecation" value="off"/>
@@ -450,7 +448,7 @@
   </target>
 
   <target name="package"
-      depends="jar-all,compile-all,docs,javadoc,ivy-retrieve-redist,scripts"
+      depends="jar-all,compile-all,docs,ivy-retrieve-redist,scripts"
       description="Create a redistributable package">
 
     <mkdir dir="${dist.dir}"/>
@@ -511,6 +509,8 @@
     <copy todir="${dist.dir}/docs" includeEmptyDirs="false" flatten="false">
       <fileset dir="${build.dir}/docs">
         <include name="**/*.html" />
+        <include name="**/*.css" />
+        <include name="images/**" />
       </fileset>
     </copy>
     <copy todir="${dist.dir}/docs/man" includeEmptyDirs="false" flatten="false">
@@ -716,15 +716,6 @@
     </uptodate>
   </target>
 
-  <target name="webdocs-uptodate" depends="init">
-    <uptodate property="webdocs.uptodate">
-      <srcfiles dir="${basedir}/src/docs/">
-        <include name="**/*.txt" />
-      </srcfiles>
-      <mapper type="merge" to="${build.webdocs.timestamp}" />
-    </uptodate>
-  </target>
-
   <target name="checkversion">
     <if>
       <contains string="${version}" substring="SNAPSHOT" />
@@ -737,6 +728,14 @@
   <target name="relnotes-uptodate" depends="init">
     <!-- releasenotes are considered up-to-date if they exist. -->
     <available property="relnotes.exists" file="${relnotes.filename}" />
+
+    <!-- if we're building a snapshot release, don't make release notes. -->
+    <if>
+      <contains string="${version}" substring="SNAPSHOT" />
+      <then>
+        <property name="relnotes.exists" value="true" />
+      </then>
+    </if>
   </target>
 
   <target name="relnotes" depends="relnotes-uptodate" unless="relnotes.exists"
@@ -751,11 +750,11 @@
     </exec>
   </target>
 
-  <target name="release" depends="checkversion,tar,webdocs,relnotes,releaseaudit"
+  <target name="release" depends="checkversion,tar,releaseaudit"
       description="Roll a release artifact">
     <echo message="Release complete" />
     <echo message="Binary tar: ${tar.file}" />
-    <echo message="Web docs: ${build.dir}/webdocs" />
+    <echo message="Documentation: ${build.dir}/docs" />
     <echo message="Release notes: ${relnotes.filename}" />
     <echo message="Release audit report: ${build.dir}/rat.log" />
   </target>
@@ -901,20 +900,10 @@
     </artifact:deploy>
   </target>
 
-  <target name="webdocs" depends="webdocs-uptodate" unless="webdocs.uptodate"
-      description="Build website documentation">
-    <exec executable="make" failonerror="true">
-      <arg value="-C" />
-      <arg value="${basedir}/src/docs" />
-      <arg value="BUILDROOT=${build.dir}" />
-      <arg value="VERSION=${version}" />
-      <arg value="website" />
-    </exec>
-    <touch file="${build.webdocs.timestamp}" />
-  </target>
+  <target name="docs" depends="real-docs,relnotes,javadoc"
+      description="Build documentation"/>
 
-  <target name="docs" depends="docs-uptodate" unless="docs.uptodate"
-      description="Build documentation">
+  <target name="real-docs" depends="docs-uptodate,init" unless="docs.uptodate">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
       <arg value="${basedir}/src/docs" />
@@ -941,7 +930,7 @@
       <arg value="+%Y" />
     </exec>
     <javadoc
-      packagenames="com.cloudera.sqoop.*"
+      packagenames="com.cloudera.sqoop.lib.*"
       destdir="${build.javadoc}"
       author="true"
       version="true"
@@ -949,7 +938,9 @@
       windowtitle="${Name} ${version} API"
       doctitle="${Name} ${version} API"
       bottom="Copyright &amp;copy; ${year} Cloudera, Inc.">
-      <packageset dir="${src.dir}" />
+      <packageset dir="${src.dir}">
+        <include name="com/cloudera/sqoop/lib/**" />
+      </packageset>
       <classpath>
         <path refid="compile.classpath" />
       </classpath>
