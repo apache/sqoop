@@ -63,7 +63,7 @@ public class TestToolPlugin extends TestCase {
    */
   public static class FooTool extends BaseSqoopTool {
     /** Holds the name of the last user we "operated" as.  */
-    private static String lastUser; 
+    private static String lastUser;
     static String getLastUser() {
       return lastUser;
     }
@@ -90,7 +90,7 @@ public class TestToolPlugin extends TestCase {
     }
 
     @Override
-    public void applyOptions(CommandLine in, SqoopOptions out) 
+    public void applyOptions(CommandLine in, SqoopOptions out)
         throws InvalidOptionsException {
       applyCommonOptions(in, out);
     }
@@ -101,7 +101,7 @@ public class TestToolPlugin extends TestCase {
       validateCommonOptions(options);
     }
   }
-  
+
   public void testPlugin() {
     // Register the plugin with SqoopTool.
     Configuration pluginConf = new Configuration();

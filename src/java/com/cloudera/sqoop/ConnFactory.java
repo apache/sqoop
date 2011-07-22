@@ -60,7 +60,7 @@ public class ConnFactory {
     instantiateFactories(conf);
   }
 
-  /** The sqoop-site.xml configuration property used to set the list of 
+  /** The sqoop-site.xml configuration property used to set the list of
    * available ManagerFactories.
    */
   public static final String FACTORY_CLASS_NAMES_KEY =
@@ -69,7 +69,7 @@ public class ConnFactory {
   // The default value for sqoop.connection.factories is the
   // name of the DefaultManagerFactory.
   static final String DEFAULT_FACTORY_CLASS_NAMES =
-      DefaultManagerFactory.class.getName(); 
+      DefaultManagerFactory.class.getName();
 
   /** The list of ManagerFactory instances consulted by getManager().
    */
@@ -199,7 +199,7 @@ public class ConnFactory {
     String confDirName = System.getenv("SQOOP_CONF_DIR");
     if (null == confDirName) {
       LOG.warn("$SQOOP_CONF_DIR has not been set in the environment. "
-          + "Cannot check for additional configuration.");  
+          + "Cannot check for additional configuration.");
       return conf;
     }
 

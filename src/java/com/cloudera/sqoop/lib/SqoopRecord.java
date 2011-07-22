@@ -49,7 +49,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
 
   /**
    * Inserts the data in this object into the PreparedStatement, starting
-   * at parameter 'offset'. 
+   * at parameter 'offset'.
    * @return the number of fields written to the statement.
    */
   public abstract int write(PreparedStatement stmt, int offset)
@@ -130,7 +130,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
    */
   public Map<String, Object> getFieldMap() {
     // Default implementation does not support field iteration.
-    // ClassWriter should provide an overriding version. 
+    // ClassWriter should provide an overriding version.
   throw new RuntimeException(
       "Got null field map from record. Regenerate your record class.");
   }

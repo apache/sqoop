@@ -58,7 +58,7 @@ public class LargeObjectLoader implements Closeable {
   private Path workPath;
   private FileSystem fs;
 
-  // Handles to the open BLOB / CLOB file writers. 
+  // Handles to the open BLOB / CLOB file writers.
   private LobFile.Writer curBlobWriter;
   private LobFile.Writer curClobWriter;
 
@@ -155,7 +155,7 @@ public class LargeObjectLoader implements Closeable {
    */
   private String getRelativePath(LobFile.Writer w) {
     Path writerPath = w.getPath();
-    
+
     String writerPathStr = writerPath.toString();
     String workPathStr = workPath.toString();
     if (!workPathStr.endsWith(File.separator)) {

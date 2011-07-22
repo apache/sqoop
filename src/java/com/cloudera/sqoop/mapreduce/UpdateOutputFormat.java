@@ -44,14 +44,14 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  *
  * Uses DBOutputFormat/DBConfiguration for configuring the output.
  */
-public class UpdateOutputFormat<K extends SqoopRecord, V> 
+public class UpdateOutputFormat<K extends SqoopRecord, V>
     extends AsyncSqlOutputFormat<K, V> {
 
   private static final Log LOG = LogFactory.getLog(UpdateOutputFormat.class);
 
   @Override
   /** {@inheritDoc} */
-  public void checkOutputSpecs(JobContext context) 
+  public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     DBConfiguration dbConf = new DBConfiguration(conf);
@@ -71,7 +71,7 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
 
   @Override
   /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
       return new UpdateRecordWriter(context);
@@ -126,7 +126,7 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
         return Arrays.copyOf(columnNames, columnNames.length);
       }
     }
-    
+
     /**
      * @return the column we are using to determine the row to update.
      */

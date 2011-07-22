@@ -100,7 +100,7 @@ public class TableClassName {
 
   /**
    * @return just the last segment of the class name -- all package info
-   * stripped. 
+   * stripped.
    */
   public String getShortClassForTable(String tableName) {
     String fullClass = getClassForTable(tableName);

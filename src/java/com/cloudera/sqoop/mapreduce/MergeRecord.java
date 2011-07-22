@@ -72,9 +72,9 @@ public class MergeRecord implements Configurable, Writable {
   /** @return true if this record came from the "new" dataset. */
   public boolean isNewRecord() {
     return isNew;
-  } 
+  }
 
-  /** 
+  /**
    * Set the isNew field to 'newVal'.
    */
   public void setNewRecord(boolean newVal) {

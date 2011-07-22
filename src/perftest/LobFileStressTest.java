@@ -48,7 +48,7 @@ public class LobFileStressTest {
   private Path getPath(boolean compress) {
     if (compress) {
       return new Path("compressed.lob");
-    } else { 
+    } else {
       return new Path("integers.lob");
     }
   }
@@ -76,7 +76,7 @@ public class LobFileStressTest {
       return 5000000; // 5 million; the compressor is just too slow for 40M.
     }
   }
-  
+
   private void writeIntegerFile(boolean compress) throws Exception {
     boolean passed = false;
     try {
@@ -297,7 +297,7 @@ public class LobFileStressTest {
       throw new Exception("Couldn't read all the data! expected "
           + expected + " more bytes");
     }
-    
+
     if (is.read() != -1) {
       throw new Exception("Got an extra byte! Expected no more data.");
     }
@@ -305,7 +305,7 @@ public class LobFileStressTest {
 
   private void testBigFile(boolean compress) throws Exception {
     // Write a file containing 5 GB records.
-    
+
     final int NUM_RECORDS = 5;
     boolean passed = false;
 

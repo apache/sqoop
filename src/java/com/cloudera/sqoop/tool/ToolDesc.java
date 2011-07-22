@@ -28,7 +28,7 @@ public final class ToolDesc {
 
 
   /**
-   * Main c'tor; sets all fields that describe a SqoopTool. 
+   * Main c'tor; sets all fields that describe a SqoopTool.
    */
   public ToolDesc(String name, Class<? extends SqoopTool> cls, String desc) {
     this.toolName = name;

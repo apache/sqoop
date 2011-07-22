@@ -1345,7 +1345,7 @@ public class SqoopOptions implements Cloneable {
   public void setUseCompression(boolean compress) {
     this.useCompression = compress;
   }
-  
+
   /**
    * @return the name of the compression codec to use when importing.
    * E.g. <code>org.apache.hadoop.io.compress.GzipCodec</code>.
@@ -1353,7 +1353,7 @@ public class SqoopOptions implements Cloneable {
   public String getCompressionCodec() {
     return compressionCodec;
   }
-  
+
   public void setCompressionCodec(String codec) {
     this.compressionCodec = codec;
   }

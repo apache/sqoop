@@ -118,7 +118,7 @@ public class ExportStressTest extends Configured implements Tool {
     options.setLinesTerminatedBy('\n');
     options.setFieldsTerminatedBy(',');
     options.setExplicitDelims(true);
- 
+
     SqoopTool exportTool = new ExportTool();
     Sqoop sqoop = new Sqoop(exportTool, getConf(), options);
     int ret = Sqoop.runSqoop(sqoop, new String[0]);

@@ -100,7 +100,7 @@ public class MySQLExportJob extends ExportJobBase {
     DataDrivenDBInputFormat.setInput(job, DBWritable.class,
         tableName, null, null, sqlColNames);
 
-    // Configure the actual InputFormat to use. 
+    // Configure the actual InputFormat to use.
     super.configureInputFormat(job, tableName, tableClassName, splitByCol);
   }
 

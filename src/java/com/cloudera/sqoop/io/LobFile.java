@@ -85,14 +85,14 @@ public final class LobFile {
   public static final int LATEST_LOB_VERSION = 0;
   static final char [] HEADER_ID_STR = { 'L', 'O', 'B' };
 
-  // Value for entryId to write to the beginning of an IndexSegment. 
+  // Value for entryId to write to the beginning of an IndexSegment.
   static final long SEGMENT_HEADER_ID = -1;
 
   // Value for entryId to write before the finale.
   static final long SEGMENT_OFFSET_ID = -2;
 
   // Value for entryID to write before the IndexTable
-  static final long INDEX_TABLE_ID = -3; 
+  static final long INDEX_TABLE_ID = -3;
 
   /**
    * Represents a header block in a LobFile. Can write a new header
@@ -111,7 +111,7 @@ public final class LobFile {
     public LobFileHeader() {
       this.version = LATEST_LOB_VERSION;
       this.startMark = new RecordStartMark();
-      this.metaBlock = new MetaBlock();  
+      this.metaBlock = new MetaBlock();
     }
 
     /**
@@ -271,7 +271,7 @@ public final class LobFile {
         entries.put(entry.getKey(), entry.getValue());
       }
     }
-    
+
     @Override
     public Set<Map.Entry<String, BytesWritable>> entrySet() {
       return entries.entrySet();
@@ -409,7 +409,7 @@ public final class LobFile {
     public void write(DataOutput out) throws IOException {
       // Write the SEGMENT_HEADER_ID to distinguish this from a LobRecord.
       WritableUtils.writeVLong(out, SEGMENT_HEADER_ID);
-      
+
       // The length of the main body of the segment is the length of the
       // data byte array.
       int segmentBytesLen = recordLenBytes.getLength();
@@ -444,12 +444,12 @@ public final class LobFile {
 
       reset(); // Reset the iterator allowing the user to yield offset/lengths.
     }
-    
+
 
     // The following methods are used by a Reader to walk through the index
     // segment and get data about the records described in this segment of
     // the index.
-    
+
     private DataInputBuffer dataInputBuf;
 
     // The following two fields are advanced by the next() method.
@@ -559,7 +559,7 @@ public final class LobFile {
    * Describes an IndexSegment. This is one entry in the IndexTable. It
    * holds the physical location of the IndexSegment in the file, as well
    * as the range of entryIds and byte ranges corresponding to records
-   * described by the index subset in the IndexSegment. 
+   * described by the index subset in the IndexSegment.
    */
   private static class IndexTableEntry implements Writable {
     private long segmentOffset;
@@ -792,16 +792,16 @@ public final class LobFile {
     // The LobIndex we are constructing.
     private LinkedList<IndexSegment> indexSegments;
     // Number of entries in the current IndexSegment.
-    private int entriesInSegment; 
+    private int entriesInSegment;
     private IndexTable indexTable;
 
     // Number of entries that can be written to a single IndexSegment.
-    private int maxEntriesPerSegment; 
+    private int maxEntriesPerSegment;
 
     // By default we write this many entries per IndexSegment.
     static final int DEFAULT_MAX_SEGMENT_ENTRIES = 4096;
-    
-    // Our OutputStream to the underlying file. 
+
+    // Our OutputStream to the underlying file.
     private DataOutputStream out;
 
     // 'out' is layered on top of this stream, which gives us a count
@@ -848,7 +848,7 @@ public final class LobFile {
           this.compressor = codec.createCompressor();
         }
       }
-      
+
       init();
     }
 
@@ -1217,7 +1217,7 @@ public final class LobFile {
     private long claimedRecordLen;
 
     // After we've aligned on a record, this contains its entryId.
-    private long curEntryId; 
+    private long curEntryId;
 
     // After we've aligned on a record, this contains the offset of the
     // beginning of its RSM from the start of the file.
@@ -1437,7 +1437,7 @@ public final class LobFile {
 
     /**
      * @return the offset in 'buf' where a RecordStartMark begins, or -1
-     * if the RecordStartMark is not present in the buffer. 
+     * if the RecordStartMark is not present in the buffer.
      */
     private int findRecordStartMark(byte [] buf) {
       byte [] rsm = this.header.getStartMark().getBytes();
@@ -1482,7 +1482,7 @@ public final class LobFile {
       LOG.debug("Looking for the first record at/after offset " + start);
 
       // Scan through the IndexTable until we find the IndexSegment
-      // that contains the offset. 
+      // that contains the offset.
       for (int i = 0; i < indexTable.size(); i++) {
         IndexTableEntry tableEntry = indexTable.get(i);
         if (LOG.isDebugEnabled()) {
@@ -1495,7 +1495,7 @@ public final class LobFile {
           // Seek to the IndexSegment associated with this tableEntry.
           curIndexSegmentId = i;
           loadIndexSegment();
-          
+
           // Use this index segment. The record index iterator
           // is at the beginning of the IndexSegment, since we just
           // read it in.
@@ -1525,7 +1525,7 @@ public final class LobFile {
       }
 
       // If we didn't return inside the loop, then we've searched the entire
-      // file and it's not there. Advance the IndexSegment iterator to 
+      // file and it's not there. Advance the IndexSegment iterator to
       // the end of the road so that next() returns false.
       this.curIndexSegmentId = indexTable.size();
       loadIndexSegment();
@@ -1614,7 +1614,7 @@ public final class LobFile {
         // Nothing left in the last IndexSegment.
         LOG.debug("Last index segment is finished; false.");
         this.curIndexSegment = null;
-        return false; 
+        return false;
       }
 
       // Determine where the next record starts.
@@ -1761,7 +1761,7 @@ public final class LobFile {
     if (version == 0) {
       return new V0Reader(p, conf, header, dis, fis, stats[0].getLen());
     } else {
-      throw new IOException("No reader available for LobFile version "  
+      throw new IOException("No reader available for LobFile version "
           + version);
     }
   }

@@ -220,7 +220,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     int actualNumRecords = 0;
     ResultSet rs = null;
-    try { 
+    try {
       rs = statement.executeQuery();
       try {
         rs.next();

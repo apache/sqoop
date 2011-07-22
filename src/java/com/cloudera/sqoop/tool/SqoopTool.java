@@ -172,7 +172,7 @@ public abstract class SqoopTool {
     String confDirName = System.getenv("SQOOP_CONF_DIR");
     if (null == confDirName) {
       LOG.warn("$SQOOP_CONF_DIR has not been set in the environment. "
-          + "Cannot check for additional configuration.");  
+          + "Cannot check for additional configuration.");
       return conf;
     }
 

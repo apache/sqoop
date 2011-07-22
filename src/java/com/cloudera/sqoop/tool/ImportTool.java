@@ -706,7 +706,7 @@ public class ImportTool extends BaseSqoopTool {
       if (in.hasOption(COMPRESS_ARG)) {
         out.setUseCompression(true);
       }
-      
+
       if (in.hasOption(COMPRESSION_CODEC_ARG)) {
         out.setCompressionCodec(in.getOptionValue(COMPRESSION_CODEC_ARG));
       }

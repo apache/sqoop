@@ -41,7 +41,7 @@ public class MetastoreTool extends BaseSqoopTool {
   private HsqldbMetaStore metastore;
 
   // If set to true, shut an existing metastore down.
-  private boolean shutdown = false; 
+  private boolean shutdown = false;
 
   public MetastoreTool() {
     super("metastore");

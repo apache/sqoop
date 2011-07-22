@@ -33,7 +33,7 @@ public class MySQLTextExportMapper
     extends MySQLExportMapper<LongWritable, Text> {
 
   // End-of-record delimiter.
-  private String recordEndStr; 
+  private String recordEndStr;
 
   @Override
   protected void setup(Context context) {

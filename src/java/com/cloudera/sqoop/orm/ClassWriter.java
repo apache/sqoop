@@ -713,7 +713,7 @@ public class ClassWriter {
         if (!first) {
           sb.append("    else");
         }
-        
+
         sb.append("    if (\"" + colName + "\".equals(__fieldName)) {\n");
         sb.append("      this." + colName + " = (" + javaType
             + ") __fieldVal;\n");

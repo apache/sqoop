@@ -32,7 +32,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 /**
  * Utility class to help with test cases. Just reads the first (k, v) pair
  * from a SequenceFile and returns the value part.
- * 
+ *
  *
  */
 public final class SeqFileReader {

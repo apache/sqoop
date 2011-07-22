@@ -78,7 +78,7 @@ public abstract class JobStorage extends Configured implements Closeable {
    */
   public abstract void update(String jobName, JobData data)
       throws IOException;
-  
+
   /**
    * Close any resources opened by the JobStorage system.
    */

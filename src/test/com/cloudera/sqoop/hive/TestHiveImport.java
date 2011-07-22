@@ -158,7 +158,7 @@ public class TestHiveImport extends ImportJobTestCase {
 
     // create a table and populate it with a row...
     createTableWithColTypes(types, values);
-    
+
     // set up our mock hive shell to compare our generated script
     // against the correct expected one.
     SqoopOptions options = getSqoopOptions(args, tool);

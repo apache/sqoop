@@ -89,7 +89,7 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   // instance variables populated during setUp, used during tests
   private OracleManager manager;
-  
+
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
@@ -219,7 +219,7 @@ public class OracleManagerTest extends ImportJobTestCase {
       ioe.printStackTrace();
       fail(ioe.toString());
     }
-      
+
     File f = new File(filePath.toString());
     assertTrue("Could not find imported data file", f.exists());
     BufferedReader r = null;

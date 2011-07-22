@@ -34,7 +34,7 @@ import org.apache.hadoop.conf.Configuration;
  * Singleton pattern. While nothing prevents multiple LobReaderCache
  * instances, it is most useful to have a single global cache. This cache is
  * internally synchronized; only one thread can insert or retrieve a reader
- * from the cache at a time. 
+ * from the cache at a time.
  */
 public final class LobReaderCache {
 
@@ -78,7 +78,7 @@ public final class LobReaderCache {
     }
     return path.makeQualified(fs);
   }
-  
+
   /**
    * Open a LobFile for read access, returning a cached reader if one is
    * available, or a new reader otherwise.

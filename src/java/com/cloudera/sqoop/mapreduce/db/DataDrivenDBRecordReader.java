@@ -45,7 +45,7 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
   // TODO(aaron): Refactor constructor to use fewer arguments.
   /**
    * @param split The InputSplit to read data for
-   * @throws SQLException 
+   * @throws SQLException
    */
   public DataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
       Class<T> inputClass, Configuration conf, Connection conn,

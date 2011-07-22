@@ -67,7 +67,7 @@ public final class RecordParser {
 
   /**
    * An error thrown when parsing fails.
-   */ 
+   */
   public static class ParseError extends Exception {
     public ParseError() {
       super("ParseError");
@@ -112,8 +112,8 @@ public final class RecordParser {
    * This list is backed by an internal buffer which is cleared by the
    * next call to parseRecord().
    */
-  public List<String> parseRecord(Text input) throws ParseError { 
-    if (null == input) { 
+  public List<String> parseRecord(Text input) throws ParseError {
+    if (null == input) {
       throw new ParseError("null input string");
     }
 
@@ -286,7 +286,7 @@ public final class RecordParser {
         }
 
         break;
-        
+
       case ENCLOSED_ESCAPE:
         // Treat this character literally, whatever it is, and return to
         // enclosed field processing.
@@ -342,7 +342,7 @@ public final class RecordParser {
   }
   // CHECKSTYLE:ON
 
-  public boolean isEnclosingRequired() { 
+  public boolean isEnclosingRequired() {
     return delimiters.isEncloseRequired();
   }
 

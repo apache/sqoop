@@ -218,7 +218,7 @@ public class AppendUtils {
 
   /**
    * Creates a unique path object inside the sqoop temporary directory.
-   * 
+   *
    * @param tableName
    * @return a path pointing to the temporary directory
    */

@@ -1008,12 +1008,12 @@ public class MockResultSet implements ResultSet {
   public <T> T unwrap(Class<T> iface) throws SQLException {
     return null;
   }
-  
+
   @Override
   public byte[] getBytes(int columnIndex) throws SQLException {
     return null;
   }
-  
+
   @Override
   public byte[] getBytes(String columnLabel) throws SQLException {
     return null;

@@ -99,7 +99,7 @@ public class TestRecordParser extends TestCase {
 
     return asList;
   }
-  
+
   public void testEmptyLine() throws RecordParser.ParseError {
     // an empty line should return no fields.
 
@@ -256,7 +256,7 @@ public class TestRecordParser extends TestCase {
     assertListsEqual(null, list(strings),
         parser.parseRecord("field1,\"field2\""));
   }
-  
+
   public void testRequiredQuotes0() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(
         new DelimiterSet(',', '\n', '\"', '\\', true));

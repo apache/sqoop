@@ -44,7 +44,7 @@ public class TestDataDrivenDBInputFormat extends HadoopTestCase {
       TestDataDrivenDBInputFormat.class);
 
   private static final String DB_NAME = "dddbif";
-  private static final String DB_URL = 
+  private static final String DB_URL =
     "jdbc:hsqldb:mem:" + DB_NAME;
   private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
 

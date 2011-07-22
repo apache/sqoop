@@ -29,12 +29,12 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 /**
  * Oracle-specific SQL formatting overrides default ExportOutputFormat's.
  */
-public class OracleExportOutputFormat<K extends SqoopRecord, V> 
+public class OracleExportOutputFormat<K extends SqoopRecord, V>
     extends ExportOutputFormat<K, V> {
 
   @Override
   /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
       return new OracleExportRecordWriter(context);

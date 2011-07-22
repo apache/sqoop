@@ -121,7 +121,7 @@ public class JobTool extends BaseSqoopTool {
 
     // The '--' and any subsequent args.
     String [] extraChildArgv = getElementsAfterDoubleDash(childArgv);
-   
+
     // Now feed the arguments into the tool itself.
     try {
       childOptions = childTool.parseArguments(parseableChildArgv,
@@ -253,7 +253,7 @@ public class JobTool extends BaseSqoopTool {
 
     // TODO: This does not show entries in the Configuration
     // (SqoopOptions.getConf()) which were stored as different from the
-    // default. 
+    // default.
 
     return 0;
   }
@@ -392,9 +392,9 @@ public class JobTool extends BaseSqoopTool {
     System.out.println("usage: sqoop " + getToolName()
         + " [GENERIC-ARGS] [JOB-ARGS] [-- [<tool-name>] [TOOL-ARGS]]");
     System.out.println("");
-    
+
     opts.printHelp();
-  
+
     System.out.println("");
     System.out.println("Generic Hadoop command-line arguments:");
     System.out.println("(must preceed any tool-specific arguments)");

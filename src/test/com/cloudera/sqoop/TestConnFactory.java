@@ -27,7 +27,7 @@ import com.cloudera.sqoop.tool.ImportTool;
 
 import junit.framework.TestCase;
 
-import java.io.IOException; 
+import java.io.IOException;
 import java.util.Map;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -111,7 +111,7 @@ public class TestConnFactory extends TestCase {
     }
 
     public String [] listDatabases() {
-      return null; 
+      return null;
     }
 
     public String [] listTables() {

@@ -51,7 +51,7 @@ import com.cloudera.sqoop.lib.ProcessingException;
  * <p>If the FMP implements Configurable, it will be configured
  * correctly via ReflectionUtils.</p>
  */
-public class DelegatingOutputFormat<K extends FieldMappable, V> 
+public class DelegatingOutputFormat<K extends FieldMappable, V>
     extends OutputFormat<K, V> {
 
   /** conf key: the FieldMapProcessor class to instantiate. */
@@ -60,7 +60,7 @@ public class DelegatingOutputFormat<K extends FieldMappable, V>
 
   @Override
   /** {@inheritDoc} */
-  public void checkOutputSpecs(JobContext context) 
+  public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
 
@@ -71,14 +71,14 @@ public class DelegatingOutputFormat<K extends FieldMappable, V>
 
   @Override
   /** {@inheritDoc} */
-  public OutputCommitter getOutputCommitter(TaskAttemptContext context) 
+  public OutputCommitter getOutputCommitter(TaskAttemptContext context)
       throws IOException, InterruptedException {
     return new NullOutputCommitter();
   }
 
   @Override
   /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
       return new DelegatingRecordWriter(context);

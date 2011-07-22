@@ -49,7 +49,7 @@ public class CombineShimRecordReader
   private int index;
   private RecordReader<LongWritable, Object> rr;
 
-  /** 
+  /**
    * Constructor invoked by CombineFileRecordReader that identifies part of a
    * CombineFileSplit to use.
    */

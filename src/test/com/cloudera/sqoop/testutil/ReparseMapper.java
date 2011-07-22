@@ -38,7 +38,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 
 /**
- * Test harness mapper. Instantiate the user's specific type, parse() the input 
+ * Test harness mapper. Instantiate the user's specific type, parse() the input
  * line of text, and throw an IOException if the output toString() line of text
  * differs.
  */

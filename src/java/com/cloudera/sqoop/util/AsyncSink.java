@@ -27,7 +27,7 @@ import java.io.InputStream;
  * When the stream is closed, the thread should terminate.
  */
 public abstract class AsyncSink {
-  
+
   /**
    * Create and run a thread to handle input from the provided InputStream.
    * When processStream returns, the thread should be running; it should

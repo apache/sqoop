@@ -34,7 +34,7 @@ import com.cloudera.sqoop.tool.VersionTool;
 
 import junit.framework.TestCase;
 
-import java.io.IOException; 
+import java.io.IOException;
 import java.sql.Connection;
 
 /**
@@ -156,7 +156,7 @@ public class TestSavedJobs extends TestCase {
     } catch (IOException ioe) {
       // This is expected. Continue.
     }
-  
+
     // Now delete the job.
     storage.delete("versionJob");
 

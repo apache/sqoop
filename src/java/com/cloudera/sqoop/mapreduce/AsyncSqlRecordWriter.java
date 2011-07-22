@@ -50,7 +50,7 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
   private Configuration conf;
 
   protected final int rowsPerStmt; // rows to insert per statement.
-  
+
   // Buffer for records to be put into export SQL statements.
   private List<SqoopRecord> records;
 
@@ -85,7 +85,7 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
    * Allow subclasses access to the Connection instance we hold.
    * This Connection is shared with the asynchronous SQL exec thread.
    * Any uses of the Connection must be synchronized on it.
-   * @return the Connection object used for this SQL transaction. 
+   * @return the Connection object used for this SQL transaction.
    */
   protected final Connection getConnection() {
     return this.connection;

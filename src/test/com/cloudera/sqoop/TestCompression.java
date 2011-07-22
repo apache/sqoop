@@ -112,7 +112,7 @@ public class TestCompression extends ImportJobTestCase {
           getTableName());
 
       reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
-      
+
       if (codec == null) {
         codec = new GzipCodec();
       }
@@ -150,11 +150,11 @@ public class TestCompression extends ImportJobTestCase {
 
   public void runTextCompressionTest(CompressionCodec codec, int expectedNum)
     throws IOException {
-  
+
     String [] columns = HsqldbTestServer.getFieldNames();
     String [] argv = getArgv(true, columns, codec, "--as-textfile");
     runImport(argv);
-    
+
     Configuration conf = new Configuration();
     if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
       conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);

@@ -40,7 +40,7 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  * enough commands are created.
  *
  * This supports a configurable "spill threshold" at which
- * point intermediate transactions are committed. 
+ * point intermediate transactions are committed.
  *
  * Uses DBOutputFormat/DBConfiguration for configuring the output.
  * This is used in conjunction with the abstract AsyncSqlRecordWriter
@@ -49,7 +49,7 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  * Clients of this OutputFormat must implement getRecordWriter(); the
  * returned RecordWriter is intended to subclass AsyncSqlRecordWriter.
  */
-public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V> 
+public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
     extends OutputFormat<K, V> {
 
   /** conf key: number of rows to export per INSERT statement. */
@@ -87,13 +87,13 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
 
   @Override
   /** {@inheritDoc} */
-  public void checkOutputSpecs(JobContext context) 
+  public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {
   }
 
   @Override
   /** {@inheritDoc} */
-  public OutputCommitter getOutputCommitter(TaskAttemptContext context) 
+  public OutputCommitter getOutputCommitter(TaskAttemptContext context)
       throws IOException, InterruptedException {
     return new NullOutputCommitter();
   }

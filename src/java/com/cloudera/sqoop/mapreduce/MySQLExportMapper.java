@@ -42,7 +42,7 @@ import com.cloudera.sqoop.util.TaskId;
 
 /**
  * Mapper that starts a 'mysqlimport' process and uses that to export rows from
- * HDFS to a MySQL database at high speed. 
+ * HDFS to a MySQL database at high speed.
  *
  * map() methods are actually provided by subclasses that read from
  * SequenceFiles (containing existing SqoopRecords) or text files

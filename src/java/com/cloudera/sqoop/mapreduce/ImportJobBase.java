@@ -87,7 +87,7 @@ public class ImportJobBase extends JobBase {
 
     if (options.shouldUseCompression()) {
       FileOutputFormat.setCompressOutput(job, true);
-      
+
       String codecName = options.getCompressionCodec();
       Class<? extends CompressionCodec> codecClass;
       if (codecName == null) {
@@ -97,13 +97,13 @@ public class ImportJobBase extends JobBase {
         codecClass = CodecMap.getCodec(codecName, conf).getClass();
       }
       FileOutputFormat.setOutputCompressorClass(job, codecClass);
-      
+
       if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
         SequenceFileOutputFormat.setOutputCompressionType(job,
             CompressionType.BLOCK);
       }
     }
-    
+
     Path outputPath = context.getDestination();
     FileOutputFormat.setOutputPath(job, outputPath);
   }

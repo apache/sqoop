@@ -55,7 +55,7 @@ public class TestAppendUtils extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
-   * 
+   *
    * @return the argv as an array of strings.
    */
   protected ArrayList getOutputlessArgv(boolean includeHadoopFlags,
@@ -143,7 +143,7 @@ public class TestAppendUtils extends ImportJobTestCase {
       return fs1.getPath().toString().compareTo(fs2.getPath().toString());
     }
   }
-  
+
   /** @return a concat. string with file-creation dates excluding folders. */
   private String getFileCreationTimeImage(FileSystem fs, Path outputPath,
       int fileCount) throws IOException {
@@ -175,7 +175,7 @@ public class TestAppendUtils extends ImportJobTestCase {
   /**
    * Test for ouput path file-count increase, current files untouched and new
    * correct partition number.
-   * 
+   *
    * @throws IOException
    */
   public void runAppendTest(ArrayList args, Path outputPath)

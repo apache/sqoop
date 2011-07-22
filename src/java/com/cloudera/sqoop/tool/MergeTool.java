@@ -115,7 +115,7 @@ public class MergeTool extends BaseSqoopTool {
         .hasArg().withDescription("Key column to use to join results")
         .withLongOpt(MERGE_KEY_ARG)
         .create());
-  
+
     // Since the "common" options aren't used in the merge tool,
     // add these settings here.
     mergeOpts.addOption(OptionBuilder

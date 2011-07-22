@@ -86,7 +86,7 @@ public class ToolOptions implements Iterable<RelatedOptions> {
     return optGroups.iterator();
   }
 
-  
+
   /**
    * Flatten the different sets of related options into a single collection
    * of options.
@@ -102,7 +102,7 @@ public class ToolOptions implements Iterable<RelatedOptions> {
         totalOpts++;
       }
     }
-    
+
     return mergedOpts;
   }
 

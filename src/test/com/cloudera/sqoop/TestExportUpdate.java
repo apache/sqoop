@@ -57,7 +57,7 @@ public class TestExportUpdate extends ExportJobTestCase {
       }
     }
   }
-  
+
   @Override
   protected String getTablePrefix() {
     return "UPDATE_TABLE_";
@@ -107,7 +107,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    * the same.
    * @param startOffsets is an optional list of row ids/values for a/c
    * which are the record ids at which the update files begin.
-   * For instance, if numFiles=3, updatesPerFile=2, and keyCol=0 then 
+   * For instance, if numFiles=3, updatesPerFile=2, and keyCol=0 then
    * if startOffsets is {5, 10, 12}, files will be generated to update
    * rows with A=5,6; A=10,11; A=12,13.
    *
@@ -132,7 +132,7 @@ public class TestExportUpdate extends ExportJobTestCase {
         // Otherwise, just carry over from the previous file iteration.
         rowId = startOffsets[i];
       }
-      
+
       for (int j = 0; j < updatesPerFile; j++) {
         w.write(getUpdateStringForRow(keyCol, rowId++));
       }
@@ -353,7 +353,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     // Update only some of the rows in the db. Also include some
     // updates that do not affect actual rows in the table.
     // These should just be ignored.
-    
+
     populateDatabase(10);
     // Create two files that update four rows each.
     // File0 updates A=-2..1 (-2 and -1 don't exist).

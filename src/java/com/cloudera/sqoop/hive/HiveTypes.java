@@ -86,7 +86,7 @@ public final class HiveTypes {
     }
   }
 
-  /** 
+  /**
    * @return true if a sql type can't be translated to a precise match
    * in Hive, and we have to cast it to something more generic.
    */

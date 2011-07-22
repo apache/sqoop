@@ -70,7 +70,7 @@ public class HBasePutProcessor implements Closeable, Configurable,
 
   public HBasePutProcessor() {
   }
-  
+
   @Override
   @SuppressWarnings("unchecked")
   public void setConf(Configuration config) {

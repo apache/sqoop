@@ -57,7 +57,7 @@ import org.junit.Test;
  * void dropTableIfExists(tableName) -- how to drop a table that may not exist.
  * void createTableWithColTypes() -- how to create a table with a set of cols.
  * Configuration getConf() -- specifies config properties specific to a test.
- * SqoopOptions getSqoopOptions(conf) -- Instantiates the SqoopOptions to use. 
+ * SqoopOptions getSqoopOptions(conf) -- Instantiates the SqoopOptions to use.
  * List&lt;String&gt; getExtraArgs() -- specifies extra argv elements.
  */
 public abstract class ManagerCompatTestCase extends ImportJobTestCase {
@@ -229,7 +229,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   protected String getClobType() {
     return "CLOB";
   }
-  
+
   /**
    * Define a BLOB column that can contain up to 16 MB of data.
    */
@@ -253,7 +253,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   //////// These methods indicate how databases respond to various datatypes.
   //////// Since our comparisons are all string-based, these return strings.
-  
+
   /** @return How we insert the value TRUE represented as an int. */
   protected String getTrueBoolNumericSqlInput() {
     return "1";
@@ -263,7 +263,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   protected String getFalseBoolNumericSqlInput() {
     return "0";
   }
-  
+
   /** @return How we insert the value TRUE represented as a boolean literal. */
   protected String getTrueBoolLiteralSqlInput() {
     return "true";
@@ -545,7 +545,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    * octets, in lower case (e.g., 'ab f0 0f 12 38').
    *
    * @param str the input string of hex digits
-   * @return the input string as space-separated lower-case octets. 
+   * @return the input string as space-separated lower-case octets.
    */
   protected String toLowerHexString(String str) {
     // The inserted text is a hex string of the form 'ABABABAB'.

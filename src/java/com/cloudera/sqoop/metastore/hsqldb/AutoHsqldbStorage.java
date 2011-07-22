@@ -36,7 +36,7 @@ public class AutoHsqldbStorage extends HsqldbJobStorage {
 
   public static final Log LOG = LogFactory.getLog(
       AutoHsqldbStorage.class.getName());
-  
+
   /**
    * Configuration key specifying whether this storage agent is active.
    * Defaults to "on" to allow zero-conf local users.

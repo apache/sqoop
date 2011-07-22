@@ -43,7 +43,7 @@ public class TestTargetDir extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
-   * 
+   *
    * @return the argv as an array of strings.
    */
   protected ArrayList getOutputArgv(boolean includeHadoopFlags) {

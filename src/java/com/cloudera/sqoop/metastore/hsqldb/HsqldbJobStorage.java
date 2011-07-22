@@ -51,9 +51,9 @@ public class HsqldbJobStorage extends JobStorage {
 
   public static final Log LOG = LogFactory.getLog(
       HsqldbJobStorage.class.getName());
-  
+
   /** descriptor key identifying the connect string for the metastore. */
-  public static final String META_CONNECT_KEY = "metastore.connect.string"; 
+  public static final String META_CONNECT_KEY = "metastore.connect.string";
 
   /** descriptor key identifying the username to use when connecting
    * to the metastore.
@@ -94,14 +94,14 @@ public class HsqldbJobStorage extends JobStorage {
       "sqoop.property.set.id";
 
   /** Current value for PROPERTY_SET_KEY. */
-  private static final String CUR_PROPERTY_SET_ID = "0"; 
+  private static final String CUR_PROPERTY_SET_ID = "0";
 
   // The following are values for propClass in the v0 schema which
   // describe different aspects of the stored metadata.
 
   /** Property class for properties about the stored data itself. */
   private static final String PROPERTY_CLASS_SCHEMA = "schema";
-  
+
   /** Property class for properties that are loaded into SqoopOptions. */
   private static final String PROPERTY_CLASS_SQOOP_OPTIONS = "SqoopOptions";
 
@@ -636,7 +636,7 @@ public class HsqldbJobStorage extends JobStorage {
       } else {
         break;
       }
-    } 
+    }
 
     // curTableName contains a table name that does not exist.
     // Create this table.

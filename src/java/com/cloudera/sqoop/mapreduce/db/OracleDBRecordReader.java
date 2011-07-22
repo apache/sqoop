@@ -40,7 +40,7 @@ public class OracleDBRecordReader<T extends DBWritable>
   private static final Log LOG = LogFactory.getLog(OracleDBRecordReader.class);
 
   // CHECKSTYLE:OFF
-  public OracleDBRecordReader(DBInputFormat.DBInputSplit split, 
+  public OracleDBRecordReader(DBInputFormat.DBInputSplit split,
       Class<T> inputClass, Configuration conf, Connection conn,
       DBConfiguration dbConfig, String cond, String [] fields,
       String table) throws SQLException {
@@ -60,14 +60,14 @@ public class OracleDBRecordReader<T extends DBWritable>
     // Oracle-specific codepath to use rownum instead of LIMIT/OFFSET.
     if(dbConf.getInputQuery() == null) {
       query.append("SELECT ");
-  
+
       for (int i = 0; i < fieldNames.length; i++) {
         query.append(fieldNames[i]);
         if (i != fieldNames.length -1) {
           query.append(", ");
         }
       }
-  
+
       query.append(" FROM ").append(tableName);
       if (conditions != null && conditions.length() > 0) {
         query.append(" WHERE ").append(conditions);
@@ -80,7 +80,7 @@ public class OracleDBRecordReader<T extends DBWritable>
       //PREBUILT QUERY
       query.append(dbConf.getInputQuery());
     }
-        
+
     try {
       DBInputFormat.DBInputSplit split = getSplit();
       if (split.getLength() > 0 && split.getStart() > 0) {

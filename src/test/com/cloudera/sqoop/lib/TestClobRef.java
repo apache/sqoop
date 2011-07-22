@@ -134,7 +134,7 @@ public class TestClobRef extends TestCase {
       w.close();
       lw.close();
 
-      String refString = "externalLob(lf," + filename 
+      String refString = "externalLob(lf," + filename
                 + "," + off + "," + len + ")";
       ClobRef clob = ClobRef.parse(refString);
       assertTrue(clob.isExternal());

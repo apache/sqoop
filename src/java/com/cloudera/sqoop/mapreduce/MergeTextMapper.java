@@ -40,7 +40,7 @@ public class MergeTextMapper extends MergeMapperBase<LongWritable, Text> {
   protected void setup(Context c) throws IOException, InterruptedException {
     Configuration conf = c.getConfiguration();
 
-    Class<? extends SqoopRecord> recordClass = 
+    Class<? extends SqoopRecord> recordClass =
         (Class<? extends SqoopRecord>) conf.getClass(
         MergeJob.MERGE_SQOOP_RECORD_KEY, SqoopRecord.class);
     this.record = ReflectionUtils.newInstance(recordClass, conf);

@@ -91,7 +91,7 @@ public class TestLobFile extends TestCase {
 
   private void verifyClobFile(Path p, String... expectedRecords)
       throws Exception {
-    
+
     LobFile.Reader reader = LobFile.open(p, conf);
 
     int recNum = 0;
@@ -226,7 +226,7 @@ public class TestLobFile extends TestCase {
     String s = new String(chars);
     assertEquals(records[1], s);
 
-    // Close the reader before we consume the entire file. 
+    // Close the reader before we consume the entire file.
     reader.close();
     assertFalse(reader.isRecordAvailable());
   }
@@ -309,7 +309,7 @@ public class TestLobFile extends TestCase {
     char [] chars = buf.array();
     String s = new String(chars);
     assertEquals(records[2], s);
-    
+
     r.close();
     reader.close();
   }

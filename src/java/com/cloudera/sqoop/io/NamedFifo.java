@@ -67,7 +67,7 @@ public class NamedFifo {
   public void create(int permissions) throws IOException {
     String filename = fifoFile.toString();
 
-    // Format permissions as a mode string in base 8. 
+    // Format permissions as a mode string in base 8.
     String modeStr = Integer.toString(permissions, 8);
 
     // Create the FIFO itself.

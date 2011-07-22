@@ -25,9 +25,9 @@ import junit.framework.TestCase;
  * Test that the field formatter works in a variety of configurations.
  */
 public class TestFieldFormatter extends TestCase {
-  
+
   public void testAllEmpty() {
-    String result = FieldFormatter.escapeAndEnclose("", 
+    String result = FieldFormatter.escapeAndEnclose("",
         new DelimiterSet(DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR,
         DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR, false));
     assertEquals("", result);
@@ -92,7 +92,7 @@ public class TestFieldFormatter extends TestCase {
     String s = "" + nul;
     assertEquals("\000", s);
   }
-  
+
   public void testEscapeCentralQuote() {
     String result = FieldFormatter.escapeAndEnclose("foo\"bar",
         new DelimiterSet(',', '\n', '\"', '\\', false));

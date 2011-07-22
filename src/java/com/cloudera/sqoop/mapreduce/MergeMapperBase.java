@@ -41,12 +41,12 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  */
 public class MergeMapperBase<INKEY, INVAL>
     extends Mapper<INKEY, INVAL, Text, MergeRecord> {
- 
+
   public static final Log LOG = LogFactory.getLog(
       MergeMapperBase.class.getName());
 
   private String keyColName; // name of the key column.
-  private boolean isNew; // true if this split is from the new dataset. 
+  private boolean isNew; // true if this split is from the new dataset.
 
   @Override
   protected void setup(Context context)

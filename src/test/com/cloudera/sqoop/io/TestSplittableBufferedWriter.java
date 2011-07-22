@@ -248,7 +248,7 @@ public class TestSplittableBufferedWriter extends TestCase {
       try {
         fis.close();
       } catch (IOException ioe) {
-        // ignored; may be generated because fis closed in verifyFileContents. 
+        // ignored; may be generated because fis closed in verifyFileContents.
       }
     }
 
