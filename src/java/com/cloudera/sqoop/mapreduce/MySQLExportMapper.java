@@ -34,7 +34,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import com.cloudera.sqoop.io.NamedFifo;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.AsyncSink;
 import com.cloudera.sqoop.util.JdbcUrl;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
@@ -100,19 +99,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
    * A File object representing the FIFO is in 'fifoFile'.
    */
   private void initMySQLImportProcess() throws IOException {
-    String tmpDir = conf.get(HadoopShim.get().getJobLocalDirProperty(),
-        "/tmp/");
-
-    // Create a local subdir specific to this task attempt.
-    String taskAttemptStr = TaskId.get(conf, "mysql_export");
-    File taskAttemptDir = new File(tmpDir, taskAttemptStr);
-    if (!taskAttemptDir.exists()) {
-      boolean createdDir = taskAttemptDir.mkdir();
-      if (!createdDir) {
-        LOG.warn("Could not create non-existent task attempt dir: "
-            + taskAttemptDir.toString());
-      }
-    }
+    File taskAttemptDir = TaskId.getLocalWorkPath(conf);
 
     this.fifoFile = new File(taskAttemptDir,
         conf.get(MySQLUtils.TABLE_NAME_KEY, "UNKNOWN_TABLE") + ".txt");

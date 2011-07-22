@@ -18,7 +18,12 @@
 
 package com.cloudera.sqoop.util;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
+
+import com.cloudera.sqoop.shims.HadoopShim;
 
 /**
  * Utility class; returns task attempt Id of the current job
@@ -30,6 +35,7 @@ public final class TaskId {
   }
 
   /**
+   * Return the task attempt id as a string.
    * @param conf the Configuration to check for the current task attempt id.
    * @param defaultVal the value to return if a task attempt id is not set.
    * @return the current task attempt id, or the default value if one isn't set.
@@ -38,4 +44,29 @@ public final class TaskId {
     return conf.get("mapreduce.task.id",
         conf.get("mapred.task.id", defaultVal));
   }
+
+  /**
+   * Return the local filesystem dir where the current task attempt can
+   * perform work.
+   * @return a File describing a directory where local temp data for the
+   * task attempt can be stored.
+   */
+  public static File getLocalWorkPath(Configuration conf) throws IOException {
+    String tmpDir = conf.get(HadoopShim.get().getJobLocalDirProperty(),
+        "/tmp/");
+
+    // Create a local subdir specific to this task attempt.
+    String taskAttemptStr = TaskId.get(conf, "task_attempt");
+    File taskAttemptDir = new File(tmpDir, taskAttemptStr);
+    if (!taskAttemptDir.exists()) {
+      boolean createdDir = taskAttemptDir.mkdirs();
+      if (!createdDir) {
+        throw new IOException("Could not create missing task attempt dir: "
+            + taskAttemptDir.toString());
+      }
+    }
+
+    return taskAttemptDir;
+  }
+
 }
