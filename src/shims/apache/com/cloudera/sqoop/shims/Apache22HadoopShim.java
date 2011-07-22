@@ -70,8 +70,23 @@ public class Apache22HadoopShim extends CommonHadoopShim {
   }
 
   @Override
+  public int getJobNumMaps(JobContext job) {
+    return job.getConfiguration().getInt(JobContext.NUM_MAPS, 1);
+  }
+
+  @Override
+  public int getConfNumMaps(Configuration conf) {
+    return conf.getInt(JobContext.NUM_MAPS, 1);
+  }
+
+  @Override
   public void setJobMapSpeculativeExecution(Job job, boolean isEnabled) {
     job.setMapSpeculativeExecution(isEnabled);
+  }
+
+  @Override
+  public void setJobReduceSpeculativeExecution(Job job, boolean isEnabled) {
+    job.setReduceSpeculativeExecution(isEnabled);
   }
 
   @Override

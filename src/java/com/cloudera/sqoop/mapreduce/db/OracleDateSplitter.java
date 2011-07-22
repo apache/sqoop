@@ -16,29 +16,23 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.mapreduce;
+package com.cloudera.sqoop.mapreduce.db;
 
-import com.cloudera.sqoop.mapreduce.db.*;
+import java.util.Date;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
- * All tests for Sqoop new mapreduce-api (com.cloudera.sqoop.mapreduce).
+ * Implement DBSplitter over date/time values returned by an Oracle db.
+ * Make use of logic from DateSplitter, since this just needs to use
+ * some Oracle-specific functions on the formatting end when generating
+ * InputSplits.
  */
-public final class MapreduceTests {
+public class OracleDateSplitter extends DateSplitter {
 
-  private MapreduceTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(
-        "Tests for com.cloudera.sqoop.mapreduce");
-    suite.addTestSuite(TestImportJob.class);
-    suite.addTestSuite(TestDataDrivenDBInputFormat.class);
-    suite.addTestSuite(TestIntegerSplitter.class);
-    suite.addTestSuite(TestTextSplitter.class);
-
-    return suite;
+  @SuppressWarnings("unchecked")
+  @Override
+  protected String dateToString(Date d) {
+    // Oracle Data objects are always actually Timestamps
+    return "TO_TIMESTAMP('" + d.toString() + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
   }
 }
-

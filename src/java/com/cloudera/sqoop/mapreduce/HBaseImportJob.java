@@ -35,7 +35,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
+import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hbase.HBasePutProcessor;

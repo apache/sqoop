@@ -31,7 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.AsyncSink;

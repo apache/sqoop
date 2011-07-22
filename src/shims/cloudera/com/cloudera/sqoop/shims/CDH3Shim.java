@@ -24,13 +24,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mrunit.mapreduce.mock.MockReporter;
-
 
 /**
  * Hadoop Shim for CDH3 (based on 0.20.2).
@@ -68,9 +68,25 @@ public class CDH3Shim extends CommonHadoopShim {
   }
 
   @Override
+  public int getJobNumMaps(JobContext job) {
+    return job.getConfiguration().getInt("mapred.map.tasks", 1);
+  }
+
+  @Override
+  public int getConfNumMaps(Configuration conf) {
+    return conf.getInt("mapred.map.tasks", 1);
+  }
+
+  @Override
   public void setJobMapSpeculativeExecution(Job job, boolean isEnabled) {
     job.getConfiguration().setBoolean(
         "mapred.map.tasks.speculative.execution", isEnabled);
+  }
+
+  @Override
+  public void setJobReduceSpeculativeExecution(Job job, boolean isEnabled) {
+    job.getConfiguration().setBoolean(
+        "mapred.reduce.tasks.speculative.execution", isEnabled);
   }
 
   @Override

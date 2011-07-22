@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.MapContext;
 
 /**
@@ -75,9 +76,25 @@ public abstract class HadoopShim {
   public abstract void setJobNumMaps(Job job, int numMapTasks);
 
   /**
+   * Get the (hinted) number of map tasks for a job.
+   */
+  public abstract int getJobNumMaps(JobContext job);
+
+  /**
+   * Get the (hinted) number of map tasks for a job.
+   */
+  public abstract int getConfNumMaps(Configuration conf);
+
+  /**
    * Set the mapper speculative execution property for a job.
    */
   public abstract void setJobMapSpeculativeExecution(Job job,
+      boolean isEnabled);
+
+  /**
+   * Set the reducer speculative execution property for a job.
+   */
+  public abstract void setJobReduceSpeculativeExecution(Job job,
       boolean isEnabled);
 
   /**

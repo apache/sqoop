@@ -21,7 +21,7 @@ package com.cloudera.sqoop.shims;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
