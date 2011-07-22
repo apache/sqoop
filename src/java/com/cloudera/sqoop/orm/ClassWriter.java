@@ -42,6 +42,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1057,11 +1058,18 @@ public class ClassWriter {
     // Translate all the column names into names that are safe to
     // use as identifiers.
     String [] cleanedColNames = cleanColNames(colNames);
-
+    Set<String> uniqColNames = new HashSet<String>();
     for (int i = 0; i < colNames.length; i++) {
+      // Guarantee uniq col identifier
+      String identifier = cleanedColNames[i];
+      if (uniqColNames.contains(identifier)) {
+          throw new IllegalArgumentException("Duplicate Column identifier "
+              + "specified: '" + identifier + "'");
+      }
+      uniqColNames.add(identifier);
+
       // Make sure the col->type mapping holds for the
       // new identifier name, too.
-      String identifier = cleanedColNames[i];
       String col = colNames[i];
       columnTypes.put(identifier, columnTypes.get(col));
     }

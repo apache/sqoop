@@ -59,7 +59,7 @@ public class TestImportJob extends ImportJobTestCase {
 
     assertTrue(fs.exists(outputPath));
 
-    String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
+    String[] argv = getArgv(true, new String[] { "DATA_COL0" }, conf);
 
     Sqoop importer = new Sqoop(new ImportTool());
     try {
@@ -72,11 +72,11 @@ public class TestImportJob extends ImportJobTestCase {
   }
 
   /** A mapper that is guaranteed to cause the task to fail. */
-  public static class NullDereferenceMapper
-      extends AutoProgressMapper<Object, Object, Text, NullWritable> {
+  public static class NullDereferenceMapper extends
+      AutoProgressMapper<Object, Object, Text, NullWritable> {
 
-    public void map(Object key, Object val, Context c)
-        throws IOException, InterruptedException {
+    public void map(Object key, Object val, Context c) throws IOException,
+        InterruptedException {
       String s = null;
       s.length(); // This will throw a NullPointerException.
     }
@@ -122,19 +122,16 @@ public class TestImportJob extends ImportJobTestCase {
 
     // Use the dependency-injection manager.
     conf.setClass(ConnFactory.FACTORY_CLASS_NAMES_KEY,
-        InjectableManagerFactory.class,
-        ManagerFactory.class);
+        InjectableManagerFactory.class, ManagerFactory.class);
 
-    String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
+    String[] argv = getArgv(true, new String[] { "DATA_COL0" }, conf);
 
     // Use dependency injection to specify a mapper that we know
     // will fail.
     conf.setClass(InjectableConnManager.MAPPER_KEY,
-        NullDereferenceMapper.class,
-        Mapper.class);
+        NullDereferenceMapper.class, Mapper.class);
 
-    conf.setClass(InjectableConnManager.IMPORT_JOB_KEY,
-        DummyImportJob.class,
+    conf.setClass(InjectableConnManager.IMPORT_JOB_KEY, DummyImportJob.class,
         ImportJobBase.class);
 
     Sqoop importer = new Sqoop(new ImportTool(), conf);
@@ -147,5 +144,32 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
-}
+  public void testDuplicateColumns() throws IOException {
+    // Make sure that if a MapReduce job to do the import fails due
+    // to an IOException, we tell the user about it.
 
+    // Create a table to attempt to import.
+    createTableForColType("VARCHAR(32)", "'meep'");
+
+    Configuration conf = new Configuration();
+
+    // Make the output dir exist so we know the job will fail via IOException.
+    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.mkdirs(outputPath);
+
+    assertTrue(fs.exists(outputPath));
+
+    String[] argv = getArgv(true, new String[] { "DATA_COL0,DATA_COL0" }, conf);
+
+    Sqoop importer = new Sqoop(new ImportTool());
+    try {
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to fail!", 1 == ret);
+    } catch (Exception e) {
+      // In debug mode, ImportException is wrapped in RuntimeException.
+      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+    }
+  }
+
+}
