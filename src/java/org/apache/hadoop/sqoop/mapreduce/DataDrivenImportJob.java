@@ -156,16 +156,15 @@ public class DataDrivenImportJob {
 
       try {
         job.waitForCompletion(false);
+        counters.stopClock();
+        counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
+          .findCounter("HDFS_BYTES_WRITTEN").getValue());
+        LOG.info("Transferred " + counters.toString());
       } catch (InterruptedException ie) {
         throw new IOException(ie);
       } catch (ClassNotFoundException cnfe) {
         throw new IOException(cnfe);
       }
-
-      counters.stopClock();
-      counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
-          .findCounter("HDFS_BYTES_WRITTEN").getValue());
-      LOG.info("Transferred " + counters.toString());
     } finally {
       if (isLocal && null != prevClassLoader) {
         // unload the special classloader for this jar.
