@@ -33,7 +33,7 @@ $ sqoop import (generic-args) (import-args)
 $ sqoop-import (generic-args) (import-args)
 ----
 
-While the Hadoop generic arguments must preceed any import arguments,
+While the Hadoop generic arguments must precede any import arguments,
 you can type the import arguments in any order with respect to one
 another.
 
@@ -245,6 +245,11 @@ directory's contents. If you use the +\--append+ argument, Sqoop will import
 data to a temporary directory and then rename the files into the normal
 target directory in a manner that does not conflict with existing filenames
 in that directory.
+
+NOTE: When using the direct mode of import, certain database client utilities
+are expected to be present in the shell path of the task process. For MySQL
+the utilities +mysqldump+ and +mysqlimport+ are required, whereas for
+PostgreSQL the utility +psql+ is required.
 
 Incremental Imports
 ^^^^^^^^^^^^^^^^^^^

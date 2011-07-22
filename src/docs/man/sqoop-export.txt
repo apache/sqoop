@@ -28,7 +28,7 @@ Export control options
 ~~~~~~~~~~~~~~~~~~~~~~
 
 --direct::
-  Use direct import fast path (mysql only)
+  Use direct import fast path (MySQL)
 
 --export-dir (dir)::
   HDFS source path for the export
@@ -69,6 +69,10 @@ after a lone '--' on the command-line.
 
 In MySQL direct mode, additional arguments are passed directly to
 mysqldump.
+
+Note: When using MySQL direct mode, the MySQL bulk utilities
++mysqldump+ and +mysqlimport+ should be available on the task nodes and
+present in the shell path of the task process.
 
 ENVIRONMENT
 -----------

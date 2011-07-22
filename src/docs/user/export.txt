@@ -83,6 +83,9 @@ MySQL provides a direct mode for exports as well, using the
 to specify this codepath. This may be
 higher-performance than the standard JDBC codepath.
 
+NOTE: When using export in direct mode with MySQL, the MySQL bulk utility
++mysqlimport+ must be available in the shell path of the task process.
+
 The +\--input-null-string+ and +\--input-null-non-string+ arguments are
 optional. If +\--input-null-string+ is not specified, then the string
 "null" will be interpreted as null for string-type columns.

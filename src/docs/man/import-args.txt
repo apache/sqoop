@@ -33,7 +33,7 @@ Import control options
   Columns to export from table
 
 --direct::
-  Use direct import fast path (mysql only)
+  Use direct import fast path (MySQL and PostgreSQL)
 
 --direct-split-size (n)::
   Split the input stream every 'n' bytes when importing in direct mode.
@@ -41,8 +41,8 @@ Import control options
 --inline-lob-limit (n)::
   Set the maximum size for an inline LOB
 
--m::
 --num-mappers (n)::
+-m::
   Use 'n' map tasks to import in parallel
 
 --query (statement)::
@@ -63,8 +63,14 @@ Import control options
 --where (clause)::
   Import only the rows for which _clause_ is true.
   e.g.: `--where "user_id > 400 AND hidden == 0"`
-  
+
 --compress::
 -z::
   Uses gzip to compress data as it is written to HDFS
+
+--null-string::
+  The string to be written for a null value for string columns
+
+--null-non-string::
+  The string to be written for a null value for non-string columns
 
