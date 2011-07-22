@@ -19,7 +19,7 @@
 import java.io.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.*;
-import org.apache.hadoop.sqoop.io.*;
+import com.cloudera.sqoop.io.*;
 
 /**
  * A simple benchmark to performance test LobFile reader/writer speed.

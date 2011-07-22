@@ -23,10 +23,10 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.util.*;
 
-import org.apache.hadoop.sqoop.Sqoop;
-import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.tool.ExportTool;
-import org.apache.hadoop.sqoop.tool.SqoopTool;
+import com.cloudera.sqoop.Sqoop;
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.tool.ExportTool;
+import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
  * Stress test export procedure by running a large-scale export to MySQL.

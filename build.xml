@@ -569,7 +569,7 @@
       <arg value="+%Y" />
     </exec>
     <javadoc
-      packagenames="org.apache.hadoop.sqoop.*"
+      packagenames="com.cloudera.sqoop.*"
       destdir="${build.javadoc}"
       author="true"
       version="true"

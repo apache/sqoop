@@ -21,4 +21,4 @@ bin=`cd ${bin} && pwd`
 
 source ${bin}/configure-sqoop
 ${HADOOP_HOME}/bin/hadoop jar ${SQOOP_JAR} \
-    org.apache.hadoop.sqoop.Sqoop "$@"
+    com.cloudera.sqoop.Sqoop "$@"

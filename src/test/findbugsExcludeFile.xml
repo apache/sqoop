@@ -29,14 +29,14 @@
 <FindBugsFilter>
   <Match>
     <!-- SQL db can return null for a boolean column; so can we. -->
-    <Class name="org.apache.hadoop.sqoop.lib.JdbcWritableBridge" />
+    <Class name="com.cloudera.sqoop.lib.JdbcWritableBridge" />
     <Method name="readBoolean" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
   <Match>
     <!-- This mapper intentially triggers an NPE to cause an exception
          which the test case much catch. -->
-    <Class name="org.apache.hadoop.sqoop.mapreduce.TestImportJob$NullDereferenceMapper" />
+    <Class name="com.cloudera.sqoop.mapreduce.TestImportJob$NullDereferenceMapper" />
     <Method name="map" />
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>

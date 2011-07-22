@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.*;
-import org.apache.hadoop.sqoop.io.*;
+import com.cloudera.sqoop.io.*;
 
 /**
  * Stress test LobFiles by writing a bunch of different files and reading
