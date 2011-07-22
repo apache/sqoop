@@ -565,7 +565,7 @@ public class OracleManager extends GenericJdbcManager {
       }
 
       try {
-        discardConnection(false);
+        close();
       } catch (SQLException ex) {
         LOG.error("Unable to discard connection", ex);
       }
@@ -615,7 +615,7 @@ public class OracleManager extends GenericJdbcManager {
       }
 
       try {
-        discardConnection(false);
+        close();
       } catch (SQLException ex) {
         LOG.error("Unable to discard connection", ex);
       }
@@ -667,7 +667,7 @@ public class OracleManager extends GenericJdbcManager {
       }
 
       try {
-        discardConnection(false);
+        close();
       } catch (SQLException ex) {
         LOG.error("Unable to discard connection", ex);
       }
@@ -719,7 +719,7 @@ public class OracleManager extends GenericJdbcManager {
       }
 
       try {
-        discardConnection(false);
+        close();
       } catch (SQLException ex) {
         LOG.error("Unable to discard connection", ex);
       }
