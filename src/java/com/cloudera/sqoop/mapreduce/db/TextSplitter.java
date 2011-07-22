@@ -129,6 +129,8 @@ public class TextSplitter extends BigDecimalSplitter {
         splits.add(new DataDrivenDBInputFormat.DataDrivenDBInputSplit(
             lowClausePrefix + start + "'", highClausePrefix + end + "'"));
       }
+
+      start = end;
     }
 
     if (minIsNull) {
