@@ -145,6 +145,8 @@ public class SqoopOptions implements Cloneable {
   private String hiveHome; // not serialized to metastore.
   @StoredAsProperty("hive.import") private boolean hiveImport;
   @StoredAsProperty("hive.overwrite.table") private boolean overwriteHiveTable;
+  @StoredAsProperty("hive.fail.table.exists")
+  private boolean failIfHiveTableExists;
   @StoredAsProperty("hive.table.name") private String hiveTableName;
   @StoredAsProperty("hive.drop.delims") private boolean hiveDropDelims;
   @StoredAsProperty("hive.partition.key") private String hivePartitionKey;
@@ -1008,6 +1010,18 @@ public class SqoopOptions implements Cloneable {
 
   public void setHiveDropDelims(boolean dropHiveDelims) {
     this.hiveDropDelims = dropHiveDelims;
+  }
+
+  /**
+   * @return the user-specified option to specify sqoop's behavior during
+   *         target table creation if the table exists.
+   */
+  public boolean doFailIfHiveTableExists() {
+    return failIfHiveTableExists;
+  }
+
+  public void setFailIfHiveTableExists(boolean fail) {
+    this.failIfHiveTableExists = fail;
   }
 
   /**

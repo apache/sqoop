@@ -92,6 +92,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_DROP_DELIMS_ARG = "hive-drop-import-delims";
   public static final String HIVE_PARTITION_KEY_ARG = "hive-partition-key";
   public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
+  public static final String CREATE_HIVE_TABLE_ARG =
+      "create-hive-table";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
   public static final String COMPRESS_ARG = "compress";
@@ -398,6 +400,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withDescription("Overwrite existing data in the Hive table")
         .withLongOpt(HIVE_OVERWRITE_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder
+        .withDescription("Fail if the target hive table exists")
+        .withLongOpt(CREATE_HIVE_TABLE_ARG)
+        .create());
     hiveOpts.addOption(OptionBuilder.withArgName("table-name")
         .hasArg()
         .withDescription("Sets the table name to use when importing to hive")
@@ -667,6 +673,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(HIVE_OVERWRITE_ARG)) {
       out.setOverwriteHiveTable(true);
+    }
+
+    if (in.hasOption(CREATE_HIVE_TABLE_ARG)) {
+      out.setFailIfHiveTableExists(true);
     }
 
     if (in.hasOption(HIVE_TABLE_ARG)) {

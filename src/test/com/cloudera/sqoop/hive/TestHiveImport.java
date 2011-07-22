@@ -245,7 +245,7 @@ public class TestHiveImport extends ImportJobTestCase {
     setNumCols(3);
     String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
     String [] vals = { "'test'", "42", "'somestring'" };
-    String [] extraArgs = {"--hive-overwrite"};
+    String [] extraArgs = {"--hive-overwrite", "--create-hive-table"};
     runImportTest(TABLE_NAME, types, vals,
         "createOverwriteImport.q", getCreateHiveTableArgs(extraArgs),
         new CreateHiveTableTool());

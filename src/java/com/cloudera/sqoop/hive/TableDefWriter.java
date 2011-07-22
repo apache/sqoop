@@ -129,7 +129,7 @@ public class TableDefWriter {
 
     String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
-    if (options.doOverwriteHiveTable()) {
+    if (options.doFailIfHiveTableExists()) {
       sb.append("CREATE TABLE `").append(outputTableName).append("` ( ");
     } else {
       sb.append("CREATE TABLE IF NOT EXISTS `");
@@ -209,8 +209,11 @@ public class TableDefWriter {
 
     StringBuilder sb = new StringBuilder();
     sb.append("LOAD DATA INPATH '");
-    sb.append(finalPathStr);
-    sb.append("' INTO TABLE `");
+    sb.append(finalPathStr + "'");
+    if (options.doOverwriteHiveTable()) {
+      sb.append(" OVERWRITE");
+    }
+    sb.append(" INTO TABLE `");
     sb.append(outputTableName);
     sb.append('`');
 

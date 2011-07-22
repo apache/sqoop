@@ -26,8 +26,11 @@ Hive options
   If set, then import the table into Hive
 
 --hive-overwrite::
-  Overwrites existing table in hive.
-  By default it does not overwrite existing table.
+  Overwrites existing data in the hive table if it exists.
+
+--create-hive-table::
+  If set, then the job will fail if the target hive table exits.
+  By default this property is false.
 
 --hive-table (table-name)::
   When used with --hive-import, overrides the destination table name
