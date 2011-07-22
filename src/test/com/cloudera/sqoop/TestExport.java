@@ -140,7 +140,7 @@ public class TestExport extends ExportJobTestCase {
    * @param numRecords how many records to write to the file.
    * @param gzip is true if the file should be gzipped.
    */
-  private void createTextFile(int fileNum, int numRecords, boolean gzip,
+  protected void createTextFile(int fileNum, int numRecords, boolean gzip,
       ColumnGenerator... extraCols) throws IOException {
     int startId = fileNum * numRecords;
 
@@ -343,7 +343,7 @@ public class TestExport extends ExportJobTestCase {
   /** Verify that for the max and min values of the 'id' column, the values
       for a given column meet the expected values.
    */
-  private void assertColMinAndMax(String colName, ColumnGenerator generator)
+  protected void assertColMinAndMax(String colName, ColumnGenerator generator)
       throws SQLException {
     Connection conn = getConnection();
     int minId = getMinRowId(conn);

@@ -29,6 +29,8 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
 
+import junit.framework.AssertionFailedError;
+
 /**
  * Test the basic Oracle connection manager with the various column types.
  */
@@ -217,15 +219,29 @@ public class OracleCompatTest extends ManagerCompatTestCase {
         "Oracle treats empty strings as null (non-ANSI compliant). Skipping.");
   }
 
-  // The timestamp output values are in a nonstandard format; we override
-  // the test to more carefully control the expected output; writing a
-  // compliant getTimestampDbOutput() method isn't worth it.
+  // Date and timestamp output values seem to be formatted in multiple
+  // different ways depending on which Oracle JDBC driver subversion is used.
+  // We override the test to control the expected output. We actually accept
+  // one of multiple different output results -- if it fails one output
+  // format, we check the other. Success on either is success for the whole
+  // test. Because of this, we can't just use a single getTimestampDbOutput()
+  // method.
+
   @Override
   public void testTimestamp1() {
-    verifyType(getTimestampType(),
-        getTimestampInsertStr("'2009-04-24 18:24:00'"),
-        "2009-4-24 18:24:0. 0",
-        "2009-04-24 18:24:00.0");
+    try {
+      // Older ojdbc6_g jars succeed with this format.
+      verifyType(getTimestampType(),
+          getTimestampInsertStr("'2009-04-24 18:24:00'"),
+          "2009-4-24 18:24:0. 0",
+          "2009-04-24 18:24:00.0");
+    } catch (AssertionFailedError afe) {
+      // Try the test again with a different timestamp format.
+      verifyType(getTimestampType(),
+          getTimestampInsertStr("'2009-04-24 18:24:00'"),
+          "2009-04-24 18:24:00",
+          "2009-04-24 18:24:00.0");
+    }
   }
 
   @Override
@@ -236,8 +252,45 @@ public class OracleCompatTest extends ManagerCompatTestCase {
           getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
           "2009-4-24 18:24:0. 200000",
           "2009-04-24 18:24:00.0002");
+    } catch (AssertionFailedError afe) {
+      // Try again with the newer version of the timestamp format.
+      // The in-db format (third argument) looks weird to me, like it's losing
+      // precision. But the final argument (the to-string version of what we
+      // extract) is correct, which is what is most important.
+      verifyType(getTimestampType(),
+          getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
+          "2009-04-24 18:24:00.2",
+          "2009-04-24 18:24:00.0002");
     } finally {
       LOG.debug("End testTimestamp2");
+    }
+  }
+
+  @Override
+  public void testDate1() {
+    try {
+      verifyType("DATE", getDateInsertStr("'2009-01-12'"),
+          "2009-01-12 00:00:00.0",
+          getDateSeqOutput("2009-01-12"));
+    } catch (AssertionFailedError afe) {
+      // If the above format doesn't work, it might be a newer ojdbc jar,
+      // which does not append the ".0" on the end.
+      verifyType("DATE", getDateInsertStr("'2009-01-12'"),
+          "2009-01-12 00:00:00",
+          getDateSeqOutput("2009-01-12"));
+    }
+  }
+
+  @Override
+  public void testDate2() {
+    try {
+      verifyType("DATE", getDateInsertStr("'2009-04-24'"),
+          "2009-04-24 00:00:00.0",
+          getDateSeqOutput("2009-04-24"));
+    } catch (AssertionFailedError afe) {
+      verifyType("DATE", getDateInsertStr("'2009-04-24'"),
+          "2009-04-24 00:00:00",
+          getDateSeqOutput("2009-04-24"));
     }
   }
 

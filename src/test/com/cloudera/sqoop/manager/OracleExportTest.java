@@ -18,6 +18,7 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -29,6 +30,8 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * Test the OracleManager implementation's exportJob() functionality.
@@ -187,9 +190,77 @@ public class OracleExportTest extends TestExport {
     };
   }
 
+  protected ColumnGenerator getNewDateColGenerator() {
+    // Return a TIMESTAMP generator that has increasing date values.
+    // Use the "new" Oracle string output format
+    return new ColumnGenerator() {
+      public String getExportText(int rowNum) {
+        int day = rowNum + 1;
+        return "2009-10-" + pad(day) + " 00:00:00.0";
+      }
+      public String getVerifyText(int rowNum) {
+        int day = rowNum + 1;
+        return "2009-10-" + pad(day) + " 00:00:00";
+      }
+      public String getType() {
+        return "TIMESTAMP"; // TODO: Support DATE more intelligently.
+      }
+    };
+  }
+
+  protected ColumnGenerator getNewTimeColGenerator() {
+    // Return a TIMESTAMP generator that has increasing time values.
+    // We currently do not support the export of DATE columns with
+    // only a time component set (because Oracle reports these column
+    // types to Sqoop as TIMESTAMP, and we parse the user's text
+    // incorrectly based on this result).
+    return new ColumnGenerator() {
+      public String getExportText(int rowNum) {
+        return "1970-01-01 10:01:" + pad(rowNum) + ".0";
+      }
+      public String getVerifyText(int rowNum) {
+        return "1970-01-01 10:01:" + pad(rowNum);
+      }
+      public String getType() {
+        return "TIMESTAMP";
+      }
+    };
+  }
+
   @Override
   protected String getBigIntType() {
     // Oracle stores everything in NUMERIC columns.
     return "NUMERIC(12,0)";
+  }
+
+  // Dates and times seem to be formatted differently in different
+  // versions of Oracle's JDBC jar. We run this test twice with
+  // different versions of the column generators to check whether
+  // either one succeeds.
+  @Override
+  public void testDatesAndTimes() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    ColumnGenerator genDate = getDateColumnGenerator();
+    ColumnGenerator genTime = getTimeColumnGenerator();
+
+    try {
+      createTextFile(0, TOTAL_RECORDS, false, genDate, genTime);
+      createTable(genDate, genTime);
+      runExport(getArgv(true, 10, 10));
+      verifyExport(TOTAL_RECORDS);
+      assertColMinAndMax(forIdx(0), genDate);
+      assertColMinAndMax(forIdx(1), genTime);
+    } catch (AssertionFailedError afe) {
+      genDate = getNewDateColGenerator();
+      genTime = getNewTimeColGenerator();
+
+      createTextFile(0, TOTAL_RECORDS, false, genDate, genTime);
+      createTable(genDate, genTime);
+      runExport(getArgv(true, 10, 10));
+      verifyExport(TOTAL_RECORDS);
+      assertColMinAndMax(forIdx(0), genDate);
+      assertColMinAndMax(forIdx(1), genTime);
+    }
   }
 }
