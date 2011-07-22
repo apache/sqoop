@@ -367,7 +367,7 @@ public class SqoopOptions {
   }
 
   public void setTmpDir(String tmp) {
-    this.tmpDir = tmpDir;
+    this.tmpDir = tmp;
   }
 
   public String getConnectString() {

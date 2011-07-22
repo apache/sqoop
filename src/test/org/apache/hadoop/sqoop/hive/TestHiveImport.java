@@ -173,7 +173,6 @@ public class TestHiveImport extends ImportJobTestCase {
     setNumCols(1);
 
     // Figure out where our target generated .q file is going to be.
-    String [] emptyArgs = new String[0];
     SqoopOptions options = getSqoopOptions(getArgv(false, null),
         new ImportTool());
     Path ddlFile = new Path(new Path(options.getCodeOutputDir()),

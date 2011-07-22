@@ -202,7 +202,7 @@ public class TestSqoopOptions extends TestCase {
     };
 
     try {
-      SqoopOptions opts = parse(args);
+      parse(args);
       fail("Expected InvalidOptionsException");
     } catch (SqoopOptions.InvalidOptionsException ioe) {
       // expected.
@@ -216,7 +216,7 @@ public class TestSqoopOptions extends TestCase {
     };
 
     try {
-      SqoopOptions opts = parse(args);
+      parse(args);
       fail("Expected InvalidOptionsException");
     } catch (SqoopOptions.InvalidOptionsException ioe) {
       // expected.
