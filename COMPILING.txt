@@ -43,6 +43,32 @@ Furthermore, Sqoop's build can be instrumented with the following:
 * cobertura (1.9.4.1) for code coverage
 * checkstyle (5.x) for code style checks
 
+Finally, while most of Sqoop's compilation dependencies are in the lib/
+directory, or retrieved via Ivy, the following dependencies must be installed
+on your system:
+
+* HBase
+* Zookeeper
+
+Both of these must be from the most recent version of CDH. These can be
+installed on linux machines via yum or apt-get; any users may also use the
+tarballs available at http://archive.cloudera.com/cdh/3/.
+
+== Configuring your build
+
+The location of HBase and Zookeeper must be specified to the Sqoop build via
+ant properties. All compilation / testing requires the +hbase.home+ and
++zookeeper.home+ properties to be set. This can be done on the command line
+(e.g.: +ant jar -Dhbase.home=/path/to/hbase -Dzookeeper.home=/path/to/zk+), or
+in a properties file.
+
+Sqoop will automatically load properties out of a file named
+'build.properties' in your Sqoop source root, or your home directory. You
+should create such a file and include the lines:
+
+hbase.home=/path/to/hbase
+zookeeper.home=/path/to/zk
+
 == The Basics
 
 Sqoop is compiled with ant. Type +ant -p+ to see the list of available targets.
@@ -86,6 +112,9 @@ After the third-party databases are installed and configured, run:
 ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
 ++++
 
+
+Note that +sqoop.thirdparty.lib.dir+ can also be specified in
++build.properties+.
 
 == Multiple Hadoop Distributions
 
