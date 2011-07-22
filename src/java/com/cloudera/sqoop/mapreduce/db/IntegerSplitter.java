@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 
@@ -32,6 +34,9 @@ import com.cloudera.sqoop.config.ConfigurationHelper;
  * Implement DBSplitter over integer values.
  */
 public class IntegerSplitter implements DBSplitter {
+  public static final Log LOG =
+    LogFactory.getLog(IntegerSplitter.class.getName());
+
   public List<InputSplit> split(Configuration conf, ResultSet results,
       String colName) throws SQLException {
 
@@ -56,6 +61,13 @@ public class IntegerSplitter implements DBSplitter {
 
     // Get all the split points together.
     List<Long> splitPoints = split(numSplits, minVal, maxVal);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(String.format("Splits: [%,28d to %,28d] into %d parts",
+          minVal, maxVal, numSplits));
+      for (int i = 0; i < splitPoints.size(); i++) {
+        LOG.debug(String.format("%,28d", splitPoints.get(i)));
+      }
+    }
     List<InputSplit> splits = new ArrayList<InputSplit>();
 
     // Turn the split points into a set of intervals.
@@ -105,23 +117,28 @@ public class IntegerSplitter implements DBSplitter {
 
     List<Long> splits = new ArrayList<Long>();
 
-    // Use numSplits as a hint. May need an extra task if the size doesn't
-    // divide cleanly.
-
+    // We take the min-max interval and divide by the numSplits and also
+    // calculate a remainder.  Because of integer division rules, numsplits *
+    // splitSize + minVal will always be <= maxVal.  We then use the remainder
+    // and add 1 if the current split index is less than the < the remainder.
+    // This is guaranteed to add up to remainder and not surpass the value.
     long splitSize = (maxVal - minVal) / numSplits;
-    if (splitSize < 1) {
-      splitSize = 1;
-    }
-
+    long remainder = (maxVal - minVal) % numSplits;
     long curVal = minVal;
 
-    while (curVal <= maxVal) {
+    // This will honor numSplits as long as split size > 0.  If split size is
+    // 0, it will have remainder splits.
+    for (int i = 0; i <= numSplits; i++) {
       splits.add(curVal);
+      if (curVal >= maxVal) {
+        break;
+      }
       curVal += splitSize;
+      curVal += (i < remainder) ? 1 : 0;
     }
 
-    if (splits.get(splits.size() - 1) != maxVal || splits.size() == 1) {
-      // We didn't end on the maxVal. Add that to the end of the list.
+    if (splits.size() == 1) {
+      // make a valid singleton split
       splits.add(maxVal);
     }
 

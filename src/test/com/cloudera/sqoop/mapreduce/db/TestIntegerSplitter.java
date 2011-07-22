@@ -70,21 +70,20 @@ public class TestIntegerSplitter extends TestCase {
     if (actual.length > expected.length) {
       fail("Actual array has " + actual.length
           + " elements; expected " + expected.length
-          + ". ACtual array is " + formatLongArray(actual));
+          + ". Actual array is " + formatLongArray(actual));
     }
   }
 
   public void testEvenSplits() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(10, 0, 100);
-    long [] expected = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    long [] expected = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, };
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testOddSplits() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(10, 0, 95);
-    long [] expected = { 0, 9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 95 };
+    long [] expected = { 0, 10, 20, 30, 40, 50, 59, 68, 77, 86, 95, };
     assertLongArrayEquals(expected, toLongArray(splits));
-
   }
 
   public void testSingletonSplit() throws SQLException {
@@ -104,6 +103,18 @@ public class TestIntegerSplitter extends TestCase {
     List<Long> splits = new IntegerSplitter().split(5, 3, 5);
     long [] expected = { 3, 4, 5 };
     assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  /**
+   * This tests verifies that overflows do not happen due to the splitting
+   * algorithm.
+   *
+   * @throws SQLException
+   */
+  public void testBigIntSplits() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(4, 14,
+        7863696997872966707L);
+    assertEquals(splits.size(), 5);
   }
 }
 
