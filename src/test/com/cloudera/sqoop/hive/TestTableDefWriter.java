@@ -74,8 +74,8 @@ public class TestTableDefWriter extends TestCase {
 
     // Assert that the statements generated have the form we expect.
     assertTrue(createTable.indexOf(
-        "CREATE TABLE IF NOT EXISTS outputTable") != -1);
-    assertTrue(loadData.indexOf("INTO TABLE outputTable") != -1);
+        "CREATE TABLE IF NOT EXISTS `outputTable`") != -1);
+    assertTrue(loadData.indexOf("INTO TABLE `outputTable`") != -1);
     assertTrue(loadData.indexOf("/inputTable'") != -1);
   }
 }

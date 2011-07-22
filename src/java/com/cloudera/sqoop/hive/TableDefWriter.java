@@ -124,9 +124,10 @@ public class TableDefWriter {
     String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
     if (options.doOverwriteHiveTable()) {
-      sb.append("CREATE TABLE " + outputTableName + " ( ");
+      sb.append("CREATE TABLE `").append(outputTableName).append("` ( ");
     } else {
-      sb.append("CREATE TABLE IF NOT EXISTS " + outputTableName + " ( ");
+      sb.append("CREATE TABLE IF NOT EXISTS `");
+      sb.append(outputTableName).append("` ( ");
     }
 
     boolean first = true;
@@ -144,7 +145,7 @@ public class TableDefWriter {
             + col);
       }
 
-      sb.append(col + " " + hiveColType);
+      sb.append('`').append(col).append("` ").append(hiveColType);
 
       if (HiveTypes.isHiveTypeImprovised(colType)) {
         LOG.warn(
@@ -192,8 +193,9 @@ public class TableDefWriter {
     StringBuilder sb = new StringBuilder();
     sb.append("LOAD DATA INPATH '");
     sb.append(finalPathStr);
-    sb.append("' INTO TABLE ");
+    sb.append("' INTO TABLE `");
     sb.append(outputTableName);
+    sb.append('`');
 
     LOG.debug("Load statement: " + sb.toString());
     return sb.toString();
