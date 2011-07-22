@@ -25,6 +25,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.lang.reflect.Method;
 
@@ -47,8 +49,140 @@ public class OracleManager extends GenericJdbcManager {
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
 
+
+  // Oracle XE does a poor job of releasing server-side resources for
+  // closed connections. So we actually want to cache connections as
+  // much as possible. This is especially important for JUnit tests which
+  // may need to make 60 or more connections (serially), since each test
+  // uses a different OracleManager instance.
+  private static class ConnCache {
+
+    public static final Log LOG = LogFactory.getLog(ConnCache.class.getName());
+
+    private static class CacheKey {
+      public final String connectString;
+      public final String username;
+
+      public CacheKey(String connect, String user) {
+        this.connectString = connect;
+        this.username = user; // note: may be null.
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (o instanceof CacheKey) {
+          CacheKey k = (CacheKey) o;
+          if (null == username) {
+            return k.username == null && k.connectString.equals(connectString);
+          } else {
+            return k.username.equals(username)
+                && k.connectString.equals(connectString);
+          }
+        } else {
+          return false;
+        }
+      }
+
+      @Override
+      public int hashCode() {
+        if (null == username) {
+          return connectString.hashCode();
+        } else {
+          return username.hashCode() ^ connectString.hashCode();
+        }
+      }
+
+      @Override
+      public String toString() {
+        return connectString + "/" + username;
+      }
+    }
+
+    private Map<CacheKey, Connection> connectionMap;
+
+    public ConnCache() {
+      LOG.debug("Instantiated new connection cache.");
+      connectionMap = new HashMap<CacheKey, Connection>();
+    }
+
+    /**
+     * @return a Connection instance that can be used to connect to the
+     * given database, if a previously-opened connection is available in
+     * the cache. Returns null if none is available in the map.
+     */
+    public synchronized Connection getConnection(String connectStr,
+        String username) throws SQLException {
+      CacheKey key = new CacheKey(connectStr, username);
+      Connection cached = connectionMap.get(key);
+      if (null != cached) {
+        connectionMap.remove(key);
+        if (cached.isReadOnly()) {
+          // Read-only mode? Don't want it.
+          cached.close();
+        }
+
+        if (cached.isClosed()) {
+          // This connection isn't usable.
+          return null;
+        }
+
+        cached.rollback(); // Reset any transaction state.
+        cached.clearWarnings();
+
+        LOG.debug("Got cached connection for " + key);
+      }
+
+      return cached;
+    }
+
+    /**
+     * Returns a connection to the cache pool for future use. If a connection
+     * is already cached for the connectstring/username pair, then this
+     * connection is closed and discarded.
+     */
+    public synchronized void recycle(String connectStr, String username,
+        Connection conn) throws SQLException {
+
+      CacheKey key = new CacheKey(connectStr, username);
+      Connection existing = connectionMap.get(key);
+      if (null != existing) {
+        // Cache is already full for this entry.
+        LOG.debug("Discarding additional connection for " + key);
+        conn.close();
+        return;
+      }
+
+      // Put it in the map for later use.
+      LOG.debug("Caching released connection for " + key);
+      connectionMap.put(key, conn);
+    }
+
+    @Override
+    protected synchronized void finalize() throws Throwable {
+      for (Connection c : connectionMap.values()) {
+        c.close();
+      }
+      
+      super.finalize();
+    }
+  }
+
+  private static final ConnCache CACHE;
+  static {
+    CACHE = new ConnCache();
+  }
+
   public OracleManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
+  }
+
+  public void close() throws SQLException {
+    release(); // Release any open statements associated with the connection.
+    if (hasOpenConnection()) {
+      // Release our open connection back to the cache.
+      CACHE.recycle(options.getConnectString(), options.getUsername(),
+          getConnection());
+    }
   }
 
   protected String getColNamesQuery(String tableName) {
@@ -77,10 +211,19 @@ public class OracleManager extends GenericJdbcManager {
 
     String username = options.getUsername();
     String password = options.getPassword();
-    if (null == username) {
-      connection = DriverManager.getConnection(options.getConnectString());
-    } else {
-      connection = DriverManager.getConnection(options.getConnectString(), username, password);
+    String connectStr = options.getConnectString();
+
+    connection = CACHE.getConnection(connectStr, username);
+    if (null == connection) {
+      // Couldn't pull one from the cache. Get a new one.
+      LOG.debug("Creating a new connection for "
+          + connectStr + "/" + username);
+      if (null == username) {
+        connection = DriverManager.getConnection(connectStr);
+      } else {
+        connection = DriverManager.getConnection(connectStr, username,
+            password);
+      }
     }
 
     // We only use this for metadata queries. Loosest semantics are okay.
@@ -272,6 +415,12 @@ public class OracleManager extends GenericJdbcManager {
       LOG.error("Could not load class " + className, ex);
     }
     return typeClass;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    close();
+    super.finalize();
   }
 }
 

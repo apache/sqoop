@@ -87,7 +87,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
       // See http://forums.oracle.com/forums/thread.jspa?messageID=1145120
       LOG.info("Sleeping to wait for Oracle connection cache clear...");
       try {
-        Thread.sleep(750);
+        Thread.sleep(250);
       } catch (InterruptedException ie) {
       }
     }

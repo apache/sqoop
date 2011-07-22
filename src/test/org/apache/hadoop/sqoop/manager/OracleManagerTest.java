@@ -68,6 +68,18 @@ import org.apache.hadoop.sqoop.util.FileListing;
  *   Create a database user named SQOOPTEST
  *   Set the user's password to '12345'
  *   Grant the user the CREATE TABLE privilege
+ *
+ * Oracle XE does a poor job of cleaning up connections in a timely fashion.
+ * Too many connections too quickly will be rejected, because XE will gc the
+ * closed connections in a lazy fashion. Oracle tests have a delay built in
+ * to work with this gc, but it is possible that you will see this error:
+ *
+ * ORA-12516, TNS:listener could not find available handler with matching
+ * protocol stack
+ *
+ * If so, log in to your database as SYSTEM and execute the following:
+ * ALTER SYSTEM SET processes=200 scope=spfile;
+ * ... then restart your database.
  */
 public class OracleManagerTest extends ImportJobTestCase {
 

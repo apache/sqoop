@@ -20,6 +20,7 @@ package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +76,7 @@ public class ExportJob {
     String tableName = context.getTableName();
     String tableClassName = new TableClassName(options).getClassForTable(tableName);
     String ormJarFile = context.getJarFile();
+    ConnManager mgr = null;
 
     LOG.info("Beginning export of " + tableName);
 
@@ -114,7 +116,7 @@ public class ExportJob {
       // Concurrent writes of the same records would be problematic.
       job.setMapSpeculativeExecution(false);
 
-      ConnManager mgr = new ConnFactory(conf).getManager(options);
+      mgr = new ConnFactory(conf).getManager(options);
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
         DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
@@ -149,6 +151,14 @@ public class ExportJob {
       if (isLocal && null != prevClassLoader) {
         // unload the special classloader for this jar.
         ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+      }
+
+      if (null != mgr) {
+        try {
+          mgr.close();
+        } catch (SQLException sqlE) {
+          LOG.warn("Error closing connection: " + sqlE);
+        }
       }
     }
   }

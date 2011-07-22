@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,58 +72,66 @@ public class MySQLDumpImportJob extends ImportJobBase {
 
     ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
 
-    String username = options.getUsername();
-    if (null == username || username.length() == 0) {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString());
-    } else {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString(), username, options.getPassword());
-    }
+    try {
+      String username = options.getUsername();
+      if (null == username || username.length() == 0) {
+        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString());
+      } else {
+        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString(), username, options.getPassword());
+      }
 
-    String [] colNames = options.getColumns();
-    if (null == colNames) {
-      colNames = mgr.getColumnNames(tableName);
-    }
+      String [] colNames = options.getColumns();
+      if (null == colNames) {
+        colNames = mgr.getColumnNames(tableName);
+      }
 
-    String [] sqlColNames = null;
-    if (null != colNames) {
-      sqlColNames = new String[colNames.length];
-      for (int i = 0; i < colNames.length; i++) {
-        sqlColNames[i] = mgr.escapeColName(colNames[i]);
+      String [] sqlColNames = null;
+      if (null != colNames) {
+        sqlColNames = new String[colNames.length];
+        for (int i = 0; i < colNames.length; i++) {
+          sqlColNames[i] = mgr.escapeColName(colNames[i]);
+        }
+      }
+
+      // It's ok if the where clause is null in DBInputFormat.setInput.
+      String whereClause = options.getWhereClause();
+
+      // We can't set the class properly in here, because we may not have the
+      // jar loaded in this JVM. So we start by calling setInput() with DBWritable
+      // and then overriding the string manually.
+
+      // Note that mysqldump also does *not* want a quoted table name.
+      DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+          tableName, whereClause,
+          mgr.escapeColName(splitByCol), sqlColNames);
+
+      Configuration conf = job.getConfiguration();
+      conf.setInt(MySQLDumpMapper.OUTPUT_FIELD_DELIM_KEY,
+          options.getOutputFieldDelim());
+      conf.setInt(MySQLDumpMapper.OUTPUT_RECORD_DELIM_KEY,
+          options.getOutputRecordDelim());
+      conf.setInt(MySQLDumpMapper.OUTPUT_ENCLOSED_BY_KEY,
+          options.getOutputEnclosedBy());
+      conf.setInt(MySQLDumpMapper.OUTPUT_ESCAPED_BY_KEY,
+          options.getOutputEscapedBy());
+      conf.setBoolean(MySQLDumpMapper.OUTPUT_ENCLOSE_REQUIRED_KEY,
+          options.isOutputEncloseRequired());
+      String [] extraArgs = options.getExtraArgs();
+      if (null != extraArgs) {
+        conf.setStrings(MySQLDumpMapper.EXTRA_ARGS_KEY, extraArgs);
+      }
+
+      LOG.debug("Using InputFormat: " + inputFormatClass);
+      job.setInputFormatClass(getInputFormatClass());
+    } finally {
+      try {
+        mgr.close();
+      } catch (SQLException sqlE) {
+        LOG.warn("Error closing connection: " + sqlE);
       }
     }
-
-    // It's ok if the where clause is null in DBInputFormat.setInput.
-    String whereClause = options.getWhereClause();
-
-    // We can't set the class properly in here, because we may not have the
-    // jar loaded in this JVM. So we start by calling setInput() with DBWritable
-    // and then overriding the string manually.
-
-    // Note that mysqldump also does *not* want a quoted table name.
-    DataDrivenDBInputFormat.setInput(job, DBWritable.class,
-        tableName, whereClause,
-        mgr.escapeColName(splitByCol), sqlColNames);
-
-    Configuration conf = job.getConfiguration();
-    conf.setInt(MySQLDumpMapper.OUTPUT_FIELD_DELIM_KEY,
-        options.getOutputFieldDelim());
-    conf.setInt(MySQLDumpMapper.OUTPUT_RECORD_DELIM_KEY,
-        options.getOutputRecordDelim());
-    conf.setInt(MySQLDumpMapper.OUTPUT_ENCLOSED_BY_KEY,
-        options.getOutputEnclosedBy());
-    conf.setInt(MySQLDumpMapper.OUTPUT_ESCAPED_BY_KEY,
-        options.getOutputEscapedBy());
-    conf.setBoolean(MySQLDumpMapper.OUTPUT_ENCLOSE_REQUIRED_KEY,
-        options.isOutputEncloseRequired());
-    String [] extraArgs = options.getExtraArgs();
-    if (null != extraArgs) {
-      conf.setStrings(MySQLDumpMapper.EXTRA_ARGS_KEY, extraArgs);
-    }
-
-    LOG.debug("Using InputFormat: " + inputFormatClass);
-    job.setInputFormatClass(getInputFormatClass());
   }
 
   /**

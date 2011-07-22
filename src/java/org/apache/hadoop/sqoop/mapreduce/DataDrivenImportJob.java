@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -107,45 +108,53 @@ public class DataDrivenImportJob extends ImportJobBase {
   protected void configureInputFormat(Job job, String tableName,
       String tableClassName, String splitByCol) throws IOException {
     ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
-    String username = options.getUsername();
-    if (null == username || username.length() == 0) {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString());
-    } else {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString(), username, options.getPassword());
-    }
+    try {
+      String username = options.getUsername();
+      if (null == username || username.length() == 0) {
+        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString());
+      } else {
+        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString(), username, options.getPassword());
+      }
 
-    String [] colNames = options.getColumns();
-    if (null == colNames) {
-      colNames = mgr.getColumnNames(tableName);
-    }
+      String [] colNames = options.getColumns();
+      if (null == colNames) {
+        colNames = mgr.getColumnNames(tableName);
+      }
 
-    String [] sqlColNames = null;
-    if (null != colNames) {
-      sqlColNames = new String[colNames.length];
-      for (int i = 0; i < colNames.length; i++) {
-        sqlColNames[i] = mgr.escapeColName(colNames[i]);
+      String [] sqlColNames = null;
+      if (null != colNames) {
+        sqlColNames = new String[colNames.length];
+        for (int i = 0; i < colNames.length; i++) {
+          sqlColNames[i] = mgr.escapeColName(colNames[i]);
+        }
+      }
+
+      // It's ok if the where clause is null in DBInputFormat.setInput.
+      String whereClause = options.getWhereClause();
+
+      // We can't set the class properly in here, because we may not have the
+      // jar loaded in this JVM. So we start by calling setInput() with DBWritable
+      // and then overriding the string manually.
+      DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+          mgr.escapeTableName(tableName), whereClause,
+          mgr.escapeColName(splitByCol), sqlColNames);
+      job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY,
+          tableClassName);
+
+      job.getConfiguration().setLong(LargeObjectLoader.MAX_INLINE_LOB_LEN_KEY,
+          options.getInlineLobLimit());
+
+      LOG.debug("Using InputFormat: " + inputFormatClass);
+      job.setInputFormatClass(inputFormatClass);
+    } finally {
+      try {
+        mgr.close();
+      } catch (SQLException sqlE) {
+        LOG.warn("Error closing connection: " + sqlE);
       }
     }
-
-    // It's ok if the where clause is null in DBInputFormat.setInput.
-    String whereClause = options.getWhereClause();
-
-    // We can't set the class properly in here, because we may not have the
-    // jar loaded in this JVM. So we start by calling setInput() with DBWritable
-    // and then overriding the string manually.
-    DataDrivenDBInputFormat.setInput(job, DBWritable.class,
-        mgr.escapeTableName(tableName), whereClause,
-        mgr.escapeColName(splitByCol), sqlColNames);
-    job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY,
-        tableClassName);
-
-    job.getConfiguration().setLong(LargeObjectLoader.MAX_INLINE_LOB_LEN_KEY,
-        options.getInlineLobLimit());
-
-    LOG.debug("Using InputFormat: " + inputFormatClass);
-    job.setInputFormatClass(inputFormatClass);
   }
 }
 

@@ -19,6 +19,7 @@
 package org.apache.hadoop.sqoop;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,89 +183,97 @@ public class Sqoop extends Configured implements Tool {
       }
     }
 
-    if (options.doHiveImport()) {
-      hiveImport = new HiveImport(options, manager, getConf());
-    }
+    try {
+      if (options.doHiveImport()) {
+        hiveImport = new HiveImport(options, manager, getConf());
+      }
 
-    SqoopOptions.ControlAction action = options.getAction();
-    if (action == SqoopOptions.ControlAction.ListTables) {
-      String [] tables = manager.listTables();
-      if (null == tables) {
-        System.err.println("Could not retrieve tables list from server");
-        LOG.error("manager.listTables() returned null");
-        return 1;
-      } else {
-        for (String tbl : tables) {
-          System.out.println(tbl);
-        }
-      }
-    } else if (action == SqoopOptions.ControlAction.ListDatabases) {
-      String [] databases = manager.listDatabases();
-      if (null == databases) {
-        System.err.println("Could not retrieve database list from server");
-        LOG.error("manager.listDatabases() returned null");
-        return 1;
-      } else {
-        for (String db : databases) {
-          System.out.println(db);
-        }
-      }
-    } else if (action == SqoopOptions.ControlAction.DebugExec) {
-      // just run a SQL statement for debugging purposes.
-      manager.execAndPrint(options.getDebugSqlCmd());
-      return 0;
-    } else if (action == SqoopOptions.ControlAction.Export) {
-      // Export a table.
-      try {
-        exportTable(options.getTableName());
-      } catch (IOException ioe) {
-        LOG.error("Encountered IOException running export job: " + ioe.toString());
-        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-          throw new RuntimeException(ioe);
-        } else {
+      SqoopOptions.ControlAction action = options.getAction();
+      if (action == SqoopOptions.ControlAction.ListTables) {
+        String [] tables = manager.listTables();
+        if (null == tables) {
+          System.err.println("Could not retrieve tables list from server");
+          LOG.error("manager.listTables() returned null");
           return 1;
-        }
-      } catch (ExportException ee) {
-        LOG.error("Error during export: " + ee.toString());
-        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-          throw new RuntimeException(ee);
         } else {
-          return 1;
-        }
-      }
-    } else {
-      // This is either FullImport or GenerateOnly.
-
-      try {
-        if (options.isAllTables()) {
-          String [] tables = manager.listTables();
-          if (null == tables) {
-            System.err.println("Could not retrieve tables list from server");
-            LOG.error("manager.listTables() returned null");
-            return 1;
-          } else {
-            for (String tableName : tables) {
-              importTable(tableName);
-            }
+          for (String tbl : tables) {
+            System.out.println(tbl);
           }
-        } else {
-          // just import a single table the user specified.
-          importTable(options.getTableName());
         }
-      } catch (IOException ioe) {
-        LOG.error("Encountered IOException running import job: " + ioe.toString());
-        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-          throw new RuntimeException(ioe);
-        } else {
+      } else if (action == SqoopOptions.ControlAction.ListDatabases) {
+        String [] databases = manager.listDatabases();
+        if (null == databases) {
+          System.err.println("Could not retrieve database list from server");
+          LOG.error("manager.listDatabases() returned null");
           return 1;
-        }
-      } catch (ImportException ie) {
-        LOG.error("Error during import: " + ie.toString());
-        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-          throw new RuntimeException(ie);
         } else {
-          return 1;
+          for (String db : databases) {
+            System.out.println(db);
+          }
         }
+      } else if (action == SqoopOptions.ControlAction.DebugExec) {
+        // just run a SQL statement for debugging purposes.
+        manager.execAndPrint(options.getDebugSqlCmd());
+        return 0;
+      } else if (action == SqoopOptions.ControlAction.Export) {
+        // Export a table.
+        try {
+          exportTable(options.getTableName());
+        } catch (IOException ioe) {
+          LOG.error("Encountered IOException running export job: " + ioe.toString());
+          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ioe);
+          } else {
+            return 1;
+          }
+        } catch (ExportException ee) {
+          LOG.error("Error during export: " + ee.toString());
+          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ee);
+          } else {
+            return 1;
+          }
+        }
+      } else {
+        // This is either FullImport or GenerateOnly.
+
+        try {
+          if (options.isAllTables()) {
+            String [] tables = manager.listTables();
+            if (null == tables) {
+              System.err.println("Could not retrieve tables list from server");
+              LOG.error("manager.listTables() returned null");
+              return 1;
+            } else {
+              for (String tableName : tables) {
+                importTable(tableName);
+              }
+            }
+          } else {
+            // just import a single table the user specified.
+            importTable(options.getTableName());
+          }
+        } catch (IOException ioe) {
+          LOG.error("Encountered IOException running import job: " + ioe.toString());
+          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ioe);
+          } else {
+            return 1;
+          }
+        } catch (ImportException ie) {
+          LOG.error("Error during import: " + ie.toString());
+          if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ie);
+          } else {
+            return 1;
+          }
+        }
+      }
+    } finally {
+      try {
+        manager.close();
+      } catch (SQLException sqlE) {
+        LOG.warn("Error while closing connection: " + sqlE);
       }
     }
 
