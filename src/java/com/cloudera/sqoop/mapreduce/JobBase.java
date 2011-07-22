@@ -18,20 +18,34 @@
 
 package com.cloudera.sqoop.mapreduce;
 
+import java.io.File;
 import java.io.IOException;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+
+import org.apache.hadoop.filecache.DistributedCache;
+
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 
+import org.apache.hadoop.util.StringUtils;
+
 import com.cloudera.sqoop.SqoopOptions;
+
+import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import com.cloudera.sqoop.util.Jars;
 
 /**
  * Base class for configuring and running a MapReduce job.
@@ -111,6 +125,80 @@ public class JobBase {
    */
   public void setOptions(SqoopOptions opts) {
     this.options = opts;
+  }
+
+  /**
+   * Put jar files required by Sqoop into the DistributedCache.
+   * @param job the Job being submitted.
+   * @param mgr the ConnManager to use.
+   */
+  protected void cacheJars(Job job, ConnManager mgr)
+      throws IOException {
+
+    Configuration conf = job.getConfiguration(); 
+    FileSystem fs = FileSystem.getLocal(conf);
+    Set<String> localUrls = new HashSet<String>();
+
+    addToCache(Jars.getSqoopJarPath(), fs, localUrls);
+    addToCache(Jars.getShimJarPath(), fs, localUrls);
+    addToCache(Jars.getDriverClassJar(mgr), fs, localUrls);
+
+    // Add anything in $SQOOP_HOME/lib, if this is set.
+    String sqoopHome = System.getenv("SQOOP_HOME");
+    if (null != sqoopHome) {
+      File sqoopHomeFile = new File(sqoopHome);
+      File sqoopLibFile = new File(sqoopHomeFile, "lib");
+      if (sqoopLibFile.exists()) {
+        addDirToCache(sqoopLibFile, fs, localUrls);
+      }
+    } else {
+      LOG.warn("SQOOP_HOME is unset. May not be able to find "
+          + "all job dependencies.");
+    }
+    
+    // If we didn't put anything in our set, then there's nothing to cache.
+    if (localUrls.isEmpty()) {
+      return;
+    }
+
+    // Add these to the 'tmpjars' array, which the MR JobSubmitter
+    // will upload to HDFS and put in the DistributedCache libjars.
+    String tmpjars = conf.get("tmpjars");
+    StringBuilder sb = new StringBuilder();
+    if (null != tmpjars) {
+      sb.append(tmpjars);
+      sb.append(",");
+    }
+    sb.append(StringUtils.arrayToString(localUrls.toArray(new String[0])));
+    conf.set("tmpjars", sb.toString());
+  }
+
+  private void addToCache(String file, FileSystem fs, Set<String> localUrls) {
+    if (null == file) {
+      return;
+    }
+
+    Path p = new Path(file);
+    String qualified = p.makeQualified(fs).toString();
+    LOG.debug("Adding to job classpath: " + qualified);
+    localUrls.add(qualified);
+  }
+
+  /**
+   * Add the .jar elements of a directory to the DCache classpath,
+   * nonrecursively.
+   */
+  private void addDirToCache(File dir, FileSystem fs, Set<String> localUrls) {
+    if (null == dir) {
+      return;
+    }
+
+    for (File libfile : dir.listFiles()) {
+      if (libfile.exists() && !libfile.isDirectory()
+          && libfile.getName().endsWith("jar")) {
+        addToCache(libfile.toString(), fs, localUrls);
+      }
+    }
   }
 
   /**

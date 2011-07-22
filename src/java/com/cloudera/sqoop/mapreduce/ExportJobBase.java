@@ -284,6 +284,7 @@ public class ExportJobBase extends JobBase {
       configureOutputFormat(job, tableName, tableClassName);
       configureMapper(job, tableName, tableClassName);
       configureNumTasks(job);
+      cacheJars(job, context.getConnManager());
 
       boolean success = runJob(job);
       if (!success) {

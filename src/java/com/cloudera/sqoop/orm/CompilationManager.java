@@ -44,6 +44,8 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.FileListing;
 import com.cloudera.sqoop.shims.HadoopShim;
 
+import com.cloudera.sqoop.util.Jars;
+
 /**
  * Manages the compilation of a bunch of .java files into .class files
  * and eventually a jar.
@@ -82,7 +84,7 @@ public class CompilationManager {
 
     if (null == hadoopHome) {
       LOG.info("$HADOOP_HOME is not set");
-      return findJarForClass(JobConf.class);
+      return Jars.getJarPathForClass(JobConf.class);
     }
 
     if (!hadoopHome.endsWith(File.separator)) {
@@ -95,7 +97,7 @@ public class CompilationManager {
 
     if (null == entries) {
       LOG.warn("HADOOP_HOME appears empty or missing");
-      return findJarForClass(JobConf.class);
+      return Jars.getJarPathForClass(JobConf.class);
     }
 
     for (File f : entries) {
@@ -106,7 +108,7 @@ public class CompilationManager {
       }
     }
 
-    return findJarForClass(JobConf.class);
+    return Jars.getJarPathForClass(JobConf.class);
   }
 
   /**
@@ -144,7 +146,7 @@ public class CompilationManager {
     }
 
     // find sqoop jar for compilation classpath
-    String sqoopJar = findThisJar();
+    String sqoopJar = Jars.getSqoopJarPath();
     if (null != sqoopJar) {
       sqoopJar = File.pathSeparator + sqoopJar;
     } else {
@@ -299,26 +301,6 @@ public class CompilationManager {
       jstream = new JarOutputStream(fstream);
 
       addClassFilesFromDir(new File(jarOutDir), jstream);
-
-      // put our own jar in there in its lib/ subdir
-      String thisJarFile = findThisJar();
-      if (null != thisJarFile) {
-        addLibJar(thisJarFile, jstream);
-      } else {
-        // couldn't find our own jar (we were running from .class files?)
-        LOG.warn("Could not find jar for Sqoop; "
-            + "MapReduce jobs may not run correctly.");
-      }
-
-      String shimJarFile = findShimJar();
-      if (null != shimJarFile) {
-        addLibJar(shimJarFile, jstream);
-      } else {
-        // Couldn't find the shim jar.
-        LOG.warn("Could not find jar for Sqoop shims.");
-        LOG.warn("MapReduce jobs may not run correctly.");
-      }
-
       jstream.finish();
     } finally {
       if (null != jstream) {
@@ -340,23 +322,6 @@ public class CompilationManager {
 
     LOG.debug("Finished writing jar file " + jarFilename);
   }
-
-  /**
-   * Add a jar in the lib/ directory of a JarOutputStream we're building.
-   * @param jarFilename the source jar file to include.
-   * @param jstream the JarOutputStream to write to.
-   */
-  private void addLibJar(String jarFilename, JarOutputStream jstream)
-      throws IOException {
-    File thisJarFileObj = new File(jarFilename);
-    String thisJarBasename = thisJarFileObj.getName();
-    String thisJarEntryName = "lib" + File.separator + thisJarBasename;
-    ZipEntry ze = new ZipEntry(thisJarEntryName);
-    jstream.putNextEntry(ze);
-    copyFileToStream(thisJarFileObj, jstream);
-    jstream.closeEntry();
-  }
-
 
   private static final int BUFFER_SZ = 4096;
 
@@ -382,47 +347,5 @@ public class CompilationManager {
     } finally {
       fis.close();
     }
-  }
-
-  private String findThisJar() {
-    return findJarForClass(CompilationManager.class);
-  }
-
-  private String findShimJar() {
-    HadoopShim h = HadoopShim.get();
-    if (null == h) {
-      return null;
-    }
-    return findJarForClass(h.getClass());
-  }
-
-  // Method mostly cloned from o.a.h.mapred.JobConf.findContainingJar().
-  private String findJarForClass(Class<? extends Object> classObj) {
-    ClassLoader loader = classObj.getClassLoader();
-    String classFile = classObj.getName().replaceAll("\\.", "/") + ".class";
-    try {
-      for (Enumeration<URL> itr = loader.getResources(classFile);
-          itr.hasMoreElements();) {
-        URL url = (URL) itr.nextElement();
-        if ("jar".equals(url.getProtocol())) {
-          String toReturn = url.getPath();
-          if (toReturn.startsWith("file:")) {
-            toReturn = toReturn.substring("file:".length());
-          }
-          // URLDecoder is a misnamed class, since it actually decodes
-          // x-www-form-urlencoded MIME type rather than actual
-          // URL encoding (which the file path has). Therefore it would
-          // decode +s to ' 's which is incorrect (spaces are actually
-          // either unencoded or encoded as "%20"). Replace +s first, so
-          // that they are kept sacred during the decoding process.
-          toReturn = toReturn.replaceAll("\\+", "%2B");
-          toReturn = URLDecoder.decode(toReturn, "UTF-8");
-          return toReturn.replaceAll("!.*$", "");
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return null;
   }
 }

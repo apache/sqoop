@@ -302,6 +302,7 @@ public class OracleManager extends GenericJdbcManager {
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
+    context.setConnManager(this);
     try {
       JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
           (Class<? extends OutputFormat>) ShimLoader.getShimClass(

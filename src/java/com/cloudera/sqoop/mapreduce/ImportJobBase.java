@@ -160,6 +160,7 @@ public class ImportJobBase extends JobBase {
       configureOutputFormat(job, tableName, tableClassName);
       configureMapper(job, tableName, tableClassName);
       configureNumTasks(job);
+      cacheJars(job, getContext().getConnManager());
 
       jobSetup(job);
       boolean success = runJob(job);

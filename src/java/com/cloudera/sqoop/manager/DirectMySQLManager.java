@@ -49,6 +49,7 @@ public class DirectMySQLManager extends MySQLManager {
   public void importTable(ImportJobContext context)
       throws IOException, ImportException {
 
+    context.setConnManager(this);
     if (context.getOptions().getColumns() != null) {
       LOG.warn("Direct-mode import from MySQL does not support column");
       LOG.warn("selection. Falling back to JDBC-based import.");
@@ -97,6 +98,7 @@ public class DirectMySQLManager extends MySQLManager {
   @Override
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
+    context.setConnManager(this);
     MySQLExportJob exportJob = new MySQLExportJob(context);
     exportJob.runExport();
   }

@@ -599,6 +599,7 @@ public abstract class SqlManager extends ConnManager {
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
+    context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context);
     exportJob.runExport();
   }
@@ -620,6 +621,7 @@ public abstract class SqlManager extends ConnManager {
    */
   public void updateTable(ExportJobContext context)
       throws IOException, ExportException {
+    context.setConnManager(this);
     JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context);
     exportJob.runExport();
   }
