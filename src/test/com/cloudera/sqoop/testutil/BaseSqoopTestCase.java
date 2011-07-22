@@ -308,7 +308,6 @@ public class BaseSqoopTestCase extends TestCase {
             insertValsStr,
             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.executeUpdate();
-        statement.close();
       } catch (SQLException sqlException) {
         fail("Could not create table: "
             + StringUtils.stringifyException(sqlException));
