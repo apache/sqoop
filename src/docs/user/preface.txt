@@ -21,7 +21,7 @@
 Supported Releases
 ------------------
 
-This documentation applies to Sqoop v1.0.0 (June 2010).
+This documentation applies to Sqoop v{revnumber}.
 
 Sqoop Releases
 --------------
@@ -30,6 +30,7 @@ Sqoop is an open source software product of Cloudera, Inc.
 
 Software development for Sqoop occurs at http://github.com/cloudera/sqoop.
 At that site you can obtain:
+
 - New releases of Sqoop as well as its most recent source code
 - An issue tracker
 - A wiki that contains Sqoop documentation

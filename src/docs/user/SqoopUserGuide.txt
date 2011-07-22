@@ -16,6 +16,10 @@
    limitations under the License.
 ////
 
+Sqoop User Guide (v{revnumber})
+===============================
+
+
 
 include::intro.txt[]
 

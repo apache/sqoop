@@ -15,6 +15,9 @@
 
 BUILDROOT=../../build
 BUILD_DIR=$(BUILDROOT)/docs
+WEBSITE_DIR=$(BUILDROOT)/webdocs
+
+VERSION=Unknown
 
 all: man userguide devguide
 
@@ -25,10 +28,33 @@ devguide: $(BUILD_DIR)/SqoopDevGuide.html
 MANSOURCES=$(shell echo man/sqoop*.txt)
 MANPAGES=$(MANSOURCES:.txt=.1.gz)
 
+REVDATE=$(shell date)
+
+
+website: 
+	mkdir -p $(WEBSITE_DIR)
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+		-b docbook \
+		user/SqoopUserGuide.txt
+	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks user/SqoopUserGuide.xml
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+		-b docbook \
+		dev/SqoopDevGuide.txt
+	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks dev/SqoopDevGuide.xml
+	asciidoc --unsafe -a revnumber=$(VERSION) \
+	  -b docbook \
+		web/index.txt
+	xmlto -o $(WEBSITE_DIR) -m web/html.xsl html-nochunks web/index.xml
+	cp web/docbook.css $(WEBSITE_DIR)
+	rsync -a web/images $(WEBSITE_DIR)/
+	rm user/SqoopUserGuide.xml
+	rm dev/SqoopDevGuide.xml
+	rm web/index.xml
+
 man: $(MANPAGES)
 
 %.1.gz : %.txt
-	asciidoc --unsafe -b docbook -d manpage $<
+	asciidoc --unsafe -b docbook -d manpage -a "author=Sqoop Team" $<
 	xmlto man $*.xml -o man
 	gzip $*.1
 	rm $*.xml
@@ -37,12 +63,14 @@ man: $(MANPAGES)
 
 $(BUILD_DIR)/SqoopUserGuide.html: user/*.txt
 	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
+		-a revnumber=$(VERSION) -a "revdate=$(REVDATE)" \
 		user/SqoopUserGuide.txt
 	mkdir -p $(BUILD_DIR)
 	mv user/SqoopUserGuide.html $(BUILD_DIR)
 
 $(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
 	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
+		-a revnumber=$(VERSION) -a "revdate=$(REVDATE)" \
 		dev/SqoopDevGuide.txt
 	mkdir -p $(BUILD_DIR)
 	mv dev/SqoopDevGuide.html $(BUILD_DIR)

@@ -16,33 +16,13 @@
    limitations under the License.
 ////
 
-
-+sqoop-version+
----------------
-
-Purpose
-~~~~~~~
-
-Display version information for Sqoop.
-
-Syntax
-~~~~~~
-
-----
-$ sqoop version
-$ sqoop-version
-----
+Sqoop Documentation (v{revnumber})
+==================================
 
 
-Example Invocations
-~~~~~~~~~~~~~~~~~~~
 
-Display the version:
+The following pages are the documentation for Sqoop v{revnumber}:
 
-----
-$ sqoop version
-Sqoop {revnumber}
-git commit id 46b3e06b79a8411320d77c984c3030db47dd1c22
-Compiled by aaron@jargon on Mon May 17 13:43:22 PDT 2010
-----
+- link:SqoopUserGuide.html[Sqoop User Guide]
+- link:SqoopDevGuide.html[Sqoop Developer's Guide]
 

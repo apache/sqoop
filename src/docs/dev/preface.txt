@@ -21,7 +21,7 @@
 Supported Releases
 ------------------
 
-This documentation applies to Sqoop v1.0.0 (June 2010).
+This documentation applies to Sqoop v{revnumber}.
 
 Sqoop Releases
 --------------

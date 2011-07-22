@@ -16,6 +16,11 @@
    limitations under the License.
 ////
 
+Sqoop Developer's Guide v{revnumber}
+====================================
+
+
+
 include::intro.txt[]
 
 include::preface.txt[]

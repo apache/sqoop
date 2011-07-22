@@ -19,11 +19,14 @@
 Getting Support
 ---------------
 
+Some general information is available at the
+http://wiki.github.com/cloudera/sqoop/[Sqoop wiki].
+
 Report bugs in Sqoop to the issue tracker at
 http://github.com/cloudera/sqoop/issues[].
 
-For general questions and answers, a support forum is available at
-http://getsatisfaction.com/cloudera/products/cloudera_sqoop[].
+Questions and discussion regarding the usage of Sqoop should be directed to the
+http://groups.google.com/a/cloudera.org/group/sqoop-user[sqoop-user mailing list].
 
 Before contacting either forum, run your Sqoop job with the
 +\--verbose+ flag to acquire as much debugging information as

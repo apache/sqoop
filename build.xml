@@ -554,11 +554,22 @@
     </junit>
   </target>
 
+  <target name="webdocs" description="Build website documentation">
+    <exec executable="make" failonerror="true">
+      <arg value="-C" />
+      <arg value="${basedir}/src/docs" />
+      <arg value="BUILDROOT=${build.dir}" />
+      <arg value="VERSION=${version}" />
+      <arg value="website" />
+    </exec>
+  </target>
+
   <target name="docs" description="Build documentation">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
       <arg value="${basedir}/src/docs" />
       <arg value="BUILDROOT=${build.dir}" />
+      <arg value="VERSION=${version}" />
     </exec>
   </target>
 
