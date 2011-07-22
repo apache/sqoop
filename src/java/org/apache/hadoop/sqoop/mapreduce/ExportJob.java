@@ -172,6 +172,9 @@ public class ExportJob {
       FileInputFormat.addInputPath(job, inputPath);
       job.setNumReduceTasks(0);
 
+      // Concurrent writes of the same records would be problematic.
+      job.setMapSpeculativeExecution(false);
+
       ConnManager mgr = new ConnFactory(conf).getManager(options);
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
