@@ -30,5 +30,9 @@ Argument                      Description
                               to Hive.
 +\--hive-drop-import-delims+  Drops '\n', '\r', and '\01' from string\
 			      fields when importing to Hive.
++\--hive-partition-key+	      Name of a hive field to partition are \
+			      sharded on
++\--hive-partition-value <v>+ String-value that serves as partition key\
+			      for this imported into hive in this job.
 --------------------------------------------------------------------------
 

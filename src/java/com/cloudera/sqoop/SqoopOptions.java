@@ -147,6 +147,8 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.overwrite.table") private boolean overwriteHiveTable;
   @StoredAsProperty("hive.table.name") private String hiveTableName;
   @StoredAsProperty("hive.drop.delims") private boolean hiveDropDelims;
+  @StoredAsProperty("hive.partition.key") private String hivePartitionKey;
+  @StoredAsProperty("hive.partition.value") private String hivePartitionValue;
 
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
@@ -1341,6 +1343,22 @@ public class SqoopOptions implements Cloneable {
 
   public void setHiveTableName(String name) {
     this.hiveTableName = name;
+  }
+
+  public String getHivePartitionKey() {
+    return hivePartitionKey;
+  }
+
+  public void setHivePartitionKey(String hpk) {
+    this.hivePartitionKey = hpk;
+  }
+
+  public String getHivePartitionValue() {
+    return hivePartitionValue;
+  }
+
+  public void setHivePartitionValue(String hpv) {
+    this.hivePartitionValue = hpv;
   }
 
   /**

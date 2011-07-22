@@ -167,6 +167,12 @@ public class TableDefWriter {
       sb.append("COMMENT 'Imported by sqoop on " + curDateStr + "' ");
     }
 
+    if (options.getHivePartitionKey() != null) {
+      sb.append("PARTITIONED BY (")
+        .append(options.getHivePartitionKey())
+        .append(" STRING) ");
+     }
+
     sb.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '");
     sb.append(getHiveOctalCharCode((int) options.getOutputFieldDelim()));
     sb.append("' LINES TERMINATED BY '");
@@ -207,6 +213,13 @@ public class TableDefWriter {
     sb.append("' INTO TABLE `");
     sb.append(outputTableName);
     sb.append('`');
+
+    if (options.getHivePartitionKey() != null) {
+      sb.append(" PARTITION (")
+        .append(options.getHivePartitionKey())
+        .append("='").append(options.getHivePartitionValue())
+        .append("')");
+    }
 
     LOG.debug("Load statement: " + sb.toString());
     return sb.toString();

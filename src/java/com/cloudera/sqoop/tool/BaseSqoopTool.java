@@ -90,6 +90,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_TABLE_ARG = "hive-table";
   public static final String HIVE_OVERWRITE_ARG = "hive-overwrite";
   public static final String HIVE_DROP_DELIMS_ARG = "hive-drop-import-delims";
+  public static final String HIVE_PARTITION_KEY_ARG = "hive-partition-key";
+  public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
   public static final String COMPRESS_ARG = "compress";
@@ -405,6 +407,17 @@ public abstract class BaseSqoopTool extends SqoopTool {
             + "(\\n\\r) from imported string fields")
         .withLongOpt(HIVE_DROP_DELIMS_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder.withArgName("partition-key")
+        .hasArg()
+        .withDescription("Sets the partition key to use when importing to hive")
+        .withLongOpt(HIVE_PARTITION_KEY_ARG)
+        .create());
+    hiveOpts.addOption(OptionBuilder.withArgName("partition-value")
+        .hasArg()
+        .withDescription("Sets the partition value to use when importing "
+            + "to hive")
+        .withLongOpt(HIVE_PARTITION_VALUE_ARG)
+        .create());
     return hiveOpts;
   }
 
@@ -661,6 +674,14 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(HIVE_DROP_DELIMS_ARG)) {
       out.setHiveDropDelims(true);
+    }
+
+    if (in.hasOption(HIVE_PARTITION_KEY_ARG)) {
+      out.setHivePartitionKey(in.getOptionValue(HIVE_PARTITION_KEY_ARG));
+    }
+
+    if (in.hasOption(HIVE_PARTITION_VALUE_ARG)) {
+      out.setHivePartitionValue(in.getOptionValue(HIVE_PARTITION_VALUE_ARG));
     }
   }
 

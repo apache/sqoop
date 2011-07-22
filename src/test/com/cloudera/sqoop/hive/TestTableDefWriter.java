@@ -21,12 +21,14 @@ package com.cloudera.sqoop.hive;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import com.cloudera.sqoop.SqoopOptions;
 
-import junit.framework.TestCase;
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.tool.ImportTool;
 
 /**
  * Test Hive DDL statement generation.
@@ -77,5 +79,31 @@ public class TestTableDefWriter extends TestCase {
         "CREATE TABLE IF NOT EXISTS `outputTable`") != -1);
     assertTrue(loadData.indexOf("INTO TABLE `outputTable`") != -1);
     assertTrue(loadData.indexOf("/inputTable'") != -1);
+  }
+
+  public void testPartitions() throws Exception {
+    String[] args = {
+        "--hive-partition-key", "ds",
+        "--hive-partition-value", "20110413",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+      new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, "inputTable", "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+    String loadData = writer.getLoadDataStmt();
+
+    assertNotNull(createTable);
+    assertNotNull(loadData);
+    assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
+        + "PARTITIONED BY (ds STRING) "
+        + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
+        + "LINES TERMINATED BY '\\012' STORED AS TEXTFILE", createTable);
+    assertTrue(loadData.endsWith(" PARTITION (ds='20110413')"));
   }
 }

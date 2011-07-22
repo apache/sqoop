@@ -359,4 +359,24 @@ public class TestHiveImport extends ImportJobTestCase {
     }
   }
 
+  /**
+   * Test hive import with row that has new line in it.
+   */
+  @Test
+  public void testImportHiveWithPartitions() throws IOException,
+      InterruptedException {
+    final String TABLE_NAME = "PARTITION_HIVE_IMPORT";
+
+    LOG.info("Doing import of single row into PARTITION_HIVE_IMPORT table");
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)", };
+    String[] vals = { "'whoop'", "42", "'I am a row in a partition'", };
+    String[] moreArgs = { "--" + BaseSqoopTool.HIVE_PARTITION_KEY_ARG, "ds",
+        "--" + BaseSqoopTool.HIVE_PARTITION_VALUE_ARG, "20110413", };
+
+    runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+        getArgv(false, moreArgs), new ImportTool());
+  }
+
 }

@@ -68,3 +68,10 @@ with Hive's defaults.
 The table name used in Hive is, by default, the same as that of the
 source table. You can control the output table name with the +\--hive-table+
 option.
+
+Hive can put data into partitions for more efficient query
+performance.  You can tell a Sqoop job to import data for Hive into a
+particular partition by specifying the +\--hive-partition-key+ and
++\--hive-partition-value+ arguments.  The partition value must be a
+string.  Please see the Hive documentation for more details on
+partitioning.

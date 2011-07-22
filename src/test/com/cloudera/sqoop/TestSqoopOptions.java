@@ -236,6 +236,16 @@ public class TestSqoopOptions extends TestCase {
     assertEquals(4, opts.getNumMappers());
   }
 
+  public void testHivePartitionParams() throws Exception {
+    String[] args = {
+        "--hive-partition-key", "ds",
+        "--hive-partition-value", "20110413",
+    };
+    SqoopOptions opts = parse(args);
+    assertEquals("ds", opts.getHivePartitionKey());
+    assertEquals("20110413", opts.getHivePartitionValue());
+  }
+
   public void testPropertySerialization1() {
     // Test that if we write a SqoopOptions out to a Properties,
     // and then read it back in, we get all the same results.
