@@ -44,12 +44,12 @@ if [ ! -d "${HADOOP_HOME}" ]; then
   echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
   exit 1
 fi
-if [ ! -d "${HBASE_HOME}" ]; then
-  echo "Error: $HBASE_HOME does not exist!"
-  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
-  exit 1
-fi
 
+## Moved to be a runtime check in sqoop.
+if [ ! -d "${HBASE_HOME}" ]; then
+  echo "Warning: $HBASE_HOME does not exist! HBase imports will fail."
+  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
+fi
 
 # Where to find the main Sqoop jar
 SQOOP_JAR_DIR=$SQOOP_HOME
@@ -76,7 +76,9 @@ if [ -d "$SQOOP_HOME/lib" ]; then
 fi
 
 # Add HBase to dependency list
-SQOOP_CLASSPATH=`$HBASE_HOME/bin/hbase classpath`:${SQOOP_CLASSPATH}
+if [ -e "$HBASE_HOME/bin/hbase" ]; then
+  SQOOP_CLASSPATH=`$HBASE_HOME/bin/hbase classpath`:${SQOOP_CLASSPATH}
+fi
 
 ZOOCFGDIR=${ZOOCFGDIR:-/etc/zookeeper}
 if [ -d "${ZOOCFGDIR}" ]; then

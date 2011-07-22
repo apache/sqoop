@@ -93,4 +93,23 @@ public class TestHBaseImport extends HBaseTestCase {
     // This cell should not be placed in the results..
     verifyHBaseCell("nullT", "0", "nullF", getColName(2), null);
   }
+
+  @Test
+  public void testExitFailure() throws IOException {
+    String [] types = { "INT", "INT", "INT" };
+    String [] vals = { "0", "42", "43" };
+    createTableWithColTypes(types, vals);
+
+    String [] argv = getArgv(true, "NoHBaseT", "NoHBaseF", true, null);
+    try {
+      HBaseUtil.setAlwaysNoHBaseJarMode(true);
+      runImport(argv);
+    } catch (IOException e)  {
+      return;
+    } finally {
+      HBaseUtil.setAlwaysNoHBaseJarMode(false);
+    }
+
+    fail("should have gotten exception");
+  }
 }

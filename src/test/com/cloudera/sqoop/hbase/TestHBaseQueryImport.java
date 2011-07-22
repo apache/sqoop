@@ -44,4 +44,24 @@ public class TestHBaseQueryImport extends HBaseTestCase {
     // This cell should not be placed in the results..
     verifyHBaseCell("queryT", "0", "queryF", getColName(2), null);
   }
+
+  @Test
+  public void testExitFailure() throws IOException {
+    String [] types = { "INT", "INT", "INT" };
+    String [] vals = { "0", "42", "43" };
+    createTableWithColTypes(types, vals);
+
+    String [] argv = getArgv(true, "queryT", "queryF", true,
+        "SELECT " + getColName(0) + ", " + getColName(1) + " FROM "
+        + getTableName() + " WHERE $CONDITIONS");
+    try {
+      HBaseUtil.setAlwaysNoHBaseJarMode(true);
+      runImport(argv);
+    } catch (Exception e)  {
+      return;
+    } finally {
+      HBaseUtil.setAlwaysNoHBaseJarMode(false);
+    }
+    fail("should have gotten exception");
+  }
 }

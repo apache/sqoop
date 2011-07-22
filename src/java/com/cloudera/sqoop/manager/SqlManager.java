@@ -21,6 +21,7 @@ package com.cloudera.sqoop.manager;
 import java.sql.Timestamp;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.hbase.HBaseUtil;
 import com.cloudera.sqoop.hive.HiveTypes;
 import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
@@ -369,7 +370,6 @@ public abstract class SqlManager extends ConnManager {
           + tableName + ". Please specify one with --split-by or perform "
           + "a sequential import with '-m 1'.");
     }
-
   }
 
   /**
@@ -387,6 +387,10 @@ public abstract class SqlManager extends ConnManager {
     ImportJobBase importer;
     if (opts.getHBaseTable() != null) {
       // Import to HBase.
+      if (!HBaseUtil.isHBaseJarPresent()) {
+        throw new ImportException("HBase jars are not present in "
+            + "classpath, cannot import to HBase!");
+      }
       importer = new HBaseImportJob(opts, context);
     } else {
       // Import to HDFS.
@@ -415,6 +419,10 @@ public abstract class SqlManager extends ConnManager {
     ImportJobBase importer;
     if (opts.getHBaseTable() != null) {
       // Import to HBase.
+      if (!HBaseUtil.isHBaseJarPresent()) {
+        throw new ImportException("HBase jars are not present in classpath,"
+            + " cannot import to HBase!");
+      }
       importer = new HBaseImportJob(opts, context);
     } else {
       // Import to HDFS.
