@@ -27,7 +27,12 @@ import os
 import re
 import sys
 
-from xml.etree import ElementTree
+try:
+  from xml.etree import ElementTree
+except ImportError:
+  print "Building release notes is not supported on this platform."
+  sys.exit(0)
+
 
 
 NUM_ARGS = 6
