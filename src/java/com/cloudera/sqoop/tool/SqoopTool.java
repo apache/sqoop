@@ -18,8 +18,16 @@
 
 package com.cloudera.sqoop.tool;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -38,6 +46,8 @@ import com.cloudera.sqoop.cli.SqoopParser;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 
+import com.cloudera.sqoop.util.ClassLoaderStack;
+
 /**
  * Base class for Sqoop subprograms (e.g., SqoopImport, SqoopExport, etc.)
  * Allows subprograms to configure the arguments they accept and
@@ -46,6 +56,12 @@ import com.cloudera.sqoop.config.ConfigurationHelper;
 public abstract class SqoopTool {
 
   public static final Log LOG = LogFactory.getLog(SqoopTool.class.getName());
+
+  /**
+   * Configuration key that specifies the set of ToolPlugin instances to load
+   * before determining which SqoopTool instance to load.
+   */
+  public static final String TOOL_PLUGINS_KEY = "sqoop.tool.plugins";
 
   private static final Map<String, Class<? extends SqoopTool>> TOOLS;
   private static final Map<String, String> DESCRIPTIONS;
@@ -93,6 +109,145 @@ public abstract class SqoopTool {
       Class<? extends SqoopTool> cls, String description) {
     TOOLS.put(toolName, cls);
     DESCRIPTIONS.put(toolName, description);
+  }
+
+  /**
+   * Add tool to available set of SqoopTool instances using the ToolDesc
+   * struct as the sole argument.
+   */
+  private static void registerTool(ToolDesc toolDescription) {
+    registerTool(toolDescription.getName(), toolDescription.getToolClass(),
+        toolDescription.getDesc());
+  }
+
+  /**
+   * Load plugins referenced in sqoop-site.xml or other config (e.g., tools.d/),
+   * to allow external tool definitions.
+   *
+   * @return the Configuration used to load the plugins.
+   */
+  public static Configuration loadPlugins(Configuration conf) {
+    conf = loadPluginsFromConfDir(conf);
+    List<ToolPlugin> plugins = conf.getInstances(TOOL_PLUGINS_KEY,
+        ToolPlugin.class);
+    for (ToolPlugin plugin : plugins) {
+      LOG.debug("Loading plugin: " + plugin.getClass().getName());
+      List<ToolDesc> descriptions = plugin.getTools();
+      for (ToolDesc desc : descriptions) {
+        LOG.debug("  Adding tool: " + desc.getName()
+            + " -> " + desc.getToolClass().getName());
+        registerTool(desc);
+      }
+    }
+
+    return conf;
+  }
+
+  /**
+   * If $SQOOP_CONF_DIR/tools.d/ exists and sqoop.tool.plugins is not set,
+   * then we look through the files in that directory; they should contain
+   * lines of the form 'plugin.class.name[=/path/to/containing.jar]'.
+   *
+   * <p>Put all plugin.class.names into the Configuration, and load any
+   * specified jars into the ClassLoader.
+   * </p>
+   *
+   * @param conf the current configuration to populate with class names.
+   * @return conf again, after possibly populating sqoop.tool.plugins.
+   */
+  private static Configuration loadPluginsFromConfDir(Configuration conf) {
+    if (conf.get(TOOL_PLUGINS_KEY) != null) {
+      LOG.debug(TOOL_PLUGINS_KEY + " is set; ignoring tools.d");
+      return conf;
+    }
+
+    String confDirName = System.getenv("SQOOP_CONF_DIR");
+    if (null == confDirName) {
+      LOG.warn("$SQOOP_CONF_DIR has not been set in the environment. "
+          + "Cannot check for additional configuration.");  
+      return conf;
+    }
+
+    File confDir = new File(confDirName);
+    File toolsDir = new File(confDir, "tools.d");
+
+    if (toolsDir.exists() && toolsDir.isDirectory()) {
+      // We have a tools.d subdirectory. Get the file list, sort it,
+      // and process them in order.
+      String [] fileNames = toolsDir.list();
+      Arrays.sort(fileNames);
+
+      for (String fileName : fileNames) {
+        File f = new File(toolsDir, fileName);
+        if (f.isFile()) {
+          loadPluginsFromFile(conf, f);
+        }
+      }
+    }
+
+    // Set the classloader in this configuration so that it will use
+    // the jars we just loaded in.
+    conf.setClassLoader(Thread.currentThread().getContextClassLoader());
+    return conf;
+  }
+
+  /**
+   * Read the specified file and extract any ToolPlugin implementation
+   * names from there.
+   * @param conf the configuration to populate.
+   * @param f the file containing the configuration data to add.
+   */
+  private static void loadPluginsFromFile(Configuration conf, File f) {
+    Reader r = null;
+    try {
+      // The file format is actually Java properties-file syntax.
+      r = new InputStreamReader(new FileInputStream(f));
+      Properties props = new Properties();
+      props.load(r);
+
+      for (Map.Entry<Object, Object> entry : props.entrySet()) {
+        // Each key is a ToolPlugin class name.
+        // Each value, if set, is the jar that contains it.
+        String plugin = entry.getKey().toString();
+        addPlugin(conf, plugin);
+
+        String jarName = entry.getValue().toString();
+        if (jarName.length() > 0) {
+          ClassLoaderStack.addJarFile(jarName, plugin);
+          LOG.debug("Added plugin " + plugin + " in jar " + jarName
+              + " specified by " + f);
+        } else if (LOG.isDebugEnabled()) {
+          LOG.debug("Added plugin " + plugin + " specified by " + f);
+        }
+      }
+    } catch (IOException ioe) {
+      LOG.error("Error loading ToolPlugin information from file "
+          + f + ": " + StringUtils.stringifyException(ioe));
+    } finally {
+      if (null != r) {
+        try {
+          r.close();
+        } catch (IOException ioe) {
+          LOG.warn("Error closing file " + f + ": " + ioe);
+        }
+      }
+    }
+  }
+
+  /**
+   * Add the specified plugin class name to the configuration string
+   * listing plugin classes.
+   */
+  private static void addPlugin(Configuration conf, String pluginName) {
+    String existingPlugins = conf.get(TOOL_PLUGINS_KEY);
+    String newPlugins = null;
+    if (null == existingPlugins || existingPlugins.length() == 0) {
+      newPlugins = pluginName;
+    } else {
+      newPlugins = existingPlugins + "," + pluginName;
+    }
+
+    conf.set(TOOL_PLUGINS_KEY, newPlugins);
   }
 
   /**
@@ -243,6 +398,9 @@ public abstract class SqoopTool {
       out.setConf(new Configuration());
     }
 
+    // This tool is the "active" tool; bind it in the SqoopOptions.
+    out.setActiveSqoopTool(this);
+
     String [] toolArgs = args; // args after generic parser is done.
     if (useGenericOptions) {
       try {
@@ -284,6 +442,51 @@ public abstract class SqoopTool {
     }
 
     this.extraArguments = newExtra;
+  }
+
+  /**
+   * Allow a tool to specify a set of dependency jar filenames. This is used
+   * to allow tools to bundle arbitrary dependency jars necessary for a
+   * MapReduce job executed by Sqoop. The jar containing the SqoopTool
+   * instance itself will already be handled by Sqoop.
+   *
+   * <p>Called by JobBase.cacheJars().</p>
+   *
+   * <p>
+   * This does not load the jars into the current VM; they are assumed to be
+   * already on the classpath if they are needed on the client side (or
+   * otherwise classloaded by the tool itself). This is purely to specify jars
+   * necessary to be added to the distributed cache. The tool itself can
+   * classload these jars by running loadDependencyJars().
+   * </p>
+   *
+   * <p>See also: c.c.s.util.Jars.getJarPathForClass()</p>
+   */
+  public List<String> getDependencyJars() {
+    // Default behavior: no additional dependencies.
+    return Collections.emptyList();
+  }
+
+  /**
+   * Loads dependency jars specified by getDependencyJars() into the current
+   * classloader stack. May optionally be called by a [third-party] tool
+   * before doing work, to ensure that all of its dependencies get classloaded
+   * properly. Note that dependencies will not be available until after the
+   * tool is already constructed.
+   */
+  protected void loadDependencyJars(SqoopOptions options) throws IOException {
+    List<String> deps = getDependencyJars();
+    if (null == deps) {
+      return;
+    }
+
+    for (String depFilename : deps) {
+      LOG.debug("Loading dependency: " + depFilename);
+      ClassLoaderStack.addJarFile(depFilename, null);
+    }
+
+    options.getConf().setClassLoader(
+        Thread.currentThread().getContextClassLoader());
   }
 
   @Override

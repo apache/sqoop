@@ -20,4 +20,6 @@
 .settings
 /tags
 /build.properties
+/conf/managers.d
+/conf/tools.d
 

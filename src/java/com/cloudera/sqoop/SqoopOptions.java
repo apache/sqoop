@@ -32,6 +32,8 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
+
+import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 
@@ -239,6 +241,11 @@ public class SqoopOptions implements Cloneable {
 
   // the connection manager fully qualified class name
   @StoredAsProperty("connection.manager") private String connManagerClassName;
+
+  // The currently active tool. (Not saved in properties)
+  // Used to pass the SqoopTool instance in to mapreduce job configuration
+  // (JobBase, etc).
+  private SqoopTool activeSqoopTool;
 
   public SqoopOptions() {
     initDefaults(null);
@@ -1649,6 +1656,15 @@ public class SqoopOptions implements Cloneable {
     return connManagerClassName;
   }
 
+  /** @return the SqoopTool that is operating this session. */
+  public SqoopTool getActiveSqoopTool() {
+    return activeSqoopTool;
+  }
+
+  public void setActiveSqoopTool(SqoopTool tool) {
+    activeSqoopTool = tool;
+  }
+
   public void setNullStringValue(String nullString) {
     this.nullStringValue = nullString;
   }
@@ -1665,21 +1681,20 @@ public class SqoopOptions implements Cloneable {
     return inNullStringValue;
   }
 
-public void setNullNonStringValue(String nullNonString) {
+  public void setNullNonStringValue(String nullNonString) {
     this.nullNonStringValue = nullNonString;
-}
+  }
 
-public String getNullNonStringValue() {
+  public String getNullNonStringValue() {
     return nullNonStringValue;
-}
+  }
 
-public void setInNullNonStringValue(String inNullNonString) {
+  public void setInNullNonStringValue(String inNullNonString) {
     this.inNullNonStringValue = inNullNonString;
-}
+  }
 
-public String getInNullNonStringValue() {
+  public String getInNullNonStringValue() {
     return inNullNonStringValue;
-}
-
+  }
 }
 

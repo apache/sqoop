@@ -36,6 +36,8 @@ import com.cloudera.sqoop.metastore.TestSavedJobs;
 import com.cloudera.sqoop.orm.TestClassWriter;
 import com.cloudera.sqoop.orm.TestParseMethods;
 
+import com.cloudera.sqoop.tool.TestToolPlugin;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -79,6 +81,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestNamedFifo.class);
     suite.addTestSuite(TestBooleanParser.class);
     suite.addTestSuite(TestMerge.class);
+    suite.addTestSuite(TestToolPlugin.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;

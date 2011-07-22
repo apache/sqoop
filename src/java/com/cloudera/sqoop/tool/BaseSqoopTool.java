@@ -165,7 +165,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
     return manager;
   }
 
-  protected void setManager(ConnManager mgr) {
+  public void setManager(ConnManager mgr) {
     this.manager = mgr;
   }
 

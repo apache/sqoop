@@ -182,8 +182,10 @@ public class ConnFactory {
    * not set, then we look through the files in that directory; they should
    * contain lines of the form mgr.class.name[=/path/to/containing.jar].
    *
+   * <p>
    * Put all mgr.class.names into the Configuration, and load any specified
    * jars into the ClassLoader.
+   * </p>
    *
    * @param conf the current configuration to populate with class names.
    * @return conf again, after possibly populating sqoop.connection.factories.

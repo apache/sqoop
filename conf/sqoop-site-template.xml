@@ -45,6 +45,28 @@
   -->
 
   <!--
+    Set the value of this property to enable third-party tools.
+
+    If this is not used, you can alternately specify a set of ToolPlugins
+    in the $SQOOP_CONF_DIR/tools.d/ subdirectory.  Each file should contain
+    one or more lines like:
+      plugin.class.name[=/path/to/containing.jar]
+
+    Files will be consulted in lexicographical order only if this property
+    is unset.
+  -->
+  <!--
+  <property>
+    <name>sqoop.tool.plugins</name>
+    <value></value>
+    <description>A comma-delimited list of ToolPlugin implementations
+      which are consulted, in order, to register SqoopTool instances which
+      allow third-party tools to be used.
+    </description>
+  </property>
+  -->
+
+  <!--
     By default, the Sqoop metastore will auto-connect to a local embedded
     database stored in ~/.sqoop/. To disable metastore auto-connect, uncomment
     this next property.

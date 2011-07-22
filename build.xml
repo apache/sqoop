@@ -381,6 +381,7 @@
         <exclude name=".project" />
         <exclude name=".classpath" />
         <exclude name="conf/managers.d/**" />
+        <exclude name="conf/tools.d/**" />
       </fileset>
     </copy>
 

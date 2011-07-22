@@ -177,7 +177,7 @@ public class Sqoop extends Configured implements Tool {
   public static int runSqoop(Sqoop sqoop, String [] args) {
     try {
       String [] toolArgs = sqoop.stashChildPrgmArgs(args);
-      return ToolRunner.run(sqoop, toolArgs);
+      return ToolRunner.run(sqoop.getConf(), sqoop, toolArgs);
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
@@ -206,6 +206,7 @@ public class Sqoop extends Configured implements Tool {
     }
 
     String toolName = expandedArgs[0];
+    Configuration pluginConf = SqoopTool.loadPlugins(new Configuration());
     SqoopTool tool = SqoopTool.getTool(toolName);
     if (null == tool) {
       System.err.println("No such sqoop tool: " + toolName
@@ -214,7 +215,7 @@ public class Sqoop extends Configured implements Tool {
     }
 
 
-    Sqoop sqoop = new Sqoop(tool);
+    Sqoop sqoop = new Sqoop(tool, pluginConf);
     return runSqoop(sqoop,
         Arrays.copyOfRange(expandedArgs, 1, expandedArgs.length));
   }

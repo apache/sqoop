@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -42,6 +43,8 @@ import com.cloudera.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.manager.ConnManager;
+
+import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import com.cloudera.sqoop.util.Jars;
 
@@ -143,6 +146,18 @@ public class JobBase {
       addToCache(Jars.getJarPathForClass(mgr.getClass()), fs, localUrls);
     }
 
+    SqoopTool tool = this.options.getActiveSqoopTool();
+    if (null != tool) {
+      // Make sure the jar for the tool itself is on the classpath. (In case
+      // this is a third-party plugin tool.)
+      addToCache(Jars.getJarPathForClass(tool.getClass()), fs, localUrls);
+      List<String> toolDeps = tool.getDependencyJars();
+      if (null != toolDeps) {
+        for (String depFile : toolDeps) {
+          addToCache(depFile, fs, localUrls);
+        }
+      }
+    }
 
     // If the user specified a particular jar file name,
 
