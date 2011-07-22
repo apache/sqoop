@@ -30,8 +30,8 @@ Syntax
 ~~~~~~
 
 ----
-$ sqoop export (generic-args) (import-args)
-$ sqoop-export (generic-args) (import-args)
+$ sqoop export (generic-args) (export-args)
+$ sqoop-export (generic-args) (export-args)
 ----
 
 Although the Hadoop generic arguments must preceed any export arguments,
