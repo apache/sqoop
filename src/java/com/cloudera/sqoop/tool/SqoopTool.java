@@ -107,6 +107,14 @@ public abstract class SqoopTool {
    */
   private static void registerTool(String toolName,
       Class<? extends SqoopTool> cls, String description) {
+    Class<? extends SqoopTool> existing = TOOLS.get(toolName);
+    if (null != existing) {
+      // Already have a tool with this name. Refuse to start.
+      throw new RuntimeException("A plugin is attempting to register a tool "
+          + "with name " + toolName + ", but this tool already exists ("
+          + existing.getName() + ")");
+    }
+
     TOOLS.put(toolName, cls);
     DESCRIPTIONS.put(toolName, description);
   }

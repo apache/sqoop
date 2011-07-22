@@ -26,6 +26,8 @@ import org.apache.commons.cli.CommandLine;
 
 import org.apache.hadoop.conf.Configuration;
 
+import org.apache.hadoop.util.StringUtils;
+
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 
@@ -118,5 +120,29 @@ public class TestToolPlugin extends TestCase {
 
     String actualUser = FooTool.getLastUser();
     assertEquals("Failed to set username correctly.", "bob", actualUser);
+  }
+
+  /**
+   * Plugin class that tries to override an existing tool definition.
+   */
+  public static class OverridePlugin extends ToolPlugin {
+    public List<ToolDesc> getTools() {
+      return Collections.singletonList(new ToolDesc("import",
+          FooTool.class, "replaces 'import' with foo"));
+    }
+  }
+
+  public void testNoOverrideTools() {
+    // Test that you can't override an existing tool definition. First
+    // registration of a tool name wins.
+    Configuration pluginConf = new Configuration();
+    pluginConf.set(SqoopTool.TOOL_PLUGINS_KEY, OverridePlugin.class.getName());
+    try {
+      SqoopTool.loadPlugins(pluginConf);
+      fail("Successfully loaded a plugin that overrides 'import' tool.");
+    } catch (RuntimeException re) {
+      LOG.info("Got runtime exception registering plugin (expected; ok): "
+          + StringUtils.stringifyException(re));
+    }
   }
 }
