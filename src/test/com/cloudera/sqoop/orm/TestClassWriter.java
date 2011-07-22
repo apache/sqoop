@@ -21,6 +21,8 @@ package com.cloudera.sqoop.orm;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -41,6 +43,7 @@ import com.cloudera.sqoop.testutil.DirUtil;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.cloudera.sqoop.util.ClassLoaderStack;
 
 /**
  * Test that the ClassWriter generates Java classes based on the given table,
@@ -118,8 +121,9 @@ public class TestClassWriter extends TestCase {
   /**
    * Run a test to verify that we can generate code and it emits the output
    * files where we expect them.
+   * @return
    */
-  private void runGenerationTest(String [] argv, String classNameToCheck) {
+  private File runGenerationTest(String [] argv, String classNameToCheck) {
     File codeGenDirFile = new File(CODE_GEN_DIR);
     File classGenDirFile = new File(JAR_GEN_DIR);
 
@@ -164,7 +168,7 @@ public class TestClassWriter extends TestCase {
     assertTrue("Cannot find compiled jar", jarFile.exists());
     LOG.debug("Found generated jar: " + jarFile);
 
-    // check that the .class file made it into the .jar by enumerating 
+    // check that the .class file made it into the .jar by enumerating
     // available entries in the jar file.
     boolean foundCompiledClass = false;
     try {
@@ -195,6 +199,7 @@ public class TestClassWriter extends TestCase {
         + ".class in jar file", foundCompiledClass);
 
     LOG.debug("Found class in jar - test success!");
+    return jarFile;
   }
 
   /**
@@ -258,7 +263,7 @@ public class TestClassWriter extends TestCase {
 
     runGenerationTest(argv, OVERRIDE_CLASS_AND_PACKAGE_NAME);
   }
- 
+
   private static final String OVERRIDE_PACKAGE_NAME =
       "special.userpackage.name";
 
@@ -334,5 +339,87 @@ public class TestClassWriter extends TestCase {
     runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "."
         + HsqldbTestServer.getTableName());
   }
-}
 
+  /**
+   * Test the generated equals method.
+   * @throws IOException
+   * @throws ClassNotFoundException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws NoSuchMethodException
+   * @throws SecurityException
+   * @throws InvocationTargetException
+   * @throws IllegalArgumentException
+   */
+  @Test
+  public void testEqualsMethod() throws IOException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException, NoSuchMethodException,
+      InvocationTargetException {
+
+    // Set the option strings in an "argv" to redirect our srcdir and bindir
+    String [] argv = {
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--class-name",
+      OVERRIDE_CLASS_AND_PACKAGE_NAME,
+    };
+
+    File ormJarFile = runGenerationTest(argv, OVERRIDE_CLASS_AND_PACKAGE_NAME);
+    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+        ormJarFile.getCanonicalPath(),
+        OVERRIDE_CLASS_AND_PACKAGE_NAME);
+    Class tableClass = Class.forName(
+        OVERRIDE_CLASS_AND_PACKAGE_NAME,
+        true,
+        Thread.currentThread().getContextClassLoader());
+    Method setterIntField1 =
+        tableClass.getMethod("set_INTFIELD1", Integer.class);
+    Method setterIntField2 =
+        tableClass.getMethod("set_INTFIELD2", Integer.class);
+    Method equalsImplementation = tableClass.getMethod("equals", Object.class);
+
+    Object instance1 = tableClass.newInstance();
+    Object instance2 = tableClass.newInstance();
+
+    // test reflexivity
+    assertTrue((Boolean) equalsImplementation.invoke(instance1, instance1));
+
+    // test equality for uninitialized fields
+    assertTrue((Boolean) equalsImplementation.invoke(instance1, instance2));
+
+    // test symmetry
+    assertTrue((Boolean) equalsImplementation.invoke(instance2, instance1));
+
+    // test reflexivity with initialized fields
+    setterIntField1.invoke(instance1, new Integer(1));
+    setterIntField2.invoke(instance1, new Integer(2));
+    assertTrue((Boolean) equalsImplementation.invoke(instance1, instance1));
+
+    // test difference in both fields
+    setterIntField1.invoke(instance2, new Integer(3));
+    setterIntField2.invoke(instance2, new Integer(4));
+    assertFalse((Boolean) equalsImplementation.invoke(instance1, instance2));
+
+    // test difference in second field
+    setterIntField1.invoke(instance2, new Integer(1));
+    setterIntField2.invoke(instance2, new Integer(3));
+    assertFalse((Boolean) equalsImplementation.invoke(instance1, instance2));
+
+    // test difference in first field
+    setterIntField1.invoke(instance2, new Integer(3));
+    setterIntField2.invoke(instance2, new Integer(2));
+    assertFalse((Boolean) equalsImplementation.invoke(instance1, instance2));
+
+    // test equality for initialized fields
+    setterIntField1.invoke(instance2, new Integer(1));
+    setterIntField2.invoke(instance2, new Integer(2));
+    assertTrue((Boolean) equalsImplementation.invoke(instance1, instance2));
+
+    if (null != prevClassLoader) {
+      ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+    }
+  }
+
+}

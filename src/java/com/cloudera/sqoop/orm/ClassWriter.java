@@ -426,13 +426,14 @@ public class ClassWriter {
   }
 
   /**
-   * Generate a member field and getter method for each column.
+   * Generate a member field, getter, setter and with method for each column.
    * @param columnTypes - mapping from column names to sql types
-   * @param colNames - ordered list of column names for table.
+   * @param colNames - ordered list of column names for table
+   * @param className - name of the generated class
    * @param sb - StringBuilder to append code to
    */
   private void generateFields(Map<String, Integer> columnTypes,
-      String [] colNames, StringBuilder sb) {
+      String [] colNames, String className, StringBuilder sb) {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
@@ -446,7 +447,49 @@ public class ClassWriter {
       sb.append("  public " + javaType + " get_" + col + "() {\n");
       sb.append("    return " + col + ";\n");
       sb.append("  }\n");
+      sb.append("  public void set_" + col + "(" + javaType + " " + col
+          + ") {\n");
+      sb.append("    this." + col + " = " + col + ";\n");
+      sb.append("  }\n");
+      sb.append("  public " + className + " with_" + col + "(" + javaType + " "
+          + col + ") {\n");
+      sb.append("    this." + col + " = " + col + ";\n");
+      sb.append("    return this;\n");
+      sb.append("  }\n");
     }
+  }
+
+  /**
+   * Generate an equals method that compares the fields for each column.
+   * @param columnTypes - mapping from column names to sql types
+   * @param colNames - ordered list of column names for table
+   * @param className - name of the generated class
+   * @param sb - StringBuilder to append code to
+   */
+  private void generateEquals(Map<String, Integer> columnTypes,
+      String [] colNames, String className, StringBuilder sb) {
+
+    sb.append("  public boolean equals(Object o) {\n");
+    sb.append("    if (this == o) {\n");
+    sb.append("      return true;\n");
+    sb.append("    }\n");
+    sb.append("    if (!(o instanceof " + className + ")) {\n");
+    sb.append("      return false;\n");
+    sb.append("    }\n");
+    sb.append("    " + className + " that = (" + className + ") o;\n");
+    sb.append("    boolean equal = true;\n");
+    for (String col : colNames) {
+      int sqlType = columnTypes.get(col);
+      String javaType = connManager.toJavaType(sqlType);
+      if (null == javaType) {
+        LOG.error("Cannot resolve SQL type " + sqlType);
+        continue;
+      }
+      sb.append("    equal = equal && (this." + col + " == null ? that." + col
+          + " == null : this." + col + ".equals(that." + col + "));\n");
+    }
+    sb.append("    return equal;\n");
+    sb.append("  }\n");
   }
 
   /**
@@ -1180,7 +1223,8 @@ public class ClassWriter {
     sb.append(
         "  public int getClassFormatVersion() { return PROTOCOL_VERSION; }\n");
     sb.append("  protected ResultSet __cur_result_set;\n");
-    generateFields(columnTypes, colNames, sb);
+    generateFields(columnTypes, colNames, className, sb);
+    generateEquals(columnTypes, colNames, className, sb);
     generateDbRead(columnTypes, colNames, sb);
     generateLoadLargeObjects(columnTypes, colNames, sb);
     generateDbWrite(columnTypes, dbWriteColNames, sb);
