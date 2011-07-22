@@ -142,25 +142,47 @@
   <property name="ivy.artifact.retrieve.pattern"
     			value="${name}/[conf]/[artifact]-[revision].[ext]"/>
 
-  <!-- The classpath for compiling and running Sqoop -->
-  <path id="compile.classpath">
-    <pathelement location="${build.classes}"/>
-    <path refid="lib.path"/>
-    <path refid="${name}.hadoop.classpath"/>
-  </path>
-
-  <path id="cobertura.classpath">
-    <fileset dir="${cobertura.home}">
-      <include name="**/*.jar" />
-    </fileset>
-  </path>
-
   <!-- load ant-contrib tasks to get the "if" task. -->
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
     <classpath>
       <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
     </classpath>
   </taskdef>
+
+  <!-- The classpath for compiling and running Sqoop -->
+  <if>
+    <isset property="hadoop.home" />
+    <then>
+      <path id="compile.classpath">
+        <pathelement location="${build.classes}"/>
+        <path refid="lib.path"/>
+        <fileset dir="${hadoop.home}">
+          <include name="hadoop-core-*.jar" />
+          <include name="hadoop-*-core.jar" />
+          <include name="hadoop-common-*.jar" />
+          <include name="hadoop-mapred-*.jar" />
+          <include name="hadoop-hdfs-*.jar" />
+        </fileset>
+        <fileset dir="${hadoop.home}/lib">
+          <include name="*.jar" />
+        </fileset>
+        <path refid="${name}.hadoop.classpath"/>
+      </path>
+    </then>
+    <else>
+      <path id="compile.classpath">
+        <pathelement location="${build.classes}"/>
+        <path refid="lib.path"/>
+        <path refid="${name}.hadoop.classpath"/>
+      </path>
+    </else>
+  </if>
+
+  <path id="cobertura.classpath">
+    <fileset dir="${cobertura.home}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
 
   <!-- "init" target used for setup purposes. --> 
   <target name="init">
@@ -187,6 +209,21 @@
         <then>
           <property name="hadoop.shim" value="cloudera" />
           <echo message="Hadoop distribution: cloudera -> cloudera (CDH3)" />
+        </then>
+      </elseif>
+      <elseif>
+        <equals arg1="${hadoop.dist}" arg2="local" />
+        <then>
+          <echo message="Hadoop distribution set to local installation" />
+          <property name="hadoop.is.local" value="true" />
+          <fail unless="hadoop.shim">
+            You must explicitly set ${hadoop.shim} to 'apache' or 'cloudera'
+            to use a local distribution.
+          </fail>
+          <fail unless="hadoop.home">
+            You must set ${hadoop.home} to point to your local
+            Hadoop installation.
+          </fail>
         </then>
       </elseif>
       <else>
@@ -933,25 +970,67 @@
   </target>
 
   <!-- retrieve ivy-managed artifacts from the Hadoop distribution -->
-  <target name="ivy-resolve-hadoop" depends="ivy-init">
+  <target name="ivy-resolve-hadoop" depends="ivy-init"
+      unless="hadoop.is.local">
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}" />
   </target>
-  <target name="ivy-retrieve-hadoop" depends="ivy-resolve-hadoop">
-    <ivy:retrieve settingsRef="${name}.ivy.settings" 
-      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
-    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="${hadoop.dist}" />
+  <target name="ivy-retrieve-hadoop" depends="ivy-init,ivy-resolve-hadoop">
+    <if>
+      <equals arg1="${hadoop.dist}" arg2="local" />
+      <then>
+        <!-- Use a local Hadoop distribution. Just retrieve the basic
+             'common' configuration, and add the Hadoop jars from
+             the local Hadoop install.
+             We can't use a subant here, because the refs wouldn't be
+             preserved when we return to executing this target. 
+        -->
+        <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
+        <ivy:retrieve settingsRef="${name}.ivy.settings" 
+            pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+            sync="true" />
+        <ivy:cachepath pathid="${name}.hadoop.classpath" conf="common" />
+      </then>
+      <else>
+        <!-- retrieve hadoop refs normally. -->
+        <ivy:retrieve settingsRef="${name}.ivy.settings" 
+          pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+          sync="true" />
+        <ivy:cachepath pathid="${name}.hadoop.classpath" conf="${hadoop.dist}" />
+      </else>
+    </if>
   </target>
 
   <!-- retrieve ivy-managed test artifacts from the Hadoop distribution -->
-  <target name="ivy-resolve-hadoop-test" depends="ivy-init">
+  <target name="ivy-resolve-hadoop-test" depends="ivy-init"
+      unless="hadoop.is.local">
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}test" />
   </target>
-  <target name="ivy-retrieve-hadoop-test" depends="ivy-resolve-hadoop-test">
-    <ivy:retrieve settingsRef="${name}.ivy.settings" 
-      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
-      sync="true" />
-    <ivy:cachepath pathid="${name}.hadooptest.classpath"
-      conf="${hadoop.dist}test" />
+  <target name="ivy-retrieve-hadoop-test"
+      depends="ivy-init,ivy-resolve-hadoop-test">
+    <if>
+      <equals arg1="${hadoop.dist}" arg2="local" />
+      <then>
+        <!-- Use a local Hadoop distribution. Just retrieve the basic
+             'test' configuration, and add the Hadoop jars from
+             the local Hadoop install.
+             We can't use a subant here, because the refs wouldn't be
+             preserved when we return to executing this target. 
+        -->
+        <ivy:resolve settingsRef="${name}.ivy.settings" conf="test" />
+        <ivy:retrieve settingsRef="${name}.ivy.settings" 
+            pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+            sync="true" />
+        <ivy:cachepath pathid="${name}.hadooptest.classpath" conf="test" />
+      </then>
+      <else>
+        <!-- retrieve hadoop refs normally. -->
+        <ivy:retrieve settingsRef="${name}.ivy.settings" 
+          pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+          sync="true" />
+        <ivy:cachepath pathid="${name}.hadooptest.classpath"
+          conf="${hadoop.dist}test" />
+      </else>
+    </if>
   </target>
 
   <!-- retrieve ivy-managed artifacts for checkstyle -->
