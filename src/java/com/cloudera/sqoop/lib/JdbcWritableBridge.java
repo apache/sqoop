@@ -115,7 +115,7 @@ public final class JdbcWritableBridge {
   public static BytesWritable readBytesWritable(int colNum, ResultSet r)
       throws SQLException {
     byte [] bytes = r.getBytes(colNum);
-    return new BytesWritable(bytes);
+    return bytes == null ? null : new BytesWritable(bytes);
   }
 
   public static BigDecimal readBigDecimal(int colNum, ResultSet r)
