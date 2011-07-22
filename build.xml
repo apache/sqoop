@@ -224,7 +224,8 @@
     </copy>
 
     <!-- copy in all shim artifacts -->
-    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
+    <mkdir dir="${dist.dir}/shims" />
+    <copy todir="${dist.dir}/shims" includeEmptyDirs="false" flatten="true">
       <fileset dir="${build.shim.dir}">
         <include name="*.jar" />
       </fileset>
@@ -266,12 +267,20 @@
         <include name="**/*" />
       </fileset>
     </copy>
+
+    <chmod perm="ugo+x" type="file" parallel="false">
+      <fileset dir="${dist.dir}/bin" />
+    </chmod>
   </target>
 
   <target name="tar" depends="package" description="Create release tarball">
     <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
       <tarfileset dir="${build.dir}" mode="664">
+        <exclude name="${artifact.name}/bin/*" />
         <include name="${artifact.name}/**" />
+      </tarfileset>
+      <tarfileset dir="${build.dir}" mode="755">
+        <include name="${artifact.name}/bin/*" />
       </tarfileset>
     </tar>
   </target>
