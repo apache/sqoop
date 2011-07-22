@@ -23,6 +23,9 @@ Import control options
 --append::
   Append data to an existing HDFS dataset
 
+----as-avrodatafile::
+  Imports data to Avro Data Files
+
 --as-sequencefile::
   Imports data to SequenceFiles
 

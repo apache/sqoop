@@ -509,6 +509,10 @@ public class ImportTool extends BaseSqoopTool {
         .withDescription("Imports data as plain text (default)")
         .withLongOpt(FMT_TEXTFILE_ARG)
         .create());
+    importOpts.addOption(OptionBuilder
+        .withDescription("Imports data to Avro data files")
+        .withLongOpt(FMT_AVRODATAFILE_ARG)
+        .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -697,6 +701,10 @@ public class ImportTool extends BaseSqoopTool {
 
       if (in.hasOption(FMT_TEXTFILE_ARG)) {
         out.setFileLayout(SqoopOptions.FileLayout.TextFile);
+      }
+
+      if (in.hasOption(FMT_AVRODATAFILE_ARG)) {
+        out.setFileLayout(SqoopOptions.FileLayout.AvroDataFile);
       }
 
       if (in.hasOption(NUM_MAPPERS_ARG)) {

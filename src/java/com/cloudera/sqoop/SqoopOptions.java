@@ -77,7 +77,8 @@ public class SqoopOptions implements Cloneable {
   /** Selects in-HDFS destination file format. */
   public enum FileLayout {
     TextFile,
-    SequenceFile
+    SequenceFile,
+    AvroDataFile
   }
 
   /**

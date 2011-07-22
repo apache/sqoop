@@ -86,6 +86,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
+  public static final String FMT_AVRODATAFILE_ARG = "as-avrodatafile";
   public static final String HIVE_IMPORT_ARG = "hive-import";
   public static final String HIVE_TABLE_ARG = "hive-table";
   public static final String HIVE_OVERWRITE_ARG = "hive-overwrite";

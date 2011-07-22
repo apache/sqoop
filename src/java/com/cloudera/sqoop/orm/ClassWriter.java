@@ -161,8 +161,8 @@ public class ClassWriter {
   }
 
   /**
-   * Coerce a candidate name for an identifier into one which will
-   * definitely compile.
+   * Coerce a candidate name for an identifier into one which is a valid
+   * Java or Avro identifier.
    *
    * Ensures that the returned identifier matches [A-Za-z_][A-Za-z0-9_]*
    * and is not a reserved word.
@@ -204,8 +204,22 @@ public class ClassWriter {
         }
       }
     }
+    return sb.toString();
+  }
 
-    String output = sb.toString();
+  /**
+   * Coerce a candidate name for an identifier into one which will
+   * definitely compile.
+   *
+   * Ensures that the returned identifier matches [A-Za-z_][A-Za-z0-9_]*
+   * and is not a reserved word.
+   *
+   * @param candidate A string we want to use as an identifier
+   * @return A string naming an identifier which compiles and is
+   *   similar to the candidate.
+   */
+  public static String toJavaIdentifier(String candidate) {
+    String output = toIdentifier(candidate);
     if (isReservedWord(output)) {
       // e.g., 'class' -> '_class';
       return "_" + output;
@@ -998,66 +1012,22 @@ public class ClassWriter {
     String [] cleanedColNames = new String[colNames.length];
     for (int i = 0; i < colNames.length; i++) {
       String col = colNames[i];
-      String identifier = toIdentifier(col);
+      String identifier = toJavaIdentifier(col);
       cleanedColNames[i] = identifier;
     }
 
     return cleanedColNames;
   }
 
-  private Map<String, Integer> setupColumnTypes() throws IOException {
-    Map<String, Integer> columnTypes;
 
-    if (null != tableName) {
-      // We're generating a class based on a table import.
-      columnTypes = connManager.getColumnTypes(tableName);
-    } else {
-      // This is based on an arbitrary query.
-      String query = this.options.getSqlQuery();
-      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
-        throw new IOException("Query [" + query + "] must contain '"
-            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
-      }
+  /**
+   * Generate the ORM code for the class.
+   */
+  public void generate() throws IOException {
+    Map<String, Integer> columnTypes = getColumnTypes();
 
-      columnTypes = connManager.getColumnTypesForQuery(query);
-    }
-    return columnTypes;
-  }
+    String[] colNames = getColumnNames(columnTypes);
 
-  private String[] setupColNames(Map<String, Integer> columnTypes) {
-    String [] colNames = options.getColumns();
-    if (null == colNames) {
-      if (null != tableName) {
-        // Table-based import. Read column names from table.
-        colNames = connManager.getColumnNames(tableName);
-      } else {
-        // Infer/assign column names for arbitrary query.
-        colNames = connManager.getColumnNamesForQuery(
-            this.options.getSqlQuery());
-      }
-    } else {
-      // These column names were provided by the user. They may not be in
-      // the same case as the keys in the columnTypes map. So make sure
-      // we add the appropriate aliases in that map.
-      for (String userColName : colNames) {
-        for (Map.Entry<String, Integer> typeEntry : columnTypes.entrySet()) {
-          String typeColName = typeEntry.getKey();
-          if (typeColName.equalsIgnoreCase(userColName)
-              && !typeColName.equals(userColName)) {
-            // We found the correct-case equivalent.
-            columnTypes.put(userColName, typeEntry.getValue());
-            // No need to continue iteration; only one could match.
-            // Also, the use of put() just invalidated the iterator.
-            break;
-          }
-        }
-      }
-    }
-    return colNames;
-  }
-
-  private String[] setupCleanedColNames(Map<String, Integer> columnTypes,
-      String[] colNames) {
     // Translate all the column names into names that are safe to
     // use as identifiers.
     String [] cleanedColNames = cleanColNames(colNames);
@@ -1082,16 +1052,6 @@ public class ClassWriter {
       }
       columnTypes.put(identifier, type);
     }
-    return cleanedColNames;
-  }
-
-  /**
-   * Generate the ORM code for the class.
-   */
-  public void generate() throws IOException {
-    Map<String, Integer> columnTypes = setupColumnTypes();
-    String[] colNames = setupColNames(columnTypes);
-    String[] cleanedColNames = setupCleanedColNames(columnTypes, colNames);
 
     // The db write() method may use column names in a different
     // order. If this is set in the options, pull it out here and
@@ -1184,6 +1144,56 @@ public class ClassWriter {
         }
       }
     }
+  }
+
+  protected String[] getColumnNames(Map<String, Integer> columnTypes) {
+    String [] colNames = options.getColumns();
+    if (null == colNames) {
+      if (null != tableName) {
+        // Table-based import. Read column names from table.
+        colNames = connManager.getColumnNames(tableName);
+      } else {
+        // Infer/assign column names for arbitrary query.
+        colNames = connManager.getColumnNamesForQuery(
+            this.options.getSqlQuery());
+      }
+    } else {
+      // These column names were provided by the user. They may not be in
+      // the same case as the keys in the columnTypes map. So make sure
+      // we add the appropriate aliases in that map.
+      for (String userColName : colNames) {
+        for (Map.Entry<String, Integer> typeEntry : columnTypes.entrySet()) {
+          String typeColName = typeEntry.getKey();
+          if (typeColName.equalsIgnoreCase(userColName)
+              && !typeColName.equals(userColName)) {
+            // We found the correct-case equivalent.
+            columnTypes.put(userColName, typeEntry.getValue());
+            // No need to continue iteration; only one could match.
+            // Also, the use of put() just invalidated the iterator.
+            break;
+          }
+        }
+      }
+    }
+    return colNames;
+  }
+
+  protected Map<String, Integer> getColumnTypes() throws IOException {
+    Map<String, Integer> columnTypes;
+    if (null != tableName) {
+      // We're generating a class based on a table import.
+      columnTypes = connManager.getColumnTypes(tableName);
+    } else {
+      // This is based on an arbitrary query.
+      String query = this.options.getSqlQuery();
+      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
+        throw new IOException("Query [" + query + "] must contain '"
+            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
+      }
+
+      columnTypes = connManager.getColumnTypesForQuery(query);
+    }
+    return columnTypes;
   }
 
   /**

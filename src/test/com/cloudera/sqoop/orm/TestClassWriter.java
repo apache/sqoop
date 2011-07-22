@@ -291,7 +291,7 @@ public class TestClassWriter extends TestCase {
 
   // Test the SQL identifier -> Java identifier conversion.
   @Test
-  public void testIdentifierConversion() {
+  public void testJavaIdentifierConversion() {
     assertNull(ClassWriter.getIdentifierStrForChar(' '));
     assertNull(ClassWriter.getIdentifierStrForChar('\t'));
     assertNull(ClassWriter.getIdentifierStrForChar('\r'));
@@ -300,14 +300,15 @@ public class TestClassWriter extends TestCase {
     assertEquals("_", ClassWriter.getIdentifierStrForChar('-'));
     assertEquals("_", ClassWriter.getIdentifierStrForChar('_'));
 
-    assertEquals("foo", ClassWriter.toIdentifier("foo"));
-    assertEquals("_class", ClassWriter.toIdentifier("class"));
-    assertEquals("_class", ClassWriter.toIdentifier("cla ss"));
-    assertEquals("_int", ClassWriter.toIdentifier("int"));
-    assertEquals("thisismanywords", ClassWriter.toIdentifier(
+    assertEquals("foo", ClassWriter.toJavaIdentifier("foo"));
+    assertEquals("_class", ClassWriter.toJavaIdentifier("class"));
+    assertEquals("_class", ClassWriter.toJavaIdentifier("cla ss"));
+    assertEquals("_int", ClassWriter.toJavaIdentifier("int"));
+    assertEquals("thisismanywords", ClassWriter.toJavaIdentifier(
         "this is many words"));
-    assertEquals("_9isLegalInSql", ClassWriter.toIdentifier("9isLegalInSql"));
-    assertEquals("___", ClassWriter.toIdentifier("___"));
+    assertEquals("_9isLegalInSql", ClassWriter.toJavaIdentifier(
+        "9isLegalInSql"));
+    assertEquals("___", ClassWriter.toJavaIdentifier("___"));
   }
 
   @Test

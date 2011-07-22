@@ -84,7 +84,21 @@
       conf="common->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
-    
+    <dependency org="org.apache.avro" name="avro" rev="${avro.version}"
+      conf="common->default;redist->default">
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.mortbay.jetty" module="jetty"/>
+      <exclude org="org.jboss.netty" module="netty"/>
+      <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
+    <dependency org="org.apache.avro" name="avro-mapred" rev="${avro.version}"
+      conf="common->default;redist->default">
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.mortbay.jetty" module="jetty"/>
+      <exclude org="org.jboss.netty" module="netty"/>
+      <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
+
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
       conf="checkstyle->default" />

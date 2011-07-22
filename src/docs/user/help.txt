@@ -75,6 +75,7 @@ Common arguments:
    --verbose                Print more information while working
 
 Import control arguments:
+   --as-avrodatafile             Imports data to Avro Data Files
    --as-sequencefile             Imports data to SequenceFiles
    --as-textfile                 Imports data as plain text (default)
 ...

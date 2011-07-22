@@ -40,7 +40,8 @@ multiple Hive installations, or +hive+ is not in your +$PATH+, use the
 *+\--hive-home+* option to identify the Hive installation directory.
 Sqoop will use +$HIVE_HOME/bin/hive+ from here.
 
-NOTE: This function is incompatible with +\--as-sequencefile+.
+NOTE: This function is incompatible with +\--as-avrodatafile+ and
++\--as-sequencefile+.
 
 Even though Hive supports escaping characters, it does not
 handle escaping of new-line character. Also, it does not support

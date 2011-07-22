@@ -95,7 +95,7 @@ public class TableClassName {
 
     // no specific class; no specific package.
     // Just make sure it's a legal identifier.
-    return ClassWriter.toIdentifier(queryName);
+    return ClassWriter.toJavaIdentifier(queryName);
   }
 
   /**
