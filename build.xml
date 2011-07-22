@@ -58,6 +58,10 @@
   <property name="test.log.dir" location="${build.dir}/test/logs"/>
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
+  <property name="build.docs.timestamp"
+      location="${build.dir}/docs.timestamp" />
+  <property name="build.webdocs.timestamp"
+      location="${build.dir}/webdocs.timestamp" />
 
   <!-- compilation -->
   <property name="javac.deprecation" value="off"/>
@@ -96,6 +100,8 @@
       value="${test.dir}/checkstyle-noframes.xsl" />
   <property name="checkstyle.report.dir" value="${build.dir}" />
 
+  <!-- Release audit -->
+  <property name="rat.reporting.classname" value="rat.Report"/>
 
   <!-- When testing with non-free JDBC drivers, override this parameter
        to contain the path to the driver library dir.
@@ -554,7 +560,43 @@
     </junit>
   </target>
 
-  <target name="webdocs" description="Build website documentation">
+  <target name="releaseaudit" depends="package,ivy-retrieve-releaseaudit"
+      description="Audit license headers for release">
+    <fail unless="rat.present"
+        message="Failed to load class [${rat.reporting.classname}]." />
+    <java classname="${rat.reporting.classname}" fork="true" 
+        output="${build.dir}/rat.log">
+      <classpath refid="${name}.releaseaudit.classpath" />
+      <arg value="${dist.dir}" />
+    </java>
+    <exec executable="${script.src.dir}/rat-violations.sh" failOnError="true">
+        <arg value="${build.dir}/rat.log" />
+        <arg value="${dist.dir}" />
+    </exec>
+    <echo message="Release audit appears okay. Full results are in " />
+    <echo message="${build.dir}/rat.log" />
+  </target>
+
+  <target name="docs-uptodate" depends="init">
+    <uptodate property="docs.uptodate">
+      <srcfiles dir="${basedir}/src/docs/">
+        <include name="**/*.txt" />
+      </srcfiles>
+      <mapper type="merge" to="${build.docs.timestamp}" />
+    </uptodate>
+  </target>
+
+  <target name="webdocs-uptodate" depends="init">
+    <uptodate property="webdocs.uptodate">
+      <srcfiles dir="${basedir}/src/docs/">
+        <include name="**/*.txt" />
+      </srcfiles>
+      <mapper type="merge" to="${build.webdocs.timestamp}" />
+    </uptodate>
+  </target>
+
+  <target name="webdocs" depends="webdocs-uptodate" unless="webdocs.uptodate"
+      description="Build website documentation">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
       <arg value="${basedir}/src/docs" />
@@ -562,15 +604,18 @@
       <arg value="VERSION=${version}" />
       <arg value="website" />
     </exec>
+    <touch file="${build.webdocs.timestamp}" />
   </target>
 
-  <target name="docs" description="Build documentation">
+  <target name="docs" depends="docs-uptodate" unless="docs.uptodate"
+      description="Build documentation">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
       <arg value="${basedir}/src/docs" />
       <arg value="BUILDROOT=${build.dir}" />
       <arg value="VERSION=${version}" />
     </exec>
+    <touch file="${build.docs.timestamp}" />
   </target>
 
   <target name="javadoc-uptodate" depends="init">
@@ -811,6 +856,19 @@
     <ivy:retrieve settingsRef="${name}.ivy.settings"
       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
     <ivy:cachepath pathid="${name}.checkstyle.classpath" conf="checkstyle" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts for releaseaudit -->
+  <target name="ivy-resolve-releaseaudit" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="releaseaudit" />
+  </target>
+  <target name="ivy-retrieve-releaseaudit" depends="ivy-resolve-releaseaudit">
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.releaseaudit.classpath" conf="releaseaudit" />
+    <available classname="${rat.reporting.classname}"
+        classpathref="${name}.releaseaudit.classpath" property="rat.present"
+        value="true" />
   </target>
 
 </project>

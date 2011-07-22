@@ -61,6 +61,9 @@
 
     <!-- configuration for running checkstyle -->
     <conf name="checkstyle" visibility="private" />
+
+    <!-- configuration for running rat -->
+    <conf name="releaseaudit" visibility="private" />
   </configurations>
 
   <publications>
@@ -119,5 +122,13 @@
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
       conf="checkstyle->default" />
+
+    <dependency org="com.google.code.p.arat" name="rat-lib"
+          rev="${rats-lib.version}" conf="releaseaudit->default" />
+    <dependency org="commons-lang" name="commons-lang"
+      rev="${commons-lang.version}" conf="releaseaudit->default"/>
+    <dependency org="commons-collections" name="commons-collections"
+      rev="${commons-collections.version}" conf="releaseaudit->default"/>
+
   </dependencies>
 </ivy-module>
