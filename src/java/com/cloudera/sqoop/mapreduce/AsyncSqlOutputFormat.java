@@ -229,8 +229,7 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
               if (op.execAsBatch()) {
                 stmt.executeBatch();
               } else {
-                // Normal update.
-                stmt.executeUpdate();
+                stmt.execute();
               }
               stmt.close();
               stmt = null;

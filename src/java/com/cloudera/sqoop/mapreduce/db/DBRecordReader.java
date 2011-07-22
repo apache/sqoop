@@ -291,4 +291,11 @@ public class DBRecordReader<T extends DBWritable> extends
   protected void setStatement(PreparedStatement stmt) {
     this.statement = stmt;
   }
+
+  /**
+   * @return the configuration. Allows subclasses to access the configuration
+   */
+  protected Configuration getConf(){
+    return conf;
+  }
 }
