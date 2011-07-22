@@ -83,6 +83,16 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  protected String getClobType() {
+    return "MEDIUMTEXT";
+  }
+
+  @Override
+  protected String getBlobType() {
+    return "MEDIUMBLOB";
+  }
+
+  @Override
   protected String getTrueBoolDbOutput() {
     return "1";
   }

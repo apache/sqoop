@@ -18,10 +18,12 @@
 
 package org.apache.hadoop.sqoop.manager;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Formatter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -192,9 +194,31 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     return doubleAsInserted;
   }
 
+  @Override
+  protected String getBlobInsertStr(String blobData) {
+    // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("'");
+
+    Formatter fmt = new Formatter(sb);
+    try {
+      for (byte b : blobData.getBytes("UTF-8")) {
+        fmt.format("%02X", b);
+      }
+    } catch (UnsupportedEncodingException uee) {
+      // Should not happen; Java always supports UTF-8.
+      fail("Could not get utf-8 bytes for blob string");
+      return null;
+    }
+    sb.append("'");
+    return sb.toString();
+  }
+
   // Disable this test since Oracle isn't ANSI compliant.
   @Override
   public void testEmptyStringCol() {
+    this.skipped = true;
     LOG.info(
         "Oracle treats empty strings as null (non-ANSI compliant). Skipping.");
   }

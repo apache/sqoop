@@ -19,6 +19,8 @@
 package org.apache.hadoop.sqoop.lib;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,11 +33,12 @@ import java.sql.Timestamp;
  * Java types, and do serialization of these types to/from DataInput/DataOutput
  * for use with Hadoop's Writable implementation. This supports null values
  * for all types.
- *
- * 
- *
  */
 public final class JdbcWritableBridge {
+
+  // Currently, cap BLOB/CLOB objects at 16 MB until we can use external storage.
+  public final static long MAX_BLOB_LENGTH = 16 * 1024 * 1024;
+  public final static long MAX_CLOB_LENGTH = 16 * 1024 * 1024;
 
   private JdbcWritableBridge() {
   }
@@ -108,6 +111,36 @@ public final class JdbcWritableBridge {
 
   public static BigDecimal readBigDecimal(int colNum, ResultSet r) throws SQLException {
     return r.getBigDecimal(colNum);
+  }
+
+  public static BlobRef readBlobRef(int colNum, ResultSet r)
+      throws SQLException {
+    Blob b = r.getBlob(colNum);
+    if (null == b) {
+      return null;
+    } else if (b.length() > MAX_BLOB_LENGTH) {
+      // TODO: Deserialize very large BLOBs into separate files.
+      throw new UnsupportedOperationException("BLOB size exceeds max: "
+          + MAX_BLOB_LENGTH);
+    } else {
+      // This is a 1-based array.
+      return new BlobRef(b.getBytes(1, (int) b.length()));
+    }
+  }
+
+  public static ClobRef readClobRef(int colNum, ResultSet r)
+      throws SQLException {
+    Clob c = r.getClob(colNum);
+    if (null == c) {
+      return null;
+    } else if (c.length() > MAX_CLOB_LENGTH) {
+      // TODO: Deserialize very large CLOBs into separate files.
+      throw new UnsupportedOperationException("CLOB size exceeds max: "
+          + MAX_CLOB_LENGTH);
+    } else {
+      // This is a 1-based array.
+      return new ClobRef(c.getSubString(1, (int) c.length()));
+    }
   }
 
   public static void writeInteger(Integer val, int paramIdx, int sqlType, PreparedStatement s)
@@ -200,4 +233,15 @@ public final class JdbcWritableBridge {
     }
   }
 
+  public static void writeBlobRef(BlobRef val, int paramIdx,
+      int sqlType, PreparedStatement s) throws SQLException {
+    // TODO: support this.
+    throw new RuntimeException("Unsupported: Cannot export BLOB data");
+  }
+
+  public static void writeClobRef(ClobRef val, int paramIdx,
+      int sqlType, PreparedStatement s) throws SQLException {
+    // TODO: support this.
+    throw new RuntimeException("Unsupported: Cannot export CLOB data");
+  }
 }

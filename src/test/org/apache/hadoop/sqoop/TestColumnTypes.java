@@ -58,5 +58,17 @@ public class TestColumnTypes extends ManagerCompatTestCase {
   }
 
   // Don't need to override getConnectString() because the default uses hsqldb.
+
+  // HSQLdb does not support these types over JDBC.
+
+  @Override
+  protected boolean supportsClob() {
+    return false;
+  }
+
+  @Override
+  protected boolean supportsBlob() {
+    return false;
+  }
 }
 

@@ -22,9 +22,12 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.SqlManager;
 import org.apache.hadoop.sqoop.lib.BigDecimalSerializer;
-import org.apache.hadoop.sqoop.lib.JdbcWritableBridge;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
+import org.apache.hadoop.sqoop.lib.JdbcWritableBridge;
+import org.apache.hadoop.sqoop.lib.LobSerializer;
 import org.apache.hadoop.sqoop.lib.RecordParser;
+import org.apache.hadoop.sqoop.lib.BlobRef;
+import org.apache.hadoop.sqoop.lib.ClobRef;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 import java.io.File;
@@ -291,6 +294,12 @@ public class ClassWriter {
     } else if (javaType.equals("java.math.BigDecimal")) {
       return "    this." + colName + " = " + BigDecimalSerializer.class.getCanonicalName()
           + ".readFields(" + inputObj + ");\n";
+    } else if (javaType.equals(ClobRef.class.getName())) {
+      return "    this." + colName + " = " + LobSerializer.class.getCanonicalName()
+          + ".readClobFields(" + inputObj + ");\n";
+    } else if (javaType.equals(BlobRef.class.getName())) {
+      return "    this." + colName + " = " + LobSerializer.class.getCanonicalName()
+          + ".readBlobFields(" + inputObj + ");\n";
     } else {
       LOG.error("No ResultSet method for Java type " + javaType);
       return null;
@@ -342,6 +351,12 @@ public class ClassWriter {
     } else if (javaType.equals("java.math.BigDecimal")) {
       return "    " + BigDecimalSerializer.class.getCanonicalName()
           + ".write(this." + colName + ", " + outputObj + ");\n";
+    } else if (javaType.equals(ClobRef.class.getName())) {
+      return "    " + LobSerializer.class.getCanonicalName()
+          + ".writeClob(this." + colName + ", " + outputObj + ");\n";
+    } else if (javaType.equals(BlobRef.class.getName())) {
+      return "    " + LobSerializer.class.getCanonicalName()
+          + ".writeBlob(this." + colName + ", " + outputObj + ");\n";
     } else {
       LOG.error("No ResultSet method for Java type " + javaType);
       return null;
@@ -622,6 +637,13 @@ public class ClassWriter {
       sb.append("      this." + colName + " = java.sql.Timestamp.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.math.BigDecimal")) {
       sb.append("      this." + colName + " = new java.math.BigDecimal(__cur_str);\n");
+    } else if (javaType.equals(ClobRef.class.getName())) {
+      sb.append("      this." + colName + " = new ClobRef(__cur_str);\n");
+    } else if (javaType.equals(BlobRef.class.getName())) {
+      // We don't support parsing BLOB data.
+      // Users must store this in SequenceFiles.
+      LOG.warn("BLOB data cannot be reparsed from text files");
+      sb.append("      this." + colName + " = new BlobRef();\n");
     } else {
       LOG.error("No parser available for Java type " + javaType);
     }
@@ -820,6 +842,8 @@ public class ClassWriter {
     sb.append("import " + JdbcWritableBridge.class.getCanonicalName() + ";\n");
     sb.append("import " + FieldFormatter.class.getCanonicalName() + ";\n");
     sb.append("import " + RecordParser.class.getCanonicalName() + ";\n");
+    sb.append("import " + BlobRef.class.getCanonicalName() + ";\n");
+    sb.append("import " + ClobRef.class.getCanonicalName() + ";\n");
     sb.append("import " + SqoopRecord.class.getCanonicalName() + ";\n");
     sb.append("import java.sql.PreparedStatement;\n");
     sb.append("import java.sql.ResultSet;\n");

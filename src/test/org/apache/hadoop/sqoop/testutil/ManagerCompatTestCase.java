@@ -20,12 +20,16 @@ package org.apache.hadoop.sqoop.testutil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.sql.Blob;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.util.ToolRunner;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
@@ -146,6 +150,16 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return true;
   }
 
+  /** @return true if the database under test supports CLOB types */
+  protected boolean supportsClob() {
+    return true;
+  }
+
+  /** @return true if the database under test supports BLOB types */
+  protected boolean supportsBlob() {
+    return true;
+  }
+
   //////// These methods indicate how to define various datatypes.
 
   /**
@@ -213,6 +227,20 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    */
   protected String getTimestampType() {
     return "TIMESTAMP";
+  }
+
+  /**
+   * Define a CLOB column that can contain up to 16 MB of data.
+   */
+  protected String getClobType() {
+    return "CLOB";
+  }
+  
+  /**
+   * Define a BLOB column that can contain up to 16 MB of data.
+   */
+  protected String getBlobType() {
+    return "BLOB";
   }
 
   //////// These methods indicate how databases respond to various datatypes.
@@ -423,6 +451,38 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
     return asInserted;
+  }
+
+  /**
+   * Encode a string to be inserted in a BLOB field
+   * @param blobData the raw text (Without quote marks) to insert for a BLOB.
+   * @return 'blobData' in a String form ready for insertion
+   */
+  protected String getBlobInsertStr(String blobData) {
+    return "'" + blobData + "'";
+  }
+
+  /**
+   * @return A byte array declaring how an inserted BLOB will be returned to
+   * us via the database.
+   */
+  protected byte [] getBlobDbOutput(String asInserted) {
+    // The database will give us back a byte array; we need to create
+    // an identical byte array.
+    try {
+      return asInserted.getBytes("UTF-8");
+    } catch (UnsupportedEncodingException uee) {
+      fail("Could not get utf8 bytes"); // Java should always support UTF-8.
+      return null;
+    }
+  }
+
+  /**
+   * @return A String declaring how an inserted BLOB will be returned to
+   * us via the sequencefile.
+   */
+  protected String getBlobSeqOutput(String asInserted) {
+    return new BytesWritable(getBlobDbOutput(asInserted)).toString();
   }
 
   //////// The actual tests occur below here. ////////
@@ -792,6 +852,88 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     verifyType(getLongVarCharType(),
         "'this is a long varchar'",
         "this is a long varchar");
+  }
+
+
+  protected void verifyClob(String insertVal, String returnVal, String seqFileVal) {
+    String [] types = { "INTEGER NOT NULL", getClobType() };
+    String [] vals = { "1", insertVal };
+    String [] checkCol = { "DATA_COL0", "DATA_COL1" };
+
+    createTableWithColTypes(types, vals);
+    verifyReadback(2, returnVal);
+    verifyImport("1," + seqFileVal, checkCol);
+  }
+
+  protected void verifyBlob(String insertVal, byte [] returnVal, String seqFileVal) {
+    String [] types = { "INTEGER NOT NULL", getBlobType() };
+    String [] vals = { "1", insertVal };
+    String [] checkCols = { "DATA_COL0", "DATA_COL1" };
+
+    createTableWithColTypes(types, vals);
+
+    // Verify readback of the data.
+    ResultSet results = null;
+    try {
+      results = getManager().readTable(getTableName(), getColNames());
+      assertNotNull("Null results from readTable()!", results);
+      assertTrue("Expected at least one row returned", results.next());
+      Blob blob = results.getBlob(2);
+      byte [] databaseBytes = blob.getBytes(1, (int) blob.length());
+      LOG.info("Verifying readback of bytes from " + getTableName());
+
+      assertEquals("byte arrays differ in size", returnVal.length,
+          databaseBytes.length);
+      for (int i = 0; i < returnVal.length; i++) {
+        assertEquals("bytes differ at position " + i + ". Expected "
+            + returnVal[i] + "; got " + databaseBytes[i],
+            returnVal[i],
+            databaseBytes[i]);
+      }
+
+      assertFalse("Expected at most one row returned", results.next());
+    } catch (SQLException sqlE) {
+      fail("Got SQLException: " + sqlE.toString());
+    } finally {
+      if (null != results) {
+        try {
+          results.close();
+        } catch (SQLException sqlE) {
+          fail("Got SQLException in resultset.close(): " + sqlE.toString());
+        }
+      }
+
+      // Free internal resources after the readTable.
+      getManager().release();
+    }
+
+    // Now verify that we can use the Sqoop import mechanism on this data.
+    verifyImport("1," + seqFileVal, checkCols);
+  }
+
+
+  @Test
+  public void testClob1() {
+    if (!supportsClob()) {
+      LOG.info("Skipping CLOB test; database does not support CLOB");
+      return;
+    }
+
+    verifyClob("'This is short CLOB data'",
+        "This is short CLOB data",
+        "This is short CLOB data");
+  }
+
+  @Test
+  public void testBlob1() {
+    if (!supportsBlob()) {
+      LOG.info("Skipping BLOB test; database does not support BLOB");
+      return;
+    }
+
+    verifyBlob(getBlobInsertStr("This is short BLOB data"),
+        getBlobDbOutput("This is short BLOB data"),
+        getBlobSeqOutput("This is short BLOB data"));
   }
 
 }

@@ -20,6 +20,8 @@ package org.apache.hadoop.sqoop.manager;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.hive.HiveTypes;
+import org.apache.hadoop.sqoop.lib.BlobRef;
+import org.apache.hadoop.sqoop.lib.ClobRef;
 import org.apache.hadoop.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.hadoop.sqoop.mapreduce.ExportJob;
 import org.apache.hadoop.sqoop.util.ExportException;
@@ -359,10 +361,17 @@ public abstract class SqlManager extends ConnManager {
       return "java.sql.Time";
     } else if (sqlType == Types.TIMESTAMP) {
       return "java.sql.Timestamp";
+    } else if (sqlType == Types.CLOB) {
+      return ClobRef.class.getName();
+    } else if (sqlType == Types.BLOB
+        || sqlType == Types.LONGVARBINARY
+        || sqlType == Types.VARBINARY
+        || sqlType == Types.BINARY) {
+      return BlobRef.class.getName();
     } else {
-      // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT, CLOB, BLOB, ARRAY,
-      // STRUCT, REF, JAVA_OBJECT.
-      // return database specific java data type
+      // TODO(aaron): Support DISTINCT, ARRAY, STRUCT, REF, JAVA_OBJECT.
+      // Return null indicating database-specific manager should return a
+      // java data type if it can find one for any nonstandard type.
       return null;
     }
   }
