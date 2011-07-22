@@ -78,7 +78,7 @@ public class HelpTool extends BaseSqoopTool {
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
 
-    if (this.extraArguments.length > 0) {
+    if (this.extraArguments != null && this.extraArguments.length > 0) {
       if (hasUnrecognizedArgs(extraArguments, 1, extraArguments.length)) {
         return 1;
       }

@@ -20,7 +20,6 @@ package com.cloudera.sqoop;
 
 import java.util.Arrays;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -28,7 +27,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.cloudera.sqoop.tool.HelpTool;
+import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
@@ -121,13 +120,16 @@ public class Sqoop extends Configured implements Tool {
       options = tool.parseArguments(args, null, options, false);
       tool.appendArgs(this.childPrgmArgs);
       tool.validateOptions(options);
-    } catch (ParseException pe) {
-      // Couldn't parse arguments. Just print a usage message and exit.
-      new HelpTool().run(new SqoopOptions(getConf()));
-      return 1;
-    } catch (SqoopOptions.InvalidOptionsException e) {
-      // Error validating arguments. Print an error message and exit.
+    } catch (Exception e) {
+      // Couldn't parse arguments. 
+      // Log the stack trace for this exception
+      LOG.debug(e.getMessage(), e);
+      // Print exception message.
       System.err.println(e.getMessage());
+      // Print the tool usage message and exit.
+      ToolOptions toolOpts = new ToolOptions();
+      tool.configureOptions(toolOpts);
+      tool.printHelp(toolOpts);
       return 1; // Exit on exception here.
     }
 

@@ -1017,7 +1017,7 @@
     <mkdir dir="${findbugs.out.dir}"/>
     <findbugs home="${findbugs.home}" output="xml:withMessages"
         outputFile="${findbugs.output.xml.file}" effort="max"
-        excludeFilter="${findbugs.excludes}">
+        excludeFilter="${findbugs.excludes}" jvmargs="-Xms512m -Xmx512m">
       <auxClasspath>
         <path refid="test.classpath"/>
       </auxClasspath>
