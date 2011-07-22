@@ -136,22 +136,33 @@ public abstract class ShimLoader {
       if (version.matches(matchExprs.get(i))) {
         String className = classNames.get(i);
         String jarPattern = jarPatterns.get(i);
+
         if (LOG.isDebugEnabled()) {
           LOG.debug("Version matched regular expression: " + matchExprs.get(i));
-          LOG.debug("Searching for jar matching: " + jarPattern);
           LOG.debug("Trying to load class: " + className);
         }
 
+        // Test to see if the class is already on the classpath.
         try {
+          // If we can load the shim directly, we just do so. In this case,
+          // there's no need to update the Configuration's classloader,
+          // because we didn't modify the classloader stack.
+          return getShimInstance(className, xface);
+        } catch (Exception e) {
+          // Not already present. We'll need to load a jar for this.
+          // Ignore this exception.
+        }
+
+        try {
+          LOG.debug("Searching for jar matching: " + jarPattern);
           loadMatchingShimJar(jarPattern, className);
-          ClassLoader cl = Thread.currentThread().getContextClassLoader();
-          Class clazz = Class.forName(className, true, cl);
-          T shim = xface.cast(clazz.newInstance());
+          LOG.debug("Loading shim from jar");
+          T shim = getShimInstance(className, xface);
 
           if (null != conf) {
             // Set the context classloader for the base Configuration to
             // the current one, so we can load more classes from the shim jar.
-            conf.setClassLoader(cl);
+            conf.setClassLoader(Thread.currentThread().getContextClassLoader());
           }
 
           return shim;
@@ -164,6 +175,22 @@ public abstract class ShimLoader {
 
     throw new RuntimeException("Could not find appropriate Hadoop shim for "
         + version);
+  }
+
+  /**
+   * Check the current classloader to see if it can load the prescribed
+   * class name as an instance of 'xface'. If so, create an instance of
+   * the class and return it.
+   * @param className the shim class to attempt to instantiate.
+   * @param xface the interface it must implement.
+   * @return an instance of className.
+   */
+  private static <T> T getShimInstance(String className, Class<T> xface)
+      throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    Class clazz = Class.forName(className, true, cl);
+    return xface.cast(clazz.newInstance());
   }
 
   /**

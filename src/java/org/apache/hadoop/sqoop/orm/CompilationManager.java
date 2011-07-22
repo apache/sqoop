@@ -43,6 +43,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.util.FileListing;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 
 /**
  * Manages the compilation of a bunch of .java files into .class files
@@ -289,16 +290,19 @@ public class CompilationManager {
       // put our own jar in there in its lib/ subdir
       String thisJarFile = findThisJar();
       if (null != thisJarFile) {
-        File thisJarFileObj = new File(thisJarFile);
-        String thisJarBasename = thisJarFileObj.getName();
-        String thisJarEntryName = "lib" + File.separator + thisJarBasename;
-        ZipEntry ze = new ZipEntry(thisJarEntryName);
-        jstream.putNextEntry(ze);
-        copyFileToStream(thisJarFileObj, jstream);
-        jstream.closeEntry();
+        addLibJar(thisJarFile, jstream);
       } else {
         // couldn't find our own jar (we were running from .class files?)
         LOG.warn("Could not find jar for Sqoop; MapReduce jobs may not run correctly.");
+      }
+
+      String shimJarFile = findShimJar();
+      if (null != shimJarFile) {
+        addLibJar(shimJarFile, jstream);
+      } else {
+        // Couldn't find the shim jar.
+        LOG.warn("Could not find jar for Sqoop shims.");
+        LOG.warn("MapReduce jobs may not run correctly.");
       }
 
       jstream.finish();
@@ -321,6 +325,22 @@ public class CompilationManager {
     }
 
     LOG.debug("Finished writing jar file " + jarFilename);
+  }
+
+  /**
+   * Add a jar in the lib/ directory of a JarOutputStream we're building.
+   * @param jarFilename the source jar file to include.
+   * @param jstream the JarOutputStream to write to.
+   */
+  private void addLibJar(String jarFilename, JarOutputStream jstream)
+      throws IOException {
+    File thisJarFileObj = new File(jarFilename);
+    String thisJarBasename = thisJarFileObj.getName();
+    String thisJarEntryName = "lib" + File.separator + thisJarBasename;
+    ZipEntry ze = new ZipEntry(thisJarEntryName);
+    jstream.putNextEntry(ze);
+    copyFileToStream(thisJarFileObj, jstream);
+    jstream.closeEntry();
   }
 
 
@@ -351,6 +371,14 @@ public class CompilationManager {
 
   private String findThisJar() {
     return findJarForClass(CompilationManager.class);
+  }
+
+  private String findShimJar() {
+    HadoopShim h = HadoopShim.get();
+    if (null == h) {
+      return null;
+    }
+    return findJarForClass(h.getClass());
   }
 
   // method mostly cloned from o.a.h.mapred.JobConf.findContainingJar()
