@@ -32,10 +32,10 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.io.CodecMap;
 import com.cloudera.sqoop.io.SplittingOutputStream;
 import com.cloudera.sqoop.io.SplittableBufferedWriter;
 
-import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Shell;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
@@ -96,15 +96,7 @@ public final class DirectImportUtils {
       if (options.getCompressionCodec() == null) {
         return new GzipCodec();
       } else {
-        try {
-          @SuppressWarnings("unchecked")
-          Class<? extends CompressionCodec> c =
-              (Class<? extends CompressionCodec>)
-              conf.getClassByName(options.getCompressionCodec());
-          return ReflectionUtils.newInstance(c, conf);
-        } catch (ClassNotFoundException e) {
-          throw new IOException(e);
-        }
+        return CodecMap.getCodec(options.getCompressionCodec(), conf);
       }
     }
     return null;

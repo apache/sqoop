@@ -41,6 +41,7 @@ import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.PerfCounters;
 import com.cloudera.sqoop.config.ConfigurationHelper;
+import com.cloudera.sqoop.io.CodecMap;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
@@ -93,10 +94,7 @@ public class ImportJobBase extends JobBase {
         codecClass = GzipCodec.class;
       } else {
         Configuration conf = job.getConfiguration();
-        @SuppressWarnings("unchecked")
-        Class<? extends CompressionCodec> c =
-            (Class<? extends CompressionCodec>) conf.getClassByName(codecName);
-        codecClass = c;
+        codecClass = CodecMap.getCodec(codecName, conf).getClass();
       }
       FileOutputFormat.setOutputCompressorClass(job, codecClass);
       
