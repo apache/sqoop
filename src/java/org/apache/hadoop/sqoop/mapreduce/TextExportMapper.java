@@ -43,16 +43,18 @@ public class TextExportMapper
   public TextExportMapper() {
   }
 
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
     super.setup(context);
 
     Configuration conf = context.getConfiguration();
 
     // Instantiate a copy of the user's class to hold and parse the record.
-    String recordClassName = conf.get(ExportJob.SQOOP_EXPORT_TABLE_CLASS_KEY);
+    String recordClassName = conf.get(
+        ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
     if (null == recordClassName) {
       throw new IOException("Export table class name ("
-          + ExportJob.SQOOP_EXPORT_TABLE_CLASS_KEY
+          + ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY
           + ") is not set!");
     }
 

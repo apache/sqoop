@@ -19,9 +19,7 @@
 package org.apache.hadoop.sqoop.util;
 
 /**
- * General error during import process.
- *
- * 
+ * General error during the import process.
  */
 @SuppressWarnings("serial")
 public class ImportException extends Exception {

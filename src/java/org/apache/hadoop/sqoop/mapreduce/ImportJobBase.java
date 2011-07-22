@@ -55,16 +55,9 @@ import org.apache.hadoop.sqoop.util.PerfCounters;
  * Base class for running an import MapReduce job.
  * Allows dependency injection, etc, for easy customization of import job types.
  */
-public class ImportJobBase {
+public class ImportJobBase extends JobBase {
 
   public static final Log LOG = LogFactory.getLog(ImportJobBase.class.getName());
-
-  protected SqoopOptions options;
-  protected Class<? extends Mapper> mapperClass;
-  protected Class<? extends InputFormat> inputFormatClass;
-  protected Class<? extends OutputFormat> outputFormatClass;
-
-  private ClassLoader prevClassLoader = null;
 
   public ImportJobBase() {
     this(null);
@@ -78,94 +71,13 @@ public class ImportJobBase {
       final Class<? extends Mapper> mapperClass,
       final Class<? extends InputFormat> inputFormatClass,
       final Class<? extends OutputFormat> outputFormatClass) {
-
-    this.options = opts;
-    this.mapperClass = mapperClass;
-    this.inputFormatClass = inputFormatClass;
-    this.outputFormatClass = outputFormatClass;
-  }
-
-  /**
-   * @return the mapper class to use for the job.
-   */
-  protected Class<? extends Mapper> getMapperClass() {
-    return this.mapperClass;
-  }
-
-  /**
-   * @return the inputformat class to use for the job.
-   */
-  protected Class<? extends InputFormat> getInputFormatClass() {
-    return this.inputFormatClass;
-  }
-
-  /**
-   * @return the outputformat class to use for the job.
-   */
-  protected Class<? extends OutputFormat> getOutputFormatClass() {
-    return this.outputFormatClass;
-  }
-
-  /** Set the OutputFormat class to use for this job */
-  public void setOutputFormatClass(Class<? extends OutputFormat> cls) {
-    this.outputFormatClass = cls;
-  }
-
-  /** Set the InputFormat class to use for this job */
-  public void setInputFormatClass(Class<? extends InputFormat> cls) {
-    this.inputFormatClass = cls;
-  }
-
-  /** Set the Mapper class to use for this job */
-  public void setMapperClass(Class<? extends Mapper> cls) {
-    this.mapperClass = cls;
-  }
-
-  /**
-   * Set the SqoopOptions configuring this job
-   */
-  public void setOptions(SqoopOptions opts) {
-    this.options = opts;
-  }
-
-  /**
-   * If jars must be loaded into the local environment, do so here.
-   */
-  protected void loadJars(Configuration conf, String ormJarFile,
-      String tableClassName) throws IOException {
-    boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
-        || "local".equals(conf.get("mapred.job.tracker"));
-    if (isLocal) {
-      // If we're using the LocalJobRunner, then instead of using the compiled jar file
-      // as the job source, we're running in the current thread. Push on another classloader
-      // that loads from that jar in addition to everything currently on the classpath.
-      this.prevClassLoader = ClassLoaderStack.addJarFile(ormJarFile,
-          tableClassName);
-    }
-  }
-
-  /**
-   * If any classloader was invoked by loadJars, free it here.
-   */
-  protected void unloadJars() {
-    if (null != this.prevClassLoader) {
-      // unload the special classloader for this jar.
-      ClassLoaderStack.setCurrentClassLoader(this.prevClassLoader);
-    }
-  }
-
-  /**
-   * Configure the inputformat to use for the job.
-   */
-  protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws IOException {
-    LOG.debug("Using InputFormat: " + inputFormatClass);
-    job.setInputFormatClass(getInputFormatClass());
+    super(opts, mapperClass, inputFormatClass, outputFormatClass);
   }
 
   /**
    * Configure the output format to use for the job.
    */
+  @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws IOException {
     String hdfsWarehouseDir = options.getWarehouseDir();
@@ -196,32 +108,11 @@ public class ImportJobBase {
   }
 
   /**
-   * Set the mapper class implementation to use in the job,
-   * as well as any related configuration (e.g., map output types).
-   */
-  protected void configureMapper(Job job, String tableName,
-      String tableClassName) throws IOException {
-    job.setMapperClass(getMapperClass());
-  }
-
-  /**
-   * Configure the number of map/reduce tasks to use in the job.
-   */
-  protected void configureNumTasks(Job job) throws IOException {
-    int numMapTasks = options.getNumMappers();
-    if (numMapTasks < 1) {
-      numMapTasks = SqoopOptions.DEFAULT_NUM_MAPPERS;
-      LOG.warn("Invalid mapper count; using " + numMapTasks + " mappers.");
-    }
-    job.getConfiguration().setInt(JobContext.NUM_MAPS, numMapTasks);
-    job.setNumReduceTasks(0);
-  }
-
-  /**
    * Actually run the MapReduce job.
    */
-  protected void runJob(Job job) throws ClassNotFoundException, IOException,
-      ImportException, InterruptedException {
+  @Override
+  protected boolean runJob(Job job) throws ClassNotFoundException, IOException,
+      InterruptedException {
 
     PerfCounters counters = new PerfCounters();
     counters.startClock();
@@ -234,10 +125,7 @@ public class ImportJobBase {
     long numRecords = job.getCounters()
       .findCounter(TaskCounter.MAP_OUTPUT_RECORDS).getValue();
     LOG.info("Retrieved " + numRecords + " records.");
-
-    if (!success) {
-      throw new ImportException("Import job failed!");
-    }
+    return success;
   }
 
 
@@ -270,7 +158,10 @@ public class ImportJobBase {
       configureNumTasks(job);
 
       try {
-        runJob(job);
+        boolean success = runJob(job);
+        if (!success) {
+          throw new ImportException("Import job failed!");
+        }
       } catch (InterruptedException ie) {
         throw new IOException(ie);
       } catch (ClassNotFoundException cnfe) {

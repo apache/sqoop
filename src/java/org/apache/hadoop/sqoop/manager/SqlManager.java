@@ -23,7 +23,7 @@ import org.apache.hadoop.sqoop.hive.HiveTypes;
 import org.apache.hadoop.sqoop.lib.BlobRef;
 import org.apache.hadoop.sqoop.lib.ClobRef;
 import org.apache.hadoop.sqoop.mapreduce.DataDrivenImportJob;
-import org.apache.hadoop.sqoop.mapreduce.ExportJob;
+import org.apache.hadoop.sqoop.mapreduce.JdbcExportJob;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.ResultSetPrinter;
@@ -488,7 +488,7 @@ public abstract class SqlManager extends ConnManager {
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
-    ExportJob exportJob = new ExportJob(context);
+    JdbcExportJob exportJob = new JdbcExportJob(context);
     exportJob.runExport();
   }
 
