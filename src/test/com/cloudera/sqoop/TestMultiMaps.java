@@ -137,9 +137,6 @@ public class TestMultiMaps extends ImportJobTestCase {
       Configuration conf = new Configuration();
       int curSum = 0;
 
-      assertTrue("Found only " + paths.size() + " path(s); expected > 1.",
-          paths.size() > 1);
-
       // We expect multiple files. We need to open all the files and sum up the
       // first column across all of them.
       for (Path p : paths) {

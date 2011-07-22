@@ -19,20 +19,21 @@
 package com.cloudera.sqoop;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -48,10 +49,6 @@ import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
-
-import junit.framework.TestCase;
-
-import java.sql.Connection;
 
 /**
  * Test the incremental import functionality.
@@ -110,7 +107,7 @@ public class TestIncrementalImport extends TestCase {
           s.close();
         } catch (SQLException sqlE) {
           LOG.warn("exception: " + sqlE);
-        } 
+        }
       }
 
       if (null != rs) {
@@ -118,7 +115,7 @@ public class TestIncrementalImport extends TestCase {
           rs.close();
         } catch (SQLException sqlE) {
           LOG.warn("exception: " + sqlE);
-        } 
+        }
       }
     }
   }
@@ -193,7 +190,7 @@ public class TestIncrementalImport extends TestCase {
   }
 
   /**
-   * Create a table with an 'id' column full of integers and a 
+   * Create a table with an 'id' column full of integers and a
    * last_modified column with timestamps.
    */
   private void createTimestampTable(String tableName, int insertRows,
@@ -290,14 +287,15 @@ public class TestIncrementalImport extends TestCase {
       Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
       Path tableDir = new Path(warehouse, tableName);
       FileStatus [] stats = fs.listStatus(tableDir);
-      String [] fileNames = new String[stats.length];
+      String [] filePaths = new String[stats.length];
       for (int i = 0; i < stats.length; i++) {
-        fileNames[i] = stats[i].getPath().toString();
+        filePaths[i] = stats[i].getPath().toString();
       }
 
       // Read the first file that is not a hidden file.
       boolean foundVal = false;
-      for (String fileName : fileNames) {
+      for (String filePath : filePaths) {
+        String fileName = new Path(filePath).getName();
         if (fileName.startsWith("_") || fileName.startsWith(".")) {
           continue;
         }
@@ -308,11 +306,11 @@ public class TestIncrementalImport extends TestCase {
         }
 
         BufferedReader r = new BufferedReader(
-            new InputStreamReader(fs.open(new Path(fileName))));
+            new InputStreamReader(fs.open(new Path(filePath))));
         try {
           String s = r.readLine();
           if (null == s) {
-            fail("Unexpected empty file " + fileName + ".");
+            fail("Unexpected empty file " + filePath + ".");
           }
           assertEquals(val, (int) Integer.valueOf(s.trim()));
 
@@ -327,7 +325,7 @@ public class TestIncrementalImport extends TestCase {
           r.close();
         }
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       fail("Got unexpected exception: " + StringUtils.stringifyException(e));
     }
   }
@@ -374,7 +372,7 @@ public class TestIncrementalImport extends TestCase {
     args.add("id");
     args.add("-m");
     args.add("1");
-    
+
     return args;
   }
 
@@ -397,7 +395,7 @@ public class TestIncrementalImport extends TestCase {
       SqoopOptions options = new SqoopOptions();
       options.setConf(conf);
       Sqoop makeJob = new Sqoop(new JobTool(), conf, options);
-      
+
       List<String> args = new ArrayList<String>();
       args.add("--create");
       args.add(jobName);
@@ -429,7 +427,7 @@ public class TestIncrementalImport extends TestCase {
       SqoopOptions options = new SqoopOptions();
       options.setConf(conf);
       Sqoop runJob = new Sqoop(new JobTool(), conf, options);
-      
+
       List<String> args = new ArrayList<String>();
       args.add("--exec");
       args.add(jobName);
@@ -553,7 +551,7 @@ public class TestIncrementalImport extends TestCase {
     // Given a table of rows imported in the past,
     // see that they are imported.
     final String TABLE_NAME = "fullLastModified";
-    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100); 
+    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
     createTimestampTable(TABLE_NAME, 10, thePast);
 
     List<String> args = getArgListForTable(TABLE_NAME, true, false);

@@ -15,7 +15,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<ivy-module version="1.0">
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
   <info organisation="com.cloudera.sqoop" module="${name}">
     <license name="Apache 2.0"/>
     <ivyauthor name="Sqoop Team" url="http://github.com/cloudera/sqoop" />
@@ -118,10 +120,6 @@
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
-    <!--
-    <dependency org="org.apache.hbase" name="hbase" rev="${hbase.version}"
-      conf="common->default" />
-      -->
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
@@ -138,8 +136,16 @@
     <dependency org="commons-collections" name="commons-collections"
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
-    <!-- dependencies on the shim jars we generate, for release poms -->
-    <dependency org="com.cloudera.sqoop" name="sqoop-shim-cloudera"
-      rev="${version}" conf="mvndeploy->default" />
+    <dependency org="org.apache.hbase" name="hbase"
+      rev="${hbase.version}" conf="cloudera->default">
+      <artifact name="hbase" type="jar"/>
+      <artifact name="hbase" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+
   </dependencies>
 </ivy-module>

@@ -180,47 +180,6 @@
     </classpath>
   </taskdef>
 
-  <!-- Download/untar HBase and ZooKeeper -->
-  <property name="cdh.tar.dir" value="http://archive.cloudera.com/cdh/3"/>
-  <property name="hbase.tar" value="hbase-${hbase.version}.tar.gz"/>
-  <property name="hbase.tar.url" value="${cdh.tar.dir}/${hbase.tar}"/>
-  <property name="hbase.dir" location="${build.dir}/hbase-${hbase.version}" />
-  <property name="zk.tar" value="zookeeper-${zookeeper.version}.tar.gz"/>
-  <property name="zk.tar.url" value="${cdh.tar.dir}/${zk.tar}"/>
-  <property name="zk.dir" location="${build.dir}/zookeeper-${zookeeper.version}" />
-
- <target name="download-hbase-zk" unless="offline">
-   <get dest="${build.dir}/${hbase.tar}" src="${hbase.tar.url}"
-        usetimestamp="true" verbose="true"/>
-   <get dest="${build.dir}/${zk.tar}" src="${zk.tar.url}" usetimestamp="true"
-        verbose="true"/>
-   <condition property="hbase-zk-already-untared">
-      <and>
-         <available file="${hbase.dir}" type="dir"/>
-         <available file="${zk.dir}" type="dir"/>
-      </and>
-   </condition>
- </target>
-
- <target name="untar-hbase-zk" unless="hbase-zk-already-untared"
-   depends="download-hbase-zk">
-   <untar src="${build.dir}/${hbase.tar}" dest="${build.dir}"
-    compression="gzip"/>
-   <untar src="${build.dir}/${zk.tar}" dest="${build.dir}" compression="gzip"/>
- </target>
-
-  <!-- manually-specified HBase classpath til it works with Ivy. -->
-  <path id="hbase.classpath">
-    <fileset dir="${hbase.dir}">
-      <include name="*.jar" />
-      <include name="lib/*.jar" />
-    </fileset>
-    <fileset dir="${zk.dir}">
-      <include name="*.jar" />
-      <include name="lib/*.jar" />
-    </fileset>
-  </path>
-
   <!-- The classpath for compiling and running Sqoop -->
   <if>
     <isset property="hadoop.home" />
@@ -239,7 +198,6 @@
           <include name="*.jar" />
         </fileset>
         <path refid="${name}.hadoop.classpath"/>
-        <path refid="hbase.classpath"/>
       </path>
     </then>
     <else>
@@ -247,7 +205,6 @@
         <pathelement location="${build.classes}"/>
         <path refid="lib.path"/>
         <path refid="${name}.hadoop.classpath"/>
-        <path refid="hbase.classpath"/>
       </path>
     </else>
   </if>
@@ -289,7 +246,7 @@
 
   <!-- Compile core classes for the project -->
   <target name="compile"
-      depends="init, gen-version, ivy-retrieve-hadoop, untar-hbase-zk"
+      depends="init, gen-version, ivy-retrieve-hadoop"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
