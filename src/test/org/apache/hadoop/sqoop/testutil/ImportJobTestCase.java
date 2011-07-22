@@ -151,7 +151,9 @@ public class ImportJobTestCase extends TestCase {
     setCurTableName(null); // clear user-override table name.
 
     try {
-      manager.close();
+      if (null != manager) {
+        manager.close();
+      }
     } catch (SQLException sqlE) {
       LOG.error("Got SQLException: " + sqlE.toString());
       fail("Got SQLException: " + sqlE.toString());

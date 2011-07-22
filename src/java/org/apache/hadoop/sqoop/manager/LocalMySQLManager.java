@@ -42,7 +42,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.sqoop.ImportOptions;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
+import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.ImportError;
+import org.apache.hadoop.sqoop.util.JdbcUrl;
 import org.apache.hadoop.sqoop.util.PerfCounters;
 import org.apache.hadoop.sqoop.util.StreamHandlerFactory;
 import org.apache.hadoop.util.Shell;
@@ -348,19 +350,8 @@ public class LocalMySQLManager extends MySQLManager {
     String tmpDir = options.getTempDir();
     File tempFile = File.createTempFile("mysql-cnf",".cnf", new File(tmpDir));
 
-    // Set this file to be 0600. Java doesn't have a built-in mechanism for this
-    // so we need to go out to the shell to execute chmod.
-    ArrayList<String> chmodArgs = new ArrayList<String>();
-    chmodArgs.add("chmod");
-    chmodArgs.add("0600");
-    chmodArgs.add(tempFile.toString());
-    try {
-      Shell.execCommand("chmod", "0600", tempFile.toString());
-    } catch (IOException ioe) {
-      // Shell.execCommand will throw IOException on exit code != 0.
-      LOG.error("Could not chmod 0600 " + tempFile.toString());
-      throw new IOException("Could not ensure password file security.", ioe);
-    }
+    // Make the password file only private readable.
+    DirectImportUtils.setFilePermissions(tempFile, "0600");
 
     // If we're here, the password file is believed to be ours alone.
     // The inability to set chmod 0600 inside Java is troublesome. We have to trust
@@ -399,32 +390,10 @@ public class LocalMySQLManager extends MySQLManager {
     // Java doesn't respect arbitrary JDBC-based schemes. So we chop off the scheme
     // (everything before '://') and replace it with 'http', which we know will work.
     String connectString = options.getConnectString();
-    String databaseName = null;
-    try {
-      String sanitizedString = null;
-      int schemeEndOffset = connectString.indexOf("://");
-      if (-1 == schemeEndOffset) {
-        // couldn't find one? try our best here.
-        sanitizedString = "http://" + connectString;
-        LOG.warn("Could not find database access scheme in connect string " + connectString);
-      } else {
-        sanitizedString = "http" + connectString.substring(schemeEndOffset);
-      }
-
-      URL connectUrl = new URL(sanitizedString);
-      databaseName = connectUrl.getPath();
-    } catch (MalformedURLException mue) {
-      LOG.error("Malformed connect string URL: " + connectString
-          + "; reason is " + mue.toString());
-    }
+    String databaseName = JdbcUrl.getDatabaseName(connectString);
 
     if (null == databaseName) {
       throw new ImportError("Could not determine database name");
-    }
-
-    // database name was found from the 'path' part of the URL; trim leading '/'
-    while (databaseName.startsWith("/")) {
-      databaseName = databaseName.substring(1);
     }
 
     LOG.info("Performing import of table " + tableName + " from database " + databaseName);
@@ -433,7 +402,6 @@ public class LocalMySQLManager extends MySQLManager {
     String password = options.getPassword();
     String passwordFile = null;
 
-    
     Process p = null;
     StreamHandlerFactory streamHandler = null;
     PerfCounters counters = new PerfCounters();
@@ -475,27 +443,8 @@ public class LocalMySQLManager extends MySQLManager {
         LOG.debug("  " + arg);
       }
 
-      FileSystem fs = FileSystem.get(conf);
-      String warehouseDir = options.getWarehouseDir();
-      Path destDir = null;
-      if (null != warehouseDir) {
-        destDir = new Path(new Path(warehouseDir), tableName);
-      } else {
-        destDir = new Path(tableName);
-      }
-
-      LOG.debug("Writing to filesystem: " + conf.get("fs.default.name"));
-      LOG.debug("Creating destination directory " + destDir);
-      fs.mkdirs(destDir);
-      Path destFile = new Path(destDir, "data-00000");
-      LOG.debug("Opening output file: " + destFile);
-      if (fs.exists(destFile)) {
-        Path canonicalDest = destFile.makeQualified(fs);
-        throw new IOException("Destination file " + canonicalDest + " already exists");
-      }
-
       // This writer will be closed by StreamHandlerFactory.
-      OutputStream os = fs.create(destFile);
+      OutputStream os = DirectImportUtils.createHdfsSink(conf, options, tableName);
       BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
 
       // Actually start the mysqldump.

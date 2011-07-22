@@ -98,6 +98,7 @@ public abstract class SqlManager implements ConnManager {
     } finally {
       try {
         results.close();
+        getConnection().commit();
       } catch (SQLException sqlE) {
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
@@ -146,6 +147,7 @@ public abstract class SqlManager implements ConnManager {
     } finally {
       try {
         results.close();
+        getConnection().commit();
       } catch (SQLException sqlE) { 
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
@@ -216,6 +218,7 @@ public abstract class SqlManager implements ConnManager {
       if (null != results) {
         try {
           results.close();
+          getConnection().commit();
         } catch (SQLException sqlE) {
           LOG.warn("Exception closing ResultSet: " + sqlE.toString());
         }
@@ -240,6 +243,7 @@ public abstract class SqlManager implements ConnManager {
         }
       } finally {
         results.close();
+        getConnection().commit();
       }
     } catch (SQLException sqlException) {
       LOG.error("Error reading primary key metadata: " + sqlException.toString());
@@ -380,6 +384,7 @@ public abstract class SqlManager implements ConnManager {
     } finally {
       try {
         results.close();
+        getConnection().commit();
       } catch (SQLException sqlE) {
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
@@ -412,6 +417,7 @@ public abstract class SqlManager implements ConnManager {
 
     // We only use this for metadata queries. Loosest semantics are okay.
     connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+    connection.setAutoCommit(false);
 
     return connection;
   }

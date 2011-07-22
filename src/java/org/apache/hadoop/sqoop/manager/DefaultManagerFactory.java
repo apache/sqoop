@@ -81,6 +81,12 @@ public final class DefaultManagerFactory implements ManagerFactory {
       } else {
         return new MySQLManager(options);
       }
+    } else if (scheme.equals("jdbc:postgresql:")) {
+      if (options.isDirect()) {
+        return new DirectPostgresqlManager(options);
+      } else {
+        return new PostgresqlManager(options);
+      }
     } else if (scheme.startsWith("jdbc:hsqldb:")) {
       return new HsqldbManager(options);
     } else if (scheme.startsWith("jdbc:oracle:")) {

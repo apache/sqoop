@@ -56,10 +56,15 @@ public class GenericJdbcManager extends SqlManager {
     return this.connection;
   }
 
+  protected boolean hasOpenConnection() {
+    return this.connection != null;
+  }
+
   public void close() throws SQLException {
     super.close();
     if (null != this.connection) {
       this.connection.close();
+      this.connection = null;
     }
   }
 
