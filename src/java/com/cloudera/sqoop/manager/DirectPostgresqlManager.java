@@ -349,9 +349,12 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         }
       }
 
-      if (!DirectImportUtils.isLocalhost(hostname) || port != -1) {
+      if (!DirectImportUtils.isLocalhost(hostname)) {
         args.add("--host");
         args.add(hostname);
+      }
+
+      if (port != -1) {
         args.add("--port");
         args.add(Integer.toString(port));
       }
