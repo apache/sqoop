@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
@@ -225,11 +226,15 @@ public class ImportJobBase {
     PerfCounters counters = new PerfCounters();
     counters.startClock();
 
-    boolean success = job.waitForCompletion(false);
+    boolean success = job.waitForCompletion(true);
     counters.stopClock();
     counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
       .findCounter("HDFS_BYTES_WRITTEN").getValue());
     LOG.info("Transferred " + counters.toString());
+    long numRecords = job.getCounters()
+      .findCounter(TaskCounter.MAP_OUTPUT_RECORDS).getValue();
+    LOG.info("Retrieved " + numRecords + " records.");
+
     if (!success) {
       throw new ImportException("Import job failed!");
     }
