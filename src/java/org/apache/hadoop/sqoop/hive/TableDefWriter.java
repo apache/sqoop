@@ -142,23 +142,6 @@ public class TableDefWriter {
     FileSystem fs = FileSystem.get(configuration);
     Path finalPath = new Path(tablePath).makeQualified(fs);
     String finalPathStr = finalPath.toString();
-    if (finalPathStr.startsWith("hdfs://") && finalPathStr.indexOf(":", 7) == -1) {
-      // Hadoop removed the port number from the fully-qualified URL.
-      // We need to reinsert this or else Hive will complain.
-      // Do this right before the third instance of the '/' character.
-      int insertPoint = 0;
-      for (int i = 0; i < 3; i++) {
-        insertPoint = finalPathStr.indexOf("/", insertPoint + 1);
-      }
-
-      if (insertPoint == -1) {
-        LOG.warn("Fully-qualified HDFS path does not contain a port.");
-        LOG.warn("this may cause a Hive error.");
-      } else {
-        finalPathStr = finalPathStr.substring(0, insertPoint) + ":" + DEFAULT_HDFS_PORT
-            + finalPathStr.substring(insertPoint, finalPathStr.length());
-      }
-    }
 
     StringBuilder sb = new StringBuilder();
     sb.append("LOAD DATA INPATH '");
