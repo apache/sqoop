@@ -317,7 +317,7 @@
         failonerror="true"
         output="${build.dir}/tools-list"
         error="/dev/null">
-      <jvmarg value="-Dhadoop.security.log.file=${build.dir}/security-audit.log" />
+      <jvmarg value="-Dhadoop.security.log.file=./build/security-audit.log" />
       <arg value="help" />
       <classpath refid="compile.classpath"/>
     </java>

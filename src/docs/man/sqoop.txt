@@ -55,8 +55,9 @@ HIVE_HOME::
 SEE ALSO
 --------
 
-The _Sqoop User Guide_ is available in HTML-form in '/usr/share/sqoop/' (if you installed via RPM or
-DEB), or in the 'docs/' directory if you installed from a tarball.
+The _Sqoop User Guide_ is available in HTML-form in '/usr/share/doc/sqoop/'
+(if you installed via RPM or DEB), or in the 'docs/' directory if you
+installed from a tarball.
 
 
 ////
