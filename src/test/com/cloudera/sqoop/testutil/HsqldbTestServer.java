@@ -43,7 +43,20 @@ public class HsqldbTestServer {
   // singleton server instance.
   private static Server server;
 
-  private static final String DATABASE_NAME = "db1";
+  // if -Dhsql.server.host hasn't been set to something like
+  // hsql://localhost.localdomain/ a defaul in-mem DB will be used
+  private static final String IN_MEM = "mem:";
+  public static String getServerHost() {
+    String host = System.getProperty("hsql.server.host", IN_MEM);
+    if (!host.endsWith("/")) { host += "/"; }
+    return host;
+  }
+
+  private static boolean inMemoryDB = IN_MEM.equals(getServerHost());
+
+  // Database name can be altered too
+  private static final String DATABASE_NAME =
+      System.getProperty("hsql.database.name",  "db1");
 
   // hsqldb always capitalizes table and column names
   private static final String DUMMY_TABLE_NAME = "TWOINTTABLE";
@@ -54,7 +67,8 @@ public class HsqldbTestServer {
 
   private static final String EMPLOYEE_TABLE_NAME = "EMPLOYEES";
 
-  private static final String DB_URL = "jdbc:hsqldb:mem:" + DATABASE_NAME;
+  private static final String DB_URL = "jdbc:hsqldb:"
+      + getServerHost() + DATABASE_NAME;
   private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
 
   // all user-created HSQLDB tables are in the "PUBLIC" schema when connected
@@ -87,8 +101,13 @@ public class HsqldbTestServer {
   public void start() {
     if (null == server) {
       LOG.info("Starting new hsqldb server; database=" + DATABASE_NAME);
+      String tmpDir = System.getProperty("test.build.data", "/tmp/");
+      String dbLocation = tmpDir + "/sqoop/testdb.file";
+      if (inMemoryDB) {dbLocation = IN_MEM; }
       server = new Server();
-      server.putPropertiesFromString("database.0=mem:" + DATABASE_NAME
+
+      server.setDatabaseName(0, DATABASE_NAME);
+      server.putPropertiesFromString("database.0=" + dbLocation
           + ";no_system_exit=true");
       server.start();
     }
