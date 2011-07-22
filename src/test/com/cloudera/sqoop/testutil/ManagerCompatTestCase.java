@@ -134,6 +134,11 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return true;
   }
 
+  /** @return true if the database under test has a VARBINARY type */
+  protected boolean supportsVarBinary() {
+    return true;
+  }
+
   /** @return true if the database under test has a TIME type */
   protected boolean supportsTime() {
     return true;
@@ -239,8 +244,35 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return "VARBINARY(12)";
   }
 
+  /**
+   * Define a TINYINT column that can contain 8-bit signed integers.
+   */
+  protected String getTinyIntType() {
+    return "TINYINT";
+  }
+
   //////// These methods indicate how databases respond to various datatypes.
   //////// Since our comparisons are all string-based, these return strings.
+  
+  /** @return How we insert the value TRUE represented as an int. */
+  protected String getTrueBoolNumericSqlInput() {
+    return "1";
+  }
+
+  /** @return How we insert the value FALSE represented as an int. */
+  protected String getFalseBoolNumericSqlInput() {
+    return "0";
+  }
+  
+  /** @return How we insert the value TRUE represented as a boolean literal. */
+  protected String getTrueBoolLiteralSqlInput() {
+    return "true";
+  }
+
+  /** @return How we insert the value FALSE represented as a boolean literal. */
+  protected String getFalseBoolLiteralSqlInput() {
+    return "false";
+  }
 
   /** @return How a BOOLEAN column with value TRUE is communicated over JDBC */
   protected String getTrueBoolDbOutput() {
@@ -262,6 +294,15 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    * import. */
   protected String getFalseBoolSeqOutput() {
     return "false";
+  }
+
+  protected String padString(int width, String str) {
+    int extra = width - str.length();
+    for (int i = 0; i < extra; i++) {
+      str = str + " ";
+    }
+
+    return str;
   }
 
   /**
@@ -619,7 +660,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("BOOLEAN", "1", getTrueBoolDbOutput(), getTrueBoolSeqOutput());
+    verifyType("BOOLEAN", getTrueBoolNumericSqlInput(),
+        getTrueBoolDbOutput(), getTrueBoolSeqOutput());
   }
 
   @Test
@@ -629,7 +671,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("BOOLEAN", "0", getFalseBoolDbOutput(), getFalseBoolSeqOutput());
+    verifyType("BOOLEAN", getFalseBoolNumericSqlInput(),
+        getFalseBoolDbOutput(), getFalseBoolSeqOutput());
   }
 
   @Test
@@ -639,7 +682,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("BOOLEAN", "false", getFalseBoolDbOutput(),
+    verifyType("BOOLEAN", getFalseBoolLiteralSqlInput(), getFalseBoolDbOutput(),
         getFalseBoolSeqOutput());
   }
 
@@ -650,7 +693,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("TINYINT", "0", "0");
+    verifyType(getTinyIntType(), "0", "0");
   }
 
   @Test
@@ -660,7 +703,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("TINYINT", "42", "42");
+    verifyType(getTinyIntType(), "42", "42");
   }
 
   @Test
@@ -993,6 +1036,11 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   @Test
   public void testVarBinary() {
+    if (!supportsVarBinary()) {
+      log.info("Skipping VARBINARY test; database does not support VARBINARY");
+      return;
+    }
+
     verifyType(getVarBinaryType(), "'F00FABCD'",
         getVarBinaryDbOutput("F00FABCD"),
         getVarBinarySeqOutput("F00FABCD"), true);

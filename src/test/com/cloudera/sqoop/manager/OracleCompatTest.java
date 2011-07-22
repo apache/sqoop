@@ -65,15 +65,6 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     OracleUtils.dropTable(table, getManager());
   }
 
-  private String padString(int width, String str) {
-    int extra = width - str.length();
-    for (int i = 0; i < extra; i++) {
-      str = str + " ";
-    }
-
-    return str;
-  }
-
   @Override
   public void tearDown() {
     super.tearDown();
