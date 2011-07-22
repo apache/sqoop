@@ -20,12 +20,13 @@ package org.apache.hadoop.sqoop.manager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.Calendar;
@@ -34,8 +35,6 @@ import java.util.ArrayList;
 import java.text.ParseException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -312,5 +311,65 @@ public class OracleManagerTest extends ImportJobTestCase {
         throw new IOException("Expected:<" + expectedLine + "> but was:<" + receivedLine + ">, while timezone offset is: " + offset);
       }
     }
+  }
+
+  public void testPurgeClosedConnections() throws Exception {
+    // Ensure that after an Oracle ConnManager releases any connections
+    // back into the cache (or closes them as redundant), it does not
+    // attempt to re-use the closed connection.
+
+    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
+        TABLE_NAME);
+    OracleUtils.setOracleAuth(options);
+
+    // Create a connection manager, use it, and then recycle its connection
+    // into the cache.
+    ConnManager m1 = new OracleManager(options);
+    Connection c1 = m1.getConnection();
+    PreparedStatement s = c1.prepareStatement("SELECT 1 FROM dual",
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    ResultSet rs = null;
+    try {
+      rs = s.executeQuery();
+      rs.close();
+    } finally {
+      s.close();
+    }
+
+    ConnManager m2 = new OracleManager(options);
+    Connection c2 = m2.getConnection(); // get a new connection.
+
+    m1.close(); // c1 should now be cached.
+
+    // Use the second connection to run a statement.
+    s = c2.prepareStatement("SELECT 2 FROM dual",
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      rs = s.executeQuery();
+      rs.close();
+    } finally {
+      s.close();
+    }
+
+    m2.close(); // c2 should be discarded (c1 is already cached).
+
+    // Try to get another connection from m2. This should result in
+    // a completely different connection getting served back to us.
+    Connection c2a = m2.getConnection();
+
+    assertFalse(c1.isClosed());
+    assertTrue(c2.isClosed());
+    assertFalse(c2a.isClosed());
+
+    s = c2a.prepareStatement("SELECT 3 FROM dual",
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      rs = s.executeQuery();
+      rs.close();
+    } finally {
+      s.close();
+    }
+
+    m2.close(); // Close the manager's active connection again.
   }
 }

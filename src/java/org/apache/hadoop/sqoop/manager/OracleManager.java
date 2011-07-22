@@ -182,6 +182,7 @@ public class OracleManager extends GenericJdbcManager {
       // Release our open connection back to the cache.
       CACHE.recycle(options.getConnectString(), options.getUsername(),
           getConnection());
+      discardConnection(false);
     }
   }
 

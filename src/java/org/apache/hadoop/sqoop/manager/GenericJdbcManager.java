@@ -57,12 +57,23 @@ public class GenericJdbcManager extends SqlManager {
     return this.connection != null;
   }
 
+  /**
+   * Any reference to the connection managed by this manager is nulled.
+   * If doClose is true, then this method will attempt to close the
+   * connection first.
+   * @param doClose if true, try to close the connection before forgetting it.
+   */
+  protected void discardConnection(boolean doClose) throws SQLException {
+    if (doClose && hasOpenConnection()) {
+      this.connection.close();
+    }
+
+    this.connection = null;
+  }
+
   public void close() throws SQLException {
     super.close();
-    if (null != this.connection) {
-      this.connection.close();
-      this.connection = null;
-    }
+    discardConnection(true);
   }
 
   public String getDriverClass() {
