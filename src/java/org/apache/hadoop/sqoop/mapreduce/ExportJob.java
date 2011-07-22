@@ -64,70 +64,6 @@ public class ExportJob {
   }
 
   /**
-   * @return true if p is a SequenceFile, or a directory containing
-   * SequenceFiles.
-   */
-  private boolean isSequenceFiles(Path p) throws IOException {
-    Configuration conf = context.getOptions().getConf();
-    FileSystem fs = p.getFileSystem(conf);
-
-    try {
-      FileStatus stat = fs.getFileStatus(p);
-
-      if (null == stat) {
-        // Couldn't get the item.
-        LOG.warn("Input path " + p + " does not exist");
-        return false;
-      }
-
-      if (stat.isDir()) {
-        FileStatus [] subitems = fs.listStatus(p);
-        if (subitems == null || subitems.length == 0) {
-          LOG.warn("Input path " + p + " contains no files");
-          return false; // empty dir.
-        }
-
-        // Pick a random child entry to examine instead.
-        stat = subitems[0];
-      }
-
-      if (null == stat) {
-        LOG.warn("null FileStatus object in isSequenceFiles(); assuming false.");
-        return false;
-      }
-
-      Path target = stat.getPath();
-      // Test target's header to see if it contains magic numbers indicating it's
-      // a SequenceFile.
-      byte [] header = new byte[3];
-      FSDataInputStream is = null;
-      try {
-        is = fs.open(target);
-        is.readFully(header);
-      } catch (IOException ioe) {
-        // Error reading header or EOF; assume not a SequenceFile.
-        LOG.warn("IOException checking SequenceFile header: " + ioe);
-        return false;
-      } finally {
-        try {
-          if (null != is) {
-            is.close();
-          }
-        } catch (IOException ioe) {
-          // ignore; closing.
-          LOG.warn("IOException closing input stream: " + ioe + "; ignoring.");
-        }
-      }
-
-      // Return true (isSequenceFile) iff the magic number sticks.
-      return header[0] == 'S' && header[1] == 'E' && header[2] == 'Q';
-    } catch (FileNotFoundException fnfe) {
-      LOG.warn("Input path " + p + " does not exist");
-      return false; // doesn't exist!
-    }
-  }
-
-  /**
    * Run an export job to dump a table from HDFS to a database
    * @throws IOException if the export job encounters an IO error
    * @throws ExportException if the job fails unexpectedly or is misconfigured.
@@ -161,16 +97,19 @@ public class ExportJob {
       Path inputPath = new Path(context.getOptions().getExportDir());
       inputPath = inputPath.makeQualified(FileSystem.get(conf));
 
-      if (isSequenceFiles(inputPath)) {
-        job.setInputFormatClass(SequenceFileInputFormat.class);
+      boolean isSeqFiles = ExportInputFormat.isSequenceFiles(
+          context.getOptions().getConf(), inputPath);
+
+      if (isSeqFiles) {
         job.setMapperClass(SequenceFileExportMapper.class);
       } else {
-        job.setInputFormatClass(TextInputFormat.class);
         job.setMapperClass(TextExportMapper.class);
       }
 
+      job.setInputFormatClass(ExportInputFormat.class);
       FileInputFormat.addInputPath(job, inputPath);
       job.setNumReduceTasks(0);
+      ExportInputFormat.setNumMapTasks(job, options.getNumMappers());
 
       // Concurrent writes of the same records would be problematic.
       job.setMapSpeculativeExecution(false);

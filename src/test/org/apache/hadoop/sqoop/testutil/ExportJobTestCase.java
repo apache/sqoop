@@ -66,6 +66,8 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     args.add("\\t");
     args.add("--lines-terminated-by");
     args.add("\\n");
+    args.add("-m");
+    args.add("1");
 
 
     if (null != additionalArgv) {

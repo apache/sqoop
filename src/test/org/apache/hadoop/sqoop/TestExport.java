@@ -305,15 +305,44 @@ public class TestExport extends ExportJobTestCase {
     assertColValForRowId(maxId, colName, expectedMax);
   }
 
+  private void multiFileTest(int numFiles, int recordsPerMap, int numMaps)
+      throws IOException, SQLException {
+
+    final int TOTAL_RECORDS = numFiles * recordsPerMap;
+
+    try {
+      LOG.info("Beginning test: numFiles=" + numFiles + "; recordsPerMap="
+          + recordsPerMap + "; numMaps=" + numMaps);
+
+      for (int i = 0; i < numFiles; i++) {
+        createTextFile(i, recordsPerMap, false);
+      }
+
+      createTable();
+      runExport(getArgv(true, "-m", "" + numMaps));
+      verifyExport(TOTAL_RECORDS);
+    } finally {
+      LOG.info("multi-file test complete");
+    }
+  }
+
   /** Export 10 rows, make sure they load in correctly */
   public void testTextExport() throws IOException, SQLException {
+    multiFileTest(1, 10, 1);
+  }
 
-    final int TOTAL_RECORDS = 10;
+  /** Make sure we can use CombineFileInputFormat to handle multiple
+   * files in a single mapper.
+   */
+  public void testMultiFilesOneMapper() throws IOException, SQLException {
+    multiFileTest(2, 10, 1);
+  }
 
-    createTextFile(0, TOTAL_RECORDS, false);
-    createTable();
-    runExport(getArgv(true));
-    verifyExport(TOTAL_RECORDS);
+  /** Make sure we can use CombineFileInputFormat to handle multiple
+   * files and multiple maps
+   */
+  public void testMultiFilesMultiMaps() throws IOException, SQLException {
+    multiFileTest(2, 10, 2);
   }
 
   /** Export 10 rows from gzipped text files. */
