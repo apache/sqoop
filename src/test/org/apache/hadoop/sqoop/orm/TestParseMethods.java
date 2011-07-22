@@ -36,7 +36,6 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.hadoop.sqoop.mapred.RawKeyTextOutputFormat;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
@@ -134,7 +133,6 @@ public class TestParseMethods extends ImportJobTestCase {
 
       job.setOutputKeyClass(Text.class);
       job.setOutputValueClass(NullWritable.class);
-      job.setOutputFormat(RawKeyTextOutputFormat.class);
 
       JobClient.runJob(job);
     } catch (InvalidOptionsException ioe) {

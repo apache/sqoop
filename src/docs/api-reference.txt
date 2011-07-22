@@ -175,7 +175,6 @@ The following subpackages under +org.apache.hadoop.sqoop+ exist:
 * +lib+ - The external public API (described earlier).
 * +manager+ - The +ConnManager+ and +ManagerFactory+ interface and their
   implementations.
-* +mapred+ - Classes interfacing with the old (pre-0.20) MapReduce API.
 * +mapreduce+ - Classes interfacing with the new (0.20+) MapReduce API....
 * +orm+ - Code auto-generation.
 * +util+ - Miscellaneous utility classes.
@@ -188,12 +187,9 @@ unsplittable compression libraries (e.g., gzip) to be used in conjunction with
 Sqoop import while still allowing subsequent MapReduce jobs to use multiple
 input splits per dataset.
 
-Code in the +mapred+ package should be considered deprecated. The +mapreduce+
-package contains +DataDrivenImportJob+, which uses the +DataDrivenDBInputFormat+
-introduced in 0.21. The mapred package contains +ImportJob+, which uses the
-older +DBInputFormat+. Most +ConnManager+ implementations use
-+DataDrivenImportJob+; +DataDrivenDBInputFormat+ does not currently work with
-Oracle in all circumstances, so it remains on the old code-path.
+The +mapreduce+ package contains +DataDrivenImportJob+, which uses the
++DataDrivenDBInputFormat+ introduced in 0.21.  Most +ConnManager+
+implementations use +DataDrivenImportJob+ to perform their imports.
 
 The +orm+ package contains code used for class generation. It depends on the
 JDK's tools.jar which provides the com.sun.tools.javac package.

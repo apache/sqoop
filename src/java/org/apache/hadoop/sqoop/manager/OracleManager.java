@@ -32,8 +32,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.lib.db.OracleDataDrivenDBInputFormat;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.mapred.ImportJob;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
@@ -131,30 +131,11 @@ public class OracleManager extends GenericJdbcManager {
     }
   }
 
-  /**
-   * This importTable() implementation continues to use the older DBInputFormat
-   * because DataDrivenDBInputFormat does not currently work with Oracle.
-   */
   public void importTable(ImportJobContext context)
       throws IOException, ImportException {
-
-    String tableName = context.getTableName();
-    String jarFile = context.getJarFile();
-    SqoopOptions options = context.getOptions();
-    ImportJob importer = new ImportJob(options);
-    String splitCol = options.getSplitByCol();
-    if (null == splitCol) {
-      // If the user didn't specify a splitting column, try to infer one.
-      splitCol = getPrimaryKey(tableName);
-    }
-
-    if (null == splitCol) {
-      // Can't infer a primary key.
-      throw new ImportException("No primary key could be found for table " + tableName
-          + ". Please specify one with --split-by.");
-    }
-
-    importer.runImport(tableName, jarFile, splitCol, options.getConf());
+    // Specify the Oracle-specific DBInputFormat for import.
+    context.setInputFormat(OracleDataDrivenDBInputFormat.class);
+    super.importTable(context);
   }
 
   @Override

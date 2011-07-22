@@ -68,11 +68,6 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     OracleUtils.dropTable(table, getManager());
   }
 
-  @Override
-  protected Path getDataFilePath() {
-    return new Path(getTablePath(), "part-00000");
-  }
-
   private String padString(int width, String str) {
     int extra = width - str.length();
     for (int i = 0; i < extra; i++) {

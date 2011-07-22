@@ -281,7 +281,8 @@ public abstract class SqlManager extends ConnManager {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
     SqoopOptions options = context.getOptions();
-    DataDrivenImportJob importer = new DataDrivenImportJob(options);
+    DataDrivenImportJob importer =
+        new DataDrivenImportJob(options, context.getInputFormat());
     String splitCol = options.getSplitByCol();
     if (null == splitCol) {
       // If the user didn't specify a splitting column, try to infer one.

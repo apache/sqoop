@@ -31,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -57,6 +58,7 @@ public class DataDrivenImportJob {
 
   private final SqoopOptions options;
   private final Class<Mapper> mapperClass;
+  private final Class<? extends InputFormat> inputFormatClass;
 
   // For dependency-injection purposes, we can specify a mapper class
   // to use during tests.
@@ -65,7 +67,13 @@ public class DataDrivenImportJob {
 
   @SuppressWarnings("unchecked")
   public DataDrivenImportJob(final SqoopOptions opts) {
+    this(opts, DataDrivenDBInputFormat.class);
+  }
+
+  public DataDrivenImportJob(final SqoopOptions opts,
+      final Class<? extends InputFormat> inputFormatClass) {
     this.options = opts;
+    this.inputFormatClass = inputFormatClass;
     this.mapperClass = (Class<Mapper>) opts.getConf().getClass(
         DATA_DRIVEN_MAPPER_KEY, null);
   }
@@ -152,8 +160,6 @@ public class DataDrivenImportJob {
       job.getConfiguration().setInt("mapred.map.tasks", numMapTasks);
       job.setNumReduceTasks(0);
 
-      job.setInputFormatClass(DataDrivenDBInputFormat.class);
-
       FileOutputFormat.setOutputPath(job, outputPath);
 
       ConnManager mgr = new ConnFactory(conf).getManager(options);
@@ -189,6 +195,9 @@ public class DataDrivenImportJob {
           mgr.escapeTableName(tableName), whereClause,
           mgr.escapeColName(splitByCol), sqlColNames);
       job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY, tableClassName);
+
+      LOG.debug("Using InputFormat: " + inputFormatClass);
+      job.setInputFormatClass(inputFormatClass);
 
       PerfCounters counters = new PerfCounters();
       counters.startClock();

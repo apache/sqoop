@@ -173,7 +173,7 @@ public class OracleManagerTest extends ImportJobTestCase {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, TABLE_NAME);
-    Path filePath = new Path(tablePath, "part-00000");
+    Path filePath = new Path(tablePath, "part-m-00000");
 
     File tableFile = new File(tablePath.toString());
     if (tableFile.exists() && tableFile.isDirectory()) {

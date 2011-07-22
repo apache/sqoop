@@ -18,6 +18,8 @@
 
 package org.apache.hadoop.sqoop.manager;
 
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
 import org.apache.hadoop.sqoop.SqoopOptions;
 
 /**
@@ -29,11 +31,13 @@ public class ImportJobContext {
   private String tableName;
   private String jarFile;
   private SqoopOptions options;
+  private Class<? extends InputFormat> inputFormatClass;
 
   public ImportJobContext(final String table, final String jar, final SqoopOptions opts) {
     this.tableName = table;
     this.jarFile = jar;
     this.options = opts;
+    this.inputFormatClass = DataDrivenDBInputFormat.class;
   }
 
   /** @return the name of the table to import. */
@@ -51,6 +55,16 @@ public class ImportJobContext {
   /** @return the SqoopOptions configured by the user */
   public SqoopOptions getOptions() {
     return options;
+  }
+
+  /** Set the InputFormat to use for the import job. */
+  public void setInputFormat(Class<? extends InputFormat> ifClass) {
+    this.inputFormatClass = ifClass;
+  }
+
+  /** @return the InputFormat to use for the import job. */
+  public Class<? extends InputFormat> getInputFormat() {
+    return this.inputFormatClass;
   }
 }
 

@@ -25,7 +25,6 @@ import org.apache.hadoop.sqoop.lib.TestFieldFormatter;
 import org.apache.hadoop.sqoop.lib.TestRecordParser;
 import org.apache.hadoop.sqoop.manager.TestHsqldbManager;
 import org.apache.hadoop.sqoop.manager.TestSqlManager;
-import org.apache.hadoop.sqoop.mapred.MapredTests;
 import org.apache.hadoop.sqoop.mapreduce.MapreduceTests;
 import org.apache.hadoop.sqoop.orm.TestClassWriter;
 import org.apache.hadoop.sqoop.orm.TestParseMethods;

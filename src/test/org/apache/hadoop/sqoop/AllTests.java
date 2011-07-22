@@ -18,8 +18,6 @@
 
 package org.apache.hadoop.sqoop;
 
-import org.apache.hadoop.sqoop.mapred.MapredTests;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -35,7 +33,6 @@ public final class AllTests {
 
     suite.addTest(SmokeTests.suite());
     suite.addTest(ThirdPartyTests.suite());
-    suite.addTest(MapredTests.suite());
 
     return suite;
   }
