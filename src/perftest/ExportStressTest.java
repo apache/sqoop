@@ -30,19 +30,20 @@ import org.apache.hadoop.sqoop.tool.SqoopTool;
 
 /**
  * Stress test export procedure by running a large-scale export to MySQL.
- * This requires MySQL be configured with a database that can be accessed
- * by the specified username without a password. The user must be able to
- * create and drop tables in the database.
+ * This requires MySQL be configured with a database that can be accessed by
+ * the specified username without a password. The user must be able to create
+ * and drop tables in the database.
  *
- * Run with: src/scripts/run-perftest.sh ExportStressTest (connect-str) (username)
+ * Run with: src/scripts/run-perftest.sh ExportStressTest \
+ *     (connect-str) (username)
  */
 public class ExportStressTest extends Configured implements Tool {
 
   // Export 10 GB of data. Each record is ~100 bytes.
-  public final static int NUM_FILES = 10;
-  public final static int RECORDS_PER_FILE = 10 * 1024 * 1024;
+  public static final int NUM_FILES = 10;
+  public static final int RECORDS_PER_FILE = 10 * 1024 * 1024;
 
-  public final static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   public ExportStressTest() {
   }
@@ -88,7 +89,8 @@ public class ExportStressTest extends Configured implements Tool {
     Connection conn = DriverManager.getConnection(connectStr, username, null);
     conn.setAutoCommit(false);
     PreparedStatement stmt = conn.prepareStatement(
-        "DROP TABLE IF EXISTS ExportStressTestTable", ResultSet.TYPE_FORWARD_ONLY,
+        "DROP TABLE IF EXISTS ExportStressTestTable",
+        ResultSet.TYPE_FORWARD_ONLY,
         ResultSet.CONCUR_READ_ONLY);
     stmt.executeUpdate();
     stmt.close();
@@ -103,7 +105,9 @@ public class ExportStressTest extends Configured implements Tool {
     conn.close();
   }
 
-  /** Actually run the export of the generated data to the user-created table. */
+  /**
+   * Actually run the export of the generated data to the user-created table.
+   */
   public void runExport(String connectStr, String username) throws Exception {
     SqoopOptions options = new SqoopOptions(getConf());
     options.setConnectString(connectStr);

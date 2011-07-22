@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
@@ -238,7 +237,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
     // Now ensure all the data got there.
     String [] expectedLines0 = {
-      "This is a string!"
+      "This is a string!",
     };
     InputStream fis = new FileInputStream(new File(getWriteDir(),
         "split-00000"));
@@ -268,7 +267,7 @@ public class TestSplittableBufferedWriter extends TestCase {
   }
 
   public void testSplittingGzipFile() throws IOException {
-    SplittingOutputStream os  = new SplittingOutputStream(getConf(),
+    SplittingOutputStream os = new SplittingOutputStream(getConf(),
         getWritePath(), "splitz-", 3, true);
     SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
     try {
@@ -289,7 +288,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
     // Now ensure all the data got there.
     String [] expectedLines0 = {
-      "This is a string!"
+      "This is a string!",
     };
     verifyFileContents(
         new GZIPInputStream(new FileInputStream(new File(getWriteDir(),

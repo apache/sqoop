@@ -35,7 +35,8 @@ import org.apache.hadoop.sqoop.testutil.ManagerCompatTestCase;
  */
 public class MySQLCompatTest extends ManagerCompatTestCase {
 
-  public static final Log LOG = LogFactory.getLog(MySQLCompatTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      MySQLCompatTest.class.getName());
 
   @Override
   protected Log getLogger() {

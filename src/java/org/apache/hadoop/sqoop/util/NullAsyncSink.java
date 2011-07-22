@@ -31,7 +31,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class NullAsyncSink extends AsyncSink {
 
-  public static final Log LOG = LogFactory.getLog(NullAsyncSink.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      NullAsyncSink.class.getName());
 
   private Thread child;
 
@@ -69,7 +70,8 @@ public class NullAsyncSink extends AsyncSink {
           }
         }
       } catch (IOException ioe) {
-        LOG.warn("IOException reading from (ignored) stream: " + ioe.toString());
+        LOG.warn("IOException reading from (ignored) stream: "
+            + ioe.toString());
       }
 
       try {

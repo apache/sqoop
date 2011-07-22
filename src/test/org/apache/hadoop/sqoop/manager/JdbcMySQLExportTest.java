@@ -18,21 +18,17 @@
 
 package org.apache.hadoop.sqoop.manager;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.TestExport;
-import org.apache.hadoop.sqoop.mapreduce.MySQLExportMapper;
 
 /**
  * Test the MySQLManager implementation's exportJob() functionality.

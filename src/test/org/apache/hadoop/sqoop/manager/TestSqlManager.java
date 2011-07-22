@@ -38,13 +38,11 @@ import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 
 /**
  * Test methods of the generic SqlManager implementation.
- *
- * 
- *
  */
 public class TestSqlManager extends TestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestSqlManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestSqlManager.class.getName());
 
   /** the name of a table that doesn't exist. */
   static final String MISSING_TABLE = "MISSING_TABLE";
@@ -81,7 +79,8 @@ public class TestSqlManager extends TestCase {
 
   @Test
   public void testListColNames() {
-    String [] colNames = manager.getColumnNames(HsqldbTestServer.getTableName());
+    String [] colNames = manager.getColumnNames(
+        HsqldbTestServer.getTableName());
     assertNotNull("manager returned no colname list", colNames);
     assertEquals("Table list should be length 2", 2, colNames.length);
     String [] knownFields = HsqldbTestServer.getFieldNames();
@@ -92,7 +91,8 @@ public class TestSqlManager extends TestCase {
 
   @Test
   public void testListColTypes() {
-    Map<String, Integer> types = manager.getColumnTypes(HsqldbTestServer.getTableName());
+    Map<String, Integer> types = manager.getColumnTypes(
+        HsqldbTestServer.getTableName());
 
     assertNotNull("manager returned no types map", types);
     assertEquals("Map should be size=2", 2, types.size());
@@ -103,13 +103,15 @@ public class TestSqlManager extends TestCase {
   @Test
   public void testMissingTableColNames() {
     String [] colNames = manager.getColumnNames(MISSING_TABLE);
-    assertNull("No column names should be returned for missing table", colNames);
+    assertNull("No column names should be returned for missing table",
+        colNames);
   }
 
   @Test
   public void testMissingTableColTypes() {
     Map<String, Integer> colTypes = manager.getColumnTypes(MISSING_TABLE);
-    assertNull("No column types should be returned for missing table", colTypes);
+    assertNull("No column types should be returned for missing table",
+        colTypes);
   }
 
   @Test
@@ -124,9 +126,9 @@ public class TestSqlManager extends TestCase {
   }
 
   // constants related to testReadTable()
-  final static int EXPECTED_NUM_ROWS = 4;
-  final static int EXPECTED_COL1_SUM = 16;
-  final static int EXPECTED_COL2_SUM = 20;
+  static final int EXPECTED_NUM_ROWS = 4;
+  static final int EXPECTED_COL1_SUM = 16;
+  static final int EXPECTED_COL2_SUM = 20;
 
   @Test
   public void testReadTable() {
@@ -141,7 +143,8 @@ public class TestSqlManager extends TestCase {
       assertNotNull("ResultSetMetadata is null in readTable()", metaData);
 
       // ensure that we get the correct number of columns back
-      assertEquals("Number of returned columns was unexpected!", metaData.getColumnCount(),
+      assertEquals("Number of returned columns was unexpected!",
+          metaData.getColumnCount(),
           HsqldbTestServer.getFieldNames().length);
 
       // should get back 4 rows. They are:
@@ -149,7 +152,8 @@ public class TestSqlManager extends TestCase {
       // 3 4
       // 5 6
       // 7 8
-      // .. so while order isn't guaranteed, we should get back 16 on the left and 20 on the right.
+      // .. so while order isn't guaranteed, we should get back 16 on the left
+      // and 20 on the right.
       int sumCol1 = 0, sumCol2 = 0, rowCount = 0;
       while (results.next()) {
         rowCount++;
@@ -181,7 +185,8 @@ public class TestSqlManager extends TestCase {
     try {
       String [] colNames = { "*" };
       results = manager.readTable(MISSING_TABLE, colNames);
-      assertNull("Expected null resultset from readTable(MISSING_TABLE)", results);
+      assertNull("Expected null resultset from readTable(MISSING_TABLE)",
+          results);
     } catch (SQLException sqlException) {
       // we actually expect this. pass.
     } finally {
@@ -226,7 +231,8 @@ public class TestSqlManager extends TestCase {
       statement.executeUpdate();
       statement.close();
     } catch (SQLException sqlException) {
-      fail("Could not create table with primary key: " + sqlException.toString());
+      fail("Could not create table with primary key: "
+          + sqlException.toString());
     } finally {
       if (null != conn) {
         try {
@@ -238,6 +244,7 @@ public class TestSqlManager extends TestCase {
     }
 
     String primaryKey = manager.getPrimaryKey(TABLE_WITH_KEY);
-    assertEquals("Expected null pkey for table without key", primaryKey, KEY_FIELD_NAME);
+    assertEquals("Expected null pkey for table without key", primaryKey,
+        KEY_FIELD_NAME);
   }
 }

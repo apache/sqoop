@@ -31,7 +31,8 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
  * that DBWritable to the OutputFormat for writeback to the database.
  */
 public class SequenceFileExportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord, NullWritable> {
+    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
+    NullWritable> {
 
   public SequenceFileExportMapper() {
   }

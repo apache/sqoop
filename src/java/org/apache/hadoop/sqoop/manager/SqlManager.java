@@ -62,7 +62,7 @@ public abstract class SqlManager extends ConnManager {
   private Statement lastStatement;
 
   /**
-   * Constructs the SqlManager
+   * Constructs the SqlManager.
    * @param opts the SqoopOptions describing the user's requested action.
    */
   public SqlManager(final SqoopOptions opts) {
@@ -171,7 +171,8 @@ public abstract class SqlManager extends ConnManager {
   }
 
   @Override
-  public ResultSet readTable(String tableName, String[] columns) throws SQLException {
+  public ResultSet readTable(String tableName, String[] columns)
+      throws SQLException {
     if (columns == null) {
       columns = getColumnNames(tableName);
     }
@@ -212,7 +213,8 @@ public abstract class SqlManager extends ConnManager {
         DatabaseMetaData metaData = this.getConnection().getMetaData();
         results = metaData.getTables(null, null, null, tableTypes);
       } catch (SQLException sqlException) {
-        LOG.error("Error reading database metadata: " + sqlException.toString());
+        LOG.error("Error reading database metadata: "
+            + sqlException.toString());
         return null;
       }
 
@@ -264,25 +266,26 @@ public abstract class SqlManager extends ConnManager {
         getConnection().commit();
       }
     } catch (SQLException sqlException) {
-      LOG.error("Error reading primary key metadata: " + sqlException.toString());
+      LOG.error("Error reading primary key metadata: "
+          + sqlException.toString());
       return null;
     }
   }
 
   /**
-   * Retrieve the actual connection from the outer ConnManager
+   * Retrieve the actual connection from the outer ConnManager.
    */
   public abstract Connection getConnection() throws SQLException;
 
   /**
    * Determine what column to use to split the table.
-   * @param options the SqoopOptions controlling this import.
+   * @param opts the SqoopOptions controlling this import.
    * @param tableName the table to import.
    * @return the splitting column, if one is set or inferrable, or null
    * otherwise.
    */
-  protected String getSplitColumn(SqoopOptions options, String tableName) {
-    String splitCol = options.getSplitByCol();
+  protected String getSplitColumn(SqoopOptions opts, String tableName) {
+    String splitCol = opts.getSplitByCol();
     if (null == splitCol) {
       // If the user didn't specify a splitting column, try to infer one.
       splitCol = getPrimaryKey(tableName);
@@ -344,7 +347,8 @@ public abstract class SqlManager extends ConnManager {
    * @return the name of a Java type to hold the sql datatype, or null if none.
    */
   public String toJavaType(int sqlType) {
-    // mappings from http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html
+    // Mappings taken from:
+    // http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html
     if (sqlType == Types.INTEGER) {
       return "Integer";
     } else if (sqlType == Types.VARCHAR) {
@@ -396,7 +400,7 @@ public abstract class SqlManager extends ConnManager {
   }
 
   /**
-   * Resolve a database-specific type to Hive data type
+   * Resolve a database-specific type to Hive data type.
    * @param sqlType     sql type
    * @return            hive type
    */
@@ -489,7 +493,8 @@ public abstract class SqlManager extends ConnManager {
     try {
       Class.forName(driverClass);
     } catch (ClassNotFoundException cnfe) {
-      throw new RuntimeException("Could not load db driver class: " + driverClass);
+      throw new RuntimeException("Could not load db driver class: "
+          + driverClass);
     }
 
     String username = options.getUsername();
@@ -497,7 +502,8 @@ public abstract class SqlManager extends ConnManager {
     if (null == username) {
       connection = DriverManager.getConnection(options.getConnectString());
     } else {
-      connection = DriverManager.getConnection(options.getConnectString(), username, password);
+      connection = DriverManager.getConnection(options.getConnectString(),
+          username, password);
     }
 
     // We only use this for metadata queries. Loosest semantics are okay.
@@ -508,7 +514,7 @@ public abstract class SqlManager extends ConnManager {
   }
 
   /**
-   * Export data stored in HDFS into a table in a database
+   * Export data stored in HDFS into a table in a database.
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {

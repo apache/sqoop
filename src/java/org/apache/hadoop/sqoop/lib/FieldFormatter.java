@@ -28,31 +28,35 @@ public final class FieldFormatter {
 
   /** 
    * Takes an input string representing the value of a field, encloses it in
-   * enclosing chars, and escapes any occurrences of such characters in the middle.
-   * The escape character itself is also escaped if it appears in the text of the
-   * field.
+   * enclosing chars, and escapes any occurrences of such characters in the
+   * middle.  The escape character itself is also escaped if it appears in the
+   * text of the field.
    *
    * The field is enclosed only if:
    *   enclose != '\000', and:
    *     encloseRequired is true, or
-   *     one of the characters in the mustEscapeFor list is present in the string.
+   *     one of the characters in the mustEscapeFor list is present
+   *     in the string.
    *
    * Escaping is not performed if the escape char is '\000'.
    *
    * @param str - The user's string to escape and enclose
-   * @param escape - What string to use as the escape sequence. If "" or null, then don't escape.
-   * @param enclose - The string to use to enclose str e.g. "quoted". If "" or null, then don't
-   *     enclose.
-   * @param mustEncloseFor - A list of characters; if one is present in 'str', then str must be
-   *     enclosed
-   * @param encloseRequired - If true, then always enclose, regardless of mustEscapeFor
-   * @return the escaped, enclosed version of 'str'
+   * @param escape - What string to use as the escape sequence. If "" or null,
+   * then don't escape.
+   * @param enclose - The string to use to enclose str e.g. "quoted". If "" or
+   * null, then don't enclose.
+   * @param mustEncloseFor - A list of characters; if one is present in 'str',
+   * then str must be enclosed.
+   * @param encloseRequired - If true, then always enclose, regardless of
+   * mustEscapeFor.
+   * @return the escaped, enclosed version of 'str'.
    */
-  public static final String escapeAndEnclose(String str, String escape, String enclose,
-      char [] mustEncloseFor, boolean encloseRequired) {
+  public static String escapeAndEnclose(String str, String escape,
+      String enclose, char [] mustEncloseFor, boolean encloseRequired) {
 
     // true if we can use an escape character.
-    boolean escapingLegal = (null != escape && escape.length() > 0 && !escape.equals("\000"));
+    boolean escapingLegal = (null != escape
+        && escape.length() > 0 && !escape.equals("\000"));
     String withEscapes;
 
     if (null == str) {
@@ -60,7 +64,7 @@ public final class FieldFormatter {
     }
 
     if (escapingLegal) {
-      // escaping is legal. Escape any instances of the escape char itself
+      // escaping is legal. Escape any instances of the escape char itself.
       withEscapes = str.replace(escape, escape + escape);
     } else {
       // no need to double-escape
@@ -68,12 +72,13 @@ public final class FieldFormatter {
     }
 
     if (null == enclose || enclose.length() == 0 || enclose.equals("\000")) {
-      // The enclose-with character was left unset, so we can't enclose items. We're done.
+      // The enclose-with character was left unset, so we can't enclose items.
+      // We're done.
       return withEscapes;
     }
 
-    // if we have an enclosing character, and escaping is legal, then the encloser must
-    // always be escaped.
+    // if we have an enclosing character, and escaping is legal, then the
+    // encloser must always be escaped.
     if (escapingLegal) {
       withEscapes = withEscapes.replace(enclose, escape + enclose);
     }

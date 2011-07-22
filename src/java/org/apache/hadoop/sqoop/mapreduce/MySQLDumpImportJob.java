@@ -25,20 +25,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
@@ -47,11 +37,7 @@ import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.MySQLUtils;
-import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.shims.ShimLoader;
-import org.apache.hadoop.sqoop.util.ClassLoaderStack;
-import org.apache.hadoop.sqoop.util.ImportException;
-import org.apache.hadoop.sqoop.util.PerfCounters;
 
 /**
  * Class that runs an import job using mysqldump in the mapper.
@@ -82,11 +68,12 @@ public class MySQLDumpImportJob extends ImportJobBase {
     try {
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
-        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-            options.getConnectString());
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(), options.getConnectString());
       } else {
-        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-            options.getConnectString(), username, options.getPassword());
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(), options.getConnectString(), username,
+            options.getPassword());
       }
 
       String [] colNames = options.getColumns();
@@ -106,8 +93,8 @@ public class MySQLDumpImportJob extends ImportJobBase {
       String whereClause = options.getWhereClause();
 
       // We can't set the class properly in here, because we may not have the
-      // jar loaded in this JVM. So we start by calling setInput() with DBWritable
-      // and then overriding the string manually.
+      // jar loaded in this JVM. So we start by calling setInput() with
+      // DBWritable and then overriding the string manually.
 
       // Note that mysqldump also does *not* want a quoted table name.
       DataDrivenDBInputFormat.setInput(job, DBWritable.class,

@@ -86,7 +86,7 @@ public class HiveImport {
 
   /**
    * If we used a MapReduce-based upload of the data, remove the _logs dir
-   * from where we put it, before running Hive LOAD DATA INPATH
+   * from where we put it, before running Hive LOAD DATA INPATH.
    */
   private void removeTempLogs(String tableName) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
@@ -102,7 +102,8 @@ public class HiveImport {
     if (fs.exists(logsPath)) {
       LOG.info("Removing temporary files from import process: " + logsPath);
       if (!fs.delete(logsPath, true)) {
-        LOG.warn("Could not delete temporary files; continuing with import, but it may fail.");
+        LOG.warn("Could not delete temporary files; "
+            + "continuing with import, but it may fail.");
       }
     }
   }
@@ -124,7 +125,7 @@ public class HiveImport {
    */
   private File getScriptFile(String outputTableName) throws IOException {
     if (!isGenerateOnly()) {
-      return File.createTempFile("hive-script-",".txt",
+      return File.createTempFile("hive-script-", ".txt",
           new File(options.getTempDir()));
     } else {
       return new File(new File(options.getCodeOutputDir()),
@@ -194,7 +195,8 @@ public class HiveImport {
           try {
             w.close();
           } catch (IOException ioe) {
-            LOG.warn("IOException closing stream to Hive script: " + ioe.toString());
+            LOG.warn("IOException closing stream to Hive script: "
+                + ioe.toString());
           }
         }
       }

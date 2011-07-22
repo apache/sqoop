@@ -88,6 +88,12 @@
   <property name="cobertura.format" value="html" /> <!-- may be 'xml' -->
   <property name="cobertura.class.dir" value="${cobertura.dir}/classes" />
 
+  <!-- Checking code style -->
+  <property name="checkstyle.xml" value="${test.dir}/checkstyle.xml" />
+  <property name="checkstyle.format.xsl"
+      value="${test.dir}/checkstyle-noframes.xsl" />
+  <property name="checkstyle.report.dir" value="${build.dir}" />
+
 
   <!-- When testing with non-free JDBC drivers, override this parameter
        to contain the path to the driver library dir.
@@ -599,6 +605,24 @@
         file="${cobertura.home}/cobertura.jar" />
   </target>
 
+  <target name="checkstyle" depends="ivy-retrieve-checkstyle"
+      description="Check source code conventions">
+    <taskdef resource="checkstyletask.properties">
+      <classpath refid="${name}.checkstyle.classpath" />
+    </taskdef>
+
+    <mkdir dir="${checkstyle.report.dir}" />
+    <checkstyle config="${checkstyle.xml}" failOnViolation="false">
+      <fileset dir="${base.src.dir}" includes="**/*.java" />
+      <formatter type="xml"
+          toFile="${checkstyle.report.dir}/checkstyle-errors.xml" />
+    </checkstyle>
+
+    <xslt style="${checkstyle.format.xsl}"
+        in="${checkstyle.report.dir}/checkstyle-errors.xml"
+        out="${checkstyle.report.dir}/checkstyle-errors.html" />
+  </target>
+
   <target name="ivy-probe-antlib" >
     <condition property="ivy.found">
       <typefound uri="antlib:org.apache.ivy.ant" name="cleancache"/>
@@ -688,6 +712,16 @@
       sync="true" />
     <ivy:cachepath pathid="${name}.hadooptest.classpath"
       conf="${hadoop.dist}test" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts for checkstyle -->
+  <target name="ivy-resolve-checkstyle" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="checkstyle" />
+  </target>
+  <target name="ivy-retrieve-checkstyle" depends="ivy-resolve-checkstyle">
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.checkstyle.classpath" conf="checkstyle" />
   </target>
 
 </project>

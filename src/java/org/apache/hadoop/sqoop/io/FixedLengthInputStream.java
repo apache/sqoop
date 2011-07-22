@@ -18,7 +18,6 @@
 
 package org.apache.hadoop.sqoop.io;
 
-import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 

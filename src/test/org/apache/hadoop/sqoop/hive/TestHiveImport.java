@@ -42,7 +42,8 @@ import org.apache.hadoop.sqoop.tool.SqoopTool;
  */
 public class TestHiveImport extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestHiveImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestHiveImport.class.getName());
 
   /**
    * Sets the expected number of columns in the table being manipulated
@@ -60,7 +61,7 @@ public class TestHiveImport extends ImportJobTestCase {
   }
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   protected String [] getArgv(boolean includeHadoopFlags, String [] moreArgs) {
@@ -147,8 +148,9 @@ public class TestHiveImport extends ImportJobTestCase {
     return opts;
   }
 
-  private void runImportTest(String tableName, String [] types, String [] values,
-      String verificationScript, String [] args, SqoopTool tool) throws IOException {
+  private void runImportTest(String tableName, String [] types,
+      String [] values, String verificationScript, String [] args,
+      SqoopTool tool) throws IOException {
 
     // create a table and populate it with a row...
     createTableWithColTypes(types, values);
@@ -158,7 +160,8 @@ public class TestHiveImport extends ImportJobTestCase {
     SqoopOptions options = getSqoopOptions(args, tool);
     String hiveHome = options.getHiveHome();
     assertNotNull("hive.home was not set", hiveHome);
-    Path testDataPath = new Path(new Path(hiveHome), "scripts/" + verificationScript);
+    Path testDataPath = new Path(new Path(hiveHome),
+        "scripts/" + verificationScript);
     System.setProperty("expected.script", testDataPath.toString());
 
     // verify that we can import it correctly into hive.
@@ -202,7 +205,7 @@ public class TestHiveImport extends ImportJobTestCase {
   }
 
 
-  /** Test that strings and ints are handled in the normal fashion */
+  /** Test that strings and ints are handled in the normal fashion. */
   @Test
   public void testNormalHiveImport() throws IOException {
     final String TABLE_NAME = "NORMAL_HIVE_IMPORT";
@@ -214,7 +217,7 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, null), new ImportTool());
   }
 
-  /** Test that table is created in hive with no data import */
+  /** Test that table is created in hive with no data import. */
   @Test
   public void testCreateOnlyHiveImport() throws IOException {
     final String TABLE_NAME = "CREATE_ONLY_HIVE_IMPORT";
@@ -227,7 +230,10 @@ public class TestHiveImport extends ImportJobTestCase {
         new CreateHiveTableTool());
   }
 
-  /** Test that table is created in hive and replaces the existing table if any */
+  /**
+   * Test that table is created in hive and replaces the existing table if
+   * any.
+   */
   @Test
   public void testCreateOverwriteHiveImport() throws IOException {
     final String TABLE_NAME = "CREATE_OVERWRITE_HIVE_IMPORT";
@@ -241,7 +247,7 @@ public class TestHiveImport extends ImportJobTestCase {
         new CreateHiveTableTool());
   }
 
-  /** Test that dates are coerced properly to strings */
+  /** Test that dates are coerced properly to strings. */
   @Test
   public void testDate() throws IOException {
     final String TABLE_NAME = "DATE_HIVE_IMPORT";
@@ -253,7 +259,7 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, null), new ImportTool());
   }
 
-  /** Test that NUMERICs are coerced to doubles */
+  /** Test that NUMERICs are coerced to doubles. */
   @Test
   public void testNumeric() throws IOException {
     final String TABLE_NAME = "NUMERIC_HIVE_IMPORT";
@@ -265,7 +271,7 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, null), new ImportTool());
   }
 
-  /** If bin/hive returns an error exit status, we should get an IOException */
+  /** If bin/hive returns an error exit status, we should get an IOException. */
   @Test
   public void testHiveExitFails() {
     // The expected script is different than the one which would be generated
@@ -285,7 +291,7 @@ public class TestHiveImport extends ImportJobTestCase {
     }
   }
 
-  /** Test that we can set delimiters how we want them */
+  /** Test that we can set delimiters how we want them. */
   @Test
   public void testCustomDelimiters() throws IOException {
     final String TABLE_NAME = "CUSTOM_DELIM_IMPORT";
@@ -293,8 +299,10 @@ public class TestHiveImport extends ImportJobTestCase {
     setNumCols(3);
     String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
     String [] vals = { "'test'", "42", "'somestring'" };
-    String [] extraArgs = { "--fields-terminated-by", ",",
-        "--lines-terminated-by", "|" };
+    String [] extraArgs = {
+      "--fields-terminated-by", ",",
+      "--lines-terminated-by", "|",
+    };
     runImportTest(TABLE_NAME, types, vals, "customDelimImport.q",
         getArgv(false, extraArgs), new ImportTool());
   }

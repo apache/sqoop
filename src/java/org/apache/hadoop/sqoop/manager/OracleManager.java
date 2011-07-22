@@ -47,7 +47,8 @@ import org.apache.hadoop.sqoop.util.ImportException;
  */
 public class OracleManager extends GenericJdbcManager {
 
-  public static final Log LOG = LogFactory.getLog(OracleManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      OracleManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
@@ -65,8 +66,8 @@ public class OracleManager extends GenericJdbcManager {
     public static final Log LOG = LogFactory.getLog(ConnCache.class.getName());
 
     private static class CacheKey {
-      public final String connectString;
-      public final String username;
+      private final String connectString;
+      private final String username;
 
       public CacheKey(String connect, String user) {
         this.connectString = connect;
@@ -212,7 +213,8 @@ public class OracleManager extends GenericJdbcManager {
     try {
       Class.forName(driverClass);
     } catch (ClassNotFoundException cnfe) {
-      throw new RuntimeException("Could not load db driver class: " + driverClass);
+      throw new RuntimeException("Could not load db driver class: "
+          + driverClass);
     }
 
     String username = options.getUsername();
@@ -242,34 +244,37 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Set session time zone
+   * Set session time zone.
    * @param conn      Connection object
    * @throws          SQLException instance
    */
   private void setSessionTimeZone(Connection conn) throws SQLException {
-    // need to use reflection to call the method setSessionTimeZone on the OracleConnection class
-    // because oracle specific java libraries are not accessible in this context
+    // Need to use reflection to call the method setSessionTimeZone on the
+    // OracleConnection class because oracle specific java libraries are not
+    // accessible in this context.
     Method method;
     try {
       method = conn.getClass().getMethod(
               "setSessionTimeZone", new Class [] {String.class});
     } catch (Exception ex) {
-      LOG.error("Could not find method setSessionTimeZone in " + conn.getClass().getName(), ex);
+      LOG.error("Could not find method setSessionTimeZone in "
+          + conn.getClass().getName(), ex);
       // rethrow SQLException
       throw new SQLException(ex);
     }
 
-    // Need to set the time zone in order for Java
-    // to correctly access the column "TIMESTAMP WITH LOCAL TIME ZONE".
-    // The user may have set this in the configuration as 'oracle.sessionTimeZone'.
-    String clientTimeZoneStr = options.getConf().get(ORACLE_TIMEZONE_KEY, "GMT");
+    // Need to set the time zone in order for Java to correctly access the
+    // column "TIMESTAMP WITH LOCAL TIME ZONE".  The user may have set this in
+    // the configuration as 'oracle.sessionTimeZone'.
+    String clientTimeZoneStr = options.getConf().get(ORACLE_TIMEZONE_KEY,
+        "GMT");
     try {
       method.setAccessible(true);
       method.invoke(conn, clientTimeZoneStr);
       LOG.info("Time zone has been set to " + clientTimeZoneStr);
     } catch (Exception ex) {
-      LOG.warn("Time zone " + clientTimeZoneStr +
-               " could not be set on Oracle database.");
+      LOG.warn("Time zone " + clientTimeZoneStr
+               + " could not be set on Oracle database.");
       LOG.info("Setting default time zone: GMT");
       try {
         // Per the documentation at:
@@ -310,7 +315,8 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   @Override
-  public ResultSet readTable(String tableName, String[] columns) throws SQLException {
+  public ResultSet readTable(String tableName, String[] columns)
+      throws SQLException {
     if (columns == null) {
       columns = getColumnNames(tableName);
     }
@@ -408,14 +414,14 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Get database type
+   * Get database type.
    * @param clazz         oracle class representing sql types
    * @param fieldName     field name
    * @return              value of database type constant
    */
   private int getDatabaseType(Class clazz, String fieldName) {
-    // need to use reflection to extract constant values
-    // because the database specific java libraries are not accessible in this context
+    // Need to use reflection to extract constant values because the database
+    // specific java libraries are not accessible in this context.
     int value = -1;
     try {
       java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
@@ -429,13 +435,13 @@ public class OracleManager extends GenericJdbcManager {
   }
 
   /**
-   * Load class by name
+   * Load class by name.
    * @param className     class name
    * @return              class instance
    */
   private Class getTypeClass(String className) {
-    // need to use reflection to load class
-    // because the database specific java libraries are not accessible in this context
+    // Need to use reflection to load class because the database specific java
+    // libraries are not accessible in this context.
     Class typeClass = null;
     try {
       typeClass = Class.forName(className);

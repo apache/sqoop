@@ -29,7 +29,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class DefaultManagerFactory extends ManagerFactory {
 
-  public static final Log LOG = LogFactory.getLog(DefaultManagerFactory.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      DefaultManagerFactory.class.getName());
 
   public ConnManager accept(SqoopOptions options) {
     String manualDriver = options.getDriverClassName();

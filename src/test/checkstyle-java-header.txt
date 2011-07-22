@@ -15,31 +15,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.hadoop.sqoop.util;
-
-import java.io.InputStream;
-
-/**
- * An interface describing a factory class for a Thread class that handles
- * input from some sort of stream.
- *
- * When the stream is closed, the thread should terminate.
- */
-public abstract class AsyncSink {
-  
-  /**
-   * Create and run a thread to handle input from the provided InputStream.
-   * When processStream returns, the thread should be running; it should
-   * continue to run until the InputStream is exhausted.
-   */
-  public abstract void processStream(InputStream is);
-
-  /**
-   * Wait until the stream has been processed.
-   * @return a status code indicating success or failure. 0 is typical for
-   * success.
-   */
-  public abstract int join() throws InterruptedException;
-}
-

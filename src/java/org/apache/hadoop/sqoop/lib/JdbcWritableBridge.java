@@ -20,8 +20,6 @@ package org.apache.hadoop.sqoop.lib;
 
 import org.apache.hadoop.io.BytesWritable;
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,14 +35,16 @@ import java.sql.Timestamp;
  */
 public final class JdbcWritableBridge {
 
-  // Currently, cap BLOB/CLOB objects at 16 MB until we can use external storage.
-  public final static long MAX_BLOB_LENGTH = 16 * 1024 * 1024;
-  public final static long MAX_CLOB_LENGTH = 16 * 1024 * 1024;
+  // Currently, cap BLOB/CLOB objects at 16 MB until we can use external
+  // storage.
+  public static final long MAX_BLOB_LENGTH = 16 * 1024 * 1024;
+  public static final long MAX_CLOB_LENGTH = 16 * 1024 * 1024;
 
   private JdbcWritableBridge() {
   }
 
-  public static Integer readInteger(int colNum, ResultSet r) throws SQLException {
+  public static Integer readInteger(int colNum, ResultSet r)
+      throws SQLException {
     int val;
     val = r.getInt(colNum);
     if (r.wasNull()) {
@@ -88,7 +88,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static Boolean readBoolean(int colNum, ResultSet r) throws SQLException {
+  public static Boolean readBoolean(int colNum, ResultSet r)
+     throws SQLException {
     boolean val;
     val = r.getBoolean(colNum);
     if (r.wasNull()) {
@@ -102,7 +103,8 @@ public final class JdbcWritableBridge {
     return r.getTime(colNum);
   }
 
-  public static Timestamp readTimestamp(int colNum, ResultSet r) throws SQLException {
+  public static Timestamp readTimestamp(int colNum, ResultSet r)
+      throws SQLException {
     return r.getTimestamp(colNum);
   }
 
@@ -116,7 +118,8 @@ public final class JdbcWritableBridge {
     return new BytesWritable(bytes);
   }
 
-  public static BigDecimal readBigDecimal(int colNum, ResultSet r) throws SQLException {
+  public static BigDecimal readBigDecimal(int colNum, ResultSet r)
+      throws SQLException {
     return r.getBigDecimal(colNum);
   }
 
@@ -132,8 +135,8 @@ public final class JdbcWritableBridge {
     return null;
   }
 
-  public static void writeInteger(Integer val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeInteger(Integer val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -141,8 +144,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeLong(Long val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeLong(Long val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -150,8 +153,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeDouble(Double val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeDouble(Double val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -159,8 +162,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeBoolean(Boolean val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeBoolean(Boolean val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -168,8 +171,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeFloat(Float val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeFloat(Float val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -177,8 +180,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeString(String val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeString(String val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -186,8 +189,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeTimestamp(Timestamp val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeTimestamp(Timestamp val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -195,8 +198,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeTime(Time val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeTime(Time val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -204,8 +207,8 @@ public final class JdbcWritableBridge {
     }
   }
 
-  public static void writeDate(Date val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeDate(Date val, int paramIdx, int sqlType,
+      PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {
@@ -228,8 +231,8 @@ public final class JdbcWritableBridge {
   }
 
 
-  public static void writeBigDecimal(BigDecimal val, int paramIdx, int sqlType, PreparedStatement s)
-      throws SQLException {
+  public static void writeBigDecimal(BigDecimal val, int paramIdx,
+      int sqlType, PreparedStatement s) throws SQLException {
     if (null == val) {
       s.setNull(paramIdx, sqlType);
     } else {

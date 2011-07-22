@@ -35,8 +35,6 @@ import org.apache.hadoop.sqoop.manager.HsqldbManager;
 
 /**
  * Create a simple hsqldb server and schema to use for testing.
- * 
- *
  */
 public class HsqldbTestServer {
   public static final Log LOG =
@@ -49,14 +47,18 @@ public class HsqldbTestServer {
 
   // hsqldb always capitalizes table and column names
   private static final String DUMMY_TABLE_NAME = "TWOINTTABLE";
-  private static final String [] TWO_INT_TABLE_FIELDS = {"INTFIELD1", "INTFIELD2"};
+  private static final String [] TWO_INT_TABLE_FIELDS = {
+    "INTFIELD1",
+    "INTFIELD2",
+  };
 
   private static final String EMPLOYEE_TABLE_NAME = "EMPLOYEES";
 
   private static final String DB_URL = "jdbc:hsqldb:mem:" + DATABASE_NAME;
   private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
 
-  // all user-created HSQLDB tables are in the "PUBLIC" schema when connected to a database.
+  // all user-created HSQLDB tables are in the "PUBLIC" schema when connected
+  // to a database.
   private static final String HSQLDB_SCHEMA_NAME = "PUBLIC";
 
   public static String getSchemaName() {
@@ -80,7 +82,7 @@ public class HsqldbTestServer {
   }
 
   /**
-   * start the server
+   * start the server.
    */
   public void start() {
     if (null == server) {
@@ -96,7 +98,8 @@ public class HsqldbTestServer {
     try {
       Class.forName(DRIVER_CLASS);
     } catch (ClassNotFoundException cnfe) {
-      LOG.error("Could not get connection; driver class not found: " + DRIVER_CLASS);
+      LOG.error("Could not get connection; driver class not found: "
+          + DRIVER_CLASS);
       return null;
     }
 
@@ -106,7 +109,7 @@ public class HsqldbTestServer {
   }
 
   /**
-   * Create a table
+   * Create a table.
    */
   public void createSchema() throws SQLException {
 
@@ -118,7 +121,8 @@ public class HsqldbTestServer {
 
       st = connection.createStatement();
       st.executeUpdate("DROP TABLE " + DUMMY_TABLE_NAME + " IF EXISTS");
-      st.executeUpdate("CREATE TABLE " + DUMMY_TABLE_NAME + "(intField1 INT, intField2 INT)");
+      st.executeUpdate("CREATE TABLE " + DUMMY_TABLE_NAME
+          + "(intField1 INT, intField2 INT)");
 
       connection.commit();
     } finally {
@@ -140,7 +144,7 @@ public class HsqldbTestServer {
   }
 
   /**
-   * Fill the table with some data
+   * Fill the table with some data.
    */
   public void populateData() throws SQLException {
 
@@ -182,10 +186,14 @@ public class HsqldbTestServer {
       st.executeUpdate("CREATE TABLE " + EMPLOYEE_TABLE_NAME
           + "(emp_id INT NOT NULL PRIMARY KEY, name VARCHAR(64))");
 
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME + " VALUES(1, 'Aaron')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME + " VALUES(2, 'Joe')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME + " VALUES(3, 'Jim')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME + " VALUES(4, 'Lisa')");
+      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
+          + " VALUES(1, 'Aaron')");
+      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
+          + " VALUES(2, 'Joe')");
+      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
+          + " VALUES(3, 'Jim')");
+      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
+          + " VALUES(4, 'Lisa')");
 
       connection.commit();
     } finally {

@@ -47,7 +47,7 @@ import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 public class TestMultiMaps extends ImportJobTestCase {
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
@@ -103,7 +103,7 @@ public class TestMultiMaps extends ImportJobTestCase {
   }
 
   /**
-   * Given a comma-delimited list of integers, grab and parse the first int
+   * Given a comma-delimited list of integers, grab and parse the first int.
    * @param str a comma-delimited list of values, the first of which is an int.
    * @return the first field in the string, cast to int
    */
@@ -130,13 +130,15 @@ public class TestMultiMaps extends ImportJobTestCase {
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
 
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, getTableName());
+      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+          getTableName());
 
       List<Path> paths = getDataFilePaths();
       Configuration conf = new Configuration();
       int curSum = 0;
 
-      assertTrue("Found only " + paths.size() + " path(s); expected > 1.", paths.size() > 1);
+      assertTrue("Found only " + paths.size() + " path(s); expected > 1.",
+          paths.size() > 1);
 
       // We expect multiple files. We need to open all the files and sum up the
       // first column across all of them.
@@ -147,11 +149,12 @@ public class TestMultiMaps extends ImportJobTestCase {
         Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
         Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
-        // We know that these values are two ints separated by a ',' character.
-        // Since this is all dynamic, though, we don't want to actually link against
-        // the class and use its methods. So we just parse this back into int fields manually.
-        // Sum them up and ensure that we get the expected total for the first column, to
-        // verify that we got all the results from the db into the file.
+        // We know that these values are two ints separated by a ','
+        // character.  Since this is all dynamic, though, we don't want to
+        // actually link against the class and use its methods. So we just
+        // parse this back into int fields manually.  Sum them up and ensure
+        // that we get the expected total for the first column, to verify that
+        // we got all the results from the db into the file.
 
         // now sum up everything in the file.
         while (reader.next(key) != null) {
@@ -163,7 +166,8 @@ public class TestMultiMaps extends ImportJobTestCase {
         reader = null;
       }
 
-      assertEquals("Total sum of first db column mismatch", expectedSum, curSum);
+      assertEquals("Total sum of first db column mismatch", expectedSum,
+          curSum);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
     } catch (ParseException pe) {

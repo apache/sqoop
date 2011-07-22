@@ -21,7 +21,6 @@ package org.apache.hadoop.sqoop.tool;
 import java.util.Set;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 
 /**

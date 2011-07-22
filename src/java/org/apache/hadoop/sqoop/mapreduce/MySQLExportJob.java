@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
@@ -80,11 +79,12 @@ public class MySQLExportJob extends ExportJobBase {
       mgr = new ConnFactory(conf).getManager(options);
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
-        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-            options.getConnectString());
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(), options.getConnectString());
       } else {
-        DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-            options.getConnectString(), username, options.getPassword());
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(), options.getConnectString(), username,
+            options.getPassword());
       }
 
       String [] colNames = options.getColumns();

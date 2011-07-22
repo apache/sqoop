@@ -120,22 +120,22 @@ public class TestExport extends ExportJobTestCase {
       the database should look like.
     */
   public interface ColumnGenerator {
-    /** for a row with id rowNum, what should we write into that
+    /** For a row with id rowNum, what should we write into that
         line of the text file to export?
       */
-    public String getExportText(int rowNum);
+    String getExportText(int rowNum);
 
-    /** for a row with id rowNum, what should the database return
+    /** For a row with id rowNum, what should the database return
         for the given column's value?
       */
-    public String getVerifyText(int rowNum);
+    String getVerifyText(int rowNum);
 
-    /** Return the column type to put in the CREATE TABLE statement */
-    public String getType();
+    /** Return the column type to put in the CREATE TABLE statement. */
+    String getType();
   }
 
   /**
-   * Create a data file that gets exported to the db
+   * Create a data file that gets exported to the db.
    * @param fileNum the number of the file (for multi-file export)
    * @param numRecords how many records to write to the file.
    * @param gzip is true if the file should be gzipped.
@@ -173,7 +173,8 @@ public class TestExport extends ExportJobTestCase {
     }
   }
 
-  private void verifyCompressedFile(Path f, int expectedNumLines) throws IOException {
+  private void verifyCompressedFile(Path f, int expectedNumLines)
+      throws IOException {
     Configuration conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     FileSystem fs = FileSystem.get(conf);
@@ -185,7 +186,8 @@ public class TestExport extends ExportJobTestCase {
     if (null == decompressor) {
       LOG.info("Verifying gzip sanity with null decompressor");
     } else {
-      LOG.info("Verifying gzip sanity with decompressor: " + decompressor.toString());
+      LOG.info("Verifying gzip sanity with decompressor: "
+          + decompressor.toString());
     }
     is = codec.createInputStream(is, decompressor);
     BufferedReader r = new BufferedReader(new InputStreamReader(is));
@@ -205,7 +207,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /**
-   * Create a data file in SequenceFile format that gets exported to the db
+   * Create a data file in SequenceFile format that gets exported to the db.
    * @param fileNum the number of the file (for multi-file export).
    * @param numRecords how many records to write to the file.
    * @param className the table class name to instantiate and populate
@@ -303,7 +305,7 @@ public class TestExport extends ExportJobTestCase {
     }
   }
 
-  /** Removing an existing table directory from the filesystem */
+  /** Removing an existing table directory from the filesystem. */
   private void removeTablePath() throws IOException {
     Configuration conf = new Configuration();
     conf.set("fs.default.name", "file:///");
@@ -346,7 +348,8 @@ public class TestExport extends ExportJobTestCase {
     int minId = getMinRowId();
     int maxId = getMaxRowId();
 
-    LOG.info("Checking min/max for column " + colName + " with type " + generator.getType());
+    LOG.info("Checking min/max for column " + colName + " with type "
+        + generator.getType());
 
     String expectedMin = generator.getVerifyText(minId);
     String expectedMax = generator.getVerifyText(maxId);
@@ -414,7 +417,7 @@ public class TestExport extends ExportJobTestCase {
     multiFileTest(1, 0, 1);
   }
 
-  /** Export 10 rows, make sure they load in correctly */
+  /** Export 10 rows, make sure they load in correctly. */
   public void testTextExport() throws IOException, SQLException {
     multiFileTest(1, 10, 1);
   }
@@ -427,7 +430,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /** Make sure we can use CombineFileInputFormat to handle multiple
-   * files and multiple maps
+   * files and multiple maps.
    */
   public void testMultiFilesMultiMaps() throws IOException, SQLException {
     multiFileTest(2, 10, 2);
@@ -481,7 +484,7 @@ public class TestExport extends ExportJobTestCase {
     verifyExport(TOTAL_RECORDS);
   }
 
-  /** Run 2 mappers, make sure all records load in correctly */
+  /** Run 2 mappers, make sure all records load in correctly. */
   public void testMultiMapTextExport() throws IOException, SQLException {
 
     final int RECORDS_PER_MAP = 10;
@@ -496,12 +499,13 @@ public class TestExport extends ExportJobTestCase {
     verifyExport(RECORDS_PER_MAP * NUM_FILES);
   }
 
-  /** Export some rows from a SequenceFile, make sure they import correctly */
+  /** Export some rows from a SequenceFile, make sure they import correctly. */
   public void testSequenceFileExport() throws Exception {
 
     final int TOTAL_RECORDS = 10;
 
-    // First, generate class and jar files that represent the table we're exporting to.
+    // First, generate class and jar files that represent the table
+    // we're exporting to.
     LOG.info("Creating initial schema for SeqFile test");
     createTable();
     LOG.info("Generating code..."); 
@@ -531,7 +535,8 @@ public class TestExport extends ExportJobTestCase {
     String jarBaseName = jarPath.getName();
     assertTrue(jarBaseName.endsWith(".jar"));
     assertTrue(jarBaseName.length() > ".jar".length());
-    String className = jarBaseName.substring(0, jarBaseName.length() - ".jar".length());
+    String className = jarBaseName.substring(0, jarBaseName.length()
+        - ".jar".length());
 
     LOG.info("Using jar filename: " + jarFileName);
     LOG.info("Using class name: " + className);
@@ -621,7 +626,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /**
-   * Get a column generator for DATE columns
+   * Get a column generator for DATE columns.
    */
   protected ColumnGenerator getDateColumnGenerator() {
     return new ColumnGenerator() {

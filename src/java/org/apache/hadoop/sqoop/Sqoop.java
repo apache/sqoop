@@ -18,11 +18,7 @@
 
 package org.apache.hadoop.sqoop;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
@@ -32,18 +28,8 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import org.apache.hadoop.sqoop.cli.ToolOptions;
-import org.apache.hadoop.sqoop.hive.HiveImport;
-import org.apache.hadoop.sqoop.manager.ConnManager;
-import org.apache.hadoop.sqoop.manager.ExportJobContext;
-import org.apache.hadoop.sqoop.manager.ImportJobContext;
-import org.apache.hadoop.sqoop.orm.ClassWriter;
-import org.apache.hadoop.sqoop.orm.CompilationManager;
-import org.apache.hadoop.sqoop.shims.ShimLoader;
 import org.apache.hadoop.sqoop.tool.HelpTool;
 import org.apache.hadoop.sqoop.tool.SqoopTool;
-import org.apache.hadoop.sqoop.util.ExportException;
-import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
  * Main entry-point for Sqoop
@@ -201,7 +187,8 @@ public class Sqoop extends Configured implements Tool {
     String toolName = args[0];
     SqoopTool tool = SqoopTool.getTool(toolName);
     if (null == tool) {
-      System.err.println("No such sqoop tool: " + toolName + ". See 'sqoop help'.");
+      System.err.println("No such sqoop tool: " + toolName
+          + ". See 'sqoop help'.");
       return 1;
     }
 
@@ -219,3 +206,4 @@ public class Sqoop extends Configured implements Tool {
     System.exit(ret);
   }
 }
+

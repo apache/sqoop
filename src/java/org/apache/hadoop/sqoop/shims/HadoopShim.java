@@ -77,7 +77,8 @@ public abstract class HadoopShim {
   /**
    * Set the mapper speculative execution property for a job.
    */
-  public abstract void setJobMapSpeculativeExecution(Job job, boolean isEnabled);
+  public abstract void setJobMapSpeculativeExecution(Job job,
+      boolean isEnabled);
 
   /**
    * Sets the Jobtracker address to use for a job.
@@ -123,7 +124,7 @@ public abstract class HadoopShim {
   public abstract MapContext getMapContextForIOPath(
       Configuration conf, Path p);
 
-  public final static synchronized HadoopShim get() {
+  public static final synchronized HadoopShim get() {
     return ShimLoader.getHadoopShim(null);
   }
 }

@@ -22,12 +22,10 @@ import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -57,7 +55,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
     this.offset = 0;
     this.length = 0;
 
-    this.data = null;
+    this.realData = null;
   }
 
   protected LobRef(CONTAINERTYPE container) {
@@ -65,7 +63,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
     this.offset = 0;
     this.length = 0;
 
-    this.data = container;
+    this.realData = container;
   }
 
   protected LobRef(String file, long offset, long length) {
@@ -73,11 +71,21 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
     this.offset = offset;
     this.length = length;
 
-    this.data = null;
+    this.realData = null;
   }
 
   // If the data is 'small', it's held directly, here.
-  protected CONTAINERTYPE data;
+  private CONTAINERTYPE realData;
+
+  /** Internal API to retrieve the data object. */
+  protected CONTAINERTYPE getDataObj() {
+    return realData;
+  }
+
+  /** Internal API to set the data object. */
+  protected void setDataObj(CONTAINERTYPE data) {
+    this.realData = data;
+  }
 
   // If there data is too large to materialize fully, it's written into a file
   // whose path (relative to the rest of the dataset) is recorded here. This
@@ -90,7 +98,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
   private long length;
 
   // If we've opened a LobFile object, track our reference to it here.
-  protected LobFile.Reader reader;
+  private LobFile.Reader lobReader;
 
   @Override
   @SuppressWarnings("unchecked")
@@ -102,9 +110,9 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
     LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE> r =
         (LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>) super.clone();
 
-    r.reader = null; // Reference to opened reader is not duplicated.
-    if (null != data) {
-      r.data = deepCopyData();
+    r.lobReader = null; // Reference to opened reader is not duplicated.
+    if (null != realData) {
+      r.realData = deepCopyData(realData);
     }
 
     return r;
@@ -113,12 +121,13 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
   @Override
   protected synchronized void finalize() throws Throwable {
     close();
+    super.finalize();
   }
 
   public void close() throws IOException {
     // Discard any open LobReader.
-    if (null != this.reader) {
-      LobReaderCache.getCache().recycle(this.reader);
+    if (null != this.lobReader) {
+      LobReaderCache.getCache().recycle(this.lobReader);
     }
   }
 
@@ -142,7 +151,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
    * @throws IOException if it could not read the LOB from external storage.
    */
   public ACCESSORTYPE getDataStream(Mapper.Context mapContext)
-      throws IllegalArgumentException, IOException {
+      throws IOException {
     InputSplit split = mapContext.getInputSplit();
     if (split instanceof FileSplit) {
       Path basePath = ((FileSplit) split).getPath().getParent();
@@ -171,35 +180,35 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
       Path pathToRead = LobReaderCache.qualify(
           new Path(basePath, fileName), conf);
       LOG.debug("Retreving data stream from external path: " + pathToRead);
-      if (reader != null) {
+      if (lobReader != null) {
         // We already have a reader open to a LobFile. Is it the correct file?
-        if (!pathToRead.equals(reader.getPath())) {
-          // No. Close this reader and get the correct one.
+        if (!pathToRead.equals(lobReader.getPath())) {
+          // No. Close this.lobReader and get the correct one.
           LOG.debug("Releasing previous external reader for "
-              + reader.getPath());
-          LobReaderCache.getCache().recycle(reader);
-          reader = LobReaderCache.getCache().get(pathToRead, conf);
+              + lobReader.getPath());
+          LobReaderCache.getCache().recycle(lobReader);
+          lobReader = LobReaderCache.getCache().get(pathToRead, conf);
         }
       } else {
-        reader = LobReaderCache.getCache().get(pathToRead, conf);
+        lobReader = LobReaderCache.getCache().get(pathToRead, conf);
       }
 
       // We now have a LobFile.Reader associated with the correct file. Get to
       // the correct offset and return an InputStream/Reader to the user.
-      if (reader.tell() != offset) {
+      if (lobReader.tell() != offset) {
         LOG.debug("Seeking to record start offset " + offset);
-        reader.seek(offset);
+        lobReader.seek(offset);
       }
 
-      if (!reader.next()) {
+      if (!lobReader.next()) {
         throw new IOException("Could not locate record at " + pathToRead
             + ":" + offset);
       }
 
-      return getExternalSource(reader);
+      return getExternalSource(lobReader);
     } else {
       // This data is already materialized in memory; wrap it and return.
-      return getInternalSource(data);
+      return getInternalSource(realData);
     }
   }
 
@@ -223,7 +232,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
   /**
    * Make a copy of the materialized data.
    */
-  protected abstract CONTAINERTYPE deepCopyData();
+  protected abstract CONTAINERTYPE deepCopyData(CONTAINERTYPE data);
 
   public DATATYPE getData() {
     if (isExternal()) {
@@ -231,7 +240,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
           "External LOBs must be read via getDataStream()");
     }
 
-    return getInternalData(data);
+    return getInternalData(realData);
   }
 
   @Override
@@ -240,7 +249,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
       return "externalLob(lf," + fileName + "," + Long.toString(offset)
           + "," + Long.toString(length) + ")";
     } else {
-      return data.toString();
+      return realData.toString();
     }
   }
 
@@ -260,7 +269,7 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
 
     boolean isExternal = in.readBoolean();
     if (isExternal) {
-      this.data = null;
+      this.realData = null;
 
       String storageType = Text.readString(in);
       if (!storageType.equals("lf")) {

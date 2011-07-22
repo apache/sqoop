@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -65,10 +64,10 @@ public class CombineShimRecordReader
   }
 
   @Override
-  public void initialize(InputSplit split, TaskAttemptContext context)
+  public void initialize(InputSplit curSplit, TaskAttemptContext curContext)
       throws IOException, InterruptedException {
-    this.split = (CombineFileSplit) split;
-    this.context = context;
+    this.split = (CombineFileSplit) curSplit;
+    this.context = curContext;
 
     if (null == rr) {
       createChildReader();
@@ -77,7 +76,7 @@ public class CombineShimRecordReader
     FileSplit fileSplit = new FileSplit(this.split.getPath(index),
         this.split.getOffset(index), this.split.getLength(index),
         this.split.getLocations());
-    this.rr.initialize(fileSplit, context);
+    this.rr.initialize(fileSplit, this.context);
   }
 
   @Override

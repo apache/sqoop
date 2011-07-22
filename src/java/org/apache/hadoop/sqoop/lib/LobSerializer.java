@@ -29,11 +29,13 @@ public final class LobSerializer {
 
   private LobSerializer() { }
 
-  public static void writeClob(ClobRef clob, DataOutput out) throws IOException {
+  public static void writeClob(ClobRef clob, DataOutput out)
+      throws IOException {
     clob.write(out);
   }
 
-  public static void writeBlob(BlobRef blob, DataOutput out) throws IOException {
+  public static void writeBlob(BlobRef blob, DataOutput out)
+      throws IOException {
     blob.write(out);
   }
 

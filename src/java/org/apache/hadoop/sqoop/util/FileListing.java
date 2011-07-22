@@ -61,15 +61,16 @@ public final class FileListing {
   *
   * @param aStartingDir is a valid directory, which can be read.
   */
-  public static List<File> getFileListing(File aStartingDir) throws FileNotFoundException {
+  public static List<File> getFileListing(File aStartingDir)
+      throws FileNotFoundException {
     validateDirectory(aStartingDir);
     List<File> result = getFileListingNoSort(aStartingDir);
     Collections.sort(result);
     return result;
   }
 
-  // PRIVATE //
-  private static List<File> getFileListingNoSort(File aStartingDir) throws FileNotFoundException {
+  private static List<File> getFileListingNoSort(File aStartingDir)
+      throws FileNotFoundException {
     List<File> result = new ArrayList<File>();
     File[] filesAndDirs = aStartingDir.listFiles();
     List<File> filesDirs = Arrays.asList(filesAndDirs);
@@ -88,23 +89,26 @@ public final class FileListing {
   /**
   * Directory is valid if it exists, does not represent a file, and can be read.
   */
-  private static void validateDirectory(File aDirectory) throws FileNotFoundException {
+  private static void validateDirectory(File aDirectory)
+      throws FileNotFoundException {
     if (aDirectory == null) {
       throw new IllegalArgumentException("Directory should not be null.");
     }
     if (!aDirectory.exists()) {
-      throw new FileNotFoundException("Directory does not exist: " + aDirectory);
+      throw new FileNotFoundException("Directory does not exist: "
+          + aDirectory);
     }
     if (!aDirectory.isDirectory()) {
       throw new IllegalArgumentException("Is not a directory: " + aDirectory);
     }
     if (!aDirectory.canRead()) {
-      throw new IllegalArgumentException("Directory cannot be read: " + aDirectory);
+      throw new IllegalArgumentException("Directory cannot be read: "
+          + aDirectory);
     }
   }
 
   /**
-   * Recursively delete a directory and all its children
+   * Recursively delete a directory and all its children.
    * @param dir is a valid directory.
    */
   public static void recursiveDeleteDir(File dir) throws IOException {

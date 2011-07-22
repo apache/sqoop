@@ -18,40 +18,14 @@
 
 package org.apache.hadoop.sqoop.mapreduce;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
-import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
-import org.apache.hadoop.sqoop.lib.FieldFormatter;
-import org.apache.hadoop.sqoop.lib.RecordParser;
-import org.apache.hadoop.sqoop.util.AsyncSink;
-import org.apache.hadoop.sqoop.util.DirectImportUtils;
-import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
-import org.apache.hadoop.sqoop.util.ErrorableThread;
-import org.apache.hadoop.sqoop.util.ImportException;
-import org.apache.hadoop.sqoop.util.JdbcUrl;
-import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
-import org.apache.hadoop.sqoop.util.PerfCounters;
 
 /**
  * InputFormat designed to take data-driven splits and feed them to a mysqldump

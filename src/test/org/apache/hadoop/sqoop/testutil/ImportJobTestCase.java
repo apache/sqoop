@@ -29,13 +29,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.Sqoop;
-import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.tool.SqoopTool;
 import org.apache.hadoop.sqoop.tool.ImportTool;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
-
-import org.junit.Test;
 
 /**
  * Class that implements common methods required for tests which import data
@@ -43,7 +40,8 @@ import org.junit.Test;
  */
 public class ImportJobTestCase extends BaseSqoopTestCase {
 
-  public static final Log LOG = LogFactory.getLog(ImportJobTestCase.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ImportJobTestCase.class.getName());
 
   protected String getTablePrefix() {
     return "IMPORT_TABLE_";
@@ -57,7 +55,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @param includeHadoopFlags if true, then include -D various.settings=values
    * @param colNames the columns to import. If null, all columns are used.
    * @param conf a Configuration specifying additional properties to use when
@@ -143,17 +141,21 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     String jarFileName = compileMgr.getJarFilename();
     ClassLoader prevClassLoader = null;
     try {
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, getTableName());
+      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+          getTableName());
 
-      // now actually open the file and check it
+      // now actually open the file and check it.
       File f = new File(dataFilePath.toString());
-      assertTrue("Error: " + dataFilePath.toString() + " does not exist", f.exists());
+      assertTrue("Error: " + dataFilePath.toString() + " does not exist",
+          f.exists());
 
       Object readValue = SeqFileReader.getFirstValue(dataFilePath.toString());
       LOG.info("Read back from sequencefile: " + readValue);
-      // add trailing '\n' to expected value since SqoopRecord.toString() encodes the record delim
+      // Add trailing '\n' to expected value since SqoopRecord.toString()
+      // encodes the record delim.
       if (null == expectedVal) {
-        assertEquals("Error validating result from SeqFile", "null\n", readValue.toString());
+        assertEquals("Error validating result from SeqFile", "null\n",
+            readValue.toString());
       } else {
         assertEquals("Error validating result from SeqFile", expectedVal + "\n",
             readValue.toString());
@@ -168,7 +170,8 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
-   * Run a MapReduce-based import (using the argv provided to control execution).
+   * Run a MapReduce-based import (using the argv provided to control
+   * execution).
    */
   protected void runImport(SqoopTool tool, String [] argv) throws IOException {
     removeTableDir();
@@ -192,7 +195,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     }
   }
 
-  /** run an import using the default ImportTool */
+  /** run an import using the default ImportTool. */
   protected void runImport(String [] argv) throws IOException {
     runImport(new ImportTool(), argv);
   }

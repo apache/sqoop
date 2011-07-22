@@ -43,7 +43,8 @@ public class TextImportMapper
   }
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
     this.lobLoader = new LargeObjectLoader(context.getConfiguration(),
         FileOutputFormat.getWorkOutputPath(context));
   }

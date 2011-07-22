@@ -20,7 +20,6 @@ package org.apache.hadoop.sqoop.manager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.File;
@@ -28,8 +27,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,13 +55,15 @@ import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
  *
  * CREATE DATABASE sqooppasstest;
  * use mysql;
- * GRANT ALL PRIVILEGES on sqooppasstest.* TO 'sqooptest'@'localhost' IDENTIFIED BY '12345';
+ * GRANT ALL PRIVILEGES on sqooppasstest.* TO 'sqooptest'@'localhost'
+ *     IDENTIFIED BY '12345';
  * flush privileges;
  *
  */
 public class MySQLAuthTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(MySQLAuthTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      MySQLAuthTest.class.getName());
 
   static final String HOST_URL = "jdbc:mysql://localhost/";
 
@@ -85,7 +84,8 @@ public class MySQLAuthTest extends ImportJobTestCase {
   @Before
   public void setUp() {
     super.setUp();
-    SqoopOptions options = new SqoopOptions(AUTH_CONNECT_STRING, AUTH_TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(AUTH_CONNECT_STRING,
+        AUTH_TABLE_NAME);
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
 
@@ -269,10 +269,11 @@ public class MySQLAuthTest extends ImportJobTestCase {
     LOG.info("Beginning zero-timestamp test #" + testNum);
 
     try {
-      final String tableName = "mysqlTimestampTable" + Integer.toString(testNum);
+      final String TABLE_NAME = "mysqlTimestampTable"
+          + Integer.toString(testNum);
 
       // Create a table containing a full-zeros timestamp.
-      SqoopOptions options = new SqoopOptions(connectString, tableName);
+      SqoopOptions options = new SqoopOptions(connectString, TABLE_NAME);
       options.setUsername(AUTH_TEST_USER);
       options.setPassword(AUTH_TEST_PASS);
 
@@ -286,19 +287,19 @@ public class MySQLAuthTest extends ImportJobTestCase {
       st = connection.createStatement();
 
       // create the database table and populate it with data. 
-      st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
-      st.executeUpdate("CREATE TABLE " + tableName + " ("
+      st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
+      st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
           + "ts TIMESTAMP NOT NULL)");
 
-      st.executeUpdate("INSERT INTO " + tableName + " VALUES("
+      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
           + "NULL,'0000-00-00 00:00:00.0')");
       connection.commit();
       st.close();
       connection.close();
 
       // Run the import.
-      String [] argv = getArgv(true, false, connectString, tableName);
+      String [] argv = getArgv(true, false, connectString, TABLE_NAME);
       try {
         runImport(argv);
       } catch (Exception e) {
@@ -313,7 +314,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
 
       // Make sure the result file is there.
       Path warehousePath = new Path(this.getWarehouseDir());
-      Path tablePath = new Path(warehousePath, tableName);
+      Path tablePath = new Path(warehousePath, TABLE_NAME);
       Path filePath = new Path(tablePath, "part-m-00000");
 
       File f = new File(filePath.toString());

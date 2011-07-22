@@ -26,9 +26,12 @@ import java.sql.Types;
 /**
  * Defines conversion between SQL types and Hive types.
  */
-public class HiveTypes {
+public final class HiveTypes {
 
   public static final Log LOG = LogFactory.getLog(HiveTypes.class.getName());
+
+  private HiveTypes() {
+  }
 
   /**
    * Given JDBC SQL types coming from another database, what is the best

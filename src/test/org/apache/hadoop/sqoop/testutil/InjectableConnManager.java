@@ -41,9 +41,12 @@ public class InjectableConnManager extends HsqldbManager {
 
   // The Configuration is used to control the injected classes.
   public static final String MAPPER_KEY = "sqoop.inject.mapper.class";
-  public static final String INPUT_FORMAT_KEY = "sqoop.inject.input.format.class";
-  public static final String OUTPUT_FORMAT_KEY = "sqoop.inject.output.format.class";
-  public static final String IMPORT_JOB_KEY = "sqoop.inject.import.job.class";
+  public static final String INPUT_FORMAT_KEY =
+      "sqoop.inject.input.format.class";
+  public static final String OUTPUT_FORMAT_KEY =
+      "sqoop.inject.output.format.class";
+  public static final String IMPORT_JOB_KEY =
+      "sqoop.inject.import.job.class";
 
   public InjectableConnManager(final SqoopOptions options) {
     super(options);

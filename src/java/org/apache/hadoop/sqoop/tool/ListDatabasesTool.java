@@ -28,7 +28,7 @@ import org.apache.hadoop.sqoop.cli.RelatedOptions;
 import org.apache.hadoop.sqoop.cli.ToolOptions;
 
 /**
- * Tool that lists available databases on a server
+ * Tool that lists available databases on a server.
  */
 public class ListDatabasesTool extends BaseSqoopTool {
 

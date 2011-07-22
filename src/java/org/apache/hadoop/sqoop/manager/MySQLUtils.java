@@ -18,28 +18,20 @@
 
 package org.apache.hadoop.sqoop.manager;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 
 /**
- * Helper methods and constants for MySQL imports/exports
+ * Helper methods and constants for MySQL imports/exports.
  */
 public final class MySQLUtils {
 
@@ -100,7 +92,7 @@ public final class MySQLUtils {
     // Create the temp file to hold the user's password.
     String tmpDir = conf.get(
         HadoopShim.get().getJobLocalDirProperty(), "/tmp/");
-    File tempFile = File.createTempFile("mysql-cnf",".cnf", new File(tmpDir));
+    File tempFile = File.createTempFile("mysql-cnf", ".cnf", new File(tmpDir));
 
     // Make the password file only private readable.
     DirectImportUtils.setFilePermissions(tempFile, "0600");

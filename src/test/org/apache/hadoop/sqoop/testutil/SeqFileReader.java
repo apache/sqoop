@@ -37,7 +37,11 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 public final class SeqFileReader {
 
-  public static final Log LOG = LogFactory.getLog(SeqFileReader.class.getName());
+  private SeqFileReader() {
+  }
+
+  public static final Log LOG = LogFactory.getLog(
+      SeqFileReader.class.getName());
 
   public static Reader getSeqFileReader(String filename) throws IOException {
     // read from local filesystem

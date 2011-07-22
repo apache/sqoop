@@ -1,8 +1,8 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
+ * Licensed to Cloudera, Inc. under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership.  Cloudera, Inc. licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
@@ -30,8 +30,9 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
  * Oracle-specific SQL formatting overrides default ExportOutputFormat's.
  */
 public class OracleExportOutputFormat<K extends SqoopRecord, V> 
-    extends ExportOutputFormat<K,V> {
+    extends ExportOutputFormat<K, V> {
 
+  @Override
   /** {@inheritDoc} */
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
       throws IOException {

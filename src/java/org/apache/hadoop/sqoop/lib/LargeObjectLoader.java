@@ -18,30 +18,21 @@
 
 package org.apache.hadoop.sqoop.lib;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
@@ -57,9 +48,9 @@ import org.apache.hadoop.sqoop.io.LobFile;
 public class LargeObjectLoader implements Closeable {
 
   // Spill to external storage for BLOB/CLOB objects > 16 MB.
-  public final static long DEFAULT_MAX_LOB_LENGTH = 16 * 1024 * 1024;
+  public static final long DEFAULT_MAX_LOB_LENGTH = 16 * 1024 * 1024;
 
-  public final static String MAX_INLINE_LOB_LEN_KEY =
+  public static final String MAX_INLINE_LOB_LEN_KEY =
       "sqoop.inline.lob.length.max";
 
   private Configuration conf;
@@ -75,7 +66,7 @@ public class LargeObjectLoader implements Closeable {
   private long nextLobFileId = 0;
 
   /**
-   * Create a new LargeObjectLoader
+   * Create a new LargeObjectLoader.
    * @param conf the Configuration to use
    * @param workPath the HDFS working directory for this task.
    */
@@ -91,6 +82,7 @@ public class LargeObjectLoader implements Closeable {
   @Override
   protected synchronized void finalize() throws Throwable {
     close();
+    super.finalize();
   }
 
   @Override

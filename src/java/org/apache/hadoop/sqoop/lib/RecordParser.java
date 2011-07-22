@@ -65,6 +65,9 @@ public final class RecordParser {
     UNENCLOSED_ESCAPE
   }
 
+  /**
+   * An error thrown when parsing fails.
+   */ 
   public static class ParseError extends Exception {
     public ParseError() {
       super("ParseError");
@@ -246,7 +249,8 @@ public final class RecordParser {
           sb.append(curChar);
 
           if (this.enclosingRequired) {
-            throw new ParseError("Opening field-encloser expected at position " + pos);
+            throw new ParseError(
+                "Opening field-encloser expected at position " + pos);
           }
         }
 
@@ -285,15 +289,15 @@ public final class RecordParser {
         break;
         
       case ENCLOSED_ESCAPE:
-        // Treat this character literally, whatever it is, and return to enclosed
-        // field processing.
+        // Treat this character literally, whatever it is, and return to
+        // enclosed field processing.
         sb.append(curChar);
         state = ParseState.ENCLOSED_FIELD;
         break;
 
       case ENCLOSED_EXPECT_DELIMITER:
-        // We were in an enclosed field, but got the final encloser. Now we expect
-        // either an end-of-field or an end-of-record.
+        // We were in an enclosed field, but got the final encloser. Now we
+        // expect either an end-of-field or an end-of-record.
         if (this.fieldDelim == curChar) {
           // end of one field is the beginning of the next.
           state = ParseState.FIELD_START;
@@ -308,8 +312,8 @@ public final class RecordParser {
         break;
 
       case UNENCLOSED_ESCAPE:
-        // Treat this character literally, whatever it is, and return to non-enclosed
-        // field processing.
+        // Treat this character literally, whatever it is, and return to
+        // non-enclosed field processing.
         sb.append(curChar);
         state = ParseState.UNENCLOSED_FIELD;
         break;
@@ -342,8 +346,8 @@ public final class RecordParser {
 
   @Override
   public String toString() {
-    return "RecordParser[" + fieldDelim + ',' + recordDelim + ',' + enclosingChar + ','
-        + escapeChar + ',' + enclosingRequired + "]";
+    return "RecordParser[" + fieldDelim + ',' + recordDelim + ','
+        + enclosingChar + ',' + escapeChar + ',' + enclosingRequired + "]";
   }
 
   @Override

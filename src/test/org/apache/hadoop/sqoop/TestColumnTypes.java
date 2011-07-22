@@ -40,7 +40,8 @@ import org.apache.hadoop.sqoop.testutil.ManagerCompatTestCase;
  */
 public class TestColumnTypes extends ManagerCompatTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestColumnTypes.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestColumnTypes.class.getName());
 
   @Override
   protected Log getLogger() {

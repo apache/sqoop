@@ -33,7 +33,8 @@ import org.apache.hadoop.sqoop.SqoopOptions;
  */
 public class GenericJdbcManager extends SqlManager {
 
-  public static final Log LOG = LogFactory.getLog(GenericJdbcManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      GenericJdbcManager.class.getName());
 
   private String jdbcDriverClass;
   private Connection connection;

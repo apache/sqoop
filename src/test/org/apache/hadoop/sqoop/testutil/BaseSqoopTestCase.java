@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
@@ -44,16 +43,17 @@ import org.apache.hadoop.sqoop.shims.ShimLoader;
 import junit.framework.TestCase;
 
 /**
- * Class that implements common methods required for tests
+ * Class that implements common methods required for tests.
  */
 public class BaseSqoopTestCase extends TestCase {
 
-  public static final Log LOG = LogFactory.getLog(BaseSqoopTestCase.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      BaseSqoopTestCase.class.getName());
 
-  /** Base directory for all temporary data */
+  /** Base directory for all temporary data. */
   public static final String TEMP_BASE_DIR;
 
-  /** Where to import table data to in the local filesystem for testing */
+  /** Where to import table data to in the local filesystem for testing. */
   public static final String LOCAL_WAREHOUSE_DIR;
 
   // Initializer for the above
@@ -199,8 +199,8 @@ public class BaseSqoopTestCase extends TestCase {
       try {
         this.manager = f.getManager(opts);
       } catch (IOException ioe) {
-        fail("IOException instantiating manager: " +
-            StringUtils.stringifyException(ioe));
+        fail("IOException instantiating manager: "
+            + StringUtils.stringifyException(ioe));
       }
     }
   }
@@ -288,6 +288,7 @@ public class BaseSqoopTestCase extends TestCase {
           try {
             statement.close();
           } catch (SQLException se) {
+            // Ignore exception on close.
           }
 
           statement = null;
@@ -312,6 +313,7 @@ public class BaseSqoopTestCase extends TestCase {
           try {
             statement.close();
           } catch (SQLException se) {
+            // Ignore exception on close.
           }
 
           statement = null;
@@ -325,6 +327,7 @@ public class BaseSqoopTestCase extends TestCase {
         try {
           conn.close();
         } catch (SQLException connSE) {
+          // Ignore exception on close.
         }
       }
       fail("Could not create table: " + StringUtils.stringifyException(se));
@@ -359,13 +362,15 @@ public class BaseSqoopTestCase extends TestCase {
       // Remove the director where the table will be imported to,
       // prior to running the MapReduce job.
       if (!DirUtil.deleteDir(tableDirFile)) {
-        LOG.warn("Could not delete table directory: " + tableDirFile.getAbsolutePath());
+        LOG.warn("Could not delete table directory: "
+            + tableDirFile.getAbsolutePath());
       }
     }
   }
 
   /**
-   * verify that the single-column single-row result can be read back from the db.
+   * Verify that the single-column single-row result can be read back from the
+   * db.
    */
   protected void verifyReadback(int colNum, String expectedVal) {
     ResultSet results = null;
@@ -381,7 +386,8 @@ public class BaseSqoopTestCase extends TestCase {
         assertNotNull("Expected non-null result value", resultVal);
       }
 
-      assertEquals("Error reading inserted value back from db", expectedVal, resultVal);
+      assertEquals("Error reading inserted value back from db", expectedVal,
+          resultVal);
       assertFalse("Expected at most one row returned", results.next());
     } catch (SQLException sqlE) {
       fail("Got SQLException: " + StringUtils.stringifyException(sqlE));

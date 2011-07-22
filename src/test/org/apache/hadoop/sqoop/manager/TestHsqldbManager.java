@@ -31,13 +31,13 @@ import org.junit.Test;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 
 /**
- * Test HsqldbManager-specific functionality that overrides SqlManager behavior
- *
- * 
+ * Test HsqldbManager-specific functionality that overrides SqlManager
+ * behavior.
  */
 public class TestHsqldbManager extends TestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestHsqldbManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestHsqldbManager.class.getName());
 
   // instance variables populated during setUp, used during tests
   private HsqldbTestServer testServer;
@@ -69,7 +69,8 @@ public class TestHsqldbManager extends TestCase {
     }
   }
 
-  // note: hsql returns only the "PUBLIC" schema name; not individual user db names.
+  // note: hsql returns only the "PUBLIC" schema name; not individual user db
+  // names.
   @Test
   public void testListDatabases() {
     String [] databases = manager.listDatabases();

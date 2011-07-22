@@ -31,7 +31,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class MySQLTestUtils {
 
-  public static final Log LOG = LogFactory.getLog(MySQLTestUtils.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      MySQLTestUtils.class.getName());
 
   public static final String HOST_URL = "jdbc:mysql://localhost/";
 
@@ -68,7 +69,8 @@ public final class MySQLTestUtils {
         try {
           r.close();
         } catch (IOException ioe) {
-          LOG.warn("IOException closing input stream from `whoami`: " + ioe.toString());
+          LOG.warn("IOException closing input stream from `whoami`: "
+              + ioe.toString());
         }
       }
 

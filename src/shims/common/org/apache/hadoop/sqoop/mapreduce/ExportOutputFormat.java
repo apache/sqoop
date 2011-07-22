@@ -1,8 +1,8 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
+ * Licensed to Cloudera, Inc. under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership.  Cloudera, Inc. licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
@@ -29,7 +29,6 @@ import java.util.concurrent.SynchronousQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -52,7 +51,7 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
  * Uses DBOutputFormat/DBConfiguration for configuring the output.
  */
 public class ExportOutputFormat<K extends SqoopRecord, V> 
-    extends OutputFormat<K,V> {
+    extends OutputFormat<K, V> {
 
   /** conf key: number of rows to export per INSERT statement. */
   public static final String RECORDS_PER_STATEMENT_KEY =
@@ -72,6 +71,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
 
   private static final Log LOG = LogFactory.getLog(ExportOutputFormat.class);
 
+  @Override
   /** {@inheritDoc} */
   public void checkOutputSpecs(JobContext context) 
       throws IOException, InterruptedException {
@@ -90,6 +90,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
     }
   }
 
+  @Override
   /** {@inheritDoc} */
   public OutputCommitter getOutputCommitter(TaskAttemptContext context) 
       throws IOException, InterruptedException {
@@ -105,6 +106,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
     };
   }
 
+  @Override
   /** {@inheritDoc} */
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
       throws IOException {
@@ -454,6 +456,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
       }
     }
 
+    @Override
     /** {@inheritDoc} */
     public void close(TaskAttemptContext context)
         throws IOException, InterruptedException {
@@ -474,6 +477,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
       }
     }
 
+    @Override
     /** {@inheritDoc} */
     public void write(K key, V value)
         throws InterruptedException, IOException {

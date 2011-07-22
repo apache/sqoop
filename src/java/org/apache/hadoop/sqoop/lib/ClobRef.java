@@ -21,20 +21,11 @@ package org.apache.hadoop.sqoop.lib;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.sqoop.io.LobFile;
 
 /**
@@ -73,7 +64,7 @@ public class ClobRef extends LobRef<String, String, Reader> {
   }
 
   @Override
-  protected String deepCopyData() {
+  protected String deepCopyData(String data) {
     return data;
   }
 
@@ -85,12 +76,12 @@ public class ClobRef extends LobRef<String, String, Reader> {
   @Override
   public void readFieldsInternal(DataInput in) throws IOException {
     // For internally-stored clobs, the data is written as UTF8 Text.
-    this.data = Text.readString(in);
+    setDataObj(Text.readString(in));
   }
 
   @Override
   public void writeInternal(DataOutput out) throws IOException {
-    Text.writeString(out, data);
+    Text.writeString(out, getDataObj());
   }
 
   /**

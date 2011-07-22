@@ -45,7 +45,6 @@ import org.apache.hadoop.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.sqoop.orm.ClassWriter;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.shims.ShimLoader;
-import org.apache.hadoop.sqoop.tool.SqoopTool;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 
@@ -77,7 +76,8 @@ public class ExportTool extends BaseSqoopTool {
     // Generate the ORM code for the tables.
     jarFile = codeGenerator.generateORM(options, tableName);
 
-    ExportJobContext context = new ExportJobContext(tableName, jarFile, options);
+    ExportJobContext context = new ExportJobContext(tableName, jarFile,
+        options);
     manager.exportTable(context);
   }
 
@@ -94,7 +94,8 @@ public class ExportTool extends BaseSqoopTool {
     try {
       exportTable(options, options.getTableName());
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running export job: " + ioe.toString());
+      LOG.error("Encountered IOException running export job: "
+          + ioe.toString());
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ioe);
       } else {

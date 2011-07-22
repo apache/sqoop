@@ -25,15 +25,15 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper.Context;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.lib.RecordParser;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 /**
- * Converts an input record from a string representation to a parsed Sqoop record
- * and emits that DBWritable to the OutputFormat for writeback to the database.
+ * Converts an input record from a string representation to a parsed Sqoop
+ * record and emits that DBWritable to the OutputFormat for writeback to the
+ * database.
  */
 public class TextExportMapper
     extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {
@@ -67,7 +67,8 @@ public class TextExportMapper
     }
 
     if (null == recordImpl) {
-      throw new IOException("Could not instantiate object of type " + recordClassName);
+      throw new IOException("Could not instantiate object of type "
+          + recordClassName);
     }
   }
 

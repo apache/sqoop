@@ -34,27 +34,34 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
 public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
     extends Mapper<KEYIN, VALIN, KEYOUT, VALOUT> {
 
-  public static final Log LOG = LogFactory.getLog(AutoProgressMapper.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      AutoProgressMapper.class.getName());
 
-  /** Total number of millis for which progress will be reported
-      by the auto-progress thread. If this is zero, then the auto-progress
-      thread will never voluntarily exit.
-    */
+  /**
+   * Total number of millis for which progress will be reported by the
+   * auto-progress thread. If this is zero, then the auto-progress thread will
+   * never voluntarily exit.
+   */
   private int maxProgressPeriod;
 
-  /** Number of milliseconds to sleep for between loop iterations. Must be less
-      than report interval.
-    */
+  /**
+   * Number of milliseconds to sleep for between loop iterations. Must be less
+   * than report interval.
+   */
   private int sleepInterval;
 
-  /** Number of milliseconds between calls to Reporter.progress(). Should be a multiple
-      of the sleepInterval.
-    */
+  /**
+   * Number of milliseconds between calls to Reporter.progress().
+   * Should be a multiple of the sleepInterval.
+   */
   private int reportInterval;
 
-  public static final String MAX_PROGRESS_PERIOD_KEY = "sqoop.mapred.auto.progress.max";
-  public static final String SLEEP_INTERVAL_KEY = "sqoop.mapred.auto.progress.sleep";
-  public static final String REPORT_INTERVAL_KEY = "sqoop.mapred.auto.progress.report";
+  public static final String MAX_PROGRESS_PERIOD_KEY =
+      "sqoop.mapred.auto.progress.max";
+  public static final String SLEEP_INTERVAL_KEY =
+      "sqoop.mapred.auto.progress.sleep";
+  public static final String REPORT_INTERVAL_KEY =
+      "sqoop.mapred.auto.progress.report";
 
   // Sleep for 10 seconds at a time.
   static final int DEFAULT_SLEEP_INTERVAL = 10000;
@@ -67,7 +74,7 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
 
   private class ProgressThread extends Thread {
 
-    private volatile boolean keepGoing; // while this is true, thread runs.
+    private volatile boolean keepGoing; // While this is true, thread runs.
 
     private Context context;
     private long startTimeMillis;
@@ -91,17 +98,20 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
       final long REPORT_INTERVAL = AutoProgressMapper.this.reportInterval;
       final long SLEEP_INTERVAL = AutoProgressMapper.this.sleepInterval;
 
-      // in a loop:
-      //   * Check that we haven't run for too long (maxProgressPeriod)
-      //   * If it's been a report interval since we last made progress, make more.
+      // In a loop:
+      //   * Check that we haven't run for too long (maxProgressPeriod).
+      //   * If it's been a report interval since we last made progress,
+      //     make more.
       //   * Sleep for a bit.
       //   * If the parent thread has signaled for exit, do so.
       while (this.keepGoing) {
         long curTimeMillis = System.currentTimeMillis();
 
-        if (MAX_PROGRESS != 0 && curTimeMillis - this.startTimeMillis > MAX_PROGRESS) {
+        if (MAX_PROGRESS != 0
+            && curTimeMillis - this.startTimeMillis > MAX_PROGRESS) {
           this.keepGoing = false;
-          LOG.info("Auto-progress thread exiting after " + MAX_PROGRESS + " ms.");
+          LOG.info("Auto-progress thread exiting after " + MAX_PROGRESS
+              + " ms.");
           break;
         }
 
@@ -130,23 +140,29 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
   /**
    * Set configuration parameters for the auto-progress thread.
    */
-  private final void configureAutoProgress(Configuration job) {
-    this.maxProgressPeriod = job.getInt(MAX_PROGRESS_PERIOD_KEY, DEFAULT_MAX_PROGRESS);
-    this.sleepInterval = job.getInt(SLEEP_INTERVAL_KEY, DEFAULT_SLEEP_INTERVAL);
-    this.reportInterval = job.getInt(REPORT_INTERVAL_KEY, DEFAULT_REPORT_INTERVAL);
+  private void configureAutoProgress(Configuration job) {
+    this.maxProgressPeriod = job.getInt(MAX_PROGRESS_PERIOD_KEY,
+        DEFAULT_MAX_PROGRESS);
+    this.sleepInterval = job.getInt(SLEEP_INTERVAL_KEY,
+        DEFAULT_SLEEP_INTERVAL);
+    this.reportInterval = job.getInt(REPORT_INTERVAL_KEY,
+        DEFAULT_REPORT_INTERVAL);
 
     if (this.reportInterval < 1) {
-      LOG.warn("Invalid " + REPORT_INTERVAL_KEY + "; setting to " + DEFAULT_REPORT_INTERVAL);
+      LOG.warn("Invalid " + REPORT_INTERVAL_KEY + "; setting to "
+          + DEFAULT_REPORT_INTERVAL);
       this.reportInterval = DEFAULT_REPORT_INTERVAL;
     }
 
     if (this.sleepInterval > this.reportInterval || this.sleepInterval < 1) {
-      LOG.warn("Invalid " + SLEEP_INTERVAL_KEY + "; setting to " + DEFAULT_SLEEP_INTERVAL);
+      LOG.warn("Invalid " + SLEEP_INTERVAL_KEY + "; setting to "
+          + DEFAULT_SLEEP_INTERVAL);
       this.sleepInterval = DEFAULT_SLEEP_INTERVAL;
     }
 
     if (this.maxProgressPeriod < 0) {
-      LOG.warn("Invalid " + MAX_PROGRESS_PERIOD_KEY + "; setting to " + DEFAULT_MAX_PROGRESS);
+      LOG.warn("Invalid " + MAX_PROGRESS_PERIOD_KEY + "; setting to "
+          + DEFAULT_MAX_PROGRESS);
       this.maxProgressPeriod = DEFAULT_MAX_PROGRESS;
     }
   }
@@ -179,7 +195,8 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
         thread.join();
         LOG.debug("Progress thread shutdown detected.");
       } catch (InterruptedException ie) {
-        LOG.warn("Interrupted when waiting on auto-progress thread: " + ie.toString());
+        LOG.warn("Interrupted when waiting on auto-progress thread: "
+            + ie.toString());
       }
     }
   }

@@ -38,7 +38,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Smoke tests for Sqoop (org.apache.hadoop.sqoop)
+ * Smoke tests for Sqoop (org.apache.hadoop.sqoop).
  */
 public final class SmokeTests {
 

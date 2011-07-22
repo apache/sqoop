@@ -174,8 +174,8 @@ public abstract class ShimLoader {
 
           return shim;
         } catch (Exception e) {
-          throw new RuntimeException("Could not load shim in class " +
-              className, e);
+          throw new RuntimeException("Could not load shim in class "
+              + className, e);
         }
       }
     }

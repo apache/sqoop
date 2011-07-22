@@ -18,44 +18,28 @@
 
 package org.apache.hadoop.sqoop.mapreduce;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.Sqoop;
 import org.apache.hadoop.sqoop.manager.ManagerFactory;
-import org.apache.hadoop.sqoop.mapreduce.AutoProgressMapper;
-import org.apache.hadoop.sqoop.mapreduce.ImportJobBase;
-import org.apache.hadoop.sqoop.testutil.CommonArgs;
-import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.InjectableManagerFactory;
 import org.apache.hadoop.sqoop.testutil.InjectableConnManager;
 import org.apache.hadoop.sqoop.tool.ImportTool;
 
 /**
- * Test aspects of the DataDrivenImportJob class
+ * Test aspects of the DataDrivenImportJob class' failure reporting.
  */
 public class TestImportJob extends ImportJobTestCase {
 
@@ -87,7 +71,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
-  // A mapper that is guaranteed to cause the task to fail.
+  /** A mapper that is guaranteed to cause the task to fail. */
   public static class NullDereferenceMapper
       extends AutoProgressMapper<Object, Object, Text, NullWritable> {
 
@@ -98,7 +82,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
-  // Run a "job" that just delivers a record to the mapper.
+  /** Run a "job" that just delivers a record to the mapper. */
   public static class DummyImportJob extends ImportJobBase {
     @Override
     public void configureInputFormat(Job job, String tableName,
@@ -115,7 +99,8 @@ public class TestImportJob extends ImportJobTestCase {
         assertTrue("Couldn't delete temp file!", result);
       }
 
-      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fs.create(p)));
+      BufferedWriter w = new BufferedWriter(
+          new OutputStreamWriter(fs.create(p)));
       w.append("This is a line!");
       w.close();
 

@@ -52,7 +52,8 @@ import org.apache.hadoop.sqoop.shims.ShimLoader;
  */
 public abstract class BaseSqoopTool extends SqoopTool {
 
-  public static final Log LOG = LogFactory.getLog(BaseSqoopTool.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      BaseSqoopTool.class.getName());
 
   public static final String HELP_STR = "\nTry --help for usage instructions.";
 
@@ -248,7 +249,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .hasArg().withDescription("Set authentication password")
         .withLongOpt(PASSWORD_ARG)
         .create());
-    commonOpts.addOption(OptionBuilder.withDescription("Read password from console")
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Read password from console")
         .create(PASSWORD_PROMPT_ARG));
 
     commonOpts.addOption(OptionBuilder.withArgName("dir")
@@ -342,10 +344,11 @@ public abstract class BaseSqoopTool extends SqoopTool {
   }
 
   /**
-   * @return options governing input format delimiters
+   * @return options governing input format delimiters.
    */
   protected RelatedOptions getInputFormatOptions() {
-    RelatedOptions inputFormatOpts = new RelatedOptions("Input parsing arguments");
+    RelatedOptions inputFormatOpts =
+        new RelatedOptions("Input parsing arguments");
     inputFormatOpts.addOption(OptionBuilder.withArgName("char")
         .hasArg()
         .withDescription("Sets the input field separator")
@@ -380,7 +383,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
    * @return options related to code generation.
    */
   protected RelatedOptions getCodeGenOpts(boolean multiTable) {
-    RelatedOptions codeGenOpts = new RelatedOptions("Code generation arguments");
+    RelatedOptions codeGenOpts =
+        new RelatedOptions("Code generation arguments");
     codeGenOpts.addOption(OptionBuilder.withArgName("dir")
         .hasArg()
         .withDescription("Output directory for generated code")

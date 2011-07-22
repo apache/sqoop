@@ -24,11 +24,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Misc directory operations
- * 
- *
+ * Misc directory operations.
  */
 public final class DirUtil {
+
+  private DirUtil() {
+  }
 
   public static final Log LOG = LogFactory.getLog(DirUtil.class.getName());
 

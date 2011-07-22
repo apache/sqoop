@@ -46,7 +46,8 @@ import org.apache.hadoop.sqoop.util.ExportException;
  */
 public class DirectMySQLManager extends MySQLManager {
 
-  public static final Log LOG = LogFactory.getLog(DirectMySQLManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      DirectMySQLManager.class.getName());
 
   public DirectMySQLManager(final SqoopOptions options) {
     super(options, false);

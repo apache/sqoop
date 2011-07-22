@@ -45,34 +45,36 @@ import org.apache.hadoop.sqoop.util.FileListing;
  * The former uses the postgres JDBC driver to perform an import;
  * the latter uses pg_dump to facilitate it.
  *
- * Since this requires a Postgresql installation on your local machine to use, this
- * class is named in such a way that Hadoop's default QA process does not run
- * it. You need to run this manually with -Dtestcase=PostgresqlTest.
+ * Since this requires a Postgresql installation on your local machine to use,
+ * this class is named in such a way that Hadoop's default QA process does not
+ * run it. You need to run this manually with -Dtestcase=PostgresqlTest or
+ * -Dthirdparty=true.
  *
- * You need to put Postgresql's JDBC driver library into a location where Hadoop
- * can access it (e.g., $HADOOP_HOME/lib).
+ * You need to put Postgresql's JDBC driver library into a location where
+ * Hadoop can access it (e.g., $HADOOP_HOME/lib).
  *
- * To configure a postgresql database to allow local connections, put the following
- * in /etc/postgresql/8.3/main/pg_hba.conf:
+ * To configure a postgresql database to allow local connections, put the
+ * following in /etc/postgresql/8.3/main/pg_hba.conf:
  *     local  all all trust
  *     host all all 127.0.0.1/32 trust
  * 
  * ... and comment out any other lines referencing 127.0.0.1.
  *
- * For postgresql 8.1, this may be in /var/lib/pgsql/data, instead.
- * You may need to restart the postgresql service after modifying this file.
+ * For postgresql 8.1, this may be in /var/lib/pgsql/data, instead.  You may
+ * need to restart the postgresql service after modifying this file.
  *
  * You should also create a sqooptest user and database:
  *
  * $ sudo -u postgres psql -U postgres template1
- * template1=> CREATE USER sqooptest;
- * template1=> CREATE DATABASE sqooptest;
- * template1=> \q
+ * template1=&gt; CREATE USER sqooptest;
+ * template1=&gt; CREATE DATABASE sqooptest;
+ * template1=&gt; \q
  *
  */
 public class PostgresqlTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(PostgresqlTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      PostgresqlTest.class.getName());
 
   static final String HOST_URL = "jdbc:postgresql://localhost/";
 
@@ -227,8 +229,8 @@ public class PostgresqlTest extends ImportJobTestCase {
   @Test
   public void testJdbcBasedImport() throws IOException {
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400.0,sales",
-        "3,Fred,2009-01-23,15.0,marketing"
+      "2,Bob,2009-04-20,400.0,sales",
+      "3,Fred,2009-01-23,15.0,marketing",
     };
 
     doImportAndVerify(false, expectedResults);
@@ -237,8 +239,8 @@ public class PostgresqlTest extends ImportJobTestCase {
   @Test
   public void testDirectImport() throws IOException {
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400,sales",
-        "3,Fred,2009-01-23,15,marketing"
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
     };
 
     doImportAndVerify(true, expectedResults);

@@ -28,7 +28,9 @@ public final class CommonArgs {
   private CommonArgs() {
   }
 
-  /** Craft a list of arguments that are common to (virtually) all Sqoop programs
+  /**
+   * Craft a list of arguments that are common to (virtually)
+   * all Sqoop programs.
    */
   public static void addHadoopFlags(List<String> args) {
     args.add("-D");

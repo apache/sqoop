@@ -33,16 +33,18 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
- * Manages connections to Postgresql databases
+ * Manages connections to Postgresql databases.
  */
 public class PostgresqlManager extends GenericJdbcManager {
 
-  public static final Log LOG = LogFactory.getLog(PostgresqlManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      PostgresqlManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "org.postgresql.Driver";
 
-  private static final int POSTGRESQL_FETCH_SIZE = 50; // Fetch 50 rows at a time.
+  // Fetch 50 rows at a time.
+  private static final int POSTGRESQL_FETCH_SIZE = 50;
 
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;

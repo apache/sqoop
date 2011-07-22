@@ -112,7 +112,8 @@ public class ExportJobBase extends JobBase {
       }
 
       if (null == stat) {
-        LOG.warn("null FileStatus object in isSequenceFiles(); assuming false.");
+        LOG.warn("null FileStatus object in isSequenceFiles(); "
+            + "assuming false.");
         return false;
       }
 
@@ -239,7 +240,7 @@ public class ExportJobBase extends JobBase {
       
 
   /**
-   * Run an export job to dump a table from HDFS to a database
+   * Run an export job to dump a table from HDFS to a database.
    * @throws IOException if the export job encounters an IO error
    * @throws ExportException if the job fails unexpectedly or is misconfigured.
    */
@@ -248,7 +249,8 @@ public class ExportJobBase extends JobBase {
     SqoopOptions options = context.getOptions();
     Configuration conf = options.getConf();
     String tableName = context.getTableName();
-    String tableClassName = new TableClassName(options).getClassForTable(tableName);
+    String tableClassName =
+        new TableClassName(options).getClassForTable(tableName);
     String ormJarFile = context.getJarFile();
 
     LOG.info("Beginning export of " + tableName);

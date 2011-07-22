@@ -25,19 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.sqoop.io.LobFile;
-import org.apache.hadoop.sqoop.io.LobReaderCache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,7 +75,7 @@ public class BlobRef extends LobRef<byte[], BytesWritable, InputStream> {
   }
 
   @Override
-  protected BytesWritable deepCopyData() {
+  protected BytesWritable deepCopyData(BytesWritable data) {
     return new BytesWritable(Arrays.copyOf(data.getBytes(), data.getLength()));
   }
 
@@ -94,15 +84,18 @@ public class BlobRef extends LobRef<byte[], BytesWritable, InputStream> {
     // For internally-stored BLOBs, the data is a BytesWritable
     // containing the actual data.
 
-    if (null == this.data) {
-      this.data = new BytesWritable();
+    BytesWritable data = getDataObj();
+
+    if (null == data) {
+      data = new BytesWritable();
     }
-    this.data.readFields(in);
+    data.readFields(in);
+    setDataObj(data);
   }
 
   @Override
   public void writeInternal(DataOutput out) throws IOException {
-    data.write(out);
+    getDataObj().write(out);
   }
 
   /**

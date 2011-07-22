@@ -57,7 +57,8 @@ import org.apache.hadoop.sqoop.util.PerfCounters;
  */
 public class ImportJobBase extends JobBase {
 
-  public static final Log LOG = LogFactory.getLog(ImportJobBase.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ImportJobBase.class.getName());
 
   public ImportJobBase() {
     this(null);
@@ -129,20 +130,24 @@ public class ImportJobBase extends JobBase {
 
 
   /**
-   * Run an import job to read a table in to HDFS
+   * Run an import job to read a table in to HDFS.
    *
    * @param tableName  the database table to read
-   * @param ormJarFile the Jar file to insert into the dcache classpath. (may be null)
-   * @param splitByCol the column of the database table to use to split the import
+   * @param ormJarFile the Jar file to insert into the dcache classpath.
+   * (may be null)
+   * @param splitByCol the column of the database table to use to split
+   * the import
    * @param conf A fresh Hadoop Configuration to use to build an MR job.
    * @throws IOException if the job encountered an IO problem
-   * @throws ImportException if the job failed unexpectedly or was misconfigured.
+   * @throws ImportException if the job failed unexpectedly or was
+   * misconfigured.
    */
   public void runImport(String tableName, String ormJarFile, String splitByCol,
       Configuration conf) throws IOException, ImportException {
 
     LOG.info("Beginning import of " + tableName);
-    String tableClassName = new TableClassName(options).getClassForTable(tableName);
+    String tableClassName =
+        new TableClassName(options).getClassForTable(tableName);
     loadJars(conf, ormJarFile, tableClassName);
 
     try {

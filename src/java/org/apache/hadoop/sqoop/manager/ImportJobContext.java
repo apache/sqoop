@@ -33,7 +33,8 @@ public class ImportJobContext {
   private SqoopOptions options;
   private Class<? extends InputFormat> inputFormatClass;
 
-  public ImportJobContext(final String table, final String jar, final SqoopOptions opts) {
+  public ImportJobContext(final String table, final String jar,
+      final SqoopOptions opts) {
     this.tableName = table;
     this.jarFile = jar;
     this.options = opts;

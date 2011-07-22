@@ -18,8 +18,6 @@
 
 package org.apache.hadoop.sqoop.util;
 
-import java.io.InputStream;
-
 /**
  * Partial implementation of AsyncSink that relies on ErrorableThread to
  * provide a status bit for the join() method.

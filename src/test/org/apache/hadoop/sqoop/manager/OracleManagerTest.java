@@ -82,7 +82,8 @@ import org.apache.hadoop.sqoop.util.FileListing;
  */
 public class OracleManagerTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(OracleManagerTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      OracleManagerTest.class.getName());
 
   static final String TABLE_NAME = "EMPLOYEES";
 
@@ -132,11 +133,17 @@ public class OracleManagerTest extends ImportJobTestCase {
           + "PRIMARY KEY (id))");
 
       st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),1000000.00,'engineering','29-DEC-09 12.00.00.000000000 PM','29-DEC-09 12.00.00.000000000 PM')");
+          + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
+          + "1000000.00,'engineering','29-DEC-09 12.00.00.000000000 PM',"
+          + "'29-DEC-09 12.00.00.000000000 PM')");
       st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),400.00,'sales','30-DEC-09 12.00.00.000000000 PM','30-DEC-09 12.00.00.000000000 PM')");
+          + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
+          + "400.00,'sales','30-DEC-09 12.00.00.000000000 PM',"
+          + "'30-DEC-09 12.00.00.000000000 PM')");
       st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,'marketing','31-DEC-09 12.00.00.000000000 PM','31-DEC-09 12.00.00.000000000 PM')");
+          + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
+          + "'marketing','31-DEC-09 12.00.00.000000000 PM',"
+          + "'31-DEC-09 12.00.00.000000000 PM')");
       connection.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: " + sqlE);
@@ -233,28 +240,33 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   @Test
   public void testOracleImport() throws IOException {
-    // no quoting of strings allowed.
-    // NOTE: Oracle JDBC 11.1 drivers auto-cast SQL DATE to java.sql.Timestamp.
-    // Even if you define your columns as DATE in Oracle, they may still contain
-    // time information, so the JDBC drivers lie to us and will never tell us we have
-    // a strict DATE type. Thus we include HH:MM:SS.mmmmm below.
+    // no quoting of strings allowed.  NOTE: Oracle JDBC 11.1 drivers
+    // auto-cast SQL DATE to java.sql.Timestamp.  Even if you define your
+    // columns as DATE in Oracle, they may still contain time information, so
+    // the JDBC drivers lie to us and will never tell us we have a strict DATE
+    // type. Thus we include HH:MM:SS.mmmmm below.
     // See http://www.oracle.com/technology/tech/java/sqlj_jdbc/htdocs/jdbc_faq.html#08_01
     String [] expectedResults = {
-        "1,Aaron,2009-05-14 00:00:00.0,1000000,engineering,2009-12-29 12:00:00.0,2009-12-29 12:00:00.0",
-        "2,Bob,2009-04-20 00:00:00.0,400,sales,2009-12-30 12:00:00.0,2009-12-30 12:00:00.0",
-        "3,Fred,2009-01-23 00:00:00.0,15,marketing,2009-12-31 12:00:00.0,2009-12-31 12:00:00.0"
+      "1,Aaron,2009-05-14 00:00:00.0,1000000,engineering,"
+          + "2009-12-29 12:00:00.0,2009-12-29 12:00:00.0",
+      "2,Bob,2009-04-20 00:00:00.0,400,sales,"
+          + "2009-12-30 12:00:00.0,2009-12-30 12:00:00.0",
+      "3,Fred,2009-01-23 00:00:00.0,15,marketing,"
+          + "2009-12-31 12:00:00.0,2009-12-31 12:00:00.0",
     };
 
     runOracleTest(expectedResults);
   }
 
   /**
-   * Compare two lines
+   * Compare two lines. Normalize the dates we receive based on the expected
+   * time zone.
    * @param expectedLine    expected line
    * @param receivedLine    received line
    * @throws IOException    exception during lines comparison
    */
-  private void compareRecords(String expectedLine, String receivedLine) throws IOException {
+  private void compareRecords(String expectedLine, String receivedLine)
+      throws IOException {
     // handle null case
     if (expectedLine == null || receivedLine == null) {
       return;
@@ -269,8 +281,10 @@ public class OracleManagerTest extends ImportJobTestCase {
     String [] expectedValues = expectedLine.split(",");
     String [] receivedValues = receivedLine.split(",");
     if (expectedValues.length != 7 || receivedValues.length != 7) {
-      LOG.error("Number of expected fields did not match number of received fields");
-      throw new IOException("Number of expected fields did not match number of received fields");
+      LOG.error("Number of expected fields did not match "
+          + "number of received fields");
+      throw new IOException("Number of expected fields did not match "
+          + "number of received fields");
     }
 
     // check first 5 values
@@ -279,20 +293,23 @@ public class OracleManagerTest extends ImportJobTestCase {
       mismatch = !expectedValues[i].equals(receivedValues[i]);
     }
     if (mismatch) {
-      throw new IOException("Expected:<" + expectedLine + "> but was:<" + receivedLine + ">");
+      throw new IOException("Expected:<" + expectedLine + "> but was:<"
+          + receivedLine + ">");
     }
 
     Date expectedDate = null;
     Date receivedDate = null;
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-    int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3600000;
+    int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())
+        / 3600000;
     for (int i = 5; i < 7; i++) {
-      // parse expected timestamp
+      // parse expected timestamp.
       try {
         expectedDate = df.parse(expectedValues[i]);
       } catch (ParseException ex) {
         LOG.error("Could not parse expected timestamp: " + expectedValues[i]);
-        throw new IOException("Could not parse expected timestamp: " + expectedValues[i]);
+        throw new IOException("Could not parse expected timestamp: "
+            + expectedValues[i]);
       }
 
       // parse received timestamp
@@ -300,7 +317,8 @@ public class OracleManagerTest extends ImportJobTestCase {
         receivedDate = df.parse(receivedValues[i]);
       } catch (ParseException ex) {
         LOG.error("Could not parse received timestamp: " + receivedValues[i]);
-        throw new IOException("Could not parse received timestamp: " + receivedValues[i]);
+        throw new IOException("Could not parse received timestamp: "
+            + receivedValues[i]);
       }
 
       // compare two timestamps considering timezone offset
@@ -312,7 +330,8 @@ public class OracleManagerTest extends ImportJobTestCase {
       receivedCal.setTime(receivedDate);
 
       if (!expectedCal.equals(receivedCal)) {
-        throw new IOException("Expected:<" + expectedLine + "> but was:<" + receivedLine + ">, while timezone offset is: " + offset);
+        throw new IOException("Expected:<" + expectedLine + "> but was:<"
+            + receivedLine + ">, while timezone offset is: " + offset);
       }
     }
   }

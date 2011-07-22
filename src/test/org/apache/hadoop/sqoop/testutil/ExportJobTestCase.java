@@ -40,7 +40,8 @@ import org.apache.hadoop.sqoop.tool.ExportTool;
  */
 public class ExportJobTestCase extends BaseSqoopTestCase {
 
-  public static final Log LOG = LogFactory.getLog(ExportJobTestCase.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ExportJobTestCase.class.getName());
 
   protected String getTablePrefix() {
     return "EXPORT_TABLE_";
@@ -68,7 +69,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @param includeHadoopFlags if true, then include -D various.settings=values
    * @param rowsPerStmt number of rows to export in a single INSERT statement.
    * @param statementsPerTx ## of statements to use in a transaction.
@@ -196,11 +197,12 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
-   * Check that we got back the expected row set
+   * Check that we got back the expected row set.
    * @param expectedNumRecords The number of records we expected to load
    * into the database.
    */
-  protected void verifyExport(int expectedNumRecords) throws IOException, SQLException {
+  protected void verifyExport(int expectedNumRecords)
+      throws IOException, SQLException {
     Connection conn = getConnection();
 
     LOG.info("Verifying export: " + getTableName());
@@ -254,7 +256,8 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
       statement.close();
     }
 
-    assertEquals("Invalid msg field for min value", getMsgPrefix() + minVal, minMsg);
+    assertEquals("Invalid msg field for min value", getMsgPrefix() + minVal,
+        minMsg);
 
     statement = conn.prepareStatement("SELECT msg FROM " + getTableName()
         + " WHERE id = " + maxVal,
@@ -272,11 +275,13 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
       statement.close();
     }
 
-    assertEquals("Invalid msg field for min value", getMsgPrefix() + maxVal, maxMsg);
+    assertEquals("Invalid msg field for min value", getMsgPrefix() + maxVal,
+        maxMsg);
   }
 
   /**
-   * Run a MapReduce-based export (using the argv provided to control execution).
+   * Run a MapReduce-based export (using the argv provided to control
+   * execution).
    * @return the generated jar filename
    */
   protected List<String> runExport(String [] argv) throws IOException {

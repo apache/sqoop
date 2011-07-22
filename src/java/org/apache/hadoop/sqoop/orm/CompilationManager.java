@@ -38,7 +38,6 @@ import javax.tools.ToolProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapred.JobConf;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
@@ -49,15 +48,13 @@ import org.apache.hadoop.sqoop.shims.HadoopShim;
  * Manages the compilation of a bunch of .java files into .class files
  * and eventually a jar.
  *
- * Also embeds this program's jar into the lib/ directory inside the compiled jar
- * to ensure that the job runs correctly.
- *
- * 
- *
+ * Also embeds this program's jar into the lib/ directory inside the compiled
+ * jar to ensure that the job runs correctly.
  */
 public class CompilationManager {
 
-  public static final Log LOG = LogFactory.getLog(CompilationManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      CompilationManager.class.getName());
 
   private SqoopOptions options;
   private List<String> sources;
@@ -98,7 +95,8 @@ public class CompilationManager {
     }
 
     for (File f : entries) {
-      if (f.getName().startsWith("hadoop-") && f.getName().endsWith("-core.jar")) {
+      if (f.getName().startsWith("hadoop-")
+          && f.getName().endsWith("-core.jar")) {
         LOG.info("Found hadoop core jar at: " + f.getAbsolutePath());
         return f.getAbsolutePath();
       }
@@ -128,9 +126,9 @@ public class CompilationManager {
     // find hadoop-*-core.jar for classpath.
     String coreJar = findHadoopCoreJar();
     if (null == coreJar) {
-      // Couldn't find a core jar to insert into the CP for compilation.
-      // If, however, we're running this from a unit test, then the path
-      // to the .class files might be set via the hadoop.alt.classpath property
+      // Couldn't find a core jar to insert into the CP for compilation.  If,
+      // however, we're running this from a unit test, then the path to the
+      // .class files might be set via the hadoop.alt.classpath property
       // instead. Check there first.
       String coreClassesPath = System.getProperty("hadoop.alt.classpath");
       if (null == coreClassesPath) {
@@ -200,7 +198,7 @@ public class CompilationManager {
   }
 
   /**
-   * @return the complete filename of the .jar file to generate */
+   * @return the complete filename of the .jar file to generate. */
   public String getJarFilename() {
     String jarOutDir = options.getJarOutputDir();
     String tableName = options.getTableName();
@@ -235,11 +233,11 @@ public class CompilationManager {
       baseDirName = baseDirName + File.separator;
     }
 
-    // for each input class file, create a zipfile entry for it,
+    // For each input class file, create a zipfile entry for it,
     // read the file into a buffer, and write it to the jar file.
     for (File entry : dirEntries) {
       if (!entry.isDirectory()) {
-        // chomp off the portion of the full path that is shared
+        // Chomp off the portion of the full path that is shared
         // with the base directory where class files were put;
         // we only record the subdir parts in the zip entry.
         String fullPath = entry.getAbsolutePath();
@@ -247,7 +245,8 @@ public class CompilationManager {
 
         boolean include = chompedPath.endsWith(".class")
             && sources.contains(
-            chompedPath.substring(0, chompedPath.length() - ".class".length()) + ".java");
+            chompedPath.substring(0, chompedPath.length() - ".class".length())
+            + ".java");
 
         if (include) {
           // include this file.
@@ -262,7 +261,7 @@ public class CompilationManager {
   }
 
   /**
-   * Create an output jar file to use when executing MapReduce jobs
+   * Create an output jar file to use when executing MapReduce jobs.
    */
   public void jar() throws IOException {
     String jarOutDir = options.getJarOutputDir();
@@ -293,7 +292,8 @@ public class CompilationManager {
         addLibJar(thisJarFile, jstream);
       } else {
         // couldn't find our own jar (we were running from .class files?)
-        LOG.warn("Could not find jar for Sqoop; MapReduce jobs may not run correctly.");
+        LOG.warn("Could not find jar for Sqoop; "
+            + "MapReduce jobs may not run correctly.");
       }
 
       String shimJarFile = findShimJar();
@@ -347,12 +347,13 @@ public class CompilationManager {
   private static final int BUFFER_SZ = 4096;
 
   /**
-   * utility method to copy a .class file into the jar stream.
+   * Utility method to copy a .class file into the jar stream.
    * @param f
    * @param ostream
    * @throws IOException
    */
-  private void copyFileToStream(File f, OutputStream ostream) throws IOException {
+  private void copyFileToStream(File f, OutputStream ostream)
+      throws IOException {
     FileInputStream fis = new FileInputStream(f);
     byte [] buffer = new byte[BUFFER_SZ];
     try {
@@ -381,7 +382,7 @@ public class CompilationManager {
     return findJarForClass(h.getClass());
   }
 
-  // method mostly cloned from o.a.h.mapred.JobConf.findContainingJar()
+  // Method mostly cloned from o.a.h.mapred.JobConf.findContainingJar().
   private String findJarForClass(Class<? extends Object> classObj) {
     ClassLoader loader = classObj.getClassLoader();
     String classFile = classObj.getName().replaceAll("\\.", "/") + ".class";

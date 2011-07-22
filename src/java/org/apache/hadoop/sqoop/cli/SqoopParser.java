@@ -51,7 +51,7 @@ public class SqoopParser extends GnuParser {
   // this Sqoop class, we cannot see their package-specific methods.
   // So we just call it by reflection. As long as we're at it, this
   // allows us to also put SqoopParser in its own package.
-  static java.lang.reflect.Method addValForProcessing;
+  private static java.lang.reflect.Method addValForProcessing;
 
   static {
     try {

@@ -19,8 +19,6 @@
 package org.apache.hadoop.sqoop.lib;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -92,7 +90,7 @@ public class TestBlobRef extends TestCase {
     }
   }
 
-  private void doExternalTest(final byte [] DATA, final String FILENAME)
+  private void doExternalTest(final byte [] data, final String filename)
       throws IOException {
 
     Configuration conf = new Configuration();
@@ -101,7 +99,7 @@ public class TestBlobRef extends TestCase {
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
 
     Path tmpPath = new Path(tmpDir);
-    Path blobFile = new Path(tmpPath, FILENAME);
+    Path blobFile = new Path(tmpPath, filename);
 
     // make any necessary parent dirs.
     Path blobParent = blobFile.getParent();
@@ -112,13 +110,13 @@ public class TestBlobRef extends TestCase {
     LobFile.Writer lw = LobFile.create(blobFile, conf, false);
     try {
       long off = lw.tell();
-      long len = DATA.length;
+      long len = data.length;
       OutputStream os = lw.writeBlobRecord(len);
-      os.write(DATA, 0, DATA.length);
+      os.write(data, 0, data.length);
       os.close();
       lw.close();
 
-      String refString = "externalLob(lf," + FILENAME
+      String refString = "externalLob(lf," + filename
           + "," + off + "," + len + ")";
       BlobRef blob = BlobRef.parse(refString);
       assertTrue(blob.isExternal());
@@ -130,9 +128,9 @@ public class TestBlobRef extends TestCase {
       int bytes = is.read(buf, 0, 4096);
       is.close();
 
-      assertEquals(DATA.length, bytes);
+      assertEquals(data.length, bytes);
       for (int i = 0; i < bytes; i++) {
-        assertEquals(DATA[i], buf[i]);
+        assertEquals(data[i], buf[i]);
       }
     } finally {
       fs.delete(blobFile, false);

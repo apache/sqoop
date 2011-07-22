@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.junit.Test;
 
 import junit.framework.TestCase;
 
@@ -34,7 +33,8 @@ import junit.framework.TestCase;
  */
 public class TestTableDefWriter extends TestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestTableDefWriter.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestTableDefWriter.class.getName());
 
   // Test getHiveOctalCharCode and expect an IllegalArgumentException.
   private void expectExceptionInCharCode(int charCode) {
@@ -73,7 +73,8 @@ public class TestTableDefWriter extends TestCase {
     LOG.debug("Load data stmt: " + loadData);
 
     // Assert that the statements generated have the form we expect.
-    assertTrue(createTable.indexOf("CREATE TABLE IF NOT EXISTS outputTable") != -1);
+    assertTrue(createTable.indexOf(
+        "CREATE TABLE IF NOT EXISTS outputTable") != -1);
     assertTrue(loadData.indexOf("INTO TABLE outputTable") != -1);
     assertTrue(loadData.indexOf("/inputTable'") != -1);
   }

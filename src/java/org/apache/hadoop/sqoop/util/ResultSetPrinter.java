@@ -29,17 +29,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 
 /**
- * Utility methods to format and print ResultSet objects
+ * Utility methods to format and print ResultSet objects.
  */
 public class ResultSetPrinter {
 
-  public static final Log LOG = LogFactory.getLog(ResultSetPrinter.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ResultSetPrinter.class.getName());
 
   // max output width to allocate to any column of the printed results.
   private static final int MAX_COL_WIDTH = 20;
 
   /**
-   * Print 'str' to the string builder, padded to 'width' chars
+   * Print 'str' to the string builder, padded to 'width' chars.
    */
   private static void printPadded(StringBuilder sb, String str, int width) {
     int numPad;
@@ -72,7 +73,8 @@ public class ResultSetPrinter {
       ResultSetMetaData metadata = results.getMetaData();
       for (int i = 1; i < cols + 1; i++) {
         String colName = metadata.getColumnName(i);
-        colWidths[i - 1] = Math.min(metadata.getColumnDisplaySize(i), MAX_COL_WIDTH);
+        colWidths[i - 1] = Math.min(metadata.getColumnDisplaySize(i),
+            MAX_COL_WIDTH);
         if (colName == null || colName.equals("")) {
           colName = metadata.getColumnLabel(i) + "*";
         }

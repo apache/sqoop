@@ -114,7 +114,7 @@ public class ToolOptions implements Iterable<RelatedOptions> {
   }
 
   /**
-   * Print the help to the console using the specified help formatter
+   * Print the help to the console using the specified help formatter.
    * @param formatter the HelpFormatter to use.
    */
   public void printHelp(HelpFormatter formatter) {

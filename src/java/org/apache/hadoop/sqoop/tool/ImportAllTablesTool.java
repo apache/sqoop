@@ -19,32 +19,13 @@
 package org.apache.hadoop.sqoop.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.StringUtils;
 
 import org.apache.hadoop.sqoop.Sqoop;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.hive.HiveImport;
-import org.apache.hadoop.sqoop.manager.ConnManager;
-import org.apache.hadoop.sqoop.manager.ExportJobContext;
-import org.apache.hadoop.sqoop.manager.ImportJobContext;
-import org.apache.hadoop.sqoop.orm.ClassWriter;
-import org.apache.hadoop.sqoop.orm.CompilationManager;
-import org.apache.hadoop.sqoop.shims.ShimLoader;
-import org.apache.hadoop.sqoop.tool.SqoopTool;
-import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
@@ -84,7 +65,8 @@ public class ImportAllTablesTool extends ImportTool {
         }
       }
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running import job: " + ioe.toString());
+      LOG.error("Encountered IOException running import job: "
+          + ioe.toString());
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ioe);
       } else {

@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -40,7 +39,7 @@ import org.apache.hadoop.util.*;
 public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
 
   protected static class RawKeyRecordWriter<K, V> extends RecordWriter<K, V> {
-    private static final String utf8 = "UTF-8";
+    private static final String UTF8 = "UTF-8";
 
     protected DataOutputStream out;
 
@@ -59,7 +58,7 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
         Text to = (Text) o;
         out.write(to.getBytes(), 0, to.getLength());
       } else {
-        out.write(o.toString().getBytes(utf8));
+        out.write(o.toString().getBytes(UTF8));
       }
     }
 
@@ -67,7 +66,8 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
       writeObject(key);
     }
 
-    public synchronized void close(TaskAttemptContext context) throws IOException {
+    public synchronized void close(TaskAttemptContext context)
+        throws IOException {
       out.close();
     }
   }

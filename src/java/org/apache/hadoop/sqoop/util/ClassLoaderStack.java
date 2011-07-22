@@ -29,19 +29,17 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Allows you to add and remove jar-files from the running JVM by
  * instantiating classloaders for them.
- *
- * 
- *
  */
 public final class ClassLoaderStack {
 
-  public static final Log LOG = LogFactory.getLog(ClassLoaderStack.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ClassLoaderStack.class.getName());
 
   private ClassLoaderStack() {
   }
 
   /**
-   * Sets the classloader for the current thread
+   * Sets the classloader for the current thread.
    */
   public static void setCurrentClassLoader(ClassLoader cl) {
     LOG.debug("Restoring classloader: " + cl.toString());
@@ -49,23 +47,27 @@ public final class ClassLoaderStack {
   }
 
   /**
-   * Adds a ClassLoader to the top of the stack that will load from the Jar file
-   * of your choice. Returns the previous classloader so you can restore it
-   * if need be, later.
+   * Adds a ClassLoader to the top of the stack that will load from the Jar
+   * file of your choice. Returns the previous classloader so you can restore
+   * it if need be, later.
    *
-   * @param jarFile The filename of a jar file that you want loaded into this JVM
-   * @param testClassName The name of the class to load immediately (optional)
+   * @param jarFile The filename of a jar file that you want loaded into this
+   * JVM.
+   * @param testClassName The name of the class to load immediately
+   * (optional).
    */
   public static ClassLoader addJarFile(String jarFile, String testClassName)
       throws IOException {
 
-    // load the classes from the ORM JAR file into the current VM
-    ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
+    // load the classes from the ORM JAR file into the current VM.
+    ClassLoader prevClassLoader =
+        Thread.currentThread().getContextClassLoader();
     String urlPath = "jar:file://" + new File(jarFile).getAbsolutePath() + "!/";
     LOG.debug("Attempting to load jar through URL: " + urlPath);
     LOG.debug("Previous classloader is " + prevClassLoader);
     URL [] jarUrlArray = {new URL(urlPath)};
-    URLClassLoader cl = URLClassLoader.newInstance(jarUrlArray, prevClassLoader);
+    URLClassLoader cl = URLClassLoader.newInstance(jarUrlArray,
+        prevClassLoader);
     try {
       if (null != testClassName) {
         // try to load a class from the jar to force loading now.
@@ -74,7 +76,8 @@ public final class ClassLoaderStack {
       }
       LOG.debug("Loaded jar into current JVM: " + urlPath);
     } catch (ClassNotFoundException cnfe) {
-      throw new IOException("Could not load jar " + jarFile + " into JVM. (Could not find class "
+      throw new IOException("Could not load jar " + jarFile
+          + " into JVM. (Could not find class "
           + testClassName + ".)", cnfe);
     }
 

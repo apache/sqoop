@@ -50,9 +50,9 @@ import java.util.Map;
  */
 public class MockResultSet implements ResultSet {
 
-  public static final byte [] BLOB_DATA() {
+  public static final byte [] blobData() {
     return new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9,
-        0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+      0xA, 0xB, 0xC, 0xD, 0xE, 0xF, };
   }
 
   public static final String CLOB_DATA = "This is the mock clob data!";
@@ -62,7 +62,7 @@ public class MockResultSet implements ResultSet {
    */
   public static class MockBlob implements Blob {
     public InputStream getBinaryStream() {
-      return new ByteArrayInputStream(BLOB_DATA());
+      return new ByteArrayInputStream(blobData());
     }
 
     public InputStream getBinaryStream(long pos, long len) {
@@ -73,7 +73,7 @@ public class MockResultSet implements ResultSet {
       byte [] bytes = new byte[length];
 
       int start = (int) pos - 1; // SQL uses 1-based arrays!!
-      byte [] blobData = BLOB_DATA();
+      byte [] blobData = blobData();
       for (int i = 0; i < length; i++) {
         bytes[i] = blobData[i + start];
       }
@@ -81,7 +81,7 @@ public class MockResultSet implements ResultSet {
     }
 
     public long length() {
-      return BLOB_DATA().length;
+      return blobData().length;
     }
 
 
@@ -89,7 +89,9 @@ public class MockResultSet implements ResultSet {
     public long position(byte[] pattern, long start) { return 0; }
     public OutputStream  setBinaryStream(long pos) { return null; }
     public int setBytes(long pos, byte[] bytes) { return 0; }
-    public int setBytes(long pos, byte[] bytes, int offset, int len) { return 0; }
+    public int setBytes(long pos, byte[] bytes, int offset, int len) {
+      return 0;
+    }
     public void truncate(long len) { }
     public void free() { }
   }
@@ -132,7 +134,9 @@ public class MockResultSet implements ResultSet {
     public OutputStream setAsciiStream(long pos) { return null; }
     public Writer setCharacterStream(long pos) { return null; }
     public int setString(long pos, String str) { return 0; }
-    public int setString(long pos, String str, int offset, int len) { return 0; }
+    public int setString(long pos, String str, int offset, int len) {
+      return 0;
+    }
     public void truncate(long len) { }
     public void free() { }
   }
@@ -789,7 +793,8 @@ public class MockResultSet implements ResultSet {
   }
 
   @Override
-  public void updateClob(String columnLabel, Reader reader) throws SQLException {
+  public void updateClob(String columnLabel, Reader reader)
+      throws SQLException {
   }
 
   @Override
@@ -890,7 +895,8 @@ public class MockResultSet implements ResultSet {
   }
 
   @Override
-  public void updateNString(int columnIndex, String string) throws SQLException {
+  public void updateNString(int columnIndex, String string)
+      throws SQLException {
   }
 
   @Override
@@ -979,7 +985,8 @@ public class MockResultSet implements ResultSet {
   }
 
   @Override
-  public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
+  public void updateTimestamp(int columnIndex, Timestamp x)
+      throws SQLException {
   }
 
   @Override

@@ -33,7 +33,7 @@ import org.apache.hadoop.mrunit.mapreduce.mock.MockReporter;
 
 
 /**
- * Hadoop Shim for CDH3 (based on 0.20.2)
+ * Hadoop Shim for CDH3 (based on 0.20.2).
  */
 public class CDH3Shim extends CommonHadoopShim {
   @Override

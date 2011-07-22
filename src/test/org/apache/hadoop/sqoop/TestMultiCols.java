@@ -31,10 +31,11 @@ import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
  */
 public class TestMultiCols extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestMultiCols.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TestMultiCols.class.getName());
 
   /**
-   * Do a full import verification test on a table containing one row
+   * Do a full import verification test on a table containing one row.
    * @param types the types of the columns to insert
    * @param insertVals the SQL text to use to insert each value
    * @param validateVals the text to expect when retrieving each value from
@@ -44,12 +45,12 @@ public class TestMultiCols extends ImportJobTestCase {
    * @param importColumns The list of columns to import
    */
   private void verifyTypes(String [] types , String [] insertVals,
-      String validateVals [], String validateLine) {
+      String [] validateVals, String validateLine) {
     verifyTypes(types, insertVals, validateVals, validateLine, null);
   }
 
   private void verifyTypes(String [] types , String [] insertVals,
-      String validateVals [], String validateLine, String [] importColumns) {
+      String [] validateVals, String validateLine, String [] importColumns) {
 
     createTableWithColTypes(types, insertVals);
 

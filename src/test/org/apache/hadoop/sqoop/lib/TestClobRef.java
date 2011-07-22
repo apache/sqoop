@@ -19,8 +19,6 @@
 package org.apache.hadoop.sqoop.lib;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -106,7 +104,7 @@ public class TestClobRef extends TestCase {
     }
   }
 
-  private void doExternalTest(final String DATA, final String FILENAME)
+  private void doExternalTest(final String data, final String filename)
       throws IOException {
 
     Configuration conf = new Configuration();
@@ -115,7 +113,7 @@ public class TestClobRef extends TestCase {
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
 
     Path tmpPath = new Path(tmpDir);
-    Path clobFile = new Path(tmpPath, FILENAME);
+    Path clobFile = new Path(tmpPath, filename);
 
     // make any necessary parent dirs.
     Path clobParent = clobFile.getParent();
@@ -126,13 +124,13 @@ public class TestClobRef extends TestCase {
     LobFile.Writer lw = LobFile.create(clobFile, conf, true);
     try {
       long off = lw.tell();
-      long len = DATA.length();
+      long len = data.length();
       Writer w = lw.writeClobRecord(len);
-      w.append(DATA);
+      w.append(data);
       w.close();
       lw.close();
 
-      String refString = "externalLob(lf," + FILENAME 
+      String refString = "externalLob(lf," + filename 
                 + "," + off + "," + len + ")";
       ClobRef clob = ClobRef.parse(refString);
       assertTrue(clob.isExternal());
@@ -145,7 +143,7 @@ public class TestClobRef extends TestCase {
       r.close();
 
       String str = new String(buf, 0, chars);
-      assertEquals(DATA, str);
+      assertEquals(data, str);
     } finally {
       fs.delete(clobFile, false);
     }

@@ -29,13 +29,14 @@ import org.apache.hadoop.sqoop.SqoopOptions;
  */
 public class HsqldbManager extends GenericJdbcManager {
 
-  public static final Log LOG = LogFactory.getLog(HsqldbManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      HsqldbManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
 
-  // HsqlDb doesn't have a notion of multiple "databases"; the user's database is always called
-  // "PUBLIC";
+  // HsqlDb doesn't have a notion of multiple "databases"; the user's database
+  // is always called "PUBLIC".
   private static final String HSQL_SCHEMA_NAME = "PUBLIC";
 
   public HsqldbManager(final SqoopOptions opts) {
@@ -43,7 +44,8 @@ public class HsqldbManager extends GenericJdbcManager {
   }
 
   /**
-   * Note: HSqldb only supports a single schema named "PUBLIC"
+   * Return list of databases hosted by the server.
+   * HSQLDB only supports a single schema named "PUBLIC".
    */
   @Override
   public String[] listDatabases() {

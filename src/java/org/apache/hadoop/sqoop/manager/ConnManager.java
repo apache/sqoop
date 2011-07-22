@@ -37,12 +37,12 @@ import org.apache.hadoop.sqoop.util.ImportException;
 public abstract class ConnManager {
 
   /**
-   * Return a list of all databases on a server
+   * Return a list of all databases on a server.
    */
   public abstract String [] listDatabases();
 
   /**
-   * Return a list of all tables in a database
+   * Return a list of all tables in a database.
    */
   public abstract String [] listTables();
 
@@ -57,14 +57,14 @@ public abstract class ConnManager {
   public abstract String getPrimaryKey(String tableName);
 
   /**
-   * Return java type for SQL type
+   * Return java type for SQL type.
    * @param sqlType     sql type
    * @return            java type
    */
   public abstract String toJavaType(int sqlType);
 
     /**
-     * Return hive type for SQL type
+     * Return hive type for SQL type.
      * @param sqlType   sql type
      * @return          hive type
      */
@@ -86,25 +86,27 @@ public abstract class ConnManager {
    * returned ResultSet object, and for calling release() after that to free
    * internal state.
    */
-  public abstract ResultSet readTable(String tableName, String [] columns) throws SQLException;
+  public abstract ResultSet readTable(String tableName, String [] columns)
+      throws SQLException;
 
   /**
-   * @return the actual database connection
+   * @return the actual database connection.
    */
   public abstract Connection getConnection() throws SQLException;
 
   /**
-   * @return a string identifying the driver class to load for this JDBC connection type.
+   * @return a string identifying the driver class to load for this
+   * JDBC connection type.
    */
   public abstract String getDriverClass();
 
   /**
-   * Execute a SQL statement 's' and print its results to stdout
+   * Execute a SQL statement 's' and print its results to stdout.
    */
   public abstract void execAndPrint(String s);
 
   /**
-   * Perform an import of a table from the database into HDFS
+   * Perform an import of a table from the database into HDFS.
    */
   public abstract void importTable(ImportJobContext context)
       throws IOException, ImportException;
@@ -139,7 +141,7 @@ public abstract class ConnManager {
   public abstract void close() throws SQLException;
 
   /**
-   * Export data stored in HDFS into a table in a database
+   * Export data stored in HDFS into a table in a database.
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {

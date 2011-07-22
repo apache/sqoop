@@ -25,16 +25,17 @@ import org.apache.hadoop.sqoop.io.*;
  * A simple benchmark to performance test LobFile reader/writer speed.
  * Writes out 10 GB of data to the local disk and then reads it back.
  * Run with:
- * HADOOP_OPTS=-agentlib:hprof=cpu=samples src/scripts/run-perftest.sh LobFilePerfTest
+ * HADOOP_OPTS=-agentlib:hprof=cpu=samples \
+ *     src/scripts/run-perftest.sh LobFilePerfTest
  */
 public class LobFilePerfTest {
 
-  long recordLen = 20 * 1024 * 1024; // 20 MB records
-  int numRecords = 500;
-  Configuration conf;
-  Path p;
-  long startTime;
-  byte [] record;
+  private long recordLen = 20 * 1024 * 1024; // 20 MB records
+  private int numRecords = 500;
+  private Configuration conf;
+  private Path p;
+  private long startTime;
+  private byte [] record;
 
   public LobFilePerfTest() {
     conf = new Configuration();
@@ -99,7 +100,7 @@ public class LobFilePerfTest {
     System.out.println("Read " + recordSize + " bytes");
   }
 
-  private void run() throws Exception {
+  public void run() throws Exception {
     makeRecordBody();
     writeFile();
     readFile();

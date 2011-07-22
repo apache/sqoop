@@ -45,7 +45,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TableDefWriter {
 
-  public static final Log LOG = LogFactory.getLog(TableDefWriter.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      TableDefWriter.class.getName());
 
   private SqoopOptions options;
   private ConnManager connManager;
@@ -139,13 +140,15 @@ public class TableDefWriter {
       Integer colType = columnTypes.get(col);
       String hiveColType = connManager.toHiveType(colType);
       if (null == hiveColType) {
-        throw new IOException("Hive does not support the SQL type for column " + col);
+        throw new IOException("Hive does not support the SQL type for column "
+            + col);
       }
 
       sb.append(col + " " + hiveColType);
 
       if (HiveTypes.isHiveTypeImprovised(colType)) {
-        LOG.warn("Column " + col + " had to be cast to a less precise type in Hive");
+        LOG.warn(
+            "Column " + col + " had to be cast to a less precise type in Hive");
       }
     }
 
@@ -171,7 +174,7 @@ public class TableDefWriter {
       org.apache.hadoop.hdfs.server.namenode.NameNode.DEFAULT_PORT;
 
   /**
-   * @return the LOAD DATA statement to import the data in HDFS into hive
+   * @return the LOAD DATA statement to import the data in HDFS into hive.
    */
   public String getLoadDataStmt() throws IOException { 
     String warehouseDir = options.getWarehouseDir();
@@ -207,10 +210,9 @@ public class TableDefWriter {
    * @param charNum the character to use as a delimiter
    * @return a string of the form "\ooo" where ooo is an octal number
    * in [000, 177].
-   * @throws IllegalArgumentException if charNum &gt;> 0177.
+   * @throws IllegalArgumentException if charNum &gt; 0177.
    */
-  static String getHiveOctalCharCode(int charNum)
-      throws IllegalArgumentException {
+  static String getHiveOctalCharCode(int charNum) {
     if (charNum > 0177) {
       throw new IllegalArgumentException(
           "Character " + charNum + " is an out-of-range delimiter");

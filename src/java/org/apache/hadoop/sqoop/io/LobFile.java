@@ -76,7 +76,10 @@ import org.apache.hadoop.io.compress.DecompressorStream;
  * The LobFile format is specified at:
  * http://wiki.github.com/cloudera/sqoop/sip-3
  */
-public class LobFile {
+public final class LobFile {
+
+  private LobFile() {
+  }
 
   public static final Log LOG = LogFactory.getLog(LobFile.class.getName());
 
@@ -716,7 +719,7 @@ public class LobFile {
   /**
    * Class that writes out a LobFile. Instantiate via LobFile.create().
    */
-  public static abstract class Writer implements Closeable {
+  public abstract static class Writer implements Closeable {
 
     /**
      * If this Writer is writing to a physical LobFile, then this returns
@@ -733,6 +736,7 @@ public class LobFile {
     @Override
     protected synchronized void finalize() throws Throwable {
       close();
+      super.finalize();
     }
 
     /**
@@ -759,7 +763,7 @@ public class LobFile {
         throws IOException;
 
     /**
-     * Report the current position in the output file
+     * Report the current position in the output file.
      * @return the number of bytes written through this Writer.
      */
     public abstract long tell() throws IOException;
@@ -795,7 +799,8 @@ public class LobFile {
 
     // The LobIndex we are constructing.
     private LinkedList<IndexSegment> indexSegments;
-    private int entriesInSegment; // number of entries in the current IndexSegment.
+    // Number of entries in the current IndexSegment.
+    private int entriesInSegment; 
     private IndexTable indexTable;
 
     // Number of entries that can be written to a single IndexSegment.
@@ -1078,7 +1083,7 @@ public class LobFile {
   /**
    * Class that can read a LobFile. Create with LobFile.open().
    */
-  public static abstract class Reader implements Closeable {
+  public abstract static class Reader implements Closeable {
     /**
      * If this Reader is reading from a physical LobFile, then this returns
      * the file path it is reading from. Otherwise it returns null.
@@ -1087,7 +1092,7 @@ public class LobFile {
     public abstract Path getPath();
 
     /**
-     * Report the current position in the file
+     * Report the current position in the file.
      * @return the current offset from the start of the file in bytes.
      */
     public abstract long tell() throws IOException;
@@ -1179,6 +1184,7 @@ public class LobFile {
     @Override
     protected synchronized void finalize() throws Throwable {
       close();
+      super.finalize();
     }
   }
 
@@ -1449,17 +1455,20 @@ public class LobFile {
       return -1; // couldn't find it.
     }
 
+    @Override
     /** {@inheritDoc} */
     public Path getPath() {
       return this.path;
     }
 
+    @Override
     /** {@inheritDoc} */
     public long tell() throws IOException {
       checkForNull(this.underlyingInput);
       return this.underlyingInput.getPos();
     }
 
+    @Override
     /** {@inheritDoc} */
     public void seek(long pos) throws IOException {
       closeUserStream();
@@ -1576,6 +1585,7 @@ public class LobFile {
       }
     }
 
+    @Override
     /** {@inheritDoc} */
     public boolean next() throws IOException {
       LOG.debug("Checking for next record");
@@ -1646,26 +1656,31 @@ public class LobFile {
       return true;
     }
 
+    @Override
     /** {@inheritDoc} */
     public boolean isRecordAvailable() {
       return this.isAligned;
     }
 
+    @Override
     /** {@inheritDoc} */
     public long getRecordLen() {
       return this.claimedRecordLen;
     }
 
+    @Override
     /** {@inheritDoc} */
     public long getRecordId() {
       return this.curEntryId;
     }
 
+    @Override
     /** {@inheritDoc} */
     public long getRecordOffset() {
       return this.curRecordOffset;
     }
 
+    @Override
     /** {@inheritDoc} */
     public InputStream readBlobRecord() throws IOException {
       if (!isRecordAvailable()) {
@@ -1700,6 +1715,7 @@ public class LobFile {
       return this.userInputStream;
     }
 
+    @Override
     /** {@inheritDoc} */
     public java.io.Reader readClobRecord() throws IOException {
       // Get a handle to the binary reader and then wrap it.
@@ -1707,6 +1723,7 @@ public class LobFile {
       return new InputStreamReader(is);
     }
 
+    @Override
     /** {@inheritDoc} */
     public void close() throws IOException {
       closeUserStream();
@@ -1724,6 +1741,7 @@ public class LobFile {
       this.isAligned = false;
     }
 
+    @Override
     /** {@inheritDoc} */
     public boolean isClosed() {
       return this.underlyingInput == null;

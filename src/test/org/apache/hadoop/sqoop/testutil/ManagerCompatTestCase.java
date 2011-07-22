@@ -18,24 +18,14 @@
 
 package org.apache.hadoop.sqoop.testutil;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
-
-import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.Sqoop;
-import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.hadoop.sqoop.orm.CompilationManager;
-import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 import org.junit.Test;
 
@@ -177,7 +167,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   /**
    * Return the number of digits to use in the integral part of a
-   * NUMERIC type
+   * NUMERIC type.
    */
   protected int getNumericScale() {
     return 30;
@@ -185,7 +175,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   /**
    * Return the number of digits to use in the decimal part of a
-   * NUMERIC type
+   * NUMERIC type.
    */
   protected int getNumericDecPartDigits() {
     return 5;
@@ -193,7 +183,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   /**
    * Return the number of digits to use in the integral part of a
-   * DECIMAL type
+   * DECIMAL type.
    */
   protected int getDecimalScale() {
     return 30;
@@ -201,7 +191,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   /**
    * Return the number of digits to use in the decimal part of a
-   * DECIMAL type
+   * DECIMAL type.
    */
   protected int getDecimalDecPartDigits() {
     return 5;
@@ -423,7 +413,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
     int dotPos = tsAsInserted.indexOf(".");
     if (-1 == dotPos) {
-      // No dot in the original string; expand to add a single item after the dot.
+      // No dot in the original string; expand to add a single item after the
+      // dot.
       return tsAsInserted + ".0";
     } else {
       // all other strings return as-is.
@@ -460,7 +451,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   }
 
   /**
-   * Encode a string to be inserted in a BLOB field
+   * Encode a string to be inserted in a BLOB field.
    * @param blobData the raw text (Without quote marks) to insert for a BLOB.
    * @return 'blobData' in a String form ready for insertion
    */
@@ -648,7 +639,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("BOOLEAN", "false", getFalseBoolDbOutput(), getFalseBoolSeqOutput());
+    verifyType("BOOLEAN", "false", getFalseBoolDbOutput(),
+        getFalseBoolSeqOutput());
   }
 
   @Test
@@ -923,7 +915,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   }
 
 
-  protected void verifyClob(String insertVal, String returnVal, String seqFileVal) {
+  protected void verifyClob(String insertVal, String returnVal,
+      String seqFileVal) {
     String [] types = { "INTEGER NOT NULL", getClobType() };
     String [] vals = { "1", insertVal };
     String [] checkCol = { "DATA_COL0", "DATA_COL1" };
@@ -933,7 +926,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     verifyImport("1," + seqFileVal, checkCol);
   }
 
-  protected void verifyBlob(String insertVal, byte [] returnVal, String seqFileVal) {
+  protected void verifyBlob(String insertVal, byte [] returnVal,
+      String seqFileVal) {
     String [] types = { "INTEGER NOT NULL", getBlobType() };
     String [] vals = { "1", insertVal };
     String [] checkCols = { "DATA_COL0", "DATA_COL1" };

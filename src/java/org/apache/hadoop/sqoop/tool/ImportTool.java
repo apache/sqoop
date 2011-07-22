@@ -84,7 +84,8 @@ public class ImportTool extends BaseSqoopTool {
     jarFile = codeGenerator.generateORM(options, tableName);
 
     // Do the actual import.
-    ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
+    ImportJobContext context = new ImportJobContext(tableName, jarFile,
+        options);
     manager.importTable(context);
 
     // If the user wants this table to be in Hive, perform that post-load.
@@ -120,7 +121,8 @@ public class ImportTool extends BaseSqoopTool {
       // Import a single table the user specified.
       importTable(options, options.getTableName(), hiveImport);
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running import job: " + ioe.toString());
+      LOG.error("Encountered IOException running import job: "
+          + ioe.toString());
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ioe);
       } else {

@@ -51,10 +51,12 @@ import org.apache.hadoop.sqoop.util.PerfCounters;
  * commands.
  */
 public class DirectPostgresqlManager extends PostgresqlManager {
-  public static final Log LOG = LogFactory.getLog(DirectPostgresqlManager.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      DirectPostgresqlManager.class.getName());
 
   public DirectPostgresqlManager(final SqoopOptions opts) {
-    // Inform superclass that we're overriding import method via alt. constructor.
+    // Inform superclass that we're overriding import method via alt.
+    // constructor.
     super(opts, true);
   }
 
@@ -68,8 +70,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     private final PerfCounters counters;
     private final SqoopOptions options;
 
-    PostgresqlAsyncSink(final SplittableBufferedWriter w, final SqoopOptions opts,
-        final PerfCounters ctrs) {
+    PostgresqlAsyncSink(final SplittableBufferedWriter w,
+        final SqoopOptions opts, final PerfCounters ctrs) {
       this.writer = w;
       this.options = opts;
       this.counters = ctrs;
@@ -81,14 +83,16 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     }
 
     private static class PostgresqlStreamThread extends ErrorableThread {
-      public static final Log LOG = LogFactory.getLog(PostgresqlStreamThread.class.getName());
+      public static final Log LOG = LogFactory.getLog(
+          PostgresqlStreamThread.class.getName());
 
       private final SplittableBufferedWriter writer;
       private final InputStream stream;
       private final SqoopOptions options;
       private final PerfCounters counters;
 
-      PostgresqlStreamThread(final InputStream is, final SplittableBufferedWriter w,
+      PostgresqlStreamThread(final InputStream is,
+          final SplittableBufferedWriter w,
           final SqoopOptions opts, final PerfCounters ctrs) {
         this.stream = is;
         this.writer = w;
@@ -143,7 +147,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
   }
 
   /**
-    Takes a list of columns and turns them into a string like "col1, col2, col3..."
+   * Takes a list of columns and turns them into a string like
+   * "col1, col2, col3...".
    */
   private String getColumnListStr(String [] cols) {
     if (null == cols) {
@@ -164,20 +169,20 @@ public class DirectPostgresqlManager extends PostgresqlManager {
   }
 
   /**
-   * @return the Postgresql-specific SQL command to copy the table ("COPY .... TO STDOUT")
+   * @return the Postgresql-specific SQL command to copy the
+   * table ("COPY .... TO STDOUT").
    */
   private String getCopyCommand(String tableName) {
-    /*
-       Format of this command is:
 
-          COPY table(col, col....) TO STDOUT 
-      or  COPY ( query ) TO STDOUT
-        WITH DELIMITER 'fieldsep'
-        CSV
-        QUOTE 'quotechar'
-        ESCAPE 'escapechar'
-        FORCE QUOTE col, col, col....
-    */
+    // Format of this command is:
+    //
+    //     COPY table(col, col....) TO STDOUT 
+    // or  COPY ( query ) TO STDOUT
+    //   WITH DELIMITER 'fieldsep'
+    //   CSV
+    //   QUOTE 'quotechar'
+    //   ESCAPE 'escapechar'
+    //   FORCE QUOTE col, col, col....
 
     StringBuilder sb = new StringBuilder();
     String [] cols = getColumnNames(tableName);
@@ -238,12 +243,12 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     return copyCmd;
   }
 
-  /** Write the COPY command to a temp file
+  /** Write the COPY command to a temp file.
     * @return the filename we wrote to.
     */
   private String writeCopyCommand(String command) throws IOException {
     String tmpDir = options.getTempDir();
-    File tempFile = File.createTempFile("tmp-",".sql", new File(tmpDir));
+    File tempFile = File.createTempFile("tmp-", ".sql", new File(tmpDir));
     BufferedWriter w = new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(tempFile)));
     w.write(command);
@@ -258,7 +263,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
   private String writePasswordFile(String password) throws IOException {
 
     String tmpDir = options.getTempDir();
-    File tempFile = File.createTempFile("pgpass",".pgpass", new File(tmpDir));
+    File tempFile = File.createTempFile("pgpass", ".pgpass", new File(tmpDir));
     LOG.debug("Writing password to tempfile: " + tempFile);
 
     // Make sure it's only readable by the current user.
@@ -300,9 +305,9 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     PerfCounters counters = new PerfCounters();
 
     try {
-      // Get the COPY TABLE command to issue, write this to a file, and pass it
-      // in to psql with -f filename.
-      // Then make sure we delete this file in our finally block.
+      // Get the COPY TABLE command to issue, write this to a file, and pass
+      // it in to psql with -f filename.  Then make sure we delete this file
+      // in our finally block.
       String copyCmd = getCopyCommand(tableName);
       commandFilename = writeCopyCommand(copyCmd);
 
@@ -312,10 +317,10 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       // Environment to pass to psql.
       List<String> envp = Executor.getCurEnvpStrings();
 
-      // We need to parse the connect string URI to determine the database name
-      // and the host and port. If the host is localhost and the port is not specified,
-      // we don't want to pass this to psql, because we want to force the use of a
-      // UNIX domain socket, not a TCP/IP socket.
+      // We need to parse the connect string URI to determine the database
+      // name and the host and port. If the host is localhost and the port is
+      // not specified, we don't want to pass this to psql, because we want to
+      // force the use of a UNIX domain socket, not a TCP/IP socket.
       String connectString = options.getConnectString();
       String databaseName = JdbcUrl.getDatabaseName(connectString);
       String hostname = JdbcUrl.getHostName(connectString);
@@ -325,7 +330,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         throw new ImportException("Could not determine database name");
       }
 
-      LOG.info("Performing import of table " + tableName + " from database " + databaseName);
+      LOG.info("Performing import of table " + tableName + " from database "
+          + databaseName);
       args.add(PSQL_CMD); // requires that this is on the path.
       args.add("--tuples-only");
       args.add("--quiet");
@@ -401,7 +407,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       // Remove any password file we wrote
       if (null != passwordFilename) {
         if (!new File(passwordFilename).delete()) {
-          LOG.error("Could not remove postgresql password file " + passwordFilename);
+          LOG.error("Could not remove postgresql password file "
+              + passwordFilename);
           LOG.error("You should remove this file to protect your credentials.");
         }
       }

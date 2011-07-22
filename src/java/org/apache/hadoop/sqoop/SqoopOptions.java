@@ -37,14 +37,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
- * Command-line arguments used by Sqoop
+ * Command-line arguments used by Sqoop.
  */
 public class SqoopOptions {
 
   public static final Log LOG = LogFactory.getLog(SqoopOptions.class.getName());
 
   /**
-   * Thrown when invalid cmdline options are given
+   * Thrown when invalid cmdline options are given.
    */
   @SuppressWarnings("serial")
   public static class InvalidOptionsException extends Exception {
@@ -64,7 +64,7 @@ public class SqoopOptions {
     }
   }
 
-  // selects in-HDFS destination file format
+  /** Selects in-HDFS destination file format. */
   public enum FileLayout {
     TextFile,
     SequenceFile
@@ -98,18 +98,27 @@ public class SqoopOptions {
   private boolean overwriteHiveTable;
   private String hiveTableName;
   private String packageName; // package to prepend to auto-named classes.
-  private String className; // package+class to apply to individual table import.
-                            // also used as an *input* class with existingJarFile.
-  private String existingJarFile; // Name of a jar containing existing table definition
-                                  // class to use.
+
+  // package+class to apply to individual table import.
+  // also used as an *input* class with existingJarFile.
+  private String className; 
+
+  // Name of a jar containing existing table definition
+  // class to use.
+  private String existingJarFile;
+
   private int numMappers;
   private boolean useCompression;
-  private long directSplitSize; // In direct mode, open a new stream every X bytes.
 
-  private long maxInlineLobSize; // Max size of an inline LOB; larger LOBs are written
-                                 // to external files on disk.
+  // In direct mode, open a new stream every X bytes.
+  private long directSplitSize;
 
-  private String exportDir; // HDFS path to read from when performing an export
+  // Max size of an inline LOB; larger LOBs are written
+  // to external files on disk.
+  private long maxInlineLobSize;
+
+  // HDFS path to read from when performing an export
+  private String exportDir;
 
   private char inputFieldDelim;
   private char inputRecordDelim;
@@ -142,7 +151,7 @@ public class SqoopOptions {
   }
 
   /**
-   * Alternate SqoopOptions interface used mostly for unit testing
+   * Alternate SqoopOptions interface used mostly for unit testing.
    * @param connect JDBC connect string to use
    * @param table Table to read
    */
@@ -153,19 +162,22 @@ public class SqoopOptions {
     this.tableName = table;
   }
 
-  private boolean getBooleanProperty(Properties props, String propName, boolean defaultValue) {
+  private boolean getBooleanProperty(Properties props, String propName,
+      boolean defaultValue) {
     String str = props.getProperty(propName,
         Boolean.toString(defaultValue)).toLowerCase();
     return "true".equals(str) || "yes".equals(str) || "1".equals(str);
   }
 
-  private long getLongProperty(Properties props, String propName, long defaultValue) {
+  private long getLongProperty(Properties props, String propName,
+      long defaultValue) {
     String str = props.getProperty(propName,
         Long.toString(defaultValue)).toLowerCase();
     try {
       return Long.parseLong(str);
     } catch (NumberFormatException nfe) {
-      LOG.warn("Could not parse integer value for config parameter " + propName);
+      LOG.warn("Could not parse integer value for config parameter "
+          + propName);
       return defaultValue;
     }
   }
@@ -189,31 +201,40 @@ public class SqoopOptions {
       this.username = props.getProperty("db.username", this.username);
       this.password = props.getProperty("db.password", this.password);
       this.tableName = props.getProperty("db.table", this.tableName);
-      this.connectString = props.getProperty("db.connect.url", this.connectString);
+      this.connectString = props.getProperty("db.connect.url",
+          this.connectString);
       this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
       this.whereClause = props.getProperty("db.where.clause", this.whereClause);
-      this.driverClassName = props.getProperty("jdbc.driver", this.driverClassName);
-      this.warehouseDir = props.getProperty("hdfs.warehouse.dir", this.warehouseDir);
+      this.driverClassName = props.getProperty("jdbc.driver",
+          this.driverClassName);
+      this.warehouseDir = props.getProperty("hdfs.warehouse.dir",
+          this.warehouseDir);
       this.hiveHome = props.getProperty("hive.home", this.hiveHome);
       this.className = props.getProperty("java.classname", this.className);
-      this.packageName = props.getProperty("java.packagename", this.packageName);
-      this.existingJarFile = props.getProperty("java.jar.file", this.existingJarFile);
+      this.packageName = props.getProperty("java.packagename",
+          this.packageName);
+      this.existingJarFile = props.getProperty("java.jar.file",
+          this.existingJarFile);
       this.exportDir = props.getProperty("export.dir", this.exportDir);
 
       this.direct = getBooleanProperty(props, "direct.import", this.direct);
-      this.hiveImport = getBooleanProperty(props, "hive.import", this.hiveImport);
-      this.overwriteHiveTable = getBooleanProperty(props, "hive.overwrite.table", this.overwriteHiveTable);
-      this.useCompression = getBooleanProperty(props, "compression", this.useCompression);
+      this.hiveImport = getBooleanProperty(props, "hive.import",
+          this.hiveImport);
+      this.overwriteHiveTable = getBooleanProperty(props,
+          "hive.overwrite.table", this.overwriteHiveTable);
+      this.useCompression = getBooleanProperty(props, "compression",
+          this.useCompression);
       this.directSplitSize = getLongProperty(props, "direct.split.size",
           this.directSplitSize);
     } catch (IOException ioe) {
-      LOG.error("Could not read properties file " + DEFAULT_CONFIG_FILE + ": " + ioe.toString());
+      LOG.error("Could not read properties file " + DEFAULT_CONFIG_FILE + ": "
+          + ioe.toString());
     } finally {
       if (null != istream) {
         try {
           istream.close();
         } catch (IOException ioe) {
-          // ignore this; we're closing.
+          // Ignore this; we're closing.
         }
       }
     }
@@ -221,7 +242,7 @@ public class SqoopOptions {
 
   /**
    * @return the temp directory to use; this is guaranteed to end with
-   * the file separator character (e.g., '/')
+   * the file separator character (e.g., '/').
    */
   public String getTempDir() {
     return this.tmpDir;
@@ -280,17 +301,19 @@ public class SqoopOptions {
   }
 
   /**
-   * Given a string containing a single character or an escape sequence representing
-   * a char, return that char itself.
+   * Given a string containing a single character or an escape sequence
+   * representing a char, return that char itself.
    *
    * Normal literal characters return themselves: "x" -&gt; 'x', etc.
-   * Strings containing a '\' followed by one of t, r, n, or b escape to the usual
-   * character as seen in Java: "\n" -&gt; (newline), etc.
+   * Strings containing a '\' followed by one of t, r, n, or b escape to the
+   * usual character as seen in Java: "\n" -&gt; (newline), etc.
    *
-   * Strings like "\0ooo" return the character specified by the octal sequence 'ooo'
-   * Strings like "\0xhhh" or "\0Xhhh" return the character specified by the hex sequence 'hhh'
+   * Strings like "\0ooo" return the character specified by the octal sequence
+   * 'ooo'. Strings like "\0xhhh" or "\0Xhhh" return the character specified by
+   * the hex sequence 'hhh'.
    *
-   * If the input string contains leading or trailing spaces, these are ignored.
+   * If the input string contains leading or trailing spaces, these are
+   * ignored.
    */
   public static char toChar(String charish) throws InvalidOptionsException {
     if (null == charish || charish.length() == 0) {
@@ -300,8 +323,9 @@ public class SqoopOptions {
 
     if (charish.startsWith("\\0x") || charish.startsWith("\\0X")) {
       if (charish.length() == 3) {
-        throw new InvalidOptionsException("Base-16 value expected for character argument."
-          + "\nTry --help for usage instructions.");
+        throw new InvalidOptionsException(
+            "Base-16 value expected for character argument."
+            + "\nTry --help for usage instructions.");
       } else {
         String valStr = charish.substring(3);
         int val = Integer.parseInt(valStr, 16);
@@ -323,7 +347,8 @@ public class SqoopOptions {
         return '\\';
       } else if (charish.length() > 2) {
         // we don't have any 3+ char escape strings. 
-        throw new InvalidOptionsException("Cannot understand character argument: " + charish
+        throw new InvalidOptionsException(
+            "Cannot understand character argument: " + charish
             + "\nTry --help for usage instructions.");
       } else {
         // this is some sort of normal 1-character escape sequence.
@@ -344,7 +369,8 @@ public class SqoopOptions {
         case '\\':
           return '\\';
         default:
-          throw new InvalidOptionsException("Cannot understand character argument: " + charish
+          throw new InvalidOptionsException(
+              "Cannot understand character argument: " + charish
               + "\nTry --help for usage instructions.");
         }
       }
@@ -359,8 +385,9 @@ public class SqoopOptions {
     }
   }
 
-  /** get the temporary directory; guaranteed to end in File.separator
-   * (e.g., '/')
+  /**
+   * Get the temporary directory; guaranteed to end in File.separator
+   * (e.g., '/').
    */
   public String getTmpDir() {
     return tmpDir;
@@ -447,7 +474,8 @@ public class SqoopOptions {
   }
 
   /**
-   * Allow the user to enter his password on the console without printing characters.
+   * Allow the user to enter his password on the console without printing
+   * characters.
    * @return the password as a string
    */
   private String securePasswordEntry() {
@@ -475,7 +503,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the number of map tasks to use for import
+   * @return the number of map tasks to use for import.
    */
   public int getNumMappers() {
     return this.numMappers;
@@ -486,7 +514,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the user-specified absolute class name for the table
+   * @return the user-specified absolute class name for the table.
    */
   public String getClassName() {
     return className;
@@ -497,7 +525,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the user-specified package to prepend to table names via --package-name.
+   * @return the user-specified package to prepend to table names via
+   * --package-name.
    */
   public String getPackageName() {
     return packageName;
@@ -515,7 +544,7 @@ public class SqoopOptions {
     this.hiveHome = hiveHome;
   }
 
-  /** @return true if we should import the table into Hive */
+  /** @return true if we should import the table into Hive. */
   public boolean doHiveImport() {
     return hiveImport;
   }
@@ -525,7 +554,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the user-specified option to overwrite existing table in hive
+   * @return the user-specified option to overwrite existing table in hive.
    */
   public boolean doOverwriteHiveTable() {
     return overwriteHiveTable;
@@ -536,7 +565,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return location where .java files go; guaranteed to end with '/'
+   * @return location where .java files go; guaranteed to end with '/'.
    */
   public String getCodeOutputDir() {
     if (codeOutputDir.endsWith(File.separator)) {
@@ -551,7 +580,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return location where .jar and .class files go; guaranteed to end with '/'
+   * @return location where .jar and .class files go; guaranteed to end with
+   * '/'.
    */
   public String getJarOutputDir() {
     if (jarOutputDir.endsWith(File.separator)) {
@@ -566,7 +596,7 @@ public class SqoopOptions {
   }
 
   /**
-   * Return the value of $HADOOP_HOME
+   * Return the value of $HADOOP_HOME.
    * @return $HADOOP_HOME, or null if it's not set.
    */
   public String getHadoopHome() {
@@ -589,7 +619,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return The JDBC driver class name specified with --driver
+   * @return The JDBC driver class name specified with --driver.
    */
   public String getDriverClassName() {
     return driverClassName;
@@ -622,8 +652,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the field delimiter to use when parsing lines. Defaults to the field delim
-   * to use when printing lines
+   * @return the field delimiter to use when parsing lines. Defaults to the
+   * field delim to use when printing lines.
    */
   public char getInputFieldDelim() {
     if (inputFieldDelim == '\000') {
@@ -638,8 +668,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the record delimiter to use when parsing lines. Defaults to the record delim
-   * to use when printing lines.
+   * @return the record delimiter to use when parsing lines. Defaults to the
+   * record delim to use when printing lines.
    */
   public char getInputRecordDelim() {
     if (inputRecordDelim == '\000') {
@@ -654,8 +684,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the character that may enclose fields when parsing lines. Defaults to the
-   * enclosing-char to use when printing lines.
+   * @return the character that may enclose fields when parsing lines.
+   * Defaults to the enclosing-char to use when printing lines.
    */
   public char getInputEnclosedBy() {
     if (inputEnclosedBy == '\000') {
@@ -670,8 +700,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the escape character to use when parsing lines. Defaults to the escape
-   * character used when printing lines.
+   * @return the escape character to use when parsing lines. Defaults to the
+   * escape character used when printing lines.
    */
   public char getInputEscapedBy() {
     if (inputEscapedBy == '\000') {
@@ -686,8 +716,9 @@ public class SqoopOptions {
   }
 
   /**
-   * @return true if fields must be enclosed by the --enclosed-by character when parsing.
-   * Defaults to false. Set true when --input-enclosed-by is used.
+   * @return true if fields must be enclosed by the --enclosed-by character
+   * when parsing.  Defaults to false. Set true when --input-enclosed-by is
+   * used.
    */
   public boolean isInputEncloseRequired() {
     if (inputEnclosedBy == '\000') {
@@ -702,7 +733,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the character to print between fields when importing them to text.
+   * @return the character to print between fields when importing them to
+   * text.
    */
   public char getOutputFieldDelim() {
     return this.outputFieldDelim;
@@ -714,7 +746,8 @@ public class SqoopOptions {
 
 
   /**
-   * @return the character to print between records when importing them to text.
+   * @return the character to print between records when importing them to
+   * text.
    */
   public char getOutputRecordDelim() {
     return this.outputRecordDelim;
@@ -725,7 +758,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return a character which may enclose the contents of fields when imported to text.
+   * @return a character which may enclose the contents of fields when
+   * imported to text.
    */
   public char getOutputEnclosedBy() {
     return this.outputEnclosedBy;
@@ -736,7 +770,8 @@ public class SqoopOptions {
   }
 
   /**
-   * @return a character which signifies an escape sequence when importing to text.
+   * @return a character which signifies an escape sequence when importing to
+   * text.
    */
   public char getOutputEscapedBy() {
     return this.outputEscapedBy;
@@ -747,8 +782,9 @@ public class SqoopOptions {
   }
 
   /**
-   * @return true if fields imported to text must be enclosed by the EnclosedBy char.
-   * default is false; set to true if --enclosed-by is used instead of --optionally-enclosed-by.
+   * @return true if fields imported to text must be enclosed by the
+   * EnclosedBy char.  default is false; set to true if --enclosed-by is used
+   * instead of --optionally-enclosed-by.
    */
   public boolean isOutputEncloseRequired() {
     return this.outputMustBeEnclosed;
@@ -770,7 +806,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return the name of the destination table when importing to Hive
+   * @return the name of the destination table when importing to Hive.
    */
   public String getHiveTableName() {
     if (null != this.hiveTableName) {
@@ -829,7 +865,7 @@ public class SqoopOptions {
   }
 
   /**
-   * @return command-line arguments after a '-'
+   * @return command-line arguments after a '-'.
    */
   public String [] getExtraArgs() {
     if (extraArgs == null) {
@@ -855,3 +891,4 @@ public class SqoopOptions {
     }
   }
 }
+

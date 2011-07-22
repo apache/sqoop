@@ -22,21 +22,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
@@ -52,11 +47,12 @@ import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 public class TestParseMethods extends ImportJobTestCase {
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   private String [] getArgv(boolean includeHadoopFlags, String fieldTerminator, 
-      String lineTerminator, String encloser, String escape, boolean encloserRequired) {
+      String lineTerminator, String encloser, String escape,
+      boolean encloserRequired) {
 
     ArrayList<String> args = new ArrayList<String>();
 
@@ -91,13 +87,14 @@ public class TestParseMethods extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
-  public void runParseTest(String fieldTerminator, String lineTerminator, String encloser,
-      String escape, boolean encloseRequired) throws IOException {
+  public void runParseTest(String fieldTerminator, String lineTerminator,
+      String encloser, String escape, boolean encloseRequired)
+      throws IOException {
 
     ClassLoader prevClassLoader = null;
 
-    String [] argv = getArgv(true, fieldTerminator, lineTerminator, encloser, escape,
-        encloseRequired);
+    String [] argv = getArgv(true, fieldTerminator, lineTerminator,
+        encloser, escape, encloseRequired);
     runImport(argv);
     try {
       String tableClassName = getTableName();
@@ -110,8 +107,9 @@ public class TestParseMethods extends ImportJobTestCase {
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
 
-      // make sure the user's class is loaded into our address space.
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, tableClassName);
+      // Make sure the user's class is loaded into our address space.
+      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+          tableClassName);
 
       JobConf job = new JobConf();
       job.setJar(jarFileName);
@@ -165,19 +163,46 @@ public class TestParseMethods extends ImportJobTestCase {
   }
 
   public void testStringEscapes() throws IOException {
-    String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-    String [] vals = { "'foo'", "'foo,bar'", "'foo''bar'", "'foo\\bar'", "'foo,bar''baz'" };
+    String [] types = {
+      "VARCHAR(32)",
+      "VARCHAR(32)",
+      "VARCHAR(32)",
+      "VARCHAR(32)",
+      "VARCHAR(32)",
+    };
+    String [] vals = {
+      "'foo'",
+      "'foo,bar'",
+      "'foo''bar'",
+      "'foo\\bar'",
+      "'foo,bar''baz'",
+    };
 
     createTableWithColTypes(types, vals);
     runParseTest(",", "\\n", "\\\'", "\\", false);
   }
 
   public void testNumericTypes() throws IOException {
-    String [] types = { "INTEGER", "REAL", "FLOAT", "DATE", "TIME",
-        "TIMESTAMP", "NUMERIC", "BOOLEAN" };
-    String [] vals = { "42", "36.0", "127.1", "'2009-07-02'", "'11:24:00'",
-        "'2009-08-13 20:32:00.1234567'", "92104916282869291837672829102857271948687.287475322",
-        "true" };
+    String [] types = {
+      "INTEGER",
+      "REAL",
+      "FLOAT",
+      "DATE",
+      "TIME",
+      "TIMESTAMP",
+      "NUMERIC",
+      "BOOLEAN",
+    };
+    String [] vals = {
+      "42",
+      "36.0",
+      "127.1",
+      "'2009-07-02'",
+      "'11:24:00'",
+      "'2009-08-13 20:32:00.1234567'",
+      "92104916282869291837672829102857271948687.287475322",
+      "true",
+    };
     
     createTableWithColTypes(types, vals);
     runParseTest(",", "\\n", "\\\'", "\\", false);

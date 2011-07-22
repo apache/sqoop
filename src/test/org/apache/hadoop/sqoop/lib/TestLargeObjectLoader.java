@@ -19,8 +19,6 @@
 package org.apache.hadoop.sqoop.lib;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -29,13 +27,8 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.MapContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.testutil.MockResultSet;
 
@@ -105,7 +98,7 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(blob);
     assertFalse(blob.isExternal());
     byte [] data = blob.getData();
-    byte [] blobData = MockResultSet.BLOB_DATA();
+    byte [] blobData = MockResultSet.blobData();
     assertEquals(blobData.length, data.length);
     for (int i = 0; i < data.length; i++) {
       assertEquals(blobData[i], data[i]);

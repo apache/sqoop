@@ -35,7 +35,7 @@ import org.apache.hadoop.io.Text;
  * We serialize in one of two formats:
  *
  *  First, check whether the BigInt can fit in a long:
- *  boolean b = BigIntegerPart > LONG_MAX || BigIntegerPart < LONG_MIN
+ *  boolean b = BigIntegerPart &gt; LONG_MAX || BigIntegerPart &lt; LONG_MIN
  *
  *  [int: scale][boolean: b == false][long: BigInt-part]
  *  [int: scale][boolean: b == true][string: BigInt-part.toString()]
@@ -46,8 +46,10 @@ public final class BigDecimalSerializer {
 
   private BigDecimalSerializer() { }
 
-  static final BigInteger LONG_MAX_AS_BIGINT = BigInteger.valueOf(Long.MAX_VALUE);
-  static final BigInteger LONG_MIN_AS_BIGINT = BigInteger.valueOf(Long.MIN_VALUE);
+  static final BigInteger LONG_MAX_AS_BIGINT =
+      BigInteger.valueOf(Long.MAX_VALUE);
+  static final BigInteger LONG_MIN_AS_BIGINT =
+      BigInteger.valueOf(Long.MIN_VALUE);
 
   public static void write(BigDecimal d, DataOutput out) throws IOException {
     int scale = d.scale();

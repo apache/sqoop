@@ -18,13 +18,11 @@
 
 package org.apache.hadoop.sqoop.lib;
 
-import java.util.ArrayList;
-import java.util.List;
 import junit.framework.TestCase;
 
 
 /**
- * Test that the field formatter works in a variety of configurations
+ * Test that the field formatter works in a variety of configurations.
  */
 public class TestFieldFormatter extends TestCase {
   
@@ -35,7 +33,8 @@ public class TestFieldFormatter extends TestCase {
   }
 
   public void testNullArgs() {
-    String result = FieldFormatter.escapeAndEnclose("", null, null, null, false);
+    String result = FieldFormatter.escapeAndEnclose("", null, null, null,
+        false);
     assertEquals("", result);
 
     char [] encloseFor = { '\"' };
@@ -44,38 +43,44 @@ public class TestFieldFormatter extends TestCase {
   }
 
   public void testBasicStr() {
-    String result = FieldFormatter.escapeAndEnclose("foo", null, null, null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo", null, null, null,
+        false);
     assertEquals("foo", result);
   }
 
   public void testEscapeSlash() {
-    String result = FieldFormatter.escapeAndEnclose("foo\\bar", "\\", "\"", null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\\bar", "\\", "\"",
+        null, false);
     assertEquals("foo\\\\bar", result);
   }
 
   public void testMustEnclose() {
-    String result = FieldFormatter.escapeAndEnclose("foo", null, "\"", null, true);
+    String result = FieldFormatter.escapeAndEnclose("foo", null, "\"",
+        null, true);
     assertEquals("\"foo\"", result);
   }
 
   public void testEncloseComma1() {
     char [] chars = { ',' };
 
-    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"",
+        chars, false);
     assertEquals("\"foo,bar\"", result);
   }
 
   public void testEncloseComma2() {
     char [] chars = { '\n', ',' };
 
-    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"",
+        chars, false);
     assertEquals("\"foo,bar\"", result);
   }
 
   public void testEncloseComma3() {
     char [] chars = { ',', '\n' };
 
-    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "\"",
+        chars, false);
     assertEquals("\"foo,bar\"", result);
   }
 
@@ -91,7 +96,8 @@ public class TestFieldFormatter extends TestCase {
     char [] chars = { ',', '\n' };
 
     // can't enclose because encloser is ""
-    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", "",
+        chars, false);
     assertEquals("foo,bar", result);
   }
 
@@ -99,12 +105,14 @@ public class TestFieldFormatter extends TestCase {
     char [] chars = { ',', '\n' };
 
     // can't enclose because encloser is null
-    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", null, chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo,bar", "\\", null,
+        chars, false);
     assertEquals("foo,bar", result);
   }
 
   public void testEmptyCharToEscapeString() {
-    // test what happens when the escape char is null. It should encode the null char.
+    // test what happens when the escape char is null. It should encode the
+    // null char.
 
     char nul = '\000';
     String s = "" + nul;
@@ -112,36 +120,42 @@ public class TestFieldFormatter extends TestCase {
   }
   
   public void testEscapeCentralQuote() {
-    String result = FieldFormatter.escapeAndEnclose("foo\"bar", "\\", "\"", null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\"bar", "\\", "\"",
+        null, false);
     assertEquals("foo\\\"bar", result);
   }
 
   public void testEscapeMultiCentralQuote() {
-    String result = FieldFormatter.escapeAndEnclose("foo\"\"bar", "\\", "\"", null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\"\"bar", "\\", "\"",
+        null, false);
     assertEquals("foo\\\"\\\"bar", result);
   }
 
   public void testDoubleEscape() {
-    String result = FieldFormatter.escapeAndEnclose("foo\\\"bar", "\\", "\"", null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\\\"bar", "\\", "\"",
+        null, false);
     assertEquals("foo\\\\\\\"bar", result);
   }
 
   public void testReverseEscape() {
-    String result = FieldFormatter.escapeAndEnclose("foo\"\\bar", "\\", "\"", null, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\"\\bar", "\\", "\"",
+        null, false);
     assertEquals("foo\\\"\\\\bar", result);
   }
 
   public void testQuotedEncloser() {
     char [] chars = { ',', '\n' };
     
-    String result = FieldFormatter.escapeAndEnclose("foo\",bar", "\\", "\"", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\",bar", "\\", "\"",
+        chars, false);
     assertEquals("\"foo\\\",bar\"", result);
   }
 
   public void testQuotedEscape() {
     char [] chars = { ',', '\n' };
     
-    String result = FieldFormatter.escapeAndEnclose("foo\\,bar", "\\", "\"", chars, false);
+    String result = FieldFormatter.escapeAndEnclose("foo\\,bar", "\\", "\"",
+        chars, false);
     assertEquals("\"foo\\\\,bar\"", result);
   }
 }

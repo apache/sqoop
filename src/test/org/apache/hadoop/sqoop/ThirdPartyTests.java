@@ -33,9 +33,10 @@ import org.apache.hadoop.sqoop.manager.OracleCompatTest;
 import org.apache.hadoop.sqoop.manager.PostgresqlTest;
 
 /**
- * Test battery including all tests of vendor-specific ConnManager implementations.
- * These tests likely aren't run by Apache Hudson, because they require configuring
- * and using Oracle, MySQL, etc., which may have incompatible licenses with Apache.
+ * Test battery including all tests of vendor-specific ConnManager
+ * implementations.  These tests likely aren't run by Apache Hudson, because
+ * they require configuring and using Oracle, MySQL, etc., which may have
+ * incompatible licenses with Apache.
  */
 public final class ThirdPartyTests extends TestCase {
 

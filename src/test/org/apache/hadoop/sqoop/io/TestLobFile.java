@@ -89,7 +89,8 @@ public class TestLobFile extends TestCase {
     return offsets;
   }
 
-  private void verifyClobFile(Path p, String... expectedRecords) throws Exception {
+  private void verifyClobFile(Path p, String... expectedRecords)
+      throws Exception {
     
     LobFile.Reader reader = LobFile.open(p, conf);
 
@@ -236,16 +237,16 @@ public class TestLobFile extends TestCase {
     // quantity in the readahead buffer.
 
     Path p = new Path(TEMP_BASE_DIR, "shortread.lob");
-    final String firstLine = "line1";
-    final String secondLine =
+    final String FIRST_LINE = "line1";
+    final String SECOND_LINE =
         "This contains much more in the record than just one line.";
-    final String record2 = "here is the second record.";
-    final String record3 = "The 3rd record, which we won't actually read.";
+    final String RECORD2 = "here is the second record.";
+    final String RECORD3 = "The 3rd record, which we won't actually read.";
 
-    runLineAndRecordTest(p, firstLine,
-        firstLine + "\n" + secondLine,
-        record2,
-        record3);
+    runLineAndRecordTest(p, FIRST_LINE,
+        FIRST_LINE + "\n" + SECOND_LINE,
+        RECORD2,
+        RECORD3);
 
   }
 
@@ -254,15 +255,15 @@ public class TestLobFile extends TestCase {
     // next record start mark; make sure we realign properly.
 
     Path p = new Path(TEMP_BASE_DIR, "longread.lob");
-    final String firstLine = "this is a really long line of text to read!";
-    final String secondLine = "not this.";
-    final String record2 = "Here is yet another record to verify.";
-    final String record3 = "Nobody cares about record 3.";
+    final String FIRST_LINE = "this is a really long line of text to read!";
+    final String SECOND_LINE = "not this.";
+    final String RECORD2 = "Here is yet another record to verify.";
+    final String RECORD3 = "Nobody cares about record 3.";
 
-    runLineAndRecordTest(p, firstLine,
-        firstLine + "\n" + secondLine,
-        record2,
-        record3);
+    runLineAndRecordTest(p, FIRST_LINE,
+        FIRST_LINE + "\n" + SECOND_LINE,
+        RECORD2,
+        RECORD3);
   }
 
   public void testSeekToRecord() throws Exception {
@@ -272,7 +273,7 @@ public class TestLobFile extends TestCase {
     String [] records = {
       "this is the first record!",
       "here comes record number two. It is a bit longer.",
-      "this is the third record. we can read it."
+      "this is the third record. we can read it.",
     };
 
     // Write the file and memorize when the third record starts.
@@ -355,7 +356,7 @@ public class TestLobFile extends TestCase {
       "rec6 is yet another record",
       "rec7 is starting to feel boring",
       "rec8 is at the end of seg 1",
-      "rec9 is all by itself in seg 2"
+      "rec9 is all by itself in seg 2",
     };
 
     // Write the records to a file, save their offsets.
@@ -547,9 +548,9 @@ public class TestLobFile extends TestCase {
     LOG.info("Testing with codec: " + codec);
     Path p = new Path(TEMP_BASE_DIR, "compressed-" + codec + ".lob");
     String [] records = {
-       "this is the first record, It should be compressed a lot!",
-       "record 2 record 2 record 2 record 2 2 2 2 2 2 2 2 2 2 2 2",
-       "and a third and a third yes this is the third"
+      "this is the first record, It should be compressed a lot!",
+      "record 2 record 2 record 2 record 2 2 2 2 2 2 2 2 2 2 2 2",
+      "and a third and a third yes this is the third",
     };
 
     runClobFileTest(p, codec, records);

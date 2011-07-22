@@ -47,7 +47,7 @@ public class PerfCounters {
 
   private static final double ONE_BILLION = 1000.0 * 1000.0 * 1000.0;
 
-  /** maximum number of digits after the decimal place */
+  /** Maximum number of digits after the decimal place. */
   private static final int MAX_PLACES = 4;
 
   /**
@@ -63,8 +63,8 @@ public class PerfCounters {
 
 
   /**
-   * @return a string of the form "xxxx bytes" or "xxxxx KB" or "xxxx GB", scaled
-   * as is appropriate for the current value.
+   * @return a string of the form "xxxx bytes" or "xxxxx KB" or "xxxx GB",
+   * scaled as is appropriate for the current value.
    */
   private String formatBytes() {
     double val;
@@ -125,7 +125,8 @@ public class PerfCounters {
   }
 
   public String toString() {
-    return formatBytes() + " in " + formatTimeInSeconds() + " (" + formatSpeed() + ")";
+    return formatBytes() + " in " + formatTimeInSeconds() + " ("
+        + formatSpeed() + ")";
   }
 }
 

@@ -28,7 +28,8 @@ import junit.framework.TestCase;
  */
 public class TestRecordParser extends TestCase {
 
-  private void assertListsEqual(String msg, List<String> expected, List<String> actual) {
+  private void assertListsEqual(String msg, List<String> expected,
+      List<String> actual) {
     if (expected == null && actual != null) {
       if (null == msg) {
         msg = "expected null list";
@@ -130,55 +131,63 @@ public class TestRecordParser extends TestCase {
   public void testQuotedField1() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the field" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the field\"\n"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the field\"\n"));
   }
 
   public void testQuotedField2() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the field" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the field\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the field\""));
   }
 
   public void testQuotedField3() throws RecordParser.ParseError {
     // quoted containing EOF
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the ,field" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the ,field\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the ,field\""));
   }
 
   public void testQuotedField4() throws RecordParser.ParseError {
     // quoted containing multiple EOFs
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the ,,field" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the ,,field\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the ,,field\""));
   }
 
   public void testQuotedField5() throws RecordParser.ParseError {
     // quoted containing EOF and EOR
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the ,\nfield" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the ,\nfield\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the ,\nfield\""));
   }
 
   public void testQuotedField6() throws RecordParser.ParseError {
     // quoted containing EOR
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the \nfield" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the \nfield\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the \nfield\""));
   }
 
   public void testQuotedField7() throws RecordParser.ParseError {
     // quoted containing multiple EORs
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the \n\nfield" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the \n\nfield\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the \n\nfield\""));
   }
 
   public void testQuotedField8() throws RecordParser.ParseError {
     // quoted containing escaped quoted char
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "the \"field" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"the \\\"field\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"the \\\"field\""));
   }
 
   public void testUnquotedEscape1() throws RecordParser.ParseError {
@@ -204,37 +213,43 @@ public class TestRecordParser extends TestCase {
   public void testTwoFields2() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("field1,field2\n"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("field1,field2\n"));
   }
 
   public void testTwoFields3() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"field1\",field2\n"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"field1\",field2\n"));
   }
 
   public void testTwoFields4() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("field1,\"field2\"\n"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("field1,\"field2\"\n"));
   }
 
   public void testTwoFields5() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', false);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("field1,\"field2\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("field1,\"field2\""));
   }
   
   public void testRequiredQuotes0() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', true);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"field1\",\"field2\"\n"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"field1\",\"field2\"\n"));
   }
 
   public void testRequiredQuotes1() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', '\n', '\"', '\\', true);
     String [] strings = { "field1", "field2" };
-    assertListsEqual(null, list(strings), parser.parseRecord("\"field1\",\"field2\""));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("\"field1\",\"field2\""));
   }
 
   public void testRequiredQuotes2() throws RecordParser.ParseError {
@@ -336,22 +351,26 @@ public class TestRecordParser extends TestCase {
   public void testEofIsEor() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', ',', '\"', '\\', false);
     String [] strings = { "three", "different", "fields" };
-    assertListsEqual(null, list(strings), parser.parseRecord("three,different,fields"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("three,different,fields"));
   }
 
   public void testEofIsEor2() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', ',', '\"', '\\', false);
     String [] strings = { "three", "different", "fields" };
-    assertListsEqual(null, list(strings), parser.parseRecord("three,\"different\",fields"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("three,\"different\",fields"));
   }
 
   public void testRepeatedParse() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(',', ',', '\"', '\\', false);
     String [] strings = { "three", "different", "fields" };
-    assertListsEqual(null, list(strings), parser.parseRecord("three,\"different\",fields"));
+    assertListsEqual(null, list(strings),
+        parser.parseRecord("three,\"different\",fields"));
 
     String [] strings2 = { "foo", "bar" };
-    assertListsEqual(null, list(strings2), parser.parseRecord("foo,\"bar\""));
+    assertListsEqual(null, list(strings2),
+        parser.parseRecord("foo,\"bar\""));
   }
 
 }

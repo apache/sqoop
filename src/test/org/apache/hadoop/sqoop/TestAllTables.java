@@ -42,7 +42,7 @@ import org.apache.hadoop.sqoop.tool.ImportAllTablesTool;
 public class TestAllTables extends ImportJobTestCase {
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   private String [] getArgv(boolean includeHadoopFlags) {
@@ -67,7 +67,7 @@ public class TestAllTables extends ImportJobTestCase {
   /** the names of the tables we're creating. */
   private List<String> tableNames;
 
-  /** The strings to inject in the (ordered) tables */
+  /** The strings to inject in the (ordered) tables. */
   private List<String> expectedStrings;
 
   @Before
@@ -123,7 +123,8 @@ public class TestAllTables extends ImportJobTestCase {
       this.expectedStrings.remove(0);
 
       BufferedReader reader = new BufferedReader(
-          new InputStreamReader(new FileInputStream(new File(filePath.toString()))));
+          new InputStreamReader(new FileInputStream(
+          new File(filePath.toString()))));
       try {
         String line = reader.readLine();
         assertEquals("Table " + tableName + " expected a different string",

@@ -30,7 +30,8 @@ public class ExportJobContext {
   private String jarFile;
   private SqoopOptions options;
 
-  public ExportJobContext(final String table, final String jar, final SqoopOptions opts) {
+  public ExportJobContext(final String table, final String jar,
+      final SqoopOptions opts) {
     this.tableName = table;
     this.jarFile = jar;
     this.options = opts;

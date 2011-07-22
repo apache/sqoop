@@ -52,6 +52,9 @@
          Things we actually need to ship are marked with a 'redist'
          configuration. -->
     <conf name="redist" visibility="private" extends="master" />
+
+    <!-- configuration for running checkstyle -->
+    <conf name="checkstyle" visibility="private" />
   </configurations>
 
   <publications>
@@ -92,5 +95,9 @@
       conf="common->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
+    
+    <!-- dependencies for static analysis -->
+    <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
+      conf="checkstyle->default" />
   </dependencies>
 </ivy-module>

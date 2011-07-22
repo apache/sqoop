@@ -20,7 +20,6 @@ package org.apache.hadoop.sqoop.manager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.File;
@@ -65,7 +64,8 @@ import org.apache.hadoop.sqoop.util.FileListing;
  */
 public class DirectMySQLTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(DirectMySQLTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      DirectMySQLTest.class.getName());
 
   static final String TABLE_PREFIX = "EMPLOYEES_MYSQL_";
 
@@ -225,8 +225,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testDirectBulkImportWithDefaultDelims() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400,sales",
-        "3,Fred,2009-01-23,15,marketing"
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
     };
 
     doImport(false, true, getTableName(), expectedResults, null);
@@ -236,8 +236,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testWithExtraParams() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400,sales",
-        "3,Fred,2009-01-23,15,marketing"
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
     };
 
     String [] extraArgs = { "--", "--lock-tables" };
@@ -249,8 +249,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testMultiMappers() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400,sales",
-        "3,Fred,2009-01-23,15,marketing"
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
     };
 
     String [] extraArgs = { "-m", "2" };
@@ -264,8 +264,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
     LOG.info("Starting JDBC Column Subset test.");
 
     String [] expectedResults = {
-        "2,Bob,400.0",
-        "3,Fred,15.0"
+      "2,Bob,400.0",
+      "3,Fred,15.0",
     };
 
     String [] extraArgs = { "--columns", "id,name,salary" };
@@ -279,8 +279,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
     LOG.info("Starting Direct Column Subset test.");
 
     String [] expectedResults = {
-        "2,Bob,400.0",
-        "3,Fred,15.0"
+      "2,Bob,400.0",
+      "3,Fred,15.0",
     };
 
     String [] extraArgs = { "--columns", "id,name,salary" };
@@ -291,8 +291,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testDirectBulkImportWithMySQLQuotes() throws IOException {
     // mysql quotes all string-based output.
     String [] expectedResults = {
-        "2,'Bob','2009-04-20',400,'sales'",
-        "3,'Fred','2009-01-23',15,'marketing'"
+      "2,'Bob','2009-04-20',400,'sales'",
+      "3,'Fred','2009-01-23',15,'marketing'",
     };
 
     doImport(true, true, getTableName(), expectedResults, null);
@@ -301,8 +301,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   @Test
   public void testMySQLJdbcImport() throws IOException {
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400.0,sales",
-        "3,Fred,2009-01-23,15.0,marketing"
+      "2,Bob,2009-04-20,400.0,sales",
+      "3,Fred,2009-01-23,15.0,marketing",
     };
 
     doImport(false, false, getTableName(), expectedResults, null);
@@ -312,9 +312,9 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testJdbcEscapedTableName() throws Exception {
     // Test a JDBC-based import of a table whose name is
     // a reserved sql keyword (and is thus `quoted`)
-    final String reservedTableName = "TABLE";
+    final String RESERVED_TABLE_NAME = "TABLE";
     SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
-        reservedTableName);
+        RESERVED_TABLE_NAME);
     options.setUsername(MySQLTestUtils.getCurrentUser());
     ConnManager mgr = new MySQLManager(options);
 
@@ -327,15 +327,15 @@ public class DirectMySQLTest extends ImportJobTestCase {
       st = connection.createStatement();
 
       // create the database table and populate it with data.
-      st.executeUpdate("DROP TABLE IF EXISTS `" + reservedTableName + "`");
-      st.executeUpdate("CREATE TABLE `" + reservedTableName + "` ("
+      st.executeUpdate("DROP TABLE IF EXISTS `" + RESERVED_TABLE_NAME + "`");
+      st.executeUpdate("CREATE TABLE `" + RESERVED_TABLE_NAME + "` ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
           + "name VARCHAR(24) NOT NULL, "
           + "start_date DATE, "
           + "salary FLOAT, "
           + "dept VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO `" + reservedTableName + "` VALUES("
+      st.executeUpdate("INSERT INTO `" + RESERVED_TABLE_NAME + "` VALUES("
           + "2,'Aaron','2009-05-14',1000000.00,'engineering')");
       connection.commit();
     } finally {
@@ -349,20 +349,20 @@ public class DirectMySQLTest extends ImportJobTestCase {
     }
 
     String [] expectedResults = {
-        "2,Aaron,2009-05-14,1000000.0,engineering"
+        "2,Aaron,2009-05-14,1000000.0,engineering",
     };
 
-    doImport(false, false, reservedTableName, expectedResults, null);
+    doImport(false, false, RESERVED_TABLE_NAME, expectedResults, null);
   }
 
   @Test
   public void testJdbcEscapedColumnName() throws Exception {
     // Test a JDBC-based import of a table with a column whose name is
-    // a reserved sql keyword (and is thus `quoted`)
-    final String tableName = "mysql_escaped_col_table";
-    setCurTableName(tableName);
+    // a reserved sql keyword (and is thus `quoted`).
+    final String TABLE_NAME = "mysql_escaped_col_table";
+    setCurTableName(TABLE_NAME);
     SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
-        tableName);
+        TABLE_NAME);
     options.setUsername(MySQLTestUtils.getCurrentUser());
     ConnManager mgr = new MySQLManager(options);
 
@@ -375,15 +375,15 @@ public class DirectMySQLTest extends ImportJobTestCase {
       st = connection.createStatement();
 
       // create the database table and populate it with data.
-      st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
-      st.executeUpdate("CREATE TABLE " + tableName + " ("
+      st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
+      st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
           + "`table` VARCHAR(24) NOT NULL, "
           + "`CREATE` DATE, "
           + "salary FLOAT, "
           + "dept VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO " + tableName + " VALUES("
+      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
           + "2,'Aaron','2009-05-14',1000000.00,'engineering')");
       connection.commit();
     } finally {
@@ -397,9 +397,9 @@ public class DirectMySQLTest extends ImportJobTestCase {
     }
 
     String [] expectedResults = {
-        "2,Aaron,2009-05-14,1000000.0,engineering"
+        "2,Aaron,2009-05-14,1000000.0,engineering",
     };
 
-    doImport(false, false, tableName, expectedResults, null);
+    doImport(false, false, TABLE_NAME, expectedResults, null);
   }
 }

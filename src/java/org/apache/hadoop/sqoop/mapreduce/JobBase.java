@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 
@@ -92,23 +91,23 @@ public class JobBase {
     return this.outputFormatClass;
   }
 
-  /** Set the OutputFormat class to use for this job */
+  /** Set the OutputFormat class to use for this job. */
   public void setOutputFormatClass(Class<? extends OutputFormat> cls) {
     this.outputFormatClass = cls;
   }
 
-  /** Set the InputFormat class to use for this job */
+  /** Set the InputFormat class to use for this job. */
   public void setInputFormatClass(Class<? extends InputFormat> cls) {
     this.inputFormatClass = cls;
   }
 
-  /** Set the Mapper class to use for this job */
+  /** Set the Mapper class to use for this job. */
   public void setMapperClass(Class<? extends Mapper> cls) {
     this.mapperClass = cls;
   }
 
   /**
-   * Set the SqoopOptions configuring this job
+   * Set the SqoopOptions configuring this job.
    */
   public void setOptions(SqoopOptions opts) {
     this.options = opts;
@@ -122,9 +121,10 @@ public class JobBase {
     boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
         || "local".equals(conf.get("mapred.job.tracker"));
     if (isLocal) {
-      // If we're using the LocalJobRunner, then instead of using the compiled jar file
-      // as the job source, we're running in the current thread. Push on another classloader
-      // that loads from that jar in addition to everything currently on the classpath.
+      // If we're using the LocalJobRunner, then instead of using the compiled
+      // jar file as the job source, we're running in the current thread. Push
+      // on another classloader that loads from that jar in addition to
+      // everything currently on the classpath.
       this.prevClassLoader = ClassLoaderStack.addJarFile(ormJarFile,
           tableClassName);
     }

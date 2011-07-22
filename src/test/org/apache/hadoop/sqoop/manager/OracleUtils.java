@@ -18,31 +18,14 @@
 
 package org.apache.hadoop.sqoop.manager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.testutil.CommonArgs;
-import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
-import org.apache.hadoop.sqoop.util.FileListing;
 
 /**
  * Helper methods for Oracle testing.
@@ -67,7 +50,7 @@ public final class OracleUtils {
   }
 
   /**
-   * Drop a table if it exists
+   * Drop a table if it exists.
    */
   public static void dropTable(String tableName, ConnManager manager)
       throws SQLException {

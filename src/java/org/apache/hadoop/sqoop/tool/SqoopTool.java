@@ -83,7 +83,7 @@ public abstract class SqoopTool {
    * @param cls the class providing the tool.
    * @param description a user-friendly description of the tool's function.
    */
-  private static final void registerTool(String toolName,
+  private static void registerTool(String toolName,
       Class<? extends SqoopTool> cls, String description) {
     TOOLS.put(toolName, cls);
     DESCRIPTIONS.put(toolName, description);
@@ -169,7 +169,8 @@ public abstract class SqoopTool {
    * @param opts the configured tool options
    */
   public void printHelp(ToolOptions opts) {
-    System.out.println("usage: sqoop " + getToolName() + " [GENERIC-ARGS] [TOOL-ARGS]");
+    System.out.println("usage: sqoop " + getToolName()
+        + " [GENERIC-ARGS] [TOOL-ARGS]");
     System.out.println("");
 
     opts.printHelp();

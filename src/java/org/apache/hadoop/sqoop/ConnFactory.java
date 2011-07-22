@@ -37,7 +37,8 @@ import org.apache.commons.logging.LogFactory;
  *
  * This class delegates the actual responsibility for instantiating
  * ConnManagers to one or more instances of ManagerFactory. ManagerFactories
- * are consulted in the order specified in sqoop-site.xml (sqoop.connection.factories).
+ * are consulted in the order specified in sqoop-site.xml
+ * (sqoop.connection.factories).
  */
 public class ConnFactory {
 
@@ -51,10 +52,13 @@ public class ConnFactory {
   /** The sqoop-site.xml configuration property used to set the list of 
    * available ManagerFactories.
    */
-  public final static String FACTORY_CLASS_NAMES_KEY = "sqoop.connection.factories";
+  public static final String FACTORY_CLASS_NAMES_KEY =
+      "sqoop.connection.factories";
 
-  // The default value for sqoop.connection.factories is the name of the DefaultManagerFactory.
-  final static String DEFAULT_FACTORY_CLASS_NAMES = DefaultManagerFactory.class.getName(); 
+  // The default value for sqoop.connection.factories is the
+  // name of the DefaultManagerFactory.
+  static final String DEFAULT_FACTORY_CLASS_NAMES =
+      DefaultManagerFactory.class.getName(); 
 
   /** The list of ManagerFactory instances consulted by getManager().
    */
@@ -76,7 +80,8 @@ public class ConnFactory {
         LOG.debug("Loaded manager factory: " + className);
         factories.add(factory);
       } catch (ClassNotFoundException cnfe) {
-        LOG.error("Could not load ManagerFactory " + className + " (not found)");
+        LOG.error("Could not load ManagerFactory " + className
+            + " (not found)");
       }
     }
   }
@@ -98,7 +103,8 @@ public class ConnFactory {
       }
     }
 
-    throw new IOException("No manager for connect string: " + opts.getConnectString());
+    throw new IOException("No manager for connect string: "
+        + opts.getConnectString());
   }
 }
 

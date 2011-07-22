@@ -30,14 +30,14 @@ import org.apache.hadoop.sqoop.io.*;
 public class LobFileStressTest {
 
   // Big records in testBigFile() are 5 GB each.
-  public final static long LARGE_RECORD_LEN = 5L * 1024L * 1024L * 1024L;
+  public static final long LARGE_RECORD_LEN = 5L * 1024L * 1024L * 1024L;
 
-  int numRandomTrials = 1000000;
-  Configuration conf;
-  boolean allPassed;
+  private int numRandomTrials = 1000000;
+  private Configuration conf;
+  private boolean allPassed;
 
-  long lastCompressPos; // start offset of the last record in the file.
-  long lastRawPos;
+  private long lastCompressPos; // start offset of the last record in the file.
+  private long lastRawPos;
 
   public LobFileStressTest() {
     conf = new Configuration();
@@ -314,7 +314,7 @@ public class LobFileStressTest {
           + compress + ". ");
 
       Path p = getBigFilePath(compress);
-      long startOffsets [] = new long[NUM_RECORDS];
+      long [] startOffsets = new long[NUM_RECORDS];
 
       // Write the file. Five records, 5 GB a piece.
       System.out.print("Testing write. ");
@@ -364,8 +364,7 @@ public class LobFileStressTest {
     }
   }
 
-
-  private void run() throws Exception {
+  public void run() throws Exception {
     writeIntegerFile(true);
     writeIntegerFile(false);
     testSequentialScan(false);

@@ -19,9 +19,6 @@
 package org.apache.hadoop.sqoop.manager;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
 
@@ -29,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.testutil.ManagerCompatTestCase;
 
@@ -38,7 +34,8 @@ import org.apache.hadoop.sqoop.testutil.ManagerCompatTestCase;
  */
 public class OracleCompatTest extends ManagerCompatTestCase {
 
-  public static final Log LOG = LogFactory.getLog(OracleCompatTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      OracleCompatTest.class.getName());
 
   @Override
   protected Log getLogger() {
@@ -89,6 +86,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
       try {
         Thread.sleep(250);
       } catch (InterruptedException ie) {
+        // This delay may run a bit short.. no problem.
       }
     }
   }

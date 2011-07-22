@@ -19,10 +19,8 @@
 package org.apache.hadoop.sqoop.io;
 
 import java.io.BufferedWriter;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
-import java.util.Formatter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +46,7 @@ public class SplittableBufferedWriter extends BufferedWriter {
     this.alwaysFlush = false;
   }
 
-  /** For testing */
+  /** For testing. */
   SplittableBufferedWriter(final SplittingOutputStream splitOutputStream,
       final boolean alwaysFlush) {
     super(new OutputStreamWriter(splitOutputStream));

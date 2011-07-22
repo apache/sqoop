@@ -38,8 +38,8 @@ public final class JdbcUrl {
   }
 
   /**
-   * @return the database name from the connect string, which is typically the 'path'
-   * component, or null if we can't.
+   * @return the database name from the connect string, which is typically the
+   * 'path' component, or null if we can't.
    */
   public static String getDatabaseName(String connectString) {
     try {
@@ -48,7 +48,8 @@ public final class JdbcUrl {
       if (-1 == schemeEndOffset) {
         // couldn't find one? try our best here.
         sanitizedString = "http://" + connectString;
-        LOG.warn("Could not find database access scheme in connect string " + connectString);
+        LOG.warn("Could not find database access scheme in connect string "
+            + connectString);
       } else {
         sanitizedString = "http" + connectString.substring(schemeEndOffset);
       }
@@ -81,7 +82,8 @@ public final class JdbcUrl {
       String sanitizedString = null;
       int schemeEndOffset = connectString.indexOf("://");
       if (-1 == schemeEndOffset) {
-        // couldn't find one? ok, then there's no problem, it should work as a URL.
+        // Couldn't find one? ok, then there's no problem, it should work as a
+        // URL.
         sanitizedString = connectString;
       } else {
         sanitizedString = "http" + connectString.substring(schemeEndOffset);
@@ -104,7 +106,8 @@ public final class JdbcUrl {
       String sanitizedString = null;
       int schemeEndOffset = connectString.indexOf("://");
       if (-1 == schemeEndOffset) {
-        // couldn't find one? ok, then there's no problem, it should work as a URL.
+        // Couldn't find one? ok, then there's no problem, it should work as a
+        // URL.
         sanitizedString = connectString;
       } else {
         sanitizedString = "http" + connectString.substring(schemeEndOffset);

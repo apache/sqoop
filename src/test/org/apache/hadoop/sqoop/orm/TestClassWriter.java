@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -37,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
-import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.testutil.DirUtil;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
@@ -112,12 +110,14 @@ public class TestClassWriter extends TestCase {
     }
   }
 
-  static final String CODE_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR + "sqoop/test/codegen";
-  static final String JAR_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR + "sqoop/test/jargen";
+  static final String CODE_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR
+      + "sqoop/test/codegen";
+  static final String JAR_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR
+      + "sqoop/test/jargen";
 
   /**
-   * Run a test to verify that we can generate code and it emits the output files
-   * where we expect them.
+   * Run a test to verify that we can generate code and it emits the output
+   * files where we expect them.
    */
   private void runGenerationTest(String [] argv, String classNameToCheck) {
     File codeGenDirFile = new File(CODE_GEN_DIR);
@@ -131,8 +131,8 @@ public class TestClassWriter extends TestCase {
     }
 
     CompilationManager compileMgr = new CompilationManager(options);
-    ClassWriter writer = new ClassWriter(options, manager, HsqldbTestServer.getTableName(),
-        compileMgr);
+    ClassWriter writer = new ClassWriter(options, manager,
+        HsqldbTestServer.getTableName(), compileMgr);
 
     try {
       writer.generate();
@@ -143,16 +143,21 @@ public class TestClassWriter extends TestCase {
       fail("Got IOException: " + ioe.toString());
     }
 
-    String classFileNameToCheck = classNameToCheck.replace('.', File.separatorChar);
+    String classFileNameToCheck = classNameToCheck.replace('.',
+        File.separatorChar);
     LOG.debug("Class file to check for: " + classFileNameToCheck);
 
-    // check that all the files we expected to generate (.java, .class, .jar) exist.
+    // Check that all the files we expected to generate (.java, .class, .jar)
+    // exist.
     File tableFile = new File(codeGenDirFile, classFileNameToCheck + ".java");
-    assertTrue("Cannot find generated source file for table!", tableFile.exists());
+    assertTrue("Cannot find generated source file for table!",
+        tableFile.exists());
     LOG.debug("Found generated source: " + tableFile);
 
-    File tableClassFile = new File(classGenDirFile, classFileNameToCheck + ".class");
-    assertTrue("Cannot find generated class file for table!", tableClassFile.exists());
+    File tableClassFile = new File(classGenDirFile, classFileNameToCheck
+        + ".class");
+    assertTrue("Cannot find generated class file for table!",
+        tableClassFile.exists());
     LOG.debug("Found generated class: " + tableClassFile);
 
     File jarFile = new File(compileMgr.getJarFilename());
@@ -186,24 +191,25 @@ public class TestClassWriter extends TestCase {
       fail("Got IOException iterating over Jar file: " + ioe.toString());
     }
 
-    assertTrue("Cannot find .class file " + classFileNameToCheck + ".class in jar file",
-        foundCompiledClass);
+    assertTrue("Cannot find .class file " + classFileNameToCheck
+        + ".class in jar file", foundCompiledClass);
 
     LOG.debug("Found class in jar - test success!");
   }
 
   /**
-   * Test that we can generate code. Test that we can redirect the --outdir and --bindir too.
+   * Test that we can generate code. Test that we can redirect the --outdir
+   * and --bindir too.
    */
   @Test
   public void testCodeGen() {
 
-    // Set the option strings in an "argv" to redirect our srcdir and bindir
+    // Set the option strings in an "argv" to redirect our srcdir and bindir.
     String [] argv = {
-        "--bindir",
-        JAR_GEN_DIR,
-        "--outdir",
-        CODE_GEN_DIR
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
     };
 
     runGenerationTest(argv, HsqldbTestServer.getTableName());
@@ -212,64 +218,69 @@ public class TestClassWriter extends TestCase {
   private static final String OVERRIDE_CLASS_NAME = "override";
 
   /**
-   * Test that we can generate code with a custom class name
+   * Test that we can generate code with a custom class name.
    */
   @Test
   public void testSetClassName() {
 
     // Set the option strings in an "argv" to redirect our srcdir and bindir
     String [] argv = {
-        "--bindir",
-        JAR_GEN_DIR,
-        "--outdir",
-        CODE_GEN_DIR,
-        "--class-name",
-        OVERRIDE_CLASS_NAME
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--class-name",
+      OVERRIDE_CLASS_NAME,
     };
 
     runGenerationTest(argv, OVERRIDE_CLASS_NAME);
   }
 
-  private static final String OVERRIDE_CLASS_AND_PACKAGE_NAME = "override.pkg.prefix.classname";
+  private static final String OVERRIDE_CLASS_AND_PACKAGE_NAME =
+      "override.pkg.prefix.classname";
 
   /**
-   * Test that we can generate code with a custom class name that includes a package
+   * Test that we can generate code with a custom class name that includes a
+   * package.
    */
   @Test
   public void testSetClassAndPackageName() {
 
     // Set the option strings in an "argv" to redirect our srcdir and bindir
     String [] argv = {
-        "--bindir",
-        JAR_GEN_DIR,
-        "--outdir",
-        CODE_GEN_DIR,
-        "--class-name",
-        OVERRIDE_CLASS_AND_PACKAGE_NAME
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--class-name",
+      OVERRIDE_CLASS_AND_PACKAGE_NAME,
     };
 
     runGenerationTest(argv, OVERRIDE_CLASS_AND_PACKAGE_NAME);
   }
  
-  private static final String OVERRIDE_PACKAGE_NAME = "special.userpackage.name";
+  private static final String OVERRIDE_PACKAGE_NAME =
+      "special.userpackage.name";
 
   /**
-   * Test that we can generate code with a custom class name that includes a package
+   * Test that we can generate code with a custom class name that includes a
+   * package.
    */
   @Test
   public void testSetPackageName() {
 
     // Set the option strings in an "argv" to redirect our srcdir and bindir
     String [] argv = {
-        "--bindir",
-        JAR_GEN_DIR,
-        "--outdir",
-        CODE_GEN_DIR,
-        "--package-name",
-        OVERRIDE_PACKAGE_NAME
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--package-name",
+      OVERRIDE_PACKAGE_NAME,
     };
 
-    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "." + HsqldbTestServer.getTableName());
+    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "."
+        + HsqldbTestServer.getTableName());
   }
 
 
@@ -288,7 +299,8 @@ public class TestClassWriter extends TestCase {
     assertEquals("_class", ClassWriter.toIdentifier("class"));
     assertEquals("_class", ClassWriter.toIdentifier("cla ss"));
     assertEquals("_int", ClassWriter.toIdentifier("int"));
-    assertEquals("thisismanywords", ClassWriter.toIdentifier("this is many words"));
+    assertEquals("thisismanywords", ClassWriter.toIdentifier(
+        "this is many words"));
     assertEquals("_9isLegalInSql", ClassWriter.toIdentifier("9isLegalInSql"));
     assertEquals("___", ClassWriter.toIdentifier("___"));
   }
@@ -311,15 +323,16 @@ public class TestClassWriter extends TestCase {
     }
 
     String [] argv = {
-        "--bindir",
-        JAR_GEN_DIR,
-        "--outdir",
-        CODE_GEN_DIR,
-        "--package-name",
-        OVERRIDE_PACKAGE_NAME
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--package-name",
+      OVERRIDE_PACKAGE_NAME,
     };
 
-    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "." + HsqldbTestServer.getTableName());
+    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "."
+        + HsqldbTestServer.getTableName());
   }
 }
 

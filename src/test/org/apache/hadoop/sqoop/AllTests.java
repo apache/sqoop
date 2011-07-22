@@ -22,7 +22,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * All tests for Sqoop (org.apache.hadoop.sqoop)
+ * All tests for Sqoop (org.apache.hadoop.sqoop).
  */
 public final class AllTests {
 

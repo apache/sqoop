@@ -35,10 +35,9 @@ import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.ExportJobContext;
-import org.apache.hadoop.sqoop.shims.ShimLoader;
 
 /**
- * Run an export using JDBC (JDBC-based ExportOutputFormat)
+ * Run an export using JDBC (JDBC-based ExportOutputFormat).
  */
 public class JdbcExportJob extends ExportJobBase {
 

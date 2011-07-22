@@ -38,7 +38,8 @@ public class TestConnFactory extends TestCase {
 
   public void testCustomFactory() throws IOException {
     Configuration conf = new Configuration();
-    conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY, AlwaysDummyFactory.class.getName());
+    conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+        AlwaysDummyFactory.class.getName());
 
     ConnFactory factory = new ConnFactory(conf);
     ConnManager manager = factory.getManager(new SqoopOptions());
@@ -76,6 +77,10 @@ public class TestConnFactory extends TestCase {
 
   ////// mock classes used for test cases above //////
 
+  /**
+   * Factory that always returns a DummyManager, regardless of the
+   * configuration.
+   */
   public static class AlwaysDummyFactory extends ManagerFactory {
     public ConnManager accept(SqoopOptions opts) {
       // Always return a new DummyManager
@@ -83,6 +88,9 @@ public class TestConnFactory extends TestCase {
     }
   }
 
+  /**
+   * ManagerFactory that accepts no configurations.
+   */
   public static class EmptyFactory extends ManagerFactory {
     public ConnManager accept(SqoopOptions opts) {
       // Never instantiate a proper ConnManager;
@@ -114,7 +122,7 @@ public class TestConnFactory extends TestCase {
     }
 
     /**
-    * Default implementation
+    * Default implementation.
     * @param sqlType     sql data type
     * @return            java data type
     */
@@ -123,7 +131,7 @@ public class TestConnFactory extends TestCase {
     }
 
     /**
-    * Default implementation
+    * Default implementation.
     * @param sqlType     sql data type
     * @return            hive data type
     */

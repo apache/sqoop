@@ -32,7 +32,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class LoggingAsyncSink extends AsyncSink {
 
-  public static final Log LOG = LogFactory.getLog(LoggingAsyncSink.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      LoggingAsyncSink.class.getName());
 
   private Log contextLog;
 

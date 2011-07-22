@@ -37,7 +37,7 @@ import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
- * Manages connections to MySQL databases
+ * Manages connections to MySQL databases.
  */
 public class MySQLManager extends GenericJdbcManager {
 
@@ -103,7 +103,7 @@ public class MySQLManager extends GenericJdbcManager {
 
   @Override
   public void importTable(ImportJobContext context)
-        throws IOException, ImportException {
+      throws IOException, ImportException {
 
     // Check that we're not doing a MapReduce from localhost. If we are, point
     // out that we could use mysqldump.

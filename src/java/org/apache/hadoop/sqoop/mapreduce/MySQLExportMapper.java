@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.util.Shell;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.sqoop.lib.TaskId;
@@ -53,7 +52,8 @@ import org.apache.hadoop.sqoop.util.NullAsyncSink;
 public class MySQLExportMapper<KEYIN, VALIN>
     extends Mapper<KEYIN, VALIN, NullWritable, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(MySQLExportMapper.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      MySQLExportMapper.class.getName());
 
   /** Configuration key that specifies the number of bytes before which it
    * commits the current export transaction and opens a new one.
@@ -82,7 +82,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
   protected AsyncSink outSink;
   protected AsyncSink errSink;
 
-  /** File object where we wrote the user's password to pass to mysqlimport */
+  /** File object where we wrote the user's password to pass to mysqlimport. */
   protected File passwordFile;
 
   /** Character set used to write to mysqlimport. */

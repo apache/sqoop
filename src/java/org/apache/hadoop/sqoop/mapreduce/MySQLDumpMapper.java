@@ -19,14 +19,10 @@
 package org.apache.hadoop.sqoop.mapreduce;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +31,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
 import org.apache.hadoop.sqoop.manager.MySQLUtils;
 import org.apache.hadoop.sqoop.util.AsyncSink;
-import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
 import org.apache.hadoop.sqoop.util.ErrorableThread;
-import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.JdbcUrl;
 import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
 import org.apache.hadoop.sqoop.util.PerfCounters;
@@ -57,7 +48,8 @@ import org.apache.hadoop.sqoop.util.PerfCounters;
 public class MySQLDumpMapper
     extends Mapper<String, NullWritable, String, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(MySQLDumpMapper.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      MySQLDumpMapper.class.getName());
 
   private Configuration conf;
 
@@ -111,19 +103,22 @@ public class MySQLDumpMapper
               break; // EOF.
             }
 
-            // this line is of the form "INSERT .. VALUES ( actual value text );"
-            // strip the leading preamble up to the '(' and the trailing ');'.
+            // this line is of the form "INSERT .. VALUES ( actual value text
+            // );" strip the leading preamble up to the '(' and the trailing
+            // ');'.
             if (preambleLen == -1) {
               // we haven't determined how long the preamble is. It's constant
               // across all lines, so just figure this out once.
               String recordStartMark = "VALUES (";
-              preambleLen = inLine.indexOf(recordStartMark) + recordStartMark.length();
+              preambleLen = inLine.indexOf(recordStartMark)
+                  + recordStartMark.length();
             }
 
             // chop off the leading and trailing text as we write the
             // output to HDFS.
             int len = inLine.length() - 2 - preambleLen;
-            context.write(inLine.substring(preambleLen, inLine.length() - 2), null);
+            context.write(inLine.substring(preambleLen, inLine.length() - 2),
+                null);
             context.write("\n", null);
             counters.addBytes(1 + len);
           }
@@ -235,18 +230,21 @@ public class MySQLDumpMapper
               break; // EOF.
             }
 
-            // this line is of the form "INSERT .. VALUES ( actual value text );"
-            // strip the leading preamble up to the '(' and the trailing ');'.
+            // this line is of the form "INSERT .. VALUES ( actual value text
+            // );" strip the leading preamble up to the '(' and the trailing
+            // ');'.
             if (preambleLen == -1) {
               // we haven't determined how long the preamble is. It's constant
               // across all lines, so just figure this out once.
               String recordStartMark = "VALUES (";
-              preambleLen = inLine.indexOf(recordStartMark) + recordStartMark.length();
+              preambleLen = inLine.indexOf(recordStartMark)
+                  + recordStartMark.length();
             }
 
-            // Wrap the input string in a char buffer that ignores the leading and trailing
-            // text.
-            CharBuffer charbuf = CharBuffer.wrap(inLine, preambleLen, inLine.length() - 2);
+            // Wrap the input string in a char buffer that ignores the leading
+            // and trailing text.
+            CharBuffer charbuf = CharBuffer.wrap(inLine, preambleLen,
+                inLine.length() - 2);
 
             // Pass this along to the parser
             List<String> fields = null;
@@ -258,7 +256,8 @@ public class MySQLDumpMapper
               continue; // Skip emitting this row.
             }
 
-            // For all of the output fields, emit them using the delimiters the user chooses.
+            // For all of the output fields, emit them using the delimiters
+            // the user chooses.
             boolean first = true;
             int recordLen = 1; // for the delimiter.
             for (String field : fields) {
@@ -312,10 +311,11 @@ public class MySQLDumpMapper
     ArrayList<String> args = new ArrayList<String>();
     String tableName = conf.get(MySQLUtils.TABLE_NAME_KEY);
 
-    // We need to parse the connect string URI to determine the database
-    // name. Using java.net.URL directly on the connect string will fail because
-    // Java doesn't respect arbitrary JDBC-based schemes. So we chop off the scheme
-    // (everything before '://') and replace it with 'http', which we know will work.
+    // We need to parse the connect string URI to determine the database name.
+    // Using java.net.URL directly on the connect string will fail because
+    // Java doesn't respect arbitrary JDBC-based schemes. So we chop off the
+    // scheme (everything before '://') and replace it with 'http', which we
+    // know will work.
     String connectString = conf.get(MySQLUtils.CONNECT_STRING_KEY);
     String databaseName = JdbcUrl.getDatabaseName(connectString);
     String hostname = JdbcUrl.getHostName(connectString);
@@ -391,7 +391,8 @@ public class MySQLDumpMapper
       InputStream is = p.getInputStream();
 
       if (MySQLUtils.outputDelimsAreMySQL(conf)) {
-        LOG.debug("Output delimiters conform to mysqldump; using straight copy"); 
+        LOG.debug("Output delimiters conform to mysqldump; "
+            + "using straight copy");
         sink = new CopyingAsyncSink(context, counters);
       } else {
         LOG.debug("User-specified delimiters; using reparsing import");

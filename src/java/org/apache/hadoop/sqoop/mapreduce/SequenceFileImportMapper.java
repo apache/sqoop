@@ -31,12 +31,14 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
  * Imports records by writing them to a SequenceFile.
  */
 public class SequenceFileImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, LongWritable, SqoopRecord> {
+    extends AutoProgressMapper<LongWritable, SqoopRecord, LongWritable,
+    SqoopRecord> {
 
   private LargeObjectLoader lobLoader;
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
     this.lobLoader = new LargeObjectLoader(context.getConfiguration(),
         FileOutputFormat.getWorkOutputPath(context));
   }

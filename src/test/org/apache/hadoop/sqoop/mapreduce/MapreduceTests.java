@@ -22,14 +22,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * All tests for Sqoop new mapreduce-api (org.apache.hadoop.sqoop.mapreduce)
+ * All tests for Sqoop new mapreduce-api (org.apache.hadoop.sqoop.mapreduce).
  */
 public final class MapreduceTests {
 
   private MapreduceTests() { }
 
   public static Test suite() {
-    TestSuite suite = new TestSuite("Tests for org.apache.hadoop.sqoop.mapreduce");
+    TestSuite suite = new TestSuite(
+        "Tests for org.apache.hadoop.sqoop.mapreduce");
     suite.addTestSuite(TestImportJob.class);
     return suite;
   }

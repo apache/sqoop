@@ -24,7 +24,7 @@ import org.apache.hadoop.sqoop.tool.ImportTool;
 
 
 /**
- * Test aspects of the SqoopOptions class
+ * Test aspects of the SqoopOptions class.
  */
 public class TestSqoopOptions extends TestCase {
 
@@ -158,8 +158,8 @@ public class TestSqoopOptions extends TestCase {
   // test that setting output delimiters also sets input delimiters 
   public void testDelimitersInherit() throws Exception {
     String [] args = {
-        "--fields-terminated-by",
-        "|"
+      "--fields-terminated-by",
+      "|",
     };
 
     SqoopOptions opts = parse(args);
@@ -167,13 +167,14 @@ public class TestSqoopOptions extends TestCase {
     assertEquals('|', opts.getOutputFieldDelim());
   }
 
-  // test that setting output delimiters and setting input delims separately works
+  // Test that setting output delimiters and setting input delims
+  // separately works.
   public void testDelimOverride1() throws Exception {
     String [] args = {
-        "--fields-terminated-by",
-        "|",
-        "--input-fields-terminated-by",
-        "*"
+      "--fields-terminated-by",
+      "|",
+      "--input-fields-terminated-by",
+      "*",
     };
 
     SqoopOptions opts = parse(args);
@@ -184,10 +185,10 @@ public class TestSqoopOptions extends TestCase {
   // test that the order in which delims are specified doesn't matter
   public void testDelimOverride2() throws Exception {
     String [] args = {
-        "--input-fields-terminated-by",
-        "*",
-        "--fields-terminated-by",
-        "|"
+      "--input-fields-terminated-by",
+      "*",
+      "--fields-terminated-by",
+      "|",
     };
 
     SqoopOptions opts = parse(args);
@@ -198,7 +199,7 @@ public class TestSqoopOptions extends TestCase {
   public void testBadNumMappers1() throws Exception {
     String [] args = {
       "--num-mappers",
-      "x"
+      "x",
     };
 
     try {
@@ -212,7 +213,7 @@ public class TestSqoopOptions extends TestCase {
   public void testBadNumMappers2() throws Exception {
     String [] args = {
       "-m",
-      "x"
+      "x",
     };
 
     try {
@@ -226,7 +227,7 @@ public class TestSqoopOptions extends TestCase {
   public void testGoodNumMappers() throws Exception {
     String [] args = {
       "-m",
-      "4"
+      "4",
     };
 
     SqoopOptions opts = parse(args);

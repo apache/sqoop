@@ -62,7 +62,7 @@ public class CodeGenTool extends BaseSqoopTool {
   }
 
   /**
-   * Generate the .class and .jar files
+   * Generate the .class and .jar files.
    * @return the filename of the emitted jar file.
    * @throws IOException
    */

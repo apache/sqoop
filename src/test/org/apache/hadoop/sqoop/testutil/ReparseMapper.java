@@ -45,7 +45,8 @@ import org.apache.hadoop.util.ReflectionUtils;
 public class ReparseMapper extends MapReduceBase
     implements Mapper<LongWritable, Text, Text, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(ReparseMapper.class.getName());
+  public static final Log LOG = LogFactory.getLog(
+      ReparseMapper.class.getName());
 
   public static final String USER_TYPE_NAME_KEY = "sqoop.user.class";
 
@@ -54,7 +55,8 @@ public class ReparseMapper extends MapReduceBase
   public void configure(JobConf job) {
     String userTypeName = job.get(USER_TYPE_NAME_KEY);
     if (null == userTypeName) {
-      throw new RuntimeException("Unconfigured parameter: " + USER_TYPE_NAME_KEY);
+      throw new RuntimeException("Unconfigured parameter: "
+          + USER_TYPE_NAME_KEY);
     }
 
     LOG.info("User type name set to " + userTypeName);
@@ -76,12 +78,13 @@ public class ReparseMapper extends MapReduceBase
 
     if (null == this.userRecord) {
       LOG.error("Could not instantiate user record of type " + userTypeName);
-      throw new RuntimeException("Could not instantiate user record of type " + userTypeName);
+      throw new RuntimeException("Could not instantiate user record of type "
+          + userTypeName);
     }
   }
 
-  public void map(LongWritable key, Text val, OutputCollector<Text, NullWritable> out, Reporter r)
-      throws IOException {
+  public void map(LongWritable key, Text val,
+      OutputCollector<Text, NullWritable> out, Reporter r) throws IOException {
 
     LOG.info("Mapper input line: " + val.toString());
 
@@ -99,7 +102,8 @@ public class ReparseMapper extends MapReduceBase
 
     if (!userRecord.toString().equals(val.toString() + "\n")) {
       // misparsed.
-      throw new IOException("Returned string has value [" + userRecord.toString() + "] when ["
+      throw new IOException("Returned string has value ["
+          + userRecord.toString() + "] when ["
           + val.toString() + "\n] was expected.");
     }
   }

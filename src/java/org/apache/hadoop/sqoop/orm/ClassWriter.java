@@ -21,7 +21,6 @@ package org.apache.hadoop.sqoop.orm;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
-import org.apache.hadoop.sqoop.manager.SqlManager;
 import org.apache.hadoop.sqoop.lib.BigDecimalSerializer;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.JdbcWritableBridge;
@@ -45,7 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Creates an ORM class to represent a table from a database
+ * Creates an ORM class to represent a table from a database.
  */
 public class ClassWriter {
 
@@ -209,12 +208,13 @@ public class ClassWriter {
 
   /**
    * @param javaType
-   * @return the name of the method of JdbcWritableBridge to read an entry with a given java type.
+   * @return the name of the method of JdbcWritableBridge to read an entry
+   * with a given java type.
    */
   private String dbGetterForType(String javaType) {
     // All Class-based types (e.g., java.math.BigDecimal) are handled with
-    // "readBar" where some.package.foo.Bar is the canonical class name.
-    // Turn the javaType string into the getter type string.
+    // "readBar" where some.package.foo.Bar is the canonical class name.  Turn
+    // the javaType string into the getter type string.
 
     String [] parts = javaType.split("\\.");
     if (parts.length == 0) {
@@ -224,18 +224,21 @@ public class ClassWriter {
 
     String lastPart = parts[parts.length - 1];
     try {
-      String getter = "read" + Character.toUpperCase(lastPart.charAt(0)) + lastPart.substring(1);
+      String getter = "read" + Character.toUpperCase(lastPart.charAt(0))
+          + lastPart.substring(1);
       return getter;
     } catch (StringIndexOutOfBoundsException oob) {
       // lastPart.*() doesn't work on empty strings.
-      LOG.error("Could not infer JdbcWritableBridge getter for Java type " + javaType);
+      LOG.error("Could not infer JdbcWritableBridge getter for Java type "
+          + javaType);
       return null;
     }
   }
 
   /**
    * @param javaType
-   * @return the name of the method of JdbcWritableBridge to write an entry with a given java type.
+   * @return the name of the method of JdbcWritableBridge to write an entry
+   * with a given java type.
    */
   private String dbSetterForType(String javaType) {
     // TODO(aaron): Lots of unit tests needed here.
@@ -249,11 +252,13 @@ public class ClassWriter {
 
     String lastPart = parts[parts.length - 1];
     try {
-      String setter = "write" + Character.toUpperCase(lastPart.charAt(0)) + lastPart.substring(1);
+      String setter = "write" + Character.toUpperCase(lastPart.charAt(0))
+          + lastPart.substring(1);
       return setter;
     } catch (StringIndexOutOfBoundsException oob) {
       // lastPart.*() doesn't work on empty strings.
-      LOG.error("Could not infer PreparedStatement setter for Java type " + javaType);
+      LOG.error("Could not infer PreparedStatement setter for Java type "
+          + javaType);
       return null;
     }
   }
@@ -262,7 +267,7 @@ public class ClassWriter {
     if (javaType.equals("String")) {
       return colName;
     } else {
-      // this is an object type -- just call its toString() in a null-safe way.
+      // This is an object type -- just call its toString() in a null-safe way.
       return "\"\" + " + colName;
     }
   }
@@ -271,36 +276,49 @@ public class ClassWriter {
    * @param javaType the type to read
    * @param inputObj the name of the DataInput to read from
    * @param colName the column name to read
-   * @return the line of code involving a DataInput object to read an entry with a given java type.
+   * @return the line of code involving a DataInput object to read an entry
+   * with a given java type.
    */
-  private String rpcGetterForType(String javaType, String inputObj, String colName) {
+  private String rpcGetterForType(String javaType, String inputObj,
+      String colName) {
     if (javaType.equals("Integer")) {
-      return "    this." + colName + " = Integer.valueOf(" + inputObj + ".readInt());\n";
+      return "    this." + colName + " = Integer.valueOf(" + inputObj
+          + ".readInt());\n";
     } else if (javaType.equals("Long")) {
-      return "    this." + colName + " = Long.valueOf(" + inputObj + ".readLong());\n";
+      return "    this." + colName + " = Long.valueOf(" + inputObj
+          + ".readLong());\n";
     } else if (javaType.equals("Float")) {
-      return "    this." + colName + " = Float.valueOf(" + inputObj + ".readFloat());\n";
+      return "    this." + colName + " = Float.valueOf(" + inputObj
+          + ".readFloat());\n";
     } else if (javaType.equals("Double")) {
-      return "    this." + colName + " = Double.valueOf(" + inputObj + ".readDouble());\n";
+      return "    this." + colName + " = Double.valueOf(" + inputObj
+          + ".readDouble());\n";
     } else if (javaType.equals("Boolean")) {
-      return "    this." + colName + " = Boolean.valueOf(" + inputObj + ".readBoolean());\n";
+      return "    this." + colName + " = Boolean.valueOf(" + inputObj
+          + ".readBoolean());\n";
     } else if (javaType.equals("String")) {
       return "    this." + colName + " = Text.readString(" + inputObj + ");\n";
     } else if (javaType.equals("java.sql.Date")) {
-      return "    this." + colName + " = new Date(" + inputObj + ".readLong());\n";
+      return "    this." + colName + " = new Date(" + inputObj
+          + ".readLong());\n";
     } else if (javaType.equals("java.sql.Time")) {
-      return "    this." + colName + " = new Time(" + inputObj + ".readLong());\n";
+      return "    this." + colName + " = new Time(" + inputObj
+          + ".readLong());\n";
     } else if (javaType.equals("java.sql.Timestamp")) {
-      return "    this." + colName + " = new Timestamp(" + inputObj + ".readLong());\n"
-          + "    this." + colName + ".setNanos(" + inputObj + ".readInt());\n";
+      return "    this." + colName + " = new Timestamp(" + inputObj
+          + ".readLong());\n" + "    this." + colName + ".setNanos("
+          + inputObj + ".readInt());\n";
     } else if (javaType.equals("java.math.BigDecimal")) {
-      return "    this." + colName + " = " + BigDecimalSerializer.class.getCanonicalName()
+      return "    this." + colName + " = "
+          + BigDecimalSerializer.class.getCanonicalName()
           + ".readFields(" + inputObj + ");\n";
     } else if (javaType.equals(ClobRef.class.getName())) {
-      return "    this." + colName + " = " + LobSerializer.class.getCanonicalName()
+      return "    this." + colName + " = "
+          + LobSerializer.class.getCanonicalName()
           + ".readClobFields(" + inputObj + ");\n";
     } else if (javaType.equals(BlobRef.class.getName())) {
-      return "    this." + colName + " = " + LobSerializer.class.getCanonicalName()
+      return "    this." + colName + " = "
+          + LobSerializer.class.getCanonicalName()
           + ".readBlobFields(" + inputObj + ");\n";
     } else if (javaType.equals(BytesWritable.class.getName())) {
       return "    this." + colName + " = new BytesWritable();\n"
@@ -312,13 +330,14 @@ public class ClassWriter {
   }
 
   /**
-   * Deserialize a possibly-null value from the DataInput stream
+   * Deserialize a possibly-null value from the DataInput stream.
    * @param javaType name of the type to deserialize if it's not null.
    * @param inputObj name of the DataInput to read from
    * @param colName the column name to read.
    * @return
    */
-  private String rpcGetterForMaybeNull(String javaType, String inputObj, String colName) {
+  private String rpcGetterForMaybeNull(String javaType, String inputObj,
+      String colName) {
     return "    if (" + inputObj + ".readBoolean()) { \n"
         + "        this." + colName + " = null;\n"
         + "    } else {\n"
@@ -330,10 +349,11 @@ public class ClassWriter {
    * @param javaType the type to write
    * @param inputObj the name of the DataOutput to write to
    * @param colName the column name to write
-   * @return the line of code involving a DataOutput object to write an entry with
-   *         a given java type.
+   * @return the line of code involving a DataOutput object to write an entry
+   * with a given java type.
    */
-  private String rpcSetterForType(String javaType, String outputObj, String colName) {
+  private String rpcSetterForType(String javaType, String outputObj,
+      String colName) {
     if (javaType.equals("Integer")) {
       return "    " + outputObj + ".writeInt(this." + colName + ");\n";
     } else if (javaType.equals("Long")) {
@@ -347,12 +367,15 @@ public class ClassWriter {
     } else if (javaType.equals("String")) {
       return "    Text.writeString(" + outputObj + ", " + colName + ");\n";
     } else if (javaType.equals("java.sql.Date")) {
-      return "    " + outputObj + ".writeLong(this." + colName + ".getTime());\n";
+      return "    " + outputObj + ".writeLong(this." + colName
+          + ".getTime());\n";
     } else if (javaType.equals("java.sql.Time")) {
-      return "    " + outputObj + ".writeLong(this." + colName + ".getTime());\n";
+      return "    " + outputObj + ".writeLong(this." + colName
+          + ".getTime());\n";
     } else if (javaType.equals("java.sql.Timestamp")) {
-      return "    " + outputObj + ".writeLong(this." + colName + ".getTime());\n"
-          + "    " + outputObj + ".writeInt(this." + colName + ".getNanos());\n";
+      return "    " + outputObj + ".writeLong(this." + colName
+          + ".getTime());\n" + "    " + outputObj + ".writeInt(this." + colName
+          + ".getNanos());\n";
     } else if (javaType.equals(BytesWritable.class.getName())) {
       return "    this." + colName + ".write(" + outputObj + ");\n";
     } else if (javaType.equals("java.math.BigDecimal")) {
@@ -378,7 +401,8 @@ public class ClassWriter {
    * @param colName the column name to read.
    * @return
    */
-  private String rpcSetterForMaybeNull(String javaType, String outputObj, String colName) {
+  private String rpcSetterForMaybeNull(String javaType, String outputObj,
+      String colName) {
     return "    if (null == this." + colName + ") { \n"
         + "        " + outputObj + ".writeBoolean(true);\n"
         + "    } else {\n"
@@ -388,13 +412,13 @@ public class ClassWriter {
   }
 
   /**
-   * Generate a member field and getter method for each column
+   * Generate a member field and getter method for each column.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateFields(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateFields(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
@@ -412,15 +436,16 @@ public class ClassWriter {
   }
 
   /**
-   * Generate the readFields() method used by the database
+   * Generate the readFields() method used by the database.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateDbRead(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateDbRead(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
-    sb.append("  public void readFields(ResultSet __dbResults) throws SQLException {\n");
+    sb.append("  public void readFields(ResultSet __dbResults) ");
+    sb.append("throws SQLException {\n");
 
     // Save ResultSet object cursor for use in LargeObjectLoader
     // if necessary.
@@ -462,7 +487,8 @@ public class ClassWriter {
     // readFields() method generated by generateDbRead().
 
     sb.append("  public void loadLargeObjects(LargeObjectLoader __loader)\n");
-    sb.append("      throws SQLException, IOException, InterruptedException {\n");
+    sb.append("      throws SQLException, IOException, ");
+    sb.append("InterruptedException {\n");
 
     int fieldNum = 0;
 
@@ -479,9 +505,9 @@ public class ClassWriter {
       String getterMethod = dbGetterForType(javaType);
       if ("readClobRef".equals(getterMethod)
           || "readBlobRef".equals(getterMethod)) {
-        // This field is a blob/clob field with delayed loading.
-        // Call the appropriate LargeObjectLoader method (which has the
-        // same name as a JdbcWritableBridge method).
+        // This field is a blob/clob field with delayed loading.  Call the
+        // appropriate LargeObjectLoader method (which has the same name as a
+        // JdbcWritableBridge method).
         sb.append("    this." + col + " = __loader." + getterMethod
             + "(" + fieldNum + ", this.__cur_result_set);\n");
       }
@@ -491,19 +517,21 @@ public class ClassWriter {
 
 
   /**
-   * Generate the write() method used by the database
+   * Generate the write() method used by the database.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateDbWrite(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateDbWrite(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
-    sb.append("  public void write(PreparedStatement __dbStmt) throws SQLException {\n");
+    sb.append("  public void write(PreparedStatement __dbStmt) "
+        + "throws SQLException {\n");
     sb.append("    write(__dbStmt, 0);\n");
     sb.append("  }\n\n");
 
-    sb.append("  public int write(PreparedStatement __dbStmt, int __off) throws SQLException {\n");
+    sb.append("  public int write(PreparedStatement __dbStmt, int __off) "
+        + "throws SQLException {\n");
 
     int fieldNum = 0;
 
@@ -533,15 +561,16 @@ public class ClassWriter {
 
 
   /**
-   * Generate the readFields() method used by the Hadoop RPC system
+   * Generate the readFields() method used by the Hadoop RPC system.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateHadoopRead(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateHadoopRead(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
-    sb.append("  public void readFields(DataInput __dataIn) throws IOException {\n");
+    sb.append("  public void readFields(DataInput __dataIn) "
+        + "throws IOException {\n");
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
@@ -610,27 +639,27 @@ public class ClassWriter {
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateToString(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateToString(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
     // Embed the delimiters into the class, as characters...
-    sb.append("  private static final char __OUTPUT_FIELD_DELIM_CHAR = " +
+    sb.append("  private static final char __OUTPUT_FIELD_DELIM_CHAR = "
         + (int)options.getOutputFieldDelim() + ";\n");
-    sb.append("  private static final char __OUTPUT_RECORD_DELIM_CHAR = " 
+    sb.append("  private static final char __OUTPUT_RECORD_DELIM_CHAR = "
         + (int)options.getOutputRecordDelim() + ";\n");
 
     // as strings...
-    sb.append("  private static final String __OUTPUT_FIELD_DELIM = \"\" + (char) "
-        + (int) options.getOutputFieldDelim() + ";\n");
-    sb.append("  private static final String __OUTPUT_RECORD_DELIM = \"\" + (char) " 
-        + (int) options.getOutputRecordDelim() + ";\n");
-    sb.append("  private static final String __OUTPUT_ENCLOSED_BY = \"\" + (char) " 
-        + (int) options.getOutputEnclosedBy() + ";\n");
-    sb.append("  private static final String __OUTPUT_ESCAPED_BY = \"\" + (char) " 
-        + (int) options.getOutputEscapedBy() + ";\n");
+    sb.append("  private static final String __OUTPUT_FIELD_DELIM = "
+        + "\"\" + (char) " + (int) options.getOutputFieldDelim() + ";\n");
+    sb.append("  private static final String __OUTPUT_RECORD_DELIM = "
+        + "\"\" + (char) "  + (int) options.getOutputRecordDelim() + ";\n");
+    sb.append("  private static final String __OUTPUT_ENCLOSED_BY = "
+        + "\"\" + (char) "  + (int) options.getOutputEnclosedBy() + ";\n");
+    sb.append("  private static final String __OUTPUT_ESCAPED_BY = "
+        + "\"\" + (char) " + (int) options.getOutputEscapedBy() + ";\n");
 
     // and some more options.
-    sb.append("  private static final boolean __OUTPUT_ENCLOSE_REQUIRED = " 
+    sb.append("  private static final boolean __OUTPUT_ENCLOSE_REQUIRED = "
         + options.isOutputEncloseRequired() + ";\n");
     sb.append("  private static final char [] __OUTPUT_DELIMITER_LIST = { "
         + "__OUTPUT_FIELD_DELIM_CHAR, __OUTPUT_RECORD_DELIM_CHAR };\n\n");
@@ -662,8 +691,8 @@ public class ClassWriter {
       }
 
       sb.append("    __sb.append(FieldFormatter.escapeAndEnclose(" + stringExpr 
-          + ", __OUTPUT_ESCAPED_BY, __OUTPUT_ENCLOSED_BY, __OUTPUT_DELIMITER_LIST, "
-          + "__OUTPUT_ENCLOSE_REQUIRED));\n");
+          + ", __OUTPUT_ESCAPED_BY, __OUTPUT_ENCLOSED_BY, "
+          + "__OUTPUT_DELIMITER_LIST, __OUTPUT_ENCLOSE_REQUIRED));\n");
 
     }
 
@@ -675,17 +704,21 @@ public class ClassWriter {
 
 
   /**
-   * Helper method for generateParser(). Writes out the parse() method for one particular
-   * type we support as an input string-ish type.
+   * Helper method for generateParser(). Writes out the parse() method for one
+   * particular type we support as an input string-ish type.
    */
   private void generateParseMethod(String typ, StringBuilder sb) {
-    sb.append("  public void parse(" + typ + " __record) throws RecordParser.ParseError {\n");
+    sb.append("  public void parse(" + typ + " __record) "
+        + "throws RecordParser.ParseError {\n");
     sb.append("    if (null == this.__parser) {\n");
-    sb.append("      this.__parser = new RecordParser(__INPUT_FIELD_DELIM_CHAR, ");
-    sb.append("__INPUT_RECORD_DELIM_CHAR, __INPUT_ENCLOSED_BY_CHAR, __INPUT_ESCAPED_BY_CHAR, ");
+    sb.append("      this.__parser = new RecordParser("
+        + "__INPUT_FIELD_DELIM_CHAR, ");
+    sb.append("__INPUT_RECORD_DELIM_CHAR, __INPUT_ENCLOSED_BY_CHAR, "
+        + "__INPUT_ESCAPED_BY_CHAR, ");
     sb.append("__INPUT_ENCLOSE_REQUIRED);\n");
     sb.append("    }\n");
-    sb.append("    List<String> __fields = this.__parser.parseRecord(__record);\n");
+    sb.append("    List<String> __fields = "
+        + "this.__parser.parseRecord(__record);\n");
     sb.append("    __loadFromFields(__fields);\n");
     sb.append("  }\n\n");
   }
@@ -701,18 +734,20 @@ public class ClassWriter {
   }
 
   /**
-   * Helper method for generateParser(). Generates the code that loads one field of
-   * a specified name and type from the next element of the field strings list.
+   * Helper method for generateParser(). Generates the code that loads one
+   * field of a specified name and type from the next element of the field
+   * strings list.
    */
   private void parseColumn(String colName, int colType, StringBuilder sb) {
-    // assume that we have __it and __cur_str vars, based on __loadFromFields() code.
+    // assume that we have __it and __cur_str vars, based on
+    // __loadFromFields() code.
     sb.append("    __cur_str = __it.next();\n");
     String javaType = connManager.toJavaType(colType);
 
     parseNullVal(colName, sb);
     if (javaType.equals("String")) {
-      // TODO(aaron): Distinguish between 'null' and null. Currently they both set the
-      // actual object to null.
+      // TODO(aaron): Distinguish between 'null' and null. Currently they both
+      // set the actual object to null.
       sb.append("      this." + colName + " = __cur_str;\n");
     } else if (javaType.equals("Integer")) {
       sb.append("      this." + colName + " = Integer.valueOf(__cur_str);\n");
@@ -725,13 +760,17 @@ public class ClassWriter {
     } else if (javaType.equals("Boolean")) {
       sb.append("      this." + colName + " = Boolean.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.sql.Date")) {
-      sb.append("      this." + colName + " = java.sql.Date.valueOf(__cur_str);\n");
+      sb.append("      this." + colName
+          + " = java.sql.Date.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.sql.Time")) {
-      sb.append("      this." + colName + " = java.sql.Time.valueOf(__cur_str);\n");
+      sb.append("      this." + colName
+          + " = java.sql.Time.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.sql.Timestamp")) {
-      sb.append("      this." + colName + " = java.sql.Timestamp.valueOf(__cur_str);\n");
+      sb.append("      this." + colName
+          + " = java.sql.Timestamp.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.math.BigDecimal")) {
-      sb.append("      this." + colName + " = new java.math.BigDecimal(__cur_str);\n");
+      sb.append("      this." + colName
+          + " = new java.math.BigDecimal(__cur_str);\n");
     } else if (javaType.equals(ClobRef.class.getName())) {
       sb.append("      this." + colName + " = ClobRef.parse(__cur_str);\n");
     } else if (javaType.equals(BlobRef.class.getName())) {
@@ -744,18 +783,19 @@ public class ClassWriter {
   }
 
   /**
-   * Generate the parse() method
+   * Generate the parse() method.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateParser(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateParser(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
-    // Embed into the class the delimiter characters to use when parsing input records.
-    // Note that these can differ from the delims to use as output via toString(), if
-    // the user wants to use this class to convert one format to another.
-    sb.append("  private static final char __INPUT_FIELD_DELIM_CHAR = " +
+    // Embed into the class the delimiter characters to use when parsing input
+    // records.  Note that these can differ from the delims to use as output
+    // via toString(), if the user wants to use this class to convert one
+    // format to another.
+    sb.append("  private static final char __INPUT_FIELD_DELIM_CHAR = "
         + (int)options.getInputFieldDelim() + ";\n");
     sb.append("  private static final char __INPUT_RECORD_DELIM_CHAR = " 
         + (int)options.getInputRecordDelim() + ";\n");
@@ -778,9 +818,9 @@ public class ClassWriter {
     generateParseMethod("ByteBuffer", sb);
     generateParseMethod("CharBuffer", sb);
 
-    // The wrapper methods call __loadFromFields() to actually interpret the raw
-    // field data as string, int, boolean, etc. The generation of this method is
-    // type-dependent for the fields.
+    // The wrapper methods call __loadFromFields() to actually interpret the
+    // raw field data as string, int, boolean, etc. The generation of this
+    // method is type-dependent for the fields.
     sb.append("  private void __loadFromFields(List<String> fields) {\n");
     sb.append("    Iterator<String> __it = fields.listIterator();\n");
     sb.append("    String __cur_str;\n");
@@ -792,15 +832,16 @@ public class ClassWriter {
   }
 
   /**
-   * Generate the write() method used by the Hadoop RPC system
+   * Generate the write() method used by the Hadoop RPC system.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateHadoopWrite(Map<String, Integer> columnTypes, String [] colNames,
-      StringBuilder sb) {
+  private void generateHadoopWrite(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
 
-    sb.append("  public void write(DataOutput __dataOut) throws IOException {\n");
+    sb.append("  public void write(DataOutput __dataOut) "
+        + "throws IOException {\n");
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
@@ -840,21 +881,22 @@ public class ClassWriter {
       String identifier = toIdentifier(col);
       cleanedColNames[i] = identifier;
 
-      // make sure the col->type mapping holds for the 
+      // Make sure the col->type mapping holds for the 
       // new identifier name, too.
       columnTypes.put(identifier, columnTypes.get(col));
     }
 
-    // Generate the Java code
+    // Generate the Java code.
     StringBuilder sb = generateClassForColumns(columnTypes, cleanedColNames);
 
     // Write this out to a file.
     String codeOutDir = options.getCodeOutputDir();
 
-    // Get the class name to generate, which includes package components
+    // Get the class name to generate, which includes package components.
     String className = new TableClassName(options).getClassForTable(tableName);
-    // convert the '.' characters to '/' characters
-    String sourceFilename = className.replace('.', File.separatorChar) + ".java";
+    // Convert the '.' characters to '/' characters.
+    String sourceFilename = className.replace('.', File.separatorChar)
+        + ".java";
     String filename = codeOutDir + sourceFilename;
 
     if (LOG.isDebugEnabled()) {
@@ -908,7 +950,7 @@ public class ClassWriter {
   }
 
   /**
-   * Generate the ORM code for a table object containing the named columns
+   * Generate the ORM code for a table object containing the named columns.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @return - A StringBuilder that contains the text of the class code.
@@ -917,7 +959,8 @@ public class ClassWriter {
       String [] colNames) {
     StringBuilder sb = new StringBuilder();
     sb.append("// ORM class for " + tableName + "\n");
-    sb.append("// WARNING: This class is AUTO-GENERATED. Modify at your own risk.\n");
+    sb.append("// WARNING: This class is AUTO-GENERATED. "
+        + "Modify at your own risk.\n");
 
     TableClassName tableNameInfo = new TableClassName(options);
 
@@ -958,7 +1001,8 @@ public class ClassWriter {
     String className = tableNameInfo.getShortClassForTable(tableName);
     sb.append("public class " + className
         + " implements DBWritable, SqoopRecord, Writable {\n");
-    sb.append("  public static final int PROTOCOL_VERSION = " + CLASS_WRITER_VERSION + ";\n");
+    sb.append("  public static final int PROTOCOL_VERSION = "
+        + CLASS_WRITER_VERSION + ";\n");
     sb.append("  protected ResultSet __cur_result_set;\n");
     generateFields(columnTypes, colNames, sb);
     generateDbRead(columnTypes, colNames, sb);
@@ -970,7 +1014,8 @@ public class ClassWriter {
     generateParser(columnTypes, colNames, sb);
     generateCloneMethod(columnTypes, colNames, sb);
 
-    // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a WritableComparable
+    // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a
+    // WritableComparable
 
     sb.append("}\n");
 

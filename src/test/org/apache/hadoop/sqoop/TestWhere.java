@@ -45,7 +45,7 @@ import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 public class TestWhere extends ImportJobTestCase {
 
   /**
-   * Create the argv to pass to Sqoop
+   * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
@@ -87,7 +87,7 @@ public class TestWhere extends ImportJobTestCase {
 
 
   /**
-   * Given a comma-delimited list of integers, grab and parse the first int
+   * Given a comma-delimited list of integers, grab and parse the first int.
    * @param str a comma-delimited list of values, the first of which is an int.
    * @return the first field in the string, cast to int
    */
@@ -96,8 +96,8 @@ public class TestWhere extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runWhereTest(String whereClause, String firstValStr, int numExpectedResults,
-      int expectedSum) throws IOException {
+  public void runWhereTest(String whereClause, String firstValStr,
+      int numExpectedResults, int expectedSum) throws IOException {
 
     String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
@@ -113,7 +113,8 @@ public class TestWhere extends ImportJobTestCase {
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
 
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, getTableName());
+      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+          getTableName());
 
       reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
 
@@ -128,13 +129,15 @@ public class TestWhere extends ImportJobTestCase {
 
       // make sure that the value we think should be at the top, is.
       reader.getCurrentValue(val);
-      assertEquals("Invalid ordering within sorted SeqFile", firstValStr, val.toString());
+      assertEquals("Invalid ordering within sorted SeqFile", firstValStr,
+          val.toString());
 
       // We know that these values are two ints separated by a ',' character.
-      // Since this is all dynamic, though, we don't want to actually link against
-      // the class and use its methods. So we just parse this back into int fields manually.
-      // Sum them up and ensure that we get the expected total for the first column, to
-      // verify that we got all the results from the db into the file.
+      // Since this is all dynamic, though, we don't want to actually link
+      // against the class and use its methods. So we just parse this back
+      // into int fields manually.  Sum them up and ensure that we get the
+      // expected total for the first column, to verify that we got all the
+      // results from the db into the file.
       int curSum = getFirstInt(val.toString());
       int totalResults = 1;
 
@@ -145,8 +148,10 @@ public class TestWhere extends ImportJobTestCase {
         totalResults++;
       }
 
-      assertEquals("Total sum of first db column mismatch", expectedSum, curSum);
-      assertEquals("Incorrect number of results for query", numExpectedResults, totalResults);
+      assertEquals("Total sum of first db column mismatch", expectedSum,
+          curSum);
+      assertEquals("Incorrect number of results for query", numExpectedResults,
+          totalResults);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
     } catch (ParseException pe) {
