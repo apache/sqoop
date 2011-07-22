@@ -100,6 +100,8 @@ public class SqoopOptions {
   private String tmpDir; // where temp data goes; usually /tmp
   private String hiveHome;
   private boolean hiveImport;
+  private boolean createHiveTableOnly;
+  private boolean overwriteHiveTable;
   private String hiveTableName;
   private String packageName; // package to prepend to auto-named classes.
   private String className; // package+class to apply to individual table import.
@@ -204,6 +206,8 @@ public class SqoopOptions {
 
       this.direct = getBooleanProperty(props, "direct.import", this.direct);
       this.hiveImport = getBooleanProperty(props, "hive.import", this.hiveImport);
+      this.createHiveTableOnly = getBooleanProperty(props, "hive.create.table.only", this.createHiveTableOnly);
+      this.overwriteHiveTable = getBooleanProperty(props, "hive.overwrite.table", this.overwriteHiveTable);
       this.useCompression = getBooleanProperty(props, "compression", this.useCompression);
       this.directSplitSize = getLongProperty(props, "direct.split.size",
           this.directSplitSize);
@@ -513,6 +517,10 @@ public class SqoopOptions {
           this.hiveHome = args[++i];
         } else if (args[i].equals("--hive-import")) {
           this.hiveImport = true;
+        } else if (args[i].equals("--hive-create-only")) {
+          this.createHiveTableOnly = true;
+        } else if (args[i].equals("--hive-overwrite")) {
+          this.overwriteHiveTable = true;
         } else if (args[i].equals("--hive-table")) {
           this.hiveTableName = args[++i];
         } else if (args[i].equals("--num-mappers") || args[i].equals("-m")) {
@@ -777,6 +785,20 @@ public class SqoopOptions {
   /** @return true if we should import the table into Hive */
   public boolean doHiveImport() {
     return hiveImport;
+  }
+
+  /**
+   * @return the user-specified option to create tables in hive with no loading
+   */
+  public boolean doCreateHiveTableOnly() {
+    return createHiveTableOnly;
+  }
+
+  /**
+   * @return the user-specified option to overwrite existing table in hive
+   */
+  public boolean doOverwriteHiveTable() {
+    return overwriteHiveTable;
   }
 
   /**

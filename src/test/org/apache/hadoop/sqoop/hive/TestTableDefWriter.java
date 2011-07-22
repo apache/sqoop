@@ -73,7 +73,7 @@ public class TestTableDefWriter extends TestCase {
     LOG.debug("Load data stmt: " + loadData);
 
     // Assert that the statements generated have the form we expect.
-    assertTrue(createTable.indexOf("CREATE TABLE outputTable") != -1);
+    assertTrue(createTable.indexOf("CREATE TABLE IF NOT EXISTS outputTable") != -1);
     assertTrue(loadData.indexOf("INTO TABLE outputTable") != -1);
     assertTrue(loadData.indexOf("/inputTable'") != -1);
   }

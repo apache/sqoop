@@ -121,7 +121,11 @@ public class TableDefWriter {
 
     String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
-    sb.append("CREATE TABLE " + outputTableName + " ( ");
+    if (options.doOverwriteHiveTable()) {
+      sb.append("CREATE TABLE " + outputTableName + " ( ");
+    } else {
+      sb.append("CREATE TABLE IF NOT EXISTS " + outputTableName + " ( ");
+    }
 
     boolean first = true;
     for (String col : colNames) {

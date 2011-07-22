@@ -118,9 +118,12 @@ public class Sqoop extends Configured implements Tool {
     jarFile = generateORM(tableName);
 
     if (options.getAction() == SqoopOptions.ControlAction.FullImport) {
-      // Proceed onward to do the import.
-      ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
-      manager.importTable(context);
+      // check if data import is to be performed
+      if (!options.doCreateHiveTableOnly()) {
+        // Proceed onward to do the import.
+        ImportJobContext context = new ImportJobContext(tableName, jarFile, options);
+        manager.importTable(context);
+      }
 
       // If the user wants this table to be in Hive, perform that post-load.
       if (options.doHiveImport()) {

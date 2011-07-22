@@ -150,7 +150,9 @@ public class HiveImport {
         FileOutputStream fos = new FileOutputStream(tempFile);
         w = new BufferedWriter(new OutputStreamWriter(fos));
         w.write(createTableStr, 0, createTableStr.length());
-        w.write(loadDataStmtStr, 0, loadDataStmtStr.length());
+        if (!options.doCreateHiveTableOnly()) {
+          w.write(loadDataStmtStr, 0, loadDataStmtStr.length());
+        }
       } catch (IOException ioe) {
         LOG.error("Error writing Hive load-in script: " + ioe.toString());
         ioe.printStackTrace();

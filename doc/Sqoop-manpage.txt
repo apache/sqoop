@@ -98,6 +98,13 @@ Import control options
 --hive-import::
   If set, then import the table into Hive
 
+--hive-create-only::
+  Creates table in hive and skips the data import step
+
+--hive-overwrite::
+  Overwrites existing table in hive.
+  By default it does not overwrite existing table.
+
 --table (table-name)::
   The table to import
 

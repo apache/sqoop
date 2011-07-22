@@ -27,14 +27,18 @@ TABLE+ statement to define the data's layout in Hive. Importing data
 into Hive is as simple as adding the *+--hive-import+* option to your
 Sqoop command line.
 
-After your data is imported into HDFS, Sqoop will generate a Hive
-script containing a +CREATE TABLE+ operation defining your columns using
-Hive's types, and a +LOAD DATA INPATH+ statement to move the data files
-into Hive's warehouse directory. The script will be executed by
-calling the installed copy of hive on the machine where Sqoop is run.
-If you have multiple Hive installations, or +hive+ is not in your
-+$PATH+ use the *+--hive-home+* option to identify the Hive installation
-directory. Sqoop will use +$HIVE_HOME/bin/hive+ from here.
+By default the data is imported into HDFS, but you can skip this operation
+by using the *+--hive-create+* option. Optionally, you can specify the
+*+--hive-overwrite+* option to indicate that existing table in hive must
+be replaced. After your data is imported into HDFS or this step is
+omitted, Sqoop will generate a Hive script containing a +CREATE TABLE+
+operation defining your columns using Hive's types, and a +LOAD DATA INPATH+
+statement to move the data files into Hive's warehouse directory if
+*+--hive-create+* option is not added. The script will be executed by calling
+the installed copy of hive on the machine where Sqoop is run. If you have
+multiple Hive installations, or +hive+ is not in your +$PATH+ use the
+*+--hive-home+* option to identify the Hive installation directory.
+Sqoop will use +$HIVE_HOME/bin/hive+ from here.
 
 NOTE: This function is incompatible with +--as-sequencefile+.
 

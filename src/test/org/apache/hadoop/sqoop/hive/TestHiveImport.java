@@ -109,6 +109,24 @@ public class TestHiveImport extends ImportJobTestCase {
     runImportTest("NORMAL_HIVE_IMPORT", types, vals, "normalImport.q", null);
   }
 
+  /** Test that table is created in hive with no data import */
+  @Test
+  public void testCreateOnlyHiveImport() throws IOException {
+    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] vals = { "'test'", "42", "'somestring'" };
+    String [] extraArgs = {"--hive-create-only"};
+    runImportTest("CREATE_ONLY_HIVE_IMPORT", types, vals, "createOnlyImport.q", extraArgs);
+  }
+
+  /** Test that table is created in hive and replaces the existing table if any */
+  @Test
+  public void testCreateOverwriteHiveImport() throws IOException {
+    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] vals = { "'test'", "42", "'somestring'" };
+    String [] extraArgs = {"--hive-create-only", "--hive-overwrite"};
+    runImportTest("CREATE_OVERWRITE_HIVE_IMPORT", types, vals, "createOverwriteImport.q", extraArgs);
+  }
+
   /** Test that dates are coerced properly to strings */
   @Test
   public void testDate() throws IOException {
