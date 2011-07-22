@@ -48,6 +48,10 @@
   <property name="javac.debug" value="on"/>
   <property name="build.encoding" value="ISO-8859-1"/>
 
+  <!-- controlling the Hadoop source -->
+  <!-- valid values for ${hadoop.dist} are 'apache' and 'cloudera' -->
+  <property name="hadoop.dist" value="apache" />
+
   <!-- testing with JUnit -->
   <property name="test.junit.output.format" value="plain"/>
   <property name="test.output" value="no"/>
@@ -107,11 +111,13 @@
     <pathelement location="${build.classes}"/>
     <path refid="lib.path"/>
     <path refid="${name}.common.classpath"/>
+    <path refid="${name}.hadoop.classpath"/>
   </path>
 
   <!-- Classpath for unit tests (superset of compile.classpath) -->
   <path id="test.classpath">
     <pathelement location="${build.test.classes}" />
+    <path refid="${name}.hadooptest.classpath"/>
     <path refid="${name}.test.classpath"/>
     <path refid="compile.classpath"/>
   </path>
@@ -126,7 +132,8 @@
   <target name="init" />
 
   <!-- Compile core classes for the project -->
-  <target name="compile" depends="init, ivy-retrieve-common"
+  <target name="compile"
+      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
@@ -143,7 +150,8 @@
     </javac>
   </target>
 
-  <target name="compile-test" depends="compile, ivy-retrieve-test"
+  <target name="compile-test"
+      depends="compile, ivy-retrieve-test, ivy-retrieve-hadoop-test"
       description="Compile test classes">
     <mkdir dir="${build.test.classes}" />
     <javac
@@ -362,6 +370,13 @@
     <delete dir="${build.dir}"/>
   </target>
 
+  <target name="veryclean"
+      depends="clean"
+      description="Clean build and remove cached dependencies">
+    <delete dir="${user.home}/.ivy2/cache/org.apache.hadoop" />
+    <delete file="${ivy.jar}" />
+  </target>
+
   <target name="findbugs" depends="check-for-findbugs,jar,compile-test"
       if="findbugs.present" description="Run FindBugs">
     <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
@@ -467,37 +482,59 @@
     <property name="ivy.configured" value="true" />
   </target>
 
+
+  <!-- retrieve ivy-managed artifacts for the compile configuration -->
   <target name="ivy-resolve-common" depends="ivy-init">
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
   </target>
-
-  <!-- retrieve ivy-managed artifacts for the compile configuration -->
   <target name="ivy-retrieve-common" depends="ivy-resolve-common">
     <ivy:retrieve settingsRef="${name}.ivy.settings" 
       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
     <ivy:cachepath pathid="${name}.common.classpath" conf="common" />
   </target>
 
+
+  <!-- retrieve ivy-managed artifacts for the test configuration -->
   <target name="ivy-resolve-test" depends="ivy-init">
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="test" />
   </target>
-
-  <!-- retrieve ivy-managed artifacts for the test configuration -->
   <target name="ivy-retrieve-test" depends="ivy-resolve-test">
     <ivy:retrieve settingsRef="${name}.ivy.settings"
       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
     <ivy:cachepath pathid="${name}.test.classpath" conf="test" />
   </target>
 
+
+  <!-- retrieve ivy-managed artifacts for the redist configuration -->
   <target name="ivy-resolve-redist" depends="ivy-init">
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="redist" />
   </target>
-
-  <!-- retrieve ivy-managed artifacts for the redist configuration -->
   <target name="ivy-retrieve-redist" depends="ivy-resolve-redist">
     <ivy:retrieve settingsRef="${name}.ivy.settings"
       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
     <ivy:cachepath pathid="${name}.redist.classpath" conf="redist" />
+  </target>
+
+  <!-- retrieve ivy-managed artifacts from the Hadoop distribution -->
+  <target name="ivy-resolve-hadoop" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}" />
+  </target>
+  <target name="ivy-retrieve-hadoop" depends="ivy-resolve-hadoop">
+    <ivy:retrieve settingsRef="${name}.ivy.settings" 
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
+    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="${hadoop.dist}" />
+  </target>
+
+  <!-- retrieve ivy-managed test artifacts from the Hadoop distribution -->
+  <target name="ivy-resolve-hadoop-test" depends="ivy-init">
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}test" />
+  </target>
+  <target name="ivy-retrieve-hadoop-test" depends="ivy-resolve-hadoop-test">
+    <ivy:retrieve settingsRef="${name}.ivy.settings" 
+      pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+      sync="true" />
+    <ivy:cachepath pathid="${name}.hadooptest.classpath"
+      conf="${hadoop.dist}test" />
   </target>
 
 </project>

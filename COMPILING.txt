@@ -1,0 +1,130 @@
+
+= Compiling
+
+This document explains how to compile Sqoop.
+
+== Build Dependencies
+
+Compiling Sqoop requires the following tools:
+
+* Apache ant (1.7.1)
+* Java JDK 1.6
+
+Additionally, building the documentation requires these tools:
+
+* asciidoc
+* make
+* python 2.5+
+* xmlto
+* tar
+* gzip
+
+Furthermore, Sqoop's build can be instrumented with the following:
+
+* findbugs (1.3.9) for code quality checks
+* cobertura (1.9.4.1) for code coverage
+
+== The Basics
+
+Sqoop is compiled with ant. Type +ant -p+ to see the list of available targets.
+
+Type +ant jar+ to compile java sources into jar files. Type +ant package+ to
+produce a fully self-hosted build. This will appear in the
++build/sqoop-(version)/+ directory.
+
+== Testing Sqoop
+
+Sqoop has several unit tests which can be run with +ant test+. This command
+will run all the "basic" checks against an in-memory database, HSQLDB.
+
+Sqoop also has compatibility tests that check its ability to work with
+several third-party databases. To enable these tests, you will need to install
+and configure the databases, and download the JDBC drivers for each one.
+
+=== MySQL
+
+Install MySQL server and client 5.0. Download MySQL Connector/J 5.0.8 for
+JDBC. Instructions for configuring the MySQL database are in MySQLAuthTest
+and DirectMySQLTest.
+
+=== Oracle
+
+Install Oracle XE (Express edition) 10.2.0. Instructions for configuring the
+database are in OracleManagerTest. Download the ojdbc6_g jar.
+
+=== PostgreSQL
+
+Install PostgreSQL 8.3.9. Download the postgresql 8.4 jdbc driver. Instructions
+for configuring the database are in PostgresqlTest.
+
+=== Running the Third-party Tests
+
+After the third-party databases are installed and configured, run:
+
+++++
+ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
+++++
+
+
+== Multiple Hadoop Distributions
+
+Sqoop can be compiled against different versions of Hadoop. Both the svn
+trunk of Apache Hadoop, and Cloudera's Distribution for Hadoop (CDH3)
+can be used as the underlying Hadoop implementation.
+
+By default, Sqoop will compile against the latest snapshot from Apache
+(retrieved through maven). You can specify the Hadoop distribution to
+retrieve with the hadoop.dist property. Valid values are "apache" or
+"cloudera":
+
+++++
+ant jar -Dhadoop.dist=apache
+ant jar -Dhadoop.dist=cloudera
+++++
+
+To switch between builds, you will need to clear Ivy's dependency
+cache: +ant veryclean+
+
+
+== Code Quality Analysis
+
+We have two tools which can be used to analyze Sqoop's code quality.
+
+=== Findbugs
+
+Findbugs detects common errors in programming. New patches should not
+trigger additional warnings in Findbugs.
+
+Install findbugs (1.3.9) according to its instructions. To use it,
+run:
+
+++++
+ant findbugs -Dfindbugs.home=/path/to/findbugs/
+++++
+
+A report will be generated in +build/findbugs/+
+
+=== Cobertura
+
+Cobertura runs code coverage checks. It instruments the build and
+checks that each line and conditional expression is evaluated along
+all possible paths.
+
+Install Cobertura according to its instructions. Then run a test with:
+
+++++
+ant clean
+ant cobertura -Dcobertura.home=/path/to/cobertura
+ant cobertura -Dcobertura.home=/path/to/cobertura \
+    -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/thirdparty
+++++
+
+(You'll need to run the cobertura target twice; once against the regular
+test targets, and once against the thirdparty targets.)
+
+When complete, the report will be placed in +build/cobertura/+
+
+New patches should come with sufficient tests for their functionality
+as well as their error recovery code paths. Cobertura can help assess
+whether your tests are thorough enough, or where gaps lie.
+

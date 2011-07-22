@@ -32,7 +32,20 @@
     <conf name="common" visibility="private"
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
+    <conf name="apache" visibility="private"
+      extends="runtime"
+      description="artifacts from Apache for compile/test" />
+    <conf name="cloudera" visibility="private"
+      extends="runtime"
+      description="artifacts from Cloudera for compile/test" />
+
     <conf name="test" visibility="private" extends="runtime"/>
+    <conf name="apachetest" visibility="private"
+      extends="test"
+      description="artifacts from Apache for testing" />
+    <conf name="clouderatest" visibility="private"
+      extends="test"
+      description="artifacts from Cloudera for testing" />
 
     <!-- We don't redistribute everything we depend on (e.g., Hadoop itself);
          anything which Hadoop itself also depends on, we do not ship.
@@ -46,18 +59,27 @@
     <artifact conf="master"/>
   </publications>
   <dependencies>
+    <!-- Dependencies for Apache Hadoop -->
     <dependency org="org.apache.hadoop" name="hadoop-core"
-      rev="${hadoop-core.version}" conf="common->default"/>
+      rev="${hadoop-core.apache.version}" conf="apache->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-core-test"
-      rev="${hadoop-core.version}" conf="common->default"/>
+      rev="${hadoop-core.apache.version}" conf="apachetest->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
-      rev="${hadoop-hdfs.version}" conf="common->default"/>
+      rev="${hadoop-hdfs.apache.version}" conf="apache->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
-      rev="${hadoop-hdfs.version}" conf="test->default"/>
+      rev="${hadoop-hdfs.apache.version}" conf="apachetest->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapred"
-      rev="${hadoop-mapred.version}" conf="common->default"/>
+      rev="${hadoop-mapred.apache.version}" conf="apache->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapred-test"
-      rev="${hadoop-mapred.version}" conf="test->default"/>
+      rev="${hadoop-mapred.apache.version}" conf="apachetest->default"/>
+
+    <!-- Dependencies for Cloudera's Distribution for Hadoop -->
+    <dependency org="org.apache.hadoop" name="hadoop-core"
+      rev="${hadoop-core.cloudera.version}" conf="cloudera->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-core-test"
+      rev="${hadoop-core.cloudera.version}" conf="clouderatest->default"/>
+
+    <!-- Common dependencies for Sqoop -->
     <dependency org="commons-logging" name="commons-logging"
       rev="${commons-logging.version}" conf="common->default"/>
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
