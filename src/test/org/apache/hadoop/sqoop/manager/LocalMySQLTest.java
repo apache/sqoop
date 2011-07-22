@@ -198,6 +198,8 @@ public class LocalMySQLTest extends ImportJobTestCase {
     args.add(getCurrentUser());
     args.add("--where");
     args.add("id > 1");
+    args.add("--num-mappers");
+    args.add("1");
 
     if (mysqlOutputDelims) {
       args.add("--mysql-delimiters");

@@ -34,15 +34,15 @@ import org.apache.hadoop.sqoop.testutil.SeqFileReader;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
- * Test that --order-by works
+ * Test that --split-by works
  */
-public class TestOrderBy extends ImportJobTestCase {
+public class TestSplitBy extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String orderByCol) {
+  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String splitByCol) {
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";
@@ -63,13 +63,15 @@ public class TestOrderBy extends ImportJobTestCase {
     args.add(HsqldbTestServer.getTableName());
     args.add("--columns");
     args.add(columnsString);
-    args.add("--order-by");
-    args.add(orderByCol);
+    args.add("--split-by");
+    args.add(splitByCol);
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-sequencefile");
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }
@@ -90,18 +92,18 @@ public class TestOrderBy extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runOrderByTest(String orderByCol, String firstValStr, int expectedSum)
+  public void runSplitByTest(String splitByCol, int expectedSum)
       throws IOException {
 
     String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, columns, orderByCol);
+    String [] argv = getArgv(true, columns, splitByCol);
     runImport(argv);
     try {
       ImportOptions opts = new ImportOptions();
-      opts.parse(getArgv(false, columns, orderByCol));
+      opts.parse(getArgv(false, columns, splitByCol));
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
@@ -115,22 +117,14 @@ public class TestOrderBy extends ImportJobTestCase {
       Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
       Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
-      if (reader.next(key) == null) {
-        fail("Empty SequenceFile during import");
-      }
-
-      // make sure that the value we think should be at the top, is.
-      reader.getCurrentValue(val);
-      assertEquals("Invalid ordering within sorted SeqFile", firstValStr, val.toString());
-
       // We know that these values are two ints separated by a ',' character.
       // Since this is all dynamic, though, we don't want to actually link against
       // the class and use its methods. So we just parse this back into int fields manually.
       // Sum them up and ensure that we get the expected total for the first column, to
       // verify that we got all the results from the db into the file.
-      int curSum = getFirstInt(val.toString());
 
-      // now sum up everything else in the file.
+      // Sum up everything in the file.
+      int curSum = 0;
       while (reader.next(key) != null) {
         reader.getCurrentValue(val);
         curSum += getFirstInt(val.toString());
@@ -148,13 +142,13 @@ public class TestOrderBy extends ImportJobTestCase {
     }
   }
 
-  public void testOrderByFirstCol() throws IOException {
-    String orderByCol = "INTFIELD1";
-    runOrderByTest(orderByCol, "1,8\n", HsqldbTestServer.getFirstColSum());
+  public void testSplitByFirstCol() throws IOException {
+    String splitByCol = "INTFIELD1";
+    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
   }
 
-  public void testOrderBySecondCol() throws IOException {
-    String orderByCol = "INTFIELD2";
-    runOrderByTest(orderByCol, "7,2\n", HsqldbTestServer.getFirstColSum());
+  public void testSplitBySecondCol() throws IOException {
+    String splitByCol = "INTFIELD2";
+    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
   }
 }

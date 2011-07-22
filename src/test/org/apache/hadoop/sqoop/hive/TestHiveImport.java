@@ -61,8 +61,10 @@ public class TestHiveImport extends ImportJobTestCase {
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--hive-import");
-    args.add("--order-by");
+    args.add("--split-by");
     args.add(getColNames()[0]);
+    args.add("--num-mappers");
+    args.add("1");
 
     if (null != moreArgs) {
       for (String arg: moreArgs) {

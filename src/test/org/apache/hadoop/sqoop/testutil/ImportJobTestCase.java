@@ -277,7 +277,7 @@ public class ImportJobTestCase extends TestCase {
       colNames = getColNames();
     }
 
-    String orderByCol = colNames[0];
+    String splitByCol = colNames[0];
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";
@@ -298,13 +298,15 @@ public class ImportJobTestCase extends TestCase {
     args.add(getTableName());
     args.add("--columns");
     args.add(columnsString);
-    args.add("--order-by");
-    args.add(orderByCol);
+    args.add("--split-by");
+    args.add(splitByCol);
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-sequencefile");
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }
@@ -316,7 +318,7 @@ public class ImportJobTestCase extends TestCase {
   }
 
   protected Path getDataFilePath() {
-    return new Path(getTablePath(), "part-00000");
+    return new Path(getTablePath(), "part-m-00000");
   }
 
   protected void removeTableDir() {
@@ -350,8 +352,7 @@ public class ImportJobTestCase extends TestCase {
       ret = ToolRunner.run(importer, getArgv(true, importCols));
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
-      e.printStackTrace();
-      ret = 1;
+      throw new RuntimeException(e);
     }
 
     // expect a successful return.

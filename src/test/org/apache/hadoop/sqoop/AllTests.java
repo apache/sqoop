@@ -23,7 +23,8 @@ import org.apache.hadoop.sqoop.lib.TestFieldFormatter;
 import org.apache.hadoop.sqoop.lib.TestRecordParser;
 import org.apache.hadoop.sqoop.manager.TestHsqldbManager;
 import org.apache.hadoop.sqoop.manager.TestSqlManager;
-import org.apache.hadoop.sqoop.mapred.TestAutoProgressMapRunner;
+import org.apache.hadoop.sqoop.mapred.MapredTests;
+import org.apache.hadoop.sqoop.mapreduce.MapreduceTests;
 import org.apache.hadoop.sqoop.orm.TestClassWriter;
 import org.apache.hadoop.sqoop.orm.TestParseMethods;
 
@@ -32,24 +33,22 @@ import junit.framework.TestSuite;
 
 /**
  * All tests for Sqoop (org.apache.hadoop.sqoop)
- *
- * 
  */
-public final class AllTests  {
+public final class AllTests {
 
   private AllTests() { }
 
   public static Test suite() {
     TestSuite suite = new TestSuite("Tests for org.apache.hadoop.sqoop");
 
-    suite.addTestSuite(TestAutoProgressMapRunner.class);
     suite.addTestSuite(TestAllTables.class);
     suite.addTestSuite(TestHsqldbManager.class);
     suite.addTestSuite(TestSqlManager.class);
     suite.addTestSuite(TestClassWriter.class);
     suite.addTestSuite(TestColumnTypes.class);
     suite.addTestSuite(TestMultiCols.class);
-    suite.addTestSuite(TestOrderBy.class);
+    suite.addTestSuite(TestMultiMaps.class);
+    suite.addTestSuite(TestSplitBy.class);
     suite.addTestSuite(TestWhere.class);
     suite.addTestSuite(TestHiveImport.class);
     suite.addTestSuite(TestRecordParser.class);
@@ -58,6 +57,8 @@ public final class AllTests  {
     suite.addTestSuite(TestParseMethods.class);
     suite.addTestSuite(TestConnFactory.class);
     suite.addTest(ThirdPartyTests.suite());
+    suite.addTest(MapredTests.suite());
+    suite.addTest(MapreduceTests.suite());
 
     return suite;
   }

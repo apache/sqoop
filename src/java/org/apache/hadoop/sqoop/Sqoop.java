@@ -42,6 +42,11 @@ public class Sqoop extends Configured implements Tool {
 
   public static final Log LOG = LogFactory.getLog(Sqoop.class.getName());
 
+  /** If this System property is set, always throw an exception, do not just
+      exit with status 1.
+    */
+  public static final String SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError";
+
   static {
     Configuration.addDefaultResource("sqoop-default.xml");
     Configuration.addDefaultResource("sqoop-site.xml");
@@ -112,7 +117,11 @@ public class Sqoop extends Configured implements Tool {
       manager = new ConnFactory(getConf()).getManager(options);
     } catch (Exception e) {
       LOG.error("Got error creating database manager: " + e.toString());
-      return 1;
+      if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+        throw new RuntimeException(e);
+      } else {
+        return 1;
+      }
     }
 
     if (options.doHiveImport()) {
@@ -167,10 +176,18 @@ public class Sqoop extends Configured implements Tool {
         }
       } catch (IOException ioe) {
         LOG.error("Encountered IOException running import job: " + ioe.toString());
-        return 1;
+        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+          throw new RuntimeException(ioe);
+        } else {
+          return 1;
+        }
       } catch (ImportError ie) {
         LOG.error("Error during import: " + ie.toString());
-        return 1;
+        if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
+          throw new RuntimeException(ie);
+        } else {
+          return 1;
+        }
       }
     }
 

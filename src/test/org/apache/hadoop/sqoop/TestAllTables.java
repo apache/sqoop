@@ -36,9 +36,6 @@ import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 
 /**
  * Test the --all-tables functionality that can import multiple tables.
- * ;
- * 
- *
  */
 public class TestAllTables extends ImportJobTestCase {
 
@@ -63,6 +60,8 @@ public class TestAllTables extends ImportJobTestCase {
     args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }
@@ -107,7 +106,7 @@ public class TestAllTables extends ImportJobTestCase {
     Path warehousePath = new Path(this.getWarehouseDir());
     for (String tableName : this.tableNames) {
       Path tablePath = new Path(warehousePath, tableName);
-      Path filePath = new Path(tablePath, "part-00000");
+      Path filePath = new Path(tablePath, "part-m-00000");
 
       // dequeue the expected value for this table. This
       // list has the same order as the tableNames list.

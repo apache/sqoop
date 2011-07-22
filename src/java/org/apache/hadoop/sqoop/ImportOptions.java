@@ -87,7 +87,7 @@ public class ImportOptions {
   private String jarOutputDir;
   private ControlAction action;
   private String hadoopHome;
-  private String orderByCol;
+  private String splitByCol;
   private String whereClause;
   private String debugSqlCmd;
   private String driverClassName;
@@ -99,6 +99,7 @@ public class ImportOptions {
   private boolean hiveImport;
   private String packageName; // package to prepend to auto-named classes.
   private String className; // package+class to apply to individual table import.
+  private int numMappers;
 
   private char inputFieldDelim;
   private char inputRecordDelim;
@@ -113,6 +114,8 @@ public class ImportOptions {
   private boolean outputMustBeEnclosed;
 
   private boolean areDelimsManuallySet;
+
+  public static final int DEFAULT_NUM_MAPPERS = 4;
 
   private static final String DEFAULT_CONFIG_FILE = "sqoop.properties";
 
@@ -153,7 +156,7 @@ public class ImportOptions {
       this.password = props.getProperty("db.password", this.password);
       this.tableName = props.getProperty("db.table", this.tableName);
       this.connectString = props.getProperty("db.connect.url", this.connectString);
-      this.orderByCol = props.getProperty("db.sort.column", this.orderByCol);
+      this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
       this.whereClause = props.getProperty("db.where.clause", this.whereClause);
       this.driverClassName = props.getProperty("jdbc.driver", this.driverClassName);
       this.warehouseDir = props.getProperty("hdfs.warehouse.dir", this.warehouseDir);
@@ -227,6 +230,8 @@ public class ImportOptions {
 
     this.areDelimsManuallySet = false;
 
+    this.numMappers = DEFAULT_NUM_MAPPERS;
+
     loadFromProperties();
   }
 
@@ -255,7 +260,7 @@ public class ImportOptions {
     System.out.println("Import control options:");
     System.out.println("--table (tablename)          Table to read");
     System.out.println("--columns (col,col,col...)   Columns to export from table");
-    System.out.println("--order-by (column-name)     Column of the table used to order results");
+    System.out.println("--split-by (column-name)     Column of the table used to split work units");
     System.out.println("--where (where clause)       Where clause to use during export");
     System.out.println("--hadoop-home (dir)          Override $HADOOP_HOME");
     System.out.println("--hive-home (dir)            Override $HIVE_HOME");
@@ -263,9 +268,10 @@ public class ImportOptions {
     System.out.println("--as-sequencefile            Imports data to SequenceFiles");
     System.out.println("--as-textfile                Imports data as plain text (default)");
     System.out.println("--all-tables                 Import all tables in database");
-    System.out.println("                             (Ignores --table, --columns and --order-by)");
+    System.out.println("                             (Ignores --table, --columns and --split-by)");
     System.out.println("--hive-import                If set, then import the table into Hive.");
     System.out.println("                    (Uses Hive's default delimiters if none are set.)");
+    System.out.println("-m, --num-mappers (n)        Use 'n' map tasks to import in parallel");
     System.out.println("");
     System.out.println("Output line formatting options:");
     System.out.println("--fields-terminated-by (char)    Sets the field separator character");
@@ -409,8 +415,8 @@ public class ImportOptions {
         } else if (args[i].equals("--columns")) {
           String columnString = args[++i];
           this.columns = columnString.split(",");
-        } else if (args[i].equals("--order-by")) {
-          this.orderByCol = args[++i];
+        } else if (args[i].equals("--split-by")) {
+          this.splitByCol = args[++i];
         } else if (args[i].equals("--where")) {
           this.whereClause = args[++i];
         } else if (args[i].equals("--list-tables")) {
@@ -441,6 +447,14 @@ public class ImportOptions {
           this.hiveHome = args[++i];
         } else if (args[i].equals("--hive-import")) {
           this.hiveImport = true;
+        } else if (args[i].equals("--num-mappers") || args[i].equals("-m")) {
+          String numMappersStr = args[++i];
+          try {
+            this.numMappers = Integer.valueOf(numMappersStr);
+          } catch (NumberFormatException nfe) {
+            throw new InvalidOptionsException("Invalid argument; expected "
+                + args[i - 1] + " (number).");
+          }
         } else if (args[i].equals("--fields-terminated-by")) {
           this.outputFieldDelim = ImportOptions.toChar(args[++i]);
           this.areDelimsManuallySet = true;
@@ -530,9 +544,9 @@ public class ImportOptions {
       // If we're reading all tables in a database, can't filter column names.
       throw new InvalidOptionsException("--columns and --all-tables are incompatible options."
           + HELP_STR);
-    } else if (this.allTables && this.orderByCol != null) {
+    } else if (this.allTables && this.splitByCol != null) {
       // If we're reading all tables in a database, can't set pkey
-      throw new InvalidOptionsException("--order-by and --all-tables are incompatible options."
+      throw new InvalidOptionsException("--split-by and --all-tables are incompatible options."
           + HELP_STR);
     } else if (this.allTables && this.className != null) {
       // If we're reading all tables, can't set individual class name
@@ -544,6 +558,10 @@ public class ImportOptions {
     } else if (this.className != null && this.packageName != null) {
       throw new InvalidOptionsException(
           "--class-name overrides --package-name. You cannot use both." + HELP_STR);
+    } else if (this.action == ControlAction.FullImport && !this.allTables
+        && this.tableName == null) {
+      throw new InvalidOptionsException(
+          "One of --table or --all-tables is required for import." + HELP_STR);
     }
 
     if (this.hiveImport) {
@@ -594,8 +612,8 @@ public class ImportOptions {
     }
   }
 
-  public String getOrderByCol() {
-    return orderByCol;
+  public String getSplitByCol() {
+    return splitByCol;
   }
   
   public String getWhereClause() {
@@ -620,6 +638,13 @@ public class ImportOptions {
 
   public boolean isDirect() {
     return direct;
+  }
+
+  /**
+   * @return the number of map tasks to use for import
+   */
+  public int getNumMappers() {
+    return this.numMappers;
   }
 
   /**

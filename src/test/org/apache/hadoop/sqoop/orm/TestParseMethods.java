@@ -73,8 +73,8 @@ public class TestParseMethods extends ImportJobTestCase {
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-textfile");
-    args.add("--order-by");
-    args.add("DATA_COL0"); // always order by first column.
+    args.add("--split-by");
+    args.add("DATA_COL0"); // always split by first column.
     args.add("--fields-terminated-by");
     args.add(fieldTerminator);
     args.add("--lines-terminated-by");
@@ -87,7 +87,8 @@ public class TestParseMethods extends ImportJobTestCase {
       args.add("--optionally-enclosed-by");
     }
     args.add(encloser);
-
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }

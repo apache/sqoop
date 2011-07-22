@@ -156,6 +156,8 @@ public class OracleManagerTest extends ImportJobTestCase {
     args.add(ORACLE_USER_NAME);
     args.add("--password");
     args.add(ORACLE_USER_PASS);
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }

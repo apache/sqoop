@@ -20,8 +20,12 @@ package org.apache.hadoop.sqoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -34,18 +38,15 @@ import org.apache.hadoop.sqoop.testutil.SeqFileReader;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
- * Test that --where works in Sqoop.
- * Methods essentially copied out of the other Test* classes.
- * TODO(kevin or aaron): Factor out these common test methods
- * so that every new Test* class doesn't need to copy the code.
+ * Test that using multiple mapper splits works.
  */
-public class TestWhere extends ImportJobTestCase {
+public class TestMultiMaps extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String whereClause) {
+  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String splitByCol) {
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";
@@ -57,8 +58,6 @@ public class TestWhere extends ImportJobTestCase {
       args.add("-D");
       args.add("mapred.job.tracker=local");
       args.add("-D");
-      args.add("mapred.map.tasks=1");
-      args.add("-D");
       args.add("fs.default.name=file:///");
     }
 
@@ -66,17 +65,15 @@ public class TestWhere extends ImportJobTestCase {
     args.add(HsqldbTestServer.getTableName());
     args.add("--columns");
     args.add(columnsString);
-    args.add("--where");
-    args.add(whereClause);
     args.add("--split-by");
-    args.add("INTFIELD1");
+    args.add(splitByCol);
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-sequencefile");
     args.add("--num-mappers");
-    args.add("1");
+    args.add("2");
 
     return args.toArray(new String[0]);
   }
@@ -86,6 +83,20 @@ public class TestWhere extends ImportJobTestCase {
     return HsqldbTestServer.getTableName();
   }
 
+  /** @return a list of Path objects for each data file */
+  protected List<Path> getDataFilePaths() throws IOException {
+    List<Path> paths = new ArrayList<Path>();
+    Configuration conf = new Configuration();
+    conf.set("fs.default.name", "file:///");
+    FileSystem fs = FileSystem.get(conf);
+
+    FileStatus [] stats = fs.listStatus(getTablePath());
+    for (FileStatus stat : stats) {
+      paths.add(stat.getPath());
+    }
+
+    return paths;
+  }
 
   /**
    * Given a comma-delimited list of integers, grab and parse the first int
@@ -97,56 +108,56 @@ public class TestWhere extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runWhereTest(String whereClause, String firstValStr, int numExpectedResults,
-      int expectedSum) throws IOException {
+  public void runMultiMapTest(String splitByCol, int expectedSum)
+      throws IOException {
 
     String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, columns, whereClause);
+    String [] argv = getArgv(true, columns, splitByCol);
     runImport(argv);
     try {
       ImportOptions opts = new ImportOptions();
-      opts.parse(getArgv(false, columns, whereClause));
+      opts.parse(getArgv(false, columns, splitByCol));
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
 
       prevClassLoader = ClassLoaderStack.addJarFile(jarFileName, getTableName());
 
-      reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
-
-      // here we can actually instantiate (k, v) pairs.
+      List<Path> paths = getDataFilePaths();
       Configuration conf = new Configuration();
-      Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
-      Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
+      int curSum = 0;
 
-      if (reader.next(key) == null) {
-        fail("Empty SequenceFile during import");
-      }
+      assertTrue("Found only " + paths.size() + " path(s); expected > 1.", paths.size() > 1);
 
-      // make sure that the value we think should be at the top, is.
-      reader.getCurrentValue(val);
-      assertEquals("Invalid ordering within sorted SeqFile", firstValStr, val.toString());
+      // We expect multiple files. We need to open all the files and sum up the
+      // first column across all of them.
+      for (Path p : paths) {
+        reader = SeqFileReader.getSeqFileReader(p.toString());
 
-      // We know that these values are two ints separated by a ',' character.
-      // Since this is all dynamic, though, we don't want to actually link against
-      // the class and use its methods. So we just parse this back into int fields manually.
-      // Sum them up and ensure that we get the expected total for the first column, to
-      // verify that we got all the results from the db into the file.
-      int curSum = getFirstInt(val.toString());
-      int totalResults = 1;
+        // here we can actually instantiate (k, v) pairs.
+        Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+        Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
-      // now sum up everything else in the file.
-      while (reader.next(key) != null) {
-        reader.getCurrentValue(val);
-        curSum += getFirstInt(val.toString());
-        totalResults++;
+        // We know that these values are two ints separated by a ',' character.
+        // Since this is all dynamic, though, we don't want to actually link against
+        // the class and use its methods. So we just parse this back into int fields manually.
+        // Sum them up and ensure that we get the expected total for the first column, to
+        // verify that we got all the results from the db into the file.
+
+        // now sum up everything in the file.
+        while (reader.next(key) != null) {
+          reader.getCurrentValue(val);
+          curSum += getFirstInt(val.toString());
+        }
+
+        IOUtils.closeStream(reader);
+        reader = null;
       }
 
       assertEquals("Total sum of first db column mismatch", expectedSum, curSum);
-      assertEquals("Incorrect number of results for query", numExpectedResults, totalResults);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
     } finally {
@@ -158,13 +169,7 @@ public class TestWhere extends ImportJobTestCase {
     }
   }
 
-  public void testSingleClauseWhere() throws IOException {
-    String whereClause = "INTFIELD2 > 4";
-    runWhereTest(whereClause, "1,8\n", 2, 4);
-  }
-
-  public void testMultiClauseWhere() throws IOException {
-    String whereClause = "INTFIELD1 > 4 AND INTFIELD2 < 3";
-    runWhereTest(whereClause, "7,2\n", 1, 7);
+  public void testSplitByFirstCol() throws IOException {
+    runMultiMapTest("INTFIELD1", HsqldbTestServer.getFirstColSum());
   }
 }
