@@ -33,6 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.GzipCodec;
 
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
@@ -131,7 +132,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
   public void testNonSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
-        getWritePath(), "nonsplit-", 0, false);
+        getWritePath(), "nonsplit-", 0, null);
     try {
       SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
       try {
@@ -178,7 +179,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
   public void testNonSplittingGzipFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
-        getWritePath(), "nonsplit-", 0, true);
+        getWritePath(), "nonsplit-", 0, new GzipCodec());
     SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
     try {
       w.allowSplit();
@@ -208,7 +209,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
   public void testSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
-        getWritePath(), "split-", 10, false);
+        getWritePath(), "split-", 10, null);
     try {
       SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
       try {
@@ -268,7 +269,7 @@ public class TestSplittableBufferedWriter extends TestCase {
 
   public void testSplittingGzipFile() throws IOException {
     SplittingOutputStream os = new SplittingOutputStream(getConf(),
-        getWritePath(), "splitz-", 3, true);
+        getWritePath(), "splitz-", 3, new GzipCodec());
     SplittableBufferedWriter w = new SplittableBufferedWriter(os, true);
     try {
       w.write("This is a string!");

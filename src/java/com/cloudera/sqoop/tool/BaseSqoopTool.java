@@ -95,6 +95,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
   public static final String COMPRESS_ARG = "compress";
+  public static final String COMPRESSION_CODEC_ARG = "compression-codec";
   public static final String COMPRESS_SHORT_ARG = "z";
   public static final String DIRECT_SPLIT_SIZE_ARG = "direct-split-size";
   public static final String INLINE_LOB_LIMIT_ARG = "inline-lob-limit";

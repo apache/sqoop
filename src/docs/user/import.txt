@@ -70,6 +70,7 @@ Argument                          Description
 +\--warehouse-dir <dir>+          HDFS parent for table destination
 +\--where <where clause>+         WHERE clause to use during import
 +-z,\--compress+                  Enable compression
++\--compression-codec <c>+        Use Hadoop codec (default gzip)
 +--null-string <null-string>+     The string to be written for a null\
                                   value for string columns
 +--null-non-string <null-string>+ The string to be written for a null\
@@ -335,7 +336,8 @@ need to be parsed).
 
 By default, data is not compressed. You can compress
 your data by using the deflate (gzip) algorithm with the +-z+ or
-+\--compress+ argument. This applies to both SequenceFiles or text
++\--compress+ argument, or specify any Hadoop compression codec using the
++\--compression-codec+ argument. This applies to both SequenceFiles or text
 files.
 
 Large Objects

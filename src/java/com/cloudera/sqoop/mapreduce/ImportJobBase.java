@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -85,11 +86,26 @@ public class ImportJobBase extends JobBase {
 
     if (options.shouldUseCompression()) {
       FileOutputFormat.setCompressOutput(job, true);
-      FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
-      SequenceFileOutputFormat.setOutputCompressionType(job,
-          CompressionType.BLOCK);
+      
+      String codecName = options.getCompressionCodec();
+      Class<? extends CompressionCodec> codecClass;
+      if (codecName == null) {
+        codecClass = GzipCodec.class;
+      } else {
+        Configuration conf = job.getConfiguration();
+        @SuppressWarnings("unchecked")
+        Class<? extends CompressionCodec> c =
+            (Class<? extends CompressionCodec>) conf.getClassByName(codecName);
+        codecClass = c;
+      }
+      FileOutputFormat.setOutputCompressorClass(job, codecClass);
+      
+      if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
+        SequenceFileOutputFormat.setOutputCompressionType(job,
+            CompressionType.BLOCK);
+      }
     }
-
+    
     Path outputPath = context.getDestination();
     FileOutputFormat.setOutputPath(job, outputPath);
   }

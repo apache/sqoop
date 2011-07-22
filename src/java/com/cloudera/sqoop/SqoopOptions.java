@@ -168,6 +168,7 @@ public class SqoopOptions implements Cloneable {
 
   @StoredAsProperty("mapreduce.num.mappers") private int numMappers;
   @StoredAsProperty("enable.compression") private boolean useCompression;
+  @StoredAsProperty("compression.codec") private String compressionCodec;
 
   // In direct mode, open a new stream every X bytes.
   @StoredAsProperty("import.direct.split.size") private long directSplitSize;
@@ -695,6 +696,7 @@ public class SqoopOptions implements Cloneable {
 
     this.numMappers = DEFAULT_NUM_MAPPERS;
     this.useCompression = false;
+    this.compressionCodec = null;
     this.directSplitSize = 0;
 
     this.maxInlineLobSize = LargeObjectLoader.DEFAULT_MAX_LOB_LENGTH;
@@ -1323,13 +1325,24 @@ public class SqoopOptions implements Cloneable {
    * @return true if the user wants imported results to be compressed.
    */
   public boolean shouldUseCompression() {
-    return this.useCompression;
+    return this.useCompression || compressionCodec != null;
   }
 
   public void setUseCompression(boolean compress) {
     this.useCompression = compress;
   }
-
+  
+  /**
+   * @return the name of the compression codec to use when importing.
+   * E.g. <code>org.apache.hadoop.io.compress.GzipCodec</code>.
+   */
+  public String getCompressionCodec() {
+    return compressionCodec;
+  }
+  
+  public void setCompressionCodec(String codec) {
+    this.compressionCodec = codec;
+  }
   /**
    * @return the name of the destination table when importing to Hive.
    */

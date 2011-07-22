@@ -28,10 +28,14 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.io.SplittingOutputStream;
 import com.cloudera.sqoop.io.SplittableBufferedWriter;
+
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Shell;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
@@ -83,7 +87,27 @@ public final class DirectImportUtils {
     // This Writer will be closed by the caller.
     return new SplittableBufferedWriter(
         new SplittingOutputStream(conf, destDir, "data-",
-        options.getDirectSplitSize(), options.shouldUseCompression()));
+        options.getDirectSplitSize(), getCodec(conf, options)));
+  }
+
+  private static CompressionCodec getCodec(Configuration conf,
+      SqoopOptions options) throws IOException {
+    if (options.shouldUseCompression()) {
+      if (options.getCompressionCodec() == null) {
+        return new GzipCodec();
+      } else {
+        try {
+          @SuppressWarnings("unchecked")
+          Class<? extends CompressionCodec> c =
+              (Class<? extends CompressionCodec>)
+              conf.getClassByName(options.getCompressionCodec());
+          return ReflectionUtils.newInstance(c, conf);
+        } catch (ClassNotFoundException e) {
+          throw new IOException(e);
+        }
+      }
+    }
+    return null;
   }
 
   /** @return true if someHost refers to localhost.

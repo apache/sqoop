@@ -511,6 +511,11 @@ public class ImportTool extends BaseSqoopTool {
         .withDescription("Enable compression")
         .withLongOpt(COMPRESS_ARG)
         .create(COMPRESS_SHORT_ARG));
+    importOpts.addOption(OptionBuilder.withArgName("codec")
+        .hasArg()
+        .withDescription("Compression codec to use for import")
+        .withLongOpt(COMPRESSION_CODEC_ARG)
+        .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg()
         .withDescription("Split the input stream every 'n' bytes "
@@ -690,6 +695,10 @@ public class ImportTool extends BaseSqoopTool {
 
       if (in.hasOption(COMPRESS_ARG)) {
         out.setUseCompression(true);
+      }
+      
+      if (in.hasOption(COMPRESSION_CODEC_ARG)) {
+        out.setCompressionCodec(in.getOptionValue(COMPRESSION_CODEC_ARG));
       }
 
       if (in.hasOption(DIRECT_SPLIT_SIZE_ARG)) {

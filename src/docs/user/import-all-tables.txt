@@ -53,6 +53,7 @@ Argument                     Description
 +-m,\--num-mappers <n>+      Use 'n' map tasks to import in parallel
 +\--warehouse-dir <dir>+     HDFS parent for table destination
 +-z,\--compress+             Enable compression
++\--compression-codec <c>+   Use Hadoop codec (default gzip)
 ---------------------------------------------------------------------
 
 These arguments behave in the same manner as they do when used for the

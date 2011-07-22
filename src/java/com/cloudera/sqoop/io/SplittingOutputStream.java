@@ -20,7 +20,6 @@ package com.cloudera.sqoop.io;
 
 import java.io.OutputStream;
 import java.io.IOException;
-import java.util.zip.GZIPOutputStream;
 import java.util.Formatter;
 
 import org.apache.commons.io.output.CountingOutputStream;
@@ -30,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.CompressionCodec;
 
 /**
  * An output stream that writes to an underlying filesystem, opening
@@ -47,7 +47,7 @@ public class SplittingOutputStream extends OutputStream {
   private Path destDir;
   private String filePrefix;
   private long cutoffBytes;
-  private boolean doGzip;
+  private CompressionCodec codec;
   private int fileNum;
 
   /**
@@ -62,7 +62,7 @@ public class SplittingOutputStream extends OutputStream {
    *   suffix.
    */
   public SplittingOutputStream(final Configuration conf, final Path destDir,
-      final String filePrefix, final long cutoff, final boolean doGzip)
+      final String filePrefix, final long cutoff, final CompressionCodec codec)
       throws IOException {
 
     this.conf = conf;
@@ -72,7 +72,7 @@ public class SplittingOutputStream extends OutputStream {
     if (this.cutoffBytes < 0) {
       this.cutoffBytes = 0; // splitting disabled.
     }
-    this.doGzip = doGzip;
+    this.codec = codec;
     this.fileNum = 0;
 
     openNextFile();
@@ -87,8 +87,8 @@ public class SplittingOutputStream extends OutputStream {
     Formatter fmt = new Formatter(sb);
     fmt.format("%05d", this.fileNum++);
     String filename = filePrefix + fmt.toString();
-    if (this.doGzip) {
-      filename = filename + ".gz";
+    if (codec != null) {
+      filename = filename + codec.getDefaultExtension();
     }
     Path destFile = new Path(destDir, filename);
     LOG.debug("Opening next output file: " + destFile);
@@ -103,9 +103,9 @@ public class SplittingOutputStream extends OutputStream {
     // Count how many actual bytes hit HDFS.
     this.countingFilterStream = new CountingOutputStream(fsOut);
 
-    if (this.doGzip) {
-      // Wrap that in a Gzip stream.
-      this.writeStream = new GZIPOutputStream(this.countingFilterStream);
+    if (codec != null) {
+      // Wrap that in a compressing stream.
+      this.writeStream = codec.createOutputStream(this.countingFilterStream);
     } else {
       // Write to the counting stream directly.
       this.writeStream = this.countingFilterStream;
