@@ -117,6 +117,7 @@ public class HsqldbSessionStorage extends SessionStorage {
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
 
 
+  private Map<String, String> connectedDescriptor;
   private String metastoreConnectStr;
   private String metastoreUser;
   private String metastorePassword;
@@ -144,6 +145,13 @@ public class HsqldbSessionStorage extends SessionStorage {
 
   private static final String DB_DRIVER_CLASS = "org.hsqldb.jdbcDriver";
 
+  /**
+   * Set the descriptor used to open() this storage.
+   */
+  protected void setConnectedDescriptor(Map<String, String> descriptor) {
+    this.connectedDescriptor = descriptor;
+  }
+
   @Override
   /**
    * Initialize the connection to the database.
@@ -152,6 +160,7 @@ public class HsqldbSessionStorage extends SessionStorage {
     setMetastoreConnectStr(descriptor.get(META_CONNECT_KEY));
     setMetastoreUser(descriptor.get(META_USERNAME_KEY));
     setMetastorePassword(descriptor.get(META_PASSWORD_KEY));
+    setConnectedDescriptor(descriptor);
 
     init();
   }
@@ -292,6 +301,10 @@ public class HsqldbSessionStorage extends SessionStorage {
       SqoopOptions opts = new SqoopOptions();
       opts.setConf(conf);
       opts.loadProperties(sqoopOptProps);
+
+      // Set the session connection information for this session.
+      opts.setSessionName(sessionName);
+      opts.setStorageDescriptor(connectedDescriptor);
 
       return new SessionData(opts, tool);
     } catch (SQLException sqlE) {

@@ -38,6 +38,7 @@ public final class AllTests {
     suite.addTest(ThirdPartyTests.suite());
     suite.addTestSuite(TestHBaseImport.class);
     suite.addTestSuite(TestHBaseQueryImport.class);
+    suite.addTestSuite(TestIncrementalImport.class);
 
     return suite;
   }

@@ -209,6 +209,12 @@ public class SessionTool extends BaseSqoopTool {
     SqoopOptions childOpts = data.getSqoopOptions();
     SqoopTool childTool = data.getSqoopTool();
 
+    // Don't overwrite the original SqoopOptions with the
+    // arguments; make a child options.
+
+    SqoopOptions clonedOpts = (SqoopOptions) childOpts.clone();
+    clonedOpts.setParent(childOpts);
+
     int dashPos = getDashPosition(extraArguments);
     String [] childArgv;
     if (dashPos >= extraArguments.length) {
@@ -218,13 +224,13 @@ public class SessionTool extends BaseSqoopTool {
           extraArguments.length);
     }
 
-    int confRet = configureChildTool(childOpts, childTool, childArgv);
+    int confRet = configureChildTool(clonedOpts, childTool, childArgv);
     if (0 != confRet) {
       // Error.
       return confRet;
     }
 
-    return childTool.run(childOpts);
+    return childTool.run(clonedOpts);
   }
 
   private int showSession(SqoopOptions opts) throws IOException {

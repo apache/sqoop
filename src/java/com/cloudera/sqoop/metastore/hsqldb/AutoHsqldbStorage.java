@@ -106,6 +106,7 @@ public class AutoHsqldbStorage extends HsqldbSessionStorage {
     setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
     setMetastorePassword(conf.get(AUTO_STORAGE_PASS_KEY,
         DEFAULT_AUTO_PASSWORD));
+    setConnectedDescriptor(descriptor);
 
     init();
   }

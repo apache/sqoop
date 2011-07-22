@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.Method;
@@ -455,6 +456,16 @@ public class OracleManager extends GenericJdbcManager {
   protected void finalize() throws Throwable {
     close();
     super.finalize();
+  }
+
+  @Override
+  protected String getCurTimestampQuery() {
+    return "SELECT SYSDATE FROM dual";
+  }
+
+  @Override
+  public String timestampToQueryString(Timestamp ts) {
+    return "TO_TIMESTAMP('" + ts + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
   }
 }
 

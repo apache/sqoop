@@ -22,6 +22,7 @@ package com.cloudera.sqoop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -31,9 +32,9 @@ import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 
 /**
- * Command-line arguments used by Sqoop.
+ * Configurable state used by Sqoop tools.
  */
-public class SqoopOptions {
+public class SqoopOptions implements Cloneable {
 
   public static final Log LOG = LogFactory.getLog(SqoopOptions.class.getName());
 
@@ -71,6 +72,22 @@ public class SqoopOptions {
   public enum FileLayout {
     TextFile,
     SequenceFile
+  }
+
+  /**
+   * Incremental imports support two modes:
+   * <ul>
+   * <li>new rows being appended to the end of a table with an
+   * incrementing id</li>
+   * <li>new data results in a date-last-modified column being
+   * updated to NOW(); Sqoop will pull all dirty rows in the next
+   * incremental import.</li>
+   * </ul>
+   */
+  public enum IncrementalMode {
+    None,
+    AppendRows,
+    DateLastModified,
   }
 
 
@@ -148,6 +165,26 @@ public class SqoopOptions {
   private String hbaseColFamily; // Column family to prepend to inserted cols.
   private String hbaseRowKeyCol; // Column of the input to use as the row key.
   private boolean hbaseCreateTable; // if true, create tables/col families.
+
+  // col to filter on for incremental imports.
+  private String incrementalTestCol; 
+  // incremental import mode we're using.
+  private IncrementalMode incrementalMode;
+  // What was the last-imported value of incrementalTestCol?
+  private String incrementalLastValue;
+
+
+  // These next two fields are not serialized to the metastore.
+  // If this SqoopOptions is created by reading a saved session, these will
+  // be populated by the SessionStorage to facilitate updating the same
+  // session.
+  private String sessionName;
+  private Map<String, String> sessionStorageDescriptor;
+
+  // If we restore a session and then allow the user to apply arguments on
+  // top, we retain the version without the arguments in a reference to the
+  // 'parent' SqoopOptions instance, here.
+  private SqoopOptions parent;
 
   public SqoopOptions() {
     initDefaults(null);
@@ -356,10 +393,12 @@ public class SqoopOptions {
         this.targetDir);
     this.append = getBooleanProperty(props, "hdfs.append.dir", this.append);
     
-    String fileFmtStr = props.getProperty("hdfs.file.format", "text");
-    if (fileFmtStr.equals("seq")) {
-      this.layout = FileLayout.SequenceFile;
-    } else {
+    try {
+      this.layout = FileLayout.valueOf(
+        props.getProperty("hdfs.file.format", this.layout.toString()));
+    } catch (IllegalArgumentException iae) {
+      LOG.warn("Unsupported file format: "
+          + props.getProperty("hdfs.file.format", null) + "; setting to text");
       this.layout = FileLayout.TextFile;
     }
 
@@ -410,6 +449,20 @@ public class SqoopOptions {
         this.hbaseRowKeyCol);
     this.hbaseCreateTable = getBooleanProperty(props, "hbase.create.table",
         this.hbaseCreateTable);
+
+    try {
+      this.incrementalMode = IncrementalMode.valueOf(props.getProperty(
+          "incremental.mode", this.incrementalMode.toString()));
+    } catch (IllegalArgumentException iae) {
+      LOG.warn("Invalid incremental import type: "
+          + props.getProperty("incremental.mode", null) + "; setting to None");
+      this.incrementalMode = IncrementalMode.None;
+    }
+
+    this.incrementalTestCol = props.getProperty("incremental.col",
+        this.incrementalTestCol);
+    this.incrementalLastValue = props.getProperty("incremental.last.value",
+        this.incrementalLastValue);
   }
 
   /**
@@ -448,11 +501,7 @@ public class SqoopOptions {
     putProperty(props, "hdfs.warehouse.dir", this.warehouseDir);
     putProperty(props, "hdfs.target.dir", this.targetDir);
     putProperty(props, "hdfs.append.dir", Boolean.toString(this.append));
-    if (this.layout == FileLayout.SequenceFile) {
-      putProperty(props, "hdfs.file.format", "seq");
-    } else {
-      putProperty(props, "hdfs.file.format", "text");
-    }
+    putProperty(props, "hdfs.file.format", this.layout.toString());
     putProperty(props, "direct.import", Boolean.toString(this.direct));
     putProperty(props, "hive.import", Boolean.toString(this.hiveImport));
     putProperty(props, "hive.overwrite.table",
@@ -482,7 +531,46 @@ public class SqoopOptions {
     putProperty(props, "hbase.create.table",
         Boolean.toString(this.hbaseCreateTable));
 
+    putProperty(props, "incremental.mode", this.incrementalMode.toString());
+    putProperty(props, "incremental.col", this.incrementalTestCol);
+    putProperty(props, "incremental.last.value", this.incrementalLastValue);
+
     return props;
+  }
+
+  @Override
+  public Object clone() {
+    try {
+      SqoopOptions other = (SqoopOptions) super.clone();
+      if (null != columns) {
+        other.columns = Arrays.copyOf(columns, columns.length);
+      }
+
+      if (null != dbOutColumns) {
+        other.dbOutColumns = Arrays.copyOf(dbOutColumns, dbOutColumns.length);
+      }
+
+      if (null != inputDelimiters) {
+        other.inputDelimiters = (DelimiterSet) inputDelimiters.clone();
+      }
+
+      if (null != outputDelimiters) {
+        other.outputDelimiters = (DelimiterSet) outputDelimiters.clone();
+      }
+
+      if (null != conf) {
+        other.conf = new Configuration(conf);
+      }
+
+      if (null != extraArgs) {
+        other.extraArgs = Arrays.copyOf(extraArgs, extraArgs.length);
+      }
+
+      return other;
+    } catch (CloneNotSupportedException cnse) {
+      // Shouldn't happen.
+      return null;
+    }
   }
 
   /**
@@ -536,6 +624,8 @@ public class SqoopOptions {
     this.extraArgs = null;
 
     this.dbOutColumns = null;
+
+    this.incrementalMode = IncrementalMode.None;
   }
 
   /**
@@ -1311,6 +1401,94 @@ public class SqoopOptions {
    */
   public void setHBaseTable(String table) {
     this.hbaseTable = table;
+  }
+
+  /**
+   * Set the column of the import source table to check for incremental import
+   * state.
+   */
+  public void setIncrementalTestColumn(String colName) {
+    this.incrementalTestCol = colName;
+  }
+
+  /**
+   * Return the name of the column of the import source table
+   * to check for incremental import state.
+   */
+  public String getIncrementalTestColumn() {
+    return this.incrementalTestCol;
+  }
+
+  /**
+   * Set the incremental import mode to use.
+   */
+  public void setIncrementalMode(IncrementalMode mode) {
+    this.incrementalMode = mode;
+  }
+
+  /**
+   * Get the incremental import mode to use.
+   */
+  public IncrementalMode getIncrementalMode() { 
+    return this.incrementalMode;
+  }
+
+  /**
+   * Set the last imported value of the incremental import test column.
+   */
+  public void setIncrementalLastValue(String lastVal) {
+    this.incrementalLastValue = lastVal;
+  }
+
+  /**
+   * Get the last imported value of the incremental import test column.
+   */
+  public String getIncrementalLastValue() {
+    return this.incrementalLastValue;
+  }
+
+  /**
+   * Set the name of the saved session this SqoopOptions belongs to.
+   */
+  public void setSessionName(String session) {
+    this.sessionName = session;
+  }
+
+  /**
+   * Get the name of the saved session this SqoopOptions belongs to.
+   */
+  public String getSessionName() {
+    return this.sessionName;
+  }
+
+  /**
+   * Set the SessionStorage descriptor used to open the saved session
+   * this SqoopOptions belongs to.
+   */
+  public void setStorageDescriptor(Map<String, String> descriptor) {
+    this.sessionStorageDescriptor = descriptor;
+  }
+
+  /**
+   * Get the SessionStorage descriptor used to open the saved session
+   * this SqoopOptions belongs to.
+   */
+  public Map<String, String> getStorageDescriptor() {
+    return this.sessionStorageDescriptor;
+  }
+
+  /**
+   * Return the parent instance this SqoopOptions is derived from.
+   */
+  public SqoopOptions getParent() {
+    return this.parent;
+  }
+
+  /**
+   * Set the parent instance this SqoopOptions is derived from.
+   */
+  public void setParent(SqoopOptions options) {
+    this.parent = options;
   }
 }
 

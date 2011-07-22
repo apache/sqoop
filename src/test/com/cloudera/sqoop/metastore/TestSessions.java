@@ -46,7 +46,8 @@ import java.sql.Connection;
  */
 public class TestSessions extends TestCase {
 
-  public static final String TEST_AUTOCONNECT_URL = "jdbc:hsqldb:mem:testdb";
+  public static final String TEST_AUTOCONNECT_URL =
+      "jdbc:hsqldb:mem:sqoopmetastore";
   public static final String TEST_AUTOCONNECT_USER = "SA";
   public static final String TEST_AUTOCONNECT_PASS = "";
 
@@ -62,6 +63,13 @@ public class TestSessions extends TestCase {
     options.setUsername(TEST_AUTOCONNECT_USER);
     options.setPassword(TEST_AUTOCONNECT_PASS);
 
+    resetSchema(options);
+  }
+
+  /**
+   * Drop all tables in the configured HSQLDB-based schema/user/pass.
+   */
+  public static void resetSchema(SqoopOptions options) throws SQLException {
     HsqldbManager manager = new HsqldbManager(options);
     Connection c = manager.getConnection();
     Statement s = c.createStatement();

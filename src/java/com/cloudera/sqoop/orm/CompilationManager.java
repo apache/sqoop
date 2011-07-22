@@ -23,10 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -42,7 +39,6 @@ import org.apache.hadoop.mapred.JobConf;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.FileListing;
-import com.cloudera.sqoop.shims.HadoopShim;
 
 import com.cloudera.sqoop.util.Jars;
 

@@ -909,6 +909,23 @@ public class ClassWriter {
         colNames = connManager.getColumnNamesForQuery(
             this.options.getSqlQuery());
       }
+    } else {
+      // These column names were provided by the user. They may not be in
+      // the same case as the keys in the columnTypes map. So make sure
+      // we add the appropriate aliases in that map.
+      for (String userColName : colNames) {
+        for (Map.Entry<String, Integer> typeEntry : columnTypes.entrySet()) {
+          String typeColName = typeEntry.getKey();
+          if (typeColName.equalsIgnoreCase(userColName)
+              && !typeColName.equals(userColName)) {
+            // We found the correct-case equivalent.
+            columnTypes.put(userColName, typeEntry.getValue());
+            // No need to continue iteration; only one could match.
+            // Also, the use of put() just invalidated the iterator.
+            break;
+          }
+        }
+      }
     }
 
     // Translate all the column names into names that are safe to

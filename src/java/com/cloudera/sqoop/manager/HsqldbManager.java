@@ -52,4 +52,14 @@ public class HsqldbManager extends GenericJdbcManager {
     String [] databases = {HSQL_SCHEMA_NAME};
     return databases;
   }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  protected String getCurTimestampQuery() {
+    // HSQLDB requires that you select from a table; this table is
+    // guaranteed to exist.
+    return "SELECT CURRENT_TIMESTAMP FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
+  }
 }

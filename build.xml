@@ -843,7 +843,7 @@
         outputFile="${findbugs.output.xml.file}" effort="max"
         excludeFilter="${findbugs.excludes}">
       <auxClasspath>
-        <path refid="compile.classpath"/>
+        <path refid="test.classpath"/>
       </auxClasspath>
       <sourcePath path="${src.dir}" />
       <sourcePath path="${test.dir}" />

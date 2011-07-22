@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -200,5 +201,22 @@ public abstract class ConnManager {
    * to close.
    */
   public abstract void release();
+
+  /**
+   * Return the current time from the perspective of the database server.
+   * Return null if this cannot be accessed.
+   */
+  public Timestamp getCurrentDbTimestamp() {
+    LOG.warn("getCurrentDbTimestamp(): Using local system timestamp.");
+    return new Timestamp(System.currentTimeMillis());
+  }
+
+  /**
+   * Given a non-null Timestamp, return the quoted string that can
+   * be inserted into a SQL statement, representing that timestamp.
+   */
+  public String timestampToQueryString(Timestamp ts) {
+    return "'" + ts + "'";
+  }
 }
 

@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.sql.Timestamp;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hive.HiveTypes;
 import com.cloudera.sqoop.lib.BlobRef;
@@ -616,13 +618,61 @@ public abstract class SqlManager extends ConnManager {
     }
   }
 
+  @Override
   /**
-   * @{inheritDoc}
+   * {@inheritDoc}
    */
   public void updateTable(ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context);
     exportJob.runExport();
+  }
+
+  /**
+   * @return a SQL query to retrieve the current timestamp from the db.
+   */
+  protected String getCurTimestampQuery() {
+    return "SELECT CURRENT_TIMESTAMP()";
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public Timestamp getCurrentDbTimestamp() {
+    release(); // Release any previous ResultSet.
+
+    Statement s = null;
+    ResultSet rs = null;
+    try {
+      Connection c = getConnection();
+      s = c.createStatement();
+      rs = s.executeQuery(getCurTimestampQuery());
+      if (rs == null || !rs.next()) {
+        return null; // empty ResultSet.
+      }
+
+      return rs.getTimestamp(1);
+    } catch (SQLException sqlE) {
+      LOG.warn("SQL exception accessing current timestamp: " + sqlE);
+      return null;
+    } finally {
+      try {
+        if (null != rs) {
+          rs.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("SQL Exception closing resultset: " + sqlE);
+      }
+
+      try {
+        if (null != s) {
+          s.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("SQL Exception closing statement: " + sqlE);
+      }
+    }
   }
 }

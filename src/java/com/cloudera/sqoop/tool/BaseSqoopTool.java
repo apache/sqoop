@@ -114,6 +114,11 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HELP_ARG = "help";
   public static final String UPDATE_KEY_ARG = "update-key";
 
+  // Arguments for incremental imports.
+  public static final String INCREMENT_TYPE_ARG = "incremental";
+  public static final String INCREMENT_COL_ARG = "check-column";
+  public static final String INCREMENT_LAST_VAL_ARG = "last-value";
+
   // HBase arguments.
   public static final String HBASE_TABLE_ARG = "hbase-table";
   public static final String HBASE_COL_FAM_ARG = "column-family";

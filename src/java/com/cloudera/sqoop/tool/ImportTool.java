@@ -19,7 +19,16 @@
 package com.cloudera.sqoop.tool;
 
 import java.io.IOException;
+
+import java.math.BigDecimal;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
@@ -35,6 +44,10 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
+
+import com.cloudera.sqoop.metastore.SessionData;
+import com.cloudera.sqoop.metastore.SessionStorage;
+import com.cloudera.sqoop.metastore.SessionStorageFactory;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
 import org.apache.hadoop.fs.Path;
@@ -76,8 +89,239 @@ public class ImportTool extends BaseSqoopTool {
   public List<String> getGeneratedJarFiles() {
     return this.codeGenerator.getGeneratedJarFiles();
   }
+
+  /**
+   * @return true if the supplied options specify an incremental import.
+   */
+  private boolean isIncremental(SqoopOptions options) {
+    return !options.getIncrementalMode().equals(
+        SqoopOptions.IncrementalMode.None);
+  }
   
-  protected void importTable(SqoopOptions options, String tableName,
+  /**
+   * If this is an incremental import, then we should save the
+   * user's state back to the metastore (if this session was run
+   * from the metastore). Otherwise, log to the user what data
+   * they need to supply next time.
+   */
+  private void saveIncrementalState(SqoopOptions options)
+      throws IOException {
+    if (!isIncremental(options)) {
+      return;
+    }
+
+    Map<String, String> descriptor = options.getStorageDescriptor();
+    String sessionName = options.getSessionName();
+
+    if (null != sessionName && null != descriptor) {
+      // Actually save it back to the metastore.
+      LOG.info("Saving incremental import state to the metastore");
+      SessionStorageFactory ssf = new SessionStorageFactory(options.getConf());
+      SessionStorage storage = ssf.getSessionStorage(descriptor);
+      storage.open(descriptor);
+      try {
+        // Save the 'parent' SqoopOptions; this does not contain the mutations
+        // to the SqoopOptions state that occurred over the course of this
+        // execution, except for the one we specifically want to memorize:
+        // the latest value of the check column.
+        SessionData data = new SessionData(options.getParent(), this);
+        storage.update(sessionName, data);
+        LOG.info("Updated data for session: " + sessionName);
+      } finally {
+        storage.close();
+      }
+    } else {
+      // If there wasn't a parent SqoopOptions, then the incremental
+      // state data was stored in the current SqoopOptions.
+      LOG.info("Incremental import complete! To run another incremental "
+          + "import of all data following this import, supply the "
+          + "following arguments:");
+      SqoopOptions.IncrementalMode incrementalMode =
+          options.getIncrementalMode();
+      switch (incrementalMode) {
+      case AppendRows:
+        LOG.info(" --incremental append");
+        break;
+      case DateLastModified:
+        LOG.info(" --incremental lastmodified");
+        break;
+      default:
+        LOG.warn("Undefined incremental mode: " + incrementalMode);
+        break;
+      }
+      LOG.info("  --check-column " + options.getIncrementalTestColumn());
+      LOG.info("  --last-value " + options.getIncrementalLastValue());
+      LOG.info("(Consider saving this with 'sqoop session --create')");
+    }
+  }
+
+  /**
+   * Return the max value in the incremental-import test column. This
+   * value must be numeric.
+   */
+  private BigDecimal getMaxColumnId(SqoopOptions options) throws SQLException {
+    StringBuilder sb = new StringBuilder();
+    sb.append("SELECT MAX(");
+    sb.append(options.getIncrementalTestColumn());
+    sb.append(") FROM ");
+    sb.append(options.getTableName());
+
+    String where = options.getWhereClause();
+    if (null != where) {
+      sb.append(" WHERE ");
+      sb.append(where);
+    }
+
+    Connection conn = manager.getConnection();
+    Statement s = null;
+    ResultSet rs = null;
+    try {
+      s = conn.createStatement();
+      rs = s.executeQuery(sb.toString());
+      if (!rs.next()) {
+        // This probably means the table is empty.
+        LOG.warn("Unexpected: empty results for max value query?");
+        return null;
+      }
+
+      return rs.getBigDecimal(1);
+    } finally {
+      try {
+        if (null != rs) {
+          rs.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("SQL Exception closing resultset: " + sqlE);
+      }
+
+      try {
+        if (null != s) {
+          s.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("SQL Exception closing statement: " + sqlE);
+      }
+    }
+  }
+
+  /**
+   * Initialize the constraints which set the incremental import range.
+   * @return false if an import is not necessary, because the dataset has not
+   * changed.
+   */
+  private boolean initIncrementalConstraints(SqoopOptions options,
+      ImportJobContext context) throws ImportException, IOException {
+
+    // If this is an incremental import, determine the constraints
+    // to inject in the WHERE clause or $CONDITIONS for a query.
+    // Also modify the 'last value' field of the SqoopOptions to
+    // specify the current job start time / start row.
+
+    if (!isIncremental(options)) {
+      return true;
+    }
+
+    SqoopOptions.IncrementalMode incrementalMode = options.getIncrementalMode();
+    String nextIncrementalValue = null;
+
+    switch (incrementalMode) {
+    case AppendRows:
+      try {
+        BigDecimal nextVal = getMaxColumnId(options);
+        if (null != nextVal) {
+          nextIncrementalValue = nextVal.toString();
+        }
+      } catch (SQLException sqlE) {
+        throw new IOException(sqlE);
+      }
+      break;
+    case DateLastModified:
+      Timestamp dbTimestamp = manager.getCurrentDbTimestamp();
+      if (null == dbTimestamp) {
+        throw new IOException("Could not get current time from database");
+      }
+
+      nextIncrementalValue = manager.timestampToQueryString(dbTimestamp);
+      break;
+    default:
+      throw new ImportException("Undefined incremental import type: "
+          + incrementalMode);
+    }
+
+    // Build the WHERE clause components that are used to import
+    // only this incremental section.
+    StringBuilder sb = new StringBuilder();
+    String prevEndpoint = options.getIncrementalLastValue();
+
+    String checkColName = manager.escapeColName(
+        options.getIncrementalTestColumn());
+    LOG.info("Incremental import based on column " + checkColName);
+    if (null != prevEndpoint) {
+      if (prevEndpoint.equals(nextIncrementalValue)) {
+        LOG.info("No new rows detected since last import.");
+        return false;
+      }
+      LOG.info("Lower bound value: " + prevEndpoint);
+      sb.append(checkColName);
+      switch (incrementalMode) {
+      case AppendRows:
+        sb.append(" > ");
+        break;
+      case DateLastModified:
+        sb.append(" >= ");
+        break;
+      default:
+        throw new ImportException("Undefined comparison");
+      }
+      sb.append(prevEndpoint);
+      sb.append(" AND ");
+    }
+
+    if (null != nextIncrementalValue) {
+      sb.append(checkColName);
+      switch (incrementalMode) {
+      case AppendRows:
+        sb.append(" <= ");
+        break;
+      case DateLastModified:
+        sb.append(" < ");
+        break;
+      default:
+        throw new ImportException("Undefined comparison");
+      }
+      sb.append(nextIncrementalValue);
+    } else {
+      sb.append(checkColName);
+      sb.append(" IS NULL ");
+    }
+
+    LOG.info("Upper bound value: " + nextIncrementalValue);
+
+    String prevWhereClause = options.getWhereClause();
+    if (null != prevWhereClause) {
+      sb.append(" AND (");
+      sb.append(prevWhereClause);
+      sb.append(")");
+    }
+
+    String newConstraints = sb.toString();
+    options.setWhereClause(newConstraints);
+
+    // Save this state for next time.
+    SqoopOptions recordOptions = options.getParent();
+    if (null == recordOptions) {
+      recordOptions = options;
+    }
+    recordOptions.setIncrementalLastValue(nextIncrementalValue);
+
+    return true;
+  }
+
+  /**
+   * Import a table or query.
+   * @return true if an import was performed, false otherwise.
+   */
+  protected boolean importTable(SqoopOptions options, String tableName,
       HiveImport hiveImport) throws IOException, ImportException {
     String jarFile = null;
 
@@ -87,6 +331,12 @@ public class ImportTool extends BaseSqoopTool {
     // Do the actual import.
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
         options, getOutputPath(options, tableName));
+    
+    // If we're doing an incremental import, set up the
+    // filtering conditions used to get the latest records.
+    if (!initIncrementalConstraints(options, context)) {
+      return false;
+    }
     
     if (null != tableName) {
       manager.importTable(context);
@@ -103,6 +353,10 @@ public class ImportTool extends BaseSqoopTool {
     if (options.doHiveImport()) {
       hiveImport.importTable(tableName, options.getHiveTableName(), false);
     }
+
+    saveIncrementalState(options);
+
+    return true;
   }
   
   /**   
@@ -264,12 +518,42 @@ public class ImportTool extends BaseSqoopTool {
     return importOpts;
   }
 
+  /**
+   * Return options for incremental import.
+   */
+  protected RelatedOptions getIncrementalOptions() {
+    RelatedOptions incrementalOpts =
+        new RelatedOptions("Incremental import arguments");
+
+    incrementalOpts.addOption(OptionBuilder.withArgName("import-type")
+        .hasArg()
+        .withDescription(
+        "Define an incremental import of type 'append' or 'lastmodified'")
+        .withLongOpt(INCREMENT_TYPE_ARG)
+        .create());
+    incrementalOpts.addOption(OptionBuilder.withArgName("column")
+        .hasArg()
+        .withDescription("Source column to check for incremental change")
+        .withLongOpt(INCREMENT_COL_ARG)
+        .create());
+    incrementalOpts.addOption(OptionBuilder.withArgName("value")
+        .hasArg()
+        .withDescription("Last imported value in the incremental check column")
+        .withLongOpt(INCREMENT_LAST_VAL_ARG)
+        .create());
+
+    return incrementalOpts;
+  }
+
   @Override
   /** Configure the command-line arguments we expect to receive */
   public void configureOptions(ToolOptions toolOptions) {
 
     toolOptions.addUniqueOptions(getCommonOptions());
     toolOptions.addUniqueOptions(getImportOptions());
+    if (!allTables) {
+      toolOptions.addUniqueOptions(getIncrementalOptions());
+    }
     toolOptions.addUniqueOptions(getOutputFormatOptions());
     toolOptions.addUniqueOptions(getInputFormatOptions());
     toolOptions.addUniqueOptions(getHiveOptions(true));
@@ -304,6 +588,32 @@ public class ImportTool extends BaseSqoopTool {
         "Arguments to mysqldump and other subprograms may be supplied");
     System.out.println(
         "after a '--' on the command line.");
+  }
+
+  private void applyIncrementalOptions(CommandLine in, SqoopOptions out)
+      throws InvalidOptionsException  {
+    if (in.hasOption(INCREMENT_TYPE_ARG)) {
+      String incrementalTypeStr = in.getOptionValue(INCREMENT_TYPE_ARG);
+      if ("append".equals(incrementalTypeStr)) {
+        out.setIncrementalMode(SqoopOptions.IncrementalMode.AppendRows);
+        // This argument implies ability to append to the same directory.
+        out.setAppendMode(true);
+      } else if ("lastmodified".equals(incrementalTypeStr)) {
+        out.setIncrementalMode(SqoopOptions.IncrementalMode.DateLastModified);
+      } else {
+        throw new InvalidOptionsException("Unknown incremental import mode: "
+            + incrementalTypeStr + ". Use 'append' or 'lastmodified'."
+            + HELP_STR);
+      }
+    }
+
+    if (in.hasOption(INCREMENT_COL_ARG)) {
+      out.setIncrementalTestColumn(in.getOptionValue(INCREMENT_COL_ARG));
+    }
+
+    if (in.hasOption(INCREMENT_LAST_VAL_ARG)) {
+      out.setIncrementalLastValue(in.getOptionValue(INCREMENT_LAST_VAL_ARG));
+    }
   }
 
   @Override
@@ -382,6 +692,7 @@ public class ImportTool extends BaseSqoopTool {
         out.setExistingJarName(in.getOptionValue(JAR_FILE_NAME_ARG));
       }
 
+      applyIncrementalOptions(in, out);
       applyHiveOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyInputFormatOptions(in, out);
@@ -437,6 +748,32 @@ public class ImportTool extends BaseSqoopTool {
     }
   }
 
+  /**
+   * Validate the incremental import options.
+   */
+  private void validateIncrementalOptions(SqoopOptions options)
+      throws InvalidOptionsException {
+    if (options.getIncrementalMode() != SqoopOptions.IncrementalMode.None
+        && options.getIncrementalTestColumn() == null) {
+      throw new InvalidOptionsException(
+          "For an incremental import, the check column must be specified "
+          + "with --" + INCREMENT_COL_ARG + ". " + HELP_STR);
+    }
+
+    if (options.getIncrementalMode() == SqoopOptions.IncrementalMode.None
+        && options.getIncrementalTestColumn() != null) {
+      throw new InvalidOptionsException(
+          "You must specify an incremental import mode with --"
+          + INCREMENT_TYPE_ARG + ". " + HELP_STR);
+    }
+
+    if (options.getIncrementalMode() != SqoopOptions.IncrementalMode.None
+        && options.getTableName() == null) {
+      throw new InvalidOptionsException("Incremental imports require a table."
+          + HELP_STR);
+    }
+  }
+
   @Override
   /** {@inheritDoc} */
   public void validateOptions(SqoopOptions options)
@@ -452,6 +789,7 @@ public class ImportTool extends BaseSqoopTool {
     }
 
     validateImportOptions(options);
+    validateIncrementalOptions(options);
     validateCommonOptions(options);
     validateCodeGenOptions(options);
     validateOutputFormatOptions(options);
