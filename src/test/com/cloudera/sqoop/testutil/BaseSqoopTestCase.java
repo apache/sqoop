@@ -251,7 +251,7 @@ public class BaseSqoopTestCase extends TestCase {
     guaranteeCleanWarehouse();
   }
 
-  static final String BASE_COL_NAME = "DATA_COL";
+  public static final String BASE_COL_NAME = "DATA_COL";
 
   protected String getColName(int i) {
     return BASE_COL_NAME + i;

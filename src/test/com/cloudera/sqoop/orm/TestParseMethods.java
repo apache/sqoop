@@ -34,6 +34,8 @@ import org.apache.hadoop.mapred.JobConf;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.config.ConfigurationHelper;
+
+import com.cloudera.sqoop.testutil.ExplicitSetMapper;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
@@ -204,6 +206,67 @@ public class TestParseMethods extends ImportJobTestCase {
 
     createTableWithColTypes(types, vals);
     runParseTest(",", "\\n", "\\\'", "\\", false);
+  }
+
+  public void testFieldSetter() throws IOException {
+    ClassLoader prevClassLoader = null;
+
+    String [] types = { "VARCHAR(32)", "VARCHAR(32)" };
+    String [] vals = { "'meep'", "'foo'" };
+    createTableWithColTypes(types, vals);
+
+    String [] argv = getArgv(true, ",", "\\n", "\\\'", "\\", false);
+    runImport(argv);
+    try {
+      String tableClassName = getTableName();
+
+      argv = getArgv(false, ",", "\\n", "\\\'", "\\", false);
+      SqoopOptions opts = new ImportTool().parseArguments(argv, null, null,
+          true);
+
+      CompilationManager compileMgr = new CompilationManager(opts);
+      String jarFileName = compileMgr.getJarFilename();
+
+      // Make sure the user's class is loaded into our address space.
+      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+          tableClassName);
+
+      JobConf job = new JobConf();
+      job.setJar(jarFileName);
+
+      // Tell the job what class we're testing.
+      job.set(ExplicitSetMapper.USER_TYPE_NAME_KEY, tableClassName);
+      job.set(ExplicitSetMapper.SET_COL_KEY, BASE_COL_NAME + "0");
+      job.set(ExplicitSetMapper.SET_VAL_KEY, "this-is-a-test");
+
+      // use local mode in the same JVM.
+      ConfigurationHelper.setJobtrackerAddr(job, "local");
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
+      String warehouseDir = getWarehouseDir();
+      Path warehousePath = new Path(warehouseDir);
+      Path inputPath = new Path(warehousePath, getTableName());
+      Path outputPath = new Path(warehousePath, getTableName() + "-out");
+
+      job.setMapperClass(ExplicitSetMapper.class);
+      job.setNumReduceTasks(0);
+      FileInputFormat.addInputPath(job, inputPath);
+      FileOutputFormat.setOutputPath(job, outputPath);
+
+      job.setOutputKeyClass(Text.class);
+      job.setOutputValueClass(NullWritable.class);
+
+      JobClient.runJob(job);
+    } catch (InvalidOptionsException ioe) {
+      fail(ioe.toString());
+    } catch (ParseException pe) {
+      fail(pe.toString());
+    } finally {
+      if (null != prevClassLoader) {
+        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+      }
+    }
   }
 }
 

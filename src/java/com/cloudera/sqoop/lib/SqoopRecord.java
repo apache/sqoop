@@ -96,5 +96,17 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
   throw new RuntimeException(
       "Got null field map from record. Regenerate your record class.");
   }
+
+  /**
+   * Allows an arbitrary field to be set programmatically to the
+   * specified value object. The value object must match the
+   * type expected for the particular field or a RuntimeException
+   * will result.
+   * @throws RuntimeException if the specified field name does not exist.
+   */
+  public void setField(String fieldName, Object fieldVal) {
+    throw new RuntimeException("This SqoopRecord does not support setField(). "
+        + "Regenerate your record class.");
+  }
 }
 

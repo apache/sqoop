@@ -650,6 +650,41 @@ public class ClassWriter {
   }
 
   /**
+   * Generate the setField() method.
+   * @param columnTypes - mapping from column names to sql types
+   * @param colNames - ordered list of column names for table.
+   * @param sb - StringBuilder to append code to
+   */
+  private void generateSetField(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
+    sb.append("  public void setField(String __fieldName, Object __fieldVal) "
+        + "{\n");
+    boolean first = true;
+    for (String colName : colNames) {
+      int sqlType = columnTypes.get(colName);
+      String javaType = connManager.toJavaType(sqlType);
+      if (null == javaType) {
+        continue;
+      } else {
+        if (!first) {
+          sb.append("    else");
+        }
+        
+        sb.append("    if (\"" + colName + "\".equals(__fieldName)) {\n");
+        sb.append("      this." + colName + " = (" + javaType
+            + ") __fieldVal;\n");
+        sb.append("    }\n");
+        first = false;
+      }
+    }
+    sb.append("    else {\n");
+    sb.append("      throw new RuntimeException(");
+    sb.append("\"No such field: \" + __fieldName);\n");
+    sb.append("    }\n");
+    sb.append("  }\n");
+  }
+
+  /**
    * Generate the getFieldMap() method.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
@@ -1131,6 +1166,7 @@ public class ClassWriter {
     generateParser(columnTypes, colNames, sb);
     generateCloneMethod(columnTypes, colNames, sb);
     generateGetFieldMap(columnTypes, colNames, sb);
+    generateSetField(columnTypes, colNames, sb);
 
     // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a
     // WritableComparable
