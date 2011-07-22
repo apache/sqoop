@@ -132,6 +132,7 @@ public class MergeJob extends JobBase {
 
       // Make sure Sqoop and anything else we need is on the classpath.
       cacheJars(job, null);
+      setJob(job);
       return this.runJob(job);
     } catch (InterruptedException ie) {
       throw new IOException(ie);

@@ -61,6 +61,8 @@ public class JobBase {
   protected Class<? extends InputFormat> inputFormatClass;
   protected Class<? extends OutputFormat> outputFormatClass;
 
+  private Job mrJob;
+
   private ClassLoader prevClassLoader = null;
 
   public JobBase() {
@@ -290,6 +292,19 @@ public class JobBase {
     ConfigurationHelper.setJobNumMaps(job, numMapTasks);
     job.setNumReduceTasks(0);
     return numMapTasks;
+  }
+
+  /** Set the main job that will be run. */
+  protected void setJob(Job job) {
+    mrJob = job;
+  }
+
+  /**
+   * @return the main MapReduce job that is being run, or null if no
+   * job has started.
+   */
+  public Job getJob() {
+    return mrJob;
   }
 
   /**

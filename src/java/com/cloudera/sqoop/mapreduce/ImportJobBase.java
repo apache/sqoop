@@ -163,6 +163,7 @@ public class ImportJobBase extends JobBase {
       cacheJars(job, getContext().getConnManager());
 
       jobSetup(job);
+      setJob(job);
       boolean success = runJob(job);
       if (!success) {
         throw new ImportException("Import job failed!");

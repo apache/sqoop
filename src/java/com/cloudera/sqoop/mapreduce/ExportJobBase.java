@@ -254,7 +254,6 @@ public class ExportJobBase extends JobBase {
     return success;
   }
 
-
   /**
    * Run an export job to dump a table from HDFS to a database. If a staging
    * table is specified and the connection manager supports staging of data,
@@ -333,7 +332,7 @@ public class ExportJobBase extends JobBase {
       configureMapper(job, tableName, tableClassName);
       configureNumTasks(job);
       cacheJars(job, context.getConnManager());
-
+      setJob(job);
       boolean success = runJob(job);
       if (!success) {
         throw new ExportException("Export job failed!");
