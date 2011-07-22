@@ -37,9 +37,6 @@ fi
 if [ -z "${HBASE_HOME}" ]; then
   HBASE_HOME=/usr/lib/hbase
 fi
-if [ -z "${ZOOKEEPER_HOME}" ]; then
-  ZOOKEEPER_HOME=/usr/lib/zookeeper
-fi
 
 # Check: If we can't find our dependencies, give up here.
 if [ ! -d "${HADOOP_HOME}" ]; then
@@ -50,11 +47,6 @@ fi
 if [ ! -d "${HBASE_HOME}" ]; then
   echo "Error: $HBASE_HOME does not exist!"
   echo 'Please set $HBASE_HOME to the root of your HBase installation.'
-  exit 1
-fi
-if [ ! -d "${ZOOKEEPER_HOME}" ]; then
-  echo "Error: $ZOOKEEPER_HOME does not exist!"
-  echo 'Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.'
   exit 1
 fi
 
@@ -84,14 +76,12 @@ if [ -d "$SQOOP_HOME/lib" ]; then
 fi
 
 # Add HBase to dependency list
-add_to_classpath $HBASE_HOME
-add_to_classpath $HBASE_HOME/lib
+SQOOP_CLASSPATH=`$HBASE_HOME/bin/hbase classpath`:${SQOOP_CLASSPATH}
 
-HBASE_CONF_DIR=${HBASE_CONF_DIR:-${HBASE_HOME}/conf}
-SQOOP_CLASSPATH=${HBASE_CONF_DIR}:${SQOOP_CLASSPATH}
-
-add_to_classpath $ZOOKEEPER_HOME
-add_to_classpath $ZOOKEEPER_HOME/lib
+ZOOCFGDIR=${ZOOCFGDIR:-/etc/zookeeper}
+if [ -d "${ZOOCFGDIR}" ]; then
+  SQOOP_CLASSPATH=$ZOOCFGDIR:$SQOOP_CLASSPATH
+fi
 
 SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-${SQOOP_HOME}/conf}
 SQOOP_CLASSPATH=${SQOOP_CONF_DIR}:${SQOOP_CLASSPATH}
@@ -105,10 +95,17 @@ fi
 
 add_to_classpath ${SQOOP_JAR_DIR}
 
+HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
+if [ ! -z "$SQOOP_USER_CLASSPATH" ]; then
+  # User has elements to prepend to the classpath, forcibly overriding
+  # Sqoop's own lib directories.
+  export HADOOP_CLASSPATH="${SQOOP_USER_CLASSPATH}:${HADOOP_CLASSPATH}"
+fi
+
 export SQOOP_CLASSPATH
 export SQOOP_CONF_DIR
 export SQOOP_JAR_DIR
-export HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
+export HADOOP_CLASSPATH
 export HADOOP_HOME
 export HBASE_HOME
 
