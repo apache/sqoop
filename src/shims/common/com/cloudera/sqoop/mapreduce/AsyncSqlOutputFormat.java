@@ -112,22 +112,36 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
    */
   public static class AsyncDBOperation {
     private final PreparedStatement stmt;
-    private final boolean commitAndClose;
     private final boolean isBatch;
+    private final boolean commit;
+    private final boolean stopThread;
+
+    @Deprecated
+    /** Do not use AsyncDBOperation(PreparedStatement s, boolean
+     * commitAndClose, boolean batch). Use AsyncDBOperation(PreparedStatement
+     *  s, boolean batch, boolean commit, boolean stopThread) instead.
+     */
+    public AsyncDBOperation(PreparedStatement s, boolean commitAndClose,
+        boolean batch) {
+        this(s, batch, commitAndClose, commitAndClose);
+    }
 
     /**
      * Create an asynchronous database operation.
      * @param s the statement, if any, to execute.
-     * @param commitAndClose if true, the current transaction should be
-     * committed, and the executor thread should stop after this operation.
      * @param batch is true if this is a batch PreparedStatement, or false
      * if it's a normal singleton statement.
+     * @param commit is true if this statement should be committed to the
+     * database.
+     * @param stopThread if true, the executor thread should stop after this
+     * operation.
      */
-    public AsyncDBOperation(PreparedStatement s, boolean commitAndClose,
-        boolean batch) {
+    public AsyncDBOperation(PreparedStatement s, boolean batch,
+        boolean commit, boolean stopThread) {
       this.stmt = s;
-      this.commitAndClose = commitAndClose;
       this.isBatch = batch;
+      this.commit = commit;
+      this.stopThread = stopThread;
     }
 
     /**
@@ -142,14 +156,14 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
      * If getStatement() is non-null, the statement is run first.
      */
     public boolean requiresCommit() {
-      return this.commitAndClose;
+      return this.commit;
     }
 
     /**
      * @return true if the executor should stop after this command.
      */
     public boolean stop() {
-      return this.commitAndClose;
+      return this.stopThread;
     }
 
     /**
@@ -246,12 +260,6 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
             // Always check whether we should end the loop, regardless
             // of the presence of an exception.
             if (op.stop()) {
-              // Don't continue processing after this operation.
-              try {
-                conn.close();
-              } catch (SQLException sqlE) {
-                setLastError(sqlE);
-              }
               return;
             }
           } // try .. catch .. finally.

@@ -131,7 +131,7 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
    * @param closeConn if true, commits the transaction and closes the
    * connection.
    */
-  private void execUpdate(boolean closeConn)
+  private void execUpdate(boolean commit, boolean stopThread)
       throws InterruptedException, SQLException {
 
     if (!startedExecThread) {
@@ -150,8 +150,8 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
       // Pass this operation off to the update thread. This will block if
       // the update thread is already performing an update.
       AsyncSqlOutputFormat.AsyncDBOperation op =
-          new AsyncSqlOutputFormat.AsyncDBOperation(stmt, closeConn,
-          isBatchExec());
+          new AsyncSqlOutputFormat.AsyncDBOperation(stmt, isBatchExec(),
+                  commit, stopThread);
       execThread.put(op);
       successfulPut = true; // op has been posted to the other thread.
     } finally {
@@ -173,20 +173,33 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
   public void close(TaskAttemptContext context)
       throws IOException, InterruptedException {
     try {
-      execUpdate(true);
-    } catch (SQLException sqle) {
-      throw new IOException(sqle);
-    } finally {
-      execThread.join();
-    }
+      try {
+        execUpdate(true, true);
+      } catch (SQLException sqle) {
+        throw new IOException(sqle);
+      } finally {
+        execThread.join();
+      }
 
-    // If we're not leaving on an error return path already,
-    // now that execThread is definitely stopped, check that the
-    // error slot remains empty.
-    SQLException lastErr = execThread.getLastError();
-    if (null != lastErr) {
-      throw new IOException(lastErr);
+      // If we're not leaving on an error return path already,
+      // now that execThread is definitely stopped, check that the
+      // error slot remains empty.
+      SQLException lastErr = execThread.getLastError();
+      if (null != lastErr) {
+        throw new IOException(lastErr);
+      }
+    } finally {
+      try {
+        closeConnection(context);
+      } catch (SQLException sqle) {
+        throw new IOException(sqle);
+      }
     }
+  }
+
+  public void closeConnection(TaskAttemptContext context)
+      throws SQLException {
+    this.connection.close();
   }
 
   @Override
@@ -196,7 +209,7 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
     try {
       records.add((SqoopRecord) key.clone());
       if (records.size() >= this.rowsPerStmt) {
-        execUpdate(false);
+        execUpdate(false, false);
       }
     } catch (CloneNotSupportedException cnse) {
       throw new IOException("Could not buffer record", cnse);
