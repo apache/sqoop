@@ -199,6 +199,14 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("incremental.last.value")
   private String incrementalLastValue;
 
+  // HDFS paths for "old" and "new" datasets in merge tool.
+  @StoredAsProperty("merge.old.path") private String mergeOldPath;
+  @StoredAsProperty("merge.new.path") private String mergeNewPath;
+
+  // "key" column for the merge operation.
+  @StoredAsProperty("merge.key.col") private String mergeKeyCol;
+
+
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
   // be populated by the JobStorage to facilitate updating the same
@@ -1531,5 +1539,52 @@ public class SqoopOptions implements Cloneable {
   public void setParent(SqoopOptions options) {
     this.parent = options;
   }
+
+  /**
+   * Set the path name used to do an incremental import of old data
+   * which will be combined with an "new" dataset.
+   */
+  public void setMergeOldPath(String path) {
+    this.mergeOldPath = path;
+  }
+
+  /**
+   * Return the path name used to do an incremental import of old data
+   * which will be combined with an "new" dataset.
+   */
+  public String getMergeOldPath() {
+    return this.mergeOldPath;
+  }
+
+  /**
+   * Set the path name used to do an incremental import of new data
+   * which will be combined with an "old" dataset.
+   */
+  public void setMergeNewPath(String path) {
+    this.mergeNewPath = path;
+  }
+
+  /**
+   * Return the path name used to do an incremental import of new data
+   * which will be combined with an "old" dataset.
+   */
+  public String getMergeNewPath() {
+    return this.mergeNewPath;
+  }
+
+  /** 
+   * Set the name of the column used to merge an old and new dataset.
+   */
+  public void setMergeKeyCol(String col) {
+    this.mergeKeyCol = col;
+  }
+
+  /** 
+   * Return the name of the column used to merge an old and new dataset.
+   */
+  public String getMergeKeyCol() {
+    return this.mergeKeyCol;
+  }
+
 }
 

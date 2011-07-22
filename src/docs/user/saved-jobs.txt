@@ -51,7 +51,7 @@ $ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]
 $ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]
 ----
 
-Although the Hadoop generic arguments must preceed any export arguments,
+Although the Hadoop generic arguments must preceed any job arguments,
 the job arguments can be entered in any order with respect to one
 another.
 
@@ -230,4 +230,79 @@ value +jdbc:hsqldb:hsql://<server-name>:<port>/sqoop+. For example,
 
 This metastore may be hosted on a machine within the Hadoop cluster, or
 elsewhere on the network.
+
+
++sqoop-merge+
+-------------
+
+Purpose
+~~~~~~~
+
+include::merge-purpose.txt[]
+
+Syntax
+~~~~~~
+
+----
+$ sqoop merge (generic-args) (merge-args)
+$ sqoop-merge (generic-args) (merge-args)
+----
+
+Although the Hadoop generic arguments must preceed any merge arguments,
+the job arguments can be entered in any order with respect to one
+another.
+
+.Merge options:
+[grid="all"]
+`---------------------------`------------------------------------------
+Argument                    Description
+-----------------------------------------------------------------------
++\--class-name <class>+     Specify the name of the record-specific \
+                            class to use during the merge job.
++\--jar-file <file>+        Specify the name of the jar to load the \
+                            record class from.
++\--merge-key <col>+        Specify the name of a column to use as \
+                            the merge key.
++\--new-data <path>+        Specify the path of the newer dataset.
++\--onto <path>+            Specify the path of the older dataset.
++\--target-dir <path>+      Specify the target path for the output \
+                            of the merge job.
+-----------------------------------------------------------------------
+
+The +merge+ tool runs a MapReduce job that takes two directories as
+input: a newer dataset, and an older one. These are specified with
++\--new-data+ and +\--onto+ respectively. The output of the MapReduce
+job will be placed in the directory in HDFS specified by +\--target-dir+.
+
+When merging the datasets, it is assumed that there is a unique primary
+key value in each record. The column for the primary key is specified
+with +\--merge-key+. Multiple rows in the same dataset should not
+have the same primary key, or else data loss may occur.
+
+To parse the dataset and extract the key column, the auto-generated
+class from a previous import must be used. You should specify the
+class name and jar file with +\--class-name+ and +\--jar-file+. If
+this is not availab,e you can recreate the class using the +codegen+
+tool.
+
+The merge tool is typically run after an incremental import with the
+date-last-modified mode (+sqoop import --incremental lastmodified ...+).
+
+Supposing two incremental imports were performed, where some older data
+is in an HDFS directory named +older+ and newer data is in an HDFS
+directory named +newer+, these could be merged like so:
+
+----
+$ sqoop merge --new-data newer --onto older --target-dir merged \
+    --jar-file datatypes.jar --class-name Foo --merge-key id
+----
+
+This would run a MapReduce job where the value in the +id+ column
+of each row is used to join rows; rows in the +newer+ dataset will
+be used in preference to rows in the +older+ dataset.
+
+This can be used with both SequenceFile- and text-based incremental
+imports. The file types of the newer and older datasets must be the
+same.
+
 

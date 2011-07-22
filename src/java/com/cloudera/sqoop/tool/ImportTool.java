@@ -253,6 +253,14 @@ public class ImportTool extends BaseSqoopTool {
     StringBuilder sb = new StringBuilder();
     String prevEndpoint = options.getIncrementalLastValue();
 
+    if (incrementalMode == SqoopOptions.IncrementalMode.DateLastModified
+        && null != prevEndpoint && !prevEndpoint.contains("\'")) {
+      // Incremental imports based on timestamps should be 'quoted' in
+      // ANSI SQL. If the user didn't specify single-quotes, put them
+      // around, here.
+      prevEndpoint = "'" + prevEndpoint + "'";
+    }
+
     String checkColName = manager.escapeColName(
         options.getIncrementalTestColumn());
     LOG.info("Incremental import based on column " + checkColName);

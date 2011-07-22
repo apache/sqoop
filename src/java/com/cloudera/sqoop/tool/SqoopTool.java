@@ -73,6 +73,8 @@ public abstract class SqoopTool {
         "List available databases on a server");
     registerTool("list-tables", ListTablesTool.class,
         "List available tables in a database");
+    registerTool("merge", MergeTool.class,
+        "Merge results of incremental imports");
     registerTool("metastore", MetastoreTool.class,
         "Run a standalone Sqoop metastore");
     registerTool("job", JobTool.class,

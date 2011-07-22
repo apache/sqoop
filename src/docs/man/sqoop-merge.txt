@@ -1,0 +1,77 @@
+sqoop-merge(1)
+==============
+
+NAME
+----
+sqoop-merge - Merge a newer dataset from an incremental import onto an
+older one.
+
+SYNOPSIS
+--------
+'sqoop-merge' <generic-options> <tool-options>
+
+'sqoop merge' <generic-options> <tool-options>
+
+
+DESCRIPTION
+-----------
+
+include::../user/merge-purpose.txt[]
+
+OPTIONS
+-------
+
+Merge options
+~~~~~~~~~~~~~
+--class-name (class)::
+  Specify the name of the record-specific class to use during the merge job.
+
+--jar-file (file)::
+  Specify the name of the jar to load the record class from.
+
+--merge-key (col)::
+  Specify the name of a column to use as the merge key.
+
+--new-data (path)::
+  Specify the path of the newer dataset.
+
+--onto (path)::
+  Specify the path of the older dataset.
+
+--target-dir (path)::
+  Specify the target path for the output of the merge job.
+
+
+Common options
+~~~~~~~~~~~~~~
+
+--help::
+  Print usage instructions
+
+--verbose::
+  Print more information while working
+
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+

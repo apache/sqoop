@@ -139,8 +139,13 @@ public class JobBase {
 
     addToCache(Jars.getSqoopJarPath(), fs, localUrls);
     addToCache(Jars.getShimJarPath(), fs, localUrls);
-    addToCache(Jars.getDriverClassJar(mgr), fs, localUrls);
-    addToCache(Jars.getJarPathForClass(mgr.getClass()), fs, localUrls);
+    if (null != mgr) {
+      addToCache(Jars.getDriverClassJar(mgr), fs, localUrls);
+      addToCache(Jars.getJarPathForClass(mgr.getClass()), fs, localUrls);
+    }
+
+
+    // If the user specified a particular jar file name,
 
     // Add anything in $SQOOP_HOME/lib, if this is set.
     String sqoopHome = System.getenv("SQOOP_HOME");

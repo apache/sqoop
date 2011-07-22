@@ -80,6 +80,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestSavedJobs.class);
     suite.addTestSuite(TestNamedFifo.class);
     suite.addTestSuite(TestBooleanParser.class);
+    suite.addTestSuite(TestMerge.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;

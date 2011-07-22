@@ -138,6 +138,12 @@ public abstract class BaseSqoopTool extends SqoopTool {
   // Arguments for the metastore.
   public static final String METASTORE_SHUTDOWN_ARG = "shutdown";
 
+
+  // Arguments for merging datasets.
+  public static final String NEW_DATASET_ARG = "new-data";
+  public static final String OLD_DATASET_ARG = "onto";
+  public static final String MERGE_KEY_ARG = "merge-key";
+
   public BaseSqoopTool() {
   }
 
