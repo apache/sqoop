@@ -42,18 +42,21 @@ Sqoop will use +$HIVE_HOME/bin/hive+ from here.
 
 NOTE: This function is incompatible with +\--as-sequencefile+.
 
-Hive's text parser does not support escaping or enclosing
-characters. Sqoop will print a warning if you use +\--escaped-by+,
-+\--enclosed-by+, or +\--optionally-enclosed-by+ because Hive does not know
-how to parse these. It will pass the field and record delimiters through
-to Hive. If you do not set any delimiters and do use +\--hive-import+,
-the field delimiter will be set to +^A+ and the record delimiter will
-be set to +\n+ to be consistent with Hive's defaults. It is important when
-importing data to Hive to choose unambiguous field and record delimiters
-due to the lack of escape and enclosing characters.
+Even though Hive supports escaping characters, it does not
+handle escaping of new-line character. Also, it does not support
+the notion of enclosing characters that may include field delimiters
+in the enclosed string.  It is therefore recommended that you choose
+unambiguous field and record-terminating delimiters without the help
+of escaping and enclosing characters when working with Hive; this is
+due to limitations of Hive's input parsing abilities. If you do use
++\--escaped-by+, +\--enclosed-by+, or +\--optionally-enclosed-by+ when
+importing data into Hive, Sqoop will print a warning message.
+
+Sqoop will pass the field and record delimiters through to Hive. If you do
+not set any delimiters and do use +\--hive-import+, the field delimiter will
+be set to +^A+ and the record delimiter will be set to +\n+ to be consistent
+with Hive's defaults.
 
 The table name used in Hive is, by default, the same as that of the
 source table. You can control the output table name with the +\--hive-table+
 option.
-
-

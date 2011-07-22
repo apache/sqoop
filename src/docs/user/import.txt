@@ -203,7 +203,7 @@ support imports of large object columns.
 When importing from PostgreSQL in conjunction with direct mode, you
 can split the import into separate files after
 individual files reach a certain size. This size limit is controlled
-with the +\--direct-split-size+ argument. 
+with the +\--direct-split-size+ argument.
 
 By default, Sqoop will import a table named +foo+ to a directory named
 +foo+ inside your home directory in HDFS. For example, if your
@@ -437,11 +437,13 @@ Which would result in the following import:
 "Another \"string with quotes\"",4,5,6...
 ----
 
-NOTE: Hive does not support enclosing and escaping characters. You
-must choose unambiguous field and record-terminating delimiters
-without the help of escaping and enclosing characters when
-working with Hive; this is a limitation of Hive's input parsing
-abilities.
+NOTE: Even though Hive supports escaping characters, it does not
+handle escaping of new-line character. Also, it does not support
+the notion of enclosing characters that may include field delimiters
+in the enclosed string.  It is therefore recommended that you choose
+unambiguous field and record-terminating delimiters without the help
+of escaping and enclosing characters when working with Hive; this is
+due to limitations of Hive's input parsing abilities.
 
 The +\--mysql-delimiters+ argument is a shorthand argument which uses
 the default delimiters for the +mysqldump+ program.
@@ -459,7 +461,7 @@ include::input-args.txt[]
 
 When Sqoop imports data to HDFS, it generates a Java class which can
 reinterpret the text files that it creates when doing a
-delimited-format import. The delimiters are chosen with arguments such 
+delimited-format import. The delimiters are chosen with arguments such
 as +\--fields-terminated-by+; this controls both how the data is
 written to disk, and how the generated +parse()+ method reinterprets
 this data. The delimiters used by the +parse()+ method can be chosen
@@ -565,7 +567,7 @@ $ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
     --class-name com.foocorp.Employee --as-sequencefile
 ----
 
-Specifying the delimiters to use in a text-mode import: 
+Specifying the delimiters to use in a text-mode import:
 
 ----
 $ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
