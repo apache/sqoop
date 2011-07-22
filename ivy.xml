@@ -34,23 +34,11 @@
     <conf name="common" visibility="private"
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
-    <conf name="apache" visibility="private"
-      extends="common,runtime"
-      description="artifacts from Apache for compile/test" />
-    <conf name="apache21" visibility="private"
-      extends="common,runtime"
-      description="artifacts from Apache 0.21 for compile/test" />
     <conf name="cloudera" visibility="private"
       extends="common,runtime"
       description="artifacts from Cloudera for compile/test" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
-    <conf name="apachetest" visibility="private"
-      extends="test,apache"
-      description="artifacts from Apache for testing" />
-    <conf name="apache21test" visibility="private"
-      extends="test,apache21"
-      description="artifacts from Apache 0.21 for testing" />
     <conf name="clouderatest" visibility="private"
       extends="test,cloudera"
       description="artifacts from Cloudera for testing" />
@@ -77,34 +65,6 @@
     <artifact conf="master"/>
   </publications>
   <dependencies>
-    <!-- Dependencies for Apache Hadoop (trunk) -->
-    <dependency org="org.apache.hadoop" name="hadoop-common"
-      rev="${hadoop-common.apache.version}" conf="apache->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-common-test"
-      rev="${hadoop-common.apache.version}" conf="apachetest->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-hdfs"
-      rev="${hadoop-hdfs.apache.version}" conf="apache->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
-      rev="${hadoop-hdfs.apache.version}" conf="apachetest->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-mapred"
-      rev="${hadoop-mapred.apache.version}" conf="apache->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-mapred-test"
-      rev="${hadoop-mapred.apache.version}" conf="apachetest->default"/>
-
-    <!-- Dependencies for Apache Hadoop (0.21) -->
-    <dependency org="org.apache.hadoop" name="hadoop-common"
-      rev="${hadoop-common.apache21.version}" conf="apache21->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-common-test"
-      rev="${hadoop-common.apache21.version}" conf="apache21test->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-hdfs"
-      rev="${hadoop-hdfs.apache21.version}" conf="apache21->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-hdfs-test"
-      rev="${hadoop-hdfs.apache21.version}" conf="apache21test->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-mapred"
-      rev="${hadoop-mapred.apache21.version}" conf="apache21->default"/>
-    <dependency org="org.apache.hadoop" name="hadoop-mapred-test"
-      rev="${hadoop-mapred.apache21.version}" conf="apache21test->default"/>
-
     <!-- Dependencies for Cloudera's Distribution for Hadoop -->
     <dependency org="com.cloudera.hadoop" name="hadoop-core"
       rev="${hadoop-core.cloudera.version}" conf="cloudera->default"/>

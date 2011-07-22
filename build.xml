@@ -99,11 +99,6 @@
   <property name="javac.debug" value="on"/>
   <property name="build.encoding" value="ISO-8859-1"/>
 
-  <!-- controlling the Hadoop source -->
-  <!-- valid values for ${hadoop.dist} are 'apache' (trunk), 'apache21',
-       and 'cloudera' -->
-  <!-- <property name="hadoop.dist" value="cloudera" /> -->
-
   <!-- testing with JUnit -->
   <property name="test.junit.output.format" value="plain"/>
   <property name="test.output" value="no"/>
@@ -167,7 +162,7 @@
 
   <!--this is the naming policy for artifacts we want pulled down-->
   <property name="ivy.artifact.retrieve.pattern"
-            value="${name}/[conf]/[artifact]-[revision].[ext]"/>
+	    value="${name}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
 
   <!--test related properties -->
   <property name="sqoop.test.oracle.connectstring"

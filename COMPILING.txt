@@ -53,6 +53,10 @@ If you want to build everything (including the documentation), type
 +ant package+. This will appear in the
 +build/sqoop-(version)/+ directory.
 
+Sqoop is built against the latest Hadoop distribution available from Cloudera.
+These dependencies are obtained via IVY which downloads the necessary binaries
+from Cloudera maven repository.
+
 == Testing Sqoop
 
 Sqoop has several unit tests which can be run with +ant test+. This command
@@ -89,26 +93,6 @@ ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
 
 Note that +sqoop.thirdparty.lib.dir+ can also be specified in
 +build.properties+.
-
-== Multiple Hadoop Distributions
-
-Sqoop can be compiled against different versions of Hadoop. Both the svn
-trunk of Apache Hadoop, and Cloudera's Distribution for Hadoop (CDH3)
-can be used as the underlying Hadoop implementation.
-
-By default, Sqoop will compile against the latest snapshot from Apache
-(retrieved through maven). You can specify the Hadoop distribution to
-retrieve with the hadoop.dist property. Valid values are "apache",
-"apache21", or "cloudera":
-
-++++
-ant jar -Dhadoop.dist=apache # Uses the nightly build of "trunk"
-ant jar -Dhadoop.dist=apache21
-ant jar -Dhadoop.dist=cloudera
-++++
-
-To switch between builds, you will need to clear Ivy's dependency
-cache: +ant veryclean+
 
 == Code Quality Analysis
 
