@@ -56,7 +56,7 @@ public class HiveTypes {
     } else if (sqlType == Types.TINYINT) {
       return "TINYINT";
     } else if (sqlType == Types.SMALLINT) {
-      return "INTEGER";
+      return "INT";
     } else if (sqlType == Types.BIGINT) {
       return "BIGINT";
     } else if (sqlType == Types.REAL) {
