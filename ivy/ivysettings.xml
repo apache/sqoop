@@ -34,6 +34,9 @@
   <property name="snapshot.apache.org"
       value="https://repository.apache.org/content/repositories/snapshots/"
       override="false"/>
+  <property name="snapshot.cloudera.com"
+      value="https://repository.cloudera.com/nexus/content/repositories/snapshots/"
+      override="false"/>
   <property name="maven2.pattern"
       value="[organisation]/[module]/[revision]/[module]-[revision]"/>
   <property name="repo.dir" value="${user.home}/.m2/repository"/>
@@ -46,6 +49,8 @@
         pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="apache-snapshot" root="${snapshot.apache.org}"
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
+    <ibiblio name="cloudera-snapshot" root="${snapshot.cloudera.com}"
+        m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
 
     <filesystem name="fs" m2compatible="true">
        <artifact pattern="${repo.dir}/org/apache/hadoop/[module]/[revision]/[module]-[revision].[ext]"/>
@@ -55,12 +60,14 @@
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
       <resolver ref="apache-snapshot"/> 
+      <resolver ref="cloudera-snapshot"/> 
       <resolver ref="maven2"/>
     </chain>
 
     <chain name="internal" dual="true">
       <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/> 
+      <resolver ref="cloudera-snapshot"/> 
       <resolver ref="maven2"/>
     </chain>
 
