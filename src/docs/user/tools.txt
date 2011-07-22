@@ -156,9 +156,14 @@ single dash character (+-+), whereas tool-specific arguments start
 with two dashes (+\--+), unless they are single character arguments such as +-P+.
 
 The +-conf+, +-D+, +-fs+ and +-jt+ arguments control the configuration
-and Hadoop server settings. The +-files+, +-libjars+, and +-archives+
-arguments are not typically used with Sqoop, but they are included as
-part of Hadoop's internal argument-parsing system.
+and Hadoop server settings. For example, the +-D mapred.job.name=<job_name>+ can
+be used to set the name of the MR job that Sqoop launches, if not specified,
+the name defaults to the jar name for the job - which is derived from the used
+table name.
+
+The +-files+, +-libjars+, and +-archives+ arguments are not typically used with
+Sqoop, but they are included as part of Hadoop's internal argument-parsing
+system.
 
 
 Using Options Files to Pass Arguments
