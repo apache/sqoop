@@ -1056,4 +1056,22 @@
         value="true" />
   </target>
 
+  <target name="eclipse" description="Generate Eclipse project"
+      depends="init,ivy-retrieve-hadoop,ivy-retrieve-hadoop-test">
+    <taskdef name="eclipse" classname="prantl.ant.eclipse.EclipseTask"
+        classpath="${lib.dir}/ant-eclipse-1.0-jvm1.2.jar" />
+    <eclipse failonerror="true" updatealways="true">
+      <project name="${name}" />
+      <classpath>
+        <source path="src/java" />
+        <source path="src/perftest" />
+        <source path="src/shims/apache" />
+        <source path="src/shims/common" />
+        <source path="src/shims/cloudera" />
+        <source path="src/test" />
+        <output path="${build.dir}/eclipse-build" />
+        <library pathref="test.classpath" />
+      </classpath>
+    </eclipse>
+  </target>
 </project>

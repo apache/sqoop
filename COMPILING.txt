@@ -226,3 +226,10 @@ snapshot. To simultaneously deploy this to a maven repository, include
 the +mvn-install+ or +mvn-deploy+ targets as well.
 
 
+== Using Eclipse
+
+Running +ant eclipse+ will generate +.project+ and +.classpath+ files that
+will allow you to edit Sqoop sources in Eclipse with all the library
+dependencies correctly resolved. To compile the jars, you should still
+use ant.
+
