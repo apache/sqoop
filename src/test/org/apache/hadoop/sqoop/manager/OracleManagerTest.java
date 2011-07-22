@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.util.FileListing;
@@ -78,7 +78,7 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   @Before
   public void setUp() {
-    ImportOptions options = new ImportOptions(CONNECT_STRING, TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
     options.setUsername(ORACLE_USER_NAME);
     options.setPassword(ORACLE_USER_PASS);
 

@@ -26,7 +26,8 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 
-import org.apache.hadoop.sqoop.util.ImportError;
+import org.apache.hadoop.sqoop.util.ExportException;
+import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
  * Abstract interface that manages connections to a database.
@@ -91,11 +92,19 @@ public abstract class ConnManager {
    * Perform an import of a table from the database into HDFS
    */
   public abstract void importTable(ImportJobContext context)
-      throws IOException, ImportError;
+      throws IOException, ImportException;
 
   /**
    * Perform any shutdown operations on the connection.
    */
   public abstract void close() throws SQLException;
+
+  /**
+   * Export data stored in HDFS into a table in a database
+   */
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    throw new ExportException("This database does not support exports");
+  }
 }
 

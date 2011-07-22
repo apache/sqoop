@@ -16,18 +16,29 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop.manager;
-
-import org.apache.hadoop.sqoop.SqoopOptions;
+package org.apache.hadoop.sqoop.util;
 
 /**
- * Interface for factory classes for ConnManager implementations.
- * ManagerFactories are instantiated by o.a.h.s.ConnFactory and
- * stored in an ordered list. The ConnFactory.getManager() implementation
- * calls the accept() method of each ManagerFactory, in order until
- * one such call returns a non-null ConnManager instance.
+ * General error during import process.
+ *
+ * 
  */
-public abstract class ManagerFactory {
-  public abstract ConnManager accept(SqoopOptions options);
-}
+@SuppressWarnings("serial")
+public class ImportException extends Exception {
 
+  public ImportException() {
+    super("ImportException");
+  }
+
+  public ImportException(final String message) {
+    super(message);
+  }
+
+  public ImportException(final Throwable cause) {
+    super(cause);
+  }
+
+  public ImportException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+}

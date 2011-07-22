@@ -21,28 +21,28 @@ package org.apache.hadoop.sqoop.manager;
 import org.apache.hadoop.sqoop.SqoopOptions;
 
 /**
- * A set of parameters describing an import operation; this is passed to
- * ConnManager.importTable() as its argument.
+ * A set of parameters describing an export operation; this is passed to
+ * ConnManager.exportTable() as its argument.
  */
-public class ImportJobContext {
+public class ExportJobContext {
 
   private String tableName;
   private String jarFile;
   private SqoopOptions options;
 
-  public ImportJobContext(final String table, final String jar, final SqoopOptions opts) {
+  public ExportJobContext(final String table, final String jar, final SqoopOptions opts) {
     this.tableName = table;
     this.jarFile = jar;
     this.options = opts;
   }
 
-  /** @return the name of the table to import. */
+  /** @return the name of the table to export. */
   public String getTableName() {
     return tableName;
   }
 
   /** @return the name of the jar file containing the user's compiled
-   * ORM classes to use during the import.
+   * ORM classes to use during the export.
    */
   public String getJarFile() {
     return jarFile;

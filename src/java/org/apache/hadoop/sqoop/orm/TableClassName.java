@@ -18,23 +18,23 @@
 
 package org.apache.hadoop.sqoop.orm;
 
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Reconciles the table name being imported with the class naming information
- * specified in ImportOptions to determine the actual package and class name
+ * specified in SqoopOptions to determine the actual package and class name
  * to use for a table.
  */
 public class TableClassName {
 
   public static final Log LOG = LogFactory.getLog(TableClassName.class.getName());
 
-  private final ImportOptions options;
+  private final SqoopOptions options;
 
-  public TableClassName(final ImportOptions opts) {
+  public TableClassName(final SqoopOptions opts) {
     if (null == opts) {
       throw new NullPointerException("Cannot instantiate a TableClassName on null options.");
     } else {

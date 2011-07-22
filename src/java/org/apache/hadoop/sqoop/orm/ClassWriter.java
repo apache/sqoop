@@ -18,7 +18,7 @@
 
 package org.apache.hadoop.sqoop.orm;
 
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.SqlManager;
 import org.apache.hadoop.sqoop.lib.BigDecimalSerializer;
@@ -57,7 +57,7 @@ public class ClassWriter {
    */
   public static final int CLASS_WRITER_VERSION = 2;
 
-  private ImportOptions options;
+  private SqoopOptions options;
   private ConnManager connManager;
   private String tableName;
   private CompilationManager compileManager;
@@ -68,7 +68,7 @@ public class ClassWriter {
    * @param connMgr the connection manager used to describe the table.
    * @param table the name of the table to read.
    */
-  public ClassWriter(final ImportOptions opts, final ConnManager connMgr,
+  public ClassWriter(final SqoopOptions opts, final ConnManager connMgr,
       final String table, final CompilationManager compMgr) {
     this.options = opts;
     this.connManager = connMgr;

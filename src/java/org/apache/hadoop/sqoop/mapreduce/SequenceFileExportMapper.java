@@ -16,18 +16,28 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop.manager;
+package org.apache.hadoop.sqoop.mapreduce;
 
-import org.apache.hadoop.sqoop.SqoopOptions;
+import java.io.IOException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Mapper.Context;
+
+import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 /**
- * Interface for factory classes for ConnManager implementations.
- * ManagerFactories are instantiated by o.a.h.s.ConnFactory and
- * stored in an ordered list. The ConnFactory.getManager() implementation
- * calls the accept() method of each ManagerFactory, in order until
- * one such call returns a non-null ConnManager instance.
+ * Reads a SqoopRecord from the SequenceFile in which it's packed and emits
+ * that DBWritable to the DBOutputFormat for writeback to the database.
  */
-public abstract class ManagerFactory {
-  public abstract ConnManager accept(SqoopOptions options);
-}
+public class SequenceFileExportMapper
+    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord, NullWritable> {
 
+  public SequenceFileExportMapper() {
+  }
+
+  public void map(LongWritable key, SqoopRecord val, Context context)
+      throws IOException, InterruptedException {
+    context.write(val, NullWritable.get());
+  }
+}

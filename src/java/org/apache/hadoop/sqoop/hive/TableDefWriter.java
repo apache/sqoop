@@ -22,7 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.hive.HiveTypes;
 
@@ -47,7 +47,7 @@ public class TableDefWriter {
 
   public static final Log LOG = LogFactory.getLog(TableDefWriter.class.getName());
 
-  private ImportOptions options;
+  private SqoopOptions options;
   private ConnManager connManager;
   private Configuration configuration;
   private String tableName;
@@ -62,7 +62,7 @@ public class TableDefWriter {
    * @param withComments if true, then tables will be created with a
    *        timestamp comment.
    */
-  public TableDefWriter(final ImportOptions opts, final ConnManager connMgr,
+  public TableDefWriter(final SqoopOptions opts, final ConnManager connMgr,
       final String table, final Configuration config, final boolean withComments) {
     this.options = opts;
     this.connManager = connMgr;

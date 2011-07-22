@@ -47,6 +47,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestSqlManager.class);
     suite.addTestSuite(TestClassWriter.class);
     suite.addTestSuite(TestColumnTypes.class);
+    suite.addTestSuite(TestExport.class);
     suite.addTestSuite(TestMultiCols.class);
     suite.addTestSuite(TestMultiMaps.class);
     suite.addTestSuite(TestSplitBy.class);
@@ -54,7 +55,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestHiveImport.class);
     suite.addTestSuite(TestRecordParser.class);
     suite.addTestSuite(TestFieldFormatter.class);
-    suite.addTestSuite(TestImportOptions.class);
+    suite.addTestSuite(TestSqoopOptions.class);
     suite.addTestSuite(TestParseMethods.class);
     suite.addTestSuite(TestConnFactory.class);
     suite.addTestSuite(TestSplittableBufferedWriter.class);

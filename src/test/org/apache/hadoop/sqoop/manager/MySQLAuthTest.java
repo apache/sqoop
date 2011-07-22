@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 
@@ -79,7 +79,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
 
   @Before
   public void setUp() {
-    ImportOptions options = new ImportOptions(AUTH_CONNECT_STRING, AUTH_TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(AUTH_CONNECT_STRING, AUTH_TABLE_NAME);
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
 

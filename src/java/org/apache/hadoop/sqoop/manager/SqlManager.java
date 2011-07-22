@@ -18,9 +18,11 @@
 
 package org.apache.hadoop.sqoop.manager;
 
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.mapreduce.DataDrivenImportJob;
-import org.apache.hadoop.sqoop.util.ImportError;
+import org.apache.hadoop.sqoop.mapreduce.ExportJob;
+import org.apache.hadoop.sqoop.util.ExportException;
+import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.ResultSetPrinter;
 
 import java.io.IOException;
@@ -49,14 +51,14 @@ public abstract class SqlManager extends ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 
-  protected ImportOptions options;
+  protected SqoopOptions options;
 
   /**
    * Constructs the SqlManager
    * @param opts
    * @param specificMgr
    */
-  public SqlManager(final ImportOptions opts) {
+  public SqlManager(final SqoopOptions opts) {
     this.options = opts;
   }
 
@@ -261,10 +263,10 @@ public abstract class SqlManager extends ConnManager {
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
   public void importTable(ImportJobContext context)
-      throws IOException, ImportError {
+      throws IOException, ImportException {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
-    ImportOptions options = context.getOptions();
+    SqoopOptions options = context.getOptions();
     DataDrivenImportJob importer = new DataDrivenImportJob(options);
     String splitCol = options.getSplitByCol();
     if (null == splitCol) {
@@ -274,7 +276,7 @@ public abstract class SqlManager extends ConnManager {
 
     if (null == splitCol) {
       // Can't infer a primary key.
-      throw new ImportError("No primary key could be found for table " + tableName
+      throw new ImportException("No primary key could be found for table " + tableName
           + ". Please specify one with --split-by.");
     }
 
@@ -423,5 +425,14 @@ public abstract class SqlManager extends ConnManager {
     connection.setAutoCommit(false);
 
     return connection;
+  }
+
+  /**
+   * Export data stored in HDFS into a table in a database
+   */
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    ExportJob exportJob = new ExportJob(context);
+    exportJob.runExport();
   }
 }

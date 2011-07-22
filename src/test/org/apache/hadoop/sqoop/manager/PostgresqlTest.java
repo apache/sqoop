@@ -35,7 +35,7 @@ import org.junit.Test;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.util.FileListing;
 
@@ -84,7 +84,7 @@ public class PostgresqlTest extends ImportJobTestCase {
   public void setUp() {
     LOG.debug("Setting up another postgresql test...");
 
-    ImportOptions options = new ImportOptions(CONNECT_STRING, TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
     options.setUsername(DATABASE_USER);
 
     ConnManager manager = null;

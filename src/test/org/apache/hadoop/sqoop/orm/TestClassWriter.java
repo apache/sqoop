@@ -34,8 +34,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.apache.hadoop.sqoop.ImportOptions;
-import org.apache.hadoop.sqoop.ImportOptions.InvalidOptionsException;
+import org.apache.hadoop.sqoop.SqoopOptions;
+import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.testutil.DirUtil;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
@@ -53,7 +53,7 @@ public class TestClassWriter extends TestCase {
   // instance variables populated during setUp, used during tests
   private HsqldbTestServer testServer;
   private ConnManager manager;
-  private ImportOptions options;
+  private SqoopOptions options;
 
   @Before
   public void setUp() {
@@ -71,7 +71,7 @@ public class TestClassWriter extends TestCase {
     }
 
     manager = testServer.getManager();
-    options = testServer.getImportOptions();
+    options = testServer.getSqoopOptions();
 
     // sanity check: make sure we're in a tmp dir before we blow anything away.
     assertTrue("Test generates code in non-tmp dir!",
