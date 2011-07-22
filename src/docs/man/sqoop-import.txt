@@ -27,6 +27,9 @@ include::common-args.txt[]
 Import control options
 ~~~~~~~~~~~~~~~~~~~~~~
 
+--append::
+  Append data to an existing HDFS dataset
+
 --as-sequencefile::
   Imports data to SequenceFiles
 
@@ -54,6 +57,9 @@ Import control options
 
 --table (table-name)::
   The table to read (required)
+
+--target-dir (dir)::
+  Explicit HDFS target directory for the import.
 
 --warehouse-dir (dir)::
   Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+

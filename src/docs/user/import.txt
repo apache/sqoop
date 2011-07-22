@@ -52,6 +52,8 @@ include::connecting.txt[]
 `-----------------------------`--------------------------------------
 Argument                      Description
 ---------------------------------------------------------------------
++\--append+                   Append data to an existing dataset\
+                              in HDFS
 +\--as-sequencefile+          Imports data to SequenceFiles
 +\--as-textfile+              Imports data as plain text (default)
 +\--columns <col,col,col...>+ Columns to import from table
@@ -63,6 +65,7 @@ Argument                      Description
 +\--split-by <column-name>+   Column of the table used to split work\
                               units
 +\--table <table-name>+       Table to read
++\--target-dir <dir>+         HDFS destination dir
 +\--warehouse-dir <dir>+      HDFS parent for table destination
 +\--where <where clause>+     WHERE clause to use during import
 +-z,\--compress+              Enable compression
@@ -170,6 +173,16 @@ $ sqoop import --connnect <connect-str> --table foo --warehouse-dir /shared \
 
 This command would write to a set of files in the +/shared/foo/+ directory.
 
+You can also explicitly choose the target directory, like so:
+
+----
+$ sqoop import --connnect <connect-str> --table foo --target-dir /dest \
+    ...
+----
+
+This will import the files into the +/dest+ directory. +\--target-dir+ is
+incompatible with +\--warehouse-dir+.
+
 When using direct mode, you can specify additional arguments which
 should be passed to the underlying tool. If the argument
 +\--+ is given on the command-line, then subsequent arguments are sent
@@ -180,6 +193,13 @@ the character set used by +mysqldump+:
 $ sqoop import --connect jdbc:mysql://server.foo.com/db --table bar \
     --direct -- --default-character-set=latin1
 ----
+
+By default, imports go to a new target location. If the destination directory
+already exists in HDFS, Sqoop will refuse to import and overwrite that
+directory's contents. If you use the +\--append+ argument, Sqoop will import
+data to a temporary directory and then rename the files into the normal
+target directory in a manner that does not conflict with existing filenames
+in that directory.
 
 File Formats
 ^^^^^^^^^^^^
@@ -492,6 +512,14 @@ $ hadoop fs -cat EMPLOYEES/part-m-00000 | head -n 10
 0,joe,smith,engineering
 1,jane,doe,marketing
 ...
+----
+
+Performing an incremental import of new data, after having already
+imported the first 100,000 rows of a table:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/somedb --table sometable \
+    --where "id > 100000" --target-dir /incremental_dataset --append
 ----
 
 
