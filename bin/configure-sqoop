@@ -58,6 +58,9 @@ if [ -d "$SQOOP_HOME/lib" ]; then
   done
 fi
 
+SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-${SQOOP_HOME}/conf}
+SQOOP_CLASSPATH=${SQOOP_CONF_DIR}:${SQOOP_CLASSPATH}
+
 # If there's a build subdir, use Ivy-retrieved dependencies too.
 if [ -d "$SQOOP_HOME/build/ivy/lib/sqoop" ]; then
   for f in $SQOOP_HOME/build/ivy/lib/sqoop/*/*.jar; do
