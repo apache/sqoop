@@ -66,12 +66,12 @@ public class BlobRef extends LobRef<byte[], BytesWritable, InputStream> {
 
   @Override
   protected InputStream getInternalSource(BytesWritable data) {
-    return new ByteArrayInputStream(data.getBytes());
+    return new ByteArrayInputStream(data.getBytes(), 0, data.getLength());
   }
 
   @Override
   protected byte [] getInternalData(BytesWritable data) {
-    return data.getBytes();
+    return Arrays.copyOf(data.getBytes(), data.getLength());
   }
 
   @Override
