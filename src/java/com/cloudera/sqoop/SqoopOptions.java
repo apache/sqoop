@@ -231,7 +231,7 @@ public class SqoopOptions implements Cloneable {
   private static String curNonce;
 
   // the connection manager fully qualified class name
-  private String connManagerClassName;
+  @StoredAsProperty("connection.manager") private String connManagerClassName;
 
   public SqoopOptions() {
     initDefaults(null);
