@@ -74,8 +74,10 @@ public class HiveTypes {
     } else if (sqlType == Types.TIMESTAMP) {
       // unfortunate type coercion
       return "STRING";
+    } else if (sqlType == Types.CLOB) {
+      return "STRING";
     } else {
-      // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT, CLOB,
+      // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
       // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
       return null;
     }

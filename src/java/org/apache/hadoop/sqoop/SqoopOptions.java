@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Category;
 import org.apache.log4j.Level;
@@ -114,6 +115,9 @@ public class SqoopOptions {
   private int numMappers;
   private boolean useCompression;
   private long directSplitSize; // In direct mode, open a new stream every X bytes.
+
+  private long maxInlineLobSize; // Max size of an inline LOB; larger LOBs are written
+                                 // to external files on disk.
 
   private String exportDir; // HDFS path to read from when performing an export
 
@@ -275,6 +279,8 @@ public class SqoopOptions {
     this.useCompression = false;
     this.directSplitSize = 0;
 
+    this.maxInlineLobSize = LargeObjectLoader.DEFAULT_MAX_LOB_LENGTH;
+
     if (null == baseConfiguration) {
       this.conf = new Configuration();
     } else {
@@ -328,6 +334,7 @@ public class SqoopOptions {
     System.out.println("-z, --compress               Enable compression");
     System.out.println("--direct-split-size (n)      Split the input stream every 'n' bytes");
     System.out.println("                             when importing in direct mode.");
+    System.out.println("--inline-lob-limit (n)       Set the maximum size for an inline LOB");
     System.out.println("");
     System.out.println("Export options:");
     System.out.println("--export-dir (dir)           Export from an HDFS path into a table");
@@ -584,6 +591,8 @@ public class SqoopOptions {
           this.useCompression = true;
         } else if (args[i].equals("--direct-split-size")) {
           this.directSplitSize = Long.parseLong(args[++i]);
+        } else if (args[i].equals("--inline-lob-limit")) {
+          this.maxInlineLobSize = Long.parseLong(args[++i]);
         } else if (args[i].equals("--jar-file")) {
           this.existingJarFile = args[++i];
         } else if (args[i].equals("--list-databases")) {
@@ -1001,6 +1010,13 @@ public class SqoopOptions {
    */
   public long getDirectSplitSize() {
     return this.directSplitSize;
+  }
+
+  /**
+   * @return the max size of a LOB before we spill to a separate file.
+   */
+  public long getInlineLobLimit() {
+    return this.maxInlineLobSize;
   }
 
   public Configuration getConf() {

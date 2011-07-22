@@ -21,6 +21,8 @@ package org.apache.hadoop.sqoop.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,8 +30,9 @@ import java.sql.SQLException;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
+import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
+import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 import junit.framework.TestCase;
 
@@ -39,10 +42,10 @@ import junit.framework.TestCase;
 public class TestTextImportMapper extends TestCase {
 
 
-  static class DummyDBWritable implements DBWritable {
+  static class DummySqoopRecord implements SqoopRecord {
     long field;
 
-    public DummyDBWritable(final long val) {
+    public DummySqoopRecord(final long val) {
       this.field = val;
     }
 
@@ -65,14 +68,22 @@ public class TestTextImportMapper extends TestCase {
     public String toString() {
       return "" + field;
     }
+
+    public void loadLargeObjects(LargeObjectLoader loader) { }
+    public void parse(CharSequence s) { }
+    public void parse(Text s) { }
+    public void parse(byte [] s) { }
+    public void parse(char [] s) { }
+    public void parse(ByteBuffer s) { }
+    public void parse(CharBuffer s) { }
   }
 
   public void testTextImport() {
     TextImportMapper m = new TextImportMapper();
-    MapDriver<LongWritable, DBWritable, Text, NullWritable> driver =
-      new MapDriver<LongWritable, DBWritable, Text, NullWritable>(m);
+    MapDriver<LongWritable, SqoopRecord, Text, NullWritable> driver =
+      new MapDriver<LongWritable, SqoopRecord, Text, NullWritable>(m);
 
-    driver.withInput(new LongWritable(0), new DummyDBWritable(42))
+    driver.withInput(new LongWritable(0), new DummySqoopRecord(42))
           .withOutput(new Text("42"), NullWritable.get())
           .runTest();
   }

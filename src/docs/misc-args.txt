@@ -34,6 +34,14 @@ Data emitted to HDFS is by default uncompressed. You can instruct
 Sqoop to use gzip to compress your data by providing either the
 +--compress+ or +-z+ argument (both are equivalent).
 
+Small CLOB and BLOB values will be imported as string-based data inline
+with the rest of their containing record. Over a size threshold (by
+default, 16 MB per object), these values will not be materialized directly,
+inline, and will be written to external files in HDFS; the inline records
+will contain pointers to these files. The inline materialization limit can
+be controlled with the +--inline-lob-limit+ argument; the limit itself is
+specified in bytes.
+
 Using +--verbose+ will instruct Sqoop to print more details about its
 operation; this is particularly handy if Sqoop appears to be misbehaving.
 

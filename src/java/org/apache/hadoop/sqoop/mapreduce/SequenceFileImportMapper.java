@@ -22,23 +22,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
 import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 /**
- * Imports records by transforming them to strings for a plain-text flat file.
+ * Imports records by writing them to a SequenceFile.
  */
-public class TextImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, Text, NullWritable> {
-
-  private Text outkey;
-
-  public TextImportMapper() {
-    outkey = new Text();
-  }
+public class SequenceFileImportMapper
+    extends AutoProgressMapper<LongWritable, SqoopRecord, LongWritable, SqoopRecord> {
 
   public void map(LongWritable key, SqoopRecord val, Context context)
       throws IOException, InterruptedException {
@@ -50,8 +42,7 @@ public class TextImportMapper
       throw new IOException(sqlE);
     }
 
-    outkey.set(val.toString());
-    context.write(outkey, NullWritable.get());
+    context.write(key, val);
   }
 }
 

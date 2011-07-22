@@ -123,6 +123,10 @@ Import control options
   When using direct mode, write to multiple files of
   approximately _size_ bytes each.
 
+--inline-lob-limit (size)::
+  When importing LOBs, keep objects inline up to
+  _size_ bytes.
+
 Export control options
 ~~~~~~~~~~~~~~~~~~~~~~
 

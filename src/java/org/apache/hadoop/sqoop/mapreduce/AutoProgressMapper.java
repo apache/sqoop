@@ -158,6 +158,7 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
   /**
    * Run the mapping process for this task, wrapped in an auto-progress system.
    */
+  @Override
   public void run(Context context) throws IOException, InterruptedException {
     configureAutoProgress(context.getConfiguration());
     ProgressThread thread = this.new ProgressThread(context);
@@ -182,5 +183,4 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
       }
     }
   }
-
 }

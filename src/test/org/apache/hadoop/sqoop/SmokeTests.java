@@ -23,6 +23,9 @@ import org.apache.hadoop.sqoop.hive.TestTableDefWriter;
 import org.apache.hadoop.sqoop.io.TestSplittableBufferedWriter;
 import org.apache.hadoop.sqoop.lib.TestFieldFormatter;
 import org.apache.hadoop.sqoop.lib.TestRecordParser;
+import org.apache.hadoop.sqoop.lib.TestBlobRef;
+import org.apache.hadoop.sqoop.lib.TestClobRef;
+import org.apache.hadoop.sqoop.lib.TestLargeObjectLoader;
 import org.apache.hadoop.sqoop.manager.TestHsqldbManager;
 import org.apache.hadoop.sqoop.manager.TestSqlManager;
 import org.apache.hadoop.sqoop.mapreduce.MapreduceTests;
@@ -60,6 +63,9 @@ public final class SmokeTests {
     suite.addTestSuite(TestConnFactory.class);
     suite.addTestSuite(TestSplittableBufferedWriter.class);
     suite.addTestSuite(TestTableDefWriter.class);
+    suite.addTestSuite(TestBlobRef.class);
+    suite.addTestSuite(TestClobRef.class);
+    suite.addTestSuite(TestLargeObjectLoader.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;

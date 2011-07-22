@@ -44,6 +44,7 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
+import org.apache.hadoop.sqoop.lib.LargeObjectLoader;
 import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
@@ -85,7 +86,7 @@ public class DataDrivenImportJob extends ImportJobBase {
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return TextImportMapper.class;
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
-      return AutoProgressMapper.class;
+      return SequenceFileImportMapper.class;
     }
 
     return null;
@@ -139,6 +140,9 @@ public class DataDrivenImportJob extends ImportJobBase {
         mgr.escapeColName(splitByCol), sqlColNames);
     job.getConfiguration().set(DBConfiguration.INPUT_CLASS_PROPERTY,
         tableClassName);
+
+    job.getConfiguration().setLong(LargeObjectLoader.MAX_INLINE_LOB_LEN_KEY,
+        options.getInlineLobLimit());
 
     LOG.debug("Using InputFormat: " + inputFormatClass);
     job.setInputFormatClass(inputFormatClass);

@@ -115,32 +115,14 @@ public final class JdbcWritableBridge {
 
   public static BlobRef readBlobRef(int colNum, ResultSet r)
       throws SQLException {
-    Blob b = r.getBlob(colNum);
-    if (null == b) {
-      return null;
-    } else if (b.length() > MAX_BLOB_LENGTH) {
-      // TODO: Deserialize very large BLOBs into separate files.
-      throw new UnsupportedOperationException("BLOB size exceeds max: "
-          + MAX_BLOB_LENGTH);
-    } else {
-      // This is a 1-based array.
-      return new BlobRef(b.getBytes(1, (int) b.length()));
-    }
+    // Loading of BLOBs is delayed; handled by LargeObjectLoader.
+    return null;
   }
 
   public static ClobRef readClobRef(int colNum, ResultSet r)
       throws SQLException {
-    Clob c = r.getClob(colNum);
-    if (null == c) {
-      return null;
-    } else if (c.length() > MAX_CLOB_LENGTH) {
-      // TODO: Deserialize very large CLOBs into separate files.
-      throw new UnsupportedOperationException("CLOB size exceeds max: "
-          + MAX_CLOB_LENGTH);
-    } else {
-      // This is a 1-based array.
-      return new ClobRef(c.getSubString(1, (int) c.length()));
-    }
+    // Loading of CLOBs is delayed; handled by LargeObjectLoader.
+    return null;
   }
 
   public static void writeInteger(Integer val, int paramIdx, int sqlType, PreparedStatement s)
