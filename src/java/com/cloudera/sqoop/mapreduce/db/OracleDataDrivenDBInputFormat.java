@@ -65,7 +65,7 @@ public class OracleDataDrivenDBInputFormat<T extends DBWritable>
           conf, getConnection(), dbConf, dbConf.getInputConditions(),
           dbConf.getInputFieldNames(), dbConf.getInputTableName());
     } catch (SQLException ex) {
-      throw new IOException(ex.getMessage());
+      throw new IOException(ex);
     }
   }
 }

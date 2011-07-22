@@ -198,7 +198,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
       return splitter.split(job.getConfiguration(), results,
           getDBConf().getInputOrderBy());
     } catch (SQLException e) {
-      throw new IOException(e.getMessage());
+      throw new IOException(e);
     } finally {
       // More-or-less ignore SQL exceptions here, but log in case we need it.
       try {
@@ -293,7 +293,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
           dbConf.getInputFieldNames(), dbConf.getInputTableName(),
           dbProductName);
     } catch (SQLException ex) {
-      throw new IOException(ex.getMessage());
+      throw new IOException(ex);
     }
   }
 

@@ -165,7 +165,7 @@ public class DBRecordReader<T extends DBWritable> extends
         connection.close();
       }
     } catch (SQLException e) {
-      throw new IOException(e.getMessage());
+      throw new IOException(e);
     }
   }
 
