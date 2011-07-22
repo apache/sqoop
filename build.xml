@@ -62,6 +62,14 @@
   <property name="findbugs.excludes"
       location="${test.dir}/findbugsExcludeFile.xml" />
 
+  <!-- code coverage -->
+  <property name="cobertura.dir" value="${build.dir}/cobertura" />
+  <property name="cobertura.home" value="${cobertura.dir}" />
+  <property name="cobertura.report.dir" value="${cobertura.dir}/report" />
+  <property name="cobertura.format" value="html" /> <!-- may be 'xml' -->
+  <property name="cobertura.class.dir" value="${cobertura.dir}/classes" />
+
+
   <!-- When testing with non-free JDBC drivers, override this parameter
        to contain the path to the driver library dir.
     -->
@@ -108,12 +116,21 @@
     <path refid="compile.classpath"/>
   </path>
 
+  <path id="cobertura.classpath">
+    <fileset dir="${cobertura.home}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
   <!-- "init" target reserved for future setup purposes. --> 
   <target name="init" />
 
   <!-- Compile core classes for the project -->
   <target name="compile" depends="init, ivy-retrieve-common"
       description="Compile core classes for the project">
+    <!-- don't use an out-of-date instrumented build. -->
+    <delete dir="${cobertura.class.dir}" />
+    <!-- ensure normal build target dir exists -->
     <mkdir dir="${build.classes}" />
     <javac
         encoding="${build.encoding}"
@@ -209,12 +226,14 @@
   <target name="test-prep-normal" unless="thirdparty">
     <!-- Set this to run all the "standard" tests -->
     <property name="test.pattern" value="Test*" />
+    <property name="cobertura.testset" value="base" />
   </target>
 
   <target name="test-prep-thirdparty" if="thirdparty">
     <!-- Run tests that *end* with the name Test, instead of starting with it;
          this runs non-standard tests e.g. third-party database tests. -->
     <property name="test.pattern" value="*Test" />
+    <property name="cobertura.testset" value="thirdparty" />
   </target>
 
   <!-- ================================================================== -->
@@ -223,14 +242,24 @@
   <!-- To run third-party tests, run with -Dthirdparty=true               -->
   <!-- ================================================================== -->
   <target name="test" depends="compile-test,compile,test-prep,run-tests"
-      description="Run unit tests"/>
+      description="Run unit tests" />
 
   <!-- actually run the selected unit tests -->
   <target name="run-tests" depends="compile-test,compile,test-prep">
+    <antcall target="checkfailure" inheritRefs="true" />
+  </target>
+ 
+  <target name="test-core">
+    <!-- inner target only intended to be used via antcall.
+         Does not define its dependencies. Should be invoked through the
+         'test' target. Does not fail the build if tests fail.
+    -->
+
     <delete dir="${test.log.dir}"/>
     <mkdir dir="${test.log.dir}"/>
     <delete dir="${build.test}/data"/>
     <mkdir dir="${build.test}/data" />
+    <mkdir dir="${cobertura.class.dir}" />
     <junit
       printsummary="yes" showoutput="${test.output}"
       haltonfailure="no" fork="yes" maxmemory="256m"
@@ -248,6 +277,9 @@
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
+
+      <sysproperty key="net.sourceforge.cobertura.datafile"
+          value="${cobertura.dir}/cobertura-${cobertura.testset}.ser" />
 
       <!-- define this property to force Sqoop to throw better exceptions on
            errors during testing, instead of printing a short message and
@@ -288,10 +320,18 @@
       <sysproperty key="hive.home" value="${basedir}/testdata/hive" />
 
       <classpath>
-        <path refid="test.classpath"/>
+        <!-- instrumented classes go ahead of normal classes -->
+        <pathelement location="${cobertura.class.dir}" />
+
+        <!-- main classpath here. -->
+        <path refid="test.classpath" />
+
         <!-- need thirdparty JDBC drivers for thirdparty tests -->
         <fileset dir="${sqoop.thirdparty.lib.dir}"
             includes="*.jar" />
+
+        <!-- include cobertura itself on the classpath -->
+        <path refid="cobertura.classpath" />
       </classpath>
       <formatter type="${test.junit.output.format}" />
       <batchtest todir="${build.test}" unless="testcase">
@@ -303,7 +343,6 @@
         <fileset dir="${test.dir}" includes="**/${testcase}.java"/>
       </batchtest>
     </junit>
-    <antcall target="checkfailure"/>
   </target>
 
   <target name="docs" description="Build documentation">
@@ -314,7 +353,7 @@
     </exec>
   </target>
 
-  <target name="checkfailure" if="tests.failed">
+  <target name="checkfailure" depends="test-core" if="tests.failed">
     <touch file="${build.dir}/testsfailed"/>
     <fail unless="continueOnFailure">Unit tests failed!</fail>
   </target>
@@ -351,6 +390,45 @@
   <target name="check-for-findbugs" depends="warn-findbugs-unset">
     <available property="findbugs.present"
         file="${findbugs.home}/lib/findbugs.jar" />
+  </target>
+
+  <target name="cobertura"
+      depends="check-for-cobertura,warn-cobertura-unset,jar,compile-test,test-prep"
+      if="cobertura.present" description="Run Cobertura (code coverage)">
+    <taskdef classpathref="cobertura.classpath"
+        resource="tasks.properties"/>
+    <mkdir dir="${cobertura.class.dir}" />
+    <cobertura-instrument todir="${cobertura.class.dir}"
+        datafile="${cobertura.dir}/cobertura-${cobertura.testset}.ser">
+      <fileset dir="${build.classes}">
+        <include name="**/*.class" />
+      </fileset>
+    </cobertura-instrument>
+
+    <!-- Run the unit tests, but do not fail the build if tests fail. -->
+    <antcall target="test-core" inheritRefs="true" />
+
+    <!-- merge the reports together from the internal and thirdparty tests -->
+    <delete file="${cobertura.dir}/cobertura.ser" />
+    <cobertura-merge datafile="${cobertura.dir}/cobertura.ser">
+      <fileset dir="${cobertura.dir}">
+        <include name="*.ser" />
+      </fileset>
+    </cobertura-merge>
+    <delete dir="${cobertura.report.dir}" />
+    <cobertura-report srcdir="${src.dir}" destdir="${cobertura.report.dir}"
+        format="${cobertura.format}"
+        datafile="${cobertura.dir}/cobertura.ser" />
+  </target>
+
+  <target name="warn-cobertura-unset" depends="check-for-cobertura"
+      unless="cobertura.present">
+    <fail message="You need to set -Dcobertura.home=/path/to/cobertura" />
+  </target>
+
+  <target name="check-for-cobertura">
+    <available property="cobertura.present"
+        file="${cobertura.home}/cobertura.jar" />
   </target>
 
   <target name="ivy-probe-antlib" >
