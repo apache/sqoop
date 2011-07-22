@@ -18,10 +18,16 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
+
+import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
+
+import com.cloudera.sqoop.util.ExportException;
 
 /**
  * Manages connections to hsqldb databases.
@@ -66,5 +72,15 @@ public class HsqldbManager extends GenericJdbcManager {
   @Override
   public boolean supportsStagingForExport() {
     return true;
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    // HSQLDB does not support multi-row inserts; disable that before export.
+    context.getOptions().getConf().setInt(
+        AsyncSqlOutputFormat.RECORDS_PER_STATEMENT_KEY, 1);
+    super.exportTable(context);
   }
 }
