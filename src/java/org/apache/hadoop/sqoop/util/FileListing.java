@@ -27,14 +27,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
-* Recursive file listing under a specified directory.
-*
-* Taken from http://www.javapractices.com/topic/TopicAction.do?Id=68
-* Used under the terms of the CC Attribution license:
-* http://creativecommons.org/licenses/by/3.0/
-*
-* Method by Alex Wong (javapractices.com)
-*/
+ * Recursive file listing under a specified directory.
+ *
+ * Taken from http://www.javapractices.com/topic/TopicAction.do?Id=68
+ * Used under the terms of the CC Attribution license:
+ * http://creativecommons.org/licenses/by/3.0/
+ *
+ * Method by Alex Wong (javapractices.com)
+ */
 public final class FileListing {
 
   private FileListing() { }
@@ -105,7 +105,7 @@ public final class FileListing {
 
   /**
    * Recursively delete a directory and all its children
-   * @param aStartingDir is a valid directory.
+   * @param dir is a valid directory.
    */
   public static void recursiveDeleteDir(File dir) throws IOException {
     if (!dir.exists()) {

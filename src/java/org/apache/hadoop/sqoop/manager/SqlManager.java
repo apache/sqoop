@@ -61,8 +61,7 @@ public abstract class SqlManager extends ConnManager {
 
   /**
    * Constructs the SqlManager
-   * @param opts
-   * @param specificMgr
+   * @param opts the SqoopOptions describing the user's requested action.
    */
   public SqlManager(final SqoopOptions opts) {
     this.options = opts;

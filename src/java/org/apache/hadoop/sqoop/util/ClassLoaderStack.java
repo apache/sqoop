@@ -54,7 +54,7 @@ public final class ClassLoaderStack {
    * if need be, later.
    *
    * @param jarFile The filename of a jar file that you want loaded into this JVM
-   * @param tableClassName The name of the class to load immediately (optional)
+   * @param testClassName The name of the class to load immediately (optional)
    */
   public static ClassLoader addJarFile(String jarFile, String testClassName)
       throws IOException {

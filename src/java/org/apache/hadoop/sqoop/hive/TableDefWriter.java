@@ -58,7 +58,8 @@ public class TableDefWriter {
    * Creates a new TableDefWriter to generate a Hive CREATE TABLE statement.
    * @param opts program-wide options
    * @param connMgr the connection manager used to describe the table.
-   * @param table the name of the table to read.
+   * @param inputTable the name of the table to load.
+   * @param outputTable the name of the Hive table to create.
    * @param config the Hadoop configuration to use to connect to the dfs
    * @param withComments if true, then tables will be created with a
    *        timestamp comment.

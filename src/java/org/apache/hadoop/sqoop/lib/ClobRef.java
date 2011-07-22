@@ -125,13 +125,14 @@ public class ClobRef implements Writable {
     }
   }
 
+  @Override
   /**
    * @return a string representation of the ClobRef. If this is an
    * inline clob (isExternal() returns false), it will contain the
    * materialized data. Otherwise it returns a description of the
-   * reference. To ensure access to the data itself, {@see #getDataStream()}.
+   * reference. To ensure access to the data itself,
+   * {@see #getDataReader(Configuration,Path)}.
    */
-  @Override
   public String toString() {
     if (isExternal()) {
       return "externalClob(" + fileName + ")";

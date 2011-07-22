@@ -154,7 +154,6 @@ public class SqoopOptions {
   /**
    * Alternate SqoopOptions interface used mostly for unit testing
    * @param connect JDBC connect string to use
-   * @param database Database to read
    * @param table Table to read
    */
   public SqoopOptions(final String connect, final String table) {

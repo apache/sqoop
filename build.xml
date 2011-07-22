@@ -40,6 +40,7 @@
   <property name="build.classes" location="${build.dir}/classes"/>
   <property name="build.test" location="${build.dir}/test"/>
   <property name="build.test.classes" location="${build.test}/classes" />
+  <property name="build.javadoc" location="${build.dir}/docs/api" />
   <property name="test.log.dir" location="${build.dir}/test/logs"/>
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
@@ -202,7 +203,7 @@
   <target name="compile-all" depends="compile,compile-test,compile-all-shims"
       description="Compile all sources"/>
 
-  <target name="package" depends="jar,compile-all,docs,ivy-retrieve-redist"
+  <target name="package" depends="jar,compile-all,docs,javadoc,ivy-retrieve-redist"
       description="Create a redistributable package">
 
     <!-- rebuild the jar to include all shims. -->
@@ -393,6 +394,38 @@
       <arg value="${basedir}/src/docs" />
       <arg value="BUILDROOT=${build.dir}" />
     </exec>
+  </target>
+
+  <target name="javadoc-uptodate" depends="init">
+    <uptodate property="javadoc.is.uptodate">
+      <srcfiles dir="${src.dir}">
+        <include name="**/*.java" />
+        <include name="**/*.html" />
+      </srcfiles>
+      <mapper type="merge" to="${build.javadoc}/index.html" />
+    </uptodate>
+  </target>
+
+  <target name="javadoc" description="Build javadoc"
+      depends="init,javadoc-uptodate,compile" unless="javadoc.is.uptodate">
+    <mkdir dir="${build.javadoc}" />
+    <exec executable="date" outputproperty="year">
+      <arg value="+%Y" />
+    </exec>
+    <javadoc
+      packagenames="org.apache.hadoop.sqoop.*"
+      destdir="${build.javadoc}"
+      author="true"
+      version="true"
+      use="true"
+      windowtitle="${Name} ${version} API"
+      doctitle="${Name} ${version} API"
+      bottom="Copyright &amp;copy; ${year} Cloudera, Inc.">
+      <packageset dir="${src.dir}" />
+      <classpath>
+        <path refid="compile.classpath" />
+      </classpath>
+    </javadoc>
   </target>
 
   <target name="checkfailure" depends="test-core" if="tests.failed">
