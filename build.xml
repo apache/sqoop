@@ -595,6 +595,23 @@
     </uptodate>
   </target>
 
+  <target name="checkversion">
+    <if>
+      <contains string="${version}" substring="SNAPSHOT" />
+      <then>
+        <fail message="Error: cannot release a snapshot. Set -Dversion" />
+      </then>
+    </if>
+  </target>
+
+  <target name="release" depends="checkversion,tar,webdocs,releaseaudit"
+      description="Roll a release artifact">
+    <echo message="Release complete" />
+    <echo message="Binary tar: ${tar.file}" />
+    <echo message="Web docs: ${build.dir}/webdocs" />
+    <echo message="Release audit report: ${build.dir}/rat.log" />
+  </target>
+
   <target name="webdocs" depends="webdocs-uptodate" unless="webdocs.uptodate"
       description="Build website documentation">
     <exec executable="make" failonerror="true">
