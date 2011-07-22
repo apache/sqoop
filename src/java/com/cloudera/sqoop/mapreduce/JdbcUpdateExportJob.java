@@ -19,12 +19,10 @@
 package com.cloudera.sqoop.mapreduce;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -32,7 +30,6 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 
-import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.shims.ShimLoader;
@@ -85,8 +82,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws IOException {
 
-    Configuration conf = options.getConf();
-    ConnManager mgr = new ConnFactory(conf).getManager(options);
+    ConnManager mgr = context.getConnManager();
     try {
       String username = options.getUsername();
       if (null == username || username.length() == 0) {
@@ -131,12 +127,6 @@ public class JdbcUpdateExportJob extends ExportJobBase {
       job.getConfiguration().set(SQOOP_EXPORT_UPDATE_COL_KEY, updateKeyCol);
     } catch (ClassNotFoundException cnfe) {
       throw new IOException("Could not load OutputFormat", cnfe);
-    } finally {
-      try {
-        mgr.close();
-      } catch (SQLException sqlE) {
-        LOG.warn("Error closing connection: " + sqlE);
-      }
     }
   }
 }

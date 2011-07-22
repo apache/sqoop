@@ -19,7 +19,6 @@
 package com.cloudera.sqoop.mapreduce;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +32,6 @@ import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
-import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLUtils;
@@ -71,69 +69,60 @@ public class MySQLDumpImportJob extends ImportJobBase {
         throw new IOException("null tableName for MySQLDumpImportJob.");
     }
 
-    ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
+    ConnManager mgr = getContext().getConnManager();
+    String username = options.getUsername();
+    if (null == username || username.length() == 0) {
+      DBConfiguration.configureDB(job.getConfiguration(),
+          mgr.getDriverClass(), options.getConnectString());
+    } else {
+      DBConfiguration.configureDB(job.getConfiguration(),
+          mgr.getDriverClass(), options.getConnectString(), username,
+          options.getPassword());
+    }
 
-    try {
-      String username = options.getUsername();
-      if (null == username || username.length() == 0) {
-        DBConfiguration.configureDB(job.getConfiguration(),
-            mgr.getDriverClass(), options.getConnectString());
-      } else {
-        DBConfiguration.configureDB(job.getConfiguration(),
-            mgr.getDriverClass(), options.getConnectString(), username,
-            options.getPassword());
-      }
+    String [] colNames = options.getColumns();
+    if (null == colNames) {
+      colNames = mgr.getColumnNames(tableName);
+    }
 
-      String [] colNames = options.getColumns();
-      if (null == colNames) {
-        colNames = mgr.getColumnNames(tableName);
-      }
-
-      String [] sqlColNames = null;
-      if (null != colNames) {
-        sqlColNames = new String[colNames.length];
-        for (int i = 0; i < colNames.length; i++) {
-          sqlColNames[i] = mgr.escapeColName(colNames[i]);
-        }
-      }
-
-      // It's ok if the where clause is null in DBInputFormat.setInput.
-      String whereClause = options.getWhereClause();
-
-      // We can't set the class properly in here, because we may not have the
-      // jar loaded in this JVM. So we start by calling setInput() with
-      // DBWritable and then overriding the string manually.
-
-      // Note that mysqldump also does *not* want a quoted table name.
-      DataDrivenDBInputFormat.setInput(job, DBWritable.class,
-          tableName, whereClause,
-          mgr.escapeColName(splitByCol), sqlColNames);
-
-      Configuration conf = job.getConfiguration();
-      conf.setInt(MySQLUtils.OUTPUT_FIELD_DELIM_KEY,
-          options.getOutputFieldDelim());
-      conf.setInt(MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
-          options.getOutputRecordDelim());
-      conf.setInt(MySQLUtils.OUTPUT_ENCLOSED_BY_KEY,
-          options.getOutputEnclosedBy());
-      conf.setInt(MySQLUtils.OUTPUT_ESCAPED_BY_KEY,
-          options.getOutputEscapedBy());
-      conf.setBoolean(MySQLUtils.OUTPUT_ENCLOSE_REQUIRED_KEY,
-          options.isOutputEncloseRequired());
-      String [] extraArgs = options.getExtraArgs();
-      if (null != extraArgs) {
-        conf.setStrings(MySQLUtils.EXTRA_ARGS_KEY, extraArgs);
-      }
-
-      LOG.debug("Using InputFormat: " + inputFormatClass);
-      job.setInputFormatClass(getInputFormatClass());
-    } finally {
-      try {
-        mgr.close();
-      } catch (SQLException sqlE) {
-        LOG.warn("Error closing connection: " + sqlE);
+    String [] sqlColNames = null;
+    if (null != colNames) {
+      sqlColNames = new String[colNames.length];
+      for (int i = 0; i < colNames.length; i++) {
+        sqlColNames[i] = mgr.escapeColName(colNames[i]);
       }
     }
+
+    // It's ok if the where clause is null in DBInputFormat.setInput.
+    String whereClause = options.getWhereClause();
+
+    // We can't set the class properly in here, because we may not have the
+    // jar loaded in this JVM. So we start by calling setInput() with
+    // DBWritable and then overriding the string manually.
+
+    // Note that mysqldump also does *not* want a quoted table name.
+    DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+        tableName, whereClause,
+        mgr.escapeColName(splitByCol), sqlColNames);
+
+    Configuration conf = job.getConfiguration();
+    conf.setInt(MySQLUtils.OUTPUT_FIELD_DELIM_KEY,
+        options.getOutputFieldDelim());
+    conf.setInt(MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
+        options.getOutputRecordDelim());
+    conf.setInt(MySQLUtils.OUTPUT_ENCLOSED_BY_KEY,
+        options.getOutputEnclosedBy());
+    conf.setInt(MySQLUtils.OUTPUT_ESCAPED_BY_KEY,
+        options.getOutputEscapedBy());
+    conf.setBoolean(MySQLUtils.OUTPUT_ENCLOSE_REQUIRED_KEY,
+        options.isOutputEncloseRequired());
+    String [] extraArgs = options.getExtraArgs();
+    if (null != extraArgs) {
+      conf.setStrings(MySQLUtils.EXTRA_ARGS_KEY, extraArgs);
+    }
+
+    LOG.debug("Using InputFormat: " + inputFormatClass);
+    job.setInputFormatClass(getInputFormatClass());
   }
 
   /**
