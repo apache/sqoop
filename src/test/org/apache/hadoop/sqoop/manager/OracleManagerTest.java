@@ -144,7 +144,7 @@ public class OracleManagerTest extends ImportJobTestCase {
     args.add("-D");
     args.add("fs.default.name=file:///");
     args.add("-D");
-    args.add("mapred.job.tracker=local");
+    args.add("mapreduce.jobtracker.address=local");
 
     args.add("--table");
     args.add(TABLE_NAME);

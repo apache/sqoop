@@ -37,6 +37,8 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.db.DBConfiguration;
 import org.apache.hadoop.mapred.lib.db.DBInputFormat;
 import org.apache.hadoop.mapred.lib.db.DBWritable;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.server.jobtracker.JTConfig;
 
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.ImportOptions;
@@ -73,7 +75,7 @@ public class ImportJob {
 
     String tableClassName = new TableClassName(options).getClassForTable(tableName);
 
-    boolean isLocal = "local".equals(conf.get("mapred.job.tracker"));
+    boolean isLocal = "local".equals(conf.get(JTConfig.JT_IPC_ADDRESS));
     ClassLoader prevClassLoader = null;
     if (isLocal) {
       // If we're using the LocalJobRunner, then instead of using the compiled jar file
@@ -106,7 +108,7 @@ public class ImportJob {
         job.setOutputFormat(SequenceFileOutputFormat.class);
         SequenceFileOutputFormat.setCompressOutput(job, true);
         SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
-        job.set("mapred.output.value.class", tableClassName);
+        job.set(JobContext.OUTPUT_VALUE_CLASS, tableClassName);
       } else {
         LOG.warn("Unknown file layout specified: " + options.getFileLayout() + "; using text.");
       }

@@ -31,6 +31,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.server.jobtracker.JTConfig;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.ImportOptions;
@@ -59,9 +60,9 @@ public class TestParseMethods extends ImportJobTestCase {
 
     if (includeHadoopFlags) {
       args.add("-D");
-      args.add("mapred.job.tracker=local");
+      args.add("mapreduce.jobtracker.address=local");
       args.add("-D");
-      args.add("mapred.map.tasks=1");
+      args.add("mapreduce.job.maps=1");
       args.add("-D");
       args.add("fs.default.name=file:///");
     }
@@ -122,7 +123,7 @@ public class TestParseMethods extends ImportJobTestCase {
       job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
       // use local mode in the same JVM.
-      job.set("mapred.job.tracker", "local");
+      job.set(JTConfig.JT_IPC_ADDRESS, "local");
       job.set("fs.default.name", "file:///");
 
       String warehouseDir = getWarehouseDir();

@@ -47,9 +47,9 @@ public class TestHiveImport extends ImportJobTestCase {
 
     if (includeHadoopFlags) {
       args.add("-D");
-      args.add("mapred.job.tracker=local");
+      args.add("mapreduce.jobtracker.address=local");
       args.add("-D");
-      args.add("mapred.map.tasks=1");
+      args.add("mapreduce.job.maps=1");
       args.add("-D");
       args.add("fs.default.name=file:///");
     }
