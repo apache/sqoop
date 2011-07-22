@@ -193,7 +193,7 @@ public class Sqoop extends Configured implements Tool {
    * Entry-point that parses the correct SqoopTool to use from the args,
    * but does not call System.exit() as main() will.
    */
-  public static int runTool(String [] args) {
+  public static int runTool(String [] args, Configuration conf) {
     // Expand the options
     String[] expandedArgs = null;
     try {
@@ -206,7 +206,7 @@ public class Sqoop extends Configured implements Tool {
     }
 
     String toolName = expandedArgs[0];
-    Configuration pluginConf = SqoopTool.loadPlugins(new Configuration());
+    Configuration pluginConf = SqoopTool.loadPlugins(conf);
     SqoopTool tool = SqoopTool.getTool(toolName);
     if (null == tool) {
       System.err.println("No such sqoop tool: " + toolName
@@ -218,6 +218,14 @@ public class Sqoop extends Configured implements Tool {
     Sqoop sqoop = new Sqoop(tool, pluginConf);
     return runSqoop(sqoop,
         Arrays.copyOfRange(expandedArgs, 1, expandedArgs.length));
+  }
+
+  /**
+   * Entry-point that parses the correct SqoopTool to use from the args,
+   * but does not call System.exit() as main() will.
+   */
+  public static int runTool(String [] args) {
+    return runTool(args, new Configuration());
   }
 
   public static void main(String [] args) {
