@@ -20,6 +20,7 @@
 package com.cloudera.sqoop;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -28,10 +29,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
-
 import com.cloudera.sqoop.util.RandomHash;
+import com.cloudera.sqoop.util.StoredAsProperty;
 
 /**
  * Configurable state used by Sqoop tools.
@@ -93,69 +95,78 @@ public class SqoopOptions implements Cloneable {
   }
 
 
-  // TODO(aaron): Adding something here? Add a setter and a getter.
-  // Add a default value in initDefaults() if you need one.  If this value
-  // needs to be serialized in the metastore for this session, you need to add
-  // an appropriate line to loadProperties() and writeProperties().  Then add
-  // command-line arguments in the appropriate tools. The names of all
-  // command-line args are stored as constants in BaseSqoopTool.
+  // TODO(aaron): Adding something here? Add a setter and a getter.  Add a
+  // default value in initDefaults() if you need one.  If this value needs to
+  // be serialized in the metastore, it should be marked with
+  // @StoredAsProperty(), if it is an int, long, boolean, String, or Enum.
+  // Arrays and other "special" types should be added directly to the
+  // loadProperties() and writeProperties() methods. Then add command-line
+  // arguments in the appropriate tools. The names of all command-line args
+  // are stored as constants in BaseSqoopTool.
 
-  private String connectString;
-  private String tableName;
-  private String [] columns;
-  private String username;
-  private String password; // May not be serialized, based on configuration.
-  private String codeOutputDir;
-  private String jarOutputDir;
+  @StoredAsProperty("db.connect.string") private String connectString;
+  @StoredAsProperty("db.table") private String tableName;
+  private String [] columns; // Array stored as db.column.list.
+  @StoredAsProperty("db.username") private String username;
+
+  // May not be serialized, based on configuration.
+  // db.require.password is used to determine whether 'some' password is
+  // used. If so, it is stored as 'db.password'.
+  private String password;
+
+  @StoredAsProperty("codegen.output.dir") private String codeOutputDir;
+  @StoredAsProperty("codegen.compile.dir") private String jarOutputDir;
   private String hadoopHome; // not serialized to metastore.
-  private String splitByCol;
-  private String whereClause;
-  private String sqlQuery;
-  private boolean sqlQueryIsUpdate;
-  private String driverClassName;
-  private String warehouseDir;
-  private String targetDir;
-  private boolean append;   
-  private FileLayout layout;
-  private boolean direct; // if true and conn is mysql, use mysqldump.
+  @StoredAsProperty("db.split.column") private String splitByCol;
+  @StoredAsProperty("db.where.clause") private String whereClause;
+  @StoredAsProperty("db.query") private String sqlQuery;
+  @StoredAsProperty("db.query.is.update") private boolean sqlQueryIsUpdate;
+  @StoredAsProperty("jdbc.driver.class") private String driverClassName;
+  @StoredAsProperty("hdfs.warehouse.dir") private String warehouseDir;
+  @StoredAsProperty("hdfs.target.dir") private String targetDir;
+  @StoredAsProperty("hdfs.append.dir") private boolean append;
+  @StoredAsProperty("hdfs.file.format") private FileLayout layout;
+  @StoredAsProperty("direct.import") private boolean direct; // "direct mode."
   private String tmpDir; // where temp data goes; usually /tmp; not serialized.
   private String hiveHome; // not serialized to metastore.
-  private boolean hiveImport;
-  private boolean overwriteHiveTable;
-  private String hiveTableName;
-  private String packageName; // package to prepend to auto-named classes.
+  @StoredAsProperty("hive.import") private boolean hiveImport;
+  @StoredAsProperty("hive.overwrite.table") private boolean overwriteHiveTable;
+  @StoredAsProperty("hive.table.name") private String hiveTableName;
 
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
   // Not serialized to metastore.
   private String [] dbOutColumns;
 
+  // package to prepend to auto-named classes.
+  @StoredAsProperty("codegen.java.packagename") private String packageName;
+
   // package+class to apply to individual table import.
   // also used as an *input* class with existingJarFile.
-  private String className; 
+  @StoredAsProperty("codegen.java.classname") private String className;
 
   // Name of a jar containing existing table definition
   // class to use.
-  private String existingJarFile;
+  @StoredAsProperty("codegen.jar.file") private String existingJarFile;
 
-  private int numMappers;
-  private boolean useCompression;
+  @StoredAsProperty("mapreduce.num.mappers") private int numMappers;
+  @StoredAsProperty("enable.compression") private boolean useCompression;
 
   // In direct mode, open a new stream every X bytes.
-  private long directSplitSize;
+  @StoredAsProperty("import.direct.split.size") private long directSplitSize;
 
   // Max size of an inline LOB; larger LOBs are written
   // to external files on disk.
-  private long maxInlineLobSize;
+  @StoredAsProperty("import.max.inline.lob.size") private long maxInlineLobSize;
 
   // HDFS path to read from when performing an export
-  private String exportDir;
+  @StoredAsProperty("export.source.dir") private String exportDir;
 
   // Column to use for the WHERE clause in an UPDATE-based export.
-  private String updateKeyCol;
+  @StoredAsProperty("export.update.col") private String updateKeyCol;
 
-  private DelimiterSet inputDelimiters;
-  private DelimiterSet outputDelimiters;
+  private DelimiterSet inputDelimiters; // codegen.input.delimiters.
+  private DelimiterSet outputDelimiters; // codegen.output.delimiters.
   private boolean areDelimsManuallySet;
 
   private Configuration conf;
@@ -164,18 +175,26 @@ public class SqoopOptions implements Cloneable {
 
   private String [] extraArgs;
 
-  private String hbaseTable; // HBase table to import into.
-  private String hbaseColFamily; // Column family to prepend to inserted cols.
-  private String hbaseRowKeyCol; // Column of the input to use as the row key.
-  private boolean hbaseCreateTable; // if true, create tables/col families.
+  // HBase table to import into.
+  @StoredAsProperty("hbase.table") private String hbaseTable;
+
+  // Column family to prepend to inserted cols.
+  @StoredAsProperty("hbase.col.family") private String hbaseColFamily;
+
+  // Column of the input to use as the row key.
+  @StoredAsProperty("hbase.row.key.col") private String hbaseRowKeyCol;
+
+  // if true, create tables/col families.
+  @StoredAsProperty("hbase.create.table") private boolean hbaseCreateTable;
 
   // col to filter on for incremental imports.
-  private String incrementalTestCol; 
+  @StoredAsProperty("incremental.col") private String incrementalTestCol;
   // incremental import mode we're using.
+  @StoredAsProperty("incremental.mode")
   private IncrementalMode incrementalMode;
   // What was the last-imported value of incrementalTestCol?
+  @StoredAsProperty("incremental.last.value")
   private String incrementalLastValue;
-
 
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved session, these will
@@ -359,15 +378,48 @@ public class SqoopOptions implements Cloneable {
     }
   }
 
+  @SuppressWarnings("unchecked")
   /**
    * Given a set of properties, load this into the current SqoopOptions
    * instance.
    */
   public void loadProperties(Properties props) {
 
-    this.connectString = props.getProperty("db.connect.string",
-        this.connectString);
-    this.username = props.getProperty("db.username", this.username);
+    try {
+      Field [] fields = getClass().getDeclaredFields();
+      for (Field f : fields) {
+        if (f.isAnnotationPresent(StoredAsProperty.class)) {
+          Class typ = f.getType();
+          StoredAsProperty storedAs = f.getAnnotation(StoredAsProperty.class);
+          String propName = storedAs.value();
+
+          if (typ.equals(int.class)) {
+            f.setInt(this,
+                getIntProperty(props, propName, f.getInt(this)));
+          } else if (typ.equals(boolean.class)) {
+            f.setBoolean(this,
+                getBooleanProperty(props, propName, f.getBoolean(this)));
+          } else if (typ.equals(long.class)) {
+            f.setLong(this,
+                getLongProperty(props, propName, f.getLong(this)));
+          } else if (typ.equals(String.class)) {
+            f.set(this, props.getProperty(propName, (String) f.get(this)));
+          } else if (typ.isEnum()) {
+            f.set(this, Enum.valueOf(typ,
+                props.getProperty(propName, f.get(this).toString())));
+          } else {
+            throw new RuntimeException("Could not retrieve property "
+                + propName + " for type: " + typ);
+          }
+        }
+      }
+    } catch (IllegalAccessException iae) {
+      throw new RuntimeException("Illegal access to field in property setter",
+          iae);
+    }
+
+    // Now load properties that were stored with special types, or require
+    // additional logic to set.
 
     if (getBooleanProperty(props, "db.require.password", false)) {
       // The user's password was stripped out from the metastore.
@@ -377,72 +429,10 @@ public class SqoopOptions implements Cloneable {
       this.password = props.getProperty("db.password", this.password);
     }
 
-    this.tableName = props.getProperty("db.table", this.tableName);
     String colListStr = props.getProperty("db.column.list", null);
     if (null != colListStr) {
       this.columns = listToArray(colListStr);
     }
-
-    this.codeOutputDir = props.getProperty("codegen.output.dir",
-        this.codeOutputDir);
-    this.jarOutputDir = props.getProperty("codegen.compile.dir",
-        this.jarOutputDir);
-
-    this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
-    this.whereClause = props.getProperty("db.where.clause", this.whereClause);
-    this.sqlQuery = props.getProperty("db.query", this.sqlQuery);
-    this.sqlQueryIsUpdate = getBooleanProperty(props, "db.query.is.update",
-        this.sqlQueryIsUpdate);
-
-    this.driverClassName = props.getProperty("jdbc.driver.class",
-        this.driverClassName);
-
-    this.warehouseDir = props.getProperty("hdfs.warehouse.dir",
-        this.warehouseDir);
-    this.targetDir = props.getProperty("hdfs.target.dir",
-        this.targetDir);
-    this.append = getBooleanProperty(props, "hdfs.append.dir", this.append);
-    
-    try {
-      this.layout = FileLayout.valueOf(
-        props.getProperty("hdfs.file.format", this.layout.toString()));
-    } catch (IllegalArgumentException iae) {
-      LOG.warn("Unsupported file format: "
-          + props.getProperty("hdfs.file.format", null) + "; setting to text");
-      this.layout = FileLayout.TextFile;
-    }
-
-    this.direct = getBooleanProperty(props, "direct.import", this.direct);
-
-    this.hiveImport = getBooleanProperty(props, "hive.import",
-        this.hiveImport);
-    this.overwriteHiveTable = getBooleanProperty(props,
-        "hive.overwrite.table", this.overwriteHiveTable);
-    this.hiveTableName = props.getProperty("hive.table.name",
-        this.hiveTableName);
-
-    this.className = props.getProperty("codegen.java.classname",
-        this.className);
-    this.packageName = props.getProperty("codegen.java.packagename",
-        this.packageName);
-    this.existingJarFile = props.getProperty("codegen.jar.file",
-        this.existingJarFile);
-
-    this.numMappers = getIntProperty(props, "mapreduce.num.mappers",
-        this.numMappers);
-
-    this.useCompression = getBooleanProperty(props, "enable.compression",
-        this.useCompression);
-
-    this.directSplitSize = getLongProperty(props, "import.direct.split.size",
-        this.directSplitSize);
-
-    this.maxInlineLobSize = getLongProperty(props,
-        "import.max.inline.lob.size", this.maxInlineLobSize);
-
-    this.exportDir = props.getProperty("export.source.dir", this.exportDir);
-    this.updateKeyCol = props.getProperty("export.update.col",
-        this.updateKeyCol);
 
     this.inputDelimiters = getDelimiterProperties(props,
         "codegen.input.delimiters", this.inputDelimiters);
@@ -452,27 +442,9 @@ public class SqoopOptions implements Cloneable {
     this.extraArgs = getArgArrayProperty(props, "tool.arguments",
         this.extraArgs);
 
-    this.hbaseTable = props.getProperty("hbase.table", this.hbaseTable);
-    this.hbaseColFamily = props.getProperty("hbase.col.family",
-        this.hbaseColFamily);
-    this.hbaseRowKeyCol = props.getProperty("hbase.row.key.col",
-        this.hbaseRowKeyCol);
-    this.hbaseCreateTable = getBooleanProperty(props, "hbase.create.table",
-        this.hbaseCreateTable);
-
-    try {
-      this.incrementalMode = IncrementalMode.valueOf(props.getProperty(
-          "incremental.mode", this.incrementalMode.toString()));
-    } catch (IllegalArgumentException iae) {
-      LOG.warn("Invalid incremental import type: "
-          + props.getProperty("incremental.mode", null) + "; setting to None");
-      this.incrementalMode = IncrementalMode.None;
-    }
-
-    this.incrementalTestCol = props.getProperty("incremental.col",
-        this.incrementalTestCol);
-    this.incrementalLastValue = props.getProperty("incremental.last.value",
-        this.incrementalLastValue);
+    // Delimiters were previously memoized; don't let the tool override
+    // them with defaults.
+    this.areDelimsManuallySet = true;
   }
 
   /**
@@ -483,12 +455,39 @@ public class SqoopOptions implements Cloneable {
   public Properties writeProperties() {
     Properties props = new Properties();
 
-    putProperty(props, "db.connect.string", this.connectString);
-    putProperty(props, "db.username", this.username);
+    try {
+      Field [] fields = getClass().getDeclaredFields();
+      for (Field f : fields) {
+        if (f.isAnnotationPresent(StoredAsProperty.class)) {
+          Class typ = f.getType();
+          StoredAsProperty storedAs = f.getAnnotation(StoredAsProperty.class);
+          String propName = storedAs.value();
+
+          if (typ.equals(int.class)) {
+            putProperty(props, propName, Integer.toString(f.getInt(this)));
+          } else if (typ.equals(boolean.class)) {
+            putProperty(props, propName, Boolean.toString(f.getBoolean(this)));
+          } else if (typ.equals(long.class)) {
+            putProperty(props, propName, Long.toString(f.getLong(this)));
+          } else if (typ.equals(String.class)) {
+            putProperty(props, propName, (String) f.get(this));
+          } else if (typ.isEnum()) {
+            putProperty(props, propName, f.get(this).toString());
+          } else {
+            throw new RuntimeException("Could not set property "
+                + propName + " for type: " + typ);
+          }
+        }
+      }
+    } catch (IllegalAccessException iae) {
+      throw new RuntimeException("Illegal access to field in property setter",
+          iae);
+    }
+
 
     if (this.getConf().getBoolean(
         METASTORE_PASSWORD_KEY, METASTORE_PASSWORD_DEFAULT)) {
-      // If the user specifies, we may store the password in the metastore. 
+      // If the user specifies, we may store the password in the metastore.
       putProperty(props, "db.password", this.password);
       putProperty(props, "db.require.password", "false");
     } else if (this.password != null) {
@@ -500,52 +499,12 @@ public class SqoopOptions implements Cloneable {
       putProperty(props, "db.require.password", "false");
     }
 
-    putProperty(props, "db.table", this.tableName);
     putProperty(props, "db.column.list", arrayToList(this.columns));
-    putProperty(props, "codegen.output.dir", this.codeOutputDir);
-    putProperty(props, "codegen.compile.dir", this.jarOutputDir);
-    putProperty(props, "db.split.column", this.splitByCol);
-    putProperty(props, "db.where.clause", this.whereClause);
-    putProperty(props, "db.query", this.sqlQuery);
-    putProperty(props, "db.query.is.update",
-        Boolean.toString(this.sqlQueryIsUpdate));
-    putProperty(props, "jdbc.driver.class", this.driverClassName);
-    putProperty(props, "hdfs.warehouse.dir", this.warehouseDir);
-    putProperty(props, "hdfs.target.dir", this.targetDir);
-    putProperty(props, "hdfs.append.dir", Boolean.toString(this.append));
-    putProperty(props, "hdfs.file.format", this.layout.toString());
-    putProperty(props, "direct.import", Boolean.toString(this.direct));
-    putProperty(props, "hive.import", Boolean.toString(this.hiveImport));
-    putProperty(props, "hive.overwrite.table",
-        Boolean.toString(this.overwriteHiveTable));
-    putProperty(props, "hive.table.name", this.hiveTableName);
-    putProperty(props, "codegen.java.classname", this.className);
-    putProperty(props, "codegen.java.packagename", this.packageName);
-    putProperty(props, "codegen.jar.file", this.existingJarFile);
-    putProperty(props, "mapreduce.num.mappers",
-        Integer.toString(this.numMappers));
-    putProperty(props, "enable.compression",
-        Boolean.toString(this.useCompression));
-    putProperty(props, "import.direct.split.size",
-        Long.toString(this.directSplitSize));
-    putProperty(props, "import.max.inline.lob.size",
-        Long.toString(this.maxInlineLobSize));
-    putProperty(props, "export.source.dir", this.exportDir);
-    putProperty(props, "export.update.col", this.updateKeyCol);
     setDelimiterProperties(props, "codegen.input.delimiters",
         this.inputDelimiters);
     setDelimiterProperties(props, "codegen.output.delimiters",
         this.outputDelimiters);
     setArgArrayProperties(props, "tool.arguments", this.extraArgs);
-    putProperty(props, "hbase.table", this.hbaseTable);
-    putProperty(props, "hbase.col.family", this.hbaseColFamily);
-    putProperty(props, "hbase.row.key.col", this.hbaseRowKeyCol);
-    putProperty(props, "hbase.create.table",
-        Boolean.toString(this.hbaseCreateTable));
-
-    putProperty(props, "incremental.mode", this.incrementalMode.toString());
-    putProperty(props, "incremental.col", this.incrementalTestCol);
-    putProperty(props, "incremental.last.value", this.incrementalLastValue);
 
     return props;
   }
