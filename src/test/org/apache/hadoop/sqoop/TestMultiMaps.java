@@ -48,7 +48,8 @@ public class TestMultiMaps extends ImportJobTestCase {
    * Create the argv to pass to Sqoop
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String splitByCol) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
+      String splitByCol) {
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";

@@ -152,5 +152,8 @@ public class TestConnFactory extends TestCase {
 
     public void importTable(ImportJobContext context) {
     }
+
+    public void release() {
+    }
   }
 }

@@ -73,22 +73,25 @@ public class OracleManagerTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(OracleManagerTest.class.getName());
 
-  static final String ORACLE_DATABASE_NAME = "xe"; // Express edition hardcoded name.
   static final String TABLE_NAME = "EMPLOYEES";
-  static final String CONNECT_STRING = "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME;
-  static final String ORACLE_USER_NAME = "SQOOPTEST";
-  static final String ORACLE_USER_PASS = "12345";
 
   // instance variables populated during setUp, used during tests
   private OracleManager manager;
 
   @Before
   public void setUp() {
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
-    options.setUsername(ORACLE_USER_NAME);
-    options.setPassword(ORACLE_USER_PASS);
+    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
+        TABLE_NAME);
+    OracleUtils.setOracleAuth(options);
 
     manager = new OracleManager(options);
+
+    // Drop the existing table, if there is one.
+    try {
+      OracleUtils.dropTable(TABLE_NAME, manager);
+    } catch (SQLException sqlE) {
+      fail("Could not drop table " + TABLE_NAME + ": " + sqlE);
+    }
 
     Connection connection = null;
     Statement st = null;
@@ -98,9 +101,7 @@ public class OracleManagerTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
-      st.executeUpdate("BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + TABLE_NAME + "'; "
-          + "exception when others then null; end;");
+      // create the database table and populate it with data.
       st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
           + "id INT NOT NULL, "
           + "name VARCHAR2(24) NOT NULL, "
@@ -157,11 +158,11 @@ public class OracleManagerTest extends ImportJobTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(CONNECT_STRING);
+    args.add(OracleUtils.CONNECT_STRING);
     args.add("--username");
-    args.add(ORACLE_USER_NAME);
+    args.add(OracleUtils.ORACLE_USER_NAME);
     args.add("--password");
-    args.add(ORACLE_USER_PASS);
+    args.add(OracleUtils.ORACLE_USER_PASS);
     args.add("--num-mappers");
     args.add("1");
 

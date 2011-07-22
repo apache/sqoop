@@ -79,7 +79,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
   @Before
   public void setUp() {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
-    options.setUsername(getCurrentUser());
+    options.setUsername(MySQLUtils.getCurrentUser());
     manager = new LocalMySQLManager(options);
 
     Connection connection = null;
@@ -135,53 +135,6 @@ public class LocalMySQLTest extends ImportJobTestCase {
     }
   }
 
-  /** @return the current username. */
-  private String getCurrentUser() {
-    // First, check the $USER environment variable.
-    String envUser = System.getenv("USER");
-    if (null != envUser) {
-      return envUser;
-    }
-
-    // Try `whoami`
-    String [] whoamiArgs = new String[1];
-    whoamiArgs[0] = "whoami";
-    Process p = null;
-    BufferedReader r = null;
-    try {
-      p = Runtime.getRuntime().exec(whoamiArgs);
-      InputStream is = p.getInputStream();
-      r = new BufferedReader(new InputStreamReader(is));
-      return r.readLine();
-    } catch (IOException ioe) {
-      LOG.error("IOException reading from `whoami`: " + ioe.toString());
-      return null;
-    } finally {
-      // close our stream.
-      if (null != r) {
-        try {
-          r.close();
-        } catch (IOException ioe) {
-          LOG.warn("IOException closing input stream from `whoami`: " + ioe.toString());
-        }
-      }
-
-      // wait for whoami to exit.
-      while (p != null) {
-        try {
-          int ret = p.waitFor();
-          if (0 != ret) {
-            LOG.error("whoami exited with error status " + ret);
-            // suppress original return value from this method.
-            return null; 
-          }
-        } catch (InterruptedException ie) {
-          continue; // loop around.
-        }
-      }
-    }
-  }
-
   private String [] getArgv(boolean mysqlOutputDelims, boolean isDirect,
       String tableName, String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
@@ -198,7 +151,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
       args.add("--direct");
     }
     args.add("--username");
-    args.add(getCurrentUser());
+    args.add(MySQLUtils.getCurrentUser());
     args.add("--where");
     args.add("id > 1");
     args.add("--num-mappers");
@@ -289,7 +242,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
   }
 
   @Test
-  public void testLocalBulkImportWithMysqlQuotes() throws IOException {
+  public void testLocalBulkImportWithMySQLQuotes() throws IOException {
     // mysql quotes all string-based output.
     String [] expectedResults = {
         "2,'Bob','2009-04-20',400,'sales'",
@@ -300,7 +253,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
   }
 
   @Test
-  public void testMysqlJdbcImport() throws IOException {
+  public void testMySQLJdbcImport() throws IOException {
     String [] expectedResults = {
         "2,Bob,2009-04-20,400.0,sales",
         "3,Fred,2009-01-23,15.0,marketing"
@@ -316,7 +269,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
     final String reservedTableName = "TABLE";
     SqoopOptions options = new SqoopOptions(CONNECT_STRING,
         reservedTableName);
-    options.setUsername(getCurrentUser());
+    options.setUsername(MySQLUtils.getCurrentUser());
     ConnManager mgr = new MySQLManager(options);
 
     Connection connection = null;
@@ -363,7 +316,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
     final String tableName = "mysql_escaped_col_table";
     SqoopOptions options = new SqoopOptions(CONNECT_STRING,
         tableName);
-    options.setUsername(getCurrentUser());
+    options.setUsername(MySQLUtils.getCurrentUser());
     ConnManager mgr = new MySQLManager(options);
 
     Connection connection = null;

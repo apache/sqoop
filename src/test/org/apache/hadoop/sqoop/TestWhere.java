@@ -46,7 +46,8 @@ public class TestWhere extends ImportJobTestCase {
    * Create the argv to pass to Sqoop
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String [] colNames, String whereClause) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
+      String whereClause) {
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";

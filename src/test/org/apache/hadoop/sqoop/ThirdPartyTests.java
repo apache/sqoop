@@ -24,7 +24,9 @@ import junit.framework.TestSuite;
 
 import org.apache.hadoop.sqoop.manager.LocalMySQLTest;
 import org.apache.hadoop.sqoop.manager.MySQLAuthTest;
+import org.apache.hadoop.sqoop.manager.MySQLCompatTest;
 import org.apache.hadoop.sqoop.manager.OracleManagerTest;
+import org.apache.hadoop.sqoop.manager.OracleCompatTest;
 import org.apache.hadoop.sqoop.manager.PostgresqlTest;
 
 /**
@@ -41,7 +43,9 @@ public final class ThirdPartyTests extends TestCase {
       + "implementations in Sqoop");
     suite.addTestSuite(LocalMySQLTest.class);
     suite.addTestSuite(MySQLAuthTest.class);
+    suite.addTestSuite(MySQLCompatTest.class);
     suite.addTestSuite(OracleManagerTest.class);
+    suite.addTestSuite(OracleCompatTest.class);
     suite.addTestSuite(PostgresqlTest.class);
 
     return suite;

@@ -170,6 +170,8 @@ public class TestSqlManager extends TestCase {
           fail("SQL Exception in ResultSet.close(): " + sqlE.toString());
         }
       }
+
+      manager.release();
     }
   }
 
@@ -190,6 +192,8 @@ public class TestSqlManager extends TestCase {
           fail("SQL Exception in ResultSet.close(): " + sqlE.toString());
         }
       }
+
+      manager.release();
     }
   }
 
@@ -220,6 +224,7 @@ public class TestSqlManager extends TestCase {
           + " INT NOT NULL PRIMARY KEY, foo INT)",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       statement.executeUpdate();
+      statement.close();
     } catch (SQLException sqlException) {
       fail("Could not create table with primary key: " + sqlException.toString());
     } finally {

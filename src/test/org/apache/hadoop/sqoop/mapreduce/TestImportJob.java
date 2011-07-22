@@ -57,14 +57,16 @@ public class TestImportJob extends ImportJobTestCase {
     // Create a table to attempt to import.
     createTableForColType("VARCHAR(32)", "'meep'");
 
+    Configuration conf = new Configuration();
+
     // Make the output dir exist so we know the job will fail via IOException.
     Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(new Configuration());
+    FileSystem fs = FileSystem.getLocal(conf);
     fs.mkdirs(outputPath);
 
     assertTrue(fs.exists(outputPath));
 
-    String [] argv = getArgv(true, new String [] { "DATA_COL0" });
+    String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
 
     Sqoop importer = new Sqoop();
     try {
@@ -94,11 +96,11 @@ public class TestImportJob extends ImportJobTestCase {
     // Create a table to attempt to import.
     createTableForColType("VARCHAR(32)", "'meep'");
 
-    String [] argv = getArgv(true, new String [] { "DATA_COL0" });
+    Configuration conf = new Configuration();
+    String [] argv = getArgv(true, new String [] { "DATA_COL0" }, conf);
 
     // Use dependency injection to specify a mapper that we know
     // will fail.
-    Configuration conf = new Configuration();
     conf.setClass(DataDrivenImportJob.DATA_DRIVEN_MAPPER_KEY,
         NullDereferenceMapper.class,
         Mapper.class);

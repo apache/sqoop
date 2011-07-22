@@ -21,17 +21,20 @@ package org.apache.hadoop.sqoop.testutil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
-
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.Sqoop;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
+
+import org.junit.Test;
 
 /**
  * Class that implements common methods required for tests which import data
@@ -46,12 +49,22 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
+   * @return a list of additional args to pass to the sqoop command line.
+   */
+  protected List<String> getExtraArgs(Configuration conf) {
+    return new ArrayList<String>();
+  }
+
+  /**
    * Create the argv to pass to Sqoop
    * @param includeHadoopFlags if true, then include -D various.settings=values
    * @param colNames the columns to import. If null, all columns are used.
+   * @param conf a Configuration specifying additional properties to use when
+   * determining the arguments.
    * @return the argv as an array of strings.
    */
-  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
+      Configuration conf) {
     if (null == colNames) {
       colNames = getColNames();
     }
@@ -77,10 +90,12 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
     args.add("--as-sequencefile");
     args.add("--num-mappers");
     args.add("1");
+
+    args.addAll(getExtraArgs(conf));
 
     return args.toArray(new String[0]);
   }
@@ -98,11 +113,14 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
 
     removeTableDir();
 
+    Configuration conf = getConf();
+    SqoopOptions opts = getSqoopOptions(conf);
+
     // run the tool through the normal entry-point.
     int ret;
     try {
-      Sqoop importer = new Sqoop();
-      ret = ToolRunner.run(importer, getArgv(true, importCols));
+      Sqoop importer = new Sqoop(conf, opts);
+      ret = ToolRunner.run(importer, getArgv(true, importCols, conf));
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       throw new RuntimeException(e);
@@ -111,9 +129,9 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     // expect a successful return.
     assertEquals("Failure during job", 0, ret);
 
-    SqoopOptions opts = new SqoopOptions();
+    opts = getSqoopOptions(conf);
     try {
-      opts.parse(getArgv(false, importCols));
+      opts.parse(getArgv(false, importCols, conf));
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
     }
@@ -128,6 +146,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
       assertTrue("Error: " + dataFilePath.toString() + " does not exist", f.exists());
 
       Object readValue = SeqFileReader.getFirstValue(dataFilePath.toString());
+      LOG.info("Read back from sequencefile: " + readValue);
       // add trailing '\n' to expected value since SqoopRecord.toString() encodes the record delim
       if (null == expectedVal) {
         assertEquals("Error validating result from SeqFile", "null\n", readValue.toString());
@@ -153,7 +172,9 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
     // run the tool through the normal entry-point.
     int ret;
     try {
-      Sqoop importer = new Sqoop();
+      Configuration conf = getConf();
+      SqoopOptions opts = getSqoopOptions(conf);
+      Sqoop importer = new Sqoop(conf, opts);
       ret = ToolRunner.run(importer, argv);
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());

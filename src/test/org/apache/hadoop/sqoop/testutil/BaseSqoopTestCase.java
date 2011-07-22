@@ -34,6 +34,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
 
+import org.apache.hadoop.sqoop.ConnFactory;
+import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 
 import junit.framework.TestCase;
@@ -119,6 +121,37 @@ public class BaseSqoopTestCase extends TestCase {
     tableNum++;
   }
 
+  /**
+   * @return true if we need an in-memory database to run these tests.
+   */
+  protected boolean useHsqldbTestServer() {
+    return true;
+  }
+
+  /**
+   * @return the connect string to use for interacting with the database.
+   * If useHsqldbTestServer is false, you need to override this and provide
+   * a different connect string.
+   */
+  protected String getConnectString() {
+    return HsqldbTestServer.getUrl();
+  }
+
+  /**
+   * @return a Configuration object used to configure tests.
+   */
+  protected Configuration getConf() {
+    return new Configuration();
+  }
+
+  /**
+   * @return a new SqoopOptions customized for this particular test, but one
+   * which has not had any arguments parsed yet.
+   */
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    return new SqoopOptions(conf);
+  }
+
   @Before
   public void setUp() {
 
@@ -130,18 +163,31 @@ public class BaseSqoopTestCase extends TestCase {
       LOG.info("Configured log4j with console appender.");
     }
 
-    testServer = new HsqldbTestServer();
-    try {
-      testServer.resetServer();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    } catch (ClassNotFoundException cnfe) {
-      LOG.error("Could not find class for db driver: " + cnfe.toString());
-      fail("Could not find class for db driver: " + cnfe.toString());
-    }
+    if (useHsqldbTestServer()) {
+      testServer = new HsqldbTestServer();
+      try {
+        testServer.resetServer();
+      } catch (SQLException sqlE) {
+        LOG.error("Got SQLException: " + sqlE.toString());
+        fail("Got SQLException: " + sqlE.toString());
+      } catch (ClassNotFoundException cnfe) {
+        LOG.error("Could not find class for db driver: " + cnfe.toString());
+        fail("Could not find class for db driver: " + cnfe.toString());
+      }
 
-    manager = testServer.getManager();
+      manager = testServer.getManager();
+    } else {
+      Configuration conf = getConf();
+      SqoopOptions opts = getSqoopOptions(conf);
+      opts.setConnectString(getConnectString());
+      opts.setTableName(getTableName());
+      ConnFactory f = new ConnFactory(conf);
+      try {
+        this.manager = f.getManager(opts);
+      } catch (IOException ioe) {
+        fail("IOException instantiating manager: " + ioe);
+      }
+    }
   }
 
   @After
@@ -156,10 +202,24 @@ public class BaseSqoopTestCase extends TestCase {
       LOG.error("Got SQLException: " + sqlE.toString());
       fail("Got SQLException: " + sqlE.toString());
     }
-
   }
 
   static final String BASE_COL_NAME = "DATA_COL";
+
+  /**
+   * Drop a table if it already exists in the database.
+   * @param table the name of the table to drop.
+   * @throws SQLException if something goes wrong.
+   */
+  protected void dropTableIfExists(String table) throws SQLException {
+    Connection conn = getManager().getConnection();
+    PreparedStatement statement = conn.prepareStatement(
+        "DROP TABLE " + table + " IF EXISTS",
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    statement.executeUpdate();
+    statement.close();
+    conn.commit();
+  }
 
   /**
    * Create a table with a set of columns and add a row of values.
@@ -168,57 +228,85 @@ public class BaseSqoopTestCase extends TestCase {
    */
   protected void createTableWithColTypes(String [] colTypes, String [] vals) {
     Connection conn = null;
+    PreparedStatement statement = null;
+    String createTableStr = null;
+    String columnDefStr = "";
+    String columnListStr = "";
+    String valueListStr = "";
+    String [] myColNames = new String[colTypes.length];
+
     try {
-      conn = getTestServer().getConnection();
-      PreparedStatement statement = conn.prepareStatement(
-          "DROP TABLE " + getTableName() + " IF EXISTS",
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      statement.executeUpdate();
-      statement.close();
+      try {
+        dropTableIfExists(getTableName());
 
-      String columnDefStr = "";
-      String columnListStr = "";
-      String valueListStr = "";
+        conn = getManager().getConnection();
 
-      String [] myColNames = new String[colTypes.length];
+        for (int i = 0; i < colTypes.length; i++) {
+          String colName = BASE_COL_NAME + Integer.toString(i);
+          columnDefStr += colName + " " + colTypes[i];
+          columnListStr += colName;
+          valueListStr += vals[i];
+          myColNames[i] = colName;
+          if (i < colTypes.length - 1) {
+            columnDefStr += ", ";
+            columnListStr += ", ";
+            valueListStr += ", ";
+          }
+        }
 
-      for (int i = 0; i < colTypes.length; i++) {
-        String colName = BASE_COL_NAME + Integer.toString(i);
-        columnDefStr += colName + " " + colTypes[i];
-        columnListStr += colName;
-        valueListStr += vals[i];
-        myColNames[i] = colName;
-        if (i < colTypes.length - 1) {
-          columnDefStr += ", ";
-          columnListStr += ", ";
-          valueListStr += ", ";
+        createTableStr = "CREATE TABLE " + getTableName()
+            + "(" + columnDefStr + ")";
+        LOG.info("Creating table: " + createTableStr);
+        statement = conn.prepareStatement(
+            createTableStr,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement.executeUpdate();
+      } catch (SQLException sqlException) {
+        fail("Could not create table: " + sqlException.toString());
+      } finally {
+        if (null != statement) {
+          try {
+            statement.close();
+          } catch (SQLException se) {
+          }
+
+          statement = null;
         }
       }
 
-      statement = conn.prepareStatement(
-          "CREATE TABLE " + getTableName() + "(" + columnDefStr + ")",
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      statement.executeUpdate();
-      statement.close();
+      try {
+        String insertValsStr = "INSERT INTO " + getTableName()
+            + "(" + columnListStr + ")"
+            + " VALUES(" + valueListStr + ")";
+        LOG.info("Inserting values: " + insertValsStr);
+        statement = conn.prepareStatement(
+            insertValsStr,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement.executeUpdate();
+        statement.close();
+      } catch (SQLException sqlException) {
+        fail("Could not create table: " + sqlException.toString());
+      } finally {
+        if (null != statement) {
+          try {
+            statement.close();
+          } catch (SQLException se) {
+          }
 
-      statement = conn.prepareStatement(
-          "INSERT INTO " + getTableName() + "(" + columnListStr + ")"
-          + " VALUES(" + valueListStr + ")",
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      statement.executeUpdate();
-      statement.close();
+          statement = null;
+        }
+      }
+
       conn.commit();
       this.colNames = myColNames;
-    } catch (SQLException sqlException) {
-      fail("Could not create table: " + sqlException.toString());
-    } finally {
+    } catch (SQLException se) {
       if (null != conn) {
         try {
           conn.close();
-        } catch (SQLException sqlE) {
-          LOG.warn("Got SQLException during close: " + sqlE.toString());
+        } catch (SQLException connSE) {
         }
       }
+      fail("Could not create table: " + se.toString());
     }
   }
 
@@ -265,6 +353,9 @@ public class BaseSqoopTestCase extends TestCase {
       assertNotNull("Null results from readTable()!", results);
       assertTrue("Expected at least one row returned", results.next());
       String resultVal = results.getString(colNum);
+      LOG.info("Verifying readback from " + getTableName()
+          + ": got value [" + resultVal + "]");
+      LOG.info("Expected value is: [" + expectedVal + "]");
       if (null != expectedVal) {
         assertNotNull("Expected non-null result value", resultVal);
       }
@@ -281,6 +372,9 @@ public class BaseSqoopTestCase extends TestCase {
           fail("Got SQLException in resultset.close(): " + sqlE.toString());
         }
       }
+
+      // Free internal resources after the readTable.
+      getManager().release();
     }
   }
 }
