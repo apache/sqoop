@@ -44,17 +44,17 @@ fi
 # Check: If we can't find our dependencies, give up here.
 if [ ! -d "${HADOOP_HOME}" ]; then
   echo "Error: $HADOOP_HOME does not exist!"
-  echo "Please set $$HADOOP_HOME to the root of your Hadoop installation."
+  echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
   exit 1
 fi
 if [ ! -d "${HBASE_HOME}" ]; then
   echo "Error: $HBASE_HOME does not exist!"
-  echo "Please set $$HBASE_HOME to the root of your HBase installation."
+  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
   exit 1
 fi
 if [ ! -d "${ZOOKEEPER_HOME}" ]; then
   echo "Error: $ZOOKEEPER_HOME does not exist!"
-  echo "Please set $$ZOOKEEPER_HOME to the root of your ZooKeeper installation."
+  echo 'Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.'
   exit 1
 fi
 
