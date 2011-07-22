@@ -1,0 +1,189 @@
+== <!--
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+    
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+--> ==
+
+|SIP           | 6                                         |
+|Title         | Reusable Jobs for Sqoop Operations        |
+|Author        | Aaron Kimball (aaron at cloudera dot com) |
+|Created       | July 26, 2010                             |
+|Status        | Accepted                                  |
+|Discussion    | "https://issues.cloudera.org/browse/SQOOP-39":https://issues.cloudera.org/browse/SQOOP-39 |
+|Implementation| "https://review.cloudera.org/r/421":https://review.cloudera.org/r/421 |
+
+h2. Abstract
+
+This SIP describes a mechanism for memorizing details of jobs so they can be reused. Users can define an import or export process and its associated parameters, and attach a job name to this process. The process can then be reexecuted by referencing its job name.
+
+
+h2. Problem statement
+
+Both to save user input for tasks that are expected to be executed multple times, as well as to facilitate further features (for example, recurring imports of new data added to a table since a previous import), Sqoop requires the ability to save and restore the configuration used to perform an operation.
+
+This mechanism will be built in two parts: an API (described in this SIP) that saves and restores jobs, and an implementation. The proposed implementation will be stored in an embedded database (HSQLDB); other implementations based on file storage, or stored in the target database are also possible.
+
+h2. Specification
+
+h3. Job API
+
+Jobs are stored in an underlying resource (for example, a file, or rows of a database). The parameters required to access this resource will be described by a @Map<String, String>@. This map must be populated with parameters; any metadata such as the connect string of a job-storing database, username, etc. 
+
+The @JobStorage@ API will connect to this underlying resource, and then access jobs, which are described by a String-based identifier. "Accessing" jobs means creating them, restoring them, deleting, etc.
+
+The actual data to be stored in a job will be contained in a @JobData@ object, which currently contains a @SqoopOptions@ and a @SqoopTool@.
+
+bc.. public class JobData {
+  public void setSqoopOptions(SqoopOptions opts);
+  public void setSqoopTool(SqoopTool tool);
+  public SqoopOptions getSqoopOptions();
+  public SqoopTool getSqoopTool();
+}
+
+p. The following API describes how user jobs are saved, manipulated, and restored:
+
+bc.. public abstract class JobStorage {
+
+  /**
+   * Returns true if the JobStorage system can use the metadata in
+   * the descriptor to connect to an underlying resource. This does not
+   * actually attempt to connect to the resource. This merely specifies
+   * that the correct metadata strings are present in the descriptor.
+   */
+  public boolean canAccept(Map<String, String> descriptor);
+
+  /**
+   * Given a resource descriptor, open the job storage resource.
+   */
+  public void open(Map<String, String> descriptor) throws IOException;
+
+  /* Given a job name, reconstitute the JobData that contains all
+   * information required for the job. Returns null if the descriptor
+   * does not match an available job.
+   */
+  public JobData read(String jobName) throws IOException;
+
+  /**
+   * Forget about a saved job.
+   */
+  public void delete(String jobName) throws IOException;
+
+  /**
+   * Given a job name and the data describing a configured
+   * job, record the job information to the storage medium.
+   */
+  public void create(String jobName, JobData data)
+      throws IOException;
+
+  /**
+   * Given a job name and the data describing a configured
+   * job, update the job information in the storage medium
+   * to reflect the current state of the job data.
+   */
+  public void update(String jobName, JobData data)
+      throws IOException;
+
+  /**
+   * Enumerate all the job names that can be retrieved from the
+   * connected storage resource.
+   */
+  public List<String> list() throws IOException;
+
+  /**
+   * Close any connection opened during connect().
+   */
+  public void close() throws IOException;
+}
+
+p. This allows the @JobStorage@ system to define an arbitrary location to hold the physical job information. @JobStorage@ instances will be managed by a @JobStorageFactory@ that uses the @canAccept()@ method to determine the correct @JobStorage@ to handle the job resource descriptor.
+
+h3. Database-Backed Implementation
+
+The @JobStorage@ API will be initially implemented by a separate HSQLDB instance. HSQLDB is a lightweight SQL-compliant Java database that is already distributed with Sqoop and Hadoop for testing purposes. It can be configured to serve concurrent clients in a standalone fashion and interoperates via JDBC. 
+
+The "root" metadata for the system will be stored in a table called "sqoop_root" defined as follows:
+
+bc.. CREATE TABLE sqoop_root(
+    version INT,
+    propname VARCHAR(128)) NOT NULL,
+    propval VARCHAR(256));
+
+p. The root table name for the schema can be overridden with sqoop.hsqldb.root.table.name in sqoop-site.xml.
+
+If a row has a NULL version it applies to all versions of the hsqldb-based schemas. The propname "sqoop.hsqldb.job.storage.version" has a value of 'n' (an integer) defining the current storage version. Rolling back the metastore requires simply decrementing this value and Sqoop will use the previous edition of the metadata.
+
+Rows with a non-null version number apply only to that version. When doing a schema evolution, all keys from the previous version of the root metadata table which are still required will be duplicated with the newer version number. 
+
+The first version, defined in this SIP, shall be version 0.  In version 0, the root table includes a propname of "sqoop.hsqldb.job.info.table" with a propval identifying the table name, which will default to being "sqoop_jobs". If this table name is taken, Sqoop will find a different table name to use which includes a unique integer. This table will be defined as follows:
+
+bc.. CREATE TABLE sqoop_jobs (
+  job_name VARCHAR(64) NOT NULL,
+  propname VARCHAR(128) NOT NULL,
+  propval VARCHAR(256),
+  propclass VARCHAR(32));
+
+p. Each job contains a set of (key, value) pairs identified by @propname@ and @propval@. The properties can be broken down into multiple property classes (@propclass@). The initially-defined values for @propclass@ are @'SqoopOptions'@ and @'config'@. Rows with @propclass = 'SqoopOptions'@ are used to configure a @SqoopOptions@ instance. Rows with a property class of @'config'@ are placed in the free-form @Configuration@ instance that holds "free-form" parameters not managed by @SqoopOptions@ directly. Only those values in a @SqoopOptions@ managed @Configuration@ instance that differ from a "vanilla" @Configuration@ loaded from the default resources are recorded.
+
+The schema version number will be bumped when the entire schema needs to change.
+
+Within the v0 property-based schema, multiple versions of the set of properties used to describe a table may exist. This is called the "sqoop.property.set.id" and is a property of the job, described in the sqoop_jobs table for a particular job_name.
+
+Subsequent releases of Sqoop may add more names to the set of propnames which describe a job. This does not change the recorded sqoop.property.set.id. This is only incremented when a set of existing values are deprecated, and either renamed or deleted entirely. Performing renames of existing deployed propnames or removal of existing deployed propnames requires incrementing the sqoop.property.set.id recorded in a specific job. Thus, when reading in a job, Sqoop can determine which set of functionality the job expects Sqoop to provide. If Sqoop deprecates and eventually removes functionality, it needs to be be able to determine that a previous job may be too old to execute with the current version of Sqoop, and an older version of Sqoop may be necessary.
+
+When migrating a schema to a new version, Sqoop will create a new table or set of tables with the new layout. It will then copy existing jobs from the previously-current job id into the new layout. It will then copy any properties in the sqoop_root table to new rows in that same table with an increased version number, if such properties need to be retained. Finally, it will update the master 'sqoop.hsqldb.job.storage.version' row in the sqoop_root table, completing the update. If an update needs to be rolled back, this row can simply be updated again. Updates can be "finalized" by removing metadata used in prior versions. This conserves space in the metastore db, but removes the ability to revert to earlier schemas if sqoop needs to be downgraded. At such a time that multiple schema versions exist, a schema-admin tool will be introduced to perform these functions.
+
+h3. Moving to Shared Storage
+
+Ideally, Sqoop would not need to manage its own metadata server (database instance). Projects such as "Howl":http://wiki.apache.org/pig/Howl will hopefully provide common metadata storage for a variety of Hadoop-based systems. When such a system is available, we would like to deprecate the HSQLDB approach and move to this common platform. The @JobStorageFactory@ used in Sqoop makes this migration possible. The factory currently only produces Hsqldb-backed @JobStorage@ instances. A new @JobStorage@ which connects to Howl (or another platform) would be written. This implementation would also accept a "combined" storage descriptor which contains the metadata required to connect both to Howl and Hsqldb. It would migrate the data from Hsqldb by reading all the jobs (using the existing Hsqldb-backed @JobStorage@ implementation) from the old data source and then insert them into the Howl-backed datastore. The @JobStorageFactory@ would be modified to attempt to use the new Howl-based storage before falling back to the Hsqldb approach.
+
+
+h3. Job Management Tool
+
+Sqoop will introduce the following new @SqoopTool@ implementation to manage user jobs:
+
+* @job@ - Manages user jobs. This tool requires an _action_ from the list below. The tool takes as arguments the parameters required to describe a job storage descriptor. Most actions also take a job name, used to create or read the specified job. 
+** With the --create option, it creates a new user job. Takes as arguments any arguments required to create a job descriptor, followed by the name of a tool and the arguments to that tool which represent the job itself. The tool is not executed; instead it is configured, and the job state is recorded.
+** With the --delete option, it deletes an existing job.
+** The --list option lists existing jobs.
+** The --execute option executes an existing job. Additional arguments may be provided which override in-job parameters if required, which are passed to the job-specific tool (e.g., the @ImportTool@). The tool is then executed.
+** The --show option displays the parameters for an existing job.
+
+h3. Database server
+
+To support the HSQLDB-based job management tool, a @metastore@ @SqoopTool@ will be provided. This will host a standalone SQL database which can store and retrieve job information. By default, this is not required; the system will configure local filesystem-based storage which will be used directly in the HSQLDB JDBC driver without a standalone server.
+
+
+h2. Compatibility Issues
+
+This does not introduce any regression in functionality; backwards compatibility is not a problem.
+
+Care must be taken in the @JobStorage@ implementations that we do not incur forwards-compatibility problems. For example, a database-backed @JobStorage@ must be able to tolerate database schemas that evolve over time. The HSQLDB-based implementation includes provisions for schema evolution over time as well as graceful downgrading.
+
+h2. Test Plan
+
+Unit tests will be used with an in-memory persistent database to test job reuse over time.
+
+A standalone HSQLDB instance will also be configured; manual testing against this instance will ensure that Sqoop can operate in a "real" environment as well.
+
+h2. Security Implications
+
+Access to the metastore is currently unsecured. Any JDBC client can access and modify this information. Authentication will be added in a later system.
+
+By default, the metastore will not record any passwords in the job; users will be required to reenter their password upon restoring a job. Users can set the @sqoop.metastore.client.record.password@ parameter to @true@ with @-D@, which will override this behavior.
+
+h2. Discussion
+
+Please provide feedback and comments at "https://issues.cloudera.org/browse/SQOOP-39":https://issues.cloudera.org/browse/SQOOP-39
+
+
