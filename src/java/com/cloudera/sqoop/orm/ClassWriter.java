@@ -23,6 +23,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
+import com.cloudera.sqoop.lib.BooleanParser;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.JdbcWritableBridge;
@@ -764,7 +765,8 @@ public class ClassWriter {
     } else if (javaType.equals("Double")) {
       sb.append("      this." + colName + " = Double.valueOf(__cur_str);\n");
     } else if (javaType.equals("Boolean")) {
-      sb.append("      this." + colName + " = Boolean.valueOf(__cur_str);\n");
+      sb.append("      this." + colName
+          + " = BooleanParser.valueOf(__cur_str);\n");
     } else if (javaType.equals("java.sql.Date")) {
       sb.append("      this." + colName
           + " = java.sql.Date.valueOf(__cur_str);\n");
@@ -1066,6 +1068,7 @@ public class ClassWriter {
     sb.append("import " + DelimiterSet.class.getCanonicalName() + ";\n");
     sb.append("import " + FieldFormatter.class.getCanonicalName() + ";\n");
     sb.append("import " + RecordParser.class.getCanonicalName() + ";\n");
+    sb.append("import " + BooleanParser.class.getCanonicalName() + ";\n");
     sb.append("import " + BlobRef.class.getCanonicalName() + ";\n");
     sb.append("import " + ClobRef.class.getCanonicalName() + ";\n");
     sb.append("import " + LargeObjectLoader.class.getCanonicalName() + ";\n");

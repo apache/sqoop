@@ -23,6 +23,7 @@ import com.cloudera.sqoop.hive.TestTableDefWriter;
 import com.cloudera.sqoop.io.TestLobFile;
 import com.cloudera.sqoop.io.TestNamedFifo;
 import com.cloudera.sqoop.io.TestSplittableBufferedWriter;
+import com.cloudera.sqoop.lib.TestBooleanParser;
 import com.cloudera.sqoop.lib.TestFieldFormatter;
 import com.cloudera.sqoop.lib.TestRecordParser;
 import com.cloudera.sqoop.lib.TestBlobRef;
@@ -78,6 +79,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestExportUpdate.class);
     suite.addTestSuite(TestSessions.class);
     suite.addTestSuite(TestNamedFifo.class);
+    suite.addTestSuite(TestBooleanParser.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;
