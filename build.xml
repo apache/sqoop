@@ -149,7 +149,7 @@ to call at top-level: ant deploy-contrib compile-core-test
         <fileset dir="${src.test}" includes="**/${testcase}.java"/>
       </batchtest>
     </junit>
-    <fail if="tests.failed">Tests failed!</fail>
+    <antcall target="checkfailure"/>
   </target>
 
   <target name="doc">
