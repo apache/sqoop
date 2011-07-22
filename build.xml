@@ -488,6 +488,7 @@
         <exclude name="tags" />
         <exclude name=".project" />
         <exclude name=".classpath" />
+        <exclude name="conf/managers.d/**" />
       </fileset>
     </copy>
 

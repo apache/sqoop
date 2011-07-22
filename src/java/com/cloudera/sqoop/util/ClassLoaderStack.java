@@ -59,9 +59,22 @@ public final class ClassLoaderStack {
   public static ClassLoader addJarFile(String jarFile, String testClassName)
       throws IOException {
 
-    // load the classes from the ORM JAR file into the current VM.
     ClassLoader prevClassLoader =
         Thread.currentThread().getContextClassLoader();
+
+    if (null != testClassName) {
+      try {
+        // Test to see if testClassName is already available. If so, do not
+        // load this jar.
+        LOG.debug("Checking for existing class: " + testClassName);
+        Class.forName(testClassName, true, prevClassLoader);
+        LOG.debug("Class is already available. Skipping jar " + jarFile);
+        return prevClassLoader;
+      } catch (ClassNotFoundException cnfe) {
+        // Expected this; we need to load the jar. continue.
+      }
+    }
+
     String urlPath = "jar:file://" + new File(jarFile).getAbsolutePath() + "!/";
     LOG.debug("Attempting to load jar through URL: " + urlPath);
     LOG.debug("Previous classloader is " + prevClassLoader);

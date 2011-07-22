@@ -22,8 +22,16 @@
 <configuration>
 
   <!--
-    Override the value of this property to enable third-party ManagerFactory
-    plugins.
+    Set the value of this property to explicitly enable third-party
+    ManagerFactory plugins.
+
+    If this is not used, you can alternately specify a set of ManagerFactories
+    in the $SQOOP_CONF_DIR/managers.d/ subdirectory.  Each file should contain
+    one or more lines like:
+      manager.class.name[=/path/to/containing.jar]
+
+    Files will be consulted in lexicographical order only if this property
+    is unset.
   -->
   <!--
   <property>
