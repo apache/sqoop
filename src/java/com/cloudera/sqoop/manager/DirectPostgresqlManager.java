@@ -185,6 +185,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     StringBuilder sb = new StringBuilder();
     String [] cols = getColumnNames(tableName);
 
+    String escapedTableName = escapeTableName(tableName);
+
     sb.append("COPY ");
     String whereClause = this.options.getWhereClause();
     if (whereClause != null && whereClause.length() > 0) {
@@ -198,13 +200,13 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       }
 
       sb.append(" FROM ");
-      sb.append(tableName);
+      sb.append(escapedTableName);
       sb.append(" WHERE ");
       sb.append(whereClause);
       sb.append(")");
     } else {
       // Import just the table.
-      sb.append(tableName);
+      sb.append(escapedTableName);
       if (null != cols) {
         // specify columns.
         sb.append("(");

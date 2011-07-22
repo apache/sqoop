@@ -102,9 +102,8 @@ public class PostgresqlManager extends GenericJdbcManager {
 
   @Override
   public String getPrimaryKey(String tableName) {
-    // Postgresql stores table names using lower-case internally; need
-    // to always convert to lowercase before querying the metadata dictionary.
-    return super.getPrimaryKey(tableName.toLowerCase());
+    // The table name is already escaped
+    return super.getPrimaryKey(tableName);
   }
 
   @Override
