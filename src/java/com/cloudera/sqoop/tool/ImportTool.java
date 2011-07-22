@@ -445,13 +445,7 @@ public class ImportTool extends BaseSqoopTool {
     // If extraArguments is full, check for '--' followed by args for
     // mysqldump or other commands we rely on.
     options.setExtraArgs(getSubcommandArgs(extraArguments));
-    int dashPos = extraArguments.length;
-    for (int i = 0; i < extraArguments.length; i++) {
-      if (extraArguments[i].equals("--")) {
-        dashPos = i;
-        break;
-      }
-    }
+    int dashPos = getDashPosition(extraArguments);
 
     if (hasUnrecognizedArgs(extraArguments, 0, dashPos)) {
       throw new InvalidOptionsException(HELP_STR);

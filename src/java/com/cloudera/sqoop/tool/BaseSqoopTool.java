@@ -22,7 +22,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
@@ -118,6 +120,17 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HBASE_ROW_KEY_ARG = "hbase-row-key";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
+
+  // Arguments for the session management system.
+  public static final String SESSION_METASTORE_ARG = "meta-connect";
+  public static final String SESSION_CMD_CREATE_ARG = "create";
+  public static final String SESSION_CMD_DELETE_ARG = "delete";
+  public static final String SESSION_CMD_EXEC_ARG = "exec";
+  public static final String SESSION_CMD_LIST_ARG = "list";
+  public static final String SESSION_CMD_SHOW_ARG = "show";
+
+  // Arguments for the metastore.
+  public static final String METASTORE_SHUTDOWN_ARG = "shutdown";
 
   public BaseSqoopTool() {
   }
@@ -232,6 +245,65 @@ public abstract class BaseSqoopTool extends SqoopTool {
     }
 
     return null;
+  }
+
+  /**
+   * @return RelatedOptions used by session management tools.
+   */
+  protected RelatedOptions getSessionOptions() {
+    RelatedOptions relatedOpts = new RelatedOptions(
+        "Session management arguments");
+    relatedOpts.addOption(OptionBuilder.withArgName("jdbc-uri")
+        .hasArg()
+        .withDescription("Specify JDBC connect string for the metastore")
+        .withLongOpt(SESSION_METASTORE_ARG)
+        .create());
+
+    // Create an option-group surrounding the operations a user
+    // can perform on sessions.
+    OptionGroup group = new OptionGroup();
+    group.addOption(OptionBuilder.withArgName("session-id")
+        .hasArg()
+        .withDescription("Create a new session")
+        .withLongOpt(SESSION_CMD_CREATE_ARG)
+        .create());
+    group.addOption(OptionBuilder.withArgName("session-id")
+        .hasArg()
+        .withDescription("Delete a saved session")
+        .withLongOpt(SESSION_CMD_DELETE_ARG)
+        .create());
+    group.addOption(OptionBuilder.withArgName("session-id")
+        .hasArg()
+        .withDescription("Show the parameters for a saved session")
+        .withLongOpt(SESSION_CMD_SHOW_ARG)
+        .create());
+
+    Option execOption = OptionBuilder.withArgName("session-id")
+        .hasArg()
+        .withDescription("Run a saved session")
+        .withLongOpt(SESSION_CMD_EXEC_ARG)
+        .create();
+    group.addOption(execOption);
+
+    group.addOption(OptionBuilder
+        .withDescription("List saved sessions")
+        .withLongOpt(SESSION_CMD_LIST_ARG)
+        .create());
+
+    relatedOpts.addOptionGroup(group);
+
+    // Since the "common" options aren't used in the session tool,
+    // add these settings here.
+    relatedOpts.addOption(OptionBuilder
+        .withDescription("Print more information while working")
+        .withLongOpt(VERBOSE_ARG)
+        .create());
+    relatedOpts.addOption(OptionBuilder
+        .withDescription("Print usage instructions")
+        .withLongOpt(HELP_ARG)
+        .create());
+
+    return relatedOpts;
   }
 
   /**
@@ -689,6 +761,23 @@ public abstract class BaseSqoopTool extends SqoopTool {
           "Both --hbase-table and --column-family must be set together."
           + HELP_STR);
     }
+  }
+
+  /**
+   * Given an array of extra arguments (usually populated via
+   * this.extraArguments), determine the offset of the first '--'
+   * argument in the list. Return 'extra.length' if there is none.
+   */
+  protected int getDashPosition(String [] extra) {
+    int dashPos = extra.length;
+    for (int i = 0; i < extra.length; i++) {
+      if (extra[i].equals("--")) {
+        dashPos = i;
+        break;
+      }
+    }
+
+    return dashPos;
   }
 }
 

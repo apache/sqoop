@@ -40,6 +40,14 @@
     <Method name="map" />
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>
+  <Match>
+    <!-- createRootTable() allows a user-specified table name retrieved
+         from properties. This since instance is allowed for now.
+    -->
+    <Class name="com.cloudera.sqoop.metastore.hsqldb.HsqldbSessionStorage" />
+    <Method name="createRootTable" />
+    <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+  </Match>
 
   <!-- The following broad categories suppress warnings in test code that do
        not need to be rigidly upheld. -->

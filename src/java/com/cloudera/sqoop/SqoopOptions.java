@@ -20,9 +20,7 @@
 package com.cloudera.sqoop;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -38,6 +36,15 @@ import com.cloudera.sqoop.lib.LargeObjectLoader;
 public class SqoopOptions {
 
   public static final Log LOG = LogFactory.getLog(SqoopOptions.class.getName());
+
+  /**
+   * Set to true in configuration if you want to put db passwords
+   * in the metastore.
+   */
+  public static final String METASTORE_PASSWORD_KEY =
+      "sqoop.metastore.client.record.password";
+
+  public static final boolean METASTORE_PASSWORD_DEFAULT = false;
 
   /**
    * Thrown when invalid cmdline options are given.
@@ -68,19 +75,20 @@ public class SqoopOptions {
 
 
   // TODO(aaron): Adding something here? Add a setter and a getter.
-  // Add a default value in initDefaults() if you need one.
-  // If you want to load from a properties file, add an entry in the
-  // loadFromProperties() method.
-  // Then add command-line arguments in the appropriate tools. The
-  // names of all command-line args are stored as constants in BaseSqoopTool.
+  // Add a default value in initDefaults() if you need one.  If this value
+  // needs to be serialized in the metastore for this session, you need to add
+  // an appropriate line to loadProperties() and writeProperties().  Then add
+  // command-line arguments in the appropriate tools. The names of all
+  // command-line args are stored as constants in BaseSqoopTool.
+
   private String connectString;
   private String tableName;
   private String [] columns;
   private String username;
-  private String password;
+  private String password; // May not be serialized, based on configuration.
   private String codeOutputDir;
   private String jarOutputDir;
-  private String hadoopHome;
+  private String hadoopHome; // not serialized to metastore.
   private String splitByCol;
   private String whereClause;
   private String sqlQuery;
@@ -90,8 +98,8 @@ public class SqoopOptions {
   private boolean append;   
   private FileLayout layout;
   private boolean direct; // if true and conn is mysql, use mysqldump.
-  private String tmpDir; // where temp data goes; usually /tmp
-  private String hiveHome;
+  private String tmpDir; // where temp data goes; usually /tmp; not serialized.
+  private String hiveHome; // not serialized to metastore.
   private boolean hiveImport;
   private boolean overwriteHiveTable;
   private String hiveTableName;
@@ -99,6 +107,7 @@ public class SqoopOptions {
 
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
+  // Not serialized to metastore.
   private String [] dbOutColumns;
 
   // package+class to apply to individual table import.
@@ -132,8 +141,6 @@ public class SqoopOptions {
   private Configuration conf;
 
   public static final int DEFAULT_NUM_MAPPERS = 4;
-
-  private static final String DEFAULT_CONFIG_FILE = "sqoop.properties";
 
   private String [] extraArgs;
 
@@ -182,62 +189,300 @@ public class SqoopOptions {
     }
   }
 
-  private void loadFromProperties() {
-    File configFile = new File(DEFAULT_CONFIG_FILE);
-    if (!configFile.canRead()) {
-      return; //can't do this.
+  private int getIntProperty(Properties props, String propName,
+      int defaultVal) {
+    long longVal = getLongProperty(props, propName, defaultVal);
+    return (int) longVal;
+  }
+
+  private char getCharProperty(Properties props, String propName,
+      char defaultVal) {
+    int intVal = getIntProperty(props, propName, (int) defaultVal);
+    return (char) intVal;
+  }
+
+  private DelimiterSet getDelimiterProperties(Properties props,
+      String prefix, DelimiterSet defaults) {
+
+    if (null == defaults) {
+      defaults = new DelimiterSet();
     }
 
-    Properties props = new Properties();
-    InputStream istream = null;
-    try {
-      LOG.info("Loading properties from " + configFile.getAbsolutePath());
-      istream = new FileInputStream(configFile);
-      props.load(istream);
+    char field = getCharProperty(props, prefix + ".field", 
+        defaults.getFieldsTerminatedBy());
+    char record = getCharProperty(props, prefix + ".record",
+        defaults.getLinesTerminatedBy());
+    char enclose = getCharProperty(props, prefix + ".enclose",
+        defaults.getEnclosedBy());
+    char escape = getCharProperty(props, prefix + ".escape",
+        defaults.getEscapedBy());
+    boolean required = getBooleanProperty(props, prefix +".enclose.required",
+        defaults.isEncloseRequired());
 
-      this.hadoopHome = props.getProperty("hadoop.home", this.hadoopHome);
-      this.codeOutputDir = props.getProperty("out.dir", this.codeOutputDir);
-      this.jarOutputDir = props.getProperty("bin.dir", this.jarOutputDir);
-      this.username = props.getProperty("db.username", this.username);
-      this.password = props.getProperty("db.password", this.password);
-      this.tableName = props.getProperty("db.table", this.tableName);
-      this.connectString = props.getProperty("db.connect.url",
-          this.connectString);
-      this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
-      this.whereClause = props.getProperty("db.where.clause", this.whereClause);
-      this.driverClassName = props.getProperty("jdbc.driver",
-          this.driverClassName);
-      this.warehouseDir = props.getProperty("hdfs.warehouse.dir",
-          this.warehouseDir);
-      this.hiveHome = props.getProperty("hive.home", this.hiveHome);
-      this.className = props.getProperty("java.classname", this.className);
-      this.packageName = props.getProperty("java.packagename",
-          this.packageName);
-      this.existingJarFile = props.getProperty("java.jar.file",
-          this.existingJarFile);
-      this.exportDir = props.getProperty("export.dir", this.exportDir);
+    return new DelimiterSet(field, record, enclose, escape, required);
+  }
 
-      this.direct = getBooleanProperty(props, "direct.import", this.direct);
-      this.hiveImport = getBooleanProperty(props, "hive.import",
-          this.hiveImport);
-      this.overwriteHiveTable = getBooleanProperty(props,
-          "hive.overwrite.table", this.overwriteHiveTable);
-      this.useCompression = getBooleanProperty(props, "compression",
-          this.useCompression);
-      this.directSplitSize = getLongProperty(props, "direct.split.size",
-          this.directSplitSize);
-    } catch (IOException ioe) {
-      LOG.error("Could not read properties file " + DEFAULT_CONFIG_FILE + ": "
-          + ioe.toString());
-    } finally {
-      if (null != istream) {
-        try {
-          istream.close();
-        } catch (IOException ioe) {
-          // Ignore this; we're closing.
-        }
+  private void setDelimiterProperties(Properties props,
+      String prefix, DelimiterSet values) {
+    putProperty(props, prefix + ".field",
+        Integer.toString((int) values.getFieldsTerminatedBy()));
+    putProperty(props, prefix + ".record",
+        Integer.toString((int) values.getLinesTerminatedBy()));
+    putProperty(props, prefix + ".enclose",
+        Integer.toString((int) values.getEnclosedBy()));
+    putProperty(props, prefix + ".escape",
+        Integer.toString((int) values.getEscapedBy()));
+    putProperty(props, prefix + ".enclose.required",
+        Boolean.toString(values.isEncloseRequired()));
+  }
+
+  /** Take a comma-delimited list of input and split the elements
+   * into an output array. */
+  private String [] listToArray(String strList) {
+    return strList.split(",");
+  }
+
+  private String arrayToList(String [] array) {
+    if (null == array) {
+      return null;
+    }
+
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    for (String elem : array) {
+      if (!first) {
+        sb.append(",");
       }
+      sb.append(elem);
+      first = false;
     }
+
+    return sb.toString();
+  }
+
+  /**
+   * A put() method for Properties that is tolerent of 'null' values.
+   * If a null value is specified, the property is unset.
+   */
+  private void putProperty(Properties props, String k, String v) {
+    if (null == v) {
+      props.remove(k);
+    } else {
+      props.setProperty(k, v);
+    }
+  }
+
+  /**
+   * Given a property prefix that denotes a set of numbered properties,
+   * return an array containing all the properties.
+   *
+   * For instance, if prefix is "foo", then return properties "foo.0",
+   * "foo.1", "foo.2", and so on as an array. If no such properties
+   * exist, return 'defaults'.
+   */
+  private String [] getArgArrayProperty(Properties props, String prefix, 
+      String [] defaults) {
+    int cur = 0;
+    ArrayList<String> al = new ArrayList<String>();
+    while (true) {
+      String curProp = prefix + "." + cur;
+      String curStr = props.getProperty(curProp, null);
+      if (null == curStr) {
+        break;
+      }
+
+      al.add(curStr);
+      cur++;
+    }
+
+    if (cur == 0) {
+      // Couldn't find an array here; return the defaults.
+      return defaults;
+    }
+
+    return al.toArray(new String[0]);
+  }
+
+  private void setArgArrayProperties(Properties props, String prefix,
+      String [] values) {
+    if (null == values) {
+      return;
+    }
+
+    for (int i = 0; i < values.length; i++) {
+      putProperty(props, prefix + "." + i, values[i]);
+    }
+  }
+
+  /**
+   * Given a set of properties, load this into the current SqoopOptions
+   * instance.
+   */
+  public void loadProperties(Properties props) {
+
+    this.connectString = props.getProperty("db.connect.string",
+        this.connectString);
+    this.username = props.getProperty("db.username", this.username);
+
+    if (getBooleanProperty(props, "db.require.password", false)) {
+      // The user's password was stripped out from the metastore.
+      // Require that the user enter it now.
+      setPasswordFromConsole();
+    } else {
+      this.password = props.getProperty("db.password", this.password);
+    }
+
+    this.tableName = props.getProperty("db.table", this.tableName);
+    String colListStr = props.getProperty("db.column.list", null);
+    if (null != colListStr) {
+      this.columns = listToArray(colListStr);
+    }
+
+    this.codeOutputDir = props.getProperty("codegen.output.dir",
+        this.codeOutputDir);
+    this.jarOutputDir = props.getProperty("codegen.compile.dir",
+        this.jarOutputDir);
+
+    this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
+    this.whereClause = props.getProperty("db.where.clause", this.whereClause);
+    this.sqlQuery = props.getProperty("db.query", this.sqlQuery);
+
+    this.driverClassName = props.getProperty("jdbc.driver.class",
+        this.driverClassName);
+
+    this.warehouseDir = props.getProperty("hdfs.warehouse.dir",
+        this.warehouseDir);
+    this.targetDir = props.getProperty("hdfs.target.dir",
+        this.targetDir);
+    this.append = getBooleanProperty(props, "hdfs.append.dir", this.append);
+    
+    String fileFmtStr = props.getProperty("hdfs.file.format", "text");
+    if (fileFmtStr.equals("seq")) {
+      this.layout = FileLayout.SequenceFile;
+    } else {
+      this.layout = FileLayout.TextFile;
+    }
+
+    this.direct = getBooleanProperty(props, "direct.import", this.direct);
+
+    this.hiveImport = getBooleanProperty(props, "hive.import",
+        this.hiveImport);
+    this.overwriteHiveTable = getBooleanProperty(props,
+        "hive.overwrite.table", this.overwriteHiveTable);
+    this.hiveTableName = props.getProperty("hive.table.name",
+        this.hiveTableName);
+
+    this.className = props.getProperty("codegen.java.classname",
+        this.className);
+    this.packageName = props.getProperty("codegen.java.packagename",
+        this.packageName);
+    this.existingJarFile = props.getProperty("codegen.jar.file",
+        this.existingJarFile);
+
+    this.numMappers = getIntProperty(props, "mapreduce.num.mappers",
+        this.numMappers);
+
+    this.useCompression = getBooleanProperty(props, "enable.compression",
+        this.useCompression);
+
+    this.directSplitSize = getLongProperty(props, "import.direct.split.size",
+        this.directSplitSize);
+
+    this.maxInlineLobSize = getLongProperty(props,
+        "import.max.inline.lob.size", this.maxInlineLobSize);
+
+    this.exportDir = props.getProperty("export.source.dir", this.exportDir);
+    this.updateKeyCol = props.getProperty("export.update.col",
+        this.updateKeyCol);
+
+    this.inputDelimiters = getDelimiterProperties(props,
+        "codegen.input.delimiters", this.inputDelimiters);
+    this.outputDelimiters = getDelimiterProperties(props,
+        "codegen.output.delimiters", this.outputDelimiters);
+
+    this.extraArgs = getArgArrayProperty(props, "tool.arguments",
+        this.extraArgs);
+
+    this.hbaseTable = props.getProperty("hbase.table", this.hbaseTable);
+    this.hbaseColFamily = props.getProperty("hbase.col.family",
+        this.hbaseColFamily);
+    this.hbaseRowKeyCol = props.getProperty("hbase.row.key.col",
+        this.hbaseRowKeyCol);
+    this.hbaseCreateTable = getBooleanProperty(props, "hbase.create.table",
+        this.hbaseCreateTable);
+  }
+
+  /**
+   * Return a Properties instance that encapsulates all the "sticky"
+   * state of this SqoopOptions that should be written to a metastore
+   * to restore the session later.
+   */
+  public Properties writeProperties() {
+    Properties props = new Properties();
+
+    putProperty(props, "db.connect.string", this.connectString);
+    putProperty(props, "db.username", this.username);
+
+    if (this.getConf().getBoolean(
+        METASTORE_PASSWORD_KEY, METASTORE_PASSWORD_DEFAULT)) {
+      // If the user specifies, we may store the password in the metastore. 
+      putProperty(props, "db.password", this.password);
+      putProperty(props, "db.require.password", "false");
+    } else if (this.password != null) {
+      // Otherwise, if the user has set a password, we just record
+      // a flag stating that the password will need to be reentered.
+      putProperty(props, "db.require.password", "true");
+    } else {
+      // No password saved or required.
+      putProperty(props, "db.require.password", "false");
+    }
+
+    putProperty(props, "db.table", this.tableName);
+    putProperty(props, "db.column.list", arrayToList(this.columns));
+    putProperty(props, "codegen.output.dir", this.codeOutputDir);
+    putProperty(props, "codegen.compile.dir", this.jarOutputDir);
+    putProperty(props, "db.split.column", this.splitByCol);
+    putProperty(props, "db.where.clause", this.whereClause);
+    putProperty(props, "db.query", this.sqlQuery);
+    putProperty(props, "jdbc.driver.class", this.driverClassName);
+    putProperty(props, "hdfs.warehouse.dir", this.warehouseDir);
+    putProperty(props, "hdfs.target.dir", this.targetDir);
+    putProperty(props, "hdfs.append.dir", Boolean.toString(this.append));
+    if (this.layout == FileLayout.SequenceFile) {
+      putProperty(props, "hdfs.file.format", "seq");
+    } else {
+      putProperty(props, "hdfs.file.format", "text");
+    }
+    putProperty(props, "direct.import", Boolean.toString(this.direct));
+    putProperty(props, "hive.import", Boolean.toString(this.hiveImport));
+    putProperty(props, "hive.overwrite.table",
+        Boolean.toString(this.overwriteHiveTable));
+    putProperty(props, "hive.table.name", this.hiveTableName);
+    putProperty(props, "codegen.java.classname", this.className);
+    putProperty(props, "codegen.java.packagename", this.packageName);
+    putProperty(props, "codegen.jar.file", this.existingJarFile);
+    putProperty(props, "mapreduce.num.mappers",
+        Integer.toString(this.numMappers));
+    putProperty(props, "enable.compression",
+        Boolean.toString(this.useCompression));
+    putProperty(props, "import.direct.split.size",
+        Long.toString(this.directSplitSize));
+    putProperty(props, "import.max.inline.lob.size",
+        Long.toString(this.maxInlineLobSize));
+    putProperty(props, "export.source.dir", this.exportDir);
+    putProperty(props, "export.update.col", this.updateKeyCol);
+    setDelimiterProperties(props, "codegen.input.delimiters",
+        this.inputDelimiters);
+    setDelimiterProperties(props, "codegen.output.delimiters",
+        this.outputDelimiters);
+    setArgArrayProperties(props, "tool.arguments", this.extraArgs);
+    putProperty(props, "hbase.table", this.hbaseTable);
+    putProperty(props, "hbase.col.family", this.hbaseColFamily);
+    putProperty(props, "hbase.row.key.col", this.hbaseRowKeyCol);
+    putProperty(props, "hbase.create.table",
+        Boolean.toString(this.hbaseCreateTable));
+
+    return props;
   }
 
   /**
@@ -291,8 +536,6 @@ public class SqoopOptions {
     this.extraArgs = null;
 
     this.dbOutColumns = null;
-
-    loadFromProperties();
   }
 
   /**

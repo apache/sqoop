@@ -18,11 +18,12 @@
 
 package com.cloudera.sqoop;
 
+import java.util.Properties;
+
 import junit.framework.TestCase;
 
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.tool.ImportTool;
-
 
 /**
  * Test aspects of the SqoopOptions class.
@@ -233,5 +234,31 @@ public class TestSqoopOptions extends TestCase {
 
     SqoopOptions opts = parse(args);
     assertEquals(4, opts.getNumMappers());
+  }
+
+  public void testPropertySerialization() {
+    // Test that if we write a SqoopOptions out to a Properties,
+    // and then read it back in, we get all the same results.
+    SqoopOptions out = new SqoopOptions();
+    out.setUsername("user");
+    out.setConnectString("bla");
+    out.setNumMappers(4);
+    out.setAppendMode(true);
+    out.setHBaseTable("hbasetable");
+    out.setWarehouseDir("Warehouse");
+    out.setClassName("someclass");
+    out.setSplitByCol("somecol");
+    out.setSqlQuery("the query");
+    out.setPackageName("a.package");
+    out.setHiveImport(true);
+
+    Properties outProps = out.writeProperties();
+
+    SqoopOptions in = new SqoopOptions();
+    in.loadProperties(outProps);
+
+    Properties inProps = in.writeProperties();
+
+    assertEquals("properties don't match", outProps, inProps);
   }
 }

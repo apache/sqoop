@@ -46,7 +46,6 @@ public class Sqoop extends Configured implements Tool {
   public static final String SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError";
 
   static {
-    Configuration.addDefaultResource("sqoop-default.xml");
     Configuration.addDefaultResource("sqoop-site.xml");
   }
 

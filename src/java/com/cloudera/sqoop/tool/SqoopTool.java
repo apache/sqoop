@@ -73,6 +73,10 @@ public abstract class SqoopTool {
         "List available databases on a server");
     registerTool("list-tables", ListTablesTool.class,
         "List available tables in a database");
+    registerTool("metastore", MetastoreTool.class,
+        "Run a standalone Sqoop metastore");
+    registerTool("session", SessionTool.class,
+        "Work with saved sessions");
     registerTool("version", VersionTool.class,
         "Display version information");
   }

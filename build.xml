@@ -484,6 +484,14 @@
         <include name="**/*.sh" />
       </fileset>
     </chmod>
+
+    <!-- In the configuration directory, take the sqoop-site-template
+         and copy it to sqoop-site.xml, overwriting any user-specified
+         sqoop-site.xml in there.
+     -->
+    <copy file="${dist.dir}/conf/sqoop-site-template.xml" 
+        tofile="${dist.dir}/conf/sqoop-site.xml"
+        overwrite="true" />
   </target>
 
   <target name="tar" depends="package" description="Create release tarball">
