@@ -102,8 +102,10 @@ public class TableDefWriter {
       }
 
       return keyList.toArray(new String[keyList.size()]);
-    } else {
+    } else if (null != inputTableName) {
       return connManager.getColumnNames(inputTableName);
+    } else {
+      return connManager.getColumnNamesForQuery(options.getSqlQuery());
     }
   }
 
@@ -118,7 +120,11 @@ public class TableDefWriter {
       columnTypes = externalColTypes;
     } else {
       // Get these from the database.
-      columnTypes = connManager.getColumnTypes(inputTableName);
+      if (null != inputTableName) {
+        columnTypes = connManager.getColumnTypes(inputTableName);
+      } else {
+        columnTypes = connManager.getColumnTypesForQuery(options.getSqlQuery());
+      }
     }
 
     String [] colNames = getColumnNames();
@@ -177,7 +183,7 @@ public class TableDefWriter {
   /**
    * @return the LOAD DATA statement to import the data in HDFS into hive.
    */
-  public String getLoadDataStmt() throws IOException { 
+  public String getLoadDataStmt() throws IOException {
     String warehouseDir = options.getWarehouseDir();
     if (null == warehouseDir) {
       warehouseDir = "";
@@ -185,7 +191,12 @@ public class TableDefWriter {
       warehouseDir = warehouseDir + File.separator;
     }
 
-    String tablePath = warehouseDir + inputTableName;
+    String tablePath;
+    if (null != inputTableName) {
+      tablePath = warehouseDir + inputTableName;
+    } else {
+      tablePath = options.getTargetDir();
+    }
     FileSystem fs = FileSystem.get(configuration);
     Path finalPath = new Path(tablePath).makeQualified(fs);
     String finalPathStr = finalPath.toString();

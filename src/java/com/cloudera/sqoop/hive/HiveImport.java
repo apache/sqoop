@@ -68,7 +68,7 @@ public class HiveImport {
   }
 
 
-  /** 
+  /**
    * @return the filename of the hive executable to run to do the import
    */
   private String getHiveBinPath() {
@@ -98,12 +98,17 @@ public class HiveImport {
    */
   private void removeTempLogs(String tableName) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
-    String warehouseDir = options.getWarehouseDir();
-    Path tablePath; 
-    if (warehouseDir != null) {
-      tablePath = new Path(new Path(warehouseDir), tableName);
+    Path tablePath;
+    if (null != tableName) {
+        String warehouseDir = options.getWarehouseDir();
+        if (warehouseDir != null) {
+          tablePath = new Path(new Path(warehouseDir), tableName);
+        } else {
+          tablePath = new Path(tableName);
+        }
     } else {
-      tablePath = new Path(tableName);
+        // --table option is not used, so use the target dir instead
+        tablePath = new Path(options.getTargetDir());
     }
 
     Path logsPath = new Path(tablePath, "_logs");
@@ -163,7 +168,7 @@ public class HiveImport {
     LOG.debug("Hive.inputTable: " + inputTableName);
     LOG.debug("Hive.outputTable: " + outputTableName);
 
-    // For testing purposes against our mock hive implementation, 
+    // For testing purposes against our mock hive implementation,
     // if the sysproperty "expected.script" is set, we set the EXPECTED_SCRIPT
     // environment variable for the child hive process. We also disable
     // timestamp comments so that we have deterministic table creation scripts.
@@ -299,7 +304,7 @@ public class HiveImport {
     }
   }
 
-  /** 
+  /**
    * Execute Hive via an external 'bin/hive' process.
    * @param filename the Script file to run.
    * @param env the environment strings to pass to any subprocess.
