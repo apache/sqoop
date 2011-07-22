@@ -31,11 +31,20 @@
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
   <property name="version" value="1.1.0-SNAPSHOT" />
+
+  <!-- The last version released. -->
+  <property name="oldversion" value="1.0.0" />
+  <!-- The point when we branched for the previous release. -->
+  <property name="prev.git.hash" value="e96ced0b59a" />
+
   <property name="artifact.name" value="${name}-${version}" />
   <property name="dest.jar" value="${artifact.name}.jar" />
   <property name="test.jar" value="${name}-test-${version}.jar" />
   <property name="git.hash" value="" />
   
+  <!-- programs used -->
+  <property name="python" value="python" />
+
   <!-- locations in the source tree -->
   <property name="base.src.dir" location="${basedir}/src" />
   <property name="src.dir" location="${base.src.dir}/java" />
@@ -79,6 +88,10 @@
   <!-- generated documentation output directory -->
   <property name="build.javadoc" location="${build.dir}/docs/api" />
 
+  <!-- Target dir for release notes file. -->
+  <property name="build.relnotes.dir" location="${build.dir}/docs" />
+  <property name="relnotes.filename"
+      location="${build.relnotes.dir}/sqoop-${version}.releasenotes.html" />
 
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
@@ -720,11 +733,29 @@
     </if>
   </target>
 
-  <target name="release" depends="checkversion,tar,webdocs,releaseaudit"
+  <target name="relnotes-uptodate" depends="init">
+    <!-- releasenotes are considered up-to-date if they exist. -->
+    <available property="relnotes.exists" file="${relnotes.filename}" />
+  </target>
+
+  <target name="relnotes" depends="relnotes-uptodate" unless="relnotes.exists"
+      description="Generate release notes">
+    <exec executable="${python}" failonerror="yes">
+      <arg value="${script.src.dir}/relnotes.py" />
+      <arg value="${build.relnotes.dir}" />
+      <arg value="${basedir}" />
+      <arg value="${prev.git.hash}..HEAD" />
+      <arg value="${version}" />
+      <arg value="${oldversion}" />
+    </exec>
+  </target>
+
+  <target name="release" depends="checkversion,tar,webdocs,relnotes,releaseaudit"
       description="Roll a release artifact">
     <echo message="Release complete" />
     <echo message="Binary tar: ${tar.file}" />
     <echo message="Web docs: ${build.dir}/webdocs" />
+    <echo message="Release notes: ${relnotes.filename}" />
     <echo message="Release audit report: ${build.dir}/rat.log" />
   </target>
 
