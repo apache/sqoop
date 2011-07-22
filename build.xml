@@ -30,7 +30,7 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="0.1-SNAPSHOT" />
+  <property name="version" value="1.1.0-SNAPSHOT" />
   <property name="artifact.name" value="${name}-${version}" />
   <property name="dest.jar" value="${artifact.name}.jar"/>
   
