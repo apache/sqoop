@@ -1,6 +1,22 @@
 sqoop-version(1)
 ================
 
+NAME
+----
+sqoop-version - Display version information for Sqoop.
+
+SYNOPSIS
+--------
+'sqoop-version'
+
+'sqoop version'
+
+
+DESCRIPTION
+-----------
+
+Display version information.
+
 ////
    Licensed to Cloudera, Inc. under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -17,20 +33,4 @@ sqoop-version(1)
    See the License for the specific language governing permissions and
    limitations under the License.
 ////
-
-NAME
-----
-sqoop-version - Display version information for Sqoop.
-
-SYNOPSIS
---------
-'sqoop-version'
-
-'sqoop version'
-
-
-DESCRIPTION
------------
-
-Display version information.
 
