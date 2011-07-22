@@ -140,6 +140,7 @@ public class JobBase {
     addToCache(Jars.getSqoopJarPath(), fs, localUrls);
     addToCache(Jars.getShimJarPath(), fs, localUrls);
     addToCache(Jars.getDriverClassJar(mgr), fs, localUrls);
+    addToCache(Jars.getJarPathForClass(mgr.getClass()), fs, localUrls);
 
     // Add anything in $SQOOP_HOME/lib, if this is set.
     String sqoopHome = System.getenv("SQOOP_HOME");
