@@ -183,7 +183,10 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     try {
       statement = connection.createStatement();
 
-      results = statement.executeQuery(getBoundingValsQuery());
+      String query = getBoundingValsQuery();
+      LOG.info("BoundingValsQuery: " + query);
+
+      results = statement.executeQuery(query);
       results.next();
 
       // Based on the type of the results, use a different mechanism

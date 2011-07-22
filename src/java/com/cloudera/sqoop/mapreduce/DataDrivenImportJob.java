@@ -143,8 +143,13 @@ public class DataDrivenImportJob extends ImportJobBase {
         String inputQuery = options.getSqlQuery();
         String sanitizedQuery = inputQuery.replace(
             DataDrivenDBInputFormat.SUBSTITUTE_TOKEN, " (1 = 1) ");
-        String inputBoundingQuery = "SELECT MIN(" + splitByCol
-            + "), MAX(" + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
+
+        String inputBoundingQuery =
+            mgr.getInputBoundsQuery(splitByCol, sanitizedQuery);
+        if (inputBoundingQuery == null) {
+            inputBoundingQuery = "SELECT MIN(" + splitByCol + "), MAX("
+                    + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
+        }
         DataDrivenDBInputFormat.setInput(job, DBWritable.class,
             inputQuery, inputBoundingQuery);
         new DBConfiguration(job.getConfiguration()).setInputOrderBy(

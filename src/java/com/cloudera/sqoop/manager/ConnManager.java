@@ -272,5 +272,20 @@ public abstract class ConnManager {
   public String timestampToQueryString(Timestamp ts) {
     return "'" + ts + "'";
   }
+
+  /**
+   * This method allows the ConnManager to override the creation of an
+   * input-bounds query that is used to create splits when running import
+   * based on free-form query. Any non-null return value is used, whereas a null
+   * return value indicates that the default input bounds query should be
+   * used.
+   * @param splitByCol the column name to split on.
+   * @param sanitizedQuery the sanitized input query specified by user.
+   * @return an input-bounds query or <tt>null</tt> if default query is
+   * acceptable.
+   */
+  public String getInputBoundsQuery(String splitByCol, String sanitizedQuery) {
+      return null;
+  }
 }
 
