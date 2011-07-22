@@ -333,7 +333,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .hasArg().withDescription("Specify JDBC connect string")
         .withLongOpt(CONNECT_STRING_ARG)
         .create());
-    commonOpts.addOption(OptionBuilder.withArgName("conn-manager-class-name")
+    commonOpts.addOption(OptionBuilder.withArgName("class-name")
             .hasArg().withDescription("Specify connection manager class name")
             .withLongOpt(CONN_MANAGER_CLASS_NAME)
             .create());
@@ -500,22 +500,22 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withDescription("Put auto-generated classes in this package")
         .withLongOpt(PACKAGE_NAME_ARG)
         .create());
-    codeGenOpts.addOption(OptionBuilder.withArgName("null-string")
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
             .hasArg()
             .withDescription("Null string representation")
             .withLongOpt(NULL_STRING)
             .create());
-    codeGenOpts.addOption(OptionBuilder.withArgName("input-null-string")
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
             .hasArg()
             .withDescription("Input null string representation")
             .withLongOpt(INPUT_NULL_STRING)
             .create());
-    codeGenOpts.addOption(OptionBuilder.withArgName("null-non-string")
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
             .hasArg()
             .withDescription("Null non-string representation")
             .withLongOpt(NULL_NON_STRING)
             .create());
-    codeGenOpts.addOption(OptionBuilder.withArgName("input-null-non-string")
+    codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
             .hasArg()
             .withDescription("Input null non-string representation")
             .withLongOpt(INPUT_NULL_NON_STRING)
