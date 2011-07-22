@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop.manager;
 
+import static com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,8 +29,9 @@ import java.io.OutputStreamWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import static com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
-import com.cloudera.sqoop.shims.HadoopShim;
+
+import com.cloudera.sqoop.config.ConfigurationConstants;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.util.DirectImportUtils;
 
 /**
@@ -55,15 +58,15 @@ public final class MySQLUtils {
   public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
       "sqoop.output.enclose.required";
   public static final String TABLE_NAME_KEY =
-      HadoopShim.get().getDbInputTableNameProperty();
+      ConfigurationHelper.getDbInputTableNameProperty();
   public static final String CONNECT_STRING_KEY =
-      HadoopShim.get().getDbUrlProperty();
+      ConfigurationHelper.getDbUrlProperty();
   public static final String USERNAME_KEY =
-      HadoopShim.get().getDbUsernameProperty();
+      ConfigurationHelper.getDbUsernameProperty();
   public static final String PASSWORD_KEY =
-      HadoopShim.get().getDbPasswordProperty();
+      ConfigurationHelper.getDbPasswordProperty();
   public static final String WHERE_CLAUSE_KEY =
-      HadoopShim.get().getDbInputConditionsProperty();
+      ConfigurationHelper.getDbInputConditionsProperty();
   public static final String EXTRA_ARGS_KEY =
       "sqoop.mysql.extra.args";
 
@@ -92,7 +95,7 @@ public final class MySQLUtils {
       throws IOException {
     // Create the temp file to hold the user's password.
     String tmpDir = conf.get(
-        HadoopShim.get().getJobLocalDirProperty(), "/tmp/");
+        ConfigurationConstants.PROP_JOB_LOCAL_DIRECTORY, "/tmp/");
     File tempFile = File.createTempFile("mysql-cnf", ".cnf", new File(tmpDir));
 
     // Make the password file only private readable.

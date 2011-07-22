@@ -38,11 +38,10 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.shims.HadoopShim;
-import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.PerfCounters;
 
@@ -137,7 +136,7 @@ public class ExportJobBase extends JobBase {
   }
 
   /**
-   * @param file a file to test. 
+   * @param file a file to test.
    * @return true if 'file' refers to a SequenceFile.
    */
   private static boolean hasSequenceFileHeader(Path file, Configuration conf) {
@@ -192,8 +191,7 @@ public class ExportJobBase extends JobBase {
       throws ClassNotFoundException {
     Class<? extends InputFormat> configuredIF = super.getInputFormatClass();
     if (null == configuredIF) {
-      return (Class<? extends InputFormat>) ShimLoader.getShimClass(
-          "com.cloudera.sqoop.mapreduce.ExportInputFormat");
+      return ExportInputFormat.class;
     } else {
       return configuredIF;
     }
@@ -204,8 +202,7 @@ public class ExportJobBase extends JobBase {
       throws ClassNotFoundException {
     Class<? extends OutputFormat> configuredOF = super.getOutputFormatClass();
     if (null == configuredOF) {
-      return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-          "com.cloudera.sqoop.mapreduce.ExportOutputFormat");
+      return ExportOutputFormat.class;
     } else {
       return configuredOF;
     }
@@ -218,7 +215,7 @@ public class ExportJobBase extends JobBase {
     job.setMapperClass(getMapperClass());
 
     // Concurrent writes of the same records would be problematic.
-    HadoopShim.get().setJobMapSpeculativeExecution(job, false);
+    ConfigurationHelper.setJobMapSpeculativeExecution(job, false);
 
     job.setMapOutputKeyClass(SqoopRecord.class);
     job.setMapOutputValueClass(NullWritable.class);
@@ -249,13 +246,13 @@ public class ExportJobBase extends JobBase {
       perfCounters.addBytes(jobCounters.getGroup("FileSystemCounters")
         .findCounter("HDFS_BYTES_READ").getValue());
       LOG.info("Transferred " + perfCounters.toString());
-      long numRecords = HadoopShim.get().getNumMapInputRecords(job);
+      long numRecords =  ConfigurationHelper.getNumMapInputRecords(job);
       LOG.info("Exported " + numRecords + " records.");
     }
 
     return success;
   }
-      
+
 
   /**
    * Run an export job to dump a table from HDFS to a database.

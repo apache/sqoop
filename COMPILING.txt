@@ -110,26 +110,6 @@ ant jar -Dhadoop.dist=cloudera
 To switch between builds, you will need to clear Ivy's dependency
 cache: +ant veryclean+
 
-=== Using a Local Hadoop Installation
-
-Sqoop can be compiled against a locally-installed version of Sqoop,
-bypassing the maven repository. To do this you will need to set 
-three properties:
-
-- hadoop.dist should be set to "local"
-- hadoop.shim should be set to "cloudera" or "apache", to tell Sqoop whether
-  to build the Cloudera or Apache-specific shim jar
-- hadoop.home should be set to the path where Hadoop is installed.
-
-For example, the following will compile Sqoop against a locally-installed
-version of CDH.
-
-++++
-ant jar jar-one-shim -Dhadoop.dist=local -Dhadoop.shim=cloudera \
-    -Dhadoop.home=/usr/lib/hadoop
-++++
-
-
 == Code Quality Analysis
 
 We have three tools which can be used to analyze Sqoop's code quality.

@@ -62,17 +62,10 @@ fi
 # Where to find the main Sqoop jar
 SQOOP_JAR_DIR=$SQOOP_HOME
 
-# Where to find the shim jars.
-SQOOP_SHIM_DIR=$SQOOP_HOME/shims
-
 # If there's a "build" subdir, override with this, so we use
 # the newly-compiled copy.
 if [ -d "$SQOOP_JAR_DIR/build" ]; then
   SQOOP_JAR_DIR="${SQOOP_JAR_DIR}/build"
-
-  if [ -d "$SQOOP_JAR_DIR/shims" ]; then
-    SQOOP_SHIM_DIR="$SQOOP_JAR_DIR/shims"
-  fi
 fi
 
 function add_to_classpath() {
@@ -115,9 +108,7 @@ add_to_classpath ${SQOOP_JAR_DIR}
 export SQOOP_CLASSPATH
 export SQOOP_CONF_DIR
 export SQOOP_JAR_DIR
-export SQOOP_SHIM_DIR
 export HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
 export HADOOP_HOME
 export HBASE_HOME
-export HADOOP_OPTS="-Dsqoop.shim.jar.dir=${SQOOP_SHIM_DIR} ${HADOOP_OPTS}"
 

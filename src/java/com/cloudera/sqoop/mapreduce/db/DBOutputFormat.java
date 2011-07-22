@@ -36,24 +36,24 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 
 /**
  * A OutputFormat that sends the reduce output to a SQL table.
- * <p> 
- * {@link DBOutputFormat} accepts &lt;key,value&gt; pairs, where 
- * key has a type extending DBWritable. Returned {@link RecordWriter} 
- * writes <b>only the key</b> to the database with a batch SQL query.  
- * 
+ * <p>
+ * {@link DBOutputFormat} accepts &lt;key,value&gt; pairs, where
+ * key has a type extending DBWritable. Returned {@link RecordWriter}
+ * writes <b>only the key</b> to the database with a batch SQL query.
+ *
  */
-public class DBOutputFormat<K extends DBWritable, V> 
+public class DBOutputFormat<K extends DBWritable, V>
     extends OutputFormat<K, V> {
 
   private static final Log LOG = LogFactory.getLog(DBOutputFormat.class);
-  public void checkOutputSpecs(JobContext context) 
+  public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {}
 
-  public OutputCommitter getOutputCommitter(TaskAttemptContext context) 
+  public OutputCommitter getOutputCommitter(TaskAttemptContext context)
       throws IOException, InterruptedException {
     return new FileOutputCommitter(FileOutputFormat.getOutputPath(context),
                                    context);
@@ -62,7 +62,7 @@ public class DBOutputFormat<K extends DBWritable, V>
   /**
    * A RecordWriter that writes the reduce output to a SQL table.
    */
-  public class DBRecordWriter 
+  public class DBRecordWriter
       extends RecordWriter<K, V> {
 
     private Connection connection;
@@ -81,11 +81,11 @@ public class DBOutputFormat<K extends DBWritable, V>
     public Connection getConnection() {
       return connection;
     }
-    
+
     public PreparedStatement getStatement() {
       return statement;
     }
-    
+
     @Override
     /** {@inheritDoc} */
     public void close(TaskAttemptContext context) throws IOException {
@@ -123,7 +123,7 @@ public class DBOutputFormat<K extends DBWritable, V>
 
   /**
    * Constructs the query used as the prepared statement to insert data.
-   * 
+   *
    * @param table
    *          the table to insert into
    * @param fieldNames
@@ -163,20 +163,20 @@ public class DBOutputFormat<K extends DBWritable, V>
 
   @Override
   /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
     String tableName = dbConf.getOutputTableName();
     String[] fieldNames = dbConf.getOutputFieldNames();
-    
+
     if(fieldNames == null) {
       fieldNames = new String[dbConf.getOutputFieldCount()];
     }
-    
+
     try {
       Connection connection = dbConf.getConnection();
       PreparedStatement statement = null;
-  
+
       statement = connection.prepareStatement(
                     constructQuery(tableName, fieldNames));
       return new DBRecordWriter(connection, statement);
@@ -188,12 +188,12 @@ public class DBOutputFormat<K extends DBWritable, V>
   /**
    * Initializes the reduce-part of the job with
    * the appropriate output settings.
-   * 
+   *
    * @param job The job
    * @param tableName The table to insert data into
    * @param fieldNames The field names in the table.
    */
-  public static void setOutput(Job job, String tableName, 
+  public static void setOutput(Job job, String tableName,
       String... fieldNames) throws IOException {
     if(fieldNames.length > 0 && fieldNames[0] != null) {
       DBConfiguration dbConf = setOutput(job, tableName);
@@ -201,34 +201,34 @@ public class DBOutputFormat<K extends DBWritable, V>
     } else {
       if (fieldNames.length > 0) {
         setOutput(job, tableName, fieldNames.length);
-      } else { 
+      } else {
         throw new IllegalArgumentException(
             "Field names must be greater than 0");
       }
     }
   }
-  
+
   /**
-   * Initializes the reduce-part of the job 
+   * Initializes the reduce-part of the job
    * with the appropriate output settings.
-   * 
+   *
    * @param job The job
    * @param tableName The table to insert data into
    * @param fieldCount the number of fields in the table.
    */
-  public static void setOutput(Job job, String tableName, 
+  public static void setOutput(Job job, String tableName,
       int fieldCount) throws IOException {
     DBConfiguration dbConf = setOutput(job, tableName);
     dbConf.setOutputFieldCount(fieldCount);
   }
-  
+
   private static DBConfiguration setOutput(Job job,
       String tableName) throws IOException {
     job.setOutputFormatClass(DBOutputFormat.class);
-    HadoopShim.get().setJobReduceSpeculativeExecution(job, false);
+    ConfigurationHelper.setJobReduceSpeculativeExecution(job, false);
 
     DBConfiguration dbConf = new DBConfiguration(job.getConfiguration());
-    
+
     dbConf.setOutputTableName(tableName);
     return dbConf;
   }

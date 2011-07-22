@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.shims;
+
+package com.cloudera.sqoop.testutil;
 
 import java.io.IOException;
 
@@ -23,8 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
@@ -33,65 +32,17 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mrunit.mapreduce.mock.MockReporter;
 
 /**
- * Hadoop Shim for CDH3 (based on 0.20.2).
+ * Allows the creation of various mock objects for testing purposes.
  */
-public class CDH3Shim extends CommonHadoopShim {
-  @Override
-  public long getNumMapOutputRecords(Job job)
-      throws IOException, InterruptedException {
-    return job.getCounters().findCounter(
-        "org.apache.hadoop.mapred.Task$Counter",
-        "MAP_OUTPUT_RECORDS").getValue();
-  }
+public final class MockObjectFactory {
 
-  @Override
-  public long getNumMapInputRecords(Job job)
-      throws IOException, InterruptedException {
-    return job.getCounters().findCounter(
-        "org.apache.hadoop.mapred.Task$Counter",
-        "MAP_INPUT_RECORDS").getValue();
-  }
-
-  @Override
-  public String getTaskIdProperty() {
-    return "mapred.task.id";
-  }
-
-  @Override
-  public String getJobLocalDirProperty() {
-    return "job.local.dir";
-  }
-
-  @Override
-  public void setJobNumMaps(Job job, int numMapTasks) {
-    job.getConfiguration().setInt("mapred.map.tasks", numMapTasks);
-  }
-
-  @Override
-  public int getJobNumMaps(JobContext job) {
-    return job.getConfiguration().getInt("mapred.map.tasks", 1);
-  }
-
-  @Override
-  public int getConfNumMaps(Configuration conf) {
-    return conf.getInt("mapred.map.tasks", 1);
-  }
-
-  @Override
-  public void setJobMapSpeculativeExecution(Job job, boolean isEnabled) {
-    job.getConfiguration().setBoolean(
-        "mapred.map.tasks.speculative.execution", isEnabled);
-  }
-
-  @Override
-  public void setJobReduceSpeculativeExecution(Job job, boolean isEnabled) {
-    job.getConfiguration().setBoolean(
-        "mapred.reduce.tasks.speculative.execution", isEnabled);
-  }
-
-  @Override
-  public void setJobtrackerAddr(Configuration conf, String addr) {
-    conf.set("mapred.job.tracker", addr);
+  /**
+   * Returns a mock MapContext that has both an OutputCommitter and an
+   * InputSplit wired to the specified path.
+   * Used for testing LargeObjectLoader.
+   */
+  public static MapContext getMapContextForIOPath(Configuration conf, Path p) {
+    return new MockMapContextWithCommitter(conf, p);
   }
 
   private static class MockMapContextWithCommitter
@@ -101,7 +52,7 @@ public class CDH3Shim extends CommonHadoopShim {
 
     public MockMapContextWithCommitter(Configuration c, Path p) {
       super(c, new TaskAttemptID("jt", 0, true, 0, 0),
-          null, null, null, new MockReporter(new Counters()), null);
+            null, null, null, new MockReporter(new Counters()), null);
 
       this.path = p;
       this.conf = c;
@@ -127,8 +78,7 @@ public class CDH3Shim extends CommonHadoopShim {
     }
   }
 
-  @Override
-  public MapContext getMapContextForIOPath(Configuration conf, Path p) {
-    return new MockMapContextWithCommitter(conf, p);
+  private MockObjectFactory() {
+    // Disable explicity object creation
   }
 }

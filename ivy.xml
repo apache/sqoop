@@ -139,8 +139,6 @@
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
     <!-- dependencies on the shim jars we generate, for release poms -->
-    <dependency org="com.cloudera.sqoop" name="sqoop-shim-apache"
-      rev="${version}" conf="mvndeploy->default" />
     <dependency org="com.cloudera.sqoop" name="sqoop-shim-cloudera"
       rev="${version}" conf="mvndeploy->default" />
   </dependencies>

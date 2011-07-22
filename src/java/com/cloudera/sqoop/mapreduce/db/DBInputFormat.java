@@ -42,15 +42,15 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 
 /**
  * A InputFormat that reads input data from an SQL table.
  * <p>
- * DBInputFormat emits LongWritables containing the record number as 
- * key and DBWritables as value. 
- * 
- * The SQL query, and input class can be using one of the two 
+ * DBInputFormat emits LongWritables containing the record number as
+ * key and DBWritables as value.
+ *
+ * The SQL query, and input class can be using one of the two
  * setInput methods.
  */
 public class DBInputFormat<T extends DBWritable>
@@ -71,7 +71,7 @@ public class DBInputFormat<T extends DBWritable>
     @Override
     public void write(PreparedStatement arg0) throws SQLException { }
   }
-  
+
   /**
    * A InputSplit that spans a set of rows.
    */
@@ -172,7 +172,7 @@ public class DBInputFormat<T extends DBWritable>
   public Configuration getConf() {
     return dbConf.getConf();
   }
-  
+
   public DBConfiguration getDBConf() {
     return dbConf;
   }
@@ -227,7 +227,7 @@ public class DBInputFormat<T extends DBWritable>
   @Override
   /** {@inheritDoc} */
   public RecordReader<LongWritable, T> createRecordReader(InputSplit split,
-      TaskAttemptContext context) throws IOException, InterruptedException {  
+      TaskAttemptContext context) throws IOException, InterruptedException {
 
     return createDBRecordReader((DBInputSplit) split,
         context.getConfiguration());
@@ -237,7 +237,7 @@ public class DBInputFormat<T extends DBWritable>
   @Override
   public List<InputSplit> getSplits(JobContext job) throws IOException {
 
-    ResultSet results = null;  
+    ResultSet results = null;
     Statement statement = null;
     try {
       statement = connection.createStatement();
@@ -246,7 +246,7 @@ public class DBInputFormat<T extends DBWritable>
       results.next();
 
       long count = results.getLong(1);
-      int chunks = HadoopShim.get().getJobNumMaps(job);
+      int chunks = ConfigurationHelper.getJobNumMaps(job);
       long chunkSize = (count / chunks);
 
       results.close();
@@ -285,14 +285,14 @@ public class DBInputFormat<T extends DBWritable>
     }
   }
 
-  /** Returns the query for getting the total number of rows, 
+  /** Returns the query for getting the total number of rows,
    * subclasses can override this for custom behaviour.*/
   protected String getCountQuery() {
-    
+
     if(dbConf.getInputCountQuery() != null) {
       return dbConf.getInputCountQuery();
     }
-    
+
     StringBuilder query = new StringBuilder();
     query.append("SELECT COUNT(*) FROM " + tableName);
 
@@ -304,20 +304,20 @@ public class DBInputFormat<T extends DBWritable>
 
   /**
    * Initializes the map-part of the job with the appropriate input settings.
-   * 
+   *
    * @param job The map-reduce job
-   * @param inputClass the class object implementing DBWritable, which is the 
+   * @param inputClass the class object implementing DBWritable, which is the
    * Java object holding tuple fields.
    * @param tableName The table to read data from
-   * @param conditions The condition which to select data with, 
+   * @param conditions The condition which to select data with,
    * eg. '(updated &gt; 20070101 AND length &gt; 0)'
    * @param orderBy the fieldNames in the orderBy clause.
    * @param fieldNames The field names in the table
    * @see #setInput(Job, Class, String, String)
    */
-  public static void setInput(Job job, 
+  public static void setInput(Job job,
       Class<? extends DBWritable> inputClass,
-      String tableName, String conditions, 
+      String tableName, String conditions,
       String orderBy, String... fieldNames) {
     job.setInputFormatClass(DBInputFormat.class);
     DBConfiguration dbConf = new DBConfiguration(job.getConfiguration());
@@ -327,17 +327,17 @@ public class DBInputFormat<T extends DBWritable>
     dbConf.setInputConditions(conditions);
     dbConf.setInputOrderBy(orderBy);
   }
-  
+
   /**
    * Initializes the map-part of the job with the appropriate input settings.
-   * 
+   *
    * @param job The map-reduce job
-   * @param inputClass the class object implementing DBWritable, which is the 
+   * @param inputClass the class object implementing DBWritable, which is the
    * Java object holding tuple fields.
-   * @param inputQuery the input query to select fields. Example : 
+   * @param inputQuery the input query to select fields. Example :
    * "SELECT f1, f2, f3 FROM Mytable ORDER BY f1"
-   * @param inputCountQuery the input query that returns 
-   * the number of records in the table. 
+   * @param inputCountQuery the input query that returns
+   * the number of records in the table.
    * Example : "SELECT COUNT(f1) FROM Mytable"
    * @see #setInput(Job, Class, String, String, String, String...)
    */

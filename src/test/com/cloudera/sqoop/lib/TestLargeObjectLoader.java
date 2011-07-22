@@ -18,7 +18,9 @@
 
 package com.cloudera.sqoop.lib;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -29,7 +31,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import com.cloudera.sqoop.shims.HadoopShim;
+
+import com.cloudera.sqoop.testutil.MockObjectFactory;
 import com.cloudera.sqoop.testutil.MockResultSet;
 
 /**
@@ -61,7 +64,7 @@ public class TestLargeObjectLoader extends TestCase {
      * getInputSplit() to determine where to read our source data from--the same
      * directory. We are repurposing the same context for both output and input.
      */
-    mapContext = HadoopShim.get().getMapContextForIOPath(conf, outDir);
+    mapContext = MockObjectFactory.getMapContextForIOPath(conf, outDir);
     loader = new LargeObjectLoader(mapContext.getConfiguration(),
         FileOutputFormat.getWorkOutputPath(mapContext));
   }

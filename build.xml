@@ -42,7 +42,7 @@
   <property name="dest.jar" value="${artifact.name}.jar" />
   <property name="test.jar" value="${name}-test-${version}.jar" />
   <property name="git.hash" value="" />
-  
+
   <!-- programs used -->
   <property name="python" value="python" />
 
@@ -50,7 +50,6 @@
   <property name="base.src.dir" location="${basedir}/src" />
   <property name="src.dir" location="${base.src.dir}/java" />
   <property name="test.dir" location="${base.src.dir}/test" />
-  <property name="shim.src.dir" location="${base.src.dir}/shims" />
   <property name="perftest.src.dir" location="${base.src.dir}/perftest" />
   <property name="lib.dir" location="${basedir}/lib" />
   <property name="docs.src.dir" location="${base.src.dir}/docs" />
@@ -70,10 +69,6 @@
 
   <!-- compiled classes for the main sqoop artifact. -->
   <property name="build.classes" location="${build.dir}/classes"/>
-
-  <!-- compiled outputs for the shim artifacts. -->
-  <property name="build.shim.dir" location="${build.dir}/shims"/>
-  <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
 
   <!-- root directory for output/intermediate data for testing -->
   <property name="build.test" location="${build.dir}/test"/>
@@ -107,7 +102,7 @@
   <!-- controlling the Hadoop source -->
   <!-- valid values for ${hadoop.dist} are 'apache' (trunk), 'apache21',
        and 'cloudera' -->
-  <property name="hadoop.dist" value="cloudera" />
+  <!-- <property name="hadoop.dist" value="cloudera" /> -->
 
   <!-- testing with JUnit -->
   <property name="test.junit.output.format" value="plain"/>
@@ -131,10 +126,6 @@
       value="https://repository.cloudera.com/content/repositories/${mvn.repo}"/>
   <property name="sqoop.pom" value="${mvn.build.dir}/sqoop.pom" />
   <property name="sqooptest.pom" value="${mvn.build.dir}/sqoop-test.pom" />
-  <property name="apache.shim.pom"
-      value="${mvn.build.dir}/sqoop-shim-apache.pom" />
-  <property name="cloudera.shim.pom"
-      value="${mvn.build.dir}/sqoop-shim-cloudera.pom" />
 
   <!-- code coverage -->
   <property name="cobertura.dir" value="${build.dir}/cobertura" />
@@ -162,8 +153,8 @@
   <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
   <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
   <property name="ivy.jar" location="${lib.dir}/ivy-${ivy.version}.jar"/>
-  <property name="ivy_repo_url" 
-	value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
+  <property name="ivy_repo_url"
+  value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
   <property name="mvn_repo_url"
   value="http://repo2.maven.org/maven2/org/apache/maven/maven-ant-tasks/${mvn.version}/maven-ant-tasks-${mvn.version}.jar"/>
   <property name="mvn.jar"
@@ -172,7 +163,7 @@
   <property name="build.ivy.lib.dir" location="${build.ivy.dir}/lib" />
   <property name="build.ivy.report.dir" location="${build.ivy.dir}/report" />
   <property name="redist.ivy.lib.dir"
-      location="${build.ivy.lib.dir}/${name}/redist"/> 
+      location="${build.ivy.lib.dir}/${name}/redist"/>
 
   <!--this is the naming policy for artifacts we want pulled down-->
   <property name="ivy.artifact.retrieve.pattern"
@@ -211,10 +202,10 @@
    </condition>
  </target>
 
- <target name="untar-hbase-zk" unless="hbase-zk-already-untared" 
-	 depends="download-hbase-zk">
-   <untar src="${build.dir}/${hbase.tar}" dest="${build.dir}" 
-	  compression="gzip"/>
+ <target name="untar-hbase-zk" unless="hbase-zk-already-untared"
+   depends="download-hbase-zk">
+   <untar src="${build.dir}/${hbase.tar}" dest="${build.dir}"
+    compression="gzip"/>
    <untar src="${build.dir}/${zk.tar}" dest="${build.dir}" compression="gzip"/>
  </target>
 
@@ -267,60 +258,14 @@
     </fileset>
   </path>
 
-  <!-- "init" target used for setup purposes. --> 
+  <!-- "init" target used for setup purposes. -->
   <target name="init">
-    <!-- The hadoop.dist property determines which version of Hadoop to
-         retrieve; this may be "cloudera", "apache", or "apache21". But
-         multiple of these versions can use the same shim. We set the
-         hadoop.shim property here, based on that one.
-    -->
-    <if>
-      <equals arg1="${hadoop.dist}" arg2="apache" />
-      <then>
-        <property name="hadoop.shim" value="apache" />
-        <echo message="Hadoop distribution: apache -> apache (trunk) " />
-      </then>
-      <elseif>
-        <equals arg1="${hadoop.dist}" arg2="apache21" />
-        <then>
-          <property name="hadoop.shim" value="apache" />
-          <echo message="Hadoop distribution: apache21 -> apache (0.21)" />
-        </then>
-      </elseif>
-      <elseif>
-        <equals arg1="${hadoop.dist}" arg2="cloudera" />
-        <then>
-          <property name="hadoop.shim" value="cloudera" />
-          <echo message="Hadoop distribution: cloudera -> cloudera (CDH3)" />
-        </then>
-      </elseif>
-      <elseif>
-        <equals arg1="${hadoop.dist}" arg2="local" />
-        <then>
-          <echo message="Hadoop distribution set to local installation" />
-          <property name="hadoop.is.local" value="true" />
-          <fail unless="hadoop.shim">
-            You must explicitly set ${hadoop.shim} to 'apache' or 'cloudera'
-            to use a local distribution.
-          </fail>
-          <fail unless="hadoop.home">
-            You must set ${hadoop.home} to point to your local
-            Hadoop installation.
-          </fail>
-        </then>
-      </elseif>
-      <else>
-        <fail message="Invalid value for hadoop.dist: ${hadoop.dist}"/>
-      </else>
-    </if>
-
     <!-- Path containing third-party libraries deployed directly with Sqoop.
          This does not include anything that Ivy can retrieve for us.
       -->
     <path id="lib.path">
       <fileset dir="${lib.dir}">
         <include name="*.jar" />
-        <include name="${hadoop.shim}/*.jar" />
       </fileset>
     </path>
 
@@ -329,42 +274,7 @@
       <pathelement location="${build.test.classes}" />
       <path refid="${name}.hadooptest.classpath" />
       <path refid="compile.classpath" />
-      <pathelement location="${build.shim.classes}/${hadoop.shim}" />
     </path>
-  </target>
-
-  <!-- Compile a shim class so Sqoop can run with the specified
-       hadoop.dist.
-  -->
-  <target name="compile-one-shim"
-      depends="init, ivy-retrieve-hadoop">
-    <mkdir dir="${build.shim.classes}/${hadoop.shim}" />
-    <javac
-        encoding="${build.encoding}"
-        destdir="${build.shim.classes}/${hadoop.shim}"
-        debug="${javac.debug}"
-        deprecation="${javac.deprecation}">
-      <classpath refid="compile.classpath"/>
-      <src path="${shim.src.dir}/${hadoop.shim}" />
-      <src path="${shim.src.dir}/common" />
-      <include name="**/*.java" />
-    </javac>
-  </target>
-
-  <!-- Compile one shim and fetch it into a jar file. -->
-  <target name="jar-one-shim" depends="init,compile-one-shim">
-    <jar jarfile="${build.shim.dir}/${name}-shim-${hadoop.shim}-${version}.jar"
-        basedir="${build.shim.classes}/${hadoop.shim}" />
-  </target>
-
-  <!-- Create jars for all shims -->
-  <target name="jar-all-shims" depends="init,compile">
-    <antcall target="jar-one-shim" inheritAll="false">
-      <param name="hadoop.dist" value="apache" />
-    </antcall>
-    <antcall target="jar-one-shim" inheritAll="false">
-      <param name="hadoop.dist" value="cloudera" />
-    </antcall>
   </target>
 
   <!-- generate the version information class. -->
@@ -376,7 +286,7 @@
       <arg value="${git.hash}" />
     </exec>
   </target>
-  
+
   <!-- Compile core classes for the project -->
   <target name="compile"
       depends="init, gen-version, ivy-retrieve-hadoop, untar-hbase-zk"
@@ -410,7 +320,7 @@
   </target>
 
   <target name="compile-test"
-      depends="compile, compile-one-shim, ivy-retrieve-hadoop-test"
+      depends="compile, ivy-retrieve-hadoop-test"
       description="Compile test classes">
     <mkdir dir="${build.test.classes}" />
     <javac
@@ -451,11 +361,11 @@
 
   <!-- Ensure that all source code can be built -->
   <target name="compile-all"
-      depends="compile,compile-test,jar-all-shims,compile-perf-test"
+      depends="compile,compile-test,compile-perf-test"
       description="Compile all sources"/>
 
   <!-- Create all jars. Note this does not include the perftests. -->
-  <target name="jar-all" depends="jar,jar-test,jar-all-shims"
+  <target name="jar-all" depends="jar,jar-test"
       description="Create all jar artifacts" />
 
   <target name="scripts" depends="jar"
@@ -498,14 +408,6 @@
     <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
       <fileset dir="${build.dir}">
         <include name="${test.jar}" />
-      </fileset>
-    </copy>
-
-    <!-- copy in all shim artifacts -->
-    <mkdir dir="${dist.dir}/shims" />
-    <copy todir="${dist.dir}/shims" includeEmptyDirs="false" flatten="true">
-      <fileset dir="${build.shim.dir}">
-        <include name="*.jar" />
       </fileset>
     </copy>
 
@@ -576,7 +478,7 @@
          and copy it to sqoop-site.xml, overwriting any user-specified
          sqoop-site.xml in there.
      -->
-    <copy file="${dist.dir}/conf/sqoop-site-template.xml" 
+    <copy file="${dist.dir}/conf/sqoop-site-template.xml"
         tofile="${dist.dir}/conf/sqoop-site.xml"
         overwrite="true" />
   </target>
@@ -617,15 +519,15 @@
   <!-- To run third-party tests, run with -Dthirdparty=true               -->
   <!-- ================================================================== -->
   <target name="test"
-      depends="compile-test,compile,jar-one-shim,test-prep,run-tests"
+      depends="compile-test,compile,test-prep,run-tests"
       description="Run unit tests" />
 
   <!-- actually run the selected unit tests -->
   <target name="run-tests"
-      depends="compile-test,compile,jar-one-shim,test-prep">
+      depends="compile-test,compile,test-prep">
     <antcall target="checkfailure" inheritRefs="true" />
   </target>
- 
+
   <target name="test-core">
     <!-- inner target only intended to be used via antcall.
          Does not define its dependencies. Should be invoked through the
@@ -654,8 +556,6 @@
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
-
-      <sysproperty key="sqoop.shim.jar.dir" value="${build.shim.dir}" />
 
       <sysproperty key="net.sourceforge.cobertura.datafile"
           value="${cobertura.dir}/cobertura-${cobertura.testset}.ser" />
@@ -736,7 +636,7 @@
       description="Audit license headers for release">
     <fail unless="rat.present"
         message="Failed to load class [${rat.reporting.classname}]." />
-    <java classname="${rat.reporting.classname}" fork="true" 
+    <java classname="${rat.reporting.classname}" fork="true"
         output="${build.dir}/rat.log">
       <classpath refid="${name}.releaseaudit.classpath" />
       <arg value="${dist.dir}" />
@@ -810,7 +710,7 @@
 
     <!-- Register mvn tasks -->
     <path id="mvn-ant-task.classpath" path="${mvn.jar}" />
-    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" 
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
         uri="urn:maven-artifact-ant"
         classpathref="mvn-ant-task.classpath"/>
 
@@ -822,17 +722,6 @@
       <mapping conf="runtime" scope="runtime" />
     </ivy:makepom>
     <ivy:makepom ivyfile="ivy/sqoop-test.xml" pomfile="${sqooptest.pom}"
-        settingsRef="${name}.ivy.settings">
-      <mapping conf="default" scope="compile" />
-      <mapping conf="runtime" scope="runtime" />
-    </ivy:makepom>
-
-    <ivy:makepom ivyfile="ivy/apache-shim.xml" pomfile="${apache.shim.pom}"
-        settingsRef="${name}.ivy.settings">
-      <mapping conf="default" scope="compile" />
-      <mapping conf="runtime" scope="runtime" />
-    </ivy:makepom>
-    <ivy:makepom ivyfile="ivy/cloudera-shim.xml" pomfile="${cloudera.shim.pom}"
         settingsRef="${name}.ivy.settings">
       <mapping conf="default" scope="compile" />
       <mapping conf="runtime" scope="runtime" />
@@ -858,14 +747,6 @@
     <jar jarfile="${build.srcjar.dir}/${name}-test-${version}-sources.jar">
       <fileset dir="${test.dir}" />
     </jar>
-    <jar jarfile="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar">
-      <fileset dir="${shim.src.dir}/apache/" />
-      <fileset dir="${shim.src.dir}/common/" />
-    </jar>
-    <jar jarfile="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar">
-      <fileset dir="${shim.src.dir}/cloudera/" />
-      <fileset dir="${shim.src.dir}/common/" />
-    </jar>
   </target>
 
   <target name="mvn-install" depends="init,mvn-prep,jar-all,srcjars"
@@ -882,24 +763,6 @@
       <pom refid="sqoop-test" />
       <attach file="${build.srcjar.dir}/${name}-test-${version}-sources.jar"
           classifier="sources" />
-    </artifact:install>
-
-    <artifact:pom file="${apache.shim.pom}" id="sqoop-apache-shim" />
-    <artifact:install
-        file="${build.shim.dir}/${name}-shim-apache-${version}.jar">
-      <pom refid="sqoop-apache-shim" />
-      <attach
-        file="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar"
-        classifier="sources" />
-    </artifact:install>
-
-    <artifact:pom file="${cloudera.shim.pom}" id="sqoop-cloudera-shim" />
-    <artifact:install
-        file="${build.shim.dir}/${name}-shim-cloudera-${version}.jar">
-      <pom refid="sqoop-cloudera-shim" />
-      <attach
-        file="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar"
-        classifier="sources" />
     </artifact:install>
   </target>
 
@@ -921,25 +784,6 @@
           classifier="sources" />
     </artifact:deploy>
 
-    <artifact:pom file="${apache.shim.pom}" id="sqoop-apache-shim" />
-    <artifact:deploy
-        file="${build.shim.dir}/${name}-shim-apache-${version}.jar">
-      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
-      <pom refid="sqoop-apache-shim" />
-      <attach
-        file="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar"
-        classifier="sources" />
-    </artifact:deploy>
-
-    <artifact:pom file="${cloudera.shim.pom}" id="sqoop-cloudera-shim" />
-    <artifact:deploy
-        file="${build.shim.dir}/${name}-shim-cloudera-${version}.jar">
-      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
-      <pom refid="sqoop-cloudera-shim" />
-      <attach
-        file="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar"
-        classifier="sources" />
-    </artifact:deploy>
   </target>
 
   <target name="docs" depends="real-docs,relnotes,javadoc"
@@ -1041,7 +885,7 @@
   </target>
 
   <target name="cobertura"
-      depends="check-for-cobertura,warn-cobertura-unset,jar,compile-test,test-prep,jar-all-shims"
+      depends="check-for-cobertura,warn-cobertura-unset,jar,compile-test,test-prep"
       if="cobertura.present" description="Run Cobertura (code coverage)">
     <taskdef classpathref="cobertura.classpath"
         resource="tasks.properties"/>
@@ -1140,7 +984,7 @@
     <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
   </target>
   <target name="ivy-retrieve-common" depends="ivy-resolve-common">
-    <ivy:retrieve settingsRef="${name}.ivy.settings" 
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" sync="true" />
     <ivy:cachepath pathid="${name}.common.classpath" conf="common" />
   </target>
@@ -1170,65 +1014,28 @@
   <!-- retrieve ivy-managed artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="cloudera" />
   </target>
   <target name="ivy-retrieve-hadoop" depends="ivy-init,ivy-resolve-hadoop">
-    <if>
-      <equals arg1="${hadoop.dist}" arg2="local" />
-      <then>
-        <!-- Use a local Hadoop distribution. Just retrieve the basic
-             'common' configuration, and add the Hadoop jars from
-             the local Hadoop install.
-             We can't use a subant here, because the refs wouldn't be
-             preserved when we return to executing this target. 
-        -->
-        <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
-        <ivy:retrieve settingsRef="${name}.ivy.settings" 
-            pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
-            sync="true" />
-        <ivy:cachepath pathid="${name}.hadoop.classpath" conf="common" />
-      </then>
-      <else>
-        <!-- retrieve hadoop refs normally. -->
-        <ivy:retrieve settingsRef="${name}.ivy.settings" 
-          pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
-          sync="true" />
-        <ivy:cachepath pathid="${name}.hadoop.classpath" conf="${hadoop.dist}" />
-      </else>
-    </if>
+    <!-- retrieve hadoop refs normally. -->
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
+       pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
+       sync="true" />
+    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="cloudera" />
   </target>
 
   <!-- retrieve ivy-managed test artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop-test" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="${hadoop.dist}test" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="clouderatest" />
   </target>
   <target name="ivy-retrieve-hadoop-test"
       depends="ivy-init,ivy-resolve-hadoop-test">
-    <if>
-      <equals arg1="${hadoop.dist}" arg2="local" />
-      <then>
-        <!-- Use a local Hadoop distribution. Just retrieve the basic
-             'test' configuration, and add the Hadoop jars from
-             the local Hadoop install.
-             We can't use a subant here, because the refs wouldn't be
-             preserved when we return to executing this target. 
-        -->
-        <ivy:resolve settingsRef="${name}.ivy.settings" conf="test" />
-        <ivy:retrieve settingsRef="${name}.ivy.settings" 
-            pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
-            sync="true" />
-        <ivy:cachepath pathid="${name}.hadooptest.classpath" conf="test" />
-      </then>
-      <else>
-        <!-- retrieve hadoop refs normally. -->
-        <ivy:retrieve settingsRef="${name}.ivy.settings" 
+        <ivy:retrieve settingsRef="${name}.ivy.settings"
           pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
           sync="true" />
         <ivy:cachepath pathid="${name}.hadooptest.classpath"
-          conf="${hadoop.dist}test" />
-      </else>
-    </if>
+          conf="clouderatest" />
   </target>
 
   <!-- retrieve ivy-managed artifacts for checkstyle -->
@@ -1263,9 +1070,6 @@
       <classpath>
         <source path="src/java" />
         <source path="src/perftest" />
-        <source path="src/shims/apache" />
-        <source path="src/shims/common" />
-        <source path="src/shims/cloudera" />
         <source path="src/test" />
         <output path="${build.dir}/eclipse-build" />
         <library pathref="test.classpath" />

@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 
 /**
  * Implement DBSplitter over BigDecimal values.
@@ -46,9 +46,9 @@ public class BigDecimalSplitter implements DBSplitter {
 
     String lowClausePrefix = colName + " >= ";
     String highClausePrefix = colName + " < ";
-    
+
     BigDecimal numSplits = new BigDecimal(
-        HadoopShim.get().getConfNumMaps(conf));
+        ConfigurationHelper.getConfNumMaps(conf));
 
     if (minVal == null && maxVal == null) {
       // Range is null to null. Return a null split accordingly.

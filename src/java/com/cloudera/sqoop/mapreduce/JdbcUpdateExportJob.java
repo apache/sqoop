@@ -32,7 +32,6 @@ import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.shims.ShimLoader;
 
 /**
  * Run an update-based export using JDBC (JDBC-based UpdateOutputFormat).
@@ -48,13 +47,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
    */
   private static Class<? extends OutputFormat> getUpdateOutputFormat()
        throws IOException {
-    try {
-      return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-          "com.cloudera.sqoop.mapreduce.UpdateOutputFormat");
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException("Could not load updating export OutputFormat",
-          cnfe);
-    }
+    return UpdateOutputFormat.class;
   }
 
   public JdbcUpdateExportJob(final ExportJobContext context)

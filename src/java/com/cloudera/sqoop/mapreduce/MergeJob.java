@@ -21,23 +21,17 @@ package com.cloudera.sqoop.mapreduce;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
-
-import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.util.Jars;
 
 /**
@@ -78,7 +72,7 @@ public class MergeJob extends JobBase {
     String existingJar = options.getExistingJarName();
     if (existingJar != null) {
       // User explicitly identified a jar path.
-      LOG.debug("Setting job jar to user-specified jar: " + existingJar); 
+      LOG.debug("Setting job jar to user-specified jar: " + existingJar);
       job.getConfiguration().set("mapred.jar", existingJar);
     } else {
       // Infer it from the location of the specified class, if it's on the
@@ -124,9 +118,7 @@ public class MergeJob extends JobBase {
         job.setMapperClass(MergeRecordMapper.class);
       } else {
         job.setMapperClass(MergeTextMapper.class);
-        job.setOutputFormatClass((Class<? extends OutputFormat>)
-            ShimLoader.getShimClass(
-            "com.cloudera.sqoop.mapreduce.RawKeyTextOutputFormat"));
+        job.setOutputFormatClass(RawKeyTextOutputFormat.class);
       }
 
       jobConf.set("mapred.output.key.class", userClassName);

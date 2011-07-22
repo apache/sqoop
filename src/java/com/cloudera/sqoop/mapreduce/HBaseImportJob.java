@@ -43,7 +43,6 @@ import com.cloudera.sqoop.lib.FieldMapProcessor;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.util.ImportException;
 
 /**
@@ -76,14 +75,13 @@ public class HBaseImportJob extends DataDrivenImportJob {
   @Override
   protected Class<? extends OutputFormat> getOutputFormatClass()
       throws ClassNotFoundException {
-    return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-       "com.cloudera.sqoop.mapreduce.DelegatingOutputFormat");
+    return DelegatingOutputFormat.class;
   }
 
   @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
- 
+
     // Use the DelegatingOutputFormat with the HBasePutProcessor.
     job.setOutputFormatClass(getOutputFormatClass());
 

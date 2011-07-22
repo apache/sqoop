@@ -32,7 +32,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
@@ -50,7 +50,7 @@ public class TestParseMethods extends ImportJobTestCase {
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags, String fieldTerminator, 
+  private String [] getArgv(boolean includeHadoopFlags, String fieldTerminator,
       String lineTerminator, String encloser, String escape,
       boolean encloserRequired) {
 
@@ -118,7 +118,7 @@ public class TestParseMethods extends ImportJobTestCase {
       job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
       // use local mode in the same JVM.
-      HadoopShim.get().setJobtrackerAddr(job, "local");
+      ConfigurationHelper.setJobtrackerAddr(job, "local");
       job.set("fs.default.name", "file:///");
 
       String warehouseDir = getWarehouseDir();
@@ -203,7 +203,7 @@ public class TestParseMethods extends ImportJobTestCase {
       "92104916282869291837672829102857271948687.287475322",
       "true",
     };
-    
+
     createTableWithColTypes(types, vals);
     runParseTest(",", "\\n", "\\\'", "\\", false);
   }

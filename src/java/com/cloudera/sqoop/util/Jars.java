@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.shims.HadoopShim;
 
 /**
  * Utility class; returns the locations of various jars.
@@ -45,17 +44,6 @@ public final class Jars {
    */
   public static String getSqoopJarPath() {
     return getJarPathForClass(Jars.class);
-  }
-
-  /**
-   * @return the path to the currently-loaded shim jar.
-   */
-  public static String getShimJarPath() {
-    HadoopShim h = HadoopShim.get();
-    if (null == h) {
-      return null;
-    }
-    return getJarPathForClass(h.getClass());
   }
 
   /**

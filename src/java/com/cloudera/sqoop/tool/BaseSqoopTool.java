@@ -41,7 +41,6 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.shims.ShimLoader;
 
 /**
  * Layer on top of SqoopTool that provides some basic common code
@@ -77,8 +76,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_HOME_ARG = "hive-home";
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
   public static final String TARGET_DIR_ARG = "target-dir";
-  public static final String APPEND_ARG = "append";  
-  
+  public static final String APPEND_ARG = "append";
+
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
   public static final String HIVE_IMPORT_ARG = "hive-import";
@@ -170,10 +169,6 @@ public abstract class BaseSqoopTool extends SqoopTool {
    * @return true on success, false on failure.
    */
   protected boolean init(SqoopOptions sqoopOpts) {
-
-    // Make sure shim jar is classloaded early.
-    ShimLoader.getHadoopShim(sqoopOpts.getConf());
-
     // Get the connection to the database.
     try {
       JobData data = new JobData(sqoopOpts, this);
@@ -227,7 +222,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
           LOG.error("Error parsing arguments for " + getToolName() + ":");
           printedBanner = true;
         }
-        LOG.error("Unrecognized argument: " + argv[i]); 
+        LOG.error("Unrecognized argument: " + argv[i]);
         unrecognized = true;
       }
     }
@@ -537,7 +532,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   }
 
 
-  
+
   /**
    * Apply common command-line to the state.
    */
@@ -650,7 +645,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
           in.getOptionValue(ESCAPED_BY_ARG)));
       out.setExplicitDelims(true);
     }
-    
+
     if (in.hasOption(MYSQL_DELIMITERS_ARG)) {
       out.setOutputEncloseRequired(false);
       out.setFieldsTerminatedBy(',');

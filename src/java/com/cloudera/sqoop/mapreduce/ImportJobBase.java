@@ -37,9 +37,9 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.PerfCounters;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
@@ -49,7 +49,7 @@ import com.cloudera.sqoop.manager.ImportJobContext;
 public class ImportJobBase extends JobBase {
 
   private ImportJobContext context;
-  
+
   public static final Log LOG = LogFactory.getLog(
       ImportJobBase.class.getName());
 
@@ -76,7 +76,7 @@ public class ImportJobBase extends JobBase {
   @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
- 
+
     job.setOutputFormatClass(getOutputFormatClass());
 
     if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
@@ -115,7 +115,7 @@ public class ImportJobBase extends JobBase {
       perfCounters.addBytes(jobCounters.getGroup("FileSystemCounters")
         .findCounter("HDFS_BYTES_WRITTEN").getValue());
       LOG.info("Transferred " + perfCounters.toString());
-      long numRecords = HadoopShim.get().getNumMapOutputRecords(job);
+      long numRecords = ConfigurationHelper.getNumMapOutputRecords(job);
       LOG.info("Retrieved " + numRecords + " records.");
     }
     return success;

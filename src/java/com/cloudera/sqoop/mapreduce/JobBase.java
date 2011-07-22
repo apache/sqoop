@@ -40,8 +40,8 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 
+import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.shims.HadoopShim;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import com.cloudera.sqoop.util.Jars;
 
@@ -133,12 +133,11 @@ public class JobBase {
   protected void cacheJars(Job job, ConnManager mgr)
       throws IOException {
 
-    Configuration conf = job.getConfiguration(); 
+    Configuration conf = job.getConfiguration();
     FileSystem fs = FileSystem.getLocal(conf);
     Set<String> localUrls = new HashSet<String>();
 
     addToCache(Jars.getSqoopJarPath(), fs, localUrls);
-    addToCache(Jars.getShimJarPath(), fs, localUrls);
     if (null != mgr) {
       addToCache(Jars.getDriverClassJar(mgr), fs, localUrls);
       addToCache(Jars.getJarPathForClass(mgr.getClass()), fs, localUrls);
@@ -159,7 +158,7 @@ public class JobBase {
       LOG.warn("SQOOP_HOME is unset. May not be able to find "
           + "all job dependencies.");
     }
-    
+
     // If we didn't put anything in our set, then there's nothing to cache.
     if (localUrls.isEmpty()) {
       return;
@@ -273,7 +272,7 @@ public class JobBase {
       LOG.warn("Invalid mapper count; using " + numMapTasks + " mappers.");
     }
 
-    HadoopShim.get().setJobNumMaps(job, numMapTasks);
+    ConfigurationHelper.setJobNumMaps(job, numMapTasks);
     job.setNumReduceTasks(0);
     return numMapTasks;
   }

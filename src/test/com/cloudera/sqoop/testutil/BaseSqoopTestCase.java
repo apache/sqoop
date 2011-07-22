@@ -39,7 +39,6 @@ import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.tool.ImportTool;
 
 import junit.framework.TestCase;
@@ -168,7 +167,6 @@ public class BaseSqoopTestCase extends TestCase {
   @Before
   public void setUp() {
 
-    ShimLoader.getHadoopShim();
     incrementTableNum();
 
     if (!isLog4jConfigured) {

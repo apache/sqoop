@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationConstants;
 
 /**
  * Utility class; returns task attempt Id of the current job
@@ -52,7 +52,8 @@ public final class TaskId {
    * task attempt can be stored.
    */
   public static File getLocalWorkPath(Configuration conf) throws IOException {
-    String tmpDir = conf.get(HadoopShim.get().getJobLocalDirProperty(),
+    String tmpDir = conf.get(
+        ConfigurationConstants.PROP_JOB_LOCAL_DIRECTORY,
         "/tmp/");
 
     // Create a local subdir specific to this task attempt.

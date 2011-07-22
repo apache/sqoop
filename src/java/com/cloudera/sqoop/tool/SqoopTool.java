@@ -36,7 +36,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.SqoopParser;
 import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.shims.ShimLoader;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 
 /**
  * Base class for Sqoop subprograms (e.g., SqoopImport, SqoopExport, etc.)
@@ -158,7 +158,7 @@ public abstract class SqoopTool {
    * configureOptions()/applyOptions().
    * @return an integer return code for external programs to consume. 0
    * represents success; nonzero means failure.
-   */  
+   */
   public abstract int run(SqoopOptions options);
 
   /**
@@ -246,7 +246,7 @@ public abstract class SqoopTool {
     String [] toolArgs = args; // args after generic parser is done.
     if (useGenericOptions) {
       try {
-        toolArgs = ShimLoader.getHadoopShim().parseGenericOptions(
+        toolArgs = ConfigurationHelper.parseGenericOptions(
             out.getConf(), args);
       } catch (IOException ioe) {
         ParseException pe = new ParseException(

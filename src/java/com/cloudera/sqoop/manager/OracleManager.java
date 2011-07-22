@@ -19,6 +19,7 @@
 package com.cloudera.sqoop.manager;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -26,16 +27,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.shims.ShimLoader;
+import com.cloudera.sqoop.mapreduce.OracleExportOutputFormat;
+import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -166,7 +165,7 @@ public class OracleManager extends GenericJdbcManager {
       for (Connection c : connectionMap.values()) {
         c.close();
       }
-      
+
       super.finalize();
     }
   }
@@ -304,15 +303,9 @@ public class OracleManager extends GenericJdbcManager {
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
-    try {
-      JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-          (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-          "com.cloudera.sqoop.mapreduce.OracleExportOutputFormat"));
-      exportJob.runExport();
-    } catch (ClassNotFoundException cnfe) {
-      throw new ExportException("Could not start export; could not find class",
-          cnfe);
-    }
+    JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
+                                  OracleExportOutputFormat.class);
+    exportJob.runExport();
   }
 
   @Override
@@ -376,7 +369,7 @@ public class OracleManager extends GenericJdbcManager {
     // return null if no java type was found for sqlType
     return null;
   }
-    
+
   /**
    * Attempt to map sql type to hive type.
    * @param sqlType     sql data type

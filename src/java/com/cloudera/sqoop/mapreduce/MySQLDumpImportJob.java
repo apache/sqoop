@@ -22,21 +22,17 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.shims.ShimLoader;
 import com.cloudera.sqoop.manager.ImportJobContext;
+import com.cloudera.sqoop.manager.MySQLUtils;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 /**
  * Class that runs an import job using mysqldump in the mapper.
@@ -48,11 +44,8 @@ public class MySQLDumpImportJob extends ImportJobBase {
 
   public MySQLDumpImportJob(final SqoopOptions opts, ImportJobContext context)
       throws ClassNotFoundException {
-    super(opts, MySQLDumpMapper.class,
-        (Class<? extends InputFormat>) ShimLoader.getShimClass(
-            "com.cloudera.sqoop.mapreduce.MySQLDumpInputFormat"),
-        (Class<? extends OutputFormat>) ShimLoader.getShimClass(
-            "com.cloudera.sqoop.mapreduce.RawKeyTextOutputFormat"), context);
+    super(opts, MySQLDumpMapper.class, MySQLDumpInputFormat.class,
+        RawKeyTextOutputFormat.class, context);
   }
 
   /**

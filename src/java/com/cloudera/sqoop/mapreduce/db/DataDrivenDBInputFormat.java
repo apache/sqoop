@@ -42,7 +42,7 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.shims.HadoopShim;
+import com.cloudera.sqoop.config.ConfigurationHelper;
 
 /**
  * A InputFormat that reads input data from an SQL table.
@@ -167,7 +167,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
   /** {@inheritDoc} */
   public List<InputSplit> getSplits(JobContext job) throws IOException {
 
-    int targetNumTasks = HadoopShim.get().getJobNumMaps(job);
+    int targetNumTasks = ConfigurationHelper.getJobNumMaps(job);
     if (1 == targetNumTasks) {
       // There's no need to run a bounding vals query; just return a split
       // that separates nothing. This can be considerably more optimal for a
@@ -313,9 +313,9 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     * We reuse the same field, but it's not strictly ordering it
     * -- just partitioning the results.
     */
-  public static void setInput(Job job, 
+  public static void setInput(Job job,
       Class<? extends DBWritable> inputClass,
-      String tableName, String conditions, 
+      String tableName, String conditions,
       String splitBy, String... fieldNames) {
     DBInputFormat.setInput(job, inputClass, tableName, conditions,
         splitBy, fieldNames);

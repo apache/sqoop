@@ -39,7 +39,7 @@ fi
 
 # Run main compilation step.
 
-${ANT} clean jar-all-shims findbugs javadoc cobertura checkstyle \
+${ANT} clean jar-all findbugs javadoc cobertura checkstyle \
     -Divy.home=$IVY_HOME -Dhadoop.dist=${COMPILE_HADOOP_DIST} \
     -Dcobertura.home=${COBERTURA_HOME} -Dcobertura.format=xml \
     -Dfindbugs.home=${FINDBUGS_HOME} \
