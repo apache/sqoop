@@ -89,6 +89,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HIVE_IMPORT_ARG = "hive-import";
   public static final String HIVE_TABLE_ARG = "hive-table";
   public static final String HIVE_OVERWRITE_ARG = "hive-overwrite";
+  public static final String HIVE_DROP_DELIMS_ARG = "hive-drop-import-delims";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
   public static final String COMPRESS_ARG = "compress";
@@ -399,7 +400,11 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withDescription("Sets the table name to use when importing to hive")
         .withLongOpt(HIVE_TABLE_ARG)
         .create());
-
+    hiveOpts.addOption(OptionBuilder
+        .withDescription("Drop Hive record \\0x01 and row delimiters "
+            + "(\\n\\r) from imported string fields")
+        .withLongOpt(HIVE_DROP_DELIMS_ARG)
+        .create());
     return hiveOpts;
   }
 
@@ -652,6 +657,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(HIVE_TABLE_ARG)) {
       out.setHiveTableName(in.getOptionValue(HIVE_TABLE_ARG));
+    }
+
+    if (in.hasOption(HIVE_DROP_DELIMS_ARG)) {
+      out.setHiveDropDelims(true);
     }
   }
 

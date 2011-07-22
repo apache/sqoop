@@ -146,6 +146,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.import") private boolean hiveImport;
   @StoredAsProperty("hive.overwrite.table") private boolean overwriteHiveTable;
   @StoredAsProperty("hive.table.name") private String hiveTableName;
+  @StoredAsProperty("hive.drop.delims") private boolean hiveDropDelims;
 
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
@@ -995,6 +996,17 @@ public class SqoopOptions implements Cloneable {
   }
 
   /**
+   * @return the user-specified option to modify fields to drop hive delimiters
+   */
+  public boolean doHiveDropDelims() {
+    return hiveDropDelims;
+  }
+
+  public void setHiveDropDelims(boolean dropHiveDelims) {
+    this.hiveDropDelims = dropHiveDelims;
+  }
+
+  /**
    * @return location where .java files go; guaranteed to end with '/'.
    */
   public String getCodeOutputDir() {
@@ -1696,5 +1708,6 @@ public class SqoopOptions implements Cloneable {
   public String getInNullNonStringValue() {
     return inNullNonStringValue;
   }
+
 }
 

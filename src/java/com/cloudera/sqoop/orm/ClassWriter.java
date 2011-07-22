@@ -767,8 +767,15 @@ public class ClassWriter {
         continue;
       }
 
-      sb.append("    __sb.append(FieldFormatter.escapeAndEnclose(" + stringExpr
-          + ", delimiters));\n");
+      if (javaType.equals("String") && options.doHiveDropDelims()) {
+          sb.append("    // special case for strings hive, dropping delimiters "
+              + "\\n,\\r,\\01 from strings\n");
+          sb.append("    __sb.append(FieldFormatter.hiveStringDropDelims("
+              + stringExpr + ", delimiters));\n");
+      } else {
+        sb.append("    __sb.append(FieldFormatter.escapeAndEnclose("
+            + stringExpr + ", delimiters));\n");
+      }
     }
 
     sb.append("    if (useRecordDelim) {\n");

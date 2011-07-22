@@ -18,20 +18,24 @@
 
 package com.cloudera.sqoop.hive;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Test;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import com.cloudera.sqoop.tool.BaseSqoopTool;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.tool.CreateHiveTableTool;
 import com.cloudera.sqoop.tool.ImportTool;
@@ -306,5 +310,53 @@ public class TestHiveImport extends ImportJobTestCase {
     runImportTest(TABLE_NAME, types, vals, "customDelimImport.q",
         getArgv(false, extraArgs), new ImportTool());
   }
-}
 
+  /**
+   * Test hive import with row that has new line in it.
+   */
+  @Test
+  public void testFieldWithHiveDelims() throws IOException,
+    InterruptedException {
+    final String TABLE_NAME = "FIELD_WITH_NL_HIVE_IMPORT";
+
+    LOG.info("Doing import of single row into FIELD_WITH_NL_HIVE_IMPORT table");
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String[] vals = { "'test with \n new lines \n'", "42",
+        "'oh no " + '\01' + " field delims " + '\01' + "'", };
+    String[] moreArgs = { "--"+ BaseSqoopTool.HIVE_DROP_DELIMS_ARG };
+
+    runImportTest(TABLE_NAME, types, vals, "fieldWithNewlineImport.q",
+        getArgv(false, moreArgs), new ImportTool());
+
+    LOG.info("Validating data in single row is present in: "
+          + "FIELD_WITH_NL_HIVE_IMPORT table");
+
+    // Ideally, we would actually invoke hive code to verify that record with
+    // record and field delimiters have values replaced and that we have the
+    // proper number of hive records. Unfortunately, this is a non-trivial task,
+    // and better dealt with at an integration test level
+    //
+    // Instead, this assumes the path of the generated table and just validate
+    // map job output.
+
+    // Get and read the raw output file
+    String whDir = getWarehouseDir();
+    File p = new File(new File(whDir, TABLE_NAME), "part-m-00000");
+    File f = new File(p.toString());
+    FileReader fr = new FileReader(f);
+    BufferedReader br = new BufferedReader(fr);
+    try {
+      // verify the output
+      assertEquals(br.readLine(), "test with  new lines " + '\01' + "42"
+          + '\01' + "oh no  field delims ");
+      assertEquals(br.readLine(), null); // should only be one line
+    } catch (IOException ioe) {
+      fail("Unable to read files generated from hive");
+    } finally {
+      br.close();
+    }
+  }
+
+}

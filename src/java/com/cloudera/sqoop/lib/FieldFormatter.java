@@ -25,7 +25,19 @@ public final class FieldFormatter {
 
   private FieldFormatter() { }
 
-  /** 
+  /**
+   * only pass fields that are strings when --hive-drop-delims option is on.
+   * @param str
+   * @param delimiters
+   * @return
+   */
+  public static String hiveStringDropDelims(String str,
+      DelimiterSet delimiters) {
+    String droppedDelims = str.replaceAll("\\n|\\r|\01", "");
+    return escapeAndEnclose(droppedDelims, delimiters);
+  }
+
+  /**
    * Takes an input string representing the value of a field, encloses it in
    * enclosing chars, and escapes any occurrences of such characters in the
    * middle.  The escape character itself is also escaped if it appears in the
