@@ -47,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -56,6 +57,12 @@ import org.apache.hadoop.util.StringUtils;
 public abstract class SqlManager extends ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
+
+  /** Substring that must appear in free-form queries submitted by users.
+   * This is the string '$CONDITIONS'.
+   */
+  public static final String SUBSTITUTE_TOKEN =
+      DataDrivenDBInputFormat.SUBSTITUTE_TOKEN;
 
   protected SqoopOptions options;
   private Statement lastStatement;
@@ -78,9 +85,23 @@ public abstract class SqlManager extends ConnManager {
   }
 
   @Override
+  /** {@inheritDoc} */
   public String[] getColumnNames(String tableName) {
     String stmt = getColNamesQuery(tableName);
+    return getColumnNamesForRawQuery(stmt);
+  }
 
+  @Override
+  /** {@inheritDoc} */
+  public String [] getColumnNamesForQuery(String query) {
+    String rawQuery = query.replace(SUBSTITUTE_TOKEN, " (1 = 0) ");
+    return getColumnNamesForRawQuery(rawQuery);
+  }
+
+  /**
+   * Get column names for a query statement that we do not modify further.
+   */
+  public String[] getColumnNamesForRawQuery(String stmt) {
     ResultSet results;
     try {
       results = execute(stmt);
@@ -98,6 +119,9 @@ public abstract class SqlManager extends ConnManager {
         String colName = metadata.getColumnName(i);
         if (colName == null || colName.equals("")) {
           colName = metadata.getColumnLabel(i);
+          if (null == colName) {
+            colName = "_RESULT_" + i;
+          }
         }
         columns.add(colName);
       }
@@ -128,7 +152,20 @@ public abstract class SqlManager extends ConnManager {
   @Override
   public Map<String, Integer> getColumnTypes(String tableName) {
     String stmt = getColTypesQuery(tableName);
+    return getColumnTypesForRawQuery(stmt);
+  }
 
+  @Override
+  public Map<String, Integer> getColumnTypesForQuery(String query) {
+    // Manipulate the query to return immediately, with zero rows.
+    String rawQuery = query.replace(SUBSTITUTE_TOKEN, " (1 = 0) ");
+    return getColumnTypesForRawQuery(rawQuery);
+  }
+
+  /**
+   * Get column types for a query statement that we do not modify further.
+   */
+  protected Map<String, Integer> getColumnTypesForRawQuery(String stmt) { 
     ResultSet results;
     try {
       results = execute(stmt);
@@ -285,7 +322,7 @@ public abstract class SqlManager extends ConnManager {
    */
   protected String getSplitColumn(SqoopOptions opts, String tableName) {
     String splitCol = opts.getSplitByCol();
-    if (null == splitCol) {
+    if (null == splitCol && null != tableName) {
       // If the user didn't specify a splitting column, try to infer one.
       splitCol = getPrimaryKey(tableName);
     }
@@ -315,6 +352,30 @@ public abstract class SqlManager extends ConnManager {
     }
 
     importer.runImport(tableName, jarFile, splitCol, opts.getConf());
+  }
+
+  /**
+   * Default implementation of importQuery() is to launch a MapReduce job
+   * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat,
+   * using its free-form query importer.
+   */
+  public void importQuery(ImportJobContext context)
+      throws IOException, ImportException {
+    String jarFile = context.getJarFile();
+    SqoopOptions opts = context.getOptions();
+
+    DataDrivenImportJob importer =
+        new DataDrivenImportJob(opts, context.getInputFormat(), context);
+
+    String splitCol = getSplitColumn(opts, null);
+    if (null == splitCol && opts.getNumMappers() > 1) {
+      // Can't infer a primary key.
+      throw new ImportException("A split-by column must be specified for "
+          + "parallel free-form query imports. Please specify one with "
+          + "--split-by or perform a sequential import with '-m 1'.");
+    }
+
+    importer.runImport(null, jarFile, splitCol, opts.getConf());
   }
 
   /**

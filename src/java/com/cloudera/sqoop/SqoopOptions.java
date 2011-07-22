@@ -83,7 +83,7 @@ public class SqoopOptions {
   private String hadoopHome;
   private String splitByCol;
   private String whereClause;
-  private String debugSqlCmd;
+  private String sqlQuery;
   private String driverClassName;
   private String warehouseDir;
   private String targetDir;
@@ -591,12 +591,12 @@ public class SqoopOptions {
   /**
    * @return a sql command to execute and exit with.
    */
-  public String getDebugSqlCmd() {
-    return debugSqlCmd;
+  public String getSqlQuery() {
+    return sqlQuery;
   }
 
-  public void setDebugSqlCmd(String sqlStatement) {
-    this.debugSqlCmd = sqlStatement;
+  public void setSqlQuery(String sqlStatement) {
+    this.sqlQuery = sqlStatement;
   }
 
   /**

@@ -24,6 +24,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -33,6 +36,8 @@ import com.cloudera.sqoop.util.ImportException;
  * the database about table formats, etc.
  */
 public abstract class ConnManager {
+
+  public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 
   /**
    * Return a list of all databases on a server.
@@ -48,6 +53,14 @@ public abstract class ConnManager {
    * Return a list of column names in a table in the order returned by the db.
    */
   public abstract String [] getColumnNames(String tableName);
+
+  /**
+   * Return a list of column names in query in the order returned by the db.
+   */
+  public String [] getColumnNamesForQuery(String query) {
+    LOG.error("This database does not support free-form query column names.");
+    return null;
+  }
 
   /**
    * Return the name of the primary key for a table, or null if there is none.
@@ -75,6 +88,17 @@ public abstract class ConnManager {
    * The Integer type id is a constant from java.sql.Types
    */
   public abstract Map<String, Integer> getColumnTypes(String tableName);
+
+  /**
+   * Return an unordered mapping from colname to sqltype for
+   * all columns in a query.
+   *
+   * The Integer type id is a constant from java.sql.Types
+   */
+  public Map<String, Integer> getColumnTypesForQuery(String query) {
+    LOG.error("This database does not support free-form query column types.");
+    return null;
+  }
 
   /**
    * Execute a SQL statement to read the named set of columns from a table.
@@ -108,6 +132,15 @@ public abstract class ConnManager {
    */
   public abstract void importTable(ImportJobContext context)
       throws IOException, ImportException;
+
+  /**
+   * Perform an import of a free-form query from the database into HDFS.
+   */
+  public void importQuery(ImportJobContext context)
+      throws IOException, ImportException {
+    throw new ImportException(
+        "This database only supports table-based imports.");
+  }
 
   /**
    * When using a column name in a generated SQL query, how (if at all)

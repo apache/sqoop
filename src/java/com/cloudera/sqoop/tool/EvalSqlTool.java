@@ -48,7 +48,7 @@ public class EvalSqlTool extends BaseSqoopTool {
 
     try {
       // just run a SQL statement for debugging purposes.
-      manager.execAndPrint(options.getDebugSqlCmd());
+      manager.execAndPrint(options.getSqlQuery());
     } finally {
       destroy(options);
     }
@@ -65,8 +65,8 @@ public class EvalSqlTool extends BaseSqoopTool {
     evalOpts.addOption(OptionBuilder.withArgName("statement")
         .hasArg()
         .withDescription("Execute 'statement' in SQL and exit")
-        .withLongOpt(DEBUG_SQL_ARG)
-        .create(DEBUG_SQL_SHORT_ARG));
+        .withLongOpt(SQL_QUERY_ARG)
+        .create(SQL_QUERY_SHORT_ARG));
 
     toolOptions.addUniqueOptions(evalOpts);
   }
@@ -77,8 +77,8 @@ public class EvalSqlTool extends BaseSqoopTool {
       throws InvalidOptionsException {
 
     applyCommonOptions(in, out);
-    if (in.hasOption(DEBUG_SQL_ARG)) {
-      out.setDebugSqlCmd(in.getOptionValue(DEBUG_SQL_ARG));
+    if (in.hasOption(SQL_QUERY_ARG)) {
+      out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
     }
   }
 
@@ -91,10 +91,10 @@ public class EvalSqlTool extends BaseSqoopTool {
       throw new InvalidOptionsException(HELP_STR);
     }
 
-    String sqlCmd = options.getDebugSqlCmd();
+    String sqlCmd = options.getSqlQuery();
     if (null == sqlCmd || sqlCmd.length() == 0) {
       throw new InvalidOptionsException(
-          "This command requires the " + DEBUG_SQL_ARG + " argument."
+          "This command requires the " + SQL_QUERY_ARG + " argument."
           + HELP_STR);
     }
 

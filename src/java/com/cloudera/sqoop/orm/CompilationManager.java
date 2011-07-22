@@ -53,6 +53,10 @@ import com.cloudera.sqoop.shims.HadoopShim;
  */
 public class CompilationManager {
 
+  /** If we cannot infer a jar name from a table name, etc., use this. */
+  public static final String DEFAULT_CODEGEN_JAR_NAME =
+      "sqoop-codegen-created.jar";
+
   public static final Log LOG = LogFactory.getLog(
       CompilationManager.class.getName());
 
@@ -202,7 +206,11 @@ public class CompilationManager {
   public String getJarFilename() {
     String jarOutDir = options.getJarOutputDir();
     String tableName = options.getTableName();
-    if (null != tableName && tableName.length() > 0) {
+    String specificClassName = options.getClassName();
+
+    if (specificClassName != null && specificClassName.length() > 0) {
+      return jarOutDir + specificClassName + ".jar";
+    } else if (null != tableName && tableName.length() > 0) {
       return jarOutDir + tableName + ".jar";
     } else if (this.sources.size() == 1) {
       // if we only have one source file, find it's base name,
@@ -213,7 +221,7 @@ public class CompilationManager {
       String preExtPart = parts[0];
       return jarOutDir + preExtPart + ".jar";
     } else {
-      return jarOutDir + "sqoop.jar";
+      return jarOutDir + DEFAULT_CODEGEN_JAR_NAME;
     }
   }
 

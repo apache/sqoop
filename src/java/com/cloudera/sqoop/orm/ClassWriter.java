@@ -21,6 +21,7 @@ package com.cloudera.sqoop.orm;
 import org.apache.hadoop.io.BytesWritable;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
@@ -114,10 +115,12 @@ public class ClassWriter {
   private CompilationManager compileManager;
 
   /**
-   * Creates a new ClassWriter to generate an ORM class for a table.
+   * Creates a new ClassWriter to generate an ORM class for a table
+   * or arbitrary query.
    * @param opts program-wide options
    * @param connMgr the connection manager used to describe the table.
-   * @param table the name of the table to read.
+   * @param table the name of the table to read. If null, query is taken
+   * from the SqoopOptions.
    */
   public ClassWriter(final SqoopOptions opts, final ConnManager connMgr,
       final String table, final CompilationManager compMgr) {
@@ -843,11 +846,32 @@ public class ClassWriter {
    * Generate the ORM code for the class.
    */
   public void generate() throws IOException {
-    Map<String, Integer> columnTypes = connManager.getColumnTypes(tableName);
+    Map<String, Integer> columnTypes;
+    
+    if (null != tableName) {
+      // We're generating a class based on a table import.
+      columnTypes = connManager.getColumnTypes(tableName);
+    } else {
+      // This is based on an arbitrary query.
+      String query = this.options.getSqlQuery();
+      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
+        throw new IOException("Query must contain '"
+            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
+      }
+
+      columnTypes = connManager.getColumnTypesForQuery(query);
+    }
 
     String [] colNames = options.getColumns();
     if (null == colNames) {
-      colNames = connManager.getColumnNames(tableName);
+      if (null != tableName) {
+        // Table-based import. Read column names from table.
+        colNames = connManager.getColumnNames(tableName);
+      } else {
+        // Infer/assign column names for arbitrary query.
+        colNames = connManager.getColumnNamesForQuery(
+            this.options.getSqlQuery());
+      }
     }
 
     // Translate all the column names into names that are safe to

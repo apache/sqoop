@@ -45,11 +45,14 @@ Import control options
 --num-mappers (n)::
   Use 'n' map tasks to import in parallel
 
+--query (statement)::
+  Imports the results of +statement+ instead of a table
+
 --split-by (column-name)::
   Column of the table used to split the table for parallel import
 
 --table (table-name)::
-  The table to read (required)
+  The table to import
 
 --target-dir (dir)::
   Explicit HDFS target directory for the import.

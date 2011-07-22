@@ -117,28 +117,42 @@ public class DataDrivenImportJob extends ImportJobBase {
             username, options.getPassword());
       }
 
-      String [] colNames = options.getColumns();
-      if (null == colNames) {
-        colNames = mgr.getColumnNames(tableName);
-      }
-
-      String [] sqlColNames = null;
-      if (null != colNames) {
-        sqlColNames = new String[colNames.length];
-        for (int i = 0; i < colNames.length; i++) {
-          sqlColNames[i] = mgr.escapeColName(colNames[i]);
+      if (null != tableName) {
+        // Import a table.
+        String [] colNames = options.getColumns();
+        if (null == colNames) {
+          colNames = mgr.getColumnNames(tableName);
         }
+
+        String [] sqlColNames = null;
+        if (null != colNames) {
+          sqlColNames = new String[colNames.length];
+          for (int i = 0; i < colNames.length; i++) {
+            sqlColNames[i] = mgr.escapeColName(colNames[i]);
+          }
+        }
+
+        // It's ok if the where clause is null in DBInputFormat.setInput.
+        String whereClause = options.getWhereClause();
+
+        // We can't set the class properly in here, because we may not have the
+        // jar loaded in this JVM. So we start by calling setInput() with
+        // DBWritable and then overriding the string manually.
+        DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+            mgr.escapeTableName(tableName), whereClause,
+            mgr.escapeColName(splitByCol), sqlColNames);
+      } else {
+        // Import a free-form query.
+        String inputQuery = options.getSqlQuery();
+        String sanitizedQuery = inputQuery.replace(
+            DataDrivenDBInputFormat.SUBSTITUTE_TOKEN, " (1 = 1) ");
+        String inputBoundingQuery = "SELECT MIN(" + splitByCol
+            + "), MAX(" + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
+        DataDrivenDBInputFormat.setInput(job, DBWritable.class,
+            inputQuery, inputBoundingQuery);
+        new DBConfiguration(job.getConfiguration()).setInputOrderBy(
+            splitByCol);
       }
-
-      // It's ok if the where clause is null in DBInputFormat.setInput.
-      String whereClause = options.getWhereClause();
-
-      // We can't set the class properly in here, because we may not have the
-      // jar loaded in this JVM. So we start by calling setInput() with
-      // DBWritable and then overriding the string manually.
-      DataDrivenDBInputFormat.setInput(job, DBWritable.class,
-          mgr.escapeTableName(tableName), whereClause,
-          mgr.escapeColName(splitByCol), sqlColNames);
 
       LOG.debug("Using table class: " + tableClassName);
       job.getConfiguration().set(HadoopShim.get().getDbInputClassProperty(),

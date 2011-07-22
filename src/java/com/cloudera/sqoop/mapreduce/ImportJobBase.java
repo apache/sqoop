@@ -117,7 +117,9 @@ public class ImportJobBase extends JobBase {
   /**
    * Run an import job to read a table in to HDFS.
    *
-   * @param tableName  the database table to read
+   * @param tableName  the database table to read; may be null if a free-form
+   * query is specified in the SqoopOptions, and the ImportJobBase subclass
+   * supports free-form queries.
    * @param ormJarFile the Jar file to insert into the dcache classpath.
    * (may be null)
    * @param splitByCol the column of the database table to use to split
@@ -130,7 +132,12 @@ public class ImportJobBase extends JobBase {
   public void runImport(String tableName, String ormJarFile, String splitByCol,
       Configuration conf) throws IOException, ImportException {
 
-    LOG.info("Beginning import of " + tableName);
+    if (null != tableName) {
+      LOG.info("Beginning import of " + tableName);
+    } else {
+      LOG.info("Beginning query import.");
+    }
+
     String tableClassName =
         new TableClassName(options).getClassForTable(tableName);
     loadJars(conf, ormJarFile, tableClassName);

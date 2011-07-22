@@ -62,6 +62,7 @@ Argument                      Description
                               when importing in direct mode
 +\--inline-lob-limit <n>+     Set the maximum size for an inline LOB
 +-m,\--num-mappers <n>+       Use 'n' map tasks to import in parallel
++-e,\--query <statement>+     Import the results of '+statement+'.
 +\--split-by <column-name>+   Column of the table used to split work\
                               units
 +\--table <table-name>+       Table to read
@@ -76,7 +77,7 @@ Argument                      Description
 Selecting the Data to Import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Sqoop currently imports data in a table-centric fashion. Use the
+Sqoop typically imports data in a table-centric fashion. Use the
 +\--table+ argument to select the table to import. For example, +\--table
 employees+. This argument can also identify a +VIEW+ or other table-like
 entity in a database.
@@ -102,6 +103,38 @@ form +SELECT <column list> FROM <table name>+. You can append a
 +WHERE+ clause to this with the +\--where+ argument. For example: +\--where
 "id > 400"+. Only rows where the +id+ column has a value greater than
 400 will be imported.
+
+Free-form Query Imports
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop can also import the result set of an arbitrary SQL query. Instead of
+using the +\--table+, +\--columns+ and +\--where+ arguments, you can specify
+a SQL statement with the +\--query+ argument.
+
+When importing a free-form query, you must specify a destination directory
+with +\--target-dir+.
+
+If you want to import the results of a query in parallel, then each map task
+will need to execute a copy of the query, with results partitioned by bounding
+conditions inferred by Sqoop. Your query must include the token +$CONDITIONS+
+which each Sqoop process will replace with a unique condition expression.
+You must also select a splitting column with +\--split-by+.
+
+For example:
+
+----
+$ sqoop import \
+  --query 'SELECT a.*, b.* FROM a JOIN b on (a.id == b.id) WHERE $CONDITIONS' \
+  --split-by a.id --target-dir /user/foo/joinresults
+----
+
+Alternately, the query can be executed once and imported serially, by
+specifying a single map task with +-m 1+:
+
+----
+$ sqoop import --query 'SELECT a.*, b.* FROM a JOIN b on (a.id == b.id)' \
+  -m 1 --target-dir /user/foo/joinresults
+----
 
 Controlling Parallelism
 ^^^^^^^^^^^^^^^^^^^^^^^

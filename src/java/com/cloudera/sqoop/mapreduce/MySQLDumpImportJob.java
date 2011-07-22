@@ -64,6 +64,13 @@ public class MySQLDumpImportJob extends ImportJobBase {
       String tableClassName, String splitByCol)
       throws ClassNotFoundException, IOException {
 
+    if (null == tableName) {
+        LOG.error(
+            "mysqldump-based import cannot support free-form query imports.");
+        LOG.error("Do not use --direct and --query together for MySQL.");
+        throw new IOException("null tableName for MySQLDumpImportJob.");
+    }
+
     ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
 
     try {

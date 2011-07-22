@@ -76,29 +76,30 @@ public class TableClassName {
    * @return the full name of the class to generate/use to import a table.
    */
   public String getClassForTable(String tableName) {
-    if (null == tableName) {
-      return null;
-    }
-
     String predefinedClass = options.getClassName();
     if (predefinedClass != null) {
       // The user's chosen a specific class name for this job.
       return predefinedClass;
     }
 
+    String queryName = tableName;
+    if (null == queryName) {
+      queryName = "QueryResult";
+    }
+
     String packageName = options.getPackageName();
     if (null != packageName) {
-      // return packageName.tableName.
-      return packageName + "." + tableName;
+      // return packageName.queryName.
+      return packageName + "." + queryName;
     }
 
     // no specific class; no specific package.
     // Just make sure it's a legal identifier.
-    return ClassWriter.toIdentifier(tableName);
+    return ClassWriter.toIdentifier(queryName);
   }
 
   /**
-   * @return just the last spegment of the class name -- all package info
+   * @return just the last segment of the class name -- all package info
    * stripped. 
    */
   public String getShortClassForTable(String tableName) {

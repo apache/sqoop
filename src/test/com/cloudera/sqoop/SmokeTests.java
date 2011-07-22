@@ -56,6 +56,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestMultiCols.class);
     suite.addTestSuite(TestMultiMaps.class);
     suite.addTestSuite(TestSplitBy.class);
+    suite.addTestSuite(TestQuery.class);
     suite.addTestSuite(TestWhere.class);
     suite.addTestSuite(TestTargetDir.class);
     suite.addTestSuite(TestAppendUtils.class);

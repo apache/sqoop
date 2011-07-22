@@ -26,6 +26,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.hadoop.util.StringUtils;
+
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -86,7 +88,11 @@ public class ImportTool extends BaseSqoopTool {
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
         options, getOutputPath(options, tableName));
     
-    manager.importTable(context);
+    if (null != tableName) {
+      manager.importTable(context);
+    } else {
+      manager.importQuery(context);
+    }
     
     if (options.isAppendMode()) {
       AppendUtils app = new AppendUtils(context);
@@ -150,11 +156,11 @@ public class ImportTool extends BaseSqoopTool {
         hiveImport = new HiveImport(options, manager, options.getConf(), false);
       }
 
-      // Import a single table the user specified.
+      // Import a single table (or query) the user specified.
       importTable(options, options.getTableName(), hiveImport);
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running import job: "
-          + ioe.toString());
+          + StringUtils.stringifyException(ioe));
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ioe);
       } else {
@@ -215,6 +221,11 @@ public class ImportTool extends BaseSqoopTool {
           .hasArg().withDescription("HDFS plain table destination")
           .withLongOpt(TARGET_DIR_ARG)
           .create());    
+      importOpts.addOption(OptionBuilder.withArgName("statement")
+          .hasArg()
+          .withDescription("Import results of SQL 'statement'")
+          .withLongOpt(SQL_QUERY_ARG)
+          .create(SQL_QUERY_SHORT_ARG));
     }
 
     importOpts.addOption(OptionBuilder.withArgName("dir")
@@ -329,12 +340,15 @@ public class ImportTool extends BaseSqoopTool {
         if (in.hasOption(APPEND_ARG)) {
           out.setAppendMode(true);
         }
+
+        if (in.hasOption(SQL_QUERY_ARG)) {
+          out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
+        }
       }
 
       if (in.hasOption(WAREHOUSE_DIR_ARG)) {
         out.setWarehouseDir(in.getOptionValue(WAREHOUSE_DIR_ARG));
       }
-
 
       if (in.hasOption(FMT_SEQUENCEFILE_ARG)) {
         out.setFileLayout(SqoopOptions.FileLayout.SequenceFile);
@@ -382,9 +396,11 @@ public class ImportTool extends BaseSqoopTool {
    */
   protected void validateImportOptions(SqoopOptions options)
       throws InvalidOptionsException {
-    if (!allTables && options.getTableName() == null) {
+    if (!allTables && options.getTableName() == null
+        && options.getSqlQuery() == null) {
       throw new InvalidOptionsException(
-          "--table is required for import. (Or use sqoop import-all-tables.)"
+          "--table or --" + SQL_QUERY_ARG + " is required for import. "
+          + "(Or use sqoop import-all-tables.)"
           + HELP_STR);
     } else if (options.getExistingJarName() != null
         && options.getClassName() == null) {
@@ -393,8 +409,28 @@ public class ImportTool extends BaseSqoopTool {
     } else if (options.getTargetDir() != null
         && options.getWarehouseDir() != null) {
       throw new InvalidOptionsException(
-          "--target-dir with --warehouse-dir are incompatible options"
+          "--target-dir with --warehouse-dir are incompatible options."
           + HELP_STR);
+    } else if (options.getTableName() != null
+        && options.getSqlQuery() != null) {
+      throw new InvalidOptionsException(
+          "Cannot specify --" + SQL_QUERY_ARG + " and --table together."
+          + HELP_STR);
+    } else if (options.getSqlQuery() != null
+        && options.getTargetDir() == null) {
+      throw new InvalidOptionsException(
+          "Must specify destination with --target-dir."
+          + HELP_STR);
+    } else if (options.getSqlQuery() != null && options.doHiveImport()
+        && options.getHiveTableName() == null) {
+      throw new InvalidOptionsException(
+          "When importing a query to Hive, you must specify --"
+          + HIVE_TABLE_ARG + "." + HELP_STR);
+    } else if (options.getSqlQuery() != null && options.getNumMappers() > 1
+        && options.getSplitByCol() == null) {
+      throw new InvalidOptionsException(
+          "When importing query results in parallel, you must specify --"
+          + SPLIT_BY_ARG + "." + HELP_STR);
     }
   }
 
