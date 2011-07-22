@@ -16,31 +16,29 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package com.cloudera.sqoop.mapreduce;
 
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
- * All tests for Sqoop (com.cloudera.sqoop).
+ * OutputCommitter instance that does nothing.
  */
-public final class AllTests {
+public class NullOutputCommitter extends OutputCommitter {
+  public void abortTask(TaskAttemptContext taskContext) { }
 
-  private AllTests() { }
+  public void cleanupJob(JobContext jobContext) { }
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for com.cloudera.sqoop");
+  public void commitTask(TaskAttemptContext taskContext) { }
 
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-
-    return suite;
+  public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+    return false;
   }
 
+  public void setupJob(JobContext jobContext) { }
+
+  public void setupTask(TaskAttemptContext taskContext) { }
 }
 

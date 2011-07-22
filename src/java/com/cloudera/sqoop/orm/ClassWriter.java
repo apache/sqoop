@@ -634,9 +634,26 @@ public class ClassWriter {
     }
 
     sb.append("    return o;\n");
-    sb.append("  }\n");
+    sb.append("  }\n\n");
+  }
 
-
+  /**
+   * Generate the getFieldMap() method.
+   * @param columnTypes - mapping from column names to sql types
+   * @param colNames - ordered list of column names for table.
+   * @param sb - StringBuilder to append code to
+   */
+  private void generateGetFieldMap(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
+    sb.append("  public Map<String, Object> getFieldMap() {\n");
+    sb.append("    Map<String, Object> __sqoop$field_map = "
+        + "new TreeMap<String, Object>();\n");
+    for (String colName : colNames) {
+      sb.append("    __sqoop$field_map.put(\"" + colName + "\", this."
+          + colName + ");\n");
+    }
+    sb.append("    return __sqoop$field_map;\n");
+    sb.append("  }\n\n");
   }
 
   /**
@@ -875,7 +892,7 @@ public class ClassWriter {
       // This is based on an arbitrary query.
       String query = this.options.getSqlQuery();
       if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
-        throw new IOException("Query must contain '"
+        throw new IOException("Query [" + query + "] must contain '"
             + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
       }
 
@@ -1049,6 +1066,8 @@ public class ClassWriter {
     sb.append("import java.util.Arrays;\n");
     sb.append("import java.util.Iterator;\n");
     sb.append("import java.util.List;\n");
+    sb.append("import java.util.Map;\n");
+    sb.append("import java.util.TreeMap;\n");
     sb.append("\n");
 
     String className = tableNameInfo.getShortClassForTable(tableName);
@@ -1068,6 +1087,7 @@ public class ClassWriter {
     generateToString(columnTypes, colNames, sb);
     generateParser(columnTypes, colNames, sb);
     generateCloneMethod(columnTypes, colNames, sb);
+    generateGetFieldMap(columnTypes, colNames, sb);
 
     // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a
     // WritableComparable

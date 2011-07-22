@@ -108,6 +108,7 @@ public class ImportTool extends BaseSqoopTool {
   /**   
    * @return the output path for the imported files;
    * in append mode this will point to a temporary folder.
+   * if importing to hbase, this may return null.
    */
   private Path getOutputPath(SqoopOptions options, String tableName) {
     // Get output directory
@@ -124,7 +125,7 @@ public class ImportTool extends BaseSqoopTool {
         outputPath = new Path(hdfsTargetDir);
       } else if (hdfsWarehouseDir != null) {
         outputPath = new Path(hdfsWarehouseDir, tableName);
-      } else {
+      } else if (null != tableName) {
         outputPath = new Path(tableName);
       }
     }
@@ -272,6 +273,7 @@ public class ImportTool extends BaseSqoopTool {
     toolOptions.addUniqueOptions(getOutputFormatOptions());
     toolOptions.addUniqueOptions(getInputFormatOptions());
     toolOptions.addUniqueOptions(getHiveOptions(true));
+    toolOptions.addUniqueOptions(getHBaseOptions());
 
     // get common codegen opts.
     RelatedOptions codeGenOpts = getCodeGenOpts(allTables);
@@ -384,6 +386,7 @@ public class ImportTool extends BaseSqoopTool {
       applyOutputFormatOptions(in, out);
       applyInputFormatOptions(in, out);
       applyCodeGenOptions(in, out, allTables);
+      applyHBaseOptions(in, out);
     } catch (NumberFormatException nfe) {
       throw new InvalidOptionsException("Error: expected numeric argument.\n"
           + "Try --help for usage.");
@@ -417,7 +420,7 @@ public class ImportTool extends BaseSqoopTool {
           "Cannot specify --" + SQL_QUERY_ARG + " and --table together."
           + HELP_STR);
     } else if (options.getSqlQuery() != null
-        && options.getTargetDir() == null) {
+        && options.getTargetDir() == null && options.getHBaseTable() == null) {
       throw new InvalidOptionsException(
           "Must specify destination with --target-dir."
           + HELP_STR);
@@ -458,6 +461,7 @@ public class ImportTool extends BaseSqoopTool {
     validateCommonOptions(options);
     validateCodeGenOptions(options);
     validateOutputFormatOptions(options);
+    validateHBaseOptions(options);
   }
 }
 

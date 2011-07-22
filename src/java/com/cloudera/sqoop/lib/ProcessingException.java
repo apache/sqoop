@@ -16,31 +16,33 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
-
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.cloudera.sqoop.lib;
 
 /**
- * All tests for Sqoop (com.cloudera.sqoop).
+ * General error during processing of a SqoopRecord.
  */
-public final class AllTests {
+@SuppressWarnings("serial")
+public class ProcessingException extends Exception {
 
-  private AllTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for com.cloudera.sqoop");
-
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-
-    return suite;
+  public ProcessingException() {
+    super("ProcessingException");
   }
 
-}
+  public ProcessingException(final String message) {
+    super(message);
+  }
 
+  public ProcessingException(final Throwable cause) {
+    super(cause);
+  }
+
+  public ProcessingException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ProcessingException" : msg;
+  }
+}

@@ -1,0 +1,49 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+
+Importing Data Into HBase
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop supports additional import targets beyond HDFS and Hive. Sqoop
+can also import records into a table in HBase.
+
+By specifying +\--hbase-table+, you instruct Sqoop to import
+to a table in HBase rather than a directory in HDFS. Sqoop will
+import data to the table specified as the argument to +\--hbase-table+.
+Each row of the input table will be transformed into an HBase
++Put+ operation to a row of the output table. The key for each row is
+taken from a column of the input. By default Sqoop will use the split-by
+column as the row key column. If that is not specified, it will try to
+identify the primary key column, if any, of the source table. You can
+manually specify the row key column with +\--hbase-row-key+. Each output
+column will be placed in the same column family, which must be specified
+with +\--column-family+.
+
+If the target table and column family do not exist, the Sqoop job will
+exit with an error. You should create the target table and column family
+before running an import. If you specify +\--hbase-create-table+, Sqoop
+will create the target table and column family if they do not exist,
+using the default parameters from your HBase configuration.
+
+Sqoop currently serializes all values to HBase by converting each field
+to its string representation (as if you were importing to HDFS in text
+mode), and then inserts the UTF-8 bytes of this string in the target
+cell.
+
+

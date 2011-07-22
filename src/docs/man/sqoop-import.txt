@@ -82,6 +82,8 @@ include::input-args.txt[]
 
 include::hive-args.txt[]
 
+include::hbase-args.txt[]
+
 include::codegen-args.txt[]
 
 Database-specific options

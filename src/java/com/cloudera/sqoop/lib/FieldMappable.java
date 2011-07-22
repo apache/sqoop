@@ -16,31 +16,21 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package com.cloudera.sqoop.lib;
 
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Map;
 
 /**
- * All tests for Sqoop (com.cloudera.sqoop).
+ * Interface describing a class capable of returning a map of the fields
+ * of the object to their values.
  */
-public final class AllTests {
+public interface FieldMappable {
 
-  private AllTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for com.cloudera.sqoop");
-
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-
-    return suite;
-  }
-
+  /**
+   * Returns a map containing all fields of this record. 
+   * @return a map from column names to the object-based values for
+   * this record. The map may not be null, though it may be empty.
+   */
+  Map<String, Object> getFieldMap();
 }
 

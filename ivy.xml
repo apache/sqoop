@@ -118,6 +118,10 @@
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="common->default"/>
+    <!--
+    <dependency org="org.apache.hbase" name="hbase" rev="${hbase.version}"
+      conf="common->default" />
+      -->
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"

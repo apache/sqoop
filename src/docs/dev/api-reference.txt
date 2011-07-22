@@ -137,6 +137,41 @@ Extension authors may make use of classes in the +com.cloudera.sqoop.io+,
 These packages and classes are described in more detail in the following
 section.
 
+HBase Serialization Extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop supports imports from databases to HBase. When copying data into
+HBase, it must be transformed into a format HBase can accept. Specifically:
+
+* Data must be placed into one (or more) tables in HBase.
+* Columns of input data must be placed into a column family.
+* Values must be serialized to byte arrays to put into cells.
+
+All of this is done via +Put+ statements in the HBase client API.
+Sqoop's interaction with HBase is performed in the +com.cloudera.sqoop.hbase+
+package. Records are deserialzed from the database and emitted from the mapper.
+The OutputFormat is responsible for inserting the results into HBase. This is
+done through an interface called +PutTransformer+. The +PutTransformer+
+has a method called +getPutCommand()+ that
+takes as input a +Map<String, Object>+ representing the fields of the dataset.
+It returns a +List<Put>+ describing how to insert the cells into HBase.
+The default +PutTransformer+ implementation is the +ToStringPutTransformer+
+that uses the string-based representation of each field to serialize the
+fields to HBase.
+
+You can override this implementation by implementing your own +PutTransformer+
+and adding it to the classpath for the map tasks (e.g., with the +-libjars+
+option). To tell Sqoop to use your implementation, set the
++sqoop.hbase.insert.put.transformer.class+ property to identify your class
+with +-D+.
+
+Within your PutTransformer implementation, the specified row key
+column and column family are 
+available via the +getRowKeyColumn()+ and +getColumnFamily()+ methods.
+You are free to make additional Put operations outside these constraints;
+for example, to inject additional rows representing a secondary index.
+However, Sqoop will execute all +Put+ operations against the table
+specified with +\--hbase-table+.
 
 Sqoop Internals
 ~~~~~~~~~~~~~~~

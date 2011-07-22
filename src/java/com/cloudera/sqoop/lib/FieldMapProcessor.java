@@ -16,31 +16,23 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package com.cloudera.sqoop.lib;
 
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
 
 /**
- * All tests for Sqoop (com.cloudera.sqoop).
+ * Interface implemented by classes that process FieldMappable objects.
  */
-public final class AllTests {
+public interface FieldMapProcessor {
 
-  private AllTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for com.cloudera.sqoop");
-
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-
-    return suite;
-  }
-
+  /**
+   * Allow arbitrary processing of a FieldMappable object.
+   * @param record an object which can emit a map of its field names to values.
+   * @throws IOException if the processor encounters an IO error when
+   * operating on this object.
+   * @throws ProcessingException if the FieldMapProcessor encounters
+   * a general processing error when operating on this object.
+   */
+  void accept(FieldMappable record) throws IOException, ProcessingException;
 }
 

@@ -153,6 +153,7 @@ public class ImportJobBase extends JobBase {
       configureMapper(job, tableName, tableClassName);
       configureNumTasks(job);
 
+      jobSetup(job);
       boolean success = runJob(job);
       if (!success) {
         throw new ImportException("Import job failed!");
@@ -164,5 +165,17 @@ public class ImportJobBase extends JobBase {
     } finally {
       unloadJars();
     }
+  }
+
+  /**
+   * Open-ended "setup" routine that is called after the job is configured
+   * but just before it is submitted to MapReduce. Subclasses may override
+   * if necessary.
+   */
+  protected void jobSetup(Job job) throws IOException, ImportException {
+  }
+
+  protected ImportJobContext getContext() {
+    return context;
   }
 }

@@ -222,6 +222,10 @@ public class BaseSqoopTestCase extends TestCase {
 
   static final String BASE_COL_NAME = "DATA_COL";
 
+  protected String getColName(int i) {
+    return BASE_COL_NAME + i;
+  }
+
   /**
    * Drop a table if it already exists in the database.
    * @param table the name of the table to drop.

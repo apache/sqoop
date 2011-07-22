@@ -291,6 +291,7 @@ public class OracleManager extends GenericJdbcManager {
   @Override
   public void importTable(ImportJobContext context)
       throws IOException, ImportException {
+    context.setConnManager(this);
     // Specify the Oracle-specific DBInputFormat for import.
     context.setInputFormat(OracleDataDrivenDBInputFormat.class);
     super.importTable(context);

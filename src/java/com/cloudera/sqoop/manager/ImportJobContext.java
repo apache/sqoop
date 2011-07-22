@@ -34,6 +34,7 @@ public class ImportJobContext {
   private SqoopOptions options;
   private Class<? extends InputFormat> inputFormatClass;
   private Path destination;
+  private ConnManager manager;
 
   public ImportJobContext(final String table, final String jar,
       final SqoopOptions opts, final Path destination) {
@@ -77,6 +78,22 @@ public class ImportJobContext {
    */
   public Path getDestination() {
     return this.destination;
+  }
+
+  /**
+   * Set the ConnManager instance to be used during the import's
+   * configuration.
+   */
+  public void setConnManager(ConnManager mgr) {
+    this.manager = mgr;
+  }
+
+  /**
+   * Get the ConnManager instance to use during an import's
+   * configuration stage.
+   */
+  public ConnManager getConnManager() {
+    return this.manager;
   }
 
 }

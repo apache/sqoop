@@ -29,10 +29,35 @@ if [ -z "$SQOOP_HOME" ]; then
   export SQOOP_HOME=${bin}/..
 fi
 
+# Find paths to our dependency systems. If they are unset, use CDH defaults.
+
 if [ -z "${HADOOP_HOME}" ]; then
-  # Try CDH default if the user hasn't set this.
   HADOOP_HOME=/usr/lib/hadoop
 fi
+if [ -z "${HBASE_HOME}" ]; then
+  HBASE_HOME=/usr/lib/hbase
+fi
+if [ -z "${ZOOKEEPER_HOME}" ]; then
+  ZOOKEEPER_HOME=/usr/lib/zookeeper
+fi
+
+# Check: If we can't find our dependencies, give up here.
+if [ ! -d "${HADOOP_HOME}" ]; then
+  echo "Error: $HADOOP_HOME does not exist!"
+  echo "Please set $$HADOOP_HOME to the root of your Hadoop installation."
+  exit 1
+fi
+if [ ! -d "${HBASE_HOME}" ]; then
+  echo "Error: $HBASE_HOME does not exist!"
+  echo "Please set $$HBASE_HOME to the root of your HBase installation."
+  exit 1
+fi
+if [ ! -d "${ZOOKEEPER_HOME}" ]; then
+  echo "Error: $ZOOKEEPER_HOME does not exist!"
+  echo "Please set $$ZOOKEEPER_HOME to the root of your ZooKeeper installation."
+  exit 1
+fi
+
 
 # Where to find the main Sqoop jar
 SQOOP_JAR_DIR=$SQOOP_HOME
@@ -50,13 +75,30 @@ if [ -d "$SQOOP_JAR_DIR/build" ]; then
   fi
 fi
 
+function add_to_classpath() {
+  dir=$1
+  for f in $dir/*.jar; do
+    SQOOP_CLASSPATH=${SQOOP_CLASSPATH}:$f;
+  done
+
+  export SQOOP_CLASSPATH
+}
+
 # Add sqoop dependencies to classpath.
 SQOOP_CLASSPATH=""
 if [ -d "$SQOOP_HOME/lib" ]; then
-  for f in $SQOOP_HOME/lib/*.jar; do
-    SQOOP_CLASSPATH=${SQOOP_CLASSPATH}:$f;
-  done
+  add_to_classpath $SQOOP_HOME/lib
 fi
+
+# Add HBase to dependency list
+add_to_classpath $HBASE_HOME
+add_to_classpath $HBASE_HOME/lib
+
+HBASE_CONF_DIR=${HBASE_CONF_DIR:-${HBASE_HOME}/conf}
+SQOOP_CLASSPATH=${HBASE_CONF_DIR}:${SQOOP_CLASSPATH}
+
+add_to_classpath $ZOOKEEPER_HOME
+add_to_classpath $ZOOKEEPER_HOME/lib
 
 SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-${SQOOP_HOME}/conf}
 SQOOP_CLASSPATH=${SQOOP_CONF_DIR}:${SQOOP_CLASSPATH}
@@ -74,5 +116,6 @@ export SQOOP_SHIM_DIR
 export SQOOP_JAR=`ls -1 ${SQOOP_JAR_DIR}/sqoop-*.jar | head -n 1`
 export HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
 export HADOOP_HOME
+export HBASE_HOME
 export HADOOP_OPTS="-Dsqoop.shim.jar.dir=${SQOOP_SHIM_DIR} ${HADOOP_OPTS}"
 

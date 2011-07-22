@@ -35,7 +35,6 @@ import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.db.DataDrivenDBInputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
-import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
@@ -105,7 +104,7 @@ public class DataDrivenImportJob extends ImportJobBase {
   @Override
   protected void configureInputFormat(Job job, String tableName,
       String tableClassName, String splitByCol) throws IOException {
-    ConnManager mgr = new ConnFactory(options.getConf()).getManager(options);
+    ConnManager mgr = getContext().getConnManager();
     try {
       String username = options.getUsername();
       if (null == username || username.length() == 0) {

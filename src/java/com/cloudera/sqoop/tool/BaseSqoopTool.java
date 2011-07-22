@@ -112,6 +112,12 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String HELP_ARG = "help";
   public static final String UPDATE_KEY_ARG = "update-key";
 
+  // HBase arguments.
+  public static final String HBASE_TABLE_ARG = "hbase-table";
+  public static final String HBASE_COL_FAM_ARG = "column-family";
+  public static final String HBASE_ROW_KEY_ARG = "hbase-row-key";
+  public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
+
 
   public BaseSqoopTool() {
   }
@@ -413,6 +419,33 @@ public abstract class BaseSqoopTool extends SqoopTool {
     return codeGenOpts;
   }
 
+  protected RelatedOptions getHBaseOptions() {
+    RelatedOptions hbaseOpts =
+        new RelatedOptions("HBase arguments");
+    hbaseOpts.addOption(OptionBuilder.withArgName("table")
+        .hasArg()
+        .withDescription("Import to <table> in HBase")
+        .withLongOpt(HBASE_TABLE_ARG)
+        .create());
+    hbaseOpts.addOption(OptionBuilder.withArgName("family")
+        .hasArg()
+        .withDescription("Sets the target column family for the import")
+        .withLongOpt(HBASE_COL_FAM_ARG)
+        .create());
+    hbaseOpts.addOption(OptionBuilder.withArgName("col")
+        .hasArg()
+        .withDescription("Specifies which input column to use as the row key")
+        .withLongOpt(HBASE_ROW_KEY_ARG)
+        .create());
+    hbaseOpts.addOption(OptionBuilder
+        .withDescription("If specified, create missing HBase tables")
+        .withLongOpt(HBASE_CREATE_TABLE_ARG)
+        .create());
+
+    return hbaseOpts;
+  }
+
+
   
   /**
    * Apply common command-line to the state.
@@ -582,6 +615,24 @@ public abstract class BaseSqoopTool extends SqoopTool {
     }
   }
 
+  protected void applyHBaseOptions(CommandLine in, SqoopOptions out) {
+    if (in.hasOption(HBASE_TABLE_ARG)) {
+      out.setHBaseTable(in.getOptionValue(HBASE_TABLE_ARG));
+    }
+
+    if (in.hasOption(HBASE_COL_FAM_ARG)) {
+      out.setHBaseColFamily(in.getOptionValue(HBASE_COL_FAM_ARG));
+    }
+
+    if (in.hasOption(HBASE_ROW_KEY_ARG)) {
+      out.setHBaseRowKeyColumn(in.getOptionValue(HBASE_ROW_KEY_ARG));
+    }
+
+    if (in.hasOption(HBASE_CREATE_TABLE_ARG)) {
+      out.setCreateHBaseTable(true);
+    }
+  }
+
   protected void validateCommonOptions(SqoopOptions options)
       throws InvalidOptionsException {
     if (options.getConnectString() == null) {
@@ -623,10 +674,21 @@ public abstract class BaseSqoopTool extends SqoopTool {
     }
   }
 
-  protected void validateHiveOptions(SqoopOptions options) {
+  protected void validateHiveOptions(SqoopOptions options)
+      throws InvalidOptionsException {
     // Empty; this method is present to maintain API consistency, and
     // is reserved for future constraints on Hive options.
   }
 
+  protected void validateHBaseOptions(SqoopOptions options)
+      throws InvalidOptionsException {
+    if ((options.getHBaseColFamily() != null && options.getHBaseTable() == null)
+        || (options.getHBaseColFamily() == null
+        && options.getHBaseTable() != null)) {
+      throw new InvalidOptionsException(
+          "Both --hbase-table and --column-family must be set together."
+          + HELP_STR);
+    }
+  }
 }
 

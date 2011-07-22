@@ -45,3 +45,10 @@ export TEST_HADOOP_DIST=${TEST_HADOOP_DIST:-apache}
 export WORKSPACE=${WORKSPACE:-$projroot}
 export IVY_HOME=${IVY_HOME:-$WORKSPACE/.ivy2}
 
+export HBASE_HOME=${HBASE_HOME:-/usr/lib/hbase}
+export ZOOKEEPER_HOME=${ZOOKEEPER_HOME:-/usr/lib/zookeeper}
+
+if [ -z "${ANT_ARGUMENTS}" ]; then
+  export ANT_ARGUMENTS=""
+fi
+

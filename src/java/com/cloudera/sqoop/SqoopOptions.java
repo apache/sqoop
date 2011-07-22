@@ -137,6 +137,11 @@ public class SqoopOptions {
 
   private String [] extraArgs;
 
+  private String hbaseTable; // HBase table to import into.
+  private String hbaseColFamily; // Column family to prepend to inserted cols.
+  private String hbaseRowKeyCol; // Column of the input to use as the row key.
+  private boolean hbaseCreateTable; // if true, create tables/col families.
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -1005,6 +1010,64 @@ public class SqoopOptions {
     } else {
       this.dbOutColumns = Arrays.copyOf(outCols, outCols.length);
     }
+  }
+
+  /**
+   * Set whether we should create missing HBase tables.
+   */
+  public void setCreateHBaseTable(boolean create) {
+    this.hbaseCreateTable = create;
+  }
+
+  /**
+   * Returns true if we should create HBase tables/column families
+   * that are missing.
+   */
+  public boolean getCreateHBaseTable() {
+    return this.hbaseCreateTable;
+  }
+
+  /**
+   * Sets the HBase target column family.
+   */
+  public void setHBaseColFamily(String colFamily) {
+    this.hbaseColFamily = colFamily;
+  }
+
+  /**
+   * Gets the HBase import target column family.
+   */
+  public String getHBaseColFamily() {
+    return this.hbaseColFamily;
+  }
+
+  /**
+   * Gets the column to use as the row id in an hbase import.
+   * If null, use the primary key column.
+   */
+  public String getHBaseRowKeyColumn() {
+    return this.hbaseRowKeyCol;
+  }
+
+  /**
+   * Sets the column to use as the row id in an hbase import.
+   */
+  public void setHBaseRowKeyColumn(String col) {
+    this.hbaseRowKeyCol = col;
+  }
+
+  /**
+   * Gets the target HBase table name, if any.
+   */
+  public String getHBaseTable() {
+    return this.hbaseTable;
+  }
+
+  /**
+   * Sets the target HBase table name for an import.
+   */
+  public void setHBaseTable(String table) {
+    this.hbaseTable = table;
   }
 }
 

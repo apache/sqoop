@@ -149,6 +149,18 @@
     </classpath>
   </taskdef>
 
+  <!-- manually-specified HBase classpath til it works with Ivy. -->
+  <path id="hbase.classpath">
+    <fileset dir="${hbase.home}">
+      <include name="*.jar" />
+      <include name="lib/*.jar" />
+    </fileset>
+    <fileset dir="${zookeeper.home}">
+      <include name="*.jar" />
+      <include name="lib/*.jar" />
+    </fileset>
+  </path>
+
   <!-- The classpath for compiling and running Sqoop -->
   <if>
     <isset property="hadoop.home" />
@@ -167,6 +179,7 @@
           <include name="*.jar" />
         </fileset>
         <path refid="${name}.hadoop.classpath"/>
+        <path refid="hbase.classpath"/>
       </path>
     </then>
     <else>
@@ -174,6 +187,7 @@
         <pathelement location="${build.classes}"/>
         <path refid="lib.path"/>
         <path refid="${name}.hadoop.classpath"/>
+        <path refid="hbase.classpath"/>
       </path>
     </else>
   </if>

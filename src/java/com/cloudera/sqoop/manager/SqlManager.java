@@ -23,6 +23,8 @@ import com.cloudera.sqoop.hive.HiveTypes;
 import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
+import com.cloudera.sqoop.mapreduce.HBaseImportJob;
+import com.cloudera.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
 import com.cloudera.sqoop.util.ExportException;
@@ -341,8 +343,17 @@ public abstract class SqlManager extends ConnManager {
     String jarFile = context.getJarFile();
     SqoopOptions opts = context.getOptions();
 
-    DataDrivenImportJob importer =
-        new DataDrivenImportJob(opts, context.getInputFormat(), context);
+    context.setConnManager(this);
+
+    ImportJobBase importer;
+    if (opts.getHBaseTable() != null) {
+      // Import to HBase.
+      importer = new HBaseImportJob(opts, context);
+    } else {
+      // Import to HDFS.
+      importer = new DataDrivenImportJob(opts, context.getInputFormat(),
+          context);
+    }
 
     String splitCol = getSplitColumn(opts, tableName);
     if (null == splitCol && opts.getNumMappers() > 1) {
@@ -365,8 +376,17 @@ public abstract class SqlManager extends ConnManager {
     String jarFile = context.getJarFile();
     SqoopOptions opts = context.getOptions();
 
-    DataDrivenImportJob importer =
-        new DataDrivenImportJob(opts, context.getInputFormat(), context);
+    context.setConnManager(this);
+
+    ImportJobBase importer;
+    if (opts.getHBaseTable() != null) {
+      // Import to HBase.
+      importer = new HBaseImportJob(opts, context);
+    } else {
+      // Import to HDFS.
+      importer = new DataDrivenImportJob(opts, context.getInputFormat(),
+          context);
+    }
 
     String splitCol = getSplitColumn(opts, null);
     if (null == splitCol && opts.getNumMappers() > 1) {

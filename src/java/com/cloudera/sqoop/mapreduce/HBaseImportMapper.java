@@ -16,31 +16,26 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package com.cloudera.sqoop.mapreduce;
 
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
+import java.io.IOException;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import com.cloudera.sqoop.lib.SqoopRecord;
 
 /**
- * All tests for Sqoop (com.cloudera.sqoop).
+ * Imports records by writing them to HBase via the DelegatingOutputFormat
+ * and the HBasePutProcessor.
  */
-public final class AllTests {
+public class HBaseImportMapper
+    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
+    NullWritable> {
 
-  private AllTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for com.cloudera.sqoop");
-
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-
-    return suite;
+  @Override
+  public void map(LongWritable key, SqoopRecord val, Context context)
+      throws IOException, InterruptedException {
+    context.write(val, NullWritable.get());
   }
-
 }
 

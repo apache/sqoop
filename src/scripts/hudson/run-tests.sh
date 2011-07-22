@@ -29,7 +29,9 @@ source ${bin}/test-config.sh
 
 # Run compilation step.
 
-${ANT} clean jar -Divy.home=$IVY_HOME -Dhadoop.dist=${COMPILE_HADOOP_DIST}
+${ANT} clean jar -Divy.home=$IVY_HOME -Dhadoop.dist=${COMPILE_HADOOP_DIST} \
+    -Dhbase.home=${HBASE_HOME} -Dzookeeper.home=${ZOOKEEPER_HOME} \
+    ${ANT_ARGUMENTS}
 if [ "$?" != "0" ]; then
   echo "Error during compilation phase. Aborting!"
   exit 1
@@ -40,7 +42,8 @@ testfailed=0
 # Run basic unit tests.
 
 ${ANT} clean-cache test -Divy.home=$IVY_HOME -Dtest.junit.output.format=xml \
-    -Dhadoop.dist=${TEST_HADOOP_DIST}
+    -Dhbase.home=${HBASE_HOME} -Dzookeeper.home=${ZOOKEEPER_HOME} \
+    -Dhadoop.dist=${TEST_HADOOP_DIST} ${ANT_ARGUMENTS}
 if [ "$?" != "0" ]; then
   testfailed=1
 fi
@@ -53,7 +56,8 @@ fi
 
 ${ANT} test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=${THIRDPARTY_LIBS} \
     -Dtest.junit.output.format=xml -Divy.home=$IVY_HOME \
-    -Dhadoop.dist=${TEST_HADOOP_DIST}
+    -Dhbase.home=${HBASE_HOME} -Dzookeeper.home=${ZOOKEEPER_HOME} \
+    -Dhadoop.dist=${TEST_HADOOP_DIST} ${ANT_ARGUMENTS}
 if [ "$?" != "0" ]; then
   testfailed=1
 fi
