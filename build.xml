@@ -193,8 +193,30 @@
     </tar>
   </target>
 
-  <target name="test" depends="compile-test,compile"
-      description="Run unit tests">
+  <!-- set variables that configure the actual test -->
+  <target name="test-prep" depends="test-prep-normal,test-prep-thirdparty"/>
+
+  <target name="test-prep-normal" unless="thirdparty">
+    <!-- Set this to run all the "standard" tests -->
+    <property name="test.pattern" value="Test*" />
+  </target>
+
+  <target name="test-prep-thirdparty" if="thirdparty">
+    <!-- Run tests that *end* with the name Test, instead of starting with it;
+         this runs non-standard tests e.g. third-party database tests. -->
+    <property name="test.pattern" value="*Test" />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Run unit tests                                                     -->
+  <!-- By default, we'll run the "normal" tests: Test*.java               -->
+  <!-- To run third-party tests, run with -Dthirdparty=true               -->
+  <!-- ================================================================== -->
+  <target name="test" depends="compile-test,compile,test-prep,run-tests"
+      description="Run unit tests"/>
+
+  <!-- actually run the selected unit tests -->
+  <target name="run-tests" depends="compile-test,compile,test-prep">
     <delete dir="${test.log.dir}"/>
     <mkdir dir="${test.log.dir}"/>
     <delete dir="${build.test}/data"/>
@@ -261,7 +283,8 @@
       <formatter type="${test.junit.output.format}" />
       <batchtest todir="${build.test}" unless="testcase">
         <fileset dir="${test.dir}"
-                 includes="**/Test*.java" excludes="**/${test.exclude}.java" />
+                 includes="**/${test.pattern}.java"
+                 excludes="**/${test.exclude}.java" />
       </batchtest>
       <batchtest todir="${build.test}" if="testcase">
         <fileset dir="${test.dir}" includes="**/${testcase}.java"/>

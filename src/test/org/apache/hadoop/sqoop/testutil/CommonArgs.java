@@ -36,7 +36,7 @@ public final class CommonArgs {
     args.add("-D");
     args.add("mapreduce.job.maps=1");
     args.add("-D");
-    args.add("fs.default.name=file:///");
+    args.add("fs.defaultFS=file:///");
     args.add("-D");
     args.add("jobclient.completion.poll.interval=50");
     args.add("-D");
