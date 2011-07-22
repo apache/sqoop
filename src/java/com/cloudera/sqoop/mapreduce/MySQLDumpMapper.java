@@ -305,6 +305,8 @@ public class MySQLDumpMapper
     }
   }
 
+  // TODO(aaron): Refactor this method to be much shorter.
+  // CHECKSTYLE:OFF
   /**
    * Import the table into HDFS by using mysqldump to pull out the data from
    * the database and upload the files directly to HDFS.
@@ -483,6 +485,7 @@ public class MySQLDumpMapper
       LOG.info("Transferred " + counters.toString());
     }
   }
+  // CHECKSTYLE:ON
 
   @Override
   protected void setup(Context context) {

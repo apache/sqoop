@@ -245,7 +245,8 @@ public class OracleManagerTest extends ImportJobTestCase {
     // columns as DATE in Oracle, they may still contain time information, so
     // the JDBC drivers lie to us and will never tell us we have a strict DATE
     // type. Thus we include HH:MM:SS.mmmmm below.
-    // See http://www.oracle.com/technology/tech/java/sqlj_jdbc/htdocs/jdbc_faq.html#08_01
+    // See http://www.oracle.com
+    //     /technology/tech/java/sqlj_jdbc/htdocs/jdbc_faq.html#08_01
     String [] expectedResults = {
       "1,Aaron,2009-05-14 00:00:00.0,1000000,engineering,"
           + "2009-12-29 12:00:00.0,2009-12-29 12:00:00.0",

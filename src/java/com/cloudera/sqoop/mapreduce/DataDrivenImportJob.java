@@ -78,7 +78,8 @@ public class DataDrivenImportJob extends ImportJobBase {
   protected Class<? extends Mapper> getMapperClass() {
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return TextImportMapper.class;
-    } else if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
+    } else if (options.getFileLayout()
+        == SqoopOptions.FileLayout.SequenceFile) {
       return SequenceFileImportMapper.class;
     }
 
@@ -91,7 +92,8 @@ public class DataDrivenImportJob extends ImportJobBase {
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
          "com.cloudera.sqoop.mapreduce.RawKeyTextOutputFormat");
-    } else if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
+    } else if (options.getFileLayout()
+        == SqoopOptions.FileLayout.SequenceFile) {
       return SequenceFileOutputFormat.class;
     }
 

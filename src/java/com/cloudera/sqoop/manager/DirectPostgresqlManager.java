@@ -275,6 +275,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     return tempFile.toString();
   }
 
+  // TODO(aaron): Refactor this method to be much shorter.
+  // CHECKSTYLE:OFF
   @Override
   /**
    * Import the table into HDFS by using psql to pull the data out of the db
@@ -460,4 +462,5 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       LOG.info("Transferred " + counters.toString());
     }
   }
+  // CHECKSTYLE:ON
 }

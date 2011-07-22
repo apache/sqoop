@@ -62,10 +62,10 @@ import org.junit.Test;
  */
 public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
-  public Log LOG;
+  private Log log;
 
   public ManagerCompatTestCase() {
-    this.LOG = LogFactory.getLog(ManagerCompatTestCase.class.getName());
+    this.log = LogFactory.getLog(ManagerCompatTestCase.class.getName());
   }
 
   /**
@@ -94,7 +94,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   @Override
   public void setUp() {
-    LOG = getLogger();
+    log = getLogger();
     skipped = false;
     super.setUp();
   }
@@ -105,7 +105,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       // Clean up the database on our way out.
       dropTableIfExists(getTableName());
     } catch (SQLException e) {
-      LOG.warn("Error trying to drop table '" + getTableName()
+      log.warn("Error trying to drop table '" + getTableName()
           + "' on tearDown: " + e);
     }
     super.tearDown();
@@ -615,7 +615,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testBoolean() {
     if (!supportsBoolean()) {
-      LOG.info("Skipping boolean test (unsupported)");
+      log.info("Skipping boolean test (unsupported)");
       skipped = true;
       return;
     }
@@ -625,7 +625,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testBoolean2() {
     if (!supportsBoolean()) {
-      LOG.info("Skipping boolean test (unsupported)");
+      log.info("Skipping boolean test (unsupported)");
       skipped = true;
       return;
     }
@@ -635,7 +635,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testBoolean3() {
     if (!supportsBoolean()) {
-      LOG.info("Skipping boolean test (unsupported)");
+      log.info("Skipping boolean test (unsupported)");
       skipped = true;
       return;
     }
@@ -646,7 +646,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTinyInt1() {
     if (!supportsTinyInt()) {
-      LOG.info("Skipping tinyint test (unsupported)");
+      log.info("Skipping tinyint test (unsupported)");
       skipped = true;
       return;
     }
@@ -656,7 +656,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTinyInt2() {
     if (!supportsTinyInt()) {
-      LOG.info("Skipping tinyint test (unsupported)");
+      log.info("Skipping tinyint test (unsupported)");
       skipped = true;
       return;
     }
@@ -676,7 +676,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testBigInt1() {
     if (!supportsBigInt()) {
-      LOG.info("Skipping bigint test (unsupported)");
+      log.info("Skipping bigint test (unsupported)");
       skipped = true;
       return;
     }
@@ -743,7 +743,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTime1() {
     if (!supportsTime()) {
-      LOG.info("Skipping time test (unsupported)");
+      log.info("Skipping time test (unsupported)");
       skipped = true;
       return;
     }
@@ -753,7 +753,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTime2() {
     if (!supportsTime()) {
-      LOG.info("Skipping time test (unsupported)");
+      log.info("Skipping time test (unsupported)");
       skipped = true;
       return;
     }
@@ -763,7 +763,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTime3() {
     if (!supportsTime()) {
-      LOG.info("Skipping time test (unsupported)");
+      log.info("Skipping time test (unsupported)");
       skipped = true;
       return;
     }
@@ -773,7 +773,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTime4() {
     if (!supportsTime()) {
-      LOG.info("Skipping time test (unsupported)");
+      log.info("Skipping time test (unsupported)");
       skipped = true;
       return;
     }
@@ -791,23 +791,23 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testTimestamp2() {
     try {
-      LOG.debug("Beginning testTimestamp2");
+      log.debug("Beginning testTimestamp2");
       verifyType(getTimestampType(),
           getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
           getTimestampDbOutput("2009-04-24 18:24:00.0002"),
           getTimestampSeqOutput("2009-04-24 18:24:00.0002"));
     } finally {
-      LOG.debug("End testTimestamp2");
+      log.debug("End testTimestamp2");
     }
   }
 
   @Test
   public void testTimestamp3() {
     try {
-      LOG.debug("Beginning testTimestamp3");
+      log.debug("Beginning testTimestamp3");
       verifyType(getTimestampType(), "null", null);
     } finally {
-      LOG.debug("End testTimestamp3");
+      log.debug("End testTimestamp3");
     }
   }
 
@@ -905,7 +905,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testLongVarChar() {
     if (!supportsLongVarChar()) {
-      LOG.info("Skipping long varchar test (unsupported)");
+      log.info("Skipping long varchar test (unsupported)");
       skipped = true;
       return;
     }
@@ -942,7 +942,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       assertTrue("Expected at least one row returned", results.next());
       Blob blob = results.getBlob(2);
       byte [] databaseBytes = blob.getBytes(1, (int) blob.length());
-      LOG.info("Verifying readback of bytes from " + getTableName());
+      log.info("Verifying readback of bytes from " + getTableName());
 
       assertEquals("byte arrays differ in size", returnVal.length,
           databaseBytes.length);
@@ -977,7 +977,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testClob1() {
     if (!supportsClob()) {
-      LOG.info("Skipping CLOB test; database does not support CLOB");
+      log.info("Skipping CLOB test; database does not support CLOB");
       return;
     }
 
@@ -989,7 +989,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testBlob1() {
     if (!supportsBlob()) {
-      LOG.info("Skipping BLOB test; database does not support BLOB");
+      log.info("Skipping BLOB test; database does not support BLOB");
       return;
     }
 

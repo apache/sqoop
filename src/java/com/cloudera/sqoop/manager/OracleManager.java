@@ -275,7 +275,8 @@ public class OracleManager extends GenericJdbcManager {
       LOG.info("Setting default time zone: GMT");
       try {
         // Per the documentation at:
-        // http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14225/applocaledata.htm#i637736
+        // http://download-west.oracle.com/docs/cd/B19306_01
+        //     /server.102/b14225/applocaledata.htm#i637736
         // The "GMT" timezone is guaranteed to exist in the available timezone
         // regions, whereas others (e.g., "UTC") are not.
         method.invoke(conn, "GMT");

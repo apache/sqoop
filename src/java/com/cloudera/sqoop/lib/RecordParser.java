@@ -156,6 +156,8 @@ public final class RecordParser {
     return parseRecord(input.asCharBuffer());
   }
 
+  // TODO(aaron): Refactor this method to be much shorter.
+  // CHECKSTYLE:OFF
   /**
    * Return a list of strings representing the fields of the input line.
    * This list is backed by an internal buffer which is cleared by the
@@ -236,6 +238,7 @@ public final class RecordParser {
           state = ParseState.UNENCLOSED_ESCAPE;
         } else if (fieldDelim == curChar) {
           // we have a zero-length field. This is a no-op.
+          continue;
         } else if (recordDelim == curChar) {
           // we have a zero-length field, that ends processing.
           pos = len;
@@ -337,6 +340,7 @@ public final class RecordParser {
 
     return outputs;
   }
+  // CHECKSTYLE:ON
 
   public boolean isEnclosingRequired() { 
     return delimiters.isEncloseRequired();

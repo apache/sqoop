@@ -205,5 +205,10 @@
     -->
     <!-- module name="TodoComment"/ -->
     <module name="UpperEll"/>
+
+    <module name="FileContentsHolder" />
   </module>
+
+  <!-- allow warnings to be suppressed -->
+  <module name="SuppressionCommentFilter" />
 </module>
