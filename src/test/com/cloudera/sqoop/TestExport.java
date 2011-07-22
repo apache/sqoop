@@ -633,7 +633,7 @@ public class TestExport extends ExportJobTestCase {
     return new ColumnGenerator() {
       public String getExportText(int rowNum) {
         int day = rowNum + 1;
-        return "2009-10-" + day;
+        return "2009-10-" + pad(day);
       }
       public String getVerifyText(int rowNum) {
         int day = rowNum + 1;
@@ -651,7 +651,7 @@ public class TestExport extends ExportJobTestCase {
   protected ColumnGenerator getTimeColumnGenerator() {
     return new ColumnGenerator() {
       public String getExportText(int rowNum) {
-        return "10:01:" + rowNum;
+        return "10:01:" + pad(rowNum);
       }
       public String getVerifyText(int rowNum) {
         return "10:01:" + pad(rowNum);

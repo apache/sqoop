@@ -721,20 +721,13 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   @Test
   public void testDate1() {
-    verifyType("DATE", getDateInsertStr("'2009-1-12'"),
-        getDateDbOutput("2009-01-12"),
-        getDateSeqOutput("2009-01-12"));
-  }
-
-  @Test
-  public void testDate2() {
     verifyType("DATE", getDateInsertStr("'2009-01-12'"),
         getDateDbOutput("2009-01-12"),
         getDateSeqOutput("2009-01-12"));
   }
 
   @Test
-  public void testDate3() {
+  public void testDate2() {
     verifyType("DATE", getDateInsertStr("'2009-04-24'"),
         getDateDbOutput("2009-04-24"),
         getDateSeqOutput("2009-04-24"));
