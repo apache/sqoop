@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -123,6 +124,8 @@ public class ImportOptions {
   public static final int DEFAULT_NUM_MAPPERS = 4;
 
   private static final String DEFAULT_CONFIG_FILE = "sqoop.properties";
+
+  private String [] extraArgs;
 
   public ImportOptions() {
     initDefaults();
@@ -254,6 +257,8 @@ public class ImportOptions {
 
     this.conf = new Configuration();
 
+    this.extraArgs = null;
+
     loadFromProperties();
   }
 
@@ -326,6 +331,10 @@ public class ImportOptions {
     System.out.println("--list-tables                List tables in database and exit");
     System.out.println("--list-databases             List all databases available and exit");
     System.out.println("--debug-sql (statement)      Execute 'statement' in SQL and exit");
+    System.out.println("");
+    System.out.println("Database-specific options:");
+    System.out.println("Arguments may be passed to the database manager after a lone '-':");
+    System.out.println("  MySQL direct mode: arguments passed directly to mysqldump");
     System.out.println("");
     System.out.println("Generic Hadoop command-line options:");
     ToolRunner.printGenericCommandUsage(System.out);
@@ -546,6 +555,13 @@ public class ImportOptions {
         } else if (args[i].equals("--help")) {
           printUsage();
           throw new InvalidOptionsException("");
+        } else if (args[i].equals("-")) {
+          // Everything after a '--' goes into extraArgs.
+          ArrayList<String> extra = new ArrayList<String>();
+          for (i++; i < args.length; i++) {
+            extra.add(args[i]);
+          }
+          this.extraArgs = extra.toArray(new String[0]);
         } else {
           throw new InvalidOptionsException("Invalid argument: " + args[i] + ".\n"
               + "Try --help for usage.");
@@ -881,5 +897,20 @@ public class ImportOptions {
 
   public void setConf(Configuration config) {
     this.conf = config;
+  }
+
+  /**
+   * @return command-line arguments after a '-'
+   */
+  public String [] getExtraArgs() {
+    if (extraArgs == null) {
+      return null;
+    }
+
+    String [] out = new String[extraArgs.length];
+    for (int i = 0; i < extraArgs.length; i++) {
+      out[i] = extraArgs[i];
+    }
+    return out;
   }
 }

@@ -18,16 +18,15 @@
 
 
 Direct-mode Imports
-------------------
+-------------------
 
 While the JDBC-based import method used by Sqoop provides it with the
 ability to read from a variety of databases using a generic driver, it
 is not the most high-performance method available. Sqoop can read from
 certain database systems faster by using their built-in export tools.
 
-For example, Sqoop can read from a local MySQL database by using the +mysqldump+
-tool distributed with MySQL. If you run Sqoop on the same machine where a
-MySQL database is present, you can take advantage of this faster
+For example, Sqoop can read from a MySQL database by using the +mysqldump+
+tool distributed with MySQL. You can take advantage of this faster
 import method by running Sqoop with the +--direct+ argument. This
 combined with a connect string that begins with +jdbc:mysql://+ will
 inform Sqoop that it should select the faster access method.
@@ -57,5 +56,22 @@ bytes. Sqoop will generate files of approximately this size. e.g.,
 each. If compressing the HDFS files with +--compress+, this will allow
 subsequent MapReduce programs to use multiple mappers across your data
 in parallel.
+
+Tool-specific arguments
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Sqoop will generate a set of command-line arguments with which it invokes
+the underlying direct-mode tool (e.g., mysqldump). You can specify additional
+arguments which should be passed to the tool by passing them to Sqoop
+after a single '+-+' argument. e.g.:
+
+----
+$ sqoop --connect jdbc:mysql://localhost/db --table foo --direct - --lock-tables
+----
+
+The +--lock-tables+ argument (and anything else to the right of the +-+ argument)
+will be passed directly to mysqldump.
+
+
 
 

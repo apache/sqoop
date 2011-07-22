@@ -20,6 +20,8 @@ package org.apache.hadoop.sqoop.util;
 
 import java.io.IOException;
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,6 +89,23 @@ public final class DirectImportUtils {
     return new SplittableBufferedWriter(
         new SplittingOutputStream(conf, destDir, "data-",
         options.getDirectSplitSize(), options.shouldUseCompression()));
+  }
+
+  /** @return true if someHost refers to localhost.
+   */
+  public static boolean isLocalhost(String someHost) {
+    if (null == someHost) {
+      return false;
+    }
+
+    try {
+      InetAddress localHostAddr = InetAddress.getLocalHost();
+      InetAddress someAddr = InetAddress.getByName(someHost);
+
+      return localHostAddr.equals(someAddr);
+    } catch (UnknownHostException uhe) {
+      return false;
+    }
   }
 }
 

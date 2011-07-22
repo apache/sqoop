@@ -27,8 +27,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,14 +36,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.ImportOptions;
 import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
+import org.apache.hadoop.sqoop.util.AsyncSink;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
 import org.apache.hadoop.sqoop.util.ErrorableThread;
 import org.apache.hadoop.sqoop.util.Executor;
 import org.apache.hadoop.sqoop.util.ImportError;
 import org.apache.hadoop.sqoop.util.JdbcUrl;
+import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
 import org.apache.hadoop.sqoop.util.PerfCounters;
-import org.apache.hadoop.sqoop.util.AsyncSink;
 
 /**
  * Manages direct dumps from Postgresql databases via psql COPY TO STDOUT
@@ -273,23 +272,6 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     return tempFile.toString();
   }
 
-  /** @return true if someHost refers to localhost.
-   */
-  private boolean isLocalhost(String someHost) {
-    if (null == someHost) {
-      return false;
-    }
-
-    try {
-      InetAddress localHostAddr = InetAddress.getLocalHost();
-      InetAddress someAddr = InetAddress.getByName(someHost);
-
-      return localHostAddr.equals(someAddr);
-    } catch (UnknownHostException uhe) {
-      return false;
-    }
-  }
-
   @Override
   /**
    * Import the table into HDFS by using psql to pull the data out of the db
@@ -315,6 +297,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
     String passwordFilename = null;
     Process p = null;
     AsyncSink sink = null;
+    AsyncSink errSink = null;
     PerfCounters counters = new PerfCounters();
 
     try {
@@ -361,7 +344,7 @@ public class DirectPostgresqlManager extends PostgresqlManager {
         }
       }
 
-      if (!isLocalhost(hostname) || port != -1) {
+      if (!DirectImportUtils.isLocalhost(hostname) || port != -1) {
         args.add("--host");
         args.add(hostname);
         args.add("--port");
@@ -397,6 +380,8 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       LOG.debug("Starting stream sink");
       counters.startClock();
       sink.processStream(is);
+      errSink = new LoggingAsyncSink(LOG);
+      errSink.processStream(p.getErrorStream());
     } finally {
       // block until the process is done.
       LOG.debug("Waiting for process completion");
@@ -441,6 +426,18 @@ public class DirectPostgresqlManager extends PostgresqlManager {
           }
 
           break;
+        }
+      }
+
+      // Attempt to block for stderr stream sink; errors are advisory.
+      if (null != errSink) {
+        try {
+          if (0 != errSink.join()) {
+            LOG.info("Encountered exception reading stderr stream");
+          }
+        } catch (InterruptedException ie) {
+          LOG.info("Thread interrupted waiting for stderr to complete: "
+              + ie.toString());
         }
       }
 

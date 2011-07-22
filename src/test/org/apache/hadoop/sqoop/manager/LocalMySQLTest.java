@@ -181,7 +181,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
     }
   }
 
-  private String [] getArgv(boolean mysqlOutputDelims) {
+  private String [] getArgv(boolean mysqlOutputDelims, String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     args.add("-D");
@@ -205,11 +205,17 @@ public class LocalMySQLTest extends ImportJobTestCase {
       args.add("--mysql-delimiters");
     }
 
+    if (null != extraArgs) {
+      for (String arg : extraArgs) {
+        args.add(arg);
+      }
+    }
+
     return args.toArray(new String[0]);
   }
 
-  private void doLocalBulkImport(boolean mysqlOutputDelims, String [] expectedResults)
-      throws IOException {
+  private void doLocalBulkImport(boolean mysqlOutputDelims,
+      String [] expectedResults, String [] extraArgs) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, TABLE_NAME);
@@ -221,7 +227,7 @@ public class LocalMySQLTest extends ImportJobTestCase {
       FileListing.recursiveDeleteDir(tableFile);
     }
 
-    String [] argv = getArgv(mysqlOutputDelims);
+    String [] argv = getArgv(mysqlOutputDelims, extraArgs);
     try {
       runImport(argv);
     } catch (IOException ioe) {
@@ -256,7 +262,20 @@ public class LocalMySQLTest extends ImportJobTestCase {
         "3,Fred,2009-01-23,15,marketing"
     };
 
-    doLocalBulkImport(false, expectedResults);
+    doLocalBulkImport(false, expectedResults, null);
+  }
+
+  @Test
+  public void testWithExtraParams() throws IOException {
+    // no quoting of strings allowed.
+    String [] expectedResults = {
+        "2,Bob,2009-04-20,400,sales",
+        "3,Fred,2009-01-23,15,marketing"
+    };
+
+    String [] extraArgs = { "-", "--lock-tables" };
+
+    doLocalBulkImport(false, expectedResults, extraArgs);
   }
 
   @Test
@@ -267,6 +286,6 @@ public class LocalMySQLTest extends ImportJobTestCase {
         "3,'Fred','2009-01-23',15,'marketing'"
     };
 
-    doLocalBulkImport(true, expectedResults);
+    doLocalBulkImport(true, expectedResults, null);
   }
 }

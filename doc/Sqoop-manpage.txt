@@ -163,6 +163,14 @@ no import or code generation is performed.
 --list-tables::
   List tables in database and exit
 
+Database-specific options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional arguments may be passed to the database manager
+after a lone '-' on the command-line.
+
+In MySQL direct mode, additional arguments are passed directly to
+mysqldump.
 
 ENVIRONMENT
 -----------

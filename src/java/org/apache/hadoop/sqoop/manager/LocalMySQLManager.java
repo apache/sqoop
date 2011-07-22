@@ -38,13 +38,14 @@ import org.apache.hadoop.sqoop.ImportOptions;
 import org.apache.hadoop.sqoop.io.SplittableBufferedWriter;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
+import org.apache.hadoop.sqoop.util.AsyncSink;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
 import org.apache.hadoop.sqoop.util.ErrorableThread;
 import org.apache.hadoop.sqoop.util.ImportError;
 import org.apache.hadoop.sqoop.util.JdbcUrl;
+import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
 import org.apache.hadoop.sqoop.util.PerfCounters;
-import org.apache.hadoop.sqoop.util.AsyncSink;
 
 /**
  * Manages direct connections to MySQL databases
@@ -365,6 +366,8 @@ public class LocalMySQLManager extends MySQLManager {
     // (everything before '://') and replace it with 'http', which we know will work.
     String connectString = options.getConnectString();
     String databaseName = JdbcUrl.getDatabaseName(connectString);
+    String hostname = JdbcUrl.getHostName(connectString);
+    int port = JdbcUrl.getPort(connectString);
 
     if (null == databaseName) {
       throw new ImportError("Could not determine database name");
@@ -378,6 +381,7 @@ public class LocalMySQLManager extends MySQLManager {
 
     Process p = null;
     AsyncSink sink = null;
+    AsyncSink errSink = null;
     PerfCounters counters = new PerfCounters();
     try {
       // --defaults-file must be the first argument.
@@ -394,18 +398,29 @@ public class LocalMySQLManager extends MySQLManager {
         args.add(whereClause);
       }
 
+      if (!DirectImportUtils.isLocalhost(hostname) || port != -1) {
+        args.add("--host=" + hostname);
+        args.add("--port=" + Integer.toString(port));
+      }
+
       args.add("--skip-opt");
       args.add("--compact");
       args.add("--no-create-db");
       args.add("--no-create-info");
       args.add("--quick"); // no buffering
-      // TODO(aaron): Add a flag to allow --lock-tables instead for MyISAM data
       args.add("--single-transaction"); 
-      // TODO(aaron): Add --host and --port arguments to support remote direct connects.
 
       String username = options.getUsername();
       if (null != username) {
         args.add("--user=" + username);
+      }
+
+      // If the user supplied extra args, add them here.
+      String [] extra = options.getExtraArgs();
+      if (null != extra) {
+        for (String arg : extra) {
+          args.add(arg);
+        }
       }
 
       args.add(databaseName);
@@ -442,6 +457,10 @@ public class LocalMySQLManager extends MySQLManager {
       // Start an async thread to read and upload the whole stream.
       counters.startClock();
       sink.processStream(is);
+
+      // Start an async thread to send stderr to log4j.
+      errSink = new LoggingAsyncSink(LOG);
+      errSink.processStream(p.getErrorStream());
     } finally {
 
       // block until the process is done.
@@ -479,6 +498,18 @@ public class LocalMySQLManager extends MySQLManager {
           }
 
           break;
+        }
+      }
+
+      // Try to wait for stderr to finish, but regard any errors as advisory.
+      if (null != errSink) {
+        try {
+          if (0 != errSink.join()) {
+            LOG.info("Encountered exception reading stderr stream");
+          }
+        } catch (InterruptedException ie) {
+          LOG.info("Thread interrupted waiting for stderr to complete: "
+              + ie.toString());
         }
       }
 
