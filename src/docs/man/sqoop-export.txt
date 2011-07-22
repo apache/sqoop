@@ -40,6 +40,9 @@ Export control options
 --table (table-name)::
   The table to read (required)
 
+--update-key (col-name)::
+  Anchor column to use for updates
+
 include::input-args.txt[]
 
 include::output-args.txt[]

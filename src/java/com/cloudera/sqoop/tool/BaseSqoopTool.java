@@ -110,6 +110,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String SQL_QUERY_SHORT_ARG = "e";
   public static final String VERBOSE_ARG = "verbose";
   public static final String HELP_ARG = "help";
+  public static final String UPDATE_KEY_ARG = "update-key";
 
 
   public BaseSqoopTool() {

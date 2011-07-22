@@ -36,20 +36,18 @@ import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import com.cloudera.sqoop.lib.SqoopRecord;
 
 /**
- * Insert the emitted keys as records into a database table.
- * This supports a configurable "spill threshold" at which
- * point intermediate transactions are committed. 
+ * Update an existing table of data with new value data.
+ * This requires a designated 'key column' for the WHERE clause
+ * of an UPDATE statement.
  *
- * Record objects are buffered before actually performing the INSERT
- * statements; this requires that the key implement the
- * SqoopRecord interface.
+ * Updates are executed en batch in the PreparedStatement.
  *
  * Uses DBOutputFormat/DBConfiguration for configuring the output.
  */
-public class ExportOutputFormat<K extends SqoopRecord, V> 
+public class UpdateOutputFormat<K extends SqoopRecord, V> 
     extends AsyncSqlOutputFormat<K, V> {
 
-  private static final Log LOG = LogFactory.getLog(ExportOutputFormat.class);
+  private static final Log LOG = LogFactory.getLog(UpdateOutputFormat.class);
 
   @Override
   /** {@inheritDoc} */
@@ -62,11 +60,12 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
     if (null == conf.get(DBConfiguration.URL_PROPERTY)) {
       throw new IOException("Database connection URL is not set.");
     } else if (null == dbConf.getOutputTableName()) {
-      throw new IOException("Table name is not set for export");
-    } else if (null == dbConf.getOutputFieldNames()
-        && 0 == dbConf.getOutputFieldCount()) {
+      throw new IOException("Table name is not set for export.");
+    } else if (null == dbConf.getOutputFieldNames()) {
       throw new IOException(
-          "Output field names are null and zero output field count set.");
+          "Output field names are null.");
+    } else if (null == conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY)) {
+      throw new IOException("Update key column is not set for export.");
     }
   }
 
@@ -75,23 +74,23 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context) 
       throws IOException {
     try {
-      return new ExportRecordWriter(context);
+      return new UpdateRecordWriter(context);
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   /**
-   * RecordWriter to write the output to a row in a database table.
-   * The actual database updates are executed in a second thread.
+   * RecordWriter to write the output to UPDATE statements modifying rows
+   * in the database.
    */
-  public class ExportRecordWriter extends AsyncSqlRecordWriter<K, V> {
+  public class UpdateRecordWriter extends AsyncSqlRecordWriter<K, V> {
 
     private String tableName;
-    private String [] columnNames; // The columns to insert into.
-    private int columnCount; // If columnNames is null, tells ## of cols.
+    private String [] columnNames; // The columns to update.
+    private String updateCol; // The column containing the fixed key.
 
-    public ExportRecordWriter(TaskAttemptContext context)
+    public UpdateRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {
       super(context);
 
@@ -100,7 +99,14 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
       DBConfiguration dbConf = new DBConfiguration(conf);
       this.tableName = dbConf.getOutputTableName();
       this.columnNames = dbConf.getOutputFieldNames();
-      this.columnCount = dbConf.getOutputFieldCount();
+      this.updateCol = conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    protected boolean isBatchExec() {
+      // We use batches here.
+      return true;
     }
 
     /**
@@ -120,12 +126,12 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
         return Arrays.copyOf(columnNames, columnNames.length);
       }
     }
-
+    
     /**
-     * @return the number of columns we are updating.
+     * @return the column we are using to determine the row to update.
      */
-    protected final int getColumnCount() {
-      return columnCount;
+    protected final String getUpdateCol() {
+      return updateCol;
     }
 
     @Override
@@ -139,69 +145,43 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
       // with the operations in the update thread.
       Connection conn = getConnection();
       synchronized (conn) {
-        stmt = conn.prepareStatement(getInsertStatement(userRecords.size()));
+        stmt = conn.prepareStatement(getUpdateStatement());
       }
 
-      // Inject the record parameters into the VALUES clauses.
-      int position = 0;
+      // Inject the record parameters into the UPDATE and WHERE clauses.  This
+      // assumes that the update key column is the last column serialized in
+      // by the underlying record. Our code auto-gen process for exports was
+      // responsible for taking care of this constraint.
       for (SqoopRecord record : userRecords) {
-        position += record.write(stmt, position);
+        record.write(stmt, 0);
+        stmt.addBatch();
       }
 
       return stmt;
     }
 
     /**
-     * @return an INSERT statement suitable for inserting 'numRows' rows.
+     * @return an UPDATE statement that modifies rows based on a single key
+     * column (with the intent of modifying a single row).
      */
-    protected String getInsertStatement(int numRows) {
+    protected String getUpdateStatement() {
       StringBuilder sb = new StringBuilder();
+      sb.append("UPDATE " + this.tableName + " SET ");
 
-      sb.append("INSERT INTO " + tableName + " ");
-
-      int numSlots;
-      if (this.columnNames != null) {
-        numSlots = this.columnNames.length;
-
-        sb.append("(");
-        boolean first = true;
-        for (String col : columnNames) {
-          if (!first) {
-            sb.append(", ");
-          }
-
-          sb.append(col);
-          first = false;
-        }
-
-        sb.append(") ");
-      } else {
-        numSlots = this.columnCount; // set if columnNames is null.
-      }
-
-      sb.append("VALUES ");
-
-      // generates the (?, ?, ?...) used for each row.
-      StringBuilder sbRow = new StringBuilder();
-      sbRow.append("(");
-      for (int i = 0; i < numSlots; i++) {
-        if (i != 0) {
-          sbRow.append(", ");
-        }
-
-        sbRow.append("?");
-      }
-      sbRow.append(")");
-
-      // Now append that numRows times.
-      for (int i = 0; i < numRows; i++) {
-        if (i != 0) {
+      boolean first = true;
+      for (String col : this.columnNames) {
+        if (!first) {
           sb.append(", ");
         }
 
-        sb.append(sbRow);
+        sb.append(col);
+        sb.append("=?");
+        first = false;
       }
 
+      sb.append(" WHERE ");
+      sb.append(this.updateCol);
+      sb.append("=?");
       return sb.toString();
     }
   }

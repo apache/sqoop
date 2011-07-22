@@ -97,6 +97,10 @@ public class SqoopOptions {
   private String hiveTableName;
   private String packageName; // package to prepend to auto-named classes.
 
+  // An ordered list of column names denoting what order columns are
+  // serialized to a PreparedStatement from a generated record type.
+  private String [] dbOutColumns;
+
   // package+class to apply to individual table import.
   // also used as an *input* class with existingJarFile.
   private String className; 
@@ -117,6 +121,9 @@ public class SqoopOptions {
 
   // HDFS path to read from when performing an export
   private String exportDir;
+
+  // Column to use for the WHERE clause in an UPDATE-based export.
+  private String updateKeyCol;
 
   private DelimiterSet inputDelimiters;
   private DelimiterSet outputDelimiters;
@@ -277,6 +284,8 @@ public class SqoopOptions {
     }
 
     this.extraArgs = null;
+
+    this.dbOutColumns = null;
 
     loadFromProperties();
   }
@@ -949,6 +958,52 @@ public class SqoopOptions {
     this.extraArgs = new String[args.length];
     for (int i = 0; i < args.length; i++) {
       this.extraArgs[i] = args[i];
+    }
+  }
+
+  /**
+   * Set the name of the column to be used in the WHERE clause of an
+   * UPDATE-based export process.
+   */
+  public void setUpdateKeyCol(String colName) {
+    this.updateKeyCol = colName;
+  }
+
+  /**
+   * @return the column which is the key column in a table to be exported
+   * in update mode.
+   */
+  public String getUpdateKeyCol() {
+    return this.updateKeyCol;
+  }
+
+  /**
+   * @return an ordered list of column names. The code generator should
+   * generate the DBWritable.write(PreparedStatement) method with columns
+   * exporting in this order, if it is non-null.
+   */
+  public String [] getDbOutputColumns() {
+    if (null != dbOutColumns) {
+      return Arrays.copyOf(this.dbOutColumns, dbOutColumns.length);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Set the order in which columns should be serialized by the generated
+   * DBWritable.write(PreparedStatement) method. Setting this to null will use
+   * the "natural order" of the database table.
+   *
+   * TODO: Expose this setter via the command-line arguments for the codegen
+   * module. That would allow users to export to tables with columns in a
+   * different physical order than the file layout in HDFS.
+   */
+  public void setDbOutputColumns(String [] outCols) {
+    if (null == outCols) {
+      this.dbOutColumns = null;
+    } else {
+      this.dbOutColumns = Arrays.copyOf(outCols, outCols.length);
     }
   }
 }

@@ -61,15 +61,16 @@ public class OracleExportOutputFormat<K extends SqoopRecord, V>
     protected String getInsertStatement(int numRows) {
       StringBuilder sb = new StringBuilder();
 
-      sb.append("INSERT INTO " + tableName + " ");
+      sb.append("INSERT INTO " + getTableName() + " ");
 
       int numSlots;
-      if (this.columnNames != null) {
-        numSlots = this.columnNames.length;
+      String [] colNames = getColumnNames();
+      if (colNames != null) {
+        numSlots = colNames.length;
 
         sb.append("(");
         boolean first = true;
-        for (String col : columnNames) {
+        for (String col : colNames) {
           if (!first) {
             sb.append(", ");
           }
@@ -80,7 +81,7 @@ public class OracleExportOutputFormat<K extends SqoopRecord, V>
 
         sb.append(") ");
       } else {
-        numSlots = this.columnCount; // set if columnNames is null.
+        numSlots = getColumnCount(); // set if columnNames is null.
       }
 
       // generates the (?, ?, ?...) used for each row.

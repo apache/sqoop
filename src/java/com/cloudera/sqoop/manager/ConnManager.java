@@ -173,10 +173,21 @@ public abstract class ConnManager {
 
   /**
    * Export data stored in HDFS into a table in a database.
+   * This inserts new rows into the target table.
    */
   public void exportTable(ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support exports");
+  }
+
+  /**
+   * Export updated data stored in HDFS into a database table.
+   * This updates existing rows in the target table, based on the
+   * updateKeyCol specified in the context's SqoopOptions.
+   */
+  public void updateTable(ExportJobContext context)
+      throws IOException, ExportException {
+    throw new ExportException("This database does not support updates");
   }
 
   /**

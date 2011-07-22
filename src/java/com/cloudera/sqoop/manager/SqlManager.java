@@ -24,6 +24,7 @@ import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
+import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.ResultSetPrinter;
@@ -592,5 +593,14 @@ public abstract class SqlManager extends ConnManager {
 
       this.lastStatement = null;
     }
+  }
+
+  /**
+   * @{inheritDoc}
+   */
+  public void updateTable(ExportJobContext context)
+      throws IOException, ExportException {
+    JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context);
+    exportJob.runExport();
   }
 }

@@ -57,6 +57,13 @@ public class ExportJobBase extends JobBase {
   public static final String SQOOP_EXPORT_TABLE_CLASS_KEY =
       "sqoop.mapreduce.export.table.class";
 
+  /**
+   * What column of the table to use for the WHERE clause of
+   * an updating export.
+   */
+  public static final String SQOOP_EXPORT_UPDATE_COL_KEY =
+      "sqoop.mapreduce.export.update.col";
+
   /** Number of map tasks to use for an export. */
   public static final String EXPORT_MAP_TASKS_KEY =
       "sqoop.mapreduce.export.map.tasks";

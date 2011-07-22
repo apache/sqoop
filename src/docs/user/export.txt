@@ -43,14 +43,15 @@ include::common-args.txt[]
 
 .Export control arguments:
 [grid="all"]
-`-------------------------`------------------------------------------
-Argument                  Description
----------------------------------------------------------------------
-+\--direct+               Use direct export fast path
-+\--export-dir <dir>+     HDFS source path for the export
-+-m,\--num-mappers <n>+   Use 'n' map tasks to export in parallel
-+\--table <table-name>+   Table to populate
----------------------------------------------------------------------
+`---------------------------`------------------------------------------
+Argument                    Description
+-----------------------------------------------------------------------
++\--direct+                 Use direct export fast path
++\--export-dir <dir>+       HDFS source path for the export
++-m,\--num-mappers <n>+     Use 'n' map tasks to export in parallel
++\--table <table-name>+     Table to populate
++\--update-key <col-name>+  Anchor column to use for updates
+-----------------------------------------------------------------------
 
 The +\--table+ and +\--export-dir+ arguments are required. These
 specify the table to populate in the database, and the
@@ -72,6 +73,58 @@ MySQL provides a direct mode for exports as well, using the
 to specify this codepath. This may be
 higher-performance than the standard JDBC codepath. 
 
+
+Inserts vs. Updates
+~~~~~~~~~~~~~~~~~~~
+
+By default, +sqoop-export+ appends new rows to a table; each input
+record is transformed into an +INSERT+ statement that adds a row to the
+target database table. If your table has constraints (e.g., a primary
+key column whose values must be unique) and already contains data, you
+must take care to avoid inserting records that violate these
+constraints. The export process will fail if an +INSERT+ statement
+fails. This mode is primarily intended for exporting records to a new,
+empty table intended to receive these results.
+
+If you specify the +\--update-key+ argument, Sqoop will instead modify
+an existing dataset in the database. Each input record is treated as
+an +UPDATE+ statement that modifies an existing row. The row a
+statement modifies is determined by the column name specified with
++\--update-key+. For example, consider the following table
+definition:
+
+----
+CREATE TABLE foo(
+    id INT NOT NULL PRIMARY KEY,
+    msg VARCHAR(32),
+    bar INT);
+----
+
+Consider also a dataset in HDFS containing records like these:
+
+----
+0,this is a test,42
+1,some more data,100
+...
+----
+
+Running +sqoop-export \--table foo \--update-key id \--export-dir
+/path/to/data \--connect ...+ will run an export job that executes SQL
+statements based on the data like so:
+
+----
+UPDATE foo SET msg='this is a test', bar=42 WHERE id=0;
+UPDATE foo SET msg='some more data', bar=100 WHERE id=1;
+...
+----
+
+If an +UPDATE+ statement modifies no rows, this is not considered an
+error; the export will silently continue. (In effect, this means that
+an update-based export will not insert new rows into the database.)
+Likewise, if the column specified with +\--update-key+ does not
+uniquely identify rows and multiple rows are updated by a single
+statement, this condition is also undetected.
+
 include::input-args.txt[]
 
 include::output-args.txt[]
@@ -92,6 +145,11 @@ If the records to be exported were generated as the result of a
 previous import, then the original generated class can be used to read
 the data back. Specifying +\--jar-file+ and +\--class-name+ obviate
 the need to specify delimiters in this case.
+
+The use of existing generated code is incompatible with
++\--update-key+; an update-mode export requires new code generation to
+perform the update. You cannot use +\--jar-file+, and must fully specify
+any non-default delimiters.
 
 Exports and Transactions
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -73,6 +73,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestLargeObjectLoader.class);
     suite.addTestSuite(TestDirectImportUtils.class);
     suite.addTestSuite(TestLobFile.class);
+    suite.addTestSuite(TestExportUpdate.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;

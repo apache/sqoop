@@ -842,6 +842,26 @@ public class ClassWriter {
 
     sb.append("  }\n");
   }
+
+  /**
+   * Create a list of identifiers to use based on the true column names
+   * of the table.
+   * @param colNames the actual column names of the table.
+   * @return a list of column names in the same order which are
+   * cleaned up to be used as identifiers in the generated Java class.
+   */
+  private String [] cleanColNames(String [] colNames) {
+    String [] cleanedColNames = new String[colNames.length];
+    for (int i = 0; i < colNames.length; i++) {
+      String col = colNames[i];
+      String identifier = toIdentifier(col);
+      cleanedColNames[i] = identifier;
+    }
+
+    return cleanedColNames;
+  }
+
+
   /**
    * Generate the ORM code for the class.
    */
@@ -876,19 +896,47 @@ public class ClassWriter {
 
     // Translate all the column names into names that are safe to
     // use as identifiers.
-    String [] cleanedColNames = new String[colNames.length];
-    for (int i = 0; i < colNames.length; i++) {
-      String col = colNames[i];
-      String identifier = toIdentifier(col);
-      cleanedColNames[i] = identifier;
+    String [] cleanedColNames = cleanColNames(colNames);
 
+    for (int i = 0; i < colNames.length; i++) {
       // Make sure the col->type mapping holds for the 
       // new identifier name, too.
+      String identifier = cleanedColNames[i];
+      String col = colNames[i];
       columnTypes.put(identifier, columnTypes.get(col));
     }
 
+    // The db write() method may use column names in a different
+    // order. If this is set in the options, pull it out here and
+    // make sure we format the column names to identifiers in the same way
+    // as we do for the ordinary column list.
+    String [] dbWriteColNames = options.getDbOutputColumns();
+    String [] cleanedDbWriteColNames = null;
+    if (null == dbWriteColNames) {
+      cleanedDbWriteColNames = cleanedColNames;
+    } else {
+      cleanedDbWriteColNames = cleanColNames(dbWriteColNames);
+    }
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("selected columns:");
+      for (String col : cleanedColNames) {
+        LOG.debug("  " + col);
+      }
+
+      if (cleanedDbWriteColNames != cleanedColNames) {
+        // dbWrite() has a different set of columns than the rest of the
+        // generators.
+        LOG.debug("db write column order:");
+        for (String dbCol : cleanedDbWriteColNames) {
+          LOG.debug("  " + dbCol);
+        }
+      }
+    }
+
     // Generate the Java code.
-    StringBuilder sb = generateClassForColumns(columnTypes, cleanedColNames);
+    StringBuilder sb = generateClassForColumns(columnTypes,
+        cleanedColNames, cleanedDbWriteColNames);
 
     // Write this out to a file.
     String codeOutDir = options.getCodeOutputDir();
@@ -954,10 +1002,13 @@ public class ClassWriter {
    * Generate the ORM code for a table object containing the named columns.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
+   * @param dbWriteColNames - ordered list of column names for the db
+   * write() method of the class.
    * @return - A StringBuilder that contains the text of the class code.
    */
-  public StringBuilder generateClassForColumns(Map<String, Integer> columnTypes,
-      String [] colNames) {
+  private StringBuilder generateClassForColumns(
+      Map<String, Integer> columnTypes,
+      String [] colNames, String [] dbWriteColNames) {
     StringBuilder sb = new StringBuilder();
     sb.append("// ORM class for " + tableName + "\n");
     sb.append("// WARNING: This class is AUTO-GENERATED. "
@@ -1011,7 +1062,7 @@ public class ClassWriter {
     generateFields(columnTypes, colNames, sb);
     generateDbRead(columnTypes, colNames, sb);
     generateLoadLargeObjects(columnTypes, colNames, sb);
-    generateDbWrite(columnTypes, colNames, sb);
+    generateDbWrite(columnTypes, dbWriteColNames, sb);
     generateHadoopRead(columnTypes, colNames, sb);
     generateHadoopWrite(columnTypes, colNames, sb);
     generateToString(columnTypes, colNames, sb);

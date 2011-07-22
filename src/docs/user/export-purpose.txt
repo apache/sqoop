@@ -19,6 +19,11 @@
 The +export+ tool exports a set of files from HDFS back to an RDBMS.
 The target table must already exist in the database. The input files
 are read and parsed into a set of records according to the
-user-specified delimiters. These are then transformed into a set of
-+INSERT+ statements that inject the records into the database.
+user-specified delimiters. 
+
+The default operation is to transform these into a set of +INSERT+
+statements that inject the records into the database. In "update mode,"
+Sqoop will generate +UPDATE+ statements that replace existing records
+in the database.
+
 

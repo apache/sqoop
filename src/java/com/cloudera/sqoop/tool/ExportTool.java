@@ -19,6 +19,7 @@
 package com.cloudera.sqoop.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -64,7 +65,13 @@ public class ExportTool extends BaseSqoopTool {
 
     ExportJobContext context = new ExportJobContext(tableName, jarFile,
         options);
-    manager.exportTable(context);
+    if (options.getUpdateKeyCol() != null) {
+      // UPDATE-based export.
+      manager.updateTable(context);
+    } else {
+      // INSERT-based export.
+      manager.exportTable(context);
+    }
   }
 
   @Override
@@ -76,6 +83,28 @@ public class ExportTool extends BaseSqoopTool {
     }
 
     codeGenerator.setManager(manager);
+
+    String updateKeyCol = options.getUpdateKeyCol();
+    if (updateKeyCol != null) {
+      // We're in update mode. We need to explicitly set the database output
+      // column ordering in the codeGenerator.  The UpdateKeyCol must come
+      // last, because the UPDATE-based OutputFormat will generate the SET
+      // clause followed by the WHERE clause, and the SqoopRecord needs to
+      // serialize to this layout.
+      String [] allColNames = manager.getColumnNames(options.getTableName());
+      List<String> dbOutCols = new ArrayList<String>();
+      String upperCaseKeyCol = updateKeyCol.toUpperCase();
+      for (String col : allColNames) {
+        if (!upperCaseKeyCol.equals(col.toUpperCase())) {
+          dbOutCols.add(col); // add non-key columns to the output order list.
+        }
+      }
+
+      // Then add the update key column last.
+      dbOutCols.add(updateKeyCol);
+      options.setDbOutputColumns(dbOutCols.toArray(
+          new String[dbOutCols.size()]));
+    }
 
     try {
       exportTable(options, options.getTableName());
@@ -125,6 +154,11 @@ public class ExportTool extends BaseSqoopTool {
         .hasArg()
         .withDescription("HDFS source path for the export")
         .withLongOpt(EXPORT_PATH_ARG)
+        .create());
+    exportOpts.addOption(OptionBuilder.withArgName("key")
+        .hasArg()
+        .withDescription("Update records by specified key column")
+        .withLongOpt(UPDATE_KEY_ARG)
         .create());
 
     return exportOpts;
@@ -193,6 +227,10 @@ public class ExportTool extends BaseSqoopTool {
         out.setExistingJarName(in.getOptionValue(JAR_FILE_NAME_ARG));
       }
 
+      if (in.hasOption(UPDATE_KEY_ARG)) {
+        out.setUpdateKeyCol(in.getOptionValue(UPDATE_KEY_ARG));
+      }
+
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
@@ -220,6 +258,13 @@ public class ExportTool extends BaseSqoopTool {
         && options.getClassName() == null) {
       throw new InvalidOptionsException("Jar specified with --jar-file, but no "
           + "class specified with --class-name." + HELP_STR);
+    } else if (options.getExistingJarName() != null
+        && options.getUpdateKeyCol() != null) {
+      // We need to regenerate the class with the output column order set
+      // correctly for the update-based export. So we can't use a premade
+      // class.
+      throw new InvalidOptionsException("Jar cannot be specified with "
+          + "--jar-file when export is running in update mode.");
     }
   }
 
