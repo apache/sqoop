@@ -66,8 +66,11 @@ Sqoop may work with older versions of the databases listed, but we have
 only tested it with the versions specified above.
 
 Even if Sqoop supports a database internally, you may still need to
-install the database vendor's JDBC driver in your +$HADOOP_HOME/lib+
-path.
+install the database vendor's JDBC driver in your +$SQOOP_HOME/lib+
+path on your client. Sqoop can load classes from any jars in
++$SQOOP_HOME/lib+ on the client and will use them as part of any
+MapReduce jobs it runs; unlike older versions, you no longer need to
+install JDBC jars in the Hadoop library path on your servers.
 
 MySQL
 ~~~~~

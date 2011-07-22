@@ -57,25 +57,25 @@ a password from a console prompt, and is the preferred method of
 entering credentials. Credentials may still be transferred between
 nodes of the MapReduce cluster using insecure means.
 
-Sqoop automatically supports several databases, including MySQL.
-Connect strings beginning with +jdbc:mysql://+ are handled
-automatically in Sqoop, though you may need to install the driver
-yourself. (A full list of databases with built-in support is provided
-in the "Supported Databases" section.)
+Sqoop automatically supports several databases, including MySQL.  Connect
+strings beginning with +jdbc:mysql://+ are handled automatically in Sqoop.  (A
+full list of databases with built-in support is provided in the "Supported
+Databases" section. For some, you may need to install the JDBC driver
+yourself.)
 
 You can use Sqoop with any other
 JDBC-compliant database. First, download the appropriate JDBC
 driver for the type of database you want to import, and install the .jar
-file in the +/usr/hadoop/lib+ directory on all machines in your Hadoop
-cluster, or some other directory which is in the classpath
-on all nodes. Each driver +.jar+ file also has a specific driver class which defines
+file in the +$SQOOP_HOME/lib+ directory on your client machine. (This will
+be +/usr/lib/sqoop/lib+ if you installed from an RPM or Debian package.)
+Each driver +.jar+ file also has a specific driver class which defines
 the entry-point to the driver. For example, MySQL's Connector/J library has
 a driver class of +com.mysql.jdbc.Driver+. Refer to your database
 vendor-specific documentation to determine the main driver class.
 This class must be provided as an argument to Sqoop with +\--driver+.
 
 For example, to connect to a SQLServer database, first download the driver from
-microsoft.com and install it in your Hadoop lib path.
+microsoft.com and install it in your Sqoop lib path.
 
 Then run Sqoop. For example:
 
