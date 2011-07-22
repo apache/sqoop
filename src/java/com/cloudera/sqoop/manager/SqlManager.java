@@ -590,10 +590,18 @@ public abstract class SqlManager extends ConnManager {
     }
 
     // We only use this for metadata queries. Loosest semantics are okay.
-    connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+    connection.setTransactionIsolation(getMetadataIsolationLevel());
     connection.setAutoCommit(false);
 
     return connection;
+  }
+
+  /**
+   * @return the transaction isolation level to use for metadata queries
+   * (queries executed by the ConnManager itself).
+   */
+  protected int getMetadataIsolationLevel() {
+    return Connection.TRANSACTION_READ_UNCOMMITTED;
   }
 
   /**
