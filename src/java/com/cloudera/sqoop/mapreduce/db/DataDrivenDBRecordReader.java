@@ -18,6 +18,7 @@
 
 package com.cloudera.sqoop.mapreduce.db;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -54,6 +55,12 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
     this.dbProductName = dbProduct;
   }
   // CHECKSTYLE:ON
+
+  @Override
+  /** {@inheritDoc} */
+  public float getProgress() throws IOException {
+    return isDone() ? 1.0f : 0.0f;
+  }
 
   /** Returns the query for selecting the records,
    * subclasses can override this for custom behaviour.*/

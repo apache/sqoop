@@ -240,6 +240,18 @@ public class DBRecordReader<T extends DBWritable> extends
     return true;
   }
 
+  /**
+   * @return true if nextKeyValue() would return false.
+   */
+  protected boolean isDone() {
+    try {
+      return this.results != null
+          && (results.isLast() || results.isAfterLast());
+    } catch (SQLException sqlE) {
+      return true;
+    }
+  }
+
   protected DBInputFormat.DBInputSplit getSplit() {
     return split;
   }
