@@ -61,3 +61,5 @@ include::hive.txt[]
 
 include::supported-dbs.txt[]
 
+include::api-reference.txt[]
+
