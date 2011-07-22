@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -210,4 +212,39 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateVals, validateLine, loadCols);
   }
 
+  /**
+   * This tests that the columns argument can handle comma-separated column
+   * names.  So this is like having:
+   *   --columns "DATA_COL0,DATA_COL1,DATA_COL2"
+   * as two args on a sqoop command line
+   *
+   * @throws IOException
+   */
+  public void testSingleColumnsArg() throws IOException {
+    String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
+    String [] insertVals = { "'foo'", "'bar'", "'baz'" };
+    String [] validateVals = { "foo", "bar", "baz" };
+    String validateLine = "foo,bar,baz";
+    String [] loadCols = {"DATA_COL0,DATA_COL1,DATA_COL2"};
+
+    verifyTypes(types, insertVals, validateVals, validateLine, loadCols);
+  }
+
+  /**
+   * This tests that the columns argument can handle spaces between column
+   * names.  So this is like having:
+   *   --columns "DATA_COL0, DATA_COL1, DATA_COL2"
+   * as two args on a sqoop command line
+   *
+   * @throws IOException
+   */
+  public void testColumnsWithSpaces() throws IOException {
+    String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
+    String [] insertVals = { "'foo'", "'bar'", "'baz'" };
+    String [] validateVals = { "foo", "bar", "baz" };
+    String validateLine = "foo,bar,baz";
+    String [] loadCols = {"DATA_COL0, DATA_COL1, DATA_COL2"};
+
+    verifyTypes(types, insertVals, validateVals, validateLine, loadCols);
+  }
 }

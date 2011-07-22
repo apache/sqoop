@@ -653,7 +653,11 @@ public class ImportTool extends BaseSqoopTool {
         }
 
         if (in.hasOption(COLUMNS_ARG)) {
-          out.setColumns(in.getOptionValue(COLUMNS_ARG).split(","));
+          String[] cols= in.getOptionValue(COLUMNS_ARG).split(",");
+          for (int i=0; i<cols.length; i++) {
+            cols[i] = cols[i].trim();
+          }
+          out.setColumns(cols);
         }
 
         if (in.hasOption(SPLIT_BY_ARG)) {
