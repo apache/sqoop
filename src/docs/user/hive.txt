@@ -52,6 +52,14 @@ due to limitations of Hive's input parsing abilities. If you do use
 +\--escaped-by+, +\--enclosed-by+, or +\--optionally-enclosed-by+ when
 importing data into Hive, Sqoop will print a warning message.
 
+Hive will have problems using Sqoop-imported data if your database's
+rows contain string fields that have Hive's default row delimiters
+(+\n+ and +\r+ characters) or column delimiters (+\01+ characters)
+present in them.  You can use the +\--hive-drop-import-delims+ option
+to drop those characters on import to give Hive-compatible text data.
+This option should only be used if you use Hive's default delimiters
+and should not be used if different delimiters are specified.
+
 Sqoop will pass the field and record delimiters through to Hive. If you do
 not set any delimiters and do use +\--hive-import+, the field delimiter will
 be set to +^A+ and the record delimiter will be set to +\n+ to be consistent

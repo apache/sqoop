@@ -28,5 +28,7 @@ Argument                      Description
 +\--hive-overwrite+           Overwrite existing data in the Hive table.
 +\--hive-table <table-name>+  Sets the table name to use when importing\
                               to Hive.
++\--hive-drop-import-delims+  Drops '\n', '\r', and '\01' from string\
+			      fields when importing to Hive.
 --------------------------------------------------------------------------
 
