@@ -312,10 +312,20 @@
          the wrapper scripts to invoke each of these.
       -->
     <mkdir dir="${build.bin.dir}" />
+    <java classname="com.cloudera.sqoop.Sqoop"
+        fork="true"
+        failonerror="true"
+        output="${build.dir}/tools-list"
+        error="/dev/null">
+      <jvmarg value="-Dhadoop.security.log.file=${build.dir}/security-audit.log" />
+      <arg value="help" />
+      <classpath refid="compile.classpath"/>
+    </java>
     <exec executable="${script.src.dir}/create-tool-scripts.sh"
         dir="${basedir}" failonerror="true">
       <arg value="${build.bin.dir}" />
       <arg value="${script.src.dir}/tool-script.sh.template" />
+      <arg value="${build.dir}/tools-list" />
     </exec>
   </target>
 
