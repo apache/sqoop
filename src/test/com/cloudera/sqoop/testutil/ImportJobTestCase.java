@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.testutil;
 
-import java.io.File;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.Sqoop;
@@ -108,7 +110,7 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
   protected void verifyImport(String expectedVal, String [] importCols) {
 
     // paths to where our output file will wind up.
-    Path dataFilePath = getDataFilePath();
+    Path tableDirPath = getTablePath();
 
     removeTableDir();
 
@@ -144,21 +146,47 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
       prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
           getTableName());
 
-      // now actually open the file and check it.
-      File f = new File(dataFilePath.toString());
-      assertTrue("Error: " + dataFilePath.toString() + " does not exist",
-          f.exists());
+      // Now open and check all part-files in the table path until we find
+      // a non-empty one that we can verify contains the value.
 
-      Object readValue = SeqFileReader.getFirstValue(dataFilePath.toString());
-      LOG.info("Read back from sequencefile: " + readValue);
-      // Add trailing '\n' to expected value since SqoopRecord.toString()
-      // encodes the record delim.
-      if (null == expectedVal) {
-        assertEquals("Error validating result from SeqFile", "null\n",
-            readValue.toString());
-      } else {
-        assertEquals("Error validating result from SeqFile", expectedVal + "\n",
-            readValue.toString());
+      FileSystem fs = FileSystem.getLocal(conf);
+      FileStatus [] stats = fs.listStatus(tableDirPath);
+
+      if (stats == null || stats.length == 0) {
+        fail("Error: no files in " + tableDirPath);
+      }
+
+      boolean foundRecord = false;
+      for (FileStatus stat : stats) {
+        if (!stat.getPath().getName().startsWith("part-")
+            && !stat.getPath().getName().startsWith("data-")) {
+          // This isn't a data file. Ignore it.
+          continue;
+        }
+
+        try {
+          Object readValue = SeqFileReader.getFirstValue(
+              stat.getPath().toString());
+          LOG.info("Read back from sequencefile: " + readValue);
+          foundRecord = true;
+          // Add trailing '\n' to expected value since SqoopRecord.toString()
+          // encodes the record delim.
+          if (null == expectedVal) {
+            assertEquals("Error validating result from SeqFile", "null\n",
+                readValue.toString());
+          } else {
+            assertEquals("Error validating result from SeqFile",
+                expectedVal + "\n", readValue.toString());
+          }
+        } catch (EOFException eoe) {
+          // EOF in a file isn't necessarily a problem. We may have some
+          // empty sequence files, which will throw this. Just continue
+          // in the loop.
+        }
+      }
+
+      if (!foundRecord) {
+        fail("Couldn't read any records from SequenceFiles");
       }
     } catch (IOException ioe) {
       fail("IOException: " + ioe.toString());
