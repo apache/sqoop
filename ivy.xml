@@ -117,7 +117,7 @@
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
-      conf="common->default"/>
+      conf="test->default"/>
     <!--
     <dependency org="org.apache.hbase" name="hbase" rev="${hbase.version}"
       conf="common->default" />

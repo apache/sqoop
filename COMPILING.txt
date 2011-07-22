@@ -47,8 +47,10 @@ Furthermore, Sqoop's build can be instrumented with the following:
 
 Sqoop is compiled with ant. Type +ant -p+ to see the list of available targets.
 
-Type +ant jar+ to compile java sources into jar files. Type +ant package+ to
-produce a fully self-hosted build. This will appear in the
+Type +ant+ to compile all java sources. You can then run Sqoop with +bin/sqoop+.
+
+If you want to build everything (including the documentation), type
++ant package+. This will appear in the
 +build/sqoop-(version)/+ directory.
 
 == Testing Sqoop

@@ -110,10 +110,11 @@ if [ -d "$SQOOP_HOME/build/ivy/lib/sqoop" ]; then
   done
 fi
 
+add_to_classpath ${SQOOP_JAR_DIR}
+
 export SQOOP_CLASSPATH
 export SQOOP_JAR_DIR
 export SQOOP_SHIM_DIR
-export SQOOP_JAR=`ls -1 ${SQOOP_JAR_DIR}/sqoop-*.jar | head -n 1`
 export HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
 export HADOOP_HOME
 export HBASE_HOME

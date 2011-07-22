@@ -29,7 +29,7 @@ buildroot=$1
 version=$2
 specifiedgithash=$3
 
-outputdir=${buildroot}/src/com.cloudera.sqoop
+outputdir=${buildroot}/src/com/cloudera/sqoop
 outputfile=${outputdir}/SqoopVersion.java
 
 signature=$specifiedgithash

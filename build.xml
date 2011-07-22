@@ -17,7 +17,7 @@
    limitations under the License.
 -->
 
-<project name="sqoop" default="jar"
+<project name="sqoop" default="jar-all"
     xmlns:artifact="urn:maven-artifact-ant"
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
@@ -33,6 +33,7 @@
   <property name="version" value="1.1.0-SNAPSHOT" />
   <property name="artifact.name" value="${name}-${version}" />
   <property name="dest.jar" value="${artifact.name}.jar" />
+  <property name="test.jar" value="${name}-test-${version}.jar" />
   <property name="git.hash" value="" />
   
   <!-- locations in the source tree -->
@@ -45,18 +46,40 @@
   <property name="docs.src.dir" location="${base.src.dir}/docs" />
   <property name="script.src.dir" location="${base.src.dir}/scripts" />
 
+  <!-- base directory for all build/test process output -->
   <property name="build.dir" location="${basedir}/build" />
+
+  <!-- generated bin scripts -->
   <property name="build.bin.dir" location="${build.dir}/bin" />
+
+  <!-- generated source code -->
   <property name="build.src.dir" location="${build.dir}/src" />
+
+  <!-- staging area for *-sources.jar files -->
+  <property name="build.srcjar.dir" location="${build.dir}/srcjars" />
+
+  <!-- compiled classes for the main sqoop artifact. -->
   <property name="build.classes" location="${build.dir}/classes"/>
+
+  <!-- compiled outputs for the shim artifacts. -->
   <property name="build.shim.dir" location="${build.dir}/shims"/>
   <property name="build.shim.classes" location="${build.shim.dir}/classes"/>
+
+  <!-- root directory for output/intermediate data for testing -->
   <property name="build.test" location="${build.dir}/test"/>
+  <property name="test.log.dir" location="${build.dir}/test/logs"/>
+
+  <!-- compiled test classes -->
   <property name="build.test.classes" location="${build.test}/classes" />
+
+  <!-- compiled "perftest" programs -->
   <property name="build.perftest" location="${build.dir}/perftest"/>
   <property name="build.perftest.classes" location="${build.perftest}/classes"/>
+
+  <!-- generated documentation output directory -->
   <property name="build.javadoc" location="${build.dir}/docs/api" />
-  <property name="test.log.dir" location="${build.dir}/test/logs"/>
+
+
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
   <property name="build.docs.timestamp"
@@ -95,6 +118,7 @@
   <property name="mvn.deploy.url"
       value="https://repository.cloudera.com/content/repositories/${mvn.repo}"/>
   <property name="sqoop.pom" value="${mvn.build.dir}/sqoop.pom" />
+  <property name="sqooptest.pom" value="${mvn.build.dir}/sqoop-test.pom" />
   <property name="apache.shim.pom"
       value="${mvn.build.dir}/sqoop-shim-apache.pom" />
   <property name="cloudera.shim.pom"
@@ -376,10 +400,18 @@
     <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
   </target>
 
+  <target name="jar-test" depends="compile-test" description="Create test jar">
+    <jar jarfile="${build.dir}/${test.jar}" basedir="${build.test.classes}" />
+  </target>
+
   <!-- Ensure that all source code can be built -->
   <target name="compile-all"
       depends="compile,compile-test,jar-all-shims,compile-perf-test"
       description="Compile all sources"/>
+
+  <!-- Create all jars. Note this does not include the perftests. -->
+  <target name="jar-all" depends="jar,jar-test,jar-all-shims"
+      description="Create all jar artifacts" />
 
   <target name="scripts" depends="jar"
       description="Create tool-specific wrapper scripts">
@@ -405,7 +437,7 @@
   </target>
 
   <target name="package"
-      depends="jar,compile-all,docs,javadoc,ivy-retrieve-redist,scripts"
+      depends="jar-all,compile-all,docs,javadoc,ivy-retrieve-redist,scripts"
       description="Create a redistributable package">
 
     <mkdir dir="${dist.dir}"/>
@@ -414,6 +446,13 @@
     <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
       <fileset dir="${build.dir}">
         <include name="${dest.jar}" />
+      </fileset>
+    </copy>
+
+    <!-- copy the test artifact -->
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.dir}">
+        <include name="${test.jar}" />
       </fileset>
     </copy>
 
@@ -689,7 +728,7 @@
     <echo message="Release audit report: ${build.dir}/rat.log" />
   </target>
 
-  <target name="mvn-prep" depends="init,ivy-resolve-common">
+  <target name="mvn-prep" depends="init,ivy-resolve-test">
     <!-- prepare for mvn tasks. -->
 
     <!-- Download maven -->
@@ -704,7 +743,12 @@
 
     <!-- generate our poms from our ivy files. -->
     <mkdir dir="${mvn.build.dir}" />
-    <ivy:makepom ivyfile="ivy.xml" pomfile="${sqoop.pom}"
+    <ivy:makepom ivyfile="ivy/sqoop.xml" pomfile="${sqoop.pom}"
+        settingsRef="${name}.ivy.settings">
+      <mapping conf="default" scope="compile" />
+      <mapping conf="runtime" scope="runtime" />
+    </ivy:makepom>
+    <ivy:makepom ivyfile="ivy/sqoop-test.xml" pomfile="${sqooptest.pom}"
         settingsRef="${name}.ivy.settings">
       <mapping conf="default" scope="compile" />
       <mapping conf="runtime" scope="runtime" />
@@ -731,32 +775,97 @@
     </replaceregexp>
   </target>
 
-  <target name="mvn-install" depends="init,mvn-prep,jar,jar-all-shims"
+  <target name="srcjars" depends="init,jar-all"
+      description="Create source jars">
+    <mkdir dir="${build.srcjar.dir}" />
+    <jar jarfile="${build.srcjar.dir}/${artifact.name}-sources.jar">
+      <fileset dir="${src.dir}" />
+      <fileset dir="${build.src.dir}" />
+    </jar>
+    <jar jarfile="${build.srcjar.dir}/${name}-test-${version}-sources.jar">
+      <fileset dir="${test.dir}" />
+    </jar>
+    <jar jarfile="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar">
+      <fileset dir="${shim.src.dir}/apache/" />
+      <fileset dir="${shim.src.dir}/common/" />
+    </jar>
+    <jar jarfile="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar">
+      <fileset dir="${shim.src.dir}/cloudera/" />
+      <fileset dir="${shim.src.dir}/common/" />
+    </jar>
+  </target>
+
+  <target name="mvn-install" depends="init,mvn-prep,jar-all,srcjars"
       description="Install Sqoop in local m2 repository">
     <artifact:pom file="${sqoop.pom}" id="sqoop" />
     <artifact:install file="${build.dir}/${dest.jar}">
       <pom refid="sqoop" />
+      <attach file="${build.srcjar.dir}/${artifact.name}-sources.jar"
+          classifier="sources" />
+    </artifact:install>
+
+    <artifact:pom file="${sqooptest.pom}" id="sqoop-test" />
+    <artifact:install file="${build.dir}/${test.jar}">
+      <pom refid="sqoop-test" />
+      <attach file="${build.srcjar.dir}/${name}-test-${version}-sources.jar"
+          classifier="sources" />
     </artifact:install>
 
     <artifact:pom file="${apache.shim.pom}" id="sqoop-apache-shim" />
     <artifact:install
         file="${build.shim.dir}/${name}-shim-apache-${version}.jar">
       <pom refid="sqoop-apache-shim" />
+      <attach
+        file="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar"
+        classifier="sources" />
     </artifact:install>
 
     <artifact:pom file="${cloudera.shim.pom}" id="sqoop-cloudera-shim" />
     <artifact:install
         file="${build.shim.dir}/${name}-shim-cloudera-${version}.jar">
       <pom refid="sqoop-cloudera-shim" />
+      <attach
+        file="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar"
+        classifier="sources" />
     </artifact:install>
   </target>
 
-  <target name="mvn-deploy" depends="mvn-prep,jar,jar-all-shims"
+  <target name="mvn-deploy" depends="init,mvn-prep,jar-all,srcjars"
       description="Deploy Sqoop to public maven repository">
     <artifact:pom file="${sqoop.pom}" id="sqoop" />
     <artifact:deploy file="${build.dir}/${dest.jar}">
       <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
       <pom refid="sqoop" />
+      <attach file="${build.srcjar.dir}/${artifact.name}-sources.jar"
+          classifier="sources" />
+    </artifact:deploy>
+
+    <artifact:pom file="${sqooptest.pom}" id="sqoop-test" />
+    <artifact:deploy file="${build.dir}/${test.jar}">
+      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
+      <pom refid="sqoop-test" />
+      <attach file="${build.srcjar.dir}/${name}-test-${version}-sources.jar"
+          classifier="sources" />
+    </artifact:deploy>
+
+    <artifact:pom file="${apache.shim.pom}" id="sqoop-apache-shim" />
+    <artifact:deploy
+        file="${build.shim.dir}/${name}-shim-apache-${version}.jar">
+      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
+      <pom refid="sqoop-apache-shim" />
+      <attach
+        file="${build.srcjar.dir}/${name}-shim-apache-${version}-sources.jar"
+        classifier="sources" />
+    </artifact:deploy>
+
+    <artifact:pom file="${cloudera.shim.pom}" id="sqoop-cloudera-shim" />
+    <artifact:deploy
+        file="${build.shim.dir}/${name}-shim-cloudera-${version}.jar">
+      <remoteRepository id="${mvn.repo.id}" url="${mvn.deploy.url}"/>
+      <pom refid="sqoop-cloudera-shim" />
+      <attach
+        file="${build.srcjar.dir}/${name}-shim-cloudera-${version}-sources.jar"
+        classifier="sources" />
     </artifact:deploy>
   </target>
 
@@ -826,6 +935,8 @@
 
   <target name="clean-cache" description="Remove cached dependencies">
     <delete dir="${user.home}/.ivy2/cache/org.apache.hadoop" />
+    <delete dir="${user.home}/.ivy2/cache/com.cloudera.hadoop" />
+    <delete dir="${user.home}/.ivy2/cache/com.cloudera.hadoop" />
     <delete file="${ivy.jar}" />
   </target>
 
@@ -903,7 +1014,7 @@
         file="${cobertura.home}/cobertura.jar" />
   </target>
 
-  <target name="checkstyle" depends="ivy-retrieve-checkstyle, compile-all"
+  <target name="checkstyle" depends="ivy-retrieve-checkstyle,compile-all"
       description="Check source code conventions">
     <taskdef resource="checkstyletask.properties">
       <classpath refid="${name}.checkstyle.classpath" />
