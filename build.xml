@@ -32,6 +32,7 @@
   <!-- locations in the source tree -->
   <property name="src.dir" location="${basedir}/src/java" />
   <property name="test.dir" location="${basedir}/src/test" />
+  <property name="shim.src.dir" location="${basedir}/src/shims" />
   <property name="lib.dir" location="${basedir}/lib" />
   <property name="docs.src.dir" location="${basedir}/src/docs" />
 
@@ -101,7 +102,8 @@
     -->
   <path id="lib.path">
     <fileset dir="${lib.dir}">
-      <include name="**/*.jar" />
+      <include name="*.jar" />
+      <include name="${hadoop.dist}/*.jar" />
     </fileset>
   </path>
 
@@ -131,9 +133,35 @@
   <!-- "init" target reserved for future setup purposes. --> 
   <target name="init" />
 
+  <!-- Compile a shim class so Sqoop can run with the specified hadoop.dist -->
+  <target name="compile-one-shim"
+      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop">
+    <mkdir dir="${build.classes}" />
+    <javac
+        encoding="${build.encoding}"
+        destdir="${build.classes}"
+        debug="${javac.debug}"
+        deprecation="${javac.deprecation}">
+      <classpath refid="compile.classpath"/>
+      <src path="${shim.src.dir}/${hadoop.dist}" />
+      <src path="${shim.src.dir}/common" />
+      <include name="**/*.java" />
+    </javac>
+  </target>
+
+  <!-- Compile all shim classes (for a distribution jar) -->
+  <target name="compile-all-shims" depends="init">
+    <antcall target="compile-one-shim" inheritAll="false">
+      <param name="hadoop.dist" value="apache" />
+    </antcall>
+    <antcall target="compile-one-shim" inheritAll="false">
+      <param name="hadoop.dist" value="cloudera" />
+    </antcall>
+  </target>
+  
   <!-- Compile core classes for the project -->
   <target name="compile"
-      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop"
+      depends="init, ivy-retrieve-common, ivy-retrieve-hadoop, compile-one-shim"
       description="Compile core classes for the project">
     <!-- don't use an out-of-date instrumented build. -->
     <delete dir="${cobertura.class.dir}" />
@@ -171,11 +199,14 @@
   </target>
 
   <!-- Ensure that all source code can be built -->
-  <target name="compile-all" depends="compile,compile-test"
+  <target name="compile-all" depends="compile,compile-test,compile-all-shims"
       description="Compile all sources"/>
 
   <target name="package" depends="jar,compile-all,docs,ivy-retrieve-redist"
       description="Create a redistributable package">
+
+    <!-- rebuild the jar to include all shims. -->
+    <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
 
     <mkdir dir="${dist.dir}"/>
 
@@ -194,6 +225,9 @@
         <exclude name="build/**" />
         <exclude name="lib/**" />
         <exclude name=".git/**" />
+        <exclude name="tags" />
+        <exclude name=".project" />
+        <exclude name=".classpath" />
       </fileset>
     </copy>
 
@@ -205,7 +239,7 @@
       </fileset>
     </copy>
 
-    <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false">
       <fileset dir="${lib.dir}">
         <include name="**/*" />
         <exclude name="ivy*" />

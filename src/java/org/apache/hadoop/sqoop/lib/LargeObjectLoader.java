@@ -42,6 +42,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
@@ -81,7 +82,8 @@ public class LargeObjectLoader {
    */
   private String getNextLobFileName() {
     String file = "_lob/obj_" + context.getConfiguration().get(
-        JobContext.TASK_ID, "unknown_task_id") + nextLobFileId;
+        HadoopShim.get().getTaskIdProperty(), "unknown_task_id")
+        + nextLobFileId;
     nextLobFileId++;
 
     return file;

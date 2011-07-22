@@ -47,7 +47,7 @@
     <ibiblio name="apache-snapshot" root="${snapshot.apache.org}"
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
 
-    <filesystem name="fs" m2compatible="true" force="true">
+    <filesystem name="fs" m2compatible="true">
        <artifact pattern="${repo.dir}/org/apache/hadoop/[module]/[revision]/[module]-[revision].[ext]"/>
        <ivy pattern="${repo.dir}/org/apache/hadoop/[module]/[revision]/[module]-[revision].pom"/>
     </filesystem>

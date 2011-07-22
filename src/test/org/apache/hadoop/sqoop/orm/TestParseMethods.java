@@ -31,12 +31,12 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapreduce.server.jobtracker.JTConfig;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
@@ -118,7 +118,7 @@ public class TestParseMethods extends ImportJobTestCase {
       job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
       // use local mode in the same JVM.
-      job.set(JTConfig.JT_IPC_ADDRESS, "local");
+      HadoopShim.get().setJobtrackerAddr(job, "local");
       job.set("fs.default.name", "file:///");
 
       String warehouseDir = getWarehouseDir();

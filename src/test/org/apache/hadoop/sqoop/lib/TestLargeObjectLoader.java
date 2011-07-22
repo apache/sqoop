@@ -35,55 +35,13 @@ import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContext;
-import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.testutil.MockResultSet;
 
 /**
  * Test deserialization of ClobRef and BlobRef fields.
  */
 public class TestLargeObjectLoader extends TestCase {
-
-  /**
-   * A mock MapContext that uses FileOutputCommitter.
-   * This MapContext is actually serving two roles here; when writing the
-   * CLOB files, its OutputCommitter is used to determine where to write
-   * the CLOB data, as these are placed in the task output work directory.
-   * When reading the CLOB data back for verification, we use the
-   * getInputSplit() to determine where to read our source data from--the same
-   * directory. We are repurposing the same context for both output and input.
-   */
-  private static class MockMapContextWithCommitter<K1, V1, K2, V2>
-      extends MockMapContext<K1, V1, K2, V2> {
-    private Path outputDir;
-    private Configuration conf;
-
-    public MockMapContextWithCommitter(Configuration conf, Path outDir) {
-      super(new ArrayList<Pair<K1, V1>>(), new Counters());
-
-      this.outputDir = outDir;
-      this.conf = conf;
-    }
-
-    @Override
-    public OutputCommitter getOutputCommitter() {
-      try {
-        return new FileOutputCommitter(outputDir, this);
-      } catch (IOException ioe) {
-        return null;
-      }
-    }
-
-    @Override
-    public InputSplit getInputSplit() {
-      return new FileSplit(new Path(outputDir, "inputFile"), 0, 0, new String[0]);
-    }
-
-    @Override
-    public Configuration getConfiguration() {
-      return conf;
-    }
-  }
 
   protected Configuration conf;
   protected MapContext mapContext;
@@ -100,7 +58,15 @@ public class TestLargeObjectLoader extends TestCase {
     }
     fs.mkdirs(outDir);
 
-    mapContext = new MockMapContextWithCommitter(conf, outDir);
+    /* A mock MapContext that uses FileOutputCommitter.
+     * This MapContext is actually serving two roles here; when writing the
+     * CLOB files, its OutputCommitter is used to determine where to write
+     * the CLOB data, as these are placed in the task output work directory.
+     * When reading the CLOB data back for verification, we use the
+     * getInputSplit() to determine where to read our source data from--the same
+     * directory. We are repurposing the same context for both output and input.
+     */
+    mapContext = HadoopShim.get().getMapContextForIOPath(conf, outDir);
     loader = new LargeObjectLoader(mapContext);
   }
 

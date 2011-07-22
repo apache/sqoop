@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.sqoop.manager.MySQLUtils;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.AsyncSink;
 import org.apache.hadoop.sqoop.util.JdbcUrl;
 import org.apache.hadoop.sqoop.util.LoggingAsyncSink;
@@ -97,7 +98,8 @@ public class MySQLExportMapper<KEYIN, VALIN>
    * A File object representing the FIFO is in 'fifoFile'.
    */
   private void initMySQLImportProcess() throws IOException {
-    String tmpDir = conf.get(JobContext.JOB_LOCAL_DIR, "/tmp/");
+    String tmpDir = conf.get(HadoopShim.get().getJobLocalDirProperty(),
+        "/tmp/");
     this.fifoFile = new File(tmpDir,
         conf.get(MySQLUtils.TABLE_NAME_KEY, "UNKNOWN_TABLE") + ".txt");
     String filename = fifoFile.toString();

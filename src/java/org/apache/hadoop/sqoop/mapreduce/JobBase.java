@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 
 import org.apache.hadoop.sqoop.SqoopOptions;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 
 /**
@@ -175,7 +176,8 @@ public class JobBase {
       numMapTasks = SqoopOptions.DEFAULT_NUM_MAPPERS;
       LOG.warn("Invalid mapper count; using " + numMapTasks + " mappers.");
     }
-    job.getConfiguration().setInt(JobContext.NUM_MAPS, numMapTasks);
+
+    HadoopShim.get().setJobNumMaps(job, numMapTasks);
     job.setNumReduceTasks(0);
     return numMapTasks;
   }

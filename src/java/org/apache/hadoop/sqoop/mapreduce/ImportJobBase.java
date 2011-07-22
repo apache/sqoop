@@ -36,7 +36,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
@@ -47,6 +46,7 @@ import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.orm.TableClassName;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
@@ -122,8 +122,7 @@ public class ImportJobBase extends JobBase {
     counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
       .findCounter("HDFS_BYTES_WRITTEN").getValue());
     LOG.info("Transferred " + counters.toString());
-    long numRecords = job.getCounters()
-      .findCounter(TaskCounter.MAP_OUTPUT_RECORDS).getValue();
+    long numRecords = HadoopShim.get().getNumMapOutputRecords(job);
     LOG.info("Retrieved " + numRecords + " records.");
     return success;
   }

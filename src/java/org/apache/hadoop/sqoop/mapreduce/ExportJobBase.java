@@ -36,7 +36,6 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -49,6 +48,7 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.ExportJobContext;
 import org.apache.hadoop.sqoop.orm.TableClassName;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.PerfCounters;
@@ -113,7 +113,7 @@ public class ExportJobBase extends JobBase {
     job.setMapperClass(getMapperClass());
 
     // Concurrent writes of the same records would be problematic.
-    job.setMapSpeculativeExecution(false);
+    HadoopShim.get().setJobMapSpeculativeExecution(job, false);
 
     job.setMapOutputKeyClass(SqoopRecord.class);
     job.setMapOutputValueClass(NullWritable.class);
@@ -138,8 +138,7 @@ public class ExportJobBase extends JobBase {
     counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
       .findCounter("HDFS_BYTES_READ").getValue());
     LOG.info("Transferred " + counters.toString());
-    long numRecords = job.getCounters()
-      .findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
+    long numRecords = HadoopShim.get().getNumMapInputRecords(job);
     LOG.info("Exported " + numRecords + " records.");
 
     return success;

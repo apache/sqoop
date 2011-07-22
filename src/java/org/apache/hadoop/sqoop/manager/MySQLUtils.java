@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.sqoop.shims.HadoopShim;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 
 /**
@@ -97,7 +98,8 @@ public final class MySQLUtils {
   public static String writePasswordFile(Configuration conf)
       throws IOException {
     // Create the temp file to hold the user's password.
-    String tmpDir = conf.get(JobContext.JOB_LOCAL_DIR, "/tmp/");
+    String tmpDir = conf.get(
+        HadoopShim.get().getJobLocalDirProperty(), "/tmp/");
     File tempFile = File.createTempFile("mysql-cnf",".cnf", new File(tmpDir));
 
     // Make the password file only private readable.
