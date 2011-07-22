@@ -66,10 +66,6 @@ public class ExportJobBase extends JobBase {
 
   protected ExportJobContext context;
 
-  public ExportJobBase() {
-    this(null);
-  }
-
   public ExportJobBase(final ExportJobContext ctxt) {
     this(ctxt, null, null, null);
   }
@@ -189,6 +185,19 @@ public class ExportJobBase extends JobBase {
       }
     } finally {
       unloadJars();
+    }
+  }
+
+  /**
+   * @return true if the input directory contains SequenceFiles.
+   */
+  protected boolean inputIsSequenceFiles() {
+    try {
+      return ExportInputFormat.isSequenceFiles(
+          context.getOptions().getConf(), getInputPath());
+    } catch (IOException ioe) {
+      LOG.warn("Could not check file format for export; assuming text");
+      return false;
     }
   }
 }

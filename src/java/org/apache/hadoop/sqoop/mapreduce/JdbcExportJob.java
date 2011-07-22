@@ -49,17 +49,7 @@ public class JdbcExportJob extends ExportJobBase {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-
-    boolean isSeqFiles;
-    try {
-      isSeqFiles = ExportInputFormat.isSequenceFiles(
-          context.getOptions().getConf(), getInputPath());
-    } catch (IOException ioe) {
-      LOG.warn("Could not check file format for export; assuming text");
-      isSeqFiles = false;
-    }
-
-    if (isSeqFiles) {
+    if (inputIsSequenceFiles()) {
       return SequenceFileExportMapper.class;
     } else {
       return TextExportMapper.class;

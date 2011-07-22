@@ -43,7 +43,7 @@ Database    version  +--direct+ support?  connect string matches
 HSQLDB      1.8.0+   No                   +jdbc:hsqldb:*//+
 MySQL       5.0+     Yes                  +jdbc:mysql://+
 Oracle      10.2.0+  No                   +jdbc:oracle:*//+
-PostgreSQL  8.3+     Yes                  +jdbc:postgresql://+
+PostgreSQL  8.3+     Yes (import only)    +jdbc:postgresql://+
 ----------------------------------------------------------------
 
 Sqoop may work with older versions of the databases listed, but we have

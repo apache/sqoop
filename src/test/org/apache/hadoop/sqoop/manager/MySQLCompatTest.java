@@ -49,13 +49,13 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
 
   @Override
   protected String getConnectString() {
-    return MySQLUtils.CONNECT_STRING;
+    return MySQLTestUtils.CONNECT_STRING;
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLUtils.getCurrentUser());
+    opts.setUsername(MySQLTestUtils.getCurrentUser());
     return opts;
 
   }

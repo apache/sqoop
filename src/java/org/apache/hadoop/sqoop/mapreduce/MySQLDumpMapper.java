@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.lib.FieldFormatter;
 import org.apache.hadoop.sqoop.lib.RecordParser;
+import org.apache.hadoop.sqoop.manager.MySQLUtils;
 import org.apache.hadoop.sqoop.util.AsyncSink;
 import org.apache.hadoop.sqoop.util.DirectImportUtils;
 import org.apache.hadoop.sqoop.util.ErrorableAsyncSink;
@@ -57,27 +58,6 @@ public class MySQLDumpMapper
     extends Mapper<String, NullWritable, String, NullWritable> {
 
   public static final Log LOG = LogFactory.getLog(MySQLDumpMapper.class.getName());
-
-  public static final String OUTPUT_FIELD_DELIM_KEY =
-      "sqoop.output.field.delim";
-  public static final String OUTPUT_RECORD_DELIM_KEY =
-      "sqoop.output.record.delim";
-  public static final String OUTPUT_ENCLOSED_BY_KEY =
-      "sqoop.output.enclosed.by";
-  public static final String OUTPUT_ESCAPED_BY_KEY =
-      "sqoop.output.escaped.by";
-  public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
-      "sqoop.output.enclose.required";
-  public static final String TABLE_NAME_KEY =
-      DBConfiguration.INPUT_TABLE_NAME_PROPERTY;
-  public static final String CONNECT_STRING_KEY = DBConfiguration.URL_PROPERTY;
-  public static final String USERNAME_KEY = DBConfiguration.USERNAME_PROPERTY;
-  public static final String PASSWORD_KEY = DBConfiguration.PASSWORD_PROPERTY;
-  public static final String WHERE_CLAUSE_KEY =
-      DBConfiguration.INPUT_CONDITIONS_PROPERTY;
-  public static final String EXTRA_ARGS_KEY =
-      "sqoop.mysqldump.extra.args";
-
 
   private Configuration conf;
 
@@ -231,18 +211,20 @@ public class MySQLDumpMapper
           r = new BufferedReader(new InputStreamReader(this.stream));
 
           char outputFieldDelim = (char) conf.getInt(
-              OUTPUT_FIELD_DELIM_KEY, '\000');
+              MySQLUtils.OUTPUT_FIELD_DELIM_KEY, '\000');
           String outputFieldDelimStr = "" + outputFieldDelim;
           char outputRecordDelim = (char) conf.getInt(
-              OUTPUT_RECORD_DELIM_KEY, '\000');
+              MySQLUtils.OUTPUT_RECORD_DELIM_KEY, '\000');
           String outputRecordDelimStr = "" + outputRecordDelim;
-          char outputEnclose = (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY,
+          char outputEnclose = (char) conf.getInt(
+              MySQLUtils.OUTPUT_ENCLOSED_BY_KEY,
               '\000');
           String outputEncloseStr = "" + outputEnclose;
-          char outputEscape = (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, '\000');
+          char outputEscape = (char) conf.getInt(
+              MySQLUtils.OUTPUT_ESCAPED_BY_KEY, '\000');
           String outputEscapeStr = "" + outputEscape;
           boolean outputEncloseRequired = conf.getBoolean(
-              OUTPUT_ENCLOSE_REQUIRED_KEY, false);
+              MySQLUtils.OUTPUT_ENCLOSE_REQUIRED_KEY, false);
           char [] encloseFor = { outputFieldDelim, outputRecordDelim };
 
           // Actually do the read/write transfer loop here.
@@ -318,49 +300,6 @@ public class MySQLDumpMapper
     }
   }
 
-  private static final String MYSQL_DUMP_CMD = "mysqldump";
-
-  /**
-   * @return true if the user's output delimiters match those used by mysqldump.
-   * fields: ,
-   * lines: \n
-   * optional-enclose: \'
-   * escape: \\
-   */
-  private boolean outputDelimsAreMySQL(Configuration conf) {
-    return ',' == (char) conf.getInt(OUTPUT_FIELD_DELIM_KEY, '\000')
-        && '\n' == (char) conf.getInt(OUTPUT_RECORD_DELIM_KEY, '\000')
-        && '\'' == (char) conf.getInt(OUTPUT_ENCLOSED_BY_KEY, '\000')
-        && '\\' == (char) conf.getInt(OUTPUT_ESCAPED_BY_KEY, '\000')
-        && !conf.getBoolean(OUTPUT_ENCLOSE_REQUIRED_KEY, false);
-  }
-
-  /**
-   * Writes the user's password to a tmp file with 0600 permissions.
-   * @return the filename used.
-   */
-  private String writePasswordFile() throws IOException {
-    // Create the temp file to hold the user's password.
-    String tmpDir = conf.get(JobContext.JOB_LOCAL_DIR, "/tmp/");
-    File tempFile = File.createTempFile("mysql-cnf",".cnf", new File(tmpDir));
-
-    // Make the password file only private readable.
-    DirectImportUtils.setFilePermissions(tempFile, "0600");
-
-    // If we're here, the password file is believed to be ours alone.
-    // The inability to set chmod 0600 inside Java is troublesome. We have to trust
-    // that the external 'chmod' program in the path does the right thing, and returns
-    // the correct exit status. But given our inability to re-read the permissions
-    // associated with a file, we'll have to make do with this.
-    String password = conf.get(PASSWORD_KEY);
-    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile)));
-    w.write("[client]\n");
-    w.write("password=" + password + "\n");
-    w.close();
-
-    return tempFile.toString();
-  }
-
   /**
    * Import the table into HDFS by using mysqldump to pull out the data from
    * the database and upload the files directly to HDFS.
@@ -368,17 +307,16 @@ public class MySQLDumpMapper
   public void map(String splitConditions, NullWritable val, Context context)
       throws IOException, InterruptedException {
 
-
     LOG.info("Beginning mysqldump fast path import");
 
     ArrayList<String> args = new ArrayList<String>();
-    String tableName = conf.get(TABLE_NAME_KEY);
+    String tableName = conf.get(MySQLUtils.TABLE_NAME_KEY);
 
     // We need to parse the connect string URI to determine the database
     // name. Using java.net.URL directly on the connect string will fail because
     // Java doesn't respect arbitrary JDBC-based schemes. So we chop off the scheme
     // (everything before '://') and replace it with 'http', which we know will work.
-    String connectString = conf.get(CONNECT_STRING_KEY);
+    String connectString = conf.get(MySQLUtils.CONNECT_STRING_KEY);
     String databaseName = JdbcUrl.getDatabaseName(connectString);
     String hostname = JdbcUrl.getHostName(connectString);
     int port = JdbcUrl.getPort(connectString);
@@ -387,11 +325,12 @@ public class MySQLDumpMapper
       throw new IOException("Could not determine database name");
     }
 
-    LOG.info("Performing import of table " + tableName + " from database " + databaseName);
+    LOG.info("Performing import of table " + tableName + " from database "
+        + databaseName);
 
-    args.add(MYSQL_DUMP_CMD); // requires that this is on the path.
+    args.add(MySQLUtils.MYSQL_DUMP_CMD); // requires that this is on the path.
 
-    String password = conf.get(PASSWORD_KEY);
+    String password = conf.get(MySQLUtils.PASSWORD_KEY);
     String passwordFile = null;
 
     Process p = null;
@@ -401,14 +340,14 @@ public class MySQLDumpMapper
     try {
       // --defaults-file must be the first argument.
       if (null != password && password.length() > 0) {
-        passwordFile = writePasswordFile();
+        passwordFile = MySQLUtils.writePasswordFile(conf);
         args.add("--defaults-file=" + passwordFile);
       }
 
       // Don't use the --where="<whereClause>" version because spaces in it can
       // confuse Java, and adding in surrounding quotes confuses Java as well.
-      String whereClause = conf.get(WHERE_CLAUSE_KEY, "(1=1)") + " AND ("
-          + splitConditions + ")";
+      String whereClause = conf.get(MySQLUtils.WHERE_CLAUSE_KEY, "(1=1)")
+          + " AND (" + splitConditions + ")";
       args.add("-w");
       args.add(whereClause);
 
@@ -423,13 +362,13 @@ public class MySQLDumpMapper
       args.add("--quick"); // no buffering
       args.add("--single-transaction");
 
-      String username = conf.get(USERNAME_KEY);
+      String username = conf.get(MySQLUtils.USERNAME_KEY);
       if (null != username) {
         args.add("--user=" + username);
       }
 
       // If the user supplied extra args, add them here.
-      String [] extra = conf.getStrings(EXTRA_ARGS_KEY);
+      String [] extra = conf.getStrings(MySQLUtils.EXTRA_ARGS_KEY);
       if (null != extra) {
         for (String arg : extra) {
           args.add(arg);
@@ -451,7 +390,7 @@ public class MySQLDumpMapper
       // read from the stdout pipe into the HDFS writer.
       InputStream is = p.getInputStream();
 
-      if (outputDelimsAreMySQL(conf)) {
+      if (MySQLUtils.outputDelimsAreMySQL(conf)) {
         LOG.debug("Output delimiters conform to mysqldump; using straight copy"); 
         sink = new CopyingAsyncSink(context, counters);
       } else {

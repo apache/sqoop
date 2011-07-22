@@ -56,3 +56,21 @@ parameters. Providing these options will disable autogeneration of a new
 class based on the target table.
 
 
+Exporting to MySQL
+~~~~~~~~~~~~~~~~~~
+
+MySQL supports a direct mode for exports. If the +--direct+ argument is given
+when exporting to a MySQL database, Sqoop will use instances of +mysqlimport+
+to manage the export process.
+
+For performance, each writer will commit approximately every 32 MB of exported
+data. This can be controlled by passing the following argument _before_ any
+named parameters: +-D sqoop.mysql.export.checkpoint.bytes=_size_+, where _size_
+is a value in bytes. Setting _size_ to 0 will disable intermediate checkpoints,
+although individual files being exported will continue to be committed
+independently of one another.
+
+IMPORTANT: Note that any arguments to Sqoop that are of the form
++-D parameter=value+ must appear before any named arguments (e.g., +--connect+,
++--table+, etc).
+

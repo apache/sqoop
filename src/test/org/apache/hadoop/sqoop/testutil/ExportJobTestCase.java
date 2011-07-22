@@ -45,6 +45,18 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   }
 
   /**
+   * @return a connection to the database under test.
+   */
+  protected Connection getConnection() {
+    try {
+      return getTestServer().getConnection();
+    } catch (SQLException sqlE) {
+      LOG.error("Could not get connection to test server: " + sqlE);
+      return null;
+    }
+  }
+
+  /**
    * Create the argv to pass to Sqoop
    * @param includeHadoopFlags if true, then include -D various.settings=values
    * @return the argv as an array of strings.
@@ -56,12 +68,26 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
+    // Any additional Hadoop flags (-D foo=bar) are prepended.
+    if (null != additionalArgv) {
+      boolean prevIsFlag = false;
+      for (String arg : additionalArgv) {
+        if (arg.equals("-D")) {
+          args.add(arg);
+          prevIsFlag = true;
+        } else if (prevIsFlag) {
+          args.add(arg);
+          prevIsFlag = false;
+        }
+      }
+    }
+
     args.add("--table");
     args.add(getTableName());
     args.add("--export-dir");
     args.add(getTablePath().toString());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
     args.add("--fields-terminated-by");
     args.add("\\t");
     args.add("--lines-terminated-by");
@@ -69,10 +95,20 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     args.add("-m");
     args.add("1");
 
-
+    // The rest of the additional args are appended.
     if (null != additionalArgv) {
+      boolean prevIsFlag = false;
       for (String arg : additionalArgv) {
-        args.add(arg);
+        if (arg.equals("-D")) {
+          prevIsFlag = true;
+          continue;
+        } else if (prevIsFlag) {
+          prevIsFlag = false;
+          continue;
+        } else {
+          // normal argument.
+          args.add(arg);
+        }
       }
     }
 
@@ -87,7 +123,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
 
   /** @return the minimum 'id' value in the table */
   protected int getMinRowId() throws SQLException {
-    Connection conn = getTestServer().getConnection();
+    Connection conn = getConnection();
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MIN(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -109,7 +145,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
 
   /** @return the maximum 'id' value in the table */
   protected int getMaxRowId() throws SQLException {
-    Connection conn = getTestServer().getConnection();
+    Connection conn = getConnection();
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MAX(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -135,7 +171,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
    * into the database.
    */
   protected void verifyExport(int expectedNumRecords) throws IOException, SQLException {
-    Connection conn = getTestServer().getConnection();
+    Connection conn = getConnection();
 
     LOG.info("Verifying export: " + getTableName());
     // Check that we got back the correct number of records.

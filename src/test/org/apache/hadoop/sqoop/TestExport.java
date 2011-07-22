@@ -60,11 +60,13 @@ public class TestExport extends ExportJobTestCase {
     // start the server
     super.setUp();
 
-    // throw away any existing data that might be in the database.
-    try {
-      this.getTestServer().dropExistingSchema();
-    } catch (SQLException sqlE) {
-      fail(sqlE.toString());
+    if (useHsqldbTestServer()) {
+      // throw away any existing data that might be in the database.
+      try {
+        this.getTestServer().dropExistingSchema();
+      } catch (SQLException sqlE) {
+        fail(sqlE.toString());
+      }
     }
   }
 
@@ -190,7 +192,8 @@ public class TestExport extends ExportJobTestCase {
       // Instantiate the value record object via reflection. 
       Class cls = Class.forName(className, true,
           Thread.currentThread().getContextClassLoader());
-      SqoopRecord record = (SqoopRecord) ReflectionUtils.newInstance(cls, new Configuration());
+      SqoopRecord record = (SqoopRecord) ReflectionUtils.newInstance(
+          cls, new Configuration());
 
       // Create the SequenceFile.
       Configuration conf = new Configuration();
@@ -199,8 +202,8 @@ public class TestExport extends ExportJobTestCase {
       Path tablePath = getTablePath();
       Path filePath = new Path(tablePath, "part" + fileNum);
       fs.mkdirs(tablePath);
-      SequenceFile.Writer w =
-          SequenceFile.createWriter(fs, conf, filePath, LongWritable.class, cls);
+      SequenceFile.Writer w = SequenceFile.createWriter(
+          fs, conf, filePath, LongWritable.class, cls);
 
       // Now write the data.
       int startId = fileNum * numRecords;
@@ -229,14 +232,23 @@ public class TestExport extends ExportJobTestCase {
     return "col" + idx;
   }
 
+  /**
+   * Return a SQL statement that drops a table, if it exists.
+   * @param tableName the table to drop.
+   * @return the SQL statement to drop that table.
+   */
+  protected String getDropTableStatement(String tableName) {
+    return "DROP TABLE " + tableName + " IF EXISTS";
+  }
+
   /** Create the table definition to export to, removing any prior table.
       By specifying ColumnGenerator arguments, you can add extra columns
       to the table of arbitrary type.
    */
   public void createTable(ColumnGenerator... extraColumns) throws SQLException {
-    Connection conn = getTestServer().getConnection();
+    Connection conn = getConnection();
     PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE " + getTableName() + " IF EXISTS",
+        getDropTableStatement(getTableName()),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();
@@ -278,7 +290,7 @@ public class TestExport extends ExportJobTestCase {
    */
   private void assertColValForRowId(int id, String colName, String expectedVal)
       throws SQLException {
-    Connection conn = getTestServer().getConnection();
+    Connection conn = getConnection();
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
 
     PreparedStatement statement = conn.prepareStatement(
@@ -317,8 +329,39 @@ public class TestExport extends ExportJobTestCase {
     assertColValForRowId(maxId, colName, expectedMax);
   }
 
-  private void multiFileTest(int numFiles, int recordsPerMap, int numMaps)
-      throws IOException, SQLException {
+  /**
+   * Create a new string array with 'moreEntries' appended to the 'entries'
+   * array.
+   * @param entries initial entries in the array
+   * @param moreEntries variable-length additional entries.
+   * @return an array containing entries with all of moreEntries appended.
+   */
+  protected String [] newStrArray(String [] entries, String... moreEntries)  {
+    if (null == moreEntries) {
+      return entries;
+    }
+
+    if (null == entries) {
+      entries = new String[0];
+    }
+
+    int newSize = entries.length + moreEntries.length;
+    String [] out = new String [newSize];
+
+    int i = 0;
+    for (String e : entries) {
+      out[i++] = e;
+    }
+
+    for (String e : moreEntries) {
+      out[i++] = e;
+    }
+
+    return out;
+  }
+
+  protected void multiFileTest(int numFiles, int recordsPerMap, int numMaps,
+      String... argv) throws IOException, SQLException {
 
     final int TOTAL_RECORDS = numFiles * recordsPerMap;
 
@@ -331,7 +374,7 @@ public class TestExport extends ExportJobTestCase {
       }
 
       createTable();
-      runExport(getArgv(true, "-m", "" + numMaps));
+      runExport(getArgv(true, newStrArray(argv, "-m", "" + numMaps)));
       verifyExport(TOTAL_RECORDS);
     } finally {
       LOG.info("multi-file test complete");
@@ -536,16 +579,16 @@ public class TestExport extends ExportJobTestCase {
   }
 
   public void testNumericTypes() throws IOException, SQLException {
-    final int TOTAL_RECORDS = 10;
+    final int TOTAL_RECORDS = 9;
 
     // Check floating point values
     ColumnGenerator genFloat = new ColumnGenerator() {
       public String getExportText(int rowNum) {
-        double v = 3.141 * (double) rowNum;
+        double v = 3.141 * (double) (rowNum + 1);
         return "" + v;
       }
       public String getVerifyText(int rowNum) {
-        double v = 3.141 * (double) rowNum;
+        double v = 3.141 * (double) (rowNum + 1);
         return "" + v;
       }
       public String getType() {
@@ -566,7 +609,7 @@ public class TestExport extends ExportJobTestCase {
         return "2.718" + digit;
       }
       public String getType() {
-        return "NUMERIC";
+        return "NUMERIC(6,4)";
       }
     };
 

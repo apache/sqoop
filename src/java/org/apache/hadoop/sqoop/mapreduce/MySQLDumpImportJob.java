@@ -46,6 +46,7 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.manager.ConnManager;
+import org.apache.hadoop.sqoop.manager.MySQLUtils;
 import org.apache.hadoop.sqoop.orm.TableClassName;
 import org.apache.hadoop.sqoop.util.ClassLoaderStack;
 import org.apache.hadoop.sqoop.util.ImportException;
@@ -108,19 +109,19 @@ public class MySQLDumpImportJob extends ImportJobBase {
           mgr.escapeColName(splitByCol), sqlColNames);
 
       Configuration conf = job.getConfiguration();
-      conf.setInt(MySQLDumpMapper.OUTPUT_FIELD_DELIM_KEY,
+      conf.setInt(MySQLUtils.OUTPUT_FIELD_DELIM_KEY,
           options.getOutputFieldDelim());
-      conf.setInt(MySQLDumpMapper.OUTPUT_RECORD_DELIM_KEY,
+      conf.setInt(MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
           options.getOutputRecordDelim());
-      conf.setInt(MySQLDumpMapper.OUTPUT_ENCLOSED_BY_KEY,
+      conf.setInt(MySQLUtils.OUTPUT_ENCLOSED_BY_KEY,
           options.getOutputEnclosedBy());
-      conf.setInt(MySQLDumpMapper.OUTPUT_ESCAPED_BY_KEY,
+      conf.setInt(MySQLUtils.OUTPUT_ESCAPED_BY_KEY,
           options.getOutputEscapedBy());
-      conf.setBoolean(MySQLDumpMapper.OUTPUT_ENCLOSE_REQUIRED_KEY,
+      conf.setBoolean(MySQLUtils.OUTPUT_ENCLOSE_REQUIRED_KEY,
           options.isOutputEncloseRequired());
       String [] extraArgs = options.getExtraArgs();
       if (null != extraArgs) {
-        conf.setStrings(MySQLDumpMapper.EXTRA_ARGS_KEY, extraArgs);
+        conf.setStrings(MySQLUtils.EXTRA_ARGS_KEY, extraArgs);
       }
 
       LOG.debug("Using InputFormat: " + inputFormatClass);

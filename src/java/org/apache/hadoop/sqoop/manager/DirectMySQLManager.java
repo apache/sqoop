@@ -36,7 +36,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.sqoop.SqoopOptions;
 import org.apache.hadoop.sqoop.mapreduce.MySQLDumpImportJob;
+import org.apache.hadoop.sqoop.mapreduce.MySQLExportJob;
 import org.apache.hadoop.sqoop.util.ImportException;
+import org.apache.hadoop.sqoop.util.ExportException;
 
 /**
  * Manages direct connections to MySQL databases
@@ -54,6 +56,7 @@ public class DirectMySQLManager extends MySQLManager {
    * Import the table into HDFS by using mysqldump to pull out the data from
    * the database and upload the files directly to HDFS.
    */
+  @Override
   public void importTable(ImportJobContext context)
       throws IOException, ImportException {
 
@@ -91,6 +94,17 @@ public class DirectMySQLManager extends MySQLManager {
     }
 
     importer.runImport(tableName, jarFile, splitCol, options.getConf());
+  }
+
+  /**
+   * Export the table from HDFS by using mysqlimport to insert the data
+   * back into the database.
+   */
+  @Override
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    MySQLExportJob exportJob = new MySQLExportJob(context);
+    exportJob.runExport();
   }
 }
 

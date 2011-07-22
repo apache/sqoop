@@ -29,9 +29,9 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Utilities for mysql-based tests.
  */
-public final class MySQLUtils {
+public final class MySQLTestUtils {
 
-  public static final Log LOG = LogFactory.getLog(MySQLUtils.class.getName());
+  public static final Log LOG = LogFactory.getLog(MySQLTestUtils.class.getName());
 
   public static final String HOST_URL = "jdbc:mysql://localhost/";
 
@@ -39,7 +39,7 @@ public final class MySQLUtils {
   public static final String TABLE_NAME = "EMPLOYEES_MYSQL";
   public static final String CONNECT_STRING = HOST_URL + MYSQL_DATABASE_NAME;
 
-  private MySQLUtils() { }
+  private MySQLTestUtils() { }
 
   /** @return the current username. */
   public static String getCurrentUser() {
