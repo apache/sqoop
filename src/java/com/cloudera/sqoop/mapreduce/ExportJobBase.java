@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -234,16 +235,23 @@ public class ExportJobBase extends JobBase {
   protected boolean runJob(Job job) throws ClassNotFoundException, IOException,
       InterruptedException {
 
-    PerfCounters counters = new PerfCounters();
-    counters.startClock();
+    PerfCounters perfCounters = new PerfCounters();
+    perfCounters.startClock();
 
     boolean success = job.waitForCompletion(true);
-    counters.stopClock();
-    counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
-      .findCounter("HDFS_BYTES_READ").getValue());
-    LOG.info("Transferred " + counters.toString());
-    long numRecords = HadoopShim.get().getNumMapInputRecords(job);
-    LOG.info("Exported " + numRecords + " records.");
+    perfCounters.stopClock();
+
+    Counters jobCounters = job.getCounters();
+    // If the job has been retired, these may be unavailable.
+    if (null == jobCounters) {
+      displayRetiredJobNotice(LOG);
+    } else {
+      perfCounters.addBytes(jobCounters.getGroup("FileSystemCounters")
+        .findCounter("HDFS_BYTES_READ").getValue());
+      LOG.info("Transferred " + perfCounters.toString());
+      long numRecords = HadoopShim.get().getNumMapInputRecords(job);
+      LOG.info("Exported " + numRecords + " records.");
+    }
 
     return success;
   }

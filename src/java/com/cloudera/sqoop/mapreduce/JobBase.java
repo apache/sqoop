@@ -193,4 +193,20 @@ public class JobBase {
       InterruptedException {
     return job.waitForCompletion(true);
   }
+
+  /**
+   * Display a notice on the log that the current MapReduce job has
+   * been retired, and thus Counters are unavailable.
+   * @param log the Log to display the info to.
+   */
+  protected void displayRetiredJobNotice(Log log) {
+    log.info("The MapReduce job has already been retired. Performance");
+    log.info("counters are unavailable. To get this information, ");
+    log.info("you will need to enable the completed job store on ");
+    log.info("the jobtracker with:");
+    log.info("mapreduce.jobtracker.persist.jobstatus.active = true");
+    log.info("mapreduce.jobtracker.persist.jobstatus.hours = 1");
+    log.info("A jobtracker restart is required for these settings");
+    log.info("to take effect.");
+  }
 }
