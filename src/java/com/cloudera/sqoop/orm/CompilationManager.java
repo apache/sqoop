@@ -33,13 +33,13 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.FileListing;
-
 import com.cloudera.sqoop.util.Jars;
 
 /**
@@ -223,9 +223,10 @@ public class CompilationManager {
           LOG.error("Could not make directory: " + fDestParent);
         }
       }
-
-      if (!fOrig.renameTo(fDest)) {
-        LOG.error("Could not rename " + orig + " to " + dest);
+      try {
+          FileUtils.moveFile(fOrig, fDest);  
+      } catch (IOException e) {
+          LOG.error("Could not rename " + orig + " to " + dest, e);
       }
     }
   }
