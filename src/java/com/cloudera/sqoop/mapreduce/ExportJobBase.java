@@ -99,8 +99,19 @@ public class ExportJobBase extends JobBase {
           return false; // empty dir.
         }
 
-        // Pick a random child entry to examine instead.
-        stat = subitems[0];
+        // Pick a child entry to examine instead.
+        boolean foundChild = false;
+        for (int i = 0; i < subitems.length; i++) {
+          stat = subitems[i];
+          if (!stat.isDir() && !stat.getPath().getName().startsWith("_")) {
+            foundChild = true;
+            break; // This item is a visible file. Check it.
+          }
+        }
+
+        if (!foundChild) {
+          stat = null; // Couldn't find a reasonable candidate.
+        }
       }
 
       if (null == stat) {
