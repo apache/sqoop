@@ -675,6 +675,10 @@ public class SqoopOptions {
     return connectString;
   }
 
+  public void setConnectString(String connectStr) {
+    this.connectString = connectStr;
+  }
+
   public String getTableName() {
     return tableName;
   }

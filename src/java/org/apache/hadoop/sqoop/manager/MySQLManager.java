@@ -19,6 +19,8 @@
 package org.apache.hadoop.sqoop.manager;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -113,8 +115,60 @@ public class MySQLManager extends GenericJdbcManager {
       }
     }
 
+    checkDateTimeBehavior(context);
+
     // Then run the normal importTable() method.
     super.importTable(context);
+  }
+
+  /**
+   * MySQL allows TIMESTAMP fields to have the value '0000-00-00 00:00:00',
+   * which causes errors in import. If the user has not set the
+   * zeroDateTimeBehavior property already, we set it for them to coerce
+   * the type to null.
+   */
+  private void checkDateTimeBehavior(ImportJobContext context) {
+    final String zeroBehaviorStr = "zeroDateTimeBehavior";
+    final String convertToNull = "=convertToNull";
+
+    String connectStr = context.getOptions().getConnectString();
+    if (connectStr.indexOf("jdbc:") != 0) {
+      // This connect string doesn't have the prefix we expect.
+      // We can't parse the rest of it here.
+      return;
+    }
+
+    // This starts with 'jdbc:mysql://' ... let's remove the 'jdbc:'
+    // prefix so that java.net.URI can parse the rest of the line.
+    String uriComponent = connectStr.substring(5);
+    try {
+      URI uri = new URI(uriComponent);
+      String query = uri.getQuery(); // get the part after a '?'
+
+      // If they haven't set the zeroBehavior option, set it to
+      // squash-null for them.
+      if (null == query) {
+        connectStr = connectStr + "?" + zeroBehaviorStr + convertToNull;
+        LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
+      } else if (query.length() == 0) {
+        connectStr = connectStr + zeroBehaviorStr + convertToNull;
+        LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
+      } else if (query.indexOf(zeroBehaviorStr) == -1) {
+        if (!connectStr.endsWith("&")) {
+          connectStr = connectStr + "&";
+        }
+        connectStr = connectStr + zeroBehaviorStr + convertToNull;
+        LOG.info("Setting zero DATETIME behavior to convertToNull (mysql)");
+      }
+
+      LOG.debug("Rewriting connect string to " + connectStr);
+      context.getOptions().setConnectString(connectStr);
+    } catch (URISyntaxException use) {
+      // Just ignore this. If we can't parse the URI, don't attempt
+      // to add any extra flags to it.
+      LOG.debug("mysql: Couldn't parse connect str in checkDateTimeBehavior: "
+          + use);
+    }
   }
 
   /**
