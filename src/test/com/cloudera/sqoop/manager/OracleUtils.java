@@ -38,7 +38,8 @@ public final class OracleUtils {
   public static final String ORACLE_DATABASE_NAME = "xe";
 
   public static final String CONNECT_STRING =
-      "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME;
+      System.getProperty("sqoop.test.oracle.connectstring",
+      "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME);
   public static final String ORACLE_USER_NAME = "SQOOPTEST";
   public static final String ORACLE_USER_PASS = "12345";
 
@@ -62,7 +63,7 @@ public final class OracleUtils {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
+      // create the database table and populate it with data.
       st.executeUpdate(getDropTableStatement(tableName));
 
       connection.commit();

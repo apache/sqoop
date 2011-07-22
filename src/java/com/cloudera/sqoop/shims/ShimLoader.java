@@ -68,9 +68,11 @@ public abstract class ShimLoader {
   static {
     // These regular expressions will be evaluated in order until one matches.
 
-    // CDH3 (based on 0.20.2) has versions of the form "0.20.2+nnn" where
-    // nnn is a build number.
-    HADOOP_SHIM_MATCHES.add("0.20.2\\+[0-9]+");
+    // CDH3 distribution has versions as follows (with nnn being build number):
+    //    0.20.2+nnn: for CDH3B2 release
+    //    0.20.3-CDH3-SNAPSHOT: for CDH3B3 development builds
+    //    0.20.3+nnn: expected for CDH3B3 release
+    HADOOP_SHIM_MATCHES.add("0.20.(2|3)((\\+[0-9]+)|(-CDH3-SNAPSHOT))");
     HADOOP_SHIM_CLASSES.add("com.cloudera.sqoop.shims.CDH3Shim");
     HADOOP_SHIM_JARS.add("sqoop-shim-cloudera-.*.jar");
 

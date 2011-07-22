@@ -176,7 +176,11 @@
 
   <!--this is the naming policy for artifacts we want pulled down-->
   <property name="ivy.artifact.retrieve.pattern"
-    			value="${name}/[conf]/[artifact]-[revision].[ext]"/>
+            value="${name}/[conf]/[artifact]-[revision].[ext]"/>
+
+  <!--test related properties -->
+  <property name="sqoop.test.oracle.connectstring"
+            value="jdbc:oracle:thin:@//localhost/xe"/>
 
   <!-- load ant-contrib tasks to get the "if" task. -->
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
@@ -664,6 +668,14 @@
            that the unit tests pick it up.
       -->
       <sysproperty key="hive.home" value="${basedir}/testdata/hive" />
+
+      <!-- By default the Oracle tests assume an Oracle XE installation
+           with a hardcoded connection string. If you want to overwrite
+           that specify the value at command line or via
+           build.properties file.
+      -->
+      <sysproperty key="sqoop.test.oracle.connectstring"
+                   value="${sqoop.test.oracle.connectstring}"/>
 
       <classpath>
         <!-- instrumented classes go ahead of normal classes -->
