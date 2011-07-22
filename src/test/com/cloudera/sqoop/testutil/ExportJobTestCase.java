@@ -153,8 +153,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
 
 
   /** @return the minimum 'id' value in the table */
-  protected int getMinRowId() throws SQLException {
-    Connection conn = getConnection();
+  protected int getMinRowId(Connection conn) throws SQLException {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MIN(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -175,8 +174,7 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   }
 
   /** @return the maximum 'id' value in the table */
-  protected int getMaxRowId() throws SQLException {
-    Connection conn = getConnection();
+  protected int getMaxRowId(Connection conn) throws SQLException {
     PreparedStatement statement = conn.prepareStatement(
         "SELECT MAX(id) FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -204,7 +202,17 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   protected void verifyExport(int expectedNumRecords)
       throws IOException, SQLException {
     Connection conn = getConnection();
+    verifyExport(expectedNumRecords, conn);
+  }
 
+  /**
+   * Check that we got back the expected row set.
+   * @param expectedNumRecords The number of records we expected to load
+   * into the database.
+   * @param conn the db connection to use.
+   */
+  protected void verifyExport(int expectedNumRecords, Connection conn)
+      throws IOException, SQLException {
     LOG.info("Verifying export: " + getTableName());
     // Check that we got back the correct number of records.
     PreparedStatement statement = conn.prepareStatement(
@@ -232,11 +240,11 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
     }
 
     // Check that we start with row 0.
-    int minVal = getMinRowId();
+    int minVal = getMinRowId(conn);
     assertEquals("Minimum row was not zero", 0, minVal);
 
     // Check that the last row we loaded is numRows - 1
-    int maxVal = getMaxRowId();
+    int maxVal = getMaxRowId(conn);
     assertEquals("Maximum row had invalid id", expectedNumRecords - 1, maxVal);
 
     // Check that the string values associated with these points match up.

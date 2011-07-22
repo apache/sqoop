@@ -96,7 +96,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
 
-  private String getRecordLine(int recordNum, ColumnGenerator... extraCols) {
+  protected String getRecordLine(int recordNum, ColumnGenerator... extraCols) {
     String idStr = Integer.toString(recordNum);
     StringBuilder sb = new StringBuilder();
 
@@ -345,8 +345,9 @@ public class TestExport extends ExportJobTestCase {
    */
   private void assertColMinAndMax(String colName, ColumnGenerator generator)
       throws SQLException {
-    int minId = getMinRowId();
-    int maxId = getMaxRowId();
+    Connection conn = getConnection();
+    int minId = getMinRowId(conn);
+    int maxId = getMaxRowId(conn);
 
     LOG.info("Checking min/max for column " + colName + " with type "
         + generator.getType());

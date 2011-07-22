@@ -18,12 +18,19 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 
@@ -144,5 +151,75 @@ public class DirectMySQLExportTest extends TestExport {
   public void testMultiTxExport() throws IOException, SQLException {
     multiFileTest(1, 20, 1,
         "-D", MySQLExportMapper.MYSQL_CHECKPOINT_BYTES_KEY + "=10");
+  }
+
+  /**
+   * Test an authenticated export using mysqlimport.
+   */
+  public void testAuthExport() throws IOException, SQLException {
+    SqoopOptions options = new SqoopOptions(MySQLAuthTest.AUTH_CONNECT_STRING,
+        getTableName());
+    options.setUsername(MySQLAuthTest.AUTH_TEST_USER);
+    options.setPassword(MySQLAuthTest.AUTH_TEST_PASS);
+
+    manager = new DirectMySQLManager(options);
+
+    Connection connection = null;
+    Statement st = null;
+
+    String tableName = getTableName();
+
+    try {
+      connection = manager.getConnection();
+      connection.setAutoCommit(false);
+      st = connection.createStatement();
+
+      // create a target database table.
+      st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+      st.executeUpdate("CREATE TABLE " + tableName + " ("
+          + "id INT NOT NULL PRIMARY KEY, "
+          + "msg VARCHAR(24) NOT NULL)");
+      connection.commit();
+
+      // Write a file containing a record to export.
+      Path tablePath = getTablePath();
+      Path filePath = new Path(tablePath, "datafile");
+      Configuration conf = new Configuration();
+      conf.set("fs.default.name", "file:///");
+
+      FileSystem fs = FileSystem.get(conf);
+      fs.mkdirs(tablePath);
+      OutputStream os = fs.create(filePath);
+      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+      w.write(getRecordLine(0));
+      w.write(getRecordLine(1));
+      w.write(getRecordLine(2));
+      w.close();
+      os.close();
+
+      // run the export and verify that the results are good.
+      runExport(getArgv(true, 10, 10,
+          "--username", MySQLAuthTest.AUTH_TEST_USER,
+          "--password", MySQLAuthTest.AUTH_TEST_PASS,
+          "--connect", MySQLAuthTest.AUTH_CONNECT_STRING));
+      verifyExport(3, connection);
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: " + sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when accessing target table. " + sqlE);
+    } finally {
+      try {
+        if (null != st) {
+          st.close();
+        }
+
+        if (null != connection) {
+          connection.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("Got SQLException when closing connection: " + sqlE);
+      }
+    }
+
   }
 }

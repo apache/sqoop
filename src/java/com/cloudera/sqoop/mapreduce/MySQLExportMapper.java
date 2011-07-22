@@ -148,6 +148,11 @@ public class MySQLExportMapper<KEYIN, VALIN>
       args.add("--defaults-file=" + passwordFile);
     }
 
+    String username = conf.get(MySQLUtils.USERNAME_KEY);
+    if (null != username) {
+      args.add("--user=" + username);
+    }
+
     args.add("--host=" + hostname);
     if (-1 != port) {
       args.add("--port=" + Integer.toString(port));
