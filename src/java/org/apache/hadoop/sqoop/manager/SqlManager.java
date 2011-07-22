@@ -33,6 +33,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public abstract class SqlManager extends ConnManager {
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 
   protected SqoopOptions options;
+  private Statement lastStatement;
 
   /**
    * Constructs the SqlManager
@@ -81,6 +83,7 @@ public abstract class SqlManager extends ConnManager {
       results = execute(stmt);
     } catch (SQLException sqlE) {
       LOG.error("Error executing statement: " + sqlE.toString());
+      release();
       return null;
     }
 
@@ -106,6 +109,8 @@ public abstract class SqlManager extends ConnManager {
       } catch (SQLException sqlE) {
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
+
+      release();
     }
   }
 
@@ -126,6 +131,7 @@ public abstract class SqlManager extends ConnManager {
       results = execute(stmt);
     } catch (SQLException sqlE) {
       LOG.error("Error executing statement: " + sqlE.toString());
+      release();
       return null;
     }
 
@@ -152,9 +158,11 @@ public abstract class SqlManager extends ConnManager {
       try {
         results.close();
         getConnection().commit();
-      } catch (SQLException sqlE) { 
+      } catch (SQLException sqlE) {
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
+
+      release();
     }
   }
 
@@ -179,7 +187,9 @@ public abstract class SqlManager extends ConnManager {
     sb.append(" AS ");   // needed for hsqldb; doesn't hurt anyone else.
     sb.append(escapeTableName(tableName));
 
-    return execute(sb.toString());
+    String sqlCmd = sb.toString();
+    LOG.debug("Reading table with command: " + sqlCmd);
+    return execute(sqlCmd);
   }
 
   @Override
@@ -291,6 +301,9 @@ public abstract class SqlManager extends ConnManager {
    * @return A ResultSet encapsulating the results or null on error
    */
   protected ResultSet execute(String stmt, Object... args) throws SQLException {
+    // Release any previously-open statement.
+    release();
+
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -301,6 +314,7 @@ public abstract class SqlManager extends ConnManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
+    this.lastStatement = statement;
     return statement.executeQuery();
   }
 
@@ -363,6 +377,7 @@ public abstract class SqlManager extends ConnManager {
   }
 
   public void close() throws SQLException {
+    release();
   }
 
   /**
@@ -376,6 +391,7 @@ public abstract class SqlManager extends ConnManager {
       results = execute(s);
     } catch (SQLException sqlE) {
       LOG.error("Error executing statement: " + sqlE.toString());
+      release();
       return;
     }
 
@@ -404,6 +420,8 @@ public abstract class SqlManager extends ConnManager {
       } catch (SQLException sqlE) {
         LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
       }
+
+      release();
     }
   }
 
@@ -445,5 +463,17 @@ public abstract class SqlManager extends ConnManager {
       throws IOException, ExportException {
     ExportJob exportJob = new ExportJob(context);
     exportJob.runExport();
+  }
+
+  public void release() {
+    if (null != this.lastStatement) {
+      try {
+        this.lastStatement.close();
+      } catch (SQLException e) {
+        LOG.warn("Exception closing executed Statement: " + e);
+      }
+
+      this.lastStatement = null;
+    }
   }
 }

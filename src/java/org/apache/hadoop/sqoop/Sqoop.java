@@ -63,16 +63,21 @@ public class Sqoop extends Configured implements Tool {
   private List<String> generatedJarFiles;
 
   public Sqoop() {
-    init();
+    this((Configuration) null);
   }
 
   public Sqoop(Configuration conf) {
-    init();
-    setConf(conf);
+    this(conf, new SqoopOptions());
   }
 
-  private void init() {
+  public Sqoop(Configuration conf, SqoopOptions opts) {
     generatedJarFiles = new ArrayList<String>();
+    if (null != conf) {
+      setConf(conf);
+    }
+
+    this.options = opts;
+    this.options.setConf(getConf());
   }
 
   public SqoopOptions getOptions() {
@@ -146,8 +151,13 @@ public class Sqoop extends Configured implements Tool {
    * Actual main entry-point for the program
    */
   public int run(String [] args) {
-    options = new SqoopOptions();
-    options.setConf(getConf());
+    if (options.getConf() == null) {
+      // Configuration wasn't initialized until after the ToolRunner
+      // got us to this point. ToolRunner gave Sqoop itself a Conf
+      // though.
+      options.setConf(getConf());
+    }
+
     try {
       options.parse(args);
       options.validate();

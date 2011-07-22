@@ -157,6 +157,30 @@ public class OracleManager extends GenericJdbcManager {
     importer.runImport(tableName, jarFile, splitCol, options.getConf());
   }
 
+  @Override
+  public ResultSet readTable(String tableName, String[] columns) throws SQLException {
+    if (columns == null) {
+      columns = getColumnNames(tableName);
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("SELECT ");
+    boolean first = true;
+    for (String col : columns) {
+      if (!first) {
+        sb.append(", ");
+      }
+      sb.append(escapeColName(col));
+      first = false;
+    }
+    sb.append(" FROM ");
+    sb.append(escapeTableName(tableName));
+
+    String sqlCmd = sb.toString();
+    LOG.debug("Reading table with command: " + sqlCmd);
+    return execute(sqlCmd);
+  }
+
   /**
    * Resolve a database-specific type to the Java type that should contain it.
    * @param sqlType

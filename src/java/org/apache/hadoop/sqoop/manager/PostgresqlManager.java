@@ -21,6 +21,7 @@ package org.apache.hadoop.sqoop.manager;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -45,6 +46,8 @@ public class PostgresqlManager extends GenericJdbcManager {
 
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
+
+  private Statement lastStatement;
 
   public PostgresqlManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
@@ -108,6 +111,9 @@ public class PostgresqlManager extends GenericJdbcManager {
    * @return A ResultSet encapsulating the results or null on error
    */
   protected ResultSet execute(String stmt, Object... args) throws SQLException {
+    // Free any previous resources used.
+    release();
+
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -119,7 +125,20 @@ public class PostgresqlManager extends GenericJdbcManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
+    this.lastStatement = statement;
     return statement.executeQuery();
+  }
+
+  public void release() {
+    if (null != this.lastStatement) {
+      try {
+        this.lastStatement.close();
+      } catch (SQLException e) {
+        LOG.warn("Exception closing executed Statement: " + e);
+      }
+
+      this.lastStatement = null;
+    }
   }
 }
 

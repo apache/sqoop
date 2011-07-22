@@ -723,6 +723,10 @@ public class SqoopOptions {
     return tableName;
   }
 
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
+  }
+
   public String getExportDir() {
     return exportDir;
   }

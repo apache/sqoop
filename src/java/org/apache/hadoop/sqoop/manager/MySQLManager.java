@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -45,6 +46,8 @@ public class MySQLManager extends GenericJdbcManager {
 
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
+
+  private Statement lastStatement;
 
   public MySQLManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
@@ -70,6 +73,7 @@ public class MySQLManager extends GenericJdbcManager {
       results = execute("SHOW DATABASES");
     } catch (SQLException sqlE) {
       LOG.error("Error executing statement: " + sqlE.toString());
+      release();
       return null;
     }
 
@@ -90,6 +94,8 @@ public class MySQLManager extends GenericJdbcManager {
       } catch (SQLException sqlE) {
         LOG.warn("Exception closing ResultSet: " + sqlE.toString());
       }
+
+      release();
     }
   }
 
@@ -182,6 +188,9 @@ public class MySQLManager extends GenericJdbcManager {
    * @return A ResultSet encapsulating the results or null on error
    */
   protected ResultSet execute(String stmt, Object... args) throws SQLException {
+    // Free any previous resources.
+    release();
+
     PreparedStatement statement = null;
     statement = this.getConnection().prepareStatement(stmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -193,7 +202,20 @@ public class MySQLManager extends GenericJdbcManager {
     }
 
     LOG.info("Executing SQL statement: " + stmt);
+    this.lastStatement = statement;
     return statement.executeQuery();
+  }
+
+  public void release() {
+    if (null != this.lastStatement) {
+      try {
+        this.lastStatement.close();
+      } catch (SQLException e) {
+        LOG.warn("Exception closing executed Statement: " + e);
+      }
+
+      this.lastStatement = null;
+    }
   }
 
   /**

@@ -83,7 +83,8 @@ public abstract class ConnManager {
    * If columns is null, all columns from the table are read. This is a direct
    * (non-parallelized) read of the table back to the current client.
    * The client is responsible for calling ResultSet.close() when done with the
-   * returned ResultSet object.
+   * returned ResultSet object, and for calling release() after that to free
+   * internal state.
    */
   public abstract ResultSet readTable(String tableName, String [] columns) throws SQLException;
 
@@ -144,5 +145,16 @@ public abstract class ConnManager {
       throws IOException, ExportException {
     throw new ExportException("This database does not support exports");
   }
+
+  /**
+   * If a method of this ConnManager has returned a ResultSet to you,
+   * you are responsible for calling release() after you close the
+   * ResultSet object, to free internal resources. ConnManager
+   * implementations do not guarantee the ability to have multiple
+   * returned ResultSets available concurrently. Requesting a new
+   * ResultSet from a ConnManager may cause other open ResulSets
+   * to close.
+   */
+  public abstract void release();
 }
 
