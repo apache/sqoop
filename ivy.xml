@@ -68,5 +68,17 @@
       name="avro"
       rev="1.0.0"
       conf="common->default"/>
+    <dependency org="javax.servlet"
+      name="servlet-api"
+      rev="${servlet-api.version}"
+      conf="common->master"/>
+    <dependency org="org.mortbay.jetty"
+      name="jetty"
+      rev="${jetty.version}"
+      conf="common->master"/>
+    <dependency org="org.mortbay.jetty"
+      name="jetty-util"
+      rev="${jetty-util.version}"
+      conf="common->master"/>
     </dependencies>
 </ivy-module>

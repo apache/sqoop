@@ -114,6 +114,7 @@ public class ImportJob {
       job.setNumReduceTasks(0);
       job.setNumMapTasks(1);
       job.setInputFormat(DBInputFormat.class);
+      job.setMapRunnerClass(AutoProgressMapRunner.class);
 
       FileOutputFormat.setOutputPath(job, outputPath);
 
@@ -130,7 +131,7 @@ public class ImportJob {
       if (null == colNames) {
         colNames = mgr.getColumnNames(tableName);
       }
-      
+
       // It's ok if the where clause is null in DBInputFormat.setInput.
       String whereClause = options.getWhereClause();
 

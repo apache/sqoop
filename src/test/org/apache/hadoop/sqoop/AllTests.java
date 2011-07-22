@@ -23,6 +23,7 @@ import org.apache.hadoop.sqoop.lib.TestFieldFormatter;
 import org.apache.hadoop.sqoop.lib.TestRecordParser;
 import org.apache.hadoop.sqoop.manager.TestHsqldbManager;
 import org.apache.hadoop.sqoop.manager.TestSqlManager;
+import org.apache.hadoop.sqoop.mapred.TestAutoProgressMapRunner;
 import org.apache.hadoop.sqoop.orm.TestClassWriter;
 import org.apache.hadoop.sqoop.orm.TestParseMethods;
 
@@ -41,6 +42,7 @@ public final class AllTests  {
   public static Test suite() {
     TestSuite suite = new TestSuite("Tests for org.apache.hadoop.sqoop");
 
+    suite.addTestSuite(TestAutoProgressMapRunner.class);
     suite.addTestSuite(TestAllTables.class);
     suite.addTestSuite(TestHsqldbManager.class);
     suite.addTestSuite(TestSqlManager.class);
