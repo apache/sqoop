@@ -57,8 +57,14 @@ import com.cloudera.sqoop.util.FileListing;
  * following in /etc/postgresql/8.3/main/pg_hba.conf:
  *     local  all all trust
  *     host all all 127.0.0.1/32 trust
- * 
- * ... and comment out any other lines referencing 127.0.0.1.
+ *     host all all ::1/128      trust
+ *
+ * ... and comment out any other lines referencing 127.0.0.1 or ::1.
+ *
+ * Also in the file /etc/postgresql/8.3/main/postgresql.conf, uncomment
+ * the line that starts with listen_addresses and set its value to '*' as
+ * follows
+ *     listen_address = '*'
  *
  * For postgresql 8.1, this may be in /var/lib/pgsql/data, instead.  You may
  * need to restart the postgresql service after modifying this file.
@@ -107,7 +113,7 @@ public class PostgresqlTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
+      // create the database table and populate it with data.
 
       try {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
