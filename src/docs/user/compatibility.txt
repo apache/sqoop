@@ -82,13 +82,13 @@ Connector/J JDBC driver is included with the installation.
 zeroDateTimeBehavior
 ^^^^^^^^^^^^^^^^^^^^
 
-MySQL allows values of +'0000-00-00'+ for +DATE+ columns, which is a
+MySQL allows values of +\'0000-00-00\'+ for +DATE+ columns, which is a
 non-standard extension to SQL. When communicated via JDBC, these
 values are handled in one of three different ways:
 
 - Convert to +NULL+.
 - Throw an exception in the client.
-- Round to the nearest legal date (+'0001-01-01'+).
+- Round to the nearest legal date (+\'0001-01-01\'+).
 
 You specify the behavior by using the +zeroDateTimeBehavior+
 property of the connect string. If a +zeroDateTimeBehavior+ property

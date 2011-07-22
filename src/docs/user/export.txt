@@ -24,11 +24,7 @@
 Purpose
 ~~~~~~~
 
-The +export+ tool exports a set of files from HDFS back to an RDBMS.
-The target table must already exist in the database. The input files
-are read and parsed into a set of records according to the
-user-specified delimiters. These are then transformed into a set of
-+INSERT+ statements that inject the records into the database.
+include::export-purpose.txt[]
 
 Syntax
 ~~~~~~

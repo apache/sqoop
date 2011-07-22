@@ -24,16 +24,7 @@
 Purpose
 ~~~~~~~
 
-The +create-hive-table+ tool populates a Hive metastore with a
-definition for a table based on a database table previously imported
-to HDFS, or one planned to be imported. This effectively performs the
-"+\--hive-import+" step of +sqoop-import+ without running the
-preceeding import.
-
-If data was already loaded to HDFS, you can use this tool to finish
-the pipeline of importing the data to Hive. You can also create Hive tables
-with this tool; data then can be imported and populated into
-the target after a preprocessing step run by the user.
+include::create-hive-table-purpose.txt[]
 
 Syntax
 ~~~~~~

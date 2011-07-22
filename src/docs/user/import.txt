@@ -23,10 +23,7 @@
 Purpose
 ~~~~~~~
 
-The +import+ tool imports an individual table from an RDBMS to HDFS.
-Each row from a table is represented as a separate record in HDFS.
-Records can be stored as text files (one record per line), or in
-binary representation in SequenceFiles.
+include::import-purpose.txt[]
 
 Syntax
 ~~~~~~
@@ -266,10 +263,10 @@ Delimiters may be specified as:
 * +\0+ (NUL) - This will insert NUL characters between fields or lines,
   or will disable enclosing/escaping if used for one of the +\--enclosed-by+,
   +\--optionally-enclosed-by+, or +\--escaped-by+ arguments.
-- The octal representation of a A UTF-8 character's code point. This
+- The octal representation of a UTF-8 character's code point. This
   should be of the form +\0ooo+, where _ooo_ is the octal value.
   For example, +\--fields-terminated-by \001+ would yield the +^A+ character.
-- The hexadecimal representation of a A UTF-8 character's code point. This
+- The hexadecimal representation of a UTF-8 character's code point. This
   should be of the form +\0xhhh+, where _hhh_ is the hex value.
   For example, +\--fields-terminated-by \0x10+ would yield the carriage
   return character.

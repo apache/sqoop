@@ -1,0 +1,43 @@
+
+Import control options
+~~~~~~~~~~~~~~~~~~~~~~
+
+--as-sequencefile::
+  Imports data to SequenceFiles
+
+--as-textfile::
+  Imports data as plain text (default)
+
+--columns (col,col,col...)::
+  Columns to export from table
+
+--direct::
+  Use direct import fast path (mysql only)
+
+--direct-split-size (n)::
+  Split the input stream every 'n' bytes when importing in direct mode.
+
+--inline-lob-limit (n)::
+  Set the maximum size for an inline LOB
+
+-m::
+--num-mappers (n)::
+  Use 'n' map tasks to import in parallel
+
+--split-by (column-name)::
+  Column of the table used to split the table for parallel import
+
+--table (table-name)::
+  The table to read (required)
+
+--warehouse-dir (dir)::
+  Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+
+
+--where (clause)::
+  Import only the rows for which _clause_ is true.
+  e.g.: `--where "user_id > 400 AND hidden == 0"`
+  
+--compress::
+-z::
+  Uses gzip to compress data as it is written to HDFS
+

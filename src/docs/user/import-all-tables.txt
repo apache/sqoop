@@ -23,16 +23,7 @@
 Purpose
 ~~~~~~~
 
-The +import-all-tables+ tool imports a set of tables from an RDBMS to HDFS.
-Data from each table is stored in a separate directory in HDFS.
-
-For the +import-all-tables+ tool to be useful, the following conditions
-must be met:
-
-- Each table must have a single-column primary key.
-- You must intend to import all columns of each table.
-- You must not intend to use non-default splitting column, nor impose
-  any conditions via a +WHERE+ clause.
+include::import-all-tables-purpose.txt[]
 
 Syntax
 ~~~~~~

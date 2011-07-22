@@ -23,6 +23,7 @@ Furthermore, Sqoop's build can be instrumented with the following:
 
 * findbugs (1.3.9) for code quality checks
 * cobertura (1.9.4.1) for code coverage
+* checkstyle (5.x) for code style checks
 
 == The Basics
 
@@ -88,7 +89,7 @@ cache: +ant veryclean+
 
 == Code Quality Analysis
 
-We have two tools which can be used to analyze Sqoop's code quality.
+We have three tools which can be used to analyze Sqoop's code quality.
 
 === Findbugs
 
@@ -127,4 +128,23 @@ When complete, the report will be placed in +build/cobertura/+
 New patches should come with sufficient tests for their functionality
 as well as their error recovery code paths. Cobertura can help assess
 whether your tests are thorough enough, or where gaps lie.
+
+=== Checkstyle
+
+Checkstyle enforces our style guide. There are currently a very small
+number of violations of this style in the source code, but hopefully this
+will remain the case. New code should not trigger additional checkstyle
+warnings.
+
+Checkstyle does not need to be installed manually; it will be retrieved via
+Ivy when necessary.
+
+To run checkstyle, execute:
+
+++++
+ant checkstyle
+++++
+
+A report will be generated as +build/checkstyle-errors.html+
+
 

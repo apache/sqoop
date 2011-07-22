@@ -1,0 +1,108 @@
+sqoop-import(1)
+===============
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+NAME
+----
+sqoop-import - Import a table from an RDBMS to HDFS
+
+SYNOPSIS
+--------
+'sqoop-import' <generic-options> <tool-options>
+
+'sqoop import' <generic-options> <tool-options>
+
+
+DESCRIPTION
+-----------
+
+include::../user/import-purpose.txt[]
+
+OPTIONS
+-------
+
+The +--connect+ and +--table+ options are required.
+
+include::common-args.txt[]
+
+Import control options
+~~~~~~~~~~~~~~~~~~~~~~
+
+--as-sequencefile::
+  Imports data to SequenceFiles
+
+--as-textfile::
+  Imports data as plain text (default)
+
+--columns (col,col,col...)::
+  Columns to export from table
+
+--direct::
+  Use direct import fast path (mysql only)
+
+--direct-split-size (n)::
+  Split the input stream every 'n' bytes when importing in direct mode.
+
+--inline-lob-limit (n)::
+  Set the maximum size for an inline LOB
+
+--num-mappers (n)::
+-m::
+  Use 'n' map tasks to import in parallel
+
+--split-by (column-name)::
+  Column of the table used to split the table for parallel import
+
+--table (table-name)::
+  The table to read (required)
+
+--warehouse-dir (dir)::
+  Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+
+
+--where (clause)::
+  Import only the rows for which _clause_ is true.
+  e.g.: `--where "user_id > 400 AND hidden == 0"`
+
+--compress::
+-z::
+  Uses gzip to compress data as it is written to HDFS
+
+
+include::output-args.txt[]
+
+include::input-args.txt[]
+
+include::hive-args.txt[]
+
+include::codegen-args.txt[]
+
+Database-specific options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional arguments may be passed to the database manager
+after a lone '--' on the command-line.
+
+In MySQL direct mode, additional arguments are passed directly to
+mysqldump.
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+

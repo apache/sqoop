@@ -18,19 +18,22 @@ BUILD_DIR=$(BUILDROOT)/docs
 
 all: man userguide devguide
 
-man: $(BUILD_DIR)/sqoop.1.gz
-
 userguide: $(BUILD_DIR)/SqoopUserGuide.html
 
 devguide: $(BUILD_DIR)/SqoopDevGuide.html
 
-$(BUILD_DIR)/sqoop.1.gz: user/Sqoop-manpage.txt user/*formatting*.txt
-	asciidoc -b docbook -d manpage user/Sqoop-manpage.txt
-	xmlto man Sqoop-manpage.xml
-	gzip sqoop.1
-	rm Sqoop-manpage.xml
+MANSOURCES=$(shell echo man/sqoop*.txt)
+MANPAGES=$(MANSOURCES:.txt=.1.gz)
+
+man: $(MANPAGES)
+
+%.1.gz : %.txt
+	asciidoc --unsafe -b docbook -d manpage $<
+	xmlto man $*.xml -o man
+	gzip $*.1
+	rm $*.xml
 	mkdir -p $(BUILD_DIR)
-	mv sqoop.1.gz $(BUILD_DIR)
+	mv $@ $(BUILD_DIR)
 
 $(BUILD_DIR)/SqoopUserGuide.html: user/*.txt
 	asciidoc -a toc -a toclevels=1 -a "toc-title=Table of Contents" \
@@ -45,9 +48,8 @@ $(BUILD_DIR)/SqoopDevGuide.html: dev/*.txt
 	mv dev/SqoopDevGuide.html $(BUILD_DIR)
 
 clean:
-	-rm $(BUILD_DIR)/sqoop.1.gz
+	-rm $(BUILD_DIR)/sqoop-*.1.gz
 	-rm $(BUILD_DIR)/SqoopUserGuide.html
-	-rm $(BUILD_DIR)/SqoopUserGuide.pdf
 	-rm user/SqoopUserGuide.html
 	-rm dev/SqoopDevGuide.html
 

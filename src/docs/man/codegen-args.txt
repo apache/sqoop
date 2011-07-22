@@ -1,0 +1,38 @@
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Code generation options
+~~~~~~~~~~~~~~~~~~~~~~~
+
+--bindir (dir)::
+  Output directory for compiled objects
+
+--class-name (name)::
+  Sets the name of the class to generate. By default, classes are
+  named after the table they represent. Using this parameters
+  ignores +--package-name+.
+
+--jar-file (filename)::
+  Disable code generation; use specified jar
+
+--outdir (dir)::
+  Output directory for generated code
+
+--package-name (package)::
+  Puts auto-generated classes in the named Java package
+

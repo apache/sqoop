@@ -1,0 +1,79 @@
+sqoop-export(1)
+===============
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+NAME
+----
+sqoop-export - Export records from HDFS to a table in an RDBMS
+
+SYNOPSIS
+--------
+'sqoop-export' <generic-options> <tool-options>
+
+'sqoop export' <generic-options> <tool-options>
+
+
+DESCRIPTION
+-----------
+
+include::../user/export-purpose.txt[]
+
+OPTIONS
+-------
+
+The +--connect+, +--export-dir+, and +--table+ options are required.
+
+include::common-args.txt[]
+
+Export control options
+~~~~~~~~~~~~~~~~~~~~~~
+
+--direct::
+  Use direct import fast path (mysql only)
+
+--export-dir (dir)::
+  HDFS source path for the export
+
+-m::
+--num-mappers (n)::
+  Use 'n' map tasks to import in parallel
+
+--table (table-name)::
+  The table to read (required)
+
+include::input-args.txt[]
+
+include::output-args.txt[]
+
+include::codegen-args.txt[]
+
+Database-specific options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional arguments may be passed to the database manager
+after a lone '--' on the command-line.
+
+In MySQL direct mode, additional arguments are passed directly to
+mysqldump.
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+

@@ -1,0 +1,114 @@
+sqoop-import-all-tables(1)
+==========================
+
+////
+   Licensed to Cloudera, Inc. under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   Cloudera, Inc. licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+NAME
+----
+sqoop-import-all-tables - Import a set of table from an RDBMS to HDFS
+
+SYNOPSIS
+--------
+'sqoop-import-all-tables' <generic-options> <tool-options>
+
+'sqoop import-all-tables' <generic-options> <tool-options>
+
+
+DESCRIPTION
+-----------
+
+include::../user/import-all-tables-purpose.txt[]
+
+OPTIONS
+-------
+
+The +--connect+ option is required.
+
+include::common-args.txt[]
+
+Import control options
+~~~~~~~~~~~~~~~~~~~~~~
+
+--as-sequencefile::
+  Imports data to SequenceFiles
+
+--as-textfile::
+  Imports data as plain text (default)
+
+--direct::
+  Use direct import fast path (mysql only)
+
+--direct-split-size (n)::
+  Split the input stream every 'n' bytes when importing in direct mode.
+
+--inline-lob-limit (n)::
+  Set the maximum size for an inline LOB
+
+-m::
+--num-mappers (n)::
+  Use 'n' map tasks to import in parallel
+
+--warehouse-dir (dir)::
+  Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+
+
+--compress::
+-z::
+  Uses gzip to compress data as it is written to HDFS
+
+
+include::output-args.txt[]
+
+include::input-args.txt[]
+
+include::hive-args.txt[]
+
+Code generation options
+~~~~~~~~~~~~~~~~~~~~~~~
+
+--bindir (dir)::
+  Output directory for compiled objects
+
+--class-name (name)::
+  Sets the name of the class to generate. By default, classes are
+  named after the table they represent. Using this parameters
+  ignores +--package-name+.
+
+--jar-file (filename)::
+  Disable code generation; use specified jar
+
+--outdir (dir)::
+  Output directory for generated code
+
+--package-name (package)::
+  Puts auto-generated classes in the named Java package
+
+
+Database-specific options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional arguments may be passed to the database manager
+after a lone '--' on the command-line.
+
+In MySQL direct mode, additional arguments are passed directly to
+mysqldump.
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'
+

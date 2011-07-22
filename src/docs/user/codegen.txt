@@ -24,12 +24,7 @@
 Purpose
 ~~~~~~~
 
-The +codegen+ tool generates Java classes which encapsulate and
-interpret imported records. The Java definition of a record is
-instantiated as part of the import process, but can also be performed
-separately. For example, if Java source is lost, it can be recreated.
-New versions of a class can be created which use different delimiters
-between fields, and so on.
+include::codegen-purpose.txt[]
 
 Syntax
 ~~~~~~
