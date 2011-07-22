@@ -67,7 +67,7 @@
   <!-- controlling the Hadoop source -->
   <!-- valid values for ${hadoop.dist} are 'apache' (trunk), 'apache21',
        and 'cloudera' -->
-  <property name="hadoop.dist" value="apache" />
+  <property name="hadoop.dist" value="cloudera" />
 
   <!-- testing with JUnit -->
   <property name="test.junit.output.format" value="plain"/>
