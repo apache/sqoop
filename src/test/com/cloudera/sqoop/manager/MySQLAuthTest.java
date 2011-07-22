@@ -65,7 +65,9 @@ public class MySQLAuthTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       MySQLAuthTest.class.getName());
 
-  static final String HOST_URL = "jdbc:mysql://localhost/";
+  static final String HOST_URL = System.getProperty(
+          "sqoop.test.mysql.connectstring.host_url",
+          "jdbc:mysql://localhost/");
 
   static final String AUTH_TEST_DATABASE = "sqooppasstest";
   static final String AUTH_TEST_USER = "sqooptest";
@@ -89,6 +91,8 @@ public class MySQLAuthTest extends ImportJobTestCase {
     options.setUsername(AUTH_TEST_USER);
     options.setPassword(AUTH_TEST_PASS);
 
+    LOG.debug("Setting up another MySQLAuthTest: " + AUTH_CONNECT_STRING);
+
     manager = new DirectMySQLManager(options);
 
     Connection connection = null;
@@ -99,7 +103,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
+      // create the database table and populate it with data.
       st.executeUpdate("DROP TABLE IF EXISTS " + AUTH_TABLE_NAME);
       st.executeUpdate("CREATE TABLE " + AUTH_TABLE_NAME + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
@@ -286,7 +290,7 @@ public class MySQLAuthTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
+      // create the database table and populate it with data.
       st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
       st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "

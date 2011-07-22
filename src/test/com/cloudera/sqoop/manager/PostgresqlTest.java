@@ -82,7 +82,9 @@ public class PostgresqlTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       PostgresqlTest.class.getName());
 
-  static final String HOST_URL = "jdbc:postgresql://localhost/";
+  static final String HOST_URL = System.getProperty(
+      "sqoop.test.postgresql.connectstring.host_url",
+      "jdbc:postgresql://localhost/");
 
   static final String DATABASE_USER = "sqooptest";
   static final String DATABASE_NAME = "sqooptest";
@@ -98,7 +100,7 @@ public class PostgresqlTest extends ImportJobTestCase {
   public void setUp() {
     super.setUp();
 
-    LOG.debug("Setting up another postgresql test...");
+    LOG.debug("Setting up another postgresql test: " + CONNECT_STRING);
 
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
     options.setUsername(DATABASE_USER);

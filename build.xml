@@ -162,11 +162,17 @@
 
   <!--this is the naming policy for artifacts we want pulled down-->
   <property name="ivy.artifact.retrieve.pattern"
-	    value="${name}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+      value="${name}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
 
   <!--test related properties -->
   <property name="sqoop.test.oracle.connectstring"
             value="jdbc:oracle:thin:@//localhost/xe"/>
+
+  <property name="sqoop.test.mysql.connectstring.host_url"
+            value="jdbc:mysql://localhost/"/>
+
+  <property name="sqoop.test.postgresql.connectstring.host_url"
+            value="jdbc:postgresql://localhost/"/>
 
   <!-- load ant-contrib tasks to get the "if" task. -->
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
@@ -557,6 +563,12 @@
       -->
       <sysproperty key="sqoop.test.oracle.connectstring"
                    value="${sqoop.test.oracle.connectstring}"/>
+
+      <sysproperty key="sqoop.test.mysql.connectstring.host_url"
+                   value="${sqoop.test.mysql.connectstring.host_url}"/>
+
+      <sysproperty key="sqoop.test.postgresql.connectstring.host_url"
+                   value="${sqoop.test.postgresql.connectstring.host_url}"/>
 
       <classpath>
         <!-- instrumented classes go ahead of normal classes -->

@@ -84,6 +84,10 @@ public class DirectMySQLTest extends ImportJobTestCase {
     SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
         getTableName());
     options.setUsername(MySQLTestUtils.getCurrentUser());
+
+    LOG.debug("Setting up another DirectMySQLTest: "
+        + MySQLTestUtils.CONNECT_STRING);
+
     manager = new DirectMySQLManager(options);
 
     Connection connection = null;
@@ -94,7 +98,7 @@ public class DirectMySQLTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data. 
+      // create the database table and populate it with data.
       st.executeUpdate("DROP TABLE IF EXISTS " + getTableName());
       st.executeUpdate("CREATE TABLE " + getTableName() + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "

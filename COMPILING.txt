@@ -72,15 +72,42 @@ Install MySQL server and client 5.0. Download MySQL Connector/J 5.0.8 for
 JDBC. Instructions for configuring the MySQL database are in MySQLAuthTest
 and DirectMySQLTest.
 
+Use the system property sqoop.test.mysql.connectstring.host_url to specify the
+URL for the MySQL host used for testing. Specify this property on the command
+line or via the build.properties file. For example:
+
+sqoop.test.mysql.connectstring.host_url=jdbc:mysql://host.example.com/
+
+If not specified, the default value used for this property is:
+jdbc:mysql://localhost/
+
 === Oracle
 
 Install Oracle XE (Express edition) 10.2.0. Instructions for configuring the
 database are in OracleManagerTest. Download the ojdbc6_g jar.
 
+Use the system property sqoop.test.oracle.connectstring to specify the
+connection string for Oracle host used for testing. Specify this property on the
+command line or via the build.properties file. For example:
+
+sqoop.test.oracle.connectstring=jdbc:oracle:thin:@//host.example.com/xe
+
+If not specified, the default value used for this property is:
+jdbc:oracle:thin:@//localhost/xe
+
 === PostgreSQL
 
 Install PostgreSQL 8.3.9. Download the postgresql 8.4 jdbc driver. Instructions
 for configuring the database are in PostgresqlTest.
+
+Use the system property sqoop.test.postgresql.connectstring.host_url to specify
+the URL for the PostgreSQL host used for testing. Specify this property on the
+command line or via the build.properties file. For example:
+
+sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.cloudera.com/
+
+If not specified, the default value used for this property is:
+jdbc:postgresql://localhost/
 
 === Running the Third-party Tests
 

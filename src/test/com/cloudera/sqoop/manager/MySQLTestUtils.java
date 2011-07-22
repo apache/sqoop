@@ -34,7 +34,9 @@ public final class MySQLTestUtils {
   public static final Log LOG = LogFactory.getLog(
       MySQLTestUtils.class.getName());
 
-  public static final String HOST_URL = "jdbc:mysql://localhost/";
+  public static final String HOST_URL = System.getProperty(
+      "sqoop.test.mysql.connectstring.host_url",
+      "jdbc:mysql://localhost/");
 
   public static final String MYSQL_DATABASE_NAME = "sqooptestdb";
   public static final String TABLE_NAME = "EMPLOYEES_MYSQL";
@@ -81,7 +83,7 @@ public final class MySQLTestUtils {
           if (0 != ret) {
             LOG.error("whoami exited with error status " + ret);
             // suppress original return value from this method.
-            return null; 
+            return null;
           }
         } catch (InterruptedException ie) {
           continue; // loop around.
