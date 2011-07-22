@@ -215,7 +215,7 @@ public class ExportJobBase extends JobBase {
     PerfCounters counters = new PerfCounters();
     counters.startClock();
 
-    boolean success = job.waitForCompletion(false);
+    boolean success = job.waitForCompletion(true);
     counters.stopClock();
     counters.addBytes(job.getCounters().getGroup("FileSystemCounters")
       .findCounter("HDFS_BYTES_READ").getValue());
