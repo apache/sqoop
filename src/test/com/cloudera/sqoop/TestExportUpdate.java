@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -115,8 +116,11 @@ public class TestExportUpdate extends ExportJobTestCase {
    */
   private void createUpdateFiles(int numFiles, int updatesPerFile,
       int keyCol, int... startOffsets) throws IOException {
-
-    FileSystem fs = FileSystem.getLocal(new Configuration());
+    Configuration conf = getConf();
+    if (!isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
+    FileSystem fs = FileSystem.get(conf);
 
     int rowId = 0;
     for (int i = 0; i < numFiles; i++) {

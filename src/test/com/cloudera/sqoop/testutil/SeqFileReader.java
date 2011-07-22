@@ -46,7 +46,9 @@ public final class SeqFileReader {
   public static Reader getSeqFileReader(String filename) throws IOException {
     // read from local filesystem
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
     LOG.info("Opening SequenceFile " + filename);
     return new SequenceFile.Reader(fs, new Path(filename), conf);
@@ -57,7 +59,9 @@ public final class SeqFileReader {
     try {
       // read from local filesystem
       Configuration conf = new Configuration();
-      conf.set("fs.default.name", "file:///");
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
       FileSystem fs = FileSystem.get(conf);
       r = new SequenceFile.Reader(fs, new Path(filename), conf);
       Object key = ReflectionUtils.newInstance(r.getKeyClass(), conf);

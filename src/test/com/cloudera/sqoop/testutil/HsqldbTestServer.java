@@ -128,6 +128,14 @@ public class HsqldbTestServer {
   }
 
   /**
+   * Returns database URL for the server instance.
+   * @return String representation of DB_URL
+   */
+  public static String getDbUrl() {
+    return DB_URL;
+  }
+
+  /**
    * Create a table.
    */
   public void createSchema() throws SQLException {

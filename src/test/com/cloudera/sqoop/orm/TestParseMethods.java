@@ -21,6 +21,7 @@ package com.cloudera.sqoop.orm;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.cloudera.sqoop.testutil.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -33,10 +34,6 @@ import org.apache.hadoop.mapred.JobConf;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.testutil.ReparseMapper;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
@@ -119,8 +116,9 @@ public class TestParseMethods extends ImportJobTestCase {
 
       // use local mode in the same JVM.
       ConfigurationHelper.setJobtrackerAddr(job, "local");
-      job.set("fs.default.name", "file:///");
-
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
       String warehouseDir = getWarehouseDir();
       Path warehousePath = new Path(warehouseDir);
       Path inputPath = new Path(warehousePath, getTableName());

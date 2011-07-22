@@ -19,7 +19,6 @@
 package com.cloudera.sqoop;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -29,6 +28,8 @@ import java.sql.SQLException;
 
 import java.util.List;
 
+import com.cloudera.sqoop.testutil.CommonArgs;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -38,19 +39,16 @@ import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.MergeTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
-import junit.framework.TestCase;
-
 /**
  * Test that the merge tool works.
  */
-public class TestMerge extends TestCase {
+public class TestMerge extends BaseSqoopTestCase {
 
   private static final Log LOG =
       LogFactory.getLog(TestMerge.class.getName());
@@ -61,42 +59,24 @@ public class TestMerge extends TestCase {
   public static final String SOURCE_DB_URL = "jdbc:hsqldb:mem:merge";
 
   @Override
-  public void setUp() throws IOException, InterruptedException, SQLException {
-    Configuration conf = newConf();
-    SqoopOptions options = getSqoopOptions(conf);
-    manager = new HsqldbManager(options);
-    conn = manager.getConnection();
-  }
-
-  @Override
-  public void tearDown() throws SQLException {
-    if (null != conn) {
-      this.conn.close();
+  public void setUp() {
+    super.setUp();
+    manager = getManager();
+    try {
+      conn = manager.getConnection();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
-  /** Base directory for all temporary data. */
-  public static final String TEMP_BASE_DIR;
-
-  /** Where to import table data to in the local filesystem for testing. */
-  public static final String LOCAL_WAREHOUSE_DIR;
-
-  // Initializer for the above.
-  static {
-    String tmpDir = System.getProperty("test.build.data", "/tmp/");
-    if (!tmpDir.endsWith(File.separator)) {
-      tmpDir = tmpDir + File.separator;
-    }
-
-    TEMP_BASE_DIR = tmpDir;
-    LOCAL_WAREHOUSE_DIR = TEMP_BASE_DIR + "sqoop/warehouse";
-  }
-
-  public static final String TABLE_NAME = "MergeTable"; 
+  public static final String TABLE_NAME = "MergeTable";
 
   public Configuration newConf() {
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     conf.set("mapred.job.tracker", "local");
     return conf;
   }
@@ -106,7 +86,7 @@ public class TestMerge extends TestCase {
    */
   public SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions options = new SqoopOptions(conf);
-    options.setConnectString(SOURCE_DB_URL);
+    options.setConnectString(HsqldbTestServer.getDbUrl());
 
     return options;
   }

@@ -24,6 +24,8 @@ import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import com.cloudera.sqoop.testutil.CommonArgs;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
@@ -47,10 +49,12 @@ public class TestLargeObjectLoader extends TestCase {
 
   public void setUp() throws IOException, InterruptedException {
     conf = new Configuration();
-    conf.set("fs.defaultFS", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
     this.outDir = new Path(new Path(tmpDir), "testLobLoader");
-    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystem fs = FileSystem.get(conf);
     if (fs.exists(outDir)) {
       fs.delete(outDir, true);
     }

@@ -29,6 +29,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.log4j.BasicConfigurator;
@@ -50,6 +51,15 @@ public class BaseSqoopTestCase extends TestCase {
 
   public static final Log LOG = LogFactory.getLog(
       BaseSqoopTestCase.class.getName());
+
+  public static boolean isOnPhysicalCluster() {
+    return onPhysicalCluster;
+  }
+  private static void setOnPhysicalCluster(boolean value) {
+    onPhysicalCluster = value;
+  }
+
+  private static boolean onPhysicalCluster = false;
 
   /** Base directory for all temporary data. */
   public static final String TEMP_BASE_DIR;
@@ -166,7 +176,11 @@ public class BaseSqoopTestCase extends TestCase {
 
   @Before
   public void setUp() {
-
+    // The assumption is that correct HADOOP configuration will have it set to
+    // hdfs://namenode
+    setOnPhysicalCluster(
+        !CommonArgs.LOCAL_FS.equals(System.getProperty(
+            CommonArgs.FS_DEFAULT_NAME)));
     incrementTableNum();
 
     if (!isLog4jConfigured) {
@@ -205,6 +219,22 @@ public class BaseSqoopTestCase extends TestCase {
     }
   }
 
+  private void guaranteeCleanWarehouse() {
+    if (isOnPhysicalCluster()) {
+      Path warehousePath = new Path(this.getWarehouseDir());
+      try {
+        FileSystem fs = FileSystem.get(getConf());
+        fs.delete(warehousePath, true);
+      } catch (IOException e) {
+        LOG.warn(e);
+      }
+    }
+    File s = new File(getWarehouseDir());
+    if (!s.delete()) {
+      LOG.warn("Can't delete " + s.getPath());
+    }
+  }
+
   @After
   public void tearDown() {
     setCurTableName(null); // clear user-override table name.
@@ -218,6 +248,7 @@ public class BaseSqoopTestCase extends TestCase {
       LOG.error("Got SQLException: " + StringUtils.stringifyException(sqlE));
       fail("Got SQLException: " + StringUtils.stringifyException(sqlE));
     }
+    guaranteeCleanWarehouse();
   }
 
   static final String BASE_COL_NAME = "DATA_COL";

@@ -20,6 +20,8 @@ package com.cloudera.sqoop.lib;
 
 import java.io.*;
 
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import com.cloudera.sqoop.testutil.CommonArgs;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
@@ -108,7 +110,9 @@ public class TestClobRef extends TestCase {
       throws IOException {
 
     Configuration conf = new Configuration();
-    conf.set("fs.defaultFS", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
 

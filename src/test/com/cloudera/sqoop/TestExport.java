@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -152,7 +154,9 @@ public class TestExport extends ExportJobTestCase {
     Path filePath = new Path(tablePath, "part" + fileNum + ext);
 
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
     fs.mkdirs(tablePath);
     OutputStream os = fs.create(filePath);
@@ -176,7 +180,9 @@ public class TestExport extends ExportJobTestCase {
   private void verifyCompressedFile(Path f, int expectedNumLines)
       throws IOException {
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
     InputStream is = fs.open(f);
     CompressionCodecFactory ccf = new CompressionCodecFactory(conf);
@@ -225,7 +231,9 @@ public class TestExport extends ExportJobTestCase {
 
       // Create the SequenceFile.
       Configuration conf = new Configuration();
-      conf.set("fs.default.name", "file:///");
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
       FileSystem fs = FileSystem.get(conf);
       Path tablePath = getTablePath();
       Path filePath = new Path(tablePath, "part" + fileNum);
@@ -355,7 +363,9 @@ public class TestExport extends ExportJobTestCase {
   /** Removing an existing table directory from the filesystem. */
   private void removeTablePath() throws IOException {
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
     fs.delete(getTablePath(), true);
   }

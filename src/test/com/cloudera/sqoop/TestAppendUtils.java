@@ -269,7 +269,9 @@ public class TestAppendUtils extends ImportJobTestCase {
    */
   public void testAppendSrcDoesNotExist() throws IOException {
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     SqoopOptions options = new SqoopOptions(conf);
     options.setTableName("meep");
     Path missingPath = new Path("doesNotExistForAnyReason");

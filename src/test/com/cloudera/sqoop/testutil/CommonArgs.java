@@ -28,6 +28,17 @@ public final class CommonArgs {
   private CommonArgs() {
   }
 
+  public static final String LOCAL_FS="file:///";
+  // this key is deprecated past 0.21
+  public static final String FS_DEFAULT_NAME="fs.defaultfs.name";
+  public static final String FS_DEFAULTFS="fs.defaultFS";
+
+  public static String getJobtrackerAddress() {
+    return System.getProperty("mapreduce.jobtracker.address", "local");
+  }
+  public static String getDefaultFS() {
+    return System.getProperty(FS_DEFAULT_NAME, LOCAL_FS);
+  }
   /**
    * Craft a list of arguments that are common to (virtually)
    * all Sqoop programs.

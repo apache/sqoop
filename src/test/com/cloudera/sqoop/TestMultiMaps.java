@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.sqoop.testutil.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -34,10 +35,6 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.orm.CompilationManager;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
@@ -89,7 +86,9 @@ public class TestMultiMaps extends ImportJobTestCase {
   protected List<Path> getDataFilePaths() throws IOException {
     List<Path> paths = new ArrayList<Path>();
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
     FileSystem fs = FileSystem.get(conf);
 
     FileStatus [] stats = fs.listStatus(getTablePath(),

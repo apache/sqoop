@@ -148,8 +148,10 @@ public class ImportJobTestCase extends BaseSqoopTestCase {
 
       // Now open and check all part-files in the table path until we find
       // a non-empty one that we can verify contains the value.
-
-      FileSystem fs = FileSystem.getLocal(conf);
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
+      FileSystem fs = FileSystem.get(conf);
       FileStatus [] stats = fs.listStatus(tableDirPath);
 
       if (stats == null || stats.length == 0) {

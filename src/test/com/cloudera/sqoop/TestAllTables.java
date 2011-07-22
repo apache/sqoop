@@ -18,15 +18,13 @@
 
 package com.cloudera.sqoop;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Before;
@@ -122,9 +120,16 @@ public class TestAllTables extends ImportJobTestCase {
           + this.expectedStrings.get(0);
       this.expectedStrings.remove(0);
 
-      BufferedReader reader = new BufferedReader(
-          new InputStreamReader(new FileInputStream(
-          new File(filePath.toString()))));
+      BufferedReader reader = null;
+      if (!isOnPhysicalCluster()) {
+        reader = new BufferedReader(
+            new InputStreamReader(new FileInputStream(
+                new File(filePath.toString()))));
+      } else {
+        FileSystem dfs = FileSystem.get(getConf());
+        FSDataInputStream dis = dfs.open(filePath);
+        reader = new BufferedReader(new InputStreamReader(dis));
+      }
       try {
         String line = reader.readLine();
         assertEquals("Table " + tableName + " expected a different string",
