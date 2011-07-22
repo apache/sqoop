@@ -29,7 +29,8 @@ public final class FieldFormatter {
    * Takes an input string representing the value of a field, encloses it in
    * enclosing chars, and escapes any occurrences of such characters in the
    * middle.  The escape character itself is also escaped if it appears in the
-   * text of the field.
+   * text of the field.  If there is no enclosing character, then any
+   * delimiters present in the field body are escaped instead.
    *
    * The field is enclosed only if:
    *   enclose != '\000', and:
@@ -69,7 +70,18 @@ public final class FieldFormatter {
 
     if (DelimiterSet.NULL_CHAR == enclose) {
       // The enclose-with character was left unset, so we can't enclose items.
-      // We're done.
+
+      if (escapingLegal) {
+        // If the user has used the fields-terminated-by or
+        // lines-terminated-by characters in the string, escape them if we
+        // have an escape character.
+        String fields = "" + delimiters.getFieldsTerminatedBy();
+        String lines = "" + delimiters.getLinesTerminatedBy();
+        withEscapes = withEscapes.replace(fields, "" + escape + fields);
+        withEscapes = withEscapes.replace(lines, "" + escape + lines);
+      }
+
+      // No enclosing possible, so now return this.
       return withEscapes;
     }
 

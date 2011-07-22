@@ -76,11 +76,12 @@ public class TestFieldFormatter extends TestCase {
   }
 
   public void testCannotEnclose() {
-    // can't enclose because encloser is nul
+    // Can't enclose because encloser is nul.
+    // This should escape the comma instead.
     String result = FieldFormatter.escapeAndEnclose("foo,bar",
         new DelimiterSet(',', '\n', DelimiterSet.NULL_CHAR, '\\', false));
 
-    assertEquals("foo,bar", result);
+    assertEquals("foo\\,bar", result);
   }
 
   public void testEmptyCharToEscapeString() {
