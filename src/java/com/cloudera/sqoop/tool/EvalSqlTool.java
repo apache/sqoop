@@ -18,10 +18,16 @@
 
 package com.cloudera.sqoop.tool;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -46,10 +52,32 @@ public class EvalSqlTool extends BaseSqoopTool {
       return 1;
     }
 
+    PreparedStatement stmt = null;
     try {
-      // just run a SQL statement for debugging purposes.
-      manager.execAndPrint(options.getSqlQuery());
+      if (options.isSqlQueryUpdate()) {
+        // Run the SQL statement and commit the tx.
+        Connection c = manager.getConnection();
+        stmt = c.prepareStatement(options.getSqlQuery());
+        stmt.executeUpdate();
+        c.commit();
+      } else {
+        // Run the SQL statement and print the results.
+        manager.execAndPrint(options.getSqlQuery());
+      }
+    } catch (SQLException sqlE) {
+      LOG.warn("SQL exception executing statement: "
+          + StringUtils.stringifyException(sqlE));
+      return 1;
     } finally {
+      if (null != stmt) {
+        try {
+          stmt.close();
+        } catch (SQLException sqlE) {
+          LOG.warn("SQL exception closing statement: "
+              + StringUtils.stringifyException(sqlE));
+          return 1;
+        }
+      }
       destroy(options);
     }
 
@@ -67,6 +95,10 @@ public class EvalSqlTool extends BaseSqoopTool {
         .withDescription("Execute 'statement' in SQL and exit")
         .withLongOpt(SQL_QUERY_ARG)
         .create(SQL_QUERY_SHORT_ARG));
+    evalOpts.addOption(OptionBuilder
+        .withDescription("Execute an update operation")
+        .withLongOpt(SQL_QUERY_UPDATE_ARG)
+        .create());
 
     toolOptions.addUniqueOptions(evalOpts);
   }
@@ -79,6 +111,10 @@ public class EvalSqlTool extends BaseSqoopTool {
     applyCommonOptions(in, out);
     if (in.hasOption(SQL_QUERY_ARG)) {
       out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
+    }
+
+    if (in.hasOption(SQL_QUERY_UPDATE_ARG)) {
+      out.setSqlQueryIsUpdate(true);
     }
   }
 

@@ -31,6 +31,8 @@ SQL evaluation options
 --query (statement)::
   Execute +statement+ in SQL.
 
+--update::
+  Specifies that +statement+ should be executed as a DDL/DML operation.
 
 ENVIRONMENT
 -----------

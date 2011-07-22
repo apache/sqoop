@@ -111,6 +111,7 @@ public class SqoopOptions implements Cloneable {
   private String splitByCol;
   private String whereClause;
   private String sqlQuery;
+  private boolean sqlQueryIsUpdate;
   private String driverClassName;
   private String warehouseDir;
   private String targetDir;
@@ -390,6 +391,8 @@ public class SqoopOptions implements Cloneable {
     this.splitByCol = props.getProperty("db.split.column", this.splitByCol);
     this.whereClause = props.getProperty("db.where.clause", this.whereClause);
     this.sqlQuery = props.getProperty("db.query", this.sqlQuery);
+    this.sqlQueryIsUpdate = getBooleanProperty(props, "db.query.is.update",
+        this.sqlQueryIsUpdate);
 
     this.driverClassName = props.getProperty("jdbc.driver.class",
         this.driverClassName);
@@ -504,6 +507,8 @@ public class SqoopOptions implements Cloneable {
     putProperty(props, "db.split.column", this.splitByCol);
     putProperty(props, "db.where.clause", this.whereClause);
     putProperty(props, "db.query", this.sqlQuery);
+    putProperty(props, "db.query.is.update",
+        Boolean.toString(this.sqlQueryIsUpdate));
     putProperty(props, "jdbc.driver.class", this.driverClassName);
     putProperty(props, "hdfs.warehouse.dir", this.warehouseDir);
     putProperty(props, "hdfs.target.dir", this.targetDir);
@@ -1546,6 +1551,22 @@ public class SqoopOptions implements Cloneable {
    */
   public void setParent(SqoopOptions options) {
     this.parent = options;
+  }
+
+  /**
+   * @return true if the user's specified sql query is an update (DDL/DML)
+   * statement. 
+   */
+  public boolean isSqlQueryUpdate() {
+    return this.sqlQueryIsUpdate;
+  }
+
+  /**
+   * Set the flag specifying whether the user's sql query is an update
+   * (DDL/DML) or a data-retrieving query.
+   */
+  public void setSqlQueryIsUpdate(boolean isUpdate) {
+    this.sqlQueryIsUpdate = isUpdate;
   }
 }
 
