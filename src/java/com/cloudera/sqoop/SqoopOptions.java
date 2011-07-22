@@ -116,6 +116,10 @@ public class SqoopOptions implements Cloneable {
 
   @StoredAsProperty("codegen.output.dir") private String codeOutputDir;
   @StoredAsProperty("codegen.compile.dir") private String jarOutputDir;
+  // Boolean specifying whether jarOutputDir is a nonce tmpdir (true), or
+  // explicitly set by the user (false). If the former, disregard any value
+  // for jarOutputDir saved in the metastore.
+  @StoredAsProperty("codegen.auto.compile.dir") private boolean jarDirIsAuto;
   private String hadoopHome; // not serialized to metastore.
   @StoredAsProperty("db.split.column") private String splitByCol;
   @StoredAsProperty("db.where.clause") private String whereClause;
@@ -428,6 +432,14 @@ public class SqoopOptions implements Cloneable {
       this.password = props.getProperty("db.password", this.password);
     }
 
+    if (this.jarDirIsAuto) {
+      // We memoized a user-specific nonce dir for compilation to the data
+      // store.  Disregard that setting and create a new nonce dir.
+      String localUsername = System.getProperty("user.name", "unknown");
+      this.jarOutputDir = getNonceJarDir(tmpDir + "sqoop-" + localUsername
+          + "/compile");
+    }
+
     String colListStr = props.getProperty("db.column.list", null);
     if (null != colListStr) {
       this.columns = listToArray(colListStr);
@@ -554,7 +566,9 @@ public class SqoopOptions implements Cloneable {
   /**
    * Return the name of a directory that does not exist before 
    * calling this method, and does exist afterward. We should be
-   * the only client of this directory.
+   * the only client of this directory. If this directory is not
+   * used during the lifetime of the JVM, schedule it to be removed
+   * when the JVM exits.
    */
   private static String getNonceJarDir(String tmpBase) {
 
@@ -576,6 +590,9 @@ public class SqoopOptions implements Cloneable {
 
       if (hashDir.mkdirs()) {
         // We created the directory. Use it.
+        // If this directory is not actually filled with files, delete it
+        // when the JVM quits.
+        hashDir.deleteOnExit();
         break;
       }
     }
@@ -624,7 +641,10 @@ public class SqoopOptions implements Cloneable {
     }
 
     this.tmpDir = myTmpDir;
-    this.jarOutputDir = getNonceJarDir(tmpDir + "sqoop/compile");
+    String localUsername = System.getProperty("user.name", "unknown");
+    this.jarOutputDir = getNonceJarDir(tmpDir + "sqoop-" + localUsername
+        + "/compile");
+    this.jarDirIsAuto = true;
     this.layout = FileLayout.TextFile;
 
     this.areDelimsManuallySet = false;
@@ -941,6 +961,7 @@ public class SqoopOptions implements Cloneable {
 
   public void setJarOutputDir(String outDir) {
     this.jarOutputDir = outDir;
+    this.jarDirIsAuto = false;
   }
 
   /**
