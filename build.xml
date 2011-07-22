@@ -437,11 +437,14 @@
     <delete dir="${build.dir}"/>
   </target>
 
-  <target name="veryclean"
-      depends="clean"
-      description="Clean build and remove cached dependencies">
+  <target name="clean-cache" description="Remove cached dependencies">
     <delete dir="${user.home}/.ivy2/cache/org.apache.hadoop" />
     <delete file="${ivy.jar}" />
+  </target>
+
+  <target name="veryclean"
+      depends="clean,clean-cache"
+      description="Clean build and remove cached dependencies">
   </target>
 
   <target name="findbugs" depends="check-for-findbugs,jar,compile-test"
