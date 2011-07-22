@@ -32,6 +32,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.hadoop.sqoop.ImportOptions.InvalidOptionsException;
 import org.apache.hadoop.sqoop.orm.CompilationManager;
+import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.HsqldbTestServer;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.testutil.SeqFileReader;
@@ -55,10 +56,7 @@ public class TestMultiMaps extends ImportJobTestCase {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {
-      args.add("-D");
-      args.add("mapred.job.tracker=local");
-      args.add("-D");
-      args.add("fs.default.name=file:///");
+      CommonArgs.addHadoopFlags(args);
     }
 
     args.add("--table");

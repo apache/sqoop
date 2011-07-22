@@ -68,6 +68,7 @@ public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
   private class ProgressThread extends Thread {
 
     private volatile boolean keepGoing; // while this is true, thread runs.
+
     private Context context;
     private long startTimeMillis;
     private long lastReportMillis;

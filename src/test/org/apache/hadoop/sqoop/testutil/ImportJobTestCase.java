@@ -286,12 +286,7 @@ public class ImportJobTestCase extends TestCase {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {
-      args.add("-D");
-      args.add("mapreduce.jobtracker.address=local");
-      args.add("-D");
-      args.add("mapreduce.job.maps=1");
-      args.add("-D");
-      args.add("fs.default.name=file:///");
+      CommonArgs.addHadoopFlags(args);
     }
 
     args.add("--table");

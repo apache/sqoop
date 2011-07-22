@@ -16,29 +16,30 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.sqoop;
+package org.apache.hadoop.sqoop.testutil;
 
-import org.apache.hadoop.sqoop.mapred.MapredTests;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
 
 /**
- * All tests for Sqoop (org.apache.hadoop.sqoop)
+ * Sets common arguments to Sqoop sub-instances for testing.
  */
-public final class AllTests {
+public final class CommonArgs {
 
-  private AllTests() { }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite("All tests for org.apache.hadoop.sqoop");
-
-    suite.addTest(SmokeTests.suite());
-    suite.addTest(ThirdPartyTests.suite());
-    suite.addTest(MapredTests.suite());
-
-    return suite;
+  private CommonArgs() {
   }
 
+  /** Craft a list of arguments that are common to (virtually) all Sqoop programs
+   */
+  public static void addHadoopFlags(List<String> args) {
+    args.add("-D");
+    args.add("mapreduce.jobtracker.address=local");
+    args.add("-D");
+    args.add("mapreduce.job.maps=1");
+    args.add("-D");
+    args.add("fs.default.name=file:///");
+    args.add("-D");
+    args.add("jobclient.completion.poll.interval=50");
+    args.add("-D");
+    args.add("jobclient.progress.monitor.poll.interval=50");
+  }
 }
-

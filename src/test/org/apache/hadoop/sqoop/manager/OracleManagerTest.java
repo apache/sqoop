@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.sqoop.ImportOptions;
+import org.apache.hadoop.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.sqoop.util.FileListing;
 
@@ -141,10 +142,7 @@ public class OracleManagerTest extends ImportJobTestCase {
   private String [] getArgv() {
     ArrayList<String> args = new ArrayList<String>();
 
-    args.add("-D");
-    args.add("fs.default.name=file:///");
-    args.add("-D");
-    args.add("mapreduce.jobtracker.address=local");
+    CommonArgs.addHadoopFlags(args);
 
     args.add("--table");
     args.add(TABLE_NAME);
