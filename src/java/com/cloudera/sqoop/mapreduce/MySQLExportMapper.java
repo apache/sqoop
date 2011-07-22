@@ -29,8 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.mapreduce.Mapper;
+
+import com.cloudera.sqoop.io.NamedFifo;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.shims.HadoopShim;
@@ -119,7 +120,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
 
     // Create the FIFO itself.
     try {
-      Shell.execCommand("mknod", "--mode=0600", filename, "p");
+      new NamedFifo(this.fifoFile).create();
     } catch (IOException ioe) {
       // Command failed.
       LOG.error("Could not mknod " + filename);
