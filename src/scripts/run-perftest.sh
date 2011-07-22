@@ -30,7 +30,7 @@ bin=`cd ${bin} && pwd`
 SQOOP_HOME="${bin}/../../"
 
 # Set up environment and classpath
-source ${SQOOP_HOME}/bin/configure-sqoop
+source ${SQOOP_HOME}/bin/configure-sqoop "${bin}"
 
 PERFTEST_CLASSES=${SQOOP_HOME}/build/perftest/classes
 

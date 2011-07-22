@@ -18,9 +18,12 @@
 # This is sourced in by bin/sqoop to set environment variables prior to
 # invoking Hadoop.
 
-prgm=`readlink -f $0`
-bin=`dirname ${prgm}`
-bin=`cd ${bin} && pwd`
+bin="$1"
+
+if [ -z "${bin}" ]; then
+  bin=`dirname $0`
+  bin=`cd ${bin} && pwd`
+fi
 
 if [ -z "$SQOOP_HOME" ]; then
   export SQOOP_HOME=${bin}/..
