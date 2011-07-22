@@ -25,18 +25,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
 import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
 
 import org.apache.hadoop.sqoop.ConnFactory;
 import org.apache.hadoop.sqoop.manager.ConnManager;
 import org.apache.hadoop.sqoop.manager.ExportJobContext;
-
+import org.apache.hadoop.sqoop.shims.ShimLoader;
 
 /**
- * Run an export using JDBC (DBOutputFormat)
+ * Run an export using JDBC (JDBC-based ExportOutputFormat)
  */
 public class JdbcExportJob extends ExportJobBase {
 
@@ -45,6 +47,13 @@ public class JdbcExportJob extends ExportJobBase {
 
   public JdbcExportJob(final ExportJobContext context) {
     super(context);
+  }
+
+  public JdbcExportJob(final ExportJobContext ctxt,
+      final Class<? extends Mapper> mapperClass,
+      final Class<? extends InputFormat> inputFormatClass,
+      final Class<? extends OutputFormat> outputFormatClass) {
+    super(ctxt, mapperClass, inputFormatClass, outputFormatClass);
   }
 
   @Override
@@ -81,8 +90,10 @@ public class JdbcExportJob extends ExportJobBase {
       }
       DBOutputFormat.setOutput(job, tableName, colNames);
 
-      job.setOutputFormatClass(DBOutputFormat.class);
+      job.setOutputFormatClass(getOutputFormatClass());
       job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY, tableClassName);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException("Could not load OutputFormat", cnfe);
     } finally {
       try {
         mgr.close();

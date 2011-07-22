@@ -73,6 +73,11 @@ public class ClobRef extends LobRef<String, String, Reader> {
   }
 
   @Override
+  protected String deepCopyData() {
+    return data;
+  }
+
+  @Override
   protected String getInternalData(String data) {
     return data;
   }

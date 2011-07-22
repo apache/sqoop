@@ -33,7 +33,7 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 /**
  * Converts an input record from a string representation to a parsed Sqoop record
- * and emits that DBWritable to the DBOutputFormat for writeback to the database.
+ * and emits that DBWritable to the OutputFormat for writeback to the database.
  */
 public class TextExportMapper
     extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {

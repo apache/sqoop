@@ -132,8 +132,9 @@
   <!-- Classpath for unit tests (superset of compile.classpath) -->
   <path id="test.classpath">
     <pathelement location="${build.test.classes}" />
-    <path refid="${name}.hadooptest.classpath"/>
-    <path refid="compile.classpath"/>
+    <path refid="${name}.hadooptest.classpath" />
+    <path refid="compile.classpath" />
+    <pathelement location="${build.shim.classes}/${hadoop.dist}" />
   </path>
 
   <path id="cobertura.classpath">
@@ -197,7 +198,7 @@
   </target>
 
   <target name="compile-test"
-      depends="compile, ivy-retrieve-hadoop-test"
+      depends="compile, compile-one-shim, ivy-retrieve-hadoop-test"
       description="Compile test classes">
     <mkdir dir="${build.test.classes}" />
     <javac

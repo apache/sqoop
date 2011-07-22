@@ -93,6 +93,24 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
   protected LobFile.Reader reader;
 
   @Override
+  @SuppressWarnings("unchecked")
+  /**
+   * Clone the current reference object. data is deep-copied; any open
+   * file handle remains with the original only.
+   */
+  public Object clone() throws CloneNotSupportedException {
+    LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE> r =
+        (LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>) super.clone();
+
+    r.reader = null; // Reference to opened reader is not duplicated.
+    if (null != data) {
+      r.data = deepCopyData();
+    }
+
+    return r;
+  }
+
+  @Override
   protected synchronized void finalize() throws Throwable {
     close();
   }
@@ -201,6 +219,11 @@ public abstract class LobRef<DATATYPE, CONTAINERTYPE, ACCESSORTYPE>
    * @return the materialized data itself.
    */
   protected abstract DATATYPE getInternalData(CONTAINERTYPE data);
+
+  /**
+   * Make a copy of the materialized data.
+   */
+  protected abstract CONTAINERTYPE deepCopyData();
 
   public DATATYPE getData() {
     if (isExternal()) {

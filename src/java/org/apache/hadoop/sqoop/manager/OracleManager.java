@@ -33,8 +33,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.OracleDataDrivenDBInputFormat;
 import org.apache.hadoop.sqoop.SqoopOptions;
+import org.apache.hadoop.sqoop.mapreduce.JdbcExportJob;
+import org.apache.hadoop.sqoop.shims.ShimLoader;
+import org.apache.hadoop.sqoop.util.ExportException;
 import org.apache.hadoop.sqoop.util.ImportException;
 
 /**
@@ -281,11 +285,28 @@ public class OracleManager extends GenericJdbcManager {
     }
   }
 
+  @Override
   public void importTable(ImportJobContext context)
       throws IOException, ImportException {
     // Specify the Oracle-specific DBInputFormat for import.
     context.setInputFormat(OracleDataDrivenDBInputFormat.class);
     super.importTable(context);
+  }
+
+  /**
+   * Export data stored in HDFS into a table in a database
+   */
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    try {
+      JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
+          (Class<? extends OutputFormat>) ShimLoader.getShimClass(
+          "org.apache.hadoop.sqoop.mapreduce.OracleExportOutputFormat"));
+      exportJob.runExport();
+    } catch (ClassNotFoundException cnfe) {
+      throw new ExportException("Could not start export; could not find class",
+          cnfe);
+    }
   }
 
   @Override

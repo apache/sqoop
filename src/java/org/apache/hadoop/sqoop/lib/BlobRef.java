@@ -23,6 +23,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +82,11 @@ public class BlobRef extends LobRef<byte[], BytesWritable, InputStream> {
   @Override
   protected byte [] getInternalData(BytesWritable data) {
     return data.getBytes();
+  }
+
+  @Override
+  protected BytesWritable deepCopyData() {
+    return new BytesWritable(Arrays.copyOf(data.getBytes(), data.getLength()));
   }
 
   @Override

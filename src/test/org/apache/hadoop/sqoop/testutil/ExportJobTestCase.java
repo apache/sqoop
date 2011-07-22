@@ -31,11 +31,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 
 import org.apache.hadoop.sqoop.Sqoop;
+import org.apache.hadoop.sqoop.mapreduce.ExportOutputFormat;
 import org.apache.hadoop.sqoop.tool.ExportTool;
 
 /**
  * Class that implements common methods required for tests which export data
- * from HDFS to databases, to verify correct export
+ * from HDFS to databases, to verify correct export.
  */
 public class ExportJobTestCase extends BaseSqoopTestCase {
 
@@ -43,6 +44,15 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
 
   protected String getTablePrefix() {
     return "EXPORT_TABLE_";
+  }
+
+  /**
+   * @return the maximum rows to fold into an INSERT statement.
+   * HSQLDB can only support the single-row INSERT syntax. Other databases
+   * can support greater numbers of rows per statement.
+   */
+  protected int getMaxRowsPerStatement() {
+    return 1;
   }
 
   /**
@@ -60,13 +70,27 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
   /**
    * Create the argv to pass to Sqoop
    * @param includeHadoopFlags if true, then include -D various.settings=values
+   * @param rowsPerStmt number of rows to export in a single INSERT statement.
+   * @param statementsPerTx ## of statements to use in a transaction.
    * @return the argv as an array of strings.
    */
-  protected String [] getArgv(boolean includeHadoopFlags, String... additionalArgv) {
+  protected String [] getArgv(boolean includeHadoopFlags,
+      int rowsPerStmt, int statementsPerTx, String... additionalArgv) {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
+      args.add("-D");
+      int realRowsPerStmt = Math.min(rowsPerStmt, getMaxRowsPerStatement());
+      if (realRowsPerStmt != rowsPerStmt) {
+        LOG.warn("Rows per statement set to " + realRowsPerStmt
+            + " by getMaxRowsPerStatement() limit.");
+      }
+      args.add(ExportOutputFormat.RECORDS_PER_STATEMENT_KEY + "="
+          + realRowsPerStmt);
+      args.add("-D");
+      args.add(ExportOutputFormat.STATEMENTS_PER_TRANSACTION_KEY + "="
+          + statementsPerTx);
     }
 
     // Any additional Hadoop flags (-D foo=bar) are prepended.
@@ -200,6 +224,10 @@ public class ExportJobTestCase extends BaseSqoopTestCase {
 
     assertEquals("Got back unexpected row count", expectedNumRecords,
         actualNumRecords);
+
+    if (expectedNumRecords == 0) {
+      return; // Nothing more to verify.
+    }
 
     // Check that we start with row 0.
     int minVal = getMinRowId();

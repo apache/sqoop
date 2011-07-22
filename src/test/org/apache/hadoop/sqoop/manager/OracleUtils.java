@@ -80,8 +80,7 @@ public final class OracleUtils {
       st = connection.createStatement();
 
       // create the database table and populate it with data. 
-      st.executeUpdate("BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; "
-          + "exception when others then null; end;");
+      st.executeUpdate(getDropTableStatement(tableName));
 
       connection.commit();
     } finally {
@@ -93,5 +92,10 @@ public final class OracleUtils {
         LOG.warn("Got SQLException when closing connection: " + sqlE);
       }
     }
+  }
+
+  public static String getDropTableStatement(String tableName) {
+    return "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; "
+        + "exception when others then null; end;";
   }
 }

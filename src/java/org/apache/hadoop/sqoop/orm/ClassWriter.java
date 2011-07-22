@@ -500,6 +500,10 @@ public class ClassWriter {
       StringBuilder sb) {
 
     sb.append("  public void write(PreparedStatement __dbStmt) throws SQLException {\n");
+    sb.append("    write(__dbStmt, 0);\n");
+    sb.append("  }\n\n");
+
+    sb.append("  public int write(PreparedStatement __dbStmt, int __off) throws SQLException {\n");
 
     int fieldNum = 0;
 
@@ -520,9 +524,10 @@ public class ClassWriter {
       }
 
       sb.append("    JdbcWritableBridge." + setterMethod + "(" + col + ", "
-          + fieldNum + ", " + sqlType + ", __dbStmt);\n");
+          + fieldNum + " + __off, " + sqlType + ", __dbStmt);\n");
     }
 
+    sb.append("    return " + fieldNum + ";\n");
     sb.append("  }\n");
   }
 
@@ -559,7 +564,48 @@ public class ClassWriter {
   }
 
   /**
-   * Generate the toString() method
+   * Generate the clone() method.
+   * @param columnTypes - mapping from column names to sql types
+   * @param colNames - ordered list of column names for table.
+   * @param sb - StringBuilder to append code to
+   */
+  private void generateCloneMethod(Map<String, Integer> columnTypes,
+      String [] colNames, StringBuilder sb) {
+
+    TableClassName tableNameInfo = new TableClassName(options);
+    String className = tableNameInfo.getShortClassForTable(tableName);
+
+    sb.append("  public Object clone() throws CloneNotSupportedException {\n");
+    sb.append("    " + className + " o = (" + className + ") super.clone();\n");
+
+    // For each field that is mutable, we need to perform the deep copy.
+    for (String colName : colNames) {
+      int sqlType = columnTypes.get(colName);
+      String javaType = connManager.toJavaType(sqlType);
+      if (null == javaType) {
+        continue;
+      } else if (javaType.equals("java.sql.Date")
+          || javaType.equals("java.sql.Time")
+          || javaType.equals("java.sql.Timestamp")
+          || javaType.equals(ClobRef.class.getName())
+          || javaType.equals(BlobRef.class.getName())) {
+        sb.append("    o." + colName + " = (" + javaType
+            + ") o." + colName + ".clone();\n");
+      } else if (javaType.equals(BytesWritable.class.getName())) {
+        sb.append("    o." + colName + " = new BytesWritable("
+            + "Arrays.copyOf(" + colName + ".getBytes(), "
+            + colName + ".getLength()));\n");
+      }
+    }
+
+    sb.append("    return o;\n");
+    sb.append("  }\n");
+
+
+  }
+
+  /**
+   * Generate the toString() method.
    * @param columnTypes - mapping from column names to sql types
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
@@ -904,6 +950,7 @@ public class ClassWriter {
     sb.append("import java.sql.Date;\n");
     sb.append("import java.sql.Time;\n");
     sb.append("import java.sql.Timestamp;\n");
+    sb.append("import java.util.Arrays;\n");
     sb.append("import java.util.Iterator;\n");
     sb.append("import java.util.List;\n");
     sb.append("\n");
@@ -921,6 +968,8 @@ public class ClassWriter {
     generateHadoopWrite(columnTypes, colNames, sb);
     generateToString(columnTypes, colNames, sb);
     generateParser(columnTypes, colNames, sb);
+    generateCloneMethod(columnTypes, colNames, sb);
+
     // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a WritableComparable
 
     sb.append("}\n");

@@ -47,13 +47,7 @@ public class MySQLExportJob extends ExportJobBase {
       LogFactory.getLog(MySQLExportJob.class.getName());
 
   public MySQLExportJob(final ExportJobContext context) {
-    super(context);
-  }
-
-  @Override
-  protected Class<? extends OutputFormat> getOutputFormatClass() {
-    // This job does not write to the OutputCollector. Disable it.
-    return NullOutputFormat.class;
+    super(context, null, null, NullOutputFormat.class);
   }
 
   @Override

@@ -28,7 +28,7 @@ import org.apache.hadoop.sqoop.lib.SqoopRecord;
 
 /**
  * Reads a SqoopRecord from the SequenceFile in which it's packed and emits
- * that DBWritable to the DBOutputFormat for writeback to the database.
+ * that DBWritable to the OutputFormat for writeback to the database.
  */
 public class SequenceFileExportMapper
     extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord, NullWritable> {

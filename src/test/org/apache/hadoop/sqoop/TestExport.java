@@ -119,7 +119,7 @@ public class TestExport extends ExportJobTestCase {
       as what the string representation of the column as returned by
       the database should look like.
     */
-  interface ColumnGenerator {
+  public interface ColumnGenerator {
     /** for a row with id rowNum, what should we write into that
         line of the text file to export?
       */
@@ -400,11 +400,18 @@ public class TestExport extends ExportJobTestCase {
       }
 
       createTable();
-      runExport(getArgv(true, newStrArray(argv, "-m", "" + numMaps)));
+      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + numMaps)));
       verifyExport(TOTAL_RECORDS);
     } finally {
       LOG.info("multi-file test complete");
     }
+  }
+
+  /**
+   * Run an "export" on an empty file.
+   */
+  public void testEmptyExport() throws IOException, SQLException {
+    multiFileTest(1, 0, 1);
   }
 
   /** Export 10 rows, make sure they load in correctly */
@@ -435,9 +442,43 @@ public class TestExport extends ExportJobTestCase {
 
     createTextFile(0, TOTAL_RECORDS, true);
     createTable();
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
     LOG.info("Complete gzip export test");
+  }
+
+  /**
+   * Ensure that we use multiple statements in a transaction.
+   */
+  public void testMultiStatement() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 20;
+    createTextFile(0, TOTAL_RECORDS, true);
+    createTable();
+    runExport(getArgv(true, 10, 10));
+    verifyExport(TOTAL_RECORDS);
+  }
+
+  /**
+   * Ensure that we use multiple transactions in a single mapper.
+   */
+  public void testMultiTransaction() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 20;
+    createTextFile(0, TOTAL_RECORDS, true);
+    createTable();
+    runExport(getArgv(true, 5, 2));
+    verifyExport(TOTAL_RECORDS);
+  }
+
+  /**
+   * Ensure that when we don't force a commit with a statement cap,
+   * it happens anyway.
+   */
+  public void testUnlimitedTransactionSize() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 20;
+    createTextFile(0, TOTAL_RECORDS, true);
+    createTable();
+    runExport(getArgv(true, 5, -1));
+    verifyExport(TOTAL_RECORDS);
   }
 
   /** Run 2 mappers, make sure all records load in correctly */
@@ -451,7 +492,7 @@ public class TestExport extends ExportJobTestCase {
     }
 
     createTable();
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(RECORDS_PER_MAP * NUM_FILES);
   }
 
@@ -508,7 +549,8 @@ public class TestExport extends ExportJobTestCase {
 
       // Now run and verify the export.
       LOG.info("Exporting SequenceFile-based data");
-      runExport(getArgv(true, "--class-name", className, "--jar-file", jarFileName));
+      runExport(getArgv(true, 10, 10, "--class-name", className,
+          "--jar-file", jarFileName));
       verifyExport(TOTAL_RECORDS);
     } finally {
       if (null != prevClassLoader) {
@@ -535,9 +577,14 @@ public class TestExport extends ExportJobTestCase {
 
     createTextFile(0, TOTAL_RECORDS, false, gen);
     createTable(gen);
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
     assertColMinAndMax(forIdx(0), gen);
+  }
+
+  /** @return the column type for a large integer */
+  protected String getBigIntType() {
+    return "BIGINT";
   }
 
   public void testBigIntCol() throws IOException, SQLException {
@@ -554,18 +601,18 @@ public class TestExport extends ExportJobTestCase {
         return "" + val;
       }
       public String getType() {
-        return "BIGINT";
+        return getBigIntType();
       }
     };
 
     createTextFile(0, TOTAL_RECORDS, false, gen);
     createTable(gen);
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
     assertColMinAndMax(forIdx(0), gen);
   }
 
-  private String pad(int n) {
+  protected String pad(int n) {
     if (n <= 9) {
       return "0" + n;
     } else {
@@ -573,10 +620,11 @@ public class TestExport extends ExportJobTestCase {
     }
   }
 
-  public void testDatesAndTimes() throws IOException, SQLException {
-    final int TOTAL_RECORDS = 10;
-
-    ColumnGenerator genDate = new ColumnGenerator() {
+  /**
+   * Get a column generator for DATE columns
+   */
+  protected ColumnGenerator getDateColumnGenerator() {
+    return new ColumnGenerator() {
       public String getExportText(int rowNum) {
         int day = rowNum + 1;
         return "2009-10-" + day;
@@ -589,8 +637,13 @@ public class TestExport extends ExportJobTestCase {
         return "DATE";
       }
     };
+  }
 
-    ColumnGenerator genTime = new ColumnGenerator() {
+  /**
+   * Get a column generator for TIME columns.
+   */
+  protected ColumnGenerator getTimeColumnGenerator() {
+    return new ColumnGenerator() {
       public String getExportText(int rowNum) {
         return "10:01:" + rowNum;
       }
@@ -601,10 +654,17 @@ public class TestExport extends ExportJobTestCase {
         return "TIME";
       }
     };
+  }
+
+  public void testDatesAndTimes() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    ColumnGenerator genDate = getDateColumnGenerator();
+    ColumnGenerator genTime = getTimeColumnGenerator();
 
     createTextFile(0, TOTAL_RECORDS, false, genDate, genTime);
     createTable(genDate, genTime);
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
     assertColMinAndMax(forIdx(0), genDate);
     assertColMinAndMax(forIdx(1), genTime);
@@ -647,7 +707,7 @@ public class TestExport extends ExportJobTestCase {
 
     createTextFile(0, TOTAL_RECORDS, false, genFloat, genNumeric);
     createTable(genFloat, genNumeric);
-    runExport(getArgv(true));
+    runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
     assertColMinAndMax(forIdx(0), genFloat);
     assertColMinAndMax(forIdx(1), genNumeric);

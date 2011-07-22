@@ -37,7 +37,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -185,6 +184,18 @@ public class ExportJobBase extends JobBase {
           "org.apache.hadoop.sqoop.mapreduce.ExportInputFormat");
     } else {
       return configuredIF;
+    }
+  }
+
+  @Override
+  protected Class<? extends OutputFormat> getOutputFormatClass()
+      throws ClassNotFoundException {
+    Class<? extends OutputFormat> configuredOF = super.getOutputFormatClass();
+    if (null == configuredOF) {
+      return (Class<? extends OutputFormat>) ShimLoader.getShimClass(
+          "org.apache.hadoop.sqoop.mapreduce.ExportOutputFormat");
+    } else {
+      return configuredOF;
     }
   }
 

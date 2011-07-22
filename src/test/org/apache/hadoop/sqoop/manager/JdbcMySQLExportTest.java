@@ -25,6 +25,7 @@ import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,22 +35,30 @@ import org.apache.hadoop.sqoop.TestExport;
 import org.apache.hadoop.sqoop.mapreduce.MySQLExportMapper;
 
 /**
- * Test the DirectMySQLManager implementation's exportJob() functionality.
+ * Test the MySQLManager implementation's exportJob() functionality.
+ * This does a better test of ExportOutputFormat than TestExport does,
+ * because it supports multi-row INSERT statements.
  */
-public class DirectMySQLExportTest extends TestExport {
+public class JdbcMySQLExportTest extends TestExport {
 
   public static final Log LOG = LogFactory.getLog(
-      DirectMySQLExportTest.class.getName());
+      JdbcMySQLExportTest.class.getName());
 
-  static final String TABLE_PREFIX = "EXPORT_MYSQL_";
+  static final String TABLE_PREFIX = "EXPORT_MYSQL_J_";
 
   // instance variables populated during setUp, used during tests.
-  private DirectMySQLManager manager;
+  private MySQLManager manager;
   private Connection conn;
 
   @Override
   protected Connection getConnection() {
     return conn;
+  }
+
+  // MySQL allows multi-row INSERT statements.
+  @Override
+  protected int getMaxRowsPerStatement() {
+    return 1000;
   }
 
   @Override
@@ -79,15 +88,13 @@ public class DirectMySQLExportTest extends TestExport {
     SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
         getTableName());
     options.setUsername(MySQLTestUtils.getCurrentUser());
-    this.manager = new DirectMySQLManager(options);
-
+    this.manager = new MySQLManager(options);
     try {
       this.conn = manager.getConnection();
       this.conn.setAutoCommit(false);
     } catch (SQLException sqlE) {
-      LOG.error("Encountered SQL Exception: " + sqlE);
-      sqlE.printStackTrace();
-      fail("SQLException when running test setUp(): " + sqlE);
+      LOG.error(StringUtils.stringifyException(sqlE));
+      fail("Failed with sql exception in setup: " + sqlE);
     }
   }
 
@@ -134,17 +141,9 @@ public class DirectMySQLExportTest extends TestExport {
   protected String [] getArgv(boolean includeHadoopFlags,
       int rowsPerStatement, int statementsPerTx, String... additionalArgv) {
 
-    String [] subArgv = newStrArray(additionalArgv, "--direct",
+    String [] subArgv = newStrArray(additionalArgv,
         "--username", MySQLTestUtils.getCurrentUser());
     return super.getArgv(includeHadoopFlags, rowsPerStatement,
         statementsPerTx, subArgv);
-  }
-
-  /**
-   * Test a single mapper that runs several transactions serially.
-   */
-  public void testMultiTxExport() throws IOException, SQLException {
-    multiFileTest(1, 20, 1,
-        "-D", MySQLExportMapper.MYSQL_CHECKPOINT_BYTES_KEY + "=10");
   }
 }

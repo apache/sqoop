@@ -24,8 +24,10 @@ import junit.framework.TestSuite;
 
 import org.apache.hadoop.sqoop.manager.DirectMySQLTest;
 import org.apache.hadoop.sqoop.manager.DirectMySQLExportTest;
+import org.apache.hadoop.sqoop.manager.JdbcMySQLExportTest;
 import org.apache.hadoop.sqoop.manager.MySQLAuthTest;
 import org.apache.hadoop.sqoop.manager.MySQLCompatTest;
+import org.apache.hadoop.sqoop.manager.OracleExportTest;
 import org.apache.hadoop.sqoop.manager.OracleManagerTest;
 import org.apache.hadoop.sqoop.manager.OracleCompatTest;
 import org.apache.hadoop.sqoop.manager.PostgresqlTest;
@@ -44,8 +46,10 @@ public final class ThirdPartyTests extends TestCase {
       + "implementations in Sqoop");
     suite.addTestSuite(DirectMySQLTest.class);
     suite.addTestSuite(DirectMySQLExportTest.class);
+    suite.addTestSuite(JdbcMySQLExportTest.class);
     suite.addTestSuite(MySQLAuthTest.class);
     suite.addTestSuite(MySQLCompatTest.class);
+    suite.addTestSuite(OracleExportTest.class);
     suite.addTestSuite(OracleManagerTest.class);
     suite.addTestSuite(OracleCompatTest.class);
     suite.addTestSuite(PostgresqlTest.class);

@@ -40,9 +40,6 @@ import org.apache.hadoop.io.Text;
  *  [int: scale][boolean: b == false][long: BigInt-part]
  *  [int: scale][boolean: b == true][string: BigInt-part.toString()]
  *
- *
- * 
- *
  * TODO(aaron): Get this to work with Hadoop's Serializations framework.
  */
 public final class BigDecimalSerializer {
