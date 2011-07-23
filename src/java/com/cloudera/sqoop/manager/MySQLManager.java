@@ -24,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +35,7 @@ import com.cloudera.sqoop.util.ImportException;
 /**
  * Manages connections to MySQL databases.
  */
-public class MySQLManager extends GenericJdbcManager {
+public class MySQLManager extends InformationSchemaManager {
 
   public static final Log LOG = LogFactory.getLog(MySQLManager.class.getName());
 
@@ -70,41 +69,6 @@ public class MySQLManager extends GenericJdbcManager {
   protected String getColNamesQuery(String tableName) {
     // Use mysql-specific hints and LIMIT to return fast
     return "SELECT t.* FROM " + escapeTableName(tableName) + " AS t LIMIT 1";
-  }
-
-  @Override
-  public String[] listDatabases() {
-    // TODO(aaron): Add an automated unit test for this.
-
-    ResultSet results;
-    try {
-      results = execute("SHOW DATABASES");
-    } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString());
-      release();
-      return null;
-    }
-
-    try {
-      ArrayList<String> databases = new ArrayList<String>();
-      while (results.next()) {
-        String dbName = results.getString(1);
-        databases.add(dbName);
-      }
-
-      return databases.toArray(new String[0]);
-    } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: " + sqlException.toString());
-      return null;
-    } finally {
-      try {
-        results.close();
-      } catch (SQLException sqlE) {
-        LOG.warn("Exception closing ResultSet: " + sqlE.toString());
-      }
-
-      release();
-    }
   }
 
   @Override
@@ -248,6 +212,16 @@ public class MySQLManager extends GenericJdbcManager {
   @Override
   public boolean supportsStagingForExport() {
     return true;
+  }
+
+  @Override
+  protected String getListDatabasesQuery() {
+    return "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA";
+  }
+
+  @Override
+  protected String getSchemaQuery() {
+    return "SELECT SCHEMA()";
   }
 }
 
