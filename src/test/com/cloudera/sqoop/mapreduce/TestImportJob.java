@@ -22,6 +22,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -56,6 +57,8 @@ public class TestImportJob extends ImportJobTestCase {
     createTableForColType("VARCHAR(32)", "'meep'");
 
     Configuration conf = new Configuration();
+
+    LogFactory.getLog( getClass() ).info( " getWarehouseDir() " + getWarehouseDir() );
 
     // Make the output dir exist so we know the job will fail via IOException.
     Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());

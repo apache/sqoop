@@ -196,6 +196,14 @@ limitations under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.9</version>
+        <configuration>
+          <systemPropertyVariables>
+            <test.build.data>${project.build.outputDirectory}</test.build.data>
+            <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+            <sqoop.src.dir>${project.build.outputDirectory}</sqoop.src.dir>
+            <sqoop.test.import.rootDir>${project.build.outputDirectory}</sqoop.test.import.rootDir>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
