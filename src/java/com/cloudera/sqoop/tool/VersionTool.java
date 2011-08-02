@@ -19,7 +19,6 @@
 package com.cloudera.sqoop.tool;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopVersion;
 import com.cloudera.sqoop.cli.ToolOptions;
 
 /**
@@ -34,7 +33,8 @@ public class VersionTool extends BaseSqoopTool {
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
-    System.out.print(new SqoopVersion().toString());
+    // FIXME with maven buildnumber plugin
+    System.out.print("FIXME ");
     return 0;
   }
 
