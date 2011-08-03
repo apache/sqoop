@@ -235,6 +235,7 @@ limitations under the License.
             <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
             <sqoop.src.dir>${project.build.outputDirectory}</sqoop.src.dir>
             <sqoop.test.import.rootDir>${project.build.outputDirectory}</sqoop.test.import.rootDir>
+            <hive.home>${basedir}/testdata/hive</hive.home>
           </systemPropertyVariables>
           <excludes>
             <exclude>**/**MySQL*.java</exclude>
