@@ -83,6 +83,8 @@ limitations under the License.
     -->
     <!-- FIXME Cloudera Distribution dependency version -->
     <hadoopVersion>0.20.2-737</hadoopVersion>
+
+    <hbaseVersion>0.90.3</hbaseVersion>
   </properties>
 
   <dependencies>
@@ -112,10 +114,6 @@ limitations under the License.
       <version>${avroVersion}</version>
     </dependency>
     <dependency>
-      <!--
-      FIXME we must depends on org.apache !
-      <groupId>org.apache.hadoop</groupId>
-      -->
       <groupId>com.cloudera.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>${hadoopVersion}</version>
@@ -124,16 +122,15 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <!-- from cloudera repo -->
-      <version>0.90.3</version>
+      <version>${hbaseVersion}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <!-- from cloudera repo -->
-      <version>0.89.20100924-28</version>
+      <version>${hbaseVersion}</version>
       <classifier>tests</classifier>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
