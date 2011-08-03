@@ -45,7 +45,7 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 /**
  * Utility methods that facilitate HBase import tests.
  */
-public class HBaseTestCase extends ImportJobTestCase {
+public abstract class HBaseTestCase extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       HBaseTestCase.class.getName());

@@ -47,7 +47,7 @@ import junit.framework.TestCase;
 /**
  * Class that implements common methods required for tests.
  */
-public class BaseSqoopTestCase extends TestCase {
+public abstract class BaseSqoopTestCase extends TestCase {
 
   public static final Log LOG = LogFactory.getLog(
       BaseSqoopTestCase.class.getName());

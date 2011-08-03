@@ -38,7 +38,7 @@ import com.cloudera.sqoop.tool.ExportTool;
  * Class that implements common methods required for tests which export data
  * from HDFS to databases, to verify correct export.
  */
-public class ExportJobTestCase extends BaseSqoopTestCase {
+public abstract class ExportJobTestCase extends BaseSqoopTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       ExportJobTestCase.class.getName());

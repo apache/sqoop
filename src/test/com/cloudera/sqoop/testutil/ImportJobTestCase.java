@@ -40,7 +40,7 @@ import com.cloudera.sqoop.util.ClassLoaderStack;
  * Class that implements common methods required for tests which import data
  * from SQL into HDFS and verify correct import.
  */
-public class ImportJobTestCase extends BaseSqoopTestCase {
+public abstract class ImportJobTestCase extends BaseSqoopTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       ImportJobTestCase.class.getName());
