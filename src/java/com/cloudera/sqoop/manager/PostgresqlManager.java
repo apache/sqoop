@@ -30,7 +30,7 @@ import com.cloudera.sqoop.util.ImportException;
 /**
  * Manages connections to Postgresql databases.
  */
-public class PostgresqlManager extends GenericJdbcManager {
+public class PostgresqlManager extends CatalogQueryManager {
 
   public static final Log LOG = LogFactory.getLog(
       PostgresqlManager.class.getName());
@@ -101,14 +101,52 @@ public class PostgresqlManager extends GenericJdbcManager {
   }
 
   @Override
-  public String getPrimaryKey(String tableName) {
-    // The table name is already escaped
-    return super.getPrimaryKey(tableName);
+  public boolean supportsStagingForExport() {
+    return true;
   }
 
   @Override
-  public boolean supportsStagingForExport() {
-    return true;
+  protected String getListDatabasesQuery() {
+    return
+      "SELECT DATNAME FROM PG_CATALOG.PG_DATABASE";
+  }
+
+  @Override
+  protected String getListTablesQuery() {
+    return
+      "SELECT TABLENAME FROM PG_CATALOG.PG_TABLES "
+    + "WHERE SCHEMANAME = (SELECT CURRENT_SCHEMA())";
+  }
+
+  @Override
+  protected String getListColumnsQuery(String tableName) {
+    return
+      "SELECT col.ATTNAME FROM PG_CATALOG.PG_NAMESPACE sch,"
+    + "  PG_CATALOG.PG_CLASS tab, PG_CATALOG.PG_ATTRIBUTE col "
+    + "WHERE sch.OID = tab.RELNAMESPACE "
+    + "  AND tab.OID = col.ATTRELID "
+    + "  AND sch.NSPNAME = (SELECT CURRENT_SCHEMA()) "
+    + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
+    + "  AND col.ATTNUM >= 1";
+  }
+
+  @Override
+  protected String getPrimaryKeyQuery(String tableName) {
+    return
+      "SELECT col.ATTNAME FROM PG_CATALOG.PG_NAMESPACE sch, "
+    + "  PG_CATALOG.PG_CLASS tab, PG_CATALOG.PG_ATTRIBUTE col, "
+    + "  PG_CATALOG.PG_INDEX ind "
+    + "WHERE sch.OID = tab.RELNAMESPACE "
+    + "  AND tab.OID = col.ATTRELID "
+    + "  AND tab.OID = ind.INDRELID "
+    + "  AND sch.NSPNAME = (SELECT CURRENT_SCHEMA()) "
+    + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
+    + "  AND col.ATTNUM = ANY(ind.INDKEY) "
+    + "  AND ind.INDISPRIMARY";
+  }
+
+  private String escapeLiteral(String literal) {
+    return literal.replace("'", "''");
   }
 }
 

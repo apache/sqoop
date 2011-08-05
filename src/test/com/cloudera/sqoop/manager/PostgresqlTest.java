@@ -27,12 +27,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import com.cloudera.sqoop.SqoopOptions;
@@ -89,6 +91,7 @@ public class PostgresqlTest extends ImportJobTestCase {
   static final String DATABASE_USER = "sqooptest";
   static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
+  static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
   static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
   @Override
@@ -102,7 +105,14 @@ public class PostgresqlTest extends ImportJobTestCase {
 
     LOG.debug("Setting up another postgresql test: " + CONNECT_STRING);
 
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, TABLE_NAME);
+    setUpData(TABLE_NAME);
+    setUpData(SPECIAL_TABLE_NAME);
+
+    LOG.debug("setUp complete.");
+  }
+
+  public void setUpData(String tableName) {
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
 
     ConnManager manager = null;
@@ -121,15 +131,15 @@ public class PostgresqlTest extends ImportJobTestCase {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
         // get added until pg 8.3, so we just use "DROP TABLE" and ignore
         // any exception here if one occurs.
-        st.executeUpdate("DROP TABLE " + manager.escapeTableName(TABLE_NAME));
+        st.executeUpdate("DROP TABLE " + manager.escapeTableName(tableName));
       } catch (SQLException e) {
-        LOG.info("Couldn't drop table " + TABLE_NAME + " (ok)");
+        LOG.info("Couldn't drop table " + tableName + " (ok)");
         LOG.info(e.toString());
         // Now we need to reset the transaction.
         connection.rollback();
       }
 
-      st.executeUpdate("CREATE TABLE " + manager.escapeTableName(TABLE_NAME)
+      st.executeUpdate("CREATE TABLE " + manager.escapeTableName(tableName)
           + " ("
           + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
           + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
@@ -137,11 +147,11 @@ public class PostgresqlTest extends ImportJobTestCase {
           + manager.escapeColName("salary") + " FLOAT, "
           + manager.escapeColName("dept") + " VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
           + " VALUES(1,'Aaron','2009-05-14',1000000.00,'engineering')");
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
           + " VALUES(2,'Bob','2009-04-20',400.00,'sales')");
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(TABLE_NAME)
+      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
           + " VALUES(3,'Fred','2009-01-23',15.00,'marketing')");
       connection.commit();
     } catch (SQLException sqlE) {
@@ -166,13 +176,13 @@ public class PostgresqlTest extends ImportJobTestCase {
   }
 
 
-  private String [] getArgv(boolean isDirect) {
+  private String [] getArgv(boolean isDirect, String tableName) {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
 
     args.add("--table");
-    args.add(TABLE_NAME);
+    args.add(tableName);
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
@@ -189,11 +199,11 @@ public class PostgresqlTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
-  private void doImportAndVerify(boolean isDirect, String [] expectedResults)
-      throws IOException {
+  private void doImportAndVerify(boolean isDirect, String [] expectedResults,
+      String tableName) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, TABLE_NAME);
+    Path tablePath = new Path(warehousePath, tableName);
 
     Path filePath;
     if (isDirect) {
@@ -208,7 +218,7 @@ public class PostgresqlTest extends ImportJobTestCase {
       FileListing.recursiveDeleteDir(tableFile);
     }
 
-    String [] argv = getArgv(isDirect);
+    String [] argv = getArgv(isDirect, tableName);
     try {
       runImport(argv);
     } catch (IOException ioe) {
@@ -242,7 +252,7 @@ public class PostgresqlTest extends ImportJobTestCase {
       "3,Fred,2009-01-23,15.0,marketing",
     };
 
-    doImportAndVerify(false, expectedResults);
+    doImportAndVerify(false, expectedResults, TABLE_NAME);
   }
 
   @Test
@@ -252,6 +262,29 @@ public class PostgresqlTest extends ImportJobTestCase {
       "3,Fred,2009-01-23,15,marketing",
     };
 
-    doImportAndVerify(true, expectedResults);
+    doImportAndVerify(true, expectedResults, TABLE_NAME);
+  }
+
+  @Test
+  public void testListTables() throws IOException {
+    SqoopOptions options = new SqoopOptions(new Configuration());
+    options.setConnectString(CONNECT_STRING);
+    options.setUsername(DATABASE_USER);
+
+    ConnManager mgr = new PostgresqlManager(options);
+    String[] tables = mgr.listTables();
+    Arrays.sort(tables);
+    assertTrue(TABLE_NAME + " is not found!",
+        Arrays.binarySearch(tables, TABLE_NAME) >= 0);
+  }
+
+  @Test
+  public void testTableNameWithSpecialCharacter() throws IOException {
+    String [] expectedResults = {
+        "2,Bob,2009-04-20,400.0,sales",
+        "3,Fred,2009-01-23,15.0,marketing",
+    };
+
+    doImportAndVerify(false, expectedResults, SPECIAL_TABLE_NAME);
   }
 }
