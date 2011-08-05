@@ -18,9 +18,6 @@
 
 package com.cloudera.sqoop.orm;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
-
 import java.io.IOException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -30,6 +27,9 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.manager.ConnManager;
 
 /**
  * Creates an Avro schema to represent a table from a database.
@@ -106,7 +106,12 @@ public class AvroSchemaGenerator {
   }
 
   public Schema toAvroSchema(int sqlType) {
-    return Schema.create(toAvroType(sqlType));
+    // All types are assumed nullabl;e make a union of the "true" type for
+    // a column and NULL.
+    List<Schema> childSchemas = new ArrayList<Schema>();
+    childSchemas.add(Schema.create(toAvroType(sqlType)));
+    childSchemas.add(Schema.create(Schema.Type.NULL));
+    return Schema.createUnion(childSchemas);
   }
 
 }

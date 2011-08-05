@@ -18,12 +18,10 @@
 
 package com.cloudera.sqoop;
 
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
-
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +36,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import com.cloudera.sqoop.testutil.CommonArgs;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
 /**
  * Tests --as-avrodatafile.
@@ -89,14 +92,65 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals(2, fields.size());
 
     assertEquals("INTFIELD1", fields.get(0).name());
-    assertEquals(Schema.Type.INT, fields.get(0).schema().getType());
+    assertEquals(Schema.Type.UNION, fields.get(0).schema().getType());
+    assertEquals(Schema.Type.INT, fields.get(0).schema().getTypes().get(0).getType());
+    assertEquals(Schema.Type.NULL, fields.get(0).schema().getTypes().get(1).getType());
 
     assertEquals("INTFIELD2", fields.get(1).name());
-    assertEquals(Schema.Type.INT, fields.get(1).schema().getType());
+    assertEquals(Schema.Type.UNION, fields.get(1).schema().getType());
+    assertEquals(Schema.Type.INT, fields.get(1).schema().getTypes().get(0).getType());
+    assertEquals(Schema.Type.NULL, fields.get(1).schema().getTypes().get(1).getType());
 
     GenericRecord record1 = reader.next();
     assertEquals(1, record1.get("INTFIELD1"));
     assertEquals(8, record1.get("INTFIELD2"));
+  }
+
+  public void testNullableAvroImport() throws IOException, SQLException {
+    addNullRecord(); // Add a pair of NULL values to twointtable.
+    runImport(getOutputArgv(true));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    boolean foundNullRecord = false;
+
+    // Iterate thru the records in the output file til we find one that
+    // matches (NULL, NULL).
+    for (GenericRecord record : reader) {
+      LOG.debug("Input record: " + record);
+      if (record.get("INTFIELD1") == null && record.get("INTFIELD2") == null) {
+        LOG.debug("Got null record");
+        foundNullRecord = true;
+      }
+    }
+
+    assertTrue(foundNullRecord);
+  }
+
+  /**
+   * Add a record to the TWOINTTABLE that contains (NULL, NULL).
+   *
+   * @throws SQLException if there's a problem doing the INSERT statement.
+   */
+  private void addNullRecord() throws SQLException {
+    Connection connection = null;
+    Statement st = null;
+    try {
+      connection = this.getManager().getConnection();
+      st = connection.createStatement();
+      st.executeUpdate("INSERT INTO " + getTableName()
+          + " VALUES(NULL, NULL)");
+
+      connection.commit();
+    } finally {
+      if (null != st) {
+        st.close();
+      }
+
+      if (null != connection) {
+        connection.close();
+      }
+    }
   }
 
   private DataFileReader<GenericRecord> read(Path filename) throws IOException {
