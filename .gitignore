@@ -23,4 +23,5 @@
 /build.properties
 /conf/managers.d
 /conf/tools.d
-
+.idea
+*.iml
