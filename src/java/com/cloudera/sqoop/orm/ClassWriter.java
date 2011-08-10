@@ -1179,21 +1179,7 @@ public class ClassWriter {
   }
 
   protected Map<String, Integer> getColumnTypes() throws IOException {
-    Map<String, Integer> columnTypes;
-    if (null != tableName) {
-      // We're generating a class based on a table import.
-      columnTypes = connManager.getColumnTypes(tableName);
-    } else {
-      // This is based on an arbitrary query.
-      String query = this.options.getSqlQuery();
-      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
-        throw new IOException("Query [" + query + "] must contain '"
-            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
-      }
-
-      columnTypes = connManager.getColumnTypesForQuery(query);
-    }
-    return columnTypes;
+    return connManager.getColumnTypes(tableName, options.getSqlQuery());
   }
 
   /**

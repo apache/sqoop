@@ -24,6 +24,7 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -33,6 +34,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroWrapper;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 
@@ -84,6 +86,9 @@ public class AvroImportMapper
       return ((Time) o).getTime();
     } else if (o instanceof Timestamp) {
       return ((Timestamp) o).getTime();
+    } else if (o instanceof BytesWritable) {
+      BytesWritable bw = (BytesWritable) o;
+      return ByteBuffer.wrap(bw.getBytes(), 0, bw.getLength());
     } else if (o instanceof ClobRef) {
       throw new UnsupportedOperationException("ClobRef not suported");
     } else if (o instanceof BlobRef) {

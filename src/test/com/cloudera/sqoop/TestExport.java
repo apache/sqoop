@@ -51,27 +51,10 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
-import org.junit.Before;
-
 /**
  * Test that we can export data from HDFS into databases.
  */
 public class TestExport extends ExportJobTestCase {
-
-  @Before
-  public void setUp() {
-    // start the server
-    super.setUp();
-
-    if (useHsqldbTestServer()) {
-      // throw away any existing data that might be in the database.
-      try {
-        this.getTestServer().dropExistingSchema();
-      } catch (SQLException sqlE) {
-        fail(sqlE.toString());
-      }
-    }
-  }
 
   /**
    * @return an argv for the CodeGenTool to use when creating tables to export.

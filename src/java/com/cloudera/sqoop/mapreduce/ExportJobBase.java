@@ -51,6 +51,13 @@ import com.cloudera.sqoop.util.PerfCounters;
  */
 public class ExportJobBase extends JobBase {
 
+  /**
+   * The (inferred) type of a file or group of files.
+   */
+  public enum FileType {
+    SEQUENCE_FILE, AVRO_DATA_FILE, UNKNOWN
+  }
+
   public static final Log LOG = LogFactory.getLog(
       ExportJobBase.class.getName());
 
@@ -89,6 +96,15 @@ public class ExportJobBase extends JobBase {
    */
   public static boolean isSequenceFiles(Configuration conf, Path p)
       throws IOException {
+    return getFileType(conf, p) == FileType.SEQUENCE_FILE;
+  }
+
+  /**
+   * @return the type of the file represented by p (or the files in p, if a
+   * directory)
+   */
+  public static FileType getFileType(Configuration conf, Path p)
+      throws IOException {
     FileSystem fs = p.getFileSystem(conf);
 
     try {
@@ -97,14 +113,14 @@ public class ExportJobBase extends JobBase {
       if (null == stat) {
         // Couldn't get the item.
         LOG.warn("Input path " + p + " does not exist");
-        return false;
+        return FileType.UNKNOWN;
       }
 
       if (stat.isDir()) {
         FileStatus [] subitems = fs.listStatus(p);
         if (subitems == null || subitems.length == 0) {
           LOG.warn("Input path " + p + " contains no files");
-          return false; // empty dir.
+          return FileType.UNKNOWN; // empty dir.
         }
 
         // Pick a child entry to examine instead.
@@ -125,14 +141,14 @@ public class ExportJobBase extends JobBase {
       if (null == stat) {
         LOG.warn("null FileStatus object in isSequenceFiles(); "
             + "assuming false.");
-        return false;
+        return FileType.UNKNOWN;
       }
 
       Path target = stat.getPath();
-      return hasSequenceFileHeader(target, conf);
+      return fromMagicNumber(target, conf);
     } catch (FileNotFoundException fnfe) {
       LOG.warn("Input path " + p + " does not exist");
-      return false; // doesn't exist!
+      return FileType.UNKNOWN; // doesn't exist!
     }
   }
 
@@ -140,9 +156,9 @@ public class ExportJobBase extends JobBase {
    * @param file a file to test.
    * @return true if 'file' refers to a SequenceFile.
    */
-  private static boolean hasSequenceFileHeader(Path file, Configuration conf) {
-    // Test target's header to see if it contains magic numbers indicating it's
-    // a SequenceFile.
+  private static FileType fromMagicNumber(Path file, Configuration conf) {
+    // Test target's header to see if it contains magic numbers indicating its
+    // file type
     byte [] header = new byte[3];
     FSDataInputStream is = null;
     try {
@@ -150,9 +166,9 @@ public class ExportJobBase extends JobBase {
       is = fs.open(file);
       is.readFully(header);
     } catch (IOException ioe) {
-      // Error reading header or EOF; assume not a SequenceFile.
-      LOG.warn("IOException checking SequenceFile header: " + ioe);
-      return false;
+      // Error reading header or EOF; assume unknown
+      LOG.warn("IOException checking input file header: " + ioe);
+      return FileType.UNKNOWN;
     } finally {
       try {
         if (null != is) {
@@ -164,8 +180,13 @@ public class ExportJobBase extends JobBase {
       }
     }
 
-    // Return true (isSequenceFile) iff the magic number sticks.
-    return header[0] == 'S' && header[1] == 'E' && header[2] == 'Q';
+    if (header[0] == 'S' && header[1] == 'E' && header[2] == 'Q') {
+      return FileType.SEQUENCE_FILE;
+    }
+    if (header[0] == 'O' && header[1] == 'b' && header[2] == 'j') {
+      return FileType.AVRO_DATA_FILE;
+    }
+    return FileType.UNKNOWN;
   }
 
   /**
@@ -363,7 +384,9 @@ public class ExportJobBase extends JobBase {
 
   /**
    * @return true if the input directory contains SequenceFiles.
+   * @deprecated use {@link #getInputFileType()} instead
    */
+  @Deprecated
   protected boolean inputIsSequenceFiles() {
     try {
       return isSequenceFiles(
@@ -371,6 +394,14 @@ public class ExportJobBase extends JobBase {
     } catch (IOException ioe) {
       LOG.warn("Could not check file format for export; assuming text");
       return false;
+    }
+  }
+
+  protected FileType getInputFileType() {
+    try {
+      return getFileType(context.getOptions().getConf(), getInputPath());
+    } catch (IOException ioe) {
+      return FileType.UNKNOWN;
     }
   }
 }

@@ -18,25 +18,31 @@
 
 package com.cloudera.sqoop.mapreduce;
 
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.ExportJobContext;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
+import com.cloudera.sqoop.orm.ClassWriter;
+
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.MapWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
-
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
 
 /**
  * Run an export using JDBC (JDBC-based ExportOutputFormat).
  */
 public class JdbcExportJob extends ExportJobBase {
+
+  private FileType fileType;
 
   public static final Log LOG = LogFactory.getLog(
       JdbcExportJob.class.getName());
@@ -53,11 +59,50 @@ public class JdbcExportJob extends ExportJobBase {
   }
 
   @Override
+  protected void configureInputFormat(Job job, String tableName,
+      String tableClassName, String splitByCol)
+      throws ClassNotFoundException, IOException {
+
+    fileType = getInputFileType();
+
+    super.configureInputFormat(job, tableName, tableClassName, splitByCol);
+
+    if (fileType == FileType.AVRO_DATA_FILE) {
+      LOG.debug("Configuring for Avro export");
+      ConnManager connManager = context.getConnManager();
+      Map<String, Integer> columnTypeInts =
+        connManager.getColumnTypes(tableName, options.getSqlQuery());
+      MapWritable columnTypes = new MapWritable();
+      for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
+        Text columnName = new Text(e.getKey());
+        Text columnText = new Text(connManager.toJavaType(e.getValue()));
+        columnTypes.put(columnName, columnText);
+      }
+      DefaultStringifier.store(job.getConfiguration(), columnTypes,
+          AvroExportMapper.AVRO_COLUMN_TYPES_MAP);
+    }
+
+  }
+
+  @Override
+  protected Class<? extends InputFormat> getInputFormatClass()
+      throws ClassNotFoundException {
+    if (fileType == FileType.AVRO_DATA_FILE) {
+      return AvroInputFormat.class;
+    }
+    return super.getInputFormatClass();
+  }
+
+  @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (inputIsSequenceFiles()) {
-      return SequenceFileExportMapper.class;
-    } else {
-      return TextExportMapper.class;
+    switch (fileType) {
+      case SEQUENCE_FILE:
+        return SequenceFileExportMapper.class;
+      case AVRO_DATA_FILE:
+        return AvroExportMapper.class;
+      case UNKNOWN:
+      default:
+        return TextExportMapper.class;
     }
   }
 
@@ -91,8 +136,6 @@ public class JdbcExportJob extends ExportJobBase {
       throw new IOException("Could not load OutputFormat", cnfe);
     }
   }
-
-
 
 }
 

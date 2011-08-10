@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.junit.Before;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
@@ -42,6 +43,21 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       ExportJobTestCase.class.getName());
+  
+  @Before
+  public void setUp() {
+    // start the server
+    super.setUp();
+
+    if (useHsqldbTestServer()) {
+      // throw away any existing data that might be in the database.
+      try {
+        this.getTestServer().dropExistingSchema();
+      } catch (SQLException sqlE) {
+        fail(sqlE.toString());
+      }
+    }
+  }
 
   protected String getTablePrefix() {
     return "EXPORT_TABLE_";
@@ -54,18 +70,6 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
    */
   protected int getMaxRowsPerStatement() {
     return 1;
-  }
-
-  /**
-   * @return a connection to the database under test.
-   */
-  protected Connection getConnection() {
-    try {
-      return getTestServer().getConnection();
-    } catch (SQLException sqlE) {
-      LOG.error("Could not get connection to test server: " + sqlE);
-      return null;
-    }
   }
 
   /**

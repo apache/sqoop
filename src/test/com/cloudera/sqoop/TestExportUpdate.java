@@ -43,21 +43,6 @@ import org.junit.Before;
  */
 public class TestExportUpdate extends ExportJobTestCase {
 
-  @Before
-  public void setUp() {
-    // start the server
-    super.setUp();
-
-    if (useHsqldbTestServer()) {
-      // throw away any existing data that might be in the database.
-      try {
-        this.getTestServer().dropExistingSchema();
-      } catch (SQLException sqlE) {
-        fail(sqlE.toString());
-      }
-    }
-  }
-
   @Override
   protected String getTablePrefix() {
     return "UPDATE_TABLE_";

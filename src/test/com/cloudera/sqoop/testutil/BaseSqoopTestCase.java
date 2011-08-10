@@ -41,6 +41,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.google.common.collect.ObjectArrays;
 
 import junit.framework.TestCase;
 
@@ -131,6 +132,19 @@ public abstract class BaseSqoopTestCase extends TestCase {
 
   protected ConnManager getManager() {
     return manager;
+  }
+  
+
+  /**
+   * @return a connection to the database under test.
+   */
+  protected Connection getConnection() {
+    try {
+      return getTestServer().getConnection();
+    } catch (SQLException sqlE) {
+      LOG.error("Could not get connection to test server: " + sqlE);
+      return null;
+    }
   }
 
   // instance variables populated during setUp, used during tests
@@ -438,5 +452,24 @@ public abstract class BaseSqoopTestCase extends TestCase {
       // Free internal resources after the readTable.
       getManager().release();
     }
+  }
+
+  /**
+   * Create a new string array with 'moreEntries' appended to the 'entries'
+   * array.
+   * @param entries initial entries in the array
+   * @param moreEntries variable-length additional entries.
+   * @return an array containing entries with all of moreEntries appended.
+   */
+  protected String [] newStrArray(String [] entries, String... moreEntries)  {
+    if (null == moreEntries) {
+      return entries;
+    }
+
+    if (null == entries) {
+      entries = new String[0];
+    }
+
+    return ObjectArrays.concat(entries, moreEntries, String.class);
   }
 }

@@ -91,6 +91,34 @@ public abstract class ConnManager {
   public abstract Map<String, Integer> getColumnTypes(String tableName);
 
   /**
+   * Return an unordered mapping from colname to sqltype for
+   * all columns in a table or query.
+   *
+   * The Integer type id is a constant from java.sql.Types
+   *
+   * @param tableName the name of the table
+   * @param sqlQuery the SQL query to use if tableName is null
+   */
+  public Map<String, Integer> getColumnTypes(String tableName,
+      String sqlQuery) throws IOException {
+    Map<String, Integer> columnTypes;
+    if (null != tableName) {
+      // We're generating a class based on a table import.
+      columnTypes = getColumnTypes(tableName);
+    } else {
+      // This is based on an arbitrary query.
+      String query = sqlQuery;
+      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
+        throw new IOException("Query [" + query + "] must contain '"
+            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
+      }
+
+      columnTypes = getColumnTypesForQuery(query);
+    }
+    return columnTypes;
+  }
+
+  /**
    * This method allows various connection managers to indicate if they support
    * staging data for export jobs. The managers that do support this must
    * override this method and return <tt>true</tt>.
