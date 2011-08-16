@@ -42,7 +42,8 @@ public class AppendUtils {
 
   private static final SimpleDateFormat DATE_FORM = new SimpleDateFormat(
       "ddHHmmssSSS");
-  private static final String TEMP_IMPORT_ROOT = System.getProperty( "sqoop.test.import.rootDir", "_sqoop");
+  private static final String TEMP_IMPORT_ROOT =
+          System.getProperty("sqoop.test.import.rootDir", "_sqoop");
 
   private static final int PARTITION_DIGITS = 5;
   private static final String FILEPART_SEPARATOR = "-";

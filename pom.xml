@@ -82,9 +82,9 @@ limitations under the License.
     <hadoopVersion>0.20.203.0</hadoopVersion>
     -->
     <!-- FIXME Cloudera Distribution dependency version -->
-    <hadoopVersion>0.20.2-737</hadoopVersion>
+    <hadoopVersion>0.20.2-cdh3u1</hadoopVersion>
 
-    <hbaseVersion>0.90.3</hbaseVersion>
+    <hbaseVersion>0.90.3-cdh3u1</hbaseVersion>
   </properties>
 
   <dependencies>
@@ -107,22 +107,90 @@ limitations under the License.
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <version>${avroVersion}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.netty</groupId>
+          <artifactId>netty</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.velocity</groupId>
+          <artifactId>velocity</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro-mapred</artifactId>
       <version>${avroVersion}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.netty</groupId>
+          <artifactId>netty</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.velocity</groupId>
+          <artifactId>velocity</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.cloudera.hadoop</groupId>
+      <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>${hadoopVersion}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-core-asl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
       <version>${hbaseVersion}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-json</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-server</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.thrift</groupId>
+          <artifactId>thrift</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -143,7 +211,7 @@ limitations under the License.
       FIXME we must depends on org.apache !
       <groupId>org.apache.hadoop</groupId>
       -->
-      <groupId>com.cloudera.hadoop</groupId>
+      <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-test</artifactId>
       <version>${hadoopVersion}</version>
       <scope>test</scope>

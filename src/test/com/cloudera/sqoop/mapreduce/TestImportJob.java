@@ -58,7 +58,8 @@ public class TestImportJob extends ImportJobTestCase {
 
     Configuration conf = new Configuration();
 
-    LogFactory.getLog( getClass() ).info( " getWarehouseDir() " + getWarehouseDir() );
+    LogFactory.getLog(getClass()).info(
+            " getWarehouseDir() " + getWarehouseDir());
 
     // Make the output dir exist so we know the job will fail via IOException.
     Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());

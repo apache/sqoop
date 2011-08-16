@@ -68,9 +68,9 @@ under the License.
   </publications>
   <dependencies>
     <!-- Dependencies for Cloudera's Distribution for Hadoop -->
-    <dependency org="com.cloudera.hadoop" name="hadoop-core"
+    <dependency org="org.apache.hadoop" name="hadoop-core"
       rev="${hadoop-core.cloudera.version}" conf="cloudera->default"/>
-    <dependency org="com.cloudera.hadoop" name="hadoop-test"
+    <dependency org="org.apache.hadoop" name="hadoop-test"
       rev="${hadoop-core.cloudera.version}" conf="clouderatest->default"/>
 
     <!-- Common dependencies for Sqoop -->

@@ -93,13 +93,17 @@ public class TestAvroImport extends ImportJobTestCase {
 
     assertEquals("INTFIELD1", fields.get(0).name());
     assertEquals(Schema.Type.UNION, fields.get(0).schema().getType());
-    assertEquals(Schema.Type.INT, fields.get(0).schema().getTypes().get(0).getType());
-    assertEquals(Schema.Type.NULL, fields.get(0).schema().getTypes().get(1).getType());
+    assertEquals(Schema.Type.INT,
+            fields.get(0).schema().getTypes().get(0).getType());
+    assertEquals(Schema.Type.NULL,
+            fields.get(0).schema().getTypes().get(1).getType());
 
     assertEquals("INTFIELD2", fields.get(1).name());
     assertEquals(Schema.Type.UNION, fields.get(1).schema().getType());
-    assertEquals(Schema.Type.INT, fields.get(1).schema().getTypes().get(0).getType());
-    assertEquals(Schema.Type.NULL, fields.get(1).schema().getTypes().get(1).getType());
+    assertEquals(Schema.Type.INT,
+            fields.get(1).schema().getTypes().get(0).getType());
+    assertEquals(Schema.Type.NULL,
+            fields.get(1).schema().getTypes().get(1).getType());
 
     GenericRecord record1 = reader.next();
     assertEquals(1, record1.get("INTFIELD1"));

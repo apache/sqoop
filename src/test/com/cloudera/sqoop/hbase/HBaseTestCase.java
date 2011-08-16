@@ -47,6 +47,21 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
  */
 public abstract class HBaseTestCase extends ImportJobTestCase {
 
+  /*
+   * This is to restore test.build.data system property which gets reset
+   * when HBase tests are run. Since other tests in Sqoop also depend upon
+   * this property, they can fail if are run subsequently in the same VM.
+   */
+  private static String testBuildDataProperty = "";
+
+  private static void recordTestBuildDataProperty() {
+    testBuildDataProperty = System.getProperty("test.build.data", "");
+  }
+
+  private static void restoreTestBuidlDataProperty() {
+    System.setProperty("test.build.data", testBuildDataProperty);
+  }
+
   public static final Log LOG = LogFactory.getLog(
       HBaseTestCase.class.getName());
 
@@ -105,6 +120,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
   @Override
   @Before
   public void setUp() {
+    HBaseTestCase.recordTestBuildDataProperty();
     try {
       startMaster();
     } catch (Exception e) {
@@ -133,7 +149,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       LOG.warn("Error shutting down HBase minicluster: "
           + StringUtils.stringifyException(e));
     }
-
+    HBaseTestCase.restoreTestBuidlDataProperty();
     super.tearDown();
   }
 
