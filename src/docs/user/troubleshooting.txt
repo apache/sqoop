@@ -1,0 +1,130 @@
+////
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+////
+
+Troubleshooting
+---------------
+
+General Troubleshooting Process
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following steps should be followed to troubleshoot any failure that you
+encounter while running Sqoop.
+
+- Turn on verbose output by executing the same command again and specifying
+  the +\--verbose+ option. This produces more debug output on the console
+  which can be inspected to identify any obvious errors.
+
+- Look at the task logs from Hadoop to see if there are any specific failures
+  recorded there. It is possible that the failure that occurs while task
+  execution is not relayed correctly to the console.
+
+- Make sure that the necessary input files or input/output tables are present
+  and can be accessed by the user that Sqoop is executing as or connecting to
+  the database as. It is possible that the necessary files or tables are present
+  but the specific user that Sqoop connects as does not have the necessary
+  permissions to access these files.
+
+- If you are doing a compound action such as populating a Hive table or
+  partition, try breaking the job into two separate actions to see where the
+  problem really occurs. For example if an import that creates and populates a
+  Hive table is failing, you can break it down into two steps - first for doing
+  the import alone, and the second to create a Hive table without the import
+  using the +create-hive-table+ tool. While this does not address the original
+  use-case of populating the Hive table, it does help narrow down the problem
+  to either regular import or during the creation and population of Hive table.
+
+- Search the mailing lists archives and JIRA for keywords relating to the
+  problem. It is possible that you may find a solution discussed there that
+  will help you solve or work-around your problem.
+
+Specific Troubleshooting Tips
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Oracle: Connection Reset Errors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Problem: When using the default Sqoop connector for Oracle, some data does
+get transferred, but during the map-reduce job a lot of errors are reported
+as below:
+
+----
+11/05/26 16:23:47 INFO mapred.JobClient: Task Id : attempt_201105261333_0002_m_000002_0, Status : FAILED
+java.lang.RuntimeException: java.lang.RuntimeException: java.sql.SQLRecoverableException: IO Error: Connection reset
+at com.cloudera.sqoop.mapreduce.db.DBInputFormat.setConf(DBInputFormat.java:164)
+at org.apache.hadoop.util.ReflectionUtils.setConf(ReflectionUtils.java:62)
+at org.apache.hadoop.util.ReflectionUtils.newInstance(ReflectionUtils.java:117)
+at org.apache.hadoop.mapred.MapTask.runNewMapper(MapTask.java:605)
+at org.apache.hadoop.mapred.MapTask.run(MapTask.java:322)
+at org.apache.hadoop.mapred.Child$4.run(Child.java:268)
+at java.security.AccessController.doPrivileged(Native Method)
+at javax.security.auth.Subject.doAs(Subject.java:396)
+at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1115)
+at org.apache.hadoop.mapred.Child.main(Child.java:262)
+Caused by: java.lang.RuntimeException: java.sql.SQLRecoverableException: IO Error: Connection reset
+at com.cloudera.sqoop.mapreduce.db.DBInputFormat.getConnection(DBInputFormat.java:190)
+at com.cloudera.sqoop.mapreduce.db.DBInputFormat.setConf(DBInputFormat.java:159)
+... 9 more
+Caused by: java.sql.SQLRecoverableException: IO Error: Connection reset
+at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:428)
+at oracle.jdbc.driver.PhysicalConnection.<init>(PhysicalConnection.java:536)
+at oracle.jdbc.driver.T4CConnection.<init>(T4CConnection.java:228)
+at oracle.jdbc.driver.T4CDriverExtension.getConnection(T4CDriverExtension.java:32)
+at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:521)
+at java.sql.DriverManager.getConnection(DriverManager.java:582)
+at java.sql.DriverManager.getConnection(DriverManager.java:185)
+at com.cloudera.sqoop.mapreduce.db.DBConfiguration.getConnection(DBConfiguration.java:152)
+at com.cloudera.sqoop.mapreduce.db.DBInputFormat.getConnection(DBInputFormat.java:184)
+... 10 more
+Caused by: java.net.SocketException: Connection reset
+at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:96)
+at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
+at oracle.net.ns.DataPacket.send(DataPacket.java:199)
+at oracle.net.ns.NetOutputStream.flush(NetOutputStream.java:211)
+at oracle.net.ns.NetInputStream.getNextPacket(NetInputStream.java:227)
+at oracle.net.ns.NetInputStream.read(NetInputStream.java:175)
+at oracle.net.ns.NetInputStream.read(NetInputStream.java:100)
+at oracle.net.ns.NetInputStream.read(NetInputStream.java:85)
+at oracle.jdbc.driver.T4CSocketInputStreamWrapper.readNextPacket(T4CSocketInputStreamWrapper.java:123)
+at oracle.jdbc.driver.T4CSocketInputStreamWrapper.read(T4CSocketInputStreamWrapper.java:79)
+at oracle.jdbc.driver.T4CMAREngine.unmarshalUB1(T4CMAREngine.java:1122)
+at oracle.jdbc.driver.T4CMAREngine.unmarshalSB1(T4CMAREngine.java:1099)
+at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:288)
+at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:191)
+at oracle.jdbc.driver.T4CTTIoauthenticate.doOAUTH(T4CTTIoauthenticate.java:366)
+at oracle.jdbc.driver.T4CTTIoauthenticate.doOAUTH(T4CTTIoauthenticate.java:752)
+at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:366)
+... 18 more
+
+----
+
+Solution: This problem occurs primarily due to the lack of a fast random
+number generation device on the host where the map tasks execute. On
+typical Linux systems this can be addressed by setting the following
+property in the +java.security+ file:
+
+----
+java.security.egd=file:/dev/../dev/urandom
+----
+
+The +java.security+ file can be found under +$JAVA_HOME/jre/lib/security+
+directory. Alternatively, this property can also be specified on the
+command line via:
+
+----
+-D mapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom"+
+----
+

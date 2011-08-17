@@ -55,4 +55,6 @@ include::compatibility.txt[]
 
 include::support.txt[]
 
+include::troubleshooting.txt[]
+
 
