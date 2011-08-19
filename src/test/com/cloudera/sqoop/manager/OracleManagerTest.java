@@ -63,10 +63,22 @@ import com.cloudera.sqoop.util.FileListing;
  * into Apache's tree for licensing reasons).
  *
  * To set up your test environment:
- *   Install Oracle Express Edition 10.2.0.
- *   Create a database user named SQOOPTEST
- *   Set the user's password to '12345'
- *   Grant the user the CREATE TABLE privilege
+ * <ol>
+ *   <li>Install Oracle 10.2.0 or later</li>
+ *   <li>Create a database user named SQOOPTEST with password '12345' having
+ *     CONNECT and RESOURCE privileges.</li>
+ *   <li>Create a database user named SQOOPTEST2 with password 'abcdef' having
+ *     CONNECT and RESOURCE privileges</li>
+ * </ol>
+ *
+ * One way to do this is to connect to the database instance via SQL*Plus client
+ * as the SYSTEM user and execute the following commands:
+ * <ul>
+ * <li>CREATE USER SQOOPTEST identified by 12345;</li>
+ * <li>GRANT CONNECT, RESOURCE to SQOOPTEST;</li>
+ * <li>CREATE USER SQOOPTEST2 identified by ABCDEF;</li>
+ * <li>GRANT CONNECT, RESOURCE to SQOOPTEST2;</li>
+ * </ul>
  *
  * Oracle XE does a poor job of cleaning up connections in a timely fashion.
  * Too many connections too quickly will be rejected, because XE will gc the
@@ -86,6 +98,62 @@ public class OracleManagerTest extends ImportJobTestCase {
       OracleManagerTest.class.getName());
 
   static final String TABLE_NAME = "EMPLOYEES";
+  static final String SECONDARY_TABLE_NAME = "CUSTOMER";
+  static final String QUALIFIED_SECONDARY_TABLE_NAME =
+          OracleUtils.ORACLE_SECONDARY_USER_NAME + "." + SECONDARY_TABLE_NAME;
+
+  /*
+   * Array containing SQL statements necessary to create and populate
+   * the main test table.
+   */
+  private static final String[] MAIN_TABLE_SQL_STMTS = new String[] {
+      "CREATE TABLE " + TABLE_NAME + " ("
+              + "id INT NOT NULL, "
+              + "name VARCHAR2(24) NOT NULL, "
+              + "start_date DATE, "
+              + "salary FLOAT, "
+              + "dept VARCHAR2(32), "
+              + "timestamp_tz TIMESTAMP WITH TIME ZONE, "
+              + "timestamp_ltz TIMESTAMP WITH LOCAL TIME ZONE, "
+              + "PRIMARY KEY (id))",
+      "INSERT INTO " + TABLE_NAME + " VALUES("
+              + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
+              + "1000000.00,'engineering','29-DEC-09 12.00.00.000000000 PM',"
+              + "'29-DEC-09 12.00.00.000000000 PM')",
+      "INSERT INTO " + TABLE_NAME + " VALUES("
+              + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
+              + "400.00,'sales','30-DEC-09 12.00.00.000000000 PM',"
+              + "'30-DEC-09 12.00.00.000000000 PM')",
+      "INSERT INTO " + TABLE_NAME + " VALUES("
+              + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
+              + "'marketing','31-DEC-09 12.00.00.000000000 PM',"
+              + "'31-DEC-09 12.00.00.000000000 PM')",
+  };
+
+  /*
+   * Array containing SQL statements necessary to create, populate and
+   * provision the secondary test table.
+   */
+  private static final String[] SECONDARY_TABLE_SQL_STMTS = new String[] {
+      "CREATE TABLE " + SECONDARY_TABLE_NAME + " ("
+              + "id INT NOT NULL, "
+              + "name VARCHAR2(24) NOT NULL, "
+              + "PRIMARY KEY (id))",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "1,'MercuryCorp')",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "2,'VenusCorp')",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "3,'EarthCorp')",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "4,'MarsCorp')",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "5,'JupiterCorp')",
+      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+              + "6,'SaturnCorp')",
+      "GRANT SELECT, INSERT ON " + SECONDARY_TABLE_NAME + " TO "
+              + OracleUtils.ORACLE_USER_NAME,
+  };
 
   // instance variables populated during setUp, used during tests
   private OracleManager manager;
@@ -95,55 +163,18 @@ public class OracleManagerTest extends ImportJobTestCase {
     return false;
   }
 
-  @Before
-  public void setUp() {
-    super.setUp();
-
-    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
-        TABLE_NAME);
-    OracleUtils.setOracleAuth(options);
-
-    manager = new OracleManager(options);
-    options.getConf().set("oracle.sessionTimeZone", "US/Pacific");
-
-    // Drop the existing table, if there is one.
-    try {
-      OracleUtils.dropTable(TABLE_NAME, manager);
-    } catch (SQLException sqlE) {
-      fail("Could not drop table " + TABLE_NAME + ": " + sqlE);
-    }
-
+  private void executeUpdates(OracleManager mgr, String[] sqlStmts) {
     Connection connection = null;
     Statement st = null;
 
     try {
-      connection = manager.getConnection();
+      connection = mgr.getConnection();
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data.
-      st.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
-          + "id INT NOT NULL, "
-          + "name VARCHAR2(24) NOT NULL, "
-          + "start_date DATE, "
-          + "salary FLOAT, "
-          + "dept VARCHAR2(32), "
-          + "timestamp_tz TIMESTAMP WITH TIME ZONE, "
-          + "timestamp_ltz TIMESTAMP WITH LOCAL TIME ZONE, "
-          + "PRIMARY KEY (id))");
-
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
-          + "1000000.00,'engineering','29-DEC-09 12.00.00.000000000 PM',"
-          + "'29-DEC-09 12.00.00.000000000 PM')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
-          + "400.00,'sales','30-DEC-09 12.00.00.000000000 PM',"
-          + "'30-DEC-09 12.00.00.000000000 PM')");
-      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
-          + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
-          + "'marketing','31-DEC-09 12.00.00.000000000 PM',"
-          + "'31-DEC-09 12.00.00.000000000 PM')");
+      for (String sql : sqlStmts) {
+        st.executeUpdate(sql);
+      }
       connection.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: " + sqlE);
@@ -164,6 +195,53 @@ public class OracleManagerTest extends ImportJobTestCase {
     }
   }
 
+  private void provisionSecondaryTable() {
+    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
+            SECONDARY_TABLE_NAME);
+    OracleUtils.setOracleSecondaryUserAuth(options);
+
+    OracleManager mgr = new OracleManager(options);
+
+    // Drop the existing table if there is one
+    try {
+        OracleUtils.dropTable(SECONDARY_TABLE_NAME, mgr);
+    } catch (SQLException sqlE) {
+      fail("Could not drop table " + SECONDARY_TABLE_NAME + ": " + sqlE);
+    }
+
+    executeUpdates(mgr, SECONDARY_TABLE_SQL_STMTS);
+
+    try {
+        mgr.close();
+    } catch (SQLException sqlE) {
+      fail("Failed to close secondary manager instance : " + sqlE);
+    }
+  }
+
+
+  @Before
+  public void setUp() {
+    super.setUp();
+
+    provisionSecondaryTable();
+
+    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
+            TABLE_NAME);
+    OracleUtils.setOracleAuth(options);
+
+    manager = new OracleManager(options);
+    options.getConf().set("oracle.sessionTimeZone", "US/Pacific");
+
+    // Drop the existing table, if there is one.
+    try {
+      OracleUtils.dropTable(TABLE_NAME, manager);
+    } catch (SQLException sqlE) {
+      fail("Could not drop table " + TABLE_NAME + ": " + sqlE);
+    }
+
+    executeUpdates(manager, MAIN_TABLE_SQL_STMTS);
+  }
+
   @After
   public void tearDown() {
     super.tearDown();
@@ -175,7 +253,11 @@ public class OracleManagerTest extends ImportJobTestCase {
     }
   }
 
-  private String [] getArgv() {
+  private String[] getArgv() {
+    return getArgv(TABLE_NAME);
+  }
+
+  private String [] getArgv(String tableName) {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
@@ -184,7 +266,7 @@ public class OracleManagerTest extends ImportJobTestCase {
     args.add("oracle.sessionTimeZone=US/Pacific");
 
     args.add("--table");
-    args.add(TABLE_NAME);
+    args.add(tableName);
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
@@ -197,6 +279,46 @@ public class OracleManagerTest extends ImportJobTestCase {
     args.add("1");
 
     return args.toArray(new String[0]);
+  }
+
+  private void runSecondaryTableTest(String [] expectedResults)
+          throws IOException {
+    Path warehousePath = new Path(this.getWarehouseDir());
+    Path tablePath = new Path(warehousePath, QUALIFIED_SECONDARY_TABLE_NAME);
+    Path filePath = new Path(tablePath, "part-m-00000");
+
+    File tableFile = new File(tablePath.toString());
+    if (tableFile.exists() && tableFile.isDirectory()) {
+      // remove the directory before running the import
+      FileListing.recursiveDeleteDir(tableFile);
+    }
+
+    String [] argv = getArgv(QUALIFIED_SECONDARY_TABLE_NAME);
+
+    try {
+      runImport(argv);
+    } catch (IOException ioe) {
+      LOG.error("Got IOException during import: " + ioe.toString());
+      ioe.printStackTrace();
+      fail(ioe.toString());
+    }
+
+    File f = new File(filePath.toString());
+    assertTrue("Could not find imported data file", f.exists());
+    BufferedReader r = null;
+    try {
+      // Read through the file and make sure it's all there.
+      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+      for (String expectedLine : expectedResults) {
+        compareRecords(expectedLine, r.readLine());
+      }
+    } catch (IOException ioe) {
+      LOG.error("Got IOException verifying results: " + ioe.toString());
+      ioe.printStackTrace();
+      fail(ioe.toString());
+    } finally {
+      IOUtils.closeStream(r);
+    }
   }
 
   private void runOracleTest(String [] expectedResults) throws IOException {
@@ -257,6 +379,20 @@ public class OracleManagerTest extends ImportJobTestCase {
     };
 
     runOracleTest(expectedResults);
+  }
+
+  @Test
+  public void testSecondaryTableImport() throws IOException {
+
+    String [] expectedResults = {
+      "1,MercuryCorp",
+      "2,VenusCorp",
+      "3,EarthCorp",
+      "4,MarsCorp",
+      "5,JupiterCorp",
+      "6,SaturnCorp",
+    };
+    runSecondaryTableTest(expectedResults);
   }
 
   /**

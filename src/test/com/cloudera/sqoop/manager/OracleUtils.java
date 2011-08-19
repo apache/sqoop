@@ -43,11 +43,19 @@ public final class OracleUtils {
   public static final String ORACLE_USER_NAME = "SQOOPTEST";
   public static final String ORACLE_USER_PASS = "12345";
 
+  public static final String ORACLE_SECONDARY_USER_NAME = "SQOOPTEST2";
+  public static final String ORACLE_SECONDARY_USER_PASS = "ABCDEF";
+
   private OracleUtils() { }
 
   public static void setOracleAuth(SqoopOptions options) {
     options.setUsername(ORACLE_USER_NAME);
     options.setPassword(ORACLE_USER_PASS);
+  }
+
+  public static void setOracleSecondaryUserAuth(SqoopOptions options) {
+      options.setUsername(ORACLE_SECONDARY_USER_NAME);
+      options.setPassword(ORACLE_SECONDARY_USER_PASS);
   }
 
   /**

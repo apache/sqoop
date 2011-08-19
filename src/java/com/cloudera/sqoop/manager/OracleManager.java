@@ -68,12 +68,12 @@ public class OracleManager extends GenericJdbcManager {
     "SELECT USERNAME FROM DBA_USERS";
 
   /**
-   * Query to list all tables of the current schema. Even if the user has
-   * DBA privileges which allows other schemas to be visible, we will limit this
-   * query to only the current schema.
+   * Query to list all tables visible to the current user. Note that this list
+   * does not identify the table owners which is required in order to
+   * ensure that the table can be operated on for import/export purposes.
    */
   public static final String QUERY_LIST_TABLES =
-    "SELECT TABLE_NAME FROM USER_TABLES";
+    "SELECT TABLE_NAME FROM ALL_TABLES";
 
   /**
    * Query to list all columns of the given table. Even if the user has the
@@ -81,18 +81,20 @@ public class OracleManager extends GenericJdbcManager {
    * limit it to explore tables only from within the active schema.
    */
   public static final String QUERY_COLUMNS_FOR_TABLE =
-    "SELECT COLUMN_NAME FROM USER_TAB_COLUMNS WHERE TABLE_NAME = ?";
+          "SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE "
+        + "OWNER = ? AND TABLE_NAME = ?";
 
   /**
    * Query to find the primary key column name for a given table. This query
    * is restricted to the current schema.
    */
   public static final String QUERY_PRIMARY_KEY_FOR_TABLE =
-    "SELECT USER_CONS_COLUMNS.COLUMN_NAME FROM USER_CONS_COLUMNS, "
-     + "USER_CONSTRAINTS WHERE USER_CONS_COLUMNS.CONSTRAINT_NAME = "
-     + "USER_CONSTRAINTS.CONSTRAINT_NAME AND "
-     + "USER_CONSTRAINTS.CONSTRAINT_TYPE = 'P' AND "
-     + "USER_CONS_COLUMNS.TABLE_NAME = ?";
+    "SELECT ALL_CONS_COLUMNS.COLUMN_NAME FROM ALL_CONS_COLUMNS, "
+     + "ALL_CONSTRAINTS WHERE ALL_CONS_COLUMNS.CONSTRAINT_NAME = "
+     + "ALL_CONSTRAINTS.CONSTRAINT_NAME AND "
+     + "ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'P' AND "
+     + "ALL_CONS_COLUMNS.TABLE_NAME = ? AND "
+     + "ALL_CONS_COLUMNS.OWNER = ?";
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
@@ -238,7 +240,11 @@ public class OracleManager extends GenericJdbcManager {
 
   protected String getColNamesQuery(String tableName) {
     // SqlManager uses "tableName AS t" which doesn't work in Oracle.
-    return "SELECT t.* FROM " + escapeTableName(tableName) + " t WHERE 1=0";
+    String query =  "SELECT t.* FROM " + escapeTableName(tableName)
+            + " t WHERE 1=0";
+
+    LOG.debug("Using column names query: " + query);
+    return query;
   }
 
   /**
@@ -652,12 +658,23 @@ public class OracleManager extends GenericJdbcManager {
     ResultSet rset = null;
     List<String> columns = new ArrayList<String>();
 
+    String tableOwner = this.options.getUsername();
+    String shortTableName = tableName;
+    int qualifierIndex = tableName.indexOf('.');
+    if (qualifierIndex != -1) {
+      tableOwner = tableName.substring(0, qualifierIndex);
+      shortTableName = tableName.substring(qualifierIndex + 1);
+    }
+
     try {
       conn = getConnection();
 
       pStmt = conn.prepareStatement(QUERY_COLUMNS_FOR_TABLE,
                   ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      pStmt.setString(1, tableName);
+
+      pStmt.setString(1, tableOwner);
+
+      pStmt.setString(2, shortTableName);
       rset = pStmt.executeQuery();
 
       while (rset.next()) {
@@ -704,12 +721,21 @@ public class OracleManager extends GenericJdbcManager {
     ResultSet rset = null;
     List<String> columns = new ArrayList<String>();
 
+    String tableOwner = this.options.getUsername();
+    String shortTableName = tableName;
+    int qualifierIndex = tableName.indexOf('.');
+    if (qualifierIndex != -1) {
+      tableOwner = tableName.substring(0, qualifierIndex);
+      shortTableName = tableName.substring(qualifierIndex + 1);
+    }
+
     try {
       conn = getConnection();
 
       pStmt = conn.prepareStatement(QUERY_PRIMARY_KEY_FOR_TABLE,
                   ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      pStmt.setString(1, tableName);
+      pStmt.setString(1, shortTableName);
+      pStmt.setString(2, tableOwner);
       rset = pStmt.executeQuery();
 
       while (rset.next()) {
