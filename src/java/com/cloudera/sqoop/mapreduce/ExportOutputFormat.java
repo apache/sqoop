@@ -87,9 +87,9 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
    */
   public class ExportRecordWriter extends AsyncSqlRecordWriter<K, V> {
 
-    private String tableName;
-    private String [] columnNames; // The columns to insert into.
-    private int columnCount; // If columnNames is null, tells ## of cols.
+    protected String tableName;
+    protected String [] columnNames; // The columns to insert into.
+    protected int columnCount; // If columnNames is null, tells ## of cols.
 
     public ExportRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {

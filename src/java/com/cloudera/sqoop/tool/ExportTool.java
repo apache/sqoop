@@ -169,6 +169,11 @@ public class ExportTool extends BaseSqoopTool {
         + "staging table can be deleted")
         .withLongOpt(CLEAR_STAGING_TABLE_ARG)
         .create());
+    exportOpts.addOption(OptionBuilder
+        .withDescription("Indicates underlying statements "
+        + "to be executed in batch mode")
+        .withLongOpt(BATCH_ARG)
+        .create());
 
     return exportOpts;
   }
@@ -218,6 +223,10 @@ public class ExportTool extends BaseSqoopTool {
 
       if (in.hasOption(DIRECT_ARG)) {
         out.setDirectMode(true);
+      }
+
+      if (in.hasOption(BATCH_ARG)) {
+        out.setBatchMode(true);
       }
 
       if (in.hasOption(TABLE_ARG)) {

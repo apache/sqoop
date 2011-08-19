@@ -24,8 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.SQLServerExportOutputFormat;
 import com.cloudera.sqoop.util.ExportException;
 
 /**
@@ -53,7 +53,7 @@ public class SQLServerManager extends GenericJdbcManager {
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-      SQLServerExportOutputFormat.class);
+      ExportBatchOutputFormat.class);
     exportJob.runExport();
   }
 

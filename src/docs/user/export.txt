@@ -61,6 +61,8 @@ Argument                                 Description
                                          the destination table.
 +\--clear-staging-table+                 Indicates that any data present in\
                                          the staging table can be deleted.
++\--batch+                               Use batch mode for underlying\
+                                         statement execution.
 ------------------------------------------------------------------------
 
 The +\--table+ and +\--export-dir+ arguments are required. These

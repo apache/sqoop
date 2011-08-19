@@ -175,10 +175,9 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
     try {
       try {
         execUpdate(true, true);
+        execThread.join();
       } catch (SQLException sqle) {
         throw new IOException(sqle);
-      } finally {
-        execThread.join();
       }
 
       // If we're not leaving on an error return path already,

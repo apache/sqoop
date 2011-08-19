@@ -224,7 +224,11 @@ public class ExportJobBase extends JobBase {
       throws ClassNotFoundException {
     Class<? extends OutputFormat> configuredOF = super.getOutputFormatClass();
     if (null == configuredOF) {
-      return ExportOutputFormat.class;
+      if (!options.isBatchMode()) {
+        return ExportOutputFormat.class;
+      } else {
+        return ExportBatchOutputFormat.class;
+      }
     } else {
       return configuredOF;
     }

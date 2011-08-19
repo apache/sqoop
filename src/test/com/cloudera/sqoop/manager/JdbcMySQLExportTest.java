@@ -18,6 +18,7 @@
 
 package com.cloudera.sqoop.manager;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -141,5 +142,28 @@ public class JdbcMySQLExportTest extends TestExport {
         "--username", MySQLTestUtils.getCurrentUser());
     return super.getArgv(includeHadoopFlags, rowsPerStatement,
         statementsPerTx, subArgv);
+  }
+
+  public void testIntColInBatchMode() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    // generate a column equivalent to rownum.
+    ColumnGenerator gen = new ColumnGenerator() {
+      public String getExportText(int rowNum) {
+        return "" + rowNum;
+      }
+      public String getVerifyText(int rowNum) {
+        return "" + rowNum;
+      }
+      public String getType() {
+        return "INTEGER";
+      }
+    };
+
+    createTextFile(0, TOTAL_RECORDS, false, gen);
+    createTable(gen);
+    runExport(getArgv(true, 10, 10, "--batch"));
+    verifyExport(TOTAL_RECORDS);
+    assertColMinAndMax(forIdx(0), gen);
   }
 }

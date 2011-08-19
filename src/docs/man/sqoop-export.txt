@@ -55,6 +55,10 @@ Export control options
 --clear-staging-table::
   Will result in deletion of any data that exists in the staging table.
 
+--batch::
+  Use batch mode for underlying statement execution. This is useful, for example,
+  for those databases that do not support multirow insert in a single statement yet.
+
 include::input-args.txt[]
 
 include::output-args.txt[]

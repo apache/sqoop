@@ -143,6 +143,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hdfs.append.dir") private boolean append;
   @StoredAsProperty("hdfs.file.format") private FileLayout layout;
   @StoredAsProperty("direct.import") private boolean direct; // "direct mode."
+  @StoredAsProperty("db.batch") private boolean batchMode;
   private String tmpDir; // where temp data goes; usually /tmp; not serialized.
   private String hiveHome; // not serialized to metastore.
   @StoredAsProperty("hive.import") private boolean hiveImport;
@@ -1012,6 +1013,18 @@ public class SqoopOptions implements Cloneable {
 
   public void setDirectMode(boolean isDirect) {
     this.direct = isDirect;
+  }
+
+  /**
+   * @return true if underlying statements to be executed in batch mode,
+   * or false if to be executed in a single multirow statement.
+   */
+  public boolean isBatchMode() {
+    return batchMode;
+  }
+
+  public void setBatchMode(boolean mode) {
+    this.batchMode = mode;
   }
 
   /**
