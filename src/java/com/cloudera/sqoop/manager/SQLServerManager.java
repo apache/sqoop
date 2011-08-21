@@ -32,7 +32,7 @@ import com.cloudera.sqoop.util.ExportException;
  * Manages connections to SQLServer databases. Requires the SQLServer JDBC
  * driver.
  */
-public class SQLServerManager extends GenericJdbcManager {
+public class SQLServerManager extends InformationSchemaManager {
 
   public static final Log LOG = LogFactory.getLog(
       SQLServerManager.class.getName());
@@ -65,6 +65,16 @@ public class SQLServerManager extends GenericJdbcManager {
   @Override
   public String getCurTimestampQuery() {
       return "SELECT CURRENT_TIMESTAMP";
+  }
+
+  @Override
+  protected String getListDatabasesQuery() {
+    return "SELECT NAME FROM SYS.DATABASES";
+  }
+
+  @Override
+  protected String getSchemaQuery() {
+    return "SELECT SCHEMA_NAME()";
   }
 }
 
