@@ -76,3 +76,12 @@ particular partition by specifying the +\--hive-partition-key+ and
 +\--hive-partition-value+ arguments.  The partition value must be a
 string.  Please see the Hive documentation for more details on
 partitioning.
+
+You can import compressed tables into Hive using the +\--compress+ and
++\--compression-codec+ options. One downside to compressing tables imported
+into Hive is that many codecs cannot be split for processing by parallel map
+tasks. The lzop codec, however, does support splitting. When importing tables
+with this codec, Sqoop will automatically index the files for splitting and
+configuring a new Hive table with the correct InputFormat. This feature
+currently requires that all partitions of a table be compressed with the lzop
+codec.

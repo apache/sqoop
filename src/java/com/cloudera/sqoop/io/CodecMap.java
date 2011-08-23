@@ -40,6 +40,7 @@ public final class CodecMap {
   public static final String NONE = "none";
   public static final String DEFLATE = "deflate";
   public static final String LZO = "lzo";
+  public static final String LZOP = "lzop";
 
   private static Map<String, String> codecNames;
   static {
@@ -49,6 +50,7 @@ public final class CodecMap {
     codecNames.put(NONE,    null);
     codecNames.put(DEFLATE, "org.apache.hadoop.io.compress.DefaultCodec");
     codecNames.put(LZO,     "com.hadoop.compression.lzo.LzoCodec");
+    codecNames.put(LZOP,     "com.hadoop.compression.lzo.LzopCodec");
 
     // add more from Hadoop CompressionCodecFactory
     for (Class<? extends CompressionCodec> cls

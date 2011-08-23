@@ -106,4 +106,32 @@ public class TestTableDefWriter extends TestCase {
         + "LINES TERMINATED BY '\\012' STORED AS TEXTFILE", createTable);
     assertTrue(loadData.endsWith(" PARTITION (ds='20110413')"));
   }
+
+  public void testLzoSplitting() throws Exception {
+    String[] args = {
+        "--compress",
+        "--compression-codec", "lzop",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+      new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, "inputTable", "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+    String loadData = writer.getLoadDataStmt();
+
+    assertNotNull(createTable);
+    assertNotNull(loadData);
+    assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
+        + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
+        + "LINES TERMINATED BY '\\012' STORED AS "
+        + "INPUTFORMAT 'com.hadoop.mapred.DeprecatedLzoTextInputFormat' "
+        + "OUTPUTFORMAT "
+        + "'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'",
+        createTable);
+  }
 }

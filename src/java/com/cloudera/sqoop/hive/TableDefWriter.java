@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.io.CodecMap;
 import com.cloudera.sqoop.manager.ConnManager;
 
 import java.io.File;
@@ -177,7 +178,16 @@ public class TableDefWriter {
     sb.append(getHiveOctalCharCode((int) options.getOutputFieldDelim()));
     sb.append("' LINES TERMINATED BY '");
     sb.append(getHiveOctalCharCode((int) options.getOutputRecordDelim()));
-    sb.append("' STORED AS TEXTFILE");
+    String codec = options.getCompressionCodec();
+    if (codec != null && (codec.equals(CodecMap.LZOP)
+            || codec.equals(CodecMap.getCodecClassName(CodecMap.LZOP)))) {
+      sb.append("' STORED AS INPUTFORMAT "
+              + "'com.hadoop.mapred.DeprecatedLzoTextInputFormat'");
+      sb.append(" OUTPUTFORMAT "
+              + "'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'");
+    } else {
+      sb.append("' STORED AS TEXTFILE");
+    }
 
     LOG.debug("Create statement: " + sb.toString());
     return sb.toString();
@@ -190,22 +200,7 @@ public class TableDefWriter {
    * @return the LOAD DATA statement to import the data in HDFS into hive.
    */
   public String getLoadDataStmt() throws IOException {
-    String warehouseDir = options.getWarehouseDir();
-    if (null == warehouseDir) {
-      warehouseDir = "";
-    } else if (!warehouseDir.endsWith(File.separator)) {
-      warehouseDir = warehouseDir + File.separator;
-    }
-
-    String tablePath;
-    if (null != inputTableName) {
-      tablePath = warehouseDir + inputTableName;
-    } else {
-      tablePath = options.getTargetDir();
-    }
-    FileSystem fs = FileSystem.get(configuration);
-    Path finalPath = new Path(tablePath).makeQualified(fs);
-    String finalPathStr = finalPath.toString();
+    String finalPathStr = getFinalPathStr();
 
     StringBuilder sb = new StringBuilder();
     sb.append("LOAD DATA INPATH '");
@@ -226,6 +221,25 @@ public class TableDefWriter {
 
     LOG.debug("Load statement: " + sb.toString());
     return sb.toString();
+  }
+
+  public String getFinalPathStr() throws IOException {
+    String warehouseDir = options.getWarehouseDir();
+    if (null == warehouseDir) {
+      warehouseDir = "";
+    } else if (!warehouseDir.endsWith(File.separator)) {
+      warehouseDir = warehouseDir + File.separator;
+    }
+
+    String tablePath;
+    if (null != inputTableName) {
+      tablePath = warehouseDir + inputTableName;
+    } else {
+      tablePath = options.getTargetDir();
+    }
+    FileSystem fs = FileSystem.get(configuration);
+    Path finalPath = new Path(tablePath).makeQualified(fs);
+    return finalPath.toString();
   }
 
   /**
