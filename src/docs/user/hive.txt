@@ -58,8 +58,11 @@ rows contain string fields that have Hive's default row delimiters
 (+\n+ and +\r+ characters) or column delimiters (+\01+ characters)
 present in them.  You can use the +\--hive-drop-import-delims+ option
 to drop those characters on import to give Hive-compatible text data.
-This option should only be used if you use Hive's default delimiters
-and should not be used if different delimiters are specified.
+Alternatively, you can use the +\--hive-delims-replacement+ option
+to replace those characters with a user-defined string on import to give
+Hive-compatible text data.  These options should only be used if you use
+Hive's default delimiters and should not be used if different delimiters
+are specified.
 
 Sqoop will pass the field and record delimiters through to Hive. If you do
 not set any delimiters and do use +\--hive-import+, the field delimiter will

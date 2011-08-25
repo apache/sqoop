@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
@@ -40,6 +41,7 @@ import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.tool.CreateHiveTableTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Test HiveImport capability after an import to HDFS.
@@ -356,6 +358,77 @@ public class TestHiveImport extends ImportJobTestCase {
       fail("Unable to read files generated from hive");
     } finally {
       br.close();
+    }
+  }
+
+  /**
+   * Test hive import with row that has new line in it.
+   */
+  @Test
+  public void testFieldWithHiveDelimsReplacement() throws IOException,
+    InterruptedException {
+    final String TABLE_NAME = "FIELD_WITH_NL_REPLACEMENT_HIVE_IMPORT";
+
+    LOG.info("Doing import of single row into "
+        + "FIELD_WITH_NL_REPLACEMENT_HIVE_IMPORT table");
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String[] vals = { "'test with\nnew lines\n'", "42",
+        "'oh no " + '\01' + " field delims " + '\01' + "'", };
+    String[] moreArgs = { "--"+BaseSqoopTool.HIVE_DELIMS_REPLACEMENT_ARG, " "};
+
+    runImportTest(TABLE_NAME, types, vals,
+        "fieldWithNewlineReplacementImport.q", getArgv(false, moreArgs),
+        new ImportTool());
+
+    LOG.info("Validating data in single row is present in: "
+          + "FIELD_WITH_NL_REPLACEMENT_HIVE_IMPORT table");
+
+    // Ideally, we would actually invoke hive code to verify that record with
+    // record and field delimiters have values replaced and that we have the
+    // proper number of hive records. Unfortunately, this is a non-trivial task,
+    // and better dealt with at an integration test level
+    //
+    // Instead, this assumes the path of the generated table and just validate
+    // map job output.
+
+    // Get and read the raw output file
+    String whDir = getWarehouseDir();
+    File p = new File(new File(whDir, TABLE_NAME), "part-m-00000");
+    File f = new File(p.toString());
+    FileReader fr = new FileReader(f);
+    BufferedReader br = new BufferedReader(fr);
+    try {
+      // verify the output
+      assertEquals(br.readLine(), "test with new lines " + '\01' + "42"
+          + '\01' + "oh no   field delims  ");
+      assertEquals(br.readLine(), null); // should only be one line
+    } catch (IOException ioe) {
+      fail("Unable to read files generated from hive");
+    } finally {
+      br.close();
+    }
+  }
+
+  /**
+   * Test hive drop and replace option validation.
+   */
+  @Test
+  public void testHiveDropAndReplaceOptionValidation() throws ParseException {
+    LOG.info("Testing conflicting Hive delimiter drop/replace options");
+
+    setNumCols(3);
+    String[] moreArgs = { "--"+BaseSqoopTool.HIVE_DELIMS_REPLACEMENT_ARG, " ",
+      "--"+BaseSqoopTool.HIVE_DROP_DELIMS_ARG, };
+
+    ImportTool tool = new ImportTool();
+    try {
+      tool.validateOptions(tool.parseArguments(getArgv(false, moreArgs), null,
+          null, true));
+      fail("Expected InvalidOptionsException");
+    } catch (InvalidOptionsException ex) {
+      /* success */
     }
   }
 

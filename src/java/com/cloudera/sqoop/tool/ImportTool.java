@@ -839,6 +839,7 @@ public class ImportTool extends BaseSqoopTool {
     validateCodeGenOptions(options);
     validateOutputFormatOptions(options);
     validateHBaseOptions(options);
+    validateHiveOptions(options);
   }
 }
 
