@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -532,6 +533,19 @@ public class OracleManager extends GenericJdbcManager {
   @Override
   public String timestampToQueryString(Timestamp ts) {
     return "TO_TIMESTAMP('" + ts + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
+  }
+
+  @Override
+  public String datetimeToQueryString(String datetime, int columnType) {
+    if (columnType == Types.TIMESTAMP) {
+      return "TO_TIMESTAMP('" + datetime + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
+    } else if (columnType == Types.DATE) {
+      return "TO_DATE('" + datetime + "', 'YYYY-MM-DD HH24:MI:SS')";
+    } else {
+      String msg = "Column type is neither timestamp nor date!";
+      LOG.error(msg);
+      throw new RuntimeException(msg);
+    }
   }
 
   @Override

@@ -347,6 +347,14 @@ public class TestIncrementalImport extends TestCase {
    */
   private List<String> getArgListForTable(String tableName, boolean commonArgs,
       boolean isAppend) {
+    return getArgListForTable(tableName, commonArgs, isAppend, false);
+  }
+
+  /**
+   * Return a list of arguments to import the specified table.
+   */
+  private List<String> getArgListForTable(String tableName, boolean commonArgs,
+      boolean isAppend, boolean appendTimestamp) {
     List<String> args = new ArrayList<String>();
     if (commonArgs) {
       CommonArgs.addHadoopFlags(args);
@@ -360,8 +368,13 @@ public class TestIncrementalImport extends TestCase {
     if (isAppend) {
       args.add("--incremental");
       args.add("append");
-      args.add("--check-column");
-      args.add("id");
+      if (!appendTimestamp) {
+        args.add("--check-column");
+        args.add("id");
+      } else {
+        args.add("--check-column");
+        args.add("last_modified");
+      }
     } else {
       args.add("--incremental");
       args.add("lastmodified");
@@ -769,6 +782,43 @@ public class TestIncrementalImport extends TestCase {
 
     List<String> args = getArgListForTable(TABLE_NAME, false, false);
     args.add("--append");
+    createJob(TABLE_NAME, args, conf);
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 10);
+
+    // Add some more rows with the timestamp equal to the job run timestamp.
+    insertIdTimestampRows(TABLE_NAME, 10, 20, firstJobTime);
+    assertRowCount(TABLE_NAME, 20);
+
+    // Run a second job with the clock advanced by 100 ms.
+    Timestamp secondJobTime = new Timestamp(now + 100);
+    InstrumentHsqldbManager.setCurrentDbTimestamp(secondJobTime);
+
+    // Import only those rows.
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 20);
+  }
+
+  public void testIncrementalAppendTimestamp() throws Exception {
+    // Run an import, and then insert rows with the last-modified timestamp
+    // set to the exact time when the first import runs. Run a second import
+    // and ensure that we pick up the new data.
+
+    long now = System.currentTimeMillis();
+
+    final String TABLE_NAME = "incrementalAppendTimestamp";
+    Timestamp thePast = new Timestamp(now - 100);
+    createTimestampTable(TABLE_NAME, 10, thePast);
+
+    Timestamp firstJobTime = new Timestamp(now);
+    InstrumentHsqldbManager.setCurrentDbTimestamp(firstJobTime);
+
+    // Configure the job to use the instrumented Hsqldb manager.
+    Configuration conf = newConf();
+    conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+        InstrumentHsqldbManagerFactory.class.getName());
+
+    List<String> args = getArgListForTable(TABLE_NAME, false, true, true);
     createJob(TABLE_NAME, args, conf);
     runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 10);

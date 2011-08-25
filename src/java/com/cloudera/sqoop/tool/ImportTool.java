@@ -20,13 +20,12 @@ package com.cloudera.sqoop.tool;
 
 import java.io.IOException;
 
-import java.math.BigDecimal;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +64,9 @@ public class ImportTool extends BaseSqoopTool {
   // overrides the run() method of this tool (which can only do
   // a single table).
   private boolean allTables;
+
+  // store check column type for incremental option
+  private int checkColumnType;
 
   public ImportTool() {
     this("import", false);
@@ -159,7 +161,7 @@ public class ImportTool extends BaseSqoopTool {
    * Return the max value in the incremental-import test column. This
    * value must be numeric.
    */
-  private BigDecimal getMaxColumnId(SqoopOptions options) throws SQLException {
+  private Object getMaxColumnId(SqoopOptions options) throws SQLException {
     StringBuilder sb = new StringBuilder();
     sb.append("SELECT MAX(");
     sb.append(options.getIncrementalTestColumn());
@@ -184,7 +186,17 @@ public class ImportTool extends BaseSqoopTool {
         return null;
       }
 
-      return rs.getBigDecimal(1);
+      ResultSetMetaData rsmd = rs.getMetaData();
+      checkColumnType = rsmd.getColumnType(1);
+      if (checkColumnType == Types.TIMESTAMP) {
+        return rs.getTimestamp(1);
+      } else if (checkColumnType == Types.DATE) {
+        return rs.getDate(1);
+      } else if (checkColumnType == Types.TIME) {
+        return rs.getTime(1);
+      } else {
+        return rs.getObject(1);
+      }
     } finally {
       try {
         if (null != rs) {
@@ -202,6 +214,16 @@ public class ImportTool extends BaseSqoopTool {
         LOG.warn("SQL Exception closing statement: " + sqlE);
       }
     }
+  }
+
+  /**
+   * Determine if a column is date/time.
+   * @return true if column type is TIMESTAMP, DATE, or TIME.
+   */
+  private boolean isDateTimeColumn(int columnType) {
+    return (columnType == Types.TIMESTAMP)
+        || (columnType == Types.DATE)
+        || (columnType == Types.TIME);
   }
 
   /**
@@ -224,24 +246,30 @@ public class ImportTool extends BaseSqoopTool {
     SqoopOptions.IncrementalMode incrementalMode = options.getIncrementalMode();
     String nextIncrementalValue = null;
 
+    Object nextVal;
     switch (incrementalMode) {
     case AppendRows:
       try {
-        BigDecimal nextVal = getMaxColumnId(options);
-        if (null != nextVal) {
-          nextIncrementalValue = nextVal.toString();
+        nextVal = getMaxColumnId(options);
+        if (isDateTimeColumn(checkColumnType)) {
+          nextIncrementalValue = (nextVal == null) ? null
+            : manager.datetimeToQueryString(nextVal.toString(),
+                                            checkColumnType);
+        } else {
+          nextIncrementalValue = (nextVal == null) ? null : nextVal.toString();
         }
       } catch (SQLException sqlE) {
         throw new IOException(sqlE);
       }
       break;
     case DateLastModified:
-      Timestamp dbTimestamp = manager.getCurrentDbTimestamp();
-      if (null == dbTimestamp) {
+      checkColumnType = Types.TIMESTAMP;
+      nextVal = manager.getCurrentDbTimestamp();
+      if (null == nextVal) {
         throw new IOException("Could not get current time from database");
       }
-
-      nextIncrementalValue = manager.timestampToQueryString(dbTimestamp);
+      nextIncrementalValue = manager.datetimeToQueryString(nextVal.toString(),
+          checkColumnType);
       break;
     default:
       throw new ImportException("Undefined incremental import type: "
@@ -253,12 +281,13 @@ public class ImportTool extends BaseSqoopTool {
     StringBuilder sb = new StringBuilder();
     String prevEndpoint = options.getIncrementalLastValue();
 
-    if (incrementalMode == SqoopOptions.IncrementalMode.DateLastModified
-        && null != prevEndpoint && !prevEndpoint.contains("\'")) {
-      // Incremental imports based on timestamps should be 'quoted' in
+    if (isDateTimeColumn(checkColumnType) && null != prevEndpoint
+        && !prevEndpoint.startsWith("\'") && !prevEndpoint.endsWith("\'")) {
+      // Incremental imports based on date/time should be 'quoted' in
       // ANSI SQL. If the user didn't specify single-quotes, put them
       // around, here.
-      prevEndpoint = "'" + prevEndpoint + "'";
+      prevEndpoint = manager.datetimeToQueryString(prevEndpoint,
+          checkColumnType);
     }
 
     String checkColName = manager.escapeColName(
@@ -320,7 +349,8 @@ public class ImportTool extends BaseSqoopTool {
     if (null == recordOptions) {
       recordOptions = options;
     }
-    recordOptions.setIncrementalLastValue(nextIncrementalValue);
+    recordOptions.setIncrementalLastValue(
+        (nextVal == null) ? null : nextVal.toString());
 
     return true;
   }

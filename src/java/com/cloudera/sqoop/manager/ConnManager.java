@@ -302,6 +302,14 @@ public abstract class ConnManager {
   }
 
   /**
+   * Given a date/time, return the quoted string that can
+   * be inserted into a SQL statement, representing that date/time.
+   */
+  public String datetimeToQueryString(String datetime, int columnType) {
+    return "'" + datetime + "'";
+  }
+
+  /**
    * This method allows the ConnManager to override the creation of an
    * input-bounds query that is used to create splits when running import
    * based on free-form query. Any non-null return value is used, whereas a null
