@@ -123,5 +123,7 @@ under the License.
       <exclude org="log4j" module="log4j"/>
     </dependency>
 
+    <exclude org="org.apache.hadoop" module="avro"/>
+
   </dependencies>
 </ivy-module>
