@@ -46,6 +46,12 @@ public final class HiveTypes {
       return "STRING";
     } else if (sqlType == Types.LONGVARCHAR) {
       return "STRING";
+    } else if (sqlType == Types.NVARCHAR) {
+      return "STRING";
+    } else if (sqlType == Types.NCHAR) {
+      return "STRING";
+    } else if (sqlType == Types.LONGNVARCHAR) {
+      return "STRING";
     } else if (sqlType == Types.NUMERIC) {
       // Per suggestion on hive-user, this is converted to DOUBLE for now.
       return "DOUBLE";

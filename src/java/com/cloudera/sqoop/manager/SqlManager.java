@@ -496,6 +496,12 @@ public abstract class SqlManager extends ConnManager {
       return "String";
     } else if (sqlType == Types.LONGVARCHAR) {
       return "String";
+    } else if (sqlType == Types.NVARCHAR) {
+      return "String";
+    } else if (sqlType == Types.NCHAR) {
+      return "String";
+    } else if (sqlType == Types.LONGNVARCHAR) {
+      return "String";
     } else if (sqlType == Types.NUMERIC) {
       return "java.math.BigDecimal";
     } else if (sqlType == Types.DECIMAL) {
