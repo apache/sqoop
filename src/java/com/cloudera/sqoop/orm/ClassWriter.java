@@ -21,7 +21,6 @@ package com.cloudera.sqoop.orm;
 import org.apache.hadoop.io.BytesWritable;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
 import com.cloudera.sqoop.lib.BooleanParser;
 import com.cloudera.sqoop.lib.DelimiterSet;
@@ -1041,8 +1040,17 @@ public class ClassWriter {
     String [] cleanedColNames = cleanColNames(colNames);
     Set<String> uniqColNames = new HashSet<String>();
     for (int i = 0; i < colNames.length; i++) {
-      // Guarantee uniq col identifier
       String identifier = cleanedColNames[i];
+
+      // Name can't be blank
+      if(identifier.isEmpty()) {
+        throw new IllegalArgumentException("We found column without column "
+                + "name. Please verify that you've entered all column names "
+                + "in your query if using free form query import (consider "
+                + "adding clause AS if you're using column transformation)");
+      }
+
+      // Guarantee uniq col identifier
       if (uniqColNames.contains(identifier)) {
           throw new IllegalArgumentException("Duplicate Column identifier "
               + "specified: '" + identifier + "'");
