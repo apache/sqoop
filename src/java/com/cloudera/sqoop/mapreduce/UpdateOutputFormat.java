@@ -86,9 +86,9 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
    */
   public class UpdateRecordWriter extends AsyncSqlRecordWriter<K, V> {
 
-    private String tableName;
-    private String [] columnNames; // The columns to update.
-    private String updateCol; // The column containing the fixed key.
+    protected String tableName;
+    protected String [] columnNames; // The columns to update.
+    protected String updateCol; // The column containing the fixed key.
 
     public UpdateRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {

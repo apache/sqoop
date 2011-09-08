@@ -138,6 +138,7 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String VERBOSE_ARG = "verbose";
   public static final String HELP_ARG = "help";
   public static final String UPDATE_KEY_ARG = "update-key";
+  public static final String UPDATE_MODE_ARG = "update-mode";
 
   // Arguments for incremental imports.
   public static final String INCREMENT_TYPE_ARG = "incremental";

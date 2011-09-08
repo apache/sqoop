@@ -194,6 +194,22 @@ public class SqoopOptions implements Cloneable {
   // Column to use for the WHERE clause in an UPDATE-based export.
   @StoredAsProperty("export.update.col") private String updateKeyCol;
 
+  /**
+   * Update mode option specifies how updates are performed when
+   * new rows are found with non-matching keys in database.
+   * It supports two modes:
+   * <ul>
+   * <li>UpdateOnly: This is the default. New rows are silently ignored.</li>
+   * <li>AllowInsert: New rows are inserted into the database.</li>
+   * </ul>
+   */
+  public enum UpdateMode {
+    UpdateOnly,
+    AllowInsert
+  }
+
+  @StoredAsProperty("export.new.update") private UpdateMode updateMode;
+
   private DelimiterSet inputDelimiters; // codegen.input.delimiters.
   private DelimiterSet outputDelimiters; // codegen.output.delimiters.
   private boolean areDelimsManuallySet;
@@ -797,6 +813,8 @@ public class SqoopOptions implements Cloneable {
     this.dbOutColumns = null;
 
     this.incrementalMode = IncrementalMode.None;
+
+    this.updateMode = UpdateMode.UpdateOnly;
   }
 
   /**
@@ -1583,6 +1601,21 @@ public class SqoopOptions implements Cloneable {
    */
   public String getUpdateKeyCol() {
     return this.updateKeyCol;
+  }
+
+  /**
+   * Set "UpdateOnly" to silently ignore new rows during update export.
+   * Set "AllowInsert" to insert new rows during update export.
+   */
+  public void setUpdateMode(UpdateMode mode) {
+    this.updateMode = mode;
+  }
+
+  /**
+   * @return how to handle new rows found in update export.
+   */
+  public UpdateMode getUpdateMode() {
+    return updateMode;
   }
 
   /**

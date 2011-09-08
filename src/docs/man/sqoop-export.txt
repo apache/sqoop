@@ -43,6 +43,12 @@ Export control options
 --update-key (col-name)::
   Anchor column to use for updates
 
+--update-mode (mode)::
+  Specify how updates are performed when new rows are found with non-matching keys
+  in database. By default, "mode" is +updateonly+, in which case new rows are
+  silently ignored. Alternatively, "mode" can be +allowinsert+, in which case
+  new rows are inserted instead.
+
 --input-null-string::
   The string to be interpreted as null for string columns
 

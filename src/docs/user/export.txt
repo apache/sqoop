@@ -52,6 +52,12 @@ Argument                                 Description
                                          parallel
 +\--table <table-name>+                  Table to populate
 +\--update-key <col-name>+               Anchor column to use for updates
++\--update-mode <mode>+                  Specify how updates are performed\
+                                         when new rows are found with\
+                                         non-matching keys in database.
+                                         Legal values for +mode+ include\
+                                         +updateonly+ (default) and\
+                                         +allowinsert+.
 +\--input-null-string <null-string>+     The string to be interpreted as\
                                          null for string columns
 +\--input-null-non-string <null-string>+ The string to be interpreted as\
@@ -168,6 +174,10 @@ an update-based export will not insert new rows into the database.)
 Likewise, if the column specified with +\--update-key+ does not
 uniquely identify rows and multiple rows are updated by a single
 statement, this condition is also undetected.
+
+Depending on the target database, you may also specify the +\--update-mode+
+argument with +allowinsert+ mode if you want to update rows if they exist
+in the database already or insert rows if they do not exist yet.
 
 include::input-args.txt[]
 

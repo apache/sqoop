@@ -19,7 +19,6 @@
 package com.cloudera.sqoop.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -30,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
@@ -66,8 +66,13 @@ public class ExportTool extends BaseSqoopTool {
     ExportJobContext context = new ExportJobContext(tableName, jarFile,
         options);
     if (options.getUpdateKeyCol() != null) {
-      // UPDATE-based export.
-      manager.updateTable(context);
+      if (options.getUpdateMode() == UpdateMode.UpdateOnly) {
+        // UPDATE-based export.
+        manager.updateTable(context);
+      } else {
+        // Mixed update/insert export
+        manager.upsertTable(context);
+      }
     } else {
       // INSERT-based export.
       manager.exportTable(context);
@@ -84,26 +89,8 @@ public class ExportTool extends BaseSqoopTool {
 
     codeGenerator.setManager(manager);
 
-    String updateKeyCol = options.getUpdateKeyCol();
-    if (updateKeyCol != null) {
-      // We're in update mode. We need to explicitly set the database output
-      // column ordering in the codeGenerator.  The UpdateKeyCol must come
-      // last, because the UPDATE-based OutputFormat will generate the SET
-      // clause followed by the WHERE clause, and the SqoopRecord needs to
-      // serialize to this layout.
-      String [] allColNames = manager.getColumnNames(options.getTableName());
-      List<String> dbOutCols = new ArrayList<String>();
-      String upperCaseKeyCol = updateKeyCol.toUpperCase();
-      for (String col : allColNames) {
-        if (!upperCaseKeyCol.equals(col.toUpperCase())) {
-          dbOutCols.add(col); // add non-key columns to the output order list.
-        }
-      }
-
-      // Then add the update key column last.
-      dbOutCols.add(updateKeyCol);
-      options.setDbOutputColumns(dbOutCols.toArray(
-          new String[dbOutCols.size()]));
+    if (options.getUpdateKeyCol() != null) {
+      manager.configureDbOutputColumns(options);
     }
 
     try {
@@ -173,6 +160,13 @@ public class ExportTool extends BaseSqoopTool {
         .withDescription("Indicates underlying statements "
         + "to be executed in batch mode")
         .withLongOpt(BATCH_ARG)
+        .create());
+    exportOpts.addOption(OptionBuilder
+        .withArgName("mode")
+        .hasArg()
+        .withDescription("Specifies how updates are performed when "
+            + "new rows are found with non-matching keys in database")
+        .withLongOpt(UPDATE_MODE_ARG)
         .create());
 
     return exportOpts;
@@ -257,6 +251,7 @@ public class ExportTool extends BaseSqoopTool {
         out.setClearStagingTable(true);
       }
 
+      applyNewUpdateOptions(in, out);
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
@@ -334,6 +329,22 @@ public class ExportTool extends BaseSqoopTool {
     validateOutputFormatOptions(options);
     validateCommonOptions(options);
     validateCodeGenOptions(options);
+  }
+
+  private void applyNewUpdateOptions(CommandLine in, SqoopOptions out)
+      throws InvalidOptionsException {
+    if (in.hasOption(UPDATE_MODE_ARG)) {
+      String updateTypeStr = in.getOptionValue(UPDATE_MODE_ARG);
+      if ("updateonly".equals(updateTypeStr)) {
+        out.setUpdateMode(UpdateMode.UpdateOnly);
+      } else if ("allowinsert".equals(updateTypeStr)) {
+        out.setUpdateMode(UpdateMode.AllowInsert);
+      } else {
+        throw new InvalidOptionsException("Unknown new update mode: "
+            + updateTypeStr + ". Use 'updateonly' or 'allowinsert'."
+            + HELP_STR);
+      }
+    }
   }
 }
 

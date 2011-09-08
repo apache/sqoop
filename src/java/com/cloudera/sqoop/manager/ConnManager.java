@@ -23,11 +23,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -271,6 +274,44 @@ public abstract class ConnManager {
   public void updateTable(ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support updates");
+  }
+
+  /**
+   * Export data stored in HDFS into a table in a database.
+   * This may update or insert rows into the target table depending on
+   * whether rows already exist in the target table or not.
+   */
+  public void upsertTable(ExportJobContext context)
+      throws IOException, ExportException {
+    throw new ExportException("Mixed update/insert is not supported"
+        + " against the target database yet");
+  }
+
+  /**
+   * Configure database output column ordering explicitly for code generator.
+   * The code generator should generate the DBWritable.write(PreparedStatement)
+   * method with columns exporting in this order.
+   */
+  public void configureDbOutputColumns(SqoopOptions options) {
+    // We're in update mode. We need to explicitly set the database output
+    // column ordering in the codeGenerator.  The UpdateKeyCol must come
+    // last, because the UPDATE-based OutputFormat will generate the SET
+    // clause followed by the WHERE clause, and the SqoopRecord needs to
+    // serialize to this layout.
+    String updateKeyCol = options.getUpdateKeyCol();
+    String [] allColNames = getColumnNames(options.getTableName());
+    List<String> dbOutCols = new ArrayList<String>();
+    String upperCaseKeyCol = updateKeyCol.toUpperCase();
+    for (String col : allColNames) {
+      if (!upperCaseKeyCol.equals(col.toUpperCase())) {
+        dbOutCols.add(col); // add non-key columns to the output order list.
+      }
+    }
+
+    // Then add the update key column last.
+    dbOutCols.add(updateKeyCol);
+    options.setDbOutputColumns(dbOutCols.toArray(
+        new String[dbOutCols.size()]));
   }
 
   /**

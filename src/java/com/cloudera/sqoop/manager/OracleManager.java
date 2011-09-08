@@ -38,8 +38,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
+import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
+import com.cloudera.sqoop.mapreduce.OracleUpsertOutputFormat;
 import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
@@ -380,6 +383,46 @@ public class OracleManager extends GenericJdbcManager {
     JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
                                   ExportBatchOutputFormat.class);
     exportJob.runExport();
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void upsertTable(ExportJobContext context)
+      throws IOException, ExportException {
+    context.setConnManager(this);
+    JdbcUpsertExportJob exportJob =
+      new JdbcUpsertExportJob(context, OracleUpsertOutputFormat.class);
+    exportJob.runExport();
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void configureDbOutputColumns(SqoopOptions options) {
+    if (options.getUpdateMode() == UpdateMode.UpdateOnly) {
+      super.configureDbOutputColumns(options);
+    } else {
+      // We're in upsert mode. We need to explicitly set
+      // the database output column ordering in the codeGenerator.
+      String updateKeyCol = options.getUpdateKeyCol();
+      String [] allColNames = getColumnNames(options.getTableName());
+      List<String> dbOutCols = new ArrayList<String>();
+      dbOutCols.add(updateKeyCol);
+      String upperCaseKeyCol = updateKeyCol.toUpperCase();
+      for (String col : allColNames) {
+        if (!upperCaseKeyCol.equals(col.toUpperCase())) {
+          dbOutCols.add(col); // add update columns to the output order list.
+        }
+      }
+      for (String col : allColNames) {
+        dbOutCols.add(col); // add insert columns to the output order list.
+      }
+      options.setDbOutputColumns(dbOutCols.toArray(
+          new String[dbOutCols.size()]));
+    }
   }
 
   @Override

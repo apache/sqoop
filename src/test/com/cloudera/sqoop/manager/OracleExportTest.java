@@ -263,4 +263,18 @@ public class OracleExportTest extends TestExport {
       assertColMinAndMax(forIdx(1), genTime);
     }
   }
+
+  /** Make sure mixed update/insert export work correctly. */
+  public void testUpsertTextExport() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+    // first time will be insert.
+    runExport(getArgv(true, 10, 10, newStrArray(null,
+        "--update-key", "ID", "--update-mode", "allowinsert")));
+    // second time will be update.
+    runExport(getArgv(true, 10, 10, newStrArray(null,
+        "--update-key", "ID", "--update-mode", "allowinsert")));
+    verifyExport(TOTAL_RECORDS);
+  }
 }
