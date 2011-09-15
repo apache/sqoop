@@ -101,6 +101,7 @@ public class AvroSchemaGenerator {
       case Types.TIMESTAMP:
         return Type.LONG;
       case Types.BINARY:
+      case Types.VARBINARY:
         return Type.BYTES;
       default:
         throw new IllegalArgumentException("Cannot convert SQL type "
