@@ -44,6 +44,16 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
   public static final Log LOG = LogFactory
       .getLog(TestAvroImportExportRoundtrip.class.getName());
 
+  public void testRoundtripQuery() throws IOException, SQLException {
+    String[] argv = {};
+
+    runImport(getOutputArgvForQuery(true));
+    deleteTableData();
+    runExport(getExportArgvForQuery(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
+
+    checkFirstColumnSum();
+  }
+
   public void testRoundtrip() throws IOException, SQLException {
     String[] argv = {};
 
@@ -81,13 +91,79 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
+   *
+   * @return the argv as an array of strings.
+   */
+  protected String[] getOutputArgvForQuery(boolean includeHadoopFlags) {
+    ArrayList<String> args = new ArrayList<String>();
+
+    if (includeHadoopFlags) {
+      CommonArgs.addHadoopFlags(args);
+    }
+
+    args.add("--query");
+    args.add("select * from " + HsqldbTestServer.getTableName() + " where $CONDITIONS");
+    args.add("--connect");
+    args.add(HsqldbTestServer.getUrl());
+    args.add("--target-dir");
+    args.add(getWarehouseDir() + "/query_result");
+    args.add("--split-by");
+    args.add("INTFIELD1");
+    args.add("--as-avrodatafile");
+
+    return args.toArray(new String[0]);
+  }
+
+  protected String [] getExportArgv(boolean includeHadoopFlags,
+      int rowsPerStmt, int statementsPerTx, String... additionalArgv) {
+    ArrayList<String> args = formatAdditionalArgs(additionalArgv);
+
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--export-dir");
+    args.add(getTablePath().toString());
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("-m");
+    args.add("1");
+
+    LOG.debug("args:");
+    for (String a : args) {
+      LOG.debug("  " + a);
+    }
+
+    return args.toArray(new String[0]);
+  }
+
+  protected String [] getExportArgvForQuery(boolean includeHadoopFlags,
+      int rowsPerStmt, int statementsPerTx, String... additionalArgv) {
+    ArrayList<String> args = formatAdditionalArgs(additionalArgv);
+
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--export-dir");
+    args.add(getWarehouseDir() + "/query_result");
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("-m");
+    args.add("1");
+
+    LOG.debug("args:");
+    for (String a : args) {
+      LOG.debug("  " + a);
+    }
+
+    return args.toArray(new String[0]);
+  }
+
+  /**
+   * Create the argv to pass to Sqoop.
    * @param includeHadoopFlags if true, then include -D various.settings=values
    * @param rowsPerStmt number of rows to export in a single INSERT statement.
    * @param statementsPerTx ## of statements to use in a transaction.
    * @return the argv as an array of strings.
    */
-  protected String [] getExportArgv(boolean includeHadoopFlags,
-      int rowsPerStmt, int statementsPerTx, String... additionalArgv) {
+  protected ArrayList<String> formatAdditionalArgs(String... additionalArgv) {
     ArrayList<String> args = new ArrayList<String>();
 
     // Any additional Hadoop flags (-D foo=bar) are prepended.
@@ -120,22 +196,7 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
         }
       }
     }
-
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--export-dir");
-    args.add(getTablePath().toString());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("-m");
-    args.add("1");
-
-    LOG.debug("args:");
-    for (String a : args) {
-      LOG.debug("  " + a);
-    }
-
-    return args.toArray(new String[0]);
+    return args;
   }
 
   // this test just uses the two int table.

@@ -63,10 +63,13 @@ public class AvroSchemaGenerator {
       field.addProp("sqlType", Integer.toString(sqlType));
       fields.add(field);
     }
-    String doc = "Sqoop import of " + tableName;
-    Schema schema = Schema.createRecord(tableName, doc, null, false);
+
+    String avroTableName = (tableName == null ? "QueryResult" : tableName);
+
+    String doc = "Sqoop import of " + avroTableName;
+    Schema schema = Schema.createRecord(avroTableName, doc, null, false);
     schema.setFields(fields);
-    schema.addProp("tableName", tableName);
+    schema.addProp("tableName", avroTableName);
     return schema;
   }
 
