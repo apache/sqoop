@@ -822,6 +822,13 @@ public class ImportTool extends BaseSqoopTool {
       throw new InvalidOptionsException(
           "When importing query results in parallel, you must specify --"
           + SPLIT_BY_ARG + "." + HELP_STR);
+    } else if (options.isDirect()
+            && options.getFileLayout() != SqoopOptions.FileLayout.TextFile
+            && options.getConnectString().contains("jdbc:mysql://")) {
+      throw new InvalidOptionsException(
+            "MySQL direct export currently supports only text output format."
+             + "Parameters --as-sequencefile and --as-avrodatafile are not "
+             + "supported with --direct params in MySQL case.");
     }
   }
 
