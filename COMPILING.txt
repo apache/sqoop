@@ -129,6 +129,24 @@ jdbc:sqlserver://sqlserverhost:1433
 This can be useful if you have the hostname sqlserverhost mapped to the IP
 address of the SQL Server instance.
 
+=== DB2
+
+Install DB2 9.74 Express C and download the appropriate JDBC driver.
+Instructions for configuring the server can be found in
+DB2ManagerImportManualTest.
+
+Use the system property sqoop.test.db2.connectstring.host_url to specify
+the URL for the DB Server host used for testing. Specify this property on
+the command line or via build.properties file. For example:
+
+sqoop.test.db2.connectstring.host_url=jdbc:db2://db2host:50000
+
+If not specified, the default value used for this property is:
+jdbc:db2://db2host:50000
+
+This can be useful if you have the hostname db2host mapped to the IP
+address of the DB2 Server instance.
+
 === Running the Third-party Tests
 
 After the third-party databases are installed and configured, run:
