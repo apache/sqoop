@@ -24,11 +24,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.hadoop.util.Shell;
+import org.apache.log4j.Logger;
 
 /**
  * A named FIFO channel.
  */
 public class NamedFifo {
+
+  private static final Logger LOG = Logger.getLogger(NamedFifo.class);
 
   private File fifoFile;
 
@@ -61,9 +64,9 @@ public class NamedFifo {
 
   /**
    * Create a named FIFO object with the specified fs permissions.
-   * This depends on the 'mknod' system utility existing. (for example,
-   * provided by Linux coreutils). This object will be deleted when
-   * the process exits.
+   * This depends on the 'mknod' or 'mkfifo' (Mac OS X) system utility
+   * existing. (for example, provided by Linux coreutils). This object
+   * will be deleted when the process exits.
    * @throws IOException on failure.
    */
   public void create(int permissions) throws IOException {
@@ -73,7 +76,20 @@ public class NamedFifo {
     String modeStr = Integer.toString(permissions, 8);
 
     // Create the FIFO itself.
-    Shell.execCommand("mknod", "--mode=0" + modeStr, filename, "p");
+    try {
+      String output = Shell.execCommand("mknod", "--mode=0" + modeStr,
+          filename, "p");
+      LOG.info("mknod output:\n"+output);
+    } catch (IOException ex) {
+      LOG.info("IO error running mknod: " + ex.getMessage());
+      LOG.debug("IO error running mknod", ex);
+    }
+    if (!this.fifoFile.exists()) {
+      LOG.info("mknod failed, falling back to mkfifo");
+      String output = Shell.execCommand("mkfifo", "-m", "0" + modeStr,
+          filename);
+      LOG.info("mkfifo output:\n"+output);
+    }
 
     // Schedule the FIFO to be cleaned up when we exit.
     this.fifoFile.deleteOnExit();
