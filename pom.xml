@@ -60,13 +60,13 @@ limitations under the License.
   </developers>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/ognl/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/ognl/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/ognl/trunk/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/sqoop/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/sqoop/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/sqoop/trunk/</url>
   </scm>
   <issueManagement>
     <system>jira</system>
-    <url>https://issues.apache.org/jira/browse/OGNL</url>
+    <url>https://issues.apache.org/jira/browse/sqoop</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
