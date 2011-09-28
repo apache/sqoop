@@ -131,3 +131,43 @@ command line via:
 -D mapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom"+
 ----
 
+Oracle: Case-Sensitive Catalog Query Errors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Problem: While working with Oracle you may encounter problems when Sqoop can
+not figure out column names. This happens because the catalog queries that
+Sqoop uses for Oracle expect the correct case to be specified for the
+user name and table name.
+
+One example, using --hive-import and resulting in a NullPointerException:
+
+----
+1/09/21 17:18:49 INFO manager.OracleManager: Time zone has been set to
+GMT
+11/09/21 17:18:49 DEBUG manager.SqlManager: Using fetchSize for next
+query: 1000
+11/09/21 17:18:49 INFO manager.SqlManager: Executing SQL statement:
+SELECT t.* FROM addlabel_pris t WHERE 1=0
+11/09/21 17:18:49 DEBUG manager.OracleManager$ConnCache: Caching
+released connection for jdbc:oracle:thin:
+11/09/21 17:18:49 ERROR sqoop.Sqoop: Got exception running Sqoop:
+java.lang.NullPointerException
+java.lang.NullPointerException
+at com.cloudera.sqoop.hive.TableDefWriter.getCreateTableStmt(TableDefWriter.java:148)
+at com.cloudera.sqoop.hive.HiveImport.importTable(HiveImport.java:187)
+at com.cloudera.sqoop.tool.ImportTool.importTable(ImportTool.java:362)
+at com.cloudera.sqoop.tool.ImportTool.run(ImportTool.java:423)
+at com.cloudera.sqoop.Sqoop.run(Sqoop.java:144)
+at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:65)
+at com.cloudera.sqoop.Sqoop.runSqoop(Sqoop.java:180)
+at com.cloudera.sqoop.Sqoop.runTool(Sqoop.java:219)
+at com.cloudera.sqoop.Sqoop.runTool(Sqoop.java:228)
+at com.cloudera.sqoop.Sqoop.main(Sqoop.java:237)
+
+----
+
+.Solution:
+. Specify the user name, which Sqoop is connecting as, in upper case (unless
+it was created with mixed/lower case within quotes).
+. Specify the table name, which you are working with, in upper case (unless
+it was created with mixed/lower case within quotes).
