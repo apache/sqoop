@@ -870,4 +870,8 @@ public abstract class SqlManager extends ConnManager {
       }
     }
   }
+
+  public String getInputBoundsQuery(String splitByCol, String sanitizedQuery) {
+    return options.getBoundaryQuery();
+  }
 }

@@ -35,6 +35,9 @@ Import control options
 --as-textfile::
   Imports data as plain text (default)
 
+--boundary-query (query)::
+  Using following query to select minimal and maximal value of '--split-by' column for creating splits
+
 --columns (col,col,col...)::
   Columns to export from table
 

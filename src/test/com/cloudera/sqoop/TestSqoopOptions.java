@@ -248,6 +248,15 @@ public class TestSqoopOptions extends TestCase {
     assertEquals("20110413", opts.getHivePartitionValue());
   }
 
+  public void testBoundaryQueryParams() throws Exception {
+    String[] args = {
+      "--boundary-query", "select 1, 2",
+    };
+
+    SqoopOptions opts = parse(args);
+    assertEquals("select 1, 2", opts.getBoundaryQuery());
+  }
+
   public void testPropertySerialization1() {
     // Test that if we write a SqoopOptions out to a Properties,
     // and then read it back in, we get all the same results.

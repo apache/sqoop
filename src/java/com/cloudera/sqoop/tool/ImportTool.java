@@ -527,6 +527,12 @@ public class ImportTool extends BaseSqoopTool {
           .withDescription("Import results of SQL 'statement'")
           .withLongOpt(SQL_QUERY_ARG)
           .create(SQL_QUERY_SHORT_ARG));
+      importOpts.addOption(OptionBuilder.withArgName("statement")
+          .hasArg()
+          .withDescription("Set boundary query for retrieving max and min"
+              + " value of the primary key")
+          .withLongOpt(SQL_QUERY_BOUNDARY)
+          .create());
     }
 
     importOpts.addOption(OptionBuilder.withArgName("dir")
@@ -720,6 +726,10 @@ public class ImportTool extends BaseSqoopTool {
 
         if (in.hasOption(SQL_QUERY_ARG)) {
           out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
+        }
+
+        if(in.hasOption(SQL_QUERY_BOUNDARY)) {
+          out.setBoundaryQuery(in.getOptionValue(SQL_QUERY_BOUNDARY));
         }
       }
 

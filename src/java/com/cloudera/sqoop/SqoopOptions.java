@@ -138,6 +138,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("db.split.column") private String splitByCol;
   @StoredAsProperty("db.where.clause") private String whereClause;
   @StoredAsProperty("db.query") private String sqlQuery;
+  @StoredAsProperty("db.query.boundary") private String boundaryQuery;
   @StoredAsProperty("jdbc.driver.class") private String driverClassName;
   @StoredAsProperty("hdfs.warehouse.dir") private String warehouseDir;
   @StoredAsProperty("hdfs.target.dir") private String targetDir;
@@ -1198,6 +1199,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setSqlQuery(String sqlStatement) {
     this.sqlQuery = sqlStatement;
+  }
+
+  public String getBoundaryQuery() {
+    return boundaryQuery;
+  }
+
+  public void setBoundaryQuery(String sqlStatement) {
+    boundaryQuery = sqlStatement;
   }
 
   /**

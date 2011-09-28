@@ -155,14 +155,24 @@ public class DataDrivenImportJob extends ImportJobBase {
         DataDrivenDBInputFormat.setInput(job, DBWritable.class,
             mgr.escapeTableName(tableName), whereClause,
             mgr.escapeColName(splitByCol), sqlColNames);
+
+        // If user specified boundary query on the command line propagate it to
+        // the job
+        if(options.getBoundaryQuery() != null) {
+          DataDrivenDBInputFormat.setBoundingQuery(job.getConfiguration(),
+                  options.getBoundaryQuery());
+        }
       } else {
         // Import a free-form query.
         String inputQuery = options.getSqlQuery();
         String sanitizedQuery = inputQuery.replace(
             DataDrivenDBInputFormat.SUBSTITUTE_TOKEN, " (1 = 1) ");
 
-        String inputBoundingQuery =
+        String inputBoundingQuery = options.getBoundaryQuery();
+
+        if(inputBoundingQuery == null) {
             mgr.getInputBoundsQuery(splitByCol, sanitizedQuery);
+        }
         if (inputBoundingQuery == null) {
             inputBoundingQuery = "SELECT MIN(" + splitByCol + "), MAX("
                     + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";

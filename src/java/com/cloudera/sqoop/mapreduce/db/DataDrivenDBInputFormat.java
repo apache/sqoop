@@ -170,10 +170,14 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
   public List<InputSplit> getSplits(JobContext job) throws IOException {
 
     int targetNumTasks = ConfigurationHelper.getJobNumMaps(job);
-    if (1 == targetNumTasks) {
-      // There's no need to run a bounding vals query; just return a split
-      // that separates nothing. This can be considerably more optimal for a
-      // large table with no index.
+    String boundaryQuery = getDBConf().getInputBoundingQuery();
+
+    // If user do not forced us to use his boundary query and we don't have to
+    // bacause there is only one mapper we will return single split that
+    // separates nothing. This can be considerably more optimal for a large
+    // table with no index.
+    if (1 == targetNumTasks
+            && (boundaryQuery == null || boundaryQuery.isEmpty())) {
       List<InputSplit> singletonSplit = new ArrayList<InputSplit>();
       singletonSplit.add(new DataDrivenDBInputSplit("1=1", "1=1"));
       return singletonSplit;

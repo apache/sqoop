@@ -60,6 +60,7 @@ Argument                          Description
 +\--as-avrodatafile+              Imports data to Avro Data Files
 +\--as-sequencefile+              Imports data to SequenceFiles
 +\--as-textfile+                  Imports data as plain text (default)
++\--boundary-query <statement>+   Boundary query to use for creating splits
 +\--columns <col,col,col...>+     Columns to import from table
 +\--direct+                       Use direct import fast path
 +\--direct-split-size <n>+        Split the input stream every 'n' bytes\
@@ -113,6 +114,11 @@ form +SELECT <column list> FROM <table name>+. You can append a
 +WHERE+ clause to this with the +\--where+ argument. For example: +\--where
 "id > 400"+. Only rows where the +id+ column has a value greater than
 400 will be imported.
+
+By default sqoop will use query +select min(<split-by>), max(<split-by>) from
+<table name>+ to find out boundaries for creating splits. In some cases this query
+is not the most optimal so you can specify any arbitrary query returning two
+numeric columns using +\--boundary-query+ argument.
 
 Free-form Query Imports
 ^^^^^^^^^^^^^^^^^^^^^^^
