@@ -1,7 +1,7 @@
 
 ////
   Copyright 2011 The Apache Software Foundation
- 
+
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -9,9 +9,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,9 @@ Argument                                 Description
 +-m,\--num-mappers <n>+                  Use 'n' map tasks to export in\
                                          parallel
 +\--table <table-name>+                  Table to populate
-+\--update-key <col-name>+               Anchor column to use for updates
++\--update-key <col-name>+               Anchor column to use for updates.\
+                                         Use a comma separated list of columns\
+                                         if there are more than one column.
 +\--update-mode <mode>+                  Specify how updates are performed\
                                          when new rows are found with\
                                          non-matching keys in database.
@@ -142,7 +144,7 @@ empty table intended to receive these results.
 If you specify the +\--update-key+ argument, Sqoop will instead modify
 an existing dataset in the database. Each input record is treated as
 an +UPDATE+ statement that modifies an existing row. The row a
-statement modifies is determined by the column name specified with
+statement modifies is determined by the column name(s) specified with
 +\--update-key+. For example, consider the following table
 definition:
 
@@ -177,6 +179,10 @@ an update-based export will not insert new rows into the database.)
 Likewise, if the column specified with +\--update-key+ does not
 uniquely identify rows and multiple rows are updated by a single
 statement, this condition is also undetected.
+
+The argument +\--update-key+ can also be given a comma separated list of
+column names. In which case, Sqoop will match all keys from this list before
+updating any existing record.
 
 Depending on the target database, you may also specify the +\--update-mode+
 argument with +allowinsert+ mode if you want to update rows if they exist

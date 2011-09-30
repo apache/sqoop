@@ -25,7 +25,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,9 +36,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 
 /**
  * Update an existing table of data with new value data.
@@ -90,7 +93,7 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
 
     protected String tableName;
     protected String [] columnNames; // The columns to update.
-    protected String updateCol; // The column containing the fixed key.
+    protected String [] updateCols; // The columns containing the fixed key.
 
     public UpdateRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {
@@ -101,7 +104,22 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
       DBConfiguration dbConf = new DBConfiguration(conf);
       this.tableName = dbConf.getOutputTableName();
       this.columnNames = dbConf.getOutputFieldNames();
-      this.updateCol = conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY);
+      String updateKeyColumns =
+          conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY);
+
+      Set<String> updateKeys = new LinkedHashSet<String>();
+      StringTokenizer stok = new StringTokenizer(updateKeyColumns, ",");
+      while (stok.hasMoreTokens()) {
+        String nextUpdateKey = stok.nextToken().trim();
+        if (nextUpdateKey.length() > 0) {
+          updateKeys.add(nextUpdateKey);
+        } else {
+          throw new RuntimeException("Invalid update key column value specified"
+              + ": '" + updateKeyColumns + "'");
+        }
+      }
+
+      updateCols = updateKeys.toArray(new String[updateKeys.size()]);
     }
 
     @Override
@@ -132,8 +150,8 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
     /**
      * @return the column we are using to determine the row to update.
      */
-    protected final String getUpdateCol() {
-      return updateCol;
+    protected final String[] getUpdateColumns() {
+      return updateCols;
     }
 
     @Override
@@ -182,8 +200,15 @@ public class UpdateOutputFormat<K extends SqoopRecord, V>
       }
 
       sb.append(" WHERE ");
-      sb.append(this.updateCol);
-      sb.append("=?");
+      first = true;
+      for (int i = 0; i < updateCols.length; i++) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(" AND ");
+        }
+        sb.append(updateCols[i]).append("=?");
+      }
       return sb.toString();
     }
   }

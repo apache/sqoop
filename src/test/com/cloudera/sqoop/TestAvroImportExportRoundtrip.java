@@ -51,7 +51,8 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
 
     runImport(getOutputArgvForQuery(true));
     deleteTableData();
-    runExport(getExportArgvForQuery(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
+    runExport(getExportArgvForQuery(true, 10, 10, newStrArray(argv, "-m",
+        "" + 1)));
 
     checkFirstColumnSum();
   }
@@ -104,7 +105,8 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
     }
 
     args.add("--query");
-    args.add("select * from " + HsqldbTestServer.getTableName() + " where $CONDITIONS");
+    args.add("select * from " + HsqldbTestServer.getTableName()
+        + " where $CONDITIONS");
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--target-dir");

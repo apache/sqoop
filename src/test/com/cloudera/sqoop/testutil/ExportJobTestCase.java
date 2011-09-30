@@ -45,7 +45,7 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       ExportJobTestCase.class.getName());
-  
+
   @Before
   public void setUp() {
     // start the server

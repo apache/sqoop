@@ -22,6 +22,8 @@ package com.cloudera.sqoop.mapreduce;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,17 +71,31 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
     protected String getUpdateStatement() {
       boolean first;
 
+      // lookup table for update columns
+      Set<String> updateKeyLookup = new LinkedHashSet<String>();
+      for (String updateKey : updateCols) {
+        updateKeyLookup.add(updateKey);
+      }
+
       StringBuilder sb = new StringBuilder();
       sb.append("MERGE INTO ");
       sb.append(tableName);
       sb.append(" USING dual ON ( ");
-      sb.append(updateCol);
-      sb.append(" = ? )");
+      first = true;
+      for (int i = 0; i < updateCols.length; i++) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(" AND ");
+        }
+        sb.append(updateCols[i]).append(" = ?");
+      }
+      sb.append(" )");
 
       sb.append("  WHEN MATCHED THEN UPDATE SET ");
       first = true;
       for (String col : columnNames) {
-        if (!col.equals(updateCol)) {
+        if (!updateKeyLookup.contains(col)) {
           if (first) {
             first = false;
           } else {

@@ -29,15 +29,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 
+import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
-
-import org.junit.Before;
 
 /**
  * Test that we can update a copy of data in the database,
@@ -83,6 +81,115 @@ public class TestExportUpdate extends ExportJobTestCase {
 
     conn.commit();
   }
+
+  /**
+   * <p>Creates a table with three columns - A INT, B INT and C VARCHAR(32).
+   * This table is populated with records in a set of three with total records
+   * with the total number of unique values of A equal to the specified aMax
+   * value. For each value of A, there will be three records with value of
+   * B ranging from 0-2, and a corresponding value of C.</p>
+   * <p>For example if <tt>aMax = 2</tt>, the table will contain the
+   * following records:
+   * <pre>
+   *    A   |   B   |  C
+   * ----------------------
+   *    0   |   0   | 0foo0
+   *    0   |   1   | 0foo1
+   *    0   |   2   | 0foo2
+   *    1   |   0   | 1foo0
+   *    1   |   1   | 1foo1
+   *    1   |   2   | 1foo2
+   * </pre></p>
+   * @param firstKeyRange the number of
+   * @throws SQLException
+   */
+  private void createMultiKeyTable(int aMax) throws SQLException {
+    Connection conn = getConnection();
+
+    PreparedStatement statement = conn.prepareStatement(
+        "CREATE TABLE " + getTableName()
+        + " (A INT NOT NULL, B INT NOT NULL, C VARCHAR(32))");
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+      statement = null;
+    }
+
+    try {
+      for (int i = 0; i< aMax; i++) {
+        for (int j = 0; j < 3; j++) {
+          statement = conn.prepareStatement("INSERT INTO " + getTableName()
+              + " VALUES (" + i + ", " + j + ", '"
+              + i + "foo" + j + "')");
+          statement.executeUpdate();
+          statement.close();
+          statement = null;
+        }
+      }
+    } finally {
+      if (null != statement) {
+        statement.close();
+      }
+    }
+
+    conn.commit();
+  }
+
+  /**
+   * <p>Creates update files for multi-key update test. The total number of
+   * update records will be number of files times the number of aKeysPerFile
+   * times 3. Column A value will start with the specified <tt>startAtValue</tt>
+   * and for each value there will be three records corresponding to Column
+   * B values [0-2].</p>
+   * @param numFiles number of files to create
+   * @param aKeysPerFile number of records sets with different column A values
+   * @param startAtValue the starting value of column A
+   * @param bKeyValues the list of values for the column B
+   * @throws IOException
+   */
+  private void createMultiKeyUpdateFiles(int numFiles, int aKeysPerFile,
+      int startAtValue, int[] bKeyValues)
+      throws IOException {
+    Configuration conf = getConf();
+    if (!isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
+    FileSystem fs = FileSystem.get(conf);
+
+    int aValue = startAtValue;
+    for (int i = 0; i < numFiles; i++) {
+      OutputStream os = fs.create(new Path(getTablePath(), "" + i + ".txt"));
+      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+
+      for (int j = 0; j < aKeysPerFile; j++) {
+        for (int k = 0; k < bKeyValues.length; k++) {
+          w.write(getUpdateStringForMultiKeyRow(aValue, bKeyValues[k]));
+        }
+        aValue++;
+      }
+
+      w.close();
+      os.close();
+    }
+  }
+
+  /**
+   * Generate a string of text representing an update for one row
+   * of the multi-key table. The values of columns A and B are given
+   * and the value of column C is generated as <em>a</em>bar<em>b</em>.
+   * @param a the value of column a
+   * @param b the value of column b
+   */
+  private String getUpdateStringForMultiKeyRow(int a, int b) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(a).append("\t").append(b).append("\t").append(a);
+    sb.append("bar").append(b).append("\n");
+
+    return sb.toString();
+  }
+
 
   /**
    * Create a set of files that will be used as the input to the update
@@ -196,6 +303,60 @@ public class TestExportUpdate extends ExportJobTestCase {
     }
   }
 
+  private void verifyMultiKeyRow(String[] keyColumnNames, int[] keyValues,
+      Object ...expectedVals) throws SQLException {
+    StringBuilder querySb = new StringBuilder("SELECT A, B, C FROM ");
+    querySb.append(getTableName()).append(" WHERE ");
+    boolean first = true;
+    for (int i = 0; i< keyColumnNames.length; i++) {
+      if (first) {
+        first = false;
+      } else {
+        querySb.append(" AND ");
+      }
+      querySb.append(keyColumnNames[i]).append(" = ");
+      querySb.append(keyValues[i]);
+    }
+
+    String query = querySb.toString();
+    PreparedStatement statement = null;
+    ResultSet rs = null;
+
+    try {
+      Connection conn = getConnection();
+      statement = conn.prepareStatement(query);
+      rs = statement.executeQuery();
+
+      boolean success = rs.next();
+      assertTrue("Expected at least one output record", success);
+
+      // Assert that all three columns have the correct values.
+      for (int i = 0; i < expectedVals.length; i++) {
+        String expected = expectedVals[i].toString();
+        String result = rs.getString(i + 1);
+        assertEquals("Invalid response for column " + i + "; got " + result
+            + " when expected " + expected, expected, result);
+      }
+
+      // This query should have returned exactly one row.
+      success = rs.next();
+      assertFalse("Expected no more than one output record", success);
+    } finally {
+      if (null != rs) {
+        try {
+          rs.close();
+        } catch (SQLException sqle) {
+          LOG.error("Error closing result set: "
+              + StringUtils.stringifyException(sqle));
+        }
+      }
+
+      if (null != statement) {
+        statement.close();
+      }
+    }
+  }
+
   /**
    * Verify that a particular row has the expected values.
    */
@@ -259,6 +420,130 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("A", "1", "1", "foo2", "2");
     verifyRow("A", "9", "9", "foo18", "18");
   }
+
+  /**
+   * Creates a table with two columns that together act as unique keys
+   * and then modifies a subset of the rows via update.
+   * @throws Exception
+   */
+  public void testMultiKeyUpdate() throws Exception {
+    createMultiKeyTable(3);
+
+    createMultiKeyUpdateFiles(1, 1, 1, new int[] {0, 1, 3});
+
+    runExport(getArgv(true, 2, 2, "-m", "1",
+        "--update-key", "A,B"));
+    verifyRowCount(9);
+    // Check a few rows...
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 0 }, 0, 0, "0foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 1 }, 0, 1, "0foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 2 }, 0, 2, "0foo2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 0 }, 1, 0, "1bar0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 1 }, 1, 1, "1bar1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 2 }, 1, 2, "1foo2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 0 }, 2, 0, "2foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 1 }, 2, 1, "2foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 2 }, 2, 2, "2foo2");
+
+  }
+
+  /**
+   * Creates a table with two columns that together act as unique keys
+   * and then modifies a subset of the rows via update.
+   * @throws Exception
+   */
+  public void testMultiKeyUpdateMultipleFilesNoUpdate() throws Exception {
+    createMultiKeyTable(4);
+
+    createMultiKeyUpdateFiles(2, 1, 1, new int[] {3, 4, 5});
+
+    runExport(getArgv(true, 2, 2, "-m", "1",
+        "--update-key", "A,B"));
+    verifyRowCount(12);
+    // Check a few rows...
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 0 }, 0, 0, "0foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 1 }, 0, 1, "0foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 2 }, 0, 2, "0foo2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 0 }, 1, 0, "1foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 1 }, 1, 1, "1foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 2 }, 1, 2, "1foo2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 0 }, 2, 0, "2foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 1 }, 2, 1, "2foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 2 }, 2, 2, "2foo2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 0 }, 3, 0, "3foo0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 1 }, 3, 1, "3foo1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 2 }, 3, 2, "3foo2");
+  }
+
+  /**
+   * Creates a table with two columns that together act as unique keys
+   * and then modifies a subset of the rows via update.
+   * @throws Exception
+   */
+  public void testMultiKeyUpdateMultipleFilesFullUpdate() throws Exception {
+    createMultiKeyTable(4);
+
+    createMultiKeyUpdateFiles(2, 2, 0, new int[] {0, 1, 2});
+
+    runExport(getArgv(true, 2, 2, "-m", "1",
+        "--update-key", "A,B"));
+    verifyRowCount(12);
+    // Check a few rows...
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 0 }, 0, 0, "0bar0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 1 }, 0, 1, "0bar1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 0, 2 }, 0, 2, "0bar2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 0 }, 1, 0, "1bar0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 1 }, 1, 1, "1bar1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 1, 2 }, 1, 2, "1bar2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 0 }, 2, 0, "2bar0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 1 }, 2, 1, "2bar1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 2, 2 }, 2, 2, "2bar2");
+
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 0 }, 3, 0, "3bar0");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 1 }, 3, 1, "3bar1");
+    verifyMultiKeyRow(new String[] { "A", "B"},
+        new int[] { 3, 2 }, 3, 2, "3bar2");
+  }
+
 
   public void testEmptyTable() throws Exception {
     // Test that an empty table will "accept" updates that modify

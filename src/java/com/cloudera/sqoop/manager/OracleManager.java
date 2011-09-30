@@ -32,9 +32,13 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -409,13 +413,26 @@ public class OracleManager extends GenericJdbcManager {
     } else {
       // We're in upsert mode. We need to explicitly set
       // the database output column ordering in the codeGenerator.
-      String updateKeyCol = options.getUpdateKeyCol();
+      Set<String> updateKeys = new LinkedHashSet<String>();
+      Set<String> updateKeysUppercase = new HashSet<String>();
+      String updateKeyValue = options.getUpdateKeyCol();
+      StringTokenizer stok = new StringTokenizer(updateKeyValue, ",");
+      while (stok.hasMoreTokens()) {
+        String nextUpdateColumn = stok.nextToken().trim();
+        if (nextUpdateColumn.length() > 0) {
+          updateKeys.add(nextUpdateColumn);
+          updateKeysUppercase.add(nextUpdateColumn.toUpperCase());
+        }  else {
+          throw new RuntimeException("Invalid update key column value specified"
+              + ": '" + updateKeyValue + "'");
+        }
+      }
+
       String [] allColNames = getColumnNames(options.getTableName());
       List<String> dbOutCols = new ArrayList<String>();
-      dbOutCols.add(updateKeyCol);
-      String upperCaseKeyCol = updateKeyCol.toUpperCase();
+      dbOutCols.addAll(updateKeys);
       for (String col : allColNames) {
-        if (!upperCaseKeyCol.equals(col.toUpperCase())) {
+        if (!updateKeysUppercase.contains(col.toUpperCase())) {
           dbOutCols.add(col); // add update columns to the output order list.
         }
       }

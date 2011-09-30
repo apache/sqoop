@@ -26,8 +26,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -300,18 +304,30 @@ public abstract class ConnManager {
     // last, because the UPDATE-based OutputFormat will generate the SET
     // clause followed by the WHERE clause, and the SqoopRecord needs to
     // serialize to this layout.
-    String updateKeyCol = options.getUpdateKeyCol();
+    Set<String> updateKeys = new LinkedHashSet<String>();
+    Set<String> updateKeysUppercase = new HashSet<String>();
+    String updateKeyValue = options.getUpdateKeyCol();
+    StringTokenizer stok = new StringTokenizer(updateKeyValue, ",");
+    while (stok.hasMoreTokens()) {
+      String nextUpdateColumn = stok.nextToken().trim();
+      if (nextUpdateColumn.length() > 0) {
+        updateKeys.add(nextUpdateColumn);
+        updateKeysUppercase.add(nextUpdateColumn.toUpperCase());
+      } else {
+        throw new RuntimeException("Invalid update key column value specified"
+                    + ": '" + updateKeyValue + "'");
+      }
+    }
     String [] allColNames = getColumnNames(options.getTableName());
     List<String> dbOutCols = new ArrayList<String>();
-    String upperCaseKeyCol = updateKeyCol.toUpperCase();
     for (String col : allColNames) {
-      if (!upperCaseKeyCol.equals(col.toUpperCase())) {
+      if (!updateKeysUppercase.contains(col.toUpperCase())) {
         dbOutCols.add(col); // add non-key columns to the output order list.
       }
     }
 
     // Then add the update key column last.
-    dbOutCols.add(updateKeyCol);
+    dbOutCols.addAll(updateKeys);
     options.setDbOutputColumns(dbOutCols.toArray(
         new String[dbOutCols.size()]));
   }

@@ -135,7 +135,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
   protected ConnManager getManager() {
     return manager;
   }
-  
+
 
   /**
    * @return a connection to the database under test.
