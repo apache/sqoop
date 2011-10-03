@@ -22,5 +22,5 @@
 The +import+ tool imports an individual table from an RDBMS to HDFS.
 Each row from a table is represented as a separate record in HDFS.
 Records can be stored as text files (one record per line), or in
-binary representation in SequenceFiles.
+binary representation as Avro or SequenceFiles.
 

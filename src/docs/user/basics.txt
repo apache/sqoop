@@ -29,7 +29,7 @@ process is a set of files containing a copy of the imported table.
 The import process is performed in parallel. For this reason, the
 output will be in multiple files. These files may be delimited text
 files (for example, with commas or tabs separating each field), or
-binary SequenceFiles containing serialized record data.
+binary Avro or SequenceFiles containing serialized record data.
 
 A by-product of the import process is a generated Java class which
 can encapsulate one row of the imported table. This class is used

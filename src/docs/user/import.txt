@@ -344,11 +344,17 @@ manipulated by custom MapReduce programs (reading from SequenceFiles
 is higher-performance than reading from text files, as records do not
 need to be parsed).
 
-By default, data is not compressed. You can compress
-your data by using the deflate (gzip) algorithm with the +-z+ or
-+\--compress+ argument, or specify any Hadoop compression codec using the
-+\--compression-codec+ argument. This applies to both SequenceFiles or text
-files.
+Avro data files are a compact, efficient binary format that provides
+interoperability with applications written in other programming
+languages.  Avro also supports versioning, so that when, e.g., columns
+are added or removed from a table, previously imported data files can
+be processed along with new ones.
+
+By default, data is not compressed. You can compress your data by
+using the deflate (gzip) algorithm with the +-z+ or +\--compress+
+argument, or specify any Hadoop compression codec using the
++\--compression-codec+ argument. This applies to SequenceFile, text,
+and Avro files.
 
 Large Objects
 ^^^^^^^^^^^^^

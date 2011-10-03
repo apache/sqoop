@@ -304,8 +304,8 @@ This would run a MapReduce job where the value in the +id+ column
 of each row is used to join rows; rows in the +newer+ dataset will
 be used in preference to rows in the +older+ dataset.
 
-This can be used with both SequenceFile- and text-based incremental
-imports. The file types of the newer and older datasets must be the
-same.
+This can be used with both SequenceFile-, Avro- and text-based
+incremental imports. The file types of the newer and older datasets
+must be the same.
 
 
