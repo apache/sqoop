@@ -206,6 +206,12 @@ public abstract class SqlManager extends ConnManager {
       ResultSetMetaData metadata = results.getMetaData();
       for (int i = 1; i < cols + 1; i++) {
         int typeId = metadata.getColumnType(i);
+        // If we have an unsigned int we need to make extra room by
+        // plopping it into a bigint
+        if (typeId == Types.INTEGER &&  !metadata.isSigned(i)){
+            typeId = Types.BIGINT;
+        }
+
         String colName = metadata.getColumnName(i);
         if (colName == null || colName.equals("")) {
           colName = metadata.getColumnLabel(i);

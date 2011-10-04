@@ -199,6 +199,13 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
       // for interpolating split points (i.e., numeric splits, text splits,
       // dates, etc.)
       int sqlDataType = results.getMetaData().getColumnType(1);
+      boolean isSigned = results.getMetaData().isSigned(1);
+
+      // MySQL has an unsigned integer which we need to allocate space for
+      if (sqlDataType == Types.INTEGER && !isSigned){
+          sqlDataType = Types.BIGINT;
+      }
+
       DBSplitter splitter = getSplitter(sqlDataType);
       if (null == splitter) {
         throw new IOException("Unknown SQL data type: " + sqlDataType);

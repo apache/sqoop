@@ -105,16 +105,17 @@ public class DirectMySQLTest extends ImportJobTestCase {
       st.executeUpdate("CREATE TABLE " + getTableName() + " ("
           + "id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
           + "name VARCHAR(24) NOT NULL, "
+          + "overly_large_number INT UNSIGNED,"
           + "start_date DATE, "
           + "salary FLOAT, "
           + "dept VARCHAR(32))");
 
       st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
-          + "NULL,'Aaron','2009-05-14',1000000.00,'engineering')");
+          + "NULL,'Aaron',0,'2009-05-14',1000000.00,'engineering')");
       st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
-          + "NULL,'Bob','2009-04-20',400.00,'sales')");
+          + "NULL,'Bob',100,'2009-04-20',400.00,'sales')");
       st.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
-          + "NULL,'Fred','2009-01-23',15.00,'marketing')");
+          + "NULL,'Fred',4000000000,'2009-01-23',15.00,'marketing')");
       connection.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: " + sqlE);
@@ -231,8 +232,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testDirectBulkImportWithDefaultDelims() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
+      "2,Bob,100,2009-04-20,400,sales",
+      "3,Fred,4000000000,2009-01-23,15,marketing",
     };
 
     doImport(false, true, getTableName(), expectedResults, null);
@@ -242,8 +243,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testWithExtraParams() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
+      "2,Bob,100,2009-04-20,400,sales",
+      "3,Fred,4000000000,2009-01-23,15,marketing",
     };
 
     String [] extraArgs = { "--", "--lock-tables" };
@@ -255,8 +256,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testMultiMappers() throws IOException {
     // no quoting of strings allowed.
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
+      "2,Bob,100,2009-04-20,400,sales",
+      "3,Fred,4000000000,2009-01-23,15,marketing",
     };
 
     String [] extraArgs = { "-m", "2" };
@@ -297,8 +298,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void testDirectBulkImportWithMySQLQuotes() throws IOException {
     // mysql quotes all string-based output.
     String [] expectedResults = {
-      "2,'Bob','2009-04-20',400,'sales'",
-      "3,'Fred','2009-01-23',15,'marketing'",
+      "2,'Bob',100,'2009-04-20',400,'sales'",
+      "3,'Fred',4000000000,'2009-01-23',15,'marketing'",
     };
 
     doImport(true, true, getTableName(), expectedResults, null);
@@ -307,8 +308,8 @@ public class DirectMySQLTest extends ImportJobTestCase {
   @Test
   public void testMySQLJdbcImport() throws IOException {
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400.0,sales",
-      "3,Fred,2009-01-23,15.0,marketing",
+      "2,Bob,100,2009-04-20,400.0,sales",
+      "3,Fred,4000000000,2009-01-23,15.0,marketing",
     };
 
     doImport(false, false, getTableName(), expectedResults, null);
