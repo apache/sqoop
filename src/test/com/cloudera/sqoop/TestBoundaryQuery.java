@@ -46,8 +46,9 @@ public class TestBoundaryQuery extends ImportJobTestCase {
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
-  protected String [] getArgv(boolean includeHadoopFlags, String boundaryQuery,
-      String targetDir) {
+  protected String [] getArgv(boolean includeHadoopFlags, boolean tableImport,
+      String boundaryQuery,
+      String targetDir, String... extraArgs) {
 
     ArrayList<String> args = new ArrayList<String>();
 
@@ -55,20 +56,29 @@ public class TestBoundaryQuery extends ImportJobTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
-    args.add("--table");
-    args.add(HsqldbTestServer.getTableName());
-    args.add("--split-by");
-    args.add("INTFIELD1");
+    if (tableImport) {
+      args.add("--table");
+      args.add(HsqldbTestServer.getTableName());
+    } else {
+      args.add("--query");
+      args.add("SELECT INTFIELD1, INTFIELD2 FROM "
+            + HsqldbTestServer.getTableName() + " WHERE $CONDITIONS");
+    }
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
-    args.add("--boundary-query");
-    args.add(boundaryQuery);
+    if (boundaryQuery != null) {
+      args.add("--boundary-query");
+      args.add(boundaryQuery);
+    }
     args.add("--as-sequencefile");
     args.add("--target-dir");
     args.add(targetDir);
     args.add("--class-name");
     args.add(getTableName());
     args.add("--verbose");
+    for (String extraArg : extraArgs) {
+      args.add(extraArg);
+    }
 
     return args.toArray(new String[0]);
   }
@@ -89,18 +99,18 @@ public class TestBoundaryQuery extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runQueryTest(String query, int numExpectedResults,
-    int expectedSum, String targetDir)
-      throws IOException {
+  public void runQueryTest(String query, boolean tableImport,
+      int numExpectedResults, int expectedSum, String targetDir,
+      String... extraArgs) throws IOException {
 
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, query, targetDir);
+    String [] argv = getArgv(true, tableImport, query, targetDir, extraArgs);
     runImport(argv);
     try {
       SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, query, targetDir),
+          getArgv(false, tableImport, query, targetDir, extraArgs),
           null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
@@ -161,6 +171,13 @@ public class TestBoundaryQuery extends ImportJobTestCase {
     String query = "select min(intfield1), max(intfield1) from "
       + getTableName() +" where intfield1 in (3, 5)";
 
-    runQueryTest(query, 2, 8, getTablePath().toString());
+    runQueryTest(query, true, 2, 8, getTablePath().toString(),
+        "--split-by", "INTFIELD1");
+  }
+
+  public void testNoBoundaryQuerySingleMapper() throws IOException {
+
+      runQueryTest(null, false, 4, 16, getTablePath().toString(),
+          "--m", "1");
   }
 }

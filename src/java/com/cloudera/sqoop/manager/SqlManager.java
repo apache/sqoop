@@ -440,11 +440,19 @@ public abstract class SqlManager extends ConnManager {
     }
 
     String splitCol = getSplitColumn(opts, null);
-    if (null == splitCol && opts.getNumMappers() > 1) {
-      // Can't infer a primary key.
-      throw new ImportException("A split-by column must be specified for "
-          + "parallel free-form query imports. Please specify one with "
-          + "--split-by or perform a sequential import with '-m 1'.");
+    if (splitCol == null) {
+      String boundaryQuery = opts.getBoundaryQuery();
+      if (opts.getNumMappers() > 1) {
+        // Can't infer a primary key.
+        throw new ImportException("A split-by column must be specified for "
+            + "parallel free-form query imports. Please specify one with "
+            + "--split-by or perform a sequential import with '-m 1'.");
+      } else if (boundaryQuery != null && !boundaryQuery.isEmpty()) {
+        // Query import with boundary query and no split column specified
+        throw new ImportException("Using a boundary query for a query based "
+            + "import requires specifying the split by column as well. Please "
+            + "specify a column name using --split-by and try again.");
+      }
     }
 
     importer.runImport(null, jarFile, splitCol, opts.getConf());

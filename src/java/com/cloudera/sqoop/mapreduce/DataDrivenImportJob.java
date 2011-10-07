@@ -171,11 +171,16 @@ public class DataDrivenImportJob extends ImportJobBase {
         String inputBoundingQuery = options.getBoundaryQuery();
 
         if(inputBoundingQuery == null) {
+          inputBoundingQuery =
             mgr.getInputBoundsQuery(splitByCol, sanitizedQuery);
-        }
-        if (inputBoundingQuery == null) {
-            inputBoundingQuery = "SELECT MIN(" + splitByCol + "), MAX("
-                    + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
+          if (inputBoundingQuery == null) {
+            if (splitByCol != null) {
+              inputBoundingQuery = "SELECT MIN(" + splitByCol + "), MAX("
+                      + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
+            } else {
+              inputBoundingQuery = "";
+            }
+          }
         }
         DataDrivenDBInputFormat.setInput(job, DBWritable.class,
             inputQuery, inputBoundingQuery);
