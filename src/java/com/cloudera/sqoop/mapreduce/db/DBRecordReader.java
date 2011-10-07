@@ -37,6 +37,8 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.conf.Configuration;
 
+import com.cloudera.sqoop.util.LoggingUtils;
+
 /**
  * A RecordReader that reads records from a SQL table.
  * Emits LongWritables containing the record number as
@@ -245,6 +247,7 @@ public class DBRecordReader<T extends DBWritable> extends
 
       pos++;
     } catch (SQLException e) {
+      LoggingUtils.logAll(LOG, e);
       throw new IOException("SQLException in nextKeyValue", e);
     }
     return true;

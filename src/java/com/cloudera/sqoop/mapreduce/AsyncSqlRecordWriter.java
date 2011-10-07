@@ -27,11 +27,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-
+import com.cloudera.sqoop.util.LoggingUtils;
 import com.cloudera.sqoop.lib.SqoopRecord;
 
 /**
@@ -46,6 +48,8 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  */
 public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
     extends RecordWriter<K, V> {
+
+  private static final Log LOG = LogFactory.getLog(AsyncSqlRecordWriter.class);
 
   private Connection connection;
 
@@ -166,6 +170,7 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
     // Check for any previous SQLException. If one happened, rethrow it here.
     SQLException lastException = execThread.getLastError();
     if (null != lastException) {
+      LoggingUtils.logAll(LOG, lastException);
       throw lastException;
     }
   }
