@@ -97,6 +97,9 @@ public class AvroSchemaGenerator {
       case Types.CHAR:
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
+      case Types.LONGNVARCHAR:
+      case Types.NVARCHAR:
+      case Types.NCHAR:
         return Type.STRING;
       case Types.DATE:
       case Types.TIME:
