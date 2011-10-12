@@ -92,6 +92,8 @@ public abstract class BaseSqoopTool extends SqoopTool {
   public static final String INPUT_NULL_STRING = "input-null-string";
   public static final String NULL_NON_STRING = "null-non-string";
   public static final String INPUT_NULL_NON_STRING = "input-null-non-string";
+  public static final String MAP_COLUMN_JAVA = "map-column-java";
+  public static final String MAP_COLUMN_HIVE = "map-column-hive";
 
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
@@ -449,6 +451,13 @@ public abstract class BaseSqoopTool extends SqoopTool {
             + "to hive")
         .withLongOpt(HIVE_PARTITION_VALUE_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("Override mapping for specific column to hive"
+          + " types.")
+        .withLongOpt(MAP_COLUMN_HIVE)
+        .create());
+
     return hiveOpts;
   }
 
@@ -550,25 +559,31 @@ public abstract class BaseSqoopTool extends SqoopTool {
         .withLongOpt(PACKAGE_NAME_ARG)
         .create());
     codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
-            .hasArg()
-            .withDescription("Null string representation")
-            .withLongOpt(NULL_STRING)
-            .create());
+        .hasArg()
+        .withDescription("Null string representation")
+        .withLongOpt(NULL_STRING)
+        .create());
     codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
-            .hasArg()
-            .withDescription("Input null string representation")
-            .withLongOpt(INPUT_NULL_STRING)
-            .create());
+        .hasArg()
+        .withDescription("Input null string representation")
+        .withLongOpt(INPUT_NULL_STRING)
+        .create());
     codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
-            .hasArg()
-            .withDescription("Null non-string representation")
-            .withLongOpt(NULL_NON_STRING)
-            .create());
+        .hasArg()
+        .withDescription("Null non-string representation")
+        .withLongOpt(NULL_NON_STRING)
+        .create());
     codeGenOpts.addOption(OptionBuilder.withArgName("null-str")
-            .hasArg()
-            .withDescription("Input null non-string representation")
-            .withLongOpt(INPUT_NULL_NON_STRING)
-            .create());
+        .hasArg()
+        .withDescription("Input null non-string representation")
+        .withLongOpt(INPUT_NULL_NON_STRING)
+        .create());
+    codeGenOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("Override mapping for specific columns to java types")
+        .withLongOpt(MAP_COLUMN_JAVA)
+        .create());
+
     if (!multiTable) {
       codeGenOpts.addOption(OptionBuilder.withArgName("name")
           .hasArg()
@@ -753,6 +768,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
     if (in.hasOption(HIVE_PARTITION_VALUE_ARG)) {
       out.setHivePartitionValue(in.getOptionValue(HIVE_PARTITION_VALUE_ARG));
     }
+
+   if (in.hasOption(MAP_COLUMN_HIVE)) {
+      out.setMapColumnHive(in.getOptionValue(MAP_COLUMN_HIVE));
+    }
   }
 
   protected void applyOutputFormatOptions(CommandLine in, SqoopOptions out)
@@ -841,6 +860,10 @@ public abstract class BaseSqoopTool extends SqoopTool {
 
     if (in.hasOption(PACKAGE_NAME_ARG)) {
       out.setPackageName(in.getOptionValue(PACKAGE_NAME_ARG));
+    }
+
+    if (in.hasOption(MAP_COLUMN_JAVA)) {
+      out.setMapColumn(in.getOptionValue(MAP_COLUMN_JAVA));
     }
 
     if (!multiTable && in.hasOption(CLASS_NAME_ARG)) {

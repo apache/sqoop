@@ -43,6 +43,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -227,6 +228,20 @@ public class ClassWriter {
     }
 
     return output;
+  }
+
+  private String toJavaType(String columnName, int sqlType) {
+    Properties mapping = options.getMapColumnJava();
+
+    if(mapping.containsKey(columnName)) {
+      String type = mapping.getProperty(columnName);
+      if(LOG.isDebugEnabled()) {
+        LOG.info("Overriding type of column " + columnName + " to " + type);
+      }
+      return type;
+    }
+
+    return connManager.toJavaType(sqlType);
   }
 
   /**
@@ -453,7 +468,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("Cannot resolve SQL type " + sqlType);
         continue;
@@ -496,7 +511,7 @@ public class ClassWriter {
     sb.append("    boolean equal = true;\n");
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("Cannot resolve SQL type " + sqlType);
         continue;
@@ -530,7 +545,7 @@ public class ClassWriter {
       fieldNum++;
 
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -570,7 +585,7 @@ public class ClassWriter {
       fieldNum++;
 
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -614,7 +629,7 @@ public class ClassWriter {
       fieldNum++;
 
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -650,7 +665,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -687,7 +702,7 @@ public class ClassWriter {
     // For each field that is mutable, we need to perform the deep copy.
     for (String colName : colNames) {
       int sqlType = columnTypes.get(colName);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(colName, sqlType);
       if (null == javaType) {
         continue;
       } else if (javaType.equals("java.sql.Date")
@@ -721,7 +736,7 @@ public class ClassWriter {
     boolean first = true;
     for (String colName : colNames) {
       int sqlType = columnTypes.get(colName);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(colName, sqlType);
       if (null == javaType) {
         continue;
       } else {
@@ -806,7 +821,7 @@ public class ClassWriter {
     boolean first = true;
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -896,7 +911,7 @@ public class ClassWriter {
     // assume that we have __it and __cur_str vars, based on
     // __loadFromFields() code.
     sb.append("    __cur_str = __it.next();\n");
-    String javaType = connManager.toJavaType(colType);
+    String javaType = toJavaType(colName, colType);
 
     parseNullVal(javaType, colName, sb);
     if (javaType.equals("String")) {
@@ -991,7 +1006,7 @@ public class ClassWriter {
 
     for (String col : colNames) {
       int sqlType = columnTypes.get(col);
-      String javaType = connManager.toJavaType(sqlType);
+      String javaType = toJavaType(col, sqlType);
       if (null == javaType) {
         LOG.error("No Java type for SQL type " + sqlType
                   + " for column " + col);
@@ -1069,6 +1084,17 @@ public class ClassWriter {
             + "' not in table");
       }
       columnTypes.put(identifier, type);
+    }
+
+    // Check that all explicitly mapped columns are present in result set
+    Properties mapping = options.getMapColumnJava();
+    if(mapping != null && !mapping.isEmpty()) {
+      for(Object column : mapping.keySet()) {
+        if(!uniqColNames.contains((String)column)) {
+        throw new IllegalArgumentException("No column by the name " + column
+                + "found while importing data");
+        }
+      }
     }
 
     // The db write() method may use column names in a different

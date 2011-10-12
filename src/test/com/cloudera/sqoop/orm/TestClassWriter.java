@@ -46,6 +46,7 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import java.lang.reflect.Field;
 
 /**
  * Test that the ClassWriter generates Java classes based on the given table,
@@ -425,4 +426,44 @@ public class TestClassWriter extends TestCase {
     }
   }
 
+  private static final String USERMAPPING_CLASS_AND_PACKAGE_NAME =
+      "usermapping.pkg.prefix.classname";
+
+  @Test
+  public void testUserMapping() throws IOException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException, NoSuchMethodException,
+      InvocationTargetException {
+
+    // Set the option strings in an "argv" to redirect our srcdir and bindir
+    String [] argv = {
+      "--bindir", JAR_GEN_DIR,
+      "--outdir", CODE_GEN_DIR,
+      "--class-name", USERMAPPING_CLASS_AND_PACKAGE_NAME,
+      "--map-column-java", "INTFIELD1=String",
+    };
+
+    File ormJarFile = runGenerationTest(argv,
+            USERMAPPING_CLASS_AND_PACKAGE_NAME);
+    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+        ormJarFile.getCanonicalPath(),
+        USERMAPPING_CLASS_AND_PACKAGE_NAME);
+    Class tableClass = Class.forName(
+        USERMAPPING_CLASS_AND_PACKAGE_NAME,
+        true,
+        Thread.currentThread().getContextClassLoader());
+
+    try {
+      Field intfield = tableClass.getDeclaredField("INTFIELD1");
+
+      assertEquals(String.class, intfield.getType());
+    } catch (NoSuchFieldException ex) {
+      fail("Can't find field for INTFIELD1");
+    } catch (SecurityException ex) {
+      fail("Can't find field for INTFIELD1");
+    }
+
+    if (null != prevClassLoader) {
+      ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+    }
+  }
 }

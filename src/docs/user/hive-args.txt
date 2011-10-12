@@ -41,5 +41,7 @@ Argument                      Description
 			      sharded on
 +\--hive-partition-value <v>+ String-value that serves as partition key\
 			      for this imported into hive in this job.
++\--map-column-hive <map>+    Override default mapping from SQL type to\
+                              Hive type for configured columns.
 --------------------------------------------------------------------------
 

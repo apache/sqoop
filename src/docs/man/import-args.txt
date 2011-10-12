@@ -86,4 +86,3 @@ Import control options
 
 --null-non-string::
   The string to be written for a null value for non-string columns
-

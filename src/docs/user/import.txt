@@ -262,6 +262,33 @@ are expected to be present in the shell path of the task process. For MySQL
 the utilities +mysqldump+ and +mysqlimport+ are required, whereas for
 PostgreSQL the utility +psql+ is required.
 
+Controlling type mapping
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop is preconfigured to map most SQL types to appropriate Java or Hive
+representatives. However the default mapping might not be suitable for
+everyone and might be overridden by +--map-column-java+ (for changing
+mapping to Java) or +--map-column-hive+ (for changing Hive mapping).
+
+.Parameters for overriding mapping
+[grid="all"]
+`---------------------------------`--------------------------------------
+Argument                          Description
+-------------------------------------------------------------------------
++\--map-column-java <mapping>+    Override mapping from SQL to Java type\
+                                  for configured columns.
++\--map-column-hive <mapping>+    Override mapping from SQL to Hive type\
+                                  for configured columns.
+-------------------------------------------------------------------------
+
+Sqoop is expecting comma separated list of mapping in form <name of column>=<new type>. For example:
+
+----
+$ sqoop import ... --map-column-java id=String,value=Integer
+----
+
+Sqoop will rise exception in case that some configured mapping will not be used.
+
 Incremental Imports
 ^^^^^^^^^^^^^^^^^^^
 

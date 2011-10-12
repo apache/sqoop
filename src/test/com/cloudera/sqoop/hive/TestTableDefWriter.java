@@ -31,6 +31,8 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import java.sql.Types;
 
 /**
  * Test Hive DDL statement generation.
@@ -135,5 +137,53 @@ public class TestTableDefWriter extends TestCase {
         + "OUTPUTFORMAT "
         + "'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'",
         createTable);
+  }
+
+  public void testUserMapping() throws Exception {
+    String[] args = {
+        "--map-column-hive", "id=STRING,value=INTEGER",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+      new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    colTypes.put("id", Types.INTEGER);
+    colTypes.put("value", Types.VARCHAR);
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+
+    assertNotNull(createTable);
+
+    assertTrue(createTable.contains("`id` STRING"));
+    assertTrue(createTable.contains("`value` INTEGER"));
+
+    assertFalse(createTable.contains("`id` INTEGER"));
+    assertFalse(createTable.contains("`value` STRING"));
+  }
+
+  public void testUserMappingFailWhenCantBeApplied() throws Exception {
+    String[] args = {
+        "--map-column-hive", "id=STRING,value=INTEGER",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+      new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    colTypes.put("id", Types.INTEGER);
+    writer.setColumnTypes(colTypes);
+
+    try {
+      String createTable = writer.getCreateTableStmt();
+      fail("Expected failure on non applied mapping.");
+    } catch(IllegalArgumentException iae) {
+      // Expected, ok
+    }
   }
 }

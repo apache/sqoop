@@ -257,6 +257,28 @@ public class TestSqoopOptions extends TestCase {
     assertEquals("select 1, 2", opts.getBoundaryQuery());
   }
 
+  public void testMapColumnHiveParams() throws Exception {
+    String[] args = {
+      "--map-column-hive", "id=STRING",
+    };
+
+    SqoopOptions opts = parse(args);
+    Properties mapping = opts.getMapColumnHive();
+    assertTrue(mapping.containsKey("id"));
+    assertEquals("STRING", mapping.get("id"));
+  }
+
+  public void testMapColumnJavaParams() throws Exception {
+    String[] args = {
+      "--map-column-java", "id=String",
+    };
+
+    SqoopOptions opts = parse(args);
+    Properties mapping = opts.getMapColumnJava();
+    assertTrue(mapping.containsKey("id"));
+    assertEquals("String", mapping.get("id"));
+  }
+
   public void testPropertySerialization1() {
     // Test that if we write a SqoopOptions out to a Properties,
     // and then read it back in, we get all the same results.

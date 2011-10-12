@@ -39,3 +39,5 @@ Code generation options
 --package-name (package)::
   Puts auto-generated classes in the named Java package
 
+--map-column-java (mapping)::
+	Override default mapping from SQL type to Java type for configured columns

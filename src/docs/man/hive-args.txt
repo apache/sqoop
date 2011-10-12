@@ -38,3 +38,5 @@ Hive options
 --hive-table (table-name)::
   When used with --hive-import, overrides the destination table name
 
+--map-column-hive (mapping)::
+	Override default mapping for SQL types into Hive types for configured columns

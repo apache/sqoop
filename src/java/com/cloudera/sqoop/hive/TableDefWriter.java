@@ -36,6 +36,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -117,6 +118,7 @@ public class TableDefWriter {
    */
   public String getCreateTableStmt() throws IOException {
     Map<String, Integer> columnTypes;
+    Properties userMapping = options.getMapColumnHive();
 
     if (externalColTypes != null) {
       // Use pre-defined column types.
@@ -139,6 +141,22 @@ public class TableDefWriter {
       sb.append(outputTableName).append("` ( ");
     }
 
+    // Check that all explicitly mapped columns are present in result set
+    for(Object column : userMapping.keySet()) {
+      boolean found = false;
+      for(String c : colNames) {
+        if(c.equals(column)) {
+          found = true;
+          break;
+        }
+      }
+
+      if(!found) {
+        throw new IllegalArgumentException("No column by the name " + column
+                + "found while importing data");
+      }
+    }
+
     boolean first = true;
     for (String col : colNames) {
       if (!first) {
@@ -148,7 +166,8 @@ public class TableDefWriter {
       first = false;
 
       Integer colType = columnTypes.get(col);
-      String hiveColType = connManager.toHiveType(colType);
+      String hiveColType = userMapping.getProperty(col);
+      if(hiveColType == null) { hiveColType = connManager.toHiveType(colType); }
       if (null == hiveColType) {
         throw new IOException("Hive does not support the SQL type for column "
             + col);

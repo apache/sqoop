@@ -159,6 +159,10 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.partition.key") private String hivePartitionKey;
   @StoredAsProperty("hive.partition.value") private String hivePartitionValue;
 
+  // User explicit mapping of types
+  private Properties mapColumnJava; // stored as map.colum.java
+  private Properties mapColumnHive; // stored as map.column.hive
+
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
   // Not serialized to metastore.
@@ -584,6 +588,12 @@ public class SqoopOptions implements Cloneable {
     this.connectionParams =
         getPropertiesAsNetstedProperties(props, "db.connect.params");
 
+    // Loading user mapping
+    this.mapColumnHive =
+            getPropertiesAsNetstedProperties(props, "map.column.hive");
+    this.mapColumnJava =
+            getPropertiesAsNetstedProperties(props, "map.column.java");
+
     // Delimiters were previously memoized; don't let the tool override
     // them with defaults.
     this.areDelimsManuallySet = true;
@@ -656,6 +666,10 @@ public class SqoopOptions implements Cloneable {
     setPropertiesAsNestedProperties(props,
             "db.connect.params", this.connectionParams);
 
+    setPropertiesAsNestedProperties(props,
+            "map.column.hive", this.mapColumnHive);
+    setPropertiesAsNestedProperties(props,
+            "map.column.java", this.mapColumnJava);
     return props;
   }
 
@@ -689,6 +703,14 @@ public class SqoopOptions implements Cloneable {
 
       if (null != connectionParams) {
         other.setConnectionParams(this.connectionParams);
+      }
+
+      if (null != mapColumnHive) {
+        other.mapColumnHive = (Properties) this.mapColumnHive.clone();
+      }
+
+      if (null != mapColumnJava) {
+        other.mapColumnJava = (Properties) this.mapColumnJava.clone();
       }
 
       return other;
@@ -817,6 +839,10 @@ public class SqoopOptions implements Cloneable {
     this.incrementalMode = IncrementalMode.None;
 
     this.updateMode = UpdateMode.UpdateOnly;
+
+    // Creating instances for user specific mapping
+    this.mapColumnHive = new Properties();
+    this.mapColumnJava = new Properties();
   }
 
   /**
@@ -1006,6 +1032,32 @@ public class SqoopOptions implements Cloneable {
 
   public String getPassword() {
     return password;
+  }
+
+  protected void parseColumnMapping(String mapping,
+          Properties output) {
+    output.clear();
+    String[] maps = mapping.split(",");
+    for(String map : maps) {
+      String[] details = map.split("=");
+      output.put(details[0], details[1]);
+    }
+  }
+
+  public void setMapColumnHive(String mapColumn) {
+    parseColumnMapping(mapColumn, mapColumnHive);
+  }
+
+  public void setMapColumn(String mapColumn) {
+    parseColumnMapping(mapColumn, mapColumnJava);
+  }
+
+  public Properties getMapColumnHive() {
+    return mapColumnHive;
+  }
+
+  public Properties getMapColumnJava() {
+    return mapColumnJava;
   }
 
   /**
