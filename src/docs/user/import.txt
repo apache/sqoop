@@ -153,6 +153,12 @@ $ sqoop import \
   -m 1 --target-dir /user/foo/joinresults
 ----
 
+NOTE: If you are issuing the query wrapped with double quotes ("),
+you will have to use +\$CONDITIONS+ instead of just +$CONDITIONS+
+to disallow your shell from treating it as a shell variable.
+For example, a double quoted query may look like:
++"SELECT * FROM x WHERE a=\'foo' AND \$CONDITIONS"+
+
 NOTE: The facility of using free-form query in the current version of Sqoop
 is limited to simple queries where there are no ambiguous projections and
 no +OR+ conditions in the +WHERE+ clause. Use of complex queries such as
