@@ -171,3 +171,45 @@ at com.cloudera.sqoop.Sqoop.main(Sqoop.java:237)
 it was created with mixed/lower case within quotes).
 . Specify the table name, which you are working with, in upper case (unless
 it was created with mixed/lower case within quotes).
+
+MySQL: Connection Failure
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Problem: While importing a MySQL table into Sqoop, if you do not have
+the necessary permissions to access your MySQL database over the network,
+you may get the below connection failure.
+
+----
+Caused by: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure
+----
+
+Solution: First, verify that you can connect to the database from the node where
+you are running Sqoop:
+----
+$ mysql --host=<IP Address> --database=test --user=<username> --password=<password>
+----
+If this works, it rules out any problem with the client network configuration
+or security/authentication configuration.
+
+Add the network port for the server to your my.cnf file +/etc/my.cnf+:
+----
+[mysqld]
+port = xxxx
+----
+
+Set up a user account to connect via Sqoop.
+Grant permissions to the user to access the database over the network:
+(1.) Log into MySQL as root +mysql -u root -p<ThisIsMyPassword>+.
+(2.) Issue the following command:
+----
+mysql> grant all privileges on test.* to 'testuser'@'%' identified by 'testpassword'
+----
+
+Note that doing this will enable the testuser to connect to the
+MySQL server from any IP address. While this will work, it is not
+advisable for a production environment. We advise consulting with your
+DBA to grant the necessary privileges based on the setup topology.
+
+If the database server's IP address changes, unless it is bound to
+a static hostname in your server, the connect string passed into Sqoop
+will also need to be changed.
