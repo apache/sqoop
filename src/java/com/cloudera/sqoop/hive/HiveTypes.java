@@ -40,58 +40,40 @@ public final class HiveTypes {
    * mapping to a Hive-specific type?
    */
   public static String toHiveType(int sqlType) {
-    if (sqlType == Types.INTEGER) {
-      return "INT";
-    } else if (sqlType == Types.VARCHAR) {
-      return "STRING";
-    } else if (sqlType == Types.CHAR) {
-      return "STRING";
-    } else if (sqlType == Types.LONGVARCHAR) {
-      return "STRING";
-    } else if (sqlType == Types.NVARCHAR) {
-      return "STRING";
-    } else if (sqlType == Types.NCHAR) {
-      return "STRING";
-    } else if (sqlType == Types.LONGNVARCHAR) {
-      return "STRING";
-    } else if (sqlType == Types.NUMERIC) {
-      // Per suggestion on hive-user, this is converted to DOUBLE for now.
-      return "DOUBLE";
-    } else if (sqlType == Types.DECIMAL) {
-      // Per suggestion on hive-user, this is converted to DOUBLE for now.
-      return "DOUBLE";
-    } else if (sqlType == Types.BIT) {
-      return "BOOLEAN";
-    } else if (sqlType == Types.BOOLEAN) {
-      return "BOOLEAN";
-    } else if (sqlType == Types.TINYINT) {
-      return "TINYINT";
-    } else if (sqlType == Types.SMALLINT) {
-      return "INT";
-    } else if (sqlType == Types.BIGINT) {
-      return "BIGINT";
-    } else if (sqlType == Types.REAL) {
-      return "DOUBLE";
-    } else if (sqlType == Types.FLOAT) {
-      return "DOUBLE";
-    } else if (sqlType == Types.DOUBLE) {
-      return "DOUBLE";
-    } else if (sqlType == Types.DATE) {
-      // unfortunate type coercion
-      return "STRING";
-    } else if (sqlType == Types.TIME) {
-      // unfortunate type coercion
-      return "STRING";
-    } else if (sqlType == Types.TIMESTAMP) {
-      // unfortunate type coercion
-      return "STRING";
-    } else if (sqlType == Types.CLOB) {
-      return "STRING";
-    } else {
-      // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
-      // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
-      return null;
-    }
+
+      switch (sqlType) {
+          case Types.INTEGER:
+          case Types.SMALLINT:
+              return "INT";
+          case Types.VARCHAR:
+          case Types.CHAR:
+          case Types.LONGVARCHAR:
+          case Types.NVARCHAR:
+          case Types.NCHAR:
+          case Types.LONGNVARCHAR:
+          case Types.DATE:
+          case Types.TIME:
+          case Types.TIMESTAMP:
+          case Types.CLOB:
+              return "STRING";
+          case Types.NUMERIC:
+          case Types.DECIMAL:
+          case Types.FLOAT:
+          case Types.DOUBLE:
+          case Types.REAL:
+              return "DOUBLE";
+          case Types.BIT:
+          case Types.BOOLEAN:
+              return "BOOLEAN";
+          case Types.TINYINT:
+              return "TINYINT";
+          case Types.BIGINT:
+              return "BIGINT";
+          default:
+        // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
+        // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
+        return null;
+      }
   }
 
   /**
