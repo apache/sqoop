@@ -27,7 +27,7 @@ limitations under the License.
 
   <groupId>org.apache.sqoop</groupId>
   <artifactId>sqoop</artifactId>
-  <version>1.0-incubating-SNAPSHOT</version>
+  <version>1.4.0-incubating-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Sqoop</name>
