@@ -336,6 +336,32 @@ limitations under the License.
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.7</version>
+        <configuration>
+          <excludes>
+            <exclude>.gitignore</exclude>
+            <exclude>DEPENDENCIES</exclude>
+            <exclude>README.txt</exclude>
+            <exclude>*.sh</exclude>
+            <exclude>.git/**</exclude>
+            <exclude>.idea/**</exclude>
+            <exclude>**/.gitattributes</exclude>
+            <exclude>testdata/hive/scripts/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>rat-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
@@ -485,7 +511,7 @@ limitations under the License.
         </plugins>
       </reporting>
     </profile>
-  </profiles>
+
 
   <repositories>
     <repository>
