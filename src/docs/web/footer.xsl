@@ -43,7 +43,7 @@
       alt="Documentation Home" /></a></span>
   <br/>
   This document was built from Sqoop source available at
-  <a href="http://github.com/cloudera/sqoop">http://github.com/cloudera/sqoop</a>.
+  <a href="http://svn.apache.org/repos/asf/incubator/sqoop/trunk/">http://svn.apache.org/repos/asf/incubator/sqoop/trunk/</a>.
   </div>
 
 </xsl:template>
