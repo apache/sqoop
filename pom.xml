@@ -353,7 +353,7 @@ limitations under the License.
           <commandlineArgs>-e</commandlineArgs>
           <environmentVariables>
             <BUILDROOT>../../target</BUILDROOT>
-            <VERSION>${version}</VERSION>
+            <VERSION>${project.version}</VERSION>
           </environmentVariables>
         </configuration>
       </plugin>
