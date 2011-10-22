@@ -23,13 +23,13 @@ Getting Support
 ---------------
 
 Some general information is available at the
-http://wiki.github.com/cloudera/sqoop/[Sqoop wiki].
+http://incubator.apache.org/sqoop/
 
 Report bugs in Sqoop to the issue tracker at
-https://issues.cloudera.org/browse/SQOOP[].
+https://issues.apache.org/jira/browse/SQOOP[].
 
 Questions and discussion regarding the usage of Sqoop should be directed to the
-http://groups.google.com/a/cloudera.org/group/sqoop-user[sqoop-user mailing list].
+http://incubator.apache.org/sqoop/mail-lists.html[sqoop-user mailing list].
 
 Before contacting either forum, run your Sqoop job with the
 +\--verbose+ flag to acquire as much debugging information as

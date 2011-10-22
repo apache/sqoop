@@ -24,7 +24,7 @@ This directory serves as a technical reference for Sqoop developers to
 understand previous design decisions.
 
 The SIP home is on the Sqoop development wiki at:
-http://wiki.github.com/cloudera/sqoop/sqoopimprovementproposals
+TODO
 
 The wiki SIP home contains all SIPs including those which are in "proposal",
 "implementation available," or "rejected" state.

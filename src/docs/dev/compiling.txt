@@ -24,11 +24,11 @@ Compiling Sqoop from Source
 ---------------------------
 
 You can obtain the source code for Sqoop at:
-http://github.com/cloudera/sqoop
+http://svn.apache.org/repos/asf/incubator/sqoop/trunk
 
 Sqoop source code is held in a +git+ repository. Instructions for
 retrieving source from the repository are provided at:
-http://wiki.github.com/cloudera/sqoop/DevelopmentProcess
+TODO provide a page in the web site.
 
 Compilation instructions are provided in the +COMPILING.txt+ file in
 the root of the source repository.
