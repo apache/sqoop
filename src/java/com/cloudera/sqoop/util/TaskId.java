@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,48 +26,18 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.config.ConfigurationConstants;
 
 /**
- * Utility class; returns task attempt Id of the current job
- * regardless of Hadoop version being used.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public final class TaskId {
 
-  private TaskId() {
-  }
+  private TaskId() { }
 
-  /**
-   * Return the task attempt id as a string.
-   * @param conf the Configuration to check for the current task attempt id.
-   * @param defaultVal the value to return if a task attempt id is not set.
-   * @return the current task attempt id, or the default value if one isn't set.
-   */
   public static String get(Configuration conf, String defaultVal) {
-    return conf.get("mapreduce.task.id",
-        conf.get("mapred.task.id", defaultVal));
+    return org.apache.sqoop.util.TaskId.get(conf, defaultVal);
   }
 
-  /**
-   * Return the local filesystem dir where the current task attempt can
-   * perform work.
-   * @return a File describing a directory where local temp data for the
-   * task attempt can be stored.
-   */
   public static File getLocalWorkPath(Configuration conf) throws IOException {
-    String tmpDir = conf.get(
-        ConfigurationConstants.PROP_JOB_LOCAL_DIRECTORY,
-        "/tmp/");
-
-    // Create a local subdir specific to this task attempt.
-    String taskAttemptStr = TaskId.get(conf, "task_attempt");
-    File taskAttemptDir = new File(tmpDir, taskAttemptStr);
-    if (!taskAttemptDir.exists()) {
-      boolean createdDir = taskAttemptDir.mkdirs();
-      if (!createdDir) {
-        throw new IOException("Could not create missing task attempt dir: "
-            + taskAttemptDir.toString());
-      }
-    }
-
-    return taskAttemptDir;
+    return org.apache.sqoop.util.TaskId.getLocalWorkPath(conf);
   }
 
 }

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,28 +18,9 @@
 
 package com.cloudera.sqoop.util;
 
-import java.io.InputStream;
-
 /**
- * An interface describing a factory class for a Thread class that handles
- * input from some sort of stream.
- *
- * When the stream is closed, the thread should terminate.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public abstract class AsyncSink {
-
-  /**
-   * Create and run a thread to handle input from the provided InputStream.
-   * When processStream returns, the thread should be running; it should
-   * continue to run until the InputStream is exhausted.
-   */
-  public abstract void processStream(InputStream is);
-
-  /**
-   * Wait until the stream has been processed.
-   * @return a status code indicating success or failure. 0 is typical for
-   * success.
-   */
-  public abstract int join() throws InterruptedException;
+public abstract class AsyncSink
+    extends org.apache.sqoop.util.AsyncSink {
 }
-

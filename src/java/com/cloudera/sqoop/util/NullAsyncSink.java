@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,68 +18,9 @@
 
 package com.cloudera.sqoop.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * An AsyncSink that takes the contents of a stream and ignores it.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class NullAsyncSink extends AsyncSink {
-
-  public static final Log LOG = LogFactory.getLog(
-      NullAsyncSink.class.getName());
-
-  private Thread child;
-
-  public void processStream(InputStream is) {
-    child = new IgnoringThread(is);
-    child.start();
-  }
-
-  public int join() throws InterruptedException {
-    child.join();
-    return 0; // always successful.
-  }
-
-  /**
-   * Run a background thread that reads and ignores the
-   * contents of the stream.
-   */
-  private static class IgnoringThread extends Thread {
-
-    private InputStream stream;
-
-    IgnoringThread(final InputStream is) {
-      this.stream = is;
-    }
-
-    public void run() {
-      InputStreamReader isr = new InputStreamReader(this.stream);
-      BufferedReader r = new BufferedReader(isr);
-
-      try {
-        while (true) {
-          String line = r.readLine();
-          if (null == line) {
-            break; // stream was closed by remote end.
-          }
-        }
-      } catch (IOException ioe) {
-        LOG.warn("IOException reading from (ignored) stream: "
-            + ioe.toString());
-      }
-
-      try {
-        r.close();
-      } catch (IOException ioe) {
-        LOG.warn("Error closing stream in NullAsyncSink: " + ioe.toString());
-      }
-    }
-  }
+public class NullAsyncSink
+    extends org.apache.sqoop.util.NullAsyncSink {
 }
-

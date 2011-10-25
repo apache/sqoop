@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -27,8 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used by SqoopOptions to denote that a field is stored in a particular
- * named property when reifying the object's state to permanent storage.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

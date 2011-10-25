@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,41 +19,22 @@
 package com.cloudera.sqoop.util;
 
 /**
- * SecurityException suppressing a System.exit() call.
- *
- * Allows retrieval of the would-be exit status code.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 @SuppressWarnings("serial")
-public class ExitSecurityException extends SecurityException {
-
-  private final int exitStatus;
+public class ExitSecurityException
+    extends org.apache.sqoop.util.ExitSecurityException {
 
   public ExitSecurityException() {
-    super("ExitSecurityException");
-    this.exitStatus = 0;
+    super();
   }
 
   public ExitSecurityException(final String message) {
     super(message);
-    this.exitStatus = 0;
   }
 
-  /**
-   * Register a System.exit() event being suppressed with a particular
-   * exit status code.
-   */
   public ExitSecurityException(int status) {
-    super("ExitSecurityException");
-    this.exitStatus = status;
+    super(status);
   }
 
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? ("exit with status " + exitStatus) : msg;
-  }
-
-  public int getExitStatus() {
-    return this.exitStatus;
-  }
 }

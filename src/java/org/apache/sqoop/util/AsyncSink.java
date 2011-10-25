@@ -16,28 +16,31 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import java.io.InputStream;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * An interface describing a factory class for a Thread class that handles
+ * input from some sort of stream.
+ *
+ * When the stream is closed, the thread should terminate.
  */
-public final class Jars {
+public abstract class AsyncSink {
 
-  private Jars() { }
+  /**
+   * Create and run a thread to handle input from the provided InputStream.
+   * When processStream returns, the thread should be running; it should
+   * continue to run until the InputStream is exhausted.
+   */
+  public abstract void processStream(InputStream is);
 
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
-  }
-
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
-  }
-
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
-  }
+  /**
+   * Wait until the stream has been processed.
+   * @return a status code indicating success or failure. 0 is typical for
+   * success.
+   */
+  public abstract int join() throws InterruptedException;
 
 }
 

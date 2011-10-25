@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,80 +18,17 @@
 
 package com.cloudera.sqoop.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
- * An AsyncSink that takes the contents of a stream and writes
- * it to log4j.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class LoggingAsyncSink extends AsyncSink {
-
-  public static final Log LOG = LogFactory.getLog(
-      LoggingAsyncSink.class.getName());
-
-  private Log contextLog;
+public class LoggingAsyncSink
+    extends org.apache.sqoop.util.LoggingAsyncSink {
 
   public LoggingAsyncSink(final Log context) {
-    if (null == context) {
-      this.contextLog = LOG;
-    } else {
-      this.contextLog = context;
-    }
+    super(context);
   }
 
-  private Thread child;
-
-  public void processStream(InputStream is) {
-    child = new LoggingThread(is);
-    child.start();
-  }
-
-  public int join() throws InterruptedException {
-    child.join();
-    return 0; // always successful.
-  }
-
-  /**
-   * Run a background thread that copies the contents of the stream
-   * to the output context log.
-   */
-  private class LoggingThread extends Thread {
-
-    private InputStream stream;
-
-    LoggingThread(final InputStream is) {
-      this.stream = is;
-    }
-
-    public void run() {
-      InputStreamReader isr = new InputStreamReader(this.stream);
-      BufferedReader r = new BufferedReader(isr);
-
-      try {
-        while (true) {
-          String line = r.readLine();
-          if (null == line) {
-            break; // stream was closed by remote end.
-          }
-
-          LoggingAsyncSink.this.contextLog.info(line);
-        }
-      } catch (IOException ioe) {
-        LOG.error("IOException reading from stream: " + ioe.toString());
-      }
-
-      try {
-        r.close();
-      } catch (IOException ioe) {
-        LOG.warn("Error closing stream in LoggingAsyncSink: " + ioe.toString());
-      }
-    }
-  }
 }
 

@@ -16,29 +16,45 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * SecurityException suppressing a System.exit() call.
+ *
+ * Allows retrieval of the would-be exit status code.
  */
 @SuppressWarnings("serial")
-public class ImportException
-    extends org.apache.sqoop.util.ImportException {
+public class ExitSecurityException extends SecurityException {
 
-  public ImportException() {
-    super();
+  private final int exitStatus;
+
+  public ExitSecurityException() {
+    super("ExitSecurityException");
+    this.exitStatus = 0;
   }
 
-  public ImportException(final String message) {
+  public ExitSecurityException(final String message) {
     super(message);
+    this.exitStatus = 0;
   }
 
-  public ImportException(final Throwable cause) {
-    super(cause);
+  /**
+   * Register a System.exit() event being suppressed with a particular
+   * exit status code.
+   */
+  public ExitSecurityException(int status) {
+    super("ExitSecurityException");
+    this.exitStatus = status;
   }
 
-  public ImportException(final String message, final Throwable cause) {
-    super(message, cause);
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? ("exit with status " + exitStatus) : msg;
+  }
+
+  public int getExitStatus() {
+    return this.exitStatus;
   }
 
 }

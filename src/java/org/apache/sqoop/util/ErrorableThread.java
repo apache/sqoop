@@ -16,27 +16,25 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
-
-import com.cloudera.sqoop.manager.ConnManager;
+package org.apache.sqoop.util;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * A thread which has an error bit which can be set from within the thread.
  */
-public final class Jars {
+public abstract class ErrorableThread extends Thread {
 
-  private Jars() { }
+  private volatile boolean error;
 
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
+  public ErrorableThread() {
+    this.error = false;
   }
 
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
+  protected void setError() {
+    this.error = true;
   }
 
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
+  public boolean isErrored() {
+    return this.error;
   }
 
 }

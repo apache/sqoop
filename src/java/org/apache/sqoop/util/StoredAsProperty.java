@@ -16,28 +16,22 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Used by SqoopOptions to denote that a field is stored in a particular
+ * named property when reifying the object's state to permanent storage.
  */
-public final class Jars {
-
-  private Jars() { }
-
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
-  }
-
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
-  }
-
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
-  }
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface StoredAsProperty {
+  String value();
 }
 

@@ -16,28 +16,34 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
-
-import com.cloudera.sqoop.manager.ConnManager;
+package org.apache.sqoop.util;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * General error during export process.
  */
-public final class Jars {
+@SuppressWarnings("serial")
+public class ExportException extends Exception {
 
-  private Jars() { }
-
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
+  public ExportException() {
+    super("ExportException");
   }
 
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
+  public ExportException(final String message) {
+    super(message);
   }
 
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
+  public ExportException(final Throwable cause) {
+    super(cause);
+  }
+
+  public ExportException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ExportException" : msg;
   }
 
 }
-

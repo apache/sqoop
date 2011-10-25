@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,20 +19,8 @@
 package com.cloudera.sqoop.util;
 
 /**
- * Partial implementation of AsyncSink that relies on ErrorableThread to
- * provide a status bit for the join() method.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public abstract class ErrorableAsyncSink extends AsyncSink {
-
-  protected ErrorableThread child;
-
-  public int join() throws InterruptedException {
-    child.join();
-    if (child.isErrored()) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
+public abstract class ErrorableAsyncSink
+    extends org.apache.sqoop.util.ErrorableAsyncSink {
 }
-

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,29 +23,14 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 
 /**
- * A helper class for logging.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public final class LoggingUtils {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
-  private LoggingUtils() {
-  }
+  private LoggingUtils() { }
 
-  /**
-   * Log every exception in the chain if
-   * the exception is a chain of exceptions.
-   */
   public static void logAll(Log log, SQLException e) {
-    log.error("Top level exception: ", e);
-    e = e.getNextException();
-    int indx = 1;
-    while (e != null) {
-      log.error("Chained exception " + indx + ": ", e);
-      e = e.getNextException();
-      indx++;
-    }
+    org.apache.sqoop.util.LoggingUtils.logAll(log, e);
   }
 }
 

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,22 +19,9 @@
 package com.cloudera.sqoop.util;
 
 /**
- * A thread which has an error bit which can be set from within the thread.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public abstract class ErrorableThread extends Thread {
-
-  private volatile boolean error;
-
-  public ErrorableThread() {
-    this.error = false;
-  }
-
-  protected void setError() {
-    this.error = true;
-  }
-
-  public boolean isErrored() {
-    return this.error;
-  }
+public abstract class ErrorableThread
+    extends org.apache.sqoop.util.ErrorableThread {
 }
 

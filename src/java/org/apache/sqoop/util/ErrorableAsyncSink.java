@@ -16,27 +16,25 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.util.AsyncSink;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Partial implementation of AsyncSink that relies on ErrorableThread to
+ * provide a status bit for the join() method.
  */
-public final class Jars {
+public abstract class ErrorableAsyncSink extends AsyncSink {
 
-  private Jars() { }
+  protected ErrorableThread child;
 
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
-  }
-
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
-  }
-
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
+  public int join() throws InterruptedException {
+    child.join();
+    if (child.isErrored()) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
 }

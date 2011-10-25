@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,13 +19,14 @@
 package com.cloudera.sqoop.util;
 
 /**
- * General error during export process.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 @SuppressWarnings("serial")
-public class ExportException extends Exception {
+public class ExportException
+    extends org.apache.sqoop.util.ExportException {
 
   public ExportException() {
-    super("ExportException");
+    super();
   }
 
   public ExportException(final String message) {
@@ -42,9 +41,4 @@ public class ExportException extends Exception {
     super(message, cause);
   }
 
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? "ExportException" : msg;
-  }
 }

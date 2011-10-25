@@ -16,27 +16,32 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * A helper class for logging.
  */
-public final class Jars {
+public final class LoggingUtils {
 
-  private Jars() { }
+  private LoggingUtils() { }
 
-  public static String getSqoopJarPath() {
-    return org.apache.sqoop.util.Jars.getSqoopJarPath();
-  }
-
-  public static String getJarPathForClass(Class<? extends Object> classObj) {
-    return org.apache.sqoop.util.Jars.getJarPathForClass(classObj);
-  }
-
-  public static String getDriverClassJar(ConnManager mgr) {
-    return org.apache.sqoop.util.Jars.getDriverClassJar(mgr);
+  /**
+   * Log every exception in the chain if
+   * the exception is a chain of exceptions.
+   */
+  public static void logAll(Log log, SQLException e) {
+    log.error("Top level exception: ", e);
+    e = e.getNextException();
+    int indx = 1;
+    while (e != null) {
+      log.error("Chained exception " + indx + ": ", e);
+      e = e.getNextException();
+      indx++;
+    }
   }
 
 }
