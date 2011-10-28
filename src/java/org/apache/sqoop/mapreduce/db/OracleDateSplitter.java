@@ -15,17 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.mapreduce.db;
+package org.apache.sqoop.mapreduce.db;
 
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import java.util.Date;
+
+import com.cloudera.sqoop.mapreduce.db.DateSplitter;
 
 /**
- * A InputFormat that reads input data from an SQL table in an Oracle db.
- *
- * @deprecated use org.apache.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat
- *   instead.
- * @see org.apache.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat
+ * Implement DBSplitter over date/time values returned by an Oracle db.
+ * Make use of logic from DateSplitter, since this just needs to use
+ * some Oracle-specific functions on the formatting end when generating
+ * InputSplits.
  */
-public class OracleDataDrivenDBInputFormat<T extends DBWritable>
-    extends org.apache.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat<T> {
+public class OracleDateSplitter extends DateSplitter  {
+
+  @SuppressWarnings("unchecked")
+  @Override
+  protected String dateToString(Date d) {
+    // Oracle Data objects are always actually Timestamps
+    return "TO_TIMESTAMP('" + d.toString() + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
+  }
 }

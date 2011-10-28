@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.mapreduce.db;
+package org.apache.sqoop.mapreduce.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,36 +23,31 @@ import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
-/**
- * A RecordReader that reads records from an Oracle SQL table.
- * @deprecated use org.apache.sqoop.mapreduce.db.OracleDBRecordReader instead.
- * @see org.apache.sqoop.mapreduce.db.OracleDBRecordReader
- */
-public class OracleDBRecordReader<T extends DBWritable> extends
-  org.apache.sqoop.mapreduce.db.OracleDBRecordReader<T> {
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
+import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
+import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
 
-  /** Configuration key to set to a timezone string. */
-  public static final String SESSION_TIMEZONE_KEY =
-      org.apache.sqoop.mapreduce.db.OracleDBRecordReader.SESSION_TIMEZONE_KEY;
+/**
+ * A RecordReader that reads records from a Oracle table
+ * via DataDrivenDBRecordReader.
+ */
+public class OracleDataDrivenDBRecordReader<T extends DBWritable>
+    extends DataDrivenDBRecordReader<T>  {
+
 
   // CHECKSTYLE:OFF
-  public OracleDBRecordReader(DBInputFormat.DBInputSplit split,
+  // TODO(aaron): Enable checkstyle after refactoring DBRecordReader c'tor.
+  public OracleDataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
       Class<T> inputClass, Configuration conf, Connection conn,
       DBConfiguration dbConfig, String cond, String [] fields,
       String table) throws SQLException {
-    super(split, inputClass, conf, conn, dbConfig, cond, fields, table);
+
+    super(split, inputClass, conf, conn, dbConfig, cond, fields, table,
+        "ORACLE");
+
+    // Must initialize the tz used by the connection for Oracle.
+    OracleDBRecordReader.setSessionTimeZone(conf, conn);
   }
   // CHECKSTYLE:ON
-
-  /**
-   * Set session time zone.
-   * @param conf The current configuration.
-   * We read the 'oracle.sessionTimeZone' property from here.
-   * @param conn The connection to alter the timezone properties of.
-   */
-  public static void setSessionTimeZone(Configuration conf,
-      Connection conn) throws SQLException {
-    org.apache.sqoop.mapreduce.db.OracleDBRecordReader.setSessionTimeZone(
-        conf, conn);
-  }
 }

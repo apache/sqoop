@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,24 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.mapreduce.db;
-
-import java.util.Date;
-
 
 /**
  * Implement DBSplitter over date/time values returned by an Oracle db.
  * Make use of logic from DateSplitter, since this just needs to use
  * some Oracle-specific functions on the formatting end when generating
  * InputSplits.
+ *
+ * @deprecated use org.apache.sqoop.mapreduce.db.OracleDateSplitter instead.
+ * @see org.apache.sqoop.mapreduce.db.OracleDateSplitter
  */
-public class OracleDateSplitter extends DateSplitter {
+public class OracleDateSplitter
+    extends org.apache.sqoop.mapreduce.db.OracleDateSplitter {
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected String dateToString(Date d) {
-    // Oracle Data objects are always actually Timestamps
-    return "TO_TIMESTAMP('" + d.toString() + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
-  }
 }

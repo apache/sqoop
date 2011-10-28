@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,17 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.mapreduce.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
-
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
 
 /**
  * A container for configuration property names for jobs with DB input/output.
@@ -42,67 +32,76 @@ import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
  * @see DBInputFormat#setInput(Job, Class, String, String)
  * @see DBInputFormat#setInput(Job, Class, String, String, String, String...)
  * @see DBOutputFormat#setOutput(Job, String, String...)
+ *
+ * @deprecated use org.apache.sqoop.mapreduce.db.DBConfiguration instead.
+ * @see org.apache.sqoop.mapreduce.db.DBConfiguration
  */
-public class DBConfiguration {
+public class DBConfiguration
+  extends org.apache.sqoop.mapreduce.db.DBConfiguration {
 
   /** The JDBC Driver class name. */
   public static final String DRIVER_CLASS_PROPERTY =
-    "mapreduce.jdbc.driver.class";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.DRIVER_CLASS_PROPERTY;
 
   /** JDBC Database access URL. */
-  public static final String URL_PROPERTY = "mapreduce.jdbc.url";
+  public static final String URL_PROPERTY =
+      org.apache.sqoop.mapreduce.db.DBConfiguration.URL_PROPERTY;
 
   /** User name to access the database. */
-  public static final String USERNAME_PROPERTY = "mapreduce.jdbc.username";
+  public static final String USERNAME_PROPERTY =
+      org.apache.sqoop.mapreduce.db.DBConfiguration.USERNAME_PROPERTY;
 
   /** Password to access the database. */
-  public static final String PASSWORD_PROPERTY = "mapreduce.jdbc.password";
+  public static final String PASSWORD_PROPERTY =
+      org.apache.sqoop.mapreduce.db.DBConfiguration.PASSWORD_PROPERTY;
 
   /** Fetch size. */
-  public static final String FETCH_SIZE = "mapreduce.jdbc.fetchsize";
+  public static final String FETCH_SIZE =
+      org.apache.sqoop.mapreduce.db.DBConfiguration.FETCH_SIZE;
 
   /** Input table name. */
   public static final String INPUT_TABLE_NAME_PROPERTY =
-    "mapreduce.jdbc.input.table.name";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_TABLE_NAME_PROPERTY;
 
   /** Field names in the Input table. */
   public static final String INPUT_FIELD_NAMES_PROPERTY =
-    "mapreduce.jdbc.input.field.names";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_FIELD_NAMES_PROPERTY;
 
   /** WHERE clause in the input SELECT statement. */
   public static final String INPUT_CONDITIONS_PROPERTY =
-    "mapreduce.jdbc.input.conditions";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CONDITIONS_PROPERTY;
 
   /** ORDER BY clause in the input SELECT statement. */
   public static final String INPUT_ORDER_BY_PROPERTY =
-    "mapreduce.jdbc.input.orderby";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_ORDER_BY_PROPERTY;
 
   /** Whole input query, exluding LIMIT...OFFSET. */
-  public static final String INPUT_QUERY = "mapreduce.jdbc.input.query";
+  public static final String INPUT_QUERY =
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_QUERY;
 
   /** Input query to get the count of records. */
   public static final String INPUT_COUNT_QUERY =
-    "mapreduce.jdbc.input.count.query";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_COUNT_QUERY;
 
   /** Input query to get the max and min values of the jdbc.input.query. */
   public static final String INPUT_BOUNDING_QUERY =
-      "mapred.jdbc.input.bounding.query";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_BOUNDING_QUERY;
 
   /** Class name implementing DBWritable which will hold input tuples. */
   public static final String INPUT_CLASS_PROPERTY =
-    "mapreduce.jdbc.input.class";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CLASS_PROPERTY;
 
   /** Output table name. */
   public static final String OUTPUT_TABLE_NAME_PROPERTY =
-    "mapreduce.jdbc.output.table.name";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.OUTPUT_TABLE_NAME_PROPERTY;
 
   /** Field names in the Output table. */
   public static final String OUTPUT_FIELD_NAMES_PROPERTY =
-    "mapreduce.jdbc.output.field.names";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.OUTPUT_FIELD_NAMES_PROPERTY;
 
   /** Number of fields in the Output table. */
   public static final String OUTPUT_FIELD_COUNT_PROPERTY =
-    "mapreduce.jdbc.output.field.count";
+      org.apache.sqoop.mapreduce.db.DBConfiguration.OUTPUT_FIELD_COUNT_PROPERTY;
 
   /**
    * Sets the DB access related fields in the {@link Configuration}.
@@ -116,17 +115,8 @@ public class DBConfiguration {
   public static void configureDB(Configuration conf, String driverClass,
       String dbUrl, String userName, String passwd, Integer fetchSize) {
 
-    conf.set(DRIVER_CLASS_PROPERTY, driverClass);
-    conf.set(URL_PROPERTY, dbUrl);
-    if (userName != null) {
-      conf.set(USERNAME_PROPERTY, userName);
-    }
-    if (passwd != null) {
-      conf.set(PASSWORD_PROPERTY, passwd);
-    }
-    if (fetchSize != null) {
-      conf.setInt(FETCH_SIZE, fetchSize);
-    }
+    org.apache.sqoop.mapreduce.db.DBConfiguration.configureDB(
+        conf, driverClass, dbUrl, userName, passwd, fetchSize);
   }
 
   /**
@@ -138,7 +128,8 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl, Integer fetchSize) {
-    configureDB(job, driverClass, dbUrl, null, null, fetchSize);
+    org.apache.sqoop.mapreduce.db.DBConfiguration.configureDB(job, driverClass,
+        dbUrl, fetchSize);
   }
 
   /**
@@ -151,7 +142,8 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration conf, String driverClass,
       String dbUrl, String userName, String passwd) {
-    configureDB(conf, driverClass, dbUrl, userName, passwd, null);
+    org.apache.sqoop.mapreduce.db.DBConfiguration.configureDB(conf, driverClass,
+        dbUrl, userName, passwd);
   }
 
   /**
@@ -162,151 +154,12 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl) {
-    configureDB(job, driverClass, dbUrl, null);
+    org.apache.sqoop.mapreduce.db.DBConfiguration.configureDB(job, driverClass,
+        dbUrl);
   }
-
-  private Configuration conf;
 
   public DBConfiguration(Configuration job) {
-    this.conf = job;
+    super(job);
   }
-
-  /** Returns a connection object to the DB.
-   * @throws ClassNotFoundException
-   * @throws SQLException */
-  public Connection getConnection()
-      throws ClassNotFoundException, SQLException {
-
-    Class.forName(conf.get(DBConfiguration.DRIVER_CLASS_PROPERTY));
-
-    if(conf.get(DBConfiguration.USERNAME_PROPERTY) == null) {
-      return DriverManager.getConnection(
-               conf.get(DBConfiguration.URL_PROPERTY));
-    } else {
-      return DriverManager.getConnection(
-          conf.get(DBConfiguration.URL_PROPERTY),
-          conf.get(DBConfiguration.USERNAME_PROPERTY),
-          conf.get(DBConfiguration.PASSWORD_PROPERTY));
-    }
-  }
-
-  public Configuration getConf() {
-    return conf;
-  }
-
-  public Integer getFetchSize() {
-    if (conf.get(DBConfiguration.FETCH_SIZE) == null) {
-      return null;
-    }
-    return conf.getInt(DBConfiguration.FETCH_SIZE, 0);
-  }
-
-  public void setFetchSize(Integer fetchSize) {
-    if (fetchSize != null) {
-      conf.setInt(DBConfiguration.FETCH_SIZE, fetchSize);
-    } else {
-      conf.set(FETCH_SIZE, null);
-    }
-  }
-  public String getInputTableName() {
-    return conf.get(DBConfiguration.INPUT_TABLE_NAME_PROPERTY);
-  }
-
-  public void setInputTableName(String tableName) {
-    conf.set(DBConfiguration.INPUT_TABLE_NAME_PROPERTY, tableName);
-  }
-
-  public String[] getInputFieldNames() {
-    return conf.getStrings(DBConfiguration.INPUT_FIELD_NAMES_PROPERTY);
-  }
-
-  public void setInputFieldNames(String... fieldNames) {
-    conf.setStrings(DBConfiguration.INPUT_FIELD_NAMES_PROPERTY, fieldNames);
-  }
-
-  public String getInputConditions() {
-    return conf.get(DBConfiguration.INPUT_CONDITIONS_PROPERTY);
-  }
-
-  public void setInputConditions(String conditions) {
-    if (conditions != null && conditions.length() > 0) {
-      conf.set(DBConfiguration.INPUT_CONDITIONS_PROPERTY, conditions);
-    }
-  }
-
-  public String getInputOrderBy() {
-    return conf.get(DBConfiguration.INPUT_ORDER_BY_PROPERTY);
-  }
-
-  public void setInputOrderBy(String orderby) {
-    if(orderby != null && orderby.length() >0) {
-      conf.set(DBConfiguration.INPUT_ORDER_BY_PROPERTY, orderby);
-    }
-  }
-
-  public String getInputQuery() {
-    return conf.get(DBConfiguration.INPUT_QUERY);
-  }
-
-  public void setInputQuery(String query) {
-    if(query != null && query.length() >0) {
-      conf.set(DBConfiguration.INPUT_QUERY, query);
-    }
-  }
-
-  public String getInputCountQuery() {
-    return conf.get(DBConfiguration.INPUT_COUNT_QUERY);
-  }
-
-  public void setInputCountQuery(String query) {
-    if(query != null && query.length() > 0) {
-      conf.set(DBConfiguration.INPUT_COUNT_QUERY, query);
-    }
-  }
-
-  public void setInputBoundingQuery(String query) {
-    if (query != null && query.length() > 0) {
-      conf.set(DBConfiguration.INPUT_BOUNDING_QUERY, query);
-    }
-  }
-
-  public String getInputBoundingQuery() {
-    return conf.get(DBConfiguration.INPUT_BOUNDING_QUERY);
-  }
-
-  public Class<?> getInputClass() {
-    return conf.getClass(DBConfiguration.INPUT_CLASS_PROPERTY,
-                         NullDBWritable.class);
-  }
-
-  public void setInputClass(Class<? extends DBWritable> inputClass) {
-    conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, inputClass,
-                  DBWritable.class);
-  }
-
-  public String getOutputTableName() {
-    return conf.get(DBConfiguration.OUTPUT_TABLE_NAME_PROPERTY);
-  }
-
-  public void setOutputTableName(String tableName) {
-    conf.set(DBConfiguration.OUTPUT_TABLE_NAME_PROPERTY, tableName);
-  }
-
-  public String[] getOutputFieldNames() {
-    return conf.getStrings(DBConfiguration.OUTPUT_FIELD_NAMES_PROPERTY);
-  }
-
-  public void setOutputFieldNames(String... fieldNames) {
-    conf.setStrings(DBConfiguration.OUTPUT_FIELD_NAMES_PROPERTY, fieldNames);
-  }
-
-  public void setOutputFieldCount(int fieldCount) {
-    conf.setInt(DBConfiguration.OUTPUT_FIELD_COUNT_PROPERTY, fieldCount);
-  }
-
-  public int getOutputFieldCount() {
-    return conf.getInt(OUTPUT_FIELD_COUNT_PROPERTY, 0);
-  }
-
 }
 

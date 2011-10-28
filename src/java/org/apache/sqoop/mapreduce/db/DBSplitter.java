@@ -15,8 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.mapreduce.db;
+package org.apache.sqoop.mapreduce.db;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputSplit;
 
 /**
  * DBSplitter will generate DBInputSplits to use with DataDrivenDBInputFormat.
@@ -25,10 +31,14 @@ package com.cloudera.sqoop.mapreduce.db;
  * on the data-type of the column, this requires different behavior.
  * DBSplitter implementations should perform this for a data type or family
  * of data types.
- *
- * @deprecated use org.apache.sqoop.mapreduce.db.DBSplitter instead.
- * @see org.apache.sqoop.mapreduce.db.DBSplitter
  */
-public interface DBSplitter extends org.apache.sqoop.mapreduce.db.DBSplitter {
+public interface DBSplitter {
 
+  /**
+   * Given a ResultSet containing one record (and already advanced to that
+   * record) with two columns (a low value, and a high value, both of the same
+   * type), determine a set of splits that span the given values.
+   */
+  List<InputSplit> split(Configuration conf, ResultSet results, String colName)
+      throws SQLException;
 }

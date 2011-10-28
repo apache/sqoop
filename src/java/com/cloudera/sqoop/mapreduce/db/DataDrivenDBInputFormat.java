@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,67 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.mapreduce.db;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
 /**
  * A InputFormat that reads input data from an SQL table.
  * Operates like DBInputFormat, but instead of using LIMIT and OFFSET to
  * demarcate splits, it tries to generate WHERE clauses which separate the
  * data into roughly equivalent shards.
+ *
+ * @deprecated use org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat instead
+ * @see org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat
  */
 public class DataDrivenDBInputFormat<T extends DBWritable>
-    extends DBInputFormat<T> implements Configurable {
-
-  private static final Log LOG =
-      LogFactory.getLog(DataDrivenDBInputFormat.class);
+    extends org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat<T> {
 
   /**
    * If users are providing their own query, the following string is expected
    * to appear in the WHERE clause, which will be substituted with a pair of
    * conditions on the input to allow input splits to parallelise the import.
    */
-  public static final String SUBSTITUTE_TOKEN = "$CONDITIONS";
+  public static final String SUBSTITUTE_TOKEN =
+      org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.SUBSTITUTE_TOKEN;
 
   /**
    * A InputSplit that spans a set of rows.
+   *
+   * @deprecated use org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.
+   *   DataDrivenDBInputSplit instead.
+   * @see org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.
+   * 					DataDrivenDBInputSplit
    */
-  public static class DataDrivenDBInputSplit
-      extends DBInputFormat.DBInputSplit {
-
-    private String lowerBoundClause;
-    private String upperBoundClause;
+  public static class DataDrivenDBInputSplit extends
+  org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit {
 
     /**
      * Default Constructor.
      */
     public DataDrivenDBInputSplit() {
+      super();
     }
 
     /**
@@ -88,189 +67,10 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
      * on the 'upper' end.
      */
     public DataDrivenDBInputSplit(final String lower, final String upper) {
-      this.lowerBoundClause = lower;
-      this.upperBoundClause = upper;
-    }
-
-
-    /**
-     * @return The total row count in this split.
-     */
-    public long getLength() throws IOException {
-      return 0; // unfortunately, we don't know this.
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public void readFields(DataInput input) throws IOException {
-      this.lowerBoundClause = Text.readString(input);
-      this.upperBoundClause = Text.readString(input);
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public void write(DataOutput output) throws IOException {
-      Text.writeString(output, this.lowerBoundClause);
-      Text.writeString(output, this.upperBoundClause);
-    }
-
-    public String getLowerClause() {
-      return lowerBoundClause;
-    }
-
-    public String getUpperClause() {
-      return upperBoundClause;
+      super(lower, upper);
     }
   }
 
-  /**
-   * @return the DBSplitter implementation to use to divide the table/query
-   * into InputSplits.
-   */
-  protected DBSplitter getSplitter(int sqlDataType) {
-    switch (sqlDataType) {
-    case Types.NUMERIC:
-    case Types.DECIMAL:
-      return new BigDecimalSplitter();
-
-    case Types.BIT:
-    case Types.BOOLEAN:
-      return new BooleanSplitter();
-
-    case Types.INTEGER:
-    case Types.TINYINT:
-    case Types.SMALLINT:
-    case Types.BIGINT:
-      return new IntegerSplitter();
-
-    case Types.REAL:
-    case Types.FLOAT:
-    case Types.DOUBLE:
-      return new FloatSplitter();
-
-    case Types.CHAR:
-    case Types.VARCHAR:
-    case Types.LONGVARCHAR:
-      return new TextSplitter();
-
-    case Types.DATE:
-    case Types.TIME:
-    case Types.TIMESTAMP:
-      return new DateSplitter();
-
-    default:
-      // TODO: Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT, CLOB,
-      // BLOB, ARRAY, STRUCT, REF, DATALINK, and JAVA_OBJECT.
-      return null;
-    }
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public List<InputSplit> getSplits(JobContext job) throws IOException {
-
-    int targetNumTasks = ConfigurationHelper.getJobNumMaps(job);
-    String boundaryQuery = getDBConf().getInputBoundingQuery();
-
-    // If user do not forced us to use his boundary query and we don't have to
-    // bacause there is only one mapper we will return single split that
-    // separates nothing. This can be considerably more optimal for a large
-    // table with no index.
-    if (1 == targetNumTasks
-            && (boundaryQuery == null || boundaryQuery.isEmpty())) {
-      List<InputSplit> singletonSplit = new ArrayList<InputSplit>();
-      singletonSplit.add(new DataDrivenDBInputSplit("1=1", "1=1"));
-      return singletonSplit;
-    }
-
-    ResultSet results = null;
-    Statement statement = null;
-    Connection connection = getConnection();
-    try {
-      statement = connection.createStatement();
-
-      String query = getBoundingValsQuery();
-      LOG.info("BoundingValsQuery: " + query);
-
-      results = statement.executeQuery(query);
-      results.next();
-
-      // Based on the type of the results, use a different mechanism
-      // for interpolating split points (i.e., numeric splits, text splits,
-      // dates, etc.)
-      int sqlDataType = results.getMetaData().getColumnType(1);
-      boolean isSigned = results.getMetaData().isSigned(1);
-
-      // MySQL has an unsigned integer which we need to allocate space for
-      if (sqlDataType == Types.INTEGER && !isSigned){
-          sqlDataType = Types.BIGINT;
-      }
-
-      DBSplitter splitter = getSplitter(sqlDataType);
-      if (null == splitter) {
-        throw new IOException("Unknown SQL data type: " + sqlDataType);
-      }
-
-      return splitter.split(job.getConfiguration(), results,
-          getDBConf().getInputOrderBy());
-    } catch (SQLException e) {
-      throw new IOException(e);
-    } finally {
-      // More-or-less ignore SQL exceptions here, but log in case we need it.
-      try {
-        if (null != results) {
-          results.close();
-        }
-      } catch (SQLException se) {
-        LOG.debug("SQLException closing resultset: " + se.toString());
-      }
-
-      try {
-        if (null != statement) {
-          statement.close();
-        }
-      } catch (SQLException se) {
-        LOG.debug("SQLException closing statement: " + se.toString());
-      }
-
-      try {
-        connection.commit();
-        closeConnection();
-      } catch (SQLException se) {
-        LOG.debug("SQLException committing split transaction: "
-            + se.toString());
-      }
-    }
-  }
-
-  /**
-   * @return a query which returns the minimum and maximum values for
-   * the order-by column.
-   *
-   * The min value should be in the first column, and the
-   * max value should be in the second column of the results.
-   */
-  protected String getBoundingValsQuery() {
-    // If the user has provided a query, use that instead.
-    String userQuery = getDBConf().getInputBoundingQuery();
-    if (null != userQuery) {
-      return userQuery;
-    }
-
-    // Auto-generate one based on the table name we've been provided with.
-    StringBuilder query = new StringBuilder();
-
-    String splitCol = getDBConf().getInputOrderBy();
-    query.append("SELECT MIN(").append(splitCol).append("), ");
-    query.append("MAX(").append(splitCol).append(") FROM ");
-    query.append(getDBConf().getInputTableName());
-    String conditions = getDBConf().getInputConditions();
-    if (null != conditions) {
-      query.append(" WHERE ( " + conditions + " )");
-    }
-
-    return query.toString();
-  }
 
   /** Set the user-defined bounding query to use with a user-defined query.
       This *must* include the substring "$CONDITIONS"
@@ -282,35 +82,8 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
       inside each split.
     */
   public static void setBoundingQuery(Configuration conf, String query) {
-    if (null != query) {
-      // If the user's settng a query, warn if they don't allow conditions.
-      if (query.indexOf(SUBSTITUTE_TOKEN) == -1) {
-        LOG.warn("Could not find " + SUBSTITUTE_TOKEN + " token in query: "
-            + query + "; splits may not partition data.");
-      }
-    }
-
-    conf.set(DBConfiguration.INPUT_BOUNDING_QUERY, query);
-  }
-
-  protected RecordReader<LongWritable, T> createDBRecordReader(
-      DBInputSplit split, Configuration conf) throws IOException {
-
-    DBConfiguration dbConf = getDBConf();
-    @SuppressWarnings("unchecked")
-    Class<T> inputClass = (Class<T>) (dbConf.getInputClass());
-    String dbProductName = getDBProductName();
-
-    LOG.debug("Creating db record reader for db product: " + dbProductName);
-
-    try {
-      return new DataDrivenDBRecordReader<T>(split, inputClass,
-          conf, getConnection(), dbConf, dbConf.getInputConditions(),
-          dbConf.getInputFieldNames(), dbConf.getInputTableName(),
-          dbProductName);
-    } catch (SQLException ex) {
-      throw new IOException(ex);
-    }
+    org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.setBoundingQuery(
+        conf, query);
   }
 
   // Configuration methods override superclass to ensure that the proper
@@ -324,9 +97,8 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
       Class<? extends DBWritable> inputClass,
       String tableName, String conditions,
       String splitBy, String... fieldNames) {
-    DBInputFormat.setInput(job, inputClass, tableName, conditions,
-        splitBy, fieldNames);
-    job.setInputFormatClass(DataDrivenDBInputFormat.class);
+    org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.setInput(
+        job, inputClass, tableName, conditions, splitBy, fieldNames);
   }
 
   /** setInput() takes a custom query and a separate "bounding query" to use
@@ -335,9 +107,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
   public static void setInput(Job job,
       Class<? extends DBWritable> inputClass,
       String inputQuery, String inputBoundingQuery) {
-    DBInputFormat.setInput(job, inputClass, inputQuery, "");
-    job.getConfiguration().set(DBConfiguration.INPUT_BOUNDING_QUERY,
-        inputBoundingQuery);
-    job.setInputFormatClass(DataDrivenDBInputFormat.class);
+    org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.setInput(
+        job, inputClass, inputQuery, inputBoundingQuery);
   }
 }

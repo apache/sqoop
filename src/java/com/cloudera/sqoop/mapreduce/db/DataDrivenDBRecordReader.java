@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,15 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.mapreduce.db;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
@@ -34,14 +28,13 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
  * using data-driven WHERE clause splits.
  * Emits LongWritables containing the record number as
  * key and DBWritables as value.
+ *
+ * @deprecated use org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader
+ *   instead.
+ * @see org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader
  */
 public class DataDrivenDBRecordReader<T extends DBWritable>
-    extends DBRecordReader<T> {
-
-  private static final Log LOG =
-      LogFactory.getLog(DataDrivenDBRecordReader.class);
-
-  private String dbProductName; // database manufacturer string.
+    extends org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader<T> {
 
   // CHECKSTYLE:OFF
   // TODO(aaron): Refactor constructor to use fewer arguments.
@@ -53,77 +46,8 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
       Class<T> inputClass, Configuration conf, Connection conn,
       DBConfiguration dbConfig, String cond, String [] fields, String table,
       String dbProduct) throws SQLException {
-    super(split, inputClass, conf, conn, dbConfig, cond, fields, table);
-    this.dbProductName = dbProduct;
+    super(split, inputClass, conf, conn, dbConfig,
+        cond, fields, table, dbProduct);
   }
   // CHECKSTYLE:ON
-
-  @Override
-  /** {@inheritDoc} */
-  public float getProgress() throws IOException {
-    return isDone() ? 1.0f : 0.0f;
-  }
-
-  /** Returns the query for selecting the records,
-   * subclasses can override this for custom behaviour.*/
-  protected String getSelectQuery() {
-    StringBuilder query = new StringBuilder();
-    DataDrivenDBInputFormat.DataDrivenDBInputSplit dataSplit =
-        (DataDrivenDBInputFormat.DataDrivenDBInputSplit) getSplit();
-    DBConfiguration dbConf = getDBConf();
-    String [] fieldNames = getFieldNames();
-    String tableName = getTableName();
-    String conditions = getConditions();
-
-    // Build the WHERE clauses associated with the data split first.
-    // We need them in both branches of this function.
-    StringBuilder conditionClauses = new StringBuilder();
-    conditionClauses.append("( ").append(dataSplit.getLowerClause());
-    conditionClauses.append(" ) AND ( ").append(dataSplit.getUpperClause());
-    conditionClauses.append(" )");
-
-    if(dbConf.getInputQuery() == null) {
-      // We need to generate the entire query.
-      query.append("SELECT ");
-
-      for (int i = 0; i < fieldNames.length; i++) {
-        query.append(fieldNames[i]);
-        if (i != fieldNames.length -1) {
-          query.append(", ");
-        }
-      }
-
-      query.append(" FROM ").append(tableName);
-      if (!dbProductName.startsWith("ORACLE")) {
-        // Seems to be necessary for hsqldb? Oracle explicitly does *not*
-        // use this clause.
-        query.append(" AS ").append(tableName);
-      }
-      query.append(" WHERE ");
-      if (conditions != null && conditions.length() > 0) {
-        // Put the user's conditions first.
-        query.append("( ").append(conditions).append(" ) AND ");
-      }
-
-      // Now append the conditions associated with our split.
-      query.append(conditionClauses.toString());
-
-    } else {
-      // User provided the query. We replace the special token with
-      // our WHERE clause.
-      String inputQuery = dbConf.getInputQuery();
-      if (inputQuery.indexOf(DataDrivenDBInputFormat.SUBSTITUTE_TOKEN) == -1) {
-        LOG.error("Could not find the clause substitution token "
-            + DataDrivenDBInputFormat.SUBSTITUTE_TOKEN + " in the query: ["
-            + inputQuery + "]. Parallel splits may not work correctly.");
-      }
-
-      query.append(inputQuery.replace(DataDrivenDBInputFormat.SUBSTITUTE_TOKEN,
-          conditionClauses.toString()));
-    }
-
-    LOG.debug("Using query: " + query.toString());
-
-    return query.toString();
-  }
 }

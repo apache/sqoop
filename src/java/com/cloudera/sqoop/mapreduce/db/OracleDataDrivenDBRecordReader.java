@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.mapreduce.db;
 
 import java.sql.Connection;
@@ -29,9 +26,13 @@ import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 /**
  * A RecordReader that reads records from a Oracle table
  * via DataDrivenDBRecordReader.
+ *
+ * @deprecated use org.apache.sqoop.mapreduce.db.OracleDataDrivenDBRecordReader
+ *   instead.
+ * @see org.apache.sqoop.mapreduce.db.OracleDataDrivenDBRecordReader
  */
 public class OracleDataDrivenDBRecordReader<T extends DBWritable>
-    extends DataDrivenDBRecordReader<T> {
+    extends org.apache.sqoop.mapreduce.db.OracleDataDrivenDBRecordReader<T> {
 
   // CHECKSTYLE:OFF
   // TODO(aaron): Enable checkstyle after refactoring DBRecordReader c'tor.
@@ -40,11 +41,7 @@ public class OracleDataDrivenDBRecordReader<T extends DBWritable>
       DBConfiguration dbConfig, String cond, String [] fields,
       String table) throws SQLException {
 
-    super(split, inputClass, conf, conn, dbConfig, cond, fields, table,
-        "ORACLE");
-
-    // Must initialize the tz used by the connection for Oracle.
-    OracleDBRecordReader.setSessionTimeZone(conf, conn);
+    super(split, inputClass, conf, conn, dbConfig, cond, fields, table);
   }
   // CHECKSTYLE:ON
 }
