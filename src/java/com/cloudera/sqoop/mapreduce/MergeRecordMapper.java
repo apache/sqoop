@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,20 +18,9 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.io.LongWritable;
-
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Mapper for the merge program which operates on SequenceFiles.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class MergeRecordMapper
-    extends MergeMapperBase<LongWritable, SqoopRecord> {
-
-  public void map(LongWritable key, SqoopRecord val, Context c)
-      throws IOException, InterruptedException {
-    processRecord(val, c);
-  }
+    extends org.apache.sqoop.mapreduce.MergeRecordMapper {
 }

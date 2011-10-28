@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,81 +18,10 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-
 /**
- * InputFormat designed to take data-driven splits and feed them to a mysqldump
- * invocation running in the mapper.
- *
- * The key emitted by this mapper is a WHERE clause to use in the command
- * to mysqldump.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class MySQLDumpInputFormat extends DataDrivenDBInputFormat {
-
-  public static final Log LOG = LogFactory.getLog(
-      MySQLDumpInputFormat.class.getName());
-
-  /**
-   * A RecordReader that just takes the WHERE conditions from the DBInputSplit
-   * and relates them to the mapper as a single input record.
-   */
-  public static class MySQLDumpRecordReader
-      extends RecordReader<String, NullWritable> {
-
-    private boolean delivered;
-    private String clause;
-
-    public MySQLDumpRecordReader(InputSplit split) {
-      initialize(split, null);
-    }
-
-    @Override
-    public boolean nextKeyValue() {
-      boolean hasNext = !delivered;
-      delivered = true;
-      return hasNext;
-    }
-
-    @Override
-    public String getCurrentKey() {
-      return clause;
-    }
-
-    @Override
-    public NullWritable getCurrentValue() {
-      return NullWritable.get();
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public float getProgress() {
-      return delivered ? 1.0f : 0.0f;
-    }
-
-    @Override
-    public void initialize(InputSplit split, TaskAttemptContext context) {
-      DataDrivenDBInputFormat.DataDrivenDBInputSplit dbSplit =
-          (DataDrivenDBInputFormat.DataDrivenDBInputSplit) split;
-
-      this.clause = "(" + dbSplit.getLowerClause() + ") AND ("
-          + dbSplit.getUpperClause() + ")";
-    }
-  }
-
-  public RecordReader<String, NullWritable> createRecordReader(InputSplit split,
-      TaskAttemptContext context) {
-    return new MySQLDumpRecordReader(split);
-  }
-
+public class MySQLDumpInputFormat
+    extends org.apache.sqoop.mapreduce.MySQLDumpInputFormat {
 }
 

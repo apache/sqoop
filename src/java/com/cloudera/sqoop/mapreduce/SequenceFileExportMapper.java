@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,27 +18,9 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper.Context;
-
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Reads a SqoopRecord from the SequenceFile in which it's packed and emits
- * that DBWritable to the OutputFormat for writeback to the database.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class SequenceFileExportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
-    NullWritable> {
-
-  public SequenceFileExportMapper() {
-  }
-
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    context.write(val, NullWritable.get());
-  }
+    extends org.apache.sqoop.mapreduce.SequenceFileExportMapper {
 }

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,20 +22,21 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 
 /**
- * Helper class for setting up an Avro MapReduce job.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public final class AvroJob {
-  public static final String MAP_OUTPUT_SCHEMA = "avro.map.output.schema";
 
-  private AvroJob() {
-  }
+  public static final String MAP_OUTPUT_SCHEMA =
+      org.apache.sqoop.mapreduce.AvroJob.MAP_OUTPUT_SCHEMA;
+
+  private AvroJob() { }
 
   public static void setMapOutputSchema(Configuration job, Schema s) {
-    job.set(MAP_OUTPUT_SCHEMA, s.toString());
+    org.apache.sqoop.mapreduce.AvroJob.setMapOutputSchema(job, s);
   }
 
-  /** Return a job's map output key schema. */
   public static Schema getMapOutputSchema(Configuration job) {
-    return Schema.parse(job.get(MAP_OUTPUT_SCHEMA));
+    return org.apache.sqoop.mapreduce.AvroJob.getMapOutputSchema(job);
   }
+
 }

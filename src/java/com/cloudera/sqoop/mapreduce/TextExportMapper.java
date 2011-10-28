@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,68 +18,9 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper.Context;
-import org.apache.hadoop.util.ReflectionUtils;
-
-import com.cloudera.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Converts an input record from a string representation to a parsed Sqoop
- * record and emits that DBWritable to the OutputFormat for writeback to the
- * database.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class TextExportMapper
-    extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {
-
-  private SqoopRecord recordImpl;
-
-  public TextExportMapper() {
-  }
-
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
-
-    Configuration conf = context.getConfiguration();
-
-    // Instantiate a copy of the user's class to hold and parse the record.
-    String recordClassName = conf.get(
-        ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
-    if (null == recordClassName) {
-      throw new IOException("Export table class name ("
-          + ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY
-          + ") is not set!");
-    }
-
-    try {
-      Class cls = Class.forName(recordClassName, true,
-          Thread.currentThread().getContextClassLoader());
-      recordImpl = (SqoopRecord) ReflectionUtils.newInstance(cls, conf);
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException(cnfe);
-    }
-
-    if (null == recordImpl) {
-      throw new IOException("Could not instantiate object of type "
-          + recordClassName);
-    }
-  }
-
-
-  public void map(LongWritable key, Text val, Context context)
-      throws IOException, InterruptedException {
-    try {
-      recordImpl.parse(val);
-      context.write(recordImpl, NullWritable.get());
-    } catch (RecordParser.ParseError pe) {
-      throw new IOException("Could not parse record: " + val, pe);
-    }
-  }
+    extends org.apache.sqoop.mapreduce.TextExportMapper {
 }

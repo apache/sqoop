@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,42 +18,10 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.avro.mapred.AvroWrapper;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-
-/** An {@link org.apache.hadoop.mapred.InputFormat} for Avro data files. */
+/**
+ * @deprecated Moving to use org.apache.sqoop namespace.
+ */
 public class AvroInputFormat<T>
-  extends FileInputFormat<AvroWrapper<T>, NullWritable> {
-
-  @Override
-  protected List<FileStatus> listStatus(JobContext job) throws IOException {
-    List<FileStatus> result = new ArrayList<FileStatus>();
-    for (FileStatus file : super.listStatus(job)) {
-      if (file.getPath().getName().endsWith(
-          org.apache.avro.mapred.AvroOutputFormat.EXT)) {
-        result.add(file);
-      }
-    }
-    return result;
-  }
-
-  @Override
-  public RecordReader<AvroWrapper<T>, NullWritable> createRecordReader(
-      InputSplit split, TaskAttemptContext context) throws IOException,
-      InterruptedException {
-    context.setStatus(split.toString());
-    return new AvroRecordReader<T>();
-  }
-
+    extends org.apache.sqoop.mapreduce.AvroInputFormat<T> {
 }
 

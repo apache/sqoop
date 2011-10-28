@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,85 +19,25 @@
 package com.cloudera.sqoop.mapreduce;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.*;
-
-/** An {@link OutputFormat} that writes plain text files.
- * Only writes the key. Does not write any delimiter/newline after the key.
+/**
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
+public class RawKeyTextOutputFormat<K, V>
+    extends org.apache.sqoop.mapreduce.RawKeyTextOutputFormat<K, V> {
 
-  protected static class RawKeyRecordWriter<K, V> extends RecordWriter<K, V> {
-    private static final String UTF8 = "UTF-8";
-
-    protected DataOutputStream out;
+  /**
+   * @deprecated Moving to use org.apache.sqoop namespace.
+   */
+  public static class RawKeyRecordWriter<K, V>
+      extends org.apache.sqoop.mapreduce.RawKeyTextOutputFormat.
+      RawKeyRecordWriter<K, V> {
 
     public RawKeyRecordWriter(DataOutputStream out) {
-      this.out = out;
+      super(out);
     }
 
-    /**
-     * Write the object to the byte stream, handling Text as a special
-     * case.
-     * @param o the object to print
-     * @throws IOException if the write throws, we pass it on
-     */
-    private void writeObject(Object o) throws IOException {
-      if (o instanceof Text) {
-        Text to = (Text) o;
-        out.write(to.getBytes(), 0, to.getLength());
-      } else {
-        out.write(o.toString().getBytes(UTF8));
-      }
-    }
-
-    public synchronized void write(K key, V value) throws IOException {
-      writeObject(key);
-    }
-
-    public synchronized void close(TaskAttemptContext context)
-        throws IOException {
-      out.close();
-    }
   }
 
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    boolean isCompressed = getCompressOutput(context);
-    Configuration conf = context.getConfiguration();
-    String ext = "";
-    CompressionCodec codec = null;
-
-    if (isCompressed) {
-      // create the named codec
-      Class<? extends CompressionCodec> codecClass =
-        getOutputCompressorClass(context, GzipCodec.class);
-      codec = ReflectionUtils.newInstance(codecClass, conf);
-
-      ext = codec.getDefaultExtension();
-    }
-
-    Path file = getDefaultWorkFile(context, ext);
-    FileSystem fs = file.getFileSystem(conf);
-    FSDataOutputStream fileOut = fs.create(file, false);
-    DataOutputStream ostream = fileOut;
-
-    if (isCompressed) {
-      ostream = new DataOutputStream(codec.createOutputStream(fileOut));
-    }
-
-    return new RawKeyRecordWriter<K, V>(ostream);
-  }
 }
 

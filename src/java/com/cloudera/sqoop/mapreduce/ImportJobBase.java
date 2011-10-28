@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,49 +18,24 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.PerfCounters;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.io.CodecMap;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
 /**
- * Base class for running an import MapReduce job.
- * Allows dependency injection, etc, for easy customization of import job types.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class ImportJobBase extends JobBase {
-
-  private ImportJobContext context;
-
-  public static final Log LOG = LogFactory.getLog(
-      ImportJobBase.class.getName());
+public class ImportJobBase
+    extends org.apache.sqoop.mapreduce.ImportJobBase {
 
   public ImportJobBase() {
-    this(null);
+    super();
   }
 
   public ImportJobBase(final SqoopOptions opts) {
-    this(opts, null, null, null, null);
+    super(opts);
   }
 
   public ImportJobBase(final SqoopOptions opts,
@@ -70,138 +43,7 @@ public class ImportJobBase extends JobBase {
       final Class<? extends InputFormat> inputFormatClass,
       final Class<? extends OutputFormat> outputFormatClass,
       final ImportJobContext context) {
-    super(opts, mapperClass, inputFormatClass, outputFormatClass);
-    this.context = context;
+    super(opts, mapperClass, inputFormatClass, outputFormatClass, context);
   }
 
-  /**
-   * Configure the output format to use for the job.
-   */
-  @Override
-  protected void configureOutputFormat(Job job, String tableName,
-      String tableClassName) throws ClassNotFoundException, IOException {
-
-    job.setOutputFormatClass(getOutputFormatClass());
-
-    if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
-      job.getConfiguration().set("mapred.output.value.class", tableClassName);
-    }
-
-    if (options.shouldUseCompression()) {
-      FileOutputFormat.setCompressOutput(job, true);
-
-      String codecName = options.getCompressionCodec();
-      Class<? extends CompressionCodec> codecClass;
-      if (codecName == null) {
-        codecClass = GzipCodec.class;
-      } else {
-        Configuration conf = job.getConfiguration();
-        codecClass = CodecMap.getCodec(codecName, conf).getClass();
-      }
-      FileOutputFormat.setOutputCompressorClass(job, codecClass);
-
-      if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
-        SequenceFileOutputFormat.setOutputCompressionType(job,
-            CompressionType.BLOCK);
-      }
-    }
-
-    Path outputPath = context.getDestination();
-    FileOutputFormat.setOutputPath(job, outputPath);
-  }
-
-  /**
-   * Actually run the MapReduce job.
-   */
-  @Override
-  protected boolean runJob(Job job) throws ClassNotFoundException, IOException,
-      InterruptedException {
-
-    PerfCounters perfCounters = new PerfCounters();
-    perfCounters.startClock();
-
-    boolean success = job.waitForCompletion(true);
-    perfCounters.stopClock();
-
-    Counters jobCounters = job.getCounters();
-    // If the job has been retired, these may be unavailable.
-    if (null == jobCounters) {
-      displayRetiredJobNotice(LOG);
-    } else {
-      perfCounters.addBytes(jobCounters.getGroup("FileSystemCounters")
-        .findCounter("HDFS_BYTES_WRITTEN").getValue());
-      LOG.info("Transferred " + perfCounters.toString());
-      long numRecords = ConfigurationHelper.getNumMapOutputRecords(job);
-      LOG.info("Retrieved " + numRecords + " records.");
-    }
-    return success;
-  }
-
-
-  /**
-   * Run an import job to read a table in to HDFS.
-   *
-   * @param tableName  the database table to read; may be null if a free-form
-   * query is specified in the SqoopOptions, and the ImportJobBase subclass
-   * supports free-form queries.
-   * @param ormJarFile the Jar file to insert into the dcache classpath.
-   * (may be null)
-   * @param splitByCol the column of the database table to use to split
-   * the import
-   * @param conf A fresh Hadoop Configuration to use to build an MR job.
-   * @throws IOException if the job encountered an IO problem
-   * @throws ImportException if the job failed unexpectedly or was
-   * misconfigured.
-   */
-  public void runImport(String tableName, String ormJarFile, String splitByCol,
-      Configuration conf) throws IOException, ImportException {
-
-    if (null != tableName) {
-      LOG.info("Beginning import of " + tableName);
-    } else {
-      LOG.info("Beginning query import.");
-    }
-
-    String tableClassName =
-        new TableClassName(options).getClassForTable(tableName);
-    loadJars(conf, ormJarFile, tableClassName);
-
-    try {
-      Job job = new Job(conf);
-
-      // Set the external jar to use for the job.
-      job.getConfiguration().set("mapred.jar", ormJarFile);
-
-      configureInputFormat(job, tableName, tableClassName, splitByCol);
-      configureOutputFormat(job, tableName, tableClassName);
-      configureMapper(job, tableName, tableClassName);
-      configureNumTasks(job);
-      cacheJars(job, getContext().getConnManager());
-
-      jobSetup(job);
-      setJob(job);
-      boolean success = runJob(job);
-      if (!success) {
-        throw new ImportException("Import job failed!");
-      }
-    } catch (InterruptedException ie) {
-      throw new IOException(ie);
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException(cnfe);
-    } finally {
-      unloadJars();
-    }
-  }
-
-  /**
-   * Open-ended "setup" routine that is called after the job is configured
-   * but just before it is submitted to MapReduce. Subclasses may override
-   * if necessary.
-   */
-  protected void jobSetup(Job job) throws IOException, ImportException {
-  }
-
-  protected ImportJobContext getContext() {
-    return context;
-  }
 }

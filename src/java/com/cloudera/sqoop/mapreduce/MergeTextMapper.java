@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,44 +18,9 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.util.ReflectionUtils;
-
-import com.cloudera.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Mapper for the merge program which operates on text files that we need to
- * parse into SqoopRecord instances.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class MergeTextMapper extends MergeMapperBase<LongWritable, Text> {
-
-  private SqoopRecord record;
-
-  @Override
-  protected void setup(Context c) throws IOException, InterruptedException {
-    Configuration conf = c.getConfiguration();
-
-    Class<? extends SqoopRecord> recordClass =
-        (Class<? extends SqoopRecord>) conf.getClass(
-        MergeJob.MERGE_SQOOP_RECORD_KEY, SqoopRecord.class);
-    this.record = ReflectionUtils.newInstance(recordClass, conf);
-
-    super.setup(c);
-  }
-
-  public void map(LongWritable key, Text val, Context c)
-      throws IOException, InterruptedException {
-    try {
-      this.record.parse(val);
-    } catch (RecordParser.ParseError pe) {
-      throw new IOException(pe);
-    }
-
-    processRecord(this.record, c);
-  }
+public class MergeTextMapper
+    extends org.apache.sqoop.mapreduce.MergeTextMapper {
 }

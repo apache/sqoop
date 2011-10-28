@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,48 +18,9 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.mapred.AvroWrapper;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-/** An {@link org.apache.hadoop.mapred.OutputFormat} for Avro data files. */
+/**
+ * @deprecated Moving to use org.apache.sqoop namespace.
+ */
 public class AvroOutputFormat<T>
-  extends FileOutputFormat<AvroWrapper<T>, NullWritable> {
-
-  @Override
-  public RecordWriter<AvroWrapper<T>, NullWritable> getRecordWriter(
-      TaskAttemptContext context) throws IOException, InterruptedException {
-
-    Schema schema = AvroJob.getMapOutputSchema(context.getConfiguration());
-
-    final DataFileWriter<T> WRITER =
-      new DataFileWriter<T>(new GenericDatumWriter<T>());
-
-    Path path = getDefaultWorkFile(context,
-        org.apache.avro.mapred.AvroOutputFormat.EXT);
-    WRITER.create(schema,
-        path.getFileSystem(context.getConfiguration()).create(path));
-
-    return new RecordWriter<AvroWrapper<T>, NullWritable>() {
-      @Override
-      public void write(AvroWrapper<T> wrapper, NullWritable ignore)
-        throws IOException {
-        WRITER.append(wrapper.datum());
-      }
-      @Override
-      public void close(TaskAttemptContext context) throws IOException,
-          InterruptedException {
-        WRITER.close();
-      }
-    };
-  }
-
+    extends org.apache.sqoop.mapreduce.AvroOutputFormat<T> {
 }

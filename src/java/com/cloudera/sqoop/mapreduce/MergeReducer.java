@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,41 +18,10 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
-
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Reducer for merge tool. Given records tagged as 'old' or 'new', emit
- * a new one if possible; otherwise, an old one.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class MergeReducer
-    extends Reducer<Text, MergeRecord, SqoopRecord, NullWritable> {
-
-  @Override
-  public void reduce(Text key, Iterable<MergeRecord> vals, Context c)
-      throws IOException, InterruptedException {
-    SqoopRecord bestRecord = null;
-    try {
-      for (MergeRecord val : vals) {
-        if (null == bestRecord && !val.isNewRecord()) {
-          // Use an old record if we don't have a new record.
-          bestRecord = (SqoopRecord) val.getSqoopRecord().clone();
-        } else if (val.isNewRecord()) {
-          bestRecord = (SqoopRecord) val.getSqoopRecord().clone();
-        }
-      }
-    } catch (CloneNotSupportedException cnse) {
-      throw new IOException(cnse);
-    }
-
-    if (null != bestRecord) {
-      c.write(bestRecord, NullWritable.get());
-    }
-  }
+    extends org.apache.sqoop.mapreduce.MergeReducer {
 }
 

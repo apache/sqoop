@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,24 +18,10 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import java.io.IOException;
-
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import com.cloudera.sqoop.lib.SqoopRecord;
-
 /**
- * Imports records by writing them to HBase via the DelegatingOutputFormat
- * and the HBasePutProcessor.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class HBaseImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
-    NullWritable> {
-
-  @Override
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    context.write(val, NullWritable.get());
-  }
+    extends org.apache.sqoop.mapreduce.HBaseImportMapper {
 }
 

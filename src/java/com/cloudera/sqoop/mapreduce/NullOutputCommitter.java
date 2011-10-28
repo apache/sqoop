@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,27 +18,10 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
-
 /**
- * OutputCommitter instance that does nothing.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class NullOutputCommitter extends OutputCommitter {
-  public void abortTask(TaskAttemptContext taskContext) { }
-
-  public void cleanupJob(JobContext jobContext) { }
-
-  public void commitTask(TaskAttemptContext taskContext) { }
-
-  public boolean needsTaskCommit(TaskAttemptContext taskContext) {
-    return false;
-  }
-
-  public void setupJob(JobContext jobContext) { }
-
-  public void setupTask(TaskAttemptContext taskContext) { }
+public class NullOutputCommitter
+    extends org.apache.sqoop.mapreduce.NullOutputCommitter {
 }
 
