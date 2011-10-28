@@ -808,7 +808,6 @@
       <arg value="+%Y" />
     </exec>
     <javadoc
-      packagenames="com.cloudera.sqoop.lib.*"
       destdir="${build.javadoc}"
       author="true"
       version="true"
@@ -818,6 +817,7 @@
       bottom="Copyright &amp;copy; ${year} The Apache Software Foundation">
       <packageset dir="${src.dir}">
         <include name="com/cloudera/sqoop/lib/**" />
+        <include name="org/apache/sqoop/lib/**" />
       </packageset>
       <classpath>
         <path refid="compile.classpath" />

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,6 +21,8 @@ package com.cloudera.sqoop.lib;
 /**
  * Parse string representations of boolean values into boolean
  * scalar types.
+ * @deprecated use org.apache.sqoop.lib.BooleanParser instead.
+ * @see org.apache.sqoop.lib.BooleanParser
  */
 public final class BooleanParser {
   private BooleanParser() {
@@ -37,9 +37,7 @@ public final class BooleanParser {
    * <p>All comparisons are case-insensitive.</p>
    */
   public static boolean valueOf(final String s) {
-    return s != null && ("true".equalsIgnoreCase(s) || "t".equalsIgnoreCase(s)
-        || "1".equals(s) || "on".equalsIgnoreCase(s)
-        || "yes".equalsIgnoreCase(s));
+    return org.apache.sqoop.lib.BooleanParser.valueOf(s);
   }
 }
 

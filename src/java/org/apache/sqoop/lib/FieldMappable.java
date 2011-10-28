@@ -15,16 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
+
+import java.util.Map;
 
 /**
  * Interface describing a class capable of returning a map of the fields
  * of the object to their values.
- *
- * @deprecated use org.apache.sqoop.lib.FieldMappable instead.
- * @see org.apache.sqoop.lib.FieldMappable
  */
-public interface FieldMappable extends org.apache.sqoop.lib.FieldMappable {
+public interface FieldMappable {
 
+  /**
+   * Returns a map containing all fields of this record.
+   * @return a map from column names to the object-based values for
+   * this record. The map may not be null, though it may be empty.
+   */
+  Map<String, Object> getFieldMap();
 }
-

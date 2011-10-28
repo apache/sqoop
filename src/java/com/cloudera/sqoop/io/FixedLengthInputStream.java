@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,76 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 package com.cloudera.sqoop.io;
 
 import java.io.InputStream;
-import java.io.IOException;
-
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.io.input.CountingInputStream;
-import org.apache.commons.io.input.ProxyInputStream;
 
 /**
  * Provides an InputStream that can consume a fixed maximum number of bytes
  * from an underlying stream. Closing the FixedLengthInputStream does not
  * close the underlying stream. After reading the maximum number of available
  * bytes this acts as though EOF has been reached.
+ *
+ * @deprecated use org.apache.sqoop.io.FixedLengthInputStream instead.
+ * @see org.apache.sqoop.io.FixedLengthInputStream
  */
-public class FixedLengthInputStream extends ProxyInputStream {
+public class FixedLengthInputStream
+  extends org.apache.sqoop.io.FixedLengthInputStream {
 
-  private CountingInputStream countingIn;
-  private long maxBytes;
-
-  public FixedLengthInputStream(InputStream stream, long maxLen) {
-    super(new CountingInputStream(new CloseShieldInputStream(stream)));
-
-    // Save a correctly-typed reference to the underlying stream.
-    this.countingIn = (CountingInputStream) this.in;
-    this.maxBytes = maxLen;
-  }
-
-  /** @return the number of bytes already consumed by the client. */
-  private long consumed() {
-    return countingIn.getByteCount();
-  }
-
-  /**
-   * @return number of bytes remaining to be read before the limit
-   * is reached.
-   */
-  private long toLimit() {
-    return maxBytes - consumed();
-  }
-
-  @Override
-  public int available() throws IOException {
-    return (int) Math.min(toLimit(), countingIn.available());
-  }
-
-  @Override
-  public int read() throws IOException {
-    if (toLimit() > 0) {
-      return super.read();
-    } else {
-      return -1; // EOF.
-    }
-  }
-
-  @Override
-  public int read(byte [] buf) throws IOException {
-    return read(buf, 0, buf.length);
-  }
-
-  @Override
-  public int read(byte [] buf, int start, int count) throws IOException {
-    long limit = toLimit();
-    if (limit == 0) {
-      return -1; // EOF.
-    } else {
-      return super.read(buf, start, (int) Math.min(count, limit));
-    }
-  }
+   public FixedLengthInputStream(InputStream stream, long maxLen) {
+     super(stream, maxLen);
+   }
 }
 

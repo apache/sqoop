@@ -15,13 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.apache.hadoop.io.Text;
 
 /**
  * Serialize BigDecimal classes to/from DataInput and DataOutput objects.
@@ -38,24 +40,43 @@ import java.math.BigInteger;
  *  [int: scale][boolean: b == true][string: BigInt-part.toString()]
  *
  * TODO(aaron): Get this to work with Hadoop's Serializations framework.
- *
- * @deprecated use org.apache.sqoop.lib.BigDecimalSerializer instead.
- * @see org.apache.sqoop.lib.BigDecimalSerializer
  */
 public final class BigDecimalSerializer {
 
   private BigDecimalSerializer() { }
 
-  static final BigInteger LONG_MAX_AS_BIGINT =
-      org.apache.sqoop.lib.BigDecimalSerializer.LONG_MAX_AS_BIGINT;
-  static final BigInteger LONG_MIN_AS_BIGINT =
-      org.apache.sqoop.lib.BigDecimalSerializer.LONG_MIN_AS_BIGINT;
+  public static final BigInteger LONG_MAX_AS_BIGINT =
+      BigInteger.valueOf(Long.MAX_VALUE);
+  public static final BigInteger LONG_MIN_AS_BIGINT =
+      BigInteger.valueOf(Long.MIN_VALUE);
 
   public static void write(BigDecimal d, DataOutput out) throws IOException {
-    org.apache.sqoop.lib.BigDecimalSerializer.write(d, out);
+    int scale = d.scale();
+    BigInteger bigIntPart = d.unscaledValue();
+    boolean fastpath = bigIntPart.compareTo(LONG_MAX_AS_BIGINT) < 0
+        && bigIntPart .compareTo(LONG_MIN_AS_BIGINT) > 0;
+
+    out.writeInt(scale);
+    out.writeBoolean(fastpath);
+    if (fastpath) {
+      out.writeLong(bigIntPart.longValue());
+    } else {
+      Text.writeString(out, bigIntPart.toString());
+    }
   }
 
   public static BigDecimal readFields(DataInput in) throws IOException {
-    return org.apache.sqoop.lib.BigDecimalSerializer.readFields(in);
+    int scale = in.readInt();
+    boolean fastpath = in.readBoolean();
+    BigInteger unscaledIntPart;
+    if (fastpath) {
+      long unscaledValue = in.readLong();
+      unscaledIntPart = BigInteger.valueOf(unscaledValue);
+    } else {
+      String unscaledValueStr = Text.readString(in);
+      unscaledIntPart = new BigInteger(unscaledValueStr);
+    }
+
+    return new BigDecimal(unscaledIntPart, scale);
   }
 }

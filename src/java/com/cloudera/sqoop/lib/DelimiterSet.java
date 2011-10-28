@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,33 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.lib;
 
 /**
  * Encapsulates a set of delimiters used to encode a record.
+ * @deprecated use org.apache.sqoop.lib.DelimiterSet instead.
+ * @see org.apache.sqoop.lib.DelimiterSet
  */
-public class DelimiterSet implements Cloneable {
+public class DelimiterSet extends org.apache.sqoop.lib.DelimiterSet {
 
-  public static final char NULL_CHAR = '\000';
-
-  private char fieldDelim; // fields terminated by this.
-  private char recordDelim; // records terminated by this.
-
-  // If these next two fields are '\000', then they are ignored.
-  private char enclosedBy;
-  private char escapedBy;
-
-  // If true, then the enclosed-by character is applied to every
-  // field, not just ones containing embedded delimiters.
-  private boolean encloseRequired;
+  public static final char NULL_CHAR =
+      org.apache.sqoop.lib.DelimiterSet.NULL_CHAR;
 
   /**
    * Create a delimiter set with the default delimiters
    * (comma for fields, newline for records).
    */
   public DelimiterSet() {
-    this(',', '\n', NULL_CHAR, NULL_CHAR, false);
+    super();
   }
 
   /**
@@ -57,152 +46,7 @@ public class DelimiterSet implements Cloneable {
    */
   public DelimiterSet(char field, char record, char enclose, char escape,
       boolean isEncloseRequired) {
-    this.fieldDelim = field;
-    this.recordDelim = record;
-    this.enclosedBy = enclose;
-    this.escapedBy = escape;
-    this.encloseRequired = isEncloseRequired;
-  }
-
-  /**
-   * Sets the fields-terminated-by character.
-   */
-  public void setFieldsTerminatedBy(char f) {
-    this.fieldDelim = f;
-  }
-
-  /**
-   * @return the fields-terminated-by character.
-   */
-  public char getFieldsTerminatedBy() {
-    return this.fieldDelim;
-  }
-
-  /**
-   * Sets the end-of-record lines-terminated-by character.
-   */
-  public void setLinesTerminatedBy(char r) {
-    this.recordDelim = r;
-  }
-
-  /**
-   * @return the end-of-record (lines-terminated-by) character.
-   */
-  public char getLinesTerminatedBy() {
-    return this.recordDelim;
-  }
-
-  /**
-   * Sets the enclosed-by character.
-   * @param e the enclosed-by character, or '\000' for no enclosing character.
-   */
-  public void setEnclosedBy(char e) {
-    this.enclosedBy = e;
-  }
-
-  /**
-   * @return the enclosed-by character, or '\000' for none.
-   */
-  public char getEnclosedBy() {
-    return this.enclosedBy;
-  }
-
-  /**
-   * Sets the escaped-by character.
-   * @param e the escaped-by character, or '\000' for no escape character.
-   */
-  public void setEscapedBy(char e) {
-    this.escapedBy = e;
-  }
-
-  /**
-   * @return the escaped-by character, or '\000' for none.
-   */
-  public char getEscapedBy() {
-    return this.escapedBy;
-  }
-
-  /**
-   * Set whether the enclosed-by character must be applied to all fields,
-   * or only fields with embedded delimiters.
-   */
-  public void setEncloseRequired(boolean required) {
-    this.encloseRequired = required;
-  }
-
-  /**
-   * @return true if the enclosed-by character must be applied to all fields,
-   * or false if it's only used for fields with embedded delimiters.
-   */
-  public boolean isEncloseRequired() {
-    return this.encloseRequired;
-  }
-
-  @Override
-  /**
-   * @return a string representation of the delimiters.
-   */
-  public String toString() {
-    return "fields=" + this.fieldDelim
-        + " records=" + this.recordDelim
-        + " escape=" + this.escapedBy
-        + " enclose=" + this.enclosedBy
-        + " required=" + this.encloseRequired;
-  }
-
-  /**
-   * Format this set of delimiters as a call to the constructor for
-   * this object, that would generate identical delimiters.
-   * @return a String that can be embedded in generated code that
-   * provides this set of delimiters.
-   */
-  public String formatConstructor() {
-    return "new DelimiterSet((char) " + (int) this.fieldDelim + ", "
-        + "(char) " + (int) this.recordDelim + ", "
-        + "(char) " + (int) this.enclosedBy + ", "
-        + "(char) " + (int) this.escapedBy + ", "
-        + this.encloseRequired + ")";
-  }
-
-  @Override
-  /**
-   * @return a hash code for this set of delimiters.
-   */
-  public int hashCode() {
-    return (int) this.fieldDelim
-        + (((int) this.recordDelim) << 4)
-        + (((int) this.escapedBy) << 8)
-        + (((int) this.enclosedBy) << 12)
-        + (((int) this.recordDelim) << 16)
-        + (this.encloseRequired ? 0xFEFE : 0x7070);
-  }
-
-  @Override
-  /**
-   * @return true if this delimiter set is the same as another set of
-   * delimiters.
-   */
-  public boolean equals(Object other) {
-    if (null == other) {
-      return false;
-    } else if (!other.getClass().equals(getClass())) {
-      return false;
-    }
-
-    DelimiterSet set = (DelimiterSet) other;
-    return this.fieldDelim == set.fieldDelim
-        && this.recordDelim == set.recordDelim
-        && this.escapedBy == set.escapedBy
-        && this.enclosedBy == set.enclosedBy
-        && this.encloseRequired == set.encloseRequired;
-  }
-
-  @Override
-  /**
-   * @return a new copy of this same set of delimiters.
-   */
-  public Object clone() throws CloneNotSupportedException {
-    return super.clone();
+    super(field, record, enclose, escape, isEncloseRequired);
   }
 
   /**

@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,15 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.io;
 
-import java.io.IOException;
 
 /**
  * Thrown when a compression codec cannot be recognized.
+ *
+ * @deprecated use org.apache.sqoop.io.UnsupportedCodecException instead.
+ * @see org.apache.sqoop.io.UnsupportedCodecException
  */
-public class UnsupportedCodecException extends IOException {
+public class UnsupportedCodecException
+    extends org.apache.sqoop.io.UnsupportedCodecException {
+
   public UnsupportedCodecException() {
     super("UnsupportedCodecException");
   }

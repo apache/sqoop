@@ -15,16 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 /**
- * Interface describing a class capable of returning a map of the fields
- * of the object to their values.
- *
- * @deprecated use org.apache.sqoop.lib.FieldMappable instead.
- * @see org.apache.sqoop.lib.FieldMappable
+ * Parse string representations of boolean values into boolean
+ * scalar types.
  */
-public interface FieldMappable extends org.apache.sqoop.lib.FieldMappable {
+public final class BooleanParser {
 
+  /**
+   * Return a boolean based on the value contained in the string.
+   *
+   * <p>The following values are considered true:
+   * "true", "t", "yes", "on", "1".</p>
+   * <p>All other values, including 'null', are false.</p>
+   * <p>All comparisons are case-insensitive.</p>
+   */
+  public static boolean valueOf(final String s) {
+    return s != null && ("true".equalsIgnoreCase(s) || "t".equalsIgnoreCase(s)
+        || "1".equals(s) || "on".equalsIgnoreCase(s)
+        || "yes".equalsIgnoreCase(s));
+  }
+
+  private BooleanParser() { }
 }
-

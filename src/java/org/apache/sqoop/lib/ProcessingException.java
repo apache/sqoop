@@ -15,16 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 /**
- * Interface describing a class capable of returning a map of the fields
- * of the object to their values.
- *
- * @deprecated use org.apache.sqoop.lib.FieldMappable instead.
- * @see org.apache.sqoop.lib.FieldMappable
+ * General error during processing of a SqoopRecord.
  */
-public interface FieldMappable extends org.apache.sqoop.lib.FieldMappable {
+@SuppressWarnings("serial")
+public class ProcessingException extends Exception  {
 
+  public ProcessingException() {
+    super("ProcessingException");
+  }
+
+  public ProcessingException(final String message) {
+    super(message);
+  }
+
+  public ProcessingException(final Throwable cause) {
+    super(cause);
+  }
+
+  public ProcessingException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ProcessingException" : msg;
+  }
 }
-

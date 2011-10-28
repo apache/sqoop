@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,14 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.lib;
 
 /**
  * General error during processing of a SqoopRecord.
+ *
+ * @deprecated use org.apache.sqoop.lib.ProcessingException instead.
+ * @see org.apache.sqoop.lib.ProcessingException
  */
 @SuppressWarnings("serial")
-public class ProcessingException extends Exception {
+public class ProcessingException
+  extends org.apache.sqoop.lib.ProcessingException {
 
   public ProcessingException() {
     super("ProcessingException");
@@ -40,11 +41,5 @@ public class ProcessingException extends Exception {
 
   public ProcessingException(final String message, final Throwable cause) {
     super(message, cause);
-  }
-
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? "ProcessingException" : msg;
   }
 }

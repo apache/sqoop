@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -23,29 +23,32 @@ import java.io.IOException;
 
 /**
  * Serialize LOB classes to/from DataInput and DataOutput objects.
- *
- * @deprecated use org.apache.sqoop.lib.LobSerializer instead.
- * @see org.apache.sqoop.lib.LobSerializer
  */
 public final class LobSerializer {
 
   private LobSerializer() { }
 
-  public static void writeClob(ClobRef clob, DataOutput out)
-      throws IOException {
-    org.apache.sqoop.lib.LobSerializer.writeClob(clob, out);
+  public static void writeClob(
+      com.cloudera.sqoop.lib.ClobRef clob, DataOutput out) throws IOException {
+    clob.write(out);
   }
 
-  public static void writeBlob(BlobRef blob, DataOutput out)
-      throws IOException {
-    org.apache.sqoop.lib.LobSerializer.writeBlob(blob, out);
+  public static void writeBlob(
+      com.cloudera.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
+    blob.write(out);
   }
 
-  public static ClobRef readClobFields(DataInput in) throws IOException {
-    return org.apache.sqoop.lib.LobSerializer.readClobFields(in);
+  public static com.cloudera.sqoop.lib.ClobRef readClobFields(
+      DataInput in) throws IOException {
+    com.cloudera.sqoop.lib.ClobRef clob = new com.cloudera.sqoop.lib.ClobRef();
+    clob.readFields(in);
+    return clob;
   }
 
-  public static BlobRef readBlobFields(DataInput in) throws IOException {
-    return org.apache.sqoop.lib.LobSerializer.readBlobFields(in);
+  public static com.cloudera.sqoop.lib.BlobRef readBlobFields(
+      DataInput in) throws IOException {
+    com.cloudera.sqoop.lib.BlobRef blob = new com.cloudera.sqoop.lib.BlobRef();
+    blob.readFields(in);
+    return blob;
   }
 }

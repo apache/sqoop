@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,24 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.lib;
-
-import java.io.IOException;
 
 /**
  * Interface implemented by classes that process FieldMappable objects.
+ *
+ * @deprecated use org.apache.sqoop.lib.FieldMapProcessor instead.
+ * @see org.apache.sqoop.lib.FieldMapProcessor
  */
-public interface FieldMapProcessor {
-
-  /**
-   * Allow arbitrary processing of a FieldMappable object.
-   * @param record an object which can emit a map of its field names to values.
-   * @throws IOException if the processor encounters an IO error when
-   * operating on this object.
-   * @throws ProcessingException if the FieldMapProcessor encounters
-   * a general processing error when operating on this object.
-   */
-  void accept(FieldMappable record) throws IOException, ProcessingException;
+public interface FieldMapProcessor
+  extends org.apache.sqoop.lib.FieldMapProcessor {
 }
 

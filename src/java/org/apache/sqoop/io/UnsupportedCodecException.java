@@ -15,16 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.io;
+
+import java.io.IOException;
 
 /**
- * Interface describing a class capable of returning a map of the fields
- * of the object to their values.
- *
- * @deprecated use org.apache.sqoop.lib.FieldMappable instead.
- * @see org.apache.sqoop.lib.FieldMappable
+ * Thrown when a compression codec cannot be recognized.
  */
-public interface FieldMappable extends org.apache.sqoop.lib.FieldMappable {
+public class UnsupportedCodecException extends IOException {
 
+  public UnsupportedCodecException() {
+    super("UnsupportedCodecException");
+  }
+
+  public UnsupportedCodecException(String msg) {
+    super(msg);
+  }
+
+  public UnsupportedCodecException(Throwable cause) {
+    super(cause);
+  }
 }
-

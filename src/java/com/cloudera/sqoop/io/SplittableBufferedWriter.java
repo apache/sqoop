@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,56 +18,27 @@
 
 package com.cloudera.sqoop.io;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
+import org.apache.sqoop.io.SplittingOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A BufferedWriter implementation that wraps around a SplittingOutputStream
  * and allows splitting of the underlying stream.
  * Splits occur at allowSplit() calls, or newLine() calls.
+ *
+ * @deprecated use org.apache.sqoop.io.SplittableBufferedWriter instead.
+ * @see org.apache.sqoop.io.SplittableBufferedWriter
  */
-public class SplittableBufferedWriter extends BufferedWriter {
-
-  public static final Log LOG = LogFactory.getLog(
-      SplittableBufferedWriter.class.getName());
-
-  private SplittingOutputStream splitOutputStream;
-  private boolean alwaysFlush;
+public class SplittableBufferedWriter
+  extends org.apache.sqoop.io.SplittableBufferedWriter {
 
   public SplittableBufferedWriter(
       final SplittingOutputStream splitOutputStream) {
-    super(new OutputStreamWriter(splitOutputStream));
-
-    this.splitOutputStream = splitOutputStream;
-    this.alwaysFlush = false;
+    super(splitOutputStream);
   }
 
-  /** For testing. */
   SplittableBufferedWriter(final SplittingOutputStream splitOutputStream,
       final boolean alwaysFlush) {
-    super(new OutputStreamWriter(splitOutputStream));
-
-    this.splitOutputStream = splitOutputStream;
-    this.alwaysFlush = alwaysFlush;
-  }
-
-  public void newLine() throws IOException {
-    super.newLine();
-    this.allowSplit();
-  }
-
-  public void allowSplit() throws IOException {
-    if (alwaysFlush) {
-      this.flush();
-    }
-    if (this.splitOutputStream.wouldSplit()) {
-      LOG.debug("Starting new split");
-      this.flush();
-      this.splitOutputStream.allowSplit();
-    }
+    super(splitOutputStream, alwaysFlush);
   }
 }
