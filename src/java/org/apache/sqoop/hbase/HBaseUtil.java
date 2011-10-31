@@ -16,24 +16,38 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.hbase;
+package org.apache.sqoop.hbase;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * This class provides a method that checks if HBase jars are present in the
+ * current classpath. It also provides a setAlwaysNoHBaseJarMode mechanism for
+ * testing and simulation the condition where the is on HBase jar (since hbase
+ * is pulled automatically by ivy)
  */
 public final class HBaseUtil {
 
-  private HBaseUtil() { }
+  private static boolean testingMode = false;
+
+  private HBaseUtil() {
+  }
 
   /**
    * This is a way to make this always return false for testing.
    */
   public static void setAlwaysNoHBaseJarMode(boolean mode) {
-    org.apache.sqoop.hbase.HBaseUtil.setAlwaysNoHBaseJarMode(mode);
+    testingMode = mode;
   }
 
   public static boolean isHBaseJarPresent() {
-    return org.apache.sqoop.hbase.HBaseUtil.isHBaseJarPresent();
+    if (testingMode) {
+      return false;
+    }
+    try {
+      Class.forName("org.apache.hadoop.hbase.client.HTable");
+    } catch (ClassNotFoundException cnfe) {
+      return false;
+    }
+    return true;
   }
 
 }

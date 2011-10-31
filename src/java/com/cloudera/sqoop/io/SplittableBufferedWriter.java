@@ -18,9 +18,6 @@
 
 package com.cloudera.sqoop.io;
 
-import org.apache.sqoop.io.SplittingOutputStream;
-
-
 /**
  * A BufferedWriter implementation that wraps around a SplittingOutputStream
  * and allows splitting of the underlying stream.

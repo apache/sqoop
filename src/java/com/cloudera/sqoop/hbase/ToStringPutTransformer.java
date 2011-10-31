@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -33,70 +31,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
- * PutTransformer that calls toString on all non-null fields.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class ToStringPutTransformer extends PutTransformer {
-
-  public static final Log LOG = LogFactory.getLog(
-      ToStringPutTransformer.class.getName());
-
-  // A mapping from field name -> bytes for that field name.
-  // Used to cache serialization work done for fields names.
-  private Map<String, byte[]> serializedFieldNames;
-
-  public ToStringPutTransformer() {
-    serializedFieldNames = new TreeMap<String, byte[]>();
-  }
-
-  /**
-   * Return the serialized bytes for a field name, using
-   * the cache if it's already in there.
-   */
-  private byte [] getFieldNameBytes(String fieldName) {
-    byte [] cachedName = serializedFieldNames.get(fieldName);
-    if (null != cachedName) {
-      // Cache hit. We're done.
-      return cachedName;
-    }
-
-    // Do the serialization and memoize the result.
-    byte [] nameBytes = Bytes.toBytes(fieldName);
-    serializedFieldNames.put(fieldName, nameBytes);
-    return nameBytes;
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public List<Put> getPutCommand(Map<String, Object> fields)
-      throws IOException {
-
-    String rowKeyCol = getRowKeyColumn();
-    String colFamily = getColumnFamily();
-    byte [] colFamilyBytes = Bytes.toBytes(colFamily);
-
-    Object rowKey = fields.get(rowKeyCol);
-    if (null == rowKey) {
-      // If the row-key column is null, we don't insert this row.
-      LOG.warn("Could not insert row with null value for row-key column: "
-          + rowKeyCol);
-      return null;
-    }
-
-    Put put = new Put(Bytes.toBytes(rowKey.toString()));
-
-    for (Map.Entry<String, Object> fieldEntry : fields.entrySet()) {
-      String colName = fieldEntry.getKey();
-      if (!colName.equals(rowKeyCol)) {
-        // This is a regular field, not the row key.
-        // Add it if it's not null.
-        Object val = fieldEntry.getValue();
-        if (null != val) {
-          put.add(colFamilyBytes, getFieldNameBytes(colName),
-              Bytes.toBytes(val.toString()));
-        }
-      }
-    }
-
-    return Collections.singletonList(put);
-  }
+public class ToStringPutTransformer
+    extends org.apache.sqoop.hbase.ToStringPutTransformer {
 }
