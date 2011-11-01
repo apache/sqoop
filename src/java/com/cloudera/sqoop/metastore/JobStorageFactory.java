@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,55 +18,20 @@
 
 package com.cloudera.sqoop.metastore;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 
 /**
- * Factory that produces the correct JobStorage system to work with
- * a particular job descriptor.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class JobStorageFactory {
+public class JobStorageFactory
+    extends org.apache.sqoop.metastore.JobStorageFactory {
 
-  private Configuration conf;
-
-  /**
-   * Configuration key describing the list of JobStorage implementations
-   * to use to handle jobs.
-   */
   public static final String AVAILABLE_STORAGES_KEY =
-      "sqoop.job.storage.implementations";
-
-  /** The default list of available JobStorage implementations. */
-  private static final String DEFAULT_AVAILABLE_STORAGES =
-      "com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage,"
-      + "com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage";
+          org.apache.sqoop.metastore.JobStorageFactory.AVAILABLE_STORAGES_KEY;
 
   public JobStorageFactory(Configuration config) {
-    this.conf = config;
-
-    // Ensure that we always have an available storages list.
-    if (this.conf.get(AVAILABLE_STORAGES_KEY) == null) {
-      this.conf.set(AVAILABLE_STORAGES_KEY, DEFAULT_AVAILABLE_STORAGES);
-    }
+    super(config);
   }
 
-  /**
-   * Given a storage descriptor, determine the correct JobStorage
-   * implementation to use to connect to the storage resource and return an
-   * instance of it -- or null if no JobStorage instance is appropriate.
-   */
-  public JobStorage getJobStorage(Map<String, String> descriptor) {
-    List<JobStorage> storages = this.conf.getInstances(
-        AVAILABLE_STORAGES_KEY, JobStorage.class);
-    for (JobStorage stor : storages) {
-      if (stor.canAccept(descriptor)) {
-        return stor;
-      }
-    }
-
-    return null;
-  }
 }
 

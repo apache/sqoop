@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,164 +19,24 @@
 
 package com.cloudera.sqoop.metastore.hsqldb;
 
-import java.io.File;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
-import org.apache.hadoop.util.StringUtils;
-
-import org.hsqldb.Server;
-import org.hsqldb.ServerConstants;
-
-import com.cloudera.sqoop.SqoopOptions;
-
-import com.cloudera.sqoop.manager.HsqldbManager;
-
 /**
- * Container for an HSQLDB-backed metastore.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class HsqldbMetaStore {
+public class HsqldbMetaStore
+    extends org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore {
 
-  public static final Log LOG = LogFactory.getLog(
-      HsqldbMetaStore.class.getName());
-
-  /** Where on the local fs does the metastore put files? */
   public static final String META_STORAGE_LOCATION_KEY =
-      "sqoop.metastore.server.location";
-
-  /**
-   * What port does the metastore listen on?
-   */
+    org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore.META_STORAGE_LOCATION_KEY;
   public static final String META_SERVER_PORT_KEY =
-      "sqoop.metastore.server.port";
-
-  /** Default to this port if unset. */
-  public static final int DEFAULT_PORT = 16000;
-
-  private int port;
-  private String fileLocation;
-  private Server server;
-  private Configuration conf;
+    org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore.META_SERVER_PORT_KEY;
+  public static final int DEFAULT_PORT =
+    org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore.DEFAULT_PORT;
 
   public HsqldbMetaStore(Configuration config) {
-    this.conf = config;
-    init();
+    super(config);
   }
 
-  /**
-   * Determine the user's home directory and return a file path
-   * under this root where the shared metastore can be placed.
-   */
-  private String getHomeDirFilePath() {
-    String homeDir = System.getProperty("user.home");
-
-    File homeDirObj = new File(homeDir);
-    File sqoopDataDirObj = new File(homeDirObj, ".sqoop");
-    File databaseFileObj = new File(sqoopDataDirObj, "shared-metastore.db");
-
-    return databaseFileObj.toString();
-  }
-
-  private void init() {
-    if (null != server) {
-      LOG.debug("init(): server already exists.");
-      return;
-    }
-
-    fileLocation = conf.get(META_STORAGE_LOCATION_KEY, null);
-    if (null == fileLocation) {
-      fileLocation = getHomeDirFilePath();
-      LOG.warn("The location for metastore data has not been explicitly set. "
-          + "Placing shared metastore files in " + fileLocation);
-    }
-
-    this.port = conf.getInt(META_SERVER_PORT_KEY, DEFAULT_PORT);
-  }
-
-
-  public void start() {
-    try {
-      if (server != null) {
-        server.checkRunning(false);
-      }
-    } catch (RuntimeException re) {
-      LOG.info("Server is already started.");
-      return;
-    }
-
-    server = new Server();
-    server.setDatabasePath(0, "file:" + fileLocation);
-    server.setDatabaseName(0, "sqoop");
-    server.putPropertiesFromString("hsqldb.write_delay=false");
-    server.setPort(port);
-    server.setSilent(true);
-    server.setNoSystemExit(true);
-
-    server.start();
-    LOG.info("Server started on port " + port + " with protocol "
-        + server.getProtocol());
-  }
-
-  /**
-   * Blocks the current thread until the server is shut down.
-   */
-  public void waitForServer() {
-    while (true) {
-      int curState = server.getState();
-      if (curState == ServerConstants.SERVER_STATE_SHUTDOWN) {
-        LOG.info("Got shutdown notification");
-        break;
-      }
-
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException ie) {
-        LOG.info("Interrupted while blocking for server:"
-            + StringUtils.stringifyException(ie));
-      }
-    }
-  }
-
-  /**
-   * Connects to the server and instructs it to shutdown.
-   */
-  public void shutdown() {
-    // Send the SHUTDOWN command to the server via SQL.
-    SqoopOptions options = new SqoopOptions(conf);
-    options.setConnectString("jdbc:hsqldb:hsql://localhost:"
-        + port + "/sqoop");
-    options.setUsername("SA");
-    options.setPassword("");
-    HsqldbManager manager = new HsqldbManager(options);
-    Statement s = null;
-    try {
-      Connection c = manager.getConnection();
-      s = c.createStatement();
-      s.execute("SHUTDOWN");
-    } catch (SQLException sqlE) {
-      LOG.warn("Exception shutting down database: "
-          + StringUtils.stringifyException(sqlE));
-    } finally {
-      if (null != s) {
-        try {
-          s.close();
-        } catch (SQLException sqlE) {
-          LOG.warn("Error closing statement: " + sqlE);
-        }
-      }
-
-      try {
-        manager.close();
-      } catch (SQLException sqlE) {
-        LOG.warn("Error closing manager: " + sqlE);
-      }
-    }
-  }
 }
 

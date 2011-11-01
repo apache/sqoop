@@ -16,23 +16,53 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore;
+package org.apache.sqoop.metastore;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Container for all job data that should be stored to a
+ * permanent resource.
  */
-public class JobData
-    extends org.apache.sqoop.metastore.JobData {
+public class JobData {
+  private SqoopOptions opts;
+  private SqoopTool tool;
 
   public JobData() {
-    super();
   }
 
   public JobData(SqoopOptions options, SqoopTool sqoopTool) {
-    super(options, sqoopTool);
+    this.opts = options;
+    this.tool = sqoopTool;
+  }
+
+  /**
+   * Gets the SqoopOptions.
+   */
+  public SqoopOptions getSqoopOptions() {
+    return this.opts;
+  }
+
+  /**
+   * Gets the SqoopTool.
+   */
+  public SqoopTool getSqoopTool() {
+    return this.tool;
+  }
+
+  /**
+   * Sets the SqoopOptions.
+   */
+  public void setSqoopOptions(SqoopOptions options) {
+    this.opts = options;
+  }
+
+  /**
+   * Sets the SqoopTool.
+   */
+  public void setSqoopTool(SqoopTool sqoopTool) {
+    this.tool = sqoopTool;
   }
 
 }
