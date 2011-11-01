@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,20 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.tool;
 
-import java.util.List;
-
 /**
- * Abstract base class that defines the ToolPlugin API; additional SqoopTool
- * implementations may be registered with the system via ToolPlugin classes.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public abstract class ToolPlugin {
-  /**
-   * Describes the tools made available by this plugin.
-   * @return a list of ToolDesc objects containing the tool name, class,
-   * and description.
-   */
-  public abstract List<ToolDesc> getTools();
+public abstract class ToolPlugin
+    extends org.apache.sqoop.tool.ToolPlugin {
 }

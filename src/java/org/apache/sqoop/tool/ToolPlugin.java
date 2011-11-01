@@ -15,11 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.tool;
+
+package org.apache.sqoop.tool;
+
+import java.util.List;
+
+import com.cloudera.sqoop.tool.ToolDesc;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Abstract base class that defines the ToolPlugin API; additional SqoopTool
+ * implementations may be registered with the system via ToolPlugin classes.
  */
-public class ListTablesTool
-    extends org.apache.sqoop.tool.ListTablesTool {
+public abstract class ToolPlugin {
+  /**
+   * Describes the tools made available by this plugin.
+   * @return a list of ToolDesc objects containing the tool name, class,
+   * and description.
+   */
+  public abstract List<ToolDesc> getTools();
 }

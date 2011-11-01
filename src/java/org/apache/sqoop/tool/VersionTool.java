@@ -15,11 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.tool;
+
+package org.apache.sqoop.tool;
+
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.cli.ToolOptions;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Tool that prints Sqoop's version.
  */
-public class ListTablesTool
-    extends org.apache.sqoop.tool.ListTablesTool {
+public class VersionTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+
+  public VersionTool() {
+    super("version");
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public int run(SqoopOptions options) {
+    // FIXME with maven buildnumber plugin
+    System.out.print("FIXME ");
+    return 0;
+  }
+
+  @Override
+  public void printHelp(ToolOptions opts) {
+    System.out.println("usage: sqoop " + getToolName());
+  }
 }
+
