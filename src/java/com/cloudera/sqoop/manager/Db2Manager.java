@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,93 +17,16 @@
  */
 package com.cloudera.sqoop.manager;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.util.ExportException;
 
 /**
- * Manages connections to DB2 databases. Requires the DB2 JDBC driver.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class Db2Manager extends GenericJdbcManager {
-
-  public static final Log LOG = LogFactory.getLog(
-      Db2Manager.class.getName());
-
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS =
-      "com.ibm.db2.jcc.DB2Driver";
+public class Db2Manager
+    extends org.apache.sqoop.manager.Db2Manager {
 
   public Db2Manager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(opts);
   }
 
-  /**
-   * Export data stored in HDFS into a table in a database.
-   */
-  @Override
-  public void exportTable(ExportJobContext context)
-      throws IOException, ExportException {
-    context.setConnManager(this);
-    JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-      ExportBatchOutputFormat.class);
-    exportJob.runExport();
-  }
-
-  /**
-   * DB2 does not support the CURRENT_TIMESTAMP() function. Instead
-   * it uses the sysibm schema for timestamp lookup.
-   */
-  @Override
-  public String getCurTimestampQuery() {
-    return "SELECT CURRENT TIMESTAMP FROM SYSIBM.SYSDUMMY1 WITH UR";
-  }
-
-  @Override
-  public String[] listDatabases() {
-    Connection conn = null;
-    ResultSet rset = null;
-    List<String> databases = new ArrayList<String>();
-    try {
-      conn = getConnection();
-      rset = conn.getMetaData().getSchemas();
-      while (rset.next()) {
-        // The ResultSet contains two columns - TABLE_SCHEM(1),
-        // TABLE_CATALOG(2). We are only interested in TABLE_SCHEM which
-        // represents schema name.
-        databases.add(rset.getString(1));
-      }
-      conn.commit();
-    } catch (SQLException sqle) {
-      try {
-        if (conn != null) {
-          conn.rollback();
-        }
-      } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
-      }
-      LOG.error("Failed to list databases", sqle);
-      throw new RuntimeException(sqle);
-    } finally {
-      if (rset != null) {
-        try {
-          rset.close();
-        } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
-        }
-      }
-    }
-
-    return databases.toArray(new String[databases.size()]);
-  }
 }

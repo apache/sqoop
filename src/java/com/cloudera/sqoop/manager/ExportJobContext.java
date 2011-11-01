@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,55 +21,18 @@ package com.cloudera.sqoop.manager;
 import com.cloudera.sqoop.SqoopOptions;
 
 /**
- * A set of parameters describing an export operation; this is passed to
- * ConnManager.exportTable() as its argument.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class ExportJobContext {
-
-  private String tableName;
-  private String jarFile;
-  private SqoopOptions options;
-  private ConnManager manager;
+public class ExportJobContext
+    extends org.apache.sqoop.manager.ExportJobContext {
 
   public ExportJobContext(final String table, final String jar,
       final SqoopOptions opts) {
-    this.tableName = table;
-    this.jarFile = jar;
-    this.options = opts;
+    super(table, jar, opts);
   }
 
-  /** @return the name of the table to export. */
-  public String getTableName() {
-    return tableName;
-  }
-
-  /** @return the name of the jar file containing the user's compiled
-   * ORM classes to use during the export.
-   */
-  public String getJarFile() {
-    return jarFile;
-  }
-
-  /** @return the SqoopOptions configured by the user */
-  public SqoopOptions getOptions() {
-    return options;
-  }
-
-  /**
-   * Set the ConnManager instance to be used during the export's
-   * configuration.
-   */
-  public void setConnManager(ConnManager mgr) {
-    this.manager = mgr;
-  }
-
-  /**
-   * Get the ConnManager instance to use during an export's
-   * configuration stage.
-   */
   public ConnManager getConnManager() {
-    return this.manager;
+    return (ConnManager)super.getConnManager();
   }
-
 }
 

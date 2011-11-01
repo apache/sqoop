@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,69 +18,16 @@
 
 package com.cloudera.sqoop.manager;
 
-import java.io.IOException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.cloudera.sqoop.SqoopOptions;
 
-import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
-
-import com.cloudera.sqoop.util.ExportException;
-
 /**
- * Manages connections to hsqldb databases.
- * Extends generic SQL manager.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class HsqldbManager extends GenericJdbcManager {
-
-  public static final Log LOG = LogFactory.getLog(
-      HsqldbManager.class.getName());
-
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
-
-  // HsqlDb doesn't have a notion of multiple "databases"; the user's database
-  // is always called "PUBLIC".
-  private static final String HSQL_SCHEMA_NAME = "PUBLIC";
+public class HsqldbManager
+    extends org.apache.sqoop.manager.HsqldbManager {
 
   public HsqldbManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(opts);
   }
 
-  /**
-   * Return list of databases hosted by the server.
-   * HSQLDB only supports a single schema named "PUBLIC".
-   */
-  @Override
-  public String[] listDatabases() {
-    String [] databases = {HSQL_SCHEMA_NAME};
-    return databases;
-  }
-
-  @Override
-  /**
-   * {@inheritDoc}
-   */
-  protected String getCurTimestampQuery() {
-    // HSQLDB requires that you select from a table; this table is
-    // guaranteed to exist.
-    return "SELECT CURRENT_TIMESTAMP FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
-  }
-
-  @Override
-  public boolean supportsStagingForExport() {
-    return true;
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public void exportTable(ExportJobContext context)
-      throws IOException, ExportException {
-    // HSQLDB does not support multi-row inserts; disable that before export.
-    context.getOptions().getConf().setInt(
-        AsyncSqlOutputFormat.RECORDS_PER_STATEMENT_KEY, 1);
-    super.exportTable(context);
-  }
 }

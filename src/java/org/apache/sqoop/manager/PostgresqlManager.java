@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,7 +30,8 @@ import com.cloudera.sqoop.util.ImportException;
 /**
  * Manages connections to Postgresql databases.
  */
-public class PostgresqlManager extends CatalogQueryManager {
+public class PostgresqlManager
+    extends com.cloudera.sqoop.manager.CatalogQueryManager {
 
   public static final Log LOG = LogFactory.getLog(
       PostgresqlManager.class.getName());
@@ -83,7 +84,8 @@ public class PostgresqlManager extends CatalogQueryManager {
   }
 
   @Override
-  public void importTable(ImportJobContext context)
+  public void importTable(
+          com.cloudera.sqoop.manager.ImportJobContext context)
         throws IOException, ImportException {
 
     // The user probably should have requested --direct to invoke pg_dump.
@@ -148,11 +150,5 @@ public class PostgresqlManager extends CatalogQueryManager {
   private String escapeLiteral(String literal) {
     return literal.replace("'", "''");
   }
-
-  @Override
-  protected String getCurTimestampQuery() {
-    return "SELECT CURRENT_TIMESTAMP";
-  }
-
 }
 

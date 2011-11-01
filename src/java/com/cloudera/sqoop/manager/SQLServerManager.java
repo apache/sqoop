@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,63 +18,16 @@
 
 package com.cloudera.sqoop.manager;
 
-import java.io.IOException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.util.ExportException;
 
 /**
- * Manages connections to SQLServer databases. Requires the SQLServer JDBC
- * driver.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class SQLServerManager extends InformationSchemaManager {
-
-  public static final Log LOG = LogFactory.getLog(
-      SQLServerManager.class.getName());
-
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS =
-      "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+public class SQLServerManager
+    extends org.apache.sqoop.manager.SQLServerManager {
 
   public SQLServerManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
-  }
-
-  /**
-   * Export data stored in HDFS into a table in a database.
-   */
-  @Override
-  public void exportTable(ExportJobContext context)
-      throws IOException, ExportException {
-    context.setConnManager(this);
-    JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-      ExportBatchOutputFormat.class);
-    exportJob.runExport();
-  }
-
-  /**
-   * SQLServer does not support the CURRENT_TIMESTAMP() function. Instead
-   * it has the notion of keyword CURRENT_TIMESTAMP that resolves to the
-   * current time stamp for the database system.
-   */
-  @Override
-  public String getCurTimestampQuery() {
-      return "SELECT CURRENT_TIMESTAMP";
-  }
-
-  @Override
-  protected String getListDatabasesQuery() {
-    return "SELECT NAME FROM SYS.DATABASES";
-  }
-
-  @Override
-  protected String getSchemaQuery() {
-    return "SELECT SCHEMA_NAME()";
+    super(opts);
   }
 }
 

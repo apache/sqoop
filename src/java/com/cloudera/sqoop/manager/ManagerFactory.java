@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,35 +18,10 @@
 
 package com.cloudera.sqoop.manager;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.JobData;
-
 /**
- * Interface for factory classes for ConnManager implementations.
- * ManagerFactories are instantiated by o.a.h.s.ConnFactory and
- * stored in an ordered list. The ConnFactory.getManager() implementation
- * calls the accept() method of each ManagerFactory, in order until
- * one such call returns a non-null ConnManager instance.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public abstract class ManagerFactory {
-  @Deprecated
-  /** Do not use accept(SqoopOptions). Use accept(JobData) instead. */
-  public ConnManager accept(SqoopOptions options) {
-    throw new RuntimeException(
-        "Deprecated method; override ManagerFactory.accept(JobData)");
-  }
-
-  /**
-   * Instantiate a ConnManager that can fulfill the database connection
-   * requirements of the task specified in the JobData.
-   * @param jobData the user-provided arguments that configure this
-   * Sqoop job.
-   * @return a ConnManager that can connect to the specified database
-   * and perform the operations required, or null if this factory cannot
-   * find a suitable ConnManager implementation.
-   */
-  public ConnManager accept(JobData jobData) {
-    return accept(jobData.getSqoopOptions());
-  }
+public abstract class ManagerFactory
+    extends org.apache.sqoop.manager.ManagerFactory {
 }
 
