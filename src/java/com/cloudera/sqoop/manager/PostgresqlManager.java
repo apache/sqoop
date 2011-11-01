@@ -150,5 +150,10 @@ public class PostgresqlManager extends CatalogQueryManager {
   private String escapeLiteral(String literal) {
     return literal.replace("'", "''");
   }
+
+  @Override
+  protected String getCurTimestampQuery() {
+    return "SELECT CURRENT_TIMESTAMP";
+  }
 }
 
