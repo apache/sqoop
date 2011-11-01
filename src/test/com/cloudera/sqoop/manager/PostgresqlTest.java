@@ -178,7 +178,8 @@ public class PostgresqlTest extends ImportJobTestCase {
   }
 
 
-  private String [] getArgv(boolean isDirect, String tableName) {
+  private String [] getArgv(boolean isDirect, String tableName,
+      String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
@@ -198,11 +199,15 @@ public class PostgresqlTest extends ImportJobTestCase {
       args.add("--direct");
     }
 
+    for (String arg : extraArgs) {
+      args.add(arg);
+    }
+
     return args.toArray(new String[0]);
   }
 
   private void doImportAndVerify(boolean isDirect, String [] expectedResults,
-      String tableName) throws IOException {
+      String tableName, String... extraArgs) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, tableName);
@@ -220,7 +225,7 @@ public class PostgresqlTest extends ImportJobTestCase {
       FileListing.recursiveDeleteDir(tableFile);
     }
 
-    String [] argv = getArgv(isDirect, tableName);
+    String [] argv = getArgv(isDirect, tableName, extraArgs);
     try {
       runImport(argv);
     } catch (IOException ioe) {
@@ -288,5 +293,16 @@ public class PostgresqlTest extends ImportJobTestCase {
     };
 
     doImportAndVerify(false, expectedResults, SPECIAL_TABLE_NAME);
+  }
+
+  @Test
+  public void testIncrementalImport() throws IOException {
+    String [] expectedResults = { };
+
+    String [] extraArgs = { "--incremental", "lastmodified",
+       "--check-column", "start_date",
+    };
+
+    doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
   }
 }

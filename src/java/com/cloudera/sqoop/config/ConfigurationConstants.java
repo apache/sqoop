@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,70 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 package com.cloudera.sqoop.config;
 
 /**
- * Static constants that identify configuration keys, counter group names, and
- * counter names.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public final class ConfigurationConstants {
 
-  /**
-   * The Configuration property identifying the current task id.
-   */
-  public static final String PROP_MAPRED_TASK_ID = "mapred.task.id";
-
-  /**
-   * The Configuration property identifying the job's local directory.
-   */
-  public static final String PROP_JOB_LOCAL_DIRECTORY = "job.local.dir";
-
-  /**
-   * The Configuration property identifying the number of map tasks to be used.
-   */
-  public static final String PROP_MAPRED_MAP_TASKS = "mapred.map.tasks";
-
-  /**
-   * The Configuration property identifying the speculative execution flag for
-   * map tasks.
-   */
+  public static final String PROP_MAPRED_TASK_ID =
+    org.apache.sqoop.config.ConfigurationConstants.PROP_MAPRED_TASK_ID;
+  public static final String PROP_JOB_LOCAL_DIRECTORY =
+    org.apache.sqoop.config.ConfigurationConstants.PROP_JOB_LOCAL_DIRECTORY;
+  public static final String PROP_MAPRED_MAP_TASKS =
+    org.apache.sqoop.config.ConfigurationConstants.PROP_MAPRED_MAP_TASKS;
   public static final String PROP_MAPRED_MAP_TASKS_SPECULATIVE_EXEC =
-                                "mapred.map.tasks.speculative.execution";
-
-  /**
-   * The Configuration property identifying the speculative execution flag for
-   * reduce tasks.
-   */
+    org.apache.sqoop.config.
+        ConfigurationConstants.PROP_MAPRED_MAP_TASKS_SPECULATIVE_EXEC;
   public static final String PROP_MAPRED_REDUCE_TASKS_SPECULATIVE_EXEC =
-                                "mapred.reduce.tasks.speculative.execution";
-
-  /**
-   * The Configuration property identifying the job tracker address.
-   */
+    org.apache.sqoop.config.
+        ConfigurationConstants.PROP_MAPRED_REDUCE_TASKS_SPECULATIVE_EXEC;
   public static final String PROP_MAPRED_JOB_TRACKER_ADDRESS =
-                                "mapred.job.tracker";
-
-  /**
-   * The group name of task counters.
-   */
+    org.apache.sqoop.config.
+        ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS;
   public static final String COUNTER_GROUP_MAPRED_TASK_COUNTERS =
-                                "org.apache.hadoop.mapred.Task$Counter";
-
-  /**
-   * The name of the counter that tracks output records from Map phase.
-   */
+    org.apache.sqoop.config.
+        ConfigurationConstants.COUNTER_GROUP_MAPRED_TASK_COUNTERS;
   public static final String COUNTER_MAP_OUTPUT_RECORDS =
-                                "MAP_OUTPUT_RECORDS";
-
-  /**
-   * The name of the counter that tracks input records to the Map phase.
-   */
+    org.apache.sqoop.config.ConfigurationConstants.COUNTER_MAP_OUTPUT_RECORDS;
   public static final String COUNTER_MAP_INPUT_RECORDS =
-                                "MAP_INPUT_RECORDS";
+    org.apache.sqoop.config.ConfigurationConstants.COUNTER_MAP_INPUT_RECORDS;
 
   private ConfigurationConstants() {
-    // Disable Explicit Object Creation
   }
+
 }

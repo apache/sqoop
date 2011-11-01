@@ -1,6 +1,4 @@
 /**
- * Copyright 2011 The Apache Software Foundation
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,35 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.cli;
 
-import org.apache.commons.cli.Options;
-
 /**
- * Class that extends a set of options to provide a title for a
- * related set of options.
+ * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class RelatedOptions extends Options {
-
-  private String relatedTitle;
+public class RelatedOptions 
+    extends org.apache.sqoop.cli.RelatedOptions {
 
   public RelatedOptions() {
-    this("");
+    super();
   }
 
   public RelatedOptions(final String title) {
-    super();
-    this.relatedTitle = title;
-  }
-
-  public String getTitle() {
-    return relatedTitle;
-  }
-
-  @Override
-  public String toString() {
-    return relatedTitle + "\n" + super.toString();
+    super(title);
   }
 }
 

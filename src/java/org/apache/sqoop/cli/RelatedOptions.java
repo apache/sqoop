@@ -16,12 +16,34 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.cli;
+package org.apache.sqoop.cli;
+
+import org.apache.commons.cli.Options;
 
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Class that extends a set of options to provide a title for a
+ * related set of options.
  */
-public class ToolOptions
-  extends org.apache.sqoop.cli.ToolOptions {
+public class RelatedOptions extends Options {
+
+  private String relatedTitle;
+
+  public RelatedOptions() {
+    this("");
+  }
+
+  public RelatedOptions(final String title) {
+    super();
+    this.relatedTitle = title;
+  }
+
+  public String getTitle() {
+    return relatedTitle;
+  }
+
+  @Override
+  public String toString() {
+    return relatedTitle + "\n" + super.toString();
+  }
 }
 
