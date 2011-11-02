@@ -18,18 +18,6 @@
 
 package com.cloudera.sqoop.hbase;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
-
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */

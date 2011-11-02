@@ -25,7 +25,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.lib.db.DBWritable;
 
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 
 /**
  * A container for configuration property names for jobs with DB input/output.

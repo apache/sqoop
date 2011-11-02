@@ -20,7 +20,7 @@ package com.cloudera.sqoop.cli;
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class RelatedOptions 
+public class RelatedOptions
     extends org.apache.sqoop.cli.RelatedOptions {
 
   public RelatedOptions() {

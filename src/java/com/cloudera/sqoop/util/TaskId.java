@@ -23,8 +23,6 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.config.ConfigurationConstants;
-
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */

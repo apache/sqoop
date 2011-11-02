@@ -31,6 +31,9 @@ import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBSplitter;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
+/**
+ * Implement DBSplitter over floating-point values.
+ */
 public class FloatSplitter implements DBSplitter  {
 
   private static final Log LOG = LogFactory.getLog(FloatSplitter.class);

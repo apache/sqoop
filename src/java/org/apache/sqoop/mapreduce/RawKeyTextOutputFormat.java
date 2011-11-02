@@ -32,11 +32,15 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.*;
 
-/** An {@link OutputFormat} that writes plain text files.
+/**
+ * An {@link OutputFormat} that writes plain text files.
  * Only writes the key. Does not write any delimiter/newline after the key.
  */
 public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
 
+  /**
+   * RecordWriter to write to plain text files.
+   */
   public static class RawKeyRecordWriter<K, V> extends RecordWriter<K, V> {
 
     private static final String UTF8 = "UTF-8";

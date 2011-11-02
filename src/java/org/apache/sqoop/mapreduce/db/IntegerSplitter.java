@@ -113,7 +113,7 @@ public class IntegerSplitter implements DBSplitter  {
      * [8, 12)
      * [12, 18] note the closed interval for the last split.
      */
-    protected List<Long> split(long numSplits, long minVal, long maxVal)
+    public List<Long> split(long numSplits, long minVal, long maxVal)
         throws SQLException {
 
       List<Long> splits = new ArrayList<Long>();

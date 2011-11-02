@@ -24,7 +24,7 @@ import com.cloudera.sqoop.lib.FieldMappable;
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class DelegatingOutputFormat<K extends FieldMappable, V>
-    extends org.apache.sqoop.mapreduce.DelegatingOutputFormat <K, V> {
+    extends org.apache.sqoop.mapreduce.DelegatingOutputFormat<K, V> {
 
   public static final String DELEGATE_CLASS_KEY =
       org.apache.sqoop.mapreduce.DelegatingOutputFormat.DELEGATE_CLASS_KEY;

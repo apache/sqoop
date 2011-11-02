@@ -25,6 +25,9 @@ import com.cloudera.sqoop.mapreduce.db.TextSplitter;
 
 import junit.framework.TestCase;
 
+/**
+ * Test that the TextSplitter implementation creates a sane set of splits.
+ */
 public class TestTextSplitter extends TestCase {
 
   public String formatArray(Object [] ar) {

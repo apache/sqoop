@@ -44,7 +44,7 @@ public final class LobFile {
       org.apache.sqoop.io.LobFile.LATEST_LOB_VERSION;
 
   // Must be in sync with org.apache.sqoop.io.LobFile.HEADER_ID_STR
-  static final char [] HEADER_ID_STR = 
+  static final char [] HEADER_ID_STR =
       org.apache.sqoop.io.LobFile.HEADER_ID_STR;
 
   // Value for entryId to write to the beginning of an IndexSegment.

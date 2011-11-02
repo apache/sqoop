@@ -20,6 +20,6 @@ package com.cloudera.sqoop.tool;
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class CodeGenTool 
+public class CodeGenTool
     extends org.apache.sqoop.tool.CodeGenTool {
 }

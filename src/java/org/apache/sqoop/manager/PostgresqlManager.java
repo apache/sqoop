@@ -150,5 +150,11 @@ public class PostgresqlManager
   private String escapeLiteral(String literal) {
     return literal.replace("'", "''");
   }
+
+  @Override
+  protected String getCurTimestampQuery() {
+    return "SELECT CURRENT_TIMESTAMP";
+  }
+
 }
 

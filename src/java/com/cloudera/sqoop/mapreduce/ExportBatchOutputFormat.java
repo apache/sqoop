@@ -25,5 +25,5 @@ import com.cloudera.sqoop.lib.SqoopRecord;
  */
 public class ExportBatchOutputFormat<K extends SqoopRecord, V>
     extends org.apache.sqoop.mapreduce.ExportBatchOutputFormat
-    <SqoopRecord,V> {
+    <SqoopRecord, V> {
 }

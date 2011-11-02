@@ -142,7 +142,7 @@ public class TextSplitter extends BigDecimalSplitter {
     return splits;
   }
 
-  protected List<String> split(int numSplits, String minString,
+  public List<String> split(int numSplits, String minString,
       String maxString, String commonPrefix) throws SQLException {
 
     BigDecimal minVal = stringToBigDecimal(minString);
@@ -183,7 +183,7 @@ public class TextSplitter extends BigDecimalSplitter {
    * Return a BigDecimal representation of string 'str' suitable for use in a
    * numerically-sorting order.
    */
-  protected BigDecimal stringToBigDecimal(String str) {
+  public BigDecimal stringToBigDecimal(String str) {
     // Start with 1/65536 to compute the first digit.
     BigDecimal curPlace = ONE_PLACE;
     BigDecimal result = BigDecimal.ZERO;
@@ -208,7 +208,7 @@ public class TextSplitter extends BigDecimalSplitter {
    * Convert that back into a char and create a string out of these until we
    * have no data left.
    */
-  protected String bigDecimalToString(BigDecimal bd) {
+  public String bigDecimalToString(BigDecimal bd) {
     BigDecimal cur = bd.stripTrailingZeros();
     StringBuilder sb = new StringBuilder();
 

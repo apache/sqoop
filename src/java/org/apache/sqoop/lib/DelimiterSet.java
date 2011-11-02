@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.lib;
 
-
 /**
  * Encapsulates a set of delimiters used to encode a record.
  */
@@ -60,6 +59,19 @@ public class DelimiterSet implements Cloneable {
     this.enclosedBy = enclose;
     this.escapedBy = escape;
     this.encloseRequired = isEncloseRequired;
+  }
+
+  /**
+   * Identical to clone() but does not throw spurious exceptions.
+   * @return a new copy of this same set of delimiters.
+   */
+  public DelimiterSet copy() {
+    try {
+      return (DelimiterSet) clone();
+    } catch (CloneNotSupportedException cnse) {
+      // Should never happen for DelimiterSet.
+      return null;
+    }
   }
 
   /**

@@ -58,7 +58,8 @@ public class AvroExportMapper
 
   private static final String BIG_DECIMAL_TYPE = "java.math.BigDecimal";
 
-  public static final String AVRO_COLUMN_TYPES_MAP = "sqoop.avro.column.types.map";
+  public static final String AVRO_COLUMN_TYPES_MAP =
+      "sqoop.avro.column.types.map";
 
   private MapWritable columnTypes;
   private SqoopRecord recordImpl;

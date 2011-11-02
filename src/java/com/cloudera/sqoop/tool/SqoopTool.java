@@ -19,8 +19,6 @@ package com.cloudera.sqoop.tool;
 
 import java.util.Set;
 
-import org.apache.hadoop.util.StringUtils;
-
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
