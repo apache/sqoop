@@ -136,6 +136,11 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .withDescription("Table to generate code for")
         .withLongOpt(TABLE_ARG)
         .create());
+    codeGenOpts.addOption(OptionBuilder.withArgName("statement")
+        .hasArg()
+        .withDescription("SQL 'statement' to generate code for")
+        .withLongOpt(SQL_QUERY_ARG)
+        .create(SQL_QUERY_SHORT_ARG));
     toolOptions.addUniqueOptions(codeGenOpts);
 
     toolOptions.addUniqueOptions(getOutputFormatOptions());
@@ -160,6 +165,9 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     if (in.hasOption(TABLE_ARG)) {
       out.setTableName(in.getOptionValue(TABLE_ARG));
     }
+    if (in.hasOption(SQL_QUERY_ARG)) {
+      out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
+    }
 
     applyCommonOptions(in, out);
     applyOutputFormatOptions(in, out);
@@ -182,9 +190,16 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     validateOutputFormatOptions(options);
     validateHiveOptions(options);
 
-    if (options.getTableName() == null) {
+    if (options.getTableName() == null
+     && options.getSqlQuery() == null) {
       throw new InvalidOptionsException(
-          "--table is required for code generation." + HELP_STR);
+          "--" + TABLE_ARG + " or --" + SQL_QUERY_ARG
+        + " is required for codegen. " + HELP_STR);
+    } else if (options.getTableName() != null
+            && options.getSqlQuery() != null) {
+      throw new InvalidOptionsException(
+          "Cannot specify --" + TABLE_ARG + " and --" + SQL_QUERY_ARG
+        + " together. " + HELP_STR);
     }
   }
 }
