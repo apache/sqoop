@@ -54,7 +54,7 @@ COPIED_SCRIPT="$TMPDIR/$SCRIPT_BASE"
 sed -i -e "s|BASEPATH|$TMPDIR|" $COPIED_SCRIPT
 
 # Actually check to see that the input we got matches up.
-diff --ignore-all-space --ignore-blank-lines "$COPIED_SCRIPT" "$GENERATED_SCRIPT"
+diff --ignore-matching-lines=--.* --ignore-all-space --ignore-blank-lines "$COPIED_SCRIPT" "$GENERATED_SCRIPT"
 ret=$?
 
 exit $ret
