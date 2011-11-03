@@ -77,10 +77,10 @@ public final class DirectImportUtils {
   public static SplittableBufferedWriter createHdfsSink(Configuration conf,
       SqoopOptions options, ImportJobContext context) throws IOException {
 
-    FileSystem fs = FileSystem.get(conf);
     Path destDir = context.getDestination();
+    FileSystem fs = destDir.getFileSystem(conf);
 
-    LOG.debug("Writing to filesystem: " + conf.get("fs.default.name"));
+    LOG.debug("Writing to filesystem: " + fs.getUri());
     LOG.debug("Creating destination directory " + destDir);
     fs.mkdirs(destDir);
 

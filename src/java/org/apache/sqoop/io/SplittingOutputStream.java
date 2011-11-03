@@ -79,8 +79,6 @@ public class SplittingOutputStream extends OutputStream {
   /** Initialize the OutputStream to the next file to write to.
    */
   private void openNextFile() throws IOException {
-    FileSystem fs = FileSystem.get(conf);
-
     StringBuffer sb = new StringBuffer();
     Formatter fmt = new Formatter(sb);
     fmt.format("%05d", this.fileNum++);
@@ -89,6 +87,7 @@ public class SplittingOutputStream extends OutputStream {
       filename = filename + codec.getDefaultExtension();
     }
     Path destFile = new Path(destDir, filename);
+    FileSystem fs = destFile.getFileSystem(conf);
     LOG.debug("Opening next output file: " + destFile);
     if (fs.exists(destFile)) {
       Path canonicalDest = destFile.makeQualified(fs);
