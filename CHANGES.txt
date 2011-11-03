@@ -1,0 +1,139 @@
+Sqoop Change Log
+
+Release 1.4.0-incubating
+
+  NEW FEATURES
+
+    SQOOP-367 Command-line codegen support free-form query
+
+    SQOOP-342 Allow user to override sqoop type mapping
+
+    SQOOP-331 Support boundary query on the command line
+
+    SQOOP-327 Mixed update/insert export support for OracleManager
+
+    SQOOP-313 Multiple column names to be included in --update-key argument
+              with SQOOP export (update)
+
+    SQOOP-305 Support export from Avro Data Files
+
+  BUG FIXES
+
+    SQOOP-385 Typo in PostgresqlTest.java regarding configuring postgresql.conf
+
+    SQOOP-373 Can only write to default file system on direct import
+
+    SQOOP-364 Default getCurTimestampQuery() in SqlManager is not working for
+              PostgreSQL
+
+    SQOOP-359 Import fails with Unknown SQL datatype exception
+
+    SQOOP-358 Sqoop import fails on netezza nvarchar datatype with
+              --as-avrodatafile
+
+    SQOOP-349 A bunch of the fields are wrong in pom.xml
+
+    SQOOP-346 Sqoop needs to be using java version 1.6 for its source
+
+    SQOOP-341 Sqoop doesn't handle unsigned ints at least with MySQL
+
+    SQOOP-340 Rise exception when both --direct and --as--sequencefile or
+              --as-avrodatafile are given
+
+    SQOOP-339 Use of non-portable mknod utility causes build problems on Mac OS X
+
+    SQOOP-338 NPE after specifying incorrect JDBC credentials
+
+    SQOOP-336 Avro import does not support varbinary types
+
+    SQOOP-332 Cannot use --as-avrodatafile with --query
+
+    SQOOP-330 Free form query import with column transformation failed without
+              obvious error message
+
+    SQOOP-329 SQOOP doesn't work with the DB2 JCC driver
+
+    SQOOP-325 Sqoop doesn't build on intellij
+
+    SQOOP-323 Support for the NVARCHAR datatype
+
+    SQOOP-319 The --hive-drop-import-delims option should accept a replacement
+              string
+
+    SQOOP-317 OracleManager should allow working with tables owned by other users
+
+    SQOOP-314 Basic export hangs when target database does not support INSERT
+              syntax with multiple rows of values
+
+    SQOOP-308 Generated Avro Schema cannot handle nullable fields
+
+  IMPROVEMENTS
+
+    SQOOP-366 Sqoop User Guide's troubleshooting section should include MySQL
+              setup instructions
+
+    SQOOP-361 [Docs] $CONDITIONS must be escaped to not allow shells to
+              replace it
+
+    SQOOP-357 To make debugging easier, Sqoop should print out all the
+              exceptions
+
+    SQOOP-355 Improve SQOOP documentation of Avro data file support
+
+    SQOOP-353 Cleanup the if/else statement in HiveTypes
+
+    SQOOP-351 Sqoop User Guide's troubleshooting section should include
+              Case-Sensitive Catalog Query Errors
+
+    SQOOP-326 Updgrade Avro dependency to version 1.5.3
+
+    SQOOP-321 Support date/time columns for "--incremental append" option
+
+    SQOOP-320 Use Information Schema for SQLServerManager
+
+    SQOOP-318 Add support for splittable lzo files with Hive
+
+    SQOOP-316 Sqoop user guide should have a troubleshooting section
+
+    SQOOP-315 Update Avro version to 1.5.2
+
+    SQOOP-303 Use Catalog Tables for PostgresqlManager
+
+    SQOOP-302 Use Information Schema for MySQLManager
+
+  TASKS
+
+    SQOOP-389 Include change log
+
+    SQOOP-386 Namespace migration cleanup
+
+    SQOOP-383 SQOOP-369 Version tool is not working
+
+    SQOOP-381 Migrate cli and config packages to new name space
+
+    SQOOP-380 Migrate hive and hbase packages to new name space
+
+    SQOOP-379 Migrate lib and io packages to new name space
+
+    SQOOP-378 Migrate manager package to new name space
+
+    SQOOP-377 Migrate mapreduce.db package to new name space
+
+    SQOOP-376 Migrate mapreduce package to new name space
+
+    SQOOP-375 Migrate metastore and metastore.hsqldb packages
+              to new name space
+
+    SQOOP-374 Migrate tool and orm packages to new name space
+
+    SQOOP-372 License Audit
+
+    SQOOP-371 Migrate util package to new name space
+
+    SQOOP-370 Version number for upcoming release
+
+    SQOOP-356 Move documentation generation to the maven build
+
+    SQOOP-310 Review license headers
+
+    SQOOP-309 Update Sqoop dependency versions
