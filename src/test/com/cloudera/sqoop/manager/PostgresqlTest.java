@@ -66,7 +66,7 @@ import com.cloudera.sqoop.util.FileListing;
  * Also in the file /etc/postgresql/8.3/main/postgresql.conf, uncomment
  * the line that starts with listen_addresses and set its value to '*' as
  * follows
- *     listen_address = '*'
+ *     listen_addresses = '*'
  *
  * For postgresql 8.1, this may be in /var/lib/pgsql/data, instead.  You may
  * need to restart the postgresql service after modifying this file.
