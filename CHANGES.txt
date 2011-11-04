@@ -107,7 +107,7 @@ Release 1.4.0-incubating
 
     SQOOP-386 Namespace migration cleanup
 
-    SQOOP-383 SQOOP-369 Version tool is not working
+    SQOOP-383 Version tool is not working
 
     SQOOP-381 Migrate cli and config packages to new name space
 
