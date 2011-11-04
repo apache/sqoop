@@ -1,6 +1,6 @@
-Sqoop Change Log
+Apache Sqoop Change Log
 
-Release 1.4.0-incubating
+Release 1.4.0 - Unreleased
 
   NEW FEATURES
 
