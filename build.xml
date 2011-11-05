@@ -430,6 +430,7 @@
     <!-- make sure the bin scripts are executable. -->
     <chmod perm="ugo+x" type="file" parallel="false">
       <fileset dir="${dist.dir}/bin" />
+      <fileset dir="${dist.dir}/testdata/hive/bin" />
     </chmod>
 
     <!-- make sure any scripts named *.sh are executable. -->
