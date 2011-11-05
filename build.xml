@@ -453,11 +453,13 @@
     <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
       <tarfileset dir="${build.dir}" mode="664">
         <exclude name="${artifact.name}/bin/*" />
+      	<exclude name="${artifact.name}/testdata/hive/bin/*" />
         <exclude name="${artifact.name}/**/*.sh" />
         <include name="${artifact.name}/**" />
       </tarfileset>
       <tarfileset dir="${build.dir}" mode="755">
         <include name="${artifact.name}/bin/*" />
+      	<include name="${artifact.name}/testdata/hive/bin/*" />
         <include name="${artifact.name}/**/*.sh" />
       </tarfileset>
     </tar>
