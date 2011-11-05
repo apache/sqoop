@@ -63,8 +63,6 @@ public final class SqoopVersion extends org.apache.sqoop.SqoopVersion {
     org.apache.sqoop.SqoopVersion.GIT_HASH;
   public static final String COMPILE_USER =
     org.apache.sqoop.SqoopVersion.COMPILE_USER;
-  public static final String COMPILE_HOST =
-    org.apache.sqoop.SqoopVersion.COMPILE_HOST;
   public static final String COMPILE_DATE =
     org.apache.sqoop.SqoopVersion.COMPILE_DATE;
 }
@@ -83,14 +81,13 @@ public class SqoopVersion {
   public static final String VERSION="${version}";
   public static final String GIT_HASH="${signature}";
   public static final String COMPILE_USER="${USER}";
-  public static final String COMPILE_HOST="${host}";
   public static final String COMPILE_DATE="${compiledate}";
 
   @Override
   public String toString() {
     return "Sqoop " + VERSION + "\n"
         + "git commit id " + GIT_HASH + "\n"
-        + "Compiled by " + COMPILE_USER + "@" + COMPILE_HOST
+        + "Compiled by " + COMPILE_USER
         + " on " + COMPILE_DATE + "\n";
   }
 }
