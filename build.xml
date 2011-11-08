@@ -466,9 +466,7 @@
     </tar>
   </target>
 
-  <target name="srcpackage"
-      depends="compile-all,ivy-retrieve-redist,scripts"
-      description="Create a redistributable source package">
+  <target name="srcpackage" description="Create a redistributable source package">
 
     <mkdir dir="${dist.dir}"/>
 
@@ -478,35 +476,12 @@
       <fileset dir="${basedir}">
         <include name="**/*" />
         <exclude name="build/**" />
-        <exclude name="lib/**" />
         <exclude name=".git/**" />
         <exclude name="tags" />
         <exclude name=".project" />
         <exclude name=".classpath" />
         <exclude name="conf/managers.d/**" />
         <exclude name="conf/tools.d/**" />
-      </fileset>
-    </copy>
-
-    <!-- copy the dependency libraries from ivy into the output lib dir -->
-    <mkdir dir="${dist.dir}/lib"/>
-    <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
-      <fileset dir="${redist.ivy.lib.dir}">
-        <include name="**/*.jar" />
-      </fileset>
-    </copy>
-
-    <copy todir="${dist.dir}/lib" includeEmptyDirs="false">
-      <fileset dir="${lib.dir}">
-        <include name="**/*" />
-        <exclude name="ivy*" />
-      </fileset>
-    </copy>
-
-    <!-- copy in auto-generated bin scripts -->
-    <copy todir="${dist.dir}/bin" includeEmptyDirs="false" flatten="true">
-      <fileset dir="${build.bin.dir}">
-        <include name="*" />
       </fileset>
     </copy>
 
@@ -522,14 +497,6 @@
         <include name="**/*.sh" />
       </fileset>
     </chmod>
-
-    <!-- In the configuration directory, take the sqoop-site-template
-         and copy it to sqoop-site.xml, overwriting any user-specified
-         sqoop-site.xml in there.
-     -->
-    <copy file="${dist.dir}/conf/sqoop-site-template.xml"
-        tofile="${dist.dir}/conf/sqoop-site.xml"
-        overwrite="true" />
   </target>
 
   <target name="srctar" depends="srcpackage" description="Create release source tarball">
