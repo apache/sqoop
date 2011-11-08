@@ -94,9 +94,12 @@
 
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
-  <property name="srctar.file" location="${build.dir}/${artifact.name}-src.tar.gz" />
   <property name="build.docs.timestamp"
       location="${build.dir}/docs.timestamp" />
+
+  <property name="src.artifact.name" value="${name}-${version}-src" />
+  <property name="src.dist.dir" location="${build.dir}/${src.artifact.name}" />
+  <property name="src.tar.file" location="${build.dir}/${src.artifact.name}.tar.gz" />
 
   <!-- compilation -->
   <property name="javac.deprecation" value="off"/>
@@ -468,11 +471,11 @@
 
   <target name="srcpackage" description="Create a redistributable source package">
 
-    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${src.dist.dir}"/>
 
     <!-- copy in various components of the initial source layout
          so that the redistributable can bootstrap itself. -->
-    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="false">
+    <copy todir="${src.dist.dir}" includeEmptyDirs="false" flatten="false">
       <fileset dir="${basedir}">
         <include name="**/*" />
         <exclude name="build/**" />
@@ -487,30 +490,30 @@
 
     <!-- make sure the bin scripts are executable. -->
     <chmod perm="ugo+x" type="file" parallel="false">
-      <fileset dir="${dist.dir}/bin" />
-      <fileset dir="${dist.dir}/testdata/hive/bin" />
+      <fileset dir="${src.dist.dir}/bin" />
+      <fileset dir="${src.dist.dir}/testdata/hive/bin" />
     </chmod>
 
     <!-- make sure any scripts named *.sh are executable. -->
     <chmod perm="ugo+x" type="file" parallel="false">
-      <fileset dir="${dist.dir}">
+      <fileset dir="${src.dist.dir}">
         <include name="**/*.sh" />
       </fileset>
     </chmod>
   </target>
 
   <target name="srctar" depends="srcpackage" description="Create release source tarball">
-    <tar compression="gzip" longfile="gnu" destfile="${srctar.file}">
+    <tar compression="gzip" longfile="gnu" destfile="${src.tar.file}">
       <tarfileset dir="${build.dir}" mode="664">
-        <exclude name="${artifact.name}/bin/*" />
-      	<exclude name="${artifact.name}/testdata/hive/bin/*" />
-        <exclude name="${artifact.name}/**/*.sh" />
-        <include name="${artifact.name}/**" />
+        <exclude name="${src.artifact.name}/bin/*" />
+      	<exclude name="${src.artifact.name}/testdata/hive/bin/*" />
+        <exclude name="${src.artifact.name}/**/*.sh" />
+        <include name="${src.artifact.name}/**" />
       </tarfileset>
       <tarfileset dir="${build.dir}" mode="755">
-        <include name="${artifact.name}/bin/*" />
-      	<include name="${artifact.name}/testdata/hive/bin/*" />
-        <include name="${artifact.name}/**/*.sh" />
+        <include name="${src.artifact.name}/bin/*" />
+      	<include name="${src.artifact.name}/testdata/hive/bin/*" />
+        <include name="${src.artifact.name}/**/*.sh" />
       </tarfileset>
     </tar>
   </target>
