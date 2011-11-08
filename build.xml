@@ -94,6 +94,7 @@
 
   <property name="dist.dir" location="${build.dir}/${artifact.name}" />
   <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
+  <property name="srctar.file" location="${build.dir}/${artifact.name}-src.tar.gz" />
   <property name="build.docs.timestamp"
       location="${build.dir}/docs.timestamp" />
 
@@ -451,6 +452,88 @@
 
   <target name="tar" depends="package" description="Create release tarball">
     <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
+      <tarfileset dir="${build.dir}" mode="664">
+        <exclude name="${artifact.name}/bin/*" />
+      	<exclude name="${artifact.name}/testdata/hive/bin/*" />
+        <exclude name="${artifact.name}/**/*.sh" />
+        <include name="${artifact.name}/**" />
+      </tarfileset>
+      <tarfileset dir="${build.dir}" mode="755">
+        <include name="${artifact.name}/bin/*" />
+      	<include name="${artifact.name}/testdata/hive/bin/*" />
+        <include name="${artifact.name}/**/*.sh" />
+      </tarfileset>
+    </tar>
+  </target>
+
+  <target name="srcpackage"
+      depends="compile-all,ivy-retrieve-redist,scripts"
+      description="Create a redistributable source package">
+
+    <mkdir dir="${dist.dir}"/>
+
+    <!-- copy in various components of the initial source layout
+         so that the redistributable can bootstrap itself. -->
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="false">
+      <fileset dir="${basedir}">
+        <include name="**/*" />
+        <exclude name="build/**" />
+        <exclude name="lib/**" />
+        <exclude name=".git/**" />
+        <exclude name="tags" />
+        <exclude name=".project" />
+        <exclude name=".classpath" />
+        <exclude name="conf/managers.d/**" />
+        <exclude name="conf/tools.d/**" />
+      </fileset>
+    </copy>
+
+    <!-- copy the dependency libraries from ivy into the output lib dir -->
+    <mkdir dir="${dist.dir}/lib"/>
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${redist.ivy.lib.dir}">
+        <include name="**/*.jar" />
+      </fileset>
+    </copy>
+
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false">
+      <fileset dir="${lib.dir}">
+        <include name="**/*" />
+        <exclude name="ivy*" />
+      </fileset>
+    </copy>
+
+    <!-- copy in auto-generated bin scripts -->
+    <copy todir="${dist.dir}/bin" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.bin.dir}">
+        <include name="*" />
+      </fileset>
+    </copy>
+
+    <!-- make sure the bin scripts are executable. -->
+    <chmod perm="ugo+x" type="file" parallel="false">
+      <fileset dir="${dist.dir}/bin" />
+      <fileset dir="${dist.dir}/testdata/hive/bin" />
+    </chmod>
+
+    <!-- make sure any scripts named *.sh are executable. -->
+    <chmod perm="ugo+x" type="file" parallel="false">
+      <fileset dir="${dist.dir}">
+        <include name="**/*.sh" />
+      </fileset>
+    </chmod>
+
+    <!-- In the configuration directory, take the sqoop-site-template
+         and copy it to sqoop-site.xml, overwriting any user-specified
+         sqoop-site.xml in there.
+     -->
+    <copy file="${dist.dir}/conf/sqoop-site-template.xml"
+        tofile="${dist.dir}/conf/sqoop-site.xml"
+        overwrite="true" />
+  </target>
+
+  <target name="srctar" depends="srcpackage" description="Create release source tarball">
+    <tar compression="gzip" longfile="gnu" destfile="${srctar.file}">
       <tarfileset dir="${build.dir}" mode="664">
         <exclude name="${artifact.name}/bin/*" />
       	<exclude name="${artifact.name}/testdata/hive/bin/*" />
