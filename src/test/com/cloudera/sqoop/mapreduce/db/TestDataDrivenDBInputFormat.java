@@ -23,13 +23,14 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.HadoopTestCase;
 import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.db.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
@@ -38,7 +39,7 @@ import org.apache.hadoop.util.StringUtils;
 /**
  * Test aspects of DataDrivenDBInputFormat.
  */
-public class TestDataDrivenDBInputFormat extends HadoopTestCase {
+public class TestDataDrivenDBInputFormat extends TestCase {
 
   private static final Log LOG = LogFactory.getLog(
       TestDataDrivenDBInputFormat.class);
@@ -51,10 +52,6 @@ public class TestDataDrivenDBInputFormat extends HadoopTestCase {
   private Connection connection;
 
   private static final String OUT_DIR;
-
-  public TestDataDrivenDBInputFormat() throws IOException {
-    super(LOCAL_MR, LOCAL_FS, 1, 1);
-  }
 
   static {
     OUT_DIR = System.getProperty("test.build.data", "/tmp") + "/dddbifout";

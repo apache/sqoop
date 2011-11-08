@@ -31,10 +31,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.MapContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.cloudera.sqoop.testutil.MockObjectFactory;
 import com.cloudera.sqoop.testutil.MockResultSet;
 
 /**
@@ -45,7 +42,6 @@ public class TestLargeObjectLoader extends TestCase {
   protected Configuration conf;
   protected LargeObjectLoader loader;
   protected Path outDir;
-  protected MapContext mapContext;
 
   public void setUp() throws IOException, InterruptedException {
     conf = new Configuration();
@@ -60,17 +56,7 @@ public class TestLargeObjectLoader extends TestCase {
     }
     fs.mkdirs(outDir);
 
-    /* A mock MapContext that uses FileOutputCommitter.
-     * This MapContext is actually serving two roles here; when writing the
-     * CLOB files, its OutputCommitter is used to determine where to write
-     * the CLOB data, as these are placed in the task output work directory.
-     * When reading the CLOB data back for verification, we use the
-     * getInputSplit() to determine where to read our source data from--the same
-     * directory. We are repurposing the same context for both output and input.
-     */
-    mapContext = MockObjectFactory.getMapContextForIOPath(conf, outDir);
-    loader = new LargeObjectLoader(mapContext.getConfiguration(),
-        FileOutputFormat.getWorkOutputPath(mapContext));
+    loader = new LargeObjectLoader(conf, outDir);
   }
 
   public void testReadClobRef()
@@ -88,7 +74,6 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(clob);
     assertTrue(clob.isExternal());
     loader.close();
-    mapContext.getOutputCommitter().commitTask(mapContext);
     Reader r = clob.getDataStream(conf, outDir);
     char [] buf = new char[4096];
     int chars = r.read(buf, 0, 4096);
@@ -117,7 +102,6 @@ public class TestLargeObjectLoader extends TestCase {
     assertNotNull(blob);
     assertTrue(blob.isExternal());
     loader.close();
-    mapContext.getOutputCommitter().commitTask(mapContext);
     InputStream is = blob.getDataStream(conf, outDir);
     byte [] buf = new byte[4096];
     int bytes = is.read(buf, 0, 4096);
