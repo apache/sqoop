@@ -45,9 +45,11 @@ sed -i -e "s|${basedir}||" ${auditlog}
 # Exclude paths that don't count.
 # Anything in /docs is auto-generated.
 # Anything in /testdata is a file that is supposed to represent exact output.
+# Change log does not need a license.
 grep '!?????' ${auditlog} \
     | grep -v ' \/docs\/' \
     | grep -v ' \/testdata\/' \
+    | grep -v ' \/CHANGES.txt' \
     > ${filtered}
 
 # Check: did we find any violations after filtering?
