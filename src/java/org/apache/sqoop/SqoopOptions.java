@@ -18,6 +18,9 @@
 
 package org.apache.sqoop;
 
+import com.cloudera.sqoop.SqoopOptions.FileLayout;
+import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
+import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -72,30 +75,6 @@ public class SqoopOptions implements Cloneable {
       return getMessage();
     }
   }
-
-  /** Selects in-HDFS destination file format. */
-  public enum FileLayout {
-    TextFile,
-    SequenceFile,
-    AvroDataFile
-  }
-
-  /**
-   * Incremental imports support two modes:
-   * <ul>
-   * <li>new rows being appended to the end of a table with an
-   * incrementing id</li>
-   * <li>new data results in a date-last-modified column being
-   * updated to NOW(); Sqoop will pull all dirty rows in the next
-   * incremental import.</li>
-   * </ul>
-   */
-  public enum IncrementalMode {
-    None,
-    AppendRows,
-    DateLastModified,
-  }
-
 
   // TODO(aaron): Adding something here? Add a setter and a getter.  Add a
   // default value in initDefaults() if you need one.  If this value needs to
@@ -198,20 +177,6 @@ public class SqoopOptions implements Cloneable {
   // Column to use for the WHERE clause in an UPDATE-based export.
   @StoredAsProperty("export.update.col") private String updateKeyCol;
 
-  /**
-   * Update mode option specifies how updates are performed when
-   * new rows are found with non-matching keys in database.
-   * It supports two modes:
-   * <ul>
-   * <li>UpdateOnly: This is the default. New rows are silently ignored.</li>
-   * <li>AllowInsert: New rows are inserted into the database.</li>
-   * </ul>
-   */
-  public enum UpdateMode {
-    UpdateOnly,
-    AllowInsert
-  }
-
   @StoredAsProperty("export.new.update") private UpdateMode updateMode;
 
   private DelimiterSet inputDelimiters; // codegen.input.delimiters.
@@ -263,7 +228,7 @@ public class SqoopOptions implements Cloneable {
   // If we restore a job and then allow the user to apply arguments on
   // top, we retain the version without the arguments in a reference to the
   // 'parent' SqoopOptions instance, here.
-  private SqoopOptions parent;
+  private com.cloudera.sqoop.SqoopOptions parent;
 
   // Nonce directory name. Generate one per process, lazily, if
   // getNonceJarDir() is called. Not recorded in metadata. This is used as
@@ -514,7 +479,7 @@ public class SqoopOptions implements Cloneable {
   public void loadProperties(Properties props) {
 
     try {
-      Field [] fields = getClass().getDeclaredFields();
+      Field [] fields = SqoopOptions.class.getDeclaredFields();
       for (Field f : fields) {
         if (f.isAnnotationPresent(StoredAsProperty.class)) {
           Class typ = f.getType();
@@ -606,7 +571,7 @@ public class SqoopOptions implements Cloneable {
     Properties props = new Properties();
 
     try {
-      Field [] fields = getClass().getDeclaredFields();
+      Field [] fields = SqoopOptions.class.getDeclaredFields();
       for (Field f : fields) {
         if (f.isAnnotationPresent(StoredAsProperty.class)) {
           Class typ = f.getType();
@@ -1843,14 +1808,14 @@ public class SqoopOptions implements Cloneable {
   /**
    * Return the parent instance this SqoopOptions is derived from.
    */
-  public SqoopOptions getParent() {
+  public com.cloudera.sqoop.SqoopOptions getParent() {
     return this.parent;
   }
 
   /**
    * Set the parent instance this SqoopOptions is derived from.
    */
-  public void setParent(SqoopOptions options) {
+  public void setParent(com.cloudera.sqoop.SqoopOptions options) {
     this.parent = options;
   }
 
