@@ -38,7 +38,6 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.FileLayout;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
@@ -838,10 +837,6 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
             "MySQL direct export currently supports only text output format."
              + "Parameters --as-sequencefile and --as-avrodatafile are not "
              + "supported with --direct params in MySQL case.");
-    } else if (!options.getMapColumnJava().isEmpty()
-            && options.getFileLayout() == FileLayout.AvroDataFile) {
-      throw new InvalidOptionsException(
-              "Overriding column types is currently not supported with avro.");
     }
   }
 

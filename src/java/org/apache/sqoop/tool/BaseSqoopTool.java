@@ -861,7 +861,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     if (in.hasOption(MAP_COLUMN_JAVA)) {
-      out.setMapColumn(in.getOptionValue(MAP_COLUMN_JAVA));
+      out.setMapColumnJava(in.getOptionValue(MAP_COLUMN_JAVA));
     }
 
     if (!multiTable && in.hasOption(CLASS_NAME_ARG)) {

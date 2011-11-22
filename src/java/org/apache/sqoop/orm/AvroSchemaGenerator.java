@@ -30,6 +30,7 @@ import org.apache.avro.Schema.Type;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import java.util.Properties;
 
 /**
  * Creates an Avro schema to represent a table from a database.
@@ -57,7 +58,7 @@ public class AvroSchemaGenerator {
     for (String columnName : columnNames) {
       String cleanedCol = ClassWriter.toIdentifier(columnName);
       int sqlType = columnTypes.get(cleanedCol);
-      Schema avroSchema = toAvroSchema(sqlType);
+      Schema avroSchema = toAvroSchema(sqlType, columnName);
       Field field = new Field(cleanedCol, avroSchema, null, null);
       field.addProp("columnName", columnName);
       field.addProp("sqlType", Integer.toString(sqlType));
@@ -112,13 +113,44 @@ public class AvroSchemaGenerator {
     }
   }
 
-  public Schema toAvroSchema(int sqlType) {
-    // All types are assumed nullabl;e make a union of the "true" type for
-    // a column and NULL.
+  private Type toAvroType(String type) {
+    if(type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
+    if(type.equalsIgnoreCase("LONG")) { return Type.LONG; }
+    if(type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
+    if(type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
+    if(type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
+    if(type.equalsIgnoreCase("STRING")) { return Type.STRING; }
+    if(type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
+
+    // Mapping was not found
+    throw new IllegalArgumentException("Cannot convert to AVRO type " + type);
+  }
+
+  /**
+   * Will create union, because each type is assumed to be nullable.
+   *
+   * @param sqlType Original SQL type (might be overridden by user)
+   * @param columnName Column name from the query
+   * @return Schema
+   */
+  public Schema toAvroSchema(int sqlType, String columnName) {
+    Properties mappingJava = options.getMapColumnJava();
+
+    // Try to apply any user specified mapping
+    Type targetType;
+    if(columnName != null && mappingJava.containsKey(columnName)) {
+        targetType = toAvroType((String)mappingJava.get(columnName));
+    } else {
+      targetType = toAvroType(sqlType);
+    }
+
     List<Schema> childSchemas = new ArrayList<Schema>();
-    childSchemas.add(Schema.create(toAvroType(sqlType)));
+    childSchemas.add(Schema.create(targetType));
     childSchemas.add(Schema.create(Schema.Type.NULL));
     return Schema.createUnion(childSchemas);
   }
 
+  public Schema toAvroSchema(int sqlType) {
+    return toAvroSchema(sqlType, null);
+  }
 }

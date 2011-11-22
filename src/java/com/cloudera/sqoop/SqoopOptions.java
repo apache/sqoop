@@ -21,7 +21,7 @@ package com.cloudera.sqoop;
 import org.apache.hadoop.conf.Configuration;
 
 /**
- * Configurable state used by Sqoop tools.
+ * @deprecated
  */
 public class SqoopOptions
   extends org.apache.sqoop.SqoopOptions implements Cloneable {
@@ -90,6 +90,7 @@ public class SqoopOptions
 
   /**
    * {@inheritDoc}.
+   * @deprecated
    */
   public static class InvalidOptionsException
     extends org.apache.sqoop.SqoopOptions.InvalidOptionsException {

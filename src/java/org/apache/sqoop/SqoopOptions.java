@@ -1011,7 +1011,7 @@ public class SqoopOptions implements Cloneable {
     parseColumnMapping(mapColumn, mapColumnHive);
   }
 
-  public void setMapColumn(String mapColumn) {
+  public void setMapColumnJava(String mapColumn) {
     parseColumnMapping(mapColumn, mapColumnJava);
   }
 

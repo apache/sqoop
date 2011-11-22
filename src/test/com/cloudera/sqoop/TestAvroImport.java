@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -56,7 +57,8 @@ public class TestAvroImport extends ImportJobTestCase {
    *
    * @return the argv as an array of strings.
    */
-  protected String[] getOutputArgv(boolean includeHadoopFlags) {
+  protected String[] getOutputArgv(boolean includeHadoopFlags,
+          String[] extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {
@@ -72,6 +74,9 @@ public class TestAvroImport extends ImportJobTestCase {
     args.add("--split-by");
     args.add("INTFIELD1");
     args.add("--as-avrodatafile");
+    if(extraArgs != null) {
+      args.addAll(Arrays.asList(extraArgs));
+    }
 
     return args.toArray(new String[0]);
   }
@@ -84,7 +89,7 @@ public class TestAvroImport extends ImportJobTestCase {
         "'s'", "'0102'", };
     createTableWithColTypes(types, vals);
 
-    runImport(getOutputArgv(true));
+    runImport(getOutputArgv(true, null));
 
     Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
     DataFileReader<GenericRecord> reader = read(outputFile);
@@ -115,6 +120,28 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals((byte) 2, b.get(1));
   }
 
+  public void testOverrideTypeMapping() throws IOException {
+    String [] types = { "INT" };
+    String [] vals = { "10" };
+    createTableWithColTypes(types, vals);
+
+    String [] extraArgs = { "--map-column-java", "DATA_COL0=String"};
+
+    runImport(getOutputArgv(true, extraArgs));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    Schema schema = reader.getSchema();
+    assertEquals(Schema.Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+
+    checkField(fields.get(0), "DATA_COL0", Schema.Type.STRING);
+
+    GenericRecord record1 = reader.next();
+    assertEquals("DATA_COL0", new Utf8("10"), record1.get("DATA_COL0"));
+  }
+
   private void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());
@@ -127,7 +154,7 @@ public class TestAvroImport extends ImportJobTestCase {
     String [] vals = { null };
     createTableWithColTypes(types, vals);
 
-    runImport(getOutputArgv(true));
+    runImport(getOutputArgv(true, null));
 
     Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
     DataFileReader<GenericRecord> reader = read(outputFile);
