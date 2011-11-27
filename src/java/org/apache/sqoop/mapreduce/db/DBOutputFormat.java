@@ -37,7 +37,6 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat.DBRecordWriter;
 
 /**
  * A OutputFormat that sends the reduce output to a SQL table.
@@ -119,7 +118,8 @@ public class DBOutputFormat<K extends DBWritable, V>
 
       statement = connection.prepareStatement(
                     constructQuery(tableName, fieldNames));
-      return new DBRecordWriter(connection, statement);
+      return new com.cloudera.sqoop.mapreduce.db.DBOutputFormat.DBRecordWriter(
+                     connection, statement);
     } catch (Exception ex) {
       throw new IOException(ex);
     }
