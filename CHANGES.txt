@@ -1,6 +1,6 @@
 Apache Sqoop Change Log
 
-Release 1.4.0 - Unreleased
+Release 1.4.0 - 11/29/2011
 
   NEW FEATURES
 
