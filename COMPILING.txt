@@ -55,9 +55,9 @@ If you want to build everything (including the documentation), type
 +ant package+. This will appear in the
 +build/sqoop-(version)/+ directory.
 
-Sqoop is built against the latest Hadoop distribution available from Cloudera.
-These dependencies are obtained via IVY which downloads the necessary binaries
-from Cloudera maven repository.
+This version of Sqoop is built against Hadoop 0.23 available from Apache
+maven repository by default. These dependencies are obtained via IVY which
+downloads the necessary binaries.
 
 == Testing Sqoop
 
@@ -274,3 +274,12 @@ will allow you to edit Sqoop sources in Eclipse with all the library
 dependencies correctly resolved. To compile the jars, you should still
 use ant.
 
+
+== Using a specific version of Hadoop
+
+Now Sqoop defaults to use Hadoop 0.23 available from Apache maven repository.
+To switch back to the previous version of Hadoop 0.20, for example, run:
+
+++++
+ant test -Dhadoopversion=20
+++++

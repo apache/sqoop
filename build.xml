@@ -24,6 +24,13 @@
     xmlns:artifact="urn:maven-artifact-ant"
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
+  <!-- load ant-contrib tasks to get the "if" task. -->
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
+
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->
   <property file="${user.home}/build.properties" />
@@ -150,10 +157,22 @@
     -->
   <property name="sqoop.thirdparty.lib.dir" value="" />
 
+  <!-- Set default Hadoop version if not set -->
+  <if>
+    <isset property="hadoopversion" />
+    <then>
+      <echo message="Use Hadoop 0.${hadoopversion}" />
+    </then>
+    <else>
+      <echo message="Use Hadoop 0.23 by default" />
+      <property name="hadoopversion" value="23" />
+    </else>
+  </if>
+
   <!-- Ivy-based dependency resolution -->
   <property name="ivy.dir" location="${basedir}/ivy" />
-  <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
   <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
+  <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
   <property name="ivy.jar" location="${lib.dir}/ivy-${ivy.version}.jar"/>
   <property name="ivy_repo_url"
   value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
@@ -183,13 +202,6 @@
 
   <property name="sqoop.test.sqlserver.connectstring.host_url"
             value="jdbc:sqlserver://sqlserverhost:1433"/>
-
-  <!-- load ant-contrib tasks to get the "if" task. -->
-  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
-    <classpath>
-      <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
-    </classpath>
-  </taskdef>
 
   <!-- The classpath for compiling and running Sqoop -->
   <if>
@@ -1062,20 +1074,20 @@
   <!-- retrieve ivy-managed artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="cloudera" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="hadoop${hadoopversion}" />
   </target>
   <target name="ivy-retrieve-hadoop" depends="ivy-init,ivy-resolve-hadoop">
     <!-- retrieve hadoop refs normally. -->
     <ivy:retrieve settingsRef="${name}.ivy.settings"
        pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
        sync="true" />
-    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="cloudera" />
+    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="hadoop${hadoopversion}" />
   </target>
 
   <!-- retrieve ivy-managed test artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop-test" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="clouderatest" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="hadoop${hadoopversion}test" />
   </target>
   <target name="ivy-retrieve-hadoop-test"
       depends="ivy-init,ivy-resolve-hadoop-test">
@@ -1083,7 +1095,7 @@
           pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
           sync="true" />
         <ivy:cachepath pathid="${name}.hadooptest.classpath"
-          conf="clouderatest" />
+          conf="hadoop${hadoopversion}test" />
   </target>
 
   <!-- retrieve ivy-managed artifacts for checkstyle -->

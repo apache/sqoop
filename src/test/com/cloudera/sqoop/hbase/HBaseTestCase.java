@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.util.VersionInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -120,6 +121,9 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
   @Override
   @Before
   public void setUp() {
+    if (!isHadoop20()) {
+      return;
+    }
     HBaseTestCase.recordTestBuildDataProperty();
     try {
       startMaster();
@@ -143,6 +147,9 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
   @Override
   @After
   public void tearDown() {
+    if (!isHadoop20()) {
+      return;
+    }
     try {
       shutdown();
     } catch (Exception e) {
@@ -172,5 +179,9 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     } finally {
       table.close();
     }
+  }
+
+  protected boolean isHadoop20() {
+    return VersionInfo.getVersion().startsWith("0.20");
   }
 }
