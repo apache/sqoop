@@ -35,7 +35,6 @@ import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.db.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.hadoop.util.VersionInfo;
 
 /**
  * Test aspects of DataDrivenDBInputFormat.
@@ -83,17 +82,11 @@ public class TestDataDrivenDBInputFormat extends TestCase {
   }
 
   public void setUp() throws Exception {
-    if (!isHadoop20()) {
-      return;
-    }
     initialize(DRIVER_CLASS, DB_URL);
     super.setUp();
   }
 
   public void tearDown() throws Exception {
-    if (!isHadoop20()) {
-      return;
-    }
     super.tearDown();
     shutdown();
   }
@@ -172,9 +165,6 @@ public class TestDataDrivenDBInputFormat extends TestCase {
   }
 
   public void testDateSplits() throws Exception {
-    if (!isHadoop20()) {
-      return;
-    }
     Statement s = connection.createStatement();
     final String DATE_TABLE = "datetable";
     final String COL = "foo";
@@ -230,7 +220,4 @@ public class TestDataDrivenDBInputFormat extends TestCase {
     }
   }
 
-  protected boolean isHadoop20() {
-    return VersionInfo.getVersion().startsWith("0.20");
-  }
 }

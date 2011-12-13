@@ -169,9 +169,32 @@
     </else>
   </if>
 
-  <!-- Ivy-based dependency resolution -->
+  <!-- Ivy library properties -->
   <property name="ivy.dir" location="${basedir}/ivy" />
   <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
+  <if>
+    <equals arg1="${hadoopversion}" arg2="20" />
+    <then>
+      <property name="hadoop.version" value="0.20.2-cdh3u1" />
+      <property name="hbase.version" value="0.90.3-cdh3u1" />
+      <property name="zookeeper.version" value="3.3.3-cdh3u1" />
+    </then>
+
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="23" />
+      <then>
+        <property name="hadoop.version" value="0.23.1-SNAPSHOT" />
+        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="zookeeper.version" value="3.4.0-SNAPSHOT" />
+      </then>
+    </elseif>
+
+    <else>
+      <fail message="Unrecognized hadoopversion. Can only be 20 or 23." />
+    </else>
+  </if>
+
+  <!-- Ivy-based dependency resolution -->
   <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
   <property name="ivy.jar" location="${lib.dir}/ivy-${ivy.version}.jar"/>
   <property name="ivy_repo_url"

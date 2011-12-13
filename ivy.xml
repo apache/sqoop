@@ -69,25 +69,25 @@ under the License.
 
     <!-- Dependencies for Hadoop 0.23 -->
     <dependency org="org.apache.hadoop" name="hadoop-common"
-      rev="${hadoop-common.version}" conf="hadoop23->default">
+      rev="${hadoop.version}" conf="hadoop23->default">
       <artifact name="hadoop-common" type="jar" />
       <artifact name="hadoop-common" type="jar" m:classifier="tests"/>
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
-      rev="${hadoop-common.version}" conf="hadoop23->default">
+      rev="${hadoop.version}" conf="hadoop23->default">
       <artifact name="hadoop-hdfs" type="jar" />
       <artifact name="hadoop-hdfs" type="jar" m:classifier="tests"/>
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-common"
-      rev="${hadoop-common.version}" conf="hadoop23->default"/>
+      rev="${hadoop.version}" conf="hadoop23->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core"
-      rev="${hadoop-common.version}" conf="hadoop23->default"/>
+      rev="${hadoop.version}" conf="hadoop23->default"/>
 
     <!-- Dependencies for Hadoop 0.20 -->
     <dependency org="org.apache.hadoop" name="hadoop-core"
-      rev="${hadoop-core.version}" conf="hadoop20->default"/>
+      rev="${hadoop.version}" conf="hadoop20->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-test"
-      rev="${hadoop-core.version}" conf="hadoop20test->default"/>
+      rev="${hadoop.version}" conf="hadoop20test->default"/>
 
     <!-- Common dependencies for Sqoop -->
     <dependency org="commons-cli" name="commons-cli"
