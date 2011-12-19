@@ -91,7 +91,7 @@ public class OracleManager
    */
   public static final String QUERY_COLUMNS_FOR_TABLE =
           "SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE "
-        + "OWNER = ? AND TABLE_NAME = ?";
+        + "OWNER = ? AND TABLE_NAME = ? ORDER BY COLUMN_ID";
 
   /**
    * Query to find the primary key column name for a given table. This query
