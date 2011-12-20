@@ -40,12 +40,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.SqoopParser;
 import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.tool.ToolDesc;
 
 /**
@@ -136,8 +136,9 @@ public abstract class SqoopTool {
    */
   public static Configuration loadPlugins(Configuration conf) {
     conf = loadPluginsFromConfDir(conf);
-    List<ToolPlugin> plugins = conf.getInstances(TOOL_PLUGINS_KEY,
-        ToolPlugin.class);
+    List<ToolPlugin> plugins =
+        org.apache.sqoop.config.ConfigurationHelper.getInstances(
+            conf, TOOL_PLUGINS_KEY, ToolPlugin.class);
     for (ToolPlugin plugin : plugins) {
       LOG.debug("Loading plugin: " + plugin.getClass().getName());
       List<ToolDesc> descriptions = plugin.getTools();

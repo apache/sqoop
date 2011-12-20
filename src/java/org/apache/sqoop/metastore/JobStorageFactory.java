@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.metastore.JobStorage;
 
 /**
@@ -59,8 +60,8 @@ public class JobStorageFactory {
    * instance of it -- or null if no JobStorage instance is appropriate.
    */
   public JobStorage getJobStorage(Map<String, String> descriptor) {
-    List<JobStorage> storages = this.conf.getInstances(
-        AVAILABLE_STORAGES_KEY, JobStorage.class);
+    List<JobStorage> storages = ConfigurationHelper.getInstances(
+        conf, AVAILABLE_STORAGES_KEY, JobStorage.class);
     for (JobStorage stor : storages) {
       if (stor.canAccept(descriptor)) {
         return stor;

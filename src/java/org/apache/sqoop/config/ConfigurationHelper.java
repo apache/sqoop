@@ -19,6 +19,8 @@
 package org.apache.sqoop.config;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -26,6 +28,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * This class provides static helper methods that allow access and manipulation
@@ -164,6 +167,30 @@ public final class ConfigurationHelper {
     return genericParser.getRemainingArgs();
   }
 
+  /**
+   * Get the value of the <code>name</code> property as a <code>List</code>
+   * of objects implementing the interface specified by <code>xface</code>.
+   *
+   * An exception is thrown if any of the classes does not exist, or if it does
+   * not implement the named interface.
+   *
+   * @param name the property name.
+   * @param xface the interface implemented by the classes named by
+   *        <code>name</code>.
+   * @return a <code>List</code> of objects implementing <code>xface</code>.
+   */
+  @SuppressWarnings("unchecked")
+  public static <U> List<U> getInstances(Configuration conf, String name, Class<U> xface) {
+    List<U> ret = new ArrayList<U>();
+    Class<?>[] classes = conf.getClasses(name);
+    for (Class<?> cl: classes) {
+      if (!xface.isAssignableFrom(cl)) {
+        throw new RuntimeException(cl + " does not implement " + xface);
+      }
+      ret.add((U) ReflectionUtils.newInstance(cl, conf));
+    }
+    return ret;
+  }
 
   private ConfigurationHelper() {
     // Disable explicit object creation
