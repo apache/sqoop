@@ -22,7 +22,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.sqoop.mapreduce.DBWritable;
 
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
 

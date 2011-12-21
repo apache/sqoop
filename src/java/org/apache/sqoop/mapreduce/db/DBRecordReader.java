@@ -31,7 +31,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;

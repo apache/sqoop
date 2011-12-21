@@ -20,7 +20,7 @@ package com.cloudera.sqoop.mapreduce;
 
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
+import org.apache.sqoop.mapreduce.CombineFileSplit;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

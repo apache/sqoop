@@ -17,7 +17,7 @@
  */
 package com.cloudera.sqoop.mapreduce.db;
 
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.sqoop.mapreduce.DBWritable;
 
 /**
  * A InputFormat that reads input data from an SQL table in an Oracle db.

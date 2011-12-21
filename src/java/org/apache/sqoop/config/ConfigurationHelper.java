@@ -180,7 +180,8 @@ public final class ConfigurationHelper {
    * @return a <code>List</code> of objects implementing <code>xface</code>.
    */
   @SuppressWarnings("unchecked")
-  public static <U> List<U> getInstances(Configuration conf, String name, Class<U> xface) {
+  public static <U> List<U> getInstances(Configuration conf,
+                                              String name, Class<U> xface) {
     List<U> ret = new ArrayList<U>();
     Class<?>[] classes = conf.getClasses(name);
     for (Class<?> cl: classes) {
