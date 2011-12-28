@@ -247,6 +247,21 @@ public class DBRecordReader<T extends DBWritable> extends
       pos++;
     } catch (SQLException e) {
       LoggingUtils.logAll(LOG, e);
+      if (this.statement != null) {
+        try {
+          statement.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close statement", ex);
+        }
+      }
+      if (this.connection != null) {
+        try {
+          connection.close();
+        } catch (SQLException ex) {
+          LOG.error("Failed to close connection", ex);
+        }
+      }
+
       throw new IOException("SQLException in nextKeyValue", e);
     }
     return true;

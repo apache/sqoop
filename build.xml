@@ -226,6 +226,12 @@
   <property name="sqoop.test.sqlserver.connectstring.host_url"
             value="jdbc:sqlserver://sqlserverhost:1433"/>
 
+  <property name="java.security.krb5.realm"
+            value="OX.AC.UK"/>
+
+  <property name="java.security.krb5.kdc"
+            value="kdc0.ox.ac.uk:kdc1.ox.ac.uk"/>
+
   <!-- The classpath for compiling and running Sqoop -->
   <if>
     <isset property="hadoop.home" />
@@ -688,6 +694,12 @@
 
       <sysproperty key="sqoop.test.sqlserver.connectstring.host_url"
                    value="${sqoop.test.sqlserver.connectstring.host_url}"/>
+
+      <sysproperty key="java.security.krb5.realm"
+                   value="${java.security.krb5.realm}"/>
+
+      <sysproperty key="java.security.krb5.kdc"
+                   value="${java.security.krb5.kdc}"/>
 
       <classpath>
         <!-- instrumented classes go ahead of normal classes -->
