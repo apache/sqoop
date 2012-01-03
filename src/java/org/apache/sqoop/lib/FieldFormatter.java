@@ -17,13 +17,21 @@
  */
 package org.apache.sqoop.lib;
 
+import java.util.regex.Pattern;
+
 /**
  * Static helper class that will help format data with quotes and escape chars.
  */
 public final class FieldFormatter {
 
+  private static final Pattern REPLACE_PATTERN = Pattern.compile("\\n|\\r|\01");
+
   /**
-   * only pass fields that are strings when --hive-drop-delims option is on.
+   * This drops all default Hive delimiters from the string and passes it on.
+   *
+   * These delimiters are \n, \r and \01. This method is invoked when the
+   * command line option {@code --hive-drop-delims} is provided.
+   *
    * @param str
    * @param delimiters
    * @return
@@ -42,7 +50,7 @@ public final class FieldFormatter {
    */
   public static String hiveStringReplaceDelims(String str, String replacement,
       com.cloudera.sqoop.lib.DelimiterSet delimiters) {
-    String droppedDelims = str.replaceAll("\\n|\\r|\01", replacement);
+    String droppedDelims = REPLACE_PATTERN.matcher(str).replaceAll(replacement);
     return escapeAndEnclose(droppedDelims, delimiters);
   }
 
