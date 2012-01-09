@@ -36,6 +36,9 @@ manually specify the row key column with +\--hbase-row-key+. Each output
 column will be placed in the same column family, which must be specified
 with +\--column-family+.
 
+NOTE: This function is incompatible with direct import (parameter 
++\--direct+).
+
 If the target table and column family do not exist, the Sqoop job will
 exit with an error. You should create the target table and column family
 before running an import. If you specify +\--hbase-create-table+, Sqoop
