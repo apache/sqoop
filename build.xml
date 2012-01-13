@@ -2,7 +2,7 @@
 
 <!--
   Copyright 2011 The Apache Software Foundation
- 
+
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -10,9 +10,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -161,7 +161,7 @@
   <if>
     <isset property="hadoopversion" />
     <then>
-      <echo message="Use Hadoop 0.${hadoopversion}" />
+      <echo message="Use Hadoop ${hadoopversion}" />
     </then>
     <else>
       <echo message="Use Hadoop 0.23 by default" />
@@ -185,12 +185,21 @@
       <then>
         <property name="hadoop.version" value="0.23.1-SNAPSHOT" />
         <property name="hbase.version" value="0.92.0-SNAPSHOT" />
-        <property name="zookeeper.version" value="3.4.0-SNAPSHOT" />
+        <property name="zookeeper.version" value="3.4.2" />
+      </then>
+    </elseif>
+
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="100" />
+      <then>
+        <property name="hadoop.version" value="1.0.0" />
+        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="zookeeper.version" value="3.4.2" />
       </then>
     </elseif>
 
     <else>
-      <fail message="Unrecognized hadoopversion. Can only be 20 or 23." />
+      <fail message="Unrecognized hadoopversion. Can only be 20, 23, or 100." />
     </else>
   </if>
 

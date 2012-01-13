@@ -39,10 +39,12 @@ under the License.
     <conf name="hbase" visibility="private" />
     <conf name="hadoop23" visibility="private" extends="common,runtime,hbase" />
     <conf name="hadoop20" visibility="private" extends="common,runtime,hbase" />
+    <conf name="hadoop100" visibility="private" extends="common,runtime,hbase" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
     <conf name="hadoop20test" visibility="private" extends="test,hadoop20" />
+    <conf name="hadoop100test" visibility="private" extends="test,hadoop100" />
 
     <!-- We don't redistribute everything we depend on (e.g., Hadoop itself);
          anything which Hadoop itself also depends on, we do not ship.
@@ -82,6 +84,12 @@ under the License.
       rev="${hadoop.version}" conf="hadoop23->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core"
       rev="${hadoop.version}" conf="hadoop23->default"/>
+
+    <!-- Dependencies for Hadoop 1.0.0 -->
+    <dependency org="org.apache.hadoop" name="hadoop-core"
+      rev="${hadoop.version}" conf="hadoop100->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-test"
+      rev="${hadoop.version}" conf="hadoop100test->default"/>
 
     <!-- Dependencies for Hadoop 0.20 -->
     <dependency org="org.apache.hadoop" name="hadoop-core"
