@@ -18,9 +18,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 <ivy-module version="1.0">
-  <info organisation="com.cloudera.sqoop" module="${name}">
+  <info organisation="org.apache.sqoop" module="${name}">
     <license name="Apache 2.0"/>
-    <ivyauthor name="Sqoop Team" url="http://github.com/cloudera/sqoop" />
+    <ivyauthor name="Sqoop Team" url="http://incubator.apache.org/projects/sqoop.html" />
     <description>
         Sqoop
     </description>
