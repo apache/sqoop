@@ -834,9 +834,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
             && options.getFileLayout() != SqoopOptions.FileLayout.TextFile
             && options.getConnectString().contains("jdbc:mysql://")) {
       throw new InvalidOptionsException(
-            "MySQL direct export currently supports only text output format."
+            "MySQL direct import currently supports only text output format."
              + "Parameters --as-sequencefile and --as-avrodatafile are not "
              + "supported with --direct params in MySQL case.");
+    } else if (options.isDirect()
+            && options.doHiveDropDelims()) {
+      throw new InvalidOptionsException(
+            "Direct import currently do not support dropping hive delimiters,"
+            + " please remove parameter --hive-drop-import-delims.");
     }
   }
 
