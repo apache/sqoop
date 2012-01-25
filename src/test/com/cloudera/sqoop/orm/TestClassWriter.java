@@ -309,7 +309,8 @@ public class TestClassWriter extends TestCase {
         "this is many words"));
     assertEquals("_9isLegalInSql", ClassWriter.toJavaIdentifier(
         "9isLegalInSql"));
-    assertEquals("___", ClassWriter.toJavaIdentifier("___"));
+    assertEquals("____", ClassWriter.toJavaIdentifier("___"));
+    assertEquals("__class", ClassWriter.toJavaIdentifier("_class"));
   }
 
   @Test

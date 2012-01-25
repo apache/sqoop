@@ -223,6 +223,17 @@ public class ClassWriter {
     if (isReservedWord(output)) {
       // e.g., 'class' -> '_class';
       return "_" + output;
+
+    /*
+     * We're using candidate.startsWith instead of output.startsWith on purpose
+     * to preserve backward compatibility as much as possible. For example
+     * column "9isLegalInSql" was translated into "_9isLegalInSql" in original
+     * code and will translate to same "_9isLegalInSql" now. However it would
+     * be translated to "__9isLegalInSql" (notice that there are two "_" at the
+     * begging) if we would use output.startsWith instead.
+     */
+    } else if (candidate.startsWith("_")) {
+      return "_" + output;
     }
 
     return output;
