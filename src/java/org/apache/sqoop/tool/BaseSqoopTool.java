@@ -949,6 +949,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           "Both --hbase-table and --column-family must be set together."
           + HELP_STR);
     }
+    if (options.getHBaseTable() != null && options.isDirect()) {
+      throw new InvalidOptionsException("Direct import is incompatible with "
+        + "HBase. Please remove parameter --direct");
+    }
   }
 
   /**
