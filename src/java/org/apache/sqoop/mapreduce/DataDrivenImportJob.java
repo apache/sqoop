@@ -154,7 +154,7 @@ public class DataDrivenImportJob extends ImportJobBase {
 
         // If user specified boundary query on the command line propagate it to
         // the job
-        if(options.getBoundaryQuery() != null) {
+        if (options.getBoundaryQuery() != null) {
           DataDrivenDBInputFormat.setBoundingQuery(job.getConfiguration(),
                   options.getBoundaryQuery());
         }
@@ -166,7 +166,7 @@ public class DataDrivenImportJob extends ImportJobBase {
 
         String inputBoundingQuery = options.getBoundaryQuery();
 
-        if(inputBoundingQuery == null) {
+        if (inputBoundingQuery == null) {
           inputBoundingQuery =
             mgr.getInputBoundsQuery(splitByCol, sanitizedQuery);
           if (inputBoundingQuery == null) {

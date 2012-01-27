@@ -177,7 +177,7 @@ public class DBConfiguration {
 
     Class.forName(conf.get(DBConfiguration.DRIVER_CLASS_PROPERTY));
 
-    if(conf.get(DBConfiguration.USERNAME_PROPERTY) == null) {
+    if (conf.get(DBConfiguration.USERNAME_PROPERTY) == null) {
       return DriverManager.getConnection(
                conf.get(DBConfiguration.URL_PROPERTY));
     } else {
@@ -237,7 +237,7 @@ public class DBConfiguration {
   }
 
   public void setInputOrderBy(String orderby) {
-    if(orderby != null && orderby.length() >0) {
+    if (orderby != null && orderby.length() >0) {
       conf.set(DBConfiguration.INPUT_ORDER_BY_PROPERTY, orderby);
     }
   }
@@ -247,7 +247,7 @@ public class DBConfiguration {
   }
 
   public void setInputQuery(String query) {
-    if(query != null && query.length() >0) {
+    if (query != null && query.length() >0) {
       conf.set(DBConfiguration.INPUT_QUERY, query);
     }
   }
@@ -257,7 +257,7 @@ public class DBConfiguration {
   }
 
   public void setInputCountQuery(String query) {
-    if(query != null && query.length() > 0) {
+    if (query != null && query.length() > 0) {
       conf.set(DBConfiguration.INPUT_COUNT_QUERY, query);
     }
   }

@@ -114,13 +114,13 @@ public class AvroSchemaGenerator {
   }
 
   private Type toAvroType(String type) {
-    if(type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
-    if(type.equalsIgnoreCase("LONG")) { return Type.LONG; }
-    if(type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
-    if(type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
-    if(type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
-    if(type.equalsIgnoreCase("STRING")) { return Type.STRING; }
-    if(type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
+    if (type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
+    if (type.equalsIgnoreCase("LONG")) { return Type.LONG; }
+    if (type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
+    if (type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
+    if (type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
+    if (type.equalsIgnoreCase("STRING")) { return Type.STRING; }
+    if (type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
 
     // Mapping was not found
     throw new IllegalArgumentException("Cannot convert to AVRO type " + type);
@@ -138,7 +138,7 @@ public class AvroSchemaGenerator {
 
     // Try to apply any user specified mapping
     Type targetType;
-    if(columnName != null && mappingJava.containsKey(columnName)) {
+    if (columnName != null && mappingJava.containsKey(columnName)) {
         targetType = toAvroType((String)mappingJava.get(columnName));
     } else {
       targetType = toAvroType(sqlType);

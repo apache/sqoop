@@ -85,7 +85,7 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
     conditionClauses.append(" ) AND ( ").append(dataSplit.getUpperClause());
     conditionClauses.append(" )");
 
-    if(dbConf.getInputQuery() == null) {
+    if (dbConf.getInputQuery() == null) {
       // We need to generate the entire query.
       query.append("SELECT ");
 

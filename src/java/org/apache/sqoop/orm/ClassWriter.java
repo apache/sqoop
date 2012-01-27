@@ -242,9 +242,9 @@ public class ClassWriter {
   private String toJavaType(String columnName, int sqlType) {
     Properties mapping = options.getMapColumnJava();
 
-    if(mapping.containsKey(columnName)) {
+    if (mapping.containsKey(columnName)) {
       String type = mapping.getProperty(columnName);
-      if(LOG.isDebugEnabled()) {
+      if (LOG.isDebugEnabled()) {
         LOG.info("Overriding type of column " + columnName + " to " + type);
       }
       return type;
@@ -1069,7 +1069,7 @@ public class ClassWriter {
       String identifier = cleanedColNames[i];
 
       // Name can't be blank
-      if(identifier.isEmpty()) {
+      if (identifier.isEmpty()) {
         throw new IllegalArgumentException("We found column without column "
                 + "name. Please verify that you've entered all column names "
                 + "in your query if using free form query import (consider "
@@ -1097,9 +1097,9 @@ public class ClassWriter {
 
     // Check that all explicitly mapped columns are present in result set
     Properties mapping = options.getMapColumnJava();
-    if(mapping != null && !mapping.isEmpty()) {
+    if (mapping != null && !mapping.isEmpty()) {
       for(Object column : mapping.keySet()) {
-        if(!uniqColNames.contains((String)column)) {
+        if (!uniqColNames.contains((String)column)) {
         throw new IllegalArgumentException("No column by the name " + column
                 + "found while importing data");
         }

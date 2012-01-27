@@ -118,7 +118,7 @@ public class DBRecordReader<T extends DBWritable> extends
 
     // Default codepath for MySQL, HSQLDB, etc.
     // Relies on LIMIT/OFFSET for splits.
-    if(dbConf.getInputQuery() == null) {
+    if (dbConf.getInputQuery() == null) {
       query.append("SELECT ");
 
       for (int i = 0; i < fieldNames.length; i++) {

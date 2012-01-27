@@ -142,13 +142,13 @@ public class TableDefWriter {
     for(Object column : userMapping.keySet()) {
       boolean found = false;
       for(String c : colNames) {
-        if(c.equals(column)) {
+        if (c.equals(column)) {
           found = true;
           break;
         }
       }
 
-      if(!found) {
+      if (!found) {
         throw new IllegalArgumentException("No column by the name " + column
                 + "found while importing data");
       }
@@ -164,7 +164,9 @@ public class TableDefWriter {
 
       Integer colType = columnTypes.get(col);
       String hiveColType = userMapping.getProperty(col);
-      if(hiveColType == null) { hiveColType = connManager.toHiveType(colType); }
+      if (hiveColType == null) {
+        hiveColType = connManager.toHiveType(colType);
+      }
       if (null == hiveColType) {
         throw new IOException("Hive does not support the SQL type for column "
             + col);

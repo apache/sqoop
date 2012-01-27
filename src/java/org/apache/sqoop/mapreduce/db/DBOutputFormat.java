@@ -70,7 +70,7 @@ public class DBOutputFormat<K extends DBWritable, V>
    *          array of nulls.
    */
   public String constructQuery(String table, String[] fieldNames) {
-    if(fieldNames == null) {
+    if (fieldNames == null) {
       throw new IllegalArgumentException("Field names may not be null");
     }
 
@@ -91,7 +91,7 @@ public class DBOutputFormat<K extends DBWritable, V>
 
     for (int i = 0; i < fieldNames.length; i++) {
       query.append("?");
-      if(i != fieldNames.length - 1) {
+      if (i != fieldNames.length - 1) {
         query.append(",");
       }
     }
@@ -108,7 +108,7 @@ public class DBOutputFormat<K extends DBWritable, V>
     String tableName = dbConf.getOutputTableName();
     String[] fieldNames = dbConf.getOutputFieldNames();
 
-    if(fieldNames == null) {
+    if (fieldNames == null) {
       fieldNames = new String[dbConf.getOutputFieldCount()];
     }
 
@@ -135,7 +135,7 @@ public class DBOutputFormat<K extends DBWritable, V>
    */
   public static void setOutput(Job job, String tableName,
       String... fieldNames) throws IOException {
-    if(fieldNames.length > 0 && fieldNames[0] != null) {
+    if (fieldNames.length > 0 && fieldNames[0] != null) {
       DBConfiguration dbConf = setOutput(job, tableName);
       dbConf.setOutputFieldNames(fieldNames);
     } else {

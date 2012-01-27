@@ -62,7 +62,7 @@ extends DBRecordReader<T>  {
     String [] fieldNames = getFieldNames();
 
     // Oracle-specific codepath to use rownum instead of LIMIT/OFFSET.
-    if(dbConf.getInputQuery() == null) {
+    if (dbConf.getInputQuery() == null) {
       query.append("SELECT ");
 
       for (int i = 0; i < fieldNames.length; i++) {

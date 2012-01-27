@@ -289,7 +289,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
    * subclasses can override this for custom behaviour.*/
   protected String getCountQuery() {
 
-    if(dbConf.getInputCountQuery() != null) {
+    if (dbConf.getInputCountQuery() != null) {
       return dbConf.getInputCountQuery();
     }
 

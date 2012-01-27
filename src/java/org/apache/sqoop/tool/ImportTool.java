@@ -726,7 +726,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
         }
 
-        if(in.hasOption(SQL_QUERY_BOUNDARY)) {
+        if (in.hasOption(SQL_QUERY_BOUNDARY)) {
           out.setBoundaryQuery(in.getOptionValue(SQL_QUERY_BOUNDARY));
         }
       }

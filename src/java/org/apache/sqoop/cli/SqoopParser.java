@@ -106,7 +106,7 @@ public class SqoopParser extends GnuParser {
   private String stripMatchedQuotes(String in) {
     if (null == in || "\"".equals(in)) {
       return in; // single quote stays as-is.
-    } else if(in.startsWith("\"") && in.endsWith("\"")) {
+    } else if (in.startsWith("\"") && in.endsWith("\"")) {
       // Strip this pair of matched quotes.
       return in.substring(1, in.length() - 1);
     } else {

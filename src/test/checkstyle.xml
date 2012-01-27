@@ -122,6 +122,9 @@
     <module name="GenericWhitespace"/>
     <module name="EmptyForIteratorPad"/>
     <module name="MethodParamPad"/>
+    <module name="WhitespaceAround">
+      <property name="tokens" value="LITERAL_IF" />
+    </module>
     <module name="NoWhitespaceAfter">
       <property name="tokens"
           value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS" />

@@ -74,7 +74,7 @@ public class TestAvroImport extends ImportJobTestCase {
     args.add("--split-by");
     args.add("INTFIELD1");
     args.add("--as-avrodatafile");
-    if(extraArgs != null) {
+    if (extraArgs != null) {
       args.addAll(Arrays.asList(extraArgs));
     }
 
