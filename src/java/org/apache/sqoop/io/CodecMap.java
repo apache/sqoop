@@ -49,7 +49,7 @@ public final class CodecMap {
     codecNames.put(NONE,    null);
     codecNames.put(DEFLATE, "org.apache.hadoop.io.compress.DefaultCodec");
     codecNames.put(LZO,     "com.hadoop.compression.lzo.LzoCodec");
-    codecNames.put(LZOP,     "com.hadoop.compression.lzo.LzopCodec");
+    codecNames.put(LZOP,    "com.hadoop.compression.lzo.LzopCodec");
 
     // add more from Hadoop CompressionCodecFactory
     for (Class<? extends CompressionCodec> cls
@@ -135,7 +135,7 @@ public final class CodecMap {
    * <p>
    * Note: When HADOOP-7323 is available this method can be replaced with a call
    * to CompressionCodecFactory.
-   * @param classname the canonical class name of the codec or the codec alias
+   * @param codecName the canonical class name of the codec or the codec alias
    * @return the codec object or null if none matching the name were found
    */
   private static CompressionCodec getCodecByName(String codecName,
@@ -150,6 +150,45 @@ public final class CodecMap {
     return null;
   }
 
+  /**
+   * Gets the short name for a specified codec. See {@link
+   * #getCodecByName(String, Configuration)} for details. The name returned
+   * here is the shortest possible one that means a {@code Codec} part is
+   * removed as well.
+   *
+   * @param codecName name of the codec to return the short name for
+   * @param conf      job configuration object used to get the registered
+   *                  compression codecs
+   *
+   * @return the short name of the codec
+   *
+   * @throws com.cloudera.sqoop.io.UnsupportedCodecException
+   *          if no short name could be found
+   */
+  public static String getCodecShortNameByName(String codecName,
+    Configuration conf) throws com.cloudera.sqoop.io.UnsupportedCodecException {
+    if (codecNames.containsKey(codecName)) {
+      return codecName;
+    }
+
+    CompressionCodec codec = getCodecByName(codecName, conf);
+    Class<? extends CompressionCodec> codecClass = null;
+    if (codec != null) {
+      codecClass = codec.getClass();
+    }
+
+    if (codecClass != null) {
+      String simpleName = codecClass.getSimpleName();
+      if (simpleName.endsWith("Codec")) {
+        simpleName =
+          simpleName.substring(0, simpleName.length() - "Codec".length());
+      }
+      return simpleName.toLowerCase();
+    }
+
+    throw new com.cloudera.sqoop.io.UnsupportedCodecException(
+      "Cannot find codec class " + codecName + " for codec " + codecName);
+  }
 
   private static boolean codecMatches(Class<? extends CompressionCodec> cls,
       String codecName) {

@@ -52,6 +52,23 @@ public class TestCodecMap extends TestCase {
     verifyCodec(GzipCodec.class, "org.apache.hadoop.io.compress.GzipCodec");
   }
 
+  public void testGetShortName() throws UnsupportedCodecException {
+    verifyShortName("gzip", "org.apache.hadoop.io.compress.GzipCodec");
+    verifyShortName("default", "org.apache.hadoop.io.compress.DefaultCodec");
+    try {
+      verifyShortName("NONE", "bogus");
+      fail("Expected IOException");
+    } catch (UnsupportedCodecException e) {
+      // Exception is expected
+    }
+  }
+
+  private void verifyShortName(String expected, String codecName)
+    throws UnsupportedCodecException {
+    assertEquals(expected,
+      CodecMap.getCodecShortNameByName(codecName, new Configuration()));
+  }
+
   public void testUnrecognizedCodec() {
     try {
       CodecMap.getCodec("bogus", new Configuration());
