@@ -19,6 +19,9 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+
+import org.apache.avro.file.DataFileConstants;
+import org.apache.avro.mapred.AvroJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -98,7 +101,26 @@ public class ImportJobBase extends JobBase {
 
       if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
         SequenceFileOutputFormat.setOutputCompressionType(job,
-            CompressionType.BLOCK);
+          CompressionType.BLOCK);
+      }
+
+      // SQOOP-428: Avro expects not a fully qualified class name but a "short"
+      // name instead (e.g. "snappy") and it needs to be set in a custom
+      // configuration option called "avro.output.codec".
+      // The default codec is "deflate".
+      if (options.getFileLayout() == SqoopOptions.FileLayout.AvroDataFile) {
+        if (codecName != null) {
+          String shortName =
+            CodecMap.getCodecShortNameByName(codecName, job.getConfiguration());
+          // Avro only knows about "deflate" and not "default"
+          if (shortName.equalsIgnoreCase("default")) {
+            shortName = "deflate";
+          }
+          job.getConfiguration().set(AvroJob.OUTPUT_CODEC, shortName);
+        } else {
+          job.getConfiguration()
+            .set(AvroJob.OUTPUT_CODEC, DataFileConstants.DEFLATE_CODEC);
+        }
       }
     }
 

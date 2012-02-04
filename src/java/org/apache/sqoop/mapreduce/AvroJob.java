@@ -27,6 +27,9 @@ import org.apache.hadoop.conf.Configuration;
 public final class AvroJob {
   public static final String MAP_OUTPUT_SCHEMA = "avro.map.output.schema";
 
+  /** The configuration key for a job's output schema. */
+  public static final String OUTPUT_SCHEMA = "avro.output.schema";
+
   private AvroJob() {
   }
 
@@ -36,6 +39,11 @@ public final class AvroJob {
 
   /** Return a job's map output key schema. */
   public static Schema getMapOutputSchema(Configuration job) {
-    return Schema.parse(job.get(MAP_OUTPUT_SCHEMA));
+    return Schema.parse(job.get(MAP_OUTPUT_SCHEMA, job.get(OUTPUT_SCHEMA)));
+  }
+
+  /** Return a job's output key schema. */
+  public static Schema getOutputSchema(Configuration job) {
+    return Schema.parse(job.get(OUTPUT_SCHEMA));
   }
 }

@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
@@ -82,14 +83,48 @@ public class TestAvroImport extends ImportJobTestCase {
   }
 
   public void testAvroImport() throws IOException {
+    avroImportTestHelper(null, null);
+  }
 
-    String [] types = { "BIT", "INTEGER", "BIGINT", "REAL", "DOUBLE",
-        "VARCHAR(6)", "VARBINARY(2)", };
-    String [] vals = { "true", "100", "200", "1.0", "2.0",
-        "'s'", "'0102'", };
+  public void testDeflateCompressedAvroImport() throws IOException {
+    avroImportTestHelper(new String[] {"--compression-codec",
+      "org.apache.hadoop.io.compress.DefaultCodec", }, "deflate");
+  }
+
+  public void testDefaultCompressedAvroImport() throws IOException {
+    avroImportTestHelper(new String[] {"--compress", }, "deflate");
+  }
+
+  public void testUnsupportedCodec() throws IOException {
+    try {
+      avroImportTestHelper(new String[] {"--compression-codec", "foobar", },
+        null);
+      fail("Expected IOException");
+    } catch (IOException e) {
+      // Exception is expected
+    }
+  }
+
+  /**
+   * Helper method that runs an import using Avro with optional command line
+   * arguments and checks that the created file matches the expectations.
+   * <p/>
+   * This can be used to test various extra options that are implemented for
+   * the Avro input.
+   *
+   * @param extraArgs extra command line arguments to pass to Sqoop in addition
+   *                  to those that {@link #getOutputArgv(boolean, String[])}
+   *                  returns
+   */
+  private void avroImportTestHelper(String[] extraArgs, String codec)
+    throws IOException {
+    String[] types =
+      {"BIT", "INTEGER", "BIGINT", "REAL", "DOUBLE", "VARCHAR(6)",
+        "VARBINARY(2)", };
+    String[] vals = {"true", "100", "200", "1.0", "2.0", "'s'", "'0102'", };
     createTableWithColTypes(types, vals);
 
-    runImport(getOutputArgv(true, null));
+    runImport(getOutputArgv(true, extraArgs));
 
     Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
     DataFileReader<GenericRecord> reader = read(outputFile);
@@ -118,6 +153,10 @@ public class TestAvroImport extends ImportJobTestCase {
     ByteBuffer b = ((ByteBuffer) object);
     assertEquals((byte) 1, b.get(0));
     assertEquals((byte) 2, b.get(1));
+
+    if (codec != null) {
+      assertEquals(codec, reader.getMetaString(DataFileConstants.CODEC));
+    }
   }
 
   public void testOverrideTypeMapping() throws IOException {

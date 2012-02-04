@@ -70,4 +70,15 @@ public final class CodecMap {
   public static Set<String> getCodecNames() {
     return org.apache.sqoop.io.CodecMap.getCodecNames();
   }
+
+  /**
+   * Return the short name of the codec.
+   * See {@link org.apache.sqoop.io.CodecMap#getCodecShortNameByName(String,
+   * Configuration)}.
+   */
+  public static String getCodecShortNameByName(String codecName,
+    Configuration conf) throws UnsupportedCodecException {
+    return org.apache.sqoop.io.CodecMap
+      .getCodecShortNameByName(codecName, conf);
+  }
 }
