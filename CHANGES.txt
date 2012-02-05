@@ -32,6 +32,10 @@ Release 1.4.1 - 02/01/2012
 
     SQOOP-409 hive-drop-import-delims doesn't work with MySQL direct import
 
+    SQOOP-428 AvroOutputFormat doesn't support compression even though documentation claims it does
+
+    SQOOP-433 Tests are failing on current 0.23 version
+
   IMPROVEMENTS
 
     SQOOP-432 Enforce writing space after if statement
