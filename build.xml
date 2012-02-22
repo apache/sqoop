@@ -31,6 +31,53 @@
     </classpath>
   </taskdef>
 
+  <!-- Set default Hadoop version if not set -->
+  <if>
+    <isset property="hadoopversion" />
+    <then>
+      <echo message="Use Hadoop ${hadoopversion}" />
+    </then>
+    <else>
+      <echo message="Use Hadoop 0.23 by default" />
+      <property name="hadoopversion" value="23" />
+    </else>
+  </if>
+
+	<!-- Set variables per target hadoop version -->
+  <if>
+    <equals arg1="${hadoopversion}" arg2="20" />
+    <then>
+      <property name="hadoop.version" value="0.20.2-cdh3u1" />
+      <property name="hbase.version" value="0.90.3-cdh3u1" />
+      <property name="zookeeper.version" value="3.3.3-cdh3u1" />
+      <property name="hadoop.version.full" value="0.20" />
+    </then>
+
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="23" />
+      <then>
+        <property name="hadoop.version" value="0.23.1-SNAPSHOT" />
+        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="zookeeper.version" value="3.4.2" />
+        <property name="hadoop.version.full" value="0.23" />
+      </then>
+    </elseif>
+
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="100" />
+      <then>
+        <property name="hadoop.version" value="1.0.0" />
+        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="zookeeper.version" value="3.4.2" />
+        <property name="hadoop.version.full" value="1.0.0" />
+      </then>
+    </elseif>
+
+    <else>
+      <fail message="Unrecognized hadoopversion. Can only be 20, 23, or 100." />
+    </else>
+  </if>
+
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->
   <property file="${user.home}/build.properties" />
@@ -99,12 +146,13 @@
   <property name="relnotes.filename"
       location="${build.relnotes.dir}/sqoop-${version}.releasenotes.html" />
 
-  <property name="dist.dir" location="${build.dir}/${artifact.name}" />
-  <property name="tar.file" location="${build.dir}/${artifact.name}.tar.gz" />
+  <property name="bin.artifact.name" value="${artifact.name}.bin__hadoop-${hadoop.version.full}" />
+  <property name="dist.dir" location="${build.dir}/${bin.artifact.name}" />
+  <property name="tar.file" location="${build.dir}/${bin.artifact.name}.tar.gz" />
   <property name="build.docs.timestamp"
       location="${build.dir}/docs.timestamp" />
 
-  <property name="src.artifact.name" value="${name}-${version}-src" />
+  <property name="src.artifact.name" value="${artifact.name}" />
   <property name="src.dist.dir" location="${build.dir}/${src.artifact.name}" />
   <property name="src.tar.file" location="${build.dir}/${src.artifact.name}.tar.gz" />
 
@@ -157,51 +205,10 @@
     -->
   <property name="sqoop.thirdparty.lib.dir" value="" />
 
-  <!-- Set default Hadoop version if not set -->
-  <if>
-    <isset property="hadoopversion" />
-    <then>
-      <echo message="Use Hadoop ${hadoopversion}" />
-    </then>
-    <else>
-      <echo message="Use Hadoop 0.23 by default" />
-      <property name="hadoopversion" value="23" />
-    </else>
-  </if>
 
   <!-- Ivy library properties -->
   <property name="ivy.dir" location="${basedir}/ivy" />
   <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
-  <if>
-    <equals arg1="${hadoopversion}" arg2="20" />
-    <then>
-      <property name="hadoop.version" value="0.20.2-cdh3u1" />
-      <property name="hbase.version" value="0.90.3-cdh3u1" />
-      <property name="zookeeper.version" value="3.3.3-cdh3u1" />
-    </then>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="23" />
-      <then>
-        <property name="hadoop.version" value="0.23.1-SNAPSHOT" />
-        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
-        <property name="zookeeper.version" value="3.4.2" />
-      </then>
-    </elseif>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="100" />
-      <then>
-        <property name="hadoop.version" value="1.0.0" />
-        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
-        <property name="zookeeper.version" value="3.4.2" />
-      </then>
-    </elseif>
-
-    <else>
-      <fail message="Unrecognized hadoopversion. Can only be 20, 23, or 100." />
-    </else>
-  </if>
 
   <!-- Ivy-based dependency resolution -->
   <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
@@ -506,15 +513,15 @@
   <target name="tar" depends="package" description="Create release tarball">
     <tar compression="gzip" longfile="gnu" destfile="${tar.file}">
       <tarfileset dir="${build.dir}" mode="664">
-        <exclude name="${artifact.name}/bin/*" />
-        <exclude name="${artifact.name}/testdata/hive/bin/*" />
-        <exclude name="${artifact.name}/**/*.sh" />
-        <include name="${artifact.name}/**" />
+        <exclude name="${bin.artifact.name}/bin/*" />
+        <exclude name="${bin.artifact.name}/testdata/hive/bin/*" />
+        <exclude name="${bin.artifact.name}/**/*.sh" />
+        <include name="${bin.artifact.name}/**" />
       </tarfileset>
       <tarfileset dir="${build.dir}" mode="755">
-        <include name="${artifact.name}/bin/*" />
-        <include name="${artifact.name}/testdata/hive/bin/*" />
-        <include name="${artifact.name}/**/*.sh" />
+        <include name="${bin.artifact.name}/bin/*" />
+        <include name="${bin.artifact.name}/testdata/hive/bin/*" />
+        <include name="${bin.artifact.name}/**/*.sh" />
       </tarfileset>
     </tar>
   </target>
