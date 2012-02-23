@@ -32,6 +32,12 @@ if [ -z "$SQOOP_HOME" ]; then
   export SQOOP_HOME=${bin}/..
 fi
 
+SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-${SQOOP_HOME}/conf}
+
+if [ -f "${SQOOP_CONF_DIR}/sqoop-env.sh" ]; then
+  . "${SQOOP_CONF_DIR}/sqoop-env.sh"
+fi
+
 # Find paths to our dependency systems. If they are unset, use CDH defaults.
 
 if [ -z "${HADOOP_HOME}" ]; then
@@ -89,7 +95,6 @@ if [ -d "${ZOOCFGDIR}" ]; then
   SQOOP_CLASSPATH=$ZOOCFGDIR:$SQOOP_CLASSPATH
 fi
 
-SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-${SQOOP_HOME}/conf}
 SQOOP_CLASSPATH=${SQOOP_CONF_DIR}:${SQOOP_CLASSPATH}
 
 # If there's a build subdir, use Ivy-retrieved dependencies too.
