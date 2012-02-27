@@ -272,8 +272,7 @@ public class DBRecordReader<T extends DBWritable> extends
    */
   protected boolean isDone() {
     try {
-      return this.results != null
-          && (results.isLast() || results.isAfterLast());
+      return this.results != null && results.isAfterLast();
     } catch (SQLException sqlE) {
       return true;
     }
