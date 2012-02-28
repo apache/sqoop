@@ -390,6 +390,44 @@ public class TestIncrementalImport extends TestCase {
   }
 
   /**
+   * Return list of arguments to import by query.
+   * @return
+   */
+  private List<String> getArgListForQuery(String query, String directoryName,
+    boolean commonArgs, boolean isAppend, boolean appendTimestamp) {
+    List<String> args = new ArrayList<String>();
+    if (commonArgs) {
+      CommonArgs.addHadoopFlags(args);
+    }
+    args.add("--connect");
+    args.add(SOURCE_DB_URL);
+    args.add("--query");
+    args.add(query);
+    args.add("--target-dir");
+    args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR
+      + System.getProperty("file.separator") + directoryName);
+    if (isAppend) {
+      args.add("--incremental");
+      args.add("append");
+      if (!appendTimestamp) {
+        args.add("--check-column");
+        args.add("id");
+      } else {
+        args.add("--check-column");
+        args.add("last_modified");
+      }
+    } else {
+      args.add("--incremental");
+      args.add("lastmodified");
+      args.add("--check-column");
+      args.add("last_modified");
+    }
+    args.add("-m");
+    args.add("1");
+
+    return args;
+  }
+  /**
    * Create a job with the specified name, where the job performs
    * an import configured with 'jobArgs'.
    */
@@ -508,6 +546,37 @@ public class TestIncrementalImport extends TestCase {
     createIdTable(TABLE_NAME, 0);
 
     List<String> args = getArgListForTable(TABLE_NAME, false, true);
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 0);
+
+    // Now add some rows.
+    insertIdRows(TABLE_NAME, 0, 10);
+
+    // Running the job a second time should import 10 rows.
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 10);
+
+    // Add some more rows.
+    insertIdRows(TABLE_NAME, 10, 20);
+
+    // Import only those rows.
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 20);
+  }
+
+  public void testEmptyThenFullJobAppendWithQuery() throws Exception {
+    // Create an empty table. Import it; nothing happens.
+    // Add some rows. Verify they are appended.
+
+    final String TABLE_NAME = "withQuery";
+    createIdTable(TABLE_NAME, 0);
+    clearDir(TABLE_NAME);
+
+    final String QUERY = "SELECT id FROM withQuery WHERE $CONDITIONS";
+
+    List<String> args = getArgListForQuery(QUERY, TABLE_NAME,
+      false, true, false);
     createJob(TABLE_NAME, args);
     runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 0);

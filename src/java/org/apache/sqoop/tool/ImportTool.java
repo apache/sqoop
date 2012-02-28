@@ -163,23 +163,38 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    */
   private Object getMaxColumnId(SqoopOptions options) throws SQLException {
     StringBuilder sb = new StringBuilder();
+    String query;
+
     sb.append("SELECT MAX(");
     sb.append(options.getIncrementalTestColumn());
     sb.append(") FROM ");
-    sb.append(options.getTableName());
 
-    String where = options.getWhereClause();
-    if (null != where) {
-      sb.append(" WHERE ");
-      sb.append(where);
+    if (options.getTableName() != null) {
+      // Table import
+      sb.append(options.getTableName());
+
+      String where = options.getWhereClause();
+      if (null != where) {
+        sb.append(" WHERE ");
+        sb.append(where);
+      }
+      query = sb.toString();
+    } else {
+      // Free form table based import
+      sb.append("(");
+      sb.append(options.getSqlQuery());
+      sb.append(") sqoop_import_query_alias");
+
+      query = sb.toString().replaceAll("\\$CONDITIONS", "(1 = 1)");
     }
 
     Connection conn = manager.getConnection();
     Statement s = null;
     ResultSet rs = null;
     try {
+      LOG.info("Maximal id query for free form incremental import: " + query);
       s = conn.createStatement();
-      rs = s.executeQuery(sb.toString());
+      rs = s.executeQuery(query);
       if (!rs.next()) {
         // This probably means the table is empty.
         LOG.warn("Unexpected: empty results for max value query?");
@@ -334,16 +349,24 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     LOG.info("Upper bound value: " + nextIncrementalValue);
 
-    String prevWhereClause = options.getWhereClause();
-    if (null != prevWhereClause) {
-      sb.append(" AND (");
-      sb.append(prevWhereClause);
-      sb.append(")");
+    if (options.getTableName() != null) {
+      // Table based import
+      String prevWhereClause = options.getWhereClause();
+      if (null != prevWhereClause) {
+        sb.append(" AND (");
+        sb.append(prevWhereClause);
+        sb.append(")");
+      }
+
+      String newConstraints = sb.toString();
+      options.setWhereClause(newConstraints);
+    } else {
+      // Incremental based import
+      sb.append(" AND $CONDITIONS");
+      String newQuery = options.getSqlQuery().replace(
+        "$CONDITIONS", sb.toString());
+      options.setSqlQuery(newQuery);
     }
-
-    String newConstraints = sb.toString();
-    options.setWhereClause(newConstraints);
-
     // Save this state for next time.
     SqoopOptions recordOptions = options.getParent();
     if (null == recordOptions) {
@@ -862,12 +885,6 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throw new InvalidOptionsException(
           "You must specify an incremental import mode with --"
           + INCREMENT_TYPE_ARG + ". " + HELP_STR);
-    }
-
-    if (options.getIncrementalMode() != SqoopOptions.IncrementalMode.None
-        && options.getTableName() == null) {
-      throw new InvalidOptionsException("Incremental imports require a table."
-          + HELP_STR);
     }
   }
 
