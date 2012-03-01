@@ -103,6 +103,10 @@ public class MySQLDumpMapper
               break; // EOF.
             }
 
+            if (inLine.trim().length() == 0 || inLine.startsWith("--")) {
+              continue; // comments and empty lines are ignored
+            }
+
             // this line is of the form "INSERT .. VALUES ( actual value text
             // );" strip the leading preamble up to the '(' and the trailing
             // ');'.
@@ -234,6 +238,10 @@ public class MySQLDumpMapper
             String inLine = r.readLine();
             if (null == inLine) {
               break; // EOF.
+            }
+
+            if (inLine.trim().length() == 0 || inLine.startsWith("--")) {
+              continue; // comments and empty lines are ignored
             }
 
             // this line is of the form "INSERT .. VALUES ( actual value text
