@@ -40,9 +40,8 @@ under the License.
     <artifact conf="master"/>
   </publications>
   <dependencies>
-    <!-- Dependencies for Cloudera's Distribution for Hadoop -->
-    <dependency org="com.cloudera.hadoop" name="hadoop-core"
-      rev="${hadoop-core.cloudera.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-core"
+      rev="${hadoop.version}" conf="common->default"/>
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
