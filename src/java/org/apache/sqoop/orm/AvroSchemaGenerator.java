@@ -65,10 +65,14 @@ public class AvroSchemaGenerator {
       fields.add(field);
     }
 
+    TableClassName tableClassName = new TableClassName(options);
+    String shortClassName = tableClassName.getShortClassForTable(tableName);
     String avroTableName = (tableName == null ? "QueryResult" : tableName);
+    String avroName = (shortClassName == null ? avroTableName : shortClassName);
+    String avroNamespace = tableClassName.getPackageForTable();
 
     String doc = "Sqoop import of " + avroTableName;
-    Schema schema = Schema.createRecord(avroTableName, doc, null, false);
+    Schema schema = Schema.createRecord(avroName, doc, avroNamespace, false);
     schema.setFields(fields);
     schema.addProp("tableName", avroTableName);
     return schema;
