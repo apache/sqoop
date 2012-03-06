@@ -19,23 +19,27 @@
 package org.apache.sqoop.orm;
 
 import java.io.IOException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import java.util.Properties;
 
 /**
  * Creates an Avro schema to represent a table from a database.
  */
 public class AvroSchemaGenerator {
+
+  public static final Log LOG =
+      LogFactory.getLog(AvroSchemaGenerator.class.getName());
 
   private final SqoopOptions options;
   private final ConnManager connManager;
@@ -78,58 +82,6 @@ public class AvroSchemaGenerator {
     return schema;
   }
 
-  private Type toAvroType(int sqlType) {
-    switch (sqlType) {
-      case Types.TINYINT:
-      case Types.SMALLINT:
-      case Types.INTEGER:
-        return Type.INT;
-      case Types.BIGINT:
-        return Type.LONG;
-      case Types.BIT:
-      case Types.BOOLEAN:
-        return Type.BOOLEAN;
-      case Types.REAL:
-        return Type.FLOAT;
-      case Types.FLOAT:
-      case Types.DOUBLE:
-        return Type.DOUBLE;
-      case Types.NUMERIC:
-      case Types.DECIMAL:
-        return Type.STRING;
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-      case Types.LONGNVARCHAR:
-      case Types.NVARCHAR:
-      case Types.NCHAR:
-        return Type.STRING;
-      case Types.DATE:
-      case Types.TIME:
-      case Types.TIMESTAMP:
-        return Type.LONG;
-      case Types.BINARY:
-      case Types.VARBINARY:
-        return Type.BYTES;
-      default:
-        throw new IllegalArgumentException("Cannot convert SQL type "
-            + sqlType);
-    }
-  }
-
-  private Type toAvroType(String type) {
-    if (type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
-    if (type.equalsIgnoreCase("LONG")) { return Type.LONG; }
-    if (type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
-    if (type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
-    if (type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
-    if (type.equalsIgnoreCase("STRING")) { return Type.STRING; }
-    if (type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
-
-    // Mapping was not found
-    throw new IllegalArgumentException("Cannot convert to AVRO type " + type);
-  }
-
   /**
    * Will create union, because each type is assumed to be nullable.
    *
@@ -138,23 +90,37 @@ public class AvroSchemaGenerator {
    * @return Schema
    */
   public Schema toAvroSchema(int sqlType, String columnName) {
-    Properties mappingJava = options.getMapColumnJava();
-
-    // Try to apply any user specified mapping
-    Type targetType;
-    if (columnName != null && mappingJava.containsKey(columnName)) {
-        targetType = toAvroType((String)mappingJava.get(columnName));
-    } else {
-      targetType = toAvroType(sqlType);
-    }
-
     List<Schema> childSchemas = new ArrayList<Schema>();
-    childSchemas.add(Schema.create(targetType));
+    childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
     childSchemas.add(Schema.create(Schema.Type.NULL));
     return Schema.createUnion(childSchemas);
   }
 
   public Schema toAvroSchema(int sqlType) {
     return toAvroSchema(sqlType, null);
+  }
+
+  private Type toAvroType(String columnName, int sqlType) {
+    Properties mapping = options.getMapColumnJava();
+
+    if (mapping.containsKey(columnName)) {
+      String type = mapping.getProperty(columnName);
+      if (LOG.isDebugEnabled()) {
+        LOG.info("Overriding type of column " + columnName + " to " + type);
+      }
+
+      if (type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
+      if (type.equalsIgnoreCase("LONG")) { return Type.LONG; }
+      if (type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
+      if (type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
+      if (type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
+      if (type.equalsIgnoreCase("STRING")) { return Type.STRING; }
+      if (type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
+
+      // Mapping was not found
+      throw new IllegalArgumentException("Cannot convert to AVRO type " + type);
+    }
+
+    return connManager.toAvroType(columnName, sqlType);
   }
 }

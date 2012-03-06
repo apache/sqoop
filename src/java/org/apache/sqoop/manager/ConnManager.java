@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -31,10 +32,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.BytesWritable;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.hive.HiveTypes;
+import com.cloudera.sqoop.lib.BlobRef;
+import com.cloudera.sqoop.lib.ClobRef;
+import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -76,18 +83,154 @@ public abstract class ConnManager {
   public abstract String getPrimaryKey(String tableName);
 
   /**
+   * Resolve a database-specific type to the Java type that should contain it.
+   * @param sqlType     sql type
+   * @return the name of a Java type to hold the sql datatype, or null if none.
+   */
+  public String toJavaType(int sqlType) {
+    // Mappings taken from:
+    // http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html
+    if (sqlType == Types.INTEGER) {
+      return "Integer";
+    } else if (sqlType == Types.VARCHAR) {
+      return "String";
+    } else if (sqlType == Types.CHAR) {
+      return "String";
+    } else if (sqlType == Types.LONGVARCHAR) {
+      return "String";
+    } else if (sqlType == Types.NVARCHAR) {
+      return "String";
+    } else if (sqlType == Types.NCHAR) {
+      return "String";
+    } else if (sqlType == Types.LONGNVARCHAR) {
+      return "String";
+    } else if (sqlType == Types.NUMERIC) {
+      return "java.math.BigDecimal";
+    } else if (sqlType == Types.DECIMAL) {
+      return "java.math.BigDecimal";
+    } else if (sqlType == Types.BIT) {
+      return "Boolean";
+    } else if (sqlType == Types.BOOLEAN) {
+      return "Boolean";
+    } else if (sqlType == Types.TINYINT) {
+      return "Integer";
+    } else if (sqlType == Types.SMALLINT) {
+      return "Integer";
+    } else if (sqlType == Types.BIGINT) {
+      return "Long";
+    } else if (sqlType == Types.REAL) {
+      return "Float";
+    } else if (sqlType == Types.FLOAT) {
+      return "Double";
+    } else if (sqlType == Types.DOUBLE) {
+      return "Double";
+    } else if (sqlType == Types.DATE) {
+      return "java.sql.Date";
+    } else if (sqlType == Types.TIME) {
+      return "java.sql.Time";
+    } else if (sqlType == Types.TIMESTAMP) {
+      return "java.sql.Timestamp";
+    } else if (sqlType == Types.BINARY
+        || sqlType == Types.VARBINARY) {
+      return BytesWritable.class.getName();
+    } else if (sqlType == Types.CLOB) {
+      return ClobRef.class.getName();
+    } else if (sqlType == Types.BLOB
+        || sqlType == Types.LONGVARBINARY) {
+      return BlobRef.class.getName();
+    } else {
+      // TODO(aaron): Support DISTINCT, ARRAY, STRUCT, REF, JAVA_OBJECT.
+      // Return null indicating database-specific manager should return a
+      // java data type if it can find one for any nonstandard type.
+      return null;
+    }
+  }
+
+  /**
+   * Resolve a database-specific type to Hive data type.
+   * @param sqlType     sql type
+   * @return            hive type
+   */
+  public String toHiveType(int sqlType) {
+    return HiveTypes.toHiveType(sqlType);
+  }
+
+  /**
+   * Resolve a database-specific type to Avro data type.
+   * @param sqlType     sql type
+   * @return            avro type
+   */
+  public Type toAvroType(int sqlType) {
+    switch (sqlType) {
+    case Types.TINYINT:
+    case Types.SMALLINT:
+    case Types.INTEGER:
+      return Type.INT;
+    case Types.BIGINT:
+      return Type.LONG;
+    case Types.BIT:
+    case Types.BOOLEAN:
+      return Type.BOOLEAN;
+    case Types.REAL:
+      return Type.FLOAT;
+    case Types.FLOAT:
+    case Types.DOUBLE:
+      return Type.DOUBLE;
+    case Types.NUMERIC:
+    case Types.DECIMAL:
+      return Type.STRING;
+    case Types.CHAR:
+    case Types.VARCHAR:
+    case Types.LONGVARCHAR:
+    case Types.LONGNVARCHAR:
+    case Types.NVARCHAR:
+    case Types.NCHAR:
+      return Type.STRING;
+    case Types.DATE:
+    case Types.TIME:
+    case Types.TIMESTAMP:
+      return Type.LONG;
+    case Types.BINARY:
+    case Types.VARBINARY:
+      return Type.BYTES;
+    default:
+      throw new IllegalArgumentException("Cannot convert SQL type "
+          + sqlType);
+    }
+  }
+
+  /**
    * Return java type for SQL type.
+   * @param columnName  column name
    * @param sqlType     sql type
    * @return            java type
    */
-  public abstract String toJavaType(int sqlType);
+  public String toJavaType(String columnName, int sqlType) {
+    // ignore column name by default.
+    return toJavaType(sqlType);
+  }
 
     /**
      * Return hive type for SQL type.
+     * @param columnName  column name
      * @param sqlType   sql type
      * @return          hive type
      */
-  public abstract String toHiveType(int sqlType);
+  public String toHiveType(String columnName, int sqlType) {
+    // ignore column name by default.
+    return toHiveType(sqlType);
+  }
+
+  /**
+   * Return avro type for SQL type.
+   * @param columnName  column name
+   * @param sqlType   sql type
+   * @return          avro type
+   */
+  public Type toAvroType(String columnName, int sqlType) {
+    // ignore column name by default.
+    return toAvroType(sqlType);
+  }
 
   /**
    * Return an unordered mapping from colname to sqltype for
@@ -123,6 +266,51 @@ public abstract class ConnManager {
       columnTypes = getColumnTypesForQuery(query);
     }
     return columnTypes;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sql type name for
+   * all columns in a table.
+   */
+  public Map<String, String> getColumnTypeNamesForTable(String tableName) {
+    LOG.error("This database does not support column type names.");
+    return null;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sql type name for
+   * all columns in a query.
+   */
+  public Map<String, String> getColumnTypeNamesForQuery(String query) {
+    LOG.error("This database does not support free-form query"
+        + " column type names.");
+    return null;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sql type name for
+   * all columns in a table or query.
+   *
+   * @param tableName the name of the table
+   * @param sqlQuery the SQL query to use if tableName is null
+   */
+  public Map<String, String> getColumnTypeNames(String tableName,
+      String sqlQuery) {
+    Map<String, String> columnTypeNames;
+    if (null != tableName) {
+      // We're generating a class based on a table import.
+      columnTypeNames = getColumnTypeNamesForTable(tableName);
+    } else {
+      // This is based on an arbitrary query.
+      String query = sqlQuery;
+      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
+        throw new RuntimeException("Query [" + query + "] must contain '"
+            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
+      }
+
+      columnTypeNames = getColumnTypeNamesForQuery(query);
+    }
+    return columnTypeNames;
   }
 
   /**

@@ -474,8 +474,8 @@ public class OracleManager
    * @param sqlType
    * @return the name of a Java type to hold the sql datatype, or null if none.
    */
-  public String toJavaType(int sqlType) {
-    String defaultJavaType = super.toJavaType(sqlType);
+  public String toJavaType(String columnName, int sqlType) {
+    String defaultJavaType = super.toJavaType(columnName, sqlType);
     return (defaultJavaType == null) ? dbToJavaType(sqlType) : defaultJavaType;
   }
 
@@ -511,8 +511,8 @@ public class OracleManager
    * @param sqlType     sql data type
    * @return            hive data type
    */
-  public String toHiveType(int sqlType) {
-    String defaultHiveType = super.toHiveType(sqlType);
+  public String toHiveType(String columnName, int sqlType) {
+    String defaultHiveType = super.toHiveType(columnName, sqlType);
     return (defaultHiveType == null) ? dbToHiveType(sqlType) : defaultHiveType;
   }
 

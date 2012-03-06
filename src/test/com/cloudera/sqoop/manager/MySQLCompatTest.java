@@ -27,6 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Test;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
 
@@ -188,6 +190,11 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   @Override
   protected String getDecimalDbOutput(String numAsInserted) {
     return getNumericDbOutput(numAsInserted);
+  }
+
+  @Test
+  public void testYear() {
+    verifyType("YEAR", "2012", "2012-01-01", "2012");
   }
 }
 

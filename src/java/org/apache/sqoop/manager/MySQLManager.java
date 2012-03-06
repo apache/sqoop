@@ -24,11 +24,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.util.StringUtils;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -223,6 +226,51 @@ public class MySQLManager
   @Override
   protected String getSchemaQuery() {
     return "SELECT SCHEMA()";
+  }
+
+  private Map<String, String> colTypeNames;
+  private static final int YEAR_TYPE_OVERWRITE = Types.SMALLINT;
+
+  @Override
+  public String toJavaType(String columnName, int sqlType) {
+    if (colTypeNames == null) {
+      colTypeNames = getColumnTypeNames(options.getTableName(),
+          options.getSqlQuery());
+    }
+
+    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
+      sqlType = YEAR_TYPE_OVERWRITE;
+    }
+
+    return super.toJavaType(columnName, sqlType);
+  }
+
+  @Override
+  public String toHiveType(String columnName, int sqlType) {
+    if (colTypeNames == null) {
+      colTypeNames = getColumnTypeNames(options.getTableName(),
+          options.getSqlQuery());
+    }
+
+    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
+      sqlType = YEAR_TYPE_OVERWRITE;
+    }
+
+    return super.toHiveType(columnName, sqlType);
+  }
+
+  @Override
+  public Type toAvroType(String columnName, int sqlType) {
+    if (colTypeNames == null) {
+      colTypeNames = getColumnTypeNames(options.getTableName(),
+          options.getSqlQuery());
+    }
+
+    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
+      sqlType = YEAR_TYPE_OVERWRITE;
+    }
+
+    return super.toAvroType(columnName, sqlType);
   }
 }
 

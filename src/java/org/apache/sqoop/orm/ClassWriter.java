@@ -250,7 +250,7 @@ public class ClassWriter {
       return type;
     }
 
-    return connManager.toJavaType(sqlType);
+    return connManager.toJavaType(columnName, sqlType);
   }
 
   /**

@@ -165,7 +165,7 @@ public class TableDefWriter {
       Integer colType = columnTypes.get(col);
       String hiveColType = userMapping.getProperty(col);
       if (hiveColType == null) {
-        hiveColType = connManager.toHiveType(colType);
+        hiveColType = connManager.toHiveType(col, colType);
       }
       if (null == hiveColType) {
         throw new IOException("Hive does not support the SQL type for column "

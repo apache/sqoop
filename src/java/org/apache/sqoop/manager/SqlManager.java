@@ -22,14 +22,12 @@ import java.sql.Timestamp;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hbase.HBaseUtil;
-import com.cloudera.sqoop.hive.HiveTypes;
-import com.cloudera.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
 import com.cloudera.sqoop.mapreduce.HBaseImportJob;
 import com.cloudera.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
+import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.ResultSetPrinter;
@@ -52,9 +50,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.util.StringUtils;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -220,6 +216,61 @@ public abstract class SqlManager
       }
 
       return colTypes;
+    } catch (SQLException sqlException) {
+      LOG.error("Error reading from database: " + sqlException.toString());
+      return null;
+    } finally {
+      try {
+        results.close();
+        getConnection().commit();
+      } catch (SQLException sqlE) {
+        LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
+      }
+
+      release();
+    }
+  }
+
+  @Override
+  public Map<String, String> getColumnTypeNamesForTable(String tableName) {
+    String stmt = getColTypesQuery(tableName);
+    return getColumnTypeNamesForRawQuery(stmt);
+  }
+
+  @Override
+  public Map<String, String> getColumnTypeNamesForQuery(String query) {
+    // Manipulate the query to return immediately, with zero rows.
+    String rawQuery = query.replace(SUBSTITUTE_TOKEN, " (1 = 0) ");
+    return getColumnTypeNamesForRawQuery(rawQuery);
+  }
+
+  protected Map<String, String> getColumnTypeNamesForRawQuery(String stmt) {
+    ResultSet results;
+    try {
+      results = execute(stmt);
+    } catch (SQLException sqlE) {
+      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
+      release();
+      return null;
+    }
+
+    try {
+      Map<String, String> colTypeNames = new HashMap<String, String>();
+
+      int cols = results.getMetaData().getColumnCount();
+      ResultSetMetaData metadata = results.getMetaData();
+      for (int i = 1; i < cols + 1; i++) {
+        String colTypeName = metadata.getColumnTypeName(i);
+
+        String colName = metadata.getColumnName(i);
+        if (colName == null || colName.equals("")) {
+          colName = metadata.getColumnLabel(i);
+        }
+
+        colTypeNames.put(colName, colTypeName);
+      }
+
+      return colTypeNames;
     } catch (SQLException sqlException) {
       LOG.error("Error reading from database: " + sqlException.toString());
       return null;
@@ -494,79 +545,6 @@ public abstract class SqlManager
    */
   protected ResultSet execute(String stmt, Object... args) throws SQLException {
     return execute(stmt, options.getFetchSize(), args);
-  }
-
-  /**
-   * Resolve a database-specific type to the Java type that should contain it.
-   * @param sqlType
-   * @return the name of a Java type to hold the sql datatype, or null if none.
-   */
-  public String toJavaType(int sqlType) {
-    // Mappings taken from:
-    // http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html
-    if (sqlType == Types.INTEGER) {
-      return "Integer";
-    } else if (sqlType == Types.VARCHAR) {
-      return "String";
-    } else if (sqlType == Types.CHAR) {
-      return "String";
-    } else if (sqlType == Types.LONGVARCHAR) {
-      return "String";
-    } else if (sqlType == Types.NVARCHAR) {
-      return "String";
-    } else if (sqlType == Types.NCHAR) {
-      return "String";
-    } else if (sqlType == Types.LONGNVARCHAR) {
-      return "String";
-    } else if (sqlType == Types.NUMERIC) {
-      return "java.math.BigDecimal";
-    } else if (sqlType == Types.DECIMAL) {
-      return "java.math.BigDecimal";
-    } else if (sqlType == Types.BIT) {
-      return "Boolean";
-    } else if (sqlType == Types.BOOLEAN) {
-      return "Boolean";
-    } else if (sqlType == Types.TINYINT) {
-      return "Integer";
-    } else if (sqlType == Types.SMALLINT) {
-      return "Integer";
-    } else if (sqlType == Types.BIGINT) {
-      return "Long";
-    } else if (sqlType == Types.REAL) {
-      return "Float";
-    } else if (sqlType == Types.FLOAT) {
-      return "Double";
-    } else if (sqlType == Types.DOUBLE) {
-      return "Double";
-    } else if (sqlType == Types.DATE) {
-      return "java.sql.Date";
-    } else if (sqlType == Types.TIME) {
-      return "java.sql.Time";
-    } else if (sqlType == Types.TIMESTAMP) {
-      return "java.sql.Timestamp";
-    } else if (sqlType == Types.BINARY
-        || sqlType == Types.VARBINARY) {
-      return BytesWritable.class.getName();
-    } else if (sqlType == Types.CLOB) {
-      return ClobRef.class.getName();
-    } else if (sqlType == Types.BLOB
-        || sqlType == Types.LONGVARBINARY) {
-      return BlobRef.class.getName();
-    } else {
-      // TODO(aaron): Support DISTINCT, ARRAY, STRUCT, REF, JAVA_OBJECT.
-      // Return null indicating database-specific manager should return a
-      // java data type if it can find one for any nonstandard type.
-      return null;
-    }
-  }
-
-  /**
-   * Resolve a database-specific type to Hive data type.
-   * @param sqlType     sql type
-   * @return            hive type
-   */
-  public String toHiveType(int sqlType) {
-    return HiveTypes.toHiveType(sqlType);
   }
 
   public void close() throws SQLException {
