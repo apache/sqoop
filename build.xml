@@ -57,7 +57,7 @@
       <equals arg1="${hadoopversion}" arg2="23" />
       <then>
         <property name="hadoop.version" value="0.23.1" />
-        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="hbase.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="0.23" />
       </then>
@@ -67,7 +67,7 @@
       <equals arg1="${hadoopversion}" arg2="100" />
       <then>
         <property name="hadoop.version" value="1.0.0" />
-        <property name="hbase.version" value="0.92.0-SNAPSHOT" />
+        <property name="hbase.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="1.0.0" />
       </then>
