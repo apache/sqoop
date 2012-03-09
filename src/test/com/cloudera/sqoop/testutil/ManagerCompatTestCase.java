@@ -274,20 +274,10 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return "false";
   }
 
-  /** @return How a BOOLEAN column with value TRUE is communicated over JDBC */
-  protected String getTrueBoolDbOutput() {
-    return "true";
-  }
-
   /** @return How a BOOLEAN column with value TRUE is represented in a seq-file
    * import. */
   protected String getTrueBoolSeqOutput() {
     return "true";
-  }
-
-  /** @return How a BOOLEAN column with value FALSE is communicated over JDBC */
-  protected String getFalseBoolDbOutput() {
-    return "false";
   }
 
   /** @return How a BOOLEAN column with value FALSE is represented in a seq-file
@@ -318,58 +308,27 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   }
 
   /**
-   * A real value inserted as '40' may be returned as '40', '40.', or '40.0',
-   * etc. Given a string that defines how a real value is inserted, determine
-   * how it is returned.
-   *
-   * @param realAsInserted the string we used in the SQL INSERT statement
-   * @return how the string version of this as returned by the database is
-   * represented.
-   */
-  protected String getRealDbOutput(String realAsInserted) {
-    return withDecimalZero(realAsInserted);
-  }
-
-  /**
    * @return how a given real value is represented in an imported sequence
    * file
    */
   protected String getRealSeqOutput(String realAsInserted) {
-    return getRealDbOutput(realAsInserted);
+    return withDecimalZero(realAsInserted);
   }
 
   /**
-   * A float value inserted as '40' may be returned as '40', '40.', or '40.0',
-   * etc. Given a string that defines how a float value is inserted, determine
-   * how it is returned.
-   *
-   * @param floatAsInserted the string we used in the SQL INSERT statement
-   * @return how the string version of this as returned by the database is
-   * represented.
+   * @return how a given float value is represented in an imported sequence
+   * file
    */
-  protected String getFloatDbOutput(String floatAsInserted) {
+  protected String getFloatSeqOutput(String floatAsInserted) {
     return withDecimalZero(floatAsInserted);
   }
 
-  protected String getFloatSeqOutput(String floatAsInserted) {
-    return getFloatDbOutput(floatAsInserted);
-  }
-
   /**
-   * A double value inserted as '40' may be returned as '40', '40.', or '40.0',
-   * etc. Given a string that defines how a double value is inserted, determine
-   * how it is returned.
-   *
-   * @param doubleAsInserted the string we used in the SQL INSERT statement
-   * @return how the string version of this as returned by the database is
-   * represented.
+   * @return how a given double value is represented in an imported sequence
+   * file
    */
-  protected String getDoubleDbOutput(String doubleAsInserted) {
-    return withDecimalZero(doubleAsInserted);
-  }
-
   protected String getDoubleSeqOutput(String doubleAsInserted) {
-    return getDoubleDbOutput(doubleAsInserted);
+    return withDecimalZero(doubleAsInserted);
   }
 
   /**
@@ -402,41 +361,8 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     return insertStr;
   }
 
-  protected String getDateDbOutput(String dateAsInserted) {
-    return dateAsInserted;
-  }
-
   protected String getDateSeqOutput(String dateAsInserted) {
     return dateAsInserted;
-  }
-
-  /**
-   * Convert an input timestamp to the string representation of the timestamp
-   * returned by a database select query.
-   *
-   * @param tsAsInserted the input timestamp
-   * @return the string version of this as returned by the database is
-   * represented.
-   */
-  protected String getTimestampDbOutput(String tsAsInserted) {
-    if ("null".equals(tsAsInserted)) {
-      return tsAsInserted;
-    }
-
-    int dotPos = tsAsInserted.indexOf(".");
-    if (-1 == dotPos) {
-      // No dot in the original string; expand to 9 places.
-      return tsAsInserted + ".000000000";
-    } else {
-      // Default with a dot is to pad the nanoseconds column to 9 places.
-      int numZerosNeeded = tsAsInserted.length() - dotPos;
-      String zeros = "";
-      for (int i = 0; i < numZerosNeeded; i++) {
-        zeros = zeros + "0";
-      }
-
-      return tsAsInserted + zeros;
-    }
   }
 
   /**
@@ -463,30 +389,18 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     }
   }
 
-  protected String getNumericDbOutput(String numAsInserted) {
-    return numAsInserted;
-  }
-
   protected String getNumericSeqOutput(String numAsInserted) {
-    return getNumericDbOutput(numAsInserted);
-  }
-
-  protected String getDecimalDbOutput(String numAsInserted) {
     return numAsInserted;
   }
 
   protected String getDecimalSeqOutput(String numAsInserted) {
-    return getDecimalDbOutput(numAsInserted);
+    return numAsInserted;
   }
 
   /**
-   * @return how a CHAR(fieldWidth) field is returned by the database
-   * for a given input.
+   * @return how a CHAR(fieldWidth) field is represented in an imported
+   * sequence file
    */
-  protected String getFixedCharDbOut(int fieldWidth, String asInserted) {
-    return asInserted;
-  }
-
   protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
     return asInserted;
   }
@@ -521,14 +435,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    */
   protected String getBlobSeqOutput(String asInserted) {
     return new BytesWritable(getBlobDbOutput(asInserted)).toString();
-  }
-
-  /**
-   * @return A String declaring how an inserted VARBINARY will be
-   * returned to us via the database.
-   */
-  protected String getVarBinaryDbOutput(String asInserted) {
-    return asInserted;
   }
 
   /**
@@ -572,49 +478,31 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    * Do a full verification test on the singleton value of a given type.
    * @param colType  The SQL type to instantiate the column.
    * @param insertVal The SQL text to insert a value into the database.
-   * @param returnVal The string representation of the value as extracted
-   *        from the db.
-   */
-  protected void verifyType(String colType, String insertVal,
-      String returnVal) {
-    verifyType(colType, insertVal, returnVal, returnVal);
-  }
-
-  /**
-   * Do a full verification test on the singleton value of a given type.
-   * @param colType  The SQL type to instantiate the column.
-   * @param insertVal The SQL text to insert a value into the database.
-   * @param returnVal The string representation of the value as extracted from
-   *        the db.
    * @param seqFileVal The string representation of the value as extracted
    *        through the DBInputFormat, serialized, and injected into a
    *        SequenceFile and put through toString(). This may be slightly
    *        different than what ResultSet.getString() returns, which is used
    *        by returnVal.
    */
-  protected void verifyType(String colType, String insertVal, String returnVal,
+  protected void verifyType(String colType, String insertVal,
       String seqFileVal) {
-    verifyType(colType, insertVal, returnVal, seqFileVal, false);
+    verifyType(colType, insertVal, seqFileVal, false);
   }
 
-  protected void verifyType(String colType, String insertVal, String returnVal,
-      String seqFileVal, boolean useIntPrimaryKey) {
+  protected void verifyType(String colType, String insertVal, String seqFileVal,
+      boolean useIntPrimaryKey) {
 
-    int readBackCol;
     String readbackPrepend = "";
 
     if (useIntPrimaryKey) {
       String [] types = { "INTEGER", colType };
       String [] vals = { "0", insertVal };
       createTableWithColTypes(types, vals);
-      readBackCol = 2;
       readbackPrepend = "0,"; // verifyImport will verify the entire row.
     } else {
       createTableForColType(colType, insertVal);
-      readBackCol = 1;
     }
 
-    verifyReadback(readBackCol, returnVal);
     verifyImport(readbackPrepend + seqFileVal, null);
   }
 
@@ -629,7 +517,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testStringCol2() {
     verifyType("CHAR(32)", STRING_VAL_IN,
-        getFixedCharDbOut(32, STRING_VAL_OUT),
         getFixedCharSeqOut(32, STRING_VAL_OUT));
   }
 
@@ -661,7 +548,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       return;
     }
     verifyType("BOOLEAN", getTrueBoolNumericSqlInput(),
-        getTrueBoolDbOutput(), getTrueBoolSeqOutput());
+        getTrueBoolSeqOutput());
   }
 
   @Test
@@ -672,7 +559,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       return;
     }
     verifyType("BOOLEAN", getFalseBoolNumericSqlInput(),
-        getFalseBoolDbOutput(), getFalseBoolSeqOutput());
+        getFalseBoolSeqOutput());
   }
 
   @Test
@@ -682,7 +569,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       skipped = true;
       return;
     }
-    verifyType("BOOLEAN", getFalseBoolLiteralSqlInput(), getFalseBoolDbOutput(),
+    verifyType("BOOLEAN", getFalseBoolLiteralSqlInput(),
         getFalseBoolSeqOutput());
   }
 
@@ -729,50 +616,43 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
 
   @Test
   public void testReal1() {
-    verifyType("REAL", "256", getRealDbOutput("256"), getRealSeqOutput("256"));
+    verifyType("REAL", "256", getRealSeqOutput("256"));
   }
 
   @Test
   public void testReal2() {
-    verifyType("REAL", "256.45", getRealDbOutput("256.45"),
-        getRealSeqOutput("256.45"));
+    verifyType("REAL", "256.45", getRealSeqOutput("256.45"));
   }
 
   @Test
   public void testFloat1() {
-    verifyType("FLOAT", "256", getFloatDbOutput("256"),
-        getFloatSeqOutput("256"));
+    verifyType("FLOAT", "256", getFloatSeqOutput("256"));
   }
 
   @Test
   public void testFloat2() {
-    verifyType("FLOAT", "256.5", getFloatDbOutput("256.5"),
-        getFloatSeqOutput("256.5"));
+    verifyType("FLOAT", "256.5", getFloatSeqOutput("256.5"));
   }
 
   @Test
   public void testDouble1() {
-    verifyType(getDoubleType(), "-256", getDoubleDbOutput("-256"),
-        getDoubleSeqOutput("-256"));
+    verifyType(getDoubleType(), "-256", getDoubleSeqOutput("-256"));
   }
 
   @Test
   public void testDouble2() {
-    verifyType(getDoubleType(), "256.45", getDoubleDbOutput("256.45"),
-        getDoubleSeqOutput("256.45"));
+    verifyType(getDoubleType(), "256.45", getDoubleSeqOutput("256.45"));
   }
 
   @Test
   public void testDate1() {
     verifyType("DATE", getDateInsertStr("'2009-01-12'"),
-        getDateDbOutput("2009-01-12"),
         getDateSeqOutput("2009-01-12"));
   }
 
   @Test
   public void testDate2() {
     verifyType("DATE", getDateInsertStr("'2009-04-24'"),
-        getDateDbOutput("2009-04-24"),
         getDateSeqOutput("2009-04-24"));
   }
 
@@ -820,7 +700,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testTimestamp1() {
     verifyType(getTimestampType(),
         getTimestampInsertStr("'2009-04-24 18:24:00'"),
-        getTimestampDbOutput("2009-04-24 18:24:00"),
         getTimestampSeqOutput("2009-04-24 18:24:00"));
   }
 
@@ -830,7 +709,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
       log.debug("Beginning testTimestamp2");
       verifyType(getTimestampType(),
           getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
-          getTimestampDbOutput("2009-04-24 18:24:00.0002"),
           getTimestampSeqOutput("2009-04-24 18:24:00.0002"));
     } finally {
       log.debug("End testTimestamp2");
@@ -850,21 +728,18 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   @Test
   public void testNumeric1() {
     verifyType(getNumericType(), "1",
-        getNumericDbOutput("1"),
         getNumericSeqOutput("1"));
   }
 
   @Test
   public void testNumeric2() {
     verifyType(getNumericType(), "-10",
-        getNumericDbOutput("-10"),
         getNumericSeqOutput("-10"));
   }
 
   @Test
   public void testNumeric3() {
     verifyType(getNumericType(), "3.14159",
-        getNumericDbOutput("3.14159"),
         getNumericSeqOutput("3.14159"));
   }
 
@@ -872,7 +747,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testNumeric4() {
     verifyType(getNumericType(),
         "3000000000000000000.14159",
-        getNumericDbOutput("3000000000000000000.14159"),
         getNumericSeqOutput("3000000000000000000.14159"));
   }
 
@@ -880,7 +754,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testNumeric5() {
     verifyType(getNumericType(),
         "99999999999999999999.14159",
-        getNumericDbOutput("99999999999999999999.14159"),
         getNumericSeqOutput("99999999999999999999.14159"));
 
   }
@@ -889,28 +762,24 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testNumeric6() {
     verifyType(getNumericType(),
         "-99999999999999999999.14159",
-        getNumericDbOutput("-99999999999999999999.14159"),
         getNumericSeqOutput("-99999999999999999999.14159"));
   }
 
   @Test
   public void testDecimal1() {
     verifyType(getDecimalType(), "1",
-        getDecimalDbOutput("1"),
         getDecimalSeqOutput("1"));
   }
 
   @Test
   public void testDecimal2() {
     verifyType(getDecimalType(), "-10",
-        getDecimalDbOutput("-10"),
         getDecimalSeqOutput("-10"));
   }
 
   @Test
   public void testDecimal3() {
     verifyType(getDecimalType(), "3.14159",
-        getDecimalDbOutput("3.14159"),
         getDecimalSeqOutput("3.14159"));
   }
 
@@ -918,7 +787,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testDecimal4() {
     verifyType(getDecimalType(),
         "3000000000000000000.14159",
-        getDecimalDbOutput("3000000000000000000.14159"),
         getDecimalSeqOutput("3000000000000000000.14159"));
   }
 
@@ -926,7 +794,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testDecimal5() {
     verifyType(getDecimalType(),
         "99999999999999999999.14159",
-        getDecimalDbOutput("99999999999999999999.14159"),
         getDecimalSeqOutput("99999999999999999999.14159"));
   }
 
@@ -934,7 +801,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   public void testDecimal6() {
     verifyType(getDecimalType(),
         "-99999999999999999999.14159",
-        getDecimalDbOutput("-99999999999999999999.14159"),
         getDecimalSeqOutput("-99999999999999999999.14159"));
   }
 
@@ -958,7 +824,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     String [] checkCol = { "DATA_COL0", "DATA_COL1" };
 
     createTableWithColTypes(types, vals);
-    verifyReadback(2, returnVal);
     verifyImport("1," + seqFileVal, checkCol);
   }
 
@@ -1042,7 +907,6 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
     }
 
     verifyType(getVarBinaryType(), "'F00FABCD'",
-        getVarBinaryDbOutput("F00FABCD"),
         getVarBinarySeqOutput("F00FABCD"), true);
   }
 }

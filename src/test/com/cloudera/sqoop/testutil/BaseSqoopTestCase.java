@@ -417,44 +417,6 @@ public abstract class BaseSqoopTestCase extends TestCase {
   }
 
   /**
-   * Verify that the single-column single-row result can be read back from the
-   * db.
-   */
-  protected void verifyReadback(int colNum, String expectedVal) {
-    ResultSet results = null;
-    try {
-      results = getManager().readTable(getTableName(), getColNames());
-      assertNotNull("Null results from readTable()!", results);
-      assertTrue("Expected at least one row returned", results.next());
-      String resultVal = results.getString(colNum);
-      LOG.info("Verifying readback from " + getTableName()
-          + ": got value [" + resultVal + "]");
-      LOG.info("Expected value is: [" + expectedVal + "]");
-      if (null != expectedVal) {
-        assertNotNull("Expected non-null result value", resultVal);
-      }
-
-      assertEquals("Error reading inserted value back from db", expectedVal,
-          resultVal);
-      assertFalse("Expected at most one row returned", results.next());
-    } catch (SQLException sqlE) {
-      fail("Got SQLException: " + StringUtils.stringifyException(sqlE));
-    } finally {
-      if (null != results) {
-        try {
-          results.close();
-        } catch (SQLException sqlE) {
-          fail("Got SQLException in resultset.close(): "
-              + StringUtils.stringifyException(sqlE));
-        }
-      }
-
-      // Free internal resources after the readTable.
-      getManager().release();
-    }
-  }
-
-  /**
    * Create a new string array with 'moreEntries' appended to the 'entries'
    * array.
    * @param entries initial entries in the array

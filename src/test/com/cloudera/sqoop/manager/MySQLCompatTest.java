@@ -99,28 +99,8 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
-  protected String getTrueBoolDbOutput() {
-    return "1";
-  }
-
-  @Override
-  protected String getFalseBoolDbOutput() {
-    return "0";
-  }
-
-  @Override
-  protected String getRealDbOutput(String realAsInserted) {
-    return realAsInserted;
-  }
-
-  @Override
   protected String getRealSeqOutput(String realAsInserted) {
     return withDecimalZero(realAsInserted);
-  }
-
-  @Override
-  protected String getFloatDbOutput(String floatAsInserted) {
-    return floatAsInserted;
   }
 
   @Override
@@ -129,17 +109,12 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
-  protected String getDoubleDbOutput(String doubleAsInserted) {
-    return doubleAsInserted;
-  }
-
-  @Override
   protected String getDoubleSeqOutput(String doubleAsInserted) {
     return withDecimalZero(doubleAsInserted);
   }
 
   @Override
-  protected String getTimestampDbOutput(String tsAsInserted) {
+  protected String getTimestampSeqOutput(String tsAsInserted) {
     // We trim timestamps to exactly one tenth of a second.
     if ("null".equals(tsAsInserted)) {
       return tsAsInserted;
@@ -154,12 +129,7 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
-  protected String getTimestampSeqOutput(String tsAsInserted) {
-    return getTimestampDbOutput(tsAsInserted);
-  }
-
-  @Override
-  protected String getNumericDbOutput(String numAsInserted) {
+  protected String getNumericSeqOutput(String numAsInserted) {
     // We always pad to exactly the number of digits in
     // getNumericDecPartDigits().
 
@@ -188,13 +158,13 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
-  protected String getDecimalDbOutput(String numAsInserted) {
-    return getNumericDbOutput(numAsInserted);
+  protected String getDecimalSeqOutput(String numAsInserted) {
+    return getNumericSeqOutput(numAsInserted);
   }
 
   @Test
   public void testYear() {
-    verifyType("YEAR", "2012", "2012-01-01", "2012");
+    verifyType("YEAR", "2012", "2012");
   }
 }
 

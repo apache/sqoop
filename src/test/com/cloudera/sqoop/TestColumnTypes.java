@@ -73,11 +73,6 @@ public class TestColumnTypes extends ManagerCompatTestCase {
   }
 
   @Override
-  protected String getVarBinaryDbOutput(String asInserted) {
-    return asInserted.toLowerCase();
-  }
-
-  @Override
   protected String getVarBinarySeqOutput(String asInserted) {
     return toLowerHexString(asInserted);
   }
