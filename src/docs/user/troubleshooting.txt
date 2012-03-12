@@ -211,3 +211,23 @@ DBA to grant the necessary privileges based on the setup topology.
 If the database server's IP address changes, unless it is bound to
 a static hostname in your server, the connect string passed into Sqoop
 will also need to be changed.
+
+Oracle: ORA-00933 error (SQL command not properly ended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Problem: While working with Oracle you may encounter the below problem
+when the Sqoop command explicitly specifies the --driver
+<driver name> option. When the driver option is included in
+the Sqoop command, the built-in connection manager selection defaults to the
+generic connection manager, which causes this issue with Oracle. If the
+driver option is not specified, the built-in connection manager selection
+mechanism selects the Oracle specific connection manager which generates
+valid SQL for Oracle and uses the driver "oracle.jdbc.OracleDriver".
+
+----
+ERROR manager.SqlManager: Error executing statement:
+java.sql.SQLSyntaxErrorException: ORA-00933: SQL command not properly ended
+----
+
+Solution: Omit the option --driver oracle.jdbc.driver.OracleDriver and then
+re-run the Sqoop command.
