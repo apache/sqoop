@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -166,6 +167,48 @@ public class DirectPostgresqlManager
 
     return sb.toString();
   }
+  /**
+   * We need to modify boolean results to 'TRUE' and 'FALSE' instead
+   * of postgres t/f syntax. Otherwise hive will ignore them and import nulls
+   *
+   * https://issues.cloudera.org/browse/SQOOP-43
+   *
+   *
+   * @param cols
+   * @return
+   */
+  private String getSelectListColumnsStr(String [] cols, String tableName) {
+    if (null == cols || tableName == null) {
+      return null;
+    }
+    Map<String, String> columnTypes = getColumnTypeNamesForTable(tableName);
+
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    for (String col : cols) {
+      if (!first) {
+        sb.append(", ");
+      }
+      if (columnTypes.get(col) == null) {
+        LOG.error("can not find " + col + " in type medatadata");
+        sb.append(col);
+      } else {
+        if ("bool".equalsIgnoreCase(columnTypes.get(col))) {
+          sb.append(String.format("case when %s=true then 'TRUE' "
+          + "when %s=false then 'FALSE' end as %s", col, col, col));
+        } else if ("bit".equalsIgnoreCase(columnTypes.get(col))) {
+          sb.append(String.format("case when %s=B'1' then 'TRUE' "
+          + "when %s=B'0' then 'FALSE' end as %s", col, col, col));
+        } else {
+          sb.append(col);
+        }
+      }
+      first = false;
+    }
+
+    return sb.toString();
+  }
+
 
   /**
    * @return the Postgresql-specific SQL command to copy the
@@ -190,32 +233,22 @@ public class DirectPostgresqlManager
 
     sb.append("COPY ");
     String whereClause = this.options.getWhereClause();
-    if (whereClause != null && whereClause.length() > 0) {
+    if (whereClause == null || whereClause.length() > 0) {
+        whereClause = "1=1";
+    }
       // Import from a SELECT QUERY
       sb.append("(");
       sb.append("SELECT ");
       if (null != cols) {
-        sb.append(getColumnListStr(cols));
+      sb.append(getSelectListColumnsStr(cols, tableName));
       } else {
         sb.append("*");
       }
-
       sb.append(" FROM ");
       sb.append(escapedTableName);
       sb.append(" WHERE ");
       sb.append(whereClause);
       sb.append(")");
-    } else {
-      // Import just the table.
-      sb.append(escapedTableName);
-      if (null != cols) {
-        // specify columns.
-        sb.append("(");
-        sb.append(getColumnListStr(cols));
-        sb.append(")");
-      }
-    }
-
     // Translate delimiter characters to '\ooo' octal representation.
     sb.append(" TO STDOUT WITH DELIMITER E'\\");
     sb.append(Integer.toString((int) this.options.getOutputFieldDelim(), 8));
