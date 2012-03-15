@@ -233,22 +233,24 @@ public class DirectPostgresqlManager
 
     sb.append("COPY ");
     String whereClause = this.options.getWhereClause();
-    if (whereClause == null || whereClause.length() > 0) {
+    if (whereClause == null || whereClause.isEmpty()) {
         whereClause = "1=1";
     }
-      // Import from a SELECT QUERY
-      sb.append("(");
-      sb.append("SELECT ");
-      if (null != cols) {
-      sb.append(getSelectListColumnsStr(cols, tableName));
-      } else {
-        sb.append("*");
-      }
-      sb.append(" FROM ");
-      sb.append(escapedTableName);
-      sb.append(" WHERE ");
-      sb.append(whereClause);
-      sb.append(")");
+
+    // Import from a SELECT QUERY
+    sb.append("(");
+    sb.append("SELECT ");
+    if (null != cols) {
+    sb.append(getSelectListColumnsStr(cols, tableName));
+    } else {
+      sb.append("*");
+    }
+    sb.append(" FROM ");
+    sb.append(escapedTableName);
+    sb.append(" WHERE ");
+    sb.append(whereClause);
+    sb.append(")");
+
     // Translate delimiter characters to '\ooo' octal representation.
     sb.append(" TO STDOUT WITH DELIMITER E'\\");
     sb.append(Integer.toString((int) this.options.getOutputFieldDelim(), 8));
