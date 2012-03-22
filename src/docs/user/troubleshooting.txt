@@ -231,3 +231,18 @@ java.sql.SQLSyntaxErrorException: ORA-00933: SQL command not properly ended
 
 Solution: Omit the option --driver oracle.jdbc.driver.OracleDriver and then
 re-run the Sqoop command.
+
+MySQL: Import of TINYINT(1) from MySQL to Hive does not work
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Problem: When importing a table from MySQL into Hive where one of the columns
+is of datatype TINYINT(1), Sqoop will automatically map this to the Hive
+datatype boolean. This is because the MySQL JDBC connector maps the
+TINYINT(1) datatype to java.sql.Types.BIT, which Sqoop by default maps to
+the Hive type Boolean. Consequently, if you have values such as 1 or 0 in
+this column, they will fail to parse correctly in Hive, instead appearing
+as all NULL values.
+
+Solution: Explicitly override the column mapping for the datatype TINYINT(1)
+column. For example, if the column name is foo, then pass the following
+option to Sqoop during import: --map-column-hive foo=tinyint. In the case of
+non-Hive imports to HDFS, use --map-column-java foo=integer.
