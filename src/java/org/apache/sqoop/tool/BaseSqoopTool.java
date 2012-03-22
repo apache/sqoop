@@ -938,6 +938,25 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
               + " option conflicts with the " + HIVE_DELIMS_REPLACEMENT_ARG
               + " option." + HELP_STR);
     }
+    // Many users are reporting issues when they are trying to import data
+    // directly into hive warehouse. This should prevent users from doing
+    // so in case of a default location.
+    String defaultHiveWarehouse = "/user/hive/warehouse";
+    if (options.doHiveImport()
+      && ((
+        options.getWarehouseDir() != null
+        && options.getWarehouseDir().startsWith(defaultHiveWarehouse)
+        ) || (
+        options.getTargetDir() != null
+        && options.getTargetDir().startsWith(defaultHiveWarehouse)
+    ))) {
+      LOG.warn("It seems that you're doing hive import directly into default");
+      LOG.warn("hive warehouse directory which is not supported. Sqoop is");
+      LOG.warn("firstly importing data into separate directory and then");
+      LOG.warn("inserting data into hive. Please consider removing");
+      LOG.warn("--target-dir or --warehouse-dir into /user/hive/warehouse in");
+      LOG.warn("case that you will detect any issues.");
+    }
   }
 
   protected void validateHBaseOptions(SqoopOptions options)
