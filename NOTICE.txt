@@ -1,0 +1,8 @@
+Apache Sqoop (incubating)
+Copyright 2011-2012 The Apache Software Foundation
+
+This product includes softare developed at 
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of this software were developed at
+Cloudera, Inc. (http://www.cloudera.com/).
