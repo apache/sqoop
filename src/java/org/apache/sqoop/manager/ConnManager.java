@@ -190,8 +190,10 @@ public abstract class ConnManager {
     case Types.TIME:
     case Types.TIMESTAMP:
       return Type.LONG;
+    case Types.BLOB:
     case Types.BINARY:
     case Types.VARBINARY:
+    case Types.LONGVARBINARY:
       return Type.BYTES;
     default:
       throw new IllegalArgumentException("Cannot convert SQL type "
