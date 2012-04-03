@@ -471,11 +471,14 @@ public class OracleManager
 
   /**
    * Resolve a database-specific type to the Java type that should contain it.
-   * @param sqlType
+   * @param tableName   table name
+   * @param columnName  column name
+   * @param sqlType     sql data type
    * @return the name of a Java type to hold the sql datatype, or null if none.
    */
-  public String toJavaType(String columnName, int sqlType) {
-    String defaultJavaType = super.toJavaType(columnName, sqlType);
+  @Override
+  public String toJavaType(String tableName, String columnName, int sqlType) {
+    String defaultJavaType = super.toJavaType(tableName, columnName, sqlType);
     return (defaultJavaType == null) ? dbToJavaType(sqlType) : defaultJavaType;
   }
 
@@ -508,11 +511,13 @@ public class OracleManager
 
   /**
    * Attempt to map sql type to hive type.
+   * @param tableName   table name
+   * @param columnName  column name
    * @param sqlType     sql data type
    * @return            hive data type
    */
-  public String toHiveType(String columnName, int sqlType) {
-    String defaultHiveType = super.toHiveType(columnName, sqlType);
+  public String toHiveType(String tableName, String columnName, int sqlType) {
+    String defaultHiveType = super.toHiveType(tableName, columnName, sqlType);
     return (defaultHiveType == null) ? dbToHiveType(sqlType) : defaultHiveType;
   }
 

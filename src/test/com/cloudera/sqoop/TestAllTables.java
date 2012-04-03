@@ -30,7 +30,6 @@ import org.apache.hadoop.io.IOUtils;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportAllTablesTool;
 
@@ -53,7 +52,7 @@ public class TestAllTables extends ImportJobTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
     args.add("--num-mappers");
     args.add("1");
     args.add("--escaped-by");
@@ -73,11 +72,13 @@ public class TestAllTables extends ImportJobTestCase {
     // start the server
     super.setUp();
 
-    // throw away TWOINTTABLE and things we don't care about.
-    try {
-      this.getTestServer().dropExistingSchema();
-    } catch (SQLException sqlE) {
-      fail(sqlE.toString());
+    if (useHsqldbTestServer()) {
+      // throw away TWOINTTABLE and things we don't care about.
+      try {
+        this.getTestServer().dropExistingSchema();
+      } catch (SQLException sqlE) {
+        fail(sqlE.toString());
+      }
     }
 
     this.tableNames = new ArrayList<String>();

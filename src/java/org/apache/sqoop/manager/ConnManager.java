@@ -203,34 +203,37 @@ public abstract class ConnManager {
 
   /**
    * Return java type for SQL type.
+   * @param tableName   table name
    * @param columnName  column name
    * @param sqlType     sql type
    * @return            java type
    */
-  public String toJavaType(String columnName, int sqlType) {
-    // ignore column name by default.
+  public String toJavaType(String tableName, String columnName, int sqlType) {
+    // ignore table name and column name by default.
     return toJavaType(sqlType);
   }
 
-    /**
-     * Return hive type for SQL type.
-     * @param columnName  column name
-     * @param sqlType   sql type
-     * @return          hive type
-     */
-  public String toHiveType(String columnName, int sqlType) {
-    // ignore column name by default.
+  /**
+   * Return hive type for SQL type.
+   * @param tableName   table name
+   * @param columnName  column name
+   * @param sqlType     sql type
+   * @return            hive type
+   */
+  public String toHiveType(String tableName, String columnName, int sqlType) {
+    // ignore table name and column name by default.
     return toHiveType(sqlType);
   }
 
   /**
    * Return avro type for SQL type.
+   * @param tableName   table name
    * @param columnName  column name
-   * @param sqlType   sql type
-   * @return          avro type
+   * @param sqlType     sql type
+   * @return            avro type
    */
-  public Type toAvroType(String columnName, int sqlType) {
-    // ignore column name by default.
+  public Type toAvroType(String tableName, String columnName, int sqlType) {
+    // ignore table name and column name by default.
     return toAvroType(sqlType);
   }
 

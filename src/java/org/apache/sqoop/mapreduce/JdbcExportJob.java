@@ -74,7 +74,7 @@ public class JdbcExportJob extends ExportJobBase {
       for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
         Text columnName = new Text(e.getKey());
         Text columnText = new Text(
-            connManager.toJavaType(e.getKey(), e.getValue()));
+            connManager.toJavaType(tableName, e.getKey(), e.getValue()));
         columnTypes.put(columnName, columnText);
       }
       DefaultStringifier.store(job.getConfiguration(), columnTypes,

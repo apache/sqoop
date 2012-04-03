@@ -121,6 +121,6 @@ public class AvroSchemaGenerator {
       throw new IllegalArgumentException("Cannot convert to AVRO type " + type);
     }
 
-    return connManager.toAvroType(columnName, sqlType);
+    return connManager.toAvroType(tableName, columnName, sqlType);
   }
 }
