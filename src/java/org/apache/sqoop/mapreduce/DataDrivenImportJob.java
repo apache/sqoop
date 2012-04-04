@@ -111,6 +111,36 @@ public class DataDrivenImportJob extends ImportJobBase {
     return null;
   }
 
+  /**
+   * Build the boundary query for the column of the result set created by
+   * the given query.
+   * @param col column name whose boundaries we're interested in.
+   * @param query sub-query used to create the result set.
+   * @return input boundary query as a string
+   */
+  private String buildBoundaryQuery(String col, String query) {
+    if (col == null) {
+      return "";
+    }
+
+    // Replace table name with alias 't1' if column name is a fully
+    // qualified name.  This is needed because "tableName"."columnName"
+    // in the input boundary query causes a SQL syntax error in most dbs
+    // including Oracle and MySQL.
+    String alias = "t1";
+    int dot = col.lastIndexOf('.');
+    String qualifiedName = (dot == -1) ? col : alias + col.substring(dot);
+
+    ConnManager mgr = getContext().getConnManager();
+    String ret = mgr.getInputBoundsQuery(qualifiedName, query);
+    if (ret != null) {
+      return ret;
+    }
+
+    return "SELECT MIN(" + qualifiedName + "), MAX(" + qualifiedName + ") "
+        + "FROM (" + query + ") AS " + alias;
+  }
+
   @Override
   protected void configureInputFormat(Job job, String tableName,
       String tableClassName, String splitByCol) throws IOException {
@@ -165,18 +195,8 @@ public class DataDrivenImportJob extends ImportJobBase {
             DataDrivenDBInputFormat.SUBSTITUTE_TOKEN, " (1 = 1) ");
 
         String inputBoundingQuery = options.getBoundaryQuery();
-
         if (inputBoundingQuery == null) {
-          inputBoundingQuery =
-            mgr.getInputBoundsQuery(splitByCol, sanitizedQuery);
-          if (inputBoundingQuery == null) {
-            if (splitByCol != null) {
-              inputBoundingQuery = "SELECT MIN(" + splitByCol + "), MAX("
-                      + splitByCol + ") FROM (" + sanitizedQuery + ") AS t1";
-            } else {
-              inputBoundingQuery = "";
-            }
-          }
+          inputBoundingQuery = buildBoundaryQuery(splitByCol, sanitizedQuery);
         }
         DataDrivenDBInputFormat.setInput(job, DBWritable.class,
             inputQuery, inputBoundingQuery);
