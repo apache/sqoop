@@ -119,7 +119,7 @@ public class DataDrivenImportJob extends ImportJobBase {
    * @return input boundary query as a string
    */
   private String buildBoundaryQuery(String col, String query) {
-    if (col == null) {
+    if (col == null || options.getNumMappers() == 1) {
       return "";
     }
 
