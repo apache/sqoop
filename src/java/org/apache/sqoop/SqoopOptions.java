@@ -1029,7 +1029,19 @@ public class SqoopOptions implements Cloneable {
    * @return the password as a string
    */
   private String securePasswordEntry() {
-    return new String(System.console().readPassword("Enter password: "));
+    try {
+      return new String(System.console().readPassword("Enter password: "));
+    } catch (NullPointerException e) {
+      LOG.error("It seems that you have launched a Sqoop metastore job via");
+      LOG.error("Oozie with sqoop.metastore.client.record.password disabled.");
+      LOG.error("But this configuration is not supported because Sqoop can't");
+      LOG.error("prompt the user to enter the password while being executed");
+      LOG.error("as Oozie tasks. Please enable sqoop.metastore.client.record");
+      LOG.error(".password in sqoop-site.xml, or provide the password");
+      LOG.error("explictly using --password in the command tag of the Oozie");
+      LOG.error("workflow file.");
+      return null;
+    }
   }
 
   /**

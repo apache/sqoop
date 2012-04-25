@@ -168,6 +168,9 @@ prompted for that password each time you execute the job.
 You can enable passwords in the metastore by setting
 +sqoop.metastore.client.record.password+ to +true+ in the configuration.
 
+Note that you have to set +sqoop.metastore.client.record.password+ to +true+
+if you are executing saved jobs via Oozie because Sqoop cannot prompt the user
+to enter passwords while being executed as Oozie tasks.
 
 Saved jobs and incremental imports
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
