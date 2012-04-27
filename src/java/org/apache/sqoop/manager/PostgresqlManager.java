@@ -129,7 +129,8 @@ public class PostgresqlManager
     + "  AND tab.OID = col.ATTRELID "
     + "  AND sch.NSPNAME = (SELECT CURRENT_SCHEMA()) "
     + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
-    + "  AND col.ATTNUM >= 1";
+    + "  AND col.ATTNUM >= 1"
+    + "  AND col.ATTISDROPPED = 'f'";
   }
 
   @Override
