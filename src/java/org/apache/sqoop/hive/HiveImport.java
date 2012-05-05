@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
@@ -102,18 +103,7 @@ public class HiveImport {
    */
   private void removeTempLogs(String tableName) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
-    Path tablePath;
-    if (null != tableName) {
-        String warehouseDir = options.getWarehouseDir();
-        if (warehouseDir != null) {
-          tablePath = new Path(new Path(warehouseDir), tableName);
-        } else {
-          tablePath = new Path(tableName);
-        }
-    } else {
-        // --table option is not used, so use the target dir instead
-        tablePath = new Path(options.getTargetDir());
-    }
+    Path tablePath = getOutputPath(tableName);
 
     Path logsPath = new Path(tablePath, "_logs");
     if (fs.exists(logsPath)) {
@@ -122,6 +112,26 @@ public class HiveImport {
         LOG.warn("Could not delete temporary files; "
             + "continuing with import, but it may fail.");
       }
+    }
+  }
+
+  /**
+   * Get directory where we stored job output files.
+   *
+   * @param tableName imported table name
+   * @return Path with directory where output files can be found
+   */
+  private Path getOutputPath(String tableName) {
+    if (null != tableName) {
+      String warehouseDir = options.getWarehouseDir();
+      if (warehouseDir != null) {
+        return new Path(new Path(warehouseDir), tableName);
+      } else {
+        return new Path(tableName);
+      }
+    } else {
+      // --table option is not used, so use the target dir instead
+      return new Path(options.getTargetDir());
     }
   }
 
@@ -239,6 +249,8 @@ public class HiveImport {
         executeScript(filename, env);
 
         LOG.info("Hive import complete.");
+
+        cleanUp(inputTableName);
       }
     } finally {
       if (!isGenerateOnly()) {
@@ -249,6 +261,35 @@ public class HiveImport {
           scriptFile.deleteOnExit();
         }
       }
+    }
+  }
+
+  /**
+   * Clean up after successful HIVE import.
+   *
+   * @param table Imported table name
+   * @throws IOException
+   */
+  private void cleanUp(String table) throws IOException {
+    FileSystem fs = FileSystem.get(configuration);
+
+    // HIVE is not always removing input directory after LOAD DATA statement
+    // (which is our export directory). We're removing export directory in case
+    // that is blank for case that user wants to periodically populate HIVE
+    // table (for example with --hive-overwrite).
+    Path outputPath = getOutputPath(table);
+    try {
+      if (outputPath != null && fs.exists(outputPath)) {
+        FileStatus[] statuses = fs.listStatus(outputPath);
+        if (statuses.length == 0) {
+          LOG.info("Export directory is empty, removing it.");
+          fs.delete(getOutputPath(table));
+        } else {
+          LOG.info("Export directory is not empty, keeping it.");
+        }
+      }
+    } catch(IOException e) {
+      LOG.error("Issue with cleaning (safe to ignore)", e);
     }
   }
 
