@@ -121,9 +121,8 @@ public class MySQLDumpMapper
             // chop off the leading and trailing text as we write the
             // output to HDFS.
             int len = inLine.length() - 2 - preambleLen;
-            context.write(inLine.substring(preambleLen, inLine.length() - 2),
-                null);
-            context.write("\n", null);
+            context.write(inLine.substring(preambleLen, inLine.length() - 2)
+                + "\n", null);
             counters.addBytes(1 + len);
           }
         } catch (IOException ioe) {
@@ -273,21 +272,23 @@ public class MySQLDumpMapper
             // For all of the output fields, emit them using the delimiters
             // the user chooses.
             boolean first = true;
+            StringBuilder sb = new StringBuilder();
             int recordLen = 1; // for the delimiter.
             for (String field : fields) {
               if (!first) {
-                context.write(outputFieldDelimStr, null);
+                sb.append(outputFieldDelimStr);
               } else {
                 first = false;
               }
 
               String fieldStr = FieldFormatter.escapeAndEnclose(field,
                   delimiters);
-              context.write(fieldStr, null);
+              sb.append(fieldStr);
               recordLen += fieldStr.length();
             }
 
-            context.write(outputRecordDelimStr, null);
+            sb.append(outputRecordDelimStr);
+            context.write(sb.toString(), null);
             counters.addBytes(recordLen);
           }
         } catch (IOException ioe) {
