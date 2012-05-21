@@ -60,31 +60,31 @@ limitations under the License.
   <mailingLists>
     <mailingList>
       <name>sqoop-user</name>
-      <subscribe>incubator-sqoop-user-subscribe@apache.org</subscribe>
-      <unsubscribe>incubator-sqoop-user-unsubscribe@apache.org</unsubscribe>
-      <post>sqoop-user@incubator.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-sqoop-user/</archive>
+      <subscribe>user-subscribe@sqoop.apache.org</subscribe>
+      <unsubscribe>user-unsubscribe@sqoop.apache.org</unsubscribe>
+      <post>user@sqoop.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-user/</archive>
     </mailingList>
     <mailingList>
       <name>sqoop-dev</name>
-      <subscribe>incubator-sqoop-dev-subscribe@apache.org</subscribe>
-      <unsubscribe>incubator-sqoop-dev-unsubscribe@apache.org</unsubscribe>
-      <post>sqoop-dev@incubator.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-sqoop-dev/</archive>
+      <subscribe>dev-subscribe@sqoop.apache.org</subscribe>
+      <unsubscribe>dev-unsubscribe@sqoop.apache.org</unsubscribe>
+      <post>dev@sqoop.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-dev/</archive>
     </mailingList>
     <mailingList>
       <name>sqoop-commits</name>
-      <subscribe>incubator-sqoop-commits-subscribe@apache.org</subscribe>
-      <unsubscribe>incubator-sqoop-commits-unsubscribe@apache.org</unsubscribe>
-      <post>sqoop-commits@incubator.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-sqoop-commits/</archive>
+      <subscribe>commits-subscribe@sqoop.apache.org</subscribe>
+      <unsubscribe>commits-unsubscribe@sqoop.apache.org</unsubscribe>
+      <post>commits@sqoop.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-commits/</archive>
     </mailingList>
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/sqoop/branches/sqoop2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/sqoop/branches/sqoop2/</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/sqoop/branches/sqoop2/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/sqoop/branches/sqoop2/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/sqoop/branches/sqoop2/</developerConnection>
+    <url>http://svn.apache.org/viewvc/sqoop/branches/sqoop2/</url>
   </scm>
 
   <properties>
@@ -207,7 +207,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -216,7 +216,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -225,7 +225,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -234,6 +234,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -242,7 +243,7 @@ limitations under the License.
       <organization>Quest</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -251,7 +252,7 @@ limitations under the License.
       <organization>Quest</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -260,6 +261,7 @@ limitations under the License.
       <organization>AVG Technologies</organization>
       <roles>
         <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -268,16 +270,33 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>kathleen</id>
+      <name>Kathleen Ting</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
       </roles>
     </developer>
     <developer>
       <id>kimballa</id>
       <name>Aaron Kimball</name>
-      <organization>Odiago</organization>
+      <organization>WibiData</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>olamy</id>
+      <name>Olivier Lamy</name>
+      <organization>Talend</organization>
+      <roles>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -286,7 +305,7 @@ limitations under the License.
       <organization>JPL</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -295,7 +314,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PPMC member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
