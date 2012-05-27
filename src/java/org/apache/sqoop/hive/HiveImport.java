@@ -101,10 +101,8 @@ public class HiveImport {
    * If we used a MapReduce-based upload of the data, remove the _logs dir
    * from where we put it, before running Hive LOAD DATA INPATH.
    */
-  private void removeTempLogs(String tableName) throws IOException {
+  private void removeTempLogs(Path tablePath) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
-    Path tablePath = getOutputPath(tableName);
-
     Path logsPath = new Path(tablePath, "_logs");
     if (fs.exists(logsPath)) {
       LOG.info("Removing temporary files from import process: " + logsPath);
@@ -112,26 +110,6 @@ public class HiveImport {
         LOG.warn("Could not delete temporary files; "
             + "continuing with import, but it may fail.");
       }
-    }
-  }
-
-  /**
-   * Get directory where we stored job output files.
-   *
-   * @param tableName imported table name
-   * @return Path with directory where output files can be found
-   */
-  private Path getOutputPath(String tableName) {
-    if (null != tableName) {
-      String warehouseDir = options.getWarehouseDir();
-      if (warehouseDir != null) {
-        return new Path(new Path(warehouseDir), tableName);
-      } else {
-        return new Path(tableName);
-      }
-    } else {
-      // --table option is not used, so use the target dir instead
-      return new Path(options.getTargetDir());
     }
   }
 
@@ -171,11 +149,6 @@ public class HiveImport {
   public void importTable(String inputTableName, String outputTableName,
       boolean createOnly) throws IOException {
 
-    if (!isGenerateOnly()) {
-      removeTempLogs(inputTableName);
-      LOG.info("Loading uploaded data into Hive");
-    }
-
     if (null == outputTableName) {
       outputTableName = inputTableName;
     }
@@ -200,17 +173,21 @@ public class HiveImport {
         configuration, !debugMode);
     String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
     String loadDataStmtStr = tableWriter.getLoadDataStmt() + ";\n";
+    Path finalPath = tableWriter.getFinalPath();
 
     if (!isGenerateOnly()) {
+      removeTempLogs(finalPath);
+      LOG.info("Loading uploaded data into Hive");
+
       String codec = options.getCompressionCodec();
       if (codec != null && (codec.equals(CodecMap.LZOP)
               || codec.equals(CodecMap.getCodecClassName(CodecMap.LZOP)))) {
         try {
-          String finalPathStr = tableWriter.getFinalPathStr();
           Tool tool = ReflectionUtils.newInstance(Class.
                   forName("com.hadoop.compression.lzo.DistributedLzoIndexer").
                   asSubclass(Tool.class), configuration);
-          ToolRunner.run(configuration, tool, new String[] { finalPathStr });
+          ToolRunner.run(configuration, tool,
+              new String[] { finalPath.toString() });
         } catch (Exception ex) {
           LOG.error("Error indexing lzo files", ex);
           throw new IOException("Error indexing lzo files", ex);
@@ -250,7 +227,7 @@ public class HiveImport {
 
         LOG.info("Hive import complete.");
 
-        cleanUp(inputTableName);
+        cleanUp(finalPath);
       }
     } finally {
       if (!isGenerateOnly()) {
@@ -267,23 +244,22 @@ public class HiveImport {
   /**
    * Clean up after successful HIVE import.
    *
-   * @param table Imported table name
+   * @param outputPath path to the output directory
    * @throws IOException
    */
-  private void cleanUp(String table) throws IOException {
+  private void cleanUp(Path outputPath) throws IOException {
     FileSystem fs = FileSystem.get(configuration);
 
     // HIVE is not always removing input directory after LOAD DATA statement
     // (which is our export directory). We're removing export directory in case
     // that is blank for case that user wants to periodically populate HIVE
     // table (for example with --hive-overwrite).
-    Path outputPath = getOutputPath(table);
     try {
       if (outputPath != null && fs.exists(outputPath)) {
         FileStatus[] statuses = fs.listStatus(outputPath);
         if (statuses.length == 0) {
           LOG.info("Export directory is empty, removing it.");
-          fs.delete(getOutputPath(table));
+          fs.delete(outputPath, true);
         } else {
           LOG.info("Export directory is not empty, keeping it.");
         }

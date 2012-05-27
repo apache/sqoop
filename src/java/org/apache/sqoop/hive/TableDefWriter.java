@@ -217,11 +217,11 @@ public class TableDefWriter {
    * @return the LOAD DATA statement to import the data in HDFS into hive.
    */
   public String getLoadDataStmt() throws IOException {
-    String finalPathStr = getFinalPathStr();
+    Path finalPath = getFinalPath();
 
     StringBuilder sb = new StringBuilder();
     sb.append("LOAD DATA INPATH '");
-    sb.append(finalPathStr + "'");
+    sb.append(finalPath.toString() + "'");
     if (options.doOverwriteHiveTable()) {
       sb.append(" OVERWRITE");
     }
@@ -240,7 +240,7 @@ public class TableDefWriter {
     return sb.toString();
   }
 
-  public String getFinalPathStr() throws IOException {
+  public Path getFinalPath() throws IOException {
     String warehouseDir = options.getWarehouseDir();
     if (null == warehouseDir) {
       warehouseDir = "";
@@ -248,15 +248,18 @@ public class TableDefWriter {
       warehouseDir = warehouseDir + File.separator;
     }
 
-    String tablePath;
-    if (null != inputTableName) {
-      tablePath = warehouseDir + inputTableName;
+    // Final path is determined in the following order:
+    // 1. Use target dir if the user specified.
+    // 2. Use input table name.
+    String tablePath = null;
+    String targetDir = options.getTargetDir();
+    if (null != targetDir) {
+      tablePath = warehouseDir + targetDir;
     } else {
-      tablePath = options.getTargetDir();
+      tablePath = warehouseDir + inputTableName;
     }
     FileSystem fs = FileSystem.get(configuration);
-    Path finalPath = new Path(tablePath).makeQualified(fs);
-    return finalPath.toString();
+    return new Path(tablePath).makeQualified(fs);
   }
 
   /**

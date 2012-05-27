@@ -83,6 +83,34 @@ public class TestTableDefWriter extends TestCase {
     assertTrue(loadData.indexOf("/inputTable'") != -1);
   }
 
+  public void testDifferentTargetDirs() throws Exception {
+    String targetDir = "targetDir";
+    String inputTable = "inputTable";
+    String outputTable = "outputTable";
+
+    Configuration conf = new Configuration();
+    SqoopOptions options = new SqoopOptions();
+    // Specify a different target dir from input table name
+    options.setTargetDir(targetDir);
+    TableDefWriter writer = new TableDefWriter(options, null,
+        inputTable, outputTable, conf, false);
+
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+    String loadData = writer.getLoadDataStmt();
+
+    LOG.debug("Create table stmt: " + createTable);
+    LOG.debug("Load data stmt: " + loadData);
+
+    // Assert that the statements generated have the form we expect.
+    assertTrue(createTable.indexOf(
+        "CREATE TABLE IF NOT EXISTS `" + outputTable + "`") != -1);
+    assertTrue(loadData.indexOf("INTO TABLE `" + outputTable + "`") != -1);
+    assertTrue(loadData.indexOf("/" + targetDir + "'") != -1);
+  }
+
   public void testPartitions() throws Exception {
     String[] args = {
         "--hive-partition-key", "ds",
