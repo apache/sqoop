@@ -631,9 +631,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     // common options.
     if (in.hasOption(VERBOSE_ARG)) {
       // Immediately switch into DEBUG logging.
-      Category sqoopLogger = Logger.getLogger(
-          Sqoop.class.getName()).getParent();
-      sqoopLogger.setLevel(Level.DEBUG);
+      Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
+      Logger.getLogger("com.cloudera.apache").setLevel(Level.DEBUG);
       LOG.debug("Enabled debug logging.");
     }
 
