@@ -155,7 +155,13 @@ public class TableDefWriter {
     }
 
     boolean first = true;
+    String partitionKey = options.getHivePartitionKey();
     for (String col : colNames) {
+      if (col.equals(partitionKey)) {
+        throw new IllegalArgumentException("Partition key " + col + " cannot "
+            + "be a column to import.");
+      }
+
       if (!first) {
         sb.append(", ");
       }
@@ -188,9 +194,9 @@ public class TableDefWriter {
       sb.append("COMMENT 'Imported by sqoop on " + curDateStr + "' ");
     }
 
-    if (options.getHivePartitionKey() != null) {
+    if (partitionKey != null) {
       sb.append("PARTITIONED BY (")
-        .append(options.getHivePartitionKey())
+        .append(partitionKey)
         .append(" STRING) ");
      }
 

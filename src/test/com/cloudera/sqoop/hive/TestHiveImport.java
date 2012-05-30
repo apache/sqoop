@@ -109,6 +109,28 @@ public class TestHiveImport extends ImportJobTestCase {
   }
 
   /**
+   * @return the argv to supply to a create-table only job for Hive imports.
+   */
+  protected String [] getCreateTableArgv(boolean includeHadoopFlags,
+      String [] moreArgs) {
+
+    ArrayList<String> args = new ArrayList<String>();
+
+    if (null != moreArgs) {
+      for (String arg: moreArgs) {
+        args.add(arg);
+      }
+    }
+
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--connect");
+    args.add(HsqldbTestServer.getUrl());
+
+    return args.toArray(new String[0]);
+  }
+
+  /**
    * @return the argv to supply to a code-gen only job for Hive imports.
    */
   protected String [] getCodeGenArgs() {
@@ -452,4 +474,62 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, moreArgs), new ImportTool());
   }
 
+  /**
+   * If partition key is set to one of importing columns, we should get an
+   * IOException.
+   * */
+  @Test
+  public void testImportWithBadPartitionKey() {
+    final String TABLE_NAME = "FAILING_PARTITION_HIVE_IMPORT";
+
+    LOG.info("Doing import of single row into " + TABLE_NAME + " table");
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)", };
+    String[] vals = { "'key'", "42", "'I am a row in a partition'", };
+
+    String partitionKey = getColNames()[0];
+
+    // Specify 1st column as partition key and import every column of the
+    // table by default (i.e. no --columns option).
+    String[] moreArgs1 = {
+        "--" + BaseSqoopTool.HIVE_PARTITION_KEY_ARG,
+        partitionKey,
+    };
+
+    // Specify 1st column as both partition key and importing column.
+    String[] moreArgs2 = {
+        "--" + BaseSqoopTool.HIVE_PARTITION_KEY_ARG,
+        partitionKey,
+        "--" + BaseSqoopTool.COLUMNS_ARG,
+        partitionKey,
+    };
+
+    // Test hive-import with the 1st args.
+    try {
+      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+          getArgv(false, moreArgs1), new ImportTool());
+      fail(TABLE_NAME + " test should have thrown IOException");
+    } catch (IOException ioe) {
+      // expected; ok.
+    }
+
+    // Test hive-import with the 2nd args.
+    try {
+      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+          getArgv(false, moreArgs2), new ImportTool());
+      fail(TABLE_NAME + " test should have thrown IOException");
+    } catch (IOException ioe) {
+      // expected; ok.
+    }
+
+    // Test create-hive-table with the 1st args.
+    try {
+      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+          getCreateTableArgv(false, moreArgs1), new CreateHiveTableTool());
+      fail(TABLE_NAME + " test should have thrown IOException");
+    } catch (IOException ioe) {
+      // expected; ok.
+    }
+  }
 }
