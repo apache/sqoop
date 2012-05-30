@@ -27,11 +27,10 @@ public class ShowCommand extends SqoopCommand
 {
   private ShowServerFunction serverFunction;
   private ShowVersionFunction versionFunction;
-  private ShowConnectorFunction connectorFunction;
 
   protected ShowCommand(Shell shell) {
     super(shell, "show", "\\sh",
-        new String[] {"server", "version", "connector", "connection", "job"},
+        new String[] {"server", "version", "connector"},
         "Show", "info");
   }
 
