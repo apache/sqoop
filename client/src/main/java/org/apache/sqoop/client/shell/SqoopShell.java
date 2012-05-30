@@ -59,6 +59,7 @@ public class SqoopShell
 
     shell.register(new HelpCommand(shell));
     shell.register(new SetCommand(shell));
+    shell.register(new ShowCommand(shell));
 
     if (args.length == 0) {
       // Interactive mode:
