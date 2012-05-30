@@ -23,7 +23,7 @@ import org.json.simple.JSONValue;
 
 public class VersionRequest extends Request
 {
-  public VersionBean versions(String url) {
+  public VersionBean version(String url) {
     String response = get(url + "version");
     JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
 

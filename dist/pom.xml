@@ -30,4 +30,93 @@ limitations under the License.
   <groupId>org.apache.sqoop</groupId>
   <artifactId>sqoop-dist</artifactId>
   <name>Sqoop Distribution</name>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-server</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-client</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>dist</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <!-- clean up -->
+                    <delete dir="target/sqoop-${project.version}"/>
+                    <delete file="target/sqoop-${project.version}.tar.gz"/>
+                    <!-- create dist dir -->
+                    <mkdir dir="target/sqoop-${project.version}"/>
+
+                    <!-- server -->
+                    <get src="http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.27/bin/apache-tomcat-7.0.27.tar.gz"
+                         dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
+                    <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
+                    <delete file="target/apache-tomcat.tar.gz"/>
+                    <move file="target/apache-tomcat-7.0.27" tofile="target/sqoop-${project.version}/server"/>
+                    <copy todir="target/sqoop-${project.version}/server/bin">
+                      <fileset dir="src/main/server/bin"/>
+                    </copy>
+                    <chmod dir="target/sqoop-${project.version}/server/bin" perm="u+x" includes="**/*.sh"/>
+                    <copy todir="target/sqoop-${project.version}/server/conf">
+                      <fileset dir="src/main/server/conf"/>
+                    </copy>
+                    <delete dir="target/sqoop-${project.version}/server/webapps"/>
+                    <mkdir dir="target/sqoop-${project.version}/server/webapps"/>
+                    <copy todir="target/sqoop-${project.version}/server/webapps">
+                      <fileset dir="src/main/server/webapps"/>
+                    </copy>
+                    <copy file="../server/target/sqoop.war"
+                          toDir="target/sqoop-${project.version}/server/webapps"/>
+
+                    <!-- client -->
+                    <copy todir="target/sqoop-${project.version}/client/lib">
+                      <fileset dir="../client/target/lib"/>
+                    </copy>
+                    <copy file="../client/target/sqoop-client-${project.version}.jar"
+                          toDir="target/sqoop-${project.version}/client/lib"/>
+
+                    <!-- binary -->
+                    <copy todir="target/sqoop-${project.version}/bin">
+                      <fileset dir="src/main/bin"/>
+                    </copy>
+                    <chmod dir="target/sqoop-${project.version}/bin" perm="u+x" includes="**/*.sh"/>
+
+                    <!-- create dist tar -->
+                    <tar destfile="target/sqoop-${project.version}.tar.gz" compression="gzip">
+                      <tarfileset dir="target/sqoop-${project.version}" prefix="sqoop-${project.version}"/>
+                    </tar>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

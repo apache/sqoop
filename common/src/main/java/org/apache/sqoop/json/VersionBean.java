@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.json;
 
-import java.util.Arrays;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -106,8 +104,8 @@ public class VersionBean implements JsonBean {
     return this.url;
   }
 
-  public String getProtocols() {
-    return Arrays.toString(protocols);
+  public String[] getProtocols() {
+    return this.protocols;
   }
 
 }

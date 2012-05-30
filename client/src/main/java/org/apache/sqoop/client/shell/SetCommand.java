@@ -29,7 +29,7 @@ public class SetCommand extends SqoopCommand
 
   protected SetCommand(Shell shell) {
     super(shell, "set", "\\st",
-        new String[] {"server", "client"},
+        new String[] {"server", "connector"},
         "Set", "info");
   }
 
