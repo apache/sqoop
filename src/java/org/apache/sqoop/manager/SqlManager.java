@@ -51,6 +51,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.util.SqlTypeMap;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -195,7 +196,7 @@ public abstract class SqlManager
     }
 
     try {
-      Map<String, Integer> colTypes = new HashMap<String, Integer>();
+      Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
 
       int cols = results.getMetaData().getColumnCount();
       ResultSetMetaData metadata = results.getMetaData();

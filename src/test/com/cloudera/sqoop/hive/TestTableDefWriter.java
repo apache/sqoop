@@ -18,7 +18,6 @@
 
 package com.cloudera.sqoop.hive;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -26,6 +25,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.util.SqlTypeMap;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ImportTool;
@@ -67,7 +67,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options, null,
         "inputTable", "outputTable", conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
 
     String createTable = writer.getCreateTableStmt();
@@ -95,7 +95,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options, null,
         inputTable, outputTable, conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
 
     String createTable = writer.getCreateTableStmt();
@@ -122,7 +122,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options,
         null, "inputTable", "outputTable", conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
 
     String createTable = writer.getCreateTableStmt();
@@ -148,7 +148,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options,
         null, "inputTable", "outputTable", conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
 
     String createTable = writer.getCreateTableStmt();
@@ -175,7 +175,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options,
         null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     colTypes.put("id", Types.INTEGER);
     colTypes.put("value", Types.VARCHAR);
     writer.setColumnTypes(colTypes);
@@ -201,7 +201,7 @@ public class TestTableDefWriter extends TestCase {
     TableDefWriter writer = new TableDefWriter(options,
         null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
-    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     colTypes.put("id", Types.INTEGER);
     writer.setColumnTypes(colTypes);
 
