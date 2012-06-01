@@ -26,11 +26,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.mapreduce.db.Db2DataDrivenDBInputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.util.ExportException;
+import com.cloudera.sqoop.util.ImportException;
 
 /**
  * Manages connections to DB2 databases. Requires the DB2 JDBC driver.
@@ -47,6 +49,19 @@ public class Db2Manager
 
   public Db2Manager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
+  }
+
+  /**
+   * Perform an import of a table from the database into HDFS.
+   */
+  @Override
+  public void importTable(
+          com.cloudera.sqoop.manager.ImportJobContext context)
+      throws IOException, ImportException {
+    context.setConnManager(this);
+    // Specify the DB2-specific DBInputFormat for import.
+    context.setInputFormat(Db2DataDrivenDBInputFormat.class);
+    super.importTable(context);
   }
 
   /**

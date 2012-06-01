@@ -212,6 +212,11 @@ extends InputFormat<LongWritable, T> implements Configurable  {
         return new OracleDBRecordReader<T>(split, inputClass,
             conf, getConnection(), getDBConf(), conditions, fieldNames,
             tableName);
+      } else if (dbProductName.startsWith("DB2")) {
+        // use DB2-specific db reader.
+        return new Db2DBRecordReader<T>(split, inputClass,
+            conf, getConnection(), getDBConf(), conditions, fieldNames,
+            tableName);
       } else {
         // Generic reader.
         return new DBRecordReader<T>(split, inputClass,

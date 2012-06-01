@@ -73,24 +73,31 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
   static final String DATABASE_USER = "SQOOP";
   static final String DATABASE_PASSWORD = "PASSWORD";
   static final String TABLE_NAME = "EMPLOYEES_DB2";
+  static final String QUALIFIED_TABLE_NAME = "PREFIX.EMPLOYEES_DB2";
   static final String CONNECT_STRING = HOST_URL
               + "/" + DATABASE_NAME
               + ":currentSchema=" + DATABASE_USER +";";
 
   // instance variables populated during setUp, used during tests
   private Db2Manager manager;
+  private boolean useQualifiedTableName;
+  private boolean useDefaultConnectManager;
 
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
   }
 
+  @Override
+  protected String getTableName() {
+    return useQualifiedTableName ? QUALIFIED_TABLE_NAME : TABLE_NAME;
+  }
+
   @Before
   public void setUp() {
     super.setUp();
 
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING,
-        TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, getTableName());
     options.setUsername(DATABASE_USER);
     options.setPassword(DATABASE_PASSWORD);
 
@@ -102,7 +109,7 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
     try {
       conn = manager.getConnection();
       stmt = conn.createStatement();
-      stmt.execute("DROP TABLE " + TABLE_NAME);
+      stmt.execute("DROP TABLE " + getTableName());
     } catch (SQLException sqlE) {
       LOG.info("Table was not dropped: " + sqlE.getMessage());
     } finally {
@@ -122,20 +129,20 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
       stmt = conn.createStatement();
 
       // create the database table and populate it with data.
-      stmt.executeUpdate("CREATE TABLE " + TABLE_NAME + " ("
+      stmt.executeUpdate("CREATE TABLE " + getTableName() + " ("
           + "id INT NOT NULL, "
           + "name VARCHAR(24) NOT NULL, "
           + "salary FLOAT, "
           + "dept VARCHAR(32), "
           + "PRIMARY KEY (id))");
 
-      stmt.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      stmt.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "1,'Aaron', "
           + "1000000.00,'engineering')");
-      stmt.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      stmt.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "2,'Bob', "
           + "400.00,'sales')");
-      stmt.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES("
+      stmt.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
           + "3,'Fred', 15.00,"
           + "'marketing')");
       conn.commit();
@@ -167,13 +174,36 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
 
   @Test
   public void testDb2Import() throws IOException {
-    String [] expectedResults = {
+    useQualifiedTableName = false;
+
+    // Verify that GenericJdbcManager works.
+    useDefaultConnectManager = true;
+    runDb2Test(getExpectedResults());
+
+    // Verify that Db2Manager works.
+    useDefaultConnectManager = false;
+    runDb2Test(getExpectedResults());
+  }
+
+  @Test
+  public void testDb2ImportQualifiedTableName() throws IOException {
+    useQualifiedTableName = true;
+
+    // Verify that GenericJdbcManager works.
+    useDefaultConnectManager = true;
+    runDb2Test(getExpectedResults());
+
+    // Verify that Db2Manager works.
+    useDefaultConnectManager = false;
+    runDb2Test(getExpectedResults());
+  }
+
+  private String [] getExpectedResults() {
+    return new String [] {
       "1,Aaron,1000000.0,engineering",
       "2,Bob,400.0,sales",
       "3,Fred,15.0,marketing",
     };
-
-    runDb2Test(expectedResults);
   }
 
   private String [] getArgv() {
@@ -182,7 +212,7 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
     CommonArgs.addHadoopFlags(args);
 
     args.add("--table");
-    args.add(TABLE_NAME);
+    args.add(getTableName());
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
@@ -194,13 +224,20 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
     args.add("--num-mappers");
     args.add("1");
 
+    if (useDefaultConnectManager) {
+      // Specifying the driver class forces DefaultManagerFactory
+      // to instantiate GenericJdbcManager.
+      args.add("--driver");
+      args.add("com.ibm.db2.jcc.DB2Driver");
+    }
+
     return args.toArray(new String[0]);
   }
 
   private void runDb2Test(String [] expectedResults) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, TABLE_NAME);
+    Path tablePath = new Path(warehousePath, getTableName());
     Path filePath = new Path(tablePath, "part-m-00000");
 
     File tableFile = new File(tablePath.toString());
