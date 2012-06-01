@@ -190,7 +190,11 @@ public abstract class CatalogQueryManager
     try {
       c = getConnection();
       s = c.createStatement();
-      rs = s.executeQuery(getPrimaryKeyQuery(tableName));
+
+      String primaryKeyQuery = getPrimaryKeyQuery(tableName);
+      LOG.debug("Retrieving primary key for table '"
+        + tableName + "' with query " + primaryKeyQuery);
+      rs = s.executeQuery(primaryKeyQuery);
       while (rs.next()) {
         columns.add(rs.getString(1));
       }
