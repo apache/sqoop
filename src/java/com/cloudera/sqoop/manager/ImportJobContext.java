@@ -33,6 +33,10 @@ public class ImportJobContext
     super(table, jar, opts, destination);
   }
 
+  public void setConnManager(ConnManager mgr) {
+    super.setConnManager(mgr);
+  }
+
   public ConnManager getConnManager() {
     return (ConnManager)super.getConnManager();
   }

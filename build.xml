@@ -248,6 +248,18 @@
   <property name="java.security.krb5.kdc"
             value="kdc0.ox.ac.uk:kdc1.ox.ac.uk"/>
 
+  <if>
+    <isset property="sqoop.test.msserver.connector.factory"/>
+    <then>
+      <echo message="Use ${sqoop.test.msserver.connector.factory}"/>
+    </then>
+    <else>
+      <echo message="Use built-in SQL server connector by default"/>
+      <property name="sqoop.test.msserver.connector.factory"
+                value="org.apache.sqoop.manager.DefaultManagerFactory"/>
+    </else>
+  </if>
+
   <!-- The classpath for compiling and running Sqoop -->
   <if>
     <isset property="hadoop.home" />
@@ -714,6 +726,9 @@
 
       <sysproperty key="sqoop.test.sqlserver.connectstring.host_url"
                    value="${sqoop.test.sqlserver.connectstring.host_url}"/>
+
+      <sysproperty key="sqoop.test.msserver.connector.factory"
+                   value="${sqoop.test.msserver.connector.factory}"/>
 
       <sysproperty key="java.security.krb5.realm"
                    value="${java.security.krb5.realm}"/>

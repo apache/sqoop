@@ -30,8 +30,10 @@ import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.ConnFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,8 +79,19 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
   static final String CONNECT_STRING = HOST_URL
               + ";databaseName=" + DATABASE_NAME;
 
+  static final String CONNECTOR_FACTORY = System.getProperty(
+      "sqoop.test.msserver.connector.factory",
+      ConnFactory.DEFAULT_FACTORY_CLASS_NAMES);
+
   // instance variables populated during setUp, used during tests
   private SQLServerManager manager;
+
+  private Configuration conf = new Configuration();
+
+  @Override
+  protected Configuration getConf() {
+    return conf;
+  }
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -173,6 +186,11 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
       "3,Fred,15.0,marketing",
     };
 
+    // To test with Microsoft SQL server connector, copy the connector jar to
+    // sqoop.thirdparty.lib.dir and set sqoop.test.msserver.connector.factory
+    // to com.microsoft.sqoop.SqlServer.MSSQLServerManagerFactory. By default,
+    // the built-in SQL server connector is used.
+    conf.setStrings(ConnFactory.FACTORY_CLASS_NAMES_KEY, CONNECTOR_FACTORY);
     runSQLServerTest(expectedResults);
   }
 
