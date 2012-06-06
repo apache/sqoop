@@ -17,8 +17,10 @@
  */
 package org.apache.sqoop.server.v1;
 
+import org.apache.sqoop.handler.ConnectorRequestHandler;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
 /**
@@ -28,9 +30,14 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 @SuppressWarnings("serial")
 public class ConnectorServlet extends SqoopProtocolServlet {
 
+  private RequestHandler connectorRequestHandler;
+
+  public ConnectorServlet() {
+    connectorRequestHandler = new ConnectorRequestHandler();
+  }
+
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    // TODO Auto-generated method stub
-    return super.handleGetRequest(ctx);
+    return connectorRequestHandler.handleEvent(ctx);
   }
 }

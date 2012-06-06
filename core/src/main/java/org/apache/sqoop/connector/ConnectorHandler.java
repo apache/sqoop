@@ -19,13 +19,11 @@ package org.apache.sqoop.connector;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 

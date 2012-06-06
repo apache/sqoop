@@ -37,8 +37,20 @@ public class ConnectorManager {
 
   private static final Logger LOG = Logger.getLogger(ConnectorManager.class);
 
+  // key: connector id, value: connector name
+  private static Map<Long, String> nameMap = new HashMap<Long, String>();
+
+  // key: connector name, value: connector handler
   private static Map<String, ConnectorHandler> handlerMap =
       new HashMap<String, ConnectorHandler>();
+
+  public static ConnectorHandler[] getHandlers() {
+    return handlerMap.values().toArray(new ConnectorHandler[]{});
+  }
+
+  public static ConnectorHandler getHandler(long connectorId) {
+    return handlerMap.get(nameMap.get(connectorId));
+  }
 
   public static synchronized void initialize() {
     if (LOG.isTraceEnabled()) {
@@ -116,6 +128,13 @@ public class ConnectorManager {
                 + registeredMetadata);
           }
         }
+
+        long connectorId = handler.getMetadata().getPersistenceId();
+        String connectorName = handler.getUniqueName();
+        if (connectorId == -1) {
+          throw new SqoopException(ConnectorError.CONN_0010, connectorName);
+        }
+        nameMap.put(connectorId, connectorName);
       }
       rtx.commit();
     } catch (Exception ex) {

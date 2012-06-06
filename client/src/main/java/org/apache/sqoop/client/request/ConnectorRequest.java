@@ -17,19 +17,24 @@
  */
 package org.apache.sqoop.client.request;
 
-import org.apache.sqoop.json.VersionBean;
+import org.apache.sqoop.json.ConnectorBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-public class VersionRequest extends Request
+public class ConnectorRequest extends Request
 {
-  public VersionBean doGet(String serverUrl) {
-    String response = super.get(serverUrl + "version");
+  public ConnectorBean doGet(String serverUrl, String cid) {
+    String response = null;
+    if (cid == null) {
+      response = super.get(serverUrl + "v1/connector/all");
+    } else {
+      response = super.get(serverUrl + "v1/connector/" + cid);
+    }
     JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
 
-    VersionBean versionBean = new VersionBean();
-    versionBean.restore(jsonObject);
+    ConnectorBean connectorBean = new ConnectorBean();
+    connectorBean.restore(jsonObject);
 
-    return versionBean;
+    return connectorBean;
   }
 }

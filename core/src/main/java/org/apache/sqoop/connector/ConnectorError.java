@@ -56,7 +56,10 @@ public enum ConnectorError implements ErrorCode {
    */
   CONN_0009("Attempt to register connector with a name associated with a "
       + "previously registered connector; or the connector metadata has "
-      + "changed since it was registered previously.");
+      + "changed since it was registered previously."),
+
+  /** A connector is found with an invalid id. */
+  CONN_0010("A connector is found with an invalid id");
 
   private final String message;
 

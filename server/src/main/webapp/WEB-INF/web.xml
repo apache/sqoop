@@ -46,7 +46,7 @@ limitations under the License.
   
   <servlet-mapping>
     <servlet-name>v1.ConnectorServlet</servlet-name>
-    <url-pattern>/v1/connector</url-pattern>
+    <url-pattern>/v1/connector/*</url-pattern>
   </servlet-mapping>
 
 </web-app>

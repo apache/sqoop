@@ -101,7 +101,7 @@ public class ShowVersionFunction extends SqoopFunction
       versionRequest = new VersionRequest();
     }
     VersionBean versionBean =
-        versionRequest.version(Environment.getServerUrl());
+        versionRequest.doGet(Environment.getServerUrl());
 
     if (server) {
       io.out.println("@|bold Server version:|@");
