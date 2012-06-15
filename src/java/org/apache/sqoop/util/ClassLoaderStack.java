@@ -75,10 +75,10 @@ public final class ClassLoaderStack {
       }
     }
 
-    String urlPath = "jar:file://" + new File(jarFile).getAbsolutePath() + "!/";
-    LOG.debug("Attempting to load jar through URL: " + urlPath);
+    URL url = new File(jarFile).toURI().toURL();
+    LOG.debug("Attempting to load jar through URL: " + url);
     LOG.debug("Previous classloader is " + prevClassLoader);
-    URL [] jarUrlArray = {new URL(urlPath)};
+    URL[] jarUrlArray = { url };
     URLClassLoader cl = URLClassLoader.newInstance(jarUrlArray,
         prevClassLoader);
     try {
@@ -87,7 +87,7 @@ public final class ClassLoaderStack {
         LOG.debug("Testing class in jar: " + testClassName);
         Class.forName(testClassName, true, cl);
       }
-      LOG.debug("Loaded jar into current JVM: " + urlPath);
+      LOG.debug("Loaded jar into current JVM: " + url);
     } catch (ClassNotFoundException cnfe) {
       throw new IOException("Could not load jar " + jarFile
           + " into JVM. (Could not find class "
