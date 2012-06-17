@@ -793,4 +793,63 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(0), genFloat);
     assertColMinAndMax(forIdx(1), genNumeric);
   }
+
+  public void testColumnsExport() throws IOException, SQLException {
+    final int TOTAL_COLUMNS = 3;
+    final int TOTAL_RECORDS = 10;
+
+    // This class is used to generate a column whose entries have unique
+    // sequential values that are computed as follows:
+    //  (row number * total number of columns) + column number
+    class MultiColumnGenerator implements ColumnGenerator {
+      private int col;
+      MultiColumnGenerator(int col) {
+        this.col = col;
+      }
+      public String getExportText(int rowNum) {
+        return new Integer(rowNum * TOTAL_COLUMNS + col).toString();
+      }
+      public String getVerifyText(int rowNum) {
+        return new Integer(rowNum * TOTAL_COLUMNS + col).toString();
+      }
+      public String getType() {
+        return "INTEGER";
+      }
+    }
+
+    // This class is used to generate a null column.
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "INTEGER";
+      }
+    }
+
+    // Generate an input file that only contains partial columns: col0
+    // and col2. Export these columns to the DB w/ the --columns option.
+    // Finally, verify that these two columns are exported properly. In
+    // addition, verify that the values of col1 in the DB are all null
+    // as they are not exported.
+    ColumnGenerator gen0 = new MultiColumnGenerator(0);
+    ColumnGenerator gen1 = new MultiColumnGenerator(1);
+    ColumnGenerator gen2 = new MultiColumnGenerator(2);
+
+    createTextFile(0, TOTAL_RECORDS, false, gen0, gen2);
+    createTable(gen0, gen1, gen2);
+
+    String columnsStr = "id,msg," + forIdx(0) + "," + forIdx(2);
+    runExport(getArgv(true, 10, 10, "--columns", columnsStr));
+
+    ColumnGenerator genNull = new NullColumnGenerator();
+
+    verifyExport(TOTAL_RECORDS);
+    assertColMinAndMax(forIdx(0), gen0);
+    assertColMinAndMax(forIdx(2), gen2);
+    assertColMinAndMax(forIdx(1), genNull);
+  }
 }

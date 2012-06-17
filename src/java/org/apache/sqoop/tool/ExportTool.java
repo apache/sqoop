@@ -133,6 +133,10 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .hasArg().withDescription("Table to populate")
         .withLongOpt(TABLE_ARG)
         .create());
+    exportOpts.addOption(OptionBuilder.withArgName("col,col,col...")
+        .hasArg().withDescription("Columns to export to table")
+        .withLongOpt(COLUMNS_ARG)
+        .create());
     exportOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to export in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -225,6 +229,14 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
       if (in.hasOption(TABLE_ARG)) {
         out.setTableName(in.getOptionValue(TABLE_ARG));
+      }
+
+      if (in.hasOption(COLUMNS_ARG)) {
+        String[] cols= in.getOptionValue(COLUMNS_ARG).split(",");
+        for (int i=0; i<cols.length; i++) {
+          cols[i] = cols[i].trim();
+        }
+        out.setColumns(cols);
       }
 
       if (in.hasOption(NUM_MAPPERS_ARG)) {
