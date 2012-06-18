@@ -102,6 +102,8 @@ public class MergeJob extends JobBase {
       oldPath = oldPath.makeQualified(fs);
       newPath = newPath.makeQualified(fs);
 
+      propagateOptionsToJob(job);
+
       FileInputFormat.addInputPath(job, oldPath);
       FileInputFormat.addInputPath(job, newPath);
 

@@ -190,6 +190,7 @@ public class ImportJobBase extends JobBase {
       // Set the external jar to use for the job.
       job.getConfiguration().set("mapred.jar", ormJarFile);
 
+      propagateOptionsToJob(job);
       configureInputFormat(job, tableName, tableClassName, splitByCol);
       configureOutputFormat(job, tableName, tableClassName);
       configureMapper(job, tableName, tableClassName);

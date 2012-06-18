@@ -38,6 +38,7 @@ import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Configurable state used by Sqoop tools.
@@ -85,6 +86,7 @@ public class SqoopOptions implements Cloneable {
   // arguments in the appropriate tools. The names of all command-line args
   // are stored as constants in BaseSqoopTool.
 
+  @StoredAsProperty("verbose") private boolean verbose;
   @StoredAsProperty("db.connect.string") private String connectString;
   @StoredAsProperty("db.table") private String tableName;
   private String [] columns; // Array stored as db.column.list.
@@ -560,6 +562,11 @@ public class SqoopOptions implements Cloneable {
     // Delimiters were previously memoized; don't let the tool override
     // them with defaults.
     this.areDelimsManuallySet = true;
+
+    // If we loaded true verbose flag, we need to apply it
+    if (this.verbose) {
+      LoggingUtils.setDebugLevel();
+    }
   }
 
   /**
@@ -806,6 +813,9 @@ public class SqoopOptions implements Cloneable {
     // Creating instances for user specific mapping
     this.mapColumnHive = new Properties();
     this.mapColumnJava = new Properties();
+
+    // We do not want to be verbose too much if not explicitly needed
+    this.verbose = false;
   }
 
   /**
@@ -891,6 +901,14 @@ public class SqoopOptions implements Cloneable {
 
       return charish.charAt(0);
     }
+  }
+
+  public boolean getVerbose() {
+    return verbose;
+  }
+
+  public void setVerbose(boolean beVerbose) {
+    this.verbose = beVerbose;
   }
 
   /**

@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.LoggingAsyncSink;
@@ -48,7 +47,7 @@ import com.cloudera.sqoop.manager.MySQLUtils;
  * used to interface with mysqlimport.
  */
 public class MySQLExportMapper<KEYIN, VALIN>
-    extends Mapper<KEYIN, VALIN, NullWritable, NullWritable> {
+    extends SqoopMapper<KEYIN, VALIN, NullWritable, NullWritable> {
 
   public static final Log LOG = LogFactory.getLog(
       MySQLExportMapper.class.getName());

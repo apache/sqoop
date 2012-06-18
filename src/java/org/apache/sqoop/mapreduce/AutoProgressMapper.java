@@ -22,13 +22,12 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Mapper;
 
 /**
  * Identity mapper that continuously reports progress via a background thread.
  */
 public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
-    extends Mapper<KEYIN, VALIN, KEYOUT, VALOUT> {
+    extends SqoopMapper<KEYIN, VALIN, KEYOUT, VALOUT> {
 
   public static final Log LOG = LogFactory.getLog(
       AutoProgressMapper.class.getName());

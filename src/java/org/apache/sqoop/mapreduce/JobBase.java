@@ -57,6 +57,8 @@ public class JobBase {
 
   private ClassLoader prevClassLoader = null;
 
+  public static final String PROPERTY_VERBOSE = "sqoop.verbose";
+
   public JobBase() {
     this(null);
   }
@@ -321,5 +323,19 @@ public class JobBase {
     log.info("mapreduce.jobtracker.persist.jobstatus.hours = 1");
     log.info("A jobtracker restart is required for these settings");
     log.info("to take effect.");
+  }
+
+  /**
+   * Save interesting options to constructed job. Goal here is to propagate some
+   * of them to the job itself, so that they can be easily accessed. We're
+   * propagating only interesting global options (like verbose flag).
+   *
+   * @param job Destination job to save options
+   */
+  protected void propagateOptionsToJob(Job job) {
+    Configuration configuration = job.getConfiguration();
+
+    // So far, propagate only verbose flag
+    configuration.setBoolean(PROPERTY_VERBOSE, options.getVerbose());
   }
 }

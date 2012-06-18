@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.PerfCounters;
@@ -46,7 +45,7 @@ import com.cloudera.sqoop.util.LoggingAsyncSink;
  * Mapper that opens up a pipe to mysqldump and pulls data directly.
  */
 public class MySQLDumpMapper
-    extends Mapper<String, NullWritable, String, NullWritable> {
+    extends SqoopMapper<String, NullWritable, String, NullWritable> {
 
   public static final Log LOG = LogFactory.getLog(
       MySQLDumpMapper.class.getName());
@@ -496,7 +495,9 @@ public class MySQLDumpMapper
   // CHECKSTYLE:ON
 
   @Override
-  protected void setup(Context context) {
+  protected void setup(Context context)
+    throws IOException, InterruptedException {
+    super.setup(context);
     this.conf = context.getConfiguration();
   }
 }

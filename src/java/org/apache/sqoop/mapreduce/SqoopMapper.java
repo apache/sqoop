@@ -16,39 +16,31 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.util;
+package org.apache.sqoop.mapreduce;
 
-import java.sql.SQLException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.sqoop.util.LoggingUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.io.IOException;
 
 /**
- * A helper class for logging.
+ * Base sqoop mapper class that is convenient place for common functionality.
+ * Other specific mappers are highly encouraged to inherit from this class.
  */
-public final class LoggingUtils {
+public abstract class SqoopMapper<KI, VI, KO, VO>
+  extends Mapper<KI, VI, KO, VO> {
 
-  private LoggingUtils() { }
+  @Override
+  protected void setup(Context context)
+    throws IOException, InterruptedException {
+    super.setup(context);
 
-  /**
-   * Log every exception in the chain if
-   * the exception is a chain of exceptions.
-   */
-  public static void logAll(Log log, SQLException e) {
-    log.error("Top level exception: ", e);
-    e = e.getNextException();
-    int indx = 1;
-    while (e != null) {
-      log.error("Chained exception " + indx + ": ", e);
-      e = e.getNextException();
-      indx++;
+    Configuration configuration = context.getConfiguration();
+
+    // Propagate verbose flag if needed
+    if (configuration.getBoolean(JobBase.PROPERTY_VERBOSE, false)) {
+      LoggingUtils.setDebugLevel();
     }
   }
-
-  public static void setDebugLevel() {
-    Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
-    Logger.getLogger("com.cloudera.apache").setLevel(Level.DEBUG);
-  }
 }
-

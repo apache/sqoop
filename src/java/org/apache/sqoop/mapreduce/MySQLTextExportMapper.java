@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.mapreduce.MySQLExportMapper;;
+import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
 
 /**
  * mysqlimport-based exporter which accepts lines of text from files

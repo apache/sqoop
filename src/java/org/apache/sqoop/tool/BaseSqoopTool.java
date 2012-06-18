@@ -33,8 +33,6 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
@@ -45,6 +43,7 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Layer on top of SqoopTool that provides some basic common code
@@ -630,8 +629,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     // common options.
     if (in.hasOption(VERBOSE_ARG)) {
       // Immediately switch into DEBUG logging.
-      Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
-      Logger.getLogger("com.cloudera.apache").setLevel(Level.DEBUG);
+      out.setVerbose(true);
+      LoggingUtils.setDebugLevel();
       LOG.debug("Enabled debug logging.");
     }
 
