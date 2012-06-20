@@ -18,11 +18,11 @@
 
 package org.apache.sqoop;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,12 +141,18 @@ public class ConnFactory {
    * @param f the file containing the configuration data to add.
    */
   private void addManagersFromFile(Configuration conf, File f) {
-    Reader r = null;
+    BufferedReader r = null;
     try {
       // The file format is actually Java properties-file syntax.
-      r = new InputStreamReader(new FileInputStream(f));
+      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
       Properties props = new Properties();
-      props.load(r);
+      String line;
+      while ((line = r.readLine()) != null) {
+        int separator = line.indexOf('=');
+        String key = line.substring(0, separator).trim();
+        String value = line.substring(separator + 1).trim();
+        props.setProperty(key, value);
+      }
 
       for (Map.Entry<Object, Object> entry : props.entrySet()) {
         // Each key is a ManagerFactory class name.
