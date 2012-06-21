@@ -75,7 +75,6 @@ limitations under the License.
                     <get src="http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.27/bin/apache-tomcat-7.0.27.tar.gz"
                          dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
                     <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
-                    <delete file="target/apache-tomcat.tar.gz"/>
                     <move file="target/apache-tomcat-7.0.27" tofile="target/sqoop-${project.version}/server"/>
                     <copy todir="target/sqoop-${project.version}/server/bin">
                       <fileset dir="src/main/server/bin"/>
