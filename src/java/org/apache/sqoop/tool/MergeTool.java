@@ -25,16 +25,13 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.log4j.Category;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.mapreduce.MergeJob;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Tool that merges a more recent dataset on top of an older one.
@@ -142,10 +139,7 @@ public class MergeTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throws InvalidOptionsException {
 
     if (in.hasOption(VERBOSE_ARG)) {
-      // Immediately switch into DEBUG logging.
-      Category sqoopLogger = Logger.getLogger(
-          Sqoop.class.getName()).getParent();
-      sqoopLogger.setLevel(Level.DEBUG);
+      LoggingUtils.setDebugLevel();
       LOG.debug("Enabled debug logging.");
     }
 

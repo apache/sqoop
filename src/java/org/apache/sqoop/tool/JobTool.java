@@ -34,12 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
-
-import org.apache.log4j.Category;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
@@ -47,6 +41,7 @@ import com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Tool that creates and executes saved jobs.
@@ -322,10 +317,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throws InvalidOptionsException {
 
     if (in.hasOption(VERBOSE_ARG)) {
-      // Immediately switch into DEBUG logging.
-      Category sqoopLogger = Logger.getLogger(
-          Sqoop.class.getName()).getParent();
-      sqoopLogger.setLevel(Level.DEBUG);
+      LoggingUtils.setDebugLevel();
       LOG.debug("Enabled debug logging.");
     }
 
