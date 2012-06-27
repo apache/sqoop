@@ -149,6 +149,10 @@ public class ConnFactory {
       String line;
       while ((line = r.readLine()) != null) {
         int separator = line.indexOf('=');
+        if (separator == -1) {
+          throw new IOException("the content of connector file must be "
+              + "in form of key=value");
+        }
         String key = line.substring(0, separator).trim();
         String value = line.substring(separator + 1).trim();
         props.setProperty(key, value);
