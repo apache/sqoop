@@ -60,6 +60,7 @@ public class JdbcRepository implements Repository {
           throw new SqoopException(RepositoryError.JDBCREPO_0013,
               "given[" + mConnector + "] found[" + result + "]");
         }
+        mConnector.setPersistenceId(result.getPersistenceId());
       }
       tx.commit();
     } catch (Exception ex) {
