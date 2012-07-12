@@ -23,6 +23,7 @@ import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 
@@ -34,9 +35,6 @@ public class ConnectorRequestHandler implements RequestHandler {
   /** The API version supported by this server */
   public static final String PROTOCOL_V1 = "1";
 
-
-  private ConnectorBean connectors;
-
   public ConnectorRequestHandler() {
     LOG.info("ConnectorRequestHandler initialized");
   }
@@ -44,7 +42,7 @@ public class ConnectorRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
-    ConnectorBean connectorBean;
+    MConnector[] connectors;
 
     String uri = ctx.getRequest().getRequestURI();
     int slash = uri.lastIndexOf("/");
@@ -52,30 +50,14 @@ public class ConnectorRequestHandler implements RequestHandler {
     LOG.info("ConnectorRequestHandler handles cid: " + cid);
     if (cid.equals("all")) {
       // display all connectors
-      if (connectors == null) {
-        ConnectorHandler[] handlers = ConnectorManager.getHandlers();
-        long[] ids = new long[handlers.length];
-        String[] names = new String[handlers.length];
-        String[] classes = new String[handlers.length];
-        for (int i = 0; i < handlers.length; i++) {
-          ids[i] = handlers[i].getMetadata().getPersistenceId();
-          names[i] = handlers[i].getUniqueName();
-          classes[i] = handlers[i].getConnectorClassName();
-        }
-        connectors = new ConnectorBean(ids, names, classes);
-      }
-      connectorBean = connectors;
+      connectors = ConnectorManager.getConnectors();
 
     } else {
       // display one connector
-      ConnectorHandler handler =
-          ConnectorManager.getHandler(Long.parseLong(cid));
-      long[] ids = new long[] { handler.getMetadata().getPersistenceId() };
-      String[] names = new String[] { handler.getUniqueName() };
-      String[] classes = new String[] { handler.getConnectorClassName() };
-      connectorBean = new ConnectorBean(ids, names, classes);
+      connectors = new MConnector[] {
+          ConnectorManager.getConnector(Long.parseLong(cid)) };
     }
 
-    return connectorBean;
+    return new ConnectorBean(connectors);
   }
 }

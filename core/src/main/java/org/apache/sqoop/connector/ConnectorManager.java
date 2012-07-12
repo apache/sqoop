@@ -44,12 +44,18 @@ public class ConnectorManager {
   private static Map<String, ConnectorHandler> handlerMap =
       new HashMap<String, ConnectorHandler>();
 
-  public static ConnectorHandler[] getHandlers() {
-    return handlerMap.values().toArray(new ConnectorHandler[]{});
+  public static MConnector[] getConnectors() {
+    MConnector[] connectors = new MConnector[handlerMap.size()];
+    int indx = 0;
+    for (ConnectorHandler handler : handlerMap.values()) {
+      connectors[indx++] = handler.getMetadata();
+    }
+    return connectors;
   }
 
-  public static ConnectorHandler getHandler(long connectorId) {
-    return handlerMap.get(nameMap.get(connectorId));
+  public static MConnector getConnector(long connectorId) {
+    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    return handler.getMetadata();
   }
 
   public static synchronized void initialize() {

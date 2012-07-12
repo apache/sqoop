@@ -18,6 +18,7 @@
 package org.apache.sqoop.client.shell;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -25,6 +26,11 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.ConnectorRequest;
 import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
 @SuppressWarnings("serial")
@@ -79,36 +85,62 @@ public class ShowConnectorFunction extends SqoopFunction
     }
     ConnectorBean connectorBean =
       conntectorRequest.doGet(Environment.getServerUrl(), cid);
-    long[] ids = connectorBean.getIds();
-    String[] names = connectorBean.getNames();
-    String[] classes = connectorBean.getClasses();
+    MConnector[] connectors = connectorBean.getConnectos();
 
-    if (cid == null) {
-      io.out.println("@|bold Metadata for all connectors:|@");  
-      int size = ids.length;
-      for (int i = 0; i < size; i++) {
-        io.out.print("Connector ");
-        io.out.print(i+1);
-        io.out.println(":");
+    io.out.println("@|bold " + connectors.length + " connector(s) to show: |@");
+    for (int i = 0; i < connectors.length; i++) {
+      MConnector connector = connectors[i];
+
+      io.out.print("Connector with id ");
+      io.out.print(connector.getPersistenceId());
+      io.out.println(":");
   
-        io.out.print("  Id: ");
-        io.out.println(ids[i]);
-        io.out.print("  Name: ");
-        io.out.println(names[i]);
-        io.out.print("  Class: ");
-        io.out.println(classes[i]);
-      }
-
-    } else {
-      io.out.println("@|bold Metadata for the connector:|@");
-      io.out.print("  Id: ");
-      io.out.println(ids[0]);
       io.out.print("  Name: ");
-      io.out.println(names[0]);
+      io.out.println(connector.getUniqueName());
       io.out.print("  Class: ");
-      io.out.println(classes[0]);
+      io.out.println(connector.getClassName());
+
+      displayForms(connector.getConnectionForms(), "Connection");
+      displayForms(connector.getJobForms(), "Job");
     }
 
     io.out.println();
+  }
+
+  private void displayForms(List<MForm> forms, String type) {
+    Iterator<MForm> fiter = forms.iterator();
+    int findx = 1;
+    while (fiter.hasNext()) {
+      io.out.print("  ");
+      io.out.print(type);
+      io.out.print(" form ");
+      io.out.print(findx++);
+      io.out.println(":");
+
+      MForm form = fiter.next();
+      io.out.print("    Name: ");
+      io.out.println(form.getName());
+
+      List<MInput<?>> inputs = form.getInputs();
+      Iterator<MInput<?>> iiter = inputs.iterator();
+      int iindx = 1;
+      while (iiter.hasNext()) {
+        io.out.print("    Input ");
+        io.out.print(iindx++);
+        io.out.println(":");
+
+        MInput<?> input = iiter.next();
+        io.out.print("      Name: ");
+        io.out.println(input.getName());
+        io.out.print("      Type: ");
+        io.out.println(input.getType());
+        if (input.getType() == MInputType.STRING) {
+          io.out.print("      Mask: ");
+          io.out.println(((MStringInput)input).isMasked());
+          io.out.print("      Size: ");
+          io.out.println(((MStringInput)input).getMaxLength());
+        }
+      }
+    }
   }
 }

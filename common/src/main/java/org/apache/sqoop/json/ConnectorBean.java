@@ -17,87 +17,175 @@
  */
 package org.apache.sqoop.json;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MFormType;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class ConnectorBean implements JsonBean {
 
-  public static final String IDS = "ids";
-  public static final String NAMES = "names";
-  public static final String CLASSES = "classes";
+  public static final String ID = "id";
+  public static final String NAME = "name";
+  public static final String CLASS = "class";
+  public static final String CON_FORMS = "con_forms";
+  public static final String JOB_FORMS = "job_forms";
 
-  private long[] ids;
-  private String[] names;
-  private String[] classes;
+  public static final String FORM_NAME = "name";
+  public static final String FORM_TYPE = "type";
+  public static final String FORM_INPUTS = "inputs";
+  public static final String FORM_INPUT_NAME = "name";
+  public static final String FORM_INPUT_TYPE = "type";
+  public static final String FORM_INPUT_MASK = "mask";
+  public static final String FORM_INPUT_SIZE = "size";
+
+  private MConnector[] connectors;
 
   // for "extract"
-  public ConnectorBean(long[] ids, String[] names, String[] classes) {
-    this.ids = new long[ids.length];
-    System.arraycopy(ids, 0, this.ids, 0, ids.length);
-    this.names = new String[names.length];
-    System.arraycopy(names, 0, this.names, 0, names.length);
-    this.classes = new String[classes.length];
-    System.arraycopy(classes, 0, this.classes, 0, classes.length);
+  public ConnectorBean(MConnector[] connectors) {
+    this.connectors = new MConnector[connectors.length];
+    System.arraycopy(connectors, 0, this.connectors, 0, connectors.length);
   }
 
   // for "restore"
   public ConnectorBean() {
   }
 
+  public MConnector[] getConnectos() {
+    return connectors;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract() {
+    JSONArray idArray = new JSONArray();
+    JSONArray nameArray = new JSONArray();
+    JSONArray classArray = new JSONArray();
+    JSONArray conFormsArray = new JSONArray();
+    JSONArray jobFormsArray = new JSONArray();
+
+    for (MConnector connector : connectors) {
+      idArray.add(connector.getPersistenceId());
+      nameArray.add(connector.getUniqueName());
+      classArray.add(connector.getClassName());
+      conFormsArray.add(extractForms(connector.getConnectionForms()));
+      jobFormsArray.add(extractForms(connector.getJobForms()));
+    }
+
     JSONObject result = new JSONObject();
-    JSONArray idsArray = new JSONArray();
-    for (long id : ids) {
-      idsArray.add(id);
-    }
-    result.put(IDS, idsArray);
-    JSONArray namesArray = new JSONArray();
-    for (String name : names) {
-      namesArray.add(name);
-    }
-    result.put(NAMES, namesArray);
-    JSONArray classesArray = new JSONArray();
-    for (String clz : classes) {
-      classesArray.add(clz);
-    }
-    result.put(CLASSES, classesArray);
+    result.put(ID, idArray);
+    result.put(NAME, nameArray);
+    result.put(CLASS, classArray);
+    result.put(CON_FORMS, conFormsArray);
+    result.put(JOB_FORMS, jobFormsArray);
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private JSONArray extractForms(List<MForm> mForms) {
+    JSONArray forms = new JSONArray();
+
+    for (MForm mForm : mForms) {
+      forms.add(extractForm(mForm));
+    }
+
+    return forms;
+  }
+
+  @SuppressWarnings("unchecked")
+  private JSONObject extractForm(MForm mForm) {
+    JSONObject form = new JSONObject();
+    form.put(FORM_NAME, mForm.getName());
+    form.put(FORM_TYPE, MFormType.CONNECTION.toString());
+    JSONArray mInputs = new JSONArray();
+    form.put(FORM_INPUTS, mInputs);
+
+    for (MInput<?> mInput : mForm.getInputs()) {
+      JSONObject input = new JSONObject();
+      mInputs.add(input);
+
+      input.put(FORM_INPUT_NAME, mInput.getName());
+      input.put(FORM_INPUT_TYPE, mInput.getType().toString());
+      if (mInput.getType() == MInputType.STRING) {
+        input.put(FORM_INPUT_MASK,
+            ((MStringInput)mInput).isMasked());
+        input.put(FORM_INPUT_SIZE,
+            ((MStringInput)mInput).getMaxLength());
+      }
+    }
+
+    return form;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray idsArray = (JSONArray) jsonObject.get(IDS);
-    int idsSize = idsArray.size();
-    ids = new long[idsSize];
-    for (int i = 0; i<idsSize; i++) {
-      ids[i] = (Long) idsArray.get(i);
+    JSONArray idArray = (JSONArray) jsonObject.get(ID);
+    JSONArray nameArray = (JSONArray) jsonObject.get(NAME);
+    JSONArray classArray = (JSONArray) jsonObject.get(CLASS);
+    JSONArray conFormsArray =
+        (JSONArray) jsonObject.get(CON_FORMS);
+    JSONArray jobFormsArray =
+        (JSONArray) jsonObject.get(JOB_FORMS);
+
+    connectors = new MConnector[idArray.size()];
+    for (int i = 0; i < connectors.length; i++) {
+      long persistenceId = (Long) idArray.get(i);
+      String uniqueName = (String) nameArray.get(i);
+      String className = (String) classArray.get(i);
+
+      List<MForm> conMForms = restoreForms((JSONArray) conFormsArray.get(i));
+      List<MForm> jobMForms = restoreForms((JSONArray) jobFormsArray.get(i));
+      MConnector connector = new MConnector(uniqueName, className,
+          conMForms, jobMForms);
+      connector.setPersistenceId(persistenceId);
+      connectors[i] = connector;
     }
-    JSONArray namesArray = (JSONArray) jsonObject.get(NAMES);
-    int namesSize = namesArray.size();
-    names = new String[namesSize];
-    for (int i = 0; i<namesSize; i++) {
-      names[i] = (String) namesArray.get(i);
+  }
+
+  private List<MForm> restoreForms(JSONArray forms) {
+    List<MForm> mForms = new ArrayList<MForm>();
+
+    for (int i = 0; i < forms.size(); i++) {
+      mForms.add(restoreForm((JSONObject) forms.get(i)));
     }
-    JSONArray classesArray = (JSONArray) jsonObject.get(CLASSES);
-    int classeSize = classesArray.size();
-    classes = new String[classeSize];
-    for (int i = 0; i<classeSize; i++) {
-      classes[i] = (String) classesArray.get(i);
+
+    return mForms;
+  }
+
+  private MForm restoreForm(JSONObject form) {
+    JSONArray inputs = (JSONArray) form.get(FORM_INPUTS);
+
+    List<MInput<?>> mInputs = new ArrayList<MInput<?>>();
+    for (int i = 0; i < inputs.size(); i++) {
+      JSONObject input = (JSONObject) inputs.get(i);
+      MInputType type =
+          MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
+      switch (type) {
+        case STRING: {
+          String name = (String) input.get(FORM_INPUT_NAME);
+          boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
+          long size = (Long) input.get(FORM_INPUT_SIZE);
+          MInput<String> mInput = new MStringInput(name, mask, (short)size);
+          mInputs.add(mInput);
+          break;
+        }
+        case MAP: {
+          String name = (String) input.get(FORM_INPUT_NAME);
+          MInput<Map<String, String>> mInput = new MMapInput(name);
+          mInputs.add(mInput);
+          break;
+        }
+      }
     }
-  }
 
-  public long[] getIds() {
-    return this.ids;
+    return new MForm((String) form.get(FORM_NAME), mInputs);
   }
-
-  public String[] getNames() {
-    return this.names;
-  }
-
-  public String[] getClasses() {
-    return this.classes;
-  }
-
 }

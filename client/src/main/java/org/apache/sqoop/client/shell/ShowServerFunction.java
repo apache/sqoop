@@ -94,17 +94,17 @@ public class ShowServerFunction extends SqoopFunction
   private void showServer(boolean host, boolean port, boolean webapp,
       boolean version) {
     if (host) {
-      io.out.print("@|bold Server host:|@ ");
+      io.out.print("@|bold Server host:|@");
       io.out.println(Environment.getServerHost());
     }
 
     if (port) {
-      io.out.print("@|bold Server port:|@ ");
+      io.out.print("@|bold Server port:|@");
       io.out.println(Environment.getServerPort());
     }
 
     if (webapp) {
-      io.out.print("@|bold Server webapp:|@ ");
+      io.out.print("@|bold Server webapp:|@");
       io.out.println(Environment.getServerWebapp());
     }
 
