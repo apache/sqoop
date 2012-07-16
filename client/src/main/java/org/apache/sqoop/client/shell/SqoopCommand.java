@@ -17,9 +17,18 @@
  */
 package org.apache.sqoop.client.shell;
 
+import groovy.lang.GroovyShell;
+import groovy.lang.MissingPropertyException;
+import groovy.lang.Script;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.ComplexCommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
 
@@ -111,5 +120,21 @@ public abstract class SqoopCommand extends ComplexCommandSupport
     }
 
     return help;
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  protected void resolveVariables(List arg) {
+    List temp = new ArrayList();
+    GroovyShell gs = new GroovyShell(getBinding());
+    for(Object obj:arg) {
+      Script scr = gs.parse("\""+(String)obj+"\"");
+      try {
+        temp.add(scr.run().toString());
+      }
+      catch(MissingPropertyException e) {
+        throw new SqoopException(ClientError.CLIENT_0004, e.getMessage(), e);
+      }
+    }
+    Collections.copy(arg, temp);
   }
 }

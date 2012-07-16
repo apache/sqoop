@@ -41,7 +41,7 @@ public class SetCommand extends SqoopCommand
       io.out.println();
       return null;
     }
-
+    resolveVariables(args);
     String func = (String)args.get(0);
     if (func.equals("server")) {
       if (serverFunction == null) {

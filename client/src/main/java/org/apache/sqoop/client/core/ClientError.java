@@ -31,7 +31,10 @@ public enum ClientError implements ErrorCode {
   CLIENT_0002("The specified function is not recognized"),
 
   /** An error has occurred when parsing options. */
-  CLIENT_0003("An error has occurred when parsing options");
+  CLIENT_0003("An error has occurred when parsing options"),
+
+  /** Unable to resolve the variables. */
+  CLIENT_0004("Unable to resolve the variables");
 
   private final String message;
 
