@@ -226,7 +226,7 @@ public class CompilationManager {
       try {
           FileUtils.moveFile(fOrig, fDest);
       } catch (IOException e) {
-          LOG.error("Could not rename " + orig + " to " + dest, e);
+          LOG.debug("Could not rename " + orig + " to " + dest, e);
       }
     }
   }
