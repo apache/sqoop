@@ -162,6 +162,11 @@ public class MySQLCompatTest extends ManagerCompatTestCase {
     return getNumericSeqOutput(numAsInserted);
   }
 
+  @Override
+  protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
+    return asInserted;
+  }
+
   @Test
   public void testYear() {
     verifyType("YEAR", "2012", "2012");

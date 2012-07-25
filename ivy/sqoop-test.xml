@@ -47,7 +47,7 @@ under the License.
       rev="${hadoop-core.cloudera.version}" conf="common->default"/>
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="common->default"/>
-    <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
+    <dependency org="org.hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default"/>
   </dependencies>
 </ivy-module>

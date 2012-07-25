@@ -164,6 +164,16 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  protected String getNumericSeqOutput(String numAsInserted) {
+    return numAsInserted;
+  }
+
+  @Override
+  protected String getDecimalSeqOutput(String numAsInserted) {
+    return numAsInserted;
+  }
+
+  @Override
   protected String getBlobInsertStr(String blobData) {
     // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
 

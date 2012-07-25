@@ -181,10 +181,14 @@ public class TestDataDrivenDBInputFormat extends TestCase {
 
       // Create the table.
       s.executeUpdate("CREATE TABLE " + DATE_TABLE + "(" + COL + " TIMESTAMP)");
-      s.executeUpdate("INSERT INTO " + DATE_TABLE + " VALUES('2010-04-01')");
-      s.executeUpdate("INSERT INTO " + DATE_TABLE + " VALUES('2010-04-02')");
-      s.executeUpdate("INSERT INTO " + DATE_TABLE + " VALUES('2010-05-01')");
-      s.executeUpdate("INSERT INTO " + DATE_TABLE + " VALUES('2011-04-01')");
+      s.executeUpdate("INSERT INTO " + DATE_TABLE
+          + " VALUES('2010-04-01 00:00:00')");
+      s.executeUpdate("INSERT INTO " + DATE_TABLE
+          + " VALUES('2010-04-02 00:00:00')");
+      s.executeUpdate("INSERT INTO " + DATE_TABLE
+          + " VALUES('2010-05-01 00:00:00')");
+      s.executeUpdate("INSERT INTO " + DATE_TABLE
+          + " VALUES('2011-04-01 00:00:00')");
 
       // commit this tx.
       connection.commit();

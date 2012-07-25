@@ -136,7 +136,7 @@ public class TestAvroImport extends ImportJobTestCase {
     checkField(fields.get(0), "DATA_COL0", Schema.Type.BOOLEAN);
     checkField(fields.get(1), "DATA_COL1", Schema.Type.INT);
     checkField(fields.get(2), "DATA_COL2", Schema.Type.LONG);
-    checkField(fields.get(3), "DATA_COL3", Schema.Type.FLOAT);
+    checkField(fields.get(3), "DATA_COL3", Schema.Type.DOUBLE);
     checkField(fields.get(4), "DATA_COL4", Schema.Type.DOUBLE);
     checkField(fields.get(5), "DATA_COL5", Schema.Type.STRING);
     checkField(fields.get(6), "DATA_COL6", Schema.Type.BYTES);
@@ -145,7 +145,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("DATA_COL0", true, record1.get("DATA_COL0"));
     assertEquals("DATA_COL1", 100, record1.get("DATA_COL1"));
     assertEquals("DATA_COL2", 200L, record1.get("DATA_COL2"));
-    assertEquals("DATA_COL3", 1.0f, record1.get("DATA_COL3"));
+    assertEquals("DATA_COL3", 1.0d, record1.get("DATA_COL3"));
     assertEquals("DATA_COL4", 2.0, record1.get("DATA_COL4"));
     assertEquals("DATA_COL5", new Utf8("s"), record1.get("DATA_COL5"));
     Object object = record1.get("DATA_COL6");

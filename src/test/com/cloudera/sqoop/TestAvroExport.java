@@ -315,7 +315,7 @@ public class TestAvroExport extends ExportJobTestCase {
       colGenerator(100, Schema.create(Schema.Type.INT), 100, "INTEGER"),
       colGenerator(200L, Schema.create(Schema.Type.LONG), 200L, "BIGINT"),
       // HSQLDB maps REAL to double, not float:
-      colGenerator(1.0f, Schema.create(Schema.Type.FLOAT), 1.0d, "REAL"),
+      colGenerator(1.0d, Schema.create(Schema.Type.DOUBLE), 1.0d, "REAL"),
       colGenerator(2.0d, Schema.create(Schema.Type.DOUBLE), 2.0d, "DOUBLE"),
       colGenerator("s", Schema.create(Schema.Type.STRING), "s", "VARCHAR(8)"),
       colGenerator(ByteBuffer.wrap(b), Schema.create(Schema.Type.BYTES),

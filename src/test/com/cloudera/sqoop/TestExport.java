@@ -751,6 +751,11 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), genTime);
   }
 
+  /** @return the text representation of double */
+  protected String getDoubleTextOut(double v) {
+    return Double.toString(v) + "E0";
+  }
+
   public void testNumericTypes() throws IOException, SQLException {
     final int TOTAL_RECORDS = 9;
 
@@ -758,11 +763,11 @@ public class TestExport extends ExportJobTestCase {
     ColumnGenerator genFloat = new ColumnGenerator() {
       public String getExportText(int rowNum) {
         double v = 3.141 * (double) (rowNum + 1);
-        return "" + v;
+        return Double.toString(v);
       }
       public String getVerifyText(int rowNum) {
         double v = 3.141 * (double) (rowNum + 1);
-        return "" + v;
+        return getDoubleTextOut(v);
       }
       public String getType() {
         return "FLOAT";

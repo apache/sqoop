@@ -373,8 +373,9 @@ public class TestHiveImport extends ImportJobTestCase {
     BufferedReader br = new BufferedReader(fr);
     try {
       // verify the output
-      assertEquals(br.readLine(), "test with  new lines " + '\01' + "42"
-          + '\01' + "oh no  field delims ");
+      assertEquals("test with  new lines " + '\01' + "42" + '\01'
+          + "oh no  field delims                                           ",
+          br.readLine());
       assertEquals(br.readLine(), null); // should only be one line
     } catch (IOException ioe) {
       fail("Unable to read files generated from hive");
@@ -423,8 +424,9 @@ public class TestHiveImport extends ImportJobTestCase {
     BufferedReader br = new BufferedReader(fr);
     try {
       // verify the output
-      assertEquals(br.readLine(), "test with new lines " + '\01' + "42"
-          + '\01' + "oh no   field delims  ");
+      assertEquals("test with new lines " + '\01' + "42" + '\01'
+          + "oh no   field delims                                            ",
+          br.readLine());
       assertEquals(br.readLine(), null); // should only be one line
     } catch (IOException ioe) {
       fail("Unable to read files generated from hive");

@@ -177,7 +177,7 @@ public class HsqldbJobStorage extends JobStorage {
             metastoreUser, metastorePassword);
       }
 
-      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
       connection.setAutoCommit(false);
 
       // Initialize the root schema.
@@ -596,17 +596,25 @@ public class HsqldbJobStorage extends JobStorage {
     PreparedStatement s;
     String curVal = getRootProperty(propertyName, version);
     if (null == curVal) {
-      // INSERT the row.
-      s = connection.prepareStatement("INSERT INTO " + getRootTableName()
-          + " (propval, propname, version) VALUES ( ? , ? , ? )");
-    } else if (version == null) {
-      // UPDATE an existing row with a null version
-      s = connection.prepareStatement("UPDATE " + getRootTableName()
-          + " SET propval = ? WHERE  propname = ? AND version IS NULL");
+      if (null == version) {
+          // INSERT the row with a null version.
+          s = connection.prepareStatement("INSERT INTO " + getRootTableName()
+              + " (propval, propname, version) VALUES ( ? , ? , NULL )");
+      } else {
+          // INSERT the row with a non-null version.
+          s = connection.prepareStatement("INSERT INTO " + getRootTableName()
+              + " (propval, propname, version) VALUES ( ? , ? , ? )");
+      }
     } else {
-      // UPDATE an existing row with non-null version.
-      s = connection.prepareStatement("UPDATE " + getRootTableName()
-          + " SET propval = ? WHERE  propname = ? AND version = ?");
+      if (null == version) {
+        // UPDATE an existing row with a null version.
+        s = connection.prepareStatement("UPDATE " + getRootTableName()
+            + " SET propval = ? WHERE  propname = ? AND version IS NULL");
+      } else {
+        // UPDATE an existing row with non-null version.
+        s = connection.prepareStatement("UPDATE " + getRootTableName()
+            + " SET propval = ? WHERE  propname = ? AND version = ?");
+      }
     }
 
     try {

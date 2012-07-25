@@ -74,6 +74,7 @@ under the License.
       rev="${hadoop.version}" conf="hadoop23->default">
       <artifact name="hadoop-common" type="jar" />
       <artifact name="hadoop-common" type="jar" m:classifier="tests"/>
+      <exclude org="hsqldb" module="hsqldb"/>
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop.version}" conf="hadoop23->default">
@@ -106,7 +107,7 @@ under the License.
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
-    <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
+    <dependency org="org.hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
