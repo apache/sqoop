@@ -77,5 +77,21 @@ public class SQLServerManager
   protected String getSchemaQuery() {
     return "SELECT SCHEMA_NAME()";
   }
+
+  @Override
+  public String escapeColName(String colName) {
+    if (null == colName) {
+      return null;
+    }
+    return "[" + colName + "]";
+  }
+
+  @Override
+  public String escapeTableName(String tableName) {
+    if (null == tableName) {
+      return null;
+    }
+    return "[" + tableName + "]";
+  }
 }
 
