@@ -74,7 +74,6 @@ under the License.
       rev="${hadoop.version}" conf="hadoop23->default">
       <artifact name="hadoop-common" type="jar" />
       <artifact name="hadoop-common" type="jar" m:classifier="tests"/>
-      <exclude org="hsqldb" module="hsqldb"/>
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop.version}" conf="hadoop23->default">
@@ -150,6 +149,7 @@ under the License.
       <exclude org="com.cloudera.cdh" module="zookeeper-ant" />
     </dependency>
 
+    <exclude org="hsqldb" module="hsqldb"/>
     <exclude org="org.apache.hadoop" module="avro"/>
     <exclude org="commons-daemon" module="commons-daemon" />
 
