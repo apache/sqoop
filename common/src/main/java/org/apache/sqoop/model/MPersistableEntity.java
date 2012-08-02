@@ -22,7 +22,9 @@ package org.apache.sqoop.model;
  */
 public abstract class MPersistableEntity {
 
-  private long persistenceId = -1L;
+  public static final long PERSISTANCE_ID_DEFAULT = -1L;
+
+  private long persistenceId = PERSISTANCE_ID_DEFAULT;
 
   protected MPersistableEntity() {
     // Default constructor
@@ -34,6 +36,10 @@ public abstract class MPersistableEntity {
 
   public long getPersistenceId() {
     return persistenceId;
+  }
+
+  public boolean hasPersistenceId() {
+    return persistenceId != PERSISTANCE_ID_DEFAULT;
   }
 
   @Override

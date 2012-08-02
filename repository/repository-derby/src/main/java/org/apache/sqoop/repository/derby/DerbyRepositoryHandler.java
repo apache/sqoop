@@ -69,7 +69,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
   @Override
   public void registerConnector(MConnector mc, Connection conn) {
-    if (mc.getPersistenceId() != -1L) {
+    if (mc.hasPersistenceId()) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0011,
           mc.getUniqueName());
     }

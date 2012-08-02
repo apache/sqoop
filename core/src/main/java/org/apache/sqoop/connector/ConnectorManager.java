@@ -135,12 +135,11 @@ public class ConnectorManager {
           }
         }
 
-        long connectorId = handler.getMetadata().getPersistenceId();
         String connectorName = handler.getUniqueName();
-        if (connectorId == -1) {
+        if (!handler.getMetadata().hasPersistenceId()) {
           throw new SqoopException(ConnectorError.CONN_0010, connectorName);
         }
-        nameMap.put(connectorId, connectorName);
+        nameMap.put(handler.getMetadata().getPersistenceId(), connectorName);
       }
       rtx.commit();
     } catch (Exception ex) {
