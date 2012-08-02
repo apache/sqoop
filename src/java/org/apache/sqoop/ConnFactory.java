@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,7 @@ import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
 
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.manager.GenericJdbcManager;
 
 /**
  * Factory class to create the ConnManager type required
@@ -100,12 +102,76 @@ public class ConnFactory {
   }
 
   /**
-   * Factory method to get a ConnManager for the given JDBC connect string.
+   * Factory method to get a ConnManager.
+   *
+   * Connection Manager is created directly if user specifies it on the command
+   * line or the execution is passed to various configured connection factories
+   * in case that user is not requesting one specific manager.
+   *
    * @param data the connection and other configuration arguments.
    * @return a ConnManager instance for the appropriate database.
    * @throws IOException if it cannot find a ConnManager for this schema.
    */
   public ConnManager getManager(JobData data) throws IOException {
+    com.cloudera.sqoop.SqoopOptions options = data.getSqoopOptions();
+    String manualDriver = options.getDriverClassName();
+    String managerClassName = options.getConnManagerClassName();
+
+    // User has specified --driver argument, but he did not specified
+    // manager to use. We will use GenericJdbcManager as this was
+    // the way sqoop was working originally. However we will inform
+    // user that specifying connection manager explicitly is more cleaner
+    // solution for this case.
+    if (manualDriver != null && managerClassName == null) {
+      LOG.warn("Parameter --driver is set to an explicit driver however"
+        + " appropriate connection manager is not being set (via"
+        + " --connection-manager). Sqoop is going to fall back to "
+        + GenericJdbcManager.class.getCanonicalName() + ". Please specify"
+        + " explicitly which connection manager should be used next time."
+      );
+      return new GenericJdbcManager(manualDriver, options);
+    }
+
+    // If user specified explicit connection manager, let's use it
+    if (managerClassName != null){
+      ConnManager connManager = null;
+
+      try {
+        Class<ConnManager> cls = (Class<ConnManager>)
+          Class.forName(managerClassName);
+
+        // We have two constructor options, one is with or without explicit
+        // constructor. In most cases --driver argument won't be allowed as the
+        // connectors are forcing to use their building class names.
+        if (manualDriver == null) {
+          Constructor<ConnManager> constructor =
+            cls.getDeclaredConstructor(com.cloudera.sqoop.SqoopOptions.class);
+          connManager = constructor.newInstance(options);
+        } else {
+          Constructor<ConnManager> constructor =
+            cls.getDeclaredConstructor(String.class,
+                                       com.cloudera.sqoop.SqoopOptions.class);
+          connManager = constructor.newInstance(manualDriver, options);
+        }
+      } catch (ClassNotFoundException e) {
+        LOG.error("Sqoop could not found specified connection manager class "
+          + managerClassName  + ". Please check that you've specified the "
+          + "class correctly.");
+        throw new IOException(e);
+      } catch (NoSuchMethodException e) {
+        LOG.error("Sqoop wasn't able to create connnection manager properly. "
+          + "Some of the connectors supports explicit --driver and some "
+          + "do not. Please try to either specify --driver or leave it out.");
+        throw new IOException(e);
+      } catch (Exception e) {
+        LOG.error("Problem with bootstrapping connector manager:"
+          + managerClassName);
+        LOG.error(e);
+        throw new IOException(e);
+      }
+      return connManager;
+    }
+
     // Try all the available manager factories.
     for (ManagerFactory factory : factories) {
       LOG.debug("Trying ManagerFactory: " + factory.getClass().getName());
