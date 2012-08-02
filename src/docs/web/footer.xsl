@@ -29,7 +29,7 @@
       alt="Documentation Home" /></a></span>
   <br/>
   This document was built from Sqoop source available at
-  <a href="http://svn.apache.org/repos/asf/incubator/sqoop/trunk/">http://svn.apache.org/repos/asf/incubator/sqoop/trunk/</a>.
+  <a href="http://svn.apache.org/repos/asf/sqoop/trunk/">http://svn.apache.org/repos/asf/sqoop/trunk/</a>.
   </div>
 
 </xsl:template>

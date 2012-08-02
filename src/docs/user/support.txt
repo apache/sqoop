@@ -21,13 +21,13 @@ Getting Support
 ---------------
 
 Some general information is available at the
-http://incubator.apache.org/sqoop/
+http://sqoop.apache.org/
 
 Report bugs in Sqoop to the issue tracker at
-https://issues.apache.org/jira/browse/SQOOP[].
+https://issues.apache.org/jira/browse/SQOOP.
 
 Questions and discussion regarding the usage of Sqoop should be directed to the
-http://incubator.apache.org/sqoop/mail-lists.html[sqoop-user mailing list].
+http://sqoop.apache.org/mail-lists.html[sqoop-user mailing list].
 
 Before contacting either forum, run your Sqoop job with the
 +\--verbose+ flag to acquire as much debugging information as
