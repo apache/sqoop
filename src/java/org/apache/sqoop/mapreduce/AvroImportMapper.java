@@ -113,7 +113,8 @@ public class AvroImportMapper
       BlobRef br = (BlobRef) o;
       // If blob data is stored in an external .lob file, save the ref file
       // as Avro bytes. If materialized inline, save blob data as Avro bytes.
-      return br.isExternal() ? br.toString().getBytes() : br.getData();
+      byte[] bytes = br.isExternal() ? br.toString().getBytes() : br.getData();
+      return ByteBuffer.wrap(bytes);
     } else if (o instanceof ClobRef) {
       throw new UnsupportedOperationException("ClobRef not suported");
     }
