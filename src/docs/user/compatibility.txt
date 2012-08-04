@@ -120,6 +120,12 @@ Sqoop's direct mode does not support imports of +BLOB+, +CLOB+, or
 +LONGVARBINARY+ columns. Use JDBC-based imports for these
 columns; do not supply the +\--direct+ argument to the import tool.
 
+Importing views in direct mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop is currently not supporting import from view in direct mode. Use
+JDBC based (non direct) mode in case that you need to import view (simply
+omit +--direct+ parameter).
 
 Direct-mode Transactions
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -136,6 +142,20 @@ IMPORTANT: Note that any arguments to Sqoop that are of the form +-D
 parameter=value+ are Hadoop _generic arguments_ and must appear before
 any tool-specific arguments (for example, +\--connect+, +\--table+, etc).
 
+PostgreSQL
+~~~~~~~~~~
+
+Sqoop supports JDBC-based connector for PostgreSQL: http://jdbc.postgresql.org/
+
+The connector has been tested using JDBC driver version "9.1-903 JDBC 4" with
+PostgreSQL server 9.1.
+
+Importing views in direct mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop is currently not supporting import from view in direct mode. Use
+JDBC based (non direct) mode in case that you need to import view (simply
+omit +--direct+ parameter).
 
 Oracle
 ~~~~~~
