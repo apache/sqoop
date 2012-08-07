@@ -1,5 +1,142 @@
 Apache Sqoop Change Log
 
+Release 1.4.2 - 08/07/2012
+
+  NEW FEATURES
+
+    SQOOP-439 Released artifacts should embrace unwritten naming policy
+
+    SQOOP-444 Support incremental import for free form queries
+
+  BUG FIXES
+
+    SQOOP-352 Export of avro data imported from database table (using sqoop 
+              import) fails on year
+
+    SQOOP-410 Direct modes can't import views
+
+    SQOOP-425 Sqoop invokes ResultSet.isLast() which causes Sybase JDBC driver
+              to hang
+
+    SQOOP-445 Wrong query for getListColumnsQuery in PostgresqlManager
+
+    SQOOP-448 Boolean fields get nullified during postgres direct import into 
+              hive.
+
+    SQOOP-450 Direct MySQL import can fail when using mysqldump version 5.1.14
+              or above.
+
+    SQOOP-452 Mysql free form queries fail if alias is not used.
+
+    SQOOP-453 Oozie does not work with Sqoop metastore
+
+    SQOOP-454 Upgrade dependency on HBase version 0.92.0-SNAPSHOT as it was
+              already released
+
+    SQOOP-460 Verbose logging does not turn the level for correct logger
+
+    SQOOP-468 Oracle free form queries fail.
+
+    SQOOP-473 Sqoop import-all-tables fails with MySQL connector
+
+    SQOOP-474 Split-by specification incorrectly triggers bounding value query
+
+    SQOOP-476 If table name is a qualified name, Sqoop import fails in DB2
+
+    SQOOP-480 MS SQL server connector and OraOop connector are incompatible
+              with Sqoop-1.4
+
+    SQOOP-481 Sqoop import with --hive-import using wrong column names in
+              --columns throws a NPE
+
+    SQOOP-482 Import tool for mysql direct mode reports wrong record number
+
+    SQOOP-488 Parameter for extended verbose is not working due to migrated 
+              code to different module
+
+    SQOOP-489 Cannot define partition keys for Hive tables created through Sqoop
+
+    SQOOP-490 Style error in the trunk
+
+    SQOOP-503 --columns argument support for export
+
+    SQOOP-505 Trailing space after jar in managers.d/connectors causes file not
+              found
+
+    SQOOP-508 Sqoop metastore cannot be started due to missing hsqldb jar file
+
+    SQOOP-521 Import fails on tables with names containing hyphens ( - )
+
+    SQOOP-524 hsqldb jar update regression
+
+    SQOOP-528 Remove references to incubator from sources
+
+    SQOOP-536 Blob import doesn't work with avro 1.7.1
+
+    SQOOP-539 getPrimaryKeyQuery is very slow in mysql 5.0.77
+
+  IMPROVEMENTS
+
+    SQOOP-391 Dependencies should use released versions of Apache Hadoop, HBase,
+              and ZooKeeper
+
+    SQOOP-416 Allow code-generation arguments with Avro imports
+
+    SQOOP-436 The --verbose option should enable verbose logging for MapReduce
+              jobs as well
+
+    SQOOP-438 Allow sourcing of sqoop-env.sh to set various environment 
+              variables
+
+    SQOOP-440 Rename CHANGES.txt to CHANGELOG.txt
+
+    SQOOP-442 Ant target mvn-install is generating pom with dependencies on
+              cloudera version of Hadoop
+
+    SQOOP-443 Calling sqoop with hive import is not working multiple times due
+              to kept output directory
+
+    SQOOP-447 Use release version of Apache Hadoop 0.23.1 in build
+
+    SQOOP-459 Remove redundant steps in compatibility tests: verifyReadback()
+              method
+
+    SQOOP-461 Sqoop User Guide's troubleshooting section should include Oracle
+              Connection Errors
+
+    SQOOP-463 Sqoop User Guide's troubleshooting section should explain how to
+              override the column mapping when importing a table from MySQL
+              into Hive
+
+    SQOOP-464 Warn when user is importing data into /user/hive/warehouse with
+              flag --hive-import
+
+    SQOOP-465 BLOB support for Avro import
+
+    SQOOP-483 Allow target dir to be set to a different name than table name
+              for hive import
+
+    SQOOP-484 Update troubleshooting guide section about MySQL and TINYINT(1)
+              columns
+
+    SQOOP-487 InformationSchemaManager.getPrimaryKeyQuery can take a very long
+              time for large mysql table with partitions
+
+    SQOOP-510 Improve the error message for bad connector files
+
+    SQOOP-522 Move  printing error "ERROR orm.CompilationManager: Could not
+              rename" to DEBUG
+
+    SQOOP-529 Enforce usage of --driver and --connection-manager parameters
+
+    SQOOP-538 Hudson configuration for all hadoop versions
+
+  TASKS
+
+    SQOOP-470 Create tests for blob support for Avro import
+
+    SQOOP-519 Update the version of hsqldb decadency to 2.X
+
 Release 1.4.1 - 02/16/2012
 
   NEW FEATURES

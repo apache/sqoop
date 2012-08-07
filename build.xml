@@ -87,7 +87,7 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="1.4.2-incubating-SNAPSHOT" />
+  <property name="version" value="1.4.2" />
 
   <!-- The last version released. -->
   <property name="oldversion" value="1.4.1-incubating" />
