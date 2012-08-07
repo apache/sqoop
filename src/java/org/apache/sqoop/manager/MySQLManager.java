@@ -70,6 +70,14 @@ public class MySQLManager
   }
 
   @Override
+  protected String getPrimaryKeyQuery(String tableName) {
+    return "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS "
+         + "WHERE TABLE_SCHEMA = (" + getSchemaQuery() + ") "
+         + "AND TABLE_NAME = '"+tableName+"' "
+         + "AND COLUMN_KEY = 'PRI'";
+  }
+
+  @Override
   protected String getColNamesQuery(String tableName) {
     // Use mysql-specific hints and LIMIT to return fast
     return "SELECT t.* FROM " + escapeTableName(tableName) + " AS t LIMIT 1";
