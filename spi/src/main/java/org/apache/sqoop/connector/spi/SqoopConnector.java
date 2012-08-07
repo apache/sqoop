@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.job.etl.Exporter;
+import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.model.MForm;
 
 /**
@@ -46,4 +48,15 @@ public interface SqoopConnector {
    * by Sqoop to create a job object using this connector.
    */
   public List<MForm> getJobForms();
+
+  /**
+   * @return an <tt>Importer</tt> that provides classes for performing import.
+   */
+  public Importer getImporter();
+
+  /**
+   * @return an <tt>Exporter</tt> that provides classes for performing export.
+   */
+  public Exporter getExporter();
+
 }

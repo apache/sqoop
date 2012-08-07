@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.job.etl.Exporter;
+import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MMapInput;
@@ -32,6 +34,17 @@ public class GenericJdbcConnector implements SqoopConnector {
 
   private static final List<MForm> CONNECTION_FORMS = new ArrayList<MForm>();
   private static final List<MForm> JOB_FORMS = new ArrayList<MForm>();
+
+  private Importer IMPORTER = new Importer(
+      GenericJdbcImportInitializer.class,
+      GenericJdbcImportPartitioner.class,
+      GenericJdbcImportExtractor.class,
+      GenericJdbcImportDestroyer.class);
+
+  private Exporter EXPORTER = new Exporter(
+      GenericJdbcExportInitializer.class,
+      GenericJdbcExportLoader.class,
+      GenericJdbcExportDestroyer.class);
 
   static {
     // Build the connection form
@@ -79,6 +92,16 @@ public class GenericJdbcConnector implements SqoopConnector {
   @Override
   public List<MForm> getJobForms() {
     return JOB_FORMS;
+  }
+
+  @Override
+  public Importer getImporter() {
+    return IMPORTER;
+  }
+
+  @Override
+  public Exporter getExporter() {
+    return EXPORTER;
   }
 
 }
