@@ -33,8 +33,8 @@ public enum DerbyRepoError implements ErrorCode {
   /** The system was unable to run the specified query. */
   DERBYREPO_0003("Unable to run specified query"),
 
-  /** The system was unable to query the repository for connector metadata. */
-  DERBYREPO_0004("Unable to retrieve connector metadata"),
+  /** The system was unable to query the repository for metadata. */
+  DERBYREPO_0004("Unable to retrieve metadata"),
 
   /** The metadata repository contains more than one connector with same name */
   DERBYREPO_0005("Invalid metadata state - multiple connectors with name"),
@@ -58,10 +58,10 @@ public enum DerbyRepoError implements ErrorCode {
   DERBYREPO_0010("The form retrieved does not match expteced position"),
 
   /**
-   * The system was not able to register connector metadata due to a
-   * pre-assigned persistence identifier.
+   * The system was not able to register metadata due to a pre-assigned
+   * persistence identifier.
    */
-  DERBYREPO_0011("Connector metadata cannot have preassigned persistence id"),
+  DERBYREPO_0011("Metadata cannot have preassigned persistence id"),
 
   /**
    * The system was unable to register connector metadata due to an unexpected

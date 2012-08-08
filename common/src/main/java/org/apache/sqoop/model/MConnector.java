@@ -17,30 +17,30 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public final class MConnector extends MPersistableEntity {
+/**
+ * Connector metadata.
+ *
+ * Includes unique id that identifies connector in metadata store, unique human
+ * readable name, corresponding name and all forms for both connections and
+ * jobs.
+ */
+public final class MConnector extends MFramework {
 
   private final String uniqueName;
   private final String className;
-  private final List<MForm> connectionForms;
-  private final List<MForm> jobForms;
 
   public MConnector(String uniqueName, String className,
       List<MForm> connectionForms, List<MForm> jobForms) {
+    super(connectionForms, jobForms);
+
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
     }
 
     this.uniqueName = uniqueName;
     this.className = className;
-
-    this.connectionForms = new ArrayList<MForm>(connectionForms.size());
-    this.connectionForms.addAll(connectionForms);
-
-    this.jobForms = new ArrayList<MForm>(jobForms.size());
-    this.jobForms.addAll(jobForms);
   }
 
   public String getUniqueName() {
@@ -55,8 +55,8 @@ public final class MConnector extends MPersistableEntity {
   public String toString() {
     StringBuilder sb = new StringBuilder("connector-");
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
-    sb.append(className).append("; conn-forms:").append(connectionForms);
-    sb.append("; job-forms:").append(jobForms);
+    sb.append(className).append("; conn-forms:").append(getConnectionForms());
+    sb.append("; job-forms:").append(getJobForms());
 
     return sb.toString();
   }
@@ -74,30 +74,15 @@ public final class MConnector extends MPersistableEntity {
     MConnector mc = (MConnector) other;
     return (uniqueName.equals(mc.uniqueName)
         && className.equals(mc.className))
-        && connectionForms.equals(mc.connectionForms)
-        && jobForms.equals(mc.jobForms);
+        && super.equals(other);
   }
 
   @Override
   public int hashCode() {
-    int result = 23;
+    int result = super.hashCode();
     result = 31 * result + uniqueName.hashCode();
     result = 31 * result + className.hashCode();
-    for (MForm cmf : connectionForms) {
-      result = 31 * result + cmf.hashCode();
-    }
-    for (MForm jmf : jobForms) {
-      result = 31 * result + jmf.hashCode();
-    }
 
     return result;
-  }
-
-  public List<MForm> getConnectionForms() {
-    return connectionForms;
-  }
-
-  public List<MForm> getJobForms() {
-    return jobForms;
   }
 }

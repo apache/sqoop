@@ -42,7 +42,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_FORM                     |
  *    +-----------------------------+
  *    | SQF_ID: BIGINT PK AUTO-GEN  |
- *    | SQF_CONNECTOR: BIGINT       | FK SQ_CONNECTOR(SQC_ID)
+ *    | SQF_CONNECTOR: BIGINT       | FK SQ_CONNECTOR(SQC_ID),NULL for framework
  *    | SQF_NAME: VARCHAR(64)       |
  *    | SQF_TYPE: VARCHAR(32)       | "CONNECTION"|"JOB"
  *    | SQF_INDEX: SMALLINT         |
@@ -108,11 +108,18 @@ public final class DerbySchemaQuery {
 
 
   // DML: Fetch all forms for a given connector
-  public static final String STMT_FETCH_FORM =
+  public static final String STMT_FETCH_FORM_CONNECTOR =
       "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
       + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE + ", " + COLUMN_SQF_INDEX
       + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_CONNECTOR
       + " = ? ORDER BY " + COLUMN_SQF_INDEX;
+
+  // DML: Fetch all framework forms
+  public static final String STMT_FETCH_FORM_FRAMEWORK =
+      "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
+      + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE + ", " + COLUMN_SQF_INDEX
+      + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_CONNECTOR
+      + " IS NULL ORDER BY " + COLUMN_SQF_INDEX;
 
   // DML: Fetch inputs for a given form
   public static final String STMT_FETCH_INPUT =

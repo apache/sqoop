@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository;
 
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MFramework;
 
 
 /**
@@ -34,10 +35,24 @@ public interface Repository {
    * already registered, its associated metadata is returned from the
    * repository.
    *
+   * Method will set persistent ID of given MConnector instance in case of a
+   * success.
+   *
    * @param mConnector the connector metadata to be registered
    * @return <tt>null</tt> if the connector was successfully registered or
    * a instance of previously registered metadata with the same connector
    * unique name.
    */
   public MConnector registerConnector(MConnector mConnector);
+
+  /**
+   * Registers framework metadata in the repository. No more than one set of
+   * framework metadata structure is allowed.
+   *
+   * Method will set persistent ID of given MFramework instance in case of a
+   * success.
+   *
+   * @param mFramework Framework data that should be registered.
+   */
+  public void registerFramework(MFramework mFramework);
 }
