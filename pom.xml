@@ -56,7 +56,7 @@ limitations under the License.
   </ciManagement>
 
   <inceptionYear>2011</inceptionYear>
-  
+
   <mailingLists>
     <mailingList>
       <name>sqoop-user</name>
@@ -185,6 +185,8 @@ limitations under the License.
                 <excludes>
                   <exclude>.git/</exclude>
                   <exclude>.gitignore</exclude>
+                  <exclude>.idea/</exclude>
+                  <exclude>*.iml</exclude>
                 </excludes>
               </configuration>
             </execution>
