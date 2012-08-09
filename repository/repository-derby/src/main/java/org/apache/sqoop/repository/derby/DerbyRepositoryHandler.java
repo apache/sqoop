@@ -255,6 +255,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
     return true;
   }
+
   /**
    * {@inheritDoc}
    */
@@ -431,6 +432,14 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
     // Returned loaded framework metadata
     return mf;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String validationQuery() {
+    return "values(1)"; // Yes, this is valid derby SQL
   }
 
   /**

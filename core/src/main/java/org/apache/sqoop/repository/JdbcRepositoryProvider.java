@@ -146,7 +146,7 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
 
     // creating the factor automatically wires the connection pool
     new PoolableConnectionFactory(connFactory, connectionPool, statementPool,
-        /* FIXME validation query */null, false, false,
+        handler.validationQuery(), false, false,
         repoContext.getTransactionIsolation().getCode());
 
     dataSource = new PoolingDataSource(connectionPool);

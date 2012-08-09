@@ -95,4 +95,13 @@ public interface JdbcRepositoryHandler {
    * Should clean up all resources and commit all uncommitted data.
    */
   public void shutdown();
+
+  /**
+   * Specify query that Sqoop framework can use to validate connection to
+   * repository. This query should return at least one row.
+   *
+   * @return Query or NULL in case that this repository do not support or do not
+   *   want to validate live connections.
+   */
+  public String validationQuery();
 }
