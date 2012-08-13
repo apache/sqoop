@@ -31,6 +31,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import static org.apache.sqoop.core.ConfigurationConstants.PROPERTIES_PROVIDER_SLEEP;
 
 public class PropertiesConfigurationProvider implements ConfigurationProvider {
 
@@ -38,6 +39,8 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
       Logger.getLogger(PropertiesConfigurationProvider.class);
 
   public static final String CONFIG_FILENAME = "sqoop.properties";
+
+  public static final long DEFAULT_SLEEP_TIME = 60000;
 
   private Map<String, String> configuration = new HashMap<String, String>();
 
@@ -82,7 +85,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
 
   @Override
   public synchronized void initialize(
-      File configDir, Properties bootstrapCongiruation) {
+      File configDir, Properties bootstrapConfiguration) {
     configFile = new File(configDir, CONFIG_FILENAME);
     if (!configFile.exists() || !configFile.isFile() || !configFile.canRead()) {
       throw new SqoopException(CoreError.CORE_0006, configFile.getPath());
@@ -133,11 +136,14 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
 
     private boolean shutdown;
 
+    private long sleepTime;
+
     ConfigFilePoller(File configFile) {
       this.file = configFile;
       lastUpdatedAt = configFile.lastModified();
       this.setName("sqoop-config-file-poller");
       this.setDaemon(true);
+      loadSleepTime();
     }
 
     synchronized void setShutdown() {
@@ -146,6 +152,17 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
 
     private synchronized boolean isShutdown() {
       return shutdown;
+    }
+
+    protected synchronized void loadSleepTime() {
+      try {
+        String value = configuration.get(PROPERTIES_PROVIDER_SLEEP);
+        sleepTime = Long.valueOf(value);
+      } catch(Exception e) {
+        LOG.debug("Can't load sleeping period from configuration file,"
+          + " using default value " + DEFAULT_SLEEP_TIME, e);
+        sleepTime = DEFAULT_SLEEP_TIME;
+      }
     }
 
     @Override
@@ -159,13 +176,14 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
           try {
             lastUpdatedAt = file.lastModified();
             loadConfiguration(true);
+            loadSleepTime();
           } catch (Exception ex) {
             LOG.error("Exception while loading configuration", ex);
           }
         }
 
         try {
-          Thread.sleep(30);
+          Thread.sleep(sleepTime);
         } catch (InterruptedException ex) {
           Thread.currentThread().interrupt();
         }

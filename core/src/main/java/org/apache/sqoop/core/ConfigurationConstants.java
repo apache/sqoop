@@ -33,6 +33,12 @@ public final class ConfigurationConstants {
       + "log4j.";
 
   /**
+   * Prefix for PropertiesConfigurationProvider implementation
+   */
+  public static final String PREFIX_PROPERTIES_PROVIDER_CONFIG =
+      PREFIX_GLOBAL_CONFIG + "core.configuration.provider.properties.";
+
+  /**
    * The system property that must be set for specifying the system
    * configuration directory: <tt>sqoop.config.dir</tt>.
    */
@@ -60,6 +66,9 @@ public final class ConfigurationConstants {
 
   public static final String CONNPROP_CONNECTOR_NAME =
       "org.apache.sqoop.connector.name";
+
+  public static final String PROPERTIES_PROVIDER_SLEEP =
+    PREFIX_PROPERTIES_PROVIDER_CONFIG + "sleep";
 
 
   private ConfigurationConstants() {
