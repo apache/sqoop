@@ -264,11 +264,6 @@ public class OracleExportTest extends TestExport {
     }
   }
 
-  @Override
-  protected String getDoubleTextOut(double v) {
-    return Double.toString(v);
-  }
-
   /** Make sure mixed update/insert export work correctly. */
   public void testUpsertTextExport() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;

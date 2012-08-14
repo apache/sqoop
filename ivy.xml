@@ -124,7 +124,7 @@ under the License.
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
-    <dependency org="org.hsqldb" name="hsqldb" rev="${hsqldb.version}"
+    <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
@@ -167,7 +167,6 @@ under the License.
       <exclude org="com.cloudera.cdh" module="zookeeper-ant" />
     </dependency>
 
-    <exclude org="hsqldb" module="hsqldb"/>
     <exclude org="org.apache.hadoop" module="avro"/>
     <exclude org="commons-daemon" module="commons-daemon" />
 

@@ -113,14 +113,6 @@ if [ ! -z "$SQOOP_USER_CLASSPATH" ]; then
   export HADOOP_CLASSPATH="${SQOOP_USER_CLASSPATH}:${HADOOP_CLASSPATH}"
 fi
 
-#Sqoop execution faces Class loading issue due to conflicting hsqldb 
-#jar versions in Sqoop(hsqldb-2.2.8) and Hadoop(hsqldb-1.8.0.10). 
-#Setting HADOOP_USER_CLASSPATH_FIRST to true adds Sqoop's classpath
-#(consequently, hsqldb-2.2.8.jar) before Hadoop's and resolves the issue. 
-#Refer SQOOP-524 JIRA for more details. 
-HADOOP_USER_CLASSPATH_FIRST=true
-
-export HADOOP_USER_CLASSPATH_FIRST
 export SQOOP_CLASSPATH
 export SQOOP_CONF_DIR
 export SQOOP_JAR_DIR

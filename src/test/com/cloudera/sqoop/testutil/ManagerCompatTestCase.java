@@ -390,27 +390,11 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
   }
 
   protected String getNumericSeqOutput(String numAsInserted) {
-    int dotPos = numAsInserted.indexOf(".");
-    if (-1 == dotPos) {
-      // No dot in the original string; expand to add zeros after the
-      // dot.
-      return numAsInserted + ".00000";
-    } else {
-      // all other strings return as-is.
-      return numAsInserted;
-    }
+    return numAsInserted;
   }
 
   protected String getDecimalSeqOutput(String numAsInserted) {
-    int dotPos = numAsInserted.indexOf(".");
-    if (-1 == dotPos) {
-      // No dot in the original string; expand to add zeros after the
-      // dot.
-      return numAsInserted + ".00000";
-    } else {
-      // all other strings return as-is.
-      return numAsInserted;
-    }
+    return numAsInserted;
   }
 
   /**
@@ -418,7 +402,7 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    * sequence file
    */
   protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
-    return padString(fieldWidth, asInserted);
+    return asInserted;
   }
 
   /**
