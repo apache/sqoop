@@ -17,10 +17,14 @@
  */
 package org.apache.sqoop.job.etl;
 
+import java.util.List;
+
 /**
  * This allows connector to define how input data to be partitioned.
  * The number of data partitions also determines the degree of parallelism.
  */
 public abstract class Partitioner {
+
+  public abstract List<Partition> run(Context context);
 
 }

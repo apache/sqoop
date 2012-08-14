@@ -17,8 +17,18 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.util.List;
+
+import org.apache.sqoop.job.etl.Context;
+import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 
 public class GenericJdbcImportPartitioner extends Partitioner {
+
+  @Override
+  public List<Partition> run(Context context) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

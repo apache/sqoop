@@ -17,8 +17,16 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.sqoop.job.etl.Context;
 import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.io.DataReader;
+import org.apache.sqoop.job.io.DataWriter;
 
 public class GenericJdbcExportLoader extends Loader {
+
+  @Override
+  public void run(Context context, DataReader reader) {
+    // TODO Auto-generated method stub
+  }
 
 }

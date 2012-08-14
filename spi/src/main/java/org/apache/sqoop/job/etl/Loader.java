@@ -17,9 +17,13 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.job.io.DataReader;
+
 /**
  * This allows connector to load data into a target system.
  */
 public abstract class Loader {
+
+  public abstract void run(Context context, DataReader reader);
 
 }

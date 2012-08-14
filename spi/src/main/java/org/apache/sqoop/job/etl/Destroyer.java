@@ -23,4 +23,6 @@ package org.apache.sqoop.job.etl;
  */
 public abstract class Destroyer {
 
+  public abstract void run(Context context);
+
 }

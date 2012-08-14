@@ -23,4 +23,6 @@ package org.apache.sqoop.job.etl;
  */
 public abstract class Initializer {
 
+  public abstract void run(MutableContext context);
+
 }

@@ -17,8 +17,16 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.sqoop.job.etl.Context;
+import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.io.DataWriter;
 
 public class GenericJdbcImportExtractor extends Extractor {
+
+  @Override
+  public void run(Context context, Partition partition, DataWriter writer) {
+    // TODO Auto-generated method stub
+  }
 
 }

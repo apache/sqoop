@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.job.io.DataWriter;
+
 /**
  * This allows connector to extract data from a source system
  * based on each partition.
  */
 public abstract class Extractor {
+
+  public abstract void run(Context context,
+      Partition partition, DataWriter writer);
 
 }
