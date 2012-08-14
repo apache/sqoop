@@ -75,6 +75,8 @@ Release 1.4.2 - 08/07/2012
 
     SQOOP-539 getPrimaryKeyQuery is very slow in mysql 5.0.77
 
+    SQOOP-571 Revert SQOOP-519 and SQOOP-524
+
   IMPROVEMENTS
 
     SQOOP-391 Dependencies should use released versions of Apache Hadoop, HBase,
@@ -132,6 +134,8 @@ Release 1.4.2 - 08/07/2012
     SQOOP-538 Hudson configuration for all hadoop versions
 
   TASKS
+
+    SQOOP-574 Create a Hadoop-2.0.0 build profile
 
     SQOOP-470 Create tests for blob support for Avro import
 
