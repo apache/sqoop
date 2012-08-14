@@ -30,6 +30,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -85,7 +86,7 @@ public class ShowConnectorFunction extends SqoopFunction
     }
     ConnectorBean connectorBean =
       conntectorRequest.doGet(Environment.getServerUrl(), cid);
-    MConnector[] connectors = connectorBean.getConnectos();
+    MConnector[] connectors = connectorBean.getConnectors();
 
     io.out.println("@|bold " + connectors.length + " connector(s) to show: |@");
     for (int i = 0; i < connectors.length; i++) {
@@ -94,14 +95,23 @@ public class ShowConnectorFunction extends SqoopFunction
       io.out.print("Connector with id ");
       io.out.print(connector.getPersistenceId());
       io.out.println(":");
-  
+
       io.out.print("  Name: ");
       io.out.println(connector.getUniqueName());
       io.out.print("  Class: ");
       io.out.println(connector.getClassName());
+      io.out.print("  Supported job types: ");
+      io.out.println(connector.getJobs().keySet().toString());
 
-      displayForms(connector.getConnectionForms(), "Connection");
-      displayForms(connector.getJobForms(), "Job");
+      displayForms(connector.getConnection().getForms(), "Connection");
+
+      for (MJob job : connector.getJobs().values()) {
+        io.out.print("  Forms for job type ");
+        io.out.print(job.getType().name());
+        io.out.println(":");
+
+        displayForms(job.getForms(), "Job");
+      }
     }
 
     io.out.println();
@@ -111,33 +121,33 @@ public class ShowConnectorFunction extends SqoopFunction
     Iterator<MForm> fiter = forms.iterator();
     int findx = 1;
     while (fiter.hasNext()) {
-      io.out.print("  ");
+      io.out.print("    ");
       io.out.print(type);
       io.out.print(" form ");
       io.out.print(findx++);
       io.out.println(":");
 
       MForm form = fiter.next();
-      io.out.print("    Name: ");
+      io.out.print("      Name: ");
       io.out.println(form.getName());
 
       List<MInput<?>> inputs = form.getInputs();
       Iterator<MInput<?>> iiter = inputs.iterator();
       int iindx = 1;
       while (iiter.hasNext()) {
-        io.out.print("    Input ");
+        io.out.print("      Input ");
         io.out.print(iindx++);
         io.out.println(":");
 
         MInput<?> input = iiter.next();
-        io.out.print("      Name: ");
+        io.out.print("        Name: ");
         io.out.println(input.getName());
-        io.out.print("      Type: ");
+        io.out.print("        Type: ");
         io.out.println(input.getType());
         if (input.getType() == MInputType.STRING) {
-          io.out.print("      Mask: ");
+          io.out.print("        Mask: ");
           io.out.println(((MStringInput)input).isMasked());
-          io.out.print("      Size: ");
+          io.out.print("        Size: ");
           io.out.println(((MStringInput)input).getMaxLength());
         }
       }

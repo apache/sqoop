@@ -19,9 +19,11 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.RepositoryManager;
 
@@ -41,13 +43,17 @@ public class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
-  private static final List<MForm> CONNECTION_FORMS = new ArrayList<MForm>();
-  private static final List<MForm> JOB_FORMS = new ArrayList<MForm>();
+  private static final MConnection connection;
 
-  private static MFramework mFramework;
+  private static final List<MJob> jobs;
+
+  private static final MFramework mFramework;
 
   static {
-    // Build the connection forms
+
+    List<MForm> conForms = new ArrayList<MForm>();
+
+    // Build the connection forms for import
     List<MInput<?>> connFormInputs = new ArrayList<MInput<?>>();
 
     MStringInput maxConnections = new MStringInput(
@@ -56,9 +62,10 @@ public class FrameworkManager {
 
     MForm connForm = new MForm(FORM_SECURITY, connFormInputs);
 
-    CONNECTION_FORMS.add(connForm);
+    conForms.add(connForm);
+    connection = new MConnection(conForms);
 
-    // Build job forms
+    // Build job forms for import
     List<MInput<?>> jobFormInputs = new ArrayList<MInput<?>>();
 
     MStringInput outputFormat = new MStringInput(INPUT_CONN_MAX_OUTPUT_FORMAT,
@@ -66,14 +73,20 @@ public class FrameworkManager {
     jobFormInputs.add(outputFormat);
 
     MForm jobForm = new MForm(FORM_OUTPUT, jobFormInputs);
-    JOB_FORMS.add(jobForm);
+    List<MForm> jobForms = new ArrayList<MForm>();
+    jobForms.add(jobForm);
+
+    jobs = new ArrayList<MJob>();
+    jobs.add(new MJob(MJob.Type.IMPORT, jobForms));
+    jobs.add(new MJob(MJob.Type.EXPORT, jobForms));
+
+    mFramework = new MFramework(connection, jobs);
   }
 
   public static synchronized void initialize() {
     LOG.trace("Begin connector manager initialization");
 
     // Register framework metadata
-    mFramework = new MFramework(CONNECTION_FORMS, JOB_FORMS);
     RepositoryManager.getRepository().registerFramework(mFramework);
     if (!mFramework.hasPersistenceId()) {
       throw new SqoopException(FrameworkError.FRAMEWORK_0000);

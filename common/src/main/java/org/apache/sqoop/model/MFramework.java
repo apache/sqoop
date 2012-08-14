@@ -17,31 +17,44 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.ArrayList;
+import org.apache.sqoop.common.SqoopException;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Metadata describing framework options for connections and jobs.
+ * Metadata describing framework options for connection and job for each
+ * supported operation.
  */
 public class MFramework extends MPersistableEntity {
 
-  private final List<MForm> connectionForms;
-  private final List<MForm> jobForms;
+  private final MConnection connection;
+  private final Map<MJob.Type, MJob> jobs;
 
-  public MFramework(List<MForm> connectionForms, List<MForm> jobForms) {
-    this.connectionForms = new ArrayList<MForm>(connectionForms.size());
-    this.connectionForms.addAll(connectionForms);
+  public MFramework(MConnection connection, List<MJob> jobs) {
+    this.connection = connection;
+    this.jobs = new HashMap<MJob.Type, MJob>();
 
-    this.jobForms = new ArrayList<MForm>(jobForms.size());
-    this.jobForms.addAll(jobForms);
+    for (MJob job : jobs) {
+      MJob.Type type = job.getType();
+
+      if(this.jobs.containsKey(type)) {
+        throw new SqoopException(ModelError.MODEL_001, "Duplicate entry for"
+          + " job type " + job.getType().name());
+      }
+      this.jobs.put(type, job);
+    }
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("framework-");
     sb.append(getPersistenceId()).append(":");
-    sb.append("; conn-forms:").append(connectionForms);
-    sb.append("; job-forms:").append(jobForms);
+    sb.append(", ").append(connection.toString());
+    for(MJob entry: jobs.values()) {
+      sb.append(entry.toString());
+    }
 
     return sb.toString();
   }
@@ -56,29 +69,31 @@ public class MFramework extends MPersistableEntity {
       return false;
     }
 
-    MFramework mc = (MFramework) other;
-    return connectionForms.equals(mc.connectionForms)
-        && jobForms.equals(mc.jobForms);
+    MFramework mo = (MFramework) other;
+    return connection.equals(mo.connection) && jobs.equals(mo.jobs);
   }
 
   @Override
   public int hashCode() {
-    int result = 23;
-    for (MForm cmf : connectionForms) {
-      result = 31 * result + cmf.hashCode();
-    }
-    for (MForm jmf : jobForms) {
-      result = 31 * result + jmf.hashCode();
+    int result = connection.hashCode();
+
+    for(MJob entry: jobs.values()) {
+      result = 31 * result + entry.hashCode();
     }
 
     return result;
   }
 
-  public List<MForm> getConnectionForms() {
-    return connectionForms;
+  public MConnection getConnection() {
+    return connection;
   }
 
-  public List<MForm> getJobForms() {
-    return jobForms;
+  public Map<MJob.Type, MJob> getJobs() {
+    return jobs;
+  }
+
+  public MJob getJob(MJob.Type type) {
+    return jobs.get(type);
   }
 }
+

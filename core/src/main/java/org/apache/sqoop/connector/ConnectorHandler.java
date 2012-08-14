@@ -88,7 +88,7 @@ public final class ConnectorHandler {
 
     // Initialize Metadata
     mConnector = new MConnector(connectorUniqueName, connectorClassName,
-        connector.getConnectionForms(), connector.getJobForms());
+        connector.getConnection(), connector.getJobs());
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector [" + connectorClassName + "] initialized.");

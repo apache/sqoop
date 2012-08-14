@@ -32,7 +32,6 @@ public final class MStringInput extends MInput<String> {
 
   /**
    * @param name the parameter name
-   * @param label the parameter label
    * @param mask a flag indicating if the string should be masked
    * @param maxLength the maximum length of the string
    */

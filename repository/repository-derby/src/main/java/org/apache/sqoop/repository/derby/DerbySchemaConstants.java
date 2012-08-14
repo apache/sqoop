@@ -43,6 +43,8 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQF_CONNECTOR = "SQF_CONNECTOR";
 
+  public static final String COLUMN_SQF_OPERATION = "SQF_OPERATION";
+
   public static final String COLUMN_SQF_NAME = "SQF_NAME";
 
   public static final String COLUMN_SQF_TYPE = "SQF_TYPE";

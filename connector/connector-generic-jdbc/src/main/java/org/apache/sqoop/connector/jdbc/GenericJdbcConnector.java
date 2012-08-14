@@ -24,16 +24,20 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import static org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants.*;
+
 
 public class GenericJdbcConnector implements SqoopConnector {
 
-  private static final List<MForm> CONNECTION_FORMS = new ArrayList<MForm>();
-  private static final List<MForm> JOB_FORMS = new ArrayList<MForm>();
+  private static final MConnection connection;
+  private static final List<MJob> jobs;
 
   private Importer IMPORTER = new Importer(
       GenericJdbcImportInitializer.class,
@@ -47,35 +51,44 @@ public class GenericJdbcConnector implements SqoopConnector {
       GenericJdbcExportDestroyer.class);
 
   static {
-    // Build the connection form
-    List<MInput<?>> connFormInputs = new ArrayList<MInput<?>>();
+    // Connection forms
+    List<MForm> forms = new ArrayList<MForm>();
+    List<MInput<?>> inputs = new ArrayList<MInput<?>>();
 
-    MStringInput jdbcDriver = new MStringInput(
-        GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER, false,
+    MStringInput jdbcDriver = new MStringInput(INPUT_CONN_JDBCDRIVER, false,
         (short) 128);
-    connFormInputs.add(jdbcDriver);
+    inputs.add(jdbcDriver);
 
-    MStringInput connectString = new MStringInput(
-        GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING, false,
-        (short) 128);
-    connFormInputs.add(connectString);
+    MStringInput connectString = new MStringInput(INPUT_CONN_CONNECTSTRING,
+      false, (short) 128);
+    inputs.add(connectString);
 
-    MStringInput username = new MStringInput(
-        GenericJdbcConnectorConstants.INPUT_CONN_USERNAME, false, (short) 36);
-    connFormInputs.add(username);
+    MStringInput username = new MStringInput(INPUT_CONN_USERNAME, false,
+      (short) 36);
+    inputs.add(username);
 
-    MStringInput password = new MStringInput(
-        GenericJdbcConnectorConstants.INPUT_CONN_PASSWORD, true, (short) 10);
-    connFormInputs.add(password);
+    MStringInput password = new MStringInput(INPUT_CONN_PASSWORD, true,
+      (short) 10);
+    inputs.add(password);
 
-    MMapInput jdbcProperties = new MMapInput(
-        GenericJdbcConnectorConstants.INPUT_CONN_JDBCPROPS);
-    connFormInputs.add(jdbcProperties);
+    MMapInput jdbcProperties = new MMapInput(INPUT_CONN_JDBCPROPS);
+    inputs.add(jdbcProperties);
 
-    MForm connForm = new MForm(GenericJdbcConnectorConstants.FORM_CONNECTION,
-        connFormInputs);
+    MForm connForm = new MForm(FORM_CONNECTION, inputs);
+    forms.add(connForm);
 
-    CONNECTION_FORMS.add(connForm);
+    connection = new MConnection(forms);
+
+    // Job forms
+    forms = new ArrayList<MForm>();
+    inputs = new ArrayList<MInput<?>>();
+
+    inputs.add(new MStringInput(INPUT_TBL_TABLE, false, (short) 50));
+    forms.add(new MForm(FORM_TABLE, inputs));
+
+    jobs = new ArrayList<MJob>();
+    jobs.add(new MJob(MJob.Type.IMPORT, forms));
+    jobs.add(new MJob(MJob.Type.EXPORT, forms));
   }
 
   @Override
@@ -85,13 +98,13 @@ public class GenericJdbcConnector implements SqoopConnector {
   }
 
   @Override
-  public List<MForm> getConnectionForms() {
-    return CONNECTION_FORMS;
+  public MConnection getConnection() {
+    return connection;
   }
 
   @Override
-  public List<MForm> getJobForms() {
-    return JOB_FORMS;
+  public List<MJob> getJobs() {
+    return jobs;
   }
 
   @Override

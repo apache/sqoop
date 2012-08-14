@@ -24,13 +24,15 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.model.MJob;
 
 public class MySqlJdbcConnector implements SqoopConnector {
 
   private static final List<MForm> CONNECTION_FORMS = new ArrayList<MForm>();
-  private static final List<MForm> JOB_FORMS = new ArrayList<MForm>();
+  private static final List<MJob> JOBS = new ArrayList<MJob>();
 
   @Override
   public ResourceBundle getBundle(Locale locale) {
@@ -39,14 +41,13 @@ public class MySqlJdbcConnector implements SqoopConnector {
   }
 
   @Override
-  public List<MForm> getConnectionForms() {
-    return CONNECTION_FORMS;
+  public MConnection getConnection() {
+    return new MConnection(CONNECTION_FORMS);
   }
 
   @Override
-  public List<MForm> getJobForms() {
-    // TODO Auto-generated method stub
-    return JOB_FORMS;
+  public List<MJob> getJobs() {
+    return JOBS;
   }
 
   @Override

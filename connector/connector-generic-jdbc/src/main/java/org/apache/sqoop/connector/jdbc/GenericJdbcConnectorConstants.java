@@ -32,13 +32,19 @@ public final class GenericJdbcConnectorConstants {
   // Connection form
   public static final String FORM_CONNECTION = "form-connection";
 
-  // Connection form input
+  // Connection form inputs
   public static final String INPUT_CONN_JDBCDRIVER = "inp-conn-jdbcdriver";
   public static final String INPUT_CONN_CONNECTSTRING =
       "inp-conn-connectstring";
   public static final String INPUT_CONN_USERNAME = "inp-conn-username";
   public static final String INPUT_CONN_PASSWORD = "inp-conn-password";
   public static final String INPUT_CONN_JDBCPROPS = "inp-conn-jdbc-properties";
+
+  // Table form
+  public static final String FORM_TABLE = "table-connection";
+
+  // Table form inputs
+  public static final String INPUT_TBL_TABLE = "inp-tbl-table";
 
   private GenericJdbcConnectorConstants() {
     // Disable explicit object creation

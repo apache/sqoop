@@ -43,6 +43,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    +-----------------------------+
  *    | SQF_ID: BIGINT PK AUTO-GEN  |
  *    | SQF_CONNECTOR: BIGINT       | FK SQ_CONNECTOR(SQC_ID),NULL for framework
+ *    | SQF_OPERATION: VARCHAR(32)  | "IMPORT"|"EXPORT"|NULL
  *    | SQF_NAME: VARCHAR(64)       |
  *    | SQF_TYPE: VARCHAR(32)       | "CONNECTION"|"JOB"
  *    | SQF_INDEX: SMALLINT         |
@@ -84,6 +85,7 @@ public final class DerbySchemaQuery {
       "CREATE TABLE " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID
       + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
       + "PRIMARY KEY, " + COLUMN_SQF_CONNECTOR + " BIGINT, "
+      + COLUMN_SQF_OPERATION + " VARCHAR(32), "
       + COLUMN_SQF_NAME + " VARCHAR(64), " + COLUMN_SQF_TYPE + " VARCHAR(32), "
       + COLUMN_SQF_INDEX + " SMALLINT, " + " FOREIGN KEY ("
       + COLUMN_SQF_CONNECTOR+ ") REFERENCES " + TABLE_SQ_CONNECTOR + " ("
@@ -110,16 +112,16 @@ public final class DerbySchemaQuery {
   // DML: Fetch all forms for a given connector
   public static final String STMT_FETCH_FORM_CONNECTOR =
       "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE + ", " + COLUMN_SQF_INDEX
-      + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_CONNECTOR
-      + " = ? ORDER BY " + COLUMN_SQF_INDEX;
+      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
+      + ", " + COLUMN_SQF_INDEX + " FROM " + TABLE_SQ_FORM + " WHERE "
+      + COLUMN_SQF_CONNECTOR + " = ? ORDER BY " + COLUMN_SQF_INDEX;
 
   // DML: Fetch all framework forms
   public static final String STMT_FETCH_FORM_FRAMEWORK =
       "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE + ", " + COLUMN_SQF_INDEX
-      + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_CONNECTOR
-      + " IS NULL ORDER BY " + COLUMN_SQF_INDEX;
+      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
+      + ", " + COLUMN_SQF_INDEX + " FROM " + TABLE_SQ_FORM + " WHERE " +
+      COLUMN_SQF_CONNECTOR + " IS NULL ORDER BY " + COLUMN_SQF_INDEX;
 
   // DML: Fetch inputs for a given form
   public static final String STMT_FETCH_INPUT =
@@ -136,9 +138,9 @@ public final class DerbySchemaQuery {
 
   // DML: Insert form base
   public static final String STMT_INSERT_FORM_BASE =
-      "INSERT INTO " + TABLE_SQ_FORM + " (" + COLUMN_SQF_CONNECTOR
-      + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE + ", "
-      + COLUMN_SQF_INDEX + ") VALUES ( ?, ?, ?, ?)";
+      "INSERT INTO " + TABLE_SQ_FORM + " (" + COLUMN_SQF_CONNECTOR + ", "
+      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
+      + ", " + COLUMN_SQF_INDEX + ") VALUES ( ?, ?, ?, ?, ?)";
 
   // DML: Insert form input
   public static final String STMT_INSERT_INPUT_BASE =

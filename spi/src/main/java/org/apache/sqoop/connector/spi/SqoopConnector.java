@@ -19,11 +19,13 @@ package org.apache.sqoop.connector.spi;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MJob;
 
 /**
  * Service provider interface for Sqoop Connectors.
@@ -37,17 +39,14 @@ public interface SqoopConnector {
   public ResourceBundle getBundle(Locale locale);
 
   /**
-   * @return a list of <tt>MForm</tt> that provide metadata about input needed
-   * by Sqoop to create a connection object using this connector.
+   * @return Get connection structure
    */
-  public List<MForm> getConnectionForms();
-
+  public MConnection getConnection();
 
   /**
-   * @return a list of <tt>MForm</tt> that provide metadata about input needed
-   * by Sqoop to create a job object using this connector.
+   * @return Get supported jobs and their associated data structures
    */
-  public List<MForm> getJobForms();
+  public List<MJob> getJobs();
 
   /**
    * @return an <tt>Importer</tt> that provides classes for performing import.

@@ -23,8 +23,7 @@ import java.util.List;
  * Connector metadata.
  *
  * Includes unique id that identifies connector in metadata store, unique human
- * readable name, corresponding name and all forms for both connections and
- * jobs.
+ * readable name, corresponding name and all forms for all supported job types.
  */
 public final class MConnector extends MFramework {
 
@@ -32,8 +31,8 @@ public final class MConnector extends MFramework {
   private final String className;
 
   public MConnector(String uniqueName, String className,
-      List<MForm> connectionForms, List<MForm> jobForms) {
-    super(connectionForms, jobForms);
+      MConnection connection, List<MJob> jobs) {
+    super(connection, jobs);
 
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
@@ -55,8 +54,11 @@ public final class MConnector extends MFramework {
   public String toString() {
     StringBuilder sb = new StringBuilder("connector-");
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
-    sb.append(className).append("; conn-forms:").append(getConnectionForms());
-    sb.append("; job-forms:").append(getJobForms());
+    sb.append(className);
+    sb.append(", ").append(getConnection().toString());
+    for(MJob entry: getJobs().values()) {
+      sb.append(entry.toString());
+    }
 
     return sb.toString();
   }
