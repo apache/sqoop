@@ -134,7 +134,7 @@ public class TestMultiCols extends ImportJobTestCase {
   public void testMixed4() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "-42", "17", "33333333333333333333333.1714" };
-    String validateLine = "-42,17,33333333333333333333333";
+    String validateLine = "-42,17,33333333333333333333333.1714";
 
     verifyTypes(types, insertVals, validateLine);
   }
@@ -142,7 +142,7 @@ public class TestMultiCols extends ImportJobTestCase {
   public void testMixed5() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "null", "17", "33333333333333333333333.0" };
-    String validateLine = "null,17,33333333333333333333333";
+    String validateLine = "null,17,33333333333333333333333.0";
 
     verifyTypes(types, insertVals, validateLine);
   }

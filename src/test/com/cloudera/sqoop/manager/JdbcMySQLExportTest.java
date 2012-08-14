@@ -78,11 +78,6 @@ public class JdbcMySQLExportTest extends TestExport {
     return "DROP TABLE IF EXISTS " + tableName;
   }
 
-  @Override
-  protected String getDoubleTextOut(double v) {
-    return Double.toString(v);
-  }
-
   @Before
   public void setUp() {
     super.setUp();
