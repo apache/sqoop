@@ -98,4 +98,4 @@ bin=`dirname ${prgm}`
 bin=`cd ${bin} && pwd`
 
 source ${bin}/configure-sqoop "${bin}"
-exec ${HADOOP_HOME}/bin/hadoop com.cloudera.sqoop.Sqoop "$@"
+exec ${HADOOP_HOME}/bin/hadoop org.apache.sqoop.Sqoop "$@"
