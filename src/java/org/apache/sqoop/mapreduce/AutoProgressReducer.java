@@ -23,31 +23,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Identity mapper that continuously reports progress via a background thread.
+ * Identity reducer that continuously reports progress via a background thread.
  */
-public class AutoProgressMapper<KEYIN, VALIN, KEYOUT, VALOUT>
-    extends SqoopMapper<KEYIN, VALIN, KEYOUT, VALOUT> {
+public class AutoProgressReducer<KEYIN, VALIN, KEYOUT, VALOUT>
+    extends SqoopReducer<KEYIN, VALIN, KEYOUT, VALOUT> {
 
   public static final Log LOG = LogFactory.getLog(
-      AutoProgressMapper.class.getName());
+      AutoProgressReducer.class.getName());
 
-  public static final String MAX_PROGRESS_PERIOD_KEY =
-      "sqoop.mapred.auto.progress.max";
-  public static final String SLEEP_INTERVAL_KEY =
-      "sqoop.mapred.auto.progress.sleep";
-  public static final String REPORT_INTERVAL_KEY =
-      "sqoop.mapred.auto.progress.report";
-
-  // Sleep for 10 seconds at a time.
-  public static final int DEFAULT_SLEEP_INTERVAL = 10000;
-
-  // Report progress every 30 seconds.
-  public static final int DEFAULT_REPORT_INTERVAL = 30000;
-
-  // Disable max progress, by default.
-  public static final int DEFAULT_MAX_PROGRESS = 0;
-
-  // map() method intentionally omitted; Mapper.map() is the identity mapper.
+  // reduce() method intentionally omitted;
+  // Reducer.reduce() is the identity reducer.
 
   /**
    * Run the mapping process for this task, wrapped in an auto-progress system.

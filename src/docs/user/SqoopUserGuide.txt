@@ -72,8 +72,9 @@ include::version.txt[]
 
 include::compatibility.txt[]
 
+include::connectors.txt[]
+
 include::support.txt[]
 
 include::troubleshooting.txt[]
-
 

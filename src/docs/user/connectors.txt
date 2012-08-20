@@ -1,0 +1,138 @@
+
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+
+Notes for specific connectors
+-----------------------------
+
+pg_bulkload connector
+~~~~~~~~~~~~~~~~~~~~~
+
+Purpose
+^^^^^^^
+pg_bulkload connector is a direct connector for exporting data into PostgreSQL.
+This connector uses
+http://pgbulkload.projects.postgresql.org/index.html[pg_bulkload].
+Users benefit from functionality of pg_bulkload such as
+fast exports bypassing shared bufferes and WAL,
+flexible error records handling,
+and ETL feature with filter functions.
+
+Requirements
+^^^^^^^^^^^^
+pg_bulkload connector requires following conditions for export job execution:
+
+* The link:http://pgbulkload.projects.postgresql.org/index.html[pg_bulkload]
+  must be installed on DB server and all slave nodes.
+  RPM for RedHat or CentOS is available in then
+  link:http://pgfoundry.org/frs/?group_id=1000261[download page].
+* The link:http://jdbc.postgresql.org/index.html[PostgreSQL JDBC]
+  is required on client node.
+* Superuser role of PostgreSQL database is required for execution of pg_bulkload.
+
+Syntax
+^^^^^^
+Use +--connection-manager+ option to specify connection manager classname.
+----
+$ sqoop export (generic-args) --connection-manager org.apache.sqoop.manager.PGBulkloadManager (export-args)
+$ sqoop-export (generic-args) --connection-manager org.apache.sqoop.manager.PGBulkloadManager (export-args)
+----
+
+This connector supports export arguments shown below.
+
+.Supported export control arguments:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--export-dir <dir>+                    HDFS source path for the export
++-m,\--num-mappers <n>+                  Use 'n' map tasks to export in\
+                                         parallel
++\--table <table-name>+                  Table to populate
++\--input-null-string <null-string>+     The string to be interpreted as\
+                                         null for string columns
++\--clear-staging-table+                 Indicates that any data present in\
+                                         the staging table can be deleted.
+---------------------------------------------------------------------------------
+
+There are additional configuration for pg_bulkload execution
+specified via Hadoop Configuration properties
+which can be given with +-D <property=value>+ option.
+Because Hadoop Configuration properties are generic arguments of the sqoop,
+it must preceed any export control arguments.
+
+.Supported export control properties:
+[grid="all"]
+`-----------------------------`----------------------------------------------
+Property                      Description
+-----------------------------------------------------------------------------
+mapred.reduce.tasks           Number of reduce tasks for staging. \
+                              The defalt value is 1. \
+                              Each tasks do staging in a single transaction.
+pgbulkload.bin                Path of the pg_bulkoad binary \
+                              installed on each slave nodes.
+pgbulkload.check.constraints  Specify whether CHECK constraints are checked \
+                              during the loading. \
+                              The default value is YES.
+pgbulkload.parse.errors       The maximum mumber of ingored records \
+                              that cause errors during parsing, \
+                              encoding, filtering, constraints checking, \
+                              and data type conversion. \
+                              Error records are recorded \
+                              in the PARSE BADFILE.  \
+                              The default value is INFINITE.
+pgbulkload.duplicate.errors   Number of ingored records \
+                              that violate unique constraints. \
+                              Duplicated records are recorded in the \
+                              DUPLICATE BADFILE on DB server. \
+                              The default value is INFINITE.
+pgbulkload.filter             Specify the filter function \
+                              to convert each row in the input file.  \
+                              See the pg_bulkload documentation to know \
+                              how to write FILTER functions.
+-----------------------------------------------------------------------------
+
+Here is a example of complete command line.
+----
+$ sqoop export \
+    -Dmapred.reduce.tasks=2
+    -Dpgbulkload.bin="/usr/local/bin/pg_bulkload" \
+    -Dpgbulkload.input.field.delim=$'\t' \
+    -Dpgbulkload.check.constraints="YES" \
+    -Dpgbulkload.parse.errors="INFINITE" \
+    -Dpgbulkload.duplicate.errors="INFINITE" \
+    --connect jdbc:postgresql://pgsql.example.net:5432/sqooptest \
+    --connection-manager org.apache.sqoop.manager.PGBulkloadManager \
+    --table test --username sqooptest --export-dir=/test -m 2
+----
+
+Data Staging
+^^^^^^^^^^^^
+Each map tasks of pg_bulkload connector's export job create
+their own staging table on the fly.
+The Name of staging tables is decided based on the destination table
+and the task attempt ids.
+For example, the name of staging table for the "test" table is like
++test_attempt_1345021837431_0001_m_000000_0+ .
+
+Staging tables are automatically dropped if tasks successfully complete
+or map tasks fail.
+When reduce task fails,
+staging table for the task are left for manual retry and
+users must take care of it.

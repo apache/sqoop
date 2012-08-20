@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.util.PostgreSQLUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.io.SplittableBufferedWriter;
@@ -293,26 +294,6 @@ public class DirectPostgresqlManager
     return tempFile.toString();
   }
 
-  /** Write the user's password to a file that is chmod 0600.
-      @return the filename.
-    */
-  private String writePasswordFile(String password) throws IOException {
-
-    String tmpDir = options.getTempDir();
-    File tempFile = File.createTempFile("pgpass", ".pgpass", new File(tmpDir));
-    LOG.debug("Writing password to tempfile: " + tempFile);
-
-    // Make sure it's only readable by the current user.
-    DirectImportUtils.setFilePermissions(tempFile, "0600");
-
-    // Actually write the password data into the file.
-    BufferedWriter w = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(tempFile)));
-    w.write("*:*:*:*:" + password);
-    w.close();
-    return tempFile.toString();
-  }
-
   // TODO(aaron): Refactor this method to be much shorter.
   // CHECKSTYLE:OFF
   @Override
@@ -380,7 +361,8 @@ public class DirectPostgresqlManager
         args.add(username);
         String password = options.getPassword();
         if (null != password) {
-          passwordFilename = writePasswordFile(password);
+          passwordFilename =
+            PostgreSQLUtils.writePasswordFile(options.getTempDir(), password);
           // Need to send PGPASSFILE environment variable specifying
           // location of our postgres file.
           envp.add("PGPASSFILE=" + passwordFilename);
