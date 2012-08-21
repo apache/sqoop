@@ -191,9 +191,8 @@ public class ImportJobBase extends JobBase {
         new TableClassName(options).getClassForTable(tableName);
     loadJars(conf, ormJarFile, tableClassName);
 
+    Job job = new Job(conf);
     try {
-      Job job = new Job(conf);
-
       // Set the external jar to use for the job.
       job.getConfiguration().set("mapred.jar", ormJarFile);
 
@@ -216,6 +215,7 @@ public class ImportJobBase extends JobBase {
       throw new IOException(cnfe);
     } finally {
       unloadJars();
+      jobTeardown(job);
     }
   }
 
@@ -225,6 +225,13 @@ public class ImportJobBase extends JobBase {
    * if necessary.
    */
   protected void jobSetup(Job job) throws IOException, ImportException {
+  }
+
+  /**
+   * Open-ended "teardown" routine that is called after the job is executed.
+   * Subclasses may override if necessary.
+   */
+  protected void jobTeardown(Job job) throws IOException, ImportException {
   }
 
   protected ImportJobContext getContext() {
