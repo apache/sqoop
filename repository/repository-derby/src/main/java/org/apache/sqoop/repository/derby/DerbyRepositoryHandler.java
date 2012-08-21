@@ -212,6 +212,10 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR);
     runQuery(QUERY_CREATE_TABLE_SQ_FORM);
     runQuery(QUERY_CREATE_TABLE_SQ_INPUT);
+    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION);
+    runQuery(QUERY_CREATE_TABLE_SQ_JOB);
+    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
+    runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
   }
 
   /**

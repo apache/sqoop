@@ -66,6 +66,54 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    +----------------------------+
  * </pre>
  * </p>
+ * <p>
+ * <strong>SQ_CONNECTION</strong>: Stored connections
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_CONNECTION              |
+ *    +----------------------------+
+ *    | SQN_ID: BIGINT PK AUTO-GEN |
+ *    | SQN_NAME: VARCHAR(64)      |
+ *    | SQN_CONNECTOR: BIGINT      | FK SQ_CONNECTOR(SQC_ID)
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_JOB</strong>: Stored jobs
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_JOB                     |
+ *    +----------------------------+
+ *    | SQB_ID: BIGINT PK AUTO-GEN |
+ *    | SQB_NAME: VARCHAR(64)      |
+ *    | SQB_CONNECTION: BIGINT     | FK SQ_CONNECTION(SQN_ID)
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_CONNECTION_INPUT</strong>: N:M relationship connection and input
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_CONNECTION_INPUT        |
+ *    +----------------------------+
+ *    | SQNI_CONNECTION: BIGINT PK | FK SQ_CONNECTION(SQN_ID)
+ *    | SQNI_INPUT: BIGINT PK      | FK SQ_INPUT(SQI_ID)
+ *    | SQNI_VALUE: LONG VARCHAR   |
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_JOB_INPUT</strong>: N:M relationship job and input
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_JOB_INPUT               |
+ *    +----------------------------+
+ *    | SQBI_JOB: BIGINT PK        | FK SQ_JOB(SQB_ID)
+ *    | SQBI_INPUT: BIGINT PK      | FK SQ_INPUT(SQI_ID)
+ *    | SQBI_VALUE: LONG VARCHAR   |
+ *    +----------------------------+
+ * </pre>
+ * </p>
  */
 public final class DerbySchemaQuery {
 
@@ -91,7 +139,6 @@ public final class DerbySchemaQuery {
       + COLUMN_SQF_CONNECTOR+ ") REFERENCES " + TABLE_SQ_CONNECTOR + " ("
       + COLUMN_SQC_ID + "))";
 
-
   // DDL: Create table SQ_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_INPUT =
       "CREATE TABLE " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID
@@ -101,6 +148,42 @@ public final class DerbySchemaQuery {
       + COLUMN_SQI_TYPE + " VARCHAR(32), " + COLUMN_SQI_STRMASK + " BOOLEAN, "
       + COLUMN_SQI_STRLENGTH + " SMALLINT, FOREIGN KEY (" + COLUMN_SQI_FORM
       + ") REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + "))";
+
+  // DDL: Create table SQ_CONNECTION
+  public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =
+      "CREATE TABLE " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID
+      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
+      + "PRIMARY KEY, " + COLUMN_SQN_CONNECTOR + " BIGINT, " + COLUMN_SQN_NAME
+      + " VARCHAR(32), FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") REFERENCES "
+      + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + "))";
+
+  // DDL: Create table SQ_JOB
+  public static final String QUERY_CREATE_TABLE_SQ_JOB =
+      "CREATE TABLE " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID
+      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
+      + "PRIMARY KEY, " + COLUMN_SQB_CONNECTION + " BIGINT, " + COLUMN_SQB_NAME
+      + " VARCHAR(32), FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") REFERENCES "
+      + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "))";
+
+  // DDL: Create table SQ_CONNECTION_INPUT
+  public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
+      "CREATE TABLE " + TABLE_SQ_CONNECTION_INPUT + " ("
+      + COLUMN_SQNI_CONNECTION + " BIGINT, " + COLUMN_SQNI_INPUT + " BIGINT, "
+      + COLUMN_SQNI_VALUE + " LONG VARCHAR, PRIMARY KEY ("
+      + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "), FOREIGN KEY ("
+      + COLUMN_SQNI_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " ("
+      + COLUMN_SQN_ID + "), FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") REFERENCES "
+      + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
+
+  // DDL: Create table SQ_JOB_INPUT
+  public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
+      "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
+      + COLUMN_SQBI_JOB + " BIGINT, " + COLUMN_SQBI_INPUT + " BIGINT, "
+      + COLUMN_SQBI_VALUE + " LONG VARCHAR, PRIMARY KEY ("
+      + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), FOREIGN KEY ("
+      + COLUMN_SQBI_JOB + ") REFERENCES " + TABLE_SQ_JOB + " ("
+      + COLUMN_SQB_ID + "), FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") REFERENCES "
+      + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
 
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =

@@ -23,6 +23,8 @@ public final class DerbySchemaConstants {
 
   private static final String SCHEMA_PREFIX = SCHEMA_SQOOP + ".";
 
+  // SQ_CONNECTOR
+
   public static final String TABLE_SQ_CONNECTOR_NAME = "SQ_CONNECTOR";
 
   public static final String TABLE_SQ_CONNECTOR = SCHEMA_PREFIX
@@ -34,12 +36,14 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQC_CLASS = "SQC_CLASS";
 
+  // SQ_FORM
+
   public static final String TABLE_SQ_FORM_NAME = "SQ_FORM";
 
   public static final String TABLE_SQ_FORM = SCHEMA_PREFIX
       + TABLE_SQ_FORM_NAME;
 
-  public static final String  COLUMN_SQF_ID = "SQF_ID";
+  public static final String COLUMN_SQF_ID = "SQF_ID";
 
   public static final String COLUMN_SQF_CONNECTOR = "SQF_CONNECTOR";
 
@@ -51,6 +55,7 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQF_INDEX = "SQF_INDEX";
 
+  // SQ_INPUT
 
   public static final String TABLE_SQ_INPUT_NAME = "SQ_INPUT";
 
@@ -71,17 +76,59 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQI_STRLENGTH = "SQI_STRLENGTH";
 
+  // SQ_CONNECTION
 
-  public static final String TABLE_SQ_STRING_NAME = "SQ_STRING";
-  public static final String TABLE_SQ_STRING = SCHEMA_PREFIX
-      + TABLE_SQ_STRING_NAME;
+  public static final String TABLE_SQ_CONNECTION_NAME = "SQ_CONNECTION";
 
-  public static final String COLUMN_SQS_ID = "SQS_ID";
+  public static final String TABLE_SQ_CONNECTION = SCHEMA_PREFIX
+      + TABLE_SQ_CONNECTION_NAME;
 
-  public static final String COLUMN_SQS_MASK = "SQS_MASK";
+  public static final String COLUMN_SQN_ID = "SQN_ID";
 
-  public static final String COLUMN_SQS_LENGTH = "SQS_LENGTH";
+  public static final String COLUMN_SQN_NAME = "SQN_NAME";
 
+  public static final String COLUMN_SQN_CONNECTOR = "SQN_CONNECTOR";
+
+  // SQ_JOB
+
+  public static final String TABLE_SQ_JOB_NAME = "SQ_JOB";
+
+  public static final String TABLE_SQ_JOB = SCHEMA_PREFIX
+      + TABLE_SQ_JOB_NAME;
+
+  public static final String COLUMN_SQB_ID = "SQB_ID";
+
+  public static final String COLUMN_SQB_NAME = "SQB_NAME";
+
+  public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
+
+  // SQ_CONNECTION_INPUT
+
+  public static final String TABLE_SQ_CONNECTION_INPUT_NAME =
+      "SQ_CONNECTION_INPUT";
+
+  public static final String TABLE_SQ_CONNECTION_INPUT = SCHEMA_PREFIX
+      + TABLE_SQ_CONNECTION_INPUT_NAME;
+
+  public static final String COLUMN_SQNI_CONNECTION = "SQNI_CONNECTION";
+
+  public static final String COLUMN_SQNI_INPUT = "SQNI_INPUT";
+
+  public static final String COLUMN_SQNI_VALUE = "SQNI_VALUE";
+
+  // SQ_JOB_INPUT
+
+  public static final String TABLE_SQ_JOB_INPUT_NAME =
+      "SQ_JOB_INPUT";
+
+  public static final String TABLE_SQ_JOB_INPUT = SCHEMA_PREFIX
+      + TABLE_SQ_JOB_INPUT_NAME;
+
+  public static final String COLUMN_SQBI_JOB = "SQBI_JOB";
+
+  public static final String COLUMN_SQBI_INPUT = "SQBI_INPUT";
+
+  public static final String COLUMN_SQBI_VALUE = "SQBI_VALUE";
 
   private DerbySchemaConstants() {
     // Disable explicit object creation
