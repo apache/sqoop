@@ -260,7 +260,7 @@ public class ExportJobBase extends JobBase {
     PerfCounters perfCounters = new PerfCounters();
     perfCounters.startClock();
 
-    boolean success = job.waitForCompletion(true);
+    boolean success = doSubmitJob(job);
     perfCounters.stopClock();
 
     Counters jobCounters = job.getCounters();
@@ -276,6 +276,14 @@ public class ExportJobBase extends JobBase {
     }
 
     return success;
+  }
+
+  /**
+   * Submit the Map Reduce Job
+   */
+  protected boolean doSubmitJob(Job job)
+    throws IOException, InterruptedException, ClassNotFoundException {
+    return job.waitForCompletion(true);
   }
 
   /**
