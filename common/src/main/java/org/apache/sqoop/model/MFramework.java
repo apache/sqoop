@@ -25,23 +25,23 @@ import java.util.Map;
 
 /**
  * Metadata describing framework options for connection and job for each
- * supported operation.
+ * supported job type.
  */
 public class MFramework extends MPersistableEntity {
 
-  private final MConnection connection;
-  private final Map<MJob.Type, MJob> jobs;
+  private final MConnectionForms connectionForms;
+  private final Map<MJob.Type, MJobForms> jobs;
 
-  public MFramework(MConnection connection, List<MJob> jobs) {
-    this.connection = connection;
-    this.jobs = new HashMap<MJob.Type, MJob>();
+  public MFramework(MConnectionForms connectionForms, List<MJobForms> jobForms) {
+    this.connectionForms = connectionForms;
+    this.jobs = new HashMap<MJob.Type, MJobForms>();
 
-    for (MJob job : jobs) {
+    for (MJobForms job : jobForms) {
       MJob.Type type = job.getType();
 
       if(this.jobs.containsKey(type)) {
         throw new SqoopException(ModelError.MODEL_001, "Duplicate entry for"
-          + " job type " + job.getType().name());
+          + " jobForms type " + job.getType().name());
       }
       this.jobs.put(type, job);
     }
@@ -51,8 +51,8 @@ public class MFramework extends MPersistableEntity {
   public String toString() {
     StringBuilder sb = new StringBuilder("framework-");
     sb.append(getPersistenceId()).append(":");
-    sb.append(", ").append(connection.toString());
-    for(MJob entry: jobs.values()) {
+    sb.append(", ").append(connectionForms.toString());
+    for(MJobForms entry: jobs.values()) {
       sb.append(entry.toString());
     }
 
@@ -70,29 +70,29 @@ public class MFramework extends MPersistableEntity {
     }
 
     MFramework mo = (MFramework) other;
-    return connection.equals(mo.connection) && jobs.equals(mo.jobs);
+    return connectionForms.equals(mo.connectionForms) && jobs.equals(mo.jobs);
   }
 
   @Override
   public int hashCode() {
-    int result = connection.hashCode();
+    int result = connectionForms.hashCode();
 
-    for(MJob entry: jobs.values()) {
+    for(MJobForms entry: jobs.values()) {
       result = 31 * result + entry.hashCode();
     }
 
     return result;
   }
 
-  public MConnection getConnection() {
-    return connection;
+  public MConnectionForms getConnectionForms() {
+    return connectionForms;
   }
 
-  public Map<MJob.Type, MJob> getJobs() {
+  public Map<MJob.Type, MJobForms> getAllJobsForms() {
     return jobs;
   }
 
-  public MJob getJob(MJob.Type type) {
+  public MJobForms getJobForms(MJob.Type type) {
     return jobs.get(type);
   }
 }

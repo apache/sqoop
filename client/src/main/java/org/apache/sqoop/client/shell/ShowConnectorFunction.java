@@ -30,7 +30,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -101,16 +101,16 @@ public class ShowConnectorFunction extends SqoopFunction
       io.out.print("  Class: ");
       io.out.println(connector.getClassName());
       io.out.print("  Supported job types: ");
-      io.out.println(connector.getJobs().keySet().toString());
+      io.out.println(connector.getAllJobsForms().keySet().toString());
 
-      displayForms(connector.getConnection().getForms(), "Connection");
+      displayForms(connector.getConnectionForms().getForms(), "Connection");
 
-      for (MJob job : connector.getJobs().values()) {
-        io.out.print("  Forms for job type ");
-        io.out.print(job.getType().name());
+      for (MJobForms jobForms : connector.getAllJobsForms().values()) {
+        io.out.print("  Forms for jobForms type ");
+        io.out.print(jobForms.getType().name());
         io.out.println(":");
 
-        displayForms(job.getForms(), "Job");
+        displayForms(jobForms.getForms(), "Job");
       }
     }
 

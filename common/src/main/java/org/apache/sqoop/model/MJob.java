@@ -17,65 +17,30 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.List;
-
 /**
- * Metadata for specific job type. Internally Sqoop have two different job
- * metadata for each job type. One for connector and second for framework.
+ * Model describing entire job object including both connector and
+ * framework part.
  */
-public class MJob extends MPersistableEntity {
-
+public class MJob extends MNamedElement {
 
   static public enum Type {
     IMPORT,
     EXPORT,
   }
 
-  private final Type type;
-  private final List<MForm> forms;
+  // TODO(jarcec): We probably need reference to connection object here
+  MJobForms connectorPart;
+  MJobForms frameworkPart;
 
-  public MJob(Type type, List<MForm> forms) {
-    this.type = type;
-    this.forms = forms;
+  public MJob(String name) {
+    super(name);
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("job type:").append(type.name());
-    sb.append(", forms: ").append(forms);
+    StringBuilder sb = new StringBuilder("job connector-part: ");
+    sb.append(connectorPart).append(", framework-part: ").append(frameworkPart);
+
     return sb.toString();
-  }
-
-  public Type getType() {
-    return type;
-  }
-
-  public List<MForm> getForms() {
-    return forms;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    if (!(other instanceof MJob)) {
-      return false;
-    }
-
-    MJob mj = (MJob) other;
-    return type.equals(mj.type) && forms.equals(mj.forms);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + type.hashCode();
-    for(MForm form : forms) {
-      result = 31 * result + form.hashCode();
-    }
-
-    return result;
   }
 }

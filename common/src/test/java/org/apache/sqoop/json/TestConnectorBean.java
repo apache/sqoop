@@ -19,11 +19,12 @@ package org.apache.sqoop.json;
 
 import static org.junit.Assert.*;
 
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
@@ -31,9 +32,7 @@ import org.json.simple.JSONValue;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -80,7 +79,7 @@ public class TestConnectorBean {
     inputs = new ArrayList<MInput<?>>();
     inputs.add(new MMapInput("properties"));
     connectionForms.add(new MForm("properties", inputs));
-    MConnection connection = new MConnection(connectionForms);
+    MConnectionForms connection = new MConnectionForms(connectionForms);
 
     List<MForm> jobForms = new ArrayList<MForm>();
     inputs = new ArrayList<MInput<?>>();
@@ -95,8 +94,8 @@ public class TestConnectorBean {
     inputs.add(new MStringInput("Y", false, (short) 10));
     jobForms.add(new MForm("D", inputs));
 
-    List<MJob> jobs = new ArrayList<MJob>();
-    jobs.add(new MJob(MJob.Type.IMPORT, jobForms));
+    List<MJobForms> jobs = new ArrayList<MJobForms>();
+    jobs.add(new MJobForms(MJob.Type.IMPORT, jobForms));
 
     return new MConnector(name, name + ".class", connection, jobs);
   }

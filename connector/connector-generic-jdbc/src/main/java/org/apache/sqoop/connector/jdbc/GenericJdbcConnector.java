@@ -24,10 +24,11 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -36,8 +37,8 @@ import static org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants.*;
 
 public class GenericJdbcConnector implements SqoopConnector {
 
-  private static final MConnection connection;
-  private static final List<MJob> jobs;
+  private static final MConnectionForms CONNECTION_FORMS;
+  private static final List<MJobForms> JOB_FORMS;
 
   private Importer IMPORTER = new Importer(
       GenericJdbcImportInitializer.class,
@@ -77,7 +78,7 @@ public class GenericJdbcConnector implements SqoopConnector {
     MForm connForm = new MForm(FORM_CONNECTION, inputs);
     forms.add(connForm);
 
-    connection = new MConnection(forms);
+    CONNECTION_FORMS = new MConnectionForms(forms);
 
     // Job forms
     forms = new ArrayList<MForm>();
@@ -86,9 +87,9 @@ public class GenericJdbcConnector implements SqoopConnector {
     inputs.add(new MStringInput(INPUT_TBL_TABLE, false, (short) 50));
     forms.add(new MForm(FORM_TABLE, inputs));
 
-    jobs = new ArrayList<MJob>();
-    jobs.add(new MJob(MJob.Type.IMPORT, forms));
-    jobs.add(new MJob(MJob.Type.EXPORT, forms));
+    JOB_FORMS = new ArrayList<MJobForms>();
+    JOB_FORMS.add(new MJobForms(MJob.Type.IMPORT, forms));
+    JOB_FORMS.add(new MJobForms(MJob.Type.EXPORT, forms));
   }
 
   @Override
@@ -98,13 +99,13 @@ public class GenericJdbcConnector implements SqoopConnector {
   }
 
   @Override
-  public MConnection getConnection() {
-    return connection;
+  public MConnectionForms getConnectionForms() {
+    return CONNECTION_FORMS;
   }
 
   @Override
-  public List<MJob> getJobs() {
-    return jobs;
+  public List<MJobForms> getJobsForms() {
+    return JOB_FORMS;
   }
 
   @Override

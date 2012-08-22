@@ -31,13 +31,13 @@ public class TestMFramework {
 
   @Test
   public void testFailureOnDuplicateJobTypes() {
-    MConnection connection = new MConnection(new ArrayList<MForm>());
-    List<MJob> jobs = new ArrayList<MJob>();
-    jobs.add(new MJob(MJob.Type.IMPORT, new ArrayList<MForm>()));
-    jobs.add(new MJob(MJob.Type.IMPORT, new ArrayList<MForm>()));
+    MConnectionForms connectionForms = new MConnectionForms(new ArrayList<MForm>());
+    List<MJobForms> jobForms = new ArrayList<MJobForms>();
+    jobForms.add(new MJobForms(MJob.Type.IMPORT, new ArrayList<MForm>()));
+    jobForms.add(new MJobForms(MJob.Type.IMPORT, new ArrayList<MForm>()));
 
     try {
-      new MFramework(connection, jobs);
+      new MFramework(connectionForms, jobForms);
       fail("We we're expecting exception for invalid usage");
     } catch(Exception ex) {
       // Expected case

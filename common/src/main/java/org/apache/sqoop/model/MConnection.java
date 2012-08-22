@@ -17,53 +17,24 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.List;
-
 /**
- * Metadata describing all required information to build up an connection
- * object. Both connector and framework will have it's own MConnection part of
- * metadata.
+ * Model describing entire connection object including both connector and
+ * framework part.
  */
-public class MConnection extends MPersistableEntity {
+public class MConnection extends MNamedElement {
+  // TODO(jarcec): We probably need reference to connector object here
+  MConnectionForms connectorPart;
+  MConnectionForms frameworkPart;
 
-  private final List<MForm> forms;
-
-  public MConnection(List<MForm> forms) {
-    this.forms = forms;
-  }
-
-  public List<MForm> getForms() {
-    return forms;
+  public MConnection(String name) {
+    super(name);
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("connection, forms:");
-    sb.append(forms);
+    StringBuilder sb = new StringBuilder("connection connector-part: ");
+    sb.append(connectorPart).append(", framework-part: ").append(frameworkPart);
+
     return sb.toString();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    if (!(other instanceof MConnection)) {
-      return false;
-    }
-
-    MConnection mc = (MConnection) other;
-    return forms.equals(mc.forms);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    for(MForm form : forms) {
-      result = 31 * result + form.hashCode();
-    }
-
-    return result;
   }
 }

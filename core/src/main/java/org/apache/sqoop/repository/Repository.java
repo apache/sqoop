@@ -17,8 +17,11 @@
  */
 package org.apache.sqoop.repository;
 
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
+
+import java.util.List;
 
 
 /**
@@ -55,4 +58,45 @@ public interface Repository {
    * @param mFramework Framework data that should be registered.
    */
   public void registerFramework(MFramework mFramework);
+
+  /**
+   * Save given connection to repository. This connection must not be already
+   * present in the repository otherwise exception will be thrown.
+   *
+   * @param connection Connection object to serialize into repository.
+   */
+  public void createConnection(MConnection connection);
+
+  /**
+   * Update given connection representation in repository. This connection
+   * object must already exists in the repository otherwise exception will be
+   * thrown.
+   *
+   * @param connection Connection object that should be updated in repository.
+   */
+  public void updateConnection(MConnection connection);
+
+  /**
+   * Delete given connection from repository. This connection object must
+   * exists in repository otherwise exception will be thrown.
+   *
+   * @param connection Connection object that should be removed from repository
+   */
+  public void deleteConnection(MConnection connection);
+
+  /**
+   * Find connection with given name in repository.
+   *
+   * @param name Connection name
+   * @return Deserialized form of the connection that is saved in repository
+   */
+  public MConnection findConnection(String name);
+
+  /**
+   * Get all connection objects for given connector.
+   *
+   * @param connector Connector object
+   * @return Array will all saved connection objects
+   */
+  public List<MConnection> findConnections(MConnector connector);
 }

@@ -19,11 +19,12 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.RepositoryManager;
 
@@ -43,9 +44,9 @@ public class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
-  private static final MConnection connection;
+  private static final MConnectionForms CONNECTION_FORMS;
 
-  private static final List<MJob> jobs;
+  private static final List<MJobForms> JOB_FORMS;
 
   private static final MFramework mFramework;
 
@@ -53,7 +54,7 @@ public class FrameworkManager {
 
     List<MForm> conForms = new ArrayList<MForm>();
 
-    // Build the connection forms for import
+    // Build the CONNECTION_FORMS forms for import
     List<MInput<?>> connFormInputs = new ArrayList<MInput<?>>();
 
     MStringInput maxConnections = new MStringInput(
@@ -63,7 +64,7 @@ public class FrameworkManager {
     MForm connForm = new MForm(FORM_SECURITY, connFormInputs);
 
     conForms.add(connForm);
-    connection = new MConnection(conForms);
+    CONNECTION_FORMS = new MConnectionForms(conForms);
 
     // Build job forms for import
     List<MInput<?>> jobFormInputs = new ArrayList<MInput<?>>();
@@ -76,11 +77,11 @@ public class FrameworkManager {
     List<MForm> jobForms = new ArrayList<MForm>();
     jobForms.add(jobForm);
 
-    jobs = new ArrayList<MJob>();
-    jobs.add(new MJob(MJob.Type.IMPORT, jobForms));
-    jobs.add(new MJob(MJob.Type.EXPORT, jobForms));
+    JOB_FORMS = new ArrayList<MJobForms>();
+    JOB_FORMS.add(new MJobForms(MJob.Type.IMPORT, jobForms));
+    JOB_FORMS.add(new MJobForms(MJob.Type.EXPORT, jobForms));
 
-    mFramework = new MFramework(connection, jobs);
+    mFramework = new MFramework(CONNECTION_FORMS, JOB_FORMS);
   }
 
   public static synchronized void initialize() {

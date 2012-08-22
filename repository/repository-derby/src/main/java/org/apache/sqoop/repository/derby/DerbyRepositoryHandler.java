@@ -35,14 +35,15 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
@@ -113,12 +114,12 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
 
       // Register connector forms
-      registerForms(connectorId, null, mc.getConnection().getForms(),
+      registerForms(connectorId, null, mc.getConnectionForms().getForms(),
         MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
 
       // Register all jobs
-      for (MJob job : mc.getJobs().values()) {
-        registerForms(connectorId, job.getType(), job.getForms(),
+      for (MJobForms jobForms : mc.getAllJobsForms().values()) {
+        registerForms(connectorId, jobForms.getType(), jobForms.getForms(),
           MFormType.JOB.name(), baseFormStmt, baseInputStmt);
       }
 
@@ -305,7 +306,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         formFetchStmt, inputFetchStmt);
 
       mc = new MConnector(connectorName, connectorClassName,
-        new MConnection(connectionForms),
+        new MConnectionForms(connectionForms),
         convertToJobList(jobForms));
       mc.setPersistenceId(connectorId);
 
@@ -361,12 +362,12 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
 
       // Register connector forms
-      registerForms(null, null, mf.getConnection().getForms(),
+      registerForms(null, null, mf.getConnectionForms().getForms(),
         MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
 
       // Register all jobs
-      for (MJob job : mf.getJobs().values()) {
-        registerForms(null, job.getType(), job.getForms(),
+      for (MJobForms jobForms : mf.getAllJobsForms().values()) {
+        registerForms(null, jobForms.getType(), jobForms.getForms(),
           MFormType.JOB.name(), baseFormStmt, baseInputStmt);
       }
 
@@ -419,7 +420,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         return null;
       }
 
-      mf = new MFramework(new MConnection(connectionForms),
+      mf = new MFramework(new MConnectionForms(connectionForms),
         convertToJobList(jobForms));
 
       // We're using hardcoded value for framework metadata as they are
@@ -705,14 +706,14 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     }
   }
 
-  public List<MJob> convertToJobList(Map<MJob.Type, List<MForm>> l) {
-    List<MJob> ret = new ArrayList<MJob>();
+  public List<MJobForms> convertToJobList(Map<MJob.Type, List<MForm>> l) {
+    List<MJobForms> ret = new ArrayList<MJobForms>();
 
     for (Map.Entry<MJob.Type, List<MForm>> entry : l.entrySet()) {
       MJob.Type type = entry.getKey();
       List<MForm> forms = entry.getValue();
 
-      ret.add(new MJob(type, forms));
+      ret.add(new MJobForms(type, forms));
     }
 
     return ret;

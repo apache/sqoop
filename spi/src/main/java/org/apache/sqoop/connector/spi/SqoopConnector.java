@@ -23,8 +23,8 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MConnectionForms;
 
 /**
  * Service provider interface for Sqoop Connectors.
@@ -40,12 +40,12 @@ public interface SqoopConnector {
   /**
    * @return Get connection structure
    */
-  public MConnection getConnection();
+  public MConnectionForms getConnectionForms();
 
   /**
    * @return Get supported jobs and their associated data structures
    */
-  public List<MJob> getJobs();
+  public List<MJobForms> getJobsForms();
 
   /**
    * @return an <tt>Importer</tt> that provides classes for performing import.

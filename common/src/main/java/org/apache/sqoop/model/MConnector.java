@@ -31,8 +31,8 @@ public final class MConnector extends MFramework {
   private final String className;
 
   public MConnector(String uniqueName, String className,
-      MConnection connection, List<MJob> jobs) {
-    super(connection, jobs);
+      MConnectionForms connectionForms, List<MJobForms> jobForms) {
+    super(connectionForms, jobForms);
 
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
@@ -55,8 +55,8 @@ public final class MConnector extends MFramework {
     StringBuilder sb = new StringBuilder("connector-");
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
     sb.append(className);
-    sb.append(", ").append(getConnection().toString());
-    for(MJob entry: getJobs().values()) {
+    sb.append(", ").append(getConnectionForms().toString());
+    for(MJobForms entry: getAllJobsForms().values()) {
       sb.append(entry.toString());
     }
 

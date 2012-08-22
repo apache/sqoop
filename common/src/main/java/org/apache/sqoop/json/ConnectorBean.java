@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
@@ -79,10 +80,10 @@ public class ConnectorBean implements JsonBean {
       idArray.add(connector.getPersistenceId());
       nameArray.add(connector.getUniqueName());
       classArray.add(connector.getClassName());
-      conFormsArray.add(extractForms(connector.getConnection().getForms()));
+      conFormsArray.add(extractForms(connector.getConnectionForms().getForms()));
 
       JSONObject jobForms = new JSONObject();
-      for (MJob job : connector.getJobs().values()) {
+      for (MJobForms job : connector.getAllJobsForms().values()) {
         jobForms.put(job.getType().name(), extractForms(job.getForms()));
       }
       jobFormsArray.add(jobForms);
@@ -153,7 +154,7 @@ public class ConnectorBean implements JsonBean {
       List<MForm> connForms = restoreForms((JSONArray) conFormsArray.get(i));
 
       JSONObject jobJson = (JSONObject) jobFormsArray.get(i);
-      List<MJob> jobs = new ArrayList<MJob>();
+      List<MJobForms> jobs = new ArrayList<MJobForms>();
       for( Map.Entry entry : (Set<Map.Entry>) jobJson.entrySet()) {
         //TODO(jarcec): Handle situation when server is supporting operation
         // that client do not know (server do have newer version than client)
@@ -162,11 +163,11 @@ public class ConnectorBean implements JsonBean {
         List<MForm> jobForms =
           restoreForms((JSONArray) jobJson.get(entry.getKey()));
 
-        jobs.add(new MJob(type, jobForms));
+        jobs.add(new MJobForms(type, jobForms));
       }
 
       MConnector connector = new MConnector(uniqueName, className,
-        new MConnection(connForms), jobs);
+        new MConnectionForms(connForms), jobs);
       connector.setPersistenceId(persistenceId);
       connectors[i] = connector;
     }

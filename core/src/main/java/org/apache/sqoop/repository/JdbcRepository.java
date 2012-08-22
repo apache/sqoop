@@ -18,9 +18,11 @@
 package org.apache.sqoop.repository;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 
@@ -124,5 +126,47 @@ public class JdbcRepository implements Repository {
         tx.close();
       }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createConnection(MConnection connection) {
+    // TODO(jarcec): Implement
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateConnection(MConnection connection) {
+    // TODO(jarcec): Implement
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteConnection(MConnection connection) {
+    // TODO(jarcec): Implement
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConnection findConnection(String name) {
+    // TODO(jarcec): Implement
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MConnection> findConnections(MConnector connector) {
+    // TODO(jarcec): Implement
+    return null;
   }
 }
