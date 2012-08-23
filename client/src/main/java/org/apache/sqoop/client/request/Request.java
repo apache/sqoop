@@ -23,12 +23,18 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
+import java.util.Locale;
+
 public class Request
 {
   public String get(String url) {
     Client client = Client.create();
     WebResource resource = client.resource(url);
-    Builder builder = resource.accept(MediaType.APPLICATION_JSON_TYPE);
+    Builder builder = resource
+      // Sqoop is using JSON for data transfers
+      .accept(MediaType.APPLICATION_JSON_TYPE)
+      // Transfer client locale to return client specific data
+      .acceptLanguage(Locale.getDefault());
     return builder.get(String.class);
   }
 }

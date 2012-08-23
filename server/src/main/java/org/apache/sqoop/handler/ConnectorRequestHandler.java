@@ -32,9 +32,6 @@ public class ConnectorRequestHandler implements RequestHandler {
   private static final Logger LOG =
       Logger.getLogger(ConnectorRequestHandler.class);
 
-  /** The API version supported by this server */
-  public static final String PROTOCOL_V1 = "1";
-
   public ConnectorRequestHandler() {
     LOG.info("ConnectorRequestHandler initialized");
   }
