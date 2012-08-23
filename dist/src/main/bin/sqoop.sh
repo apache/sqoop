@@ -46,10 +46,14 @@ case $COMMAND in
     ;;
 
   client)
+    # Build class path with full path to each library
     for f in client/lib/*.jar; do
-      CLASSPATH=${CLASSPATH}:$f;
+      CLASSPATH=${CLASSPATH}:`readlink -f $f`;
     done
 
+    # We need to change current directory back to original as optional user side script
+    # might be specified with relative path.
+    cd ${OLD_DIR}
     java -classpath ${CLASSPATH} org.apache.sqoop.client.shell.SqoopShell $2
     ;;
 
