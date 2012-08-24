@@ -279,7 +279,7 @@ public class ExportJobBase extends JobBase {
   }
 
   /**
-   * Submit the Map Reduce Job
+   * Submit the Map Reduce Job.
    */
   protected boolean doSubmitJob(Job job)
     throws IOException, InterruptedException, ClassNotFoundException {
