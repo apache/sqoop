@@ -94,6 +94,10 @@ public class FrameworkManager {
     }
   }
 
+  public static MFramework getFramework() {
+    return mFramework;
+  }
+
   public static synchronized void destroy() {
     LOG.trace("Begin framework manager destroy");
   }

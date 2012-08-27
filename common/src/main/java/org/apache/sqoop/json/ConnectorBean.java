@@ -27,29 +27,12 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFormType;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MInputType;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import static org.apache.sqoop.json.util.FormSerialization.*;
+
 public class ConnectorBean implements JsonBean {
-
-  public static final String ID = "id";
-  public static final String NAME = "name";
-  public static final String CLASS = "class";
-  public static final String CON_FORMS = "con_forms";
-  public static final String JOB_FORMS = "job_forms";
-
-  public static final String FORM_NAME = "name";
-  public static final String FORM_TYPE = "type";
-  public static final String FORM_INPUTS = "inputs";
-  public static final String FORM_INPUT_NAME = "name";
-  public static final String FORM_INPUT_TYPE = "type";
-  public static final String FORM_INPUT_MASK = "mask";
-  public static final String FORM_INPUT_SIZE = "size";
 
   private MConnector[] connectors;
 
@@ -98,42 +81,6 @@ public class ConnectorBean implements JsonBean {
     return result;
   }
 
-  @SuppressWarnings("unchecked")
-  private JSONArray extractForms(List<MForm> mForms) {
-    JSONArray forms = new JSONArray();
-
-    for (MForm mForm : mForms) {
-      forms.add(extractForm(mForm));
-    }
-
-    return forms;
-  }
-
-  @SuppressWarnings("unchecked")
-  private JSONObject extractForm(MForm mForm) {
-    JSONObject form = new JSONObject();
-    form.put(FORM_NAME, mForm.getName());
-    form.put(FORM_TYPE, MFormType.CONNECTION.toString());
-    JSONArray mInputs = new JSONArray();
-    form.put(FORM_INPUTS, mInputs);
-
-    for (MInput<?> mInput : mForm.getInputs()) {
-      JSONObject input = new JSONObject();
-      mInputs.add(input);
-
-      input.put(FORM_INPUT_NAME, mInput.getName());
-      input.put(FORM_INPUT_TYPE, mInput.getType().toString());
-      if (mInput.getType() == MInputType.STRING) {
-        input.put(FORM_INPUT_MASK,
-            ((MStringInput)mInput).isMasked());
-        input.put(FORM_INPUT_SIZE,
-            ((MStringInput)mInput).getMaxLength());
-      }
-    }
-
-    return form;
-  }
-
   @Override
   @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
@@ -171,44 +118,5 @@ public class ConnectorBean implements JsonBean {
       connector.setPersistenceId(persistenceId);
       connectors[i] = connector;
     }
-  }
-
-  private List<MForm> restoreForms(JSONArray forms) {
-    List<MForm> mForms = new ArrayList<MForm>();
-
-    for (int i = 0; i < forms.size(); i++) {
-      mForms.add(restoreForm((JSONObject) forms.get(i)));
-    }
-
-    return mForms;
-  }
-
-  private MForm restoreForm(JSONObject form) {
-    JSONArray inputs = (JSONArray) form.get(FORM_INPUTS);
-
-    List<MInput<?>> mInputs = new ArrayList<MInput<?>>();
-    for (int i = 0; i < inputs.size(); i++) {
-      JSONObject input = (JSONObject) inputs.get(i);
-      MInputType type =
-          MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
-      switch (type) {
-        case STRING: {
-          String name = (String) input.get(FORM_INPUT_NAME);
-          boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
-          long size = (Long) input.get(FORM_INPUT_SIZE);
-          MInput<String> mInput = new MStringInput(name, mask, (short)size);
-          mInputs.add(mInput);
-          break;
-        }
-        case MAP: {
-          String name = (String) input.get(FORM_INPUT_NAME);
-          MInput<Map<String, String>> mInput = new MMapInput(name);
-          mInputs.add(mInput);
-          break;
-        }
-      }
-    }
-
-    return new MForm((String) form.get(FORM_NAME), mInputs);
   }
 }

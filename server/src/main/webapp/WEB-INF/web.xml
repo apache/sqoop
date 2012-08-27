@@ -27,6 +27,7 @@ limitations under the License.
     <listener-class>org.apache.sqoop.server.ServerInitializer</listener-class>
   </listener>
 
+  <!-- Version servlet -->
   <servlet>
     <servlet-name>VersionServlet</servlet-name>
     <servlet-class>org.apache.sqoop.server.VersionServlet</servlet-class>
@@ -38,6 +39,7 @@ limitations under the License.
     <url-pattern>/version</url-pattern>
   </servlet-mapping>
 
+  <!-- Connector servlet -->
   <servlet>
     <servlet-name>v1.ConnectorServlet</servlet-name>
     <servlet-class>org.apache.sqoop.server.v1.ConnectorServlet</servlet-class>
@@ -47,6 +49,18 @@ limitations under the License.
   <servlet-mapping>
     <servlet-name>v1.ConnectorServlet</servlet-name>
     <url-pattern>/v1/connector/*</url-pattern>
+  </servlet-mapping>
+
+  <!-- Framework servlet -->
+  <servlet>
+    <servlet-name>v1.FrameworkServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.FrameworkServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.FrameworkServlet</servlet-name>
+    <url-pattern>/v1/framework/*</url-pattern>
   </servlet-mapping>
 
 </web-app>
