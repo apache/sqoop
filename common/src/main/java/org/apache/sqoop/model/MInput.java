@@ -22,7 +22,7 @@ package org.apache.sqoop.model;
  * or a job object.
  * @param <T> the value type associated with this parameter
  */
-public abstract class MInput<T> extends MNamedElement {
+public abstract class MInput<T> extends MValidatedElement {
   private T value;
 
   protected MInput(String name) {

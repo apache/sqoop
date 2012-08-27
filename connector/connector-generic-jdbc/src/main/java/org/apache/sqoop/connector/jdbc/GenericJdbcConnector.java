@@ -32,6 +32,8 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.validation.Validator;
+
 import static org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants.*;
 
 
@@ -116,6 +118,11 @@ public class GenericJdbcConnector implements SqoopConnector {
   @Override
   public Exporter getExporter() {
     return EXPORTER;
+  }
+
+  @Override
+  public Validator getValidator() {
+    return new Validator();
   }
 
 }

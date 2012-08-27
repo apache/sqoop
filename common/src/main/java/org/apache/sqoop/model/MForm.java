@@ -24,7 +24,7 @@ import java.util.List;
  * input gathering process to be broken down into multiple steps that can be
  * then paged through by the user interface.
  */
-public final class MForm extends MNamedElement {
+public final class MForm extends MValidatedElement {
 
   private final List<MInput<?>> inputs;
 

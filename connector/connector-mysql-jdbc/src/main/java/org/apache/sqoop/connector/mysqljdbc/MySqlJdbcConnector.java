@@ -28,6 +28,7 @@ import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.validation.Validator;
 
 public class MySqlJdbcConnector implements SqoopConnector {
 
@@ -60,5 +61,10 @@ public class MySqlJdbcConnector implements SqoopConnector {
   public Exporter getExporter() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public Validator getValidator() {
+    return new Validator();
   }
 }

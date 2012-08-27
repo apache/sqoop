@@ -28,8 +28,6 @@ public abstract class MNamedElement extends MPersistableEntity {
   private final String labelKey;
   private final String helpKey;
 
-  private String errorMessage;
-
   protected MNamedElement(String name) {
     this.name = name;
 
@@ -56,20 +54,6 @@ public abstract class MNamedElement extends MPersistableEntity {
    */
   public String getHelpKey() {
     return helpKey;
-  }
-
-  /**
-   * @param errMsg any error message associated with this parameter
-   */
-  public void setErrorMessage(String errMsg) {
-    this.errorMessage = errMsg;
-  }
-
-  /**
-   * @return any error message associated with this parameter
-   */
-  public String getErrorMessage() {
-    return this.errorMessage;
   }
 
   public abstract String toString();

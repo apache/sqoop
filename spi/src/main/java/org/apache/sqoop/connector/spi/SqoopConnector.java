@@ -25,6 +25,7 @@ import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.validation.Validator;
 
 /**
  * Service provider interface for Sqoop Connectors.
@@ -56,5 +57,14 @@ public interface SqoopConnector {
    * @return an <tt>Exporter</tt> that provides classes for performing export.
    */
   public Exporter getExporter();
+
+  /**
+   * Returns validation object that Sqoop framework can use to validate user
+   * supplied forms before accepting them. This object will be used both for
+   * connection and job forms.
+   *
+   * @return Validator object
+   */
+  public Validator getValidator();
 
 }
