@@ -1,0 +1,154 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.sqoop.json.util;
+
+import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MFormType;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MStringInput;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Convenient static methods for serializing forms.
+ */
+public class FormSerialization {
+
+  public static final String ID = "id";
+  public static final String NAME = "name";
+  public static final String CLASS = "class";
+  public static final String CON_FORMS = "con_forms";
+  public static final String JOB_FORMS = "job_forms";
+
+  public static final String FORM_NAME = "name";
+  public static final String FORM_TYPE = "type";
+  public static final String FORM_INPUTS = "inputs";
+  public static final String FORM_INPUT_NAME = "name";
+  public static final String FORM_INPUT_TYPE = "type";
+  public static final String FORM_INPUT_MASK = "mask";
+  public static final String FORM_INPUT_SIZE = "size";
+
+  /**
+   * Transform given list of forms to JSON Array object.
+   *
+   * @param mForms List of forms.
+   * @return JSON object with serialized form of the list.
+   */
+  @SuppressWarnings("unchecked")
+  public static JSONArray extractForms(List<MForm> mForms) {
+    JSONArray forms = new JSONArray();
+
+    for (MForm mForm : mForms) {
+      forms.add(extractForm(mForm));
+    }
+
+    return forms;
+  }
+
+  /**
+   * Transform given form to JSON Object.
+   *
+   * @param mForm Given MForm instance
+   * @return Serialized JSON object.
+   */
+  @SuppressWarnings("unchecked")
+  public static JSONObject extractForm(MForm mForm) {
+    JSONObject form = new JSONObject();
+    form.put(FORM_NAME, mForm.getName());
+    form.put(FORM_TYPE, MFormType.CONNECTION.toString());
+    JSONArray mInputs = new JSONArray();
+    form.put(FORM_INPUTS, mInputs);
+
+    for (MInput<?> mInput : mForm.getInputs()) {
+      JSONObject input = new JSONObject();
+      mInputs.add(input);
+
+      input.put(FORM_INPUT_NAME, mInput.getName());
+      input.put(FORM_INPUT_TYPE, mInput.getType().toString());
+      if (mInput.getType() == MInputType.STRING) {
+        input.put(FORM_INPUT_MASK,
+            ((MStringInput)mInput).isMasked());
+        input.put(FORM_INPUT_SIZE,
+            ((MStringInput)mInput).getMaxLength());
+      }
+    }
+
+    return form;
+  }
+
+  /**
+   * Restore List of MForms from JSON Array.
+   *
+   * @param forms JSON array representing list of MForms
+   * @return Restored list of MForms
+   */
+  public static List<MForm> restoreForms(JSONArray forms) {
+    List<MForm> mForms = new ArrayList<MForm>();
+
+    for (int i = 0; i < forms.size(); i++) {
+      mForms.add(restoreForm((JSONObject) forms.get(i)));
+    }
+
+    return mForms;
+  }
+
+  /**
+   * Restore one MForm from JSON Object.
+   *
+   * @param form JSON representation of the MForm.
+   * @return Restored MForm.
+   */
+  public static MForm restoreForm(JSONObject form) {
+    JSONArray inputs = (JSONArray) form.get(FORM_INPUTS);
+
+    List<MInput<?>> mInputs = new ArrayList<MInput<?>>();
+    for (int i = 0; i < inputs.size(); i++) {
+      JSONObject input = (JSONObject) inputs.get(i);
+      MInputType type =
+          MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
+      switch (type) {
+        case STRING: {
+          String name = (String) input.get(FORM_INPUT_NAME);
+          boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
+          long size = (Long) input.get(FORM_INPUT_SIZE);
+          MInput<String> mInput = new MStringInput(name, mask, (short) size);
+          mInputs.add(mInput);
+          break;
+        }
+        case MAP: {
+          String name = (String) input.get(FORM_INPUT_NAME);
+          MInput<Map<String, String>> mInput = new MMapInput(name);
+          mInputs.add(mInput);
+          break;
+        }
+      }
+    }
+
+    return new MForm((String) form.get(FORM_NAME), mInputs);
+  }
+
+  private FormSerialization() {
+    // Do not instantiate
+  }
+}
