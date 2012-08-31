@@ -19,20 +19,21 @@ package org.apache.sqoop.job.etl;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * A part of the input data partitioned by the Partitioner.
  */
-public interface Partition {
+public abstract class Partition {
 
   /**
    * Deserialize the fields of this partition from input.
    */
-  public void readFields(DataInput in);
+  public abstract void readFields(DataInput in) throws IOException;
 
   /**
    * Serialize the fields of this partition to output.
    */
-  public void write(DataOutput out);
+  public abstract void write(DataOutput out) throws IOException;
 
 }

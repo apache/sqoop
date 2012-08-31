@@ -21,6 +21,10 @@ package org.apache.sqoop.job.io;
  * An intermediate layer for passing data from the MR framework
  * to the ETL framework.
  */
-public interface DataReader {
+public abstract class DataReader {
+
+  public abstract Object[] readArrayRecord();
+
+  public abstract String readCsvRecord();
 
 }

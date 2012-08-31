@@ -15,17 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.job.etl.Context;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+package org.apache.sqoop.job.mr;
 
-public class GenericJdbcExportLoader extends Loader {
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.sqoop.job.io.Data;
+
+/**
+ * An output format for MapReduce job.
+ */
+public class SqoopFileOutputFormat
+    extends FileOutputFormat<Data, NullWritable> {
+
+  public static final Log LOG =
+      LogFactory.getLog(SqoopFileOutputFormat.class.getName());
 
   @Override
-  public void run(Context context, DataReader reader) {
-    // TODO Auto-generated method stub
+  public RecordWriter<Data, NullWritable> getRecordWriter(
+      TaskAttemptContext context) {
+    SqoopOutputFormatLoadExecutor executor =
+        new SqoopOutputFormatLoadExecutor(context);
+    return executor.getRecordWriter();
   }
 
 }

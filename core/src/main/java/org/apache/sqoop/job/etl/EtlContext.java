@@ -15,17 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.job.etl.Context;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.job.JobConstants;
 
-public class GenericJdbcExportLoader extends Loader {
+/**
+ * An immutable context used in the ETL framework
+ * for accessing configuration values.
+ */
+public class EtlContext implements Context {
+
+  protected Configuration conf;
+
+  public EtlContext(Configuration conf) {
+    this.conf = conf;
+  }
 
   @Override
-  public void run(Context context, DataReader reader) {
-    // TODO Auto-generated method stub
+  public String getString(String key) {
+    return conf.get(key);
+  }
+
+  @Override
+  public String[] getFieldNames() {
+    return StringUtils.getStrings(getString(JobConstants.JOB_ETL_FIELD_NAMES));
   }
 
 }

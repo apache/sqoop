@@ -21,6 +21,10 @@ package org.apache.sqoop.job.io;
  * An intermediate layer for passing data from the ETL framework
  * to the MR framework.
  */
-public interface DataWriter {
+public abstract class DataWriter {
+
+  public abstract void writeArrayRecord(Object[] array);
+
+  public abstract void writeCsvRecord(String csv);
 
 }

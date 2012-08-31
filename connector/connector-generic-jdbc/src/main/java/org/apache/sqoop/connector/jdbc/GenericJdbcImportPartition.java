@@ -17,14 +17,21 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.job.etl.Context;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-public class GenericJdbcExportLoader extends Loader {
+import org.apache.sqoop.job.etl.Partition;
+
+public class GenericJdbcImportPartition extends Partition {
 
   @Override
-  public void run(Context context, DataReader reader) {
+  public void readFields(DataInput in) throws IOException {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
     // TODO Auto-generated method stub
   }
 

@@ -49,7 +49,43 @@ public enum CoreError implements ErrorCode {
   CORE_0006("Properties configuration provider unable to load config file"),
 
   /** The configuration system has not been initialized correctly. */
-  CORE_0007("System not initialized");
+  CORE_0007("System not initialized"),
+
+  /** Error occurs during job execution. */
+  CORE_0008("Error occurs during job execution"),
+
+  /** The system was load to instantiate the specified class. */
+  CORE_0009("Unable to load the specified class"),
+
+  /** The system was unable to instantiate the specified class. */
+  CORE_0010("Unable to instantiate the specified class"),
+
+  /** The parameter already exists in the context */
+  CORE_0011("The parameter already exists in the context"),
+
+  /** The data type is not supported */
+  CORE_0012("The data type is not supported"),
+
+  /** Cannot write to the data writer */
+  CORE_0013("Cannot write to the data writer"),
+
+  /** Cannot read from the data reader */
+  CORE_0014("Cannot read to the data reader"),
+
+  /** Unable to write data due to interrupt */
+  CORE_0015("Unable to write data due to interrupt"),
+
+  /** Unable to read data due to interrupt */
+  CORE_0016("Unable to read data due to interrupt"),
+
+  /** Error occurs during extractor run */
+  CORE_0017("Error occurs during extractor run"),
+
+  /** Error occurs during loader run */
+  CORE_0018("Error occurs during loader run"),
+
+  /** Data have not been completely consumed yet */
+  CORE_0019("Data have not been completely consumed yet");
 
   private final String message;
 

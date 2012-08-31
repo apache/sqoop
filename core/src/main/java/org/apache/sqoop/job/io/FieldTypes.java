@@ -15,17 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.job.io;
 
-import org.apache.sqoop.job.etl.Context;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+public final class FieldTypes {
 
-public class GenericJdbcExportLoader extends Loader {
+  public static final int NULL    = 0;
 
-  @Override
-  public void run(Context context, DataReader reader) {
-    // TODO Auto-generated method stub
+  public static final int BOOLEAN = 1;
+
+  public static final int BYTE    = 10;
+  public static final int CHAR    = 11;
+
+  public static final int SHORT   = 20;
+  public static final int INT     = 21;
+  public static final int LONG    = 22;
+
+  public static final int FLOAT   = 50;
+  public static final int DOUBLE  = 51;
+
+  public static final int BIN     = 100;
+  public static final int UTF     = 101;
+
+  private FieldTypes() {
+    // Disable explicit object creation
   }
-
 }
