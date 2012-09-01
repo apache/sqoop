@@ -21,6 +21,13 @@ limitations under the License.
 
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <tomcat.majorVersion>6</tomcat.majorVersion>
+    <tomcat.minorVersion>0.35</tomcat.minorVersion>
+    <tomcat.version>${tomcat.majorVersion}.${tomcat.minorVersion}</tomcat.version>
+  </properties>
+
+
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>sqoop</artifactId>
@@ -72,10 +79,10 @@ limitations under the License.
                     <mkdir dir="target/sqoop-${project.version}"/>
 
                     <!-- server -->
-                    <get src="http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.27/bin/apache-tomcat-7.0.27.tar.gz"
+                    <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.majorVersion}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
                          dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
                     <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
-                    <move file="target/apache-tomcat-7.0.27" tofile="target/sqoop-${project.version}/server"/>
+                    <move file="target/apache-tomcat-${tomcat.version}" tofile="target/sqoop-${project.version}/server"/>
                     <copy todir="target/sqoop-${project.version}/server/bin">
                       <fileset dir="src/main/server/bin"/>
                     </copy>

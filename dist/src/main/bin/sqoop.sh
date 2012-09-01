@@ -34,6 +34,9 @@ CUR_DIR=`cd $(dirname $(which $0))/..; pwd`
 cd ${CUR_DIR}
 echo "Sqoop home directory: ${CUR_DIR}..."
 
+CATALINA_BIN=${CATALINA_BIN:-server/bin}
+CLIENT_LIB=${CLIENT_LIB:-client/lib}
+
 COMMAND=$1
 case $COMMAND in
   server)
@@ -42,12 +45,12 @@ case $COMMAND in
       exit
     fi
 
-    server/bin/catalina.sh $2
+    $CATALINA_BIN/catalina.sh $2
     ;;
 
   client)
     # Build class path with full path to each library
-    for f in client/lib/*.jar; do
+    for f in $CLIENT_LIB/*.jar; do
       CLASSPATH=${CLASSPATH}:`readlink -f $f`;
     done
 
