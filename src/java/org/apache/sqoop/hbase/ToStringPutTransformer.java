@@ -71,6 +71,8 @@ public class ToStringPutTransformer extends PutTransformer {
 
     String rowKeyCol = getRowKeyColumn();
     String colFamily = getColumnFamily();
+    String timeStampCol = getTimeStampColumn();
+
     byte [] colFamilyBytes = Bytes.toBytes(colFamily);
 
     Object rowKey = fields.get(rowKeyCol);
@@ -83,15 +85,32 @@ public class ToStringPutTransformer extends PutTransformer {
 
     Put put = new Put(Bytes.toBytes(rowKey.toString()));
 
+    Object timeStamp = null;
+    if (null != timeStampCol && !timeStampCol.isEmpty()){
+      timeStamp = fields.get(timeStampCol);
+    }
+    if (null != timeStamp && !((timeStamp instanceof Long)
+        || (timeStamp instanceof Integer))) {
+      LOG.warn(
+          "the time stamp column should be Long or Integer type, "
+          + " but the actual column: " + timeStampCol
+          + ", type: " + timeStamp.getClass());
+      timeStamp = null;
+    }
     for (Map.Entry<String, Object> fieldEntry : fields.entrySet()) {
       String colName = fieldEntry.getKey();
-      if (!colName.equals(rowKeyCol)) {
+      if (!colName.equals(rowKeyCol) && !colName.equals(timeStampCol)) {
         // This is a regular field, not the row key.
         // Add it if it's not null.
         Object val = fieldEntry.getValue();
         if (null != val) {
-          put.add(colFamilyBytes, getFieldNameBytes(colName),
-              Bytes.toBytes(val.toString()));
+          if (timeStamp == null) {
+            put.add(colFamilyBytes, getFieldNameBytes(colName),
+                Bytes.toBytes(val.toString()));
+          } else {
+            put.add(colFamilyBytes, getFieldNameBytes(colName), (Long)timeStamp,
+                Bytes.toBytes(val.toString()));
+          }
         }
       }
     }

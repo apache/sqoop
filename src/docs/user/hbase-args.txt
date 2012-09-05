@@ -27,6 +27,8 @@ Argument                      Description
 +\--hbase-create-table+       If specified, create missing HBase tables
 +\--hbase-row-key <col>+      Specifies which input column to use as the\
                               row key
++\--hbase-timestamp-column <col>+ Specifies which input column to use as \
+                              the raw timestamp 
 +\--hbase-table <table-name>+ Specifies an HBase table to use as the \
                               target instead of HDFS
 --------------------------------------------------------------------------

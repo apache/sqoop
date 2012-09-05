@@ -175,6 +175,8 @@ public abstract class BaseSqoopTool
           org.apache.sqoop.tool.BaseSqoopTool.HBASE_COL_FAM_ARG;
   public static final String HBASE_ROW_KEY_ARG =
           org.apache.sqoop.tool.BaseSqoopTool.HBASE_ROW_KEY_ARG;
+  public static final String HBASE_TIMESTAMP_ARG =
+      org.apache.sqoop.tool.BaseSqoopTool.HBASE_TIMESTAMP_ARG;
   public static final String HBASE_CREATE_TABLE_ARG =
           org.apache.sqoop.tool.BaseSqoopTool.HBASE_CREATE_TABLE_ARG;
   public static final String STORAGE_METASTORE_ARG =

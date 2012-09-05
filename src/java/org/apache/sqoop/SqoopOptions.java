@@ -200,6 +200,9 @@ public class SqoopOptions implements Cloneable {
   // Column of the input to use as the row key.
   @StoredAsProperty("hbase.row.key.col") private String hbaseRowKeyCol;
 
+  //Column of the input to use as the timestamp.
+  @StoredAsProperty("hbase.timestamp.col") private String hbaseTimeStampCol;
+
   // if true, create tables/col families.
   @StoredAsProperty("hbase.create.table") private boolean hbaseCreateTable;
 
@@ -1745,6 +1748,20 @@ public class SqoopOptions implements Cloneable {
    */
   public void setHBaseRowKeyColumn(String col) {
     this.hbaseRowKeyCol = col;
+  }
+
+  /**
+   * Gets the column to use as the timestamp in an hbase import.
+   */
+  public String getHBaseTimeStampColumn() {
+    return this.hbaseTimeStampCol;
+  }
+
+  /**
+   * Sets the column to use as the timestamp in an hbase import.
+   */
+  public void setHBaseTimeStampColumn(String col) {
+    this.hbaseTimeStampCol = col;
   }
 
   /**

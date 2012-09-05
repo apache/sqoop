@@ -32,6 +32,7 @@ public abstract class PutTransformer {
 
   private String columnFamily;
   private String rowKeyColumn;
+  private String timeStampColumn;
 
   /**
    * @return the default column family to insert into.
@@ -60,6 +61,21 @@ public abstract class PutTransformer {
    */
   public void setRowKeyColumn(String rowKeyCol) {
     this.rowKeyColumn = rowKeyCol;
+  }
+
+  /**
+   * @return the field name identifying the value to use as the timestamp.
+   */
+  public String getTimeStampColumn() {
+    return this.timeStampColumn;
+  }
+
+  /**
+   * @return set the column of the input fields which should be used to
+   *         calculate the timestamp.
+   */
+  public void setTimeStampColumn(String timeStampCol) {
+    this.timeStampColumn = timeStampCol;
   }
 
   /**

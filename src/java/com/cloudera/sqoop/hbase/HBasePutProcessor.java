@@ -30,6 +30,8 @@ public class HBasePutProcessor
       org.apache.sqoop.hbase.HBasePutProcessor.COL_FAMILY_KEY;
   public static final String ROW_KEY_COLUMN_KEY =
       org.apache.sqoop.hbase.HBasePutProcessor.ROW_KEY_COLUMN_KEY;
+  public static final String TIMESTAMP_COLUMN_KEY =
+      org.apache.sqoop.hbase.HBasePutProcessor.TIMESTAMP_COLUMN_KEY;
   public static final String TRANSFORMER_CLASS_KEY =
       org.apache.sqoop.hbase.HBasePutProcessor.TRANSFORMER_CLASS_KEY;
 

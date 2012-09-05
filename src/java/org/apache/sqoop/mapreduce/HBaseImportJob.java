@@ -114,6 +114,11 @@ public class HBaseImportJob extends DataDrivenImportJob {
     }
 
     conf.set(HBasePutProcessor.ROW_KEY_COLUMN_KEY, rowKeyCol);
+
+    if (null != options.getHBaseTimeStampColumn()) {
+      conf.set(HBasePutProcessor.TIMESTAMP_COLUMN_KEY,
+          options.getHBaseTimeStampColumn());
+    }
   }
 
   @Override
@@ -175,4 +180,3 @@ public class HBaseImportJob extends DataDrivenImportJob {
     super.jobSetup(job);
   }
 }
-

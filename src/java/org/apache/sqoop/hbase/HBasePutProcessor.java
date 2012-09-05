@@ -53,6 +53,12 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public static final String ROW_KEY_COLUMN_KEY =
       "sqoop.hbase.insert.row.key.column";
 
+  /** Configuration time stamp specifying the column of the input whose value
+   * should be used as the row id.
+   */
+  public static final String TIMESTAMP_COLUMN_KEY =
+      "sqoop.hbase.insert.timestamp.column";
+
   /**
    * Configuration key specifying the PutTransformer implementation to use.
    */
@@ -89,6 +95,8 @@ public class HBasePutProcessor implements Closeable, Configurable,
 
     this.putTransformer.setColumnFamily(conf.get(COL_FAMILY_KEY, null));
     this.putTransformer.setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
+    this.putTransformer.setTimeStampColumn(
+        conf.get(TIMESTAMP_COLUMN_KEY, null));
 
     this.tableName = conf.get(TABLE_NAME_KEY, null);
     try {

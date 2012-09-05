@@ -150,6 +150,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HBASE_TABLE_ARG = "hbase-table";
   public static final String HBASE_COL_FAM_ARG = "column-family";
   public static final String HBASE_ROW_KEY_ARG = "hbase-row-key";
+  public static final String HBASE_TIMESTAMP_ARG = "hbase-timestamp-column";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
 
@@ -249,6 +250,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         }
         LOG.error("Unrecognized argument: " + argv[i]);
         unrecognized = true;
+        throw new RuntimeException("Unrecognized: " + Arrays.toString(argv));
       }
     }
 
@@ -610,6 +612,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Specifies which input column to use as the row key")
         .withLongOpt(HBASE_ROW_KEY_ARG)
         .create());
+    hbaseOpts.addOption(OptionBuilder.withArgName("timestamp")
+        .hasArg()
+        .withDescription("Specifies which input column to use as the timestamp")
+        .withLongOpt(HBASE_TIMESTAMP_ARG)
+        .create());
     hbaseOpts.addOption(OptionBuilder
         .withDescription("If specified, create missing HBase tables")
         .withLongOpt(HBASE_CREATE_TABLE_ARG)
@@ -877,6 +884,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (in.hasOption(HBASE_ROW_KEY_ARG)) {
       out.setHBaseRowKeyColumn(in.getOptionValue(HBASE_ROW_KEY_ARG));
+    }
+
+    if (in.hasOption(HBASE_TIMESTAMP_ARG)) {
+      out.setHBaseTimeStampColumn(in.getOptionValue(HBASE_TIMESTAMP_ARG));
     }
 
     if (in.hasOption(HBASE_CREATE_TABLE_ARG)) {
