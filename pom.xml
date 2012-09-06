@@ -82,9 +82,9 @@ limitations under the License.
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/sqoop/branches/sqoop2/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/sqoop/branches/sqoop2/</developerConnection>
-    <url>http://svn.apache.org/viewvc/sqoop/branches/sqoop2/</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/sqoop.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/sqoop.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=sqoop.git</url>
   </scm>
 
   <properties>
