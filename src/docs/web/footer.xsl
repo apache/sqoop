@@ -29,7 +29,7 @@
       alt="Documentation Home" /></a></span>
   <br/>
   This document was built from Sqoop source available at
-  <a href="http://svn.apache.org/repos/asf/sqoop/trunk/">http://svn.apache.org/repos/asf/sqoop/trunk/</a>.
+  <a href="https://git-wip-us.apache.org/repos/asf?p=sqoop.git">https://git-wip-us.apache.org/repos/asf?p=sqoop.git</a>.
   </div>
 
 </xsl:template>

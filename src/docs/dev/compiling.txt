@@ -21,8 +21,8 @@
 Compiling Sqoop from Source
 ---------------------------
 
-You can obtain the source code for Sqoop at:
-http://svn.apache.org/repos/asf/sqoop/trunk
+You can obtain the source code for Sqoop using following command:
+git clone https://git-wip-us.apache.org/repos/asf/sqoop.git
 
 Sqoop source code is held in a +git+ repository. Instructions for
 retrieving source from the repository are provided at:

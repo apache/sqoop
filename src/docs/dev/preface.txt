@@ -28,7 +28,7 @@ Sqoop Releases
 --------------
 
 Apache Sqoop is an open source software product of The Apache Software Foundation.
-Development for Sqoop occurs at http://svn.apache.org/repos/asf/sqoop/trunk.  At
+Development for Sqoop occurs at http://sqoop.apache.org.  At
 that site, you can obtain:
 
 - New releases of Sqoop as well as its most recent source code

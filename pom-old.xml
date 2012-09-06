@@ -71,9 +71,9 @@ ant instead. You have been warned!
   </developers>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/sqoop/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/sqoop/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/sqoop/trunk/</url>
+    <connection>scm:git:http://git-wip-us.apache.org/repos/asf/sqoop.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/sqoop.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=sqoop.git</url>
   </scm>
   <issueManagement>
     <system>jira</system>
