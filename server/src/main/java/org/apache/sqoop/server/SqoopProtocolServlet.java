@@ -18,8 +18,6 @@
 package org.apache.sqoop.server;
 
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.ErrorCode;
-import org.apache.sqoop.common.ExceptionInfo;
+import org.apache.sqoop.json.ExceptionInfo;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.common.SqoopResponseCode;
@@ -72,6 +70,38 @@ public class SqoopProtocolServlet extends HttpServlet {
     }
   }
 
+  @Override
+  protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    RequestContext rctx = new RequestContext(req, resp);
+
+    try {
+      JsonBean bean = handlePutRequest(rctx);
+      if (bean != null) {
+        sendSuccessResponse(rctx, bean);
+      }
+    } catch (Exception ex) {
+      LOG.error("Exception in PUT " + rctx.getPath(), ex);
+      sendErrorResponse(rctx, ex);
+    }
+  }
+
+  @Override
+  protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    RequestContext rctx = new RequestContext(req, resp);
+
+    try {
+      JsonBean bean = handleDeleteRequest(rctx);
+      if (bean != null) {
+        sendSuccessResponse(rctx, bean);
+      }
+    } catch (Exception ex) {
+      LOG.error("Exception in DELETE " + rctx.getPath(), ex);
+      sendErrorResponse(rctx, ex);
+    }
+  }
+
   private void sendSuccessResponse(RequestContext ctx, JsonBean bean)
       throws IOException {
     HttpServletResponse response = ctx.getResponse();
@@ -106,9 +136,11 @@ public class SqoopProtocolServlet extends HttpServlet {
           SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_MESSAGE,
           ex.getMessage());
 
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          new ExceptionInfo(ec.getCode(),
-              ex.getMessage(), ex).extract().toJSONString());
+      ExceptionInfo exceptionInfo = new ExceptionInfo(ec.getCode(),
+        ex.getMessage(), ex);
+
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.getWriter().write(exceptionInfo.extract().toJSONString());
     } else {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -125,8 +157,6 @@ public class SqoopProtocolServlet extends HttpServlet {
         code.getCode());
     response.setHeader(SqoopProtocolConstants.HEADER_SQOOP_ERROR_MESSAGE,
         code.getMessage());
-
-
   }
 
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
@@ -137,6 +167,18 @@ public class SqoopProtocolServlet extends HttpServlet {
 
   protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
     super.doPost(ctx.getRequest(), ctx.getResponse());
+
+    return null;
+  }
+
+  protected JsonBean handlePutRequest(RequestContext ctx) throws Exception {
+    super.doPut(ctx.getRequest(), ctx.getResponse());
+
+    return null;
+  }
+
+  protected JsonBean handleDeleteRequest(RequestContext ctx) throws Exception {
+    super.doDelete(ctx.getRequest(), ctx.getResponse());
 
     return null;
   }

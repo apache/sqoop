@@ -1,0 +1,208 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.sqoop.handler;
+
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.framework.FrameworkManager;
+import org.apache.sqoop.json.ConnectionBean;
+import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.repository.Repository;
+import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validator;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Connection request handler is supporting following resources:
+ *
+ * GET /v1/connection
+ * Get brief list of all connections present in the system.
+ *
+ * GET /v1/connection/:xid
+ * Return details about one particular connection with id :xid or about all of
+ * them if :xid equals to "all".
+ *
+ * POST /v1/connection
+ * Create new connection
+ *
+ * PUT /v1/connection/:xid
+ * Update connection with id :xid.
+ *
+ * DELETE /v1/connection/:xid
+ * Remove connection with id :xid
+ */
+public class ConnectionRequestHandler implements RequestHandler {
+
+  private static final Logger LOG =
+      Logger.getLogger(ConnectorRequestHandler.class);
+
+  public ConnectionRequestHandler() {
+    LOG.info("ConnectionRequestHandler initialized");
+  }
+
+  @Override
+  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+    switch (ctx.getMethod()) {
+      case GET:
+        return getConnections(ctx);
+      case POST:
+        return createUpdateConnection(ctx, false);
+      case PUT:
+        return createUpdateConnection(ctx, true);
+      case DELETE:
+        return deleteConnection(ctx);
+    }
+
+    return null;
+  }
+
+  /**
+   * Delete connection from metadata repository.
+   *
+   * @param ctx Context object
+   * @return Empty bean
+   */
+  private JsonBean deleteConnection(RequestContext ctx) {
+    String sxid = ctx.getLastURLElement();
+    long xid = Long.valueOf(sxid);
+
+    Repository repository = RepositoryManager.getRepository();
+    repository.deleteConnection(xid);
+
+    return JsonBean.EMPTY_BEAN;
+  }
+
+  /**
+   * Update or create connection metadata in repository.
+   *
+   * @param ctx Context object
+   * @return Validation bean object
+   */
+  private JsonBean createUpdateConnection(RequestContext ctx, boolean update) {
+//    Check that given ID equals with sent ID, otherwise report an error UPDATE
+//    String sxid = ctx.getLastURLElement();
+//    long xid = Long.valueOf(sxid);
+
+    ConnectionBean bean = new ConnectionBean();
+
+    try {
+      JSONObject json =
+        (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
+      bean.restore(json);
+    } catch (IOException e) {
+      throw new SqoopException(ServerError.SERVER_0003,
+        "Can't read request content", e);
+    }
+
+    // Get connection object
+    List<MConnection> connections = bean.getConnections();
+
+    if(connections.size() != 1) {
+      throw new SqoopException(ServerError.SERVER_0003,
+        "Expected one connection metadata but got " + connections.size());
+    }
+
+    MConnection connection = connections.get(0);
+
+    // Verify that user is not trying to spoof us
+    MConnectionForms connectorForms
+      = ConnectorManager.getConnectorMetadata(connection.getConnectorId())
+      .getConnectionForms();
+    MConnectionForms frameworkForms = FrameworkManager.getFramework()
+      .getConnectionForms();
+
+    if(!connectorForms.equals(connection.getConnectorPart())
+      || !frameworkForms.equals(connection.getFrameworkPart())) {
+      throw new SqoopException(ServerError.SERVER_0003,
+        "Detected incorrect form structure");
+    }
+
+    // Get validator objects
+    Validator connectorValidator =
+      ConnectorManager.getConnector(connection.getConnectorId()).getValidator();
+    Validator frameworkValidator = FrameworkManager.getValidator();
+
+    // Validate connection object
+    Status conStat = connectorValidator.validate(connection.getConnectorPart());
+    Status frmStat = frameworkValidator.validate(connection.getFrameworkPart());
+    Status finalStatus = Status.getWorstStatus(conStat, frmStat);
+
+    // If we're good enough let's perform the action
+    if(finalStatus.canProceed()) {
+      if(update) {
+        RepositoryManager.getRepository().updateConnection(connection);
+      } else {
+        RepositoryManager.getRepository().createConnection(connection);
+      }
+    }
+
+    // Return back validations in all cases
+    return new ValidationBean(connection, finalStatus);
+  }
+
+  private JsonBean getConnections(RequestContext ctx) {
+    String sxid = ctx.getLastURLElement();
+    ConnectionBean bean;
+
+    Locale locale = ctx.getAcceptLanguageHeader();
+    Repository repository = RepositoryManager.getRepository();
+
+    if (sxid.equals("all")) {
+
+      List<MConnection> connections = repository.findConnections();
+      bean = new ConnectionBean(connections);
+
+      // Add associated resources into the bean
+      for( MConnection connection : connections) {
+        long connectorId = connection.getConnectorId();
+        if(!bean.hasConnectorBundle(connectorId)) {
+          bean.addConnectorBundle(connectorId,
+            ConnectorManager.getResourceBundle(connectorId, locale));
+        }
+      }
+    } else {
+      long xid = Long.valueOf(sxid);
+
+      MConnection connection = repository.findConnection(xid);
+      long connectorId = connection.getConnectorId();
+
+      bean = new ConnectionBean(connection);
+
+      bean.addConnectorBundle(connectorId,
+        ConnectorManager.getResourceBundle(connectorId, locale));
+    }
+
+    // Sent framework resource bundle in all cases
+    bean.setFrameworkBundle(FrameworkManager.getBundle(locale));
+
+    return bean;
+  }
+}

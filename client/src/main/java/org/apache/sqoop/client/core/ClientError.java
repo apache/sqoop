@@ -34,7 +34,15 @@ public enum ClientError implements ErrorCode {
   CLIENT_0003("An error has occurred when parsing options"),
 
   /** Unable to resolve the variables. */
-  CLIENT_0004("Unable to resolve the variables");
+  CLIENT_0004("Unable to resolve the variables"),
+
+  /** We're not able to get user input */
+  CLIENT_0005("Can't get user input"),
+
+  /** There occured exception on server side **/
+  CLIENT_0006("Server has returned exception"),
+
+  ;
 
   private final String message;
 

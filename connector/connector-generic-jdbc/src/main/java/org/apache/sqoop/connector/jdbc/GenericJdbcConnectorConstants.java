@@ -26,7 +26,6 @@ public final class GenericJdbcConnectorConstants {
   public static final String RESOURCE_BUNDLE_NAME =
       "generic-jdbc-connector-resources";
 
-
   // Metadata constants
 
   // Connection form
@@ -41,7 +40,7 @@ public final class GenericJdbcConnectorConstants {
   public static final String INPUT_CONN_JDBCPROPS = "inp-conn-jdbc-properties";
 
   // Table form
-  public static final String FORM_TABLE = "table-connection";
+  public static final String FORM_TABLE = "form-table";
 
   // Table form inputs
   public static final String INPUT_TBL_TABLE = "inp-tbl-table";

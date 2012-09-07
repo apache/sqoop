@@ -17,10 +17,24 @@
  */
 package org.apache.sqoop.server;
 
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.server.common.ServerError;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
 
 public class RequestContext {
+
+  /**
+   * Enumeration with supported HTTP methods.
+   */
+  public enum Method {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+  }
 
   private final HttpServletRequest request;
   private final HttpServletResponse response;
@@ -40,5 +54,42 @@ public class RequestContext {
 
   public String getPath() {
     return request.getRequestURL().toString();
+  }
+
+  /**
+   * Get method that was used for this HTTP request.
+   *
+   * @return Method that was used
+   */
+  public Method getMethod() {
+    try {
+      return Method.valueOf(request.getMethod());
+    } catch(IllegalArgumentException ex) {
+      throw new SqoopException(ServerError.SERVER_0002,
+        "Unsupported HTTP method:" + request.getMethod());
+    }
+  }
+
+  /**
+   * Return last element of URL.
+   *
+   * Return text occurring after last "/" character in URL, typically there will
+   * be an ID.
+   *
+   * @return String after last "/" in URL
+   */
+  public String getLastURLElement() {
+    String uri = getRequest().getRequestURI();
+    int slash = uri.lastIndexOf("/");
+    return uri.substring(slash + 1);
+  }
+
+  /**
+   * Get locale specified in accept-language HTTP header.
+   *
+   * @return First specified locale
+   */
+  public Locale getAcceptLanguageHeader() {
+    return new Locale(request.getHeader("Accept-Language"));
   }
 }

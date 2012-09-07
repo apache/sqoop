@@ -15,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.common;
+package org.apache.sqoop.json;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.apache.sqoop.json.JsonBean;
 import org.json.simple.JSONObject;
 
 public class ExceptionInfo implements JsonBean {
@@ -33,6 +32,7 @@ public class ExceptionInfo implements JsonBean {
   private String errorMessage;
   private String stackTrace;
 
+  // For "extract"
   public ExceptionInfo(String code, String message, Exception ex) {
     errorCode = code;
     errorMessage = message;
@@ -42,6 +42,10 @@ public class ExceptionInfo implements JsonBean {
     writer.flush();
 
     stackTrace = writer.getBuffer().toString();
+  }
+
+  // For "restore"
+  public ExceptionInfo() {
   }
 
   @SuppressWarnings("unchecked")
@@ -60,5 +64,10 @@ public class ExceptionInfo implements JsonBean {
     errorCode = (String) jsonObject.get(ERROR_CODE);
     errorMessage = (String) jsonObject.get(ERROR_MESSAGE);
     stackTrace = (String) jsonObject.get(STACK_TRACE);
+  }
+
+  @Override
+  public String toString() {
+    return errorMessage;
   }
 }

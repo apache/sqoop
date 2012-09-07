@@ -41,6 +41,61 @@ public class JdbcRepository implements Repository {
   }
 
   /**
+   * Private interface to wrap specific code that requires fresh connection to
+   * repository with general code that will get the connection and handle
+   * exceptions.
+   */
+  private interface DoWithConnection {
+    /**
+     * Do what is needed to be done with given connection object.
+     *
+     * @param conn Connection to metadata repository.
+     * @return Arbitrary value
+     */
+    public Object doIt(Connection conn) throws Exception;
+  }
+
+  /**
+   * Handle transaction and connection functionality and delegate action to
+   * given delegator.
+   *
+   * @param delegator Code for specific action
+   * @return Arbitrary value
+   */
+  private Object doWithConnection(DoWithConnection delegator) {
+    JdbcRepositoryTransaction tx = null;
+
+    try {
+      // Get transaction and connection
+      tx = getTransaction();
+      tx.begin();
+      Connection conn = tx.getConnection();
+
+      // Delegate the functionality to our delegator
+      Object returnValue = delegator.doIt(conn);
+
+      // Commit transaction
+      tx.commit();
+
+      // Return value that the underlying code needs to return
+      return returnValue;
+
+    } catch (Exception ex) {
+      if (tx != null) {
+        tx.rollback();
+      }
+      if (ex instanceof SqoopException) {
+        throw (SqoopException) ex;
+      }
+      throw new SqoopException(RepositoryError.JDBCREPO_0012, ex);
+    } finally {
+      if (tx != null) {
+        tx.close();
+      }
+    }
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -52,121 +107,136 @@ public class JdbcRepository implements Repository {
    * {@inheritDoc}
    */
   @Override
-  public MConnector registerConnector(MConnector mConnector) {
-    MConnector result = null;
-    JdbcRepositoryTransaction tx = null;
-    String connectorUniqueName = mConnector.getUniqueName();
-    try {
-      tx = getTransaction();
-      tx.begin();
-      Connection conn = tx.getConnection();
-      result = handler.findConnector(connectorUniqueName, conn);
-      if (result == null) {
-        handler.registerConnector(mConnector, conn);
-      } else {
-        if (!result.equals(mConnector)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0013,
-              "given[" + mConnector + "] found[" + result + "]");
+  public MConnector registerConnector(final MConnector mConnector) {
+
+    return (MConnector) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        String connectorUniqueName = mConnector.getUniqueName();
+
+        MConnector result = handler.findConnector(connectorUniqueName, conn);
+        if (result == null) {
+          handler.registerConnector(mConnector, conn);
+        } else {
+          if (!result.equals(mConnector)) {
+            throw new SqoopException(RepositoryError.JDBCREPO_0013,
+                "given[" + mConnector + "] found[" + result + "]");
+          }
+          mConnector.setPersistenceId(result.getPersistenceId());
         }
-        mConnector.setPersistenceId(result.getPersistenceId());
-      }
-      tx.commit();
-    } catch (Exception ex) {
-      if (tx != null) {
-        tx.rollback();
-      }
-      if (ex instanceof SqoopException) {
-        throw (SqoopException) ex;
-      }
-      throw new SqoopException(RepositoryError.JDBCREPO_0012,
-          mConnector.toString(), ex);
-    } finally {
-      if (tx != null) {
-        tx.close();
-      }
-    }
 
-    return result;
+        return result;
+      }
+    });
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void registerFramework(MFramework mFramework) {
-    MFramework result = null;
-    JdbcRepositoryTransaction tx = null;
-
-    try {
-      tx = getTransaction();
-      tx.begin();
-      Connection conn = tx.getConnection();
-      result = handler.findFramework(conn);
-      if (result == null) {
-        handler.registerFramework(mFramework, conn);
-      } else {
-        if (!result.equals(mFramework)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0014,
-              "given[" + mFramework + "] found[" + result + "]");
+  public void registerFramework(final MFramework mFramework) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        MFramework result = handler.findFramework(conn);
+        if (result == null) {
+          handler.registerFramework(mFramework, conn);
+        } else {
+          if (!result.equals(mFramework)) {
+            throw new SqoopException(RepositoryError.JDBCREPO_0014,
+                "given[" + mFramework + "] found[" + result + "]");
+          }
+          mFramework.setPersistenceId(result.getPersistenceId());
         }
-        mFramework.setPersistenceId(result.getPersistenceId());
+
+        return null;
       }
-      tx.commit();
-    } catch (Exception ex) {
-      if (tx != null) {
-        tx.rollback();
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createConnection(final MConnection connection) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(connection.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0015);
+        }
+
+        handler.createConnection(connection, conn);
+        return null;
       }
-      if (ex instanceof SqoopException) {
-        throw (SqoopException) ex;
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateConnection(final MConnection connection) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+       if(!connection.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0016);
+        }
+        if(!handler.existsConnection(connection.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017,
+            "Invalid id: " + connection.getPersistenceId());
+        }
+
+        handler.updateConnection(connection, conn);
+        return null;
       }
-      throw new SqoopException(RepositoryError.JDBCREPO_0012,
-        mFramework.toString(), ex);
-    } finally {
-      if (tx != null) {
-        tx.close();
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteConnection(final long connectionId) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(!handler.existsConnection(connectionId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017,
+            "Invalid id: " + connectionId);
+        }
+
+        handler.deleteConnection(connectionId, conn);
+        return null;
       }
-    }
+    });
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void createConnection(MConnection connection) {
-    // TODO(jarcec): Implement
+  public MConnection findConnection(final long connectionId) {
+    return (MConnection) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findConnection(connectionId, conn);
+      }
+    });
   }
 
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public void updateConnection(MConnection connection) {
-    // TODO(jarcec): Implement
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void deleteConnection(MConnection connection) {
-    // TODO(jarcec): Implement
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MConnection findConnection(String name) {
-    // TODO(jarcec): Implement
-    return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public List<MConnection> findConnections(MConnector connector) {
-    // TODO(jarcec): Implement
-    return null;
+  public List<MConnection> findConnections() {
+    return (List<MConnection>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findConnections(conn);
+      }
+    });
   }
 }

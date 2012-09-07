@@ -21,14 +21,21 @@ import org.apache.sqoop.json.ConnectorBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+/**
+ * Provide cRud semantics over RESTfull HTTP API for connectors. Only read
+ * is supported as creation, update and delete might be done only directly on
+ * server side.
+ */
 public class ConnectorRequest extends Request
 {
-  public ConnectorBean doGet(String serverUrl, String cid) {
+  public static final String RESOURCE = "v1/connector/";
+
+  public ConnectorBean read(String serverUrl, String cid) {
     String response = null;
     if (cid == null) {
-      response = super.get(serverUrl + "v1/connector/all");
+      response = super.get(serverUrl + RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + "v1/connector/" + cid);
+      response = super.get(serverUrl + RESOURCE + cid);
     }
     JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
 

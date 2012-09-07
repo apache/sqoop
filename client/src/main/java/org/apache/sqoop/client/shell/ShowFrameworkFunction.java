@@ -21,13 +21,13 @@ import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.FrameworkRequest;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MFramework;
-import org.apache.sqoop.model.MJobForms;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.ResourceBundle;
 
-import static org.apache.sqoop.client.display.FormDisplayer.*;
+import static org.apache.sqoop.client.utils.FormDisplayer.*;
 
 /**
  *
@@ -65,15 +65,17 @@ public class ShowFrameworkFunction extends SqoopFunction {
     }
 
     FrameworkBean frameworkBean =
-      frameworkRequest.doGet(Environment.getServerUrl());
+      frameworkRequest.read(Environment.getServerUrl());
+
     MFramework framework = frameworkBean.getFramework();
+    ResourceBundle bundle = frameworkBean.getResourceBundle();
 
     io.out.println("@|bold Framework specific options: |@");
 
     io.out.print("Persistent id: ");
     io.out.println(framework.getPersistenceId());
 
-    displayFormDetails(io, framework);
+    displayFormMetadataDetails(io, framework, bundle);
 
     io.out.println();
   }

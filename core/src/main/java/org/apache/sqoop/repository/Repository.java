@@ -77,26 +77,24 @@ public interface Repository {
   public void updateConnection(MConnection connection);
 
   /**
-   * Delete given connection from repository. This connection object must
-   * exists in repository otherwise exception will be thrown.
+   * Delete connection with given id from metadata repository.
    *
-   * @param connection Connection object that should be removed from repository
+   * @param id Connection object that should be removed from repository
    */
-  public void deleteConnection(MConnection connection);
+  public void deleteConnection(long id);
 
   /**
-   * Find connection with given name in repository.
+   * Find connection with given id in repository.
    *
-   * @param name Connection name
+   * @param id Connection id
    * @return Deserialized form of the connection that is saved in repository
    */
-  public MConnection findConnection(String name);
+  public MConnection findConnection(long id);
 
   /**
-   * Get all connection objects for given connector.
+   * Get all connection objects.
    *
-   * @param connector Connector object
    * @return Array will all saved connection objects
    */
-  public List<MConnection> findConnections(MConnector connector);
+  public List<MConnection> findConnections();
 }

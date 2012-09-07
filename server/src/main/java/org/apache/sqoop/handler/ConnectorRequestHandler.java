@@ -19,13 +19,17 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ConnectorRequestHandler implements RequestHandler {
 
@@ -39,22 +43,28 @@ public class ConnectorRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
-    MConnector[] connectors;
+    List<MConnector> connectors;
+    List<ResourceBundle> bundles;
+    Locale locale = ctx.getAcceptLanguageHeader();
 
-    String uri = ctx.getRequest().getRequestURI();
-    int slash = uri.lastIndexOf("/");
-    String cid = uri.substring(slash + 1);
+    String cid = ctx.getLastURLElement();
+
     LOG.info("ConnectorRequestHandler handles cid: " + cid);
     if (cid.equals("all")) {
       // display all connectors
-      connectors = ConnectorManager.getConnectors();
+      connectors = ConnectorManager.getConnectorsMetadata();
+      bundles = ConnectorManager.getResourceBundles(locale);
 
     } else {
-      // display one connector
-      connectors = new MConnector[] {
-          ConnectorManager.getConnector(Long.parseLong(cid)) };
+      Long id = Long.parseLong(cid);
+
+      connectors = new LinkedList<MConnector>();
+      bundles = new LinkedList<ResourceBundle>();
+
+      connectors.add(ConnectorManager.getConnectorMetadata(id));
+      bundles.add(ConnectorManager.getResourceBundle(id, locale));
     }
 
-    return new ConnectorBean(connectors);
+    return new ConnectorBean(connectors, bundles);
   }
 }

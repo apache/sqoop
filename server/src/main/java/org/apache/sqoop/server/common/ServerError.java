@@ -15,31 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.validation;
+package org.apache.sqoop.server.common;
+
+import org.apache.sqoop.common.ErrorCode;
 
 /**
- * Status modes of a validation process.
+ *
  */
-public enum Status {
-  /**
-   * Everything is correct.
-   *
-   * There are no issues, no warnings, nothing.
-   */
-  FINE,
+public enum ServerError implements ErrorCode {
 
-  /**
-   * Validated entity is correct enough to be processed.
-   *
-   * There might be some warnings, but no errors. It should be safe
-   * to proceed with processing.
-   */
-  ACCEPTABLE,
+  /** Unknown error on server side. */
+  SERVER_0001("Unknown server error"),
 
-  /**
-   * There are serious issues with validated entity.
-   *
-   * We can't proceed until reported issues will be resolved.
-   */
-  UNACCEPTABLE,
+  /** Unknown error on server side. */
+  SERVER_0002("Unsupported HTTP method"),
+
+  /** We've received invalid HTTP request */
+  SERVER_0003("Invalid HTTP request"),
+
+  ;
+
+  private final String message;
+
+  private ServerError(String message) {
+    this.message = message;
+  }
+
+  public String getCode() {
+    return name();
+  }
+
+  public String getMessage() {
+    return message;
+  }
 }

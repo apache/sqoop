@@ -19,6 +19,7 @@ package org.apache.sqoop.client.shell;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
@@ -26,10 +27,9 @@ import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.ConnectorRequest;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MJobForms;
 import org.codehaus.groovy.tools.shell.IO;
 
-import static org.apache.sqoop.client.display.FormDisplayer.*;
+import static org.apache.sqoop.client.utils.FormDisplayer.*;
 
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction
@@ -82,12 +82,13 @@ public class ShowConnectorFunction extends SqoopFunction
       conntectorRequest = new ConnectorRequest();
     }
     ConnectorBean connectorBean =
-      conntectorRequest.doGet(Environment.getServerUrl(), cid);
-    MConnector[] connectors = connectorBean.getConnectors();
+      conntectorRequest.read(Environment.getServerUrl(), cid);
+    List<MConnector> connectors = connectorBean.getConnectors();
+    List<ResourceBundle> bundles = connectorBean.getResourceBundles();
 
-    io.out.println("@|bold " + connectors.length + " connector(s) to show: |@");
-    for (int i = 0; i < connectors.length; i++) {
-      MConnector connector = connectors[i];
+    io.out.println("@|bold " + connectors.size() + " connector(s) to show: |@");
+    for (int i = 0; i < connectors.size(); i++) {
+      MConnector connector = connectors.get(i);
 
       io.out.print("Connector with id ");
       io.out.print(connector.getPersistenceId());
@@ -98,7 +99,7 @@ public class ShowConnectorFunction extends SqoopFunction
       io.out.print("  Class: ");
       io.out.println(connector.getClassName());
 
-      displayFormDetails(io, connector);
+      displayFormMetadataDetails(io, connector, bundles.get(i));
 
     }
 

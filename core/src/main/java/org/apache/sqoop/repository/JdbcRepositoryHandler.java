@@ -18,7 +18,9 @@
 package org.apache.sqoop.repository;
 
 import java.sql.Connection;
+import java.util.List;
 
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 
@@ -104,4 +106,57 @@ public interface JdbcRepositoryHandler {
    *   want to validate live connections.
    */
   public String validationQuery();
+
+  /**
+   * Save given connection to repository. This connection must not be already
+   * present in the repository otherwise exception will be thrown.
+   *
+   * @param connection Connection object to serialize into repository.
+   * @param conn Connection to metadata repository
+   */
+  public void createConnection(MConnection connection, Connection conn);
+
+  /**
+   * Update given connection representation in repository. This connection
+   * object must already exists in the repository otherwise exception will be
+   * thrown.
+   *
+   * @param connection Connection object that should be updated in repository.
+   * @param conn Connection to metadata repository
+   */
+  public void updateConnection(MConnection connection, Connection conn);
+
+  /**
+   * Check if given connection exists in metastore.
+   *
+   * @param id Connection id
+   * @param conn Connection to metadata repository
+   * @return True if the connection exists
+   */
+  public boolean existsConnection(long id, Connection conn);
+
+  /**
+   * Delete connection with given id from metadata repository.
+   *
+   * @param id Connection object that should be removed from repository
+   * @param conn Connection to metadata repository
+   */
+  public void deleteConnection(long id, Connection conn);
+
+  /**
+   * Find connection with given id in repository.
+   *
+   * @param id Connection id
+   * @param conn Connection to metadata repository
+   * @return Deserialized form of the connection that is saved in repository
+   */
+  public MConnection findConnection(long id, Connection conn);
+
+  /**
+   * Get all connection objects.
+   *
+   * @param conn Connection to metadata repository
+   * @return List will all saved connection objects
+   */
+  public List<MConnection> findConnections(Connection conn);
 }

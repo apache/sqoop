@@ -73,14 +73,24 @@ public enum RepositoryError implements ErrorCode {
    */
   JDBCREPO_0011("Attempt to reinitialize JDBC repository context"),
 
-  /** The system was unable to register metadata in its repository. */
-  JDBCREPO_0012("Failure in repository metadata registration process."),
+  /** Failure in metadata repository operation. */
+  JDBCREPO_0012("Failure in metadata repository operation."),
 
   /** The system found a change in connector metadata that requires upgrade. */
   JDBCREPO_0013("Connector metadata changed - upgrade may be required"),
 
   /** The system found a change in framework metadata that requires upgrade. */
-  JDBCREPO_0014("Framework metadata changed - upgrade may be required");
+  JDBCREPO_0014("Framework metadata changed - upgrade may be required"),
+
+  /** Connection that we're trying to create is already saved in repository **/
+  JDBCREPO_0015("Cannot create connection that was already created"),
+
+  /** Connection that we're trying to update is not yet saved **/
+  JDBCREPO_0016("Cannot update connection that was not yet created"),
+
+  /** Invalid connection id **/
+  JDBCREPO_0017("Given connection id is invalid"),
+  ;
 
   private final String message;
 

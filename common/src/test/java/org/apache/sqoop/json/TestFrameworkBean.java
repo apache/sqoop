@@ -17,20 +17,15 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ResourceBundle;
+
+import static org.apache.sqoop.json.TestUtil.*;
+
 
 import static org.junit.Assert.*;
 
@@ -45,9 +40,10 @@ public class TestFrameworkBean {
    */
   @Test
   public void testSerialization() {
-    MFramework framework = getFramework("1");
+    MFramework framework = getFramework();
+
     // Serialize it to JSON object
-    FrameworkBean bean = new FrameworkBean(framework);
+    FrameworkBean bean = new FrameworkBean(framework, getResourceBundle());
     JSONObject json = bean.extract();
 
     // "Move" it across network in text form
@@ -59,40 +55,10 @@ public class TestFrameworkBean {
     retrievedBean.restore(retrievedJson);
 
     assertEquals(framework, retrievedBean.getFramework());
-  }
 
-  public MFramework getFramework(String parameter) {
-    List<MInput<?>> inputs;
-
-    List<MForm> connectionForms = new ArrayList<MForm>();
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("url", false, (short) 10));
-    inputs.add(new MStringInput("username", false, (short) 10));
-    inputs.add(new MStringInput("password", false, (short) 10));
-    connectionForms.add(new MForm("connection", inputs));
-
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MMapInput("properties"));
-    connectionForms.add(new MForm("properties", inputs));
-    MConnectionForms connection = new MConnectionForms(connectionForms);
-
-    List<MForm> jobForms = new ArrayList<MForm>();
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("A", false, (short) 10));
-    inputs.add(new MStringInput("B", false, (short) 10));
-    inputs.add(new MStringInput("C", false, (short) 10));
-    jobForms.add((new MForm("D", inputs)));
-
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("Z", false, (short) 10));
-    inputs.add(new MStringInput("X", false, (short) 10));
-    inputs.add(new MStringInput("Y", false, (short) 10));
-    jobForms.add(new MForm("D", inputs));
-
-    List<MJobForms> jobs = new ArrayList<MJobForms>();
-    jobs.add(new MJobForms(MJob.Type.IMPORT, jobForms));
-
-    return new MFramework(connection, jobs);
+    ResourceBundle retrievedBundle = retrievedBean.getResourceBundle();
+    assertEquals("a", retrievedBundle.getString("a"));
+    assertEquals("b", retrievedBundle.getString("b"));
   }
 
 }

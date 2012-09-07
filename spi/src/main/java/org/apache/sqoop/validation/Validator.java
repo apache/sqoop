@@ -19,7 +19,6 @@ package org.apache.sqoop.validation;
 
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 
 import java.util.List;
@@ -71,9 +70,7 @@ public class Validator {
     for (MForm form : forms) {
       Status status = validate(form);
 
-      if ( finalStatus.compareTo(status) > 0 ) {
-        finalStatus = status;
-      }
+      finalStatus = Status.getWorstStatus(finalStatus, status);
     }
 
     return finalStatus;

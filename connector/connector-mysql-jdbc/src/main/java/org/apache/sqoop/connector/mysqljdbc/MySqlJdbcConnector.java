@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.mysqljdbc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -28,6 +29,7 @@ import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.utils.MapResourceBundle;
 import org.apache.sqoop.validation.Validator;
 
 public class MySqlJdbcConnector implements SqoopConnector {
@@ -37,8 +39,7 @@ public class MySqlJdbcConnector implements SqoopConnector {
 
   @Override
   public ResourceBundle getBundle(Locale locale) {
-    // TODO Auto-generated method stub
-    return null;
+    return new MapResourceBundle(new HashMap<String, Object>());
   }
 
   @Override

@@ -55,7 +55,7 @@ public enum DerbyRepoError implements ErrorCode {
    * The system could not load the connector due to unexpected position
    * of form.
    */
-  DERBYREPO_0010("The form retrieved does not match expteced position"),
+  DERBYREPO_0010("The form retrieved does not match expected position"),
 
   /**
    * The system was not able to register metadata due to a pre-assigned
@@ -70,10 +70,10 @@ public enum DerbyRepoError implements ErrorCode {
   DERBYREPO_0012("Unexpected update count on connector registration"),
 
   /**
-   * The system was unable to register connector metadata due to a failure to
-   * retrieve the generated identifier.
+   * The system was unable to register metadata due to a failure to retrieve
+   * the generated identifier.
    */
-  DERBYREPO_0013("Unable to retrieve generated identifier for new connector"),
+  DERBYREPO_0013("Unable to retrieve generated identifier"),
 
   /**
    * The system was unable to register connector metadata due to a server
@@ -103,8 +103,30 @@ public enum DerbyRepoError implements ErrorCode {
    * The system was unable to register connector metadata due to a failure to
    * retrieve the generated identifier for a form input.
    */
-  DERBYREPO_0018("Unable to retrieve generated identifier for form input");
+  DERBYREPO_0018("Unable to retrieve generated identifier for form input"),
 
+  /** We cant create new connection in metastore **/
+  DERBYREPO_0019("Unable to create new connection data"),
+
+  /** We can't save values for input to metastore **/
+  DERBYREPO_0020("Unable to save input values to metadata repository"),
+
+  /** We can't update connection in metastore **/
+  DERBYREPO_0021("Unable to update connection metadata in repository"),
+
+  /** We can't delete connection in metastore **/
+  DERBYREPO_0022("Unable to delete connection metadata in repository"),
+
+  /** We can't restore connection metadata from metastore **/
+  DERBYREPO_0023("Unable to load connection metadata from repository"),
+
+  /** We can't restore specific connection metadata from metastore **/
+  DERBYREPO_0024("Unable to load specific connection metadata from repository"),
+
+  /** We're unable to check if given connection already exists */
+  DERBYREPO_0025("Unable to check if given connection exists"),
+
+  ;
 
   private final String message;
 

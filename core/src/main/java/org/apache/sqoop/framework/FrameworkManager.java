@@ -27,11 +27,14 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.validation.Validator;
 
 import static org.apache.sqoop.framework.FrameworkConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Manager for Sqoop framework itself.
@@ -49,6 +52,8 @@ public class FrameworkManager {
   private static final List<MJobForms> JOB_FORMS;
 
   private static final MFramework mFramework;
+
+  private static final Validator validator;
 
   static {
 
@@ -82,6 +87,9 @@ public class FrameworkManager {
     JOB_FORMS.add(new MJobForms(MJob.Type.EXPORT, jobForms));
 
     mFramework = new MFramework(CONNECTION_FORMS, JOB_FORMS);
+
+    // Build validator
+    validator = new Validator();
   }
 
   public static synchronized void initialize() {
@@ -102,4 +110,12 @@ public class FrameworkManager {
     LOG.trace("Begin framework manager destroy");
   }
 
+  public static Validator getValidator() {
+    return validator;
+  }
+
+  public static ResourceBundle getBundle(Locale locale) {
+    return ResourceBundle.getBundle(
+        FrameworkConstants.RESOURCE_BUNDLE_NAME, locale);
+  }
 }

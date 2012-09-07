@@ -115,4 +115,8 @@ public final class ConnectorHandler {
   public MConnector getMetadata() {
     return mConnector;
   }
+
+  public SqoopConnector getConnector() {
+    return connector;
+  }
 }

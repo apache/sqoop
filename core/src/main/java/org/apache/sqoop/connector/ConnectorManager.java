@@ -22,11 +22,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
@@ -44,18 +49,40 @@ public class ConnectorManager {
   private static Map<String, ConnectorHandler> handlerMap =
       new HashMap<String, ConnectorHandler>();
 
-  public static MConnector[] getConnectors() {
-    MConnector[] connectors = new MConnector[handlerMap.size()];
-    int indx = 0;
-    for (ConnectorHandler handler : handlerMap.values()) {
-      connectors[indx++] = handler.getMetadata();
+  public static List<MConnector> getConnectorsMetadata() {
+    List<MConnector> connectors = new LinkedList<MConnector>();
+    for(ConnectorHandler handler : handlerMap.values()) {
+      connectors.add(handler.getMetadata());
     }
     return connectors;
   }
 
-  public static MConnector getConnector(long connectorId) {
+  public static Set<Long> getConnectoIds() {
+    return nameMap.keySet();
+  }
+
+  public static List<ResourceBundle> getResourceBundles(Locale locale) {
+    List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+    for(ConnectorHandler handler : handlerMap.values()) {
+      bundles.add(handler.getConnector().getBundle(locale));
+    }
+    return bundles;
+  }
+
+  public static ResourceBundle getResourceBundle(long connectorId,
+                                                 Locale locale) {
+    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    return  handler.getConnector().getBundle(locale);
+  }
+
+  public static MConnector getConnectorMetadata(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     return handler.getMetadata();
+  }
+
+  public static SqoopConnector getConnector(long connectorId) {
+    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    return handler.getConnector();
   }
 
   public static synchronized void initialize() {

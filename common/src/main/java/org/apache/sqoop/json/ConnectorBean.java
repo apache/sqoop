@@ -18,8 +18,10 @@
 package org.apache.sqoop.json;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.apache.sqoop.model.MConnectionForms;
@@ -31,23 +33,31 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import static org.apache.sqoop.json.util.FormSerialization.*;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
 
 public class ConnectorBean implements JsonBean {
 
-  private MConnector[] connectors;
+  private List<MConnector> connectors;
+
+  private List<ResourceBundle> bundles;
 
   // for "extract"
-  public ConnectorBean(MConnector[] connectors) {
-    this.connectors = new MConnector[connectors.length];
-    System.arraycopy(connectors, 0, this.connectors, 0, connectors.length);
+  public ConnectorBean(List<MConnector> connectors,
+                       List<ResourceBundle> bundles) {
+    this.connectors = connectors;
+    this.bundles = bundles;
   }
 
   // for "restore"
   public ConnectorBean() {
   }
 
-  public MConnector[] getConnectors() {
+  public List<MConnector> getConnectors() {
     return connectors;
+  }
+
+  public List<ResourceBundle> getResourceBundles() {
+    return bundles;
   }
 
   @SuppressWarnings("unchecked")
@@ -58,6 +68,7 @@ public class ConnectorBean implements JsonBean {
     JSONArray classArray = new JSONArray();
     JSONArray conFormsArray = new JSONArray();
     JSONArray jobFormsArray = new JSONArray();
+    JSONArray bundlesArray;
 
     for (MConnector connector : connectors) {
       idArray.add(connector.getPersistenceId());
@@ -72,12 +83,15 @@ public class ConnectorBean implements JsonBean {
       jobFormsArray.add(jobForms);
     }
 
+    bundlesArray = extractResourceBundles(bundles);
+
     JSONObject result = new JSONObject();
     result.put(ID, idArray);
     result.put(NAME, nameArray);
     result.put(CLASS, classArray);
     result.put(CON_FORMS, conFormsArray);
     result.put(JOB_FORMS, jobFormsArray);
+    result.put(RESOURCES, bundlesArray);
     return result;
   }
 
@@ -92,8 +106,8 @@ public class ConnectorBean implements JsonBean {
     JSONArray jobFormsArray =
         (JSONArray) jsonObject.get(JOB_FORMS);
 
-    connectors = new MConnector[idArray.size()];
-    for (int i = 0; i < connectors.length; i++) {
+    connectors = new LinkedList<MConnector>();
+    for (int i = 0; i < idArray.size(); i++) {
       long persistenceId = (Long) idArray.get(i);
       String uniqueName = (String) nameArray.get(i);
       String className = (String) classArray.get(i);
@@ -116,7 +130,9 @@ public class ConnectorBean implements JsonBean {
       MConnector connector = new MConnector(uniqueName, className,
         new MConnectionForms(connForms), jobs);
       connector.setPersistenceId(persistenceId);
-      connectors[i] = connector;
+      connectors.add(connector);
     }
+
+    bundles = restoreResourceBundles((JSONArray) jsonObject.get(RESOURCES));
   }
 }

@@ -88,6 +88,21 @@ public abstract class MInput<T> extends MValidatedElement {
   @Override
   public abstract int hashCode();
 
+  /**
+   * All input types must be able to tell if they contain some value or not.
+   *
+   * Empty values won't be serialized into metadata repository and will not be
+   * send across the wire between client and server.
+   *
+   * @return True if this input contains empty value.
+   */
+  public abstract boolean isEmpty();
+
+  /**
+   * Set Input value to empty value.
+   */
+  public abstract void setEmpty();
+
   @Override
   public final String toString() {
     StringBuilder sb = new StringBuilder("input-").append(getName());

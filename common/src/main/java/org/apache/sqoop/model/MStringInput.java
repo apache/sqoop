@@ -104,4 +104,14 @@ public final class MStringInput extends MInput<String> {
     result = 31 * result + maxLength;
     return result;
   }
+
+  @Override
+  public boolean isEmpty() {
+    return getValue() == null;
+  }
+
+  @Override
+  public void setEmpty() {
+    setValue(null);
+  }
 }

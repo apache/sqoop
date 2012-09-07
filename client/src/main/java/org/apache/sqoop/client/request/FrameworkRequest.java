@@ -22,12 +22,16 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- *
+ * Provide cRud semantics over RESTfull HTTP API for framework. Only read
+ * is supported as creation, update and delete is not allowed.
  */
 public class FrameworkRequest extends Request {
-  public FrameworkBean doGet(String serverUrl) {
+
+  public static final String RESOURCE = "v1/framework";
+
+  public FrameworkBean read(String serverUrl) {
     String response = null;
-    response = super.get(serverUrl + "v1/framework");
+    response = super.get(serverUrl + RESOURCE);
     JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
 
     FrameworkBean frameworkBean = new FrameworkBean();

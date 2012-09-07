@@ -21,20 +21,47 @@ package org.apache.sqoop.model;
  * Model describing entire connection object including both connector and
  * framework part.
  */
-public class MConnection extends MNamedElement {
-  // TODO(jarcec): We probably need reference to connector object here
+public class MConnection extends MPersistableEntity {
+  long connectorId;
+  String name;
+
   MConnectionForms connectorPart;
   MConnectionForms frameworkPart;
 
-  public MConnection(String name) {
-    super(name);
+  public MConnection(long connectorId,
+                     MConnectionForms connectorPart,
+                     MConnectionForms frameworkPart) {
+    this.connectorId = connectorId;
+    this.connectorPart = connectorPart;
+    this.frameworkPart = frameworkPart;
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("connection connector-part: ");
-    sb.append(connectorPart).append(", framework-part: ").append(frameworkPart);
+    StringBuilder sb = new StringBuilder("connection: ").append(name);
+    sb.append(" connector-part: ").append(connectorPart);
+    sb.append(", framework-part: ").append(frameworkPart);
 
     return sb.toString();
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public long getConnectorId() {
+    return connectorId;
+  }
+
+  public MConnectionForms getConnectorPart() {
+    return connectorPart;
+  }
+
+  public MConnectionForms getFrameworkPart() {
+    return frameworkPart;
   }
 }

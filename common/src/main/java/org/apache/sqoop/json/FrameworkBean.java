@@ -28,9 +28,11 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import static org.apache.sqoop.json.util.FormSerialization.*;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
 
 /**
  *
@@ -40,9 +42,12 @@ public class FrameworkBean implements JsonBean {
 
   private MFramework framework;
 
+  private ResourceBundle bundle;
+
   // for "extract"
-  public FrameworkBean(MFramework framework) {
+  public FrameworkBean(MFramework framework, ResourceBundle bundle) {
     this.framework = framework;
+    this.bundle = bundle;
   }
 
   // for "restore"
@@ -51,6 +56,10 @@ public class FrameworkBean implements JsonBean {
 
   public MFramework getFramework() {
     return framework;
+  }
+
+  public ResourceBundle getResourceBundle() {
+    return bundle;
   }
 
   @SuppressWarnings("unchecked")
@@ -68,9 +77,9 @@ public class FrameworkBean implements JsonBean {
     result.put(ID, framework.getPersistenceId());
     result.put(CON_FORMS, conForms);
     result.put(JOB_FORMS, jobForms);
+    result.put(RESOURCES, extractResourceBundle(bundle));
     return result;
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -94,6 +103,8 @@ public class FrameworkBean implements JsonBean {
 
     framework = new MFramework(new MConnectionForms(connForms), jobs);
     framework.setPersistenceId(id);
+
+    bundle = restoreResourceBundle((JSONObject) jsonObject.get(RESOURCES));
   }
 
 }

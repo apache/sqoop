@@ -32,13 +32,13 @@ public class SqoopShell
 {
   private static final String banner =
       "@|green Sqoop Shell:|@ Type '@|bold help|@' or '@|bold \\h|@' for help.";
-  
+
   public static HashSet<String> commandsToKeep;
   static {
     commandsToKeep = new HashSet<String>();
     commandsToKeep.add("exit");
     commandsToKeep.add("history");
-  };
+  }
 
   public static void main (String[] args) throws Exception
   {
@@ -60,6 +60,9 @@ public class SqoopShell
     shell.register(new HelpCommand(shell));
     shell.register(new SetCommand(shell));
     shell.register(new ShowCommand(shell));
+    shell.register(new CreateCommand(shell));
+    shell.register(new DeleteCommand(shell));
+    shell.register(new UpdateCommand(shell));
 
     if (args.length == 0) {
       // Interactive mode:

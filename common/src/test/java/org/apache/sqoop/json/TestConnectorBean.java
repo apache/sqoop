@@ -19,20 +19,16 @@ package org.apache.sqoop.json;
 
 import static org.junit.Assert.*;
 
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
+
+import static org.apache.sqoop.json.TestUtil.*;
 
 /**
  *
@@ -46,12 +42,17 @@ public class TestConnectorBean {
   @Test
   public void testSerialization() {
     // Create testing connector
-    MConnector[] connectors = new MConnector[2];
-    connectors[0] = buildFakeConnector("jdbc");
-    connectors[1] = buildFakeConnector("mysql");
+    List<MConnector> connectors = new LinkedList<MConnector>();
+    connectors.add(getConnector("jdbc"));
+    connectors.add(getConnector("mysql"));
+
+    // Create testing bundles
+    List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+    bundles.add(getResourceBundle());
+    bundles.add(getResourceBundle());
 
     // Serialize it to JSON object
-    ConnectorBean bean = new ConnectorBean(connectors);
+    ConnectorBean bean = new ConnectorBean(connectors, bundles);
     JSONObject json = bean.extract();
 
     // "Move" it across network in text form
@@ -62,41 +63,11 @@ public class TestConnectorBean {
     ConnectorBean retrievedBean = new ConnectorBean();
     retrievedBean.restore(retrievedJson);
 
-    assertEquals(connectors.length, retrievedBean.getConnectors().length);
-    assertEquals(connectors[0], retrievedBean.getConnectors()[0]);
-  }
+    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
 
-  protected MConnector buildFakeConnector(String name) {
-    List<MInput<?>> inputs;
-
-    List<MForm> connectionForms = new ArrayList<MForm>();
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("url", false, (short) 10));
-    inputs.add(new MStringInput("username", false, (short) 10));
-    inputs.add(new MStringInput("password", false, (short) 10));
-    connectionForms.add(new MForm("connection", inputs));
-
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MMapInput("properties"));
-    connectionForms.add(new MForm("properties", inputs));
-    MConnectionForms connection = new MConnectionForms(connectionForms);
-
-    List<MForm> jobForms = new ArrayList<MForm>();
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("A", false, (short) 10));
-    inputs.add(new MStringInput("B", false, (short) 10));
-    inputs.add(new MStringInput("C", false, (short) 10));
-    jobForms.add((new MForm("D", inputs)));
-
-    inputs = new ArrayList<MInput<?>>();
-    inputs.add(new MStringInput("Z", false, (short) 10));
-    inputs.add(new MStringInput("X", false, (short) 10));
-    inputs.add(new MStringInput("Y", false, (short) 10));
-    jobForms.add(new MForm("D", inputs));
-
-    List<MJobForms> jobs = new ArrayList<MJobForms>();
-    jobs.add(new MJobForms(MJob.Type.IMPORT, jobForms));
-
-    return new MConnector(name, name + ".class", connection, jobs);
+    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(0);
+    assertEquals("a", retrievedBundle.getString("a"));
+    assertEquals("b", retrievedBundle.getString("b"));
   }
 }

@@ -20,21 +20,88 @@ package org.apache.sqoop.client.request;
 import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
+import org.apache.sqoop.json.ExceptionInfo;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.util.Locale;
 
 public class Request
 {
-  public String get(String url) {
+  private static ServerExceptionFilter serverExceptionFilter;
+
+  static {
+    serverExceptionFilter = new ServerExceptionFilter();
+  }
+
+  protected Builder getBuilder(String url) {
     Client client = Client.create();
     WebResource resource = client.resource(url);
-    Builder builder = resource
+
+    // Provide filter that will rebuild exception that is sent from server
+    resource.addFilter(serverExceptionFilter);
+
+    return resource
       // Sqoop is using JSON for data transfers
       .accept(MediaType.APPLICATION_JSON_TYPE)
       // Transfer client locale to return client specific data
       .acceptLanguage(Locale.getDefault());
-    return builder.get(String.class);
+  }
+
+  public String get(String url) {
+    return getBuilder(url).get(String.class);
+  }
+
+  public String post(String url, String data) {
+    return getBuilder(url).post(String.class, data);
+  }
+
+  public String put(String url, String data) {
+    return getBuilder(url).put(String.class, data);
+  }
+
+  public void delete(String url) {
+    getBuilder(url).delete(String.class);
+  }
+
+  /**
+   * Client filter to intercepting exceptions sent by sqoop server and
+   * recreating them on client side. Current implementation will create new
+   * instance of SqoopException and will attach original error code and message.
+   */
+  private static class ServerExceptionFilter extends ClientFilter {
+    @Override
+    public ClientResponse handle(ClientRequest cr) {
+      ClientResponse resp = getNext().handle(cr);
+
+      // Special handling for 500 internal server error in case that server
+      // has sent us it's exception correctly. We're using default route
+      // for all other 500 occurrences.
+      if(resp.getClientResponseStatus()
+        == ClientResponse.Status.INTERNAL_SERVER_ERROR) {
+
+        if(resp.getHeaders().containsKey(
+          SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_CODE)) {
+
+          ExceptionInfo ex = new ExceptionInfo();
+
+          String responseText = resp.getEntity(String.class);
+          JSONObject json = (JSONObject) JSONValue.parse(responseText);
+          ex.restore(json);
+
+          throw new SqoopException(ClientError.CLIENT_0006, ex.toString());
+        }
+      }
+
+      return resp;
+    }
   }
 }

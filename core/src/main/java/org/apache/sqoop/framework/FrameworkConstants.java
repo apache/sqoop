@@ -31,4 +31,6 @@ public class FrameworkConstants {
     "form-security";
   public static final String FORM_OUTPUT =
     "form-output";
+
+  public static final String RESOURCE_BUNDLE_NAME = "framework-resources";
 }

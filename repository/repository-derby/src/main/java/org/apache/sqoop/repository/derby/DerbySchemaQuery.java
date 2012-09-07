@@ -210,8 +210,20 @@ public final class DerbySchemaQuery {
   public static final String STMT_FETCH_INPUT =
       "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + " FROM "
-      + TABLE_SQ_INPUT + " WHERE " + COLUMN_SQI_FORM + " = ? ORDER BY "
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
+      + ", cast(null as varchar(100)) FROM " + TABLE_SQ_INPUT + " WHERE "
+      + COLUMN_SQI_FORM + " = ? ORDER BY " + COLUMN_SQI_INDEX;
+
+  // DML: Fetch inputs and values for a given connection
+  public static final String STMT_FETCH_CONNECTION_INPUT =
+      "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
+      + ", " + COLUMN_SQNI_VALUE + " FROM " + TABLE_SQ_INPUT
+      + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT + " ON "
+      + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " WHERE "
+      + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQNI_CONNECTION
+      + " = ? OR " + COLUMN_SQNI_CONNECTION + " IS NULL) ORDER BY "
       + COLUMN_SQI_INDEX;
 
   // DML: Insert connector base
@@ -231,6 +243,52 @@ public final class DerbySchemaQuery {
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
       + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ") "
       + "VALUES (?, ?, ?, ?, ?, ?)";
+
+  // DML: Insert new connection
+  public static final String STMT_INSERT_CONNECTION =
+    "INSERT INTO " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ") VALUES (?, ?)";
+
+  // DML: Insert new connection inputs
+  public static final String STMT_INSERT_CONNECTION_INPUT =
+    "INSERT INTO " + TABLE_SQ_CONNECTION_INPUT + " (" + COLUMN_SQNI_CONNECTION
+    + ", " + COLUMN_SQNI_INPUT + ", " + COLUMN_SQNI_VALUE + ") "
+    + "VALUES (?, ?, ?)";
+
+  // DML: Delete rows from connection input table
+  public static final String STMT_DELETE_CONNECTION_INPUT =
+    "DELETE FROM " + TABLE_SQ_CONNECTION_INPUT + " WHERE "
+    + COLUMN_SQNI_CONNECTION + " = ?";
+
+  // DML: Delete row from connection table
+  public static final String STMT_DELETE_CONNECTION =
+    "DELETE FROM " + TABLE_SQ_CONNECTION + " WHERE " + COLUMN_SQN_ID + " = ?";
+
+  // DML: Select one specific connection
+  public static final String STMT_SELECT_CONNECTION_SINGLE =
+    "SELECT " + COLUMN_SQN_ID + ", " + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION + " WHERE "
+    + COLUMN_SQN_ID + " = ?";
+
+  // DML: Select one specific connection
+  public static final String STMT_SELECT_CONNECTION_ALL =
+    "SELECT " + COLUMN_SQN_ID + ", " + COLUMN_SQN_NAME + ", "
+      + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION;
+
+  // DML: Select all inputs for given connection
+  public static final String STMT_SELECT_CONNECTION_INPUT =
+    "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQI_ID + ", " + COLUMN_SQNI_VALUE
+    + " FROM " + TABLE_SQ_CONNECTION_INPUT + " JOIN " + TABLE_SQ_INPUT
+    + " JOIN " + TABLE_SQ_FORM +  " ON " + COLUMN_SQF_ID + " = "
+    + COLUMN_SQI_FORM + " ON " + COLUMN_SQI_ID + " = " + COLUMN_SQNI_INPUT
+    + " WHERE " + COLUMN_SQNI_CONNECTION + " = ? ORDER BY "
+    + COLUMN_SQF_CONNECTOR + ", " + COLUMN_SQF_INDEX
+    + ", " + COLUMN_SQI_INDEX ;
+
+  // DML: Check if given connection exists
+  public static final String STMT_SELECT_CONNECTION_CHECK =
+    "SELECT count(*) FROM " + TABLE_SQ_CONNECTION + " WHERE " + COLUMN_SQN_ID
+    + " = ?";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

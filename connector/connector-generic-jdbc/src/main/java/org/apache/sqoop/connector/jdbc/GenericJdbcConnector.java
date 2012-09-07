@@ -122,7 +122,8 @@ public class GenericJdbcConnector implements SqoopConnector {
 
   @Override
   public Validator getValidator() {
-    return new Validator();
+    // TODO(jarcec): Cache this object eventually
+    return new GenericJdbcValidator();
   }
 
 }

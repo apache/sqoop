@@ -28,7 +28,7 @@ import org.apache.sqoop.server.RequestHandler;
 /**
  *
  */
-public class FrameworkRequestHandler implements RequestHandler {
+public class FrameworkRequestHandler  implements RequestHandler {
 
   private static final Logger LOG =
       Logger.getLogger(ConnectorRequestHandler.class);
@@ -39,6 +39,7 @@ public class FrameworkRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
-    return new FrameworkBean(FrameworkManager.getFramework());
+    return new FrameworkBean(FrameworkManager.getFramework(),
+      FrameworkManager.getBundle(ctx.getAcceptLanguageHeader()));
   }
 }

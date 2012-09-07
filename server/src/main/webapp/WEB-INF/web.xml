@@ -63,5 +63,17 @@ limitations under the License.
     <url-pattern>/v1/framework/*</url-pattern>
   </servlet-mapping>
 
+  <!-- Connection servlet -->
+  <servlet>
+    <servlet-name>v1.ConnectionServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.ConnectionServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.ConnectionServlet</servlet-name>
+    <url-pattern>/v1/connection/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>
 

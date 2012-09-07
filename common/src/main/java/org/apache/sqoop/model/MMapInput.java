@@ -104,4 +104,14 @@ public final class MMapInput extends MInput<Map<String, String>> {
   public int hashCode() {
     return 23 + 31 * getName().hashCode();
   }
+
+  @Override
+  public boolean isEmpty() {
+    return getValue() == null;
+  }
+
+  @Override
+  public void setEmpty() {
+    setValue(null);
+  }
 }

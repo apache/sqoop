@@ -29,6 +29,7 @@ public class ShowCommand extends SqoopCommand
   private ShowVersionFunction versionFunction;
   private ShowConnectorFunction connectorFunction;
   private ShowFrameworkFunction frameworkFunction;
+  private ShowConnectionFunction connectionFunction;
 
   protected ShowCommand(Shell shell) {
     super(shell, "show", "\\sh",
@@ -71,7 +72,10 @@ public class ShowCommand extends SqoopCommand
       return frameworkFunction.execute(args);
 
     } else if (func.equals("connection")) {
-      return null;
+      if (connectionFunction == null) {
+        connectionFunction = new ShowConnectionFunction(io);
+      }
+      return connectionFunction.execute(args);
 
     } else if (func.equals("job")) {
       return null;

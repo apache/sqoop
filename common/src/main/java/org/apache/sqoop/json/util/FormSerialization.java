@@ -28,7 +28,6 @@ import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Convenient static methods for serializing forms.
@@ -48,6 +47,7 @@ public class FormSerialization {
   public static final String FORM_INPUT_TYPE = "type";
   public static final String FORM_INPUT_MASK = "mask";
   public static final String FORM_INPUT_SIZE = "size";
+  public static final String FORM_INPUT_VALUE = "value";
 
   /**
    * Transform given list of forms to JSON Array object.
@@ -75,6 +75,7 @@ public class FormSerialization {
   @SuppressWarnings("unchecked")
   public static JSONObject extractForm(MForm mForm) {
     JSONObject form = new JSONObject();
+    form.put(ID, mForm.getPersistenceId());
     form.put(FORM_NAME, mForm.getName());
     form.put(FORM_TYPE, MFormType.CONNECTION.toString());
     JSONArray mInputs = new JSONArray();
@@ -83,14 +84,21 @@ public class FormSerialization {
     for (MInput<?> mInput : mForm.getInputs()) {
       JSONObject input = new JSONObject();
       mInputs.add(input);
-
+      input.put(ID, mInput.getPersistenceId());
       input.put(FORM_INPUT_NAME, mInput.getName());
       input.put(FORM_INPUT_TYPE, mInput.getType().toString());
+
+      // String specific serialization
       if (mInput.getType() == MInputType.STRING) {
         input.put(FORM_INPUT_MASK,
             ((MStringInput)mInput).isMasked());
         input.put(FORM_INPUT_SIZE,
             ((MStringInput)mInput).getMaxLength());
+      }
+
+      // Serialize value if is there
+      if(!mInput.isEmpty()) {
+        input.put(FORM_INPUT_VALUE, mInput.getUrlSafeValueString());
       }
     }
 
@@ -127,25 +135,36 @@ public class FormSerialization {
       JSONObject input = (JSONObject) inputs.get(i);
       MInputType type =
           MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
+      MInput mInput = null;
       switch (type) {
         case STRING: {
           String name = (String) input.get(FORM_INPUT_NAME);
           boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
           long size = (Long) input.get(FORM_INPUT_SIZE);
-          MInput<String> mInput = new MStringInput(name, mask, (short) size);
-          mInputs.add(mInput);
+          mInput = new MStringInput(name, mask, (short) size);
           break;
         }
         case MAP: {
           String name = (String) input.get(FORM_INPUT_NAME);
-          MInput<Map<String, String>> mInput = new MMapInput(name);
-          mInputs.add(mInput);
+          mInput = new MMapInput(name);
           break;
         }
       }
+
+      // Propagate form ID
+      mInput.setPersistenceId((Long)input.get(ID));
+
+      // Propagate form optional value
+      if(input.containsKey(FORM_INPUT_VALUE)) {
+        mInput.restoreFromUrlSafeValueString(
+          (String) input.get(FORM_INPUT_VALUE));
+      }
+      mInputs.add(mInput);
     }
 
-    return new MForm((String) form.get(FORM_NAME), mInputs);
+    MForm mForm = new MForm((String) form.get(FORM_NAME), mInputs);
+    mForm.setPersistenceId((Long) form.get(ID));
+    return mForm;
   }
 
   private FormSerialization() {
