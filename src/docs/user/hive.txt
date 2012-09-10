@@ -70,6 +70,18 @@ not set any delimiters and do use +\--hive-import+, the field delimiter will
 be set to +^A+ and the record delimiter will be set to +\n+ to be consistent
 with Hive's defaults.
 
+Sqoop will by default import NULL values as string +null+. Hive is however
+using string +\N+ to denote +NULL+ values and therefore predicates dealing
+with +NULL+ (like +IS NULL+) will not work correctly. You should append
+parameters +\--null-string+ and +\--null-non-string+ in case of import job or
++--input-null-string+ and +--input-null-non-string+ in case of an export job if
+you wish to properly preserve +NULL+ values. Because sqoop is using those
+parameters in generated code, you need to properly escape value +\N+ to +\\N+:
+
+----
+$ sqoop import  ... --null-string '\\N' --null-non-string '\\N'
+----
+
 The table name used in Hive is, by default, the same as that of the
 source table. You can control the output table name with the +\--hive-table+
 option.
