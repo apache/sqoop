@@ -19,6 +19,9 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -28,6 +31,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
+import org.apache.hadoop.hbase.security.User;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -137,6 +141,44 @@ public class HBaseImportJob extends DataDrivenImportJob {
     HBaseConfiguration.addHbaseResources(conf);
 
     HBaseAdmin admin = new HBaseAdmin(conf);
+
+    // Add authentication token to the job if we're running on secure cluster.
+    //
+    // We're currently supporting HBase version 0.90 that do not have security
+    // patches which means that it do not have required method
+    // "obtainAuthTokenForJob".
+    //
+    // We're using reflection API to see if this method is available and call
+    // it only if it's present.
+    //
+    // After we will remove support for HBase 0.90 we can simplify the code to
+    // following code fragment:
+    /*
+    try {
+      User user = User.getCurrent();
+      user.obtainAuthTokenForJob(conf, job);
+    } catch(InterruptedException ex) {
+      throw new ImportException("Can't get authentication token", ex);
+    }
+    */
+    try {
+      // Get the method
+      Method obtainAuthTokenForJob = User.class.getMethod(
+        "obtainAuthTokenForJob", Configuration.class, Job.class);
+
+      // Get current user
+      User user = User.getCurrent();
+
+      // Obtain security token if needed (it's no-op on non secure cluster)
+      obtainAuthTokenForJob.invoke(user, conf, job);
+    } catch (NoSuchMethodException e) {
+      LOG.info("It seems that we're running on HBase without security"
+        + " additions. Security additions will not be used during this job.");
+    } catch (InvocationTargetException e) {
+      throw new ImportException("Can't get authentication token", e);
+    } catch (IllegalAccessException e) {
+      throw new ImportException("Can't get authentication token", e);
+    }
 
     // Check to see if the table exists.
     HTableDescriptor tableDesc = new HTableDescriptor(tableName);
