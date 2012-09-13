@@ -181,13 +181,14 @@ public class HBaseImportJob extends DataDrivenImportJob {
     }
 
     // Check to see if the table exists.
-    HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+    HTableDescriptor tableDesc = null;
     byte [] familyBytes = Bytes.toBytes(familyName);
     HColumnDescriptor colDesc = new HColumnDescriptor(familyBytes);
     if (!admin.tableExists(tableName)) {
       if (options.getCreateHBaseTable()) {
         // Create the table.
         LOG.info("Creating missing HBase table " + tableName);
+        tableDesc =  new HTableDescriptor(tableName);
         tableDesc.addFamily(colDesc);
         admin.createTable(tableDesc);
       } else {
@@ -195,18 +196,24 @@ public class HBaseImportJob extends DataDrivenImportJob {
         LOG.warn("This job may fail. Either explicitly create the table,");
         LOG.warn("or re-run with --hbase-create-table.");
       }
-    } else if (!tableDesc.hasFamily(familyBytes)) {
-      if (options.getCreateHBaseTable()) {
-        // Create the column family.
-        LOG.info("Creating missing column family " + familyName);
-        admin.disableTable(tableName);
-        admin.addColumn(tableName, colDesc);
-        admin.enableTable(tableName);
-      } else {
-        LOG.warn("Could not find column family " + familyName + " in table "
+    } else {
+      // Table exists, so retrieve their current version
+      tableDesc = admin.getTableDescriptor(Bytes.toBytes(tableName));
+
+      // Check if current version do have specified column family
+      if (!tableDesc.hasFamily(familyBytes)) {
+        if (options.getCreateHBaseTable()) {
+          // Create the column family.
+          LOG.info("Creating missing column family " + familyName);
+          admin.disableTable(tableName);
+          admin.addColumn(tableName, colDesc);
+          admin.enableTable(tableName);
+        } else {
+          LOG.warn("Could not find column family " + familyName + " in table "
             + tableName);
-        LOG.warn("This job may fail. Either create the column family,");
-        LOG.warn("or re-run with --hbase-create-table.");
+          LOG.warn("This job may fail. Either create the column family,");
+          LOG.warn("or re-run with --hbase-create-table.");
+        }
       }
     }
 
