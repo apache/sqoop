@@ -21,6 +21,38 @@
 Notes for specific connectors
 -----------------------------
 
+PostgreSQL Connector
+~~~~~~~~~~~~~~~~~~~~~
+
+Extra arguments
+^^^^^^^^^^^^^^^
+
+List of all extra arguments supported by PostgreSQL Connector is shown on table
+below:
+
+.Supported PostgreSQL extra arguments:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--schema <name>+                       Scheme name that sqoop should use. \
+                                         Default is "public".
+---------------------------------------------------------------------------------
+
+Schema support
+^^^^^^^^^^^^^^
+
+If you need to work with table that is located in schema other than default one,
+you need to specify extra argument +\--schema+. Custom schemas are supported for
+both import and export job (optional staging table however must be present in the
+same schema as target table). Example invocation:
+
+----
+$ sqoop import ... --table custom_table -- --schema custom_schema
+----
+
+
+
 pg_bulkload connector
 ~~~~~~~~~~~~~~~~~~~~~
 

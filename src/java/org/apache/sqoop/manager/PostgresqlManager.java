@@ -21,17 +21,25 @@ package org.apache.sqoop.manager;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.cli.RelatedOptions;
 
 /**
  * Manages connections to Postgresql databases.
  */
 public class PostgresqlManager
     extends com.cloudera.sqoop.manager.CatalogQueryManager {
+
+  public static final String SCHEMA = "schema";
 
   public static final Log LOG = LogFactory.getLog(
       PostgresqlManager.class.getName());
@@ -42,13 +50,20 @@ public class PostgresqlManager
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
 
+  /*
+   * PostgreSQL schema that we should use.
+   */
+  private String schema;
+
   public PostgresqlManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
-  }
 
-  protected PostgresqlManager(final SqoopOptions opts, boolean ignored) {
-    // constructor used by subclasses to avoid the --direct warning.
-    super(DRIVER_CLASS, opts);
+    // Try to parse extra arguments
+    try {
+      parseExtraArgs(opts.getExtraArgs());
+    } catch (ParseException e) {
+      throw new RuntimeException("Can't parse extra arguments", e);
+    }
   }
 
   @Override
@@ -58,6 +73,11 @@ public class PostgresqlManager
 
   @Override
   public String escapeTableName(String tableName) {
+    // Return full table name including schema if needed
+    if (schema != null && !schema.isEmpty()) {
+      return escapeIdentifier(schema) + "." + escapeIdentifier(tableName);
+    }
+
     return escapeIdentifier(tableName);
   }
 
@@ -117,7 +137,7 @@ public class PostgresqlManager
   protected String getListTablesQuery() {
     return
       "SELECT TABLENAME FROM PG_CATALOG.PG_TABLES "
-    + "WHERE SCHEMANAME = (SELECT CURRENT_SCHEMA())";
+    + "WHERE SCHEMANAME = " + getSchemaSqlFragment();
   }
 
   @Override
@@ -127,7 +147,7 @@ public class PostgresqlManager
     + "  PG_CATALOG.PG_CLASS tab, PG_CATALOG.PG_ATTRIBUTE col "
     + "WHERE sch.OID = tab.RELNAMESPACE "
     + "  AND tab.OID = col.ATTRELID "
-    + "  AND sch.NSPNAME = (SELECT CURRENT_SCHEMA()) "
+    + "  AND sch.NSPNAME = " + getSchemaSqlFragment()
     + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
     + "  AND col.ATTNUM >= 1"
     + "  AND col.ATTISDROPPED = 'f'";
@@ -142,10 +162,18 @@ public class PostgresqlManager
     + "WHERE sch.OID = tab.RELNAMESPACE "
     + "  AND tab.OID = col.ATTRELID "
     + "  AND tab.OID = ind.INDRELID "
-    + "  AND sch.NSPNAME = (SELECT CURRENT_SCHEMA()) "
+    + "  AND sch.NSPNAME = " + getSchemaSqlFragment()
     + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
     + "  AND col.ATTNUM = ANY(ind.INDKEY) "
     + "  AND ind.INDISPRIMARY";
+  }
+
+  private String getSchemaSqlFragment() {
+    if (schema != null && !schema.isEmpty()) {
+      return "'" + escapeLiteral(schema) + "'";
+    }
+
+    return "(SELECT CURRENT_SCHEMA())";
   }
 
   private String escapeLiteral(String literal) {
@@ -157,5 +185,48 @@ public class PostgresqlManager
     return "SELECT CURRENT_TIMESTAMP";
   }
 
+  /**
+   * Parse extra arguments.
+   *
+   * @param args Extra arguments array
+   * @throws ParseException
+   */
+  void parseExtraArgs(String[] args) throws ParseException {
+    // No-op when no extra arguments are present
+    if (args == null || args.length == 0) {
+      return;
+    }
+
+    // We do not need extended abilities of SqoopParser, so we're using
+    // Gnu parser instead.
+    CommandLineParser parser = new GnuParser();
+    CommandLine cmdLine = parser.parse(getExtraOptions(), args, true);
+
+    // Apply extra options
+    if (cmdLine.hasOption(SCHEMA)) {
+      String schemaName = cmdLine.getOptionValue(SCHEMA);
+      LOG.info("We will use schema " + schemaName);
+
+      this.schema = schemaName;
+    }
+  }
+
+  /**
+   * Create related options for PostgreSQL extra parameters.
+   *
+   * @return
+   */
+  @SuppressWarnings("static-access")
+  private RelatedOptions getExtraOptions() {
+    // Connection args (common)
+    RelatedOptions extraOptions =
+      new RelatedOptions("PostgreSQL extra options:");
+
+    extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
+      .withDescription("Optional schema name")
+      .withLongOpt(SCHEMA).create());
+
+    return extraOptions;
+  }
 }
 

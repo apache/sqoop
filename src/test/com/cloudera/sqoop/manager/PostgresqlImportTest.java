@@ -49,7 +49,7 @@ import com.cloudera.sqoop.util.FileListing;
  *
  * Since this requires a Postgresql installation on your local machine to use,
  * this class is named in such a way that Hadoop's default QA process does not
- * run it. You need to run this manually with -Dtestcase=PostgresqlTest or
+ * run it. You need to run this manually with -Dtestcase=PostgresqlImportTest or
  * -Dthirdparty=true.
  *
  * You need to put Postgresql's JDBC driver library into a location where
@@ -76,13 +76,14 @@ import com.cloudera.sqoop.util.FileListing;
  * $ sudo -u postgres psql -U postgres template1
  * template1=&gt; CREATE USER sqooptest;
  * template1=&gt; CREATE DATABASE sqooptest;
+ * template1=&gt; GRANT ALL ON DATABASE sqooptest TO sqooptest;
  * template1=&gt; \q
  *
  */
-public class PostgresqlTest extends ImportJobTestCase {
+public class PostgresqlImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
-      PostgresqlTest.class.getName());
+      PostgresqlImportTest.class.getName());
 
   static final String HOST_URL = System.getProperty(
       "sqoop.test.postgresql.connectstring.host_url",
@@ -92,6 +93,9 @@ public class PostgresqlTest extends ImportJobTestCase {
   static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
+  static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
+  static final String SCHEMA_PUBLIC = "public";
+  static final String SCHEMA_SPECIAL = "special";
   static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
   @Override
@@ -105,13 +109,14 @@ public class PostgresqlTest extends ImportJobTestCase {
 
     LOG.debug("Setting up another postgresql test: " + CONNECT_STRING);
 
-    setUpData(TABLE_NAME);
-    setUpData(SPECIAL_TABLE_NAME);
+    setUpData(TABLE_NAME, SCHEMA_PUBLIC);
+    setUpData(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC);
+    setUpData(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL);
 
     LOG.debug("setUp complete.");
   }
 
-  public void setUpData(String tableName) {
+  public void setUpData(String tableName, String schema) {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
 
@@ -125,33 +130,44 @@ public class PostgresqlTest extends ImportJobTestCase {
       connection.setAutoCommit(false);
       st = connection.createStatement();
 
-      // create the database table and populate it with data.
+      // Create schema if not exists in dummy way (always create and ignore
+      // errors.
+      try {
+        st.executeUpdate("CREATE SCHEMA " + manager.escapeTableName(schema));
+        connection.commit();
+      } catch (SQLException e) {
+         LOG.info("Couldn't create schema " + schema + " (is o.k. as long as"
+           + "the schema already exists.", e);
+        connection.rollback();
+      }
+
+      String fullTableName = manager.escapeTableName(schema)
+        + "." + manager.escapeTableName(tableName);
 
       try {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
         // get added until pg 8.3, so we just use "DROP TABLE" and ignore
         // any exception here if one occurs.
-        st.executeUpdate("DROP TABLE " + manager.escapeTableName(tableName));
+        st.executeUpdate("DROP TABLE " + fullTableName);
       } catch (SQLException e) {
-        LOG.info("Couldn't drop table " + tableName + " (ok)");
-        LOG.info(e.toString());
+        LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)",
+          e);
         // Now we need to reset the transaction.
         connection.rollback();
       }
 
-      st.executeUpdate("CREATE TABLE " + manager.escapeTableName(tableName)
-          + " ("
+      st.executeUpdate("CREATE TABLE " + fullTableName + " ("
           + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
           + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
           + manager.escapeColName("start_date") + " DATE, "
           + manager.escapeColName("salary") + " FLOAT, "
           + manager.escapeColName("dept") + " VARCHAR(32))");
 
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
+      st.executeUpdate("INSERT INTO " + fullTableName
           + " VALUES(1,'Aaron','2009-05-14',1000000.00,'engineering')");
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
+      st.executeUpdate("INSERT INTO " + fullTableName
           + " VALUES(2,'Bob','2009-04-20',400.00,'sales')");
-      st.executeUpdate("INSERT INTO " + manager.escapeTableName(tableName)
+      st.executeUpdate("INSERT INTO " + fullTableName
           + " VALUES(3,'Fred','2009-01-23',15.00,'marketing')");
       connection.commit();
     } catch (SQLException sqlE) {
@@ -302,5 +318,33 @@ public class PostgresqlTest extends ImportJobTestCase {
     };
 
     doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
+  }
+
+ @Test
+  public void testDifferentSchemaImport() throws IOException {
+    String [] expectedResults = {
+      "2,Bob,2009-04-20,400.0,sales",
+      "3,Fred,2009-01-23,15.0,marketing",
+    };
+
+    String [] extraArgs = { "--",
+      "--schema", SCHEMA_SPECIAL,
+    };
+
+    doImportAndVerify(false, expectedResults, DIFFERENT_TABLE_NAME, extraArgs);
+  }
+
+  @Test
+  public void testDifferentSchemaImportDirect() throws IOException {
+    String [] expectedResults = {
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
+    };
+
+    String [] extraArgs = { "--",
+      "--schema", SCHEMA_SPECIAL,
+    };
+
+    doImportAndVerify(true, expectedResults, DIFFERENT_TABLE_NAME, extraArgs);
   }
 }

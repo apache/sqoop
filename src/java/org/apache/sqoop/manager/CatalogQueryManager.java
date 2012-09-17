@@ -142,10 +142,11 @@ public abstract class CatalogQueryManager
     Statement s = null;
     ResultSet rs = null;
     List<String> columns = new ArrayList<String>();
+    String listColumnsQuery = getListColumnsQuery(tableName);
     try {
       c = getConnection();
       s = c.createStatement();
-      rs = s.executeQuery(getListColumnsQuery(tableName));
+      rs = s.executeQuery(listColumnsQuery);
       while (rs.next()) {
         columns.add(rs.getString(1));
       }
@@ -158,7 +159,7 @@ public abstract class CatalogQueryManager
       } catch (SQLException ce) {
         LOG.error("Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list columns", sqle);
+      LOG.error("Failed to list columns from query: " + listColumnsQuery, sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rs != null) {

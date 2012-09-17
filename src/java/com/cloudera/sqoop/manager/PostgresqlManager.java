@@ -29,10 +29,5 @@ public class PostgresqlManager
   public PostgresqlManager(final SqoopOptions opts) {
     super(opts);
   }
-
-  protected PostgresqlManager(final SqoopOptions opts, boolean ignored) {
-    super(opts, ignored);
-  }
-
 }
 

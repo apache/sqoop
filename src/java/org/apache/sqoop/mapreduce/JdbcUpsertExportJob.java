@@ -72,7 +72,7 @@ public class JdbcUpsertExportJob extends JdbcUpdateExportJob {
         throw new IOException(
             "Export column names could not be determined for " + tableName);
       }
-      DBOutputFormat.setOutput(job, tableName, colNames);
+      DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), colNames);
 
       String updateKeyColumns = options.getUpdateKeyCol();
       if (null == updateKeyColumns) {

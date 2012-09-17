@@ -56,9 +56,7 @@ public class DirectPostgresqlManager
       DirectPostgresqlManager.class.getName());
 
   public DirectPostgresqlManager(final SqoopOptions opts) {
-    // Inform superclass that we're overriding import method via alt.
-    // constructor.
-    super(opts, true);
+    super(opts);
   }
 
   private static final String PSQL_CMD = "psql";

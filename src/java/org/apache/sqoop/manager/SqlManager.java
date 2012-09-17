@@ -766,6 +766,10 @@ public abstract class SqlManager
   @Override
   public long getTableRowCount(String tableName) throws SQLException {
     release(); // Release any previous ResultSet
+
+    // Escape used table name
+    tableName = escapeTableName(tableName);
+
     long result = -1;
     String countQuery = "SELECT COUNT(*) FROM " + tableName;
     Statement stmt = null;
@@ -801,6 +805,10 @@ public abstract class SqlManager
   @Override
   public void deleteAllRecords(String tableName) throws SQLException {
     release(); // Release any previous ResultSet
+
+    // Escape table name
+    tableName = escapeTableName(tableName);
+
     String deleteQuery = "DELETE FROM " + tableName;
     Statement stmt = null;
     try {
@@ -827,6 +835,11 @@ public abstract class SqlManager
   public void migrateData(String fromTable, String toTable)
     throws SQLException {
     release(); // Release any previous ResultSet
+
+    // Escape all table names
+    fromTable = escapeTableName(fromTable);
+    toTable = escapeTableName(toTable);
+
     String updateQuery = "INSERT INTO " + toTable
           + " ( SELECT * FROM " + fromTable + " )";
 

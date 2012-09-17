@@ -98,10 +98,10 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
 
       query.append(" FROM ").append(tableName);
       if (!dbProductName.startsWith("ORACLE")
-          && !dbProductName.startsWith("DB2")) {
-        // The AS clause is required for hsqldb, but Oracle explicitly does
-        // not use it, and DB2 does not allow a qualified name in alias. Since
-        // this is not necessary for Oracle and DB2, we do not append.
+          && !dbProductName.startsWith("DB2")
+          && !dbProductName.startsWith("POSTGRESQL")) {
+        // The AS clause is required for hsqldb. Some other databases might have
+        // issues with it, so we're skipping some of them.
         query.append(" AS ").append(tableName);
       }
       query.append(" WHERE ");

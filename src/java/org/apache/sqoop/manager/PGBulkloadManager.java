@@ -40,7 +40,7 @@ public class PGBulkloadManager extends PostgresqlManager {
 
 
   public PGBulkloadManager(final SqoopOptions opts) {
-    super(opts, true);
+    super(opts);
   }
 
 

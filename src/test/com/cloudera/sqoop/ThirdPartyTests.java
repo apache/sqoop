@@ -30,7 +30,8 @@ import com.cloudera.sqoop.manager.MySQLCompatTest;
 import com.cloudera.sqoop.manager.OracleExportTest;
 import com.cloudera.sqoop.manager.OracleManagerTest;
 import com.cloudera.sqoop.manager.OracleCompatTest;
-import com.cloudera.sqoop.manager.PostgresqlTest;
+import com.cloudera.sqoop.manager.PostgresqlExportTest;
+import com.cloudera.sqoop.manager.PostgresqlImportTest;
 
 /**
  * Test battery including all tests of vendor-specific ConnManager
@@ -53,7 +54,8 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(OracleExportTest.class);
     suite.addTestSuite(OracleManagerTest.class);
     suite.addTestSuite(OracleCompatTest.class);
-    suite.addTestSuite(PostgresqlTest.class);
+    suite.addTestSuite(PostgresqlImportTest.class);
+    suite.addTestSuite(PostgresqlExportTest.class);
 
     return suite;
   }
