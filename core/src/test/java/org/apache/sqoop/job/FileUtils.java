@@ -15,29 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.job;
+
+import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
-/**
- * An immutable context used in the ETL framework
- * for accessing configuration values.
- */
-public class EtlContext implements Context {
+public class FileUtils {
 
-  protected Configuration conf;
-
-  public EtlContext(Configuration conf) {
-    this.conf = conf;
+  public static void delete(String file) throws IOException {
+    Path path = new Path(file);
+    FileSystem fs = path.getFileSystem(new Configuration());
+    if (fs.exists(path)) {
+      fs.delete(path, true);
+    }
   }
 
-  protected Configuration getConfiguration() {
-    return conf;
-  }
-
-  @Override
-  public String getString(String key) {
-    return conf.get(key);
+  private FileUtils() {
+    // Disable explicit object creation
   }
 
 }

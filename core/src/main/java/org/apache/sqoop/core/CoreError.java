@@ -54,7 +54,7 @@ public enum CoreError implements ErrorCode {
   /** Error occurs during job execution. */
   CORE_0008("Error occurs during job execution"),
 
-  /** The system was load to instantiate the specified class. */
+  /** The system was unable to load the specified class. */
   CORE_0009("Unable to load the specified class"),
 
   /** The system was unable to instantiate the specified class. */
@@ -63,8 +63,8 @@ public enum CoreError implements ErrorCode {
   /** The parameter already exists in the context */
   CORE_0011("The parameter already exists in the context"),
 
-  /** The data type is not supported */
-  CORE_0012("The data type is not supported"),
+  /** The type is not supported */
+  CORE_0012("The type is not supported"),
 
   /** Cannot write to the data writer */
   CORE_0013("Cannot write to the data writer"),

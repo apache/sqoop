@@ -38,13 +38,14 @@ public class Data implements WritableComparable<Data> {
   // - String for a text of CSV record
   private Object content = null;
 
-  private static final int EMPTY_DATA = 0;
-  private static final int CSV_RECORD = 1;
-  private static final int ARRAY_RECORD = 2;
+  public static final int EMPTY_DATA = 0;
+  public static final int CSV_RECORD = 1;
+  public static final int ARRAY_RECORD = 2;
   private int type = EMPTY_DATA;
 
-  private static char FIELD_DELIMITER = ',';
-  private static char RECORD_DELIMITER = '\n';
+  public static final char DEFAULT_FIELD_DELIMITER = ',';
+  public static final char DEFAULT_RECORD_DELIMITER = '\n';
+  public static final String CHARSET_NAME = "UTF-8";
 
   public void setContent(Object content) {
     if (content == null) {
@@ -72,10 +73,46 @@ public class Data implements WritableComparable<Data> {
     return (type == EMPTY_DATA);
   }
 
+  public static String format(Object content,
+      char fieldDelimiter, char recordDelimiter) {
+    if (content instanceof String) {
+      return (String)content + recordDelimiter;
+
+    } else if (content instanceof Object[]) {
+      StringBuilder sb = new StringBuilder();
+      Object[] array = (Object[])content;
+      for (int i = 0; i < array.length; i++) {
+        if (i != 0) {
+          sb.append(fieldDelimiter);
+        }
+
+        if (array[i] instanceof String) {
+          // TODO: Also need to escape those special characters as documented in:
+          // https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation#Sqoop2Intermediaterepresentation-Intermediateformatrepresentationproposal
+          sb.append("\'");
+          sb.append(((String)array[i]).replaceAll(
+              "\'", Matcher.quoteReplacement("\\\'")));
+          sb.append("\'");
+        } else if (array[i] instanceof byte[]) {
+          sb.append(Arrays.toString((byte[])array[i]));
+        } else {
+          sb.append(array[i].toString());
+        }
+      }
+      sb.append(recordDelimiter);
+      return sb.toString();
+
+    } else {
+      throw new SqoopException(CoreError.CORE_0012,
+          content.getClass().getName());
+    }
+  }
+
   @Override
   public int compareTo(Data other) {
-    byte[] myBytes = toString().getBytes(Charset.forName("UTF-8"));
-    byte[] otherBytes = other.toString().getBytes(Charset.forName("UTF-8"));
+    byte[] myBytes = toString().getBytes(Charset.forName(CHARSET_NAME));
+    byte[] otherBytes = other.toString().getBytes(
+        Charset.forName(CHARSET_NAME));
     return WritableComparator.compareBytes(
         myBytes, 0, myBytes.length, otherBytes, 0, otherBytes.length);
   }
@@ -114,33 +151,7 @@ public class Data implements WritableComparable<Data> {
 
   @Override
   public String toString() {
-    switch (type) {
-    case CSV_RECORD:
-      return (String)content + RECORD_DELIMITER;
-    case ARRAY_RECORD:
-      StringBuilder sb = new StringBuilder();
-      Object[] array = (Object[])content;
-      for (int i = 0; i < array.length; i++) {
-        if (i != 0) {
-          sb.append(FIELD_DELIMITER);
-        }
-
-        if (array[i] instanceof String) {
-          sb.append("\'");
-          sb.append(((String)array[i]).replaceAll(
-              "\'", Matcher.quoteReplacement("\\\'")));
-          sb.append("\'");
-        } else if (array[i] instanceof byte[]) {
-          sb.append(Arrays.toString((byte[])array[i]));
-        } else {
-          sb.append(array[i].toString());
-        }
-      }
-      sb.append(RECORD_DELIMITER);
-      return sb.toString();
-    default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
-    }
+    return format(content, DEFAULT_FIELD_DELIMITER, DEFAULT_RECORD_DELIMITER);
   }
 
   @Override

@@ -27,4 +27,6 @@ public abstract class DataReader {
 
   public abstract String readCsvRecord();
 
+  public abstract Object readRecord();
+
 }

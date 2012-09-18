@@ -24,6 +24,4 @@ public interface Context {
 
   public String getString(String key);
 
-  public String[] getFieldNames();
-
 }

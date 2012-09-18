@@ -127,15 +127,16 @@ public class SqoopOutputFormatLoadExecutor {
   public class OutputFormatDataReader extends DataReader {
     @Override
     public Object[] readArrayRecord() {
-      return (Object[])readContent();
+      return (Object[])readRecord();
     }
 
     @Override
     public String readCsvRecord() {
-      return (String)readContent();
+      return (String)readRecord();
     }
 
-    private Object readContent() {
+    @Override
+    public Object readRecord() {
       synchronized (data) {
         if (writerFinished) {
           return null;

@@ -80,20 +80,21 @@ public class SqoopMapper
 
     @Override
     public void writeArrayRecord(Object[] record) {
-      writeContent(record);
+      writeRecord(record);
     }
 
     @Override
     public void writeCsvRecord(String csv) {
-      writeContent(csv);
+      writeRecord(csv);
     }
 
-    private void writeContent(Object content) {
+    @Override
+    public void writeRecord(Object record) {
       if (data == null) {
         data = new Data();
       }
 
-      data.setContent(content);
+      data.setContent(record);
       try {
         context.write(data, NullWritable.get());
       } catch (Exception e) {

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -48,7 +48,7 @@ import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
 import org.junit.Test;
 
-public class TestMapReduce {
+public class TestMapReduce extends TestCase {
 
   private static final int START_ID = 1;
   private static final int NUMBER_OF_IDS = 9;
@@ -62,12 +62,12 @@ public class TestMapReduce {
 
     SqoopInputFormat inputformat = new SqoopInputFormat();
     List<InputSplit> splits = inputformat.getSplits(job);
-    Assert.assertEquals(9, splits.size());
+    assertEquals(9, splits.size());
 
     for (int id = START_ID; id <= NUMBER_OF_IDS; id++) {
       SqoopSplit split = (SqoopSplit)splits.get(id-1);
       DummyPartition partition = (DummyPartition)split.getPartition();
-      Assert.assertEquals(id, partition.getId());
+      assertEquals(id, partition.getId());
     }
   }
 
@@ -77,17 +77,8 @@ public class TestMapReduce {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
 
-    Job job = Job.getInstance(conf);
-    job.setInputFormatClass(SqoopInputFormat.class);
-    job.setMapperClass(SqoopMapper.class);
-    job.setMapOutputKeyClass(Data.class);
-    job.setMapOutputValueClass(NullWritable.class);
-    job.setOutputFormatClass(DummyOutputFormat.class);
-    job.setOutputKeyClass(Data.class);
-    job.setOutputValueClass(NullWritable.class);
-
-    boolean success = job.waitForCompletion(true);
-    Assert.assertEquals("Job failed!", true, success);
+    JobUtils.runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
+        DummyOutputFormat.class);
   }
 
   @Test
@@ -97,17 +88,8 @@ public class TestMapReduce {
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
 
-    Job job = Job.getInstance(conf);
-    job.setInputFormatClass(SqoopInputFormat.class);
-    job.setMapperClass(SqoopMapper.class);
-    job.setMapOutputKeyClass(Data.class);
-    job.setMapOutputValueClass(NullWritable.class);
-    job.setOutputFormatClass(SqoopNullOutputFormat.class);
-    job.setOutputKeyClass(Data.class);
-    job.setOutputValueClass(NullWritable.class);
-
-    boolean success = job.waitForCompletion(true);
-    Assert.assertEquals("Job failed!", true, success);
+    JobUtils.runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
+        SqoopNullOutputFormat.class);
   }
 
   public static class DummyPartition extends Partition {
@@ -150,12 +132,10 @@ public class TestMapReduce {
     public void run(Context context, Partition partition, DataWriter writer) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_ID; row++) {
-        Object[] array = new Object[] {
-          String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row),
-          new Integer(id*NUMBER_OF_ROWS_PER_ID+row),
-          new Double(id*NUMBER_OF_ROWS_PER_ID+row)
-        };
-        writer.writeArrayRecord(array);
+        writer.writeArrayRecord(new Object[] {
+            String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row),
+            new Integer(id*NUMBER_OF_ROWS_PER_ID+row),
+            new Double(id*NUMBER_OF_ROWS_PER_ID+row)});
       }
     }
   }
@@ -185,14 +165,13 @@ public class TestMapReduce {
 
       @Override
       public void write(Data key, NullWritable value) {
-        Object[] record = new Object[] {
+        data.setContent(new Object[] {
           String.valueOf(index),
           new Integer(index),
-          new Double(index)
-        };
-        data.setContent(record);
-        Assert.assertEquals(data.toString(), key.toString());
+          new Double(index)});
         index++;
+
+        assertEquals(data.toString(), key.toString());
       }
 
       @Override
@@ -238,7 +217,7 @@ public class TestMapReduce {
           new Double(index)});
         index++;
 
-        Assert.assertEquals(expected.toString(), actual.toString());
+        assertEquals(expected.toString(), actual.toString());
       };
     }
   }

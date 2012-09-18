@@ -18,12 +18,19 @@
 
 package org.apache.sqoop.job.mr;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.io.Data;
 
 /**
@@ -35,9 +42,25 @@ public class SqoopFileOutputFormat
   public static final Log LOG =
       LogFactory.getLog(SqoopFileOutputFormat.class.getName());
 
+  public static final Class<? extends CompressionCodec> DEFAULT_CODEC =
+      DefaultCodec.class;
+
   @Override
   public RecordWriter<Data, NullWritable> getRecordWriter(
-      TaskAttemptContext context) {
+      TaskAttemptContext context) throws IOException {
+    Configuration conf = context.getConfiguration();
+
+    Path filepath = getDefaultWorkFile(context, "");
+    String filename = filepath.toString();
+    conf.set(JobConstants.JOB_MR_OUTPUT_FILE, filename);
+
+    boolean isCompressed = getCompressOutput(context);
+    if (isCompressed) {
+      String codecname =
+          conf.get(FileOutputFormat.COMPRESS_CODEC, DEFAULT_CODEC.getName());
+      conf.set(JobConstants.JOB_MR_OUTPUT_CODEC, codecname);
+    }
+
     SqoopOutputFormatLoadExecutor executor =
         new SqoopOutputFormatLoadExecutor(context);
     return executor.getRecordWriter();

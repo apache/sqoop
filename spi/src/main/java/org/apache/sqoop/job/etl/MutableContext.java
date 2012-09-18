@@ -24,6 +24,4 @@ public interface MutableContext extends Context {
 
   public void setString(String key, String value);
 
-  public void setFieldNames(String[] names);
-
 }

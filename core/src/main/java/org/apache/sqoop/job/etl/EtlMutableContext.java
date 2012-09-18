@@ -18,10 +18,8 @@
 package org.apache.sqoop.job.etl;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.CoreError;
-import org.apache.sqoop.job.JobConstants;
 
 /**
  * A mutable context used in the ETL framework.
@@ -40,11 +38,6 @@ public class EtlMutableContext extends EtlContext implements MutableContext  {
     }
 
     conf.set(key, value);
-  }
-
-  @Override
-  public void setFieldNames(String[] names) {
-    setString(JobConstants.JOB_ETL_FIELD_NAMES, StringUtils.arrayToString(names));
   }
 
 }

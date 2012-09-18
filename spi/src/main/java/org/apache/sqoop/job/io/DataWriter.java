@@ -27,4 +27,6 @@ public abstract class DataWriter {
 
   public abstract void writeCsvRecord(String csv);
 
+  public abstract void writeRecord(Object record);
+
 }

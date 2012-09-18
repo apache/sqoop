@@ -28,6 +28,7 @@ public final class JobConstants {
   public static final String PREFIX_JOB_CONFIG =
       ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "job.";
 
+
   public static final String JOB_ETL_PARTITIONER = PREFIX_JOB_CONFIG
       + "etl.partitioner";
 
@@ -37,11 +38,13 @@ public final class JobConstants {
   public static final String JOB_ETL_LOADER = PREFIX_JOB_CONFIG
       + "etl.loader";
 
-  public static final String JOB_ETL_FIELD_NAMES = PREFIX_JOB_CONFIG
-      + "etl.field.names";
 
-  public static final String JOB_ETL_OUTPUT_DIRECTORY = PREFIX_JOB_CONFIG
-      + "etl.output.directory";
+  public static final String JOB_MR_OUTPUT_FILE = PREFIX_JOB_CONFIG
+      + "mr.output.file";
+
+  public static final String JOB_MR_OUTPUT_CODEC = PREFIX_JOB_CONFIG
+      + "mr.output.codec";
+
 
   private JobConstants() {
     // Disable explicit object creation
