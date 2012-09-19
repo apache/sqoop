@@ -80,7 +80,7 @@ public class SubprocessSecurityManager extends SecurityManager {
    */
   public void checkExit(int status) {
     LOG.debug("Rejecting System.exit call with status=" + status);
-    throw new ExitSecurityException(status);
+    throw new com.cloudera.sqoop.util.ExitSecurityException(status);
   }
 
   @Override
