@@ -102,7 +102,13 @@ public class TestIntegerSplitter extends TestCase {
 
   public void testTooManySplits() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(5, 3, 5);
-    long [] expected = { 3, 4, 5 };
+    long [] expected = { 3, 4, 5, 5};
+    assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  public void testExactSplitsAsInterval() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(5, 1, 5);
+    long [] expected = { 1, 2, 3, 4, 5, 5};
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 

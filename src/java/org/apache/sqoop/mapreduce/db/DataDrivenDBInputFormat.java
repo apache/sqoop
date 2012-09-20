@@ -319,6 +319,9 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     public DataDrivenDBInputSplit(final String lower, final String upper) {
       this.lowerBoundClause = lower;
       this.upperBoundClause = upper;
+
+      LOG.debug("Creating input split with lower bound '" + lower
+        + "' and upper bound '" + upper + "'");
     }
 
     /**

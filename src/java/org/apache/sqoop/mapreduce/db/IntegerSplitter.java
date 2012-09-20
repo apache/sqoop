@@ -141,6 +141,24 @@ public class IntegerSplitter implements DBSplitter  {
       if (splits.size() == 1) {
         // make a valid singleton split
         splits.add(maxVal);
+      } else if ((maxVal - minVal) <= numSplits) {
+        // Edge case when there is lesser split points (intervals) then
+        // requested number of splits. In such case we are creating last split
+        // with two values, for example interval [1, 5] broken down into 5
+        // splits will create following conditions:
+        //  * 1 <= x < 2
+        //  * 2 <= x < 3
+        //  * 3 <= x < 4
+        //  * 4 <= x <= 5
+        // Notice that the last split have twice more data than others. In
+        // those cases we add one maxVal at the end to create following splits
+        // instead:
+        //  * 1 <= x < 2
+        //  * 2 <= x < 3
+        //  * 3 <= x < 4
+        //  * 4 <= x < 5
+        //  * 5 <= x <= 5
+        splits.add(maxVal);
       }
 
       return splits;
