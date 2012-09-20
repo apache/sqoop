@@ -86,6 +86,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    +----------------------------+
  *    | SQB_ID: BIGINT PK AUTO-GEN |
  *    | SQB_NAME: VARCHAR(64)      |
+ *    | SQB_TYPE: VARCHAR(64)      |
  *    | SQB_CONNECTION: BIGINT     | FK SQ_CONNECTION(SQN_ID)
  *    +----------------------------+
  * </pre>
@@ -162,8 +163,9 @@ public final class DerbySchemaQuery {
       "CREATE TABLE " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID
       + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
       + "PRIMARY KEY, " + COLUMN_SQB_CONNECTION + " BIGINT, " + COLUMN_SQB_NAME
-      + " VARCHAR(32), FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") REFERENCES "
-      + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "))";
+      + " VARCHAR(64), " + COLUMN_SQB_TYPE + " VARCHAR(64), FOREIGN KEY("
+      + COLUMN_SQB_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " ("
+      + COLUMN_SQN_ID + "))";
 
   // DDL: Create table SQ_CONNECTION_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
@@ -226,6 +228,18 @@ public final class DerbySchemaQuery {
       + " = ? OR " + COLUMN_SQNI_CONNECTION + " IS NULL) ORDER BY "
       + COLUMN_SQI_INDEX;
 
+  // DML: Fetch inputs and values for a given job
+  public static final String STMT_FETCH_JOB_INPUT =
+      "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
+      + ", " + COLUMN_SQBI_VALUE + " FROM " + TABLE_SQ_INPUT
+      + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT + " ON "
+      + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID + " WHERE "
+      + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQBI_JOB
+      + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL) ORDER BY "
+      + COLUMN_SQI_INDEX;
+
   // DML: Insert connector base
   public static final String STMT_INSERT_CONNECTOR_BASE =
       "INSERT INTO " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_NAME
@@ -270,25 +284,53 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION + " WHERE "
     + COLUMN_SQN_ID + " = ?";
 
-  // DML: Select one specific connection
+  // DML: Select all connections
   public static final String STMT_SELECT_CONNECTION_ALL =
     "SELECT " + COLUMN_SQN_ID + ", " + COLUMN_SQN_NAME + ", "
       + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION;
-
-  // DML: Select all inputs for given connection
-  public static final String STMT_SELECT_CONNECTION_INPUT =
-    "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQI_ID + ", " + COLUMN_SQNI_VALUE
-    + " FROM " + TABLE_SQ_CONNECTION_INPUT + " JOIN " + TABLE_SQ_INPUT
-    + " JOIN " + TABLE_SQ_FORM +  " ON " + COLUMN_SQF_ID + " = "
-    + COLUMN_SQI_FORM + " ON " + COLUMN_SQI_ID + " = " + COLUMN_SQNI_INPUT
-    + " WHERE " + COLUMN_SQNI_CONNECTION + " = ? ORDER BY "
-    + COLUMN_SQF_CONNECTOR + ", " + COLUMN_SQF_INDEX
-    + ", " + COLUMN_SQI_INDEX ;
 
   // DML: Check if given connection exists
   public static final String STMT_SELECT_CONNECTION_CHECK =
     "SELECT count(*) FROM " + TABLE_SQ_CONNECTION + " WHERE " + COLUMN_SQN_ID
     + " = ?";
+
+  // DML: Insert new job
+  public static final String STMT_INSERT_JOB =
+    "INSERT INTO " + TABLE_SQ_JOB + " (" + COLUMN_SQB_NAME + ", "
+      + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE + ") VALUES (?, ?, ?)";
+
+  // DML: Insert new job inputs
+  public static final String STMT_INSERT_JOB_INPUT =
+    "INSERT INTO " + TABLE_SQ_JOB_INPUT + " (" + COLUMN_SQBI_JOB
+    + ", " + COLUMN_SQBI_INPUT + ", " + COLUMN_SQBI_VALUE + ") "
+    + "VALUES (?, ?, ?)";
+
+  // DML: Delete rows from job input table
+  public static final String STMT_DELETE_JOB_INPUT =
+    "DELETE FROM " + TABLE_SQ_JOB_INPUT + " WHERE " + COLUMN_SQBI_JOB + " = ?";
+
+  // DML: Delete row from job table
+  public static final String STMT_DELETE_JOB =
+    "DELETE FROM " + TABLE_SQ_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+
+  // DML: Check if given job exists
+  public static final String STMT_SELECT_JOB_CHECK =
+    "SELECT count(*) FROM " + TABLE_SQ_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+
+  // DML: Select one specific job
+  public static final String STMT_SELECT_JOB_SINGLE =
+    "SELECT " + COLUMN_SQN_CONNECTOR + ", " + COLUMN_SQB_ID + ", "
+    + COLUMN_SQB_NAME + ", " + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE
+    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON "
+    + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID    + " WHERE "
+    + COLUMN_SQB_ID + " = ?";
+
+  // DML: Select all jobs
+  public static final String STMT_SELECT_JOB_ALL =
+    "SELECT " + COLUMN_SQN_CONNECTOR + ", " + COLUMN_SQB_ID + ", "
+    + COLUMN_SQB_NAME + ", " + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE
+    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON "
+    + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

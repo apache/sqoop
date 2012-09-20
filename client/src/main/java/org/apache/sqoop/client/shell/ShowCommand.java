@@ -28,6 +28,7 @@ public class ShowCommand extends SqoopCommand
   private ShowServerFunction serverFunction;
   private ShowVersionFunction versionFunction;
   private ShowConnectorFunction connectorFunction;
+  private ShowJobFunction jobFunction;
   private ShowFrameworkFunction frameworkFunction;
   private ShowConnectionFunction connectionFunction;
 
@@ -78,8 +79,10 @@ public class ShowCommand extends SqoopCommand
       return connectionFunction.execute(args);
 
     } else if (func.equals("job")) {
-      return null;
-
+      if (jobFunction == null) {
+        jobFunction = new ShowJobFunction(io);
+      }
+      return jobFunction.execute(args);
     } else {
       String msg = "Usage: show " + getUsage();
       throw new SqoopException(ClientError.CLIENT_0002, msg);

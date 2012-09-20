@@ -37,6 +37,10 @@ public class GenericJdbcValidator extends Validator {
       return validateConnectionForm(form);
     }
 
+    if(form.getName().equals(FORM_TABLE)) {
+      return Status.ACCEPTABLE;
+    }
+
     // This do not seem as our form
     return Status.UNACCEPTABLE;
   }

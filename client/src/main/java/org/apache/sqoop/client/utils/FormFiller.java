@@ -18,13 +18,13 @@
 package org.apache.sqoop.client.utils;
 
 import jline.ConsoleReader;
-import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -34,11 +34,11 @@ public class FormFiller {
 
 
   public static boolean fillForms(IO io,
-                                  MConnectionForms formsMetadata,
+                                  List<MForm> forms,
                                   ConsoleReader reader,
                                   ResourceBundle bundle)
     throws IOException {
-    for (MForm form : formsMetadata.getForms()) {
+    for (MForm form : forms) {
       if(!fillForm(io, form, reader, bundle)) {
         return false;
       }

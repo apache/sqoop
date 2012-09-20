@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MJob;
 
 /**
  * Set of methods required from each JDBC based repository.
@@ -159,4 +160,58 @@ public interface JdbcRepositoryHandler {
    * @return List will all saved connection objects
    */
   public List<MConnection> findConnections(Connection conn);
+
+
+  /**
+   * Save given job to repository. This job object must not be already
+   * present in the repository otherwise exception will be thrown.
+   *
+   * @param job Job object to serialize into repository.
+   * @param conn Connection to metadata repository
+   */
+  public void createJob(MJob job, Connection conn);
+
+  /**
+   * Update given job representation in repository. This job object must
+   * already exists in the repository otherwise exception will be
+   * thrown.
+   *
+   * @param job Job object that should be updated in repository.
+   * @param conn Connection to metadata repository
+   */
+  public void updateJob(MJob job, Connection conn);
+
+  /**
+   * Check if given job exists in metastore.
+   *
+   * @param id Job id
+   * @param conn Connection to metadata repository
+   * @return True if the job exists
+   */
+  public boolean existsJob(long id, Connection conn);
+
+  /**
+   * Delete job with given id from metadata repository.
+   *
+   * @param id Job object that should be removed from repository
+   * @param conn Connection to metadata repository
+   */
+  public void deleteJob(long id, Connection conn);
+
+  /**
+   * Find job with given id in repository.
+   *
+   * @param id Job id
+   * @param conn Connection to metadata repository
+   * @return Deserialized form of the job that is present in the repository
+   */
+  public MJob findJob(long id, Connection conn);
+
+  /**
+   * Get all job objects.
+   *
+   * @param conn Connection to metadata repository
+   * @return List will all saved job objects
+   */
+  public List<MJob> findJobs(Connection conn);
 }

@@ -2,3 +2,6 @@
 .project
 .settings
 target
+*.iml
+*.log
+.idea

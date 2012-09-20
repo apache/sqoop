@@ -26,9 +26,10 @@ import java.util.List;
 /**
  *
  */
-public class UpdateCommand extends  SqoopCommand {
+public class UpdateCommand extends SqoopCommand {
 
   private UpdateConnectionFunction connectionFunction;
+  private UpdateJobFunction jobFunction;
 
   public UpdateCommand(Shell shell) {
     super(shell, "update", "\\up",
@@ -49,7 +50,11 @@ public class UpdateCommand extends  SqoopCommand {
         connectionFunction = new UpdateConnectionFunction(io);
       }
       return connectionFunction.execute(args);
-
+    } else if (func.equals("job")) {
+      if (jobFunction == null) {
+        jobFunction = new UpdateJobFunction(io);
+      }
+      return jobFunction.execute(args);
     } else {
       String msg = "Usage: update " + getUsage();
       throw new SqoopException(ClientError.CLIENT_0002, msg);

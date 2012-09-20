@@ -75,5 +75,17 @@ limitations under the License.
     <url-pattern>/v1/connection/*</url-pattern>
   </servlet-mapping>
 
+  <!-- Job servlet -->
+  <servlet>
+    <servlet-name>v1.JobServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.JobServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.JobServlet</servlet-name>
+    <url-pattern>/v1/job/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>
 

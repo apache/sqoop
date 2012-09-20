@@ -17,23 +17,65 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.common.SqoopException;
+
 /**
  * Model describing entire job object including both connector and
  * framework part.
  */
-public class MJob extends MNamedElement {
+public class MJob extends MPersistableEntity {
 
   static public enum Type {
     IMPORT,
     EXPORT,
   }
 
-  // TODO(jarcec): We probably need reference to connection object here
+  /**
+   * Connector reference.
+   *
+   * Job object do not immediately depend on connector as there is indirect
+   * dependency through connection object, but having this dependency explicitly
+   * carried along helps a lot.
+   */
+  long connectorId;
+
+  /**
+   * Corresponding connection object.
+   */
+  long connectionId;
+
+  /**
+   * User name for this object
+   */
+  String name;
+
+  /**
+   * Job type
+   */
+  Type type;
+
   MJobForms connectorPart;
   MJobForms frameworkPart;
 
-  public MJob(String name) {
-    super(name);
+  public MJob(long connectorId,
+              long connectionId,
+              Type type,
+              MJobForms connectorPart,
+              MJobForms frameworkPart) {
+    this.connectorId = connectorId;
+    this.connectionId = connectionId;
+    this.type = type;
+    this.connectorPart = connectorPart;
+    this.frameworkPart = frameworkPart;
+
+    // Check that we're operating on forms with same type
+    if (type != connectorPart.getType() || type != frameworkPart.getType()) {
+      throw new SqoopException(ModelError.MODEL_002,
+        "Incompatible types, job: " + type.name()
+        + ", connector part: " + connectorPart.getType().name()
+        + ", framework part: " + frameworkPart.getType().name()
+      );
+    }
   }
 
   @Override
@@ -42,5 +84,33 @@ public class MJob extends MNamedElement {
     sb.append(connectorPart).append(", framework-part: ").append(frameworkPart);
 
     return sb.toString();
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public long getConnectionId() {
+    return connectionId;
+  }
+
+  public long getConnectorId() {
+    return connectorId;
+  }
+
+  public MJobForms getConnectorPart() {
+    return connectorPart;
+  }
+
+  public MJobForms getFrameworkPart() {
+    return frameworkPart;
+  }
+
+  public Type getType() {
+    return type;
   }
 }

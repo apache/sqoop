@@ -25,6 +25,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MJob;
 
 public class JdbcRepository implements Repository {
 
@@ -236,6 +237,92 @@ public class JdbcRepository implements Repository {
       @Override
       public Object doIt(Connection conn) {
         return handler.findConnections(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createJob(final MJob job) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(job.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0018);
+        }
+
+        handler.createJob(job, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateJob(final MJob job) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+       if(!job.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0019);
+        }
+        if(!handler.existsConnection(job.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020,
+            "Invalid id: " + job.getPersistenceId());
+        }
+
+        handler.updateJob(job, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteJob(final long id) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(!handler.existsJob(id, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020,
+            "Invalid id: " + id);
+        }
+
+        handler.deleteJob(id, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MJob findJob(final long id) {
+    return (MJob) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findJob(id, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MJob> findJobs() {
+   return (List<MJob>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findJobs(conn);
       }
     });
   }

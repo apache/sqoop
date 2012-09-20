@@ -90,6 +90,16 @@ public enum RepositoryError implements ErrorCode {
 
   /** Invalid connection id **/
   JDBCREPO_0017("Given connection id is invalid"),
+
+  /** Job that we're trying to create is already saved in repository **/
+  JDBCREPO_0018("Cannot create job that was already created"),
+
+  /** Job that we're trying to update is not yet saved **/
+  JDBCREPO_0019("Cannot update job that was not yet created"),
+
+  /** Invalid job id **/
+  JDBCREPO_0020("Given job id is invalid"),
+
   ;
 
   private final String message;

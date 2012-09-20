@@ -19,6 +19,7 @@ package org.apache.sqoop.validation;
 
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 
 import java.util.List;
@@ -104,7 +105,7 @@ public class Validator {
    * @param job Job to be validated
    * @return Validation status
    */
-  public Status validate(MJobForms job) {
+  public Status validate(MJob.Type type, MJobForms job) {
     return validate(job.getForms());
   }
 

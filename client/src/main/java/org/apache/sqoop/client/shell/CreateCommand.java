@@ -29,6 +29,7 @@ import java.util.List;
 public class CreateCommand extends SqoopCommand {
 
   private CreateConnectionFunction connectionFunction;
+  private CreateJobFunction jobFunction;
 
   public CreateCommand(Shell shell) {
     super(shell, "create", "\\cr",
@@ -49,7 +50,11 @@ public class CreateCommand extends SqoopCommand {
         connectionFunction = new CreateConnectionFunction(io);
       }
       return connectionFunction.execute(args);
-
+    } else if (func.equals("job")) {
+      if (jobFunction == null) {
+        jobFunction = new CreateJobFunction(io);
+      }
+      return jobFunction.execute(args);
     } else {
       String msg = "Usage: create " + getUsage();
       throw new SqoopException(ClientError.CLIENT_0002, msg);

@@ -100,6 +100,8 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQB_NAME = "SQB_NAME";
 
+  public static final String COLUMN_SQB_TYPE = "SQB_TYPE";
+
   public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
 
   // SQ_CONNECTION_INPUT

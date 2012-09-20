@@ -50,7 +50,16 @@ public class TestUtil {
   public static MConnection getConnection(String name) {
     return new MConnection(1,
                            getConnector(name).getConnectionForms(),
-                           getFramework().getConnectionForms());
+                           getFramework().getConnectionForms()
+    );
+  }
+
+  public static MJob getJob(String name, MJob.Type type) {
+    return new MJob(1, 1,
+                    type,
+                    getConnector(name).getJobForms(type),
+                    getFramework().getJobForms(type)
+    );
   }
 
   public static MConnectionForms getConnectionForms() {
@@ -79,7 +88,7 @@ public class TestUtil {
     return new MConnectionForms(connectionForms);
   }
 
-  public static List<MJobForms> getAllJobForms() {
+  public static MJobForms getJobForms(MJob.Type type) {
     List<MInput<?>> inputs;
     MStringInput input;
     MForm form;
@@ -121,8 +130,12 @@ public class TestUtil {
     form.setPersistenceId(12);
     jobForms.add(form);
 
+    return new MJobForms(type, jobForms);
+  }
+
+  public static List<MJobForms> getAllJobForms() {
     List<MJobForms> jobs = new ArrayList<MJobForms>();
-    jobs.add(new MJobForms(MJob.Type.IMPORT, jobForms));
+    jobs.add(getJobForms(MJob.Type.IMPORT));
 
     return jobs;
   }

@@ -64,10 +64,9 @@ public enum DerbyRepoError implements ErrorCode {
   DERBYREPO_0011("Metadata cannot have preassigned persistence id"),
 
   /**
-   * The system was unable to register connector metadata due to an unexpected
-   * update count.
+   * The system was unable to register various entities.
    */
-  DERBYREPO_0012("Unexpected update count on connector registration"),
+  DERBYREPO_0012("Unexpected update count when registering entity"),
 
   /**
    * The system was unable to register metadata due to a failure to retrieve
@@ -125,6 +124,24 @@ public enum DerbyRepoError implements ErrorCode {
 
   /** We're unable to check if given connection already exists */
   DERBYREPO_0025("Unable to check if given connection exists"),
+
+  /** We cant create new job in metastore **/
+  DERBYREPO_0026("Unable to create new job data"),
+
+  /** We can't update job in metastore **/
+  DERBYREPO_0027("Unable to update job metadata in repository"),
+
+  /** We can't delete job in metastore **/
+  DERBYREPO_0028("Unable to delete job metadata in repository"),
+
+  /** We're unable to check if given job already exists */
+  DERBYREPO_0029("Unable to check if given job exists"),
+
+  /** We can't restore specific job metadata from metastore **/
+  DERBYREPO_0030("Unable to load specific job metadata from repository"),
+
+  /** We can't restore job metadata from metastore **/
+  DERBYREPO_0031("Unable to load job metadata from repository"),
 
   ;
 

@@ -20,6 +20,7 @@ package org.apache.sqoop.repository;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MJob;
 
 import java.util.List;
 
@@ -94,7 +95,45 @@ public interface Repository {
   /**
    * Get all connection objects.
    *
-   * @return Array will all saved connection objects
+   * @return List will all saved connection objects
    */
   public List<MConnection> findConnections();
+
+  /**
+   * Save given job to repository. This job object must not be already present
+   * in repository otherwise exception will be thrown.
+   *
+   * @param job Job object that should be saved to repository
+   */
+  public void createJob(MJob job);
+
+  /**
+   * Update given job metadata in repository. This object must already be saved
+   * in repository otherwise exception will be thrown.
+   *
+   * @param job Job object that should be updated in the repository
+   */
+  public void updateJob(MJob job);
+
+  /**
+   * Delete job with given id from metadata repository.
+   *
+   * @param id Job id that should be removed
+   */
+  public void deleteJob(long id);
+
+  /**
+   * Find job object with given id.
+   *
+   * @param id Job id
+   * @return Deserialized form of job loaded from repository
+   */
+  public MJob findJob(long id);
+
+  /**
+   * Get all job objects.
+   *
+   * @return List of all jobs in the repository
+   */
+  public List<MJob> findJobs();
 }

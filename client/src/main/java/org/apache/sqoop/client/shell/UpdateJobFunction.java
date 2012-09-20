@@ -22,10 +22,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
+import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -33,39 +33,39 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import static org.apache.sqoop.client.utils.FormFiller.*;
+import static org.apache.sqoop.client.utils.FormFiller.fillForms;
 
 /**
  *
  */
-public class UpdateConnectionFunction extends SqoopFunction {
+public class UpdateJobFunction extends SqoopFunction {
 
-  private static final String XID = "xid";
+  private static final String JID = "jid";
 
-  private ConnectionRequest connectionRequest;
+  private JobRequest jobRequest;
 
   private IO io;
 
   @SuppressWarnings("static-access")
-  public UpdateConnectionFunction(IO io) {
+  public UpdateJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connection ID")
-      .withLongOpt(XID)
+      .withDescription("Job ID")
+      .withLongOpt(JID)
       .hasArg()
-      .create(XID.charAt(0)));
+      .create(JID.charAt(0)));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(XID)) {
-      io.out.println("Required argument --xid is missing.");
+    if (!line.hasOption(JID)) {
+      io.out.println("Required argument --jid is missing.");
       return null;
     }
 
     try {
-      updateConnection(line.getOptionValue(XID));
+      updateJob(line.getOptionValue(JID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -73,23 +73,23 @@ public class UpdateConnectionFunction extends SqoopFunction {
     return null;
   }
 
-  private void updateConnection(String connectionId) throws IOException {
-    io.out.println("Updating connection with id " + connectionId);
+  private void updateJob(String jobId) throws IOException {
+    io.out.println("Updating job with id " + jobId);
 
     ConsoleReader reader = new ConsoleReader();
 
-    ConnectionBean connectionBean = readConnection(connectionId);
+    JobBean jobBean = readJob(jobId);
 
     // TODO(jarcec): Check that we have expected data
-    MConnection connection = connectionBean.getConnections().get(0);
+    MJob job = jobBean.getJobs().get(0);
     ResourceBundle frameworkBundle
-      = connectionBean.getFrameworkBundle();
+      = jobBean.getFrameworkBundle();
     ResourceBundle connectorBundle
-      = connectionBean.getConnectorBundle(connection.getConnectorId());
+      = jobBean.getConnectorBundle(job.getConnectorId());
 
     Status status = Status.FINE;
 
-    io.out.println("Please update connection metadata:");
+    io.out.println("Please update job metadata:");
 
     do {
       if( !status.canProceed() ) {
@@ -99,38 +99,38 @@ public class UpdateConnectionFunction extends SqoopFunction {
       }
 
       // Query connector forms
-      if(!fillForms(io, connection.getConnectorPart().getForms(),
-                    reader, connectorBundle)) {
+      if(!fillForms(io, job.getConnectorPart().getForms(),
+        reader, connectorBundle)) {
         return;
       }
 
       // Query framework forms
-      if(!fillForms(io, connection.getFrameworkPart().getForms(),
-                    reader, frameworkBundle)) {
+      if(!fillForms(io, job.getFrameworkPart().getForms(),
+        reader, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = updateConnection(connection);
+      status = updateJob(job);
     } while(!status.canProceed());
 
-    io.out.println("Connection was successfully updated with status "
+    io.out.println("Job was successfully updated with status "
       + status.name());
   }
 
-  private Status updateConnection(MConnection connection) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
+  private Status updateJob(MJob job) {
+    if (jobRequest == null) {
+      jobRequest = new JobRequest();
     }
 
-    return connectionRequest.update(Environment.getServerUrl(), connection);
+    return jobRequest.update(Environment.getServerUrl(), job);
   }
 
-  private ConnectionBean readConnection(String connectionId) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
+  private JobBean readJob(String jobId) {
+    if (jobRequest == null) {
+      jobRequest = new JobRequest();
     }
 
-    return connectionRequest.read(Environment.getServerUrl(), connectionId);
+    return jobRequest.read(Environment.getServerUrl(), jobId);
   }
 }

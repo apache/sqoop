@@ -24,7 +24,11 @@ import org.apache.sqoop.common.ErrorCode;
  */
 public enum ModelError implements ErrorCode {
 
-  MODEL_001("Attempt to pass two different set of MForms for single job type.");
+  MODEL_001("Attempt to pass two different set of MForms for single job type."),
+
+  MODEL_002("Creating MJob of different job types"),
+
+  ;
 
   private final String message;
 

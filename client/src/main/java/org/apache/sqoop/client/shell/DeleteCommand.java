@@ -29,6 +29,7 @@ import java.util.List;
 public class DeleteCommand extends SqoopCommand {
 
   private DeleteConnectionFunction connectionFunction;
+  private DeleteJobFunction jobFunction;
 
   public DeleteCommand(Shell shell) {
     super(shell, "delete", "\\d",
@@ -50,7 +51,11 @@ public class DeleteCommand extends SqoopCommand {
         connectionFunction = new DeleteConnectionFunction(io);
       }
       return connectionFunction.execute(args);
-
+    } else if (func.equals("job")) {
+      if (jobFunction == null) {
+        jobFunction = new DeleteJobFunction(io);
+      }
+      return jobFunction.execute(args);
     } else {
       String msg = "Usage: delete " + getUsage();
       throw new SqoopException(ClientError.CLIENT_0002, msg);

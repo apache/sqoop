@@ -25,12 +25,15 @@ import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.ConnectionRequest;
 import org.apache.sqoop.client.request.ConnectorRequest;
 import org.apache.sqoop.client.request.FrameworkRequest;
+import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -41,38 +44,51 @@ import java.util.ResourceBundle;
 import static org.apache.sqoop.client.utils.FormFiller.*;
 
 /**
- *
+ * Handles creation of new job objects.
  */
-public class CreateConnectionFunction extends SqoopFunction {
+public class CreateJobFunction extends  SqoopFunction {
 
-  private static final String CID = "cid";
+  private static final String XID = "xid";
+  private static final String TYPE = "type";
 
   private FrameworkRequest frameworkRequest;
-  private ConnectorRequest connectorRequest;
   private ConnectionRequest connectionRequest;
+  private ConnectorRequest connectorRequest;
+  private JobRequest jobRequest;
 
   private IO io;
 
   @SuppressWarnings("static-access")
-  public CreateConnectionFunction(IO io) {
+  public CreateJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connector ID")
-      .withLongOpt(CID)
+      .withDescription("Connection ID")
+      .withLongOpt(XID)
       .hasArg()
-      .create(CID.charAt(0)));
+      .create(XID.charAt(0))
+    );
+    this.addOption(OptionBuilder
+      .withDescription("Job type")
+      .withLongOpt(TYPE)
+      .hasArg()
+      .create(TYPE.charAt(0))
+    );
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(CID)) {
-      io.out.println("Required argument --cid is missing.");
+    if (!line.hasOption(XID)) {
+      io.out.println("Required argument --xid is missing.");
+      return null;
+    }
+    if (!line.hasOption(TYPE)) {
+      io.out.println("Required argument --type is missing.");
       return null;
     }
 
     try {
-      createConnection(line.getOptionValue(CID));
+      createJob(line.getOptionValue(XID), line.getOptionValue(TYPE));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -80,27 +96,37 @@ public class CreateConnectionFunction extends SqoopFunction {
     return null;
   }
 
-  private void createConnection(String connectorId) throws IOException {
-    io.out.println("Creating connection for connector with id " + connectorId);
+  private void createJob(String connectionId, String type) throws IOException {
+    io.out.println("Creating job for connection with id " + connectionId);
 
     ConsoleReader reader = new ConsoleReader();
 
     FrameworkBean frameworkBean = getFrameworkBean();
-    ConnectorBean connectorBean = getConnectorBean(connectorId);
+    ConnectionBean connectionBean = getConnectionBean(connectionId);
+    ConnectorBean connectorBean;
 
     MFramework framework = frameworkBean.getFramework();
     ResourceBundle frameworkBundle = frameworkBean.getResourceBundle();
 
+    MConnection connection = connectionBean.getConnections().get(0);
+
+    connectorBean = getConnectorBean(connection.getConnectorId());
     MConnector connector = connectorBean.getConnectors().get(0);
     ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(0);
 
-    MConnection connection = new MConnection(connector.getPersistenceId(),
-                                             connector.getConnectionForms(),
-                                             framework.getConnectionForms());
+    MJob.Type jobType = MJob.Type.valueOf(type.toUpperCase());
+
+    MJob job = new MJob(
+      connector.getPersistenceId(),
+      connection.getPersistenceId(),
+      jobType,
+      connector.getJobForms(jobType),
+      framework.getJobForms(jobType)
+    );
 
     Status status = Status.FINE;
 
-    io.out.println("Please fill following values to create new connection"
+    io.out.println("Please fill following values to create new job"
       + " object");
 
     do {
@@ -111,24 +137,25 @@ public class CreateConnectionFunction extends SqoopFunction {
       }
 
       // Query connector forms
-      if(!fillForms(io, connection.getConnectorPart().getForms(),
+      if(!fillForms(io, job.getConnectorPart().getForms(),
                     reader, connectorBundle)) {
         return;
       }
 
       // Query framework forms
-      if(!fillForms(io, connection.getFrameworkPart().getForms(),
+      if(!fillForms(io, job.getFrameworkPart().getForms(),
                     reader, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = createConnection(connection);
+      status = createJob(job);
     } while(!status.canProceed());
 
-    io.out.println("New connection was successfully created with validation "
+    io.out.println("New job was successfully created with validation "
       + "status " + status.name());
   }
+
 
   private FrameworkBean getFrameworkBean() {
     if (frameworkRequest == null) {
@@ -138,19 +165,28 @@ public class CreateConnectionFunction extends SqoopFunction {
     return frameworkRequest.read(Environment.getServerUrl());
   }
 
-  private ConnectorBean getConnectorBean(String cid) {
-    if (connectorRequest == null) {
-      connectorRequest = new ConnectorRequest();
-    }
-
-    return connectorRequest.read(Environment.getServerUrl(), cid);
-  }
-
-  private Status createConnection(MConnection connection) {
+  private ConnectionBean getConnectionBean(String xid) {
     if (connectionRequest == null) {
       connectionRequest = new ConnectionRequest();
     }
 
-    return connectionRequest.create(Environment.getServerUrl(), connection);
+    return connectionRequest.read(Environment.getServerUrl(), xid);
+  }
+
+  private ConnectorBean getConnectorBean(long cid) {
+    if (connectorRequest == null) {
+      connectorRequest = new ConnectorRequest();
+    }
+
+    return connectorRequest.read(Environment.getServerUrl(),
+      Long.toString(cid));
+  }
+
+  private Status createJob(MJob job) {
+    if (jobRequest == null) {
+      jobRequest = new JobRequest();
+    }
+
+    return jobRequest.create(Environment.getServerUrl(), job);
   }
 }

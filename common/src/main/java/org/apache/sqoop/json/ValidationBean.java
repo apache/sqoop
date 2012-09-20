@@ -20,6 +20,7 @@ package org.apache.sqoop.json;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MValidatedElement;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
@@ -34,6 +35,7 @@ import java.util.List;
 public class ValidationBean implements JsonBean {
 
   private static final String STATUS = "status";
+  private static final String TYPE = "type";
   private static final String CONNECTOR_PART = "connector";
   private static final String FRAMEWORK_PART = "framework";
 
@@ -41,6 +43,7 @@ public class ValidationBean implements JsonBean {
   private static final String MESSAGE = "message";
 
   private MConnection connection;
+  private MJob job;
   private Status status;
 
   // For "extract"
@@ -48,14 +51,24 @@ public class ValidationBean implements JsonBean {
     this.connection = connection;
     this.status = status;
   }
+  public ValidationBean(MJob job, Status status) {
+    this.job = job;
+    this.status = status;
+  }
 
   // For "restore"
   public ValidationBean(MConnection connection) {
     this.connection = connection;
   }
+  public ValidationBean(MJob job) {
+    this.job = job;
+  }
 
   public MConnection getConnection() {
     return connection;
+  }
+  public MJob getJob() {
+    return job;
   }
 
   public Status getStatus() {
@@ -67,11 +80,22 @@ public class ValidationBean implements JsonBean {
   public JSONObject extract() {
     JSONObject object = new JSONObject();
 
+    List<MForm> connectorPart = null;
+    List<MForm> frameworkPart = null;
+
+    if(connection != null) {
+      connectorPart = connection.getConnectorPart().getForms();
+      frameworkPart = connection.getFrameworkPart().getForms();
+      object.put(TYPE, "CONNECTION");
+    } else if (job != null) {
+      connectorPart = job.getConnectorPart().getForms();
+      frameworkPart = job.getFrameworkPart().getForms();
+      object.put(TYPE, "FRAMEWORK");
+    }
+
     object.put(STATUS, status.name());
-    object.put(CONNECTOR_PART,
-      extractForms(connection.getConnectorPart().getForms()));
-    object.put(FRAMEWORK_PART,
-      extractForms(connection.getFrameworkPart().getForms()));
+    object.put(CONNECTOR_PART, extractForms(connectorPart));
+    object.put(FRAMEWORK_PART, extractForms(frameworkPart));
 
     return object;
   }
@@ -110,8 +134,13 @@ public class ValidationBean implements JsonBean {
     JSONObject connectorPart = (JSONObject) jsonObject.get(CONNECTOR_PART);
     JSONObject frameworkPart = (JSONObject) jsonObject.get(FRAMEWORK_PART);
 
-    restoreForms(connectorPart, connection.getConnectorPart().getForms());
-    restoreForms(frameworkPart, connection.getFrameworkPart().getForms());
+    if(connection != null) {
+      restoreForms(connectorPart, connection.getConnectorPart().getForms());
+      restoreForms(frameworkPart, connection.getFrameworkPart().getForms());
+    } else if (job != null) {
+      restoreForms(connectorPart, job.getConnectorPart().getForms());
+      restoreForms(frameworkPart, job.getFrameworkPart().getForms());
+    }
   }
 
   private void restoreForms(JSONObject json, List<MForm> forms) {
