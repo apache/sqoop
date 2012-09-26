@@ -145,32 +145,39 @@ public class HBaseImportJob extends DataDrivenImportJob {
     // Add authentication token to the job if we're running on secure cluster.
     //
     // We're currently supporting HBase version 0.90 that do not have security
-    // patches which means that it do not have required method
-    // "obtainAuthTokenForJob".
+    // patches which means that it do not have required methods
+    // "isSecurityEnabled" and "obtainAuthTokenForJob".
     //
-    // We're using reflection API to see if this method is available and call
-    // it only if it's present.
+    // We're using reflection API to see if those methods are available and call
+    // them only if they are present.
     //
     // After we will remove support for HBase 0.90 we can simplify the code to
     // following code fragment:
     /*
     try {
-      User user = User.getCurrent();
-      user.obtainAuthTokenForJob(conf, job);
+      if (User.isSecurityEnabled()) {
+        User user = User.getCurrent();
+        user.obtainAuthTokenForJob(conf, job);
+      }
     } catch(InterruptedException ex) {
       throw new ImportException("Can't get authentication token", ex);
     }
     */
     try {
-      // Get the method
+      // Get method isSecurityEnabled
+      Method isSecurityEnabled = User.class.getMethod("isSecurityEnabled");
+
+      // Get method obtainAuthTokenForJob
       Method obtainAuthTokenForJob = User.class.getMethod(
         "obtainAuthTokenForJob", Configuration.class, Job.class);
 
       // Get current user
       User user = User.getCurrent();
 
-      // Obtain security token if needed (it's no-op on non secure cluster)
-      obtainAuthTokenForJob.invoke(user, conf, job);
+      // Obtain security token if needed
+      if((Boolean)isSecurityEnabled.invoke(null)) {
+        obtainAuthTokenForJob.invoke(user, conf, job);
+      }
     } catch (NoSuchMethodException e) {
       LOG.info("It seems that we're running on HBase without security"
         + " additions. Security additions will not be used during this job.");
