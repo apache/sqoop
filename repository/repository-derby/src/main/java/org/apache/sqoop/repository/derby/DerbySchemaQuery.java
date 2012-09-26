@@ -122,6 +122,10 @@ public final class DerbySchemaQuery {
   public static final String QUERY_CREATE_SCHEMA_SQOOP =
       "CREATE SCHEMA " + SCHEMA_SQOOP;
 
+  public static final String QUERY_SYSSCHEMA_SQOOP =
+    "SELECT SCHEMAID FROM SYS.SYSSCHEMAS WHERE SCHEMANAME = '"
+    + SCHEMA_SQOOP + "'";
+
   // DDL: Create table SQ_CONNECTOR
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
       "CREATE TABLE " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID
@@ -223,10 +227,10 @@ public final class DerbySchemaQuery {
       + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
       + ", " + COLUMN_SQNI_VALUE + " FROM " + TABLE_SQ_INPUT
       + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT + " ON "
-      + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " WHERE "
-      + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQNI_CONNECTION
-      + " = ? OR " + COLUMN_SQNI_CONNECTION + " IS NULL) ORDER BY "
-      + COLUMN_SQI_INDEX;
+      + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " AND "
+      + COLUMN_SQNI_CONNECTION + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND ("
+      + COLUMN_SQNI_CONNECTION + " = ? OR " + COLUMN_SQNI_CONNECTION
+      + " IS NULL) ORDER BY " + COLUMN_SQI_INDEX;
 
   // DML: Fetch inputs and values for a given job
   public static final String STMT_FETCH_JOB_INPUT =
@@ -235,8 +239,8 @@ public final class DerbySchemaQuery {
       + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
       + ", " + COLUMN_SQBI_VALUE + " FROM " + TABLE_SQ_INPUT
       + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT + " ON "
-      + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID + " WHERE "
-      + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQBI_JOB
+      + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID + " AND  " + COLUMN_SQBI_JOB
+      + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQBI_JOB
       + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL) ORDER BY "
       + COLUMN_SQI_INDEX;
 

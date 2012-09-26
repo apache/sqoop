@@ -187,6 +187,7 @@ limitations under the License.
                   <exclude>.gitignore</exclude>
                   <exclude>.idea/</exclude>
                   <exclude>*.iml</exclude>
+                  <exclude>*.log</exclude>
                 </excludes>
               </configuration>
             </execution>
