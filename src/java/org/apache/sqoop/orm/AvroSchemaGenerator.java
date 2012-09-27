@@ -61,7 +61,7 @@ public class AvroSchemaGenerator {
     List<Field> fields = new ArrayList<Field>();
     for (String columnName : columnNames) {
       String cleanedCol = ClassWriter.toIdentifier(columnName);
-      int sqlType = columnTypes.get(cleanedCol);
+      int sqlType = columnTypes.get(columnName);
       Schema avroSchema = toAvroSchema(sqlType, columnName);
       Field field = new Field(cleanedCol, avroSchema, null, null);
       field.addProp("columnName", columnName);
