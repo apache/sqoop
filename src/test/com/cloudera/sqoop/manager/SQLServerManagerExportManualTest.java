@@ -15,58 +15,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.cloudera.sqoop.manager;
 
-import java.io.BufferedReader;
+import com.cloudera.sqoop.ConnFactory;
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.hadoop.conf.Configuration;
+import org.junit.After;
+import org.junit.Before;
+
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Writer;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.sqoop.ConnFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.util.FileListing;
-
 /**
- * Test the SQLServerManager implementation.
- *
- * This uses JDBC to import data from an SQLServer database into HDFS.
- *
- * Since this requires an SQLServer installation,
- * this class is named in such a way that Sqoop's default QA process does
- * not run it. You need to run this manually with
- * -Dtestcase=SQLServerManagerImportManualTest.
- *
- * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
- * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons).
- *
- * To set up your test environment:
- *   Install SQL Server Express 2008 R2
- *   Create a database SQOOPTEST
- *   Create a login SQOOPUSER with password PASSWORD and grant all
- *   access for SQOOPTEST to SQOOPUSER.
+ * Please see instructions in SQLServerManagerImportManualTest.
  */
-public class SQLServerManagerImportManualTest extends ImportJobTestCase {
+public class SQLServerManagerExportManualTest extends ExportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-          SQLServerManagerImportManualTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+      SQLServerManagerExportManualTest.class.getName());
 
   static final String HOST_URL = System.getProperty(
           "sqoop.test.sqlserver.connectstring.host_url",
@@ -88,8 +66,8 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
 
   // instance variables populated during setUp, used during tests
   private SQLServerManager manager;
-
   private Configuration conf = new Configuration();
+  private Connection conn = null;
 
   @Override
   protected Configuration getConf() {
@@ -126,7 +104,6 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
     String fulltableName = manager.escapeObjectName(schema)
       + "." + manager.escapeObjectName(table);
 
-    Connection conn = null;
     Statement stmt = null;
 
     // Create schema if needed
@@ -134,6 +111,7 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
       conn = manager.getConnection();
       stmt = conn.createStatement();
       stmt.execute("CREATE SCHEMA " + schema);
+      conn.commit();
     } catch (SQLException sqlE) {
       LOG.info("Can't create schema: " + sqlE.getMessage());
     } finally {
@@ -151,6 +129,7 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
       conn = manager.getConnection();
       stmt = conn.createStatement();
       stmt.execute("DROP TABLE " + fulltableName);
+      conn.commit();
     } catch (SQLException sqlE) {
       LOG.info("Table was not dropped: " + sqlE.getMessage());
     } finally {
@@ -176,16 +155,6 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
           + "salary FLOAT, "
           + "dept VARCHAR(32), "
           + "PRIMARY KEY (id))");
-
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "1,'Aaron', "
-          + "1000000.00,'engineering')");
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "2,'Bob', "
-          + "400.00,'sales')");
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "3,'Fred', 15.00,"
-          + "'marketing')");
       conn.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: ", sqlE);
@@ -206,6 +175,7 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
   public void tearDown() {
     super.tearDown();
     try {
+      conn.close();
       manager.close();
     } catch (SQLException sqlE) {
       LOG.error("Got SQLException: " + sqlE.toString());
@@ -213,109 +183,112 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
     }
   }
 
-  @Test
-  public void testImportSimple() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults);
-  }
-
-  @Test
-  public void testImportExplicitDefaultSchema() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--schema", SCHEMA_DBO};
-
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
-  }
-
-  @Test
-  public void testImportDifferentSchema() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--schema", SCHEMA_SCH};
-
-    doImportAndVerify(SCH_TABLE_NAME, expectedResults, extraArgs);
-  }
-
-  private String [] getArgv(String tableName, String ... extraArgs) {
+  private String [] getArgv(String tableName,
+                            String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
 
     args.add("--table");
     args.add(tableName);
-    args.add("--warehouse-dir");
+    args.add("--export-dir");
     args.add(getWarehouseDir());
+    args.add("--fields-terminated-by");
+    args.add(",");
+    args.add("--lines-terminated-by");
+    args.add("\\n");
     args.add("--connect");
     args.add(CONNECT_STRING);
     args.add("--username");
     args.add(DATABASE_USER);
     args.add("--password");
     args.add(DATABASE_PASSWORD);
-    args.add("--num-mappers");
+    args.add("-m");
     args.add("1");
 
-    if (extraArgs.length > 0) {
-      args.add("--");
-      for (String arg : extraArgs) {
-        args.add(arg);
-      }
+    for (String arg : extraArgs) {
+      args.add(arg);
     }
 
     return args.toArray(new String[0]);
   }
 
-  private void doImportAndVerify(String tableName,
-                                 String [] expectedResults,
-                                 String ... extraArgs) throws IOException {
-
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, tableName);
-    Path filePath = new Path(tablePath, "part-m-00000");
-
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      FileListing.recursiveDeleteDir(tableFile);
+  protected void createTestFile(String filename,
+                                String[] lines)
+                                throws IOException {
+    new File(getWarehouseDir()).mkdirs();
+    File file = new File(getWarehouseDir() + "/" + filename);
+    Writer output = new BufferedWriter(new FileWriter(file));
+    for(String line : lines) {
+      output.write(line);
+      output.write("\n");
     }
+    output.close();
+  }
 
-    String [] argv = getArgv(tableName, extraArgs);
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    }
+  public void testExport() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,400,sales",
+      "3,Fred,15,marketing",
+    });
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
+    runExport(getArgv(DBO_TABLE_NAME));
+
+    assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
+  }
+
+  public void testExportCustomSchema() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,400,sales",
+      "3,Fred,15,marketing",
+    });
+
+    String[] extra = new String[] {"--",
+      "--schema",
+      SCHEMA_SCH,
+    };
+
+    runExport(getArgv(SCH_TABLE_NAME, extra));
+
+    assertRowCount(
+      2,
+      escapeObjectName(SCHEMA_SCH) + "." + escapeObjectName(SCH_TABLE_NAME),
+      conn
+    );
+  }
+
+  public static void assertRowCount(long expected,
+                                    String tableName,
+                                    Connection connection) {
+    Statement stmt = null;
+    ResultSet rs = null;
     try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      for (String expectedLine : expectedResults) {
-        assertEquals(expectedLine, r.readLine());
-      }
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT count(*) FROM " + tableName);
+
+      rs.next();
+
+      assertEquals(expected, rs.getLong(1));
+    } catch (SQLException e) {
+      LOG.error("Can't verify number of rows", e);
+      fail();
     } finally {
-      IOUtils.closeStream(r);
+      try {
+        connection.commit();
+
+        if (stmt != null) {
+          stmt.close();
+        }
+        if (rs != null) {
+          rs.close();
+        }
+      } catch (SQLException ex) {
+        LOG.info("Ignored exception in finally block.");
+      }
     }
+  }
+
+  public String escapeObjectName(String objectName) {
+    return "[" + objectName + "]";
   }
 }

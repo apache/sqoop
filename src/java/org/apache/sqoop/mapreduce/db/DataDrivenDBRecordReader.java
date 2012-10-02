@@ -99,6 +99,7 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
       query.append(" FROM ").append(tableName);
       if (!dbProductName.startsWith("ORACLE")
           && !dbProductName.startsWith("DB2")
+          && !dbProductName.startsWith("MICROSOFT SQL SERVER")
           && !dbProductName.startsWith("POSTGRESQL")) {
         // The AS clause is required for hsqldb. Some other databases might have
         // issues with it, so we're skipping some of them.

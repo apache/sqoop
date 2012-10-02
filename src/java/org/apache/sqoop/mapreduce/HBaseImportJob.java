@@ -175,7 +175,7 @@ public class HBaseImportJob extends DataDrivenImportJob {
       User user = User.getCurrent();
 
       // Obtain security token if needed
-      if((Boolean)isSecurityEnabled.invoke(null)) {
+      if ((Boolean)isSecurityEnabled.invoke(null)) {
         obtainAuthTokenForJob.invoke(user, conf, job);
       }
     } catch (NoSuchMethodException e) {
