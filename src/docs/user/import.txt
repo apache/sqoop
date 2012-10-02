@@ -63,6 +63,8 @@ Argument                          Description
 +\--direct+                       Use direct import fast path
 +\--direct-split-size <n>+        Split the input stream every 'n' bytes\
                                   when importing in direct mode
++\--fetch-size <n>+               Number of entries to read from database\
+                                  at once.
 +\--inline-lob-limit <n>+         Set the maximum size for an inline LOB
 +-m,\--num-mappers <n>+           Use 'n' map tasks to import in parallel
 +-e,\--query <statement>+         Import the results of '+statement+'.
