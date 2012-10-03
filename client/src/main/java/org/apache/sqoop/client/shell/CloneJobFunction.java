@@ -26,6 +26,7 @@ import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -38,7 +39,7 @@ import static org.apache.sqoop.client.utils.FormFiller.*;
 /**
  *
  */
-public class UpdateJobFunction extends SqoopFunction {
+public class CloneJobFunction extends SqoopFunction {
 
   private static final String JID = "jid";
 
@@ -47,7 +48,7 @@ public class UpdateJobFunction extends SqoopFunction {
   private IO io;
 
   @SuppressWarnings("static-access")
-  public UpdateJobFunction(IO io) {
+  public CloneJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
@@ -65,7 +66,7 @@ public class UpdateJobFunction extends SqoopFunction {
     }
 
     try {
-      updateJob(line.getOptionValue(JID));
+      cloneJob(line.getOptionValue(JID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -73,8 +74,8 @@ public class UpdateJobFunction extends SqoopFunction {
     return null;
   }
 
-  private void updateJob(String jobId) throws IOException {
-    io.out.println("Updating job with id " + jobId);
+  private void cloneJob(String jobId) throws IOException {
+    io.out.println("Cloning job with id " + jobId);
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -88,6 +89,9 @@ public class UpdateJobFunction extends SqoopFunction {
       = jobBean.getConnectorBundle(job.getConnectorId());
 
     Status status = Status.FINE;
+
+    // Remove persistent id as we're making a clone
+    job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     io.out.println("Please update job metadata:");
 
@@ -111,19 +115,19 @@ public class UpdateJobFunction extends SqoopFunction {
       }
 
       // Try to create
-      status = updateJob(job);
+      status = createJob(job);
     } while(!status.canProceed());
 
     io.out.println("Job was successfully updated with status "
       + status.name());
   }
 
-  private Status updateJob(MJob job) {
+  private Status createJob(MJob job) {
     if (jobRequest == null) {
       jobRequest = new JobRequest();
     }
 
-    return jobRequest.update(Environment.getServerUrl(), job);
+    return jobRequest.create(Environment.getServerUrl(), job);
   }
 
   private JobBean readJob(String jobId) {
