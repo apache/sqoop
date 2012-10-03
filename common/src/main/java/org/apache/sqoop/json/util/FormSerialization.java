@@ -21,6 +21,7 @@ import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
@@ -135,18 +136,21 @@ public class FormSerialization {
       JSONObject input = (JSONObject) inputs.get(i);
       MInputType type =
           MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
+      String name = (String) input.get(FORM_INPUT_NAME);
       MInput mInput = null;
       switch (type) {
         case STRING: {
-          String name = (String) input.get(FORM_INPUT_NAME);
           boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
           long size = (Long) input.get(FORM_INPUT_SIZE);
           mInput = new MStringInput(name, mask, (short) size);
           break;
         }
         case MAP: {
-          String name = (String) input.get(FORM_INPUT_NAME);
           mInput = new MMapInput(name);
+          break;
+        }
+        case INTEGER: {
+          mInput = new MIntegerInput(name);
           break;
         }
       }

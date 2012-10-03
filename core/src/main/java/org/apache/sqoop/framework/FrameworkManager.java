@@ -20,6 +20,7 @@ package org.apache.sqoop.framework;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
@@ -62,8 +63,8 @@ public class FrameworkManager {
     // Build the CONNECTION_FORMS forms for import
     List<MInput<?>> connFormInputs = new ArrayList<MInput<?>>();
 
-    MStringInput maxConnections = new MStringInput(
-      INPUT_CONN_MAX_SIMULTANEOUS_CONNECTIONS, false, (short) 10);
+    MIntegerInput maxConnections = new MIntegerInput(
+      INPUT_CONN_MAX_SIMULTANEOUS_CONNECTIONS);
     connFormInputs.add(maxConnections);
 
     MForm connForm = new MForm(FORM_SECURITY, connFormInputs);

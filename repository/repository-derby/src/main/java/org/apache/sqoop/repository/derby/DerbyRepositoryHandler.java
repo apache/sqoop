@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
@@ -934,6 +935,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         MStringInput	strInput = (MStringInput) input;
         baseInputStmt.setBoolean(5, strInput.isMasked());
         baseInputStmt.setShort(6, strInput.getMaxLength());
+      } else {
+        baseInputStmt.setNull(5, Types.BOOLEAN);
+        baseInputStmt.setNull(6, Types.INTEGER);
       }
       int baseInputCount = baseInputStmt.executeUpdate();
       if (baseInputCount != 1) {
@@ -1057,6 +1061,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
           break;
         case MAP:
           input = new MMapInput(inputName);
+          break;
+        case INTEGER:
+          input = new MIntegerInput(inputName);
           break;
         default:
           throw new SqoopException(DerbyRepoError.DERBYREPO_0006,

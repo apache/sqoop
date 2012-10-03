@@ -20,6 +20,7 @@ package org.apache.sqoop.client.utils;
 import jline.ConsoleReader;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -31,7 +32,6 @@ import java.util.ResourceBundle;
  *
  */
 public class FormFiller {
-
 
   public static boolean fillForms(IO io,
                                   List<MForm> forms,
@@ -70,12 +70,10 @@ public class FormFiller {
     // performed.
     switch (input.getValidationSeverity()) {
       case ERROR:
-        io.out.println("Error message: @|red "
-          + input.getValidationMessage() + " |@");
+        errorMessage(io, input.getValidationMessage());
         break;
       case WARNING:
-        io.out.println("Warning message: @|yellow "
-          + input.getValidationMessage() + " |@");
+        warningMessage(io, input.getValidationMessage());
         break;
       default:
         // Simply ignore all other states for the moment
@@ -86,6 +84,8 @@ public class FormFiller {
     switch (input.getType()) {
       case STRING:
         return fillInputString(io, (MStringInput) input, reader, bundle);
+      case INTEGER:
+        return fillInputInteger(io, (MIntegerInput) input, reader, bundle);
       //TODO(jarcec): Support MAP
       default:
         io.out.println("Unsupported data type " + input.getType());
@@ -93,17 +93,50 @@ public class FormFiller {
     }
   }
 
+  private static boolean fillInputInteger(IO io,
+                                          MIntegerInput input,
+                                          ConsoleReader reader,
+                                          ResourceBundle bundle)
+                                          throws IOException {
+    generatePrompt(reader, bundle, input);
+
+    // Fill already filled data when available
+    if(!input.isEmpty()) {
+      reader.putString(input.getValue().toString());
+    }
+
+    String userTyped = reader.readLine();
+
+    if (userTyped == null) {
+      return false;
+    } else if (userTyped.isEmpty()) {
+      input.setEmpty();
+    } else {
+      Integer value;
+      try {
+        value = Integer.valueOf(userTyped);
+        input.setValue(value);
+      } catch (NumberFormatException ex) {
+        errorMessage(io, "Input is not valid integer number");
+        return fillInputInteger(io, input, reader, bundle);
+      }
+
+      input.setValue(Integer.valueOf(userTyped));
+    }
+
+    return true;
+  }
+
   public static boolean fillInputString(IO io,
                                         MStringInput input,
                                         ConsoleReader reader,
                                         ResourceBundle bundle)
                                         throws IOException {
-    // Print prompt
-    reader.printString(bundle.getString(input.getLabelKey()) + ": ");
-    reader.flushConsole();
+    generatePrompt(reader, bundle, input);
 
     // Fill already filled data when available
-    if(!input.isEmpty()) {
+    // However do not printout if this input contains sensitive information.
+    if(!input.isEmpty() && !input.isMasked()) {
       reader.putString(input.getValue());
     }
 
@@ -124,6 +157,22 @@ public class FormFiller {
     }
 
     return true;
+  }
+
+  public static void generatePrompt(ConsoleReader reader,
+                                    ResourceBundle bundle,
+                                    MInput input)
+                                    throws IOException {
+    reader.printString(bundle.getString(input.getLabelKey()) + ": ");
+    reader.flushConsole();
+  }
+
+  public static void errorMessage(IO io, String message) {
+    io.out.println("Error message: @|red " + message + " |@");
+  }
+
+  public static void warningMessage(IO io, String message) {
+    io.out.println("Warning message: @|yellow " + message + " |@");
   }
 
   private FormFiller() {

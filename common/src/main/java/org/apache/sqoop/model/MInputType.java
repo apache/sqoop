@@ -29,5 +29,10 @@ public enum MInputType {
   STRING,
 
   /** Map input type */
-  MAP;
+  MAP,
+
+  /** Integer input type */
+  INTEGER,
+
+  ;
 }
