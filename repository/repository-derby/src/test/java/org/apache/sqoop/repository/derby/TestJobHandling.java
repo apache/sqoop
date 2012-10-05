@@ -177,6 +177,8 @@ public class TestJobHandling extends DerbyTestCase {
     forms = job.getFrameworkPart().getForms();
     ((MStringInput)forms.get(1).getInputs().get(1)).setValue("Injected");
 
+    job.setName("name");
+
     handler.updateJob(job, getDerbyConnection());
 
     assertEquals(1, job.getPersistenceId());
@@ -184,6 +186,8 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 18);
 
     MJob retrieved = handler.findJob(1, getDerbyConnection());
+    assertEquals("name", retrieved.getName());
+
     forms = retrieved.getConnectorPart().getForms();
     assertEquals("Injected", forms.get(0).getInputs().get(1).getValue());
 

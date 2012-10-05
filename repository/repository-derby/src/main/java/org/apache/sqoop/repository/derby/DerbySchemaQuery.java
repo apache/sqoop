@@ -273,6 +273,10 @@ public final class DerbySchemaQuery {
     + ", " + COLUMN_SQNI_INPUT + ", " + COLUMN_SQNI_VALUE + ") "
     + "VALUES (?, ?, ?)";
 
+  public static final String STMT_UPDATE_CONNECTION =
+    "UPDATE " + TABLE_SQ_CONNECTION + " SET " + COLUMN_SQN_NAME + " = ? WHERE "
+    + COLUMN_SQN_ID + " = ?";
+
   // DML: Delete rows from connection input table
   public static final String STMT_DELETE_CONNECTION_INPUT =
     "DELETE FROM " + TABLE_SQ_CONNECTION_INPUT + " WHERE "
@@ -308,6 +312,10 @@ public final class DerbySchemaQuery {
     "INSERT INTO " + TABLE_SQ_JOB_INPUT + " (" + COLUMN_SQBI_JOB
     + ", " + COLUMN_SQBI_INPUT + ", " + COLUMN_SQBI_VALUE + ") "
     + "VALUES (?, ?, ?)";
+
+  public static final String STMT_UPDATE_JOB =
+    "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_NAME + " = ? WHERE "
+      + COLUMN_SQB_ID + " = ?";
 
   // DML: Delete rows from job input table
   public static final String STMT_DELETE_JOB_INPUT =

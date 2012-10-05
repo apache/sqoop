@@ -446,18 +446,21 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
    */
   @Override
   public void updateConnection(MConnection connection, Connection conn) {
-    // We're not allowing updating values in SQ_CONNECTION (name, connector id)
-    // TODO(jarcec): Remove this limitation
-    // TODO(jarcec): check that connector and other values are not changed!
-
-    PreparedStatement stmt = null;
+    PreparedStatement deleteStmt = null;
+    PreparedStatement updateStmt = null;
     try {
       // Firstly remove old values
-      stmt = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
-      stmt.setLong(1, connection.getPersistenceId());
-      stmt.executeUpdate();
+      deleteStmt = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
+      deleteStmt.setLong(1, connection.getPersistenceId());
+      deleteStmt.executeUpdate();
 
-      // And reinsert new ones
+      // Update CONNECTION table
+      updateStmt = conn.prepareStatement(STMT_UPDATE_CONNECTION);
+      updateStmt.setString(1, connection.getName());
+      updateStmt.setLong(2, connection.getPersistenceId());
+      updateStmt.executeUpdate();
+
+      // And reinsert new values
       createInputValues(STMT_INSERT_CONNECTION_INPUT,
         connection.getPersistenceId(),
         connection.getConnectorPart().getForms(),
@@ -470,7 +473,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0021, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(deleteStmt, updateStmt);
     }
   }
 
@@ -618,17 +621,21 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
    */
   @Override
   public void updateJob(MJob job, Connection conn) {
-    // We're not allowing updating values in SQ_JOB (name, type, connection)
-    // TODO(jarcec): Remove this limitation
-
-    PreparedStatement stmt = null;
+    PreparedStatement deleteStmt = null;
+    PreparedStatement updateStmt = null;
     try {
       // Firstly remove old values
-      stmt = conn.prepareStatement(STMT_DELETE_JOB_INPUT);
-      stmt.setLong(1, job.getPersistenceId());
-      stmt.executeUpdate();
+      deleteStmt = conn.prepareStatement(STMT_DELETE_JOB_INPUT);
+      deleteStmt.setLong(1, job.getPersistenceId());
+      deleteStmt.executeUpdate();
 
-      // And reinsert new ones
+      // Update job table
+      updateStmt = conn.prepareStatement(STMT_UPDATE_JOB);
+      updateStmt.setString(1, job.getName());
+      updateStmt.setLong(2, job.getPersistenceId());
+      updateStmt.executeUpdate();
+
+      // And reinsert new values
       createInputValues(STMT_INSERT_JOB_INPUT,
                         job.getPersistenceId(),
                         job.getConnectorPart().getForms(),
@@ -641,7 +648,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0027, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(deleteStmt, updateStmt);
     }
   }
 

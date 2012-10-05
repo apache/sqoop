@@ -18,9 +18,12 @@
 package org.apache.sqoop.client.utils;
 
 import jline.ConsoleReader;
+import org.apache.sqoop.client.core.Environment;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -29,9 +32,96 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- *
+ * Convenient methods for retrieving user input.
  */
 public class FormFiller {
+
+  /**
+   * Internal input that will be reused for loading names for connection and
+   * job objects.
+   */
+  private static MStringInput nameInput =
+    new MStringInput("object-name", false, (short)25);
+
+  /**
+   * Fill job object based on user input.
+   *
+   * @param io Shell's io object
+   * @param reader Associated console reader object
+   * @param job Job that user is suppose to fill in
+   * @param connectorBundle Connector resource bundle
+   * @param frameworkBundle Framework resource bundle
+   * @return True if we filled all inputs, false if user has stopped processing
+   * @throws IOException
+   */
+  public static boolean fillJob(IO io,
+                                ConsoleReader reader,
+                                MJob job,
+                                ResourceBundle connectorBundle,
+                                ResourceBundle frameworkBundle)
+                                throws IOException {
+
+    job.setName(getName(io, reader, job.getName()));
+
+    // Fill in data from user
+     return fillForms(io,
+                      reader,
+                      job.getConnectorPart().getForms(),
+                      connectorBundle,
+                      job.getFrameworkPart().getForms(),
+                      frameworkBundle);
+  }
+
+  /**
+   * Fill connection object based on user input.
+   *
+   * @param io Shell's io object
+   * @param reader Associated console reader object
+   * @param connection Connection that user is suppose to fill in
+   * @param connectorBundle Connector resource bundle
+   * @param frameworkBundle Framework resouce bundle
+   * @return True if we filled all inputs, false if user has stopped processing
+   * @throws IOException
+   */
+  public static boolean fillConnection(IO io,
+                                       ConsoleReader reader,
+                                       MConnection connection,
+                                       ResourceBundle connectorBundle,
+                                       ResourceBundle frameworkBundle)
+                                       throws IOException {
+
+    connection.setName(getName(io, reader, connection.getName()));
+
+    // Fill in data from user
+     return fillForms(io,
+                      reader,
+                      connection.getConnectorPart().getForms(),
+                      connectorBundle,
+                      connection.getFrameworkPart().getForms(),
+                      frameworkBundle);
+  }
+
+  public static boolean fillForms(IO io,
+                                  ConsoleReader reader,
+                                  List<MForm> connectorForms,
+                                  ResourceBundle connectorBundle,
+                                  List<MForm> frameworkForms,
+                                  ResourceBundle frameworkBundle
+                                  ) throws IOException {
+
+
+    // Query connector forms
+    if(!fillForms(io, connectorForms, reader, connectorBundle)) {
+      return false;
+    }
+
+    // Query framework forms
+    if(!fillForms(io, frameworkForms, reader, frameworkBundle)) {
+      return false;
+    }
+
+    return true;
+  }
 
   public static boolean fillForms(IO io,
                                   List<MForm> forms,
@@ -167,12 +257,31 @@ public class FormFiller {
     reader.flushConsole();
   }
 
+  public static String getName(IO io, ConsoleReader reader,
+                               String name) throws IOException {
+    if(name == null) {
+      nameInput.setEmpty();
+    } else {
+      nameInput.setValue(name);
+    }
+
+    fillInputString(io, nameInput, reader, Environment.getResourceBundle());
+
+    return nameInput.getValue();
+  }
+
   public static void errorMessage(IO io, String message) {
     io.out.println("Error message: @|red " + message + " |@");
   }
 
   public static void warningMessage(IO io, String message) {
     io.out.println("Warning message: @|yellow " + message + " |@");
+  }
+
+  public static void errorIntroduction(IO io) {
+    io.out.println();
+    io.out.println("@|red There are issues with entered data, please"
+      + " revise your input:|@");
   }
 
   private FormFiller() {

@@ -167,6 +167,7 @@ public class ConnectorManager {
           throw new SqoopException(ConnectorError.CONN_0010, connectorName);
         }
         nameMap.put(handler.getMetadata().getPersistenceId(), connectorName);
+        LOG.debug("Registered connector: " + handler.getMetadata());
       }
       rtx.commit();
     } catch (Exception ex) {

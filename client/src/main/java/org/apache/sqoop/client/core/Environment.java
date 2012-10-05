@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.client.core;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class Environment
 {
   private Environment() {
@@ -31,10 +34,15 @@ public class Environment
   private static String PORT_DEFAULT = "8080";
   private static String WEBAPP_DEFAULT = "sqoop";
 
+  private static ResourceBundle resourceBundle;
+
   static {
     serverHost = HOST_DEFAULT;
     serverPort = PORT_DEFAULT;
     serverWebapp = WEBAPP_DEFAULT;
+
+    resourceBundle =
+      ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
   }
 
   public static void setServerHost(String host) {
@@ -63,5 +71,9 @@ public class Environment
 
   public static String getServerUrl() {
     return "http://" + serverHost + ":" + serverPort + "/" + serverWebapp + "/";
+  }
+
+  public static ResourceBundle getResourceBundle() {
+    return resourceBundle;
   }
 }

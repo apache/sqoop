@@ -160,6 +160,8 @@ public class TestConnectionHandling extends DerbyTestCase {
     forms = connection.getFrameworkPart().getForms();
     ((MStringInput)forms.get(1).getInputs().get(1)).setValue("Injected");
 
+    connection.setName("name");
+
     handler.updateConnection(connection, getDerbyConnection());
 
     assertEquals(1, connection.getPersistenceId());
@@ -167,6 +169,8 @@ public class TestConnectionHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 10);
 
     MConnection retrieved = handler.findConnection(1, getDerbyConnection());
+    assertEquals("name", connection.getName());
+
     forms = retrieved.getConnectorPart().getForms();
     assertEquals("Injected", forms.get(0).getInputs().get(1).getValue());
 

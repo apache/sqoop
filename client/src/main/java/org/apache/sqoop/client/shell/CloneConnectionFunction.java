@@ -97,21 +97,14 @@ public class CloneConnectionFunction extends SqoopFunction {
     io.out.println("Please update connection metadata:");
 
     do {
+      // Print error introduction if needed
       if( !status.canProceed() ) {
-        io.out.println();
-        io.out.println("@|red There are issues with entered data, please"
-          + " revise your input:|@");
+        errorIntroduction(io);
       }
 
-      // Query connector forms
-      if(!fillForms(io, connection.getConnectorPart().getForms(),
-                    reader, connectorBundle)) {
-        return;
-      }
-
-      // Query framework forms
-      if(!fillForms(io, connection.getFrameworkPart().getForms(),
-                    reader, frameworkBundle)) {
+      // Fill in data from user
+      if(!fillConnection(io, reader, connection,
+                         connectorBundle, frameworkBundle)) {
         return;
       }
 

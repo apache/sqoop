@@ -96,21 +96,13 @@ public class CloneJobFunction extends SqoopFunction {
     io.out.println("Please update job metadata:");
 
     do {
+      // Print error introduction if needed
       if( !status.canProceed() ) {
-        io.out.println();
-        io.out.println("@|red There are issues with entered data, please"
-          + " revise your input:|@");
+        errorIntroduction(io);
       }
 
-      // Query connector forms
-      if(!fillForms(io, job.getConnectorPart().getForms(),
-        reader, connectorBundle)) {
-        return;
-      }
-
-      // Query framework forms
-      if(!fillForms(io, job.getFrameworkPart().getForms(),
-        reader, frameworkBundle)) {
+      // Fill in data from user
+      if(!fillJob(io, reader, job, connectorBundle, frameworkBundle)) {
         return;
       }
 
