@@ -127,7 +127,8 @@ public class CreateConnectionFunction extends SqoopFunction {
     } while(!status.canProceed());
 
     io.out.println("New connection was successfully created with validation "
-      + "status " + status.name());
+      + "status " + status.name() + " and persistent id "
+      + connection.getPersistenceId());
   }
 
   private FrameworkBean getFrameworkBean() {

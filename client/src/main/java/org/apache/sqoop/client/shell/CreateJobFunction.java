@@ -153,7 +153,8 @@ public class CreateJobFunction extends  SqoopFunction {
     } while(!status.canProceed());
 
     io.out.println("New job was successfully created with validation "
-      + "status " + status.name());
+      + "status " + status.name() + " and persistent id "
+      + job.getPersistenceId());
   }
 
 

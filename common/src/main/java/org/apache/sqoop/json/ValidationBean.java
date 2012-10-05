@@ -21,6 +21,7 @@ import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MValidatedElement;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
@@ -36,6 +37,7 @@ public class ValidationBean implements JsonBean {
 
   private static final String STATUS = "status";
   private static final String TYPE = "type";
+  private static final String ID = "id";
   private static final String CONNECTOR_PART = "connector";
   private static final String FRAMEWORK_PART = "framework";
 
@@ -97,6 +99,17 @@ public class ValidationBean implements JsonBean {
     object.put(CONNECTOR_PART, extractForms(connectorPart));
     object.put(FRAMEWORK_PART, extractForms(frameworkPart));
 
+    // If we do have ID available, let's send it across network
+    long id = MPersistableEntity.PERSISTANCE_ID_DEFAULT;
+    if(connection != null) {
+      id = connection.getPersistenceId();
+    } else if(job != null) {
+      id = job.getPersistenceId();
+    }
+    if( id != MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
+      object.put(ID, id);
+    }
+
     return object;
   }
 
@@ -140,6 +153,16 @@ public class ValidationBean implements JsonBean {
     } else if (job != null) {
       restoreForms(connectorPart, job.getConnectorPart().getForms());
       restoreForms(frameworkPart, job.getFrameworkPart().getForms());
+    }
+
+    // Restore persistent id if available
+    if(jsonObject.containsKey(ID)) {
+      long id = (Long)jsonObject.get(ID);
+      if(connection != null) {
+        connection.setPersistenceId(id);
+      } else if(job != null) {
+        job.setPersistenceId(id);
+      }
     }
   }
 

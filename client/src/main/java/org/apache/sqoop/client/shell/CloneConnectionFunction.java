@@ -119,8 +119,8 @@ public class CloneConnectionFunction extends SqoopFunction {
       status = createConnection(connection);
     } while(!status.canProceed());
 
-    io.out.println("Connection was successfully updated with status "
-      + status.name());
+    io.out.println("Connection was successfully created with validation status "
+      + status.name() + " and persistent id " + connection.getPersistenceId());
   }
 
   private Status createConnection(MConnection connection) {

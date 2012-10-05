@@ -118,8 +118,8 @@ public class CloneJobFunction extends SqoopFunction {
       status = createJob(job);
     } while(!status.canProceed());
 
-    io.out.println("Job was successfully updated with status "
-      + status.name());
+    io.out.println("Job was successfully created with validation status "
+      + status.name() + " and persistent id " + job.getPersistenceId());
   }
 
   private Status createJob(MJob job) {
