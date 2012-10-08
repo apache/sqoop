@@ -25,14 +25,24 @@ import org.apache.sqoop.job.etl.Partition;
 
 public class GenericJdbcImportPartition extends Partition {
 
+  private String conditions;
+
+  public void setConditions(String conditions) {
+    this.conditions = conditions;
+  }
+
+  public String getConditions() {
+    return conditions;
+  }
+
   @Override
   public void readFields(DataInput in) throws IOException {
-    // TODO Auto-generated method stub
+    conditions = in.readUTF();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    // TODO Auto-generated method stub
+    out.writeUTF(conditions);
   }
 
 }

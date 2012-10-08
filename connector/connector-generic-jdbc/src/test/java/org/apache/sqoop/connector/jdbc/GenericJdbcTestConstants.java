@@ -15,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.connector.jdbc;
 
-/**
- * This allows connector to define initialization work for execution,
- * for example, context configuration.
- */
-public abstract class Initializer {
+public class GenericJdbcTestConstants {
 
-  public abstract void run(MutableContext context, Options options);
+  public static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
+  public static final String URL = "jdbc:derby:memory:TESTDB;create=true";
 
 }

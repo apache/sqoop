@@ -18,11 +18,10 @@
 package org.apache.sqoop.job.etl;
 
 /**
- * This allows connector to define initialization work for execution,
- * for example, context configuration.
+ * The options provided from user input.
  */
-public abstract class Initializer {
+public interface Options {
 
-  public abstract void run(MutableContext context, Options options);
+  public String getOption(String key);
 
 }

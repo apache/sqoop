@@ -84,8 +84,16 @@ public enum CoreError implements ErrorCode {
   /** Error occurs during loader run */
   CORE_0018("Error occurs during loader run"),
 
-  /** Data have not been completely consumed yet */
-  CORE_0019("Data have not been completely consumed yet");
+  CORE_0019("Data have not been completely consumed yet"),
+
+  /** The required option has not been set yet */
+  CORE_0020("The required option has not been set yet"),
+
+  /** Error occurs during partitioner run */
+  CORE_0021("Error occurs during partitioner run"),
+
+  /** Unable to parse because it is not properly delimited */
+  CORE_0022("Unable to parse because it is not properly delimited");
 
   private final String message;
 

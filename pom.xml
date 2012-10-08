@@ -91,11 +91,14 @@ limitations under the License.
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compile.source>1.6</maven.compile.source>
     <maven.compile.target>1.6</maven.compile.target>
-    <log4j.version>1.2.16</log4j.version>
-    <json-simple.version>1.1</json-simple.version>
     <commons-dbcp.version>1.4</commons-dbcp.version>
+    <commons-lang.version>2.5</commons-lang.version>
     <derby.version>10.8.2.2</derby.version>
+    <hadoop.version>2.0.0-SNAPSHOT</hadoop.version>
+    <json-simple.version>1.1</json-simple.version>
     <junit.version>4.9</junit.version>
+    <log4j.version>1.2.16</log4j.version>
+    <servlet.version>2.5</servlet.version>
   </properties>
 
   <dependencies>
@@ -108,14 +111,57 @@ limitations under the License.
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>${log4j.version}</version>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-client</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-core</artifactId>
+        <type>test-jar</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-server</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-spi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.repository</groupId>
+        <artifactId>sqoop-repository-derby</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.connector</groupId>
+        <artifactId>sqoop-connector-generic-jdbc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.connector</groupId>
+        <artifactId>sqoop-connector-generic-jdbc</artifactId>
+        <type>test-jar</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.connector</groupId>
+        <artifactId>sqoop-connector-mysql-jdbc</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.googlecode.json-simple</groupId>
@@ -128,16 +174,41 @@ limitations under the License.
         <version>${commons-dbcp.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.derby</groupId>
-        <artifactId>derby</artifactId>
-        <version>${derby.version}</version>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${commons-lang.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>${servlet.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
       </dependency>
-    </dependencies>
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+   </dependencies>
   </dependencyManagement>
 
   <modules>

@@ -15,14 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.job;
 
-/**
- * This allows connector to define initialization work for execution,
- * for example, context configuration.
- */
-public abstract class Initializer {
+public class Constants {
 
-  public abstract void run(MutableContext context, Options options);
+  /**
+   * All job related configuration is prefixed with this:
+   * <tt>org.apache.sqoop.job.</tt>
+   */
+  public static final String PREFIX_CONFIG = "org.apache.sqoop.job.";
+
+  public static final String JOB_ETL_NUMBER_PARTITIONS = PREFIX_CONFIG
+      + "etl.number.partitions";
+
+  public static final String JOB_ETL_FIELD_NAMES = PREFIX_CONFIG
+      + "etl.field.names";
+
+  public static final String JOB_ETL_OUTPUT_DIRECTORY = PREFIX_CONFIG
+      + "etl.output.directory";
+
+  protected Constants() {
+    // Disable explicit object creation
+  }
 
 }

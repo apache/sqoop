@@ -86,7 +86,13 @@ public class GenericJdbcConnector implements SqoopConnector {
     forms = new ArrayList<MForm>();
     inputs = new ArrayList<MInput<?>>();
 
-    inputs.add(new MStringInput(INPUT_TBL_TABLE, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_NAME, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_SQL, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_COLUMNS, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_WAREHOUSE, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_DATADIR, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_PCOL, false, (short) 50));
+    inputs.add(new MStringInput(INPUT_TBL_BOUNDARY, false, (short) 50));
     forms.add(new MForm(FORM_TABLE, inputs));
 
     JOB_FORMS = new ArrayList<MJobForms>();

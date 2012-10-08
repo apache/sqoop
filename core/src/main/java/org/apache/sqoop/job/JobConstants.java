@@ -19,7 +19,7 @@ package org.apache.sqoop.job;
 
 import org.apache.sqoop.core.ConfigurationConstants;
 
-public final class JobConstants {
+public final class JobConstants extends Constants {
 
   /**
    * All job related configuration is prefixed with this:
