@@ -66,7 +66,7 @@ public class RequestContext {
       return Method.valueOf(request.getMethod());
     } catch(IllegalArgumentException ex) {
       throw new SqoopException(ServerError.SERVER_0002,
-        "Unsupported HTTP method:" + request.getMethod());
+        "Unsupported HTTP method:" + request.getMethod(), ex);
     }
   }
 
@@ -80,7 +80,7 @@ public class RequestContext {
    */
   public String getLastURLElement() {
     String uri = getRequest().getRequestURI();
-    int slash = uri.lastIndexOf("/");
+    int slash = uri.lastIndexOf('/');
     return uri.substring(slash + 1);
   }
 

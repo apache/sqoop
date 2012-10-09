@@ -23,11 +23,11 @@ package org.apache.sqoop.repository;
  */
 public interface RepositoryTransaction {
 
-  public void begin();
+  void begin();
 
-  public void commit();
+  void commit();
 
-  public void rollback();
+  void rollback();
 
-  public void close();
+  void close();
 }

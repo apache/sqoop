@@ -23,11 +23,11 @@ import java.util.Properties;
 
 public interface ConfigurationProvider {
 
-  public void initialize(File configDir, Properties bootstrapCongiruation);
+  void initialize(File configDir, Properties bootstrapCongiruation);
 
-  public void destroy();
+  void destroy();
 
-  public void registerListener(ConfigurationListener listener);
+  void registerListener(ConfigurationListener listener);
 
-  public Map<String, String> getConfiguration();
+  Map<String, String> getConfiguration();
 }

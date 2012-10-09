@@ -32,7 +32,7 @@ import java.util.List;
  */
 public interface Repository {
 
-  public RepositoryTransaction getTransaction();
+  RepositoryTransaction getTransaction();
 
   /**
    * Registers the given connector in the repository. If the connector was
@@ -47,7 +47,7 @@ public interface Repository {
    * a instance of previously registered metadata with the same connector
    * unique name.
    */
-  public MConnector registerConnector(MConnector mConnector);
+  MConnector registerConnector(MConnector mConnector);
 
   /**
    * Registers framework metadata in the repository. No more than one set of
@@ -58,7 +58,7 @@ public interface Repository {
    *
    * @param mFramework Framework data that should be registered.
    */
-  public void registerFramework(MFramework mFramework);
+  void registerFramework(MFramework mFramework);
 
   /**
    * Save given connection to repository. This connection must not be already
@@ -66,7 +66,7 @@ public interface Repository {
    *
    * @param connection Connection object to serialize into repository.
    */
-  public void createConnection(MConnection connection);
+  void createConnection(MConnection connection);
 
   /**
    * Update given connection representation in repository. This connection
@@ -75,14 +75,14 @@ public interface Repository {
    *
    * @param connection Connection object that should be updated in repository.
    */
-  public void updateConnection(MConnection connection);
+  void updateConnection(MConnection connection);
 
   /**
    * Delete connection with given id from metadata repository.
    *
    * @param id Connection object that should be removed from repository
    */
-  public void deleteConnection(long id);
+  void deleteConnection(long id);
 
   /**
    * Find connection with given id in repository.
@@ -90,14 +90,14 @@ public interface Repository {
    * @param id Connection id
    * @return Deserialized form of the connection that is saved in repository
    */
-  public MConnection findConnection(long id);
+  MConnection findConnection(long id);
 
   /**
    * Get all connection objects.
    *
    * @return List will all saved connection objects
    */
-  public List<MConnection> findConnections();
+  List<MConnection> findConnections();
 
   /**
    * Save given job to repository. This job object must not be already present
@@ -105,7 +105,7 @@ public interface Repository {
    *
    * @param job Job object that should be saved to repository
    */
-  public void createJob(MJob job);
+  void createJob(MJob job);
 
   /**
    * Update given job metadata in repository. This object must already be saved
@@ -113,14 +113,14 @@ public interface Repository {
    *
    * @param job Job object that should be updated in the repository
    */
-  public void updateJob(MJob job);
+  void updateJob(MJob job);
 
   /**
    * Delete job with given id from metadata repository.
    *
    * @param id Job id that should be removed
    */
-  public void deleteJob(long id);
+  void deleteJob(long id);
 
   /**
    * Find job object with given id.
@@ -128,12 +128,12 @@ public interface Repository {
    * @param id Job id
    * @return Deserialized form of job loaded from repository
    */
-  public MJob findJob(long id);
+  MJob findJob(long id);
 
   /**
    * Get all job objects.
    *
    * @return List of all jobs in the repository
    */
-  public List<MJob> findJobs();
+  List<MJob> findJobs();
 }

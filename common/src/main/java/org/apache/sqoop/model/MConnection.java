@@ -22,11 +22,11 @@ package org.apache.sqoop.model;
  * framework part.
  */
 public class MConnection extends MPersistableEntity {
-  long connectorId;
-  String name;
+  private long connectorId;
+  private String name;
 
-  MConnectionForms connectorPart;
-  MConnectionForms frameworkPart;
+  private MConnectionForms connectorPart;
+  private MConnectionForms frameworkPart;
 
   public MConnection(long connectorId,
                      MConnectionForms connectorPart,

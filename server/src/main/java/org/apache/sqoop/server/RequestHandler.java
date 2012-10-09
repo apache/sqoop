@@ -18,10 +18,9 @@
 package org.apache.sqoop.server;
 
 
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JsonBean;
 
 public interface RequestHandler {
 
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException;
+  JsonBean handleEvent(RequestContext ctx);
 }

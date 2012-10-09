@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 /**
  * Convenient methods for retrieving user input.
  */
-public class FormFiller {
+public final class FormFiller {
 
   /**
    * Internal input that will be reused for loading names for connection and

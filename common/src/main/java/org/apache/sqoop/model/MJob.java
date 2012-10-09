@@ -25,7 +25,7 @@ import org.apache.sqoop.common.SqoopException;
  */
 public class MJob extends MPersistableEntity {
 
-  static public enum Type {
+  public static enum Type {
     IMPORT,
     EXPORT,
   }
@@ -37,25 +37,25 @@ public class MJob extends MPersistableEntity {
    * dependency through connection object, but having this dependency explicitly
    * carried along helps a lot.
    */
-  long connectorId;
+  private long connectorId;
 
   /**
    * Corresponding connection object.
    */
-  long connectionId;
+  private long connectionId;
 
   /**
    * User name for this object
    */
-  String name;
+  private String name;
 
   /**
    * Job type
    */
-  Type type;
+  private Type type;
 
-  MJobForms connectorPart;
-  MJobForms frameworkPart;
+  private MJobForms connectorPart;
+  private MJobForms frameworkPart;
 
   public MJob(long connectorId,
               long connectionId,

@@ -28,10 +28,10 @@ public interface ErrorCode {
   /**
    * @return the string representation of the error code.
    */
-  public String getCode();
+  String getCode();
 
   /**
    * @return the message associated with error code.
    */
-  public String getMessage();
+  String getMessage();
 }

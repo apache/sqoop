@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 /**
  * Convenience static methods for displaying form related information
  */
-public class FormDisplayer {
+public final class FormDisplayer {
 
   public static void displayFormMetadataDetails(IO io,
                                                 MFramework framework,

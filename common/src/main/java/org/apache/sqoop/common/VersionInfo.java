@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.common;
 
-public class VersionInfo {
+public final class VersionInfo {
 
   private static Package myPackage;
   private static VersionAnnotation annotation;

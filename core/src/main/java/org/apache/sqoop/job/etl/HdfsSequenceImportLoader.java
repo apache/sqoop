@@ -95,7 +95,7 @@ public class HdfsSequenceImportLoader extends Loader {
       while ((record = reader.readRecord()) != null) {
         text.set(Data.format(record, fieldDelimiter, recordDelimiter));
         filewriter.append(text, NullWritable.get());
-      };
+      }
       filewriter.close();
 
     } catch (IOException e) {

@@ -88,7 +88,7 @@ public class HdfsTextImportLoader extends Loader {
       Object record;
       while ((record = reader.readRecord()) != null) {
         filewriter.write(Data.format(record, fieldDelimiter, recordDelimiter));
-      };
+      }
       filewriter.close();
 
     } catch (IOException e) {

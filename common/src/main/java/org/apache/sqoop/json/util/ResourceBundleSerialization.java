@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
 /**
  *
  */
-public class ResourceBundleSerialization {
+public final class ResourceBundleSerialization {
 
   public static final String RESOURCES = "resources";
   public static final String CONNECTOR_RESOURCES = "resources-connector";
@@ -79,5 +79,9 @@ public class ResourceBundleSerialization {
     Map<String, Object> map = new HashMap<String, Object>();
     map.putAll(json);
     return new MapResourceBundle(map);
+  }
+
+  private ResourceBundleSerialization() {
+    // Instantiation of this class is prohibited
   }
 }

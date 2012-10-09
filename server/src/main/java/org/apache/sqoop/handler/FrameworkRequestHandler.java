@@ -38,7 +38,7 @@ public class FrameworkRequestHandler  implements RequestHandler {
   }
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+  public JsonBean handleEvent(RequestContext ctx) {
     return new FrameworkBean(FrameworkManager.getFramework(),
       FrameworkManager.getBundle(ctx.getAcceptLanguageHeader()));
   }

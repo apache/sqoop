@@ -31,7 +31,7 @@ public final class RepositoryManager {
 
   private static RepositoryProvider provider;
 
-  public synchronized static void initialize() {
+  public static synchronized void initialize() {
     Context context = SqoopConfiguration.getContext();
 
     Map<String, String> repoSysProps = context.getNestedProperties(
@@ -39,8 +39,8 @@ public final class RepositoryManager {
 
     LOG.info("Setting system properties: " + repoSysProps);
 
-    for (String key : repoSysProps.keySet()) {
-      System.setProperty(key, repoSysProps.get(key));
+    for (Map.Entry<String, String> entry : repoSysProps.entrySet()) {
+      System.setProperty(entry.getKey(), entry.getValue());
     }
 
     String repoProviderClassName = context.getString(
@@ -86,5 +86,9 @@ public final class RepositoryManager {
 
   public static synchronized Repository getRepository() {
     return provider.getRepository();
+  }
+
+  private RepositoryManager() {
+    // Instantiation of this class is prohibited
   }
 }

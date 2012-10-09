@@ -53,7 +53,7 @@ public class JdbcRepository implements Repository {
      * @param conn Connection to metadata repository.
      * @return Arbitrary value
      */
-    public Object doIt(Connection conn) throws Exception;
+    Object doIt(Connection conn) throws Exception;
   }
 
   /**
@@ -81,12 +81,11 @@ public class JdbcRepository implements Repository {
       // Return value that the underlying code needs to return
       return returnValue;
 
+    } catch (SqoopException ex) {
+      throw  ex;
     } catch (Exception ex) {
       if (tx != null) {
         tx.rollback();
-      }
-      if (ex instanceof SqoopException) {
-        throw (SqoopException) ex;
       }
       throw new SqoopException(RepositoryError.JDBCREPO_0012, ex);
     } finally {

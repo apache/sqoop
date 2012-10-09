@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.common;
 
-public class SqoopProtocolConstants {
+public final class SqoopProtocolConstants {
 
   public static final String HEADER_SQOOP_ERROR_CODE = "sqoop-error-code";
 

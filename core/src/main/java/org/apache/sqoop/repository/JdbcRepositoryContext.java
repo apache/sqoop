@@ -74,8 +74,8 @@ public final class JdbcRepositoryContext {
 
     Map<String, String> params = context.getNestedProperties(
         RepoConfigurationConstants.PREFIX_SYSCFG_REPO_JDBC_PROPERTIES);
-    for (String key : params.keySet()) {
-      connectionProperties.setProperty(key, params.get(key));
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      connectionProperties.setProperty(entry.getKey(), entry.getValue());
     }
 
     if (jdbcUserName != null) {
@@ -120,7 +120,7 @@ public final class JdbcRepositoryContext {
     try {
       maxConnInt = Integer.parseInt(maxConnStr);
     } catch (NumberFormatException ex) {
-      throw new SqoopException(RepositoryError.JDBCREPO_0005, maxConnStr);
+      throw new SqoopException(RepositoryError.JDBCREPO_0005, maxConnStr, ex);
     }
 
     if (maxConnInt <= 0) {
@@ -139,17 +139,17 @@ public final class JdbcRepositoryContext {
       sb.append("password=").append("*****").append(", ");
       sb.append("jdbc-props={");
       boolean first = true;
-      for (String key : params.keySet()) {
+      for (Map.Entry<String, String> entry: params.entrySet()) {
         if (first) {
           first = false;
         } else {
           sb.append(", ");
         }
-        sb.append(key).append("=");
-        if (key.equalsIgnoreCase("password")) {
+        sb.append(entry.getKey()).append("=");
+        if (entry.getKey().equalsIgnoreCase("password")) {
           sb.append("*****");
         } else {
-          sb.append(params.get(key));
+          sb.append(entry.getValue());
         }
       }
       sb.append("}").append(", ");

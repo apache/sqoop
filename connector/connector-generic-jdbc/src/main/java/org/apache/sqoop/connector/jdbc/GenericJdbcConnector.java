@@ -42,13 +42,13 @@ public class GenericJdbcConnector implements SqoopConnector {
   private static final MConnectionForms CONNECTION_FORMS;
   private static final List<MJobForms> JOB_FORMS;
 
-  private Importer IMPORTER = new Importer(
+  private static final Importer IMPORTER = new Importer(
       GenericJdbcImportInitializer.class,
       GenericJdbcImportPartitioner.class,
       GenericJdbcImportExtractor.class,
       GenericJdbcImportDestroyer.class);
 
-  private Exporter EXPORTER = new Exporter(
+  private static final Exporter EXPORTER = new Exporter(
       GenericJdbcExportInitializer.class,
       GenericJdbcExportLoader.class,
       GenericJdbcExportDestroyer.class);

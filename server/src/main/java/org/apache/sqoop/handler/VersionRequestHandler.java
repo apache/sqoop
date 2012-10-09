@@ -47,7 +47,7 @@ public class VersionRequestHandler implements RequestHandler {
 
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+  public JsonBean handleEvent(RequestContext ctx) {
     return versionBean;
   }
 }

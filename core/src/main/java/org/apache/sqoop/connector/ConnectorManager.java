@@ -38,7 +38,7 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.repository.RepositoryTransaction;
 import org.apache.sqoop.model.MConnector;
 
-public class ConnectorManager {
+public final class ConnectorManager {
 
   private static final Logger LOG = Logger.getLogger(ConnectorManager.class);
 
@@ -187,4 +187,7 @@ public class ConnectorManager {
     // FIXME
   }
 
+  private ConnectorManager() {
+    // Instantiation of this class is prohibited
+  }
 }

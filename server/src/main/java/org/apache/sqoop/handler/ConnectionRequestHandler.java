@@ -69,7 +69,7 @@ public class ConnectionRequestHandler implements RequestHandler {
   }
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+  public JsonBean handleEvent(RequestContext ctx) {
     switch (ctx.getMethod()) {
       case GET:
         return getConnections(ctx);

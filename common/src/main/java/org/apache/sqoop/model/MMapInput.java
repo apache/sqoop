@@ -36,15 +36,14 @@ public final class MMapInput extends MInput<Map<String, String>> {
     }
     boolean first = true;
     StringBuilder vsb = new StringBuilder();
-    for (String key : valueMap.keySet()) {
+    for (Map.Entry<String, String> entry : valueMap.entrySet()) {
       if (first) {
         first = false;
       } else {
         vsb.append("&");
       }
-      String value = valueMap.get(key);
-      vsb.append(UrlSafeUtils.urlEncode(key)).append("=");
-      vsb.append(UrlSafeUtils.urlEncode(value));
+      vsb.append(UrlSafeUtils.urlEncode(entry.getKey())).append("=");
+      vsb.append(UrlSafeUtils.urlEncode(entry.getValue()));
     }
     return vsb.toString();
   }

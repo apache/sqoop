@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Convenient static methods for serializing forms.
  */
-public class FormSerialization {
+public final class FormSerialization {
 
   public static final String ID = "id";
   public static final String NAME = "name";

@@ -104,7 +104,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
       fis = new BufferedInputStream(new FileInputStream(configFile));
       configProperties.load(fis);
     } catch (Exception ex) {
-      throw new SqoopException(CoreError.CORE_0006, configFile.getPath());
+      throw new SqoopException(CoreError.CORE_0006, configFile.getPath(), ex);
     } finally {
       if (fis != null) {
         try {
@@ -154,7 +154,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
       return shutdown;
     }
 
-    protected synchronized void loadSleepTime() {
+    private synchronized void loadSleepTime() {
       try {
         String value = configuration.get(PROPERTIES_PROVIDER_SLEEP);
         sleepTime = Long.valueOf(value);

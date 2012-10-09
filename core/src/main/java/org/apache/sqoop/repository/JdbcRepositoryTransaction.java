@@ -129,6 +129,7 @@ public class JdbcRepositoryTransaction implements RepositoryTransaction {
                 }
                 sb.append("[").append(warning.getErrorCode()).append("] ");
                 sb.append(warning.getMessage());
+                warning = warning.getNextWarning();
               }
               LOG.warn(sb.toString());
             }

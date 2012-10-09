@@ -19,6 +19,6 @@ package org.apache.sqoop.core;
 
 public interface ConfigurationListener {
 
-  public void configurationChanged();
+  void configurationChanged();
 
 }

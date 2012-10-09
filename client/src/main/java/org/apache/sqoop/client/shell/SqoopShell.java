@@ -28,12 +28,12 @@ import org.codehaus.groovy.tools.shell.CommandRegistry;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.codehaus.groovy.tools.shell.IO.Verbosity;
 
-public class SqoopShell
+public final class SqoopShell
 {
   private static final String banner =
       "@|green Sqoop Shell:|@ Type '@|bold help|@' or '@|bold \\h|@' for help.";
 
-  public static HashSet<String> commandsToKeep;
+  public final static HashSet<String> commandsToKeep;
   static {
     commandsToKeep = new HashSet<String>();
     commandsToKeep.add("exit");
@@ -91,5 +91,9 @@ public class SqoopShell
         }
       }
     }
+  }
+
+  private SqoopShell() {
+    // Instantiation of this class is prohibited
   }
 }

@@ -36,27 +36,27 @@ public interface SqoopConnector {
    * @param locale
    * @return the resource bundle associated with the given locale.
    */
-  public ResourceBundle getBundle(Locale locale);
+  ResourceBundle getBundle(Locale locale);
 
   /**
    * @return Get connection structure
    */
-  public MConnectionForms getConnectionForms();
+  MConnectionForms getConnectionForms();
 
   /**
    * @return Get supported jobs and their associated data structures
    */
-  public List<MJobForms> getJobsForms();
+  List<MJobForms> getJobsForms();
 
   /**
    * @return an <tt>Importer</tt> that provides classes for performing import.
    */
-  public Importer getImporter();
+  Importer getImporter();
 
   /**
    * @return an <tt>Exporter</tt> that provides classes for performing export.
    */
-  public Exporter getExporter();
+  Exporter getExporter();
 
   /**
    * Returns validation object that Sqoop framework can use to validate user
@@ -65,6 +65,6 @@ public interface SqoopConnector {
    *
    * @return Validator object
    */
-  public Validator getValidator();
+  Validator getValidator();
 
 }

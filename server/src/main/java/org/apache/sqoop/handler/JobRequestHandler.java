@@ -24,7 +24,6 @@ import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ValidationBean;
-import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.repository.Repository;
@@ -70,7 +69,7 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+  public JsonBean handleEvent(RequestContext ctx) {
     switch (ctx.getMethod()) {
       case GET:
         return getJobs(ctx);

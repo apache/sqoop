@@ -38,7 +38,7 @@ public final class SqoopConfiguration {
   private static ConfigurationProvider provider = null;
   private static Map<String, String> config = null;
 
-  public synchronized static void initialize() {
+  public static synchronized void initialize() {
     if (initialized) {
       LOG.warn("Attempt to reinitialize the system, ignoring");
       return;
@@ -129,7 +129,7 @@ public final class SqoopConfiguration {
     initialized = true;
   }
 
-  public synchronized static Context getContext() {
+  public static synchronized Context getContext() {
     if (!initialized) {
       throw new SqoopException(CoreError.CORE_0007);
     }
@@ -140,7 +140,7 @@ public final class SqoopConfiguration {
     return new Context(parameters);
   }
 
-  public synchronized static void destroy() {
+  public static synchronized void destroy() {
     if (provider != null) {
       try {
         provider.destroy();
@@ -154,7 +154,7 @@ public final class SqoopConfiguration {
     initialized = false;
   }
 
-  private synchronized static void configureLogging() {
+  private static synchronized void configureLogging() {
     Properties props = new Properties();
     for (String key : config.keySet()) {
       if (key.startsWith(ConfigurationConstants.PREFIX_LOG_CONFIG)) {
@@ -167,7 +167,7 @@ public final class SqoopConfiguration {
     PropertyConfigurator.configure(props);
   }
 
-  private synchronized static void refreshConfiguration()
+  private static synchronized void refreshConfiguration()
   {
     config = provider.getConfiguration();
     configureLogging();

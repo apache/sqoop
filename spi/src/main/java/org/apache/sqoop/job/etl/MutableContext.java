@@ -22,6 +22,6 @@ package org.apache.sqoop.job.etl;
  */
 public interface MutableContext extends Context {
 
-  public void setString(String key, String value);
+  void setString(String key, String value);
 
 }

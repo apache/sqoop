@@ -93,7 +93,11 @@ public class ValidationBean implements JsonBean {
       connectorPart = job.getConnectorPart().getForms();
       frameworkPart = job.getFrameworkPart().getForms();
       object.put(TYPE, "FRAMEWORK");
+    } else {
+      // This should never happen
+      return null;
     }
+
 
     object.put(STATUS, status.name());
     object.put(CONNECTOR_PART, extractForms(connectorPart));

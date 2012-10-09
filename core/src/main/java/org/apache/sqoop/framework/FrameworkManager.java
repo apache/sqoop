@@ -44,7 +44,7 @@ import java.util.ResourceBundle;
  * within this manager.
  *
  */
-public class FrameworkManager {
+public final class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
@@ -118,5 +118,9 @@ public class FrameworkManager {
   public static ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(
         FrameworkConstants.RESOURCE_BUNDLE_NAME, locale);
+  }
+
+  private FrameworkManager() {
+    // Instantiation of this class is prohibited
   }
 }

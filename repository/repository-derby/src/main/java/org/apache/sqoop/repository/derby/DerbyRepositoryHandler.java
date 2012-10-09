@@ -148,7 +148,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       // Using embedded derby. Needs explicit shutdown
       String connectUrl = repoContext.getConnectionUrl();
       if (connectUrl.startsWith("jdbc:derby:")) {
-        int index = connectUrl.indexOf(";");
+        int index = connectUrl.indexOf(';');
         String baseUrl = null;
         if (index != -1) {
           baseUrl = connectUrl.substring(0, index+1);

@@ -35,7 +35,7 @@ public interface JdbcRepositoryHandler {
    *
    * @param repoContext Context for this instance
    */
-  public void initialize(JdbcRepositoryContext repoContext);
+  void initialize(JdbcRepositoryContext repoContext);
 
   /**
    * Search for connector with given name in repository.
@@ -47,7 +47,7 @@ public interface JdbcRepositoryHandler {
    * @return null if connector is not yet registered in repository or
    *   loaded representation.
    */
-  public MConnector findConnector(String shortName, Connection conn);
+  MConnector findConnector(String shortName, Connection conn);
 
   /**
    * Register given connector in repository.
@@ -58,7 +58,7 @@ public interface JdbcRepositoryHandler {
    * @param mc Connector that should be registered.
    * @param conn JDBC connection for querying repository.
    */
-  public void registerConnector(MConnector mc, Connection conn);
+  void registerConnector(MConnector mc, Connection conn);
 
   /**
    * Search for framework metadata in the repository.
@@ -67,7 +67,7 @@ public interface JdbcRepositoryHandler {
    * @return null if framework metadata are not yet present in repository or
    *  loaded representation.
    */
-  public MFramework findFramework(Connection conn);
+  MFramework findFramework(Connection conn);
 
   /**
    * Register framework metadata in repository.
@@ -78,26 +78,26 @@ public interface JdbcRepositoryHandler {
    * @param mf Framework metadata that should be registered.
    * @param conn JDBC connection for querying repository.
    */
-  public void registerFramework(MFramework mf, Connection conn);
+  void registerFramework(MFramework mf, Connection conn);
 
   /**
    * Check if schema is already present in the repository.
    *
    * @return true if schema is already present or false if it's not
    */
-  public boolean schemaExists();
+  boolean schemaExists();
 
   /**
    * Create required schema in repository.
    */
-  public void createSchema();
+  void createSchema();
 
   /**
    * Termination callback for repository.
    *
    * Should clean up all resources and commit all uncommitted data.
    */
-  public void shutdown();
+  void shutdown();
 
   /**
    * Specify query that Sqoop framework can use to validate connection to
@@ -106,7 +106,7 @@ public interface JdbcRepositoryHandler {
    * @return Query or NULL in case that this repository do not support or do not
    *   want to validate live connections.
    */
-  public String validationQuery();
+  String validationQuery();
 
   /**
    * Save given connection to repository. This connection must not be already
@@ -115,7 +115,7 @@ public interface JdbcRepositoryHandler {
    * @param connection Connection object to serialize into repository.
    * @param conn Connection to metadata repository
    */
-  public void createConnection(MConnection connection, Connection conn);
+  void createConnection(MConnection connection, Connection conn);
 
   /**
    * Update given connection representation in repository. This connection
@@ -125,7 +125,7 @@ public interface JdbcRepositoryHandler {
    * @param connection Connection object that should be updated in repository.
    * @param conn Connection to metadata repository
    */
-  public void updateConnection(MConnection connection, Connection conn);
+  void updateConnection(MConnection connection, Connection conn);
 
   /**
    * Check if given connection exists in metastore.
@@ -134,7 +134,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return True if the connection exists
    */
-  public boolean existsConnection(long id, Connection conn);
+  boolean existsConnection(long id, Connection conn);
 
   /**
    * Delete connection with given id from metadata repository.
@@ -142,7 +142,7 @@ public interface JdbcRepositoryHandler {
    * @param id Connection object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  public void deleteConnection(long id, Connection conn);
+  void deleteConnection(long id, Connection conn);
 
   /**
    * Find connection with given id in repository.
@@ -151,7 +151,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return Deserialized form of the connection that is saved in repository
    */
-  public MConnection findConnection(long id, Connection conn);
+  MConnection findConnection(long id, Connection conn);
 
   /**
    * Get all connection objects.
@@ -159,7 +159,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return List will all saved connection objects
    */
-  public List<MConnection> findConnections(Connection conn);
+  List<MConnection> findConnections(Connection conn);
 
 
   /**
@@ -169,7 +169,7 @@ public interface JdbcRepositoryHandler {
    * @param job Job object to serialize into repository.
    * @param conn Connection to metadata repository
    */
-  public void createJob(MJob job, Connection conn);
+  void createJob(MJob job, Connection conn);
 
   /**
    * Update given job representation in repository. This job object must
@@ -179,7 +179,7 @@ public interface JdbcRepositoryHandler {
    * @param job Job object that should be updated in repository.
    * @param conn Connection to metadata repository
    */
-  public void updateJob(MJob job, Connection conn);
+  void updateJob(MJob job, Connection conn);
 
   /**
    * Check if given job exists in metastore.
@@ -188,7 +188,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return True if the job exists
    */
-  public boolean existsJob(long id, Connection conn);
+  boolean existsJob(long id, Connection conn);
 
   /**
    * Delete job with given id from metadata repository.
@@ -196,7 +196,7 @@ public interface JdbcRepositoryHandler {
    * @param id Job object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  public void deleteJob(long id, Connection conn);
+  void deleteJob(long id, Connection conn);
 
   /**
    * Find job with given id in repository.
@@ -205,7 +205,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return Deserialized form of the job that is present in the repository
    */
-  public MJob findJob(long id, Connection conn);
+  MJob findJob(long id, Connection conn);
 
   /**
    * Get all job objects.
@@ -213,5 +213,5 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return List will all saved job objects
    */
-  public List<MJob> findJobs(Connection conn);
+  List<MJob> findJobs(Connection conn);
 }

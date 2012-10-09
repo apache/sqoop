@@ -21,9 +21,9 @@ import org.json.simple.JSONObject;
 
 public interface JsonBean {
 
-  public JSONObject extract();
+  JSONObject extract();
 
-  public void restore(JSONObject jsonObject);
+  void restore(JSONObject jsonObject);
 
   public static final JsonBean EMPTY_BEAN = new JsonBean() {
 

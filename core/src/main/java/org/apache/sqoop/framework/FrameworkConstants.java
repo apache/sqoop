@@ -20,7 +20,7 @@ package org.apache.sqoop.framework;
 /**
  * Constants that are used in framework module.
  */
-public class FrameworkConstants {
+public final class FrameworkConstants {
 
   public static final String INPUT_CONN_MAX_SIMULTANEOUS_CONNECTIONS =
     "inp-conn-max-connections";
@@ -33,4 +33,8 @@ public class FrameworkConstants {
     "form-output";
 
   public static final String RESOURCE_BUNDLE_NAME = "framework-resources";
+
+  private FrameworkConstants() {
+    // Instantiation of this class is prohibited
+  }
 }

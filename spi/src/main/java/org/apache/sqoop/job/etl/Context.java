@@ -22,6 +22,6 @@ package org.apache.sqoop.job.etl;
  */
 public interface Context {
 
-  public String getString(String key);
+  String getString(String key);
 
 }

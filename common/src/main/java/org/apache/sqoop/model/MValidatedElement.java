@@ -33,7 +33,7 @@ package org.apache.sqoop.model;
  * Error represents unacceptable element content. For example in case of JDBC
  * URL path, error would be empty element or element containing invalid URL.
  */
-abstract public class MValidatedElement extends MNamedElement {
+public abstract class MValidatedElement extends MNamedElement {
 
   /**
    * Different levels of validation severity.
@@ -93,7 +93,7 @@ abstract public class MValidatedElement extends MNamedElement {
    * @param severity Message severity
    */
   public String getValidationMessage(Severity severity) {
-    return (validationSeverity == severity) ? validationMessage : null;
+    return (validationSeverity.equals(severity)) ? validationMessage : null;
   }
 
   /**

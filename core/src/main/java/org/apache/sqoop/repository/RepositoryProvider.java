@@ -21,10 +21,10 @@ import org.apache.sqoop.core.Context;
 
 public interface RepositoryProvider {
 
-  public void initialize(Context context);
+  void initialize(Context context);
 
-  public void destroy();
+  void destroy();
 
-  public Repository getRepository();
+  Repository getRepository();
 
 }

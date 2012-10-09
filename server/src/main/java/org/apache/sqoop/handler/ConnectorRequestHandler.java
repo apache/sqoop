@@ -42,7 +42,7 @@ public class ConnectorRequestHandler implements RequestHandler {
 
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) throws SqoopException {
+  public JsonBean handleEvent(RequestContext ctx) {
     List<MConnector> connectors;
     List<ResourceBundle> bundles;
     Locale locale = ctx.getAcceptLanguageHeader();

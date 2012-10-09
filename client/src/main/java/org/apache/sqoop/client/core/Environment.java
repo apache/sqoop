@@ -20,7 +20,7 @@ package org.apache.sqoop.client.core;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class Environment
+public final class Environment
 {
   private Environment() {
     // Disable explicit object creation
@@ -30,9 +30,9 @@ public class Environment
   private static String serverPort;
   private static String serverWebapp;
 
-  private static String HOST_DEFAULT = "localhost";
-  private static String PORT_DEFAULT = "8080";
-  private static String WEBAPP_DEFAULT = "sqoop";
+  private static final String HOST_DEFAULT = "localhost";
+  private static final String PORT_DEFAULT = "8080";
+  private static final String WEBAPP_DEFAULT = "sqoop";
 
   private static ResourceBundle resourceBundle;
 
