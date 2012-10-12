@@ -217,6 +217,16 @@ public final class FormFiller {
     return true;
   }
 
+  /**
+   * Load string input from the user.
+   *
+   * @param io Shell's IO object
+   * @param input Input that we should load in
+   * @param reader Associated console reader
+   * @param bundle Resource bundle for this input
+   * @return
+   * @throws IOException
+   */
   public static boolean fillInputString(IO io,
                                         MStringInput input,
                                         ConsoleReader reader,
@@ -239,11 +249,21 @@ public final class FormFiller {
     }
 
     if (userTyped == null) {
+      // Propagate end of loading process
       return false;
     } else if (userTyped.isEmpty()) {
+      // Empty input in case that nothing was given
       input.setEmpty();
     } else {
+      // Set value that user has entered
       input.setValue(userTyped);
+
+      // Check that it did not exceeds maximal allowance for given input
+      if(userTyped.length() > input.getMaxLength()) {
+        errorMessage(io, "Size of input exceeds allowance for this input"
+          + " field. Maximal allowed size is " + input.getMaxLength());
+        return fillInputString(io, input, reader, bundle);
+      }
     }
 
     return true;
