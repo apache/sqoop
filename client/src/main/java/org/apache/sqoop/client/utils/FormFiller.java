@@ -23,12 +23,15 @@ import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 /**
@@ -176,11 +179,130 @@ public final class FormFiller {
         return fillInputString(io, (MStringInput) input, reader, bundle);
       case INTEGER:
         return fillInputInteger(io, (MIntegerInput) input, reader, bundle);
-      //TODO(jarcec): Support MAP
+      case MAP:
+        return fillInputMap(io, (MMapInput)input, reader, bundle);
       default:
         io.out.println("Unsupported data type " + input.getType());
         return true;
     }
+  }
+
+  /**
+   * Load user input for map type.
+   *
+   * This implementation will load one map entry at the time. Current flows is
+   * as follows: if user did not enter anything (empty input) finish loading
+   * and return from function. If user specified input with equal sign (=),
+   * lets add new key value pair. Otherwise consider entire input as a key name
+   * and try to remove it from the map.
+   *
+   * Please note that following code do not supports equal sign in property
+   * name. It's however perfectly fine to have equal sign in value.
+   *
+   * @param io Shell's IO object
+   * @param input Input that we should read or edit
+   * @param reader Associated console reader
+   * @param bundle Resource bundle
+   * @return True if user wish to continue with loading additional inputs
+   * @throws IOException
+   */
+  private static boolean fillInputMap(IO io,
+                                      MMapInput input,
+                                      ConsoleReader reader,
+                                      ResourceBundle bundle)
+                                      throws IOException {
+    // Special prompt in Map case
+    io.out.println(bundle.getString(input.getLabelKey()) + ": ");
+
+    // Internal loading map
+    Map<String, String> values = input.getValue();
+    if(values == null) {
+      values = new HashMap<String, String>();
+    }
+
+    String userTyped;
+
+    while(true) {
+      // Print all current items in each iteration
+      io.out.println("There are currently " + values.size()
+        + " values in the map:");
+      for(Map.Entry<String, String> entry : values.entrySet()) {
+        io.out.println(entry.getKey() + " = " + entry.getValue());
+      }
+
+      // Special prompt for Map entry
+      reader.printString("entry# ");
+      reader.flushConsole();
+
+      userTyped = reader.readLine();
+
+      if(userTyped == null) {
+        // Finish loading and return back to Sqoop shell
+        return false;
+      } else if(userTyped.isEmpty()) {
+        // User has finished loading data to Map input, either set input empty
+        // if there are no entries or propagate entries to the input
+        if(values.size() == 0) {
+          input.setEmpty();
+        } else {
+          input.setValue(values);
+        }
+        return true;
+      } else {
+        // User has specified regular input, let's check if it contains equals
+        // sign. Save new entry (or update existing one) if it does. Otherwise
+        // try to remove entry that user specified.
+        if(userTyped.contains("=")) {
+          String []keyValue = userTyped.split("=", 2);
+          values.put(handleUserInput(keyValue[0]), handleUserInput(keyValue[1]));
+        } else {
+          String key = handleUserInput(userTyped);
+          if(values.containsKey(key)) {
+            values.remove(key);
+          } else {
+            errorMessage(io, "Don't know what to do with " + userTyped);
+          }
+        }
+      }
+
+    }
+  }
+
+  /**
+   * Handle special cases in user input.
+   *
+   * Preserve null and empty values, remove whitespace characters before and
+   * after loaded string and de-quote the string if it's quoted (to preserve
+   * spaces for example).
+   *
+   * @param input String loaded from user
+   * @return Unquoted transformed string
+   */
+  private static String handleUserInput(String input) {
+    // Preserve null and empty values
+    if(input == null) {
+      return null;
+    }
+    if(input.isEmpty()) {
+      return input;
+    }
+
+    // Removes empty characters at the begging and end of loaded string
+    input = input.trim();
+
+    int lastIndex = input.length() - 1;
+    char first = input.charAt(0);
+    char last = input.charAt(lastIndex);
+
+    // Remove quoting if present
+    if(first == '\'' && last == '\'') {
+      input = input.substring(1, lastIndex);
+    } else if(first == '"' && last == '"') {
+      input =  input.substring(1, lastIndex);
+    }
+
+    // Return final string
+    return input;
   }
 
   private static boolean fillInputInteger(IO io,
