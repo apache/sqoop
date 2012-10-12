@@ -160,7 +160,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
           + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
           + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
           + manager.escapeColName("start_date") + " DATE, "
-          + manager.escapeColName("salary") + " FLOAT, "
+          + manager.escapeColName("Salary") + " FLOAT, "
           + manager.escapeColName("dept") + " VARCHAR(32))");
 
       st.executeUpdate("INSERT INTO " + fullTableName

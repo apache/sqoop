@@ -160,7 +160,7 @@ public class DirectPostgresqlManager
       if (!first) {
         sb.append(", ");
       }
-      sb.append(col);
+      sb.append(escapeColName(col));
       first = false;
     }
 
@@ -185,6 +185,7 @@ public class DirectPostgresqlManager
     StringBuilder sb = new StringBuilder();
     boolean first = true;
     for (String col : cols) {
+      String colEscaped = escapeColName(col);
       if (!first) {
         sb.append(", ");
       }
@@ -194,12 +195,12 @@ public class DirectPostgresqlManager
       } else {
         if ("bool".equalsIgnoreCase(columnTypes.get(col))) {
           sb.append(String.format("case when %s=true then 'TRUE' "
-          + "when %s=false then 'FALSE' end as %s", col, col, col));
+          + "when %s=false then 'FALSE' end as %s", colEscaped, colEscaped, colEscaped));
         } else if ("bit".equalsIgnoreCase(columnTypes.get(col))) {
           sb.append(String.format("case when %s=B'1' then 'TRUE' "
-          + "when %s=B'0' then 'FALSE' end as %s", col, col, col));
+          + "when %s=B'0' then 'FALSE' end as %s", colEscaped, colEscaped, colEscaped));
         } else {
-          sb.append(col);
+          sb.append(colEscaped);
         }
       }
       first = false;
