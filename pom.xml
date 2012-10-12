@@ -273,6 +273,18 @@ limitations under the License.
     </pluginManagement>
   </build>
 
+  <!-- All reports might be generated using mvn site command -->
+  <reporting>
+    <plugins>
+    <!-- Test code coverage might be executed with mvn cobertura:cobertura command -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.5.2</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <developers>
     <!-- alphabetical by id -->
     <developer>
