@@ -74,7 +74,8 @@ public class SqoopOutputFormatLoadExecutor {
             data.wait();
           }
 
-          data.setContent(key.getContent());
+          int type = key.getType();
+          data.setContent(key.getContent(type), type);
 
           // notify reader that the data is ready
           data.notify();
@@ -126,17 +127,22 @@ public class SqoopOutputFormatLoadExecutor {
 
   public class OutputFormatDataReader extends DataReader {
     @Override
+    public void setFieldDelimiter(char fieldDelimiter) {
+      data.setFieldDelimiter(fieldDelimiter);
+    }
+
+    @Override
     public Object[] readArrayRecord() {
-      return (Object[])readRecord();
+      return (Object[])readContent(Data.ARRAY_RECORD);
     }
 
     @Override
     public String readCsvRecord() {
-      return (String)readRecord();
+      return (String)readContent(Data.CSV_RECORD);
     }
 
     @Override
-    public Object readRecord() {
+    public Object readContent(int type) {
       synchronized (data) {
         if (writerFinished) {
           return null;
@@ -148,8 +154,8 @@ public class SqoopOutputFormatLoadExecutor {
             data.wait();
           }
 
-          Object content = data.getContent();
-          data.setContent(null);
+          Object content = data.getContent(type);
+          data.setContent(null, Data.EMPTY_DATA);
 
           // notify writer that data is consumed
           data.notify();

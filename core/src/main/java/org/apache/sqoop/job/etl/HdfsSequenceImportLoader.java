@@ -37,18 +37,18 @@ import org.apache.sqoop.utils.ClassLoadingUtils;
 
 public class HdfsSequenceImportLoader extends Loader {
 
-  public static final String extension = ".seq";
+  public static final String EXTENSION = ".seq";
 
   private final char fieldDelimiter;
-  private final char recordDelimiter;
 
   public HdfsSequenceImportLoader() {
     fieldDelimiter = Data.DEFAULT_FIELD_DELIMITER;
-    recordDelimiter = Data.DEFAULT_RECORD_DELIMITER;
   }
 
   @Override
   public void run(Context context, DataReader reader) {
+    reader.setFieldDelimiter(fieldDelimiter);
+
     Configuration conf = ((EtlContext)context).getConfiguration();
     String filename =
         context.getString(JobConstants.JOB_MR_OUTPUT_FILE);
@@ -71,12 +71,12 @@ public class HdfsSequenceImportLoader extends Loader {
       }
     }
 
-    filename += extension;
+    filename += EXTENSION;
 
     try {
       Path filepath = new Path(filename);
       SequenceFile.Writer filewriter;
-      if (codecname != null) {
+      if (codec != null) {
         filewriter = SequenceFile.createWriter(conf,
             SequenceFile.Writer.file(filepath),
             SequenceFile.Writer.keyClass(Text.class),
@@ -90,10 +90,10 @@ public class HdfsSequenceImportLoader extends Loader {
           SequenceFile.Writer.compression(CompressionType.NONE));
       }
 
-      Object record;
+      String csv;
       Text text = new Text();
-      while ((record = reader.readRecord()) != null) {
-        text.set(Data.format(record, fieldDelimiter, recordDelimiter));
+      while ((csv = reader.readCsvRecord()) != null) {
+        text.set(csv);
         filewriter.append(text, NullWritable.get());
       }
       filewriter.close();

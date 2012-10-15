@@ -50,9 +50,9 @@ import org.junit.Test;
 
 public class TestMapReduce extends TestCase {
 
-  private static final int START_ID = 1;
-  private static final int NUMBER_OF_IDS = 9;
-  private static final int NUMBER_OF_ROWS_PER_ID = 10;
+  private static final int START_PARTITION = 1;
+  private static final int NUMBER_OF_PARTITIONS = 9;
+  private static final int NUMBER_OF_ROWS_PER_PARTITION = 10;
 
   @Test
   public void testInputFormat() throws Exception {
@@ -64,7 +64,7 @@ public class TestMapReduce extends TestCase {
     List<InputSplit> splits = inputformat.getSplits(job);
     assertEquals(9, splits.size());
 
-    for (int id = START_ID; id <= NUMBER_OF_IDS; id++) {
+    for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
       SqoopSplit split = (SqoopSplit)splits.get(id-1);
       DummyPartition partition = (DummyPartition)split.getPartition();
       assertEquals(id, partition.getId());
@@ -118,7 +118,7 @@ public class TestMapReduce extends TestCase {
     @Override
     public List<Partition> run(Context context) {
       List<Partition> partitions = new LinkedList<Partition>();
-      for (int id = START_ID; id <= NUMBER_OF_IDS; id++) {
+      for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
         DummyPartition partition = new DummyPartition();
         partition.setId(id);
         partitions.add(partition);
@@ -131,11 +131,11 @@ public class TestMapReduce extends TestCase {
     @Override
     public void run(Context context, Partition partition, DataWriter writer) {
       int id = ((DummyPartition)partition).getId();
-      for (int row = 0; row < NUMBER_OF_ROWS_PER_ID; row++) {
+      for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
         writer.writeArrayRecord(new Object[] {
-            String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row),
-            new Integer(id*NUMBER_OF_ROWS_PER_ID+row),
-            new Double(id*NUMBER_OF_ROWS_PER_ID+row)});
+            new Integer(id*NUMBER_OF_ROWS_PER_PARTITION+row),
+            new Double(id*NUMBER_OF_ROWS_PER_PARTITION+row),
+            String.valueOf(id*NUMBER_OF_ROWS_PER_PARTITION+row)});
       }
     }
   }
@@ -160,15 +160,16 @@ public class TestMapReduce extends TestCase {
 
     public static class DummyRecordWriter
         extends RecordWriter<Data, NullWritable> {
-      private int index = START_ID*NUMBER_OF_ROWS_PER_ID;
+      private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
       private Data data = new Data();
 
       @Override
       public void write(Data key, NullWritable value) {
         data.setContent(new Object[] {
-          String.valueOf(index),
           new Integer(index),
-          new Double(index)});
+          new Double(index),
+          String.valueOf(index)},
+          Data.ARRAY_RECORD);
         index++;
 
         assertEquals(data.toString(), key.toString());
@@ -201,7 +202,7 @@ public class TestMapReduce extends TestCase {
   }
 
   public static class DummyLoader extends Loader {
-    private int index = START_ID*NUMBER_OF_ROWS_PER_ID;
+    private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
     private Data expected = new Data();
     private Data actual = new Data();
 
@@ -209,12 +210,13 @@ public class TestMapReduce extends TestCase {
     public void run(Context context, DataReader reader) {
       Object[] array;
       while ((array = reader.readArrayRecord()) != null) {
-        actual.setContent(array);
+        actual.setContent(array, Data.ARRAY_RECORD);
 
         expected.setContent(new Object[] {
-          String.valueOf(index),
           new Integer(index),
-          new Double(index)});
+          new Double(index),
+          String.valueOf(index)},
+          Data.ARRAY_RECORD);
         index++;
 
         assertEquals(expected.toString(), actual.toString());

@@ -27,6 +27,8 @@ public abstract class DataWriter {
 
   public abstract void writeCsvRecord(String csv);
 
-  public abstract void writeRecord(Object record);
+  public abstract void writeContent(Object content, int type);
+
+  public abstract void setFieldDelimiter(char fieldDelimiter);
 
 }

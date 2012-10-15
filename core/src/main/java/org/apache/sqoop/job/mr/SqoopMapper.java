@@ -79,22 +79,31 @@ public class SqoopMapper
     }
 
     @Override
-    public void writeArrayRecord(Object[] record) {
-      writeRecord(record);
-    }
-
-    @Override
-    public void writeCsvRecord(String csv) {
-      writeRecord(csv);
-    }
-
-    @Override
-    public void writeRecord(Object record) {
+    public void setFieldDelimiter(char fieldDelimiter) {
       if (data == null) {
         data = new Data();
       }
 
-      data.setContent(record);
+      data.setFieldDelimiter(fieldDelimiter);
+    }
+
+    @Override
+    public void writeArrayRecord(Object[] array) {
+      writeContent(array, Data.ARRAY_RECORD);
+    }
+
+    @Override
+    public void writeCsvRecord(String csv) {
+      writeContent(csv, Data.CSV_RECORD);
+    }
+
+    @Override
+    public void writeContent(Object content, int type) {
+      if (data == null) {
+        data = new Data();
+      }
+
+      data.setContent(content, type);
       try {
         context.write(data, NullWritable.get());
       } catch (Exception e) {

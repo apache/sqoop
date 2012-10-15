@@ -19,7 +19,6 @@ package org.apache.sqoop.job;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +29,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -73,9 +71,8 @@ public class TestHdfsLoad extends TestCase {
     conf.set(FileOutputFormat.OUTDIR, outdir);
     JobUtils.runJob(conf);
 
-    Path filepath = new Path(outdir, OUTPUT_FILE);
-    FileSystem fs = filepath.getFileSystem(conf);
-    DataInputStream filestream = new DataInputStream(fs.open(filepath));
+    String fileName = outdir + "/" +  OUTPUT_FILE;
+    InputStream filestream = FileUtils.open(fileName);
     BufferedReader filereader = new BufferedReader(new InputStreamReader(
         filestream, Data.CHARSET_NAME));
     verifyOutputText(filereader);
@@ -97,27 +94,26 @@ public class TestHdfsLoad extends TestCase {
         FileOutputFormat.COMPRESS_CODEC, SqoopFileOutputFormat.DEFAULT_CODEC)
         .asSubclass(CompressionCodec.class);
     CompressionCodec codec = ReflectionUtils.newInstance(codecClass, conf);
-    Path filepath = new Path(outdir,
-        OUTPUT_FILE + codec.getDefaultExtension());
-    FileSystem fs = filepath.getFileSystem(conf);
-    InputStream filestream = codec.createInputStream(fs.open(filepath));
+    String fileName = outdir + "/" +  OUTPUT_FILE + codec.getDefaultExtension();
+    InputStream filestream = codec.createInputStream(FileUtils.open(fileName));
     BufferedReader filereader = new BufferedReader(new InputStreamReader(
         filestream, Data.CHARSET_NAME));
     verifyOutputText(filereader);
   }
 
   private void verifyOutputText(BufferedReader reader) throws IOException {
-    String line = null;
-    int index = START_ID*NUMBER_OF_ROWS_PER_ID;
+    String actual = null;
     String expected;
-    while ((line = reader.readLine()) != null){
-      expected = Data.format(
-          new Object[] {String.valueOf(index), new Integer(index), new Double(index)},
-          Data.DEFAULT_FIELD_DELIMITER, Data.DEFAULT_RECORD_DELIMITER);
+    Data data = new Data();
+    int index = START_ID*NUMBER_OF_ROWS_PER_ID;
+    while ((actual = reader.readLine()) != null){
+      data.setContent(new Object[] {
+          new Integer(index), new Double(index), String.valueOf(index) },
+          Data.ARRAY_RECORD);
+      expected = data.toString();
       index++;
 
-      assertEquals(expected.toString(),
-          line + Data.DEFAULT_RECORD_DELIMITER);
+      assertEquals(expected, actual);
     }
     reader.close();
 
@@ -137,7 +133,7 @@ public class TestHdfsLoad extends TestCase {
     JobUtils.runJob(conf);
 
     Path filepath = new Path(outdir,
-        OUTPUT_FILE + HdfsSequenceImportLoader.extension);
+        OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
     SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
         SequenceFile.Reader.file(filepath));
     verifyOutputSequence(filereader);
@@ -156,7 +152,7 @@ public class TestHdfsLoad extends TestCase {
     JobUtils.runJob(conf);
 
     Path filepath = new Path(outdir,
-        OUTPUT_FILE + HdfsSequenceImportLoader.extension);
+        OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
     SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
         SequenceFile.Reader.file(filepath));
     verifyOutputSequence(filereader);
@@ -164,12 +160,14 @@ public class TestHdfsLoad extends TestCase {
 
   private void verifyOutputSequence(SequenceFile.Reader reader) throws IOException {
     int index = START_ID*NUMBER_OF_ROWS_PER_ID;
-    Text expected = new Text();
     Text actual = new Text();
+    Text expected = new Text();
+    Data data = new Data();
     while (reader.next(actual)){
-      expected.set(Data.format(
-          new Object[] {String.valueOf(index), new Integer(index), new Double(index)},
-          Data.DEFAULT_FIELD_DELIMITER, Data.DEFAULT_RECORD_DELIMITER));
+      data.setContent(new Object[] {
+          new Integer(index), new Double(index), String.valueOf(index) },
+          Data.ARRAY_RECORD);
+      expected.set(data.toString());
       index++;
 
       assertEquals(expected.toString(), actual.toString());
@@ -221,9 +219,9 @@ public class TestHdfsLoad extends TestCase {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_ID; row++) {
         Object[] array = new Object[] {
-          String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row),
           new Integer(id*NUMBER_OF_ROWS_PER_ID+row),
-          new Double(id*NUMBER_OF_ROWS_PER_ID+row)
+          new Double(id*NUMBER_OF_ROWS_PER_ID+row),
+          String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row)
         };
         writer.writeArrayRecord(array);
       }

@@ -18,6 +18,8 @@
 package org.apache.sqoop.job;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,12 +27,39 @@ import org.apache.hadoop.fs.Path;
 
 public class FileUtils {
 
+  public static boolean exists(String file) throws IOException {
+    Path path = new Path(file);
+    FileSystem fs = path.getFileSystem(new Configuration());
+    return fs.exists(path);
+  }
+
   public static void delete(String file) throws IOException {
     Path path = new Path(file);
     FileSystem fs = path.getFileSystem(new Configuration());
     if (fs.exists(path)) {
       fs.delete(path, true);
     }
+  }
+
+  public static void mkdirs(String directory) throws IOException {
+    Path path = new Path(directory);
+    FileSystem fs = path.getFileSystem(new Configuration());
+    if (!fs.exists(path)) {
+      fs.mkdirs(path);
+    }
+  }
+
+  public static InputStream open(String fileName)
+    throws IOException, ClassNotFoundException {
+    Path filepath = new Path(fileName);
+    FileSystem fs = filepath.getFileSystem(new Configuration());
+    return fs.open(filepath);
+  }
+
+  public static OutputStream create(String fileName) throws IOException {
+    Path filepath = new Path(fileName);
+    FileSystem fs = filepath.getFileSystem(new Configuration());
+    return fs.create(filepath, false);
   }
 
   private FileUtils() {

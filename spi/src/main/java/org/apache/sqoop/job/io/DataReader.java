@@ -27,6 +27,8 @@ public abstract class DataReader {
 
   public abstract String readCsvRecord();
 
-  public abstract Object readRecord();
+  public abstract Object readContent(int type);
+
+  public abstract void setFieldDelimiter(char fieldDelimiter);
 
 }

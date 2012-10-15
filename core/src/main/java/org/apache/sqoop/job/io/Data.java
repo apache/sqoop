@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 
@@ -43,26 +44,45 @@ public class Data implements WritableComparable<Data> {
   public static final int ARRAY_RECORD = 2;
   private int type = EMPTY_DATA;
 
-  public static final char DEFAULT_FIELD_DELIMITER = ',';
-  public static final char DEFAULT_RECORD_DELIMITER = '\n';
   public static final String CHARSET_NAME = "UTF-8";
 
-  public void setContent(Object content) {
-    if (content == null) {
-      this.type = EMPTY_DATA;
-    } else if (content instanceof String) {
-      this.type = CSV_RECORD;
-    } else if (content instanceof Object[]) {
-      this.type = ARRAY_RECORD;
-    } else {
-      throw new SqoopException(CoreError.CORE_0012,
-          content.getClass().getName());
-    }
-    this.content = content;
+  public static final char DEFAULT_RECORD_DELIMITER = '\n';
+  public static final char DEFAULT_FIELD_DELIMITER = ',';
+  public static final char DEFAULT_STRING_DELIMITER = '\'';
+  public static final char DEFAULT_STRING_ESCAPE = '\\';
+  private char fieldDelimiter = DEFAULT_FIELD_DELIMITER;
+  private char stringDelimiter = DEFAULT_STRING_DELIMITER;
+  private char stringEscape = DEFAULT_STRING_ESCAPE;
+  private String escapedStringDelimiter = String.valueOf(new char[] {
+      stringEscape, stringDelimiter
+  });
+
+  public void setFieldDelimiter(char fieldDelimiter) {
+    this.fieldDelimiter = fieldDelimiter;
   }
 
-  public Object getContent() {
-    return content;
+  public void setContent(Object content, int type) {
+    switch (type) {
+    case EMPTY_DATA:
+    case CSV_RECORD:
+    case ARRAY_RECORD:
+      this.type = type;
+      this.content = content;
+      break;
+    default:
+      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+    }
+  }
+
+  public Object getContent(int targetType) {
+    switch (targetType) {
+    case CSV_RECORD:
+      return format();
+    case ARRAY_RECORD:
+      return parse();
+    default:
+      throw new SqoopException(CoreError.CORE_0012, String.valueOf(targetType));
+    }
   }
 
   public int getType() {
@@ -73,39 +93,9 @@ public class Data implements WritableComparable<Data> {
     return (type == EMPTY_DATA);
   }
 
-  public static String format(Object content,
-      char fieldDelimiter, char recordDelimiter) {
-    if (content instanceof String) {
-      return (String)content + recordDelimiter;
-
-    } else if (content instanceof Object[]) {
-      StringBuilder sb = new StringBuilder();
-      Object[] array = (Object[])content;
-      for (int i = 0; i < array.length; i++) {
-        if (i != 0) {
-          sb.append(fieldDelimiter);
-        }
-
-        if (array[i] instanceof String) {
-          // TODO: Also need to escape those special characters as documented in:
-          // https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation#Sqoop2Intermediaterepresentation-Intermediateformatrepresentationproposal
-          sb.append("\'");
-          sb.append(((String)array[i]).replaceAll(
-              "\'", Matcher.quoteReplacement("\\\'")));
-          sb.append("\'");
-        } else if (array[i] instanceof byte[]) {
-          sb.append(Arrays.toString((byte[])array[i]));
-        } else {
-          sb.append(array[i].toString());
-        }
-      }
-      sb.append(recordDelimiter);
-      return sb.toString();
-
-    } else {
-      throw new SqoopException(CoreError.CORE_0012,
-          content.getClass().getName());
-    }
+  @Override
+  public String toString() {
+    return (String)getContent(CSV_RECORD);
   }
 
   @Override
@@ -147,11 +137,6 @@ public class Data implements WritableComparable<Data> {
     default:
       throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
     }
-  }
-
-  @Override
-  public String toString() {
-    return format(content, DEFAULT_FIELD_DELIMITER, DEFAULT_RECORD_DELIMITER);
   }
 
   @Override
@@ -322,6 +307,72 @@ public class Data implements WritableComparable<Data> {
         );
       }
     }
+  }
+
+  private String format() {
+    switch (type) {
+    case EMPTY_DATA:
+      return null;
+
+    case CSV_RECORD:
+      if (fieldDelimiter == DEFAULT_FIELD_DELIMITER) {
+        return (String)content;
+      } else {
+        // TODO: need to exclude the case where comma is part of a string.
+        return ((String)content).replaceAll(
+            String.valueOf(DEFAULT_FIELD_DELIMITER),
+            String.valueOf(fieldDelimiter));
+      }
+
+    case ARRAY_RECORD:
+      StringBuilder sb = new StringBuilder();
+      Object[] array = (Object[])content;
+      for (int i = 0; i < array.length; i++) {
+        if (i != 0) {
+          sb.append(fieldDelimiter);
+        }
+
+        if (array[i] instanceof String) {
+          sb.append(stringDelimiter);
+          sb.append(escape((String)array[i]));
+          sb.append(stringDelimiter);
+        } else if (array[i] instanceof byte[]) {
+          sb.append(Arrays.toString((byte[])array[i]));
+        } else {
+          sb.append(String.valueOf(array[i]));
+        }
+      }
+      return sb.toString();
+
+    default:
+      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+    }
+  }
+
+  private Object[] parse() {
+    switch (type) {
+    case EMPTY_DATA:
+      return null;
+
+    case CSV_RECORD:
+      ArrayList<Object> list = new ArrayList<Object>();
+      // todo: need to parse CSV into Array
+      return list.toArray();
+
+    case ARRAY_RECORD:
+      return (Object[])content;
+
+    default:
+      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+    }
+  }
+
+  private String escape(String string) {
+    // TODO: Also need to escape those special characters as documented in:
+    // https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation#Sqoop2Intermediaterepresentation-Intermediateformatrepresentationproposal
+    String regex = String.valueOf(stringDelimiter);
+    String replacement = Matcher.quoteReplacement(escapedStringDelimiter);
+    return string.replaceAll(regex, replacement);
   }
 
 }

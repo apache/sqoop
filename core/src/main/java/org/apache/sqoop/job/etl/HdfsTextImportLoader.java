@@ -47,6 +47,8 @@ public class HdfsTextImportLoader extends Loader {
 
   @Override
   public void run(Context context, DataReader reader) {
+    reader.setFieldDelimiter(fieldDelimiter);
+
     Configuration conf = ((EtlContext)context).getConfiguration();
     String filename = context.getString(JobConstants.JOB_MR_OUTPUT_FILE);
     String codecname = context.getString(JobConstants.JOB_MR_OUTPUT_CODEC);
@@ -76,7 +78,7 @@ public class HdfsTextImportLoader extends Loader {
 
       BufferedWriter filewriter;
       DataOutputStream filestream = fs.create(filepath, false);
-      if (codecname != null) {
+      if (codec != null) {
         filewriter = new BufferedWriter(new OutputStreamWriter(
             codec.createOutputStream(filestream, codec.createCompressor()),
             Data.CHARSET_NAME));
@@ -85,9 +87,9 @@ public class HdfsTextImportLoader extends Loader {
             filestream, Data.CHARSET_NAME));
       }
 
-      Object record;
-      while ((record = reader.readRecord()) != null) {
-        filewriter.write(Data.format(record, fieldDelimiter, recordDelimiter));
+      String csv;
+      while ((csv = reader.readCsvRecord()) != null) {
+        filewriter.write(csv + recordDelimiter);
       }
       filewriter.close();
 
