@@ -28,6 +28,16 @@ public enum ModelError implements ErrorCode {
 
   MODEL_002("Creating MJob of different job types"),
 
+  MODEL_003("Object is not valid configuration object"),
+
+  MODEL_004("Usage of unsupported data type"),
+
+  MODEL_005("Can't get field details"),
+
+  MODEL_006("Incompatible form list and configuration object"),
+
+  MODEL_007("Primitive types in configuration objects are not allowed"),
+
   ;
 
   private final String message;

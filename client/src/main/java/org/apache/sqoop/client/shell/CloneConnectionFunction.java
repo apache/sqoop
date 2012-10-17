@@ -21,8 +21,6 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
@@ -35,6 +33,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -42,8 +41,6 @@ import static org.apache.sqoop.client.utils.FormFiller.*;
 public class CloneConnectionFunction extends SqoopFunction {
 
   private static final String XID = "xid";
-
-  private ConnectionRequest connectionRequest;
 
   private IO io;
 
@@ -108,27 +105,11 @@ public class CloneConnectionFunction extends SqoopFunction {
         return;
       }
 
-      // Try to create
-      status = createConnection(connection);
+      status = createConnectionApplyValidations(connection);
+
     } while(!status.canProceed());
 
     io.out.println("Connection was successfully created with validation status "
       + status.name() + " and persistent id " + connection.getPersistenceId());
-  }
-
-  private Status createConnection(MConnection connection) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-
-    return connectionRequest.create(Environment.getServerUrl(), connection);
-  }
-
-  private ConnectionBean readConnection(String connectionId) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-
-    return connectionRequest.read(Environment.getServerUrl(), connectionId);
   }
 }

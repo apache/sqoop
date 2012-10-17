@@ -21,8 +21,6 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
@@ -35,6 +33,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -42,8 +41,6 @@ import static org.apache.sqoop.client.utils.FormFiller.*;
 public class CloneJobFunction extends SqoopFunction {
 
   private static final String JID = "jid";
-
-  private JobRequest jobRequest;
 
   private IO io;
 
@@ -107,26 +104,11 @@ public class CloneJobFunction extends SqoopFunction {
       }
 
       // Try to create
-      status = createJob(job);
+      status = createJobApplyValidations(job);
     } while(!status.canProceed());
 
     io.out.println("Job was successfully created with validation status "
       + status.name() + " and persistent id " + job.getPersistenceId());
   }
 
-  private Status createJob(MJob job) {
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-
-    return jobRequest.create(Environment.getServerUrl(), job);
-  }
-
-  private JobBean readJob(String jobId) {
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-
-    return jobRequest.read(Environment.getServerUrl(), jobId);
-  }
 }

@@ -19,13 +19,19 @@ package org.apache.sqoop.connector;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MJobForms;
 
 public final class ConnectorHandler {
 
@@ -87,8 +93,19 @@ public final class ConnectorHandler {
     }
 
     // Initialize Metadata
+    List<MJobForms> jobForms = new LinkedList<MJobForms>();
+    for(MJob.Type type : MJob.Type.values()) {
+      Class klass = connector.getJobConfigurationClass(type);
+      if(klass != null) {
+        jobForms.add(new MJobForms(type, FormUtils.toForms(klass)));
+      }
+    }
+
+    MConnectionForms connectionForms = new MConnectionForms(
+      FormUtils.toForms(connector.getConnectionConfigurationClass()));
+
     mConnector = new MConnector(connectorUniqueName, connectorClassName,
-        connector.getConnectionForms(), connector.getJobsForms());
+      connectionForms, jobForms);
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector [" + connectorClassName + "] initialized.");

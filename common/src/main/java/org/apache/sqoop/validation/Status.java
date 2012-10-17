@@ -66,4 +66,13 @@ public enum Status {
   public boolean canProceed() {
     return this == FINE || this == ACCEPTABLE;
   }
+
+  /**
+   * Return default validation "everything is completely fine".
+   *
+   * @return Default validation status
+   */
+  public static Status getDefault() {
+    return FINE;
+  }
 }

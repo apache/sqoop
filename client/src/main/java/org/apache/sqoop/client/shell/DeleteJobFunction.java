@@ -19,11 +19,12 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.JobRequest;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.List;
+
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  * Handles deletion of a job object.
@@ -58,8 +59,7 @@ public class DeleteJobFunction extends SqoopFunction {
       jobRequest = new JobRequest();
     }
 
-    jobRequest.delete(Environment.getServerUrl(),
-                      Long.valueOf(line.getOptionValue(JID)));
+    deleteJob(line.getOptionValue(JID));
 
     return null;
   }

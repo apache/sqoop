@@ -161,11 +161,11 @@ public final class FormFiller {
                                   ResourceBundle bundle) throws IOException {
     // Print out warning or error message in case some validations were already
     // performed.
-    switch (input.getValidationStatus()) {
-      case UNACCEPTABLE:
+    switch (input.getValidationSeverity()) {
+      case ERROR:
         errorMessage(io, input.getValidationMessage());
         break;
-      case ACCEPTABLE:
+      case WARNING:
         warningMessage(io, input.getValidationMessage());
         break;
       default:

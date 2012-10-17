@@ -17,15 +17,15 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MValidatedElement;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validation;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
-import static org.apache.sqoop.json.TestUtil.getConnection;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 
 /**
@@ -33,21 +33,13 @@ import static org.junit.Assert.*;
  */
 public class TestValidationBean {
 
-  private static final String CONNECTOR_NAME = "coolest-connector";
-  private static final String ERROR_MESSAGE = "Houston, we have a problem!";
-
   @Test
   public void testSerialization() {
-    MConnection connection = getConnection(CONNECTOR_NAME);
-    MConnection target = getConnection(CONNECTOR_NAME);
-
-    // Fill some data at the beginning
-    MStringInput input = (MStringInput) connection.getConnectorPart().getForms()
-      .get(0).getInputs().get(0);
-    input.setErrorMessage(ERROR_MESSAGE);
-
     // Serialize it to JSON object
-    ValidationBean bean = new ValidationBean(connection, Status.UNACCEPTABLE);
+    ValidationBean bean = new ValidationBean(
+      getValidation(Status.FINE),
+      getValidation(Status.UNACCEPTABLE)
+    );
     JSONObject json = bean.extract();
 
     // "Move" it across network in text form
@@ -55,15 +47,54 @@ public class TestValidationBean {
 
     // Retrieved transferred object
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ValidationBean retrievedBean = new ValidationBean(target);
+    ValidationBean retrievedBean = new ValidationBean();
     retrievedBean.restore(retrievedJson);
 
-    // Test that value had been correctly moved
-    MStringInput targetInput = (MStringInput) target.getConnectorPart()
-      .getForms().get(0).getInputs().get(0);
-    assertEquals(MValidatedElement.Severity.ERROR,
-      targetInput.getValidationSeverity());
-    assertEquals(ERROR_MESSAGE,
-      targetInput.getValidationMessage());
+    assertNull(retrievedBean.getId());
+
+    Validation connector = retrievedBean.getConnectorValidation();
+    assertEquals(Status.FINE, connector.getStatus());
+    assertEquals(2, connector.getMessages().size());
+    assertTrue(connector.getMessages().containsKey("a"));
+    assertEquals(new Validation.Message(Status.FINE, "d"),
+      connector.getMessages().get("a"));
+
+    Validation framework = retrievedBean.getFrameworkValidation();
+    assertEquals(Status.UNACCEPTABLE, framework.getStatus());
+    assertEquals(2, framework.getMessages().size());
+    assertTrue(framework.getMessages().containsKey("b"));
+    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
+      framework.getMessages().get("b"));
+  }
+
+  @Test
+  public void testId() {
+    // Serialize it to JSON object
+    ValidationBean bean = new ValidationBean(
+      getValidation(Status.FINE),
+      getValidation(Status.FINE)
+    );
+    bean.setId((long) 10);
+    JSONObject json = bean.extract();
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    ValidationBean retrievedBean = new ValidationBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals((Long)(long) 10, retrievedBean.getId());
+  }
+
+  public Validation getValidation(Status status) {
+    Map<String, Validation.Message> messages =
+      new HashMap<String, Validation.Message>();
+
+    messages.put("a", new Validation.Message(status, "d"));
+    messages.put("b", new Validation.Message(status, "c"));
+
+    return new Validation(status, messages);
   }
 }

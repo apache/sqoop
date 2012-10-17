@@ -15,29 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
+import org.apache.sqoop.model.Configuration;
+import org.apache.sqoop.model.Input;
+
+import static org.apache.sqoop.framework.FrameworkConstants.*;
 
 /**
- *
+ * Framework class representing connection configuration
  */
-public class GenericJdbcValidator extends Validator {
+@Configuration
+public class ConnectionConfiguration {
 
-  @Override
-  public Validation validateConnection(Object configuration) {
-    Validation validation = new Validation(ConnectionConfiguration.class);
-    ConnectionConfiguration config = (ConnectionConfiguration)configuration;
-
-    if(config.connectionString == null
-      || !config.connectionString.startsWith("jdbc:")) {
-      validation.addMessage(Status.UNACCEPTABLE, "connectionString",
-        "This do not seem as a valid JDBC URL");
-    }
-
-    return validation;
-  }
+  @Input(form = FORM_SECURITY)
+  public Integer maxConnections;
 }

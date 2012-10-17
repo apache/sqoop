@@ -34,8 +34,10 @@ limitations under the License.
 
   <modules>
     <module>connector-generic-jdbc</module>
+    <!-- Uncomment and finish connectors after sqoop framework will become stable
     <module>connector-mysql-jdbc</module>
     <module>connector-mysql-fastpath</module>
+    -->
   </modules>
 
 </project>

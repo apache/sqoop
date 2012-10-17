@@ -21,10 +21,6 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
-import org.apache.sqoop.client.request.ConnectorRequest;
-import org.apache.sqoop.client.request.FrameworkRequest;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
@@ -39,6 +35,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -46,10 +43,6 @@ import static org.apache.sqoop.client.utils.FormFiller.*;
 public class CreateConnectionFunction extends SqoopFunction {
 
   private static final String CID = "cid";
-
-  private FrameworkRequest frameworkRequest;
-  private ConnectorRequest connectorRequest;
-  private ConnectionRequest connectionRequest;
 
   private IO io;
 
@@ -85,8 +78,8 @@ public class CreateConnectionFunction extends SqoopFunction {
 
     ConsoleReader reader = new ConsoleReader();
 
-    FrameworkBean frameworkBean = getFrameworkBean();
-    ConnectorBean connectorBean = getConnectorBean(connectorId);
+    FrameworkBean frameworkBean = readFramework();
+    ConnectorBean connectorBean = readConnector(connectorId);
 
     MFramework framework = frameworkBean.getFramework();
     ResourceBundle frameworkBundle = frameworkBean.getResourceBundle();
@@ -116,7 +109,7 @@ public class CreateConnectionFunction extends SqoopFunction {
       }
 
       // Try to create
-      status = createConnection(connection);
+      status = createConnectionApplyValidations(connection);
     } while(!status.canProceed());
 
     io.out.println("New connection was successfully created with validation "
@@ -124,27 +117,5 @@ public class CreateConnectionFunction extends SqoopFunction {
       + connection.getPersistenceId());
   }
 
-  private FrameworkBean getFrameworkBean() {
-    if (frameworkRequest == null) {
-      frameworkRequest = new FrameworkRequest();
-    }
 
-    return frameworkRequest.read(Environment.getServerUrl());
-  }
-
-  private ConnectorBean getConnectorBean(String cid) {
-    if (connectorRequest == null) {
-      connectorRequest = new ConnectorRequest();
-    }
-
-    return connectorRequest.read(Environment.getServerUrl(), cid);
-  }
-
-  private Status createConnection(MConnection connection) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-
-    return connectionRequest.create(Environment.getServerUrl(), connection);
-  }
 }

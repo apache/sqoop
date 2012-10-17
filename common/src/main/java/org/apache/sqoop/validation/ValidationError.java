@@ -15,29 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.validation;
 
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
+import org.apache.sqoop.common.ErrorCode;
 
 /**
  *
  */
-public class GenericJdbcValidator extends Validator {
+public enum ValidationError implements ErrorCode {
 
-  @Override
-  public Validation validateConnection(Object configuration) {
-    Validation validation = new Validation(ConnectionConfiguration.class);
-    ConnectionConfiguration config = (ConnectionConfiguration)configuration;
+  VALIDATION_0000("Unknown error"),
 
-    if(config.connectionString == null
-      || !config.connectionString.startsWith("jdbc:")) {
-      validation.addMessage(Status.UNACCEPTABLE, "connectionString",
-        "This do not seem as a valid JDBC URL");
-    }
+  VALIDATION_0001("Missing class declaration."),
 
-    return validation;
+  VALIDATION_0002("Usage of missing field"),
+
+  ;
+
+  private final String message;
+
+  private ValidationError(String message) {
+    this.message = message;
+  }
+
+  public String getCode() {
+    return name();
+  }
+
+  public String getMessage() {
+    return message;
   }
 }

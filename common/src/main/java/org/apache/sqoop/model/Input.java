@@ -15,29 +15,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.model;
 
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- *
+ * Field annotation. Each field that user might change in configuration object
+ * need to have this annotation.
  */
-public class GenericJdbcValidator extends Validator {
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Input {
+  /**
+   * Name of form where this input belongs.
+   *
+   * @return Form name
+   */
+  String form();
 
-  @Override
-  public Validation validateConnection(Object configuration) {
-    Validation validation = new Validation(ConnectionConfiguration.class);
-    ConnectionConfiguration config = (ConnectionConfiguration)configuration;
+  /**
+   * Sqoop framework will ensure that sensitive information will not be easily
+   * accessible.
+   *
+   * @return True if field is sensitive
+   */
+  boolean sensitive() default false;
 
-    if(config.connectionString == null
-      || !config.connectionString.startsWith("jdbc:")) {
-      validation.addMessage(Status.UNACCEPTABLE, "connectionString",
-        "This do not seem as a valid JDBC URL");
-    }
-
-    return validation;
-  }
+  /**
+   * Maximal length of field if applicable.
+   *
+   * @return Maximal length
+   */
+  short size() default -1;
 }

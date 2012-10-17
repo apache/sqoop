@@ -19,8 +19,6 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
 import org.codehaus.groovy.tools.shell.IO;
@@ -29,6 +27,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -38,7 +37,6 @@ public class ShowConnectionFunction extends SqoopFunction {
   public static final String XID = "xid";
 
   private IO io;
-  private ConnectionRequest connectionRequest;
 
   @SuppressWarnings("static-access")
   protected ShowConnectionFunction(IO io) {
@@ -78,11 +76,7 @@ public class ShowConnectionFunction extends SqoopFunction {
   }
 
   private void showConnection(String xid) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-    ConnectionBean connectionBean =
-      connectionRequest.read(Environment.getServerUrl(), xid);
+    ConnectionBean connectionBean = readConnection(xid);
 
     List<MConnection> connections = connectionBean.getConnections();
 

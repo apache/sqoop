@@ -20,7 +20,6 @@ package org.apache.sqoop.client.request;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -47,7 +46,7 @@ public class ConnectionRequest extends Request {
     return connectionBean;
   }
 
-  public Status create(String serverUrl, MConnection connection) {
+  public ValidationBean create(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
     JSONObject connectionJson = connectionBean.extract();
@@ -55,13 +54,13 @@ public class ConnectionRequest extends Request {
     String response = super.post(serverUrl + RESOURCE,
                                  connectionJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean(connection);
+    ValidationBean validationBean = new ValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean.getStatus();
+    return validationBean;
   }
 
-  public Status update(String serverUrl, MConnection connection) {
+  public ValidationBean update(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
     JSONObject connectionJson = connectionBean.extract();
@@ -70,13 +69,13 @@ public class ConnectionRequest extends Request {
                                   + connection.getPersistenceId(),
                                 connectionJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean(connection);
+    ValidationBean validationBean = new ValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean.getStatus();
+    return validationBean;
   }
 
-  public void delete(String serverUrl, long id) {
+  public void delete(String serverUrl, String id) {
      super.delete(serverUrl + RESOURCE + id);
   }
 }

@@ -1,0 +1,174 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.sqoop.model;
+
+import junit.framework.TestCase;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validation;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Test form utils
+ */
+public class TestFormUtils extends TestCase {
+
+  public void testToForms() {
+    Config config = new Config();
+    config.a1 = "value";
+
+    List<MForm> formsByInstance = FormUtils.toForms(config);
+    assertEquals(getForms(), formsByInstance);
+    assertEquals("value", formsByInstance.get(0).getInputs().get(0).getValue());
+
+    List<MForm> formsByClass = FormUtils.toForms(Config.class);
+    assertEquals(getForms(), formsByClass);
+
+    List<MForm> formsByBoth = FormUtils.toForms(Config.class, config);
+    assertEquals(getForms(), formsByBoth);
+    assertEquals("value", formsByBoth.get(0).getInputs().get(0).getValue());
+  }
+
+  public void testToFormsMissingAnnotation() {
+    try {
+      FormUtils.toForms(ConfigWithout.class);
+    } catch(SqoopException ex) {
+      assertEquals(ModelError.MODEL_003, ex.getErrorCode());
+      return;
+    }
+
+    fail("Correct exception wasn't thrown");
+  }
+
+  public void testFailureOnPrimitiveType() {
+    PrimitiveConfig config = new PrimitiveConfig();
+
+    try {
+      FormUtils.toForms(config);
+      fail("We were expecting exception for unsupported type.");
+    } catch(SqoopException ex) {
+      assertEquals(ModelError.MODEL_007, ex.getErrorCode());
+    }
+  }
+
+  public void testFillValues() {
+    List<MForm> forms = getForms();
+
+    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("value");
+
+    Config config = new Config();
+
+    FormUtils.fillValues(forms, config);
+    assertEquals("value", config.a1);
+  }
+
+  public void testFillValuesObjectReuse() {
+    List<MForm> forms = getForms();
+
+    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("value");
+
+    Config config = new Config();
+    config.a2 = "x";
+    config.b1 = "y";
+
+    FormUtils.fillValues(forms, config);
+    assertEquals("value", config.a1);
+    assertNull(config.a2);
+    assertNull(config.b2);
+    assertNull(config.b2);
+  }
+
+  public void testApplyValidation() {
+    Validation validation = getValidation();
+    List<MForm> forms = getForms();
+
+    FormUtils.applyValidation(forms, validation);
+
+    assertEquals(Status.ACCEPTABLE,
+      forms.get(0).getInputs().get(0).getValidationStatus());
+    assertEquals("e1",
+      forms.get(0).getInputs().get(0).getValidationMessage());
+
+    assertEquals(Status.UNACCEPTABLE,
+      forms.get(0).getInputs().get(1).getValidationStatus());
+    assertEquals("e2",
+      forms.get(0).getInputs().get(1).getValidationMessage());
+  }
+
+  protected Validation getValidation() {
+    Map<String, Validation.Message> messages
+      = new HashMap<String, Validation.Message>();
+
+    messages.put("a1", new Validation.Message(Status.ACCEPTABLE, "e1"));
+    messages.put("a2", new Validation.Message(Status.UNACCEPTABLE, "e2"));
+
+    return new Validation(Status.UNACCEPTABLE, messages);
+  }
+
+  /**
+   * Form structure that corresponds to Config class declared below
+   * @return Form structure
+   */
+  protected List<MForm> getForms() {
+    List<MForm> ret = new LinkedList<MForm>();
+
+    List<MInput<?>> inputs;
+
+    // Form A
+    inputs = new LinkedList<MInput<?>>();
+    inputs.add(new MStringInput("a1", false, (short)30));
+    inputs.add(new MStringInput("a2", true, (short)-1));
+    ret.add(new MForm("A", inputs));
+
+    // Form B
+    inputs = new LinkedList<MInput<?>>();
+    inputs.add(new MStringInput("b1", false, (short)2));
+    inputs.add(new MStringInput("b2", false, (short)3));
+    ret.add(new MForm("B", inputs));
+
+    // Form C
+    inputs = new LinkedList<MInput<?>>();
+    inputs.add(new MIntegerInput("intValue"));
+    inputs.add(new MMapInput("map"));
+    ret.add(new MForm("C", inputs));
+
+    return ret;
+  }
+
+  @Configuration
+  class Config {
+    @Input(form = "A", size = 30)  String a1;
+    @Input(form = "A", sensitive = true)  String a2;
+    @Input(form = "B", size = 2)  String b1;
+    @Input(form = "B", size = 3)  String b2;
+    @Input(form = "C") Integer intValue;
+    @Input(form = "C") Map<String, String> map;
+  }
+
+  @Configuration
+  class PrimitiveConfig {
+    @Input(form = "A") int value;
+  }
+
+  class ConfigWithout {
+  }
+}

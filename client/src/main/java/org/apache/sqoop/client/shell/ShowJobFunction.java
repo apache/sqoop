@@ -19,8 +19,6 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
 import org.codehaus.groovy.tools.shell.IO;
@@ -29,6 +27,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -39,7 +38,6 @@ public class ShowJobFunction extends SqoopFunction {
   public static final String JID = "jid";
 
   private IO io;
-  private JobRequest jobRequest;
 
   @SuppressWarnings("static-access")
   protected ShowJobFunction(IO io) {
@@ -79,10 +77,7 @@ public class ShowJobFunction extends SqoopFunction {
   }
 
   private void showJob(String jid) {
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-    JobBean jobBean = jobRequest.read(Environment.getServerUrl(), jid);
+    JobBean jobBean = readJob(jid);
 
     List<MJob> jobs = jobBean.getJobs();
 

@@ -21,11 +21,6 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
-import org.apache.sqoop.client.request.ConnectorRequest;
-import org.apache.sqoop.client.request.FrameworkRequest;
-import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ConnectorBean;
@@ -42,6 +37,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  * Handles creation of new job objects.
@@ -50,11 +46,6 @@ public class CreateJobFunction extends  SqoopFunction {
 
   private static final String XID = "xid";
   private static final String TYPE = "type";
-
-  private FrameworkRequest frameworkRequest;
-  private ConnectionRequest connectionRequest;
-  private ConnectorRequest connectorRequest;
-  private JobRequest jobRequest;
 
   private IO io;
 
@@ -101,8 +92,8 @@ public class CreateJobFunction extends  SqoopFunction {
 
     ConsoleReader reader = new ConsoleReader();
 
-    FrameworkBean frameworkBean = getFrameworkBean();
-    ConnectionBean connectionBean = getConnectionBean(connectionId);
+    FrameworkBean frameworkBean = readFramework();
+    ConnectionBean connectionBean = readConnection(connectionId);
     ConnectorBean connectorBean;
 
     MFramework framework = frameworkBean.getFramework();
@@ -110,7 +101,7 @@ public class CreateJobFunction extends  SqoopFunction {
 
     MConnection connection = connectionBean.getConnections().get(0);
 
-    connectorBean = getConnectorBean(connection.getConnectorId());
+    connectorBean = readConnector(String.valueOf(connection.getConnectorId()));
     MConnector connector = connectorBean.getConnectors().get(0);
     ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(0);
 
@@ -141,45 +132,11 @@ public class CreateJobFunction extends  SqoopFunction {
       }
 
       // Try to create
-      status = createJob(job);
+      status = createJobApplyValidations(job);
     } while(!status.canProceed());
 
     io.out.println("New job was successfully created with validation "
       + "status " + status.name() + " and persistent id "
       + job.getPersistenceId());
-  }
-
-
-  private FrameworkBean getFrameworkBean() {
-    if (frameworkRequest == null) {
-      frameworkRequest = new FrameworkRequest();
-    }
-
-    return frameworkRequest.read(Environment.getServerUrl());
-  }
-
-  private ConnectionBean getConnectionBean(String xid) {
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-
-    return connectionRequest.read(Environment.getServerUrl(), xid);
-  }
-
-  private ConnectorBean getConnectorBean(long cid) {
-    if (connectorRequest == null) {
-      connectorRequest = new ConnectorRequest();
-    }
-
-    return connectorRequest.read(Environment.getServerUrl(),
-      Long.toString(cid));
-  }
-
-  private Status createJob(MJob job) {
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-
-    return jobRequest.create(Environment.getServerUrl(), job);
   }
 }

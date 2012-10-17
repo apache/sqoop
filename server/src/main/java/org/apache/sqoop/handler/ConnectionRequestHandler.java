@@ -20,10 +20,12 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.repository.Repository;
@@ -31,7 +33,9 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.utils.ClassLoadingUtils;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -133,8 +137,8 @@ public class ConnectionRequestHandler implements RequestHandler {
     MConnection connection = connections.get(0);
 
     // Verify that user is not trying to spoof us
-    MConnectionForms connectorForms
-      = ConnectorManager.getConnectorMetadata(connection.getConnectorId())
+    MConnectionForms connectorForms =
+      ConnectorManager.getConnectorMetadata(connection.getConnectorId())
       .getConnectionForms();
     MConnectionForms frameworkForms = FrameworkManager.getFramework()
       .getConnectionForms();
@@ -145,15 +149,37 @@ public class ConnectionRequestHandler implements RequestHandler {
         "Detected incorrect form structure");
     }
 
+    // Responsible connector for this session
+    SqoopConnector connector =
+      ConnectorManager.getConnector(connection.getConnectorId());
+
     // Get validator objects
-    Validator connectorValidator =
-      ConnectorManager.getConnector(connection.getConnectorId()).getValidator();
+    Validator connectorValidator = connector.getValidator();
     Validator frameworkValidator = FrameworkManager.getValidator();
 
-    // Validate connection object
-    Status conStat = connectorValidator.validate(connection.getConnectorPart());
-    Status frmStat = frameworkValidator.validate(connection.getFrameworkPart());
-    Status finalStatus = Status.getWorstStatus(conStat, frmStat);
+    // We need translate forms to configuration objects
+    Object connectorConfig = ClassLoadingUtils.instantiate(
+      connector.getConnectionConfigurationClass());
+    Object frameworkConfig = ClassLoadingUtils.instantiate(
+      FrameworkManager.getConnectionConfigurationClass());
+
+    FormUtils.fillValues(
+      connection.getConnectorPart().getForms(), connectorConfig);
+    FormUtils.fillValues(
+      connection.getFrameworkPart().getForms(), frameworkConfig);
+
+    // Validate both parts
+    Validation connectorValidation =
+      connectorValidator.validateConnection(connectorConfig);
+    Validation frameworkValidation =
+      frameworkValidator.validateConnection(frameworkConfig);
+
+    Status finalStatus = Status.getWorstStatus(connectorValidation.getStatus(),
+      frameworkValidation.getStatus());
+
+    // Return back validations in all cases
+    ValidationBean outputBean =
+      new ValidationBean(connectorValidation, frameworkValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
@@ -161,11 +187,11 @@ public class ConnectionRequestHandler implements RequestHandler {
         RepositoryManager.getRepository().updateConnection(connection);
       } else {
         RepositoryManager.getRepository().createConnection(connection);
+        outputBean.setId(connection.getPersistenceId());
       }
     }
 
-    // Return back validations in all cases
-    return new ValidationBean(connection, finalStatus);
+    return outputBean;
   }
 
   private JsonBean getConnections(RequestContext ctx) {

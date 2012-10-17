@@ -20,7 +20,6 @@ package org.apache.sqoop.client.request;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -47,7 +46,7 @@ public class JobRequest extends Request {
     return jobBean;
   }
 
-  public Status create(String serverUrl, MJob job) {
+  public ValidationBean create(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
     JSONObject jobJson = jobBean.extract();
@@ -55,13 +54,13 @@ public class JobRequest extends Request {
     String response = super.post(serverUrl + RESOURCE,
       jobJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean(job);
+    ValidationBean validationBean = new ValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean.getStatus();
+    return validationBean;
   }
 
-  public Status update(String serverUrl, MJob job) {
+  public ValidationBean update(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
     JSONObject jobJson = jobBean.extract();
@@ -69,13 +68,13 @@ public class JobRequest extends Request {
     String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
                                 jobJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean(job);
+    ValidationBean validationBean = new ValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean.getStatus();
+    return validationBean;
   }
 
-  public void delete(String serverUrl, long id) {
+  public void delete(String serverUrl, String id) {
      super.delete(serverUrl + RESOURCE + id);
   }
 }

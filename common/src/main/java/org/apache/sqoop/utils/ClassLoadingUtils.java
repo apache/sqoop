@@ -19,6 +19,9 @@ package org.apache.sqoop.utils;
 
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 public final class ClassLoadingUtils {
 
   private static final Logger LOG = Logger.getLogger(ClassLoadingUtils.class);
@@ -44,6 +47,37 @@ public final class ClassLoadingUtils {
     }
 
     return klass;
+  }
+
+  public static Object instantiate(String className, Object ... args) {
+    return instantiate(loadClass(className), args);
+  }
+
+  public static Object instantiate(Class klass, Object ... args) {
+    if(klass == null) {
+      return null;
+    }
+
+    Class []argumentTypes = new Class[args.length];
+    for(int i = 0; i < args.length; i++) {
+      Class type = args[i].getClass();
+       argumentTypes[i] = type;
+    }
+
+    try {
+      Constructor constructor = klass.getConstructor(argumentTypes);
+      return constructor.newInstance(args);
+    } catch (NoSuchMethodException e) {
+      LOG.error("Can't find such constructor.", e);
+    } catch (InvocationTargetException e) {
+      LOG.error("Can't instantiate object.", e);
+    } catch (InstantiationException e) {
+      LOG.error("Can't instantiate object.", e);
+    } catch (IllegalAccessException e) {
+      LOG.error("Can't instantiate object.", e);
+    }
+
+    return null;
   }
 
   private ClassLoadingUtils() {

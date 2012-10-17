@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.client.shell;
 
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.FrameworkRequest;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MFramework;
 import org.codehaus.groovy.tools.shell.IO;
@@ -28,6 +26,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -35,7 +34,6 @@ import static org.apache.sqoop.client.utils.FormDisplayer.*;
 public class ShowFrameworkFunction extends SqoopFunction {
 
   private IO io;
-  private FrameworkRequest frameworkRequest;
 
   @SuppressWarnings("static-access")
   protected ShowFrameworkFunction(IO io) {
@@ -60,12 +58,7 @@ public class ShowFrameworkFunction extends SqoopFunction {
   }
 
   private void showFramework() {
-    if (frameworkRequest == null) {
-      frameworkRequest = new FrameworkRequest();
-    }
-
-    FrameworkBean frameworkBean =
-      frameworkRequest.read(Environment.getServerUrl());
+    FrameworkBean frameworkBean = readFramework();
 
     MFramework framework = frameworkBean.getFramework();
     ResourceBundle bundle = frameworkBean.getResourceBundle();

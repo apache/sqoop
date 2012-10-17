@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.validation.Status;
+
 /**
  * Element that can be validated for correctness.
  *
@@ -36,26 +38,6 @@ package org.apache.sqoop.model;
 public abstract class MValidatedElement extends MNamedElement {
 
   /**
-   * Different levels of validation severity.
-   */
-  public enum Severity {
-    /**
-     * Everything is fine, no issues with this element.
-     */
-    OK,
-
-    /**
-     * Warning is suspicious content of the element.
-     */
-    WARNING,
-
-    /**
-     * Error is incorrect, unacceptable content of the element.
-     */
-    ERROR,
-  }
-
-  /**
    * Validation message.
    *
    * One element can have only one message regardless of the type.
@@ -65,23 +47,23 @@ public abstract class MValidatedElement extends MNamedElement {
   /**
    * Severity of the message.
    */
-  private Severity validationSeverity;
+  private Status validationStatus;
 
   public MValidatedElement(String name) {
     super(name);
     // Everything is fine by default
-    this.validationSeverity = Severity.OK;
+    this.validationStatus = Status.getDefault();
   }
 
   /**
    * Set validation message and given severity.
    *
-   * @param severity Message severity
+   * @param status Message validation status
    * @param msg Message itself
    */
-  public void setValidationMessage(Severity severity, String msg) {
+  public void setValidationMessage(Status status, String msg) {
     this.validationMessage = msg;
-    this.validationSeverity = severity;
+    this.validationStatus = status;
   }
 
   /**
@@ -90,10 +72,10 @@ public abstract class MValidatedElement extends MNamedElement {
    * Return either associated message for given severity or null in case
    * that there is no message with given severity.
    *
-   * @param severity Message severity
+   * @param status Message validation status
    */
-  public String getValidationMessage(Severity severity) {
-    return (validationSeverity.equals(severity)) ? validationMessage : null;
+  public String getValidationMessage(Status status) {
+    return (validationStatus.equals(status)) ? validationMessage : null;
   }
 
   /**
@@ -106,10 +88,10 @@ public abstract class MValidatedElement extends MNamedElement {
   }
 
   /**
-   * Return message severity.
+   * Return message validation status.
    */
-  public Severity getValidationSeverity() {
-    return validationSeverity;
+  public Status getValidationStatus() {
+    return validationStatus;
   }
 
   /**
@@ -118,7 +100,7 @@ public abstract class MValidatedElement extends MNamedElement {
    * @param errMsg Error message
    */
   public void setErrorMessage(String errMsg) {
-    setValidationMessage(Severity.ERROR, errMsg);
+    setValidationMessage(Status.UNACCEPTABLE, errMsg);
   }
 
   /**
@@ -127,7 +109,7 @@ public abstract class MValidatedElement extends MNamedElement {
    * @return Error message
    */
   public String getErrorMessage() {
-    return getValidationMessage(Severity.ERROR);
+    return getValidationMessage(Status.UNACCEPTABLE);
   }
 
   /**
@@ -136,7 +118,7 @@ public abstract class MValidatedElement extends MNamedElement {
    * @param warnMsg Warning message
    */
   public void setWarningMessage(String warnMsg) {
-    setValidationMessage(Severity.WARNING, warnMsg);
+    setValidationMessage(Status.ACCEPTABLE, warnMsg);
   }
 
   /**
@@ -144,7 +126,7 @@ public abstract class MValidatedElement extends MNamedElement {
    * @return
    */
   public String getWarningMessage() {
-    return getValidationMessage(Severity.WARNING);
+    return getValidationMessage(Status.ACCEPTABLE);
   }
 
 }

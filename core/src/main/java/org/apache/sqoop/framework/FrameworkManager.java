@@ -19,20 +19,18 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
+import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
+import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
-import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.validation.Validator;
 
-import static org.apache.sqoop.framework.FrameworkConstants.*;
-
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -48,46 +46,20 @@ public final class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
-  private static final MConnectionForms CONNECTION_FORMS;
-
-  private static final List<MJobForms> JOB_FORMS;
-
   private static final MFramework mFramework;
-
   private static final Validator validator;
 
   static {
 
-    List<MForm> conForms = new ArrayList<MForm>();
-
-    // Build the CONNECTION_FORMS forms for import
-    List<MInput<?>> connFormInputs = new ArrayList<MInput<?>>();
-
-    MIntegerInput maxConnections = new MIntegerInput(
-      INPUT_CONN_MAX_SIMULTANEOUS_CONNECTIONS);
-    connFormInputs.add(maxConnections);
-
-    MForm connForm = new MForm(FORM_SECURITY, connFormInputs);
-
-    conForms.add(connForm);
-    CONNECTION_FORMS = new MConnectionForms(conForms);
-
-    // Build job forms for import
-    List<MInput<?>> jobFormInputs = new ArrayList<MInput<?>>();
-
-    MStringInput outputFormat = new MStringInput(INPUT_CONN_MAX_OUTPUT_FORMAT,
-      false, (short) 25);
-    jobFormInputs.add(outputFormat);
-
-    MForm jobForm = new MForm(FORM_OUTPUT, jobFormInputs);
-    List<MForm> jobForms = new ArrayList<MForm>();
-    jobForms.add(jobForm);
-
-    JOB_FORMS = new ArrayList<MJobForms>();
-    JOB_FORMS.add(new MJobForms(MJob.Type.IMPORT, jobForms));
-    JOB_FORMS.add(new MJobForms(MJob.Type.EXPORT, jobForms));
-
-    mFramework = new MFramework(CONNECTION_FORMS, JOB_FORMS);
+    MConnectionForms connectionForms = new MConnectionForms(
+      FormUtils.toForms(getConnectionConfigurationClass())
+    );
+    List<MJobForms> jobForms = new LinkedList<MJobForms>();
+    jobForms.add(new MJobForms(MJob.Type.IMPORT,
+      FormUtils.toForms(getJobConfigurationClass(MJob.Type.IMPORT))));
+    jobForms.add(new MJobForms(MJob.Type.EXPORT,
+      FormUtils.toForms(getJobConfigurationClass(MJob.Type.EXPORT))));
+    mFramework = new MFramework(connectionForms, jobForms);
 
     // Build validator
     validator = new Validator();
@@ -100,6 +72,21 @@ public final class FrameworkManager {
     RepositoryManager.getRepository().registerFramework(mFramework);
     if (!mFramework.hasPersistenceId()) {
       throw new SqoopException(FrameworkError.FRAMEWORK_0000);
+    }
+  }
+
+  public static Class getConnectionConfigurationClass() {
+    return ConnectionConfiguration.class;
+  }
+
+  public static Class getJobConfigurationClass(MJob.Type jobType) {
+    switch (jobType) {
+      case IMPORT:
+        return ImportJobConfiguration.class;
+      case EXPORT:
+        return ExportJobConfiguration.class;
+      default:
+        return null;
     }
   }
 

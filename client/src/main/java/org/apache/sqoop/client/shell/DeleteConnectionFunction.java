@@ -19,11 +19,10 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.core.Environment;
-import org.apache.sqoop.client.request.ConnectionRequest;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.List;
+import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
@@ -31,8 +30,6 @@ import java.util.List;
 public class DeleteConnectionFunction extends SqoopFunction {
 
   private IO io;
-
-  private ConnectionRequest connectionRequest;
 
   private static final String XID = "xid";
 
@@ -54,12 +51,7 @@ public class DeleteConnectionFunction extends SqoopFunction {
       return null;
     }
 
-    if (connectionRequest == null) {
-      connectionRequest = new ConnectionRequest();
-    }
-
-    connectionRequest.delete(Environment.getServerUrl(),
-                             Long.valueOf(line.getOptionValue(XID)));
+    deleteConnection(line.getOptionValue(XID));
 
     return null;
   }

@@ -17,14 +17,12 @@
  */
 package org.apache.sqoop.connector.spi;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Validator;
 
 /**
@@ -39,14 +37,14 @@ public interface SqoopConnector {
   ResourceBundle getBundle(Locale locale);
 
   /**
-   * @return Get connection structure
+   * @return Get connection configuration class
    */
-  MConnectionForms getConnectionForms();
+  Class getConnectionConfigurationClass();
 
   /**
-   * @return Get supported jobs and their associated data structures
+   * @return Get job configuration class for given type or null if not supported
    */
-  List<MJobForms> getJobsForms();
+  Class getJobConfigurationClass(MJob.Type jobType);
 
   /**
    * @return an <tt>Importer</tt> that provides classes for performing import.
