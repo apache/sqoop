@@ -37,6 +37,7 @@ public class DeleteCommand extends SqoopCommand {
       "Delete", "info");
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public Object execute(List args) {
     if (args.size() == 0) {
@@ -59,5 +60,6 @@ public class DeleteCommand extends SqoopCommand {
     } else {
       String msg = "Usage: delete " + getUsage();
       throw new SqoopException(ClientError.CLIENT_0002, msg);
-    }  }
+    }
+  }
 }

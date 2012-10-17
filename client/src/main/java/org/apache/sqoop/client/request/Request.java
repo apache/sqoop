@@ -28,7 +28,7 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
-import org.apache.sqoop.json.ExceptionInfo;
+import org.apache.sqoop.json.ThrowableBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -91,13 +91,13 @@ public class Request
         if(resp.getHeaders().containsKey(
           SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_CODE)) {
 
-          ExceptionInfo ex = new ExceptionInfo();
+          ThrowableBean ex = new ThrowableBean();
 
           String responseText = resp.getEntity(String.class);
           JSONObject json = (JSONObject) JSONValue.parse(responseText);
           ex.restore(json);
 
-          throw new SqoopException(ClientError.CLIENT_0006, ex.toString());
+          throw new SqoopException(ClientError.CLIENT_0006, ex.getThrowable());
         }
       }
 

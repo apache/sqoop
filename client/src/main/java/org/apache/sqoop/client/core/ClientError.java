@@ -39,7 +39,7 @@ public enum ClientError implements ErrorCode {
   /** We're not able to get user input */
   CLIENT_0005("Can't get user input"),
 
-  /** There occured exception on server side **/
+  /** There occurred exception on server side **/
   CLIENT_0006("Server has returned exception"),
 
   ;

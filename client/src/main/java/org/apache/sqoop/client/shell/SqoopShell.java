@@ -23,6 +23,8 @@ import java.io.FileReader;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.apache.sqoop.client.utils.ThrowableDisplayer;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.codehaus.groovy.tools.shell.Command;
 import org.codehaus.groovy.tools.shell.CommandRegistry;
 import org.codehaus.groovy.tools.shell.Groovysh;
@@ -44,6 +46,11 @@ public final class SqoopShell
   {
     System.setProperty("groovysh.prompt", "sqoop");
     Groovysh shell = new Groovysh();
+
+    // Install our error hook (exception handling)
+    shell.setErrorHook(
+      new MethodClosure(ThrowableDisplayer.class, "errorHook"));
+    ThrowableDisplayer.setIo(shell.getIo());
 
     CommandRegistry registry = shell.getRegistry();
     @SuppressWarnings("unchecked")

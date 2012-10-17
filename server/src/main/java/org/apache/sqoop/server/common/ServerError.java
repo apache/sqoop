@@ -33,6 +33,9 @@ public enum ServerError implements ErrorCode {
   /** We've received invalid HTTP request */
   SERVER_0003("Invalid HTTP request"),
 
+  /** Invalid argument in HTTP request */
+  SERVER_0004("Invalid argument in HTTP request"),
+
   ;
 
   private final String message;

@@ -25,6 +25,7 @@ import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.common.ServerError;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +58,11 @@ public class ConnectorRequestHandler implements RequestHandler {
 
     } else {
       Long id = Long.parseLong(cid);
+
+      // Check that user is not asking for non existing connector id
+      if(!ConnectorManager.getConnectoIds().contains(id)) {
+        throw new SqoopException(ServerError.SERVER_0004, "Invalid id " + id);
+      }
 
       connectors = new LinkedList<MConnector>();
       bundles = new LinkedList<ResourceBundle>();

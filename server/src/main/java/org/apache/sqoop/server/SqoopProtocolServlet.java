@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.ErrorCode;
-import org.apache.sqoop.json.ExceptionInfo;
+import org.apache.sqoop.json.ThrowableBean;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.common.SqoopResponseCode;
@@ -136,11 +136,10 @@ public class SqoopProtocolServlet extends HttpServlet {
           SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_MESSAGE,
           ex.getMessage());
 
-      ExceptionInfo exceptionInfo = new ExceptionInfo(ec.getCode(),
-        ex.getMessage(), ex);
+      ThrowableBean throwableBean = new ThrowableBean(ex);
 
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getWriter().write(exceptionInfo.extract().toJSONString());
+      response.getWriter().write(throwableBean.extract().toJSONString());
     } else {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

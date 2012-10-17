@@ -77,6 +77,10 @@ public final class ConnectorManager {
 
   public static MConnector getConnectorMetadata(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    if(handler == null) {
+      return null;
+    }
+
     return handler.getMetadata();
   }
 
