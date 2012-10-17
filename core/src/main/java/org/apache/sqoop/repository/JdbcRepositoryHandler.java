@@ -130,28 +130,38 @@ public interface JdbcRepositoryHandler {
   /**
    * Check if given connection exists in metastore.
    *
-   * @param id Connection id
+   * @param connetionId Connection id
    * @param conn Connection to metadata repository
    * @return True if the connection exists
    */
-  boolean existsConnection(long id, Connection conn);
+  boolean existsConnection(long connetionId, Connection conn);
+
+  /**
+   * Check if given Connection id is referenced somewhere and thus can't
+   * be removed.
+   *
+   * @param connectionId Connection id
+   * @param conn Connection to metadata repository
+   * @return
+   */
+  boolean inUseConnection(long connectionId, Connection conn);
 
   /**
    * Delete connection with given id from metadata repository.
    *
-   * @param id Connection object that should be removed from repository
+   * @param connectionId Connection object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  void deleteConnection(long id, Connection conn);
+  void deleteConnection(long connectionId, Connection conn);
 
   /**
    * Find connection with given id in repository.
    *
-   * @param id Connection id
+   * @param connectionId Connection id
    * @param conn Connection to metadata repository
    * @return Deserialized form of the connection that is saved in repository
    */
-  MConnection findConnection(long id, Connection conn);
+  MConnection findConnection(long connectionId, Connection conn);
 
   /**
    * Get all connection objects.
@@ -184,28 +194,38 @@ public interface JdbcRepositoryHandler {
   /**
    * Check if given job exists in metastore.
    *
-   * @param id Job id
+   * @param jobId Job id
    * @param conn Connection to metadata repository
    * @return True if the job exists
    */
-  boolean existsJob(long id, Connection conn);
+  boolean existsJob(long jobId, Connection conn);
+
+  /**
+   * Check if given job id is referenced somewhere and thus can't
+   * be removed.
+   *
+   * @param jobId Job id
+   * @param conn Connection to metadata repository
+   * @return
+   */
+  boolean inUseJob(long jobId, Connection conn);
 
   /**
    * Delete job with given id from metadata repository.
    *
-   * @param id Job object that should be removed from repository
+   * @param jobId Job object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  void deleteJob(long id, Connection conn);
+  void deleteJob(long jobId, Connection conn);
 
   /**
    * Find job with given id in repository.
    *
-   * @param id Job id
+   * @param jobId Job id
    * @param conn Connection to metadata repository
    * @return Deserialized form of the job that is present in the repository
    */
-  MJob findJob(long id, Connection conn);
+  MJob findJob(long jobId, Connection conn);
 
   /**
    * Get all job objects.

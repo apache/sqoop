@@ -206,6 +206,10 @@ public class JdbcRepository implements Repository {
           throw new SqoopException(RepositoryError.JDBCREPO_0017,
             "Invalid id: " + connectionId);
         }
+        if(handler.inUseConnection(connectionId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0021,
+            "Id in use: " + connectionId);
+        }
 
         handler.deleteConnection(connectionId, conn);
         return null;
@@ -291,6 +295,10 @@ public class JdbcRepository implements Repository {
         if(!handler.existsJob(id, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0020,
             "Invalid id: " + id);
+        }
+        if(handler.inUseJob(id, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0022,
+            "Id in use: " + id);
         }
 
         handler.deleteJob(id, conn);

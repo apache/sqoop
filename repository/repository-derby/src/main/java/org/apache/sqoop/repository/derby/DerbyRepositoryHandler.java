@@ -501,6 +501,29 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     }
   }
 
+  @Override
+  public boolean inUseConnection(long connectionId, Connection conn) {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_JOBS_FOR_CONNECTION_CHECK);
+      stmt.setLong(1, connectionId);
+      rs = stmt.executeQuery();
+
+      // Should be always valid in case of count(*) query
+      rs.next();
+
+      return rs.getLong(1) != 0;
+
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0032, e);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
+
   /**
    * {@inheritDoc}
    */
@@ -674,6 +697,13 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       closeResultSets(rs);
       closeStatements(stmt);
     }
+  }
+
+  @Override
+  public boolean inUseJob(long jobId, Connection conn) {
+    // TODO(jarcec): This method will need to be upgraded once submission
+    // engine will be in place as we can't remove "running" job.
+    return false;
   }
 
   /**

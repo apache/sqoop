@@ -143,6 +143,9 @@ public enum DerbyRepoError implements ErrorCode {
   /** We can't restore job metadata from metastore **/
   DERBYREPO_0031("Unable to load job metadata from repository"),
 
+  /** Can't verify if connection is referenced from somewhere **/
+  DERBYREPO_0032("Unable to check if connection is in use"),
+
   ;
 
   private final String message;

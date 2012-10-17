@@ -100,6 +100,12 @@ public enum RepositoryError implements ErrorCode {
   /** Invalid job id **/
   JDBCREPO_0020("Given job id is invalid"),
 
+  /** Connection ID is in use **/
+  JDBCREPO_0021("Given connection id is in use"),
+
+  /** Job ID is in use **/
+  JDBCREPO_0022("Given job id is in use"),
+
   ;
 
   private final String message;

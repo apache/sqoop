@@ -329,6 +329,12 @@ public final class DerbySchemaQuery {
   public static final String STMT_SELECT_JOB_CHECK =
     "SELECT count(*) FROM " + TABLE_SQ_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
 
+  // DML: Check if there are jobs for given connection
+  public static final String STMT_SELECT_JOBS_FOR_CONNECTION_CHECK =
+    "SELECT count(*) FROM " + TABLE_SQ_JOB + " JOIN " + TABLE_SQ_CONNECTION
+    + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID + " WHERE "
+    + COLUMN_SQN_ID + " = ? ";
+
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE =
     "SELECT " + COLUMN_SQN_CONNECTOR + ", " + COLUMN_SQB_ID + ", "
