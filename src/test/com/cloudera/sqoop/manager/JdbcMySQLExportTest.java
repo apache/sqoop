@@ -166,4 +166,27 @@ public class JdbcMySQLExportTest extends TestExport {
     verifyExport(TOTAL_RECORDS);
     assertColMinAndMax(forIdx(0), gen);
   }
+
+  public void testUpsert() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+
+    // Insert only
+    runExport(getArgv(true, 10, 10, "--update-key", "id",
+      "--update-mode", "allowinsert"));
+    verifyExport(TOTAL_RECORDS);
+
+    // Update only
+    runExport(getArgv(true, 10, 10, "--update-key", "id",
+      "--update-mode", "allowinsert"));
+    verifyExport(TOTAL_RECORDS);
+
+    // Insert & update
+    createTextFile(0, TOTAL_RECORDS * 2, false);
+    runExport(getArgv(true, 10, 10, "--update-key", "id",
+      "--update-mode", "allowinsert"));
+    verifyExport(TOTAL_RECORDS * 2);
+  }
 }

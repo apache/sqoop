@@ -21,6 +21,24 @@
 Notes for specific connectors
 -----------------------------
 
+MySQL JDBC Connector
+~~~~~~~~~~~~~~~~~~~~
+
+This section contains information specific to MySQL JDBC Connector.
+
+Upsert functionality
+^^^^^^^^^^^^^^^^^^^^
+
+MySQL JDBC Connector is supporting upsert functionality using argument
++\--update-mode allowinsert+. To achieve that Sqoop is using MySQL clause INSERT INTO
+... ON DUPLICATE KEY UPDATE. This clause do not allow user to specify which columns
+should be used to distinct whether we should update existing row or add new row. Instead
+this clause relies on table's unique keys (primary key belongs to this set). MySQL
+will try to insert new row and if the insertion fails with duplicate unique key error
+it will update appropriate row instead. As a result, Sqoop is ignoring values specified
+in parameter +\--update-key+, however user needs to specify at least one valid column
+to turn on update mode itself.
+
 PostgreSQL Connector
 ~~~~~~~~~~~~~~~~~~~~~
 

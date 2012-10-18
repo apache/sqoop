@@ -34,6 +34,9 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ImportException;
+import com.cloudera.sqoop.util.ExportException;
+import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
+import org.apache.sqoop.mapreduce.mysql.MySQLUpsertOutputFormat;
 
 /**
  * Manages connections to MySQL databases.
@@ -106,6 +109,39 @@ public class MySQLManager
 
     // Then run the normal importTable() method.
     super.importTable(context);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+      throws IOException, ExportException {
+    context.setConnManager(this);
+    LOG.warn("MySQL Connector upsert functionality is using INSERT ON");
+    LOG.warn("DUPLICATE KEY UPDATE clause that relies on table's unique key.");
+    LOG.warn("Insert/update distinction is therefore independent on column");
+    LOG.warn("names specified in --update-key parameter. Please see MySQL");
+    LOG.warn("documentation for additional limitations.");
+
+    JdbcUpsertExportJob exportJob =
+      new JdbcUpsertExportJob(context, MySQLUpsertOutputFormat.class);
+    exportJob.runExport();
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void configureDbOutputColumns(SqoopOptions options) {
+    // In case that we're running upsert, we do not want to change column order
+    // as we're actually going to use INSERT INTO ... ON DUPLICATE KEY UPDATE
+    // clause.
+    if (options.getUpdateMode() == SqoopOptions.UpdateMode.AllowInsert) {
+      return;
+    }
+
+    super.configureDbOutputColumns(options);
   }
 
   /**

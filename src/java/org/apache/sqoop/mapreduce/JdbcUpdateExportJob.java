@@ -121,7 +121,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
       }
 
       if (updateKeys.size() == 0) {
-        throw new IOException("Unpdate key columns not valid in export job");
+        throw new IOException("Update key columns not valid in export job");
       }
 
       // Make sure we strip out the key column from this list.
