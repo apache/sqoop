@@ -21,6 +21,16 @@ import org.apache.sqoop.core.ConfigurationConstants;
 
 public final class JobConstants extends Constants {
 
+  // Metadata constants
+
+  public static final String INPUT_JOB_JOB_TYPE = "inp-job-job-type";
+  public static final String INPUT_JOB_STORAGE_TYPE = "inp-job-storage-type";
+  public static final String INPUT_JOB_FORMAT_TYPE = "inp-job-format-type";
+  public static final String INPUT_JOB_OUTPUT_CODEC = "inp-job-output-codec";
+  public static final String INPUT_JOB_MAX_EXTRACTORS = "inp-job-max-extractors";
+  public static final String INPUT_JOB_MAX_LOADERS = "inp-job-max-loaders";
+
+
   /**
    * All job related configuration is prefixed with this:
    * <tt>org.apache.sqoop.job.</tt>
