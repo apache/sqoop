@@ -26,8 +26,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.sqoop.SqoopOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 import org.junit.Before;
 
@@ -302,7 +304,9 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
     List<String> generatedJars = null;
     try {
       ExportTool exporter = new ExportTool();
-      Sqoop sqoop = new Sqoop(exporter);
+      Configuration conf = getConf();
+      SqoopOptions opts = getSqoopOptions(conf);
+      Sqoop sqoop = new Sqoop(exporter, conf, opts);
       ret = Sqoop.runSqoop(sqoop, argv);
       generatedJars = exporter.getGeneratedJarFiles();
     } catch (Exception e) {
