@@ -118,7 +118,7 @@ typical Linux systems this can be addressed by setting the following
 property in the +java.security+ file:
 
 ----
-java.security.egd=file:/dev/../dev/urandom
+securerandom.source=file:/dev/../dev/urandom
 ----
 
 The +java.security+ file can be found under +$JAVA_HOME/jre/lib/security+
@@ -126,8 +126,13 @@ directory. Alternatively, this property can also be specified on the
 command line via:
 
 ----
--D mapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom"+
+-D mapred.child.java.opts="-Djava.security.egd=file:/dev/../dev/urandom"
 ----
+
+Please note that it's very important to specify this weird path +/dev/../dev/urandom+
+as it is due to a Java bug
+http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6202721[6202721],
+or +/dev/urandom+ will be ignored and substituted by +/dev/random+.
 
 Oracle: Case-Sensitive Catalog Query Errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
