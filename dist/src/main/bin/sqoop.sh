@@ -51,7 +51,7 @@ case $COMMAND in
   client)
     # Build class path with full path to each library
     for f in $CLIENT_LIB/*.jar; do
-      CLASSPATH=${CLASSPATH}:`readlink -f $f`;
+      CLASSPATH="${CLASSPATH}:$CUR_DIR/$f"
     done
 
     # We need to change current directory back to original as optional user side script
