@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository;
 
 import java.sql.Connection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -26,6 +27,7 @@ import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MSubmission;
 
 public class JdbcRepository implements Repository {
 
@@ -117,15 +119,16 @@ public class JdbcRepository implements Repository {
         MConnector result = handler.findConnector(connectorUniqueName, conn);
         if (result == null) {
           handler.registerConnector(mConnector, conn);
+          return mConnector;
         } else {
           if (!result.equals(mConnector)) {
             throw new SqoopException(RepositoryError.JDBCREPO_0013,
-                "given[" + mConnector + "] found[" + result + "]");
+              "Connector: " + mConnector.getUniqueName()
+              + " given: " + mConnector
+              + " found: " + result);
           }
-          mConnector.setPersistenceId(result.getPersistenceId());
+          return result;
         }
-
-        return result;
       }
     });
   }
@@ -134,22 +137,21 @@ public class JdbcRepository implements Repository {
    * {@inheritDoc}
    */
   @Override
-  public void registerFramework(final MFramework mFramework) {
-    doWithConnection(new DoWithConnection() {
+  public MFramework registerFramework(final MFramework mFramework) {
+    return (MFramework) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
         MFramework result = handler.findFramework(conn);
         if (result == null) {
           handler.registerFramework(mFramework, conn);
+          return mFramework;
         } else {
           if (!result.equals(mFramework)) {
             throw new SqoopException(RepositoryError.JDBCREPO_0014,
-                "given[" + mFramework + "] found[" + result + "]");
+             "Framework: given: " + mFramework + " found:" + result);
           }
-          mFramework.setPersistenceId(result.getPersistenceId());
+          return result;
         }
-
-        return null;
       }
     });
   }
@@ -330,6 +332,87 @@ public class JdbcRepository implements Repository {
       @Override
       public Object doIt(Connection conn) {
         return handler.findJobs(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createSubmission(final MSubmission submission) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(submission.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0023);
+        }
+
+        handler.createSubmission(submission, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateSubmission(final MSubmission submission) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+       if(!submission.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0024);
+        }
+        if(!handler.existsSubmission(submission.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0025,
+            "Invalid id: " + submission.getPersistenceId());
+        }
+
+        handler.updateSubmission(submission, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void purgeSubmissions(final Date threshold) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        handler.purgeSubmissions(threshold, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MSubmission> findSubmissionsUnfinished() {
+    return (List<MSubmission>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findSubmissionsUnfinished(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MSubmission findSubmissionLastForJob(final long jobId) {
+    return (MSubmission) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findSubmissionLastForJob(jobId, conn);
       }
     });
   }

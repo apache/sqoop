@@ -15,29 +15,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.submission.counter;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * A mutable context used in the ETL framework.
- * (for example, configuration initialization)
+ *
  */
-public class EtlMutableContext extends EtlContext implements MutableContext  {
+public class CounterGroup implements Iterable<Counter> {
 
-  public EtlMutableContext(Configuration conf) {
-    super(conf);
+  private final String name;
+  private Map<String, Counter> counters;
+
+  public CounterGroup(String name) {
+    this.name = name;
+    this.counters = new HashMap<String, Counter>();
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public CounterGroup addCounter(Counter counter) {
+    counters.put(counter.getName(), counter);
+    return this;
+  }
+
+  public Counter getCounter(String name) {
+    return counters.get(name);
   }
 
   @Override
-  public void setString(String key, String value) {
-    if (conf.get(key) != null) {
-      throw new SqoopException(CoreError.CORE_0011, key);
-    }
-
-    conf.set(key, value);
+  public Iterator<Counter> iterator() {
+    return counters.values().iterator();
   }
-
 }

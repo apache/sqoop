@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.io.DataReader;
 
 /**
@@ -24,6 +25,6 @@ import org.apache.sqoop.job.io.DataReader;
  */
 public abstract class Loader {
 
-  public abstract void run(Context context, DataReader reader);
+  public abstract void run(ImmutableContext context, DataReader reader);
 
 }

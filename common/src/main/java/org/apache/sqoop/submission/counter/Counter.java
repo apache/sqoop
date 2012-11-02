@@ -15,23 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job;
-
-import org.apache.sqoop.job.etl.EtlFramework;
-import org.apache.sqoop.job.etl.EtlOptions;
-import org.apache.sqoop.job.mr.MrExecution;
+package org.apache.sqoop.submission.counter;
 
 /**
- * This class supports Sqoop job execution.
+ *
  */
-public class JobEngine {
+public class Counter {
+  private final String name;
+  private long value;
 
-  public void run(EtlOptions options) {
-    EtlFramework etl = new EtlFramework(options);
-    MrExecution mr = new MrExecution(etl);
-    mr.initialize();
-    mr.run();
-    mr.destroy();
+  public Counter(String name) {
+    this.name = name;
   }
 
+  public Counter(String name, long value) {
+    this(name);
+    this.value = value;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public long getValue() {
+    return value;
+  }
+
+  public void setValue(long value) {
+    this.value = value;
+  }
 }

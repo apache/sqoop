@@ -68,8 +68,8 @@ public class Request
     return getBuilder(url).put(String.class, data);
   }
 
-  public void delete(String url) {
-    getBuilder(url).delete(String.class);
+  public String delete(String url) {
+    return getBuilder(url).delete(String.class);
   }
 
   /**

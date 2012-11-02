@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.Context;
+import org.apache.sqoop.common.MapContext;
 
 
 public final class JdbcRepositoryContext {
@@ -32,7 +32,7 @@ public final class JdbcRepositoryContext {
   private static final Logger LOG =
       Logger.getLogger(JdbcRepositoryContext.class);
 
-  private final Context context;
+  private final MapContext context;
   private final String handlerClassName;
   private final boolean createSchema;
   private final String connectionUrl;
@@ -44,7 +44,7 @@ public final class JdbcRepositoryContext {
   private DataSource dataSource;
   private JdbcRepositoryTransactionFactory txFactory;
 
-  public JdbcRepositoryContext(Context context) {
+  public JdbcRepositoryContext(MapContext context) {
     this.context = context;
 
     handlerClassName = context.getString(
@@ -56,7 +56,7 @@ public final class JdbcRepositoryContext {
     }
 
     createSchema = context.getBoolean(
-        RepoConfigurationConstants.SYSCFG_REPO_JDBC_CREATE_SCHEMA);
+        RepoConfigurationConstants.SYSCFG_REPO_JDBC_CREATE_SCHEMA, false);
 
     connectionUrl = context.getString(
         RepoConfigurationConstants.SYSCFG_REPO_JDBC_URL);
@@ -208,7 +208,7 @@ public final class JdbcRepositoryContext {
     return props;
   }
 
-  public Context getContext() {
+  public MapContext getContext() {
     return context;
   }
 }

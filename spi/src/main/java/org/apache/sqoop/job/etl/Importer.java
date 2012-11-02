@@ -26,25 +26,18 @@ package org.apache.sqoop.job.etl;
  * -> (framework-defined steps)
  * -> Destroyer
  */
-public class Importer {
+public class Importer extends CallbackBase {
 
-  private Class<? extends Initializer> initializer;
   private Class<? extends Partitioner> partitioner;
   private Class<? extends Extractor> extractor;
-  private Class<? extends Destroyer> destroyer;
 
   public Importer(Class<? extends Initializer> initializer,
       Class<? extends Partitioner> partitioner,
       Class<? extends Extractor> extractor,
       Class<? extends Destroyer> destroyer) {
-    this.initializer = initializer;
+    super(initializer, destroyer);
     this.partitioner = partitioner;
     this.extractor = extractor;
-    this.destroyer = destroyer;
-  }
-
-  public Class<? extends Initializer> getInitializer() {
-    return initializer;
   }
 
   public Class<? extends Partitioner> getPartitioner() {
@@ -55,8 +48,11 @@ public class Importer {
     return extractor;
   }
 
-  public Class<? extends Destroyer> getDestroyer() {
-    return destroyer;
+  @Override
+  public String toString() {
+    return "Importer{" + super.toString() +
+      ", partitioner=" + partitioner.getName() +
+      ", extractor=" + extractor.getName() +
+      '}';
   }
-
 }

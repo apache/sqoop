@@ -28,11 +28,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.etl.EtlContext;
+import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataReader;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 public class SqoopOutputFormatLoadExecutor {
 
@@ -191,29 +191,17 @@ public class SqoopOutputFormatLoadExecutor {
 
       Configuration conf = context.getConfiguration();
 
+
+      String loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
+      Loader loader = (Loader) ClassUtils.instantiate(loaderName);
+
+      // Get together framework context as configuration prefix by nothing
+      PrefixContext frameworkContext = new PrefixContext(conf, "");
+
       try {
-        String loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
-        Class<?> clz = ClassLoadingUtils.loadClass(loaderName);
-        if (clz == null) {
-          throw new SqoopException(CoreError.CORE_0009, loaderName);
-        }
-
-        Loader loader;
-        try {
-          loader = (Loader) clz.newInstance();
-        } catch (Exception e) {
-          throw new SqoopException(CoreError.CORE_0010, loaderName, e);
-        }
-
-        try {
-          loader.run(new EtlContext(conf), reader);
-
-        } catch (Throwable t) {
-          throw new SqoopException(CoreError.CORE_0018, t);
-        }
-
-      } catch (SqoopException e) {
-        exception = e;
+        loader.run(frameworkContext, reader);
+      } catch (Throwable t) {
+        throw new SqoopException(CoreError.CORE_0018, t);
       }
 
       synchronized (data) {

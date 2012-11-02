@@ -27,11 +27,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.etl.EtlContext;
+import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * A mapper to perform map function.
@@ -47,23 +47,17 @@ public class SqoopMapper
     Configuration conf = context.getConfiguration();
 
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
-    Class<?> clz = ClassLoadingUtils.loadClass(extractorName);
-    if (clz == null) {
-      throw new SqoopException(CoreError.CORE_0009, extractorName);
-    }
+    Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
-    Extractor extractor;
-    try {
-      extractor = (Extractor) clz.newInstance();
-    } catch (Exception e) {
-      throw new SqoopException(CoreError.CORE_0010, extractorName, e);
-    }
+    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
+    Object connectorConnection = ConfigurationUtils.getConnectorConnection(conf);
+    Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
 
     SqoopSplit split = context.getCurrentKey();
 
     try {
-      extractor.run(new EtlContext(conf), split.getPartition(),
-          new MapDataWriter(context));
+      extractor.run(connectorContext, connectorConnection, connectorJob, split.getPartition(),
+        new MapDataWriter(context));
 
     } catch (Exception e) {
       throw new SqoopException(CoreError.CORE_0017, e);

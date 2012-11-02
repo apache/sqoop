@@ -15,13 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.submission.counter;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * The context for getting and setting configuration values.
+ *
  */
-public interface MutableContext extends Context {
+public class Counters implements Iterable<CounterGroup> {
+  Map<String, CounterGroup> groups;
 
-  void setString(String key, String value);
+  public Counters() {
+    this.groups = new HashMap<String, CounterGroup>();
+  }
 
+  public Counters addCounterGroup(CounterGroup group) {
+    groups.put(group.getName(), group);
+    return this;
+  }
+
+  public CounterGroup getCounterGroup(String name) {
+    return groups.get(name);
+  }
+
+  @Override
+  public Iterator<CounterGroup> iterator() {
+    return groups.values().iterator();
+  }
 }

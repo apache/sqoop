@@ -18,12 +18,14 @@
 package org.apache.sqoop.repository;
 
 import java.sql.Connection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MSubmission;
 
 /**
  * Set of methods required from each JDBC based repository.
@@ -234,4 +236,53 @@ public interface JdbcRepositoryHandler {
    * @return List will all saved job objects
    */
   List<MJob> findJobs(Connection conn);
+
+  /**
+   * Save given submission in repository.
+   *
+   * @param submission Submission object
+   * @param conn Connection to metadata repository
+   */
+  void createSubmission(MSubmission submission, Connection conn);
+
+  /**
+   * Check if submission with given id already exists in repository.
+   *
+   * @param submissionId Submission internal id
+   * @param conn Connection to metadata repository
+   */
+  boolean existsSubmission(long submissionId, Connection conn);
+
+  /**
+   * Update given submission in repository.
+   *
+   * @param submission Submission object
+   * @param conn Connection to metadata repository
+   */
+  void updateSubmission(MSubmission submission, Connection conn);
+
+  /**
+   * Remove submissions older then threshold from repository.
+   *
+   * @param threshold Threshold date
+   * @param conn Connection to metadata repository
+   */
+  void purgeSubmissions(Date threshold, Connection conn);
+
+  /**
+   * Return list of unfinished submissions (as far as repository is concerned).
+   *
+   * @param conn Connection to metadata repository
+   * @return List of unfinished submissions.
+   */
+  List<MSubmission> findSubmissionsUnfinished(Connection conn);
+
+  /**
+   * Find last submission for given jobId.
+   *
+   * @param jobId Job id
+   * @param conn Connection to metadata repository
+   * @return Most recent submission
+   */
+  MSubmission findSubmissionLastForJob(long jobId, Connection conn);
 }

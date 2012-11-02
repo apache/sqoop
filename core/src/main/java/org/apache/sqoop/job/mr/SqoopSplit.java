@@ -26,7 +26,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.etl.Partition;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * An input split to be read.
@@ -58,7 +58,7 @@ public class SqoopSplit extends InputSplit implements Writable {
     // read Partition class name
     String className = in.readUTF();
     // instantiate Partition object
-    Class<?> clz = ClassLoadingUtils.loadClass(className);
+    Class<?> clz = ClassUtils.loadClass(className);
     if (clz == null) {
       throw new SqoopException(CoreError.CORE_0009, className);
     }

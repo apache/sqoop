@@ -15,13 +15,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.submission.mapreduce;
+
+import org.apache.sqoop.common.ErrorCode;
 
 /**
- * The context for getting configuration values.
+ *
  */
-public interface Context {
+public enum MapreduceSubmissionError implements ErrorCode {
 
-  String getString(String key);
+  MAPREDUCE_0001("Unknown error"),
 
+  MAPREDUCE_0002("Failure on submission engine initialization"),
+
+  MAPREDUCE_0003("Can't get RunningJob instance"),
+
+  MAPREDUCE_0004("Unknown map reduce job status"),
+
+  ;
+
+  private final String message;
+
+  private MapreduceSubmissionError(String message) {
+    this.message = message;
+  }
+
+  public String getCode() {
+    return name();
+  }
+
+  public String getMessage() {
+    return message;
+  }
 }

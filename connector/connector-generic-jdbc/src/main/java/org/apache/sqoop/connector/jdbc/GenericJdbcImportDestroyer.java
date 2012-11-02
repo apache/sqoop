@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.job.etl.Context;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.job.etl.Destroyer;
 
 public class GenericJdbcImportDestroyer extends Destroyer {
 
   @Override
-  public void run(Context context) {
+  public void run(MapContext context) {
     // TODO Auto-generated method stub
   }
 

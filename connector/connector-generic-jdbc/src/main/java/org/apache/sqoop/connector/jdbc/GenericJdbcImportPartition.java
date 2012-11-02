@@ -45,4 +45,9 @@ public class GenericJdbcImportPartition extends Partition {
     out.writeUTF(conditions);
   }
 
+  @Override
+  public String toString() {
+    return conditions;
+  }
+
 }

@@ -36,4 +36,11 @@ public abstract class Partition {
    */
   public abstract void write(DataOutput out) throws IOException;
 
+  /**
+   * Each partition must be easily serializable to human readable form so that
+   * it can be logged for debugging purpose.
+   *
+   * @return Human readable representation
+   */
+  public abstract String toString();
 }

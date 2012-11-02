@@ -132,6 +132,24 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQBI_VALUE = "SQBI_VALUE";
 
+  // SQ_SUBMISSION
+
+  public static final String TABLE_SQ_SUBMISSION_NAME =
+      "SQ_SUBMISSION";
+
+  public static final String TABLE_SQ_SUBMISSION = SCHEMA_PREFIX
+      + TABLE_SQ_SUBMISSION_NAME;
+
+  public static final String COLUMN_SQS_ID = "SQS_ID";
+
+  public static final String COLUMN_SQS_JOB = "SQS_JOB";
+
+  public static final String COLUMN_SQS_DATE = "SQS_DATE";
+
+  public static final String COLUMN_SQS_STATUS = "SQS_STATUS";
+
+  public static final String COLUMN_SQS_EXTERNAL_ID = "SQS_EXTERNAL_ID";
+
   private DerbySchemaConstants() {
     // Disable explicit object creation
   }

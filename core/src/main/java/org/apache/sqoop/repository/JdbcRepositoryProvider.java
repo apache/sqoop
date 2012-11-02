@@ -33,9 +33,9 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPoolFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.Context;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.SqoopConfiguration;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 
 public class JdbcRepositoryProvider implements RepositoryProvider {
@@ -60,7 +60,7 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
   }
 
   @Override
-  public synchronized void initialize(Context context) {
+  public synchronized void initialize(MapContext context) {
     repoContext = new JdbcRepositoryContext(SqoopConfiguration.getContext());
 
     initializeRepositoryHandler();
@@ -94,7 +94,7 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
   private void initializeRepositoryHandler() {
     String jdbcHandlerClassName = repoContext.getHandlerClassName();
 
-    Class<?> handlerClass = ClassLoadingUtils.loadClass(jdbcHandlerClassName);
+    Class<?> handlerClass = ClassUtils.loadClass(jdbcHandlerClassName);
 
     if (handlerClass == null) {
       throw new SqoopException(RepositoryError.JDBCREPO_0001,
@@ -120,7 +120,7 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
     }
 
     // Initialize a datasource
-    Class<?> driverClass = ClassLoadingUtils.loadClass(jdbcDriverClassName);
+    Class<?> driverClass = ClassUtils.loadClass(jdbcDriverClassName);
 
     if (driverClass == null) {
       throw new SqoopException(RepositoryError.JDBCREPO_0003,

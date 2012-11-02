@@ -30,4 +30,7 @@ public class ImportJobConfiguration {
 
   @Input(form = FORM_OUTPUT, size = 25)
   public String outputFormat;
+
+  @Input(form = FORM_OUTPUT, size = 25)
+  public String outputDirectory;
 }

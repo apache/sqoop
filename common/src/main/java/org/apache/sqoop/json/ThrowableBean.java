@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -24,10 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Transfer throwable.
- *
- * TODO(jarcec): After SQOOP-627 will get committed, change the throwable
- * creation to same class as was on the server instead of Throwable.
+ * Transfer throwable instance.
  */
 public class ThrowableBean implements JsonBean {
 
@@ -87,7 +85,20 @@ public class ThrowableBean implements JsonBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    throwable = new Throwable((String) jsonObject.get(MESSAGE));
+    String exceptionClass = (String) jsonObject.get(CLASS);
+    String message = (String) jsonObject.get(MESSAGE);
+    if(message == null) {
+      message = "";
+    }
+
+    // Let's firstly try to instantiate same class that was originally on remote
+    // side. Fallback to generic Throwable in case that this particular
+    // exception is not known to this JVM (for example during  server-client
+    // exchange).
+    throwable = (Throwable) ClassUtils.instantiate(exceptionClass, message);
+    if(throwable == null) {
+      throwable = new Throwable(message);
+    }
 
     List<StackTraceElement> st = new LinkedList<StackTraceElement>();
     for(Object object : (JSONArray)jsonObject.get(STACK_TRACE)) {

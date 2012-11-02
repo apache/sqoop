@@ -25,9 +25,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,9 +51,11 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
 import org.apache.sqoop.repository.JdbcRepositoryTransactionFactory;
+import org.apache.sqoop.submission.SubmissionStatus;
 
 /**
  * JDBC based repository handler for Derby database.
@@ -192,6 +197,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     runQuery(QUERY_CREATE_TABLE_SQ_JOB);
     runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
+    runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
   }
 
   /**
@@ -773,6 +779,181 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     } finally {
       closeStatements(stmt);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createSubmission(MSubmission submission, Connection conn) {
+    PreparedStatement stmt = null;
+    int result;
+    try {
+      stmt = conn.prepareStatement(STMT_INSERT_SUBMISSION,
+        Statement.RETURN_GENERATED_KEYS);
+      stmt.setLong(1, submission.getJobId());
+      stmt.setString(2, submission.getStatus().name());
+      stmt.setTimestamp(3, new Timestamp(submission.getDate().getTime()));
+      stmt.setString(4, submission.getExternalId());
+
+      result = stmt.executeUpdate();
+      if (result != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0012,
+          Integer.toString(result));
+      }
+
+      ResultSet rsetSubmissionId = stmt.getGeneratedKeys();
+
+      if (!rsetSubmissionId.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+
+      long submissionId = rsetSubmissionId.getLong(1);
+      submission.setPersistenceId(submissionId);
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0034, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean existsSubmission(long submissionId, Connection conn) {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSION_CHECK);
+      stmt.setLong(1, submissionId);
+      rs = stmt.executeQuery();
+
+      // Should be always valid in query with count
+      rs.next();
+
+      return rs.getLong(1) == 1;
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0033, ex);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateSubmission(MSubmission submission, Connection conn) {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_UPDATE_SUBMISSION);
+      stmt.setLong(1, submission.getJobId());
+      stmt.setString(2, submission.getStatus().name());
+      stmt.setTimestamp(3, new Timestamp(submission.getDate().getTime()));
+      stmt.setString(4, submission.getExternalId());
+
+      stmt.setLong(5, submission.getPersistenceId());
+      stmt.executeUpdate();
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0035, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void purgeSubmissions(Date threshold, Connection conn) {
+     PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_PURGE_SUBMISSIONS);
+      stmt.setTimestamp(1, new Timestamp(threshold.getTime()));
+      stmt.executeUpdate();
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0036, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MSubmission> findSubmissionsUnfinished(Connection conn) {
+    List<MSubmission> submissions = new LinkedList<MSubmission>();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSION_UNFINISHED);
+
+      for(SubmissionStatus status : SubmissionStatus.unfinished()) {
+        stmt.setString(1, status.name());
+        rs = stmt.executeQuery();
+
+        while(rs.next()) {
+          submissions.add(loadSubmission(rs));
+        }
+
+        rs.close();
+        rs = null;
+      }
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+
+    return submissions;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MSubmission findSubmissionLastForJob(long jobId, Connection conn) {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSION_LAST_FOR_JOB);
+      stmt.setLong(1, jobId);
+      stmt.setMaxRows(1);
+      rs = stmt.executeQuery();
+
+      if(!rs.next()) {
+        return null;
+      }
+
+      return loadSubmission(rs);
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  private MSubmission loadSubmission(ResultSet rs) throws SQLException {
+     MSubmission submission = new MSubmission(
+      rs.getLong(2),
+      rs.getTimestamp(3),
+      SubmissionStatus.valueOf(rs.getString(4)),
+      rs.getString(5)
+    );
+    submission.setPersistenceId(rs.getLong(1));
+
+    return submission;
   }
 
   private List<MConnection> loadConnections(PreparedStatement stmt,

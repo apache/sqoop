@@ -116,6 +116,4 @@ public class CreateConnectionFunction extends SqoopFunction {
       + "status " + status.name() + " and persistent id "
       + connection.getPersistenceId());
   }
-
-
 }

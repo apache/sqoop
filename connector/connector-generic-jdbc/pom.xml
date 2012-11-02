@@ -29,7 +29,7 @@ limitations under the License.
 
   <groupId>org.apache.sqoop.connector</groupId>
   <artifactId>sqoop-connector-generic-jdbc</artifactId>
-  <name>Generic JDBC Connector</name>
+  <name>Sqoop Generic JDBC Connector</name>
 
   <dependencies>
     <dependency>
@@ -53,6 +53,10 @@ limitations under the License.
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

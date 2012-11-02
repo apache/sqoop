@@ -17,12 +17,15 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.MapContext;
+
 /**
  * This allows connector to define work to complete execution, for example,
  * resource cleaning.
  */
 public abstract class Destroyer {
 
-  public abstract void run(Context context);
+  // TODO(Jarcec): This should be called with ImmutableContext
+  public abstract void run(MapContext context);
 
 }

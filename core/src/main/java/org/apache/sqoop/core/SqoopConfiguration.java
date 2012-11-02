@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 
 public final class SqoopConfiguration {
@@ -129,7 +130,7 @@ public final class SqoopConfiguration {
     initialized = true;
   }
 
-  public static synchronized Context getContext() {
+  public static synchronized MapContext getContext() {
     if (!initialized) {
       throw new SqoopException(CoreError.CORE_0007);
     }
@@ -137,7 +138,7 @@ public final class SqoopConfiguration {
     Map<String,String> parameters = new HashMap<String, String>();
     parameters.putAll(config);
 
-    return new Context(parameters);
+    return new MapContext(parameters);
   }
 
   public static synchronized void destroy() {

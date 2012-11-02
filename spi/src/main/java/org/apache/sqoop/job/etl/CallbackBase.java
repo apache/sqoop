@@ -18,10 +18,32 @@
 package org.apache.sqoop.job.etl;
 
 /**
- * The options provided from user input.
+ * Set of default callbacks that must be implement by each job type.
  */
-public interface Options {
+public abstract class CallbackBase {
 
-  public String getOption(String key);
+  private Class<? extends Initializer> initializer;
+  private Class<? extends Destroyer> destroyer;
 
+  public CallbackBase(
+    Class<? extends Initializer> initializer,
+    Class<? extends Destroyer> destroyer
+  ) {
+    this.initializer = initializer;
+    this.destroyer = destroyer;
+  }
+
+  public Class<? extends Destroyer> getDestroyer() {
+    return destroyer;
+  }
+
+  public Class<? extends Initializer> getInitializer() {
+    return initializer;
+  }
+
+  @Override
+  public String toString() {
+    return "initializer=" + initializer.getName() +
+            ", destroyer=" + destroyer.getName();
+  }
 }

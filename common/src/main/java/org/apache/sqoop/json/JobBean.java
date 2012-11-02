@@ -36,7 +36,7 @@ import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
 /**
  *
  */
-public class JobBean implements  JsonBean {
+public class JobBean implements JsonBean {
 
   private static final String ALL = "all";
   private static final String ID = "id";
@@ -61,9 +61,9 @@ public class JobBean implements  JsonBean {
     this.jobs.add(job);
   }
 
-  public JobBean(List<MJob> connections) {
+  public JobBean(List<MJob> jobs) {
     this();
-    this.jobs = connections;
+    this.jobs = jobs;
   }
 
   // For "restore"

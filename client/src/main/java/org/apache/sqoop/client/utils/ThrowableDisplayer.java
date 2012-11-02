@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.utils;
 
+import groovy.lang.MissingPropertyException;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.IO;
@@ -57,6 +58,9 @@ public class ThrowableDisplayer {
       && ((SqoopException)t).getErrorCode() == ClientError.CLIENT_0006) {
       io.out.print("@|red Server has returned exception: |@");
       printThrowable(io, t.getCause());
+    } else if(t.getClass() == MissingPropertyException.class) {
+      io.out.print("@|red Unknown command: |@");
+      io.out.println(t.getMessage());
     } else {
       printThrowable(io, t);
     }

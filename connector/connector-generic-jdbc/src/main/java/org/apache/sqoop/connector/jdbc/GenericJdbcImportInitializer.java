@@ -20,46 +20,60 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
-import org.apache.sqoop.job.etl.MutableContext;
 import org.apache.sqoop.job.etl.Initializer;
-import org.apache.sqoop.job.etl.Options;
+import org.apache.sqoop.utils.ClassUtils;
 
 public class GenericJdbcImportInitializer extends Initializer {
 
-  private MutableContext context;
-  private Options options;
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcImportInitializer.class);
 
   private GenericJdbcExecutor executor;
 
   @Override
-  public void run(MutableContext context, Options options) {
-    this.context = context;
-    this.options = options;
+  public void initialize(MutableMapContext context, Object oConnectionConfig, Object oJobConfig) {
+    ConnectionConfiguration connectionConfig = (ConnectionConfiguration)oConnectionConfig;
+    ImportJobConfiguration jobConfig = (ImportJobConfiguration)oJobConfig;
 
-    configureJdbcProperties();
+    configureJdbcProperties(context, connectionConfig, jobConfig);
+
     try {
-      configurePartitionProperties();
-      configureTableProperties();
+      configurePartitionProperties(context, connectionConfig, jobConfig);
+      configureTableProperties(context, connectionConfig, jobConfig);
 
     } finally {
       executor.close();
     }
   }
 
-  private void configureJdbcProperties() {
-    String driver = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER);
-    String url = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING);
-    String username = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_CONN_USERNAME);
-    String password = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_CONN_PASSWORD);
+  @Override
+  public List<String> getJars(MapContext context, Object connectionConfiguration, Object jobConfiguration) {
+    List<String> jars = new LinkedList<String>();
 
+    ConnectionConfiguration connection = (ConnectionConfiguration) connectionConfiguration;
+    jars.add(ClassUtils.jarForClass(connection.jdbcDriver));
+
+    return jars;
+  }
+
+  private void configureJdbcProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+    String driver = connectionConfig.jdbcDriver;
+    String url = connectionConfig.connectionString;
+    String username = connectionConfig.username;
+    String password = connectionConfig.password;
+
+    // TODO(jarcec): Those checks should be in validator and not here
     if (driver == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
@@ -93,17 +107,15 @@ public class GenericJdbcImportInitializer extends Initializer {
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties() {
+  private void configurePartitionProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     // ----- configure column name -----
 
-    String partitionColumnName = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_PCOL);
+    String partitionColumnName = connectionConfig.partitionColumn;
 
     if (partitionColumnName == null) {
       // if column is not specified by the user,
       // find the primary key of the table (when there is a table).
-      String tableName = options.getOption(
-          GenericJdbcConnectorConstants.INPUT_TBL_NAME);
+      String tableName = connectionConfig.tableName;
       if (tableName != null) {
         partitionColumnName = executor.getPrimaryKey(tableName);
       }
@@ -121,16 +133,13 @@ public class GenericJdbcImportInitializer extends Initializer {
 
     // ----- configure column type, min value, and max value -----
 
-    String minMaxQuery = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_BOUNDARY);
+    String minMaxQuery = connectionConfig.boundaryQuery;
 
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
-      String tableName = options.getOption(
-          GenericJdbcConnectorConstants.INPUT_TBL_NAME);
-      String tableSql = options.getOption(
-          GenericJdbcConnectorConstants.INPUT_TBL_SQL);
+      String tableName = connectionConfig.tableName;
+      String tableSql = connectionConfig.sql;
 
       if (tableName != null && tableSql != null) {
         // when both table name and table sql are specified:
@@ -170,6 +179,8 @@ public class GenericJdbcImportInitializer extends Initializer {
       minMaxQuery = builder.toString();
     }
 
+
+    LOG.debug("Using minMaxQuery: " + minMaxQuery);
     ResultSet rs = executor.executeQuery(minMaxQuery);
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
@@ -196,22 +207,18 @@ public class GenericJdbcImportInitializer extends Initializer {
     }
   }
 
-  private void configureTableProperties() {
+  private void configureTableProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     String dataSql;
     String fieldNames;
     String outputDirectory;
 
-    String tableName = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_NAME);
-    String tableSql = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_SQL);
-    String tableColumns = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_COLUMNS);
+    String tableName = connectionConfig.tableName;
+    String tableSql = connectionConfig.sql;
+    String tableColumns = connectionConfig.columns;
 
-    String datadir = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_DATADIR);
-    String warehouse = options.getOption(
-        GenericJdbcConnectorConstants.INPUT_TBL_WAREHOUSE);
+    //TODO(jarcec): Why is connector concerned with data directory? It should not need it at all!
+    String datadir = connectionConfig.dataDirectory;
+    String warehouse = connectionConfig.warehouse;
     if (warehouse == null) {
       warehouse = GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE;
     } else if (!warehouse.endsWith(GenericJdbcConnectorConstants.FILE_SEPARATOR)) {

@@ -115,6 +115,20 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    +----------------------------+
  * </pre>
  * </p>
+ * <p>
+ * <strong>SQ_SUBMISSION</strong>: List of submissions
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_JOB_SUBMISSION          |
+ *    +----------------------------+
+ *    | SQS_ID: BIGINT PK          |
+ *    | SQS_JOB: BIGINT            | FK SQ_JOB(SQB_ID)
+ *    | SQS_STATUS: VARCHAR(20)    |
+ *    | SQS_DATE: TIMESTAMP        |
+ *    | SQS_EXTERNAL_ID:VARCHAR(50)|
+ *    +----------------------------+
+ * </pre>
+ * </p>
  */
 public final class DerbySchemaQuery {
 
@@ -190,6 +204,18 @@ public final class DerbySchemaQuery {
       + COLUMN_SQBI_JOB + ") REFERENCES " + TABLE_SQ_JOB + " ("
       + COLUMN_SQB_ID + "), FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") REFERENCES "
       + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
+
+  // DDL: Create table SQ_SUBMISSION
+  public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
+    "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
+    + COLUMN_SQS_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+    + COLUMN_SQS_JOB + " BIGINT, "
+    + COLUMN_SQS_STATUS + " VARCHAR(20), "
+    + COLUMN_SQS_DATE + " TIMESTAMP,"
+    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
+    + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
+    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") REFERENCES " + TABLE_SQ_JOB + "("
+    +   COLUMN_SQB_ID + "))";
 
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =
@@ -349,6 +375,46 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_NAME + ", " + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE
     + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON "
     + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
+
+  // DML: Insert new submission
+  public static final String STMT_INSERT_SUBMISSION =
+    "INSERT INTO " + TABLE_SQ_SUBMISSION + "("
+    + COLUMN_SQS_JOB + ", "
+    + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_DATE + ", "
+    + COLUMN_SQS_EXTERNAL_ID + ") "
+    + " VALUES(?, ?, ?, ?)";
+
+  // DML: Update existing submission
+  public static final String STMT_UPDATE_SUBMISSION =
+    "UPDATE " + TABLE_SQ_SUBMISSION + " SET "
+    + COLUMN_SQS_JOB + " = ?, "
+    + COLUMN_SQS_STATUS + " = ?, "
+    + COLUMN_SQS_DATE + " = ?, "
+    + COLUMN_SQS_EXTERNAL_ID + " = ? "
+    + "WHERE " + COLUMN_SQS_ID + " = ?";
+
+  // DML: Check if given submission exists
+  public static final String STMT_SELECT_SUBMISSION_CHECK =
+    "SELECT count(*) FROM " + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_ID
+      + " = ?";
+
+  // DML: Purge old entries
+  public static final String STMT_PURGE_SUBMISSIONS =
+    "DELETE FROM " + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_DATE + " < ?";
+
+  // DML: Get unfinished
+  public static final String STMT_SELECT_SUBMISSION_UNFINISHED =
+    "SELECT " + COLUMN_SQS_ID + ", " + COLUMN_SQS_JOB + ", " + COLUMN_SQS_DATE
+    + ", " + COLUMN_SQS_STATUS + ", " + COLUMN_SQS_EXTERNAL_ID + " FROM "
+    + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_STATUS + " = ?";
+
+  // DML: Last submission for a job
+  public static final String STMT_SELECT_SUBMISSION_LAST_FOR_JOB =
+    "SELECT " + COLUMN_SQS_ID + ", " + COLUMN_SQS_JOB + ", " + COLUMN_SQS_DATE
+      + ", " + COLUMN_SQS_STATUS + ", " + COLUMN_SQS_EXTERNAL_ID + " FROM "
+      + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_JOB + " = ? ORDER BY "
+      + COLUMN_SQS_DATE + " DESC";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

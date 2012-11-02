@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.io.DataWriter;
 
 /**
@@ -25,7 +26,10 @@ import org.apache.sqoop.job.io.DataWriter;
  */
 public abstract class Extractor {
 
-  public abstract void run(Context context,
-      Partition partition, DataWriter writer);
+  public abstract void run(ImmutableContext context,
+                           Object connectionConfiguration,
+                           Object jobConfiguration,
+                           Partition partition,
+                           DataWriter writer);
 
 }

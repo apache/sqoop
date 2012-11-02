@@ -21,16 +21,19 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.etl.Context;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.DataWriter;
 
 public class GenericJdbcImportExtractor extends Extractor {
 
+ public static final Logger LOG = Logger.getLogger(GenericJdbcImportExtractor.class);
+
   @Override
-  public void run(Context context, Partition partition, DataWriter writer) {
+  public void run(ImmutableContext context, Object connectionC, Object jobC, Partition partition, DataWriter writer) {
     String driver = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
     String url = context.getString(
@@ -48,6 +51,7 @@ public class GenericJdbcImportExtractor extends Extractor {
         ((GenericJdbcImportPartition)partition).getConditions();
     query = query.replace(
         GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
+    LOG.debug("Using query: " + query);
     ResultSet resultSet = executor.executeQuery(query);
 
     try {

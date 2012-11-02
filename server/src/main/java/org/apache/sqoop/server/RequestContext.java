@@ -85,6 +85,13 @@ public class RequestContext {
   }
 
   /**
+   * Return all elements in the url as an array
+   */
+  public String[] getUrlElements() {
+    return getRequest().getRequestURI().split("/");
+  }
+
+  /**
    * Get locale specified in accept-language HTTP header.
    *
    * @return First specified locale

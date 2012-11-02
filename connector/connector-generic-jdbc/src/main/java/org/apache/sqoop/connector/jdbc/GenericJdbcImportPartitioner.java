@@ -21,9 +21,10 @@ import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.Constants;
-import org.apache.sqoop.job.etl.Context;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 
@@ -36,9 +37,8 @@ public class GenericJdbcImportPartitioner extends Partitioner {
   private String partitionMaxValue;
 
   @Override
-  public List<Partition> run(Context context) {
-    numberPartitions = Integer.parseInt(context.getString(
-        Constants.JOB_ETL_NUMBER_PARTITIONS));
+  public List<Partition> getPartitions(ImmutableContext context, Object connectionC, Object jobC) {
+    numberPartitions = context.getInt(Constants.JOB_ETL_NUMBER_PARTITIONS, 10);
     partitionColumnName = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME);
     partitionColumnType = Integer.parseInt(context.getString(

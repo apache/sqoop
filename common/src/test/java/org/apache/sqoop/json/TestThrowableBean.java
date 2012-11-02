@@ -43,7 +43,9 @@ public class TestThrowableBean extends TestCase {
     Throwable retrieved = retrievedBean.getThrowable();
 
     assertEquals("A", retrieved.getMessage());
+    assertEquals(RuntimeException.class, retrieved.getClass());
     assertEquals("B", retrieved.getCause().getMessage());
+    assertEquals(Exception.class, retrieved.getCause().getClass());
     assertNull(retrieved.getCause().getCause());
   }
 }

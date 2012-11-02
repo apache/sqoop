@@ -25,32 +25,27 @@ package org.apache.sqoop.job.etl;
  * -> Loader
  * -> Destroyer
  */
-public class Exporter {
+public class Exporter extends CallbackBase {
 
-  private Class<? extends Initializer> initializer;
   private Class<? extends Loader> loader;
-  private Class<? extends Destroyer> destroyer;
 
   public Exporter(
       Class<? extends Initializer> initializer,
       Class<? extends Loader> loader,
       Class<? extends Destroyer> destroyer
       ) {
-    this.initializer = initializer;
+    super(initializer, destroyer);
     this.loader = loader;
-    this.destroyer = destroyer;
-  }
-
-  public Class<? extends Initializer> getInitializer() {
-    return initializer;
   }
 
   public Class<? extends Loader> getLoader() {
     return loader;
   }
 
-  public Class<? extends Destroyer> getDestroyer() {
-    return destroyer;
+  @Override
+  public String toString() {
+    return "Exporter{" + super.toString() +
+      ", loader=" + loader +
+      '}';
   }
-
 }

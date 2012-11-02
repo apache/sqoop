@@ -17,14 +17,13 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.job.etl.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.job.etl.Initializer;
-import org.apache.sqoop.job.etl.Options;
 
 public class GenericJdbcExportInitializer extends Initializer {
 
   @Override
-  public void run(MutableContext context, Options options) {
+  public void initialize(MutableMapContext context, Object connectionConfiguration, Object jobConfiguration) {
     // TODO Auto-generated method stub
   }
 

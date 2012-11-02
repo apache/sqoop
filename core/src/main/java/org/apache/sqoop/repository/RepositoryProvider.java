@@ -17,11 +17,11 @@
  */
 package org.apache.sqoop.repository;
 
-import org.apache.sqoop.core.Context;
+import org.apache.sqoop.common.MapContext;
 
 public interface RepositoryProvider {
 
-  void initialize(Context context);
+  void initialize(MapContext context);
 
   void destroy();
 

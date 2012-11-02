@@ -30,7 +30,7 @@ public final class Environment
   private static String serverPort;
   private static String serverWebapp;
 
-  private static final String HOST_DEFAULT = "localhost";
+  private static final String HOST_DEFAULT = "vm-sqoop2";
   private static final String PORT_DEFAULT = "8080";
   private static final String WEBAPP_DEFAULT = "sqoop";
 

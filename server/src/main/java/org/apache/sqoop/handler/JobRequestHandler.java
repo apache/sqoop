@@ -33,7 +33,7 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
@@ -159,10 +159,10 @@ public class JobRequestHandler implements RequestHandler {
     Validator frameworkValidator = FrameworkManager.getValidator();
 
     // We need translate forms to configuration objects
-    Object connectorConfig = ClassLoadingUtils.instantiate(
-      connector.getConnectionConfigurationClass());
-    Object frameworkConfig = ClassLoadingUtils.instantiate(
-      FrameworkManager.getConnectionConfigurationClass());
+    Object connectorConfig = ClassUtils.instantiate(
+      connector.getJobConfigurationClass(job.getType()));
+    Object frameworkConfig = ClassUtils.instantiate(
+      FrameworkManager.getJobConfigurationClass(job.getType()));
 
     FormUtils.fillValues(job.getConnectorPart().getForms(), connectorConfig);
     FormUtils.fillValues(job.getFrameworkPart().getForms(), frameworkConfig);

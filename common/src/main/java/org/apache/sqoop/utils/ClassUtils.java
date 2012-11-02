@@ -22,10 +22,19 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-public final class ClassLoadingUtils {
+public final class ClassUtils {
 
-  private static final Logger LOG = Logger.getLogger(ClassLoadingUtils.class);
+  private static final Logger LOG = Logger.getLogger(ClassUtils.class);
 
+  /**
+   * Load class by given name and return corresponding Class object.
+   *
+   * This method will return null in case that the class is not found, no
+   * exception will be rised.
+   *
+   * @param className Name of class
+   * @return Class instance or NULL
+   */
   public static Class<?> loadClass(String className) {
     Class<?> klass = null;
     try {
@@ -49,10 +58,30 @@ public final class ClassLoadingUtils {
     return klass;
   }
 
+  /**
+   * Create instance of given class and given parameters.
+   *
+   * Please note that due to inherited limitations from Java languge, this
+   * method can't handle primitive types and NULL values.
+   *
+   * @param className Class name
+   * @param args Objects that should be passed as constructor arguments.
+   * @return Instance of new class or NULL in case of any error
+   */
   public static Object instantiate(String className, Object ... args) {
     return instantiate(loadClass(className), args);
   }
 
+  /**
+   * Create instance of given class and given parameters.
+   *
+   * Please note that due to inherited limitations from Java languge, this
+   * method can't handle primitive types and NULL values.
+   *
+   * @param klass Class object
+   * @param args Objects that should be passed as constructor arguments.
+   * @return Instance of new class or NULL in case of any error
+   */
   public static Object instantiate(Class klass, Object ... args) {
     if(klass == null) {
       return null;
@@ -80,7 +109,29 @@ public final class ClassLoadingUtils {
     return null;
   }
 
-  private ClassLoadingUtils() {
+  /**
+   * Return jar path for given class.
+   *
+   * @param className Class name
+   * @return Path on local filesystem to jar where given jar is present
+   */
+  public static String jarForClass(String className) {
+    Class klass = loadClass(className);
+    return klass.getProtectionDomain().getCodeSource().getLocation().toString();
+  }
+
+
+  /**
+   * Return jar path for given class.
+   *
+   * @param klass Class object
+   * @return Path on local filesystem to jar where given jar is present
+   */
+  public static String jarForClass(Class klass) {
+    return klass.getProtectionDomain().getCodeSource().getLocation().toString();
+  }
+
+  private ClassUtils() {
     // Disable explicit object creation
   }
 }

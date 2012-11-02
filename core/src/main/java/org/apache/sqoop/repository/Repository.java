@@ -21,7 +21,9 @@ import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MSubmission;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -35,30 +37,25 @@ public interface Repository {
   RepositoryTransaction getTransaction();
 
   /**
-   * Registers the given connector in the repository. If the connector was
-   * already registered, its associated metadata is returned from the
-   * repository.
-   *
-   * Method will set persistent ID of given MConnector instance in case of a
-   * success.
+   * Registers given connector in the repository and return registered
+   * variant. This method might return an exception in case that metadata for
+   * given connector are already registered with different structure.
    *
    * @param mConnector the connector metadata to be registered
-   * @return <tt>null</tt> if the connector was successfully registered or
-   * a instance of previously registered metadata with the same connector
-   * unique name.
+   * @return Registered connector structure
    */
   MConnector registerConnector(MConnector mConnector);
 
+
   /**
-   * Registers framework metadata in the repository. No more than one set of
-   * framework metadata structure is allowed.
+   * Registers given framework in the repository and return registered
+   * variant. This method might return an exception in case that metadata for
+   * given framework are already registered with different structure.
    *
-   * Method will set persistent ID of given MFramework instance in case of a
-   * success.
-   *
-   * @param mFramework Framework data that should be registered.
+   * @param mFramework framework metadata to be registered
+   * @return Registered connector structure
    */
-  void registerFramework(MFramework mFramework);
+  MFramework registerFramework(MFramework mFramework);
 
   /**
    * Save given connection to repository. This connection must not be already
@@ -136,4 +133,40 @@ public interface Repository {
    * @return List of all jobs in the repository
    */
   List<MJob> findJobs();
+
+  /**
+   * Create new submission record in repository.
+   *
+   * @param submission Submission object that should be serialized to repository
+   */
+  void createSubmission(MSubmission submission);
+
+  /**
+   * Update already existing submission record in repository.
+   *
+   * @param submission Submission object that should be updated
+   */
+  void updateSubmission(MSubmission submission);
+
+  /**
+   * Remove submissions older then given date from repository.
+   *
+   * @param threshold Threshold date
+   */
+  void purgeSubmissions(Date threshold);
+
+  /**
+   * Return all unfinished submissions as far as repository is concerned.
+   *
+   * @return List of unfinished submissions
+   */
+  List<MSubmission> findSubmissionsUnfinished();
+
+  /**
+   * Find last submission for given jobId.
+   *
+   * @param jobId Job id
+   * @return Most recent submission
+   */
+  MSubmission findSubmissionLastForJob(long jobId);
 }

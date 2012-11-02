@@ -21,14 +21,17 @@ import org.apache.sqoop.client.request.ConnectionRequest;
 import org.apache.sqoop.client.request.ConnectorRequest;
 import org.apache.sqoop.client.request.FrameworkRequest;
 import org.apache.sqoop.client.request.JobRequest;
+import org.apache.sqoop.client.request.SubmissionRequest;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 
@@ -41,6 +44,7 @@ public final class RequestCache {
   private static ConnectorRequest connectorRequest;
   private static ConnectionRequest connectionRequest;
   private static JobRequest jobRequest;
+  private static SubmissionRequest submissionRequest;
 
   public static FrameworkRequest getFrameworkRequest() {
     if (frameworkRequest == null) {
@@ -72,6 +76,14 @@ public final class RequestCache {
     }
 
     return jobRequest;
+  }
+
+  public static SubmissionRequest getSubmissionRequest() {
+    if (submissionRequest == null) {
+      submissionRequest = new SubmissionRequest();
+    }
+
+    return submissionRequest;
   }
 
   public static FrameworkBean readFramework() {
@@ -191,6 +203,24 @@ public final class RequestCache {
 
   public static void deleteJob(String jid) {
     getJobRequest().delete(Environment.getServerUrl(), jid);
+  }
+
+  public static MSubmission readSubmission(String jid) {
+    return getSubmissionRequest()
+      .read(Environment.getServerUrl(), jid)
+      .getSubmission();
+  }
+
+  public static MSubmission createSubmission(String jid) {
+    return getSubmissionRequest()
+      .create(Environment.getServerUrl(), jid)
+      .getSubmission();
+  }
+
+  public static MSubmission deleteSubmission(String jid) {
+    return getSubmissionRequest()
+      .delete(Environment.getServerUrl(), jid)
+      .getSubmission();
   }
 
   private RequestCache() {

@@ -157,7 +157,7 @@ public class GenericJdbcExecutor {
   }
 
   public String delimitIdentifier(String name) {
-    return "\"" + name + "\"";
+    return name;
   }
 
   public void close() {

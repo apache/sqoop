@@ -15,29 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
-
-import org.apache.hadoop.conf.Configuration;
+package org.apache.sqoop.common;
 
 /**
- * An immutable context used in the ETL framework
- * for accessing configuration values.
+ * Mutable addition to immutable context.
  */
-public class EtlContext implements Context {
+public interface MutableContext extends ImmutableContext {
 
-  protected Configuration conf;
-
-  public EtlContext(Configuration conf) {
-    this.conf = conf;
-  }
-
-  protected Configuration getConfiguration() {
-    return conf;
-  }
-
-  @Override
-  public String getString(String key) {
-    return conf.get(key);
-  }
+  /**
+   * Set string value for given key.
+   *
+   * @param key Key
+   * @param value New value
+   */
+  public void setString(String key, String value);
 
 }

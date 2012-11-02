@@ -57,7 +57,7 @@ public final class ConnectorManager {
     return connectors;
   }
 
-  public static Set<Long> getConnectoIds() {
+  public static Set<Long> getConnectorIds() {
     return nameMap.keySet();
   }
 
@@ -157,14 +157,11 @@ public final class ConnectorManager {
         MConnector connectorMetadata = handler.getMetadata();
         MConnector registeredMetadata =
             repository.registerConnector(connectorMetadata);
-        if (registeredMetadata != null) {
-          // Verify that the connector metadata is the same
-          if (!registeredMetadata.equals(connectorMetadata)) {
-            throw new SqoopException(ConnectorError.CONN_0009,
-                "To register: " + connectorMetadata + "; already registered: "
-                + registeredMetadata);
-          }
-        }
+
+        // Set registered metadata instead of connector metadata as they will
+        // have filled persistent ids. We should be confident at this point that
+        // there are no differences between those two structures.
+        handler.setMetadata(registeredMetadata);
 
         String connectorName = handler.getUniqueName();
         if (!handler.getMetadata().hasPersistenceId()) {
@@ -185,7 +182,6 @@ public final class ConnectorManager {
       }
     }
   }
-
 
   public static synchronized void destroy() {
     // FIXME

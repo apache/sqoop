@@ -17,20 +17,47 @@
  */
 package org.apache.sqoop.framework;
 
+import org.apache.sqoop.core.ConfigurationConstants;
+
 /**
  * Constants that are used in framework module.
  */
 public final class FrameworkConstants {
 
-  public static final String INPUT_CONN_MAX_SIMULTANEOUS_CONNECTIONS =
-    "inp-conn-max-connections";
-  public static final String INPUT_CONN_MAX_OUTPUT_FORMAT=
-    "inp-conn-output-format";
+  // Sqoop configuration constants
+
+  public static final String PREFIX_SUBMISSION_CONFIG =
+    ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "submission.";
+
+  public static final String SYSCFG_SUBMISSION_ENGINE =
+    PREFIX_SUBMISSION_CONFIG + "engine";
+
+  public static final String PREFIX_SUBMISSION_ENGINE_CONFIG =
+    SYSCFG_SUBMISSION_ENGINE + ".";
+
+  public static final String PREFIX_SUBMISSION_PURGE_CONFIG =
+    PREFIX_SUBMISSION_CONFIG + "purge.";
+
+  public static final String SYSCFG_SUBMISSION_PURGE_THRESHOLD =
+    PREFIX_SUBMISSION_PURGE_CONFIG + "threshold";
+
+  public static final String SYSCFG_SUBMISSION_PURGE_SLEEP =
+    PREFIX_SUBMISSION_PURGE_CONFIG + "sleep";
+
+  public static final String PREFIX_SUBMISSION_UPDATE_CONFIG =
+    PREFIX_SUBMISSION_CONFIG + "update.";
+
+  public static final String SYSCFG_SUBMISSION_UPDATE_SLEEP =
+    PREFIX_SUBMISSION_UPDATE_CONFIG + "sleep";
+
+  // Connection/Job Configuration forms
 
   public static final String FORM_SECURITY =
     "form-security";
   public static final String FORM_OUTPUT =
     "form-output";
+
+  // Bundle names
 
   public static final String RESOURCE_BUNDLE_NAME = "framework-resources";
 

@@ -22,24 +22,24 @@ import junit.framework.TestCase;
 /**
  *
  */
-public class TestClassLoadingUtils extends TestCase {
+public class TestClassUtils extends TestCase {
 
   public void testLoadClass() {
-    assertNull(ClassLoadingUtils.loadClass("A"));
-    assertEquals(A.class, ClassLoadingUtils.loadClass(A.class.getName()));
+    assertNull(ClassUtils.loadClass("A"));
+    assertEquals(A.class, ClassUtils.loadClass(A.class.getName()));
   }
 
   public void testInstantiateNull() {
-    assertNull(ClassLoadingUtils.instantiate((Class)null));
+    assertNull(ClassUtils.instantiate((Class) null));
   }
 
   public void testInstantiate() {
-    A a = (A) ClassLoadingUtils.instantiate(A.class, "a");
+    A a = (A) ClassUtils.instantiate(A.class, "a");
     assertNotNull(a);
     assertEquals(1, a.num);
     assertEquals("a", a.a);
 
-    A b = (A) ClassLoadingUtils.instantiate(A.class, "b", 3, 5);
+    A b = (A) ClassUtils.instantiate(A.class, "b", 3, 5);
     assertNotNull(b);
     assertEquals(3, b.num);
     assertEquals("b", b.a);

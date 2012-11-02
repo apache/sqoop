@@ -71,6 +71,7 @@ public final class SqoopShell
     shell.register(new DeleteCommand(shell));
     shell.register(new UpdateCommand(shell));
     shell.register(new CloneCommand(shell));
+    shell.register(new SubmissionCommand(shell));
 
     if (args.length == 0) {
       // Interactive mode:

@@ -27,13 +27,13 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataReader;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 public class HdfsSequenceImportLoader extends Loader {
 
@@ -46,17 +46,18 @@ public class HdfsSequenceImportLoader extends Loader {
   }
 
   @Override
-  public void run(Context context, DataReader reader) {
+  public void run(ImmutableContext context, DataReader reader) {
     reader.setFieldDelimiter(fieldDelimiter);
 
-    Configuration conf = ((EtlContext)context).getConfiguration();
+    Configuration conf = new Configuration();
+//    Configuration conf = ((EtlContext)context).getConfiguration();
     String filename =
         context.getString(JobConstants.JOB_MR_OUTPUT_FILE);
     String codecname = context.getString(JobConstants.JOB_MR_OUTPUT_CODEC);
 
     CompressionCodec codec = null;
     if (codecname != null) {
-      Class<?> clz = ClassLoadingUtils.loadClass(codecname);
+      Class<?> clz = ClassUtils.loadClass(codecname);
       if (clz == null) {
         throw new SqoopException(CoreError.CORE_0009, codecname);
       }

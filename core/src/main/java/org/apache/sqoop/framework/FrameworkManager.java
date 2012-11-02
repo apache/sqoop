@@ -18,18 +18,37 @@
 package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.etl.CallbackBase;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.HdfsTextImportLoader;
+import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.submission.counter.Counters;
+import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Validator;
+import org.json.simple.JSONValue;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -41,13 +60,41 @@ import java.util.ResourceBundle;
  * All Sqoop internals (job execution engine, metadata) should be handled
  * within this manager.
  *
+ * Current implementation of entire submission engine is using repository
+ * for keep of current track, so that server might be restarted at any time
+ * without any affect on running jobs. This approach however might not be the
+ * fastest way and we might want to introduce internal structures with running
+ * jobs in case that this approach will be too slow.
  */
 public final class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
-  private static final MFramework mFramework;
+  private static final long DEFAULT_PURGE_THRESHOLD = 24*60*60*1000;
+
+  private static final long DEFAULT_PURGE_SLEEP = 24*60*60*1000;
+
+  private static final long DEFAULT_UPDATE_SLEEP = 60*5*1000;
+
+  private static MFramework mFramework;
+
   private static final Validator validator;
+
+  private static SubmissionEngine submissionEngine;
+
+  private static PurgeThread purgeThread = null;
+
+  private static UpdateThread updateThread = null;
+
+  private static boolean running = true;
+
+  private static long purgeThreshold;
+
+  private static long purgeSleep;
+
+  private static long updateSleep;
+
+  private static final Object submissionMutex = new Object();
 
   static {
 
@@ -66,13 +113,86 @@ public final class FrameworkManager {
   }
 
   public static synchronized void initialize() {
-    LOG.trace("Begin connector manager initialization");
+    LOG.trace("Begin submission engine manager initialization");
+    MapContext context = SqoopConfiguration.getContext();
 
-    // Register framework metadata
-    RepositoryManager.getRepository().registerFramework(mFramework);
-    if (!mFramework.hasPersistenceId()) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0000);
+    // Register framework metadata in repository
+    mFramework = RepositoryManager.getRepository().registerFramework(mFramework);
+
+    // Let's load configured submission engine
+    String submissionEngineClassName =
+      context.getString(FrameworkConstants.SYSCFG_SUBMISSION_ENGINE);
+
+    Class<?> submissionEngineClass =
+        ClassUtils.loadClass(submissionEngineClassName);
+
+    if (submissionEngineClass == null) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0001,
+          submissionEngineClassName);
     }
+
+    try {
+      submissionEngine = (SubmissionEngine)submissionEngineClass.newInstance();
+    } catch (Exception ex) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0001,
+          submissionEngineClassName, ex);
+    }
+
+    submissionEngine.initialize(context, FrameworkConstants.PREFIX_SUBMISSION_ENGINE_CONFIG);
+
+    // Set up worker threads
+    purgeThreshold = context.getLong(
+      FrameworkConstants.SYSCFG_SUBMISSION_PURGE_THRESHOLD,
+      DEFAULT_PURGE_THRESHOLD
+    );
+    purgeSleep = context.getLong(
+      FrameworkConstants.SYSCFG_SUBMISSION_PURGE_SLEEP,
+      DEFAULT_PURGE_SLEEP
+    );
+
+    purgeThread = new PurgeThread();
+    purgeThread.start();
+
+    updateSleep = context.getLong(
+      FrameworkConstants.SYSCFG_SUBMISSION_UPDATE_SLEEP,
+      DEFAULT_UPDATE_SLEEP
+    );
+
+    updateThread = new UpdateThread();
+    updateThread.start();
+
+
+    LOG.info("Submission manager initialized: OK");
+  }
+
+  public static synchronized void destroy() {
+    LOG.trace("Begin submission engine manager destroy");
+
+    running = false;
+
+    try {
+      purgeThread.interrupt();
+      purgeThread.join();
+    } catch (InterruptedException e) {
+      //TODO(jarcec): Do I want to wait until it actually finish here?
+      LOG.error("Interrupted joining purgeThread");
+    }
+
+    try {
+      updateThread.interrupt();
+      updateThread.join();
+    } catch (InterruptedException e) {
+      //TODO(jarcec): Do I want to wait until it actually finish here?
+      LOG.error("Interrupted joining updateThread");
+    }
+
+    if(submissionEngine != null) {
+      submissionEngine.destroy();
+    }
+  }
+
+  public static Validator getValidator() {
+    return validator;
   }
 
   public static Class getConnectionConfigurationClass() {
@@ -94,17 +214,275 @@ public final class FrameworkManager {
     return mFramework;
   }
 
-  public static synchronized void destroy() {
-    LOG.trace("Begin framework manager destroy");
-  }
-
-  public static Validator getValidator() {
-    return validator;
-  }
-
   public static ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(
         FrameworkConstants.RESOURCE_BUNDLE_NAME, locale);
+  }
+
+  public static MSubmission submit(long jobId) {
+    Repository repository = RepositoryManager.getRepository();
+
+    MJob job = repository.findJob(jobId);
+    if(job == null) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0004,
+        "Unknown job id " + jobId);
+    }
+    MConnection connection = repository.findConnection(job.getConnectionId());
+    SqoopConnector connector =
+      ConnectorManager.getConnector(job.getConnectorId());
+
+    // Transform forms to connector specific classes
+    Object connectorConnection = ClassUtils.instantiate(
+      connector.getConnectionConfigurationClass());
+    FormUtils.fillValues(connection.getConnectorPart().getForms(),
+      connectorConnection);
+
+    Object connectorJob = ClassUtils.instantiate(
+      connector.getJobConfigurationClass(job.getType()));
+    FormUtils.fillValues(job.getConnectorPart().getForms(), connectorJob);
+
+    // Transform framework specific forms
+    Object frameworkConnection = ClassUtils.instantiate(
+      getConnectionConfigurationClass());
+    FormUtils.fillValues(connection.getFrameworkPart().getForms(),
+      frameworkConnection);
+
+    Object frameworkJob = ClassUtils.instantiate(
+      getJobConfigurationClass(job.getType()));
+    FormUtils.fillValues(job.getFrameworkPart().getForms(), frameworkJob);
+
+    // Create request object
+    MSubmission summary = new MSubmission(jobId);
+    SubmissionRequest request = new SubmissionRequest(summary, connector,
+      connectorConnection, connectorJob, frameworkConnection, frameworkJob);
+    request.setJobName(job.getName());
+
+    // Let's register all important jars
+    // sqoop-common
+    request.addJar(ClassUtils.jarForClass(MapContext.class));
+    // sqoop-core
+    request.addJar(ClassUtils.jarForClass(FrameworkManager.class));
+    // sqoop-spi
+    request.addJar(ClassUtils.jarForClass(SqoopConnector.class));
+    // particular connector in use
+    request.addJar(ClassUtils.jarForClass(connector.getClass()));
+
+    // Extra libraries that Sqoop code requires
+    request.addJar(ClassUtils.jarForClass(JSONValue.class));
+
+    switch (job.getType()) {
+      case IMPORT:
+        request.setConnectorCallbacks(connector.getImporter());
+        break;
+      case EXPORT:
+        request.setConnectorCallbacks(connector.getExporter());
+        break;
+      default:
+        throw  new SqoopException(FrameworkError.FRAMEWORK_0005,
+          "Unsupported job type " + job.getType().name());
+    }
+
+    LOG.debug("Using callbacks: " + request.getConnectorCallbacks());
+
+    // Initialize submission from connector perspective
+    CallbackBase baseCallbacks = request.getConnectorCallbacks();
+
+    Class<? extends Initializer> initializerClass = baseCallbacks.getInitializer();
+    Initializer initializer = (Initializer) ClassUtils.instantiate(initializerClass);
+
+    if(initializer == null) {
+      throw  new SqoopException(FrameworkError.FRAMEWORK_0006,
+        "Can't create initializer instance: " + initializerClass.getName());
+    }
+
+    // Initialize submission from connector perspective
+    initializer.initialize(request.getConnectorContext(),
+      request.getConfigConnectorConnection(),
+      request.getConfigConnectorJob());
+
+    // Add job specific jars to
+    request.addJars(initializer.getJars(request.getConnectorContext(),
+      request.getConfigConnectorConnection(),
+      request.getConfigConnectorJob()));
+
+    // Bootstrap job from framework perspective
+    switch (job.getType()) {
+      case IMPORT:
+        bootstrapImportSubmission(request);
+        break;
+      case EXPORT:
+        // TODO(jarcec): Implement export path
+        break;
+      default:
+        throw  new SqoopException(FrameworkError.FRAMEWORK_0005,
+          "Unsupported job type " + job.getType().name());
+    }
+
+    // Make sure that this job id is not currently running and submit the job
+    // only if it's not.
+    synchronized (submissionMutex) {
+      MSubmission lastSubmission = repository.findSubmissionLastForJob(jobId);
+      if(lastSubmission != null && lastSubmission.getStatus().isRunning()) {
+        throw new SqoopException(FrameworkError.FRAMEWORK_0002,
+          "Job with id " + jobId);
+      }
+
+      // TODO(jarcec): We might need to catch all exceptions here to ensure
+      // that Destroyer will be executed in all cases.
+      boolean submitted = submissionEngine.submit(request);
+      if(!submitted) {
+        destroySubmission(request);
+        summary.setStatus(SubmissionStatus.FAILURE_ON_SUBMIT);
+      }
+
+      repository.createSubmission(summary);
+    }
+
+    // Return job status most recent
+    return summary;
+  }
+
+  private static void bootstrapImportSubmission(SubmissionRequest request) {
+    Importer importer = (Importer)request.getConnectorCallbacks();
+    ImportJobConfiguration jobConfiguration = (ImportJobConfiguration) request.getConfigFrameworkJob();
+
+    // Initialize the map-reduce part (all sort of required classes, ...)
+    request.setOutputDirectory(jobConfiguration.outputDirectory);
+
+    // Defaults for classes are mostly fine for now.
+
+
+    // Set up framework context
+    MutableMapContext context = request.getFrameworkContext();
+    context.setString(JobConstants.JOB_ETL_PARTITIONER, importer.getPartitioner().getName());
+    context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
+    context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
+    context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+  }
+
+  /**
+   * Callback that will be called only if we failed to submit the job to the
+   * remote cluster.
+   */
+  private static void destroySubmission(SubmissionRequest request) {
+    CallbackBase baseCallbacks = request.getConnectorCallbacks();
+
+    Class<? extends Destroyer> destroyerClass = baseCallbacks.getDestroyer();
+    Destroyer destroyer = (Destroyer) ClassUtils.instantiate(destroyerClass);
+
+    if(destroyer == null) {
+      throw  new SqoopException(FrameworkError.FRAMEWORK_0006,
+        "Can't create destroyer instance: " + destroyerClass.getName());
+    }
+
+    // Initialize submission from connector perspective
+    destroyer.run(request.getConnectorContext());
+  }
+
+  public static MSubmission stop(long jobId) {
+    Repository repository = RepositoryManager.getRepository();
+    MSubmission submission = repository.findSubmissionLastForJob(jobId);
+
+    if(!submission.getStatus().isRunning()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0003,
+        "Job with id " + jobId + " is not running");
+    }
+
+    String externalId = submission.getExternalId();
+    submissionEngine.stop(externalId);
+
+    // Fetch new information to verify that the stop command has actually worked
+    update(submission);
+
+    // Return updated structure
+    return submission;
+  }
+
+  public static MSubmission status(long jobId) {
+    Repository repository = RepositoryManager.getRepository();
+    MSubmission submission = repository.findSubmissionLastForJob(jobId);
+
+    if(submission == null) {
+      return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
+    }
+
+    update(submission);
+
+    return submission;
+  }
+
+  private static void update(MSubmission submission) {
+    double progress  = -1;
+    Counters counters = null;
+    String externalId = submission.getExternalId();
+    SubmissionStatus newStatus = submissionEngine.status(externalId);
+    String externalLink = submissionEngine.externalLink(externalId);
+
+    if(newStatus.isRunning()) {
+      progress = submissionEngine.progress(externalId);
+    } else {
+      counters = submissionEngine.stats(externalId);
+    }
+
+    submission.setStatus(newStatus);
+    submission.setProgress(progress);
+    submission.setCounters(counters);
+    submission.setExternalLink(externalLink);
+
+    RepositoryManager.getRepository().updateSubmission(submission);
+  }
+
+  private static class PurgeThread extends Thread {
+    public PurgeThread() {
+      super("PurgeThread");
+    }
+
+    public void run() {
+      LOG.info("Starting submission manager purge thread");
+
+      while(running) {
+        try {
+          LOG.info("Purging old submissions");
+          Date threshold = new Date((new Date()).getTime() - purgeThreshold);
+          RepositoryManager.getRepository().purgeSubmissions(threshold);
+          Thread.sleep(purgeSleep);
+        } catch (InterruptedException e) {
+          LOG.debug("Purge thread interrupted", e);
+        }
+      }
+
+      LOG.info("Ending submission manager purge thread");
+    }
+  }
+
+  private static class UpdateThread extends Thread {
+     public UpdateThread() {
+      super("UpdateThread");
+    }
+
+    public void run() {
+      LOG.info("Starting submission manager update thread");
+
+      while(running) {
+        try {
+          LOG.debug("Updating running submissions");
+
+          // Let's get all running submissions from repository to check them out
+          List<MSubmission> unfinishedSubmissions =
+            RepositoryManager.getRepository().findSubmissionsUnfinished();
+
+          for(MSubmission submission : unfinishedSubmissions) {
+            update(submission);
+          }
+
+          Thread.sleep(updateSleep);
+        } catch (InterruptedException e) {
+          LOG.debug("Purge thread interrupted", e);
+        }
+      }
+
+      LOG.info("Ending submission manager update thread");
+    }
   }
 
   private FrameworkManager() {

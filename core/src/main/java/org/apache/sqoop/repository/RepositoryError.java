@@ -106,6 +106,15 @@ public enum RepositoryError implements ErrorCode {
   /** Job ID is in use **/
   JDBCREPO_0022("Given job id is in use"),
 
+  /** Cannot create submission that was already created **/
+  JDBCREPO_0023("Cannot create submission that was already created"),
+
+  /** Submission that we're trying to update is not yet created **/
+  JDBCREPO_0024("Cannot update submission that was not yet created"),
+
+  /** Invalid submission id **/
+  JDBCREPO_0025("Given submission id is invalid"),
+
   ;
 
   private final String message;

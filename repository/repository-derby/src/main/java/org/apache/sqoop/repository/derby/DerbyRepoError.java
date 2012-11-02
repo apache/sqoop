@@ -146,6 +146,21 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't verify if connection is referenced from somewhere **/
   DERBYREPO_0032("Unable to check if connection is in use"),
 
+  /** We're unable to check if given submission already exists */
+  DERBYREPO_0033("Unable to check if given submission exists"),
+
+  /** We cant create new submission in metastore **/
+  DERBYREPO_0034("Unable to create new submission data"),
+
+  /** We can't update submission in metastore **/
+  DERBYREPO_0035("Unable to update submission metadata in repository"),
+
+  /** Can't purge old submissions **/
+  DERBYREPO_0036("Unable to purge old submissions"),
+
+  /** Can't retrieve unfinished submissions **/
+  DERBYREPO_0037("Can't retrieve unfinished submissions"),
+
   ;
 
   private final String message;

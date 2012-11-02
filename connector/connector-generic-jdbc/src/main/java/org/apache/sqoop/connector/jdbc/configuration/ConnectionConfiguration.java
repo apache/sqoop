@@ -32,12 +32,11 @@ public class ConnectionConfiguration {
   @Input(form = FORM_CONNECTION, size = 128) public String jdbcDriver;
   @Input(form = FORM_CONNECTION, size = 128) public String connectionString;
   @Input(form = FORM_CONNECTION, size = 40)  public String username;
-
-  @Input(form = FORM_CONNECTION, size = 40, sensitive = true)
-  public String password;
+  @Input(form = FORM_CONNECTION, size = 40, sensitive = true) public String password;
 
   @Input(form = FORM_CONNECTION) public Map<String, String> jdbcProperties;
 
+  //TODO(jarcec): Those parameters should be moved to job configuration!
   @Input(form = FORM_TABLE, size = 50) public String tableName;
   @Input(form = FORM_TABLE, size = 50) public String sql;
   @Input(form = FORM_TABLE, size = 50) public String columns;

@@ -24,7 +24,21 @@ import org.apache.sqoop.common.ErrorCode;
  */
 public enum FrameworkError implements ErrorCode {
 
-  FRAMEWORK_0000("Metadata are not registered in repository");
+  FRAMEWORK_0000("Metadata are not registered in repository"),
+
+  FRAMEWORK_0001("Invalid submission engine"),
+
+  FRAMEWORK_0002("Given job is already running"),
+
+  FRAMEWORK_0003("Given job is not running"),
+
+  FRAMEWORK_0004("Unknown job id"),
+
+  FRAMEWORK_0005("Unsupported job type"),
+
+  FRAMEWORK_0006("Can't bootstrap job"),
+
+  ;
 
   private final String message;
 

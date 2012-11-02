@@ -44,7 +44,7 @@ public final class ConnectorHandler {
   private final String connectorUniqueName;
   private final SqoopConnector connector;
 
-  private final MConnector mConnector;
+  private MConnector mConnector;
 
   public ConnectorHandler(URL configFileUrl) {
     connectorUrl = configFileUrl.toString();
@@ -131,6 +131,10 @@ public final class ConnectorHandler {
 
   public MConnector getMetadata() {
     return mConnector;
+  }
+
+  public void setMetadata(MConnector connector) {
+    this.mConnector = connector;
   }
 
   public SqoopConnector getConnector() {

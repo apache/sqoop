@@ -21,9 +21,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.Context;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.SqoopConfiguration;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 public final class RepositoryManager {
 
@@ -32,7 +32,7 @@ public final class RepositoryManager {
   private static RepositoryProvider provider;
 
   public static synchronized void initialize() {
-    Context context = SqoopConfiguration.getContext();
+    MapContext context = SqoopConfiguration.getContext();
 
     Map<String, String> repoSysProps = context.getNestedProperties(
         RepoConfigurationConstants.SYSCFG_REPO_SYSPROP_PREFIX);
@@ -57,7 +57,7 @@ public final class RepositoryManager {
     }
 
     Class<?> repoProviderClass =
-        ClassLoadingUtils.loadClass(repoProviderClassName);
+        ClassUtils.loadClass(repoProviderClassName);
 
     if (repoProviderClass == null) {
       throw new SqoopException(RepositoryError.REPO_0001,

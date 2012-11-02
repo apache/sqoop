@@ -60,7 +60,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       Long id = Long.parseLong(cid);
 
       // Check that user is not asking for non existing connector id
-      if(!ConnectorManager.getConnectoIds().contains(id)) {
+      if(!ConnectorManager.getConnectorIds().contains(id)) {
         throw new SqoopException(ServerError.SERVER_0004, "Invalid id " + id);
       }
 

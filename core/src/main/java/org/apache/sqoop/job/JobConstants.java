@@ -20,17 +20,6 @@ package org.apache.sqoop.job;
 import org.apache.sqoop.core.ConfigurationConstants;
 
 public final class JobConstants extends Constants {
-
-  // Metadata constants
-
-  public static final String INPUT_JOB_JOB_TYPE = "inp-job-job-type";
-  public static final String INPUT_JOB_STORAGE_TYPE = "inp-job-storage-type";
-  public static final String INPUT_JOB_FORMAT_TYPE = "inp-job-format-type";
-  public static final String INPUT_JOB_OUTPUT_CODEC = "inp-job-output-codec";
-  public static final String INPUT_JOB_MAX_EXTRACTORS = "inp-job-max-extractors";
-  public static final String INPUT_JOB_MAX_LOADERS = "inp-job-max-loaders";
-
-
   /**
    * All job related configuration is prefixed with this:
    * <tt>org.apache.sqoop.job.</tt>
@@ -48,12 +37,43 @@ public final class JobConstants extends Constants {
   public static final String JOB_ETL_LOADER = PREFIX_JOB_CONFIG
       + "etl.loader";
 
+  public static final String JOB_ETL_DESTROYER = PREFIX_JOB_CONFIG
+      + "etl.destroyer";
+
 
   public static final String JOB_MR_OUTPUT_FILE = PREFIX_JOB_CONFIG
       + "mr.output.file";
 
   public static final String JOB_MR_OUTPUT_CODEC = PREFIX_JOB_CONFIG
       + "mr.output.codec";
+
+
+  public static final String JOB_CONFIG_CLASS_CONNECTOR_CONNECTION =
+    PREFIX_JOB_CONFIG + "config.class.connector.connection";
+
+  public static final String JOB_CONFIG_CLASS_CONNECTOR_JOB =
+    PREFIX_JOB_CONFIG + "config.class.connector.job";
+
+  public static final String JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION =
+    PREFIX_JOB_CONFIG + "config.class.framework.connection";
+
+  public static final String JOB_CONFIG_CLASS_FRAMEWORK_JOB =
+    PREFIX_JOB_CONFIG + "config.class.framework.job";
+
+  public static final String JOB_CONFIG_CONNECTOR_CONNECTION =
+    PREFIX_JOB_CONFIG + "config.connector.connection";
+
+  public static final String JOB_CONFIG_CONNECTOR_JOB =
+    PREFIX_JOB_CONFIG + "config.connector.job";
+
+  public static final String JOB_CONFIG_FRAMEWORK_CONNECTION =
+    PREFIX_JOB_CONFIG + "config.framework.connection";
+
+  public static final String JOB_CONFIG_FRAMEWORK_JOB =
+    PREFIX_JOB_CONFIG + "config.framework.job";
+
+  public static final String PREFIX_CONNECTOR_CONTEXT =
+    PREFIX_JOB_CONFIG + "connector.context.";
 
 
   private JobConstants() {

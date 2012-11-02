@@ -18,10 +18,13 @@
 package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.Configuration;
+import org.apache.sqoop.model.Input;
 
 /**
  *
  */
 @Configuration
 public class ImportJobConfiguration {
+  @Input(form = "ignored")
+  String ignored;
 }

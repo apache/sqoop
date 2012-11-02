@@ -94,6 +94,7 @@ abstract public class DerbyTestCase extends TestCase {
     runQuery(QUERY_CREATE_TABLE_SQ_JOB);
     runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
+    runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
   }
 
   /**
@@ -244,6 +245,22 @@ abstract public class DerbyTestCase extends TestCase {
           + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
       }
     }
+  }
+
+  /**
+   * Load testing submissions into the metadata repository.
+   *
+   * @throws Exception
+   */
+  public void loadSubmissions() throws  Exception {
+    runQuery("INSERT INTO SQOOP.SQ_SUBMISSION"
+      + "(SQS_JOB, SQS_STATUS, SQS_DATE, SQS_EXTERNAL_ID) VALUES "
+      + "(1, 'RUNNING', '2012-01-01 01:01:01', 'job_1'),"
+      + "(2, 'SUCCEEDED', '2012-01-02 01:01:01', 'job_2'),"
+      + "(3, 'FAILED', '2012-01-03 01:01:01', 'job_3'),"
+      + "(4, 'UNKNOWN', '2012-01-04 01:01:01', 'job_4'),"
+      + "(1, 'RUNNING', '2012-01-05 01:01:01', 'job_5')"
+    );
   }
 
   protected MConnector getConnector() {

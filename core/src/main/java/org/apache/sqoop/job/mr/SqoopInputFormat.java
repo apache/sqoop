@@ -30,13 +30,11 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.etl.EtlContext;
+import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
-import org.apache.sqoop.utils.ClassLoadingUtils;
+import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * An InputFormat for MapReduce job.
@@ -58,21 +56,16 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Configuration conf = context.getConfiguration();
 
     String partitionerName = conf.get(JobConstants.JOB_ETL_PARTITIONER);
-    Class<?> clz = ClassLoadingUtils.loadClass(partitionerName);
-    if (clz == null) {
-      throw new SqoopException(CoreError.CORE_0009, partitionerName);
-    }
+    Partitioner partitioner = (Partitioner) ClassUtils.instantiate(partitionerName);
 
-    Partitioner partitioner;
-    try {
-      partitioner = (Partitioner) clz.newInstance();
-    } catch (Exception e) {
-      throw new SqoopException(CoreError.CORE_0010, partitionerName, e);
-    }
+    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
+    Object connectorConnection = ConfigurationUtils.getConnectorConnection(conf);
+    Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
 
-    List<Partition> partitions = partitioner.run(new EtlContext(conf));
+    List<Partition> partitions = partitioner.getPartitions(connectorContext, connectorConnection, connectorJob);
     List<InputSplit> splits = new LinkedList<InputSplit>();
     for (Partition partition : partitions) {
+      LOG.debug("Partition: " + partition);
       SqoopSplit split = new SqoopSplit();
       split.setPartition(partition);
       splits.add(split);
