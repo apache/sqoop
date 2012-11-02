@@ -275,8 +275,8 @@ public class MySQLManager
   private Map<String, String> colTypeNames;
   private static final int YEAR_TYPE_OVERWRITE = Types.SMALLINT;
 
-  @Override
-  public String toJavaType(String tableName, String columnName, int sqlType) {
+  private int overrideSqlType(String tableName, String columnName,
+      int sqlType) {
     if (colTypeNames == null) {
       colTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
     }
@@ -284,33 +284,24 @@ public class MySQLManager
     if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
       sqlType = YEAR_TYPE_OVERWRITE;
     }
+    return sqlType;
+  }
 
+  @Override
+  public String toJavaType(String tableName, String columnName, int sqlType) {
+    sqlType = overrideSqlType(tableName, columnName, sqlType);
     return super.toJavaType(tableName, columnName, sqlType);
   }
 
   @Override
   public String toHiveType(String tableName, String columnName, int sqlType) {
-    if (colTypeNames == null) {
-      colTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
-    }
-
-    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
-      sqlType = YEAR_TYPE_OVERWRITE;
-    }
-
+    sqlType = overrideSqlType(tableName, columnName, sqlType);
     return super.toHiveType(tableName, columnName, sqlType);
   }
 
   @Override
   public Type toAvroType(String tableName, String columnName, int sqlType) {
-    if (colTypeNames == null) {
-      colTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
-    }
-
-    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
-      sqlType = YEAR_TYPE_OVERWRITE;
-    }
-
+    sqlType = overrideSqlType(tableName, columnName, sqlType);
     return super.toAvroType(tableName, columnName, sqlType);
   }
 }

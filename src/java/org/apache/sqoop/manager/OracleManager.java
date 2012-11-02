@@ -469,121 +469,90 @@ public class OracleManager
     return execute(sqlCmd);
   }
 
+  private Map<String, String> columnTypeNames;
+
   /**
    * Resolve a database-specific type to the Java type that should contain it.
    * @param tableName   table name
-   * @param columnName  column name
-   * @param sqlType     sql data type
+   * @param colName  column name
    * @return the name of a Java type to hold the sql datatype, or null if none.
    */
-  @Override
-  public String toJavaType(String tableName, String columnName, int sqlType) {
-    String defaultJavaType = super.toJavaType(tableName, columnName, sqlType);
-    return (defaultJavaType == null) ? dbToJavaType(sqlType) : defaultJavaType;
+  private String toDbSpecificJavaType(String tableName, String colName) {
+    if (columnTypeNames == null) {
+      columnTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
+    }
+
+    String colTypeName = columnTypeNames.get(colName);
+    if (colTypeName != null) {
+      if (colTypeName.equalsIgnoreCase("BINARY_FLOAT")) {
+        return "Float";
+      }
+      if (colTypeName.equalsIgnoreCase("BINARY_DOUBLE")) {
+        return "Double";
+      }
+      if (colTypeName.toUpperCase().startsWith("TIMESTAMP")) {
+        return "java.sql.Timestamp";
+      }
+    }
+    return null;
   }
 
   /**
-   * Attempt to map sql type to java type.
+   * Resolve a database-specific type to the Hive type that should contain it.
+   * @param tableName   table name
+   * @param colName  column name
+   * @return the name of a Hive type to hold the sql datatype, or null if none.
+   */
+  private String toDbSpecificHiveType(String tableName, String colName) {
+    if (columnTypeNames == null) {
+      columnTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
+    }
+
+    String colTypeName = columnTypeNames.get(colName);
+    if (colTypeName != null) {
+      if (colTypeName.equalsIgnoreCase("BINARY_FLOAT")) {
+        return "FLOAT";
+      }
+      if (colTypeName.equalsIgnoreCase("BINARY_DOUBLE")) {
+        return "DOUBLE";
+      }
+      if (colTypeName.toUpperCase().startsWith("TIMESTAMP")) {
+        return "STRING";
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return java type for SQL type.
+   * @param tableName   table name
+   * @param columnName  column name
    * @param sqlType     sql type
    * @return            java type
    */
-  private String dbToJavaType(int sqlType) {
-    // load class oracle.jdbc.OracleTypes
-    // need to use reflection because oracle specific libraries
-    // are not accessible in this context
-    Class typeClass = getTypeClass("oracle.jdbc.OracleTypes");
-
-    // check if it is TIMESTAMPTZ
-    int dbType = getDatabaseType(typeClass, "TIMESTAMPTZ");
-    if (sqlType == dbType) {
-      return "java.sql.Timestamp";
+  @Override
+  public String toJavaType(String tableName, String columnName, int sqlType) {
+    String javaType = super.toJavaType(tableName, columnName, sqlType);
+    if (javaType == null) {
+      javaType = toDbSpecificJavaType(tableName, columnName);
     }
-
-    // check if it is TIMESTAMPLTZ
-    dbType = getDatabaseType(typeClass, "TIMESTAMPLTZ");
-    if (sqlType == dbType) {
-      return "java.sql.Timestamp";
-    }
-
-    // return null if no java type was found for sqlType
-    return null;
+    return javaType;
   }
 
   /**
-   * Attempt to map sql type to hive type.
+   * Return hive type for SQL type.
    * @param tableName   table name
    * @param columnName  column name
    * @param sqlType     sql data type
-   * @return            hive data type
-   */
-  public String toHiveType(String tableName, String columnName, int sqlType) {
-    String defaultHiveType = super.toHiveType(tableName, columnName, sqlType);
-    return (defaultHiveType == null) ? dbToHiveType(sqlType) : defaultHiveType;
-  }
-
-  /**
-   * Resolve a database-specific type to Hive type.
-   * @param sqlType     sql type
    * @return            hive type
    */
-  private String dbToHiveType(int sqlType) {
-    // load class oracle.jdbc.OracleTypes
-    // need to use reflection because oracle specific libraries
-    // are not accessible in this context
-    Class typeClass = getTypeClass("oracle.jdbc.OracleTypes");
-
-    // check if it is TIMESTAMPTZ
-    int dbType = getDatabaseType(typeClass, "TIMESTAMPTZ");
-    if (sqlType == dbType) {
-      return "STRING";
+  @Override
+  public String toHiveType(String tableName, String columnName, int sqlType) {
+    String hiveType = super.toHiveType(tableName, columnName, sqlType);
+    if (hiveType == null) {
+      hiveType = toDbSpecificHiveType(tableName, columnName);
     }
-
-    // check if it is TIMESTAMPLTZ
-    dbType = getDatabaseType(typeClass, "TIMESTAMPLTZ");
-    if (sqlType == dbType) {
-      return "STRING";
-    }
-
-    // return null if no hive type was found for sqlType
-    return null;
-  }
-
-  /**
-   * Get database type.
-   * @param clazz         oracle class representing sql types
-   * @param fieldName     field name
-   * @return              value of database type constant
-   */
-  private int getDatabaseType(Class clazz, String fieldName) {
-    // Need to use reflection to extract constant values because the database
-    // specific java libraries are not accessible in this context.
-    int value = -1;
-    try {
-      java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
-      value = field.getInt(null);
-    } catch (NoSuchFieldException ex) {
-      LOG.error("Could not retrieve value for field " + fieldName, ex);
-    } catch (IllegalAccessException ex) {
-      LOG.error("Could not retrieve value for field " + fieldName, ex);
-    }
-    return value;
-  }
-
-  /**
-   * Load class by name.
-   * @param className     class name
-   * @return              class instance
-   */
-  private Class getTypeClass(String className) {
-    // Need to use reflection to load class because the database specific java
-    // libraries are not accessible in this context.
-    Class typeClass = null;
-    try {
-      typeClass = Class.forName(className);
-    } catch (ClassNotFoundException ex) {
-      LOG.error("Could not load class " + className, ex);
-    }
-    return typeClass;
+    return hiveType;
   }
 
   @Override

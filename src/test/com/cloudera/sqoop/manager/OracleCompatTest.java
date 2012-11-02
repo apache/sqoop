@@ -184,6 +184,14 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     return sb.toString();
   }
 
+  protected String getBinaryFloatInsertStr(float f) {
+    return "TO_BINARY_FLOAT('" + f + "')";
+  }
+
+  protected String getBinaryDoubleInsertStr(double d) {
+    return "TO_BINARY_DOUBLE('" + d + "')";
+  }
+
   // Disable this test since Oracle isn't ANSI compliant.
   @Override
   public void testEmptyStringCol() {
@@ -220,6 +228,30 @@ public class OracleCompatTest extends ManagerCompatTestCase {
 
   public void testRawVal() {
     verifyType("RAW(8)", "'12ABCD'", getVarBinarySeqOutput("12ABCD"), true);
+  }
+
+  public void testBinaryFloat() {
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(25f), "25.0");
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(+6.34f), "6.34");
+
+    // Max and min are from Oracle DB SQL reference for 10g release 2
+    float max = 3.40282E+38F;
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(max), "3.40282E38");
+    float min = 1.17549E-38F;
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(min), "1.17549E-38");
+  }
+
+  public void testBinaryDouble() {
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5d), "0.5");
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1d), "-1.0");
+
+    // Max and min are from Oracle DB SQL reference for 10g release 2
+    double max = 1.79769313486231E+308;
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(max),
+        "1.79769313486231E308");
+    double min = 2.22507485850720E-308;
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(min),
+        "2.2250748585072E-308");
   }
 }
 
