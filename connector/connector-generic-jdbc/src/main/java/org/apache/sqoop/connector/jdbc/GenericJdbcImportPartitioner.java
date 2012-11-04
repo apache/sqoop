@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.sqoop.common.ImmutableContext;
-import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Partition;

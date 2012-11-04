@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -30,6 +31,7 @@ import org.apache.sqoop.common.SqoopException;
 public class GenericJdbcExecutor {
 
   private Connection connection;
+  private PreparedStatement preparedStatement;
 
   public GenericJdbcExecutor(String driver, String url,
       String username, String password) {
@@ -65,6 +67,52 @@ public class GenericJdbcExecutor {
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       statement.executeUpdate(sql);
 
+    } catch (SQLException e) {
+      throw new SqoopException(
+          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public void beginBatch(String sql) {
+    try {
+      preparedStatement = connection.prepareStatement(sql,
+          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+    } catch (SQLException e) {
+      throw new SqoopException(
+          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public void addBatch(Object[] array) {
+    try {
+      for (int i=0; i<array.length; i++) {
+        preparedStatement.setObject(i+1, array[i]);
+      }
+      preparedStatement.addBatch();
+    } catch (SQLException e) {
+      throw new SqoopException(
+          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public void executeBatch(boolean commit) {
+    try {
+      preparedStatement.executeBatch();
+      if (commit) {
+        connection.commit();
+      }
+    } catch (SQLException e) {
+      throw new SqoopException(
+          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public void endBatch() {
+    try {
+      if (preparedStatement != null) {
+        preparedStatement.close();
+      }
     } catch (SQLException e) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);

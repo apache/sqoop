@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.MapContext;
-import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MutableContext;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +38,7 @@ public abstract class Initializer {
    * @param connectionConfiguration Connector's connection configuration object
    * @param jobConfiguration Connector's job configuration object
    */
-  public abstract void initialize(MutableMapContext context,
+  public abstract void initialize(MutableContext context,
                                   Object connectionConfiguration,
                                   Object jobConfiguration);
 
@@ -49,7 +49,7 @@ public abstract class Initializer {
    *
    * @return
    */
-  public List<String> getJars(MapContext context,
+  public List<String> getJars(ImmutableContext context,
                               Object connectionConfiguration,
                               Object jobConfiguration) {
     return new LinkedList<String>();

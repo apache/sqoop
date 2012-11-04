@@ -18,7 +18,6 @@
 package org.apache.sqoop.common;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

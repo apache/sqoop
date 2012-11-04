@@ -23,9 +23,58 @@ import org.apache.sqoop.job.io.DataReader;
 
 public class GenericJdbcExportLoader extends Loader {
 
+  public static final int DEFAULT_ROWS_PER_BATCH = 100;
+  public static final int DEFAULT_BATCHES_PER_TRANSACTION = 100;
+  private int rowsPerBatch = DEFAULT_ROWS_PER_BATCH;
+  private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
+
   @Override
   public void run(ImmutableContext context, DataReader reader) {
-    // TODO Auto-generated method stub
+    String driver = context.getString(
+        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
+    String url = context.getString(
+        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL);
+    String username = context.getString(
+        GenericJdbcConnectorConstants.CONNECTOR_JDBC_USERNAME);
+    String password = context.getString(
+        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PASSWORD);
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(
+        driver, url, username, password);
+
+    String sql = context.getString(
+        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
+    executor.beginBatch(sql);
+    try {
+      int numberOfRows = 0;
+      int numberOfBatches = 0;
+      Object[] array;
+
+      while ((array = reader.readArrayRecord()) != null) {
+        numberOfRows++;
+        executor.addBatch(array);
+
+        if (numberOfRows == rowsPerBatch) {
+          numberOfBatches++;
+          if (numberOfBatches == batchesPerTransaction) {
+            executor.executeBatch(true);
+            numberOfBatches = 0;
+          } else {
+            executor.executeBatch(false);
+          }
+          numberOfRows = 0;
+        }
+      }
+
+      if (numberOfRows != 0) {
+        // execute and commit the remaining rows
+        executor.executeBatch(true);
+      }
+
+      executor.endBatch();
+
+    } finally {
+      executor.close();
+    }
   }
 
 }

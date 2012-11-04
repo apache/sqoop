@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.MapContext;
-import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
@@ -42,7 +42,7 @@ public class GenericJdbcImportInitializer extends Initializer {
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(MutableMapContext context, Object oConnectionConfig, Object oJobConfig) {
+  public void initialize(MutableContext context, Object oConnectionConfig, Object oJobConfig) {
     ConnectionConfiguration connectionConfig = (ConnectionConfiguration)oConnectionConfig;
     ImportJobConfiguration jobConfig = (ImportJobConfiguration)oJobConfig;
 
@@ -58,7 +58,7 @@ public class GenericJdbcImportInitializer extends Initializer {
   }
 
   @Override
-  public List<String> getJars(MapContext context, Object connectionConfiguration, Object jobConfiguration) {
+  public List<String> getJars(ImmutableContext context, Object connectionConfiguration, Object jobConfiguration) {
     List<String> jars = new LinkedList<String>();
 
     ConnectionConfiguration connection = (ConnectionConfiguration) connectionConfiguration;
@@ -67,7 +67,7 @@ public class GenericJdbcImportInitializer extends Initializer {
     return jars;
   }
 
-  private void configureJdbcProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     String driver = connectionConfig.jdbcDriver;
     String url = connectionConfig.connectionString;
     String username = connectionConfig.username;
@@ -107,7 +107,7 @@ public class GenericJdbcImportInitializer extends Initializer {
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     // ----- configure column name -----
 
     String partitionColumnName = connectionConfig.partitionColumn;
@@ -207,7 +207,7 @@ public class GenericJdbcImportInitializer extends Initializer {
     }
   }
 
-  private void configureTableProperties(MutableMapContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     String dataSql;
     String fieldNames;
     String outputDirectory;

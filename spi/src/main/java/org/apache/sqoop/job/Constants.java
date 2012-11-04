@@ -34,6 +34,9 @@ public class Constants {
   public static final String JOB_ETL_OUTPUT_DIRECTORY = PREFIX_CONFIG
       + "etl.output.directory";
 
+  public static final String JOB_ETL_INPUT_DIRECTORY = PREFIX_CONFIG
+      + "etl.input.directory";
+
   protected Constants() {
     // Disable explicit object creation
   }

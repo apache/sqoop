@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.common.ImmutableContext;
 
 /**
  * This allows connector to define work to complete execution, for example,
@@ -25,7 +25,6 @@ import org.apache.sqoop.common.MapContext;
  */
 public abstract class Destroyer {
 
-  // TODO(Jarcec): This should be called with ImmutableContext
-  public abstract void run(MapContext context);
+  public abstract void run(ImmutableContext context);
 
 }
