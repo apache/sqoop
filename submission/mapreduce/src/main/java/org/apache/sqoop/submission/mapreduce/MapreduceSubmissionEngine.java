@@ -197,6 +197,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
       LOG.debug("Executed new map-reduce job with id " + jobId);
     } catch (Exception e) {
+      request.getSummary().setException(e);
       LOG.error("Error in submitting job", e);
       return false;
     }

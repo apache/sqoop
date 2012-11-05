@@ -38,6 +38,8 @@ public class SubmissionBean implements JsonBean {
   private static final String STATUS = "status";
   private static final String EXTERNAL_ID = "external-id";
   private static final String EXTERNAL_LINK = "external-link";
+  private static final String EXCEPTION = "exception";
+  private static final String EXCEPTION_TRACE = "exception-trace";
   private static final String PROGRESS = "progress";
   private static final String COUNTERS = "counters";
 
@@ -73,6 +75,12 @@ public class SubmissionBean implements JsonBean {
     }
     if(submission.getExternalLink() != null) {
       ret.put(EXTERNAL_LINK, submission.getExternalLink());
+    }
+    if(submission.getExceptionInfo() != null) {
+      ret.put(EXCEPTION, submission.getExceptionInfo());
+    }
+    if(submission.getExceptionStackTrace() != null) {
+      ret.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
     }
     if(submission.getCounters() != null) {
       ret.put(COUNTERS, extractCounters(submission.getCounters()));
@@ -112,6 +120,12 @@ public class SubmissionBean implements JsonBean {
     }
     if(json.containsKey(EXTERNAL_LINK)) {
       submission.setExternalLink((String) json.get(EXTERNAL_LINK));
+    }
+    if(json.containsKey(EXCEPTION)) {
+      submission.setExceptionInfo((String) json.get(EXCEPTION));
+    }
+    if(json.containsKey(EXCEPTION_TRACE)) {
+      submission.setExceptionStackTrace((String) json.get(EXCEPTION_TRACE));
     }
     if(json.containsKey(COUNTERS)) {
       submission.setCounters(restoreCounters((JSONObject) json.get(COUNTERS)));

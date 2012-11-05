@@ -72,4 +72,8 @@ public enum SubmissionStatus {
   public boolean isRunning() {
     return this == RUNNING || this == BOOTING;
   }
+
+  public boolean isFailure() {
+    return this == FAILED || this == UNKNOWN || this == FAILURE_ON_SUBMIT;
+  }
 }

@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 
 /**
@@ -81,6 +83,20 @@ public class MSubmission extends MPersistableEntity {
    * This is optional property that is not serialized in metastore.
    */
   String externalLink;
+
+  /**
+   * Associated exception info with this job (if any).
+   *
+   * This is optional property that is not serialized in metastore.
+   */
+  String exceptionInfo;
+
+  /**
+   * Associated exception stacktrace with this job (if any).
+   *
+   * This is optional property that is not serialized in metastore.
+   */
+  String exceptionStackTrace;
 
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
@@ -168,13 +184,46 @@ public class MSubmission extends MPersistableEntity {
     return externalLink;
   }
 
+  public void setExceptionInfo(String exceptionInfo) {
+    this.exceptionInfo = exceptionInfo;
+  }
+
+  public String getExceptionInfo() {
+    return exceptionInfo;
+  }
+
+  public void setExceptionStackTrace(String stackTrace) {
+    this.exceptionStackTrace = stackTrace;
+  }
+
+  public String getExceptionStackTrace() {
+    return exceptionStackTrace;
+  }
+
+  public void setException(Throwable e) {
+    // Exception info
+    this.setExceptionInfo(e.toString());
+
+    // Exception stack trace
+    StringWriter writer = new StringWriter();
+    e.printStackTrace(new PrintWriter(writer));
+    writer.flush();
+    this.setExceptionStackTrace(writer.toString());
+  }
+
   @Override
   public String toString() {
     return "MSubmission{" +
       "jobId=" + jobId +
       ", date=" + date +
       ", status=" + status +
-      ", externalId=" + externalId + "}";
+      ", externalId='" + externalId + '\'' +
+      ", progress=" + progress +
+      ", counters=" + counters +
+      ", externalLink='" + externalLink + '\'' +
+      ", exceptionInfo='" + exceptionInfo + '\'' +
+      ", exceptionStackTrace='" + exceptionStackTrace + '\'' +
+      '}';
   }
 
   public static MSubmission UNKNOWN = new MSubmission();

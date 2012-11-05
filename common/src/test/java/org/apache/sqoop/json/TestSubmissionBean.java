@@ -78,6 +78,22 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("http://", target.getExternalLink());
   }
 
+  public void testTransferException() {
+    MSubmission source = new MSubmission();
+    source.setExceptionInfo("EndOfTheWorldException");
+
+    MSubmission target = transfer(source);
+    assertEquals("EndOfTheWorldException", target.getExceptionInfo());
+  }
+
+  public void testTransferExceptionTrace() {
+    MSubmission source = new MSubmission();
+    source.setExceptionStackTrace("void.java(3): line infinity");
+
+    MSubmission target = transfer(source);
+    assertEquals("void.java(3): line infinity", target.getExceptionStackTrace());
+  }
+
   public void testTransferProgress() {
     MSubmission source = new MSubmission();
     source.setProgress(25.0);
