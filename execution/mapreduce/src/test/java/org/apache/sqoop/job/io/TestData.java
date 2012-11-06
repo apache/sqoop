@@ -15,13 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.io;
+package org.apache.sqoop.job.io;
 
 import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.apache.sqoop.job.io.Data;
 import org.junit.Test;
 
 public class TestData extends TestCase {

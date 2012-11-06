@@ -28,6 +28,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.execution.mapreduce.MRSubmissionRequest;
+import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
 import org.apache.sqoop.framework.SubmissionEngine;
 import org.apache.sqoop.job.JobConstants;
@@ -116,8 +118,22 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * {@inheritDoc}
    */
   @Override
-  @SuppressWarnings("unchecked")
-  public boolean submit(SubmissionRequest request) {
+  public boolean isExecutionEngineSupported(Class executionEngineClass) {
+    if(executionEngineClass == MapreduceExecutionEngine.class) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean submit(SubmissionRequest generalRequest) {
+    // We're supporting only map reduce jobs
+    MRSubmissionRequest request = (MRSubmissionRequest) generalRequest;
+
     // Clone global configuration
     Configuration configuration = new Configuration(globalConfiguration);
 

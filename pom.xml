@@ -220,6 +220,7 @@ limitations under the License.
     <module>client</module>
     <module>docs</module>
     <module>connector</module>
+    <module>execution</module>
     <module>submission</module>
     <module>dist</module>
   </modules>

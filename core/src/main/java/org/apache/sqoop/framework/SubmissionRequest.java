@@ -17,15 +17,11 @@
  */
 package org.apache.sqoop.framework;
 
-import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.CallbackBase;
-import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
-import org.apache.sqoop.job.mr.SqoopInputFormat;
-import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.utils.ClassUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -85,20 +81,6 @@ public class SubmissionRequest {
    */
   String outputDirectory;
 
-  /**
-   * Map-reduce specific options.
-   *
-   * I'm using strings so that this class won't have direct dependency on
-   * hadoop libraries.
-   */
-  Class inputFormatClass;
-  Class mapperClass;
-  Class mapOutputKeyClass;
-  Class mapOutputValueClass;
-  Class outputFormatClass;
-  Class outputKeyClass;
-  Class outputValueClass;
-
 
   public SubmissionRequest(MSubmission submission,
                            SqoopConnector connector,
@@ -115,15 +97,6 @@ public class SubmissionRequest {
     this.configConnectorJob = configConnectorJob;
     this.configFrameworkConnection = configFrameworkConnection;
     this.configFrameworkJob = configFrameworkJob;
-
-    // TODO(Jarcec): Move this to job execution engine
-    this.inputFormatClass = SqoopInputFormat.class;
-    this.mapperClass = SqoopMapper.class;
-    this.mapOutputKeyClass = Data.class;
-    this.mapOutputValueClass = NullWritable.class;
-    this.outputFormatClass = SqoopFileOutputFormat.class;
-    this.outputKeyClass = Data.class;
-    this.outputValueClass = NullWritable.class;
   }
 
   public MSubmission getSummary() {
@@ -148,6 +121,10 @@ public class SubmissionRequest {
 
   public void addJar(String jar) {
     jars.add(jar);
+  }
+
+  public void addJarForClass(Class klass) {
+    jars.add(ClassUtils.jarForClass(klass));
   }
 
   public void addJars(List<String> jars) {
@@ -192,32 +169,5 @@ public class SubmissionRequest {
 
   public void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
-  }
-  public Class getInputFormatClass() {
-    return inputFormatClass;
-  }
-
-  public Class getMapperClass() {
-    return mapperClass;
-  }
-
-  public Class getMapOutputKeyClass() {
-    return mapOutputKeyClass;
-  }
-
-  public Class getMapOutputValueClass() {
-    return mapOutputValueClass;
-  }
-
-  public Class getOutputFormatClass() {
-    return outputFormatClass;
-  }
-
-  public Class getOutputKeyClass() {
-    return outputKeyClass;
-  }
-
-  public Class getOutputValueClass() {
-    return outputValueClass;
   }
 }

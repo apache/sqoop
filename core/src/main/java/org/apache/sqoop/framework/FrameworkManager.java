@@ -19,7 +19,6 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
-import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -27,11 +26,8 @@ import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
-import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.CallbackBase;
 import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.HdfsTextImportLoader;
-import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
@@ -57,47 +53,93 @@ import java.util.ResourceBundle;
 /**
  * Manager for Sqoop framework itself.
  *
- * All Sqoop internals (job execution engine, metadata) should be handled
- * within this manager.
+ * All Sqoop internals are handled in this class:
+ * * Submission engine
+ * * Execution engine
+ * * Framework metadata
  *
  * Current implementation of entire submission engine is using repository
- * for keep of current track, so that server might be restarted at any time
- * without any affect on running jobs. This approach however might not be the
- * fastest way and we might want to introduce internal structures with running
- * jobs in case that this approach will be too slow.
+ * for keeping track of running submissions. Thus, server might be restarted at
+ * any time without any affect on running jobs. This approach however might not
+ * be the fastest way and we might want to introduce internal structures for
+ * running jobs in case that this approach will be too slow.
  */
 public final class FrameworkManager {
 
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
 
+  /**
+   * Default interval for purging old submissions from repository.
+   */
   private static final long DEFAULT_PURGE_THRESHOLD = 24*60*60*1000;
 
+  /**
+   * Default sleep interval for purge thread.
+   */
   private static final long DEFAULT_PURGE_SLEEP = 24*60*60*1000;
 
+  /**
+   * Default interval for update thread.
+   */
   private static final long DEFAULT_UPDATE_SLEEP = 60*5*1000;
 
+  /**
+   * Framework metadata structures in MForm format
+   */
   private static MFramework mFramework;
 
+  /**
+   * Validator instance
+   */
   private static final Validator validator;
 
+  /**
+   * Configured submission engine instance
+   */
   private static SubmissionEngine submissionEngine;
 
+  /**
+   * Configured execution engine instance
+   */
+  private static ExecutionEngine executionEngine;
+
+  /**
+   * Purge thread that will periodically remove old submissions from repository.
+   */
   private static PurgeThread purgeThread = null;
 
+  /**
+   * Update thread that will periodically check status of running submissions.
+   */
   private static UpdateThread updateThread = null;
 
+  /**
+   * Synchronization variable between threads.
+   */
   private static boolean running = true;
 
+  /**
+   * Specifies how old submissions should be removed from repository.
+   */
   private static long purgeThreshold;
 
+  /**
+   * Number of milliseconds for purge thread to sleep.
+   */
   private static long purgeSleep;
 
+  /**
+   * Number of milliseconds for update thread to slepp.
+   */
   private static long updateSleep;
 
+  /**
+   * Mutex for creating new submissions. We're not allowing more then one
+   * running submission for one job.
+   */
   private static final Object submissionMutex = new Object();
 
   static {
-
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(getConnectionConfigurationClass())
     );
@@ -123,22 +165,31 @@ public final class FrameworkManager {
     String submissionEngineClassName =
       context.getString(FrameworkConstants.SYSCFG_SUBMISSION_ENGINE);
 
-    Class<?> submissionEngineClass =
-        ClassUtils.loadClass(submissionEngineClassName);
-
-    if (submissionEngineClass == null) {
+    submissionEngine = (SubmissionEngine) ClassUtils.instantiate(submissionEngineClassName);
+    if(submissionEngine == null) {
       throw new SqoopException(FrameworkError.FRAMEWORK_0001,
-          submissionEngineClassName);
-    }
-
-    try {
-      submissionEngine = (SubmissionEngine)submissionEngineClass.newInstance();
-    } catch (Exception ex) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0001,
-          submissionEngineClassName, ex);
+        submissionEngineClassName);
     }
 
     submissionEngine.initialize(context, FrameworkConstants.PREFIX_SUBMISSION_ENGINE_CONFIG);
+
+    // Execution engine
+    String executionEngineClassName =
+      context.getString(FrameworkConstants.SYSCFG_EXECUTION_ENGINE);
+
+    executionEngine = (ExecutionEngine) ClassUtils.instantiate(executionEngineClassName);
+    if(executionEngine == null) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0007,
+        executionEngineClassName);
+    }
+
+    // We need to make sure that user has configured compatible combination of
+    // submission engine and execution engine
+    if(! submissionEngine.isExecutionEngineSupported(executionEngine.getClass())) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0008);
+    }
+
+    executionEngine.initialize(context, FrameworkConstants.PREFIX_EXECUTION_ENGINE_CONFIG);
 
     // Set up worker threads
     purgeThreshold = context.getLong(
@@ -160,7 +211,6 @@ public final class FrameworkManager {
 
     updateThread = new UpdateThread();
     updateThread.start();
-
 
     LOG.info("Submission manager initialized: OK");
   }
@@ -188,6 +238,10 @@ public final class FrameworkManager {
 
     if(submissionEngine != null) {
       submissionEngine.destroy();
+    }
+
+    if(executionEngine != null) {
+      executionEngine.destroy();
     }
   }
 
@@ -253,22 +307,26 @@ public final class FrameworkManager {
 
     // Create request object
     MSubmission summary = new MSubmission(jobId);
-    SubmissionRequest request = new SubmissionRequest(summary, connector,
-      connectorConnection, connectorJob, frameworkConnection, frameworkJob);
+    SubmissionRequest request = executionEngine.createSubmissionRequest(
+      summary, connector,
+      connectorConnection, connectorJob,
+      frameworkConnection, frameworkJob);
     request.setJobName(job.getName());
 
     // Let's register all important jars
     // sqoop-common
-    request.addJar(ClassUtils.jarForClass(MapContext.class));
+    request.addJarForClass(MapContext.class);
     // sqoop-core
-    request.addJar(ClassUtils.jarForClass(FrameworkManager.class));
+    request.addJarForClass(FrameworkManager.class);
     // sqoop-spi
-    request.addJar(ClassUtils.jarForClass(SqoopConnector.class));
-    // particular connector in use
-    request.addJar(ClassUtils.jarForClass(connector.getClass()));
+    request.addJarForClass(SqoopConnector.class);
+    // Execution engine jar
+    request.addJarForClass(executionEngine.getClass());
+    // Connector in use
+    request.addJarForClass(connector.getClass());
 
     // Extra libraries that Sqoop code requires
-    request.addJar(ClassUtils.jarForClass(JSONValue.class));
+    request.addJarForClass(JSONValue.class);
 
     switch (job.getType()) {
       case IMPORT:
@@ -308,7 +366,7 @@ public final class FrameworkManager {
     // Bootstrap job from framework perspective
     switch (job.getType()) {
       case IMPORT:
-        bootstrapImportSubmission(request);
+        prepareImportSubmission(request);
         break;
       case EXPORT:
         // TODO(jarcec): Implement export path
@@ -342,22 +400,14 @@ public final class FrameworkManager {
     return summary;
   }
 
-  private static void bootstrapImportSubmission(SubmissionRequest request) {
-    Importer importer = (Importer)request.getConnectorCallbacks();
+  private static void prepareImportSubmission(SubmissionRequest request) {
     ImportJobConfiguration jobConfiguration = (ImportJobConfiguration) request.getConfigFrameworkJob();
 
     // Initialize the map-reduce part (all sort of required classes, ...)
     request.setOutputDirectory(jobConfiguration.outputDirectory);
 
-    // Defaults for classes are mostly fine for now.
-
-
-    // Set up framework context
-    MutableMapContext context = request.getFrameworkContext();
-    context.setString(JobConstants.JOB_ETL_PARTITIONER, importer.getPartitioner().getName());
-    context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
-    context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
-    context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+    // Delegate rest of the job to execution engine
+    executionEngine.prepareImportSubmission(request);
   }
 
   /**

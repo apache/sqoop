@@ -29,6 +29,9 @@ public final class FrameworkConstants {
   public static final String PREFIX_SUBMISSION_CONFIG =
     ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "submission.";
 
+  public static final String PREFIX_EXECUTION_CONFIG =
+    ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "execution.";
+
   public static final String SYSCFG_SUBMISSION_ENGINE =
     PREFIX_SUBMISSION_CONFIG + "engine";
 
@@ -49,6 +52,12 @@ public final class FrameworkConstants {
 
   public static final String SYSCFG_SUBMISSION_UPDATE_SLEEP =
     PREFIX_SUBMISSION_UPDATE_CONFIG + "sleep";
+
+  public static final String SYSCFG_EXECUTION_ENGINE =
+    PREFIX_EXECUTION_CONFIG + "engine";
+
+  public static final String PREFIX_EXECUTION_ENGINE_CONFIG =
+    SYSCFG_EXECUTION_ENGINE + ".";
 
   // Connection/Job Configuration forms
 

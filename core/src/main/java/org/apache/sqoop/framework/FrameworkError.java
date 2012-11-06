@@ -38,6 +38,10 @@ public enum FrameworkError implements ErrorCode {
 
   FRAMEWORK_0006("Can't bootstrap job"),
 
+  FRAMEWORK_0007("Invalid execution engine"),
+
+  FRAMEWORK_0008("Invalid combination of submission and execution engines"),
+
   ;
 
   private final String message;

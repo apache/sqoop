@@ -42,6 +42,15 @@ public abstract class SubmissionEngine {
   }
 
   /**
+   * Callback to verify that configured submission engine and execution engine
+   * are compatible.
+   *
+   * @param executionEngineClass Configured execution class.
+   * @return True if such execution engine is supported
+   */
+  public abstract boolean isExecutionEngineSupported(Class executionEngineClass);
+
+  /**
    * Submit new job to remote (hadoop) cluster. This method *must* fill
    * submission.getSummary.setExternalId(), otherwise Sqoop framework won't
    * be able to track progress on this job!
