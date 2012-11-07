@@ -137,6 +137,10 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .hasArg().withDescription("Columns to export to table")
         .withLongOpt(COLUMNS_ARG)
         .create());
+    exportOpts.addOption(OptionBuilder.withArgName("name")
+        .hasArg().withDescription("Set name for generated mapreduce job")
+        .withLongOpt(MAPREDUCE_JOB_NAME)
+        .create());
     exportOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to export in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -241,6 +245,10 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
       if (in.hasOption(NUM_MAPPERS_ARG)) {
         out.setNumMappers(Integer.parseInt(in.getOptionValue(NUM_MAPPERS_ARG)));
+      }
+
+      if (in.hasOption(MAPREDUCE_JOB_NAME)) {
+        out.setMapreduceJobName(in.getOptionValue(MAPREDUCE_JOB_NAME));
       }
 
       if (in.hasOption(EXPORT_PATH_ARG)) {

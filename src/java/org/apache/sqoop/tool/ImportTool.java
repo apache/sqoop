@@ -576,6 +576,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
         .create(NUM_MAPPERS_SHORT_ARG));
+    importOpts.addOption(OptionBuilder.withArgName("name")
+        .hasArg().withDescription("Set name for generated mapreduce job")
+        .withLongOpt(MAPREDUCE_JOB_NAME)
+        .create());
     importOpts.addOption(OptionBuilder
         .withDescription("Enable compression")
         .withLongOpt(COMPRESS_ARG)
@@ -772,6 +776,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
       if (in.hasOption(NUM_MAPPERS_ARG)) {
         out.setNumMappers(Integer.parseInt(in.getOptionValue(NUM_MAPPERS_ARG)));
+      }
+
+      if (in.hasOption(MAPREDUCE_JOB_NAME)) {
+        out.setMapreduceJobName(in.getOptionValue(MAPREDUCE_JOB_NAME));
       }
 
       if (in.hasOption(COMPRESS_ARG)) {

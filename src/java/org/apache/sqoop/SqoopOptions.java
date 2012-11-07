@@ -87,6 +87,9 @@ public class SqoopOptions implements Cloneable {
   // are stored as constants in BaseSqoopTool.
 
   @StoredAsProperty("verbose") private boolean verbose;
+
+  @StoredAsProperty("mapreduce.job.name") private String mapreduceJobName;
+
   @StoredAsProperty("db.connect.string") private String connectString;
   @StoredAsProperty("db.table") private String tableName;
   private String [] columns; // Array stored as db.column.list.
@@ -1056,7 +1059,7 @@ public class SqoopOptions implements Cloneable {
       LOG.error("prompt the user to enter the password while being executed");
       LOG.error("as Oozie tasks. Please enable sqoop.metastore.client.record");
       LOG.error(".password in sqoop-site.xml, or provide the password");
-      LOG.error("explictly using --password in the command tag of the Oozie");
+      LOG.error("explicitly using --password in the command tag of the Oozie");
       LOG.error("workflow file.");
       return null;
     }
@@ -1068,6 +1071,14 @@ public class SqoopOptions implements Cloneable {
    */
   public void setPasswordFromConsole() {
     this.password = securePasswordEntry();
+  }
+
+  public String getMapreduceJobName() {
+    return mapreduceJobName;
+  }
+
+  public void setMapreduceJobName(String mapredJobName) {
+    this.mapreduceJobName = mapredJobName;
   }
 
   public void setPassword(String pass) {
