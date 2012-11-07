@@ -34,7 +34,8 @@ import java.util.Set;
 public class SubmissionBean implements JsonBean {
 
   private static final String JOB = "job";
-  private static final String DATE = "date";
+  private static final String CREATION_DATE = "creation-date";
+  private static final String LAST_UPDATE_DATE = "last-update-date";
   private static final String STATUS = "status";
   private static final String EXTERNAL_ID = "external-id";
   private static final String EXTERNAL_LINK = "external-link";
@@ -67,8 +68,11 @@ public class SubmissionBean implements JsonBean {
     ret.put(STATUS, submission.getStatus().name());
     ret.put(PROGRESS, submission.getProgress());
 
-    if(submission.getDate() != null) {
-      ret.put(DATE, submission.getDate().getTime());
+    if(submission.getCreationDate() != null) {
+      ret.put(CREATION_DATE, submission.getCreationDate().getTime());
+    }
+    if(submission.getLastUpdateDate() != null) {
+      ret.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
     }
     if(submission.getExternalId() != null) {
       ret.put(EXTERNAL_ID, submission.getExternalId());
@@ -112,8 +116,11 @@ public class SubmissionBean implements JsonBean {
     submission.setStatus(SubmissionStatus.valueOf((String) json.get(STATUS)));
     submission.setProgress((Double) json.get(PROGRESS));
 
-    if(json.containsKey(DATE)) {
-      submission.setDate(new Date((Long) json.get(DATE)));
+    if(json.containsKey(CREATION_DATE)) {
+      submission.setCreationDate(new Date((Long) json.get(CREATION_DATE)));
+    }
+    if(json.containsKey(LAST_UPDATE_DATE)) {
+      submission.setLastUpdateDate(new Date((Long) json.get(LAST_UPDATE_DATE)));
     }
     if(json.containsKey(EXTERNAL_ID)) {
       submission.setExternalId((String) json.get(EXTERNAL_ID));

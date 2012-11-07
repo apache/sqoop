@@ -478,6 +478,7 @@ public final class FrameworkManager {
     submission.setProgress(progress);
     submission.setCounters(counters);
     submission.setExternalLink(externalLink);
+    submission.setLastUpdateDate(new Date());
 
     RepositoryManager.getRepository().updateSubmission(submission);
   }

@@ -45,13 +45,22 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(666, target.getJobId());
   }
 
-  public void testTransferDate() {
+  public void testTransferCreationDate() {
     Date date = new Date();
     MSubmission source = new MSubmission();
-    source.setDate(date);
+    source.setCreationDate(date);
 
     MSubmission target = transfer(source);
-    assertEquals(date, target.getDate());
+    assertEquals(date, target.getCreationDate());
+  }
+
+  public void testTransferLastUpdateDate() {
+    Date date = new Date();
+    MSubmission source = new MSubmission();
+    source.setLastUpdateDate(date);
+
+    MSubmission target = transfer(source);
+    assertEquals(date, target.getLastUpdateDate());
   }
 
   public void testTransferStatus() {

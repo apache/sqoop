@@ -793,7 +793,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         Statement.RETURN_GENERATED_KEYS);
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
-      stmt.setTimestamp(3, new Timestamp(submission.getDate().getTime()));
+      stmt.setTimestamp(3, new Timestamp(submission.getCreationDate().getTime()));
       stmt.setString(4, submission.getExternalId());
 
       result = stmt.executeUpdate();
@@ -852,7 +852,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       stmt = conn.prepareStatement(STMT_UPDATE_SUBMISSION);
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
-      stmt.setTimestamp(3, new Timestamp(submission.getDate().getTime()));
+      stmt.setTimestamp(3, new Timestamp(submission.getCreationDate().getTime()));
       stmt.setString(4, submission.getExternalId());
 
       stmt.setLong(5, submission.getPersistenceId());

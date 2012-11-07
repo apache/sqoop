@@ -24,12 +24,16 @@ import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.codehaus.groovy.tools.shell.IO;
 
+import java.text.SimpleDateFormat;
+
 /**
  *
  */
 public final class SubmissionDisplayer {
 
   public static void display(IO io, MSubmission submission) {
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss z");
     io.out.println("@|bold Submission details|@");
 
     io.out.print("Job id: ");
@@ -38,6 +42,12 @@ public final class SubmissionDisplayer {
     io.out.print("Status: ");
     printColoredStatus(io, submission.getStatus());
     io.out.println();
+
+    io.out.print("Creation date: ");
+    io.out.println(dateFormat.format(submission.getCreationDate()));
+
+    io.out.print("Last update date: ");
+    io.out.println(dateFormat.format(submission.getLastUpdateDate()));
 
     String externalId = submission.getExternalId();
     if(externalId != null) {

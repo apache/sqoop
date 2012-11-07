@@ -47,7 +47,14 @@ public class MSubmission extends MPersistableEntity {
    *
    * This property is required and will be always present.
    */
-  private Date date;
+  private Date creationDate;
+
+  /**
+   * Date of last update to this submission instance
+   *
+   * This property is required and will be always present.
+   */
+  private Date lastUpdateDate;
 
   /**
    * Last known submission status.
@@ -101,13 +108,15 @@ public class MSubmission extends MPersistableEntity {
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
     progress = -1;
-    date = new Date();
+    creationDate = new Date();
+    lastUpdateDate = creationDate;
   }
 
-  public MSubmission(long jobId, Date date, SubmissionStatus status) {
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status) {
     this();
     this.jobId = jobId;
-    this.date = date;
+    this.creationDate = creationDate;
+    this.lastUpdateDate = creationDate;
     this.status = status;
   }
 
@@ -115,15 +124,15 @@ public class MSubmission extends MPersistableEntity {
     this(jobId, new Date(), SubmissionStatus.BOOTING);
   }
 
-  public MSubmission(long jobId, Date date, SubmissionStatus status,
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
                      String externalId) {
-    this(jobId, date, status);
+    this(jobId, creationDate, status);
     this.externalId = externalId;
   }
 
-  public MSubmission(long jobId, Date date, SubmissionStatus status,
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
                      String externalId, String externalLink, Counters counters){
-    this(jobId, date, status, externalId);
+    this(jobId, creationDate, status, externalId);
     this.externalLink = externalLink;
     this.counters = counters;
   }
@@ -136,12 +145,20 @@ public class MSubmission extends MPersistableEntity {
     return jobId;
   }
 
-  public void setDate(Date submissionDate) {
-    this.date = submissionDate;
+  public void setCreationDate(Date submissionDate) {
+    this.creationDate = submissionDate;
   }
 
-  public Date getDate() {
-    return date;
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public void setLastUpdateDate(Date date) {
+    this.lastUpdateDate = date;
+  }
+
+  public Date getLastUpdateDate() {
+    return lastUpdateDate;
   }
 
   public void setStatus(SubmissionStatus status) {
@@ -215,7 +232,8 @@ public class MSubmission extends MPersistableEntity {
   public String toString() {
     return "MSubmission{" +
       "jobId=" + jobId +
-      ", date=" + date +
+      ", creationDate=" + creationDate +
+      ", lastUpdateDate=" + lastUpdateDate +
       ", status=" + status +
       ", externalId='" + externalId + '\'' +
       ", progress=" + progress +
