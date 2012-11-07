@@ -24,6 +24,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -34,12 +38,8 @@ public class TestImportPartitioner extends TestCase {
   private static final int START = -5;
   private static final int NUMBER_OF_ROWS = 11;
 
-  public void testVoid() {}
-
-/*
-  @Test
   public void testIntegerEvenPartition() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
         "ICOL");
@@ -54,8 +54,11 @@ public class TestImportPartitioner extends TestCase {
         String.valueOf(START + NUMBER_OF_ROWS - 1));
     context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "5");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.initialize(context);
+    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -3",
@@ -66,9 +69,8 @@ public class TestImportPartitioner extends TestCase {
     });
   }
 
-  @Test
   public void testIntegerUnevenPartition() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
         "ICOL");
@@ -83,8 +85,11 @@ public class TestImportPartitioner extends TestCase {
         String.valueOf(START + NUMBER_OF_ROWS - 1));
     context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "3");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.initialize(context);
+    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -1",
@@ -93,9 +98,8 @@ public class TestImportPartitioner extends TestCase {
     });
   }
 
-  @Test
   public void testIntegerOverPartition() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
         "ICOL");
@@ -110,8 +114,11 @@ public class TestImportPartitioner extends TestCase {
         String.valueOf(START + NUMBER_OF_ROWS - 1));
     context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "13");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.initialize(context);
+    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -4",
@@ -127,9 +134,8 @@ public class TestImportPartitioner extends TestCase {
     });
   }
 
-  @Test
   public void testFloatingPointEvenPartition() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
         "DCOL");
@@ -144,8 +150,11 @@ public class TestImportPartitioner extends TestCase {
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
     context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "5");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.initialize(context);
+    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -3.0",
@@ -156,9 +165,8 @@ public class TestImportPartitioner extends TestCase {
     });
   }
 
-  @Test
   public void testFloatingPointUnevenPartition() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
         "DCOL");
@@ -173,8 +181,11 @@ public class TestImportPartitioner extends TestCase {
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
     context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "3");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.initialize(context);
+    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -1.6666666666666665",
@@ -193,19 +204,4 @@ public class TestImportPartitioner extends TestCase {
           ((GenericJdbcImportPartition)iterator.next()).getConditions());
     }
   }
-
-  public class DummyContext implements MutableContext {
-    HashMap<String, String> store = new HashMap<String, String>();
-
-    @Override
-    public String getString(String key) {
-      return store.get(key);
-    }
-
-    @Override
-    public void setString(String key, String value) {
-      store.put(key, value);
-    }
-  }
-*/
 }

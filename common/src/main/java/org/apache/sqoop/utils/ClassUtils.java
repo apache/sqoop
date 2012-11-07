@@ -36,6 +36,10 @@ public final class ClassUtils {
    * @return Class instance or NULL
    */
   public static Class<?> loadClass(String className) {
+    if(className == null) {
+      return null;
+    }
+
     Class<?> klass = null;
     try {
       klass = Class.forName(className);

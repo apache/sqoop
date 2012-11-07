@@ -51,11 +51,27 @@ public final class ConfigurationUtils {
       JobConstants.JOB_CONFIG_FRAMEWORK_JOB);
   }
 
+  /**
+   * Load configuration instance serialized in Hadoop configuration object
+   * @param configuration Hadoop configuration object associated with the job
+   * @param classProperty Property with stored configuration class name
+   * @param valueProperty Property with stored JSON representation of the
+   *                      configuration object
+   * @return New instance with loaded data
+   */
   private static Object loadConfiguration(Configuration configuration,
                                           String classProperty,
                                           String valueProperty) {
+    // Create new instance of configuration class
     Object object = ClassUtils.instantiate(configuration.get(classProperty));
+    if(object == null) {
+      return null;
+    }
+
+    // Fill it with JSON data
     FormUtils.fillValues(configuration.get(valueProperty), object);
+
+    // And give it back
     return object;
   }
 

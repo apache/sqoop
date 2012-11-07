@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.Partition;
@@ -45,7 +46,6 @@ import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
-import org.junit.Test;
 
 public class TestMapReduce extends TestCase {
 
@@ -53,10 +53,6 @@ public class TestMapReduce extends TestCase {
   private static final int NUMBER_OF_PARTITIONS = 9;
   private static final int NUMBER_OF_ROWS_PER_PARTITION = 10;
 
-  public void testVoid() {}
-
-  /*
-  @Test
   public void testInputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -73,7 +69,6 @@ public class TestMapReduce extends TestCase {
     }
   }
 
-  @Test
   public void testMapper() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -83,7 +78,6 @@ public class TestMapReduce extends TestCase {
         DummyOutputFormat.class);
   }
 
-  @Test
   public void testOutputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -114,11 +108,16 @@ public class TestMapReduce extends TestCase {
     public void write(DataOutput out) throws IOException {
       out.writeInt(id);
     }
+
+    @Override
+    public String toString() {
+      return Integer.toString(id);
+    }
   }
 
   public static class DummyPartitioner extends Partitioner {
     @Override
-    public List<Partition> initialize(Context context) {
+    public List<Partition> getPartitions(ImmutableContext context, Object oc, Object oj) {
       List<Partition> partitions = new LinkedList<Partition>();
       for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
         DummyPartition partition = new DummyPartition();
@@ -131,12 +130,12 @@ public class TestMapReduce extends TestCase {
 
   public static class DummyExtractor extends Extractor {
     @Override
-    public void initialize(Context context, Partition partition, DataWriter writer) {
+    public void run(ImmutableContext context, Object oc, Object oj, Partition partition, DataWriter writer) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
         writer.writeArrayRecord(new Object[] {
-            new Integer(id*NUMBER_OF_ROWS_PER_PARTITION+row),
-            new Double(id*NUMBER_OF_ROWS_PER_PARTITION+row),
+            id * NUMBER_OF_ROWS_PER_PARTITION + row,
+            (double) (id * NUMBER_OF_ROWS_PER_PARTITION + row),
             String.valueOf(id*NUMBER_OF_ROWS_PER_PARTITION+row)});
       }
     }
@@ -168,8 +167,8 @@ public class TestMapReduce extends TestCase {
       @Override
       public void write(Data key, NullWritable value) {
         data.setContent(new Object[] {
-          new Integer(index),
-          new Double(index),
+          index,
+          (double) index,
           String.valueOf(index)},
           Data.ARRAY_RECORD);
         index++;
@@ -209,21 +208,20 @@ public class TestMapReduce extends TestCase {
     private Data actual = new Data();
 
     @Override
-    public void initialize(Context context, DataReader reader) {
+    public void run(ImmutableContext context, DataReader reader) {
       Object[] array;
       while ((array = reader.readArrayRecord()) != null) {
         actual.setContent(array, Data.ARRAY_RECORD);
 
         expected.setContent(new Object[] {
-          new Integer(index),
-          new Double(index),
+          index,
+          (double) index,
           String.valueOf(index)},
           Data.ARRAY_RECORD);
         index++;
 
         assertEquals(expected.toString(), actual.toString());
-      };
+      }
     }
   }
-  */
 }

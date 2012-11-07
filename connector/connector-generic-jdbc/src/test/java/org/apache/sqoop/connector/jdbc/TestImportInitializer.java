@@ -18,13 +18,15 @@
 package org.apache.sqoop.connector.jdbc;
 
 import java.sql.Types;
-import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
-import org.junit.Test;
 
 public class TestImportInitializer extends TestCase {
 
@@ -38,14 +40,11 @@ public class TestImportInitializer extends TestCase {
   private static final int NUMBER_OF_ROWS = 101;
 
   public TestImportInitializer() {
-    tableName = getClass().getSimpleName();
-    tableSql = "SELECT * FROM \"" + tableName + "\" WHERE ${CONDITIONS}";
+    tableName = getClass().getSimpleName().toUpperCase();
+    tableSql = "SELECT * FROM " + tableName + " WHERE ${CONDITIONS}";
     tableColumns = "ICOL,VCOL";
   }
 
-  public void testVoid() {}
-
-  /*
   @Override
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
@@ -70,20 +69,18 @@ public class TestImportInitializer extends TestCase {
     executor.close();
   }
 
-  @Test
   public void testTableName() throws Exception {
-    DummyOptions options = new DummyOptions();
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER,
-        GenericJdbcTestConstants.DRIVER);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING,
-        GenericJdbcTestConstants.URL);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_NAME,
-        tableName);
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connectionString = GenericJdbcTestConstants.URL;
+    connConf.tableName = tableName;
 
-    DummyContext context = new DummyContext();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    MutableContext context = new MutableMapContext();
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, options);
+    initializer.initialize(context, connConf, jobConf);
 
     verifyResult(context,
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
@@ -96,22 +93,19 @@ public class TestImportInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
-  @Test
   public void testTableNameWithTableColumns() throws Exception {
-    DummyOptions options = new DummyOptions();
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER,
-        GenericJdbcTestConstants.DRIVER);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING,
-        GenericJdbcTestConstants.URL);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_NAME,
-        tableName);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_COLUMNS,
-        tableColumns);
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connectionString = GenericJdbcTestConstants.URL;
+    connConf.tableName = tableName;
+    connConf.columns = tableColumns;
 
-    DummyContext context = new DummyContext();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    MutableContext context = new MutableMapContext();
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, options);
+    initializer.initialize(context, connConf, jobConf);
 
     verifyResult(context,
         "SELECT ICOL,VCOL FROM " + executor.delimitIdentifier(tableName)
@@ -124,22 +118,19 @@ public class TestImportInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
-  @Test
   public void testTableSql() throws Exception {
-    DummyOptions options = new DummyOptions();
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER,
-        GenericJdbcTestConstants.DRIVER);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING,
-        GenericJdbcTestConstants.URL);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_SQL,
-        tableSql);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_PCOL,
-        "DCOL");
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connectionString = GenericJdbcTestConstants.URL;
+    connConf.sql = tableSql;
+    connConf.partitionColumn = "DCOL";
 
-    DummyContext context = new DummyContext();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    MutableContext context = new MutableMapContext();
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, options);
+    initializer.initialize(context, connConf, jobConf);
 
     verifyResult(context,
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
@@ -153,24 +144,20 @@ public class TestImportInitializer extends TestCase {
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
-  @Test
   public void testTableSqlWithTableColumns() throws Exception {
-    DummyOptions options = new DummyOptions();
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER,
-        GenericJdbcTestConstants.DRIVER);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING,
-        GenericJdbcTestConstants.URL);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_SQL,
-        tableSql);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_COLUMNS,
-        tableColumns);
-    options.setOption(GenericJdbcConnectorConstants.INPUT_TBL_PCOL,
-        "DCOL");
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connectionString = GenericJdbcTestConstants.URL;
+    connConf.sql = tableSql;
+    connConf.columns = tableColumns;
+    connConf.partitionColumn = "DCOL";
 
-    DummyContext context = new DummyContext();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    MutableContext context = new MutableMapContext();
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, options);
+    initializer.initialize(context, connConf, jobConf);
 
     verifyResult(context,
         "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "
@@ -185,7 +172,7 @@ public class TestImportInitializer extends TestCase {
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
-  private void verifyResult(DummyContext context,
+  private void verifyResult(MutableContext context,
       String dataSql, String fieldNames, String outputDirectory,
       String partitionColumnName, String partitionColumnType,
       String partitionMinValue, String partitionMaxValue) {
@@ -205,32 +192,4 @@ public class TestImportInitializer extends TestCase {
     assertEquals(partitionMaxValue, context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE));
   }
-
-  public class DummyOptions implements Options {
-    Hashtable<String, String> store = new Hashtable<String, String>();
-
-    public void setOption(String key, String value) {
-      store.put(key, value);
-    }
-
-    @Override
-    public String getOption(String key) {
-      return store.get(key);
-    }
-  }
-
-  public class DummyContext implements MutableContext {
-    Hashtable<String, String> store = new Hashtable<String, String>();
-
-    @Override
-    public String getString(String key) {
-      return store.get(key);
-    }
-
-    @Override
-    public void setString(String key, String value) {
-      store.put(key, value);
-    }
-  }
-*/
 }

@@ -35,6 +35,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
@@ -43,7 +44,6 @@ import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
-import org.junit.Test;
 
 public class TestHdfsLoad extends TestCase {
 
@@ -59,9 +59,6 @@ public class TestHdfsLoad extends TestCase {
     outdir = OUTPUT_ROOT + "/" + getClass().getSimpleName();
   }
 
-  public void testVoid() {}
-  /*
-  @Test
   public void testUncompressedText() throws Exception {
     FileUtils.delete(outdir);
 
@@ -79,7 +76,6 @@ public class TestHdfsLoad extends TestCase {
     verifyOutputText(filereader);
   }
 
-  @Test
   public void testCompressedText() throws Exception {
     FileUtils.delete(outdir);
 
@@ -109,7 +105,7 @@ public class TestHdfsLoad extends TestCase {
     int index = START_ID*NUMBER_OF_ROWS_PER_ID;
     while ((actual = reader.readLine()) != null){
       data.setContent(new Object[] {
-          new Integer(index), new Double(index), String.valueOf(index) },
+        index, (double) index, String.valueOf(index) },
           Data.ARRAY_RECORD);
       expected = data.toString();
       index++;
@@ -122,7 +118,6 @@ public class TestHdfsLoad extends TestCase {
         index-START_ID*NUMBER_OF_ROWS_PER_ID);
   }
 
-  @Test
   public void testUncompressedSequence() throws Exception {
     FileUtils.delete(outdir);
 
@@ -140,7 +135,6 @@ public class TestHdfsLoad extends TestCase {
     verifyOutputSequence(filereader);
   }
 
-  @Test
   public void testCompressedSequence() throws Exception {
     FileUtils.delete(outdir);
 
@@ -166,7 +160,7 @@ public class TestHdfsLoad extends TestCase {
     Data data = new Data();
     while (reader.next(actual)){
       data.setContent(new Object[] {
-          new Integer(index), new Double(index), String.valueOf(index) },
+          index, (double) index, String.valueOf(index) },
           Data.ARRAY_RECORD);
       expected.set(data.toString());
       index++;
@@ -199,11 +193,16 @@ public class TestHdfsLoad extends TestCase {
     public void write(DataOutput out) throws IOException {
       out.writeInt(id);
     }
+
+    @Override
+    public String toString() {
+      return Integer.toString(id);
+    }
   }
 
   public static class DummyPartitioner extends Partitioner {
     @Override
-    public List<Partition> initialize(Context context) {
+    public List<Partition> getPartitions(ImmutableContext context, Object oc, Object oj) {
       List<Partition> partitions = new LinkedList<Partition>();
       for (int id = START_ID; id <= NUMBER_OF_IDS; id++) {
         DummyPartition partition = new DummyPartition();
@@ -216,17 +215,16 @@ public class TestHdfsLoad extends TestCase {
 
   public static class DummyExtractor extends Extractor {
     @Override
-    public void initialize(Context context, Partition partition, DataWriter writer) {
+    public void run(ImmutableContext context, Object oc, Object oj, Partition partition, DataWriter writer) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_ID; row++) {
         Object[] array = new Object[] {
-          new Integer(id*NUMBER_OF_ROWS_PER_ID+row),
-          new Double(id*NUMBER_OF_ROWS_PER_ID+row),
+          id * NUMBER_OF_ROWS_PER_ID + row,
+          (double) (id * NUMBER_OF_ROWS_PER_ID + row),
           String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row)
         };
         writer.writeArrayRecord(array);
       }
     }
   }
-  */
 }

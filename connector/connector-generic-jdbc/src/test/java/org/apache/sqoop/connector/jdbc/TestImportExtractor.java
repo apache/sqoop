@@ -17,13 +17,14 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import java.util.HashMap;
-
 import junit.framework.TestCase;
 
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.DataWriter;
-import org.junit.Test;
 
 public class TestImportExtractor extends TestCase {
 
@@ -35,12 +36,9 @@ public class TestImportExtractor extends TestCase {
   private static final int NUMBER_OF_ROWS = 101;
 
   public TestImportExtractor() {
-    tableName = getClass().getSimpleName();
+    tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  public void testVoid() {}
-
-  /*
   @Override
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
@@ -65,9 +63,8 @@ public class TestImportExtractor extends TestCase {
     executor.close();
   }
 
-  @Test
   public void testQuery() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
         GenericJdbcTestConstants.DRIVER);
@@ -78,6 +75,9 @@ public class TestImportExtractor extends TestCase {
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     GenericJdbcImportPartition partition;
 
     Extractor extractor = new GenericJdbcImportExtractor();
@@ -85,20 +85,19 @@ public class TestImportExtractor extends TestCase {
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
-    extractor.initialize(context, partition, writer);
+    extractor.run(context, connConf, jobConf, partition, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-16.6666666666666665 <= DCOL AND DCOL < 16.666666666666667");
-    extractor.initialize(context, partition, writer);
+    extractor.run(context, connConf, jobConf, partition, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("16.666666666666667 <= DCOL AND DCOL <= 50.0");
-    extractor.initialize(context, partition, writer);
+    extractor.run(context, connConf, jobConf, partition, writer);
   }
 
-  @Test
   public void testSubquery() throws Exception {
-    DummyContext context = new DummyContext();
+    MutableContext context = new MutableMapContext();
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
         GenericJdbcTestConstants.DRIVER);
@@ -110,6 +109,9 @@ public class TestImportExtractor extends TestCase {
             + "(SELECT * FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
 
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     GenericJdbcImportPartition partition;
 
     Extractor extractor = new GenericJdbcImportExtractor();
@@ -117,29 +119,15 @@ public class TestImportExtractor extends TestCase {
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
-    extractor.initialize(context, partition, writer);
+    extractor.run(context, connConf, jobConf, partition, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-16 <= ICOL AND ICOL < 17");
-    extractor.initialize(context, partition, writer);
+    extractor.run(context, connConf, jobConf, partition, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("17 <= ICOL AND ICOL < 50");
-    extractor.initialize(context, partition, writer);
-  }
-
-  public class DummyContext implements MutableContext {
-    HashMap<String, String> store = new HashMap<String, String>();
-
-    @Override
-    public String getString(String key) {
-      return store.get(key);
-    }
-
-    @Override
-    public void setString(String key, String value) {
-      store.put(key, value);
-    }
+    extractor.run(context, connConf, jobConf, partition, writer);
   }
 
   public class DummyWriter extends DataWriter {
@@ -174,5 +162,4 @@ public class TestImportExtractor extends TestCase {
       fail("This method should not be invoked.");
     }
   }
-*/
 }

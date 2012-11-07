@@ -77,7 +77,7 @@ public class MapContext implements ImmutableContext {
 
     String value = options.get(key);
 
-    return Long.getLong(value);
+    return Long.parseLong(value);
   }
 
   /**
@@ -91,7 +91,7 @@ public class MapContext implements ImmutableContext {
 
     String value = options.get(key);
 
-    return Integer.getInteger(value);
+    return Integer.parseInt(value);
   }
 
   /**

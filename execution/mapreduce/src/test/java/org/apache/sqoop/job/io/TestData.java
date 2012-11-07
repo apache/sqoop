@@ -34,13 +34,13 @@ public class TestData extends TestCase {
 
     // with special characters:
     expected =
-        Long.valueOf((long)TEST_NUMBER) + "," +
-        Double.valueOf(TEST_NUMBER) + "," +
+        (long) TEST_NUMBER + "," +
+        TEST_NUMBER + "," +
         "'" + String.valueOf(TEST_NUMBER) + "\\',s'" + "," +
         Arrays.toString(new byte[] {1, 2, 3, 4, 5});
     data.setContent(new Object[] {
-        Long.valueOf((long)TEST_NUMBER),
-        Double.valueOf(TEST_NUMBER),
+        (long) TEST_NUMBER,
+        TEST_NUMBER,
         String.valueOf(TEST_NUMBER) + "',s",
         new byte[] {1, 2, 3, 4, 5} },
         Data.ARRAY_RECORD);
@@ -49,13 +49,13 @@ public class TestData extends TestCase {
 
     // with null characters:
     expected =
-        Long.valueOf((long)TEST_NUMBER) + "," +
-        Double.valueOf(TEST_NUMBER) + "," +
+        (long) TEST_NUMBER + "," +
+        TEST_NUMBER + "," +
         "null" + "," +
         Arrays.toString(new byte[] {1, 2, 3, 4, 5});
     data.setContent(new Object[] {
-        Long.valueOf((long)TEST_NUMBER),
-        Double.valueOf(TEST_NUMBER),
+        (long) TEST_NUMBER,
+        TEST_NUMBER,
         null,
         new byte[] {1, 2, 3, 4, 5} },
         Data.ARRAY_RECORD);
