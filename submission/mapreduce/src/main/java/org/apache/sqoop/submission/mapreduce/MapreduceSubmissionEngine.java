@@ -185,7 +185,12 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     try {
       Job job = Job.getInstance(configuration);
-      job.setJobName(request.getJobName());
+
+      if(request.getJobName() != null) {
+        job.setJobName("Sqoop: " + request.getJobName());
+      } else {
+        job.setJobName("Sqoop job with id: " + request.getJobId());
+      }
 
       job.setInputFormatClass(request.getInputFormatClass());
 

@@ -44,6 +44,11 @@ public class SubmissionRequest {
   String jobName;
 
   /**
+   * Associated job (from metadata perspective) id
+   */
+  long jobId;
+
+  /**
    * Connector instance associated with this submission request
    */
   SqoopConnector connector;
@@ -109,6 +114,14 @@ public class SubmissionRequest {
 
   public void setJobName(String jobName) {
     this.jobName = jobName;
+  }
+
+  public long getJobId() {
+    return jobId;
+  }
+
+  public void setJobId(long jobId) {
+    this.jobId = jobId;
   }
 
   public SqoopConnector getConnector() {

@@ -312,6 +312,7 @@ public final class FrameworkManager {
       connectorConnection, connectorJob,
       frameworkConnection, frameworkJob);
     request.setJobName(job.getName());
+    request.setJobId(job.getPersistenceId());
 
     // Let's register all important jars
     // sqoop-common
