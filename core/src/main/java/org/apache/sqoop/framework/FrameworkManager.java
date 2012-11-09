@@ -307,10 +307,16 @@ public final class FrameworkManager {
 
     // Create request object
     MSubmission summary = new MSubmission(jobId);
-    SubmissionRequest request = executionEngine.createSubmissionRequest(
-      summary, connector,
-      connectorConnection, connectorJob,
-      frameworkConnection, frameworkJob);
+    SubmissionRequest request = executionEngine.createSubmissionRequest();
+
+    // Save important variables to the submission request
+    request.setSummary(summary);
+    request.setConnector(connector);
+    request.setConfigConnectorConnection(connectorConnection);
+    request.setConfigConnectorJob(connectorJob);
+    request.setConfigFrameworkConnection(frameworkConnection);
+    request.setConfigFrameworkJob(frameworkJob);
+    request.setJobType(job.getType());
     request.setJobName(job.getName());
     request.setJobId(job.getPersistenceId());
 
@@ -329,6 +335,7 @@ public final class FrameworkManager {
     // Extra libraries that Sqoop code requires
     request.addJarForClass(JSONValue.class);
 
+    // Get connector callbacks
     switch (job.getType()) {
       case IMPORT:
         request.setConnectorCallbacks(connector.getImporter());
@@ -340,7 +347,6 @@ public final class FrameworkManager {
         throw  new SqoopException(FrameworkError.FRAMEWORK_0005,
           "Unsupported job type " + job.getType().name());
     }
-
     LOG.debug("Using callbacks: " + request.getConnectorCallbacks());
 
     // Initialize submission from connector perspective

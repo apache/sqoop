@@ -49,14 +49,31 @@ public class SqoopMapper
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
-    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-    Object connectorConnection = ConfigurationUtils.getConnectorConnection(conf);
-    Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
+    // Objects that should be pass to the Executor execution
+    PrefixContext subContext = null;
+    Object configConnection = null;
+    Object configJob = null;
+
+    // Executor is in connector space for IMPORT and in framework space for EXPORT
+    switch (ConfigurationUtils.getJobType(conf)) {
+      case IMPORT:
+        subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
+        configConnection = ConfigurationUtils.getConnectorConnection(conf);
+        configJob = ConfigurationUtils.getConnectorJob(conf);
+        break;
+      case EXPORT:
+        subContext = new PrefixContext(conf, "");
+        configConnection = ConfigurationUtils.getFrameworkConnection(conf);
+        configJob = ConfigurationUtils.getFrameworkJob(conf);
+        break;
+      default:
+        throw new SqoopException(CoreError.CORE_0023);
+    }
 
     SqoopSplit split = context.getCurrentKey();
 
     try {
-      extractor.run(connectorContext, connectorConnection, connectorJob, split.getPartition(),
+      extractor.run(subContext, configConnection, configJob, split.getPartition(),
         new MapDataWriter(context));
 
     } catch (Exception e) {

@@ -21,9 +21,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.SubmissionRequest;
-import org.apache.sqoop.model.MSubmission;
 
 /**
  * Map-reduce specific submission request containing all extra information
@@ -42,14 +40,8 @@ public class MRSubmissionRequest extends SubmissionRequest {
   Class<? extends Writable> outputKeyClass;
   Class<? extends Writable> outputValueClass;
 
-  public MRSubmissionRequest(MSubmission submission,
-                             SqoopConnector connector,
-                             Object configConnectorConnection,
-                             Object configConnectorJob,
-                             Object configFrameworkConnection,
-                             Object configFrameworkJob) {
-    super(submission, connector, configConnectorConnection, configConnectorJob,
-      configFrameworkConnection, configFrameworkJob);
+  public MRSubmissionRequest() {
+    super();
   }
 
   public Class<? extends InputFormat> getInputFormatClass() {

@@ -93,7 +93,12 @@ public enum CoreError implements ErrorCode {
   CORE_0021("Error occurs during partitioner run"),
 
   /** Unable to parse because it is not properly delimited */
-  CORE_0022("Unable to parse because it is not properly delimited");
+  CORE_0022("Unable to parse because it is not properly delimited"),
+
+  /** Unknown job type */
+  CORE_0023("Unknown job type"),
+
+  ;
 
   private final String message;
 

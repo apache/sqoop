@@ -55,6 +55,7 @@ public class TestMapReduce extends TestCase {
 
   public void testInputFormat() throws Exception {
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     Job job = Job.getInstance(conf);
 
@@ -71,6 +72,7 @@ public class TestMapReduce extends TestCase {
 
   public void testMapper() throws Exception {
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
 
@@ -80,6 +82,7 @@ public class TestMapReduce extends TestCase {
 
   public void testOutputFormat() throws Exception {
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());

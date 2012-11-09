@@ -63,6 +63,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
@@ -80,6 +81,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
@@ -122,6 +124,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
@@ -139,6 +142,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
+    conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());

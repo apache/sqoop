@@ -119,11 +119,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    */
   @Override
   public boolean isExecutionEngineSupported(Class executionEngineClass) {
-    if(executionEngineClass == MapreduceExecutionEngine.class) {
-      return true;
-    }
-
-    return false;
+    return executionEngineClass == MapreduceExecutionEngine.class;
   }
 
   /**
@@ -136,6 +132,9 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     // Clone global configuration
     Configuration configuration = new Configuration(globalConfiguration);
+
+    // Serialize job type as it will be needed by underlying execution engine
+    configuration.set(JobConstants.JOB_TYPE, request.getJobType().name());
 
     // Serialize framework context into job configuration
     for(Map.Entry<String, String> entry: request.getFrameworkContext()) {

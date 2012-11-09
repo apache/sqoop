@@ -19,7 +19,6 @@ package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.ExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
 import org.apache.sqoop.job.JobConstants;
@@ -29,7 +28,6 @@ import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
-import org.apache.sqoop.model.MSubmission;
 
 /**
  *
@@ -37,14 +35,8 @@ import org.apache.sqoop.model.MSubmission;
 public class MapreduceExecutionEngine extends ExecutionEngine {
 
   @Override
-  public SubmissionRequest createSubmissionRequest(MSubmission summary,
-                                                   SqoopConnector connector,
-                                                   Object connectorConnection,
-                                                   Object connectorJob,
-                                                   Object frameworkConnection,
-                                                   Object frameworkJob) {
-    return new MRSubmissionRequest(summary, connector, connectorConnection,
-      connectorJob, frameworkConnection, frameworkJob);
+  public SubmissionRequest createSubmissionRequest() {
+    return new MRSubmissionRequest();
   }
 
   @Override

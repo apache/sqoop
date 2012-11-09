@@ -27,6 +27,7 @@ public final class JobConstants extends Constants {
   public static final String PREFIX_JOB_CONFIG =
       ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "job.";
 
+  public static final String JOB_TYPE = PREFIX_JOB_CONFIG + "type";
 
   public static final String JOB_ETL_PARTITIONER = PREFIX_JOB_CONFIG
       + "etl.partitioner";

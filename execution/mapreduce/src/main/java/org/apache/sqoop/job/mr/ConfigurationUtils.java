@@ -20,12 +20,17 @@ package org.apache.sqoop.job.mr;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * Helper class to load configuration specific objects from job configuration
  */
 public final class ConfigurationUtils {
+
+  public static MJob.Type getJobType(Configuration configuration) {
+    return MJob.Type.valueOf(configuration.get(JobConstants.JOB_TYPE));
+  }
 
   public static Object getConnectorConnection(Configuration configuration) {
     return loadConfiguration(configuration,

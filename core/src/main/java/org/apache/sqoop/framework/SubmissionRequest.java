@@ -20,6 +20,7 @@ package org.apache.sqoop.framework;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.CallbackBase;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -47,6 +48,11 @@ public class SubmissionRequest {
    * Associated job (from metadata perspective) id
    */
   long jobId;
+
+  /**
+   * Job type
+   */
+  MJob.Type jobType;
 
   /**
    * Connector instance associated with this submission request
@@ -87,25 +93,18 @@ public class SubmissionRequest {
   String outputDirectory;
 
 
-  public SubmissionRequest(MSubmission submission,
-                           SqoopConnector connector,
-                           Object configConnectorConnection,
-                           Object configConnectorJob,
-                           Object configFrameworkConnection,
-                           Object configFrameworkJob) {
-    this.summary = submission;
-    this.connector = connector;
+  public SubmissionRequest() {
     this.jars = new LinkedList<String>();
     this.connectorContext = new MutableMapContext();
     this.frameworkContext = new MutableMapContext();
-    this.configConnectorConnection = configConnectorConnection;
-    this.configConnectorJob = configConnectorJob;
-    this.configFrameworkConnection = configFrameworkConnection;
-    this.configFrameworkJob = configFrameworkJob;
   }
 
   public MSubmission getSummary() {
     return summary;
+  }
+
+  public void setSummary(MSubmission summary) {
+    this.summary = summary;
   }
 
   public String getJobName() {
@@ -124,8 +123,20 @@ public class SubmissionRequest {
     this.jobId = jobId;
   }
 
+  public MJob.Type getJobType() {
+    return jobType;
+  }
+
+  public void setJobType(MJob.Type jobType) {
+    this.jobType = jobType;
+  }
+
   public SqoopConnector getConnector() {
     return connector;
+  }
+
+  public void setConnector(SqoopConnector connector) {
+    this.connector = connector;
   }
 
   public List<String> getJars() {
@@ -156,16 +167,32 @@ public class SubmissionRequest {
     return configConnectorConnection;
   }
 
+  public void setConfigConnectorConnection(Object config) {
+    configConnectorConnection = config;
+  }
+
   public Object getConfigConnectorJob() {
     return configConnectorJob;
+  }
+
+  public void setConfigConnectorJob(Object config) {
+    configConnectorJob = config;
   }
 
   public Object getConfigFrameworkConnection() {
     return configFrameworkConnection;
   }
 
+  public void setConfigFrameworkConnection(Object config) {
+    configFrameworkConnection = config;
+  }
+
   public Object getConfigFrameworkJob() {
     return configFrameworkJob;
+  }
+
+  public void setConfigFrameworkJob(Object config) {
+    configFrameworkJob = config;
   }
 
   public MutableMapContext getConnectorContext() {

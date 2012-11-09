@@ -45,22 +45,10 @@ public abstract class ExecutionEngine {
    * Return new SubmissionRequest class or any subclass if it's needed by
    * execution and submission engine combination.
    *
-   * @param summary Submission summary
-   * @param connector Appropriate connector structure
-   * @param connectorConnection Connector connection configuration
-   * @param connectorJob Connector job configuration
-   * @param frameworkConnection Framework connection configuration
-   * @param frameworkJob Framework job configuration
    * @return New Submission request object
    */
-  public SubmissionRequest createSubmissionRequest(MSubmission summary,
-                                                   SqoopConnector connector,
-                                                   Object connectorConnection,
-                                                   Object connectorJob,
-                                                   Object frameworkConnection,
-                                                   Object frameworkJob) {
-    return new SubmissionRequest(summary, connector,
-      connectorConnection, connectorJob, frameworkConnection, frameworkJob);
+  public SubmissionRequest createSubmissionRequest() {
+    return new SubmissionRequest();
   }
 
   /**
