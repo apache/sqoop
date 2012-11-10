@@ -17,12 +17,14 @@
  */
 package org.apache.sqoop.client.utils;
 
+import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.utils.StringUtils;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.Iterator;
@@ -101,6 +103,9 @@ public final class FormDisplayer {
           io.out.println(((MStringInput)input).isMasked());
           io.out.print("        Size: ");
           io.out.println(((MStringInput)input).getMaxLength());
+        } else if(input.getType() == MInputType.ENUM) {
+          io.out.print("        Possible values: ");
+          io.out.println(StringUtils.join(((MEnumInput)input).getValues(), ","));
         }
       }
     }

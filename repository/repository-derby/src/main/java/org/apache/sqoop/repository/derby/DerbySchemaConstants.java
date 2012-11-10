@@ -76,6 +76,8 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQI_STRLENGTH = "SQI_STRLENGTH";
 
+  public static final String COLUMN_SQI_ENUMVALS = "SQI_ENUMVALS";
+
   // SQ_CONNECTION
 
   public static final String TABLE_SQ_CONNECTION_NAME = "SQ_CONNECTION";

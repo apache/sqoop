@@ -15,44 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
-
-import org.apache.sqoop.common.ErrorCode;
+package org.apache.sqoop.utils;
 
 /**
+ * Convenience String methods.
  *
+ * We might consider replacing this with commons-lang library at some point.
  */
-public enum ModelError implements ErrorCode {
+public final class StringUtils {
 
-  MODEL_001("Attempt to pass two different set of MForms for single job type."),
+  public static String join(String []array, String separator) {
+    if(array == null) {
+      return null;
+    }
 
-  MODEL_002("Creating MJob of different job types"),
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
 
-  MODEL_003("Object is not valid configuration object"),
+    for(String item : array) {
+      if(first) {
+        first = false;
+      } else {
+        sb.append(separator);
+      }
 
-  MODEL_004("Usage of unsupported data type"),
+      sb.append(item);
+    }
 
-  MODEL_005("Can't get field details"),
-
-  MODEL_006("Incompatible form list and configuration object"),
-
-  MODEL_007("Primitive types in configuration objects are not allowed"),
-
-  MODEL_008("Invalid input value"),
-
-  ;
-
-  private final String message;
-
-  private ModelError(String message) {
-    this.message = message;
+    return sb.toString();
   }
 
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
+  private StringUtils() {
+    // Instantiation is prohibited
   }
 }

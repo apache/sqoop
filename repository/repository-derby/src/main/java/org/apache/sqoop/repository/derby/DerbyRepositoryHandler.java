@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -56,6 +57,7 @@ import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
 import org.apache.sqoop.repository.JdbcRepositoryTransactionFactory;
 import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.utils.StringUtils;
 
 /**
  * JDBC based repository handler for Derby database.
@@ -1149,6 +1151,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       baseInputStmt.setLong(2, formId);
       baseInputStmt.setShort(3, inputIndex++);
       baseInputStmt.setString(4, input.getType().name());
+      // String specific column(s)
       if (input.getType().equals(MInputType.STRING)) {
         MStringInput	strInput = (MStringInput) input;
         baseInputStmt.setBoolean(5, strInput.isMasked());
@@ -1157,6 +1160,13 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         baseInputStmt.setNull(5, Types.BOOLEAN);
         baseInputStmt.setNull(6, Types.INTEGER);
       }
+      // Enum specific column(s)
+      if(input.getType() == MInputType.ENUM) {
+        baseInputStmt.setString(7, StringUtils.join(((MEnumInput)input).getValues(), ","));
+      } else {
+        baseInputStmt.setNull(7, Types.VARCHAR);
+      }
+
       int baseInputCount = baseInputStmt.executeUpdate();
       if (baseInputCount != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0017,
@@ -1268,7 +1278,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         String inputType = rsetInput.getString(5);
         boolean inputStrMask = rsetInput.getBoolean(6);
         short inputStrLength = rsetInput.getShort(7);
-        String value = rsetInput.getString(8);
+        String inputEnumValues = rsetInput.getString(8);
+        String value = rsetInput.getString(9);
 
         MInputType mit = MInputType.valueOf(inputType);
 
@@ -1282,6 +1293,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
           break;
         case INTEGER:
           input = new MIntegerInput(inputName);
+          break;
+        case ENUM:
+          input = new MEnumInput(inputName, inputEnumValues.split(","));
           break;
         default:
           throw new SqoopException(DerbyRepoError.DERBYREPO_0006,

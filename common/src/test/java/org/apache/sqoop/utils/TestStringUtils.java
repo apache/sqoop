@@ -15,44 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
+package org.apache.sqoop.utils;
 
-import org.apache.sqoop.common.ErrorCode;
+import junit.framework.TestCase;
 
 /**
  *
  */
-public enum ModelError implements ErrorCode {
+public class TestStringUtils extends TestCase {
 
-  MODEL_001("Attempt to pass two different set of MForms for single job type."),
+  public void testJoin() {
+    assertNull(StringUtils.join(null, "a"));
 
-  MODEL_002("Creating MJob of different job types"),
+    String []a = new String[] {"a", "b", "c"};
 
-  MODEL_003("Object is not valid configuration object"),
-
-  MODEL_004("Usage of unsupported data type"),
-
-  MODEL_005("Can't get field details"),
-
-  MODEL_006("Incompatible form list and configuration object"),
-
-  MODEL_007("Primitive types in configuration objects are not allowed"),
-
-  MODEL_008("Invalid input value"),
-
-  ;
-
-  private final String message;
-
-  private ModelError(String message) {
-    this.message = message;
-  }
-
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
+    assertEquals("a,b,c", StringUtils.join(a, ","));
+    assertEquals("abc", StringUtils.join(a, ""));
   }
 }

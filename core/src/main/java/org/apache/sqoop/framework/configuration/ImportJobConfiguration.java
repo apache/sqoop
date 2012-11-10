@@ -29,7 +29,7 @@ import static org.apache.sqoop.framework.FrameworkConstants.*;
 public class ImportJobConfiguration {
 
   @Input(form = FORM_OUTPUT, size = 25)
-  public String outputFormat;
+  public StorageType storageType;
 
   @Input(form = FORM_OUTPUT, size = 25)
   public String outputDirectory;

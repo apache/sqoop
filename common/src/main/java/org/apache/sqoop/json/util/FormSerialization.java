@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
 import org.apache.sqoop.model.MInput;
@@ -24,6 +25,7 @@ import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.utils.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -49,6 +51,7 @@ public final class FormSerialization {
   public static final String FORM_INPUT_MASK = "mask";
   public static final String FORM_INPUT_SIZE = "size";
   public static final String FORM_INPUT_VALUE = "value";
+  public static final String FORM_INPUT_VALUES = "values";
 
   /**
    * Transform given list of forms to JSON Array object.
@@ -95,6 +98,12 @@ public final class FormSerialization {
             ((MStringInput)mInput).isMasked());
         input.put(FORM_INPUT_SIZE,
             ((MStringInput)mInput).getMaxLength());
+      }
+
+      // Enum specific serialization
+      if(mInput.getType() == MInputType.ENUM) {
+        input.put(FORM_INPUT_VALUES,
+          StringUtils.join(((MEnumInput)mInput).getValues(), ","));
       }
 
       // Serialize value if is there
@@ -151,6 +160,11 @@ public final class FormSerialization {
         }
         case INTEGER: {
           mInput = new MIntegerInput(name);
+          break;
+        }
+        case ENUM: {
+          String values = (String) input.get(FORM_INPUT_VALUES);
+          mInput = new MEnumInput(name, values.split(","));
           break;
         }
       }

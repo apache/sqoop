@@ -62,13 +62,17 @@ public abstract class MInput<T> extends MValidatedElement {
    * @return <tt>true</tt> if this type maintains more state than what is
    * stored in the <tt>MInput</tt> base class.
    */
-  protected abstract boolean hasExtraInfo();
+  public boolean hasExtraInfo() {
+    return false;
+  }
 
   /**
    * @return the string representation of state stored in this type if
    * applicable or an empty string.
    */
-  protected abstract String getExtraInfoToString();
+  public String getExtraInfoToString() {
+    return null;
+  }
 
   /**
    * All input types must override the <tt>equals()</tt> method such that the

@@ -15,44 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
-
-import org.apache.sqoop.common.ErrorCode;
+package org.apache.sqoop.framework.configuration;
 
 /**
- *
+ * Various storage types that Sqoop is supporting
  */
-public enum ModelError implements ErrorCode {
-
-  MODEL_001("Attempt to pass two different set of MForms for single job type."),
-
-  MODEL_002("Creating MJob of different job types"),
-
-  MODEL_003("Object is not valid configuration object"),
-
-  MODEL_004("Usage of unsupported data type"),
-
-  MODEL_005("Can't get field details"),
-
-  MODEL_006("Incompatible form list and configuration object"),
-
-  MODEL_007("Primitive types in configuration objects are not allowed"),
-
-  MODEL_008("Invalid input value"),
-
-  ;
-
-  private final String message;
-
-  private ModelError(String message) {
-    this.message = message;
-  }
-
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
-  }
+public enum StorageType {
+  /**
+   * Direct HDFS import
+   */
+  HDFS,
 }

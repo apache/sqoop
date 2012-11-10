@@ -63,6 +63,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQI_TYPE: VARCHAR(32)      | "STRING"|"MAP"
  *    | SQI_STRMASK: BOOLEAN       |
  *    | SQI_STRLENGTH: SMALLINT    |
+ *    | SQI_ENUMVALS: VARCHAR(100) |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -165,8 +166,9 @@ public final class DerbySchemaQuery {
       + "PRIMARY KEY, " + COLUMN_SQI_NAME + " VARCHAR(64), "
       + COLUMN_SQI_FORM + " BIGINT, " + COLUMN_SQI_INDEX + " SMALLINT, "
       + COLUMN_SQI_TYPE + " VARCHAR(32), " + COLUMN_SQI_STRMASK + " BOOLEAN, "
-      + COLUMN_SQI_STRLENGTH + " SMALLINT, FOREIGN KEY (" + COLUMN_SQI_FORM
-      + ") REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + "))";
+      + COLUMN_SQI_STRLENGTH + " SMALLINT, " + COLUMN_SQI_ENUMVALS
+      + " VARCHAR(100), FOREIGN KEY (" + COLUMN_SQI_FORM + ") REFERENCES "
+      + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + "))";
 
   // DDL: Create table SQ_CONNECTION
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =
@@ -242,18 +244,19 @@ public final class DerbySchemaQuery {
   public static final String STMT_FETCH_INPUT =
       "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
-      + ", cast(null as varchar(100)) FROM " + TABLE_SQ_INPUT + " WHERE "
-      + COLUMN_SQI_FORM + " = ? ORDER BY " + COLUMN_SQI_INDEX;
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS + ", cast(null as varchar(100)) FROM "
+      + TABLE_SQ_INPUT + " WHERE " + COLUMN_SQI_FORM + " = ? ORDER BY "
+      + COLUMN_SQI_INDEX;
 
   // DML: Fetch inputs and values for a given connection
   public static final String STMT_FETCH_CONNECTION_INPUT =
       "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
-      + ", " + COLUMN_SQNI_VALUE + " FROM " + TABLE_SQ_INPUT
-      + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT + " ON "
-      + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " AND "
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ","
+      + COLUMN_SQI_ENUMVALS + ", " + COLUMN_SQNI_VALUE + " FROM "
+      + TABLE_SQ_INPUT + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT
+      + " ON " + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " AND "
       + COLUMN_SQNI_CONNECTION + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND ("
       + COLUMN_SQNI_CONNECTION + " = ? OR " + COLUMN_SQNI_CONNECTION
       + " IS NULL) ORDER BY " + COLUMN_SQI_INDEX;
@@ -262,9 +265,9 @@ public final class DerbySchemaQuery {
   public static final String STMT_FETCH_JOB_INPUT =
       "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH
-      + ", " + COLUMN_SQBI_VALUE + " FROM " + TABLE_SQ_INPUT
-      + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT + " ON "
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS + ", " + COLUMN_SQBI_VALUE + " FROM "
+      + TABLE_SQ_INPUT + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT + " ON "
       + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID + " AND  " + COLUMN_SQBI_JOB
       + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQBI_JOB
       + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL) ORDER BY "
@@ -285,8 +288,8 @@ public final class DerbySchemaQuery {
   public static final String STMT_INSERT_INPUT_BASE =
       "INSERT INTO " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_NAME + ", "
       + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ") "
-      + "VALUES (?, ?, ?, ?, ?, ?)";
+      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS + ") " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new connection
   public static final String STMT_INSERT_CONNECTION =

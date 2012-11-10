@@ -21,10 +21,6 @@ import org.apache.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 public final class ClassUtils {
 
@@ -125,8 +121,9 @@ public final class ClassUtils {
    */
   public static String jarForClass(String className) {
     Class klass = loadClass(className);
-    return jarForClass(klass);
+    return klass.getProtectionDomain().getCodeSource().getLocation().toString();
   }
+
 
   /**
    * Return jar path for given class.
@@ -136,33 +133,6 @@ public final class ClassUtils {
    */
   public static String jarForClass(Class klass) {
     return klass.getProtectionDomain().getCodeSource().getLocation().toString();
-  }
-
-  /**
-   * Get list of constants from given Enum as a array of strings.
-   *
-   * @param klass Enumeration class
-   * @return Array of string representation or null in case of any error
-   */
-  public static String[] getEnumStrings(Class klass) {
-    if(!klass.isEnum()) {
-      return null;
-    }
-
-    ArrayList<String> values = new ArrayList<String>();
-
-    try {
-      Method methodName = klass.getMethod("name");
-
-      for(Object constant : klass.getEnumConstants()) {
-        values.add((String) methodName.invoke(constant));
-      }
-    } catch (Exception e) {
-      LOG.error("Can't get list of values from enumeration " + klass.getCanonicalName(), e);
-      return null;
-    }
-
-    return values.toArray(new String[values.size()]);
   }
 
   private ClassUtils() {

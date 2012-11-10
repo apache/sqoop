@@ -52,16 +52,6 @@ public class MIntegerInput extends MInput<Integer> {
   }
 
   @Override
-  protected boolean hasExtraInfo() {
-    return false;
-  }
-
-  @Override
-  protected String getExtraInfoToString() {
-    return "";
-  }
-
-  @Override
   public boolean equals(Object other) {
     if (other == this) {
       return true;

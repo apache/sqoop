@@ -65,4 +65,35 @@ public class TestClassUtils extends TestCase {
       this.c = c;
     }
   }
+
+  public void testGetEnumStrings() {
+    assertNull(ClassUtils.getEnumStrings(A.class));
+
+    assertEquals(
+      new String[] {"A", "B", "C"},
+      ClassUtils.getEnumStrings(EnumA.class)
+    );
+    assertEquals(
+      new String[] {"X", "Y"},
+      ClassUtils.getEnumStrings(EnumX.class)
+    );
+  }
+
+  enum EnumX {
+    X, Y
+  }
+
+  enum EnumA {
+    A, B, C
+  }
+
+  public void assertEquals(String[] expected, String[] actual) {
+    assertEquals("Arrays do not have same length", expected.length, actual.length);
+
+    for(int i = 0; i < expected.length; i++) {
+      assertEquals("Items on position " + i + " differs, expected "
+        + expected[i] + ", actual " + actual[i],
+        expected[i], actual[i]);
+    }
+  }
 }

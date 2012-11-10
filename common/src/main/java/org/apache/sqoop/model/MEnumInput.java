@@ -17,58 +17,64 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.sqoop.utils.UrlSafeUtils;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.utils.StringUtils;
+
+import java.util.Arrays;
 
 /**
- * Represents a <tt>String</tt> input. The boolean flag <tt>mask</tt> supplied
- * to its constructor can be used to indicate if the string should be masked
- * from user-view. This is helpful for creating input strings that represent
- * sensitive information such as passwords.
+ *
  */
-public final class MStringInput extends MInput<String> {
-
-  private final boolean mask;
-  private final short maxLength;
+public class MEnumInput extends MInput<String> {
 
   /**
-   * @param name the parameter name
-   * @param mask a flag indicating if the string should be masked
-   * @param maxLength the maximum length of the string
+   * Array of available values
    */
-  public MStringInput(String name, boolean mask, short maxLength) {
+  String []values;
+
+  public MEnumInput(String name, String[] values) {
     super(name);
-    this.mask = mask;
-    this.maxLength = maxLength;
+    this.values = values;
   }
 
-  /**
-   * @return <tt>true</tt> if this string represents sensitive information that
-   * should be masked
-   */
-  public boolean isMasked() {
-    return mask;
+  public String[] getValues() {
+    return values;
   }
 
-  /**
-   * @return the maximum length of this string type
-   */
-  public short getMaxLength() {
-    return maxLength;
+  @Override
+  public void setValue(String value) {
+    // Null is allowed value
+    if(value == null) {
+      super.setValue(null);
+      return;
+    }
+
+    // However non null values must be available from given enumeration list
+    for(String allowedValue : values) {
+      if(allowedValue.equals(value)) {
+        super.setValue(value);
+        return;
+      }
+    }
+
+    // Otherwise we've got invalid value
+    throw new SqoopException(ModelError.MODEL_008,
+      "Invalid value " + value);
   }
 
   @Override
   public String getUrlSafeValueString() {
-    return UrlSafeUtils.urlEncode(getValue());
+    return getValue();
   }
 
   @Override
   public void restoreFromUrlSafeValueString(String valueString) {
-    setValue(UrlSafeUtils.urlDecode(valueString));
+    setValue(valueString);
   }
 
   @Override
   public MInputType getType() {
-    return MInputType.STRING;
+    return MInputType.ENUM;
   }
 
   @Override
@@ -78,7 +84,7 @@ public final class MStringInput extends MInput<String> {
 
   @Override
   public String getExtraInfoToString() {
-    return isMasked() + ":" + getMaxLength();
+    return StringUtils.join(values, ",");
   }
 
   @Override
@@ -87,22 +93,22 @@ public final class MStringInput extends MInput<String> {
       return true;
     }
 
-    if (!(other instanceof MStringInput)) {
+    if (!(other instanceof MEnumInput)) {
       return false;
     }
 
-    MStringInput msi = (MStringInput) other;
-    return getName().equals(msi.getName())
-        && (mask == msi.mask)
-        && (maxLength == msi.maxLength);
+    MEnumInput mei = (MEnumInput) other;
+    return getName().equals(mei.getName()) && Arrays.equals(values, mei.values);
   }
 
   @Override
   public int hashCode() {
-    int result = 23 + 31 * getName().hashCode();
-    result = 31 * result + (mask ? 1 : 0);
-    result = 31 * result + maxLength;
-    return result;
+    int hash = 23 + 31 * getName().hashCode();
+    for(String value : values) {
+      hash += 31 * value.hashCode();
+    }
+
+    return hash;
   }
 
   @Override

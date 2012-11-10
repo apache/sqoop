@@ -20,6 +20,7 @@ package org.apache.sqoop.client.utils;
 import jline.ConsoleReader;
 import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
@@ -180,11 +181,84 @@ public final class FormFiller {
       case INTEGER:
         return fillInputInteger(io, (MIntegerInput) input, reader, bundle);
       case MAP:
-        return fillInputMap(io, (MMapInput)input, reader, bundle);
+        return fillInputMap(io, (MMapInput) input, reader, bundle);
+      case ENUM:
+        return fillInputEnum(io, (MEnumInput) input, reader, bundle);
       default:
         io.out.println("Unsupported data type " + input.getType());
         return true;
     }
+  }
+
+  /**
+   * Load user input for enum type.
+   *
+   * Print out numbered list of all available options and let user choose one
+   * item from that.
+   *
+   * @param io Shell's IO object
+   * @param input Input that we should read or edit
+   * @param reader Associated console reader
+   * @param bundle Resource bundle
+   * @return True if user with to continue with loading addtional inputs
+   * @throws IOException
+   */
+  private static boolean fillInputEnum(IO io,
+                                       MEnumInput input,
+                                       ConsoleReader reader,
+                                       ResourceBundle bundle)
+                                       throws IOException {
+    // Prompt in enum case
+    io.out.println(bundle.getString(input.getLabelKey()) + ": ");
+
+    // Indexes
+    int i = -1;
+    int lastChoice = -1;
+
+    // Print out all values as a numbered list
+    for(String value : input.getValues()) {
+      i++;
+
+      io.out.println("  " + i  + " : " + value);
+
+      if(!input.isEmpty() && value.equals(input.getValue())) {
+        lastChoice = i;
+      }
+    }
+
+    // Prompt
+    reader.printString("Choose: ");
+
+    // Fill previously filled index when available
+    if(lastChoice != -1) {
+      reader.putString(Integer.toString(lastChoice));
+    }
+
+    reader.flushConsole();
+    String userTyped = reader.readLine();
+
+    if (userTyped == null) {
+      return false;
+    } else if (userTyped.isEmpty()) {
+      input.setEmpty();
+    } else {
+      Integer index;
+      try {
+        index = Integer.valueOf(userTyped);
+
+        if(index < 0 || index >= input.getValues().length) {
+          errorMessage(io, "Invalid index");
+          return fillInputEnum(io, input, reader, bundle);
+        }
+
+        input.setValue(input.getValues()[index]);
+      } catch (NumberFormatException ex) {
+        errorMessage(io, "Input is not valid integer number");
+        return fillInputEnum(io, input, reader, bundle);
+      }
+    }
+
+    return true;
   }
 
   /**

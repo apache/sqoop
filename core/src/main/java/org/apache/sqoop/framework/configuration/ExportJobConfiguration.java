@@ -29,5 +29,5 @@ import static org.apache.sqoop.framework.FrameworkConstants.*;
 public class ExportJobConfiguration {
 
   @Input(form = FORM_OUTPUT, size = 25)
-  public String outputFormat;
+  public String ignored;
 }

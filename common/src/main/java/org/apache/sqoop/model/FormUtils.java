@@ -17,14 +17,13 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -111,6 +110,8 @@ public class FormUtils {
           input = new MMapInput(fieldName);
         } else if(type == Integer.class) {
           input = new MIntegerInput(fieldName);
+        } else if(type.isEnum()) {
+          input = new MEnumInput(fieldName, ClassUtils.getEnumStrings(type));
         } else {
           throw new SqoopException(ModelError.MODEL_004,
             "Unsupported type " + type.getName() + " for input " + fieldName);
@@ -167,11 +168,16 @@ public class FormUtils {
         // We need to access this field even if it would be declared as private
         field.setAccessible(true);
 
+        // Propagate value to the configuration object
         try {
           if(input.isEmpty()) {
             field.set(configuration, null);
           } else {
-            field.set(configuration, input.getValue());
+            if (input.getType() == MInputType.ENUM) {
+              field.set(configuration, Enum.valueOf((Class<? extends Enum>)field.getType(), (String) input.getValue()));
+            } else {
+              field.set(configuration, input.getValue());
+            }
           }
         } catch (IllegalAccessException e) {
           throw new SqoopException(ModelError.MODEL_005,
@@ -256,6 +262,8 @@ public class FormUtils {
           jsonObject.put(fieldName, map);
         } else if(type == Integer.class) {
           jsonObject.put(fieldName, value);
+        } else if(type.isEnum()) {
+          jsonObject.put(fieldName, value);
         } else {
           throw new SqoopException(ModelError.MODEL_004,
             "Unsupported type " + type.getName() + " for input " + fieldName);
@@ -300,6 +308,8 @@ public class FormUtils {
           field.set(key, map);
         } else if(type == Integer.class) {
           field.set(configuration, jsonObject.get(key));
+        } else if(type == Integer.class) {
+          field.set(configuration, Enum.valueOf((Class<? extends Enum>)field.getType(), (String) jsonObject.get(key)));
         } else {
           throw new SqoopException(ModelError.MODEL_004,
             "Unsupported type " + type.getName() + " for input " + key);

@@ -34,5 +34,8 @@ public enum MInputType {
   /** Integer input type */
   INTEGER,
 
+  /** String based input that can contain only predefined values **/
+  ENUM,
+
   ;
 }
