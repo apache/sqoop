@@ -195,10 +195,12 @@ public class DirectPostgresqlManager
       } else {
         if ("bool".equalsIgnoreCase(columnTypes.get(col))) {
           sb.append(String.format("case when %s=true then 'TRUE' "
-          + "when %s=false then 'FALSE' end as %s", colEscaped, colEscaped, colEscaped));
+          + "when %s=false then 'FALSE' end as %s",
+          colEscaped, colEscaped, colEscaped));
         } else if ("bit".equalsIgnoreCase(columnTypes.get(col))) {
           sb.append(String.format("case when %s=B'1' then 'TRUE' "
-          + "when %s=B'0' then 'FALSE' end as %s", colEscaped, colEscaped, colEscaped));
+          + "when %s=B'0' then 'FALSE' end as %s",
+          colEscaped, colEscaped, colEscaped));
         } else {
           sb.append(colEscaped);
         }
