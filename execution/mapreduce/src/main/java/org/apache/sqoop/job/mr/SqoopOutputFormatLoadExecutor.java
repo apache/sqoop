@@ -26,8 +26,8 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.io.Data;
@@ -88,7 +88,7 @@ public class SqoopOutputFormatLoadExecutor {
           data.notify();
 
           // throw exception
-          throw new SqoopException(CoreError.CORE_0015, e);
+          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0015, e);
         }
       }
     }
@@ -119,7 +119,7 @@ public class SqoopOutputFormatLoadExecutor {
           data.notify();
 
           // throw exception
-          throw new SqoopException(CoreError.CORE_0015, e);
+          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0015, e);
         }
       }
     }
@@ -170,7 +170,7 @@ public class SqoopOutputFormatLoadExecutor {
           data.notify();
 
           // throw exception
-          throw new SqoopException(CoreError.CORE_0016, e);
+          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0016, e);
         }
       }
     }
@@ -201,7 +201,7 @@ public class SqoopOutputFormatLoadExecutor {
       try {
         loader.run(frameworkContext, reader);
       } catch (Throwable t) {
-        throw new SqoopException(CoreError.CORE_0018, t);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
       }
 
       synchronized (data) {
@@ -214,7 +214,7 @@ public class SqoopOutputFormatLoadExecutor {
         // if no exception happens yet
         if (exception == null && !writerFinished) {
           // create exception if data are not all consumed
-          exception = new SqoopException(CoreError.CORE_0019);
+          exception = new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
         }
 
         // throw deferred exception if exist

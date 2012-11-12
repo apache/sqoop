@@ -25,8 +25,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.Data;
@@ -67,7 +67,7 @@ public class SqoopMapper
         configJob = ConfigurationUtils.getFrameworkJob(conf);
         break;
       default:
-        throw new SqoopException(CoreError.CORE_0023);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
     }
 
     SqoopSplit split = context.getCurrentKey();
@@ -77,7 +77,7 @@ public class SqoopMapper
         new MapDataWriter(context));
 
     } catch (Exception e) {
-      throw new SqoopException(CoreError.CORE_0017, e);
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0017, e);
     }
   }
 
@@ -118,7 +118,7 @@ public class SqoopMapper
       try {
         context.write(data, NullWritable.get());
       } catch (Exception e) {
-        throw new SqoopException(CoreError.CORE_0013, e);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0013, e);
       }
     }
   }

@@ -29,7 +29,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
+import org.apache.sqoop.job.MapreduceExecutionError;
 
 public class Data implements WritableComparable<Data> {
 
@@ -70,7 +70,7 @@ public class Data implements WritableComparable<Data> {
       this.content = content;
       break;
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -81,7 +81,7 @@ public class Data implements WritableComparable<Data> {
     case ARRAY_RECORD:
       return parse();
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(targetType));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(targetType));
     }
   }
 
@@ -135,7 +135,7 @@ public class Data implements WritableComparable<Data> {
       }
       return result;
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -150,7 +150,7 @@ public class Data implements WritableComparable<Data> {
       readArray(in);
       break;
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -165,7 +165,7 @@ public class Data implements WritableComparable<Data> {
       writeArray(out);
       break;
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -243,7 +243,7 @@ public class Data implements WritableComparable<Data> {
 
       default:
         throw new IOException(
-          new SqoopException(CoreError.CORE_0012, Integer.toString(type))
+          new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, Integer.toString(type))
         );
       }
     }
@@ -301,8 +301,8 @@ public class Data implements WritableComparable<Data> {
 
       } else {
         throw new IOException(
-          new SqoopException(
-              CoreError.CORE_0012, array[i].getClass().getName()
+          new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012,
+            array[i].getClass().getName()
           )
         );
       }
@@ -345,7 +345,7 @@ public class Data implements WritableComparable<Data> {
       return sb.toString();
 
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -363,7 +363,7 @@ public class Data implements WritableComparable<Data> {
       return (Object[])content;
 
     default:
-      throw new SqoopException(CoreError.CORE_0012, String.valueOf(type));
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 

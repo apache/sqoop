@@ -29,8 +29,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.core.CoreError;
 import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataReader;
 import org.apache.sqoop.utils.ClassUtils;
@@ -58,7 +58,7 @@ public class HdfsTextImportLoader extends Loader {
     if (codecname != null) {
       Class<?> clz = ClassUtils.loadClass(codecname);
       if (clz == null) {
-        throw new SqoopException(CoreError.CORE_0009, codecname);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0009, codecname);
       }
 
       try {
@@ -67,7 +67,7 @@ public class HdfsTextImportLoader extends Loader {
           ((Configurable) codec).setConf(conf);
         }
       } catch (Exception e) {
-        throw new SqoopException(CoreError.CORE_0010, codecname, e);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0010, codecname, e);
       }
 
       filename += codec.getDefaultExtension();
@@ -95,7 +95,7 @@ public class HdfsTextImportLoader extends Loader {
       filewriter.close();
 
     } catch (IOException e) {
-      throw new SqoopException(CoreError.CORE_0018, e);
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, e);
     }
 
   }
