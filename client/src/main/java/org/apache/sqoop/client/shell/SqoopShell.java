@@ -20,6 +20,7 @@ package org.apache.sqoop.client.shell;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -30,18 +31,42 @@ import org.codehaus.groovy.tools.shell.CommandRegistry;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.codehaus.groovy.tools.shell.IO.Verbosity;
 
-public final class SqoopShell
-{
-  private static final String banner =
+/**
+ * Main entry point to Sqoop client.
+ *
+ * Sqoop shell is implemented on top of Groovy shell.
+ */
+public final class SqoopShell {
+
+  /**
+   * Location of resource file that can contain few initial commands that will
+   * be loaded during each client execution.
+   */
+  private static final String RC_FILE = ".sqoop2rc";
+
+  /**
+   * Banner message that is displayed in interactive mode after client start.
+   */
+  private static final String BANNER =
       "@|green Sqoop Shell:|@ Type '@|bold help|@' or '@|bold \\h|@' for help.";
 
+  /**
+   * Hash of commands that we want to have in history in all cases.
+   */
   public final static HashSet<String> commandsToKeep;
+
   static {
     commandsToKeep = new HashSet<String>();
     commandsToKeep.add("exit");
     commandsToKeep.add("history");
   }
 
+  /**
+   * Main entry point to the client execution.
+   *
+   * @param args Command line arguments
+   * @throws Exception
+   */
   public static void main (String[] args) throws Exception
   {
     System.setProperty("groovysh.prompt", "sqoop");
@@ -73,10 +98,21 @@ public final class SqoopShell
     shell.register(new CloneCommand(shell));
     shell.register(new SubmissionCommand(shell));
 
+    // Let's see if user do have resource file with initial commands that he
+    // would like to apply.
+    String homeDir = System.getProperty("user.home");
+    File rcFile = new File(homeDir, RC_FILE);
+
+    if(rcFile.exists()) {
+      shell.getIo().out.println("Loading resource file " + RC_FILE);
+      interpretFileContent(rcFile, shell);
+      shell.getIo().out.println("Resource file loaded.");
+    }
+
     if (args.length == 0) {
       // Interactive mode:
       shell.getIo().setVerbosity(Verbosity.QUIET);
-      shell.getIo().out.println(banner);
+      shell.getIo().out.println(BANNER);
       shell.getIo().out.println();
       shell.run(args);
 
@@ -88,15 +124,37 @@ public final class SqoopShell
         script = new File(userDir, args[0]);
       }
 
-      BufferedReader in = new BufferedReader(new FileReader(script));
-      String line;
-      while ((line = in.readLine()) != null) {
-        shell.getIo().out.print(shell.renderPrompt());
-        shell.getIo().out.println(line);
-        Object result = shell.execute(line);
-        if (result != null) {
-          shell.getIo().out.println(result);
-        }
+      interpretFileContent(script, shell);
+    }
+  }
+
+  /**
+   * Interpret file content in given shell.
+   *
+   * @param script Script file that should be interpreted
+   * @param shell Shell where the script should be interpreted
+   * @throws IOException
+   */
+  private static void interpretFileContent(File script, Groovysh shell) throws IOException {
+    BufferedReader in = new BufferedReader(new FileReader(script));
+    String line;
+
+    // Iterate over all lines and executed them one by one
+    while ((line = in.readLine()) != null) {
+
+      // Skip comments and empty lines as we don't need to interpret those
+      if(line.isEmpty() || line.startsWith("#")) {
+        continue;
+      }
+
+      // Render shell and command to get user perception that it was run as usual
+      shell.getIo().out.print(shell.renderPrompt());
+      shell.getIo().out.println(line);
+
+      // Manually trigger command line parsing
+      Object result = shell.execute(line);
+      if (result != null) {
+        shell.getIo().out.println(result);
       }
     }
   }
