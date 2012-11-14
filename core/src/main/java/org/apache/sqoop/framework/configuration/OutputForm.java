@@ -15,16 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
+package org.apache.sqoop.framework.configuration;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
- * Class annotation. Each class that is used a configuration object where user
- * is expected to provide input need to have this annotation.
+ *
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Configuration {
+@FormClass
+public class OutputForm {
 
+  @Input public StorageType storageType;
+
+  @Input(size = 25) public String outputDirectory;
 }

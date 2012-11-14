@@ -17,14 +17,13 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.Configuration;
-import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Form;
 
 /**
  *
  */
-@Configuration
+@ConfigurationClass
 public class ExportJobConfiguration {
-  @Input(form = "ignored")
-  String ignored;
+  @Form IgnoredForm ignored;
 }

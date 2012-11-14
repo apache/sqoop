@@ -21,8 +21,8 @@ package org.apache.sqoop.model;
  * Represents an element of metadata used by the connector.
  */
 public abstract class MNamedElement extends MPersistableEntity {
-  private static final String LABEL_KEY_SUFFIX = "-label";
-  private static final String HELP_KEY_SUFFIX = "-help";
+  private static final String LABEL_KEY_SUFFIX = ".label";
+  private static final String HELP_KEY_SUFFIX = ".help";
 
   private final String name;
   private final String labelKey;

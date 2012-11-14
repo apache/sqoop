@@ -59,13 +59,6 @@ public final class FrameworkConstants {
   public static final String PREFIX_EXECUTION_ENGINE_CONFIG =
     SYSCFG_EXECUTION_ENGINE + ".";
 
-  // Connection/Job Configuration forms
-
-  public static final String FORM_SECURITY =
-    "form-security";
-  public static final String FORM_OUTPUT =
-    "form-output";
-
   // Bundle names
 
   public static final String RESOURCE_BUNDLE_NAME = "framework-resources";

@@ -34,7 +34,7 @@ public class TestFormUtils extends TestCase {
 
   public void testToForms() {
     Config config = new Config();
-    config.a1 = "value";
+    config.aForm.a1 = "value";
 
     List<MForm> formsByInstance = FormUtils.toForms(config);
     assertEquals(getForms(), formsByInstance);
@@ -77,8 +77,8 @@ public class TestFormUtils extends TestCase {
 
     Config config = new Config();
 
-    FormUtils.fillValues(forms, config);
-    assertEquals("value", config.a1);
+    FormUtils.fromForms(forms, config);
+    assertEquals("value", config.aForm.a1);
   }
 
   public void testFillValuesObjectReuse() {
@@ -87,14 +87,14 @@ public class TestFormUtils extends TestCase {
     ((MStringInput)forms.get(0).getInputs().get(0)).setValue("value");
 
     Config config = new Config();
-    config.a2 = "x";
-    config.b1 = "y";
+    config.aForm.a2 = "x";
+    config.bForm.b1 = "y";
 
-    FormUtils.fillValues(forms, config);
-    assertEquals("value", config.a1);
-    assertNull(config.a2);
-    assertNull(config.b2);
-    assertNull(config.b2);
+    FormUtils.fromForms(forms, config);
+    assertEquals("value", config.aForm.a1);
+    assertNull(config.aForm.a2);
+    assertNull(config.bForm.b2);
+    assertNull(config.bForm.b2);
   }
 
   public void testApplyValidation() {
@@ -118,8 +118,8 @@ public class TestFormUtils extends TestCase {
     Map<String, Validation.Message> messages
       = new HashMap<String, Validation.Message>();
 
-    messages.put("a1", new Validation.Message(Status.ACCEPTABLE, "e1"));
-    messages.put("a2", new Validation.Message(Status.UNACCEPTABLE, "e2"));
+    messages.put("aForm.a1", new Validation.Message(Status.ACCEPTABLE, "e1"));
+    messages.put("aForm.a2", new Validation.Message(Status.UNACCEPTABLE, "e2"));
 
     return new Validation(Status.UNACCEPTABLE, messages);
   }
@@ -135,40 +135,67 @@ public class TestFormUtils extends TestCase {
 
     // Form A
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("a1", false, (short)30));
-    inputs.add(new MStringInput("a2", true, (short)-1));
-    ret.add(new MForm("A", inputs));
+    inputs.add(new MStringInput("aForm.a1", false, (short)30));
+    inputs.add(new MStringInput("aForm.a2", true, (short)-1));
+    ret.add(new MForm("aForm", inputs));
 
     // Form B
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("b1", false, (short)2));
-    inputs.add(new MStringInput("b2", false, (short)3));
-    ret.add(new MForm("B", inputs));
+    inputs.add(new MStringInput("bForm.b1", false, (short)2));
+    inputs.add(new MStringInput("bForm.b2", false, (short)3));
+    ret.add(new MForm("bForm", inputs));
 
     // Form C
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MIntegerInput("intValue"));
-    inputs.add(new MMapInput("map"));
-    ret.add(new MForm("C", inputs));
+    inputs.add(new MIntegerInput("cForm.intValue"));
+    inputs.add(new MMapInput("cForm.map"));
+    ret.add(new MForm("cForm", inputs));
 
     return ret;
   }
 
-  @Configuration
-  class Config {
-    @Input(form = "A", size = 30)  String a1;
-    @Input(form = "A", sensitive = true)  String a2;
-    @Input(form = "B", size = 2)  String b1;
-    @Input(form = "B", size = 3)  String b2;
-    @Input(form = "C") Integer intValue;
-    @Input(form = "C") Map<String, String> map;
+  @ConfigurationClass
+  public static class Config {
+
+    public Config() {
+      aForm = new AForm();
+      bForm = new BForm();
+      cForm = new CForm();
+    }
+
+    @Form AForm aForm;
+    @Form BForm bForm;
+    @Form CForm cForm;
   }
 
-  @Configuration
-  class PrimitiveConfig {
-    @Input(form = "A") int value;
+  @ConfigurationClass
+  public static class PrimitiveConfig {
+    @Form DForm dForm;
   }
 
-  class ConfigWithout {
+  @FormClass
+  public static class AForm {
+    @Input(size = 30)  String a1;
+    @Input(sensitive = true)  String a2;
+  }
+
+  @FormClass
+  public static class BForm {
+    @Input(size = 2) String b1;
+    @Input(size = 3) String b2;
+  }
+
+  @FormClass
+  public static class CForm {
+    @Input Integer intValue;
+    @Input Map<String, String> map;
+  }
+
+  @FormClass
+  public static class DForm {
+    @Input int value;
+  }
+
+  public static class ConfigWithout {
   }
 }

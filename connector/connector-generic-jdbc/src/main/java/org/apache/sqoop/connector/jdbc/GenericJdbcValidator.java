@@ -32,8 +32,8 @@ public class GenericJdbcValidator extends Validator {
     Validation validation = new Validation(ConnectionConfiguration.class);
     ConnectionConfiguration config = (ConnectionConfiguration)configuration;
 
-    if(config.connectionString == null
-      || !config.connectionString.startsWith("jdbc:")) {
+    if(config.connection.connectionString == null
+      || !config.connection.connectionString.startsWith("jdbc:")) {
       validation.addMessage(Status.UNACCEPTABLE, "connectionString",
         "This do not seem as a valid JDBC URL");
     }

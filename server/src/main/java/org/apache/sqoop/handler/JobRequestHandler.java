@@ -164,8 +164,8 @@ public class JobRequestHandler implements RequestHandler {
     Object frameworkConfig = ClassUtils.instantiate(
       FrameworkManager.getJobConfigurationClass(job.getType()));
 
-    FormUtils.fillValues(job.getConnectorPart().getForms(), connectorConfig);
-    FormUtils.fillValues(job.getFrameworkPart().getForms(), frameworkConfig);
+    FormUtils.fromForms(job.getConnectorPart().getForms(), connectorConfig);
+    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
 
     // Validate both parts
     Validation connectorValidation =

@@ -71,9 +71,9 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableName() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.tableName = tableName;
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.tableName = tableName;
 
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
@@ -95,10 +95,10 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableNameWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.tableName = tableName;
-    connConf.columns = tableColumns;
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.tableName = tableName;
+    connConf.table.columns = tableColumns;
 
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
@@ -120,10 +120,10 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableSql() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.sql = tableSql;
-    connConf.partitionColumn = "DCOL";
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.sql = tableSql;
+    connConf.table.partitionColumn = "DCOL";
 
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
@@ -146,11 +146,11 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableSqlWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.sql = tableSql;
-    connConf.columns = tableColumns;
-    connConf.partitionColumn = "DCOL";
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.sql = tableSql;
+    connConf.table.columns = tableColumns;
+    connConf.table.partitionColumn = "DCOL";
 
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 

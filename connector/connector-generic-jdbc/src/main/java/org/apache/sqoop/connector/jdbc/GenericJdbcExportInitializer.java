@@ -26,7 +26,6 @@ import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.utils.ClassUtils;
@@ -54,16 +53,16 @@ public class GenericJdbcExportInitializer extends Initializer {
     List<String> jars = new LinkedList<String>();
 
     ConnectionConfiguration connection = (ConnectionConfiguration) connectionConfiguration;
-    jars.add(ClassUtils.jarForClass(connection.jdbcDriver));
+    jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
 
     return jars;
   }
 
   private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ExportJobConfiguration jobConfig) {
-    String driver = connectionConfig.jdbcDriver;
-    String url = connectionConfig.connectionString;
-    String username = connectionConfig.username;
-    String password = connectionConfig.password;
+    String driver = connectionConfig.connection.jdbcDriver;
+    String url = connectionConfig.connection.connectionString;
+    String username = connectionConfig.connection.username;
+    String password = connectionConfig.connection.password;
 
     if (driver == null) {
       throw new SqoopException(
@@ -102,12 +101,12 @@ public class GenericJdbcExportInitializer extends Initializer {
     String dataSql;
     String inputDirectory;
 
-    String tableName = connectionConfig.tableName;
-    String tableSql = connectionConfig.sql;
-    String tableColumns = connectionConfig.columns;
+    String tableName = connectionConfig.table.tableName;
+    String tableSql = connectionConfig.table.sql;
+    String tableColumns = connectionConfig.table.columns;
 
-    String datadir = connectionConfig.dataDirectory;
-    String warehouse = connectionConfig.warehouse;
+    String datadir = connectionConfig.table.dataDirectory;
+    String warehouse = connectionConfig.table.warehouse;
     if (warehouse == null) {
       warehouse = GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE;
     } else if (!warehouse.endsWith(GenericJdbcConnectorConstants.FILE_SEPARATOR)) {

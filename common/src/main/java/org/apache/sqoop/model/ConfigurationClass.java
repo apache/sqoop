@@ -15,15 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc.configuration;
+package org.apache.sqoop.model;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- *
+ * Class annotation. Each class that is used a configuration object where user
+ * is expected to provide input need to have this annotation.
  */
-@ConfigurationClass
-public class ImportJobConfiguration {
-  @Form IgnoredForm ignored;
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ConfigurationClass {
+
 }

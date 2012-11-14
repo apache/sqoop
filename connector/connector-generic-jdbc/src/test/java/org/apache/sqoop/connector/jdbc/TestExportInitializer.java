@@ -59,9 +59,9 @@ public class TestExportInitializer extends TestCase {
 
   public void testTableName() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.tableName = tableName;
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.tableName = tableName;
 
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 
@@ -78,10 +78,10 @@ public class TestExportInitializer extends TestCase {
 
   public void testTableNameWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.tableName = tableName;
-    connConf.columns = tableColumns;
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.tableName = tableName;
+    connConf.table.columns = tableColumns;
 
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 
@@ -98,9 +98,9 @@ public class TestExportInitializer extends TestCase {
 
   public void testTableSql() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
-    connConf.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connectionString = GenericJdbcTestConstants.URL;
-    connConf.sql = tableSql;
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.table.sql = tableSql;
 
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 

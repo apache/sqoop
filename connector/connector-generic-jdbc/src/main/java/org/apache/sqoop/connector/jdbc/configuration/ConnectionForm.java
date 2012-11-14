@@ -17,13 +17,19 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
+
+import java.util.Map;
 
 /**
  *
  */
-@ConfigurationClass
-public class ImportJobConfiguration {
-  @Form IgnoredForm ignored;
+@FormClass
+public class ConnectionForm {
+  @Input(size = 128) public String jdbcDriver;
+  @Input(size = 128) public String connectionString;
+  @Input(size = 40)  public String username;
+  @Input(size = 40, sensitive = true) public String password;
+  @Input public Map<String, String> jdbcProperties;
 }

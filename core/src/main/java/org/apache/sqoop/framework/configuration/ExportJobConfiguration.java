@@ -17,17 +17,14 @@
  */
 package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.model.Configuration;
-import org.apache.sqoop.model.Input;
-
-import static org.apache.sqoop.framework.FrameworkConstants.*;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Form;
 
 /**
  *
  */
-@Configuration
+@ConfigurationClass
 public class ExportJobConfiguration {
 
-  @Input(form = FORM_OUTPUT, size = 25)
-  public String ignored;
+  @Form OutputForm output;
 }

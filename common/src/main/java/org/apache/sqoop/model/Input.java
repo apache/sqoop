@@ -27,13 +27,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Input {
   /**
-   * Name of form where this input belongs.
-   *
-   * @return Form name
-   */
-  String form();
-
-  /**
    * Sqoop framework will ensure that sensitive information will not be easily
    * accessible.
    *

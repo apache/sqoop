@@ -288,22 +288,22 @@ public final class FrameworkManager {
     // Transform forms to connector specific classes
     Object connectorConnection = ClassUtils.instantiate(
       connector.getConnectionConfigurationClass());
-    FormUtils.fillValues(connection.getConnectorPart().getForms(),
+    FormUtils.fromForms(connection.getConnectorPart().getForms(),
       connectorConnection);
 
     Object connectorJob = ClassUtils.instantiate(
       connector.getJobConfigurationClass(job.getType()));
-    FormUtils.fillValues(job.getConnectorPart().getForms(), connectorJob);
+    FormUtils.fromForms(job.getConnectorPart().getForms(), connectorJob);
 
     // Transform framework specific forms
     Object frameworkConnection = ClassUtils.instantiate(
       getConnectionConfigurationClass());
-    FormUtils.fillValues(connection.getFrameworkPart().getForms(),
+    FormUtils.fromForms(connection.getFrameworkPart().getForms(),
       frameworkConnection);
 
     Object frameworkJob = ClassUtils.instantiate(
       getJobConfigurationClass(job.getType()));
-    FormUtils.fillValues(job.getFrameworkPart().getForms(), frameworkJob);
+    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkJob);
 
     // Create request object
     MSubmission summary = new MSubmission(jobId);
@@ -411,7 +411,7 @@ public final class FrameworkManager {
     ImportJobConfiguration jobConfiguration = (ImportJobConfiguration) request.getConfigFrameworkJob();
 
     // Initialize the map-reduce part (all sort of required classes, ...)
-    request.setOutputDirectory(jobConfiguration.outputDirectory);
+    request.setOutputDirectory(jobConfiguration.output.outputDirectory);
 
     // Delegate rest of the job to execution engine
     executionEngine.prepareImportSubmission(request);

@@ -163,9 +163,9 @@ public class ConnectionRequestHandler implements RequestHandler {
     Object frameworkConfig = ClassUtils.instantiate(
       FrameworkManager.getConnectionConfigurationClass());
 
-    FormUtils.fillValues(
+    FormUtils.fromForms(
       connection.getConnectorPart().getForms(), connectorConfig);
-    FormUtils.fillValues(
+    FormUtils.fromForms(
       connection.getFrameworkPart().getForms(), frameworkConfig);
 
     // Validate both parts

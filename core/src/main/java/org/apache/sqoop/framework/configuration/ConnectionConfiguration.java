@@ -17,17 +17,14 @@
  */
 package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.model.Configuration;
-import org.apache.sqoop.model.Input;
-
-import static org.apache.sqoop.framework.FrameworkConstants.*;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Form;
 
 /**
  * Framework class representing connection configuration
  */
-@Configuration
+@ConfigurationClass
 public class ConnectionConfiguration {
 
-  @Input(form = FORM_SECURITY)
-  public Integer maxConnections;
+  @Form SecurityForm security;
 }

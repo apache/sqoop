@@ -32,13 +32,15 @@ public enum ModelError implements ErrorCode {
 
   MODEL_004("Usage of unsupported data type"),
 
-  MODEL_005("Can't get field details"),
+  MODEL_005("Can't get field value"),
 
   MODEL_006("Incompatible form list and configuration object"),
 
   MODEL_007("Primitive types in configuration objects are not allowed"),
 
   MODEL_008("Invalid input value"),
+
+  MODEL_009("Invalid input name"),
 
   ;
 

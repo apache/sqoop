@@ -62,16 +62,16 @@ public class GenericJdbcImportInitializer extends Initializer {
     List<String> jars = new LinkedList<String>();
 
     ConnectionConfiguration connection = (ConnectionConfiguration) connectionConfiguration;
-    jars.add(ClassUtils.jarForClass(connection.jdbcDriver));
+    jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
 
     return jars;
   }
 
   private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
-    String driver = connectionConfig.jdbcDriver;
-    String url = connectionConfig.connectionString;
-    String username = connectionConfig.username;
-    String password = connectionConfig.password;
+    String driver = connectionConfig.connection.jdbcDriver;
+    String url = connectionConfig.connection.connectionString;
+    String username = connectionConfig.connection.username;
+    String password = connectionConfig.connection.password;
 
     // TODO(jarcec): Those checks should be in validator and not here
     if (driver == null) {
@@ -110,12 +110,12 @@ public class GenericJdbcImportInitializer extends Initializer {
   private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     // ----- configure column name -----
 
-    String partitionColumnName = connectionConfig.partitionColumn;
+    String partitionColumnName = connectionConfig.table.partitionColumn;
 
     if (partitionColumnName == null) {
       // if column is not specified by the user,
       // find the primary key of the table (when there is a table).
-      String tableName = connectionConfig.tableName;
+      String tableName = connectionConfig.table.tableName;
       if (tableName != null) {
         partitionColumnName = executor.getPrimaryKey(tableName);
       }
@@ -133,13 +133,13 @@ public class GenericJdbcImportInitializer extends Initializer {
 
     // ----- configure column type, min value, and max value -----
 
-    String minMaxQuery = connectionConfig.boundaryQuery;
+    String minMaxQuery = connectionConfig.table.boundaryQuery;
 
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
-      String tableName = connectionConfig.tableName;
-      String tableSql = connectionConfig.sql;
+      String tableName = connectionConfig.table.tableName;
+      String tableSql = connectionConfig.table.sql;
 
       if (tableName != null && tableSql != null) {
         // when both table name and table sql are specified:
@@ -212,13 +212,13 @@ public class GenericJdbcImportInitializer extends Initializer {
     String fieldNames;
     String outputDirectory;
 
-    String tableName = connectionConfig.tableName;
-    String tableSql = connectionConfig.sql;
-    String tableColumns = connectionConfig.columns;
+    String tableName = connectionConfig.table.tableName;
+    String tableSql = connectionConfig.table.sql;
+    String tableColumns = connectionConfig.table.columns;
 
     //TODO(jarcec): Why is connector concerned with data directory? It should not need it at all!
-    String datadir = connectionConfig.dataDirectory;
-    String warehouse = connectionConfig.warehouse;
+    String datadir = connectionConfig.table.dataDirectory;
+    String warehouse = connectionConfig.table.warehouse;
     if (warehouse == null) {
       warehouse = GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE;
     } else if (!warehouse.endsWith(GenericJdbcConnectorConstants.FILE_SEPARATOR)) {

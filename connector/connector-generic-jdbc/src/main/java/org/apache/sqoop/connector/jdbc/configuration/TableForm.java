@@ -17,13 +17,19 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
  *
  */
-@ConfigurationClass
-public class ImportJobConfiguration {
-  @Form IgnoredForm ignored;
+@FormClass
+public class TableForm {
+  @Input(size = 50) public String tableName;
+  @Input(size = 50) public String sql;
+  @Input(size = 50) public String columns;
+  @Input(size = 50) public String warehouse;
+  @Input(size = 50) public String dataDirectory;
+  @Input(size = 50) public String partitionColumn;
+  @Input(size = 50) public String boundaryQuery;
 }
