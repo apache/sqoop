@@ -30,18 +30,77 @@ limitations under the License.
   <groupId>org.apache.sqoop</groupId>
   <artifactId>sqoop-docs</artifactId>
   <name>Sqoop Documentation</name>
-  <packaging>war</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-  
-  <build>
-    <finalName>sqoopdocs</finalName>
-  </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+        <reportSets>
+          <reportSet>
+            <reports></reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.tomdz.maven</groupId>
+        <artifactId>sphinx-maven-plugin</artifactId>
+        <version>1.0.2</version>
+      </plugin>
+    </plugins>
+  </reporting>
+  <profiles>
+    <profile>
+      <id>maven-3</id>
+      <activation>
+        <file>
+           <!--  This employs that the basedir expression is only recognized by Maven 3.x (see MNG-2363) -->
+          <exists>${basedir}</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>3.0-beta-3</version>
+            <configuration>
+              <reportPlugins>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-project-info-reports-plugin</artifactId>
+                  <version>2.2</version>
+                  <reportSets>
+                    <reportSet>
+                      <reports></reports>
+                    </reportSet>
+                  </reportSets>
+                </plugin>
+                <plugin>
+                  <groupId>org.tomdz.maven</groupId>
+                  <artifactId>sphinx-maven-plugin</artifactId>
+                  <version>1.0.2</version>
+                </plugin>
+              </reportPlugins>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <pluginRepositories>
+    <pluginRepository>
+        <id>oss.sonatype.org</id>
+        <url>https://oss.sonatype.org/content/groups/public</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
