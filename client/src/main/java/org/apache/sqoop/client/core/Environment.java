@@ -30,9 +30,12 @@ public final class Environment
   private static String serverPort;
   private static String serverWebapp;
 
+  private static boolean verbose;
+
   private static final String HOST_DEFAULT = "vm-sqoop2";
   private static final String PORT_DEFAULT = "8080";
   private static final String WEBAPP_DEFAULT = "sqoop";
+  private static final boolean VERBOSE_DEFAULT = false;
 
   private static ResourceBundle resourceBundle;
 
@@ -40,6 +43,7 @@ public final class Environment
     serverHost = HOST_DEFAULT;
     serverPort = PORT_DEFAULT;
     serverWebapp = WEBAPP_DEFAULT;
+    verbose = VERBOSE_DEFAULT;
 
     resourceBundle =
       ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
@@ -75,5 +79,13 @@ public final class Environment
 
   public static ResourceBundle getResourceBundle() {
     return resourceBundle;
+  }
+
+  public static void setVerbose(boolean newValue) {
+    verbose = newValue;
+  }
+
+  public static boolean isVerboose() {
+    return verbose;
   }
 }

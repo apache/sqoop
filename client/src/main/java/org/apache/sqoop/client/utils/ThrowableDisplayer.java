@@ -19,6 +19,7 @@ package org.apache.sqoop.client.utils;
 
 import groovy.lang.MissingPropertyException;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -57,12 +58,12 @@ public class ThrowableDisplayer {
     if(t instanceof SqoopException
       && ((SqoopException)t).getErrorCode() == ClientError.CLIENT_0006) {
       io.out.print("@|red Server has returned exception: |@");
-      printThrowable(io, t.getCause());
+      printThrowable(io, t.getCause(), Environment.isVerboose());
     } else if(t.getClass() == MissingPropertyException.class) {
       io.out.print("@|red Unknown command: |@");
       io.out.println(t.getMessage());
     } else {
-      printThrowable(io, t);
+      printThrowable(io, t, Environment.isVerboose());
     }
   }
 
@@ -72,26 +73,28 @@ public class ThrowableDisplayer {
    * @param io IO object to use for generating output
    * @param t Throwable to display
    */
-  protected static void printThrowable(IO io, Throwable t) {
+  protected static void printThrowable(IO io, Throwable t, boolean verbose) {
     io.out.print("@|red Exception: |@");
     io.out.print(t.getClass().getName());
     io.out.print(" @|red Message: |@");
     io.out.print(t.getMessage());
     io.out.println();
 
-    io.out.println("Stack trace:");
-    for(StackTraceElement e : t.getStackTrace()) {
-      io.out.print("\t @|bold at |@ ");
-      io.out.print(e.getClassName());
-      io.out.print(" (@|bold " + e.getFileName() + ":"
-        + e.getLineNumber() + ") |@ ");
-      io.out.println();
-    }
+    if(verbose) {
+      io.out.println("Stack trace:");
+      for(StackTraceElement e : t.getStackTrace()) {
+        io.out.print("\t @|bold at |@ ");
+        io.out.print(e.getClassName());
+        io.out.print(" (@|bold " + e.getFileName() + ":"
+          + e.getLineNumber() + ") |@ ");
+        io.out.println();
+      }
 
-    Throwable cause = t.getCause();
-    if(cause != null) {
-      io.out.print("Caused by: ");
-      printThrowable(io, cause);
+      Throwable cause = t.getCause();
+      if(cause != null) {
+        io.out.print("Caused by: ");
+        printThrowable(io, cause, verbose);
+      }
     }
   }
 

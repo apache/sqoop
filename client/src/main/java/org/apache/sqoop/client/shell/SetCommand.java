@@ -26,10 +26,11 @@ import org.codehaus.groovy.tools.shell.Shell;
 public class SetCommand extends SqoopCommand
 {
   private SetServerFunction serverFunction;
+  private SetOptionFunction optionFunction;
 
   protected SetCommand(Shell shell) {
     super(shell, "set", "\\st",
-        new String[] {"server", "connector"},
+        new String[] {"server", "option"},
         "Set", "info");
   }
 
@@ -49,12 +50,15 @@ public class SetCommand extends SqoopCommand
       }
       return serverFunction.execute(args);
 
-    } else if (func.equals("client")) {
-      return null;
+    } else if (func.equals("option")) {
+      if (optionFunction == null) {
+        optionFunction = new SetOptionFunction(io);
+      }
+      return optionFunction.execute(args);
 
     } else {
       String msg = "Usage: set " + getUsage();
-      throw new SqoopException(ClientError.CLIENT_0002, msg);    
+      throw new SqoopException(ClientError.CLIENT_0002, msg);
     }
   }
 }
