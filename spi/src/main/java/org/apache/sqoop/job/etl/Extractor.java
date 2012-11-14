@@ -32,4 +32,17 @@ public abstract class Extractor {
                            Partition partition,
                            DataWriter writer);
 
+  /**
+   * Return the number of rows read by the last call to
+   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, org.apache.sqoop.job.etl.Partition, org.apache.sqoop.job.io.DataWriter) }
+   * method. This method returns only the number of rows read in the last call,
+   * and not a cumulative total of the number of rows read by this Extractor
+   * since its creation. If no calls were made to the run method, this method's
+   * behavior is undefined.
+   *
+   * @return the number of rows read by the last call to
+   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, org.apache.sqoop.job.etl.Partition, org.apache.sqoop.job.io.DataWriter) }
+   */
+  public abstract long getRowsRead();
+
 }

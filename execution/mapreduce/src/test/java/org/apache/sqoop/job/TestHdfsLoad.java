@@ -230,5 +230,10 @@ public class TestHdfsLoad extends TestCase {
         writer.writeArrayRecord(array);
       }
     }
+
+    @Override
+    public long getRowsRead() {
+      return NUMBER_OF_ROWS_PER_ID;
+    }
   }
 }

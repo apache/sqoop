@@ -32,6 +32,7 @@ public class GenericJdbcImportExtractor extends Extractor {
 
  public static final Logger LOG = Logger.getLogger(GenericJdbcImportExtractor.class);
 
+ private long rowsRead = 0;
   @Override
   public void run(ImmutableContext context, Object connectionC, Object jobC, Partition partition, DataWriter writer) {
     String driver = context.getString(
@@ -52,6 +53,7 @@ public class GenericJdbcImportExtractor extends Extractor {
     query = query.replace(
         GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
     LOG.debug("Using query: " + query);
+    rowsRead = 0;
     ResultSet resultSet = executor.executeQuery(query);
 
     try {
@@ -63,8 +65,8 @@ public class GenericJdbcImportExtractor extends Extractor {
           array[i] = resultSet.getObject(i+1);
         }
         writer.writeArrayRecord(array);
+        rowsRead++;
       }
-
     } catch (SQLException e) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0004, e);
@@ -72,6 +74,11 @@ public class GenericJdbcImportExtractor extends Extractor {
     } finally {
       executor.close();
     }
+  }
+
+  @Override
+  public long getRowsRead() {
+    return rowsRead;
   }
 
 }

@@ -31,6 +31,7 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
+import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
@@ -75,7 +76,8 @@ public class SqoopMapper
     try {
       extractor.run(subContext, configConnection, configJob, split.getPartition(),
         new MapDataWriter(context));
-
+      context.getCounter(SqoopCounters.ROWS_READ)
+              .increment(extractor.getRowsRead());
     } catch (Exception e) {
       throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0017, e);
     }

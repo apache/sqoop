@@ -142,6 +142,11 @@ public class TestMapReduce extends TestCase {
             String.valueOf(id*NUMBER_OF_ROWS_PER_PARTITION+row)});
       }
     }
+
+    @Override
+    public long getRowsRead() {
+      return NUMBER_OF_ROWS_PER_PARTITION;
+    }
   }
 
   public static class DummyOutputFormat
