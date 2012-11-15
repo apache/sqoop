@@ -25,5 +25,9 @@ import org.apache.sqoop.model.Form;
  */
 @ConfigurationClass
 public class ExportJobConfiguration {
-  @Form IgnoredForm ignored;
+  @Form public ExportTableForm table;
+
+  public ExportJobConfiguration() {
+    table = new ExportTableForm();
+  }
 }

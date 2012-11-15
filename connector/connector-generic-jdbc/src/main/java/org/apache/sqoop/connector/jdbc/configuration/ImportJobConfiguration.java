@@ -25,5 +25,9 @@ import org.apache.sqoop.model.Form;
  */
 @ConfigurationClass
 public class ImportJobConfiguration {
-  @Form IgnoredForm ignored;
+  @Form public ImportTableForm table;
+
+  public ImportJobConfiguration() {
+    table = new ImportTableForm();
+  }
 }

@@ -71,11 +71,11 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableName() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.tableName = tableName;
-
-    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.table.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
 
@@ -86,7 +86,6 @@ public class TestImportInitializer extends TestCase {
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}",
         "ICOL,DCOL,VCOL",
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE + tableName,
         "ICOL",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
@@ -95,12 +94,12 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableNameWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.tableName = tableName;
-    connConf.table.columns = tableColumns;
-
-    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.table.tableName = tableName;
+    jobConf.table.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
 
@@ -111,7 +110,6 @@ public class TestImportInitializer extends TestCase {
         "SELECT ICOL,VCOL FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}",
         tableColumns,
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE + tableName,
         "ICOL",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
@@ -120,12 +118,12 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableSql() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.sql = tableSql;
-    connConf.table.partitionColumn = "DCOL";
-
-    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.table.sql = tableSql;
+    jobConf.table.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
 
@@ -136,8 +134,6 @@ public class TestImportInitializer extends TestCase {
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}",
         "ICOL,DCOL,VCOL",
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE
-            + GenericJdbcConnectorConstants.DEFAULT_DATADIR,
         "DCOL",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
@@ -146,13 +142,13 @@ public class TestImportInitializer extends TestCase {
 
   public void testTableSqlWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.sql = tableSql;
-    connConf.table.columns = tableColumns;
-    connConf.table.partitionColumn = "DCOL";
-
-    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.table.sql = tableSql;
+    jobConf.table.columns = tableColumns;
+    jobConf.table.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
 
@@ -164,8 +160,6 @@ public class TestImportInitializer extends TestCase {
             + "(SELECT * FROM " + executor.delimitIdentifier(tableName)
             + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS",
         tableColumns,
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE
-            + GenericJdbcConnectorConstants.DEFAULT_DATADIR,
         "DCOL",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
@@ -173,15 +167,13 @@ public class TestImportInitializer extends TestCase {
   }
 
   private void verifyResult(MutableContext context,
-      String dataSql, String fieldNames, String outputDirectory,
+      String dataSql, String fieldNames,
       String partitionColumnName, String partitionColumnType,
       String partitionMinValue, String partitionMaxValue) {
     assertEquals(dataSql, context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL));
     assertEquals(fieldNames, context.getString(
         Constants.JOB_ETL_FIELD_NAMES));
-    assertEquals(outputDirectory, context.getString(
-        Constants.JOB_ETL_OUTPUT_DIRECTORY));
 
     assertEquals(partitionColumnName, context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME));

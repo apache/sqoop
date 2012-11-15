@@ -77,7 +77,7 @@ public class GenericJdbcImportInitializer extends Initializer {
     if (driver == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER);
+          "JDBC Driver");
     }
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
@@ -86,7 +86,7 @@ public class GenericJdbcImportInitializer extends Initializer {
     if (url == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING);
+          "Connection string");
     }
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL,
@@ -110,12 +110,12 @@ public class GenericJdbcImportInitializer extends Initializer {
   private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     // ----- configure column name -----
 
-    String partitionColumnName = connectionConfig.table.partitionColumn;
+    String partitionColumnName = jobConfig.table.partitionColumn;
 
     if (partitionColumnName == null) {
       // if column is not specified by the user,
       // find the primary key of the table (when there is a table).
-      String tableName = connectionConfig.table.tableName;
+      String tableName = jobConfig.table.tableName;
       if (tableName != null) {
         partitionColumnName = executor.getPrimaryKey(tableName);
       }
@@ -133,13 +133,13 @@ public class GenericJdbcImportInitializer extends Initializer {
 
     // ----- configure column type, min value, and max value -----
 
-    String minMaxQuery = connectionConfig.table.boundaryQuery;
+    String minMaxQuery = jobConfig.table.boundaryQuery;
 
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
-      String tableName = connectionConfig.table.tableName;
-      String tableSql = connectionConfig.table.sql;
+      String tableName = jobConfig.table.tableName;
+      String tableSql = jobConfig.table.sql;
 
       if (tableName != null && tableSql != null) {
         // when both table name and table sql are specified:
@@ -210,20 +210,10 @@ public class GenericJdbcImportInitializer extends Initializer {
   private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
     String dataSql;
     String fieldNames;
-    String outputDirectory;
 
-    String tableName = connectionConfig.table.tableName;
-    String tableSql = connectionConfig.table.sql;
-    String tableColumns = connectionConfig.table.columns;
-
-    //TODO(jarcec): Why is connector concerned with data directory? It should not need it at all!
-    String datadir = connectionConfig.table.dataDirectory;
-    String warehouse = connectionConfig.table.warehouse;
-    if (warehouse == null) {
-      warehouse = GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE;
-    } else if (!warehouse.endsWith(GenericJdbcConnectorConstants.FILE_SEPARATOR)) {
-      warehouse += GenericJdbcConnectorConstants.FILE_SEPARATOR;
-    }
+    String tableName = jobConfig.table.tableName;
+    String tableSql = jobConfig.table.sql;
+    String tableColumns = jobConfig.table.columns;
 
     if (tableName != null && tableSql != null) {
       // when both table name and table sql are specified:
@@ -257,13 +247,6 @@ public class GenericJdbcImportInitializer extends Initializer {
 
         fieldNames = tableColumns;
       }
-
-      if (datadir == null) {
-        outputDirectory = warehouse + tableName;
-      } else {
-        outputDirectory = warehouse + datadir;
-      }
-
     } else if (tableSql != null) {
       // when table sql is specified:
 
@@ -301,14 +284,6 @@ public class GenericJdbcImportInitializer extends Initializer {
 
         fieldNames = tableColumns;
       }
-
-      if (datadir == null) {
-        outputDirectory =
-            warehouse + GenericJdbcConnectorConstants.DEFAULT_DATADIR;
-      } else {
-        outputDirectory = warehouse + datadir;
-      }
-
     } else {
       // when neither are specified:
       throw new SqoopException(
@@ -318,7 +293,5 @@ public class GenericJdbcImportInitializer extends Initializer {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
         dataSql.toString());
     context.setString(Constants.JOB_ETL_FIELD_NAMES, fieldNames);
-    context.setString(Constants.JOB_ETL_OUTPUT_DIRECTORY, outputDirectory);
   }
-
 }

@@ -24,12 +24,8 @@ import org.apache.sqoop.model.Input;
  *
  */
 @FormClass
-public class TableForm {
+public class ExportTableForm {
   @Input(size = 50) public String tableName;
   @Input(size = 50) public String sql;
   @Input(size = 50) public String columns;
-  @Input(size = 50) public String warehouse;
-  @Input(size = 50) public String dataDirectory;
-  @Input(size = 50) public String partitionColumn;
-  @Input(size = 50) public String boundaryQuery;
 }

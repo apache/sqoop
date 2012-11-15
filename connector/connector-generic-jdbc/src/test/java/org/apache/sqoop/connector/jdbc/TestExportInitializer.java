@@ -59,11 +59,11 @@ public class TestExportInitializer extends TestCase {
 
   public void testTableName() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.tableName = tableName;
-
-    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+    jobConf.table.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
 
@@ -72,18 +72,17 @@ public class TestExportInitializer extends TestCase {
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES (?,?,?)",
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE + tableName);
+            + " VALUES (?,?,?)");
   }
 
   public void testTableNameWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.tableName = tableName;
-    connConf.table.columns = tableColumns;
-
-    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+    jobConf.table.tableName = tableName;
+    jobConf.table.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
 
@@ -92,17 +91,16 @@ public class TestExportInitializer extends TestCase {
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " (" + tableColumns + ") VALUES (?,?)",
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE + tableName);
+            + " (" + tableColumns + ") VALUES (?,?)");
   }
 
   public void testTableSql() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    connConf.table.sql = tableSql;
-
-    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+    jobConf.table.sql = tableSql;
 
     MutableContext context = new MutableMapContext();
 
@@ -111,16 +109,11 @@ public class TestExportInitializer extends TestCase {
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES (?,?,?)",
-        GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE
-            + GenericJdbcConnectorConstants.DEFAULT_DATADIR);
+            + " VALUES (?,?,?)");
   }
 
-  private void verifyResult(MutableContext context,
-      String dataSql, String inputDirectory) {
+  private void verifyResult(MutableContext context, String dataSql) {
     assertEquals(dataSql, context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL));
-    assertEquals(inputDirectory, context.getString(
-        Constants.JOB_ETL_INPUT_DIRECTORY));
   }
 }

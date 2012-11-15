@@ -67,7 +67,7 @@ public class GenericJdbcExportInitializer extends Initializer {
     if (driver == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          GenericJdbcConnectorConstants.INPUT_CONN_JDBCDRIVER);
+          "JDBC Driver");
     }
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
@@ -76,7 +76,7 @@ public class GenericJdbcExportInitializer extends Initializer {
     if (url == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          GenericJdbcConnectorConstants.INPUT_CONN_CONNECTSTRING);
+          "Connection string");
     }
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL,
@@ -99,19 +99,10 @@ public class GenericJdbcExportInitializer extends Initializer {
 
   private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ExportJobConfiguration jobConfig) {
     String dataSql;
-    String inputDirectory;
 
-    String tableName = connectionConfig.table.tableName;
-    String tableSql = connectionConfig.table.sql;
-    String tableColumns = connectionConfig.table.columns;
-
-    String datadir = connectionConfig.table.dataDirectory;
-    String warehouse = connectionConfig.table.warehouse;
-    if (warehouse == null) {
-      warehouse = GenericJdbcConnectorConstants.DEFAULT_WAREHOUSE;
-    } else if (!warehouse.endsWith(GenericJdbcConnectorConstants.FILE_SEPARATOR)) {
-      warehouse += GenericJdbcConnectorConstants.FILE_SEPARATOR;
-    }
+    String tableName = jobConfig.table.tableName;
+    String tableSql = jobConfig.table.sql;
+    String tableColumns = jobConfig.table.columns;
 
     if (tableName != null && tableSql != null) {
       // when both table name and table sql are specified:
@@ -148,13 +139,6 @@ public class GenericJdbcExportInitializer extends Initializer {
         builder.append(")");
         dataSql = builder.toString();
       }
-
-      if (datadir == null) {
-        inputDirectory = warehouse + tableName;
-      } else {
-        inputDirectory = warehouse + datadir;
-      }
-
     } else if (tableSql != null) {
       // when table sql is specified:
 
@@ -171,14 +155,6 @@ public class GenericJdbcExportInitializer extends Initializer {
         throw new SqoopException(
             GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0014);
       }
-
-      if (datadir == null) {
-        inputDirectory =
-            warehouse + GenericJdbcConnectorConstants.DEFAULT_DATADIR;
-      } else {
-        inputDirectory = warehouse + datadir;
-      }
-
     } else {
       // when neither are specified:
       throw new SqoopException(
@@ -187,7 +163,5 @@ public class GenericJdbcExportInitializer extends Initializer {
 
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
         dataSql.toString());
-    context.setString(Constants.JOB_ETL_INPUT_DIRECTORY, inputDirectory);
   }
-
 }

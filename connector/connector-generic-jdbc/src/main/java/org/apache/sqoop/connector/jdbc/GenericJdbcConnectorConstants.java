@@ -26,32 +26,6 @@ public final class GenericJdbcConnectorConstants {
   public static final String RESOURCE_BUNDLE_NAME =
       "generic-jdbc-connector-resources";
 
-  // Metadata constants
-
-  // Connection form
-  public static final String FORM_CONNECTION = "form-connection";
-
-  // Connection form inputs
-  public static final String INPUT_CONN_JDBCDRIVER = "inp-conn-jdbcdriver";
-  public static final String INPUT_CONN_CONNECTSTRING =
-      "inp-conn-connectstring";
-  public static final String INPUT_CONN_USERNAME = "inp-conn-username";
-  public static final String INPUT_CONN_PASSWORD = "inp-conn-password";
-  public static final String INPUT_CONN_JDBCPROPS = "inp-conn-jdbc-properties";
-
-  // Table form
-  public static final String FORM_TABLE = "form-table";
-
-  // Table form inputs
-  public static final String INPUT_TBL_NAME = "inp-tbl-name";
-  public static final String INPUT_TBL_SQL = "inp-tbl-sql";
-  public static final String INPUT_TBL_COLUMNS = "inp-tbl-columns";
-  public static final String INPUT_TBL_WAREHOUSE = "inp-tbl-warehouse";
-  public static final String INPUT_TBL_DATADIR = "inp-tbl-datadir";
-  public static final String INPUT_TBL_PCOL = "inp-tbl-pcol";
-  public static final String INPUT_TBL_BOUNDARY = "inp-tbl-boundary";
-
-
   /*
    * All jdbc connector related configuration is prefixed with this:
    * <tt>org.apache.sqoop.jdbc.</tt>
@@ -79,12 +53,6 @@ public final class GenericJdbcConnectorConstants {
 
   public static final String CONNECTOR_JDBC_DATA_SQL =
       PREFIX_CONNECTOR_JDBC_CONFIG + "data.sql";
-
-  public static final String FILE_SEPARATOR = System.getProperty("file.separator");
-
-  public static final String DEFAULT_WAREHOUSE = "/tmp/sqoop/warehouse/";
-
-  public static final String DEFAULT_DATADIR = "DataStore";
 
   public static final String SQL_CONDITIONS_TOKEN = "${CONDITIONS}";
 

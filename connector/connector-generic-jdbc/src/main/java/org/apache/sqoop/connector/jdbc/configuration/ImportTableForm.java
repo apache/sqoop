@@ -17,18 +17,17 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
  *
  */
-@ConfigurationClass
-public class ConnectionConfiguration {
-
-  @Form public ConnectionForm connection;
-
-  public ConnectionConfiguration() {
-    connection = new ConnectionForm();
-  }
+@FormClass
+public class ImportTableForm {
+  @Input(size = 50) public String tableName;
+  @Input(size = 50) public String sql;
+  @Input(size = 50) public String columns;
+  @Input(size = 50) public String partitionColumn;
+  @Input(size = 50) public String boundaryQuery;
 }
