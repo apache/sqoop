@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.job.mr;
 
+import java.util.concurrent.Semaphore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -39,12 +40,14 @@ public class SqoopOutputFormatLoadExecutor {
   public static final Log LOG =
       LogFactory.getLog(SqoopOutputFormatLoadExecutor.class.getName());
 
-  private boolean readerFinished;
-  private boolean writerFinished;
-  private Data data;
+  private volatile boolean readerFinished = false;
+  private volatile boolean writerFinished = false;
+  private volatile Data data;
   private JobContext context;
   private SqoopRecordWriter producer;
   private ConsumerThread consumer;
+  private Semaphore filled = new Semaphore(0, true);
+  private Semaphore free = new Semaphore(1, true);
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
     data = new Data();
@@ -59,69 +62,37 @@ public class SqoopOutputFormatLoadExecutor {
     return producer;
   }
 
+  /*
+   * This is a producer-consumer problem and can be solved
+   * with two semaphores.
+   */
   public class SqoopRecordWriter extends RecordWriter<Data, NullWritable> {
+
     @Override
-    public void write(Data key, NullWritable value) {
-      synchronized (data) {
-        if (readerFinished) {
-          consumer.checkException();
-          return;
-        }
+    public void write(Data key, NullWritable value) throws InterruptedException {
 
-        try {
-          if (!data.isEmpty()) {
-            // wait for reader to consume data
-            data.wait();
-          }
-
-          int type = key.getType();
-          data.setContent(key.getContent(type), type);
-
-          // notify reader that the data is ready
-          data.notify();
-
-        } catch (InterruptedException e) {
-          // inform reader that writer is finished
-          writerFinished = true;
-
-          // unlock reader so it can continue
-          data.notify();
-
-          // throw exception
-          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0015, e);
-        }
+      if(readerFinished) {
+        consumer.checkException();
       }
+      free.acquire();
+      int type = key.getType();
+      data.setContent(key.getContent(type), type);
+      filled.release();
     }
 
     @Override
-    public void close(TaskAttemptContext context) {
-      synchronized (data) {
-        if (readerFinished) {
-          consumer.checkException();
-          return;
-        }
-
-        try {
-          if (!data.isEmpty()) {
-            // wait for reader to consume data
-            data.wait();
-          }
-
-          writerFinished = true;
-
-          data.notify();
-
-        } catch (InterruptedException e) {
-          // inform reader that writer is finished
-          writerFinished = true;
-
-          // unlock reader so it can continue
-          data.notify();
-
-          // throw exception
-          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0015, e);
-        }
+    public void close(TaskAttemptContext context) throws InterruptedException {
+      if(readerFinished) {
+        // Reader finished before writer - something went wrong?
+        consumer.checkException();
       }
+      free.acquire();
+      writerFinished = true;
+      // This will interrupt only the acquire call in the consumer class,
+      // since we have acquired the free semaphore, and close is called from
+      // the same thread that writes - so filled has not been released since then
+      // so the consumer is definitely blocked on the filled semaphore.
+      consumer.interrupt();
     }
   }
 
@@ -132,52 +103,38 @@ public class SqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public Object[] readArrayRecord() {
+    public Object[] readArrayRecord() throws InterruptedException {
       return (Object[])readContent(Data.ARRAY_RECORD);
     }
 
     @Override
-    public String readCsvRecord() {
+    public String readCsvRecord() throws InterruptedException {
       return (String)readContent(Data.CSV_RECORD);
     }
 
     @Override
-    public Object readContent(int type) {
-      synchronized (data) {
-        if (writerFinished) {
+    public Object readContent(int type) throws InterruptedException {
+      // Has any more data been produced after I last consumed.
+      // If no, wait for the producer to produce.
+      if (writerFinished && (filled.availablePermits() == 0)) {
+        return null;
+      }
+      try {
+        filled.acquire();
+      } catch (InterruptedException ex) {
+        if(writerFinished) {
           return null;
         }
-
-        try {
-          if (data.isEmpty()) {
-            // wait for writer to produce data
-            data.wait();
-          }
-
-          Object content = data.getContent(type);
-          data.setContent(null, Data.EMPTY_DATA);
-
-          // notify writer that data is consumed
-          data.notify();
-
-          return content;
-
-        } catch (InterruptedException e) {
-          // inform writer that reader is finished
-          readerFinished = true;
-
-          // unlock writer so it can continue
-          data.notify();
-
-          // throw exception
-          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0016, e);
-        }
+        throw ex;
       }
+      Object content = data.getContent(type);
+      free.release();
+      return content;
     }
   }
 
   public class ConsumerThread extends Thread {
-    private SqoopException exception = null;
+    private volatile SqoopException exception = null;
 
     public void checkException() {
       if (exception != null) {
@@ -201,28 +158,19 @@ public class SqoopOutputFormatLoadExecutor {
       try {
         loader.run(frameworkContext, reader);
       } catch (Throwable t) {
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+        exception = new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+        LOG.error("Error while loading data out of MR job.", t);
       }
 
-      synchronized (data) {
-        // inform writer that reader is finished
-        readerFinished = true;
-
-        // unlock writer so it can continue
-        data.notify();
-
-        // if no exception happens yet
-        if (exception == null && !writerFinished) {
-          // create exception if data are not all consumed
-          exception = new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
-        }
-
-        // throw deferred exception if exist
-        if (exception != null) {
-          throw exception;
-        }
+      // if no exception happens yet and reader finished before writer,
+      // something went wrong
+      if (exception == null && !writerFinished) {
+        // create exception if data are not all consumed
+        exception = new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
+        LOG.error("Reader terminated, but writer is still running!", exception);
       }
+      // inform writer that reader is finished
+      readerFinished = true;
     }
   }
-
 }

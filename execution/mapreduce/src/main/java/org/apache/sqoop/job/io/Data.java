@@ -37,7 +37,7 @@ public class Data implements WritableComparable<Data> {
   // For example, it can be:
   // - Object[] for an array of object record
   // - String for a text of CSV record
-  private Object content = null;
+  private volatile Object content = null;
 
   public static final int EMPTY_DATA = 0;
   public static final int CSV_RECORD = 1;

@@ -29,7 +29,7 @@ public class GenericJdbcExportLoader extends Loader {
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void run(ImmutableContext context, DataReader reader) {
+  public void run(ImmutableContext context, DataReader reader) throws Exception{
     String driver = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
     String url = context.getString(

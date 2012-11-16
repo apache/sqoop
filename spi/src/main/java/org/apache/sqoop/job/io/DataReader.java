@@ -23,11 +23,11 @@ package org.apache.sqoop.job.io;
  */
 public abstract class DataReader {
 
-  public abstract Object[] readArrayRecord();
+  public abstract Object[] readArrayRecord() throws Exception;
 
-  public abstract String readCsvRecord();
+  public abstract String readCsvRecord() throws Exception;
 
-  public abstract Object readContent(int type);
+  public abstract Object readContent(int type) throws Exception;
 
   public abstract void setFieldDelimiter(char fieldDelimiter);
 

@@ -46,7 +46,7 @@ public class HdfsSequenceImportLoader extends Loader {
   }
 
   @Override
-  public void run(ImmutableContext context, DataReader reader) {
+  public void run(ImmutableContext context, DataReader reader) throws Exception{
     reader.setFieldDelimiter(fieldDelimiter);
 
     Configuration conf = new Configuration();
