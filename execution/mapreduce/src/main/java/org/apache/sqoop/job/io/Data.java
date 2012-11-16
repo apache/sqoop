@@ -57,8 +57,14 @@ public class Data implements WritableComparable<Data> {
       stringEscape, stringDelimiter
   });
 
+  private int[] fieldTypes = null;
+
   public void setFieldDelimiter(char fieldDelimiter) {
     this.fieldDelimiter = fieldDelimiter;
+  }
+
+  public void setFieldTypes(int[] fieldTypes) {
+    this.fieldTypes = fieldTypes;
   }
 
   public void setContent(Object content, int type) {
@@ -356,7 +362,37 @@ public class Data implements WritableComparable<Data> {
 
     case CSV_RECORD:
       ArrayList<Object> list = new ArrayList<Object>();
-      // todo: need to parse CSV into Array
+      char[] record = ((String)content).toCharArray();
+      int start = 0;
+      int position = start;
+      boolean stringDelimited = false;
+      boolean arrayDelimited = false;
+      int index = 0;
+      while (position < record.length) {
+        if (record[position] == fieldDelimiter) {
+          if (!stringDelimited && !arrayDelimited) {
+            index = parseField(list, record, start, position, index);
+            start = position + 1;
+          }
+        } else if (record[position] == stringDelimiter) {
+          if (!stringDelimited) {
+            stringDelimited = true;
+          }
+          else if (position > 0 && record[position-1] != stringEscape) {
+            stringDelimited = false;
+          }
+        } else if (record[position] == '[') {
+          if (!stringDelimited) {
+            arrayDelimited = true;
+          }
+        } else if (record[position] == ']') {
+          if (!stringDelimited) {
+            arrayDelimited = false;
+          }
+        }
+        position++;
+      }
+      parseField(list, record, start, position, index);
       return list.toArray();
 
     case ARRAY_RECORD:
@@ -367,6 +403,114 @@ public class Data implements WritableComparable<Data> {
     }
   }
 
+  private int parseField(ArrayList<Object> list, char[] record,
+      int start, int end, int index) {
+    String field = String.valueOf(record, start, end-start).trim();
+
+    int fieldType;
+    if (fieldTypes == null) {
+      fieldType = guessType(field);
+    } else {
+      fieldType = fieldTypes[index];
+    }
+
+    switch (fieldType) {
+    case FieldTypes.UTF:
+      if (field.charAt(0) != stringDelimiter ||
+          field.charAt(field.length()-1) != stringDelimiter) {
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0022);
+      }
+      list.add(index, unescape(field.substring(1, field.length()-1)));
+      break;
+
+    case FieldTypes.BIN:
+      if (field.charAt(0) != '[' ||
+          field.charAt(field.length()-1) != ']') {
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0022);
+      }
+      String[] splits =
+          field.substring(1, field.length()-1).split(String.valueOf(','));
+      byte[] bytes = new byte[splits.length];
+      for (int i=0; i<bytes.length; i++) {
+        bytes[i] = Byte.parseByte(splits[i].trim());
+      }
+      list.add(index, bytes);
+      break;
+
+    case FieldTypes.DOUBLE:
+      list.add(index, Double.parseDouble(field));
+      break;
+
+    case FieldTypes.FLOAT:
+      list.add(index, Float.parseFloat(field));
+      break;
+
+    case FieldTypes.LONG:
+      list.add(index, Long.parseLong(field));
+      break;
+
+    case FieldTypes.INT:
+      list.add(index, Integer.parseInt(field));
+      break;
+
+    case FieldTypes.SHORT:
+      list.add(index, Short.parseShort(field));
+      break;
+
+    case FieldTypes.CHAR:
+      list.add(index, Character.valueOf(field.charAt(0)));
+      break;
+
+    case FieldTypes.BYTE:
+      list.add(index, Byte.parseByte(field));
+      break;
+
+    case FieldTypes.BOOLEAN:
+      list.add(index, Boolean.parseBoolean(field));
+      break;
+
+    case FieldTypes.NULL:
+      list.add(index, null);
+      break;
+
+    default:
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(fieldType));
+    }
+
+    return ++index;
+  }
+
+  private int guessType(String field) {
+    char[] value = field.toCharArray();
+
+    if (value[0] == stringDelimiter) {
+      return FieldTypes.UTF;
+    }
+
+    switch (value[0]) {
+    case 'n':
+    case 'N':
+      return FieldTypes.NULL;
+    case '[':
+      return FieldTypes.BIN;
+    case 't':
+    case 'f':
+    case 'T':
+    case 'F':
+      return FieldTypes.BOOLEAN;
+    }
+
+    int position = 1;
+    while (position < value.length) {
+      switch (value[position++]) {
+      case '.':
+        return FieldTypes.DOUBLE;
+      }
+    }
+
+    return FieldTypes.LONG;
+  }
+
   private String escape(String string) {
     // TODO: Also need to escape those special characters as documented in:
     // https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation#Sqoop2Intermediaterepresentation-Intermediateformatrepresentationproposal
@@ -375,4 +519,11 @@ public class Data implements WritableComparable<Data> {
     return string.replaceAll(regex, replacement);
   }
 
+  private String unescape(String string) {
+    // TODO: Also need to unescape those special characters as documented in:
+    // https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation#Sqoop2Intermediaterepresentation-Intermediateformatrepresentationproposal
+    String regex = Matcher.quoteReplacement(escapedStringDelimiter);
+    String replacement = String.valueOf(stringDelimiter);
+    return string.replaceAll(regex, replacement);
+  }
 }

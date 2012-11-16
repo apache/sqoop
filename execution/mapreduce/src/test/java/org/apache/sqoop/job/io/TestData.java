@@ -34,13 +34,13 @@ public class TestData extends TestCase {
 
     // with special characters:
     expected =
-        (long) TEST_NUMBER + "," +
-        TEST_NUMBER + "," +
+        Long.valueOf((long)TEST_NUMBER) + "," +
+        Double.valueOf(TEST_NUMBER) + "," +
         "'" + String.valueOf(TEST_NUMBER) + "\\',s'" + "," +
         Arrays.toString(new byte[] {1, 2, 3, 4, 5});
     data.setContent(new Object[] {
-        (long) TEST_NUMBER,
-        TEST_NUMBER,
+        Long.valueOf((long)TEST_NUMBER),
+        Double.valueOf(TEST_NUMBER),
         String.valueOf(TEST_NUMBER) + "',s",
         new byte[] {1, 2, 3, 4, 5} },
         Data.ARRAY_RECORD);
@@ -49,18 +49,61 @@ public class TestData extends TestCase {
 
     // with null characters:
     expected =
-        (long) TEST_NUMBER + "," +
-        TEST_NUMBER + "," +
+        Long.valueOf((long)TEST_NUMBER) + "," +
+        Double.valueOf(TEST_NUMBER) + "," +
         "null" + "," +
         Arrays.toString(new byte[] {1, 2, 3, 4, 5});
     data.setContent(new Object[] {
-        (long) TEST_NUMBER,
-        TEST_NUMBER,
+        Long.valueOf((long)TEST_NUMBER),
+        Double.valueOf(TEST_NUMBER),
         null,
         new byte[] {1, 2, 3, 4, 5} },
         Data.ARRAY_RECORD);
     actual = (String)data.getContent(Data.CSV_RECORD);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testCsvToArray() throws Exception {
+    Data data = new Data();
+    Object[] expected;
+    Object[] actual;
+
+    // with special characters:
+    expected = new Object[] {
+        Long.valueOf((long)TEST_NUMBER),
+        Double.valueOf(TEST_NUMBER),
+        String.valueOf(TEST_NUMBER) + "',s",
+        new byte[] {1, 2, 3, 4, 5} };
+    data.setContent(
+        Long.valueOf((long)TEST_NUMBER) + "," +
+        Double.valueOf(TEST_NUMBER) + "," +
+        "'" + String.valueOf(TEST_NUMBER) + "\\',s'" + "," +
+        Arrays.toString(new byte[] {1, 2, 3, 4, 5}),
+        Data.CSV_RECORD);
+    actual = (Object[])data.getContent(Data.ARRAY_RECORD);
+    assertEquals(expected.length, actual.length);
+    for (int c=0; c<expected.length; c++) {
+      assertEquals(expected[c], actual[c]);
+    }
+
+    // with null characters:
+    expected = new Object[] {
+        Long.valueOf((long)TEST_NUMBER),
+        Double.valueOf(TEST_NUMBER),
+        null,
+        new byte[] {1, 2, 3, 4, 5} };
+    data.setContent(
+        Long.valueOf((long)TEST_NUMBER) + "," +
+        Double.valueOf(TEST_NUMBER) + "," +
+        "null" + "," +
+        Arrays.toString(new byte[] {1, 2, 3, 4, 5}),
+        Data.CSV_RECORD);
+    actual = (Object[])data.getContent(Data.ARRAY_RECORD);
+    assertEquals(expected.length, actual.length);
+    for (int c=0; c<expected.length; c++) {
+      assertEquals(expected[c], actual[c]);
+    }
   }
 
   public static void assertEquals(Object expected, Object actual) {
