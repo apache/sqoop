@@ -94,7 +94,9 @@ limitations under the License.
     <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-lang.version>2.5</commons-lang.version>
     <derby.version>10.8.2.2</derby.version>
-    <hadoop.version>2.0.0-SNAPSHOT</hadoop.version>
+    <hadoop.1.version>1.0.3</hadoop.1.version>
+    <hadoop.2.version>2.0.2-alpha</hadoop.2.version>
+    <guava.version>11.0.2</guava.version>
     <json-simple.version>1.1</json-simple.version>
     <junit.version>4.9</junit.version>
     <log4j.version>1.2.16</log4j.version>
@@ -107,6 +109,83 @@ limitations under the License.
       <artifactId>log4j</artifactId>
     </dependency>
   </dependencies>
+
+  <!-- Profiles for various supported Hadoop distributions -->
+  <profiles>
+
+    <!-- Hadoop 1.x -->
+    <profile>
+      <id>hadoop100</id>
+
+     <activation>
+        <property>
+          <name>hadoop.profile</name>
+          <value>100</value>
+        </property>
+      </activation>
+
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+            <scope>provided</scope>
+          </dependency>
+
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoop.1.version}</version>
+            <scope>provided</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+
+    <!-- Hadoop 2.x (active by default) -->
+    <profile>
+      <id>hadoop200</id>
+
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>hadoop.profile</name>
+          <value>200</value>
+        </property>
+      </activation>
+
+      <properties>
+        <hadoop.profile>200</hadoop.profile>
+      </properties>
+
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.2.version}</version>
+            <scope>provided</scope>
+          </dependency>
+
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>${hadoop.2.version}</version>
+            <scope>provided</scope>
+          </dependency>
+
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+            <version>${hadoop.2.version}</version>
+            <scope>provided</scope>
+          </dependency>
+
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+  </profiles>
 
   <dependencyManagement>
     <dependencies>
@@ -197,16 +276,6 @@ limitations under the License.
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
         <version>${derby.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-common</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-        <version>${hadoop.version}</version>
       </dependency>
    </dependencies>
   </dependencyManagement>
