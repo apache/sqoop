@@ -27,7 +27,6 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
@@ -40,7 +39,7 @@ public class JobUtils {
   public static void runJob(Configuration conf)
       throws IOException, InterruptedException, ClassNotFoundException {
     runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
-        (conf.get(FileOutputFormat.OUTDIR) != null) ?
+        (conf.get(JobConstants.HADOOP_OUTDIR) != null) ?
         SqoopFileOutputFormat.class : SqoopNullOutputFormat.class);
   }
 
@@ -49,7 +48,7 @@ public class JobUtils {
       Class<? extends Mapper<SqoopSplit, NullWritable, Data, NullWritable>> mapper,
       Class<? extends OutputFormat<Data, NullWritable>> output)
       throws IOException, InterruptedException, ClassNotFoundException {
-    Job job = Job.getInstance(conf);
+    Job job = new Job(conf);
     job.setInputFormatClass(input);
     job.setMapperClass(mapper);
     job.setMapOutputKeyClass(Data.class);

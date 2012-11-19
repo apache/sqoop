@@ -33,7 +33,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.Extractor;
@@ -67,7 +66,7 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
-    conf.set(FileOutputFormat.OUTDIR, outdir);
+    conf.set(JobConstants.HADOOP_OUTDIR, outdir);
     JobUtils.runJob(conf);
 
     String fileName = outdir + "/" +  OUTPUT_FILE;
@@ -85,12 +84,12 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
-    conf.set(FileOutputFormat.OUTDIR, outdir);
-    conf.setBoolean(FileOutputFormat.COMPRESS, true);
+    conf.set(JobConstants.HADOOP_OUTDIR, outdir);
+    conf.setBoolean(JobConstants.HADOOP_COMPRESS, true);
     JobUtils.runJob(conf);
 
     Class<? extends CompressionCodec> codecClass = conf.getClass(
-        FileOutputFormat.COMPRESS_CODEC, SqoopFileOutputFormat.DEFAULT_CODEC)
+        JobConstants.HADOOP_COMPRESS_CODEC, SqoopFileOutputFormat.DEFAULT_CODEC)
         .asSubclass(CompressionCodec.class);
     CompressionCodec codec = ReflectionUtils.newInstance(codecClass, conf);
     String fileName = outdir + "/" +  OUTPUT_FILE + codec.getDefaultExtension();
@@ -128,13 +127,13 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
-    conf.set(FileOutputFormat.OUTDIR, outdir);
+    conf.set(JobConstants.HADOOP_OUTDIR, outdir);
     JobUtils.runJob(conf);
 
     Path filepath = new Path(outdir,
         OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
-    SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
-        SequenceFile.Reader.file(filepath));
+    SequenceFile.Reader filereader = new SequenceFile.Reader(
+      filepath.getFileSystem(conf), filepath, conf);
     verifyOutputSequence(filereader);
   }
 
@@ -146,14 +145,13 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
-    conf.set(FileOutputFormat.OUTDIR, outdir);
-    conf.setBoolean(FileOutputFormat.COMPRESS, true);
+    conf.set(JobConstants.HADOOP_OUTDIR, outdir);
+    conf.setBoolean(JobConstants.HADOOP_COMPRESS, true);
     JobUtils.runJob(conf);
 
     Path filepath = new Path(outdir,
         OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
-    SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
-        SequenceFile.Reader.file(filepath));
+    SequenceFile.Reader filereader = new SequenceFile.Reader(filepath.getFileSystem(conf), filepath, conf);
     verifyOutputSequence(filereader);
   }
 

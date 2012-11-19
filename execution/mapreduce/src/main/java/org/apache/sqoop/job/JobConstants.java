@@ -76,6 +76,16 @@ public final class JobConstants extends Constants {
   public static final String PREFIX_CONNECTOR_CONTEXT =
     PREFIX_JOB_CONFIG + "connector.context.";
 
+  // Hadoop specific constants
+  // We're using constants from Hadoop 1. Hadoop 2 has different names, but
+  // provides backward compatibility layer for those names as well.
+
+  public static final String HADOOP_OUTDIR = "mapred.output.dir";
+
+  public static final String HADOOP_COMPRESS = "mapred.output.compress";
+
+  public static final String HADOOP_COMPRESS_CODEC =
+    "mapred.output.compression.codec";
 
   private JobConstants() {
     // Disable explicit object creation

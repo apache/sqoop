@@ -57,7 +57,7 @@ public class SqoopFileOutputFormat
     boolean isCompressed = getCompressOutput(context);
     if (isCompressed) {
       String codecname =
-          conf.get(FileOutputFormat.COMPRESS_CODEC, DEFAULT_CODEC.getName());
+          conf.get(JobConstants.HADOOP_COMPRESS_CODEC, DEFAULT_CODEC.getName());
       conf.set(JobConstants.JOB_MR_OUTPUT_CODEC, codecname);
     }
 

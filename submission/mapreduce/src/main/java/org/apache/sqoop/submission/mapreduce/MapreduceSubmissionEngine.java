@@ -20,6 +20,7 @@ package org.apache.sqoop.submission.mapreduce;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
@@ -100,7 +101,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     // Create job client
     try {
-      jobClient = new JobClient(new Configuration(globalConfiguration));
+      jobClient = new JobClient(new JobConf(globalConfiguration));
     } catch (IOException e) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0002, e);
     }
@@ -183,7 +184,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     configuration.set("tmpjars", sb.toString());
 
     try {
-      Job job = Job.getInstance(configuration);
+      Job job = new Job(configuration);
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

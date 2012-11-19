@@ -78,17 +78,12 @@ public class HdfsSequenceImportLoader extends Loader {
       Path filepath = new Path(filename);
       SequenceFile.Writer filewriter;
       if (codec != null) {
-        filewriter = SequenceFile.createWriter(conf,
-            SequenceFile.Writer.file(filepath),
-            SequenceFile.Writer.keyClass(Text.class),
-            SequenceFile.Writer.valueClass(NullWritable.class),
-            SequenceFile.Writer.compression(CompressionType.BLOCK, codec));
+        filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
+          conf, filepath, Text.class, NullWritable.class,
+          CompressionType.BLOCK, codec);
       } else {
-        filewriter = SequenceFile.createWriter(conf,
-          SequenceFile.Writer.file(filepath),
-          SequenceFile.Writer.keyClass(Text.class),
-          SequenceFile.Writer.valueClass(NullWritable.class),
-          SequenceFile.Writer.compression(CompressionType.NONE));
+        filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
+          conf, filepath, Text.class, NullWritable.class, CompressionType.NONE);
       }
 
       String csv;

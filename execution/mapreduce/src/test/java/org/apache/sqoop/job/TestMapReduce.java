@@ -57,7 +57,7 @@ public class TestMapReduce extends TestCase {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_TYPE, "IMPORT");
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
-    Job job = Job.getInstance(conf);
+    Job job = new Job(conf);
 
     SqoopInputFormat inputformat = new SqoopInputFormat();
     List<InputSplit> splits = inputformat.getSplits(job);
