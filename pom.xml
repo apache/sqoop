@@ -295,8 +295,16 @@ limitations under the License.
       <name>Andrew Bayer</name>
       <organization>Cloudera</organization>
       <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>abhijeet</id>
+      <name>Abhijeet Gaikwad</name>
+      <organization>Persistent Systems Limited</organization>
+      <roles>
         <role>committer</role>
-        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -313,8 +321,8 @@ limitations under the License.
       <name>Arvind Prabhakar</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -322,8 +330,16 @@ limitations under the License.
       <name>Bilung Lee</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>cheolsoo</id>
+      <name>Cheolsoo Park</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>Committer</role>
       </roles>
     </developer>
     <developer>
@@ -331,8 +347,8 @@ limitations under the License.
       <name>Greg Cottman</name>
       <organization>Quest</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -340,17 +356,17 @@ limitations under the License.
       <name>Guy le Mar</name>
       <organization>Quest</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
       <id>jarcec</id>
       <name>Jaroslav Cecho</name>
-      <organization>AVG Technologies</organization>
+      <organization>Cloudera</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -358,8 +374,8 @@ limitations under the License.
       <name>Jonathan Hsieh</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -368,6 +384,7 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -375,8 +392,8 @@ limitations under the License.
       <name>Aaron Kimball</name>
       <organization>WibiData</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -384,8 +401,16 @@ limitations under the License.
       <name>Olivier Lamy</name>
       <organization>Talend</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+     <developer>
+      <id>posix4e</id>
+      <name>Alex Newman</name>
+      <organization>Opower</organization>
+      <roles>
+        <role>Committer</role>
       </roles>
     </developer>
     <developer>
@@ -393,8 +418,8 @@ limitations under the License.
       <name>Paul Zimdars</name>
       <organization>JPL</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -402,15 +427,8 @@ limitations under the License.
       <name>Roman Shaposhnik</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>committer</role>
-        <role>PMC member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>posix4e</id>
-      <organization>OPower</organization>
-      <roles>
-        <role>committer</role>
+        <role>Committer</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
   </developers>
