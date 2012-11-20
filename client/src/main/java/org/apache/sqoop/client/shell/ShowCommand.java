@@ -34,7 +34,8 @@ public class ShowCommand extends SqoopCommand
 
   protected ShowCommand(Shell shell) {
     super(shell, "show", "\\sh",
-        new String[] {"server", "version", "connector", "framework"},
+        new String[] {"server", "version", "connector", "framework",
+          "connection", "job"},
         "Show", "info");
   }
 

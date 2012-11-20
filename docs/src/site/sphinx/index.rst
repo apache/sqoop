@@ -51,5 +51,6 @@ Overview
 Documentation
 -------------
 
+- `Command Line Client <CommandLineClient.html>`_
 - `Sqoop User Guide <SqoopUserGuide.html>`_
 - `Sqoop Developer Guide <SqoopDeveloperGuide.html>`_
