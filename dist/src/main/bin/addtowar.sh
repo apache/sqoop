@@ -96,33 +96,16 @@ function checkOption() {
 # TODO(jarcec): Add configuration specific to Hadoop 1.x
 function getHadoopJars() {
   version=$1
-#   Commented distributions are not tested
-#  if [ "${version}" = "0.20.1" ]; then
-#    #List is separated by ":"
-#    hadoopJars="hadoop-core*.jar"
-#  elif [ "${version}" = "0.20.2" ]; then
-#    #List is separated by ":"
-#    hadoopJars="hadoop-core*.jar"
-#  elif [ "${version}" = "0.20.104" ]; then
-#    #List is separated by ":"
-#    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar"
-#  elif [ "${version}" = "0.20.200" ]; then
-#    #List is separated by ":"
-#    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar"
-#  elif [[ "${version}" =~ .*23 ]]; then
-#    suffix="-[0-9.]*"
-#    #List is separated by ":"
-#    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:avro-ipc-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar"
-#  elif [[ "${version}" =~ 2.* ]]; then
-  if [[ "${version}" =~ 2.* ]]; then
+  if [[ "${version}" =~ 1.* ]]; then
+    #List is separated by ":"
+    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar"
+  elif [[ "${version}" =~ 2.* ]]; then
     suffix="-[0-9.]*"
     # List is separated by ":"
-    # Removed hadoop-yarn-client${suffix}.jar, my distribution do not have such artifact?
     hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-cli-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:avro-*.jar"
   else
     echo
-    echo "Exiting: Unsupported Hadoop version '${hadoopVer}', supported versions: 2.x"
-#    echo "Exiting: Unsupported Hadoop version '${hadoopVer}', supported versions: 0.20.1, 0.20.2, 0.20.104, 0.20.200, 0.23.x and 2.x"
+    echo "Exiting: Unsupported Hadoop version '${hadoopVer}', supported versions: 1.x, 2.x"
     echo
     cleanUp
     exit -1;
