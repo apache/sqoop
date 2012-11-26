@@ -71,7 +71,7 @@ function checkFileDoesNotExist() {
 
 # Finds a file under a directory any depth, file returns in variable RET
 function findFile() {
-   RET=`find -H ${1} -name ${2} | grep -e "[0-9.a${hadoopJarsSuffix}].jar"`
+   RET=`find -H ${1//:/$' '} -name ${2} | grep -e "[0-9.a${hadoopJarsSuffix}].jar"`
    RET=`echo ${RET} | sed "s/ .*//"`
    if [ "${RET}" = "" ]; then
      echo
@@ -92,20 +92,63 @@ function checkOption() {
   fi
 }
 
+# Try to guess installed Hadoop version
+function guessHadoopVersion() {
+  # Runn "hadoop version" command
+  guessedVersion=`hadoop version | grep "Hadoop"`
+  if [[ $? -ne 0 ]]; then
+    echo
+    echo "Hadoop binary is not in path, can't guess Hadoop version"
+    echo
+    printUsage
+    exit -1
+  fi
+
+  # Get the version number from line in format "Hadoop 2.0.2-alpha"
+  hadoopVersion=`echo $guessedVersion | sed -re "s/^Hadoop[ ]*//"`
+}
+
+# Try to guess common hadoop paths
+function guessHadoopHome() {
+  hadoopPossiblePaths="/usr/lib/hadoop /usr/lib/hadoop-mapreduce/ /usr/lib/hadoop-yarn/ /usr/lib/hadoop-hdfs"
+
+  # Check existence of each possible path and build up final structure
+  for path in $hadoopPossiblePaths; do
+    if [ -e ${path} ]; then
+      if [ -z "$hadoopHome"] ; then
+        hadoopHome="$path"
+      else
+        hadoopHome="$hadoopHome:$path"
+      fi
+    fi
+  done
+
+  if [ -z "$hadoopHome"] ; then
+    echo
+    echo "Non of expected directories with Hadoop exists"
+    echo
+    printUsage
+    exit -1
+  fi
+}
+
 # Get the list of hadoop jars that will be injected based on the hadoop version
-# TODO(jarcec): Add configuration specific to Hadoop 1.x
 function getHadoopJars() {
   version=$1
-  if [[ "${version}" =~ 1.* ]]; then
-    #List is separated by ":"
-    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar"
-  elif [[ "${version}" =~ 2.* ]]; then
+  # List is separated by ":"
+  if [[ "${version}" =~ cdh4mr1 ]]; then
     suffix="-[0-9.]*"
-    # List is separated by ":"
+    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-cli-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:avro-*.jar:hadoop-2.0.0-mr1-*-core.jar"
+  elif [[ "${version}" =~ cdh3 ]]; then
+    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:guava*.jar"
+  elif [[ "${version}" =~ ^1.* ]]; then
+    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar"
+  elif [[ "${version}" =~ ^2.* ]]; then
+    suffix="-[0-9.]*"
     hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-cli-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:avro-*.jar"
   else
     echo
-    echo "Exiting: Unsupported Hadoop version '${hadoopVer}', supported versions: 1.x, 2.x"
+    echo "Exiting: Unsupported Hadoop version '${version}', supported versions: 1.x, 2.x, cdh3, cdh4mr1"
     echo
     cleanUp
     exit -1;
@@ -114,9 +157,11 @@ function getHadoopJars() {
 
 function printUsage() {
   echo " Usage  : addtowar.sh <OPTIONS>"
-  echo " Options: -hadoop HADOOP_VERSION HADOOP_PATH"
-  echo "          [-jars JARS_PATH] (multiple JAR path separated by ':')"
-  echo "          [-war SQOOP_WAR]"
+  echo " Options: -hadoop-auto Try to guess hadoop version and path"
+  echo "          -hadoop-version HADOOP_VERSION Specify used version"
+  echo "          -hadoop-path HADOOP_PATHS Where to find hadoop jars (multiple paths with Hadoop jars separated by ':')"
+  echo "          -jars JARS_PATH Special jars that should be added (multiple JAR paths separated by ':')"
+  echo "          -war SQOOP_WAR Target Sqoop war file where all jars should be ingested"
   echo
 }
 
@@ -140,7 +185,7 @@ warPath="`dirname $0`/../server/webapps/sqoop.war"
 # Parse command line arguments
 while [ $# -gt 0 ]
 do
-  if [ "$1" = "-hadoop" ]; then
+  if [ "$1" = "-hadoop-version" ]; then
     shift
     if [ $# -eq 0 ]; then
       echo
@@ -150,6 +195,8 @@ do
       exit -1
     fi
     hadoopVersion=$1
+    addHadoop=true
+  elif [ "$1" = "-hadoop-path" ]; then
     shift
     if [ $# -eq 0 ]; then
       echo
@@ -159,6 +206,10 @@ do
       exit -1
     fi
     hadoopHome=$1
+    addHadoop=true
+  elif [ "$1" = "-hadoop-auto" ]; then
+    guessHadoopVersion
+    guessHadoopHome
     addHadoop=true
   elif [ "$1" = "-jars" ]; then
     shift
@@ -201,7 +252,10 @@ checkOption "-war" ${warPath}
 checkFileExists ${warPath}
 
 if [ "${addHadoop}" = "true" ]; then
-  checkFileExists ${hadoopHome}
+  for hadoopPath in ${hadoopHome//:/$'\n'}
+  do
+    checkFileExists ${hadoopPath}
+  done
   getHadoopJars ${hadoopVersion}
 fi
 
@@ -218,6 +272,11 @@ checkExec "Unzipping Sqoop WAR"
 
 components=""
 
+# Let's print useful information
+echo "Hadoop version: $hadoopVersion"
+echo "Hadoop path: $hadoopHome"
+echo "Extra jars: $jarsPath"
+
 # Adding hadoop binaries to WAR file
 if [ "${addHadoop}" = "true" ]; then
   components="Hadoop JARs";
@@ -231,6 +290,7 @@ if [ "${addHadoop}" = "true" ]; then
     exit -1
   fi
   ## adding hadoop
+  echo ""
   echo "Injecting following Hadoop JARs"
   echo
   for jar in ${hadoopJars//:/$'\n'}
@@ -250,6 +310,8 @@ if [ "${addJars}" = "true" ]; then
   fi
   components="${components}JARs"
 
+  echo ""
+  echo "Injecting following additional JARs"
   for jarPath in ${jarsPath//:/$'\n'}
   do
     found=`ls ${tmpWarDir}/WEB-INF/lib/${jarPath} 2> /dev/null | wc -l`
@@ -261,6 +323,9 @@ if [ "${addJars}" = "true" ]; then
       cleanUp
       exit -1
     fi
+    echo ""
+    echo "$jarPath"
+    echo ""
     cp ${jarPath} ${tmpWarDir}/WEB-INF/lib/
     checkExec "Copying jar ${jarPath} to staging"
   done
