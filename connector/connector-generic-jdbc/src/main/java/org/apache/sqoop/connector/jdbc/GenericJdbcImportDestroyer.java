@@ -23,8 +23,8 @@ import org.apache.sqoop.job.etl.Destroyer;
 public class GenericJdbcImportDestroyer extends Destroyer {
 
   @Override
-  public void run(ImmutableContext context) {
-    // TODO Auto-generated method stub
+  public void destroy(boolean success, ImmutableContext context, Object connectionConfig, Object jobConfig) {
+    // No explicit action at the moment
   }
 
 }

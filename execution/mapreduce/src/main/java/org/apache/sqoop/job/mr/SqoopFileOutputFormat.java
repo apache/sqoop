@@ -27,8 +27,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.JobStatus;
+import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.io.Data;
@@ -66,4 +70,31 @@ public class SqoopFileOutputFormat
     return executor.getRecordWriter();
   }
 
+  public synchronized OutputCommitter getOutputCommitter(TaskAttemptContext context) throws IOException {
+    Path output = getOutputPath(context);
+    return new DestroyerFileOutputCommitter(output, context);
+  }
+
+  public class DestroyerFileOutputCommitter extends FileOutputCommitter {
+
+    public DestroyerFileOutputCommitter(Path outputPath, TaskAttemptContext context) throws IOException {
+      super(outputPath, context);
+    }
+
+    @Override
+    public void commitJob(JobContext context) throws IOException {
+      super.commitJob(context);
+
+      Configuration config = context.getConfiguration();
+      SqoopDestroyerExecutor.executeDestroyer(true, config, JobConstants.JOB_ETL_DESTROYER);
+    }
+
+    @Override
+    public void abortJob(JobContext context, JobStatus.State state) throws IOException {
+      super.abortJob(context, state);
+
+      Configuration config = context.getConfiguration();
+      SqoopDestroyerExecutor.executeDestroyer(false, config, JobConstants.JOB_ETL_DESTROYER);
+    }
+  }
 }

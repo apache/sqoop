@@ -25,6 +25,17 @@ import org.apache.sqoop.common.ImmutableContext;
  */
 public abstract class Destroyer {
 
-  public abstract void run(ImmutableContext context);
+  /**
+   * Callback to clean up after job execution.
+   *
+   * @param success True if the execution was successfull
+   * @param context Connector context object
+   * @param connectionConfiguration Connection configuration object
+   * @param jobConfiguration Job configuration object
+   */
+  public abstract void destroy(boolean success,
+                               ImmutableContext context,
+                               Object connectionConfiguration,
+                               Object jobConfiguration);
 
 }

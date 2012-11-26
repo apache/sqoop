@@ -433,7 +433,8 @@ public final class FrameworkManager {
     }
 
     // Initialize submission from connector perspective
-    destroyer.run(request.getConnectorContext());
+    destroyer.destroy(false, request.getConnectorContext(),
+      request.getConfigConnectorConnection(), request.getConfigConnectorJob());
   }
 
   public static MSubmission stop(long jobId) {
