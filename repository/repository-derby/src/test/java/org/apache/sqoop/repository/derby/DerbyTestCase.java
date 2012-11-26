@@ -95,6 +95,9 @@ abstract public class DerbyTestCase extends TestCase {
     runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION);
   }
 
   /**
@@ -253,14 +256,41 @@ abstract public class DerbyTestCase extends TestCase {
    * @throws Exception
    */
   public void loadSubmissions() throws  Exception {
-    runQuery("INSERT INTO SQOOP.SQ_SUBMISSION"
-      + "(SQS_JOB, SQS_STATUS, SQS_DATE, SQS_EXTERNAL_ID) VALUES "
-      + "(1, 'RUNNING', '2012-01-01 01:01:01', 'job_1'),"
-      + "(2, 'SUCCEEDED', '2012-01-02 01:01:01', 'job_2'),"
-      + "(3, 'FAILED', '2012-01-03 01:01:01', 'job_3'),"
-      + "(4, 'UNKNOWN', '2012-01-04 01:01:01', 'job_4'),"
-      + "(1, 'RUNNING', '2012-01-05 01:01:01', 'job_5')"
+    runQuery("INSERT INTO SQOOP.SQ_COUNTER_GROUP "
+      + "(SQG_NAME) "
+      + "VALUES"
+      + "('gA'), ('gB')"
     );
+
+    runQuery("INSERT INTO SQOOP.SQ_COUNTER "
+      + "(SQR_NAME) "
+      + "VALUES"
+      + "('cA'), ('cB')"
+    );
+
+    runQuery("INSERT INTO SQOOP.SQ_SUBMISSION"
+      + "(SQS_JOB, SQS_STATUS, SQS_CREATION_DATE, SQS_UPDATE_DATE,"
+      + " SQS_EXTERNAL_ID, SQS_EXTERNAL_LINK, SQS_EXCEPTION,"
+      + " SQS_EXCEPTION_TRACE)"
+      + "VALUES "
+      + "(1, 'RUNNING', '2012-01-01 01:01:01', '2012-01-01 01:01:01', 'job_1',"
+      +   "NULL, NULL, NULL),"
+      + "(2, 'SUCCEEDED', '2012-01-01 01:01:01', '2012-01-02 01:01:01', 'job_2',"
+      + " NULL, NULL, NULL),"
+      + "(3, 'FAILED', '2012-01-01 01:01:01', '2012-01-03 01:01:01', 'job_3',"
+      + " NULL, NULL, NULL),"
+      + "(4, 'UNKNOWN', '2012-01-01 01:01:01', '2012-01-04 01:01:01', 'job_4',"
+      + " NULL, NULL, NULL),"
+      + "(1, 'RUNNING', '2012-01-01 01:01:01', '2012-01-05 01:01:01', 'job_5',"
+      + " NULL, NULL, NULL)"
+    );
+
+    runQuery("INSERT INTO SQOOP.SQ_COUNTER_SUBMISSION "
+      + "(SQRS_GROUP, SQRS_COUNTER, SQRS_SUBMISSION, SQRS_VALUE) "
+      + "VALUES"
+      + "(1, 1, 4, 300)"
+    );
+
   }
 
   protected MConnector getConnector() {

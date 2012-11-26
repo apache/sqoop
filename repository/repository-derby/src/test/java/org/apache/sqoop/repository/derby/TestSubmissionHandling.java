@@ -19,6 +19,9 @@ package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.submission.counter.Counter;
+import org.apache.sqoop.submission.counter.CounterGroup;
+import org.apache.sqoop.submission.counter.Counters;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -27,7 +30,7 @@ import java.util.List;
 /**
  *
  */
-public class TestSubmissionHandling extends  DerbyTestCase {
+public class TestSubmissionHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
@@ -84,8 +87,29 @@ public class TestSubmissionHandling extends  DerbyTestCase {
   }
 
   public void testCreateSubmission() throws Exception {
-    MSubmission submission =
-      new MSubmission(1, new Date(), SubmissionStatus.RUNNING, "job-x");
+    Date creationDate = new Date();
+    Date updateDate = new Date();
+
+    CounterGroup firstGroup = new CounterGroup("ga");
+    CounterGroup secondGroup = new CounterGroup("gb");
+    firstGroup.addCounter(new Counter("ca", 100));
+    firstGroup.addCounter(new Counter("cb", 200));
+    secondGroup.addCounter(new Counter("ca", 300));
+    secondGroup.addCounter(new Counter("cd", 400));
+    Counters counters = new Counters();
+    counters.addCounterGroup(firstGroup);
+    counters.addCounterGroup(secondGroup);
+
+    MSubmission submission = new MSubmission();
+    submission.setJobId(1);
+    submission.setStatus(SubmissionStatus.RUNNING);
+    submission.setCreationDate(creationDate);
+    submission.setLastUpdateDate(updateDate);
+    submission.setExternalId("job-x");
+    submission.setExternalLink("http://somewhere");
+    submission.setExceptionInfo("RuntimeException");
+    submission.setExceptionStackTrace("Yeah it happens");
+    submission.setCounters(counters);
 
     handler.createSubmission(submission, getDerbyConnection());
 
@@ -101,9 +125,41 @@ public class TestSubmissionHandling extends  DerbyTestCase {
 
     assertEquals(1, submission.getJobId());
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
+    assertEquals(creationDate, submission.getCreationDate());
+    assertEquals(updateDate, submission.getLastUpdateDate());
     assertEquals("job-x", submission.getExternalId());
+    assertEquals("http://somewhere", submission.getExternalLink());
+    assertEquals("RuntimeException", submission.getExceptionInfo());
+    assertEquals("Yeah it happens", submission.getExceptionStackTrace());
 
-    // Let's create second connection
+    CounterGroup group;
+    Counter counter;
+    Counters retrievedCounters = submission.getCounters();
+    assertNotNull(retrievedCounters);
+
+    group = counters.getCounterGroup("ga");
+    assertNotNull(group);
+
+    counter = group.getCounter("ca");
+    assertNotNull(counter);
+    assertEquals(100, counter.getValue());
+
+    counter = group.getCounter("cb");
+    assertNotNull(counter);
+    assertEquals(200, counter.getValue());
+
+    group = counters.getCounterGroup("gb");
+    assertNotNull(group);
+
+    counter = group.getCounter("ca");
+    assertNotNull(counter);
+    assertEquals(300, counter.getValue());
+
+    counter = group.getCounter("cd");
+    assertNotNull(counter);
+    assertEquals(400, counter.getValue());
+
+    // Let's create second (simpler) connection
     submission =
       new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
     handler.createSubmission(submission, getDerbyConnection());
@@ -161,6 +217,29 @@ public class TestSubmissionHandling extends  DerbyTestCase {
     submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
+    assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
+  }
+
+  /**
+   * Test that by directly removing jobs we will also remove associated
+   * submissions and counters.
+   *
+   * @throws Exception
+   */
+  public void testDeleteJobs() throws Exception {
+    loadSubmissions();
+    assertCountForTable("SQOOP.SQ_SUBMISSION", 5);
+
+    handler.deleteJob(1, getDerbyConnection());
+    assertCountForTable("SQOOP.SQ_SUBMISSION", 3);
+
+    handler.deleteJob(2, getDerbyConnection());
+    assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
+
+    handler.deleteJob(3, getDerbyConnection());
+    assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
+
+    handler.deleteJob(4, getDerbyConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
   }
 }

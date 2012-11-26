@@ -146,11 +146,59 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQS_JOB = "SQS_JOB";
 
-  public static final String COLUMN_SQS_DATE = "SQS_DATE";
-
   public static final String COLUMN_SQS_STATUS = "SQS_STATUS";
 
+  public static final String COLUMN_SQS_CREATION_DATE = "SQS_CREATION_DATE";
+
+  public static final String COLUMN_SQS_UPDATE_DATE = "SQS_UPDATE_DATE";
+
   public static final String COLUMN_SQS_EXTERNAL_ID = "SQS_EXTERNAL_ID";
+
+  public static final String COLUMN_SQS_EXTERNAL_LINK = "SQS_EXTERNAL_LINK";
+
+  public static final String COLUMN_SQS_EXCEPTION = "SQS_EXCEPTION";
+
+  public static final String COLUMN_SQS_EXCEPTION_TRACE = "SQS_EXCEPTION_TRACE";
+
+  // SQ_COUNTER_GROUP
+
+  public static final String TABLE_SQ_COUNTER_GROUP_NAME =
+      "SQ_COUNTER_GROUP";
+
+  public static final String TABLE_SQ_COUNTER_GROUP = SCHEMA_PREFIX
+      + TABLE_SQ_COUNTER_GROUP_NAME;
+
+  public static final String COLUMN_SQG_ID = "SQG_ID";
+
+  public static final String COLUMN_SQG_NAME = "SQG_NAME";
+
+  // SQ_COUNTER_GROUP
+
+  public static final String TABLE_SQ_COUNTER_NAME =
+      "SQ_COUNTER";
+
+  public static final String TABLE_SQ_COUNTER = SCHEMA_PREFIX
+      + TABLE_SQ_COUNTER_NAME;
+
+  public static final String COLUMN_SQR_ID = "SQR_ID";
+
+  public static final String COLUMN_SQR_NAME = "SQR_NAME";
+
+  // SQ_COUNTER_SUBMISSION
+
+  public static final String TABLE_SQ_COUNTER_SUBMISSION_NAME =
+      "SQ_COUNTER_SUBMISSION";
+
+  public static final String TABLE_SQ_COUNTER_SUBMISSION = SCHEMA_PREFIX
+      + TABLE_SQ_COUNTER_SUBMISSION_NAME;
+
+  public static final String COLUMN_SQRS_GROUP = "SQRS_GROUP";
+
+  public static final String COLUMN_SQRS_COUNTER = "SQRS_COUNTER";
+
+  public static final String COLUMN_SQRS_SUBMISSION = "SQRS_SUBMISSION";
+
+  public static final String COLUMN_SQRS_VALUE = "SQRS_VALUE";
 
   private DerbySchemaConstants() {
     // Disable explicit object creation

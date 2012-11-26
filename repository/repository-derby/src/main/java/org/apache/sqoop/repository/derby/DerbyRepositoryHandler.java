@@ -57,6 +57,9 @@ import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
 import org.apache.sqoop.repository.JdbcRepositoryTransactionFactory;
 import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.submission.counter.Counter;
+import org.apache.sqoop.submission.counter.CounterGroup;
+import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.utils.StringUtils;
 
 /**
@@ -200,6 +203,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
     runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER);
+    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION);
   }
 
   /**
@@ -796,7 +802,11 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
       stmt.setTimestamp(3, new Timestamp(submission.getCreationDate().getTime()));
-      stmt.setString(4, submission.getExternalId());
+      stmt.setTimestamp(4, new Timestamp(submission.getLastUpdateDate().getTime()));
+      stmt.setString(5, submission.getExternalId());
+      stmt.setString(6, submission.getExternalLink());
+      stmt.setString(7, submission.getExceptionInfo());
+      stmt.setString(8, submission.getExceptionStackTrace());
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -811,6 +821,12 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       }
 
       long submissionId = rsetSubmissionId.getLong(1);
+
+      if(submission.getCounters() != null) {
+        createSubmissionCounters(submissionId, submission.getCounters(), conn);
+      }
+
+      // Save created persistence id
       submission.setPersistenceId(submissionId);
 
     } catch (SQLException ex) {
@@ -850,20 +866,32 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   @Override
   public void updateSubmission(MSubmission submission, Connection conn) {
     PreparedStatement stmt = null;
+    PreparedStatement deleteStmt = null;
     try {
+      //  Update properties in main table
       stmt = conn.prepareStatement(STMT_UPDATE_SUBMISSION);
-      stmt.setLong(1, submission.getJobId());
-      stmt.setString(2, submission.getStatus().name());
-      stmt.setTimestamp(3, new Timestamp(submission.getCreationDate().getTime()));
-      stmt.setString(4, submission.getExternalId());
+      stmt.setString(1, submission.getStatus().name());
+      stmt.setTimestamp(2, new Timestamp(submission.getLastUpdateDate().getTime()));
+      stmt.setString(3, submission.getExceptionInfo());
+      stmt.setString(4, submission.getExceptionStackTrace());
 
       stmt.setLong(5, submission.getPersistenceId());
       stmt.executeUpdate();
 
+      // Delete previous counters
+      deleteStmt = conn.prepareStatement(STMT_DELETE_COUNTER_SUBMISSION);
+      deleteStmt.setLong(1, submission.getPersistenceId());
+      deleteStmt.executeUpdate();
+
+      // Reinsert new counters if needed
+      if(submission.getCounters() != null) {
+        createSubmissionCounters(submission.getPersistenceId(), submission.getCounters(), conn);
+      }
+
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0035, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(stmt, deleteStmt);
     }
   }
 
@@ -901,7 +929,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         rs = stmt.executeQuery();
 
         while(rs.next()) {
-          submissions.add(loadSubmission(rs));
+          submissions.add(loadSubmission(rs, conn));
         }
 
         rs.close();
@@ -934,7 +962,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         return null;
       }
 
-      return loadSubmission(rs);
+      return loadSubmission(rs, conn);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
     } finally {
@@ -944,18 +972,180 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   }
 
   /**
-   * {@inheritDoc}
+   * Stores counters for given submission in repository.
+   *
+   * @param submissionId Submission id
+   * @param counters Counters that should be stored
+   * @param conn Connection to derby repository
+   * @throws SQLException
    */
-  private MSubmission loadSubmission(ResultSet rs) throws SQLException {
-     MSubmission submission = new MSubmission(
-      rs.getLong(2),
-      rs.getTimestamp(3),
-      SubmissionStatus.valueOf(rs.getString(4)),
-      rs.getString(5)
-    );
+  private void createSubmissionCounters(long submissionId, Counters counters, Connection conn) throws SQLException {
+    PreparedStatement stmt = null;
+
+    try {
+      stmt = conn.prepareStatement(STMT_INSERT_COUNTER_SUBMISSION);
+
+      for(CounterGroup group : counters) {
+        long groupId = getCounterGroupId(group, conn);
+
+        for(Counter counter: group) {
+          long counterId = getCounterId(counter, conn);
+
+          stmt.setLong(1, groupId);
+          stmt.setLong(2, counterId);
+          stmt.setLong(3, submissionId);
+          stmt.setLong(4, counter.getValue());
+
+          stmt.executeUpdate();
+        }
+      }
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * Resolves counter group database id.
+   *
+   * @param group Given group
+   * @param conn Connection to metastore
+   * @return Id
+   * @throws SQLException
+   */
+  private long getCounterGroupId(CounterGroup group, Connection conn) throws SQLException {
+    PreparedStatement select = null;
+    PreparedStatement insert = null;
+    ResultSet rsSelect = null;
+    ResultSet rsInsert = null;
+
+    try {
+      select = conn.prepareStatement(STMT_SELECT_COUNTER_GROUP);
+      select.setString(1, group.getName());
+
+      rsSelect = select.executeQuery();
+
+      if(rsSelect.next()) {
+        return rsSelect.getLong(1);
+      }
+
+      insert = conn.prepareStatement(STMT_INSERT_COUNTER_GROUP, Statement.RETURN_GENERATED_KEYS);
+      insert.setString(1, group.getName());
+      insert.executeUpdate();
+
+      rsInsert = insert.getGeneratedKeys();
+
+      if (!rsInsert.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+
+      return rsInsert.getLong(1);
+    } finally {
+      closeResultSets(rsSelect, rsInsert);
+      closeStatements(select, insert);
+    }
+  }
+
+  /**
+   * Resolves counter id.
+   *
+   * @param counter Given counter
+   * @param conn connection to metastore
+   * @return Id
+   * @throws SQLException
+   */
+  private long getCounterId(Counter counter, Connection conn) throws SQLException {
+    PreparedStatement select = null;
+    PreparedStatement insert = null;
+    ResultSet rsSelect = null;
+    ResultSet rsInsert = null;
+
+    try {
+      select = conn.prepareStatement(STMT_SELECT_COUNTER);
+      select.setString(1, counter.getName());
+
+      rsSelect = select.executeQuery();
+
+      if(rsSelect.next()) {
+        return rsSelect.getLong(1);
+      }
+
+      insert = conn.prepareStatement(STMT_INSERT_COUNTER, Statement.RETURN_GENERATED_KEYS);
+      insert.setString(1, counter.getName());
+      insert.executeUpdate();
+
+      rsInsert = insert.getGeneratedKeys();
+
+      if (!rsInsert.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+
+      return rsInsert.getLong(1);
+    } finally {
+      closeResultSets(rsSelect, rsInsert);
+      closeStatements(select, insert);
+    }
+  }
+
+  /**
+   * Create MSubmission structure from result set.
+   *
+   * @param rs Result set, only active row will be fetched
+   * @param conn Connection to metastore
+   * @return Created MSubmission structure
+   * @throws SQLException
+   */
+  private MSubmission loadSubmission(ResultSet rs, Connection conn) throws SQLException {
+    MSubmission submission = new MSubmission();
+
     submission.setPersistenceId(rs.getLong(1));
+    submission.setJobId(rs.getLong(2));
+    submission.setStatus(SubmissionStatus.valueOf(rs.getString(3)));
+    submission.setCreationDate(rs.getTimestamp(4));
+    submission.setLastUpdateDate(rs.getTimestamp(5));
+    submission.setExternalId(rs.getString(6));
+    submission.setExternalLink(rs.getString(7));
+    submission.setExceptionInfo(rs.getString(8));
+    submission.setExceptionStackTrace(rs.getString(9));
+
+    Counters counters = loadCountersSubmission(rs.getLong(1), conn);
+    submission.setCounters(counters);
 
     return submission;
+  }
+
+  private Counters loadCountersSubmission(long submissionId, Connection conn) throws SQLException {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_COUNTER_SUBMISSION);
+      stmt.setLong(1, submissionId);
+      rs = stmt.executeQuery();
+
+      Counters counters = new Counters();
+
+      while(rs.next()) {
+        String groupName = rs.getString(1);
+        String counterName = rs.getString(2);
+        long value = rs.getLong(3);
+
+        CounterGroup group = counters.getCounterGroup(groupName);
+        if(group == null) {
+          group = new CounterGroup(groupName);
+          counters.addCounterGroup(group);
+        }
+
+        group.addCounter(new Counter(counterName, value));
+      }
+
+      if(counters.isEmpty()) {
+        return null;
+      } else {
+        return counters;
+      }
+    } finally {
+      closeStatements(stmt);
+      closeResultSets(rs);
+    }
   }
 
   private List<MConnection> loadConnections(PreparedStatement stmt,

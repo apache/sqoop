@@ -44,4 +44,8 @@ public class Counters implements Iterable<CounterGroup> {
   public Iterator<CounterGroup> iterator() {
     return groups.values().iterator();
   }
+
+  public boolean isEmpty() {
+    return groups.isEmpty();
+  }
 }

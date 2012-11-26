@@ -119,14 +119,53 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <p>
  * <strong>SQ_SUBMISSION</strong>: List of submissions
  * <pre>
+ *    +-----------------------------------+
+ *    | SQ_JOB_SUBMISSION                 |
+ *    +-----------------------------------+
+ *    | SQS_ID: BIGINT PK                 |
+ *    | SQS_JOB: BIGINT                   | FK SQ_JOB(SQB_ID)
+ *    | SQS_STATUS: VARCHAR(20)           |
+ *    | SQS_CREATION_DATE: TIMESTAMP      |
+ *    | SQS_UPDATE_DATE: TIMESTAMP        |
+ *    | SQS_EXTERNAL_ID: VARCHAR(25)      |
+ *    | SQS_EXTERNAL_LINK: VARCHAR(75)    |
+ *    | SQS_EXCEPTION: VARCHAR(75)        |
+ *    | SQS_EXCEPTION_TRACE: VARCHAR(500) |
+ *    +-----------------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_COUNTER_GROUP</strong>: List of counter groups
+ * <pre>
  *    +----------------------------+
- *    | SQ_JOB_SUBMISSION          |
+ *    | SQ_COUNTER_GROUP           |
  *    +----------------------------+
- *    | SQS_ID: BIGINT PK          |
- *    | SQS_JOB: BIGINT            | FK SQ_JOB(SQB_ID)
- *    | SQS_STATUS: VARCHAR(20)    |
- *    | SQS_DATE: TIMESTAMP        |
- *    | SQS_EXTERNAL_ID:VARCHAR(50)|
+ *    | SQG_ID: BIGINT PK          |
+ *    | SQG_NAME: VARCHAR(50)      |
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_COUNTER</strong>: List of counters
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_COUNTER                 |
+ *    +----------------------------+
+ *    | SQR_ID: BIGINT PK          |
+ *    | SQR_NAME: VARCHAR(50)      |
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_COUNTER_SUBMISSION</strong>: N:M Relationship
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_COUNTER_SUBMISSION      |
+ *    +----------------------------+
+ *    | SQRS_GROUP: BIGINT PK      | FK SQ_COUNTER_GROUP(SQR_ID)
+ *    | SQRS_COUNTER: BIGINT PK    | FK SQ_COUNTER(SQR_ID)
+ *    | SQRS_SUBMISSION: BIGINT PK | FK SQ_SUBMISSION(SQS_ID)
+ *    | SQRS_VALUE: BIGINT         |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -143,69 +182,77 @@ public final class DerbySchemaQuery {
 
   // DDL: Create table SQ_CONNECTOR
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
-      "CREATE TABLE " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID
-      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
-      + "PRIMARY KEY, " + COLUMN_SQC_NAME + " VARCHAR(64), " + COLUMN_SQC_CLASS
-      + " VARCHAR(255))";
+      "CREATE TABLE " + TABLE_SQ_CONNECTOR + " ("
+      + COLUMN_SQC_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQC_NAME + " VARCHAR(64), "
+      + COLUMN_SQC_CLASS + " VARCHAR(255)"
+      + ")";
 
   // DDL: Create table SQ_FORM
   public static final String QUERY_CREATE_TABLE_SQ_FORM =
-      "CREATE TABLE " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID
-      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
-      + "PRIMARY KEY, " + COLUMN_SQF_CONNECTOR + " BIGINT, "
+      "CREATE TABLE " + TABLE_SQ_FORM + " ("
+      + COLUMN_SQF_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQF_CONNECTOR + " BIGINT, "
       + COLUMN_SQF_OPERATION + " VARCHAR(32), "
-      + COLUMN_SQF_NAME + " VARCHAR(64), " + COLUMN_SQF_TYPE + " VARCHAR(32), "
-      + COLUMN_SQF_INDEX + " SMALLINT, " + " FOREIGN KEY ("
-      + COLUMN_SQF_CONNECTOR+ ") REFERENCES " + TABLE_SQ_CONNECTOR + " ("
-      + COLUMN_SQC_ID + "))";
+      + COLUMN_SQF_NAME + " VARCHAR(64), "
+      + COLUMN_SQF_TYPE + " VARCHAR(32), "
+      + COLUMN_SQF_INDEX + " SMALLINT, "
+      + " FOREIGN KEY (" + COLUMN_SQF_CONNECTOR+ ") REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_INPUT =
-      "CREATE TABLE " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID
-      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
-      + "PRIMARY KEY, " + COLUMN_SQI_NAME + " VARCHAR(64), "
-      + COLUMN_SQI_FORM + " BIGINT, " + COLUMN_SQI_INDEX + " SMALLINT, "
-      + COLUMN_SQI_TYPE + " VARCHAR(32), " + COLUMN_SQI_STRMASK + " BOOLEAN, "
-      + COLUMN_SQI_STRLENGTH + " SMALLINT, " + COLUMN_SQI_ENUMVALS
-      + " VARCHAR(100), FOREIGN KEY (" + COLUMN_SQI_FORM + ") REFERENCES "
-      + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + "))";
+      "CREATE TABLE " + TABLE_SQ_INPUT + " ("
+      + COLUMN_SQI_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQI_NAME + " VARCHAR(64), "
+      + COLUMN_SQI_FORM + " BIGINT, "
+      + COLUMN_SQI_INDEX + " SMALLINT, "
+      + COLUMN_SQI_TYPE + " VARCHAR(32), "
+      + COLUMN_SQI_STRMASK + " BOOLEAN, "
+      + COLUMN_SQI_STRLENGTH + " SMALLINT, "
+      + COLUMN_SQI_ENUMVALS + " VARCHAR(100),"
+      + " FOREIGN KEY (" + COLUMN_SQI_FORM + ") REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_CONNECTION
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =
-      "CREATE TABLE " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID
-      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
-      + "PRIMARY KEY, " + COLUMN_SQN_CONNECTOR + " BIGINT, " + COLUMN_SQN_NAME
-      + " VARCHAR(32), FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") REFERENCES "
-      + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + "))";
+      "CREATE TABLE " + TABLE_SQ_CONNECTION + " ("
+      + COLUMN_SQN_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQN_CONNECTOR + " BIGINT, "
+      + COLUMN_SQN_NAME  + " VARCHAR(32),"
+      + " FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_JOB
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
-      "CREATE TABLE " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID
-      + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) "
-      + "PRIMARY KEY, " + COLUMN_SQB_CONNECTION + " BIGINT, " + COLUMN_SQB_NAME
-      + " VARCHAR(64), " + COLUMN_SQB_TYPE + " VARCHAR(64), FOREIGN KEY("
-      + COLUMN_SQB_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " ("
-      + COLUMN_SQN_ID + "))";
+      "CREATE TABLE " + TABLE_SQ_JOB + " ("
+      + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQB_CONNECTION + " BIGINT, "
+      + COLUMN_SQB_NAME + " VARCHAR(64), "
+      + COLUMN_SQB_TYPE + " VARCHAR(64),"
+      + " FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_CONNECTION_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
       "CREATE TABLE " + TABLE_SQ_CONNECTION_INPUT + " ("
-      + COLUMN_SQNI_CONNECTION + " BIGINT, " + COLUMN_SQNI_INPUT + " BIGINT, "
-      + COLUMN_SQNI_VALUE + " LONG VARCHAR, PRIMARY KEY ("
-      + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "), FOREIGN KEY ("
-      + COLUMN_SQNI_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " ("
-      + COLUMN_SQN_ID + "), FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") REFERENCES "
-      + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
+      + COLUMN_SQNI_CONNECTION + " BIGINT, "
+      + COLUMN_SQNI_INPUT + " BIGINT, "
+      + COLUMN_SQNI_VALUE + " LONG VARCHAR,"
+      + " PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "),"
+      + " FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
+      + " FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_JOB_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
       "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
-      + COLUMN_SQBI_JOB + " BIGINT, " + COLUMN_SQBI_INPUT + " BIGINT, "
-      + COLUMN_SQBI_VALUE + " LONG VARCHAR, PRIMARY KEY ("
-      + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), FOREIGN KEY ("
-      + COLUMN_SQBI_JOB + ") REFERENCES " + TABLE_SQ_JOB + " ("
-      + COLUMN_SQB_ID + "), FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") REFERENCES "
-      + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
+      + COLUMN_SQBI_JOB + " BIGINT, "
+      + COLUMN_SQBI_INPUT + " BIGINT, "
+      + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
+      + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
+      + " FOREIGN KEY (" + COLUMN_SQBI_JOB + ") REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
+      + " FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
 
   // DDL: Create table SQ_SUBMISSION
   public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
@@ -213,11 +260,46 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
     + COLUMN_SQS_JOB + " BIGINT, "
     + COLUMN_SQS_STATUS + " VARCHAR(20), "
-    + COLUMN_SQS_DATE + " TIMESTAMP,"
-    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
+    + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
+    + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
+    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(25), "
+    + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(75), "
+    + COLUMN_SQS_EXCEPTION + " VARCHAR(75), "
+    + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(500), "
     + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") REFERENCES " + TABLE_SQ_JOB + "("
-    +   COLUMN_SQB_ID + "))";
+    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
+    +  ")";
+
+  // DDL: Create table SQ_COUNTER_GROUP
+  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
+    "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
+    + COLUMN_SQG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+    + COLUMN_SQG_NAME + " VARCHAR(50), "
+    + "PRIMARY KEY (" + COLUMN_SQG_ID + "),"
+    + "UNIQUE ( " + COLUMN_SQG_NAME + ")"
+    + ")";
+
+  // DDL: Create table SQ_COUNTER
+  public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
+    "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
+    + COLUMN_SQR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+    + COLUMN_SQR_NAME + " VARCHAR(50), "
+    + "PRIMARY KEY (" + COLUMN_SQR_ID + "), "
+    + "UNIQUE ( " + COLUMN_SQR_NAME + ")"
+    + ")";
+
+  // DDL: Create table SQ_COUNTER_SUBMISSION
+  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION =
+    "CREATE TABLE " + TABLE_SQ_COUNTER_SUBMISSION + " ("
+    + COLUMN_SQRS_GROUP + " BIGINT, "
+    + COLUMN_SQRS_COUNTER + " BIGINT, "
+    + COLUMN_SQRS_SUBMISSION + " BIGINT, "
+    + COLUMN_SQRS_VALUE + " BIGINT, "
+    + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
+    + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
+    + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
+    + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
+    + ")";
 
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =
@@ -384,18 +466,22 @@ public final class DerbySchemaQuery {
     "INSERT INTO " + TABLE_SQ_SUBMISSION + "("
     + COLUMN_SQS_JOB + ", "
     + COLUMN_SQS_STATUS + ", "
-    + COLUMN_SQS_DATE + ", "
-    + COLUMN_SQS_EXTERNAL_ID + ") "
-    + " VALUES(?, ?, ?, ?)";
+    + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_DATE + ", "
+    + COLUMN_SQS_EXTERNAL_ID + ", "
+    + COLUMN_SQS_EXTERNAL_LINK + ", "
+    + COLUMN_SQS_EXCEPTION + ", "
+    + COLUMN_SQS_EXCEPTION_TRACE + ") "
+    + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Update existing submission
   public static final String STMT_UPDATE_SUBMISSION =
     "UPDATE " + TABLE_SQ_SUBMISSION + " SET "
-    + COLUMN_SQS_JOB + " = ?, "
     + COLUMN_SQS_STATUS + " = ?, "
-    + COLUMN_SQS_DATE + " = ?, "
-    + COLUMN_SQS_EXTERNAL_ID + " = ? "
-    + "WHERE " + COLUMN_SQS_ID + " = ?";
+    + COLUMN_SQS_UPDATE_DATE + " = ?, "
+    + COLUMN_SQS_EXCEPTION + " = ?, "
+    + COLUMN_SQS_EXCEPTION_TRACE + " = ?"
+    + " WHERE " + COLUMN_SQS_ID + " = ?";
 
   // DML: Check if given submission exists
   public static final String STMT_SELECT_SUBMISSION_CHECK =
@@ -404,20 +490,93 @@ public final class DerbySchemaQuery {
 
   // DML: Purge old entries
   public static final String STMT_PURGE_SUBMISSIONS =
-    "DELETE FROM " + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_DATE + " < ?";
+    "DELETE FROM " + TABLE_SQ_SUBMISSION
+    + " WHERE " + COLUMN_SQS_UPDATE_DATE + " < ?";
 
   // DML: Get unfinished
   public static final String STMT_SELECT_SUBMISSION_UNFINISHED =
-    "SELECT " + COLUMN_SQS_ID + ", " + COLUMN_SQS_JOB + ", " + COLUMN_SQS_DATE
-    + ", " + COLUMN_SQS_STATUS + ", " + COLUMN_SQS_EXTERNAL_ID + " FROM "
-    + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_STATUS + " = ?";
+    "SELECT "
+    + COLUMN_SQS_ID + ", "
+    + COLUMN_SQS_JOB + ", "
+    + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_DATE + ", "
+    + COLUMN_SQS_EXTERNAL_ID + ", "
+    + COLUMN_SQS_EXTERNAL_LINK + ", "
+    + COLUMN_SQS_EXCEPTION + ", "
+    + COLUMN_SQS_EXCEPTION_TRACE
+    + " FROM " + TABLE_SQ_SUBMISSION
+    + " WHERE " + COLUMN_SQS_STATUS + " = ?";
 
   // DML: Last submission for a job
   public static final String STMT_SELECT_SUBMISSION_LAST_FOR_JOB =
-    "SELECT " + COLUMN_SQS_ID + ", " + COLUMN_SQS_JOB + ", " + COLUMN_SQS_DATE
-      + ", " + COLUMN_SQS_STATUS + ", " + COLUMN_SQS_EXTERNAL_ID + " FROM "
-      + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_JOB + " = ? ORDER BY "
-      + COLUMN_SQS_DATE + " DESC";
+    "SELECT "
+    + COLUMN_SQS_ID + ", "
+    + COLUMN_SQS_JOB + ", "
+    + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_DATE + ", "
+    + COLUMN_SQS_EXTERNAL_ID + ", "
+    + COLUMN_SQS_EXTERNAL_LINK + ", "
+    + COLUMN_SQS_EXCEPTION + ", "
+    + COLUMN_SQS_EXCEPTION_TRACE
+    + " FROM " + TABLE_SQ_SUBMISSION
+    + " WHERE " + COLUMN_SQS_JOB + " = ?"
+    + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";
+
+  // DML: Select counter group
+  public static final String STMT_SELECT_COUNTER_GROUP =
+    "SELECT "
+    + COLUMN_SQG_ID + ", "
+    + COLUMN_SQG_NAME + " "
+    + "FROM " + TABLE_SQ_COUNTER_GROUP + " "
+    + "WHERE " + COLUMN_SQG_NAME + " = ?";
+
+  // DML: Insert new counter group
+  public static final String STMT_INSERT_COUNTER_GROUP =
+    "INSERT INTO " + TABLE_SQ_COUNTER_GROUP + " ("
+    + COLUMN_SQG_NAME + ") "
+    + "VALUES (?)";
+
+  // DML: Select counter
+  public static final String STMT_SELECT_COUNTER =
+    "SELECT "
+    + COLUMN_SQR_ID + ", "
+    + COLUMN_SQR_NAME + " "
+    + "FROM " + TABLE_SQ_COUNTER + " "
+    + "WHERE " + COLUMN_SQR_NAME + " = ?";
+
+  // DML: Insert new counter
+  public static final String STMT_INSERT_COUNTER =
+    "INSERT INTO " + TABLE_SQ_COUNTER + " ("
+    + COLUMN_SQR_NAME + ") "
+    + "VALUES (?)";
+
+  // DML: Insert new counter submission
+  public static final String STMT_INSERT_COUNTER_SUBMISSION =
+    "INSERT INTO " + TABLE_SQ_COUNTER_SUBMISSION + " ("
+    + COLUMN_SQRS_GROUP + ", "
+    + COLUMN_SQRS_COUNTER + ", "
+    + COLUMN_SQRS_SUBMISSION + ", "
+    + COLUMN_SQRS_VALUE + ") "
+    + "VALUES (?, ?, ?, ?)";
+
+  // DML: Select counter submission
+  public static final String STMT_SELECT_COUNTER_SUBMISSION =
+    "SELECT "
+    + COLUMN_SQG_NAME + ", "
+    + COLUMN_SQR_NAME + ", "
+    + COLUMN_SQRS_VALUE + " "
+    + "FROM " + TABLE_SQ_COUNTER_SUBMISSION + " "
+    + "LEFT JOIN " + TABLE_SQ_COUNTER_GROUP + " ON " + COLUMN_SQRS_GROUP + " = " + COLUMN_SQG_ID + " "
+    + "LEFT JOIN " + TABLE_SQ_COUNTER + " ON " + COLUMN_SQRS_COUNTER + " = " + COLUMN_SQR_ID + " "
+    + "WHERE " + COLUMN_SQRS_SUBMISSION + " = ? ";
+
+  // DML: Delete rows from counter submission table
+  public static final String STMT_DELETE_COUNTER_SUBMISSION =
+    "DELETE FROM " + TABLE_SQ_COUNTER_SUBMISSION
+    + " WHERE " + COLUMN_SQRS_SUBMISSION + " = ?";
+
 
   private DerbySchemaQuery() {
     // Disable explicit object creation
