@@ -463,7 +463,10 @@ public final class FrameworkManager {
       return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
     }
 
-    update(submission);
+    // If the submission is in running state, let's update it
+    if(submission.getStatus().isRunning()) {
+      update(submission);
+    }
 
     return submission;
   }
