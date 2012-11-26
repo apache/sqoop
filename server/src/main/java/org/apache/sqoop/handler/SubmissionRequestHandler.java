@@ -39,6 +39,9 @@ import org.apache.sqoop.server.common.ServerError;
  * DELETE /v1/submission/action/:jid
  * Stop last submission for job with id :jid
  *
+ * GET /v1/submission/notification/:jid
+ * Notification endpoint to get job status outside normal interval
+ *
  * Possible additions in the future: /v1/submission/history/* for history.
  */
 public class SubmissionRequestHandler implements RequestHandler {
@@ -65,8 +68,18 @@ public class SubmissionRequestHandler implements RequestHandler {
       return handleActionEvent(ctx, urlElements[length - 1]);
     }
 
+    if(action.equals("notification")) {
+      return handleNotification(ctx, urlElements[length - 1]);
+    }
+
     throw new SqoopException(ServerError.SERVER_0003,
       "Do not know what to do.");
+  }
+
+  private JsonBean handleNotification(RequestContext ctx, String sjid) {
+    logger.debug("Received notification request for job " + sjid);
+    FrameworkManager.status(Long.parseLong(sjid));
+    return JsonBean.EMPTY_BEAN;
   }
 
   private JsonBean handleActionEvent(RequestContext ctx, String sjid) {
@@ -76,6 +89,12 @@ public class SubmissionRequestHandler implements RequestHandler {
       case GET:
         return submissionStatus(jid);
       case POST:
+        // TODO: This should be outsourced somewhere more suitable than here
+        if(FrameworkManager.getNotificationBaseUrl() == null) {
+          String url = ctx.getRequest().getRequestURL().toString();
+          FrameworkManager.setNotificationBaseUrl(
+            url.split("v1")[0] + "/v1/submission/notification/");
+        }
         return submissionSubmit(jid);
       case DELETE:
         return submissionStop(jid);

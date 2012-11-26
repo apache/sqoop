@@ -26,7 +26,6 @@ import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.repository.RepositoryManager;
 
-
 /**
  * Initializes the Sqoop server. This listener is also responsible for
  * cleaning up any resources occupied by the server during the system shutdown.
@@ -53,9 +52,9 @@ public class ServerInitializer implements ServletContextListener {
       ConnectorManager.initialize();
       FrameworkManager.initialize();
       LOG.info("Sqoop server has successfully boot up");
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       LOG.error("Server startup failure", ex);
-      throw ex;
+      throw new RuntimeException("Failure in server initialization", ex);
     }
   }
 }

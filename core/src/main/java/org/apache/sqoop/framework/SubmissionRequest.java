@@ -92,6 +92,10 @@ public class SubmissionRequest {
    */
   String outputDirectory;
 
+  /**
+   * Optional notification URL for job progress
+   */
+  String notificationUrl;
 
   public SubmissionRequest() {
     this.jars = new LinkedList<String>();
@@ -209,5 +213,13 @@ public class SubmissionRequest {
 
   public void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
+  }
+
+  public String getNotificationUrl() {
+    return notificationUrl;
+  }
+
+  public void setNotificationUrl(String url) {
+    this.notificationUrl = url;
   }
 }

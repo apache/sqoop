@@ -169,6 +169,11 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     configuration.set(JobConstants.JOB_CONFIG_FRAMEWORK_JOB,
       FormUtils.toJson(request.getConfigFrameworkConnection()));
 
+    // Set up notification URL if it's available
+    if(request.getNotificationUrl() != null) {
+      configuration.set("job.end.notification.url", request.getNotificationUrl());
+    }
+
     // Promote all required jars to the job
     StringBuilder sb = new StringBuilder();
     boolean first = true;

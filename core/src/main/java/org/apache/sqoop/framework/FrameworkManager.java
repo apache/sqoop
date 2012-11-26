@@ -139,6 +139,32 @@ public final class FrameworkManager {
    */
   private static final Object submissionMutex = new Object();
 
+  /**
+   * Base notification URL.
+   *
+   * Framework manager will always add job id.
+   */
+  private static String notificationBaseUrl;
+
+  /**
+   * Set notification base URL.
+   *
+   * @param url Base URL
+   */
+  public static void setNotificationBaseUrl(String url) {
+    LOG.debug("Setting notification base URL to " + url);
+    notificationBaseUrl = url;
+  }
+
+  /**
+   * Get base notification url.
+   *
+   * @return String representation of the URL
+   */
+  public static String getNotificationBaseUrl() {
+    return notificationBaseUrl;
+  }
+
   static {
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(getConnectionConfigurationClass())
@@ -319,6 +345,7 @@ public final class FrameworkManager {
     request.setJobType(job.getType());
     request.setJobName(job.getName());
     request.setJobId(job.getPersistenceId());
+    request.setNotificationUrl(notificationBaseUrl + jobId);
 
     // Let's register all important jars
     // sqoop-common
