@@ -72,13 +72,15 @@ public class PGBulkloadExportJob extends ExportJobBase {
       DBConfiguration.configureDB(job.getConfiguration(),
                                   mgr.getDriverClass(),
                                   options.getConnectString(),
-                                  options.getFetchSize());
+                                  options.getFetchSize(),
+                                  options.getConnectionParams());
     } else {
       DBConfiguration.configureDB(job.getConfiguration(),
                                   mgr.getDriverClass(),
                                   options.getConnectString(),
                                   username, options.getPassword(),
-                                  options.getFetchSize());
+                                  options.getFetchSize(),
+                                  options.getConnectionParams());
     }
   }
 

@@ -72,7 +72,7 @@ public class PGBulkloadManagerManualTest extends TestExport {
                                 "org.postgresql.Driver",
                                 getConnectString(),
                                 getUserName(),
-                                null, null);
+                                (String) null, (Integer) null);
     dbConf = new DBConfiguration(conf);
   }
 

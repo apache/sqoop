@@ -206,7 +206,7 @@ public class TestDataDrivenDBInputFormat extends TestCase {
       job.getConfiguration().setInt("mapreduce.map.tasks", 2);
       FileOutputFormat.setOutputPath(job, new Path(OUT_DIR));
       DBConfiguration.configureDB(job.getConfiguration(), DRIVER_CLASS,
-          DB_URL, null, null);
+          DB_URL, (String) null, (String) null);
       DataDrivenDBInputFormat.setInput(job, DateCol.class, DATE_TABLE, null,
           COL, COL);
 

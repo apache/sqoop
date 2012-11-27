@@ -20,8 +20,15 @@ package org.apache.sqoop.mapreduce.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrTokenizer;
 import org.apache.sqoop.mapreduce.DBWritable;
 
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
@@ -54,6 +61,10 @@ public class DBConfiguration {
 
   /** Password to access the database. */
   public static final String PASSWORD_PROPERTY = "mapreduce.jdbc.password";
+
+  /** JDBC connection parameters. */
+  public static final String CONNECTION_PARAMS_PROPERTY =
+    "mapreduce.jdbc.params";
 
   /** Fetch size. */
   public static final String FETCH_SIZE = "mapreduce.jdbc.fetchsize";
@@ -109,9 +120,11 @@ public class DBConfiguration {
    * @param userName DB access username
    * @param passwd DB access passwd
    * @param fetchSize DB fetch size
+   * @param connectionParams JDBC connection parameters
    */
   public static void configureDB(Configuration conf, String driverClass,
-      String dbUrl, String userName, String passwd, Integer fetchSize) {
+      String dbUrl, String userName, String passwd, Integer fetchSize,
+      Properties connectionParams) {
 
     conf.set(DRIVER_CLASS_PROPERTY, driverClass);
     conf.set(URL_PROPERTY, dbUrl);
@@ -124,6 +137,67 @@ public class DBConfiguration {
     if (fetchSize != null) {
       conf.setInt(FETCH_SIZE, fetchSize);
     }
+    if (connectionParams != null) {
+      conf.set(CONNECTION_PARAMS_PROPERTY,
+               propertiesToString(connectionParams));
+    }
+  }
+
+  /**
+   * Sets the DB access related fields in the JobConf.
+   * @param job the job
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL
+   * @param fetchSize DB fetch size
+   * @param connectionParams JDBC connection parameters
+   */
+  public static void configureDB(Configuration job, String driverClass,
+      String dbUrl, Integer fetchSize, Properties connectionParams) {
+    configureDB(job, driverClass, dbUrl, null, null, fetchSize,
+                connectionParams);
+  }
+
+  /**
+   * Sets the DB access related fields in the {@link Configuration}.
+   * @param conf the configuration
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL
+   * @param userName DB access username
+   * @param passwd DB access passwd
+   * @param connectionParams JDBC connection parameters
+   */
+  public static void configureDB(Configuration conf, String driverClass,
+      String dbUrl, String userName, String passwd,
+      Properties connectionParams) {
+    configureDB(conf, driverClass, dbUrl, userName, passwd, null,
+                connectionParams);
+  }
+
+  /**
+   * Sets the DB access related fields in the JobConf.
+   * @param job the job
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL.
+   * @param connectionParams JDBC connection parameters
+   */
+  public static void configureDB(Configuration job, String driverClass,
+      String dbUrl, Properties connectionParams) {
+    configureDB(job, driverClass, dbUrl, null, connectionParams);
+  }
+
+  /**
+   * Sets the DB access related fields in the {@link Configuration}.
+   * @param conf the configuration
+   * @param driverClass JDBC Driver class name
+   * @param dbUrl JDBC DB access URL
+   * @param userName DB access username
+   * @param passwd DB access passwd
+   * @param fetchSize DB fetch size
+   */
+  public static void configureDB(Configuration conf, String driverClass,
+      String dbUrl, String userName, String passwd, Integer fetchSize) {
+    configureDB(conf, driverClass, dbUrl, userName, passwd, fetchSize,
+                (Properties) null);
   }
 
   /**
@@ -135,7 +209,7 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl, Integer fetchSize) {
-    configureDB(job, driverClass, dbUrl, null, null, fetchSize);
+    configureDB(job, driverClass, dbUrl, fetchSize, (Properties) null);
   }
 
   /**
@@ -148,7 +222,7 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration conf, String driverClass,
       String dbUrl, String userName, String passwd) {
-    configureDB(conf, driverClass, dbUrl, userName, passwd, null);
+    configureDB(conf, driverClass, dbUrl, userName, passwd, (Properties) null);
   }
 
   /**
@@ -159,7 +233,7 @@ public class DBConfiguration {
    */
   public static void configureDB(Configuration job, String driverClass,
       String dbUrl) {
-    configureDB(job, driverClass, dbUrl, null);
+    configureDB(job, driverClass, dbUrl, (Properties) null);
   }
 
 
@@ -174,18 +248,38 @@ public class DBConfiguration {
    * @throws SQLException */
   public Connection getConnection()
       throws ClassNotFoundException, SQLException {
+    Connection connection;
 
     Class.forName(conf.get(DBConfiguration.DRIVER_CLASS_PROPERTY));
 
-    if (conf.get(DBConfiguration.USERNAME_PROPERTY) == null) {
-      return DriverManager.getConnection(
-               conf.get(DBConfiguration.URL_PROPERTY));
+    String username = conf.get(DBConfiguration.USERNAME_PROPERTY);
+    String password = conf.get(DBConfiguration.PASSWORD_PROPERTY);
+    String connectString = conf.get(DBConfiguration.URL_PROPERTY);
+    String connectionParamsStr =
+      conf.get(DBConfiguration.CONNECTION_PARAMS_PROPERTY);
+    Properties connectionParams = propertiesFromString(connectionParamsStr);
+
+    if (connectionParams != null && connectionParams.size() > 0) {
+      Properties props = new Properties();
+      if (username != null) {
+        props.put("user", username);
+      }
+
+      if (password != null) {
+        props.put("password", password);
+      }
+
+      props.putAll(connectionParams);
+      connection = DriverManager.getConnection(connectString, props);
     } else {
-      return DriverManager.getConnection(
-          conf.get(DBConfiguration.URL_PROPERTY),
-          conf.get(DBConfiguration.USERNAME_PROPERTY),
-          conf.get(DBConfiguration.PASSWORD_PROPERTY));
+      if (username == null) {
+        connection = DriverManager.getConnection(connectString);
+      } else {
+        connection = DriverManager.getConnection(
+                        connectString, username, password);
+      }
     }
+    return connection;
   }
 
   public Configuration getConf() {
@@ -304,6 +398,51 @@ public class DBConfiguration {
 
   public int getOutputFieldCount() {
     return conf.getInt(OUTPUT_FIELD_COUNT_PROPERTY, 0);
+  }
+
+  /**
+   * Converts connection properties to a String to be passed to the mappers.
+   * @param properties JDBC connection parameters
+   * @return String to be passed to configuration
+   */
+  protected static String propertiesToString(Properties properties) {
+    List<String> propertiesList = new ArrayList<String>(properties.size());
+    for(Entry<Object, Object> property : properties.entrySet()) {
+      String key = StringEscapeUtils.escapeCsv(property.getKey().toString());
+      if (key.equals(property.getKey().toString()) && key.contains("=")) {
+        key = "\"" + key + "\"";
+      }
+      String val = StringEscapeUtils.escapeCsv(property.getValue().toString());
+      if (val.equals(property.getValue().toString()) && val.contains("=")) {
+        val = "\"" + val + "\"";
+      }
+      propertiesList.add(StringEscapeUtils.escapeCsv(key + "=" + val));
+    }
+    return StringUtils.join(propertiesList, ',');
+  }
+
+  /**
+   * Converts a String back to connection parameters.
+   * @param input String from configuration
+   * @return JDBC connection parameters
+   */
+  protected static Properties propertiesFromString(String input) {
+    if (input != null && !input.isEmpty()) {
+      Properties result = new Properties();
+      StrTokenizer propertyTokenizer = StrTokenizer.getCSVInstance(input);
+      StrTokenizer valueTokenizer = StrTokenizer.getCSVInstance();
+      valueTokenizer.setDelimiterChar('=');
+      while (propertyTokenizer.hasNext()){
+        valueTokenizer.reset(propertyTokenizer.nextToken());
+        String[] values = valueTokenizer.getTokenArray();
+        if (values.length==2) {
+          result.put(values[0], values[1]);
+        }
+      }
+      return result;
+    } else {
+      return null;
+    }
   }
 
 }

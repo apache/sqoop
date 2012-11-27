@@ -150,11 +150,12 @@ public class DataDrivenImportJob extends ImportJobBase {
       if (null == username || username.length() == 0) {
         DBConfiguration.configureDB(job.getConfiguration(),
             mgr.getDriverClass(), options.getConnectString(),
-            options.getFetchSize());
+            options.getFetchSize(), options.getConnectionParams());
       } else {
         DBConfiguration.configureDB(job.getConfiguration(),
             mgr.getDriverClass(), options.getConnectString(),
-            username, options.getPassword(), options.getFetchSize());
+            username, options.getPassword(), options.getFetchSize(),
+            options.getConnectionParams());
       }
 
       if (null != tableName) {

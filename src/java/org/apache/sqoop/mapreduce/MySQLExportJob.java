@@ -73,11 +73,12 @@ public class MySQLExportJob extends ExportJobBase {
     String username = options.getUsername();
     if (null == username || username.length() == 0) {
       DBConfiguration.configureDB(job.getConfiguration(),
-          mgr.getDriverClass(), options.getConnectString());
+          mgr.getDriverClass(), options.getConnectString(),
+          options.getConnectionParams());
     } else {
       DBConfiguration.configureDB(job.getConfiguration(),
           mgr.getDriverClass(), options.getConnectString(), username,
-          options.getPassword());
+          options.getPassword(), options.getConnectionParams());
     }
 
     String [] colNames = options.getColumns();

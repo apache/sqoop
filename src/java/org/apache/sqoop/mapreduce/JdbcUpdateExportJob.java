@@ -83,12 +83,14 @@ public class JdbcUpdateExportJob extends ExportJobBase {
       if (null == username || username.length() == 0) {
         DBConfiguration.configureDB(job.getConfiguration(),
             mgr.getDriverClass(),
-            options.getConnectString());
+            options.getConnectString(),
+            options.getConnectionParams());
       } else {
         DBConfiguration.configureDB(job.getConfiguration(),
             mgr.getDriverClass(),
             options.getConnectString(),
-            username, options.getPassword());
+            username, options.getPassword(),
+            options.getConnectionParams());
       }
 
       String [] colNames = options.getColumns();
