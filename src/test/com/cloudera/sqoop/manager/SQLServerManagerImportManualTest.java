@@ -250,6 +250,30 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
     doImportAndVerify(SCH_TABLE_NAME, expectedResults, extraArgs);
   }
 
+  @Test
+  public void testImportTableHints() throws IOException {
+    String [] expectedResults = {
+      "1,Aaron,1000000.0,engineering",
+      "2,Bob,400.0,sales",
+      "3,Fred,15.0,marketing",
+    };
+
+    String[] extraArgs = new String[] {"--table-hints", "NOLOCK"};
+    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
+  }
+
+  @Test
+  public void testImportTableHintsMultiple() throws IOException {
+    String [] expectedResults = {
+      "1,Aaron,1000000.0,engineering",
+      "2,Bob,400.0,sales",
+      "3,Fred,15.0,marketing",
+    };
+
+    String[] extraArgs = new String[] {"--table-hints", "NOLOCK,NOWAIT"};
+    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
+  }
+
   private String [] getArgv(String tableName, String ... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 

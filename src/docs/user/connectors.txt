@@ -39,14 +39,55 @@ it will update appropriate row instead. As a result, Sqoop is ignoring values sp
 in parameter +\--update-key+, however user needs to specify at least one valid column
 to turn on update mode itself.
 
+Microsoft SQL Connector
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Extra arguments
+^^^^^^^^^^^^^^^
+
+List of all extra arguments supported by Microsoft SQL Connector is shown below:
+
+.Supported Microsoft SQL Connector extra arguments:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--schema <name>+                       Scheme name that sqoop should use. \
+                                         Default is "dbo".
++\--table-hints <hints>+                 Table hints that Sqoop should use for \
+                                         data movement.
+---------------------------------------------------------------------------------
+
+Schema support
+^^^^^^^^^^^^^^
+If you need to work with tables that are located in non-default schemas, you can
+specify schema names via the +\--schema+ argument. Custom schemas are supported for
+both import and export jobs. For example:
+
+----
+$ sqoop import ... --table custom_table -- --schema custom_schema
+----
+
+Table hints
+^^^^^^^^^^^
+
+Sqoop supports table hints in both import and export jobs. Table hints are used only
+for queries that move data from/to Microsoft SQL Server, but they cannot be used for
+meta data queries. You can specify a comma-separated list of table hints in the
++\--table-hints+ argument. For example:
+
+----
+$ sqoop import ... --table custom_table -- --table-hints NOLOCK
+----
+
+
 PostgreSQL Connector
 ~~~~~~~~~~~~~~~~~~~~~
 
 Extra arguments
 ^^^^^^^^^^^^^^^
 
-List of all extra arguments supported by PostgreSQL Connector is shown on table
-below:
+List of all extra arguments supported by PostgreSQL Connector is shown below:
 
 .Supported PostgreSQL extra arguments:
 [grid="all"]

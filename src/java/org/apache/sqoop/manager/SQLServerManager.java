@@ -29,10 +29,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.util.ExportException;
+import com.cloudera.sqoop.util.ImportException;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
+import org.apache.sqoop.mapreduce.sqlserver.SqlServerInputFormat;
 
 /**
  * Manages connections to SQLServer databases. Requires the SQLServer JDBC
@@ -42,6 +45,9 @@ public class SQLServerManager
     extends com.cloudera.sqoop.manager.InformationSchemaManager {
 
   public static final String SCHEMA = "schema";
+  public static final String TABLE_HINTS = "table-hints";
+  public static final String TABLE_HINTS_PROP
+    = "org.apache.sqoop.manager.sqlserver.table.hints";
 
   public static final Log LOG = LogFactory.getLog(
       SQLServerManager.class.getName());
@@ -55,6 +61,11 @@ public class SQLServerManager
    */
   private String schema;
 
+  /**
+   * Optional table hints to use.
+   */
+  private String tableHints;
+
   public SQLServerManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
 
@@ -66,6 +77,28 @@ public class SQLServerManager
     }
   }
 
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void importTable(
+          com.cloudera.sqoop.manager.ImportJobContext context)
+      throws IOException, ImportException {
+    // We're the correct connection manager
+    context.setConnManager(this);
+
+    // Propagate table hints to job
+    Configuration configuration = context.getOptions().getConf();
+    if (tableHints != null) {
+      configuration.set(TABLE_HINTS_PROP, tableHints);
+    }
+
+    // Set our own input format
+    context.setInputFormat(SqlServerInputFormat.class);
+    super.importTable(context);
+  }
+
   /**
    * Export data stored in HDFS into a table in a database.
    */
@@ -73,8 +106,15 @@ public class SQLServerManager
   public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
+
+    // Propagate table hints to job
+    Configuration configuration = context.getOptions().getConf();
+    if (tableHints != null) {
+      configuration.set(TABLE_HINTS_PROP, tableHints);
+    }
+
     JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-      ExportBatchOutputFormat.class);
+      SqlServerExportBatchOutputFormat.class);
     exportJob.runExport();
   }
 
@@ -154,6 +194,15 @@ public class SQLServerManager
 
       this.schema = schemaName;
     }
+
+    // Apply table hints
+    if (cmdLine.hasOption(TABLE_HINTS)) {
+      String hints = cmdLine.getOptionValue(TABLE_HINTS);
+      LOG.info("Sqoop will use following table hints for data transfer: "
+        + hints);
+
+      this.tableHints = hints;
+    }
   }
 
   /**
@@ -170,6 +219,10 @@ public class SQLServerManager
     extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
       .withDescription("Optional schema name")
       .withLongOpt(SCHEMA).create());
+
+    extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
+      .withDescription("Optional table hints to use")
+      .withLongOpt(TABLE_HINTS).create());
 
     return extraOptions;
   }

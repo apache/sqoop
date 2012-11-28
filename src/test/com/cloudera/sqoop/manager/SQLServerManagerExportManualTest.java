@@ -257,6 +257,32 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     );
   }
 
+  public void testExportTableHints() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,400,sales",
+      "3,Fred,15,marketing",
+    });
+
+    String []extra = new String[] {"--", "--table-hints",
+      "ROWLOCK",
+    };
+    runExport(getArgv(DBO_TABLE_NAME, extra));
+    assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
+  }
+
+  public void testExportTableHintsMultiple() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,400,sales",
+      "3,Fred,15,marketing",
+    });
+
+    String []extra = new String[] {"--", "--table-hints",
+      "ROWLOCK,NOWAIT",
+    };
+    runExport(getArgv(DBO_TABLE_NAME, extra));
+    assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
+  }
+
   public static void assertRowCount(long expected,
                                     String tableName,
                                     Connection connection) {
