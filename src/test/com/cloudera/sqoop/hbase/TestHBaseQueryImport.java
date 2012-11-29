@@ -29,9 +29,6 @@ public class TestHBaseQueryImport extends HBaseTestCase {
 
   @Test
   public void testImportFromQuery() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     String [] types = { "INT", "INT", "INT" };
     String [] vals = { "0", "42", "43" };
     createTableWithColTypes(types, vals);
@@ -50,9 +47,6 @@ public class TestHBaseQueryImport extends HBaseTestCase {
 
   @Test
   public void testExitFailure() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     String [] types = { "INT", "INT", "INT" };
     String [] vals = { "0", "42", "43" };
     createTableWithColTypes(types, vals);

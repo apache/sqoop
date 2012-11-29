@@ -77,7 +77,7 @@
       <equals arg1="${hadoopversion}" arg2="200" />
       <then>
         <property name="hadoop.version" value="2.0.0-alpha" />
-        <property name="hbase.version" value="0.92.0" />
+        <property name="hbase.version" value="0.94.2" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="2.0.0-alpha" />
       </then>

@@ -29,9 +29,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testBasicUsage() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     // Create the HBase table in Sqoop as we run the job.
     String [] argv = getArgv(true, "BasicUsage", "BasicColFam", true, null);
     String [] types = { "INT", "INT" };
@@ -43,9 +40,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testMissingTableFails() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     // Test that if the table doesn't exist, we fail unless we
     // explicitly create the table.
     String [] argv = getArgv(true, "MissingTable", "MissingFam", false, null);
@@ -62,9 +56,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testOverwriteSucceeds() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     // Test that we can create a table and then import immediately
     // back on top of it without problem.
     String [] argv = getArgv(true, "OverwriteT", "OverwriteF", true, null);
@@ -80,9 +71,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testStrings() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     String [] argv = getArgv(true, "stringT", "stringF", true, null);
     String [] types = { "INT", "VARCHAR(32)" };
     String [] vals = { "0", "'abc'" };
@@ -93,9 +81,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testNulls() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     String [] argv = getArgv(true, "nullT", "nullF", true, null);
     String [] types = { "INT", "INT", "INT" };
     String [] vals = { "0", "42", "null" };
@@ -111,9 +96,6 @@ public class TestHBaseImport extends HBaseTestCase {
 
   @Test
   public void testExitFailure() throws IOException {
-    if (!isHadoop20()) {
-      return;
-    }
     String [] types = { "INT", "INT", "INT" };
     String [] vals = { "0", "42", "43" };
     createTableWithColTypes(types, vals);

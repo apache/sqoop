@@ -28,13 +28,17 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.MiniHBaseCluster;
+import org.apache.hadoop.hbase.master.HMaster;
+import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import org.apache.hadoop.util.StringUtils;
-import org.apache.hadoop.util.VersionInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +46,10 @@ import org.junit.Before;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Utility methods that facilitate HBase import tests.
@@ -105,56 +113,94 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
 
     return args.toArray(new String[0]);
   }
-
+  // Starts a mini hbase cluster in this process.
   // Starts a mini hbase cluster in this process.
   private HBaseTestingUtility hbaseTestUtil;
-
-  private void startMaster() throws Exception {
-    if (null == hbaseTestUtil) {
-      Configuration conf = new Configuration();
-      conf = HBaseConfiguration.addHbaseResources(conf);
-      hbaseTestUtil = new HBaseTestingUtility(conf);
-      hbaseTestUtil.startMiniCluster(1);
-    }
-  }
+  private String workDir = createTempDir().getAbsolutePath();
+  private MiniZooKeeperCluster zookeeperCluster;
+  private MiniHBaseCluster hbaseCluster;
 
   @Override
   @Before
   public void setUp() {
-    if (!isHadoop20()) {
-      return;
-    }
-    HBaseTestCase.recordTestBuildDataProperty();
     try {
-      startMaster();
-    } catch (Exception e) {
-      fail(e.toString());
-    }
-    super.setUp();
-  }
+      HBaseTestCase.recordTestBuildDataProperty();
+      String hbaseDir = new File(workDir, "hbase").getAbsolutePath();
+      String hbaseRoot = "file://" + hbaseDir;
+      Configuration hbaseConf = HBaseConfiguration.create();
+      hbaseConf.set(HConstants.HBASE_DIR, hbaseRoot);
+      //Hbase 0.90 does not have HConstants.ZOOKEEPER_CLIENT_PORT
+      hbaseConf.setInt("hbase.zookeeper.property.clientPort", 21818);
+      hbaseConf.set(HConstants.ZOOKEEPER_QUORUM, "0.0.0.0");
+      hbaseConf.setInt("hbase.master.info.port", -1);
+      hbaseConf.setInt("hbase.zookeeper.property.maxClientCnxns", 500);
+      String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
+      int zookeeperPort = 21818;
+      zookeeperCluster = new MiniZooKeeperCluster();
+      Method m;
+      Class<?> zkParam[] = {Integer.TYPE};
+      try {
+        m = MiniZooKeeperCluster.class.getDeclaredMethod("setDefaultClientPort",
+                zkParam);
+      } catch (NoSuchMethodException e) {
+        m = MiniZooKeeperCluster.class.getDeclaredMethod("setClientPort",
+                zkParam);
+      }
+      m.invoke(zookeeperCluster, new Object[]{new Integer(zookeeperPort)});
+      zookeeperCluster.startup(new File(zookeeperDir));
+      hbaseCluster = new MiniHBaseCluster(hbaseConf, 1);
+      HMaster master = hbaseCluster.getMaster();
+      Object serverName = master.getServerName();
 
+      String hostAndPort;
+      if (serverName instanceof String) {
+        System.out.println("Server name is string, using HServerAddress.");
+        m = HMaster.class.getDeclaredMethod("getMasterAddress",
+                new Class<?>[]{});
+        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.HServerAddress");
+        /*
+         * Call method to get server address
+         */
+        Object serverAddr = clazz.cast(m.invoke(master, new Object[]{}));
+        //returns the address as hostname:port
+        hostAndPort = serverAddr.toString();
+      } else {
+        System.out.println("ServerName is org.apache.hadoop.hbase.ServerName,"
+                + "using getHostAndPort()");
+        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.ServerName");
+        m = clazz.getDeclaredMethod("getHostAndPort", new Class<?>[]{});
+        hostAndPort = m.invoke(serverName, new Object[]{}).toString();
+      }
+      hbaseConf.set("hbase.master", hostAndPort);
+      hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
+      hbaseTestUtil.setZkCluster(zookeeperCluster);
+      hbaseCluster.startMaster();
+      super.setUp();
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public void shutdown() throws Exception {
     LOG.info("In shutdown() method");
     if (null != hbaseTestUtil) {
       LOG.info("Shutting down HBase cluster");
-      hbaseTestUtil.shutdownMiniCluster();
-      this.hbaseTestUtil = null;
+      hbaseCluster.shutdown();
+      zookeeperCluster.shutdown();
+      hbaseTestUtil = null;
     }
+    FileUtils.deleteDirectory(new File(workDir));
     LOG.info("shutdown() method returning.");
   }
 
   @Override
   @After
   public void tearDown() {
-    if (!isHadoop20()) {
-      return;
-    }
     try {
       shutdown();
     } catch (Exception e) {
       LOG.warn("Error shutting down HBase minicluster: "
-          + StringUtils.stringifyException(e));
+              + StringUtils.stringifyException(e));
     }
     HBaseTestCase.restoreTestBuidlDataProperty();
     super.tearDown();
@@ -180,8 +226,12 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       table.close();
     }
   }
-
-  protected boolean isHadoop20() {
-    return VersionInfo.getVersion().startsWith("0.20");
+  public static File createTempDir() {
+    File baseDir = new File(System.getProperty("java.io.tmpdir"));
+    File tempDir = new File(baseDir, UUID.randomUUID().toString());
+    if (tempDir.mkdir()) {
+      return tempDir;
+    }
+    throw new IllegalStateException("Failed to create directory");
   }
 }

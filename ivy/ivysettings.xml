@@ -66,6 +66,7 @@ under the License.
 
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
+      <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/> 
       <resolver ref="cloudera-releases"/>
       <resolver ref="cloudera-staging"/> 
