@@ -136,16 +136,15 @@ function guessHadoopHome() {
 function getHadoopJars() {
   version=$1
   # List is separated by ":"
+  suffix="-[0-9.]*"
   if [[ "${version}" =~ cdh4mr1 ]]; then
-    suffix="-[0-9.]*"
-    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-cli-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:avro-*.jar:hadoop-2.0.0-mr1-*-core.jar"
+    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-java${suffix}.jar:jackson-core-asl${suffix}.jar:jackson-mapper-asl${suffix}.jar:commons-configuration${suffix}.jar:commons-cli${suffix}.jar:commons-logging${suffix}.jar:slf4j-api${suffix}.jar:slf4j-log4j12${suffix}.jar:avro${suffix}.jar:hadoop-core-2.0.0-mr1-[0-9.A-Za-z]*.jar"
   elif [[ "${version}" =~ cdh3 ]]; then
-    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:guava*.jar"
+    hadoopJars="hadoop-core${suffix}-cdh*.jar:jackson-core-asl${suffix}.jar:jackson-mapper-asl${suffix}.jar:commons-logging${suffix}.jar:slf4j-api${suffix}.jar:slf4j-log4j12${suffix}.jar:guava*.jar"
   elif [[ "${version}" =~ ^1.* ]]; then
-    hadoopJars="hadoop-core*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar"
+    hadoopJars="hadoop-core${suffix}.jar:jackson-core-asl${suffix}.jar:jackson-mapper-asl${suffix}.jar:commons-configuration${suffix}.jar:commons-logging${suffix}.jar:slf4j-api${suffix}.jar:slf4j-log4j12${suffix}.jar"
   elif [[ "${version}" =~ ^2.* ]]; then
-    suffix="-[0-9.]*"
-    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-*.jar:jackson-core-asl-*.jar:jackson-mapper-asl-*.jar:commons-configuration-*.jar:commons-cli-*.jar:commons-logging-*.jar:slf4j-api-*.jar:slf4j-log4j*.jar:avro-*.jar"
+    hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-java${suffix}.jar:jackson-core-asl${suffix}.jar:jackson-mapper-asl${suffix}.jar:commons-configuration${suffix}.jar:commons-cli${suffix}.jar:commons-logging${suffix}.jar:slf4j-api${suffix}.jar:slf4j-log4j12${suffix}.jar:avro${suffix}.jar"
   else
     echo
     echo "Exiting: Unsupported Hadoop version '${version}', supported versions: 1.x, 2.x, cdh3, cdh4mr1"
