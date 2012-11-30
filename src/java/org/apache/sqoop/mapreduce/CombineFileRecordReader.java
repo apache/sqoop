@@ -27,6 +27,11 @@ import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.conf.Configuration;
 
 /**
+ * This file was ported from Hadoop 2.0.2-alpha
+ */
+// CHECKSTYLE:OFF
+
+/**
  * A generic RecordReader that can hand out different recordReaders
  * for each chunk in a {@link CombineFileSplit}.
  * A CombineFileSplit can combine data chunks from multiple files.
@@ -34,19 +39,16 @@ import org.apache.hadoop.conf.Configuration;
  * these data chunks from different files.
  * @see CombineFileSplit
  */
-
 public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
 
-  // CHECKSTYLE:OFF
   static final Class [] constructorSignature = new Class []
                                          {CombineFileSplit.class,
                                           TaskAttemptContext.class,
                                           Integer.class};
-  // CHECKSTYLE:ON
 
   protected CombineFileSplit split;
-  protected Class<? extends RecordReader<K, V>> rrClass;
-  protected Constructor<? extends RecordReader<K, V>> rrConstructor;
+  protected Class<? extends RecordReader<K,V>> rrClass;
+  protected Constructor<? extends RecordReader<K,V>> rrConstructor;
   protected FileSystem fs;
   protected TaskAttemptContext context;
 
@@ -54,10 +56,10 @@ public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
   protected long progress;
   protected RecordReader<K, V> curReader;
 
-  public void initialize(InputSplit psplit,
-      TaskAttemptContext pcontext) throws IOException, InterruptedException {
-    this.split = (CombineFileSplit)psplit;
-    this.context = pcontext;
+  public void initialize(InputSplit split,
+      TaskAttemptContext context) throws IOException, InterruptedException {
+    this.split = (CombineFileSplit)split;
+    this.context = context;
     if (null != this.curReader) {
       this.curReader.initialize(split, context);
     }
@@ -106,7 +108,7 @@ public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
    */
   public CombineFileRecordReader(CombineFileSplit split,
                                  TaskAttemptContext context,
-                                 Class<? extends RecordReader<K, V>> rrClass)
+                                 Class<? extends RecordReader<K,V>> rrClass)
     throws IOException {
     this.split = split;
     this.context = context;
@@ -119,8 +121,8 @@ public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
       rrConstructor = rrClass.getDeclaredConstructor(constructorSignature);
       rrConstructor.setAccessible(true);
     } catch (Exception e) {
-      throw new RuntimeException(rrClass.getName()
-                                 + " does not have valid constructor", e);
+      throw new RuntimeException(rrClass.getName() +
+                                 " does not have valid constructor", e);
     }
     initNextRecordReader();
   }
@@ -145,9 +147,6 @@ public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
 
     // get a record reader for the idx-th chunk
     try {
-      curReader =  rrConstructor.newInstance(new Object []
-                            {split, context, Integer.valueOf(idx)});
-
       Configuration conf = context.getConfiguration();
       // setup some helper config variables.
       conf.set("map.input.file", split.getPath(idx).toString());
@@ -163,9 +162,10 @@ public class CombineFileRecordReader<K, V> extends RecordReader<K, V> {
         curReader.initialize(split, context);
       }
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException (e);
     }
     idx++;
     return true;
   }
 }
+// CHECKSTYLE:ON

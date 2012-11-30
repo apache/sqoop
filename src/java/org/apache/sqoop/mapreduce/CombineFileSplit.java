@@ -28,16 +28,20 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
 /**
+ * This file was ported from Hadoop 2.0.2-alpha
+ */
+ // CHECKSTYLE:OFF
+
+/**
  * A sub-collection of input files.
  *
- * Unlike {@link FileSplit}, CombineFileSplit class does not represent
+ * Unlike FileSplit, CombineFileSplit class does not represent
  * a split of a file, but a split of input files into smaller sets.
  * A split may contain blocks from different file but all
  * the blocks in the same split are probably local to some rack <br>
  * CombineFileSplit can be used to implement {@link RecordReader}'s,
  * with reading one record per file.
  *
- * @see FileSplit
  * @see CombineFileInputFormat
  */
 public class CombineFileSplit extends InputSplit implements Writable {
@@ -49,7 +53,7 @@ public class CombineFileSplit extends InputSplit implements Writable {
   private long totLength;
 
   /**
-   * default constructor.
+   * default constructor
    */
   public CombineFileSplit() {}
   public CombineFileSplit(Path[] files, long[] start,
@@ -58,31 +62,31 @@ public class CombineFileSplit extends InputSplit implements Writable {
   }
 
   public CombineFileSplit(Path[] files, long[] lengths) {
-    long[] pstartoffset = new long[files.length];
-    for (int i = 0; i < pstartoffset.length; i++) {
-      pstartoffset[i] = 0;
+    long[] startoffset = new long[files.length];
+    for (int i = 0; i < startoffset.length; i++) {
+      startoffset[i] = 0;
     }
-    String[] plocations = new String[files.length];
-    for (int i = 0; i < plocations.length; i++) {
-      plocations[i] = "";
+    String[] locations = new String[files.length];
+    for (int i = 0; i < locations.length; i++) {
+      locations[i] = "";
     }
-    initSplit(files, pstartoffset, lengths, plocations);
+    initSplit(files, startoffset, lengths, locations);
   }
 
   private void initSplit(Path[] files, long[] start,
-                         long[] plengths, String[] plocations) {
+                         long[] lengths, String[] locations) {
     this.startoffset = start;
-    this.lengths = plengths;
+    this.lengths = lengths;
     this.paths = files;
     this.totLength = 0;
-    this.locations = plocations;
+    this.locations = locations;
     for(long length : lengths) {
       totLength += length;
     }
   }
 
   /**
-   * Copy constructor.
+   * Copy constructor
    */
   public CombineFileSplit(CombineFileSplit old) throws IOException {
     this(old.getPaths(), old.getStartOffsets(),
@@ -93,42 +97,42 @@ public class CombineFileSplit extends InputSplit implements Writable {
     return totLength;
   }
 
-  /** Returns an array containing the start offsets of the files in the split.*/
+  /** Returns an array containing the start offsets of the files in the split*/
   public long[] getStartOffsets() {
     return startoffset;
   }
 
-  /** Returns an array containing the lengths of the files in the split.*/
+  /** Returns an array containing the lengths of the files in the split*/
   public long[] getLengths() {
     return lengths;
   }
 
-  /** Returns the start offset of the i<sup>th</sup> Path.*/
+  /** Returns the start offset of the i<sup>th</sup> Path */
   public long getOffset(int i) {
     return startoffset[i];
   }
 
-  /** Returns the length of the i<sup>th</sup> Path. */
+  /** Returns the length of the i<sup>th</sup> Path */
   public long getLength(int i) {
     return lengths[i];
   }
 
-  /** Returns the number of Paths in the split.*/
+  /** Returns the number of Paths in the split */
   public int getNumPaths() {
     return paths.length;
   }
 
-  /** Returns the i<sup>th</sup> Path. */
+  /** Returns the i<sup>th</sup> Path */
   public Path getPath(int i) {
     return paths[i];
   }
 
-  /** Returns all the Paths in the split. */
+  /** Returns all the Paths in the split */
   public Path[] getPaths() {
     return paths;
   }
 
-  /** Returns all the Paths where this input-split resides. */
+  /** Returns all the Paths where this input-split resides */
   public String[] getLocations() throws IOException {
     return locations;
   }
@@ -137,17 +141,17 @@ public class CombineFileSplit extends InputSplit implements Writable {
     totLength = in.readLong();
     int arrLength = in.readInt();
     lengths = new long[arrLength];
-    for(int i=0; i<arrLength; i++) {
+    for(int i=0; i<arrLength;i++) {
       lengths[i] = in.readLong();
     }
     int filesLength = in.readInt();
     paths = new Path[filesLength];
-    for(int i=0; i<filesLength; i++) {
+    for(int i=0; i<filesLength;i++) {
       paths[i] = new Path(Text.readString(in));
     }
     arrLength = in.readInt();
     startoffset = new long[arrLength];
-    for(int i=0; i<arrLength; i++) {
+    for(int i=0; i<arrLength;i++) {
       startoffset[i] = in.readLong();
     }
   }
@@ -172,11 +176,11 @@ public class CombineFileSplit extends InputSplit implements Writable {
  public String toString() {
     StringBuffer sb = new StringBuffer();
     for (int i = 0; i < paths.length; i++) {
-      if (i == 0) {
+      if (i == 0 ) {
         sb.append("Paths:");
       }
-      sb.append(paths[i].toUri().getPath() + ":" + startoffset[i]
-                + "+" + lengths[i]);
+      sb.append(paths[i].toUri().getPath() + ":" + startoffset[i] +
+                "+" + lengths[i]);
       if (i < paths.length -1) {
         sb.append(",");
       }
@@ -193,3 +197,4 @@ public class CombineFileSplit extends InputSplit implements Writable {
     return sb.toString();
   }
 }
+// CHECKSTYLE:ON
