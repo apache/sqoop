@@ -128,9 +128,9 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQS_CREATION_DATE: TIMESTAMP      |
  *    | SQS_UPDATE_DATE: TIMESTAMP        |
  *    | SQS_EXTERNAL_ID: VARCHAR(25)      |
- *    | SQS_EXTERNAL_LINK: VARCHAR(75)    |
- *    | SQS_EXCEPTION: VARCHAR(75)        |
- *    | SQS_EXCEPTION_TRACE: VARCHAR(500) |
+ *    | SQS_EXTERNAL_LINK: VARCHAR(150)   |
+ *    | SQS_EXCEPTION: VARCHAR(150)       |
+ *    | SQS_EXCEPTION_TRACE: VARCHAR(750) |
  *    +-----------------------------------+
  * </pre>
  * </p>
@@ -263,9 +263,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
     + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
     + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(25), "
-    + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(75), "
-    + COLUMN_SQS_EXCEPTION + " VARCHAR(75), "
-    + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(500), "
+    + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
+    + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
+    + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
     + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
     + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
     +  ")";
@@ -472,7 +472,7 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_EXTERNAL_LINK + ", "
     + COLUMN_SQS_EXCEPTION + ", "
     + COLUMN_SQS_EXCEPTION_TRACE + ") "
-    + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    + " VALUES(?, ?, ?, ?, ?, substr(?, 1, 150) , substr(?, 1, 150), substr(?, 1, 750))";
 
   // DML: Update existing submission
   public static final String STMT_UPDATE_SUBMISSION =
