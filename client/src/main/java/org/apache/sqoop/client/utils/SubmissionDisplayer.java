@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.utils;
 
+import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -90,7 +91,7 @@ public final class SubmissionDisplayer {
       io.out.print("@|red Exception: |@");
       io.out.println(submission.getExceptionInfo());
 
-      if(submission.getExceptionStackTrace() != null) {
+      if(Environment.isVerboose() && submission.getExceptionStackTrace() != null) {
         io.out.print("@|bold Stack trace: |@");
         io.out.println(submission.getExceptionStackTrace());
       }
