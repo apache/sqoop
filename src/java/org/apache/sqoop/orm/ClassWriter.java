@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -401,7 +402,7 @@ public class ClassWriter {
 
   /**
    * @param javaType the type to write
-   * @param inputObj the name of the DataOutput to write to
+   * @param outputObj the name of the DataOutput to write to
    * @param colName the column name to write
    * @return the line of code involving a DataOutput object to write an entry
    * with a given java type.
@@ -451,7 +452,7 @@ public class ClassWriter {
    * Serialize a possibly-null value to the DataOutput stream. First a boolean
    * isNull is written, followed by the contents itself (if not null).
    * @param javaType name of the type to deserialize if it's not null.
-   * @param inputObj name of the DataInput to read from
+   * @param outputObj name of the DataInput to read from
    * @param colName the column name to read.
    * @return
    */
@@ -1251,9 +1252,14 @@ public class ClassWriter {
           + "no columns!");
     }
     StringBuilder sb = new StringBuilder();
-    sb.append("// ORM class for " + tableName + "\n");
+    sb.append("// ORM class for table '" + tableName + "'\n");
     sb.append("// WARNING: This class is AUTO-GENERATED. "
         + "Modify at your own risk.\n");
+    sb.append("//\n");
+    sb.append("// Debug information:\n");
+    sb.append("// Generated date: " + (new Date()) + "\n");
+    sb.append("// For connector: " + connManager.getClass().getCanonicalName()
+      + "\n");
 
     TableClassName tableNameInfo = new TableClassName(options);
 
