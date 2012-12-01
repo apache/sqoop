@@ -23,10 +23,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
-import com.cloudera.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Converts an input record from a string representation to a parsed Sqoop
@@ -35,6 +38,9 @@ import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
  */
 public class TextExportMapper
     extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {
+
+  public static final Log LOG =
+    LogFactory.getLog(TextExportMapper.class.getName());
 
   private SqoopRecord recordImpl;
 
@@ -76,8 +82,35 @@ public class TextExportMapper
     try {
       recordImpl.parse(val);
       context.write(recordImpl, NullWritable.get());
-    } catch (RecordParser.ParseError pe) {
-      throw new IOException("Could not parse record: " + val, pe);
+    } catch (Exception e) {
+      // Something bad has happened
+      LOG.error("");
+      LOG.error("Exception raised during data export");
+      LOG.error("");
+
+      LOG.error("Exception: ", e);
+      LOG.error("On input: " + val);
+
+      InputSplit is = context.getInputSplit();
+      if (is instanceof FileSplit) {
+        LOG.error("On input file: " + ((FileSplit)is).getPath());
+      } else if (is instanceof CombineFileSplit) {
+        LOG.error("On input file: "
+          + context.getConfiguration().get("map.input.file"));
+      }
+      LOG.error("At position " + key);
+
+      LOG.error("");
+      LOG.error("Currently processing split:");
+      LOG.error(is);
+
+      LOG.error("");
+      LOG.error("This issue might not necessarily be caused by current input");
+      LOG.error("due to the batching nature of export.");
+      LOG.error("");
+
+      throw new IOException("Can't export data, please check task tracker logs",
+        e);
     }
   }
 }
