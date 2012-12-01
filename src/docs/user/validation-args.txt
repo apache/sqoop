@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,22 +17,16 @@
   limitations under the License.
 ////
 
-.Common arguments
+.Validation arguments <<validation,More Details>>
 [grid="all"]
 `----------------------------------------`-------------------------------------
 Argument                                  Description
 -------------------------------------------------------------------------------
-+\--connect <jdbc-uri>+                   Specify JDBC connect string
-+\--connection-manager <class-name>+      Specify connection manager class to\
-                                          use
-+\--driver <class-name>+                  Manually specify JDBC driver class\
-                                          to use
-+\--hadoop-home <dir>+                    Override $HADOOP_HOME
-+\--help+                                 Print usage instructions
-+-P+                                      Read password from console
-+\--password <password>+                  Set authentication password
-+\--username <username>+                  Set authentication username
-+\--verbose+                              Print more information while working
-+\--connection-param-file <filename>+     Optional properties file that\
-                                          provides connection parameters
++\--validate+                             Enable validation of data copied, \
+                                          supports single table copy only.  \
++\--validator <class-name>+               Specify validator class to use.
++\--validation-threshold <class-name>+    Specify validation threshold class \
+                                          to use.
++\--validation-failurehandler <class-name>+ Specify validation failure \
+                                          handler class to use.
 -------------------------------------------------------------------------------

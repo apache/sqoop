@@ -177,6 +177,8 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .withLongOpt(UPDATE_MODE_ARG)
         .create());
 
+    addValidationOpts(exportOpts);
+
     return exportOpts;
   }
 
@@ -271,6 +273,7 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         out.setClearStagingTable(true);
       }
 
+      applyValidationOptions(in, out);
       applyNewUpdateOptions(in, out);
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);

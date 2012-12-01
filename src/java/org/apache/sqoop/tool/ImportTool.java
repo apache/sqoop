@@ -508,6 +508,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    * @return the RelatedOptions that can be used to parse the import
    * arguments.
    */
+  @SuppressWarnings("static-access")
   protected RelatedOptions getImportOptions() {
     // Imports
     RelatedOptions importOpts = new RelatedOptions("Import control arguments");
@@ -554,6 +555,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
               + " value of the primary key")
           .withLongOpt(SQL_QUERY_BOUNDARY)
           .create());
+
+      addValidationOpts(importOpts);
     }
 
     importOpts.addOption(OptionBuilder.withArgName("dir")
@@ -756,6 +759,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         if (in.hasOption(SQL_QUERY_BOUNDARY)) {
           out.setBoundaryQuery(in.getOptionValue(SQL_QUERY_BOUNDARY));
         }
+
+        applyValidationOptions(in, out);
       }
 
       if (in.hasOption(WAREHOUSE_DIR_ARG)) {
@@ -873,6 +878,20 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throw new InvalidOptionsException(
             "Direct import currently do not support dropping hive delimiters,"
             + " please remove parameter --hive-drop-import-delims.");
+    } else if (allTables && options.isValidationEnabled()) {
+      throw new InvalidOptionsException("Validation is not supported for "
+            + "all tables but single table only.");
+    } else if (options.getSqlQuery() != null && options.isValidationEnabled()) {
+      throw new InvalidOptionsException("Validation is not supported for "
+            + "free from query but single table only.");
+    } else if (options.getWhereClause() != null
+            && options.isValidationEnabled()) {
+      throw new InvalidOptionsException("Validation is not supported for "
+            + "where clause but single table only.");
+    } else if (options.getIncrementalMode()
+        != SqoopOptions.IncrementalMode.None && options.isValidationEnabled()) {
+      throw new InvalidOptionsException("Validation is not supported for "
+        + "incremental imports but single table only.");
     }
   }
 

@@ -1,0 +1,136 @@
+
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+
+[[validation]]
++validation+
+--------------
+
+
+Purpose
+~~~~~~~
+
+Validate the data copied, either import or export by comparing the row
+counts from the source and the target post copy.
+
+
+Introduction
+~~~~~~~~~~~~
+
+There are 3 basic interfaces:
+ValidationThreshold - Determines if the error margin between the source and
+target are acceptable: Absolute, Percentage Tolerant, etc.
+Default implementation is AbsoluteValidationThreshold which ensures the row
+counts from source and targets are the same.
+
+ValidationFailureHandler - Responsible for handling failures: log an
+error/warning, abort, etc.
+Default implementation is LogOnFailureHandler that logs a warning message to
+the configured logger.
+
+Validator - Drives the validation logic by delegating the decision to
+ValidationThreshold and delegating failure handling to ValidationFailureHandler.
+The default implementation is RowCountValidator which validates the row
+counts from source and the target.
+
+
+Syntax
+~~~~~~
+
+----
+$ sqoop import (generic-args) (import-args)
+$ sqoop export (generic-args) (export-args)
+----
+
+Validation arguments are part of import and export arguments.
+
+
+Configuration
+~~~~~~~~~~~~~
+
+The validation framework is extensible and pluggable. It comes with default
+implementations but the interfaces can be extended to allow custom
+implementations by passing them as part of the command line arguments as
+described below.
+
+
+.Validator
+ Property:         validator
+ Description:      Driver for validation,
+                   must implement org.apache.sqoop.validation.Validator
+ Supported values: The value has to be a fully qualified class name.
+ Default value:    org.apache.sqoop.validation.RowCountValidator
+
+.Validation Threshold
+ Property:         validation-threshold
+ Description:      Drives the decision based on the validation meeting the
+                   threshold or not. Must implement
+                   org.apache.sqoop.validation.ValidationThreshold
+ Supported values: The value has to be a fully qualified class name.
+ Default value:    org.apache.sqoop.validation.AbsoluteValidationThreshold
+
+.Validation Failure Handler
+ Property:         validation-failurehandler
+ Description:      Responsible for handling failures, must implement
+                   org.apache.sqoop.validation.ValidationFailureHandler
+ Supported values: The value has to be a fully qualified class name.
+ Default value:    org.apache.sqoop.validation.LogOnFailureHandler
+
+
+Limitations
+~~~~~~~~~~~
+
+Validation currently only validates data copied from a single table into HDFS.
+The following are the limitations in the current implementation:
+
+* all-tables option
+* free-form query option
+* Data imported into Hive or HBase
+* table import with --where argument
+* incremental imports
+
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+A basic import of a table named +EMPLOYEES+ in the +corp+ database that uses
+validation to validate the row counts:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp  \
+    --table EMPLOYEES --validate
+----
+
+A basic export to populate a table named +bar+ with validation enabled:
+
+----
+$ sqoop export --connect jdbc:mysql://db.example.com/foo --table bar  \
+    --export-dir /results/bar_data --validate
+----
+
+Another example that overrides the validation args:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --validate --validator org.apache.sqoop.validation.RowCountValidator \
+    --validation-threshold \
+          org.apache.sqoop.validation.AbsoluteValidationThreshold \
+    --validation-failurehandler \
+          org.apache.sqoop.validation.LogOnFailureHandler
+----

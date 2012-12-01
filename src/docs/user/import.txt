@@ -48,6 +48,8 @@ include::common-args.txt[]
 
 include::connecting.txt[]
 
+include::validation-args.txt[]
+
 .Import control arguments:
 [grid="all"]
 `---------------------------------`--------------------------------------
@@ -677,4 +679,12 @@ $ sqoop import --connect jdbc:mysql://db.foo.com/somedb --table sometable \
     --where "id > 100000" --target-dir /incremental_dataset --append
 ----
 
+An import of a table named +EMPLOYEES+ in the +corp+ database that uses
+validation to validate the import using the table row count and number of
+rows copied into HDFS:
+<<validation,More Details>>
 
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp \
+    --table EMPLOYEES --validate
+----

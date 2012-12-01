@@ -42,6 +42,8 @@ another.
 
 include::common-args.txt[]
 
+include::validation-args.txt[]
+
 .Export control arguments:
 [grid="all"]
 `----------------------------------------`------------------------------
@@ -266,3 +268,10 @@ Sqoop attempts to insert rows which violate constraints in the database
 fails.
 
 
+Another basic export to populate a table named +bar+ with validation enabled:
+<<validation,More Details>>
+
+----
+$ sqoop export --connect jdbc:mysql://db.example.com/foo --table bar  \
+    --export-dir /results/bar_data --validate
+----

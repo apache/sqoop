@@ -21,6 +21,7 @@ package org.apache.sqoop.mapreduce;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -44,6 +45,7 @@ import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.validation.*;
 
 /**
  * Base class for running an export MapReduce job.
@@ -374,6 +376,10 @@ public class ExportJobBase extends JobBase {
       if (!success) {
         throw new ExportException("Export job failed!");
       }
+
+      if (options.isValidationEnabled()) {
+        validateExport(tableName, conf, job);
+      }
     } catch (InterruptedException ie) {
       throw new IOException(ie);
     } catch (ClassNotFoundException cnfe) {
@@ -396,6 +402,26 @@ public class ExportJobBase extends JobBase {
         throw new ExportException(
             "Failed to move data from staging table", ex);
       }
+    }
+  }
+
+  protected void validateExport(String tableName, Configuration conf, Job job)
+    throws ExportException {
+    LOG.debug("Validating exported data.");
+    try {
+      ValidationContext validationContext = new ValidationContext(
+        getRowCountFromHadoop(job),
+        getRowCountFromDB(context.getConnManager(), tableName));
+
+      doValidate(options, conf, validationContext);
+    } catch (ValidationException e) {
+      throw new ExportException("Error validating row counts", e);
+    } catch (SQLException e) {
+      throw new ExportException("Error retrieving DB target row count", e);
+    } catch (IOException e) {
+      throw new ExportException("Error retrieving source row count", e);
+    } catch (InterruptedException e) {
+      throw new ExportException("Error retrieving source row count", e);
     }
   }
 

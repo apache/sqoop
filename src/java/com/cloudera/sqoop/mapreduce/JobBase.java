@@ -18,10 +18,19 @@
 
 package com.cloudera.sqoop.mapreduce;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import com.cloudera.sqoop.SqoopOptions;
+import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.validation.*;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
@@ -44,4 +53,28 @@ public class JobBase
     super(opts, mapperClass, inputFormatClass, outputFormatClass);
   }
 
+  protected long getRowCountFromDB(ConnManager connManager, String tableName)
+    throws SQLException {
+    return connManager.getTableRowCount(tableName);
+  }
+
+  protected long getRowCountFromHadoop(Job job)
+    throws IOException, InterruptedException {
+    return ConfigurationHelper.getNumMapOutputRecords(job);
+  }
+
+  protected void doValidate(SqoopOptions options, Configuration conf,
+                            ValidationContext validationContext)
+    throws ValidationException {
+    Validator validator = (Validator) ReflectionUtils.newInstance(
+        options.getValidatorClass(), conf);
+    ValidationThreshold threshold = (ValidationThreshold)
+        ReflectionUtils.newInstance(options.getValidationThresholdClass(),
+          conf);
+    ValidationFailureHandler failureHandler = (ValidationFailureHandler)
+        ReflectionUtils.newInstance(options.getValidationFailureHandlerClass(),
+          conf);
+
+    validator.validate(validationContext, threshold, failureHandler);
+  }
 }

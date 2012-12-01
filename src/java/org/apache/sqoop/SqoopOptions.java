@@ -39,6 +39,9 @@ import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.validation.AbsoluteValidationThreshold;
+import org.apache.sqoop.validation.LogOnFailureHandler;
+import org.apache.sqoop.validation.RowCountValidator;
 
 /**
  * Configurable state used by Sqoop tools.
@@ -247,6 +250,13 @@ public class SqoopOptions implements Cloneable {
   // Used to pass the SqoopTool instance in to mapreduce job configuration
   // (JobBase, etc).
   private SqoopTool activeSqoopTool;
+
+  // Flag to determine if data copied needs to be validated against the source
+  private boolean isValidationEnabled;
+  // These take FQCN as input, convert them to Class in light of failing early
+  private Class validatorClass; // Class for the validator implementation.
+  private Class validationThresholdClass; // ValidationThreshold implementation
+  private Class validationFailureHandlerClass; // FailureHandler implementation
 
   public SqoopOptions() {
     initDefaults(null);
@@ -819,6 +829,10 @@ public class SqoopOptions implements Cloneable {
 
     // We do not want to be verbose too much if not explicitly needed
     this.verbose = false;
+    this.isValidationEnabled = false; // validation is disabled by default
+    this.validatorClass = RowCountValidator.class;
+    this.validationThresholdClass = AbsoluteValidationThreshold.class;
+    this.validationFailureHandlerClass = LogOnFailureHandler.class;
   }
 
   /**
@@ -1899,9 +1913,7 @@ public class SqoopOptions implements Cloneable {
     this.mergeKeyCol = col;
   }
 
-  /**
-   * Return the name of the column used to merge an old and new dataset.
-   */
+  /** Return the name of the column used to merge an old and new dataset. */
   public String getMergeKeyCol() {
     return this.mergeKeyCol;
   }
@@ -1963,5 +1975,37 @@ public class SqoopOptions implements Cloneable {
   public Properties getConnectionParams() {
     return connectionParams;
   }
-}
 
+  public void setValidationEnabled(boolean validationEnabled) {
+    isValidationEnabled = validationEnabled;
+  }
+
+  public boolean isValidationEnabled() {
+    return isValidationEnabled;
+  }
+
+  public Class getValidatorClass() {
+    return validatorClass;
+  }
+
+  public void setValidatorClass(Class validatorClazz) {
+    this.validatorClass = validatorClazz;
+  }
+
+  public Class getValidationThresholdClass() {
+    return validationThresholdClass;
+  }
+
+  public void setValidationThresholdClass(Class validationThresholdClazz) {
+    this.validationThresholdClass = validationThresholdClazz;
+  }
+
+  public Class getValidationFailureHandlerClass() {
+    return validationFailureHandlerClass;
+  }
+
+  public void setValidationFailureHandlerClass(
+      Class validationFailureHandlerClazz) {
+    this.validationFailureHandlerClass = validationFailureHandlerClazz;
+  }
+}

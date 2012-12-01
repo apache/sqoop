@@ -142,6 +142,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String UPDATE_KEY_ARG = "update-key";
   public static final String UPDATE_MODE_ARG = "update-mode";
 
+  // Arguments for validation.
+  public static final String VALIDATE_ARG = "validate";
+  public static final String VALIDATOR_CLASS_ARG = "validator";
+  public static final String VALIDATION_THRESHOLD_CLASS_ARG =
+      "validation-threshold";
+  public static final String VALIDATION_FAILURE_HANDLER_CLASS_ARG =
+      "validation-failurehandler";
+
   // Arguments for incremental imports.
   public static final String INCREMENT_TYPE_ARG = "incremental";
   public static final String INCREMENT_COL_ARG = "check-column";
@@ -619,7 +627,29 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     return hbaseOpts;
   }
 
-
+  @SuppressWarnings("static-access")
+  protected void addValidationOpts(RelatedOptions validationOptions) {
+    validationOptions.addOption(OptionBuilder
+      .withDescription("Validate the copy using the configured validator")
+      .withLongOpt(VALIDATE_ARG)
+      .create());
+    validationOptions.addOption(OptionBuilder
+      .withArgName(VALIDATOR_CLASS_ARG).hasArg()
+      .withDescription("Fully qualified class name for the Validator")
+      .withLongOpt(VALIDATOR_CLASS_ARG)
+      .create());
+    validationOptions.addOption(OptionBuilder
+      .withArgName(VALIDATION_THRESHOLD_CLASS_ARG).hasArg()
+      .withDescription("Fully qualified class name for ValidationThreshold")
+      .withLongOpt(VALIDATION_THRESHOLD_CLASS_ARG)
+      .create());
+    validationOptions.addOption(OptionBuilder
+      .withArgName(VALIDATION_FAILURE_HANDLER_CLASS_ARG).hasArg()
+      .withDescription("Fully qualified class name for "
+        + "ValidationFailureHandler")
+      .withLongOpt(VALIDATION_FAILURE_HANDLER_CLASS_ARG)
+      .create());
+  }
 
   /**
    * Apply common command-line to the state.
@@ -882,6 +912,39 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (in.hasOption(HBASE_CREATE_TABLE_ARG)) {
       out.setCreateHBaseTable(true);
+    }
+  }
+
+  protected void applyValidationOptions(CommandLine in, SqoopOptions out)
+    throws InvalidOptionsException {
+    if (in.hasOption(VALIDATE_ARG)) {
+      out.setValidationEnabled(true);
+    }
+
+    // Class Names are converted to Class in light of failing early
+    if (in.hasOption(VALIDATOR_CLASS_ARG)) {
+      out.setValidatorClass(
+        getClassByName(in.getOptionValue(VALIDATOR_CLASS_ARG)));
+    }
+
+    if (in.hasOption(VALIDATION_THRESHOLD_CLASS_ARG)) {
+      out.setValidationThresholdClass(
+        getClassByName(in.getOptionValue(VALIDATION_THRESHOLD_CLASS_ARG)));
+    }
+
+    if (in.hasOption(VALIDATION_FAILURE_HANDLER_CLASS_ARG)) {
+      out.setValidationFailureHandlerClass(getClassByName(
+        in.getOptionValue(VALIDATION_FAILURE_HANDLER_CLASS_ARG)));
+    }
+  }
+
+  protected Class<?> getClassByName(String className)
+    throws InvalidOptionsException {
+    try {
+      return Class.forName(className, true,
+        Thread.currentThread().getContextClassLoader());
+    } catch (ClassNotFoundException e) {
+      throw new InvalidOptionsException(e.getMessage());
     }
   }
 

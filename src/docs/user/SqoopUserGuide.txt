@@ -54,6 +54,8 @@ include::import-all-tables.txt[]
 
 include::export.txt[]
 
+include::validation.txt[]
+
 include::saved-jobs.txt[]
 
 include::codegen.txt[]
@@ -77,4 +79,3 @@ include::connectors.txt[]
 include::support.txt[]
 
 include::troubleshooting.txt[]
-

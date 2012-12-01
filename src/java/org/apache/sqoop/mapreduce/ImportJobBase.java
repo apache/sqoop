@@ -19,6 +19,7 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.mapred.AvroJob;
@@ -44,6 +45,7 @@ import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.validation.*;
 
 /**
  * Base class for running an import MapReduce job.
@@ -212,6 +214,10 @@ public class ImportJobBase extends JobBase {
       if (!success) {
         throw new ImportException("Import job failed!");
       }
+
+      if (options.isValidationEnabled()) {
+        validateImport(tableName, conf, job);
+      }
     } catch (InterruptedException ie) {
       throw new IOException(ie);
     } catch (ClassNotFoundException cnfe) {
@@ -219,6 +225,26 @@ public class ImportJobBase extends JobBase {
     } finally {
       unloadJars();
       jobTeardown(job);
+    }
+  }
+
+  protected void validateImport(String tableName, Configuration conf, Job job)
+    throws ImportException {
+    LOG.debug("Validating imported data.");
+    try {
+      ValidationContext validationContext = new ValidationContext(
+        getRowCountFromDB(context.getConnManager(), tableName), // source
+        getRowCountFromHadoop(job));                            // target
+
+      doValidate(options, conf, validationContext);
+    } catch (ValidationException e) {
+      throw new ImportException("Error validating row counts", e);
+    } catch (SQLException e) {
+      throw new ImportException("Error retrieving DB source row count", e);
+    } catch (IOException e) {
+      throw new ImportException("Error retrieving target row count", e);
+    } catch (InterruptedException e) {
+      throw new ImportException("Error retrieving target row count", e);
     }
   }
 
