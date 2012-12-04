@@ -49,6 +49,9 @@ public final class JobConstants extends Constants {
       + "mr.output.codec";
 
 
+  public static final String JOB_ETL_EXTRACTOR_NUM = PREFIX_JOB_CONFIG
+    + "etl.extractor.count";
+
   public static final String JOB_CONFIG_CLASS_CONNECTOR_CONNECTION =
     PREFIX_JOB_CONFIG + "config.class.connector.connection";
 

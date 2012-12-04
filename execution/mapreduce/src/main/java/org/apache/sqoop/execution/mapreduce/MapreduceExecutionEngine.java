@@ -68,6 +68,10 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
 
+    if(request.getExtractors() != null) {
+      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
+    }
+
     // TODO: This settings should be abstracted to core module at some point
     if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
       context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());

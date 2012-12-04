@@ -30,7 +30,9 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -62,13 +64,20 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Object connectorConnection = ConfigurationUtils.getConnectorConnection(conf);
     Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
 
-    List<Partition> partitions = partitioner.getPartitions(connectorContext, connectorConnection, connectorJob);
+    long maxPartitions = conf.getLong(JobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
+
+    List<Partition> partitions = partitioner.getPartitions(connectorContext, maxPartitions, connectorConnection, connectorJob);
     List<InputSplit> splits = new LinkedList<InputSplit>();
     for (Partition partition : partitions) {
       LOG.debug("Partition: " + partition);
       SqoopSplit split = new SqoopSplit();
       split.setPartition(partition);
       splits.add(split);
+    }
+
+    if(splits.size() > maxPartitions) {
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0025,
+        String.format("Got %d, max was %d", splits.size(), maxPartitions));
     }
 
     return splits;

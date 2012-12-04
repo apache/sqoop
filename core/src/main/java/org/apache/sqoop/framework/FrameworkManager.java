@@ -440,6 +440,12 @@ public final class FrameworkManager {
     // Initialize the map-reduce part (all sort of required classes, ...)
     request.setOutputDirectory(jobConfiguration.output.outputDirectory);
 
+    // We're directly moving configured number of extractors and loaders to
+    // underlying request object. In the future we might need to throttle this
+    // count based on other running jobs to meet our SLAs.
+    request.setExtractors(jobConfiguration.throttling.extractors);
+    request.setLoaders(jobConfiguration.throttling.loaders);
+
     // Delegate rest of the job to execution engine
     executionEngine.prepareImportSubmission(request);
   }

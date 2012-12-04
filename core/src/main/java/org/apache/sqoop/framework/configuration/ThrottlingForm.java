@@ -15,21 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.common.ImmutableContext;
-
-import java.util.List;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
- * This allows connector to define how input data to be partitioned.
- * The number of data partitions also determines the degree of parallelism.
+ * Form to set up number of loaders and extractors
  */
-public abstract class Partitioner {
+@FormClass
+public class ThrottlingForm {
 
-  public abstract List<Partition> getPartitions(ImmutableContext context,
-                                                long maxPartitions,
-                                                Object connectionConfiguration,
-                                                Object jobConfiguration);
+  @Input public Integer extractors;
 
+  @Input public Integer loaders;
 }

@@ -30,4 +30,19 @@ public interface MutableContext extends ImmutableContext {
    */
   public void setString(String key, String value);
 
+  /**
+   * Set long value for given key.
+   *
+   * @param key Key
+   * @param value New value
+   */
+  public void setLong(String key, long value);
+
+  /**
+   * Set integer value for given key.
+   *
+   * @param key Key
+   * @param value New value
+   */
+  public void setInteger(String key, int value);
 }

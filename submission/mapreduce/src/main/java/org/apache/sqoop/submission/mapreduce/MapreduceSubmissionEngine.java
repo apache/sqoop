@@ -208,8 +208,13 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         FileOutputFormat.setOutputPath(job, new Path(outputDirectory));
       }
 
-      // TODO(jarcec): Harcoded no reducers
-      job.setNumReduceTasks(0);
+      // Set number of reducers as number of configured loaders  or suppress
+      // reduce phase entirely if loaders are not set at all.
+      if(request.getLoaders() != null) {
+        job.setNumReduceTasks(request.getLoaders());
+      } else {
+        job.setNumReduceTasks(0);
+      }
 
       job.setOutputFormatClass(request.getOutputFormatClass());
       job.setOutputKeyClass(request.getOutputKeyClass());

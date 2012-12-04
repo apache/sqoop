@@ -120,7 +120,7 @@ public class TestMapReduce extends TestCase {
 
   public static class DummyPartitioner extends Partitioner {
     @Override
-    public List<Partition> getPartitions(ImmutableContext context, Object oc, Object oj) {
+    public List<Partition> getPartitions(ImmutableContext context, long maxPartitions, Object oc, Object oj) {
       List<Partition> partitions = new LinkedList<Partition>();
       for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
         DummyPartition partition = new DummyPartition();

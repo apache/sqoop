@@ -27,4 +27,6 @@ import org.apache.sqoop.model.Form;
 public class ImportJobConfiguration {
 
   @Form public OutputForm output;
+
+  @Form public ThrottlingForm throttling;
 }

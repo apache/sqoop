@@ -97,6 +97,16 @@ public class SubmissionRequest {
    */
   String notificationUrl;
 
+  /**
+   * Number of extractors
+   */
+  Integer extractors;
+
+  /**
+   * Number of loaders
+   */
+  Integer loaders;
+
   public SubmissionRequest() {
     this.jars = new LinkedList<String>();
     this.connectorContext = new MutableMapContext();
@@ -221,5 +231,21 @@ public class SubmissionRequest {
 
   public void setNotificationUrl(String url) {
     this.notificationUrl = url;
+  }
+
+  public Integer getExtractors() {
+    return extractors;
+  }
+
+  public void setExtractors(Integer extractors) {
+    this.extractors = extractors;
+  }
+
+  public Integer getLoaders() {
+    return loaders;
+  }
+
+  public void setLoaders(Integer loaders) {
+    this.loaders = loaders;
   }
 }

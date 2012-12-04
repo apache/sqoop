@@ -23,21 +23,20 @@ import java.util.List;
 
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 
 public class GenericJdbcImportPartitioner extends Partitioner {
 
-  private int numberPartitions;
+  private long numberPartitions;
   private String partitionColumnName;
   private int partitionColumnType;
   private String partitionMinValue;
   private String partitionMaxValue;
 
   @Override
-  public List<Partition> getPartitions(ImmutableContext context, Object connectionC, Object jobC) {
-    numberPartitions = context.getInt(Constants.JOB_ETL_NUMBER_PARTITIONS, 10);
+  public List<Partition> getPartitions(ImmutableContext context, long maxPartitions, Object connectionC, Object jobC) {
+    numberPartitions = maxPartitions;
     partitionColumnName = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME);
     partitionColumnType = Integer.parseInt(context.getString(

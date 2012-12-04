@@ -43,6 +43,16 @@ public class MutableMapContext extends MapContext implements Iterable<Map.Entry<
   }
 
   @Override
+  public void setLong(String key, long value) {
+    getOptions().put(key, Long.toString(value));
+  }
+
+  @Override
+  public void setInteger(String key, int value) {
+    getOptions().put(key, Integer.toString(value));
+  }
+
+  @Override
   public Iterator<Map.Entry<String, String>> iterator() {
     return getOptions().entrySet().iterator();
   }

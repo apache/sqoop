@@ -76,6 +76,9 @@ public enum MapreduceExecutionError implements ErrorCode {
   /** Unsupported output format type found **/
   MAPRED_EXEC_0024("Unknown output format type"),
 
+  /** Got invalid number of partitions from Partitioner */
+  MAPRED_EXEC_0025("Retrieved invalid number of partitions from Partitioner"),
+
   ;
 
   private final String message;
