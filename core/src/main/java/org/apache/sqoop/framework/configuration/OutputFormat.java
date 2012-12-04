@@ -17,18 +17,17 @@
  */
 package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.model.FormClass;
-import org.apache.sqoop.model.Input;
-
 /**
- *
+ * Various supported formats on disk
  */
-@FormClass
-public class OutputForm {
+public enum OutputFormat {
+  /**
+   * Comma separated text file
+   */
+  TEXT_FILE,
 
-  @Input public StorageType storageType;
-
-  @Input public OutputFormat outputFormat;
-
-  @Input(size = 25) public String outputDirectory;
+  /**
+   * Sequence file
+   */
+  SEQUENCE_FILE,
 }

@@ -19,9 +19,14 @@ package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.ExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
+import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.job.io.Data;
@@ -42,6 +47,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
   @Override
   public void prepareImportSubmission(SubmissionRequest gRequest) {
     MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
+    ImportJobConfiguration jobConf = (ImportJobConfiguration) request.getConfigFrameworkJob();
 
     // Configure map-reduce classes for import
     request.setInputFormatClass(SqoopInputFormat.class);
@@ -61,6 +67,15 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(JobConstants.JOB_ETL_PARTITIONER, importer.getPartitioner().getName());
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
-    context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+
+    // TODO: This settings should be abstracted to core module at some point
+    if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
+      context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+    } else if(jobConf.output.outputFormat == OutputFormat.SEQUENCE_FILE) {
+      context.setString(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
+    } else {
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
+        "Format: " + jobConf.output.outputFormat);
+    }
   }
 }

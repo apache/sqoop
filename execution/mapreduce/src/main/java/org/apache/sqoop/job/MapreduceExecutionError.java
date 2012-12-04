@@ -73,6 +73,9 @@ public enum MapreduceExecutionError implements ErrorCode {
   /** Unknown job type */
   MAPRED_EXEC_0023("Unknown job type"),
 
+  /** Unsupported output format type found **/
+  MAPRED_EXEC_0024("Unknown output format type"),
+
   ;
 
   private final String message;
