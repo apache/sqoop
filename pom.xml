@@ -248,6 +248,18 @@ limitations under the License.
         <version>${json-simple.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.sqoop.submission</groupId>
+        <artifactId>sqoop-submission-mapreduce</artifactId>
+        <version>${project.version}</version>
+        <classifier>hadoop${hadoop.profile}</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.execution</groupId>
+        <artifactId>sqoop-execution-mapreduce</artifactId>
+        <version>${project.version}</version>
+        <classifier>hadoop${hadoop.profile}</classifier>
+      </dependency>
+      <dependency>
         <groupId>commons-dbcp</groupId>
         <artifactId>commons-dbcp</artifactId>
         <version>${commons-dbcp.version}</version>

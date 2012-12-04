@@ -36,32 +36,27 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-common</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop.submission</groupId>
       <artifactId>sqoop-submission-mapreduce</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
       <classifier>hadoop${hadoop.profile}</classifier>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop.repository</groupId>
       <artifactId>sqoop-repository-derby</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop.connector</groupId>
       <artifactId>sqoop-connector-generic-jdbc</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
 <!--

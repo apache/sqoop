@@ -26,20 +26,17 @@ limitations under the License.
 
   <groupId>org.apache.sqoop.submission</groupId>
   <artifactId>sqoop-submission-mapreduce</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
   <name>Sqoop Mapreduce Submission Engine</name>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop.execution</groupId>
       <artifactId>sqoop-execution-mapreduce</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
       <classifier>hadoop${hadoop.profile}</classifier>
     </dependency>
 
@@ -52,7 +49,6 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
