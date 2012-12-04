@@ -19,6 +19,7 @@ package org.apache.sqoop.client.shell;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.cli.CommandLine;
@@ -78,7 +79,7 @@ public class ShowConnectorFunction extends SqoopFunction
   private void showConnector(String cid) {
     ConnectorBean connectorBean = readConnector(cid);
     List<MConnector> connectors = connectorBean.getConnectors();
-    List<ResourceBundle> bundles = connectorBean.getResourceBundles();
+    Map<Long, ResourceBundle> bundles = connectorBean.getResourceBundles();
 
     io.out.println("@|bold " + connectors.size() + " connector(s) to show: |@");
     for (int i = 0; i < connectors.size(); i++) {
@@ -93,7 +94,7 @@ public class ShowConnectorFunction extends SqoopFunction
       io.out.print("  Class: ");
       io.out.println(connector.getClassName());
 
-      displayFormMetadataDetails(io, connector, bundles.get(i));
+      displayFormMetadataDetails(io, connector, bundles.get(connector.getPersistenceId()));
 
     }
 

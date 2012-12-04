@@ -61,10 +61,12 @@ public final class ConnectorManager {
     return nameMap.keySet();
   }
 
-  public static List<ResourceBundle> getResourceBundles(Locale locale) {
-    List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+  public static Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
+    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
     for(ConnectorHandler handler : handlerMap.values()) {
-      bundles.add(handler.getConnector().getBundle(locale));
+      long id = handler.getMetadata().getPersistenceId();
+      ResourceBundle bundle = handler.getConnector().getBundle(locale);
+      bundles.put(id, bundle);
     }
     return bundles;
   }

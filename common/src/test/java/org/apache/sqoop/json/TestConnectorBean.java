@@ -24,8 +24,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.json.TestUtil.*;
@@ -47,9 +49,9 @@ public class TestConnectorBean {
     connectors.add(getConnector("mysql"));
 
     // Create testing bundles
-    List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
-    bundles.add(getResourceBundle());
-    bundles.add(getResourceBundle());
+    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+    bundles.put(1L, getResourceBundle());
+    bundles.put(2L, getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorBean bean = new ConnectorBean(connectors, bundles);
@@ -66,7 +68,8 @@ public class TestConnectorBean {
     assertEquals(connectors.size(), retrievedBean.getConnectors().size());
     assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
 
-    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(0);
+    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(1L);
+    assertNotNull(retrievedBundle);
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));
   }

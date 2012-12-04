@@ -27,9 +27,11 @@ import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ConnectorRequestHandler implements RequestHandler {
@@ -45,7 +47,7 @@ public class ConnectorRequestHandler implements RequestHandler {
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
     List<MConnector> connectors;
-    List<ResourceBundle> bundles;
+    Map<Long, ResourceBundle> bundles;
     Locale locale = ctx.getAcceptLanguageHeader();
 
     String cid = ctx.getLastURLElement();
@@ -55,7 +57,6 @@ public class ConnectorRequestHandler implements RequestHandler {
       // display all connectors
       connectors = ConnectorManager.getConnectorsMetadata();
       bundles = ConnectorManager.getResourceBundles(locale);
-
     } else {
       Long id = Long.parseLong(cid);
 
@@ -65,10 +66,10 @@ public class ConnectorRequestHandler implements RequestHandler {
       }
 
       connectors = new LinkedList<MConnector>();
-      bundles = new LinkedList<ResourceBundle>();
+      bundles = new HashMap<Long, ResourceBundle>();
 
       connectors.add(ConnectorManager.getConnectorMetadata(id));
-      bundles.add(ConnectorManager.getResourceBundle(id, locale));
+      bundles.put(id, ConnectorManager.getResourceBundle(id, locale));
     }
 
     return new ConnectorBean(connectors, bundles);

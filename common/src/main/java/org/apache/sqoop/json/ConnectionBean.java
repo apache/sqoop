@@ -41,9 +41,6 @@ import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
  */
 public class ConnectionBean implements JsonBean {
 
-  private static final String ALL = "all";
-  private static final String ID = "id";
-  private static final String NAME = "name";
   private static final String CONNECTOR_ID = "connector-id";
   private static final String CONNECTOR_PART = "connector";
   private static final String FRAMEWORK_PART = "framework";

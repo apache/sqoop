@@ -18,7 +18,7 @@
 package org.apache.sqoop.json;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -39,11 +39,11 @@ public class ConnectorBean implements JsonBean {
 
   private List<MConnector> connectors;
 
-  private List<ResourceBundle> bundles;
+  private Map<Long, ResourceBundle> bundles;
 
   // for "extract"
   public ConnectorBean(List<MConnector> connectors,
-                       List<ResourceBundle> bundles) {
+                       Map<Long, ResourceBundle> bundles) {
     this.connectors = connectors;
     this.bundles = bundles;
   }
@@ -56,69 +56,69 @@ public class ConnectorBean implements JsonBean {
     return connectors;
   }
 
-  public List<ResourceBundle> getResourceBundles() {
+  public Map<Long, ResourceBundle> getResourceBundles() {
     return bundles;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract() {
-    JSONArray idArray = new JSONArray();
-    JSONArray nameArray = new JSONArray();
-    JSONArray classArray = new JSONArray();
-    JSONArray conFormsArray = new JSONArray();
-    JSONArray jobFormsArray = new JSONArray();
-    JSONArray bundlesArray;
+
+    JSONArray array = new JSONArray();
 
     for (MConnector connector : connectors) {
-      idArray.add(connector.getPersistenceId());
-      nameArray.add(connector.getUniqueName());
-      classArray.add(connector.getClassName());
-      conFormsArray.add(extractForms(connector.getConnectionForms().getForms()));
+      JSONObject object = new JSONObject();
+
+      object.put(ID, connector.getPersistenceId());
+      object.put(NAME, connector.getUniqueName());
+      object.put(CLASS, connector.getClassName());
+      object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms()));
 
       JSONObject jobForms = new JSONObject();
       for (MJobForms job : connector.getAllJobsForms().values()) {
         jobForms.put(job.getType().name(), extractForms(job.getForms()));
       }
-      jobFormsArray.add(jobForms);
+      object.put(JOB_FORMS, jobForms);
+
+      array.add(object);
     }
 
-    bundlesArray = extractResourceBundles(bundles);
+    JSONObject all = new JSONObject();
+    all.put(ALL, array);
 
-    JSONObject result = new JSONObject();
-    result.put(ID, idArray);
-    result.put(NAME, nameArray);
-    result.put(CLASS, classArray);
-    result.put(CON_FORMS, conFormsArray);
-    result.put(JOB_FORMS, jobFormsArray);
-    result.put(RESOURCES, bundlesArray);
-    return result;
+    if(bundles != null && !bundles.isEmpty()) {
+      JSONObject jsonBundles = new JSONObject();
+
+      for(Map.Entry<Long, ResourceBundle> entry : bundles.entrySet()) {
+        jsonBundles.put(entry.getKey().toString(),
+                         extractResourceBundle(entry.getValue()));
+      }
+
+      all.put(CONNECTOR_RESOURCES, jsonBundles);
+    }
+
+    return all;
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
-    JSONArray idArray = (JSONArray) jsonObject.get(ID);
-    JSONArray nameArray = (JSONArray) jsonObject.get(NAME);
-    JSONArray classArray = (JSONArray) jsonObject.get(CLASS);
-    JSONArray conFormsArray =
-        (JSONArray) jsonObject.get(CON_FORMS);
-    JSONArray jobFormsArray =
-        (JSONArray) jsonObject.get(JOB_FORMS);
+    connectors = new ArrayList<MConnector>();
 
-    connectors = new LinkedList<MConnector>();
-    for (int i = 0; i < idArray.size(); i++) {
-      long persistenceId = (Long) idArray.get(i);
-      String uniqueName = (String) nameArray.get(i);
-      String className = (String) classArray.get(i);
+    JSONArray array = (JSONArray) jsonObject.get(ALL);
 
-      List<MForm> connForms = restoreForms((JSONArray) conFormsArray.get(i));
+    for (Object obj : array) {
+      JSONObject object = (JSONObject) obj;
 
-      JSONObject jobJson = (JSONObject) jobFormsArray.get(i);
+      long connectorId = (Long) object.get(ID);
+      String uniqueName = (String) object.get(NAME);
+      String className = (String) object.get(CLASS);
+
+      List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
+
+      JSONObject jobJson = (JSONObject) object.get(JOB_FORMS);
       List<MJobForms> jobs = new ArrayList<MJobForms>();
       for( Map.Entry entry : (Set<Map.Entry>) jobJson.entrySet()) {
-        //TODO(jarcec): Handle situation when server is supporting operation
-        // that client do not know (server do have newer version than client)
         MJob.Type type = MJob.Type.valueOf((String) entry.getKey());
 
         List<MForm> jobForms =
@@ -127,12 +127,21 @@ public class ConnectorBean implements JsonBean {
         jobs.add(new MJobForms(type, jobForms));
       }
 
-      MConnector connector = new MConnector(uniqueName, className,
-        new MConnectionForms(connForms), jobs);
-      connector.setPersistenceId(persistenceId);
+      MConnector connector = new MConnector(uniqueName, className, new MConnectionForms(connForms), jobs);
+      connector.setPersistenceId(connectorId);
+
       connectors.add(connector);
     }
 
-    bundles = restoreResourceBundles((JSONArray) jsonObject.get(RESOURCES));
+    if(jsonObject.containsKey(CONNECTOR_RESOURCES)) {
+      bundles = new HashMap<Long, ResourceBundle>();
+
+      JSONObject jsonBundles = (JSONObject) jsonObject.get(CONNECTOR_RESOURCES);
+      Set<Map.Entry<String, JSONObject>> entrySet = jsonBundles.entrySet();
+      for (Map.Entry<String, JSONObject> entry : entrySet) {
+        bundles.put(Long.parseLong(entry.getKey()),
+                             restoreResourceBundle(entry.getValue()));
+      }
+    }
   }
 }
