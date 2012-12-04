@@ -59,4 +59,12 @@ public class PrefixContext implements ImmutableContext {
   public boolean getBoolean(String key, boolean defaultValue) {
     return configuration.getBoolean(prefix + key, defaultValue);
   }
+
+  /*
+   * TODO: Use getter methods for retrieval instead of
+   * exposing configuration directly.
+   */
+  public Configuration getConfiguration() {
+    return configuration;
+  }
 }
