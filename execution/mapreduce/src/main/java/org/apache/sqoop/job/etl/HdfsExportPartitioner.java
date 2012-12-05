@@ -68,7 +68,7 @@ public class HdfsExportPartitioner extends Partitioner {
 
   @Override
   public List<Partition> getPartitions(ImmutableContext context,
-      Object connectionConfiguration, Object jobConfiguration) {
+      long maxPartitions, Object connectionConfiguration, Object jobConfiguration) {
     Configuration conf = ((PrefixContext)context).getConfiguration();
 
     try {
