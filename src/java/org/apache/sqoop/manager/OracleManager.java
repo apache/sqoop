@@ -82,7 +82,7 @@ public class OracleManager
    * ensure that the table can be operated on for import/export purposes.
    */
   public static final String QUERY_LIST_TABLES =
-    "SELECT TABLE_NAME FROM ALL_TABLES";
+    "SELECT TABLE_NAME FROM ALL_TABLES WHERE OWNER = ?";
 
   /**
    * Query to list all columns of the given table. Even if the user has the
@@ -654,15 +654,20 @@ public class OracleManager
   @Override
   public String[] listTables() {
     Connection conn = null;
-    Statement stmt = null;
+    PreparedStatement pStmt = null;
     ResultSet rset = null;
     List<String> tables = new ArrayList<String>();
+    String tableOwner = this.options.getUsername();
+
 
     try {
       conn = getConnection();
-      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+      pStmt = conn.prepareStatement(QUERY_LIST_TABLES,
+          ResultSet.TYPE_FORWARD_ONLY,
               ResultSet.CONCUR_READ_ONLY);
-      rset = stmt.executeQuery(QUERY_LIST_TABLES);
+      pStmt.setString(1, tableOwner);
+
+      rset = pStmt.executeQuery();
 
       while (rset.next()) {
         tables.add(rset.getString(1));
@@ -683,9 +688,9 @@ public class OracleManager
           LOG.error("Failed to close resultset", ex);
         }
       }
-      if (stmt != null) {
+      if (pStmt != null) {
         try {
-          stmt.close();
+          pStmt.close();
         } catch (Exception ex) {
           LOG.error("Failed to close statement", ex);
         }
