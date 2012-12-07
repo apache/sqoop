@@ -18,32 +18,44 @@
 package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.ExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
+import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.etl.Exporter;
+import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
+import org.apache.sqoop.job.etl.HdfsTextExportExtractor;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
+import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 
 /**
  *
  */
 public class MapreduceExecutionEngine extends ExecutionEngine {
 
+  /**
+   *  {@inheritDoc}
+   */
   @Override
   public SubmissionRequest createSubmissionRequest() {
     return new MRSubmissionRequest();
   }
 
+  /**
+   *  {@inheritDoc}
+   */
   @Override
   public void prepareImportSubmission(SubmissionRequest gRequest) {
     MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
@@ -80,6 +92,42 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     } else {
       throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
         "Format: " + jobConf.output.outputFormat);
+    }
+  }
+
+  /**
+   *  {@inheritDoc}
+   */
+  @Override
+  public void prepareExportSubmission(SubmissionRequest gRequest) {
+    MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
+    ExportJobConfiguration jobConf = (ExportJobConfiguration) request.getConfigFrameworkJob();
+
+    // Configure map-reduce classes for import
+    request.setInputFormatClass(SqoopInputFormat.class);
+
+    request.setMapperClass(SqoopMapper.class);
+    request.setMapOutputKeyClass(Data.class);
+    request.setMapOutputValueClass(NullWritable.class);
+
+    request.setOutputFormatClass(SqoopNullOutputFormat.class);
+    request.setOutputKeyClass(Data.class);
+    request.setOutputValueClass(NullWritable.class);
+
+    Exporter exporter = (Exporter)request.getConnectorCallbacks();
+
+    // Set up framework context
+    MutableMapContext context = request.getFrameworkContext();
+    context.setString(JobConstants.JOB_ETL_PARTITIONER, HdfsExportPartitioner.class.getName());
+    context.setString(JobConstants.JOB_ETL_LOADER, exporter.getLoader().getName());
+    context.setString(JobConstants.JOB_ETL_DESTROYER, exporter.getDestroyer().getName());
+
+    // We should make one extractor that will be able to read all supported file types
+    context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsTextExportExtractor.class.getName());
+    context.setString(FileInputFormat.INPUT_DIR, jobConf.input.inputDirectory);
+
+    if(request.getExtractors() != null) {
+      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
     }
   }
 }

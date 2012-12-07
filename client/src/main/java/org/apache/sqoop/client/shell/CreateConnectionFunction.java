@@ -85,7 +85,7 @@ public class CreateConnectionFunction extends SqoopFunction {
     ResourceBundle frameworkBundle = frameworkBean.getResourceBundle();
 
     MConnector connector = connectorBean.getConnectors().get(0);
-    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(0);
+    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(connector.getPersistenceId());
 
     MConnection connection = new MConnection(connector.getPersistenceId(),
                                              connector.getConnectionForms(),

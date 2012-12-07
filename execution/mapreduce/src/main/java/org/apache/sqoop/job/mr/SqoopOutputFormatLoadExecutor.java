@@ -169,11 +169,28 @@ public class SqoopOutputFormatLoadExecutor {
       String loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
       Loader loader = (Loader) ClassUtils.instantiate(loaderName);
 
-      // Get together framework context as configuration prefix by nothing
-      PrefixContext frameworkContext = new PrefixContext(conf, "");
+      // Objects that should be pass to the Executor execution
+      PrefixContext subContext = null;
+      Object configConnection = null;
+      Object configJob = null;
+
+      switch (ConfigurationUtils.getJobType(conf)) {
+        case EXPORT:
+          subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
+          configConnection = ConfigurationUtils.getConnectorConnection(conf);
+          configJob = ConfigurationUtils.getConnectorJob(conf);
+          break;
+        case IMPORT:
+          subContext = new PrefixContext(conf, "");
+          configConnection = ConfigurationUtils.getFrameworkConnection(conf);
+          configJob = ConfigurationUtils.getFrameworkJob(conf);
+          break;
+        default:
+          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
+      }
 
       try {
-        loader.run(frameworkContext, reader);
+        loader.load(subContext, configConnection, configJob, reader);
       } catch (Throwable t) {
         LOG.error("Error while loading data out of MR job.", t);
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);

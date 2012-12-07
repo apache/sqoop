@@ -46,7 +46,7 @@ public class HdfsTextImportLoader extends Loader {
   }
 
   @Override
-  public void run(ImmutableContext context, DataReader reader) throws Exception{
+  public void load(ImmutableContext context, Object oc, Object oj, DataReader reader) throws Exception{
     reader.setFieldDelimiter(fieldDelimiter);
 
     Configuration conf = new Configuration();

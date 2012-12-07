@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Set;
@@ -30,7 +31,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
@@ -42,7 +42,7 @@ import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.Constants;
+import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 
@@ -68,12 +68,10 @@ public class HdfsExportPartitioner extends Partitioner {
 
   @Override
   public List<Partition> getPartitions(ImmutableContext context,
-      long maxPartitions, Object connectionConfiguration, Object jobConfiguration) {
+      long numTasks, Object connectionConfiguration, Object jobConfiguration) {
     Configuration conf = ((PrefixContext)context).getConfiguration();
 
     try {
-      int numTasks = Integer.parseInt(conf.get(
-          Constants.JOB_ETL_NUMBER_PARTITIONS));
       long numInputBytes = getInputSize(conf);
       maxSplitSize = numInputBytes / numTasks;
 
@@ -117,24 +115,21 @@ public class HdfsExportPartitioner extends Partitioner {
       // all the files in input set
       String indir = conf.get(FileInputFormat.INPUT_DIR);
       FileSystem fs = FileSystem.get(conf);
-      Path[] paths = FileUtil.stat2Paths(fs.listStatus(new Path(indir)));
+
+      List<Path> paths = new LinkedList<Path>();
+      for(FileStatus status : fs.listStatus(new Path(indir))) {
+        if(!status.isDirectory()) {
+          paths.add(status.getPath());
+        }
+      }
+
       List<Partition> partitions = new ArrayList<Partition>();
-      if (paths.length == 0) {
+      if (paths.size() == 0) {
         return partitions;
       }
 
-      // Convert them to Paths first. This is a costly operation and
-      // we should do it first, otherwise we will incur doing it multiple
-      // times, one time each for each pool in the next loop.
-      List<Path> newpaths = new ArrayList<Path>();
-      for (int i = 0; i < paths.length; i++) {
-        Path p = new Path(paths[i].toUri().getPath());
-        newpaths.add(p);
-      }
-      paths = null;
-
       // create splits for all files that are not in any pool.
-      getMoreSplits(conf, newpaths.toArray(new Path[newpaths.size()]),
+      getMoreSplits(conf, paths,
                     maxSize, minSizeNode, minSizeRack, partitions);
 
       // free up rackToNodes map
@@ -161,7 +156,7 @@ public class HdfsExportPartitioner extends Partitioner {
   /**
    * Return all the splits in the specified set of paths
    */
-  private void getMoreSplits(Configuration conf, Path[] paths,
+  private void getMoreSplits(Configuration conf, List<Path> paths,
       long maxSize, long minSizeNode, long minSizeRack,
       List<Partition> partitions) throws IOException {
 
@@ -180,14 +175,14 @@ public class HdfsExportPartitioner extends Partitioner {
     HashMap<String, List<OneBlockInfo>> nodeToBlocks =
                               new HashMap<String, List<OneBlockInfo>>();
 
-    files = new OneFileInfo[paths.length];
-    if (paths.length == 0) {
+    files = new OneFileInfo[paths.size()];
+    if (paths.size() == 0) {
       return;
     }
 
     // populate all the blocks for all files
-    for (int i = 0; i < paths.length; i++) {
-      files[i] = new OneFileInfo(paths[i], conf, isSplitable(conf, paths[i]),
+    for (int i = 0; i < paths.size(); i++) {
+      files[i] = new OneFileInfo(paths.get(i), conf, isSplitable(conf, paths.get(i)),
                                  rackToBlocks, blockToNodes, nodeToBlocks,
                                  rackToNodes, maxSize);
     }

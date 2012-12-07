@@ -403,7 +403,7 @@ public final class FrameworkManager {
         prepareImportSubmission(request);
         break;
       case EXPORT:
-        // TODO(jarcec): Implement export path
+        prepareExportSubmission(request);
         break;
       default:
         throw  new SqoopException(FrameworkError.FRAMEWORK_0005,
@@ -448,6 +448,19 @@ public final class FrameworkManager {
 
     // Delegate rest of the job to execution engine
     executionEngine.prepareImportSubmission(request);
+  }
+
+  private static void prepareExportSubmission(SubmissionRequest request) {
+    ExportJobConfiguration jobConfiguration = (ExportJobConfiguration) request.getConfigFrameworkJob();
+
+    // We're directly moving configured number of extractors and loaders to
+    // underlying request object. In the future we might need to throttle this
+    // count based on other running jobs to meet our SLAs.
+    request.setExtractors(jobConfiguration.throttling.extractors);
+    request.setLoaders(jobConfiguration.throttling.loaders);
+
+    // Delegate rest of the job to execution engine
+    executionEngine.prepareExportSubmission(request);
   }
 
   /**

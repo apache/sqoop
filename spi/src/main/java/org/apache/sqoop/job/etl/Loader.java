@@ -25,6 +25,18 @@ import org.apache.sqoop.job.io.DataReader;
  */
 public abstract class Loader {
 
-  public abstract void run(ImmutableContext context, DataReader reader) throws Exception;
+  /**
+   * Load data to target.
+   *
+   * @param context Context object
+   * @param connectionConfiguration Connection configuration
+   * @param jobConfiguration Job configuration
+   * @param reader Data reader object
+   * @throws Exception
+   */
+  public abstract void load(ImmutableContext context,
+                            Object connectionConfiguration,
+                            Object jobConfiguration,
+                            DataReader reader) throws Exception;
 
 }

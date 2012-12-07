@@ -26,5 +26,11 @@ import org.apache.sqoop.model.Form;
 @ConfigurationClass
 public class ExportJobConfiguration {
 
-  @Form OutputForm output;
+  @Form public InputForm input;
+
+  @Form public ThrottlingForm throttling;
+
+  public ExportJobConfiguration() {
+    throttling = new ThrottlingForm();
+  }
 }

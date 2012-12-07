@@ -17,21 +17,14 @@
  */
 package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
  *
  */
-@ConfigurationClass
-public class ImportJobConfiguration {
+@FormClass
+public class InputForm {
 
-  @Form public OutputForm output;
-
-  @Form public ThrottlingForm throttling;
-
-  public ImportJobConfiguration() {
-    output = new OutputForm();
-    throttling = new ThrottlingForm();
-  }
+  @Input(size = 50) public String inputDirectory;
 }

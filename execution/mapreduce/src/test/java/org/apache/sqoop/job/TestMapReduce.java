@@ -216,7 +216,7 @@ public class TestMapReduce extends TestCase {
     private Data actual = new Data();
 
     @Override
-    public void run(ImmutableContext context, DataReader reader) throws Exception{
+    public void load(ImmutableContext context, Object oc, Object oj, DataReader reader) throws Exception{
       Object[] array;
       while ((array = reader.readArrayRecord()) != null) {
         actual.setContent(array, Data.ARRAY_RECORD);

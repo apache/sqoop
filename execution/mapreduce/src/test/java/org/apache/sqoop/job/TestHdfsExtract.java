@@ -233,7 +233,7 @@ public class TestHdfsExtract extends TestCase {
 
   public static class DummyLoader extends Loader {
     @Override
-    public void run(ImmutableContext context, DataReader reader)
+    public void load(ImmutableContext context, Object oc, Object oj, DataReader reader)
         throws Exception {
       int index = 1;
       int sum = 0;
