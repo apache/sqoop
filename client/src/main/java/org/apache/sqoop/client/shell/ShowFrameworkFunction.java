@@ -17,11 +17,14 @@
  */
 package org.apache.sqoop.client.shell;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MFramework;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -41,7 +44,7 @@ public class ShowFrameworkFunction extends SqoopFunction {
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: show framework");
+    out.println(getResource().getString(Constants.RES_SHOW_FRAMEWORK_USAGE));
     super.printHelp(out);
   }
 
@@ -62,11 +65,9 @@ public class ShowFrameworkFunction extends SqoopFunction {
 
     MFramework framework = frameworkBean.getFramework();
     ResourceBundle bundle = frameworkBean.getResourceBundle();
-
-    io.out.println("@|bold Framework specific options: |@");
-
-    io.out.print("Persistent id: ");
-    io.out.println(framework.getPersistenceId());
+    io.out.println(StringEscapeUtils.unescapeJava(
+        MessageFormat.format(Constants.RES_SHOW_PROMPT_FRAMEWORK_OPTS,
+            framework.getPersistenceId())));
 
     displayFormMetadataDetails(io, framework, bundle);
 

@@ -17,9 +17,12 @@
  */
 package org.apache.sqoop.client.shell;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
@@ -32,61 +35,64 @@ public class ShowCommand extends SqoopCommand
   private ShowFrameworkFunction frameworkFunction;
   private ShowConnectionFunction connectionFunction;
 
+
   protected ShowCommand(Shell shell) {
-    super(shell, "show", "\\sh",
-        new String[] {"server", "version", "connector", "framework",
-          "connection", "job"},
-        "Show", "info");
+    super(shell, Constants.CMD_SHOW, Constants.CMD_SHOW_SC,
+        new String[] {Constants.FN_SERVER, Constants.FN_VERSION,
+          Constants.FN_CONNECTOR, Constants.FN_FRAMEWORK,
+          Constants.FN_CONNECTION, Constants.FN_JOB },
+          Constants.PRE_SHOW, Constants.SUF_INFO);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Object execute(List args) {
+    String usageMsg = MessageFormat.format(getResource().getString(Constants
+        .RES_SHOW_USAGE), getUsage());
     if (args.size() == 0) {
-      shell.getIo().out.println("Usage: show " + getUsage());
+      shell.getIo().out.println(usageMsg);
       io.out.println();
       return null;
     }
 
     String func = (String)args.get(0);
-    if (func.equals("server")) {
+    if (func.equals(Constants.FN_SERVER)) {
       if (serverFunction == null) {
         serverFunction = new ShowServerFunction(io);
       }
       return serverFunction.execute(args);
 
-    } else if (func.equals("version")) {
+    } else if (func.equals(Constants.FN_VERSION)) {
       if (versionFunction == null) {
         versionFunction = new ShowVersionFunction(io);
       }
       return versionFunction.execute(args);
 
-    } else if (func.equals("connector")) {
+    } else if (func.equals(Constants.FN_CONNECTOR)) {
       if (connectorFunction == null) {
         connectorFunction = new ShowConnectorFunction(io);
       }
       return connectorFunction.execute(args);
 
-    } else if (func.equals("framework")) {
+    } else if (func.equals(Constants.FN_FRAMEWORK)) {
       if (frameworkFunction == null) {
         frameworkFunction = new ShowFrameworkFunction(io);
       }
       return frameworkFunction.execute(args);
 
-    } else if (func.equals("connection")) {
+    } else if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
         connectionFunction = new ShowConnectionFunction(io);
       }
       return connectionFunction.execute(args);
 
-    } else if (func.equals("job")) {
+    } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
         jobFunction = new ShowJobFunction(io);
       }
       return jobFunction.execute(args);
     } else {
-      String msg = "Usage: show " + getUsage();
-      throw new SqoopException(ClientError.CLIENT_0002, msg);
+      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
     }
   }
 }

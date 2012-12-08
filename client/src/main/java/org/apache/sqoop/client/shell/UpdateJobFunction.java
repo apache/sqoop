@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
@@ -28,6 +29,7 @@ import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -39,30 +41,30 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class UpdateJobFunction extends SqoopFunction {
 
-  private static final String JID = "jid";
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   public UpdateJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Job ID")
-      .withLongOpt(JID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_ID))
+      .withLongOpt(Constants.OPT_JID)
       .hasArg()
-      .create(JID.charAt(0)));
+      .create(Constants.OPT_JID_CHAR));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(JID)) {
-      io.out.println("Required argument --jid is missing.");
+    if (!line.hasOption(Constants.OPT_JID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_JID_MISSING));
       return null;
     }
 
     try {
-      updateJob(line.getOptionValue(JID));
+      updateJob(line.getOptionValue(Constants.OPT_JID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -71,7 +73,8 @@ public class UpdateJobFunction extends SqoopFunction {
   }
 
   private void updateJob(String jobId) throws IOException {
-    io.out.println("Updating job with id " + jobId);
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_UPDATE_UPDATING_JOB), jobId));
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -86,7 +89,7 @@ public class UpdateJobFunction extends SqoopFunction {
 
     Status status = Status.FINE;
 
-    io.out.println("Please update job metadata:");
+    io.out.println(getResource().getString(Constants.RES_PROMPT_UPDATE_JOB_METADATA));
 
     do {
       // Print error introduction if needed
@@ -103,7 +106,7 @@ public class UpdateJobFunction extends SqoopFunction {
       status = updateJobApplyValidations(job);
     } while(!status.canProceed());
 
-    io.out.println("Job was successfully updated with status "
-      + status.name());
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_UPDATE_JOB_SUCCESSFUL), status.name()));
   }
 }

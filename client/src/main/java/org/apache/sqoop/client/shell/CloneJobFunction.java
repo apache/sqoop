@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
@@ -29,6 +30,7 @@ import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -40,30 +42,30 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class CloneJobFunction extends SqoopFunction {
 
-  private static final String JID = "jid";
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   public CloneJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Job ID")
-      .withLongOpt(JID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_ID))
+      .withLongOpt(Constants.OPT_JID)
       .hasArg()
-      .create(JID.charAt(0)));
+      .create(Constants.OPT_JID_CHAR));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(JID)) {
-      io.out.println("Required argument --jid is missing.");
+    if (!line.hasOption(Constants.OPT_JID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_JID_MISSING));
       return null;
     }
 
     try {
-      cloneJob(line.getOptionValue(JID));
+      cloneJob(line.getOptionValue(Constants.OPT_JID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -72,7 +74,8 @@ public class CloneJobFunction extends SqoopFunction {
   }
 
   private void cloneJob(String jobId) throws IOException {
-    io.out.println("Cloning job with id " + jobId);
+    MessageFormat.format(getResource().getString(Constants.RES_CLONE_CLONING_JOB),
+        jobId);
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -90,7 +93,8 @@ public class CloneJobFunction extends SqoopFunction {
     // Remove persistent id as we're making a clone
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    io.out.println("Please update job metadata:");
+    io.out.println(getResource().getString(Constants
+        .RES_PROMPT_UPDATE_JOB_METADATA));
 
     do {
       // Print error introduction if needed
@@ -107,8 +111,9 @@ public class CloneJobFunction extends SqoopFunction {
       status = createJobApplyValidations(job);
     } while(!status.canProceed());
 
-    io.out.println("Job was successfully created with validation status "
-      + status.name() + " and persistent id " + job.getPersistenceId());
+    io.out.println(MessageFormat.format(getResource()
+        .getString(Constants.RES_CLONE_JOB_SUCCESSFUL), status.name(),
+        job.getPersistenceId()));
   }
 
 }

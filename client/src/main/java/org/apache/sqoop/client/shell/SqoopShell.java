@@ -21,9 +21,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.ThrowableDisplayer;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.codehaus.groovy.tools.shell.Command;
@@ -44,11 +47,14 @@ public final class SqoopShell {
    */
   private static final String RC_FILE = ".sqoop2rc";
 
+
+
+  private static final ResourceBundle clientResource =
+      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
   /**
    * Banner message that is displayed in interactive mode after client start.
    */
-  private static final String BANNER =
-      "@|green Sqoop Shell:|@ Type '@|bold help|@' or '@|bold \\h|@' for help.";
+
 
   /**
    * Hash of commands that we want to have in history in all cases.
@@ -69,7 +75,7 @@ public final class SqoopShell {
    */
   public static void main (String[] args) throws Exception
   {
-    System.setProperty("groovysh.prompt", "sqoop");
+    System.setProperty("groovysh.prompt", Constants.SQOOP_PROMPT);
     Groovysh shell = new Groovysh();
 
     // Install our error hook (exception handling)
@@ -100,19 +106,22 @@ public final class SqoopShell {
 
     // Let's see if user do have resource file with initial commands that he
     // would like to apply.
-    String homeDir = System.getProperty("user.home");
+    String homeDir = System.getProperty(Constants.PROP_HOMEDIR);
     File rcFile = new File(homeDir, RC_FILE);
 
     if(rcFile.exists()) {
-      shell.getIo().out.println("Loading resource file " + RC_FILE);
+      shell.getIo().out.println(MessageFormat.format(clientResource.getString
+          (Constants.RES_SQOOP_PROMPT_SHELL_LOADRC), RC_FILE));
       interpretFileContent(rcFile, shell);
-      shell.getIo().out.println("Resource file loaded.");
+      shell.getIo().out.println(clientResource.getString(clientResource.getString
+          (Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC)));
     }
 
     if (args.length == 0) {
       // Interactive mode:
       shell.getIo().setVerbosity(Verbosity.QUIET);
-      shell.getIo().out.println(BANNER);
+      shell.getIo().out.println(clientResource.getString(Constants
+          .RES_SQOOP_SHELL_BANNER));
       shell.getIo().out.println();
       shell.run(args);
 
@@ -120,7 +129,7 @@ public final class SqoopShell {
       // Batch mode (with a script file):
       File script = new File(args[0]);
       if (!script.isAbsolute()) {
-        String userDir = System.getProperty("user.dir");
+        String userDir = System.getProperty(Constants.PROP_CURDIR);
         script = new File(userDir, args[0]);
       }
 

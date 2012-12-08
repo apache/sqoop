@@ -22,38 +22,38 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.core.Environment;
 import org.codehaus.groovy.tools.shell.IO;
 
 @SuppressWarnings("serial")
 public class SetServerFunction extends SqoopFunction
 {
-  public static final String HOST = "host";
-  public static final String PORT = "port";
-  public static final String WEBAPP = "webapp";
+
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   protected SetServerFunction(IO io) {
     this.io = io;
 
-    this.addOption(OptionBuilder.hasArg().withArgName("host")
-        .withDescription(  "Host name to invoke server resources" )
-        .withLongOpt(HOST)
-        .create(HOST.charAt(0)));
-    this.addOption(OptionBuilder.hasArg().withArgName("port")
-        .withDescription(  "Port number to invoke server resources" )
-        .withLongOpt(PORT)
-        .create(PORT.charAt(0)));
-    this.addOption(OptionBuilder.hasArg().withArgName("webbapp")
-        .withDescription(  "Web app to invoke server resources" )
-        .withLongOpt(WEBAPP)
-        .create(WEBAPP.charAt(0)));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_HOST)
+        .withDescription(getResource().getString(Constants.RES_SET_HOST_DESCRIPTION))
+        .withLongOpt(Constants.OPT_HOST)
+        .create(Constants.OPT_HOST_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_PORT)
+        .withDescription(getResource().getString(Constants.RES_SET_PORT_DESCRIPTION))
+        .withLongOpt(Constants.OPT_PORT)
+        .create(Constants.OPT_PORT_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_WEBAPP)
+        .withDescription(getResource().getString(Constants.RES_WEBAPP_DESCRIPTION))
+        .withLongOpt(Constants.OPT_WEBAPP)
+        .create(Constants.OPT_WEBAPP_CHAR));
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: set server");
+    out.println(getResource().getString(Constants.RES_SET_SERVER_USAGE));
     super.printHelp(out);
   }
 
@@ -65,17 +65,17 @@ public class SetServerFunction extends SqoopFunction
     }
 
     CommandLine line = parseOptions(this, 1, args);
-    if (line.hasOption(HOST)) {
-      Environment.setServerHost(line.getOptionValue(HOST));
+    if (line.hasOption(Constants.OPT_HOST)) {
+      Environment.setServerHost(line.getOptionValue(Constants.OPT_HOST));
     }
-    if (line.hasOption(PORT)) {
-      Environment.setServerPort(line.getOptionValue(PORT));
+    if (line.hasOption(Constants.OPT_PORT)) {
+      Environment.setServerPort(line.getOptionValue(Constants.OPT_PORT));
     }
-    if (line.hasOption(WEBAPP)) {
-      Environment.setServerWebapp(line.getOptionValue(WEBAPP));
+    if (line.hasOption(Constants.OPT_WEBAPP)) {
+      Environment.setServerWebapp(line.getOptionValue(Constants.OPT_WEBAPP));
     }
 
-    io.out.println("Server is set successfully.");
+    io.out.println(getResource().getString(Constants.RES_SET_SERVER_SUCCESSFUL));
     io.out.println();
     return null;
   }

@@ -19,11 +19,13 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
@@ -33,27 +35,29 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  *
  */
 public class ShowConnectionFunction extends SqoopFunction {
-  public static final String ALL = "all";
-  public static final String XID = "xid";
+
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   protected ShowConnectionFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-        .withDescription("Display all connections")
-        .withLongOpt(ALL)
-        .create(ALL.charAt(0)));
-    this.addOption(OptionBuilder.hasArg().withArgName("xid")
-        .withDescription(  "Display the connection with xid" )
-        .withLongOpt(XID)
-        .create('x'));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_ALL_CONNS))
+        .withLongOpt(Constants.OPT_ALL)
+        .create(Constants.OPT_ALL_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_XID)
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_CONN_XID))
+        .withLongOpt(Constants.OPT_XID)
+        .create(Constants.OPT_XID_CHAR));
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: show connection");
+    out.println(getResource().getString(Constants.RES_SHOW_CONN_USAGE));
     super.printHelp(out);
   }
 
@@ -65,11 +69,11 @@ public class ShowConnectionFunction extends SqoopFunction {
     }
 
     CommandLine line = parseOptions(this, 1, args);
-    if (line.hasOption(ALL)) {
+    if (line.hasOption(Constants.OPT_ALL)) {
       showConnection(null);
 
-    } else if (line.hasOption(XID)) {
-      showConnection(line.getOptionValue(XID));
+    } else if (line.hasOption(Constants.OPT_XID)) {
+      showConnection(line.getOptionValue(Constants.OPT_XID));
     }
 
     return null;
@@ -80,12 +84,16 @@ public class ShowConnectionFunction extends SqoopFunction {
 
     List<MConnection> connections = connectionBean.getConnections();
 
-    io.out.println("@|bold " + connections.size()
-      + " connection(s) to show: |@");
+    String s = MessageFormat.format(getResource().getString(Constants
+        .RES_SHOW_PROMPT_CONNS_TO_SHOW), connections.size());
+
+    io.out.println(s);
 
     for (MConnection connection : connections) {
-      io.out.println("Connection with id " + connection.getPersistenceId()
-        + " and name: " + connection.getName());
+      s =  MessageFormat.format(getResource().getString
+          (Constants.RES_SHOW_PROMPT_CONN_INFO), connection.getPersistenceId(),
+          connection.getName());
+      io.out.println(s);
 
       long connectorId = connection.getConnectorId();
 

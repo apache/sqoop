@@ -19,6 +19,7 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.request.JobRequest;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -35,23 +36,22 @@ public class DeleteJobFunction extends SqoopFunction {
 
   private JobRequest jobRequest;
 
-  private static final String JID = "jid";
 
   @SuppressWarnings("static-access")
   public DeleteJobFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Job ID")
-      .withLongOpt(JID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_ID))
+      .withLongOpt(Constants.OPT_JID)
       .hasArg()
       .create('j'));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(JID)) {
-      io.out.println("Required argument --jid is missing.");
+    if (!line.hasOption(Constants.OPT_JID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_JID_MISSING));
       return null;
     }
 
@@ -59,7 +59,7 @@ public class DeleteJobFunction extends SqoopFunction {
       jobRequest = new JobRequest();
     }
 
-    deleteJob(line.getOptionValue(JID));
+    deleteJob(line.getOptionValue(Constants.OPT_JID));
 
     return null;
   }

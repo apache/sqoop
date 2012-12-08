@@ -19,9 +19,11 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.core.Environment;
 import org.codehaus.groovy.tools.shell.IO;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -29,44 +31,44 @@ import java.util.List;
  */
 public class SetOptionFunction extends SqoopFunction {
 
-  public static final String NAME = "name";
-  public static final String VALUE = "value";
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   protected SetOptionFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder.hasArg()
-      .withDescription("Client option name")
-      .withLongOpt(NAME)
-      .create(NAME.charAt(0)));
+      .withDescription(getResource().getString(Constants.RES_SET_PROMPT_OPT_NAME))
+      .withLongOpt(Constants.OPT_NAME)
+      .create(Constants.OPT_NAME_CHAR));
     this.addOption(OptionBuilder.hasArg()
-      .withDescription("New option value")
-      .withLongOpt(VALUE)
-      .create(VALUE.charAt(0)));
+      .withDescription(getResource().getString(Constants.RES_SET_PROMPT_OPT_VALUE))
+      .withLongOpt(Constants.OPT_VALUE)
+      .create(Constants.OPT_VALUE_CHAR));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(NAME)) {
-      io.out.println("Required argument --name is missing.");
+    if (!line.hasOption(Constants.OPT_NAME)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_NAME_MISSING));
       return null;
     }
-    if (!line.hasOption(VALUE)) {
-      io.out.println("Required argument --value is missing.");
+    if (!line.hasOption(Constants.OPT_VALUE)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_VALUE_MISSING));
       return null;
     }
 
-    handleOptionSetting(line.getOptionValue(NAME), line.getOptionValue(VALUE));
+    handleOptionSetting(line.getOptionValue(Constants.OPT_NAME),
+        line.getOptionValue(Constants.OPT_VALUE));
 
     io.out.println();
     return null;
   }
 
   private void handleOptionSetting(String name, String value) {
-    if(name.equals("verbose")) {
+    if(name.equals(Constants.OPT_VERBOSE)) {
       boolean newValue = false;
 
       if(value.equals("1") || value.equals("true")) {
@@ -74,10 +76,12 @@ public class SetOptionFunction extends SqoopFunction {
       }
 
       Environment.setVerbose(newValue);
-      io.out.println("Verbose option was changed to " + newValue);
+      io.out.println(MessageFormat.format(getResource().getString(Constants
+          .RES_SET_VERBOSE_CHANGED), newValue));
       return;
     }
 
-    io.out.println("Unknown option " + name + ". Ignoring...");
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_SET_UNKNOWN_OPT_IGNORED), name));
   }
 }

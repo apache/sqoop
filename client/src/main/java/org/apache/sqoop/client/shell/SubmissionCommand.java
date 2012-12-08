@@ -18,10 +18,13 @@
 package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -32,38 +35,41 @@ public class SubmissionCommand  extends SqoopCommand {
   private SubmissionStopFunction stopFunction;
   private SubmissionStatusFunction statusFunction;
 
+
   public SubmissionCommand(Shell shell) {
-    super(shell, "submission", "\\sub",
-      new String[] {"start", "stop", "status"},
-      "Submission", "info");
+    super(shell, Constants.CMD_SUBMISSION, Constants.CMD_SUBMISSION_SC,
+      new String[] {Constants.FN_START, Constants.FN_STOP,
+          Constants.FN_STATUS},
+      Constants.PRE_SUBMISSION, Constants.SUF_INFO);
   }
 
   public Object execute(List args) {
+    String usageMsg = MessageFormat.format(getResource().getString(Constants
+        .RES_SUBMISSION_USAGE), getUsage());
     if (args.size() == 0) {
-      io.out.println("Usage: submission " + getUsage());
+      io.out.println(usageMsg);
       io.out.println();
       return null;
     }
 
     String func = (String)args.get(0);
-    if (func.equals("start")) {
+    if (func.equals(Constants.FN_START)) {
       if (startFunction == null) {
         startFunction = new SubmissionStartFunction(io);
       }
       return startFunction.execute(args);
-    } else if (func.equals("stop")) {
+    } else if (func.equals(Constants.FN_STOP)) {
         if (stopFunction == null) {
           stopFunction = new SubmissionStopFunction(io);
         }
         return stopFunction.execute(args);
-    } else if (func.equals("status")) {
+    } else if (func.equals(Constants.FN_STATUS)) {
       if (statusFunction == null) {
         statusFunction = new SubmissionStatusFunction(io);
       }
       return statusFunction.execute(args);
     } else {
-      String msg = "Usage: status " + getUsage();
-      throw new SqoopException(ClientError.CLIENT_0002, msg);
+      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
     }
   }
 }

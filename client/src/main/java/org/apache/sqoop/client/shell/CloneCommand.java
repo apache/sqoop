@@ -18,10 +18,13 @@
 package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Client side cloning of connection and job objects.
@@ -31,33 +34,37 @@ public class CloneCommand extends SqoopCommand {
   private CloneConnectionFunction connectionFunction;
   private CloneJobFunction jobFunction;
 
+
+
   public CloneCommand(Shell shell) {
-    super(shell, "clone", "\\cl",
-      new String[] {"connection", "job"},
-      "Clone", "Info");
+    super(shell, Constants.CMD_CLONE, Constants.CMD_CLONE_SC,
+      new String[] {Constants.FN_CONNECTION, Constants.FN_JOB},
+      Constants.PRE_CLONE, Constants.SUF_INFO);
   }
 
   public Object execute(List args) {
+    String usageMsg = MessageFormat.format(getResource().getString(Constants
+        .RES_CLONE_USAGE), getUsage());
+
     if (args.size() == 0) {
-      io.out.println("Usage: clone " + getUsage());
+      io.out.println(usageMsg);
       io.out.println();
       return null;
     }
 
     String func = (String)args.get(0);
-    if (func.equals("connection")) {
+    if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
         connectionFunction = new CloneConnectionFunction(io);
       }
       return connectionFunction.execute(args);
-    } else if (func.equals("job")) {
+    } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
         jobFunction = new CloneJobFunction(io);
       }
       return jobFunction.execute(args);
     } else {
-      String msg = "Usage: clone " + getUsage();
-      throw new SqoopException(ClientError.CLIENT_0002, msg);
+      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
     }
   }
 }

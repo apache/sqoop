@@ -19,9 +19,11 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.List;
+
 import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
@@ -31,27 +33,26 @@ public class DeleteConnectionFunction extends SqoopFunction {
 
   private IO io;
 
-  private static final String XID = "xid";
 
   @SuppressWarnings("static-access")
   public DeleteConnectionFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connection ID")
-      .withLongOpt(XID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withLongOpt(Constants.OPT_XID)
       .hasArg()
       .create('x'));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(XID)) {
-      io.out.println("Required argument --xid is missing.");
+    if (!line.hasOption(Constants.OPT_XID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
       return null;
     }
 
-    deleteConnection(line.getOptionValue(XID));
+    deleteConnection(line.getOptionValue(Constants.OPT_XID));
 
     return null;
   }

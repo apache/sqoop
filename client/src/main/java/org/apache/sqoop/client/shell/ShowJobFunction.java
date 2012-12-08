@@ -19,11 +19,13 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
@@ -34,9 +36,6 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class ShowJobFunction extends SqoopFunction {
 
-  public static final String ALL = "all";
-  public static final String JID = "jid";
-
   private IO io;
 
   @SuppressWarnings("static-access")
@@ -44,17 +43,19 @@ public class ShowJobFunction extends SqoopFunction {
     this.io = io;
 
     this.addOption(OptionBuilder
-        .withDescription("Display all jobs")
-        .withLongOpt(ALL)
-        .create(ALL.charAt(0)));
-    this.addOption(OptionBuilder.hasArg().withArgName("jid")
-        .withDescription("Display job with given jid" )
-        .withLongOpt(JID)
-        .create('j'));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_ALL_JOBS))
+        .withLongOpt(Constants.OPT_ALL)
+        .create(Constants.OPT_ALL_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_JOB_JID))
+        .withLongOpt(Constants.OPT_JID)
+        .create(Constants.OPT_JID_CHAR));
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: show job");
+    out.println(getResource().getString(Constants.RES_SHOW_JOB_USAGE));
     super.printHelp(out);
   }
 
@@ -66,11 +67,11 @@ public class ShowJobFunction extends SqoopFunction {
     }
 
     CommandLine line = parseOptions(this, 1, args);
-    if (line.hasOption(ALL)) {
+    if (line.hasOption(Constants.OPT_ALL)) {
       showJob(null);
 
-    } else if (line.hasOption(JID)) {
-      showJob(line.getOptionValue(JID));
+    } else if (line.hasOption(Constants.OPT_JID)) {
+      showJob(line.getOptionValue(Constants.OPT_JID));
     }
 
     return null;
@@ -80,13 +81,15 @@ public class ShowJobFunction extends SqoopFunction {
     JobBean jobBean = readJob(jid);
 
     List<MJob> jobs = jobBean.getJobs();
-
-    io.out.println("@|bold " + jobs.size()
-      + " job(s) to show: |@");
+    String s = MessageFormat.format(Constants
+        .RES_SHOW_PROMPT_JOBS_TO_SHOW, jobs.size());
+    io.out.println(s);
 
     for (MJob job : jobs) {
-      io.out.println("Job with id " + job.getPersistenceId()
-        + " and name: " + job.getName());
+      s = MessageFormat.format(getResource().getString
+          (Constants.RES_SHOW_PROMPT_JOB_INFO), job.getPersistenceId(),
+          job.getName());
+      io.out.println(s);
 
       long connectorId = job.getConnectorId();
 

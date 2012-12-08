@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
@@ -28,6 +29,7 @@ import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -39,30 +41,30 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class UpdateConnectionFunction extends SqoopFunction {
 
-  private static final String XID = "xid";
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   public UpdateConnectionFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connection ID")
-      .withLongOpt(XID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withLongOpt(Constants.OPT_XID)
       .hasArg()
-      .create(XID.charAt(0)));
+      .create(Constants.OPT_XID_CHAR));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(XID)) {
-      io.out.println("Required argument --xid is missing.");
+    if (!line.hasOption(Constants.OPT_XID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
       return null;
     }
 
     try {
-      updateConnection(line.getOptionValue(XID));
+      updateConnection(line.getOptionValue(Constants.OPT_XID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -71,7 +73,8 @@ public class UpdateConnectionFunction extends SqoopFunction {
   }
 
   private void updateConnection(String connectionId) throws IOException {
-    io.out.println("Updating connection with id " + connectionId);
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_UPDATE_UPDATING_CONN), connectionId));
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -86,7 +89,8 @@ public class UpdateConnectionFunction extends SqoopFunction {
 
     Status status = Status.FINE;
 
-    io.out.println("Please update connection metadata:");
+    io.out.println(getResource().getString(Constants
+        .RES_PROMPT_UPDATE_CONN_METADATA));
 
     do {
       // Print error introduction if needed
@@ -104,8 +108,8 @@ public class UpdateConnectionFunction extends SqoopFunction {
       status = updateConnectionApplyValidations(connection);
     } while(!status.canProceed());
 
-    io.out.println("Connection was successfully updated with status "
-      + status.name());
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_UPDATE_CONN_SUCCESSFUL), status.name()));
   }
 
 

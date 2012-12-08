@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
@@ -31,6 +32,7 @@ import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -42,7 +44,6 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class CreateConnectionFunction extends SqoopFunction {
 
-  private static final String CID = "cid";
 
   private IO io;
 
@@ -51,21 +52,21 @@ public class CreateConnectionFunction extends SqoopFunction {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connector ID")
-      .withLongOpt(CID)
+      .withDescription(Constants.RES_CONNECTOR_ID)
+      .withLongOpt(Constants.OPT_CID)
       .hasArg()
-      .create(CID.charAt(0)));
+      .create(Constants.OPT_CID_CHAR));
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(CID)) {
-      io.out.println("Required argument --cid is missing.");
+    if (!line.hasOption(Constants.OPT_CID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_CID_MISSING));
       return null;
     }
 
     try {
-      createConnection(line.getOptionValue(CID));
+      createConnection(line.getOptionValue(Constants.OPT_CID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -74,7 +75,8 @@ public class CreateConnectionFunction extends SqoopFunction {
   }
 
   private void createConnection(String connectorId) throws IOException {
-    io.out.println("Creating connection for connector with id " + connectorId);
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_CREATE_CREATING_CONN), connectorId));
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -93,8 +95,7 @@ public class CreateConnectionFunction extends SqoopFunction {
 
     Status status = Status.FINE;
 
-    io.out.println("Please fill following values to create new connection"
-      + " object");
+    io.out.println(getResource().getString(Constants.RES_PROMPT_FILL_CONN_METADATA));
 
     do {
       // Print error introduction if needed
@@ -112,8 +113,9 @@ public class CreateConnectionFunction extends SqoopFunction {
       status = createConnectionApplyValidations(connection);
     } while(!status.canProceed());
 
-    io.out.println("New connection was successfully created with validation "
-      + "status " + status.name() + " and persistent id "
-      + connection.getPersistenceId());
+
+    io.out.println(MessageFormat.format(getResource()
+        .getString(Constants.RES_CREATE_CONN_SUCCESSFUL), status.name(),
+        connection.getPersistenceId()));
   }
 }

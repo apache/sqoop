@@ -20,6 +20,7 @@ package org.apache.sqoop.client.shell;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -28,14 +29,22 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 
 @SuppressWarnings("serial")
 public class SqoopFunction extends Options
 {
+  private static final ResourceBundle clientResource =
+      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
+
   public void printHelp(PrintWriter out) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printOptions(out, formatter.getWidth(), this, 0, 4);
+  }
+
+  protected  ResourceBundle getResource() {
+    return clientResource;
   }
 
   protected CommandLine parseOptions(Options options,

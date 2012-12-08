@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ConnectorBean;
@@ -33,6 +34,7 @@ import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -44,8 +46,6 @@ import static org.apache.sqoop.client.core.RequestCache.*;
  */
 public class CreateJobFunction extends  SqoopFunction {
 
-  private static final String XID = "xid";
-  private static final String TYPE = "type";
 
   private IO io;
 
@@ -54,32 +54,33 @@ public class CreateJobFunction extends  SqoopFunction {
     this.io = io;
 
     this.addOption(OptionBuilder
-      .withDescription("Connection ID")
-      .withLongOpt(XID)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withLongOpt(Constants.OPT_XID)
       .hasArg()
-      .create(XID.charAt(0))
+      .create(Constants.OPT_XID_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription("Job type")
-      .withLongOpt(TYPE)
+      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_TYPE))
+      .withLongOpt(Constants.OPT_TYPE)
       .hasArg()
-      .create(TYPE.charAt(0))
+      .create(Constants.OPT_TYPE_CHAR)
     );
   }
 
   public Object execute(List<String> args) {
     CommandLine line = parseOptions(this, 1, args);
-    if (!line.hasOption(XID)) {
-      io.out.println("Required argument --xid is missing.");
+    if (!line.hasOption(Constants.OPT_XID)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
       return null;
     }
-    if (!line.hasOption(TYPE)) {
-      io.out.println("Required argument --type is missing.");
+    if (!line.hasOption(Constants.OPT_TYPE)) {
+      io.out.println(getResource().getString(Constants.RES_ARGS_TYPE_MISSING));
       return null;
     }
 
     try {
-      createJob(line.getOptionValue(XID), line.getOptionValue(TYPE));
+      createJob(line.getOptionValue(Constants.OPT_XID),
+          line.getOptionValue(Constants.OPT_TYPE));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -88,7 +89,8 @@ public class CreateJobFunction extends  SqoopFunction {
   }
 
   private void createJob(String connectionId, String type) throws IOException {
-    io.out.println("Creating job for connection with id " + connectionId);
+    io.out.println(MessageFormat.format(getResource().getString(Constants
+        .RES_CREATE_CREATING_JOB), connectionId));
 
     ConsoleReader reader = new ConsoleReader();
 
@@ -117,8 +119,7 @@ public class CreateJobFunction extends  SqoopFunction {
 
     Status status = Status.FINE;
 
-    io.out.println("Please fill following values to create new job"
-      + " object");
+    io.out.println(getResource().getString(Constants.RES_PROMPT_FILL_JOB_METADATA));
 
     do {
       // Print error introduction if needed
@@ -135,8 +136,8 @@ public class CreateJobFunction extends  SqoopFunction {
       status = createJobApplyValidations(job);
     } while(!status.canProceed());
 
-    io.out.println("New job was successfully created with validation "
-      + "status " + status.name() + " and persistent id "
-      + job.getPersistenceId());
+    io.out.println(MessageFormat.format(getResource()
+        .getString(Constants.RES_CREATE_JOB_SUCCESSFUL), status.name(),
+        job.getPersistenceId()));
   }
 }

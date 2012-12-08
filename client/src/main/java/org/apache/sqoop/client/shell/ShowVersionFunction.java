@@ -18,52 +18,56 @@
 package org.apache.sqoop.client.shell;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.VersionRequest;
-import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.VersionBean;
 import org.codehaus.groovy.tools.shell.IO;
 
 @SuppressWarnings("serial")
 public class ShowVersionFunction extends SqoopFunction
 {
-  public static final String ALL = "all";
-  public static final String SERVER = "server";
-  public static final String CLIENT = "client";
-  public static final String PROTOCOL = "protocol";
+
 
   private IO io;
   private VersionRequest versionRequest;
+
 
   @SuppressWarnings("static-access")
   protected ShowVersionFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-        .withDescription("Display all versions")
-        .withLongOpt(ALL)
-        .create(ALL.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_ALL_VERSIONS))
+        .withLongOpt(Constants.OPT_ALL)
+        .create(Constants.OPT_ALL_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display server version")
-        .withLongOpt(SERVER)
-        .create(SERVER.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_VERSION_SERVER))
+        .withLongOpt(Constants.OPT_SERVER)
+        .create(Constants.OPT_SERVER_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display client version")
-        .withLongOpt(CLIENT)
-        .create(CLIENT.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_VERSION_CLIENT))
+        .withLongOpt(Constants.OPT_CLIENT)
+        .create(Constants.OPT_CLIENT_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display protocol version")
-        .withLongOpt(PROTOCOL)
-        .create(PROTOCOL.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_VERSION_PROTOCOL))
+        .withLongOpt(Constants.OPT_PROTOCOL)
+        .create(Constants.OPT_PROTOCOL_CHAR));
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: show version");
+    out.println(getResource().getString(Constants.RES_SHOW_VERSION_USAGE));
     super.printHelp(out);
   }
 
@@ -75,18 +79,18 @@ public class ShowVersionFunction extends SqoopFunction
     }
 
     CommandLine line = parseOptions(this, 1, args);
-    if (line.hasOption(ALL)) {
+    if (line.hasOption(Constants.OPT_ALL)) {
       showVersion(true, true, true);
 
     } else {
       boolean server = false, client = false, protocol = false;
-      if (line.hasOption(SERVER)) {
+      if (line.hasOption(Constants.OPT_SERVER)) {
         server = true;
       }
-      if (line.hasOption(CLIENT)) {
+      if (line.hasOption(Constants.OPT_CLIENT)) {
         client = true;
       }
-      if (line.hasOption(PROTOCOL)) {
+      if (line.hasOption(Constants.OPT_PROTOCOL)) {
         protocol = true;
       }
 
@@ -102,35 +106,30 @@ public class ShowVersionFunction extends SqoopFunction
     }
     VersionBean versionBean =
         versionRequest.doGet(Environment.getServerUrl());
+    MessageFormat msg;
+    String s;
 
     if (server) {
-      io.out.println("@|bold Server version:|@");
-      io.out.print("  Sqoop ");
-      io.out.print(versionBean.getVersion());
-      io.out.print(" revision ");
-      io.out.println(versionBean.getRevision());
-      io.out.print("  Compiled by ");
-      io.out.print(versionBean.getUser());
-      io.out.print(" on ");
-      io.out.println(versionBean.getDate());
+      s = MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_VERSION_CLIENT_SERVER), Constants.OPT_SERVER,
+          versionBean.getVersion(), versionBean.getRevision(),
+          versionBean.getUser(), versionBean.getDate());
+      io.out.println(StringEscapeUtils.unescapeJava(s));
     }
 
     if (client) {
-      io.out.println("@|bold Client version:|@");
-      io.out.print("  Sqoop ");
-      io.out.print(VersionInfo.getVersion());
-      io.out.print(" revision ");
-      io.out.println(VersionInfo.getRevision());
-      io.out.print("  Compiled by ");
-      io.out.print(VersionInfo.getUser());
-      io.out.print(" on ");
-      io.out.println(VersionInfo.getDate());
+      s = MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_VERSION_CLIENT_SERVER), Constants.OPT_CLIENT,
+          versionBean.getVersion(), versionBean.getRevision(),
+          versionBean.getUser(), versionBean.getDate());
+      io.out.println(StringEscapeUtils.unescapeJava(s));
     }
 
     if (protocol) {
-      io.out.println("@|bold Protocol version:|@");
-      io.out.print("  ");
-      io.out.println(Arrays.toString(versionBean.getProtocols()));
+      s = MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_VERSION_PROTOCOL), Arrays.toString(versionBean.
+          getProtocols()));
+      io.out.println(StringEscapeUtils.unescapeJava(s));
     }
 
     io.out.println();

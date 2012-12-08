@@ -18,47 +18,50 @@
 package org.apache.sqoop.client.shell;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.core.Environment;
 import org.codehaus.groovy.tools.shell.IO;
 
 @SuppressWarnings("serial")
 public class ShowServerFunction extends SqoopFunction
 {
-  public static final String ALL = "all";
-  public static final String HOST = "host";
-  public static final String PORT = "port";
-  public static final String WEBAPP = "webapp";
 
   private IO io;
+
 
   @SuppressWarnings("static-access")
   protected ShowServerFunction(IO io) {
     this.io = io;
 
     this.addOption(OptionBuilder
-        .withDescription("Display all information")
-        .withLongOpt(ALL)
-        .create(ALL.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS))
+        .withLongOpt(Constants.OPT_ALL)
+        .create(Constants.OPT_ALL_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display server host name")
-        .withLongOpt(HOST)
-        .create(HOST.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_SERVER_HOST))
+        .withLongOpt(Constants.OPT_HOST)
+        .create(Constants.OPT_HOST_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display server port number")
-        .withLongOpt(PORT)
-        .create(PORT.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_SERVER_PORT))
+        .withLongOpt(Constants.OPT_PORT)
+        .create(Constants.OPT_PORT_CHAR));
     this.addOption(OptionBuilder
-        .withDescription("Display server web app name")
-        .withLongOpt(WEBAPP)
-        .create(WEBAPP.charAt(0)));
+        .withDescription(getResource().getString(Constants
+            .RES_SHOW_PROMPT_DISPLAY_SERVER_WEBAPP))
+        .withLongOpt(Constants.OPT_WEBAPP)
+        .create(Constants.OPT_WEBAPP_CHAR));
   }
 
   public void printHelp(PrintWriter out) {
-    out.println("Usage: show server");
+    out.println(getResource().getString(Constants.RES_SHOW_SERVER_USAGE));
     super.printHelp(out);
   }
 
@@ -70,18 +73,18 @@ public class ShowServerFunction extends SqoopFunction
     }
 
     CommandLine line = parseOptions(this, 1, args);
-    if (line.hasOption(ALL)) {
+    if (line.hasOption(Constants.OPT_ALL)) {
       showServer(true, true, true, true);
 
     } else {
       boolean host = false, port = false, webapp = false, version = false;
-      if (line.hasOption(HOST)) {
+      if (line.hasOption(Constants.OPT_HOST)) {
         host = true;
       }
-      if (line.hasOption(PORT)) {
+      if (line.hasOption(Constants.OPT_PORT)) {
         port = true;
       }
-      if (line.hasOption(WEBAPP)) {
+      if (line.hasOption(Constants.OPT_WEBAPP)) {
         webapp = true;
       }
 
@@ -93,19 +96,23 @@ public class ShowServerFunction extends SqoopFunction
 
   private void showServer(boolean host, boolean port, boolean webapp,
       boolean version) {
+    String s;
     if (host) {
-      io.out.print("@|bold Server host:|@");
-      io.out.println(Environment.getServerHost());
+      s =  MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_SERVER_HOST), Environment.getServerHost());
+      io.out.println(s);
     }
 
     if (port) {
-      io.out.print("@|bold Server port:|@");
-      io.out.println(Environment.getServerPort());
+      s = MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_SERVER_PORT), Environment.getServerPort());
+      io.out.println(s);
     }
 
     if (webapp) {
-      io.out.print("@|bold Server webapp:|@");
-      io.out.println(Environment.getServerWebapp());
+      s = MessageFormat.format(getResource().getString(Constants
+          .RES_SHOW_PROMPT_SERVER_WEBAPP), Environment.getServerWebapp());
+      io.out.println(s);
     }
 
     io.out.println();
