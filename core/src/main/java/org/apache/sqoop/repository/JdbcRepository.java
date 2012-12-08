@@ -412,6 +412,10 @@ public class JdbcRepository implements Repository {
     return (MSubmission) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
+        if(!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020,
+            "Invalid id: " + jobId);
+        }
         return handler.findSubmissionLastForJob(jobId, conn);
       }
     });
