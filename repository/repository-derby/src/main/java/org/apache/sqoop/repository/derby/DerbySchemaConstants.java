@@ -36,6 +36,8 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQC_CLASS = "SQC_CLASS";
 
+  public static final String COLUMN_SQC_VERSION = "SQC_VERSION";
+
   // SQ_FORM
 
   public static final String TABLE_SQ_FORM_NAME = "SQ_FORM";

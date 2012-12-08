@@ -97,6 +97,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
       baseConnectorStmt.setString(1, mc.getUniqueName());
       baseConnectorStmt.setString(2, mc.getClassName());
+      baseConnectorStmt.setString(3, mc.getVersion());
 
       int baseConnectorCount = baseConnectorStmt.executeUpdate();
       if (baseConnectorCount != 1) {
@@ -276,6 +277,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       long connectorId = rsetBaseConnector.getLong(1);
       String connectorName = rsetBaseConnector.getString(2);
       String connectorClassName = rsetBaseConnector.getString(3);
+      String connectorVersion = rsetBaseConnector.getString(4);
 
       formFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
       formFetchStmt.setLong(1, connectorId);
@@ -287,7 +289,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
       loadForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
 
-      mc = new MConnector(connectorName, connectorClassName,
+      mc = new MConnector(connectorName, connectorClassName, connectorVersion,
         new MConnectionForms(connectionForms),
         convertToJobList(jobForms));
       mc.setPersistenceId(connectorId);

@@ -39,7 +39,7 @@ import java.util.ResourceBundle;
  */
 public class TestUtil {
   public static MConnector getConnector(String name) {
-    return new MConnector(name, name + ".class",
+    return new MConnector(name, name + ".class", "1.0-test",
       getConnectionForms(), getAllJobForms());
   }
 

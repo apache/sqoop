@@ -32,6 +32,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQC_ID: BIGINT PK AUTO-GEN |
  *    | SQC_NAME: VARCHAR(64)      |
  *    | SQC_CLASS: VARCHAR(255)    |
+ *    | SQC_VERSION: VARCHAR(25)   |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -185,7 +186,8 @@ public final class DerbySchemaQuery {
       "CREATE TABLE " + TABLE_SQ_CONNECTOR + " ("
       + COLUMN_SQC_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
       + COLUMN_SQC_NAME + " VARCHAR(64), "
-      + COLUMN_SQC_CLASS + " VARCHAR(255)"
+      + COLUMN_SQC_CLASS + " VARCHAR(255), "
+      + COLUMN_SQC_VERSION + " VARCHAR(25) "
       + ")";
 
   // DDL: Create table SQ_FORM
@@ -303,9 +305,13 @@ public final class DerbySchemaQuery {
 
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =
-      "SELECT " + COLUMN_SQC_ID + ", " + COLUMN_SQC_NAME + ", "
-      + COLUMN_SQC_CLASS + " FROM " + TABLE_SQ_CONNECTOR + " WHERE "
-      + COLUMN_SQC_NAME + " = ?";
+      "SELECT "
+      + COLUMN_SQC_ID + ", "
+      + COLUMN_SQC_NAME + ", "
+      + COLUMN_SQC_CLASS + ", "
+      + COLUMN_SQC_VERSION
+      + " FROM " + TABLE_SQ_CONNECTOR
+      + " WHERE " + COLUMN_SQC_NAME + " = ?";
 
 
   // DML: Fetch all forms for a given connector
@@ -357,8 +363,11 @@ public final class DerbySchemaQuery {
 
   // DML: Insert connector base
   public static final String STMT_INSERT_CONNECTOR_BASE =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_NAME
-      + ", " + COLUMN_SQC_CLASS + ") VALUES ( ?, ?)";
+      "INSERT INTO " + TABLE_SQ_CONNECTOR + " ("
+      + COLUMN_SQC_NAME + ", "
+      + COLUMN_SQC_CLASS + ", "
+      + COLUMN_SQC_VERSION
+      + ") VALUES (?, ?, ?)";
 
   // DML: Insert form base
   public static final String STMT_INSERT_FORM_BASE =

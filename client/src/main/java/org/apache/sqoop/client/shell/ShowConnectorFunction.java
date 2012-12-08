@@ -82,9 +82,7 @@ public class ShowConnectorFunction extends SqoopFunction
     Map<Long, ResourceBundle> bundles = connectorBean.getResourceBundles();
 
     io.out.println("@|bold " + connectors.size() + " connector(s) to show: |@");
-    for (int i = 0; i < connectors.size(); i++) {
-      MConnector connector = connectors.get(i);
-
+    for (MConnector connector : connectors) {
       io.out.print("Connector with id ");
       io.out.print(connector.getPersistenceId());
       io.out.println(":");
@@ -93,6 +91,8 @@ public class ShowConnectorFunction extends SqoopFunction
       io.out.println(connector.getUniqueName());
       io.out.print("  Class: ");
       io.out.println(connector.getClassName());
+      io.out.print("  Version: ");
+      io.out.println(connector.getVersion());
 
       displayFormMetadataDetails(io, connector, bundles.get(connector.getPersistenceId()));
 

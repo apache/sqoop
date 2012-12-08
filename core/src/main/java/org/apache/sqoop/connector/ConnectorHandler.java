@@ -104,8 +104,10 @@ public final class ConnectorHandler {
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(connector.getConnectionConfigurationClass()));
 
+    String connectorVersion = connector.getVersion();
+
     mConnector = new MConnector(connectorUniqueName, connectorClassName,
-      connectionForms, jobForms);
+      connectorVersion, connectionForms, jobForms);
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector [" + connectorClassName + "] initialized.");

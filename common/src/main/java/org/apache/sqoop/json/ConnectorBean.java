@@ -72,6 +72,7 @@ public class ConnectorBean implements JsonBean {
       object.put(ID, connector.getPersistenceId());
       object.put(NAME, connector.getUniqueName());
       object.put(CLASS, connector.getClassName());
+      object.put(VERSION, connector.getVersion());
       object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms()));
 
       JSONObject jobForms = new JSONObject();
@@ -113,6 +114,7 @@ public class ConnectorBean implements JsonBean {
       long connectorId = (Long) object.get(ID);
       String uniqueName = (String) object.get(NAME);
       String className = (String) object.get(CLASS);
+      String version = (String) object.get(VERSION);
 
       List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
 
@@ -127,7 +129,7 @@ public class ConnectorBean implements JsonBean {
         jobs.add(new MJobForms(type, jobForms));
       }
 
-      MConnector connector = new MConnector(uniqueName, className, new MConnectionForms(connForms), jobs);
+      MConnector connector = new MConnector(uniqueName, className, version, new MConnectionForms(connForms), jobs);
       connector.setPersistenceId(connectorId);
 
       connectors.add(connector);

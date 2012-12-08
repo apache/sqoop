@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
@@ -42,6 +43,17 @@ public class GenericJdbcConnector implements SqoopConnector {
       GenericJdbcExportLoader.class,
       GenericJdbcExportDestroyer.class);
 
+
+  /**
+   * {@inheritDoc}
+   *
+   * As this is build-in connector it will return same version as rest of the
+   * Sqoop infrastructure.
+   */
+  @Override
+  public String getVersion() {
+    return VersionInfo.getVersion();
+  }
 
   @Override
   public ResourceBundle getBundle(Locale locale) {

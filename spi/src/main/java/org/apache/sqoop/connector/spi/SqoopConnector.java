@@ -31,6 +31,13 @@ import org.apache.sqoop.validation.Validator;
 public interface SqoopConnector {
 
   /**
+   * Retrieve connector version.
+   *
+   * @return Version encoded as a string
+   */
+  String getVersion();
+
+  /**
    * @param locale
    * @return the resource bundle associated with the given locale.
    */

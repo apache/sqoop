@@ -142,8 +142,8 @@ abstract public class DerbyTestCase extends TestCase {
    */
   protected void loadConnectorAndFramework() throws Exception {
     // Connector entry
-    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS)"
-      + "VALUES('A', 'org.apache.sqoop.test.A')");
+    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+      + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
 
     for(String connector : new String[] {"1", "NULL"}) {
       // Form entries
@@ -294,7 +294,7 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   protected MConnector getConnector() {
-    return new MConnector("A", "org.apache.sqoop.test.A",
+    return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test",
       getConnectionForms(), getJobForms());
   }
 
