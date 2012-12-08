@@ -145,6 +145,13 @@ limitations under the License.
                       </fileset>
                     </copy>
 
+                    <!-- Copy generated documentation (must be generated prior packing by calling mvn site!) -->
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/docs" includeEmptyDirs="false" flatten="false">
+                      <fileset dir="../docs/target/site">
+                        <include name="**/*" />
+                      </fileset>
+                     </copy>
+
                     <!-- Build server directory -->
                     <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.majorVersion}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
                          dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
