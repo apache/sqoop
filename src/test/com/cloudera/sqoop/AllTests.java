@@ -18,9 +18,6 @@
 
 package com.cloudera.sqoop;
 
-import com.cloudera.sqoop.hbase.TestHBaseImport;
-import com.cloudera.sqoop.hbase.TestHBaseQueryImport;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -36,9 +33,6 @@ public final class AllTests {
 
     suite.addTest(SmokeTests.suite());
     suite.addTest(ThirdPartyTests.suite());
-    suite.addTestSuite(TestHBaseImport.class);
-    suite.addTestSuite(TestHBaseQueryImport.class);
-    suite.addTestSuite(TestIncrementalImport.class);
 
     return suite;
   }

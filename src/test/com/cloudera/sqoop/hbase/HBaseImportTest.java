@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * Test imports of tables into HBase.
  */
-public class TestHBaseImport extends HBaseTestCase {
+public class HBaseImportTest extends HBaseTestCase {
 
   @Test
   public void testBasicUsage() throws IOException {

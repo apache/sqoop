@@ -18,6 +18,9 @@
 
 package com.cloudera.sqoop;
 
+import com.cloudera.sqoop.hbase.HBaseImportTest;
+import com.cloudera.sqoop.hbase.HBaseQueryImportTest;
+import com.cloudera.sqoop.hbase.HBaseUtilTest;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -45,17 +48,28 @@ public final class ThirdPartyTests extends TestCase {
 
   public static Test suite() {
     TestSuite suite = new TestSuite("Tests vendor-specific ConnManager "
-      + "implementations in Sqoop");
+      + "implementations in Sqoop and tests with third party dependencies");
+
+    // MySQL
     suite.addTestSuite(DirectMySQLTest.class);
     suite.addTestSuite(DirectMySQLExportTest.class);
     suite.addTestSuite(JdbcMySQLExportTest.class);
     suite.addTestSuite(MySQLAuthTest.class);
     suite.addTestSuite(MySQLCompatTest.class);
+
+    // Oracle
     suite.addTestSuite(OracleExportTest.class);
     suite.addTestSuite(OracleManagerTest.class);
     suite.addTestSuite(OracleCompatTest.class);
+
+    // PostgreSQL
     suite.addTestSuite(PostgresqlImportTest.class);
     suite.addTestSuite(PostgresqlExportTest.class);
+
+    // Hbase
+    suite.addTestSuite(HBaseImportTest.class);
+    suite.addTestSuite(HBaseQueryImportTest.class);
+    suite.addTestSuite(HBaseUtilTest.class);
 
     return suite;
   }

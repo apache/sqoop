@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * Test import of free-form query into HBase.
  */
-public class TestHBaseQueryImport extends HBaseTestCase {
+public class HBaseQueryImportTest extends HBaseTestCase {
 
   @Test
   public void testImportFromQuery() throws IOException {

@@ -26,7 +26,7 @@ import junit.framework.TestCase;
  * This tests to verify that HBase is present (default when running test cases)
  * and that when in fake not present mode, the method return false.
  */
-public class TestHBaseUtil extends TestCase {
+public class HBaseUtilTest extends TestCase {
 
   @Test
   public void testHBasePresent() {
