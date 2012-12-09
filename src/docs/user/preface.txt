@@ -36,9 +36,6 @@ At that site you can obtain:
 - An issue tracker
 - A wiki that contains Sqoop documentation
 
-Sqoop is compatible with Apache Hadoop 0.21 and Cloudera's
-Distribution of Hadoop version 3.
-
 Prerequisites
 -------------
 
@@ -50,10 +47,8 @@ The following prerequisite knowledge is required for this product:
 - Basic familiarity with the purpose and operation of Hadoop
 
 Before you can use Sqoop, a release of Hadoop must be installed and
-configured. We recommend that you download Cloudera's Distribution
-for Hadoop (CDH3) from the Cloudera Software Archive at
-http://archive.cloudera.com for straightforward installation of Hadoop
-on Linux systems.
+configured. Sqoop is currently supporting 4 major Hadoop releases - 0.20,
+0.23, 1.0 and 2.0.
 
 This document assumes you are using a Linux or Linux-like environment.
 If you are using Windows, you may be able to use cygwin to accomplish
