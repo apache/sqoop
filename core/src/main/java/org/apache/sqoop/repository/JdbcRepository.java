@@ -275,7 +275,7 @@ public class JdbcRepository implements Repository {
        if(!job.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
-        if(!handler.existsConnection(job.getPersistenceId(), conn)) {
+        if(!handler.existsJob(job.getPersistenceId(), conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0020,
             "Invalid id: " + job.getPersistenceId());
         }
