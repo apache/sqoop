@@ -85,6 +85,18 @@ limitations under the License.
                 </plugin>
               </reportPlugins>
             </configuration>
+
+            <!-- Configure generating documentation alongside with package -->
+            <executions>
+              <execution>
+                <id>packaging-documentation</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>site</goal>
+                </goals>
+              </execution>
+            </executions>
+
           </plugin>
         </plugins>
       </build>
