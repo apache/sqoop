@@ -361,11 +361,23 @@ limitations under the License.
   <!-- All reports might be generated using mvn site command -->
   <reporting>
     <plugins>
-    <!-- Test code coverage might be executed with mvn cobertura:cobertura command -->
+      <!-- Test code coverage might be executed with mvn cobertura:cobertura command -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
         <version>2.5.2</version>
+      </plugin>
+
+      <!-- Turning off standard reports as they collide with sphinx -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+        <reportSets>
+          <reportSet>
+            <reports></reports>
+          </reportSet>
+        </reportSets>
       </plugin>
     </plugins>
   </reporting>
