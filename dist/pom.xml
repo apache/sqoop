@@ -174,7 +174,10 @@ limitations under the License.
 
                     <!-- Build client directory -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/client/lib">
-                      <fileset dir="../client/target/lib"/>
+                      <fileset dir="../client/target/lib">
+                        <include name="*.jar" />
+                        <exclude name="junit-*.jar" />
+                      </fileset>
                     </copy>
                     <copy file="../client/target/sqoop-client-${project.version}.jar"
                       toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/client/lib"/>
