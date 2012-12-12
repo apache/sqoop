@@ -19,10 +19,11 @@
 package org.apache.sqoop.job.mr;
 
 import com.google.common.base.Throwables;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
+
+import java.io.IOException;
+import java.util.concurrent.*;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -60,7 +61,8 @@ public class SqoopOutputFormatLoadExecutor {
   }
 
   public RecordWriter<Data, NullWritable> getRecordWriter() {
-    consumerFuture = Executors.newSingleThreadExecutor().submit(
+    consumerFuture = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat
+        ("OutputFormatLoader-consumer").build()).submit(
             new ConsumerThread());
     return producer;
   }
@@ -73,7 +75,7 @@ public class SqoopOutputFormatLoadExecutor {
 
     @Override
     public void write(Data key, NullWritable value) throws InterruptedException {
-      checkConsumerCompletion();
+      checkIfConsumerThrew();
       free.acquire();
       int type = key.getType();
       data.setContent(key.getContent(type), type);
@@ -81,18 +83,20 @@ public class SqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public void close(TaskAttemptContext context) throws InterruptedException {
-      checkConsumerCompletion();
+    public void close(TaskAttemptContext context)
+            throws InterruptedException, IOException {
       free.acquire();
       writerFinished = true;
-      // This will interrupt only the acquire call in the consumer class,
-      // since we have acquired the free semaphore, and close is called from
-      // the same thread that writes - so filled has not been released since then
-      // so the consumer is definitely blocked on the filled semaphore.
-      consumerFuture.cancel(true);
+      filled.release();
+      waitForConsumer();
     }
   }
 
+  private void checkIfConsumerThrew() {
+    if(readerFinished) {
+      waitForConsumer();
+    }
+  }
   /**
    * This method checks if the reader thread has finished, and re-throw
    * any exceptions thrown by the reader thread.
@@ -100,23 +104,21 @@ public class SqoopOutputFormatLoadExecutor {
    * @throws SqoopException if the consumer thread threw it.
    * @throws RuntimeException if some other exception was thrown.
    */
-  private void checkConsumerCompletion() {
-    if (readerFinished) {
-      try {
-        consumerFuture.get();
-      } catch (ExecutionException ex) {
-        // In almost all cases, the exception will be SqoopException,
-        // because all exceptions are caught and propagated as
-        // SqoopExceptions
-        Throwable t = ex.getCause();
-        if(t instanceof SqoopException) {
-          throw (SqoopException)t;
-        }
-        //In the rare case, it was not a SqoopException
-        Throwables.propagate(t);
-      } catch (Exception ex) {
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019, ex);
+  private void waitForConsumer() {
+    try {
+      consumerFuture.get();
+    } catch (ExecutionException ex) {
+      // In almost all cases, the exception will be SqoopException,
+      // because all exceptions are caught and propagated as
+      // SqoopExceptions
+      Throwable t = ex.getCause();
+      if (t instanceof SqoopException) {
+        throw (SqoopException) t;
       }
+      //In the rare case, it was not a SqoopException
+      Throwables.propagate(t);
+    } catch (Exception ex) {
+      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019, ex);
     }
   }
 
@@ -140,16 +142,17 @@ public class SqoopOutputFormatLoadExecutor {
     public Object readContent(int type) throws InterruptedException {
       // Has any more data been produced after I last consumed.
       // If no, wait for the producer to produce.
-      if (writerFinished && (filled.availablePermits() == 0)) {
-        return null;
-      }
       try {
         filled.acquire();
       } catch (InterruptedException ex) {
-        if(writerFinished) {
-          return null;
-        }
+        //Really at this point, there is nothing to do. Just throw and get out
+        LOG.error("Interrupted while waiting for data to be available from " +
+            "mapper", ex);
         throw ex;
+      }
+      // If the writer has finished, there is definitely no data remaining
+      if (writerFinished) {
+        return null;
       }
       Object content = data.getContent(type);
       free.release();
@@ -186,12 +189,14 @@ public class SqoopOutputFormatLoadExecutor {
           configJob = ConfigurationUtils.getFrameworkJob(conf);
           break;
         default:
+          readerFinished = true;
           throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
       }
 
       try {
         loader.load(subContext, configConnection, configJob, reader);
       } catch (Throwable t) {
+        readerFinished = true;
         LOG.error("Error while loading data out of MR job.", t);
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
       }
@@ -200,6 +205,7 @@ public class SqoopOutputFormatLoadExecutor {
       // something went wrong
       if (!writerFinished) {
         // throw exception if data are not all consumed
+        readerFinished = true;
         LOG.error("Reader terminated, but writer is still running!");
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
 
