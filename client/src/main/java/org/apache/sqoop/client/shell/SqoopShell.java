@@ -113,8 +113,7 @@ public final class SqoopShell {
       shell.getIo().out.println(MessageFormat.format(clientResource.getString
           (Constants.RES_SQOOP_PROMPT_SHELL_LOADRC), RC_FILE));
       interpretFileContent(rcFile, shell);
-      shell.getIo().out.println(clientResource.getString(clientResource.getString
-          (Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC)));
+      shell.getIo().out.println(clientResource.getString(Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC));
     }
 
     if (args.length == 0) {
