@@ -174,6 +174,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       configuration.set("job.end.notification.url", request.getNotificationUrl());
     }
 
+    // Turn off speculative execution
+    configuration.setBoolean("mapred.map.tasks.speculative.execution", false);
+    configuration.setBoolean("mapred.reduce.tasks.speculative.execution", false);
+
     // Promote all required jars to the job
     StringBuilder sb = new StringBuilder();
     boolean first = true;
