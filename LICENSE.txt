@@ -200,3 +200,185 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+===============================================================================
+
+This Apache Sqoop distribution includes the following sources/binaries.
+The use of these sources/binaries is subject to the terms and conditions
+of their respective licenses.
+
+For server/lib/catalina-tribes.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/catalina-ant.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/catalina.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/jsp-api.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-i18n-fr.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/servlet-api.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/ecj-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/jasper-el.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/jasper.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-i18n-es.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/el-api.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/annotations-api.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/catalina-ha.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-i18n-ja.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-coyote.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-dbcp.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/tomcat-juli.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/commons-daemon.jar:
+
+  The Apache License, Version 2.0
+
+For server/lib/bootstrap.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/groovy-all-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/commons-cli-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/jansi-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/hamcrest-core-<version>.jar:
+
+  BSD License
+
+  Copyright (c) 2000-2006, www.hamcrest.org
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  Redistributions of source code must retain the above copyright notice, this list of
+  conditions and the following disclaimer. Redistributions in binary form must reproduce
+  the above copyright notice, this list of conditions and the following disclaimer in
+  the documentation and/or other materials provided with the distribution.
+
+  Neither the name of Hamcrest nor the names of its contributors may be used to endorse
+  or promote products derived from this software without specific prior written
+  permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+  SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+  DAMAGE.
+
+For client/lib/json-simple-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/log4j-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For client/lib/jline-<version>.jar:
+
+  BSD License
+
+  Copyright (c) 2002-2006, Marc Prud'hommeaux <mwp1@cornell.edu>
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or
+  without modification, are permitted provided that the following
+  conditions are met:
+
+  Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+
+  Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer
+  in the documentation and/or other materials provided with
+  the distribution.
+
+  Neither the name of JLine nor the names of its contributors
+  may be used to endorse or promote products derived from this
+  software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+  BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+  EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+  AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+  OF THE POSSIBILITY OF SUCH DAMAGE.
+
+For client/lib/commons-lang-<version>.jar
+
+  The Apache License, Version 2.0
+
+For client/lib/jersey-core-<version>.jar
+
+  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
+
+For client/lib/jersey-client-<version>.jar:
+
+  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
+
