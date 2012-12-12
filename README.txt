@@ -1,13 +1,34 @@
-----
-The sqoop2 branch is an experimental branch for the development of the
-next major release of Sqoop.
+= Welcome to Sqoop
 
-For more details please see the following JIRA issue:
-https://issues.apache.org/jira/browse/SQOOP-365
-----
+Apache Sqoop is a tool designed for efficiently transferring bulk data between
+Apache Hadoop and structured datastores such as relational databases. You can use
+Sqoop to import data from external structured datastores into Hadoop Distributed
+File System or related systems like Hive and HBase. Conversely, Sqoop can be used
+to extract data from Hadoop and export it to external structured datastores such
+as relational databases and enterprise data warehouses.
 
-Welcome to Sqoop!
+== Documentation
 
-This document outlines how to build the source code.
+Sqoop ships with documentation, please check module "docs" for additional materials.
 
-TODO: add details
+More documentation is available online on Sqoop home page:
+
+http://sqoop.apache.org/
+
+== Compiling Sqoop
+
+Sqoop uses the Maven build system, and it can be compiled and built running the
+following commands:
+
+  mvn compile # Compile project
+  mvn package # Build source artifact
+  mvn package -Pbinary # Build binary artifact
+
+Sqoop currently supports multiple Hadoop distributions. In order to compile Sqoop
+against a specific Hadoop version, please specify the hadoop.profile property in
+Maven commands. For example:
+
+  mvn package -Pbinary -Dhadoop.profile=100
+
+Please refer to the Sqoop documentation for a full list of supported Hadoop
+distributions and values of the hadoop.profile property.
