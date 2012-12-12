@@ -26,6 +26,7 @@ public class Constants {
   public static final String RESOURCE_NAME = "client-resource";
   public static final String BOLD_STR_SEQUENCE = "@|bold";
   public static final String END_STR_SEQUENCE = "|@";
+
   // Options
 
   public static final String OPT_XID = "xid";
@@ -77,7 +78,7 @@ public class Constants {
   public static final String CMD_SHOW = "show";
   public static final String CMD_SHOW_SC = "\\sh";
 
-  public static final String CMD_SUBMISSION = "submit";
+  public static final String CMD_SUBMISSION = "submission";
   public static final String CMD_SUBMISSION_SC = "\\sub";
 
   public static final String CMD_UPDATE = "update";
