@@ -81,8 +81,7 @@ public class ShowJobFunction extends SqoopFunction {
     JobBean jobBean = readJob(jid);
 
     List<MJob> jobs = jobBean.getJobs();
-    String s = MessageFormat.format(Constants
-        .RES_SHOW_PROMPT_JOBS_TO_SHOW, jobs.size());
+    String s = MessageFormat.format(getResource().getString(Constants.RES_SHOW_PROMPT_JOBS_TO_SHOW), jobs.size());
     io.out.println(s);
 
     for (MJob job : jobs) {

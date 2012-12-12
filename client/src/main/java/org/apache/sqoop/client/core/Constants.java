@@ -57,8 +57,6 @@ public class Constants {
   public static final char OPT_CLIENT_CHAR = 'c';
   public static final char OPT_PROTOCOL_CHAR = 'p';
 
-
-
   // Resource keys for various commands, command options,
   // functions and descriptions
   public static final String CMD_CLONE = "clone";
@@ -143,20 +141,16 @@ public class Constants {
   public static final String RES_PROMPT_FILL_JOB_METADATA =
       "prompt.fill_job_metadata";
 
-
-
-
   public static final String RES_CLONE_USAGE =
       "clone.usage";
   public static final String RES_CLONE_CONN_SUCCESSFUL =
-      "clone.conn_successful";
+      "clone.conn.successful";
   public static final String RES_CLONE_JOB_SUCCESSFUL =
       "clone.job.successful";
   public static final String RES_CLONE_CLONING_CONN =
       "clone.cloning_conn";
   public static final String RES_CLONE_CLONING_JOB =
       "clone.cloning_job";
-
 
   public static final String RES_CREATE_USAGE =
       "create.usage";
@@ -168,7 +162,6 @@ public class Constants {
       "create.creating_conn";
   public static final String RES_CREATE_CREATING_JOB =
       "create.creating_job";
-
 
   public static final String RES_DELETE_USAGE =
       "delete.usage";
@@ -226,7 +219,6 @@ public class Constants {
       "show.prompt_conns_to_show";
   public static final String RES_SHOW_PROMPT_CONN_INFO =
       "show.prompt_conn_info";
-
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS =
       "show.prompt_display_all_connectors";
@@ -287,8 +279,6 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_VERSION_PROTOCOL =
       "show.prompt_version_protocol";
 
-
-
   public static final String RES_SQOOP_SHELL_BANNER =
       "sqoop.shell_banner";
   public static final String RES_SQOOP_PROMPT_SHELL_LOADRC =
@@ -296,19 +286,17 @@ public class Constants {
   public static final String RES_SQOOP_PROMPT_SHELL_LOADEDRC =
       "sqoop.prompt_shell_loadedrc";
 
-
   public static final String RES_SUBMISSION_USAGE =
       "submission.usage";
-
 
   public static final String RES_UPDATE_USAGE =
       "update.usage";
   public static final String RES_UPDATE_UPDATING_CONN =
-      "update.updating_conn";
+      "update.conn";
   public static final String RES_UPDATE_CONN_SUCCESSFUL =
       "update.conn_successful";
   public static final String RES_UPDATE_UPDATING_JOB =
-      "update.updating_job";
+      "update.job";
   public static final String RES_UPDATE_JOB_SUCCESSFUL =
       "update.job_successful";
   private Constants() {
