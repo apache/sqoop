@@ -85,10 +85,12 @@ public class SqoopOutputFormatLoadExecutor {
     @Override
     public void close(TaskAttemptContext context)
             throws InterruptedException, IOException {
+      LOG.info("SqoopOutputFormatLoadExecutor::SqoopRecordWriter is about to be closed");
       free.acquire();
       writerFinished = true;
       filled.release();
       waitForConsumer();
+      LOG.info("SqoopOutputFormatLoadExecutor::SqoopRecordWriter is closed");
     }
   }
 
@@ -194,7 +196,9 @@ public class SqoopOutputFormatLoadExecutor {
       }
 
       try {
+        LOG.info("Running loader class " + loaderName);
         loader.load(subContext, configConnection, configJob, reader);
+        LOG.info("Loader has finished");
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Error while loading data out of MR job.", t);

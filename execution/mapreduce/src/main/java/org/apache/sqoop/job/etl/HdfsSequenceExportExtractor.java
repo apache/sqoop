@@ -19,6 +19,8 @@ package org.apache.sqoop.job.etl;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -31,6 +33,9 @@ import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
 
 public class HdfsSequenceExportExtractor extends Extractor {
+
+  public static final Log LOG =
+    LogFactory.getLog(HdfsSequenceExportExtractor.class.getName());
 
   private Configuration conf;
   private DataWriter datawriter;
@@ -51,6 +56,7 @@ public class HdfsSequenceExportExtractor extends Extractor {
 
     try {
       HdfsExportPartition p = (HdfsExportPartition)partition;
+      LOG.info("Working on partition: " + p);
       int numFiles = p.getNumberOfFiles();
       for (int i=0; i<numFiles; i++) {
         extractFile(p.getFile(i), p.getOffset(i), p.getLength(i));
@@ -60,9 +66,13 @@ public class HdfsSequenceExportExtractor extends Extractor {
     }
   }
 
-  private void extractFile(Path file, long offset, long length)
+  private void extractFile(Path file, long start, long length)
       throws IOException {
-    long start = offset;
+    long end = start + length;
+    LOG.info("Extracting file " + file);
+    LOG.info("\t from offset " + start);
+    LOG.info("\t to offset " + end);
+    LOG.info("\t of length " + length);
 
     SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
         SequenceFile.Reader.file(file));
