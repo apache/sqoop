@@ -97,7 +97,13 @@ limitations under the License.
 
                     <!-- Create final distribution tar -->
                     <tar destfile="target/sqoop-${project.version}.tar.gz" compression="gzip">
-                      <tarfileset dir="target/sqoop-${project.version}" prefix="sqoop-${project.version}"/>
+                      <tarfileset dir="target/sqoop-${project.version}" prefix="sqoop-${project.version}" filemode="755">
+                        <include name="**/*.sh" />
+                      </tarfileset>
+                      <tarfileset dir="target/sqoop-${project.version}" prefix="sqoop-${project.version}">
+                        <include name="**/*" />
+                        <exclude name="**/bin/*" />
+                      </tarfileset>
                     </tar>
                   </target>
                 </configuration>
@@ -190,7 +196,13 @@ limitations under the License.
 
                     <!-- Finally create distribution tar -->
                     <tar destfile="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}.tar.gz" compression="gzip">
-                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.profile}"/>
+                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.profile}" filemode="755">
+                        <include name="**/*.sh" />
+                      </tarfileset>
+                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.profile}">
+                        <include name="**/*" />
+                        <exclude name="**/*.sh" />
+                      </tarfileset>
                     </tar>
                   </target>
                 </configuration>
