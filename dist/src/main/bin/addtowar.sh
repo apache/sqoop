@@ -71,7 +71,7 @@ function checkFileDoesNotExist() {
 
 # Finds a file under a directory any depth, file returns in variable RET
 function findFile() {
-   RET=`find -H ${1//:/$' '} -name ${2} | grep -e "[0-9.a${hadoopJarsSuffix}].jar"`
+   RET=`find -H ${1//:/$' '} -name ${2}`
    RET=`echo ${RET} | sed "s/ .*//"`
    if [ "${RET}" = "" ]; then
      echo
@@ -136,7 +136,7 @@ function guessHadoopHome() {
 function getHadoopJars() {
   version=$1
   # List is separated by ":"
-  suffix="-[0-9.]*"
+  suffix="[0-9a-zA-Z\.\-]*"
   if [[ "${version}" =~ cdh4mr1 ]]; then
     hadoopJars="hadoop-mapreduce-client-core${suffix}.jar:hadoop-mapreduce-client-common${suffix}.jar:hadoop-mapreduce-client-jobclient${suffix}.jar:hadoop-mapreduce-client-app${suffix}.jar:hadoop-yarn-common${suffix}.jar:hadoop-yarn-api${suffix}.jar:hadoop-hdfs${suffix}.jar:hadoop-common${suffix}.jar:hadoop-auth${suffix}.jar:guava*.jar:protobuf-java${suffix}.jar:jackson-core-asl${suffix}.jar:jackson-mapper-asl${suffix}.jar:commons-configuration${suffix}.jar:commons-cli${suffix}.jar:commons-logging${suffix}.jar:slf4j-api${suffix}.jar:slf4j-log4j12${suffix}.jar:avro${suffix}.jar:hadoop-core-2.0.0-mr1-[0-9.A-Za-z]*.jar"
   elif [[ "${version}" =~ cdh3 ]]; then
