@@ -83,6 +83,8 @@ public final class JobConstants extends Constants {
   // We're using constants from Hadoop 1. Hadoop 2 has different names, but
   // provides backward compatibility layer for those names as well.
 
+  public static final String HADOOP_INPUTDIR = "mapred.input.dir";
+
   public static final String HADOOP_OUTDIR = "mapred.output.dir";
 
   public static final String HADOOP_COMPRESS = "mapred.output.compress";

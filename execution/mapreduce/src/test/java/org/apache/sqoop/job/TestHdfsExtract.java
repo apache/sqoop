@@ -71,7 +71,7 @@ public class TestHdfsExtract extends TestCase {
         HdfsTextExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(FileInputFormat.INPUT_DIR, indir);
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
     JobUtils.runJob(conf);
   }
 
@@ -89,7 +89,7 @@ public class TestHdfsExtract extends TestCase {
         HdfsTextExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(FileInputFormat.INPUT_DIR, indir);
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
     JobUtils.runJob(conf);
 
     FileUtils.delete(indir);
@@ -102,7 +102,7 @@ public class TestHdfsExtract extends TestCase {
         HdfsTextExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(FileInputFormat.INPUT_DIR, indir);
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
     JobUtils.runJob(conf);
   }
 
@@ -120,7 +120,7 @@ public class TestHdfsExtract extends TestCase {
         HdfsSequenceExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(FileInputFormat.INPUT_DIR, indir);
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
     JobUtils.runJob(conf);
   }
 
@@ -138,7 +138,7 @@ public class TestHdfsExtract extends TestCase {
         HdfsSequenceExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(FileInputFormat.INPUT_DIR, indir);
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
     JobUtils.runJob(conf);
   }
 
@@ -198,17 +198,12 @@ public class TestHdfsExtract extends TestCase {
           "part-r-" + padZeros(fi, 5) + HdfsSequenceImportLoader.EXTENSION);
       SequenceFile.Writer filewriter;
       if (codec != null) {
-        filewriter = SequenceFile.createWriter(conf,
-            SequenceFile.Writer.file(filepath),
-            SequenceFile.Writer.keyClass(Text.class),
-            SequenceFile.Writer.valueClass(NullWritable.class),
-            SequenceFile.Writer.compression(CompressionType.BLOCK, codec));
+        filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
+          conf, filepath, Text.class, NullWritable.class,
+          CompressionType.BLOCK, codec);
       } else {
-        filewriter = SequenceFile.createWriter(conf,
-          SequenceFile.Writer.file(filepath),
-          SequenceFile.Writer.keyClass(Text.class),
-          SequenceFile.Writer.valueClass(NullWritable.class),
-          SequenceFile.Writer.compression(CompressionType.NONE));
+        filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
+          conf, filepath, Text.class, NullWritable.class, CompressionType.NONE);
       }
 
       Text text = new Text();

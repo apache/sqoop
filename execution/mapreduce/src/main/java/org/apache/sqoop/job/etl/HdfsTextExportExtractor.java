@@ -30,8 +30,6 @@ import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.io.compress.SplitCompressionInputStream;
-import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.hadoop.util.LineReader;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
@@ -93,32 +91,20 @@ public class HdfsTextExportExtractor extends Extractor {
       byte[] recordDelimiterBytes = String.valueOf(
           Data.DEFAULT_RECORD_DELIMITER).getBytes(
               Charset.forName(Data.CHARSET_NAME));
-      filereader = new LineReader(filestream, conf,
-          recordDelimiterBytes);
+      // Hadoop 1.0 do not have support for custom record delimiter and thus we
+      // are supporting only default one.
+      filereader = new LineReader(filestream, conf);
       fileseeker = filestream;
-
-    } else if (codec instanceof SplittableCompressionCodec) {
-      SplitCompressionInputStream compressionstream =
-          ((SplittableCompressionCodec)codec).createInputStream(
-              filestream, codec.createDecompressor(), start, end,
-              SplittableCompressionCodec.READ_MODE.BYBLOCK);
-      byte[] recordDelimiterBytes = String.valueOf(
-          Data.DEFAULT_RECORD_DELIMITER).getBytes(
-              Charset.forName(Data.CHARSET_NAME));
-      filereader = new LineReader(compressionstream,
-          conf, recordDelimiterBytes);
-      fileseeker = compressionstream;
-
-      start = compressionstream.getAdjustedStart();
-      end = compressionstream.getAdjustedEnd();
-
+    // We might add another "else if" case for SplittableCompressionCodec once
+    // we drop support for Hadoop 1.0.
     } else {
       byte[] recordDelimiterBytes = String.valueOf(
           Data.DEFAULT_RECORD_DELIMITER).getBytes(
               Charset.forName(Data.CHARSET_NAME));
+      // Hadoop 1.0 do not have support for custom record delimiter and thus we
+      // are supporting only default one.
       filereader = new LineReader(
-          codec.createInputStream(filestream, codec.createDecompressor()),
-          conf, recordDelimiterBytes);
+          codec.createInputStream(filestream, codec.createDecompressor()), conf);
       fileseeker = filestream;
     }
 

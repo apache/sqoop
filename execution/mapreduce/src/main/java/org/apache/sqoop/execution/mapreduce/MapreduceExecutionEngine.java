@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.execution.mapreduce;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.ExecutionEngine;
@@ -60,6 +60,9 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
   public void prepareImportSubmission(SubmissionRequest gRequest) {
     MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
     ImportJobConfiguration jobConf = (ImportJobConfiguration) request.getConfigFrameworkJob();
+
+    // Add jar dependencies
+    addDependencies(request);
 
     // Configure map-reduce classes for import
     request.setInputFormatClass(SqoopInputFormat.class);
@@ -103,6 +106,9 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
     ExportJobConfiguration jobConf = (ExportJobConfiguration) request.getConfigFrameworkJob();
 
+    // Add jar dependencies
+    addDependencies(request);
+
     // Configure map-reduce classes for import
     request.setInputFormatClass(SqoopInputFormat.class);
 
@@ -124,10 +130,22 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
 
     // We should make one extractor that will be able to read all supported file types
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsTextExportExtractor.class.getName());
-    context.setString(FileInputFormat.INPUT_DIR, jobConf.input.inputDirectory);
+    context.setString(JobConstants.HADOOP_INPUTDIR, jobConf.input.inputDirectory);
 
     if(request.getExtractors() != null) {
       context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
     }
+  }
+
+  /**
+   * Our execution engine have additional dependencies that needs to be available
+   * at mapreduce job time. This method will register all dependencies in the request
+   * object.
+   *
+   * @param request Active request object.
+   */
+  protected void addDependencies(MRSubmissionRequest request) {
+    // Guava
+    request.addJarForClass(ThreadFactoryBuilder.class);
   }
 }

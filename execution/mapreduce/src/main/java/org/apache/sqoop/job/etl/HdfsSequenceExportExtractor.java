@@ -74,8 +74,7 @@ public class HdfsSequenceExportExtractor extends Extractor {
     LOG.info("\t to offset " + end);
     LOG.info("\t of length " + length);
 
-    SequenceFile.Reader filereader = new SequenceFile.Reader(conf,
-        SequenceFile.Reader.file(file));
+    SequenceFile.Reader filereader = new SequenceFile.Reader(file.getFileSystem(conf), file, conf);
 
     if (start > filereader.getPosition()) {
       filereader.sync(start); // sync to start
