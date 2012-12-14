@@ -74,8 +74,10 @@ public class SqoopMapper
     SqoopSplit split = context.getCurrentKey();
 
     try {
+      LOG.info("Running extractor class " + extractorName);
       extractor.run(subContext, configConnection, configJob, split.getPartition(),
         new MapDataWriter(context));
+      LOG.info("Extractor has finished");
       context.getCounter(SqoopCounters.ROWS_READ)
               .increment(extractor.getRowsRead());
     } catch (Exception e) {

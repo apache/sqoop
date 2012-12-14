@@ -54,6 +54,7 @@ public class SqoopDestroyerExecutor {
     Object configConnection = ConfigurationUtils.getConnectorConnection(configuration);
     Object configJob = ConfigurationUtils.getConnectorJob(configuration);
 
+    LOG.info("Executing destroyer class " + destroyer.getClass());
     destroyer.destroy(success, subContext, configConnection, configJob);
   }
 

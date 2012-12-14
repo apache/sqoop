@@ -139,9 +139,19 @@ public class HdfsExportPartition extends Partition {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("{");
-    sb.append(files[0]);
-    for(int i = 1; i < files.length; i++) {
-      sb.append(", " + files[i]);
+    boolean first = true;
+    for(int i = 0; i < files.length; i++) {
+      if(first) {
+        first = false;
+      } else {
+        sb.append(", ");
+      }
+
+      sb.append(files[i]);
+      sb.append(" (offset=").append(offsets[i]);
+      sb.append(", end=").append(offsets[i] + lengths[i]);
+      sb.append(", length=").append(lengths[i]);
+      sb.append(")");
     }
     sb.append("}");
     return sb.toString();

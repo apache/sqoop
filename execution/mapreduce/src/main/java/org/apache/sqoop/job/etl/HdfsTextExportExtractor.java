@@ -20,6 +20,8 @@ package org.apache.sqoop.job.etl;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,6 +42,9 @@ import org.apache.sqoop.job.io.DataWriter;
 
 public class HdfsTextExportExtractor extends Extractor {
 
+  public static final Log LOG =
+    LogFactory.getLog(HdfsTextExportExtractor.class.getName());
+
   private Configuration conf;
   private DataWriter datawriter;
 
@@ -59,6 +64,7 @@ public class HdfsTextExportExtractor extends Extractor {
 
     try {
       HdfsExportPartition p = (HdfsExportPartition)partition;
+      LOG.info("Working on partition: " + p);
       int numFiles = p.getNumberOfFiles();
       for (int i=0; i<numFiles; i++) {
         extractFile(p.getFile(i), p.getOffset(i), p.getLength(i));
@@ -68,10 +74,13 @@ public class HdfsTextExportExtractor extends Extractor {
     }
   }
 
-  private void extractFile(Path file, long offset, long length)
+  private void extractFile(Path file, long start, long length)
       throws IOException {
-    long start = offset;
     long end = start + length;
+    LOG.info("Extracting file " + file);
+    LOG.info("\t from offset " + start);
+    LOG.info("\t to offset " + end);
+    LOG.info("\t of length " + length);
 
     FileSystem fs = file.getFileSystem(conf);
     FSDataInputStream filestream = fs.open(file);
@@ -129,6 +138,7 @@ public class HdfsTextExportExtractor extends Extractor {
 
       datawriter.writeCsvRecord(line.toString());
     }
+    LOG.info("Extracting ended on position: " + fileseeker.getPos());
   }
 
   @Override
