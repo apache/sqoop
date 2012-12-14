@@ -36,7 +36,6 @@ import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
@@ -113,12 +112,12 @@ public class HdfsExportPartitioner extends Partitioner {
       }
 
       // all the files in input set
-      String indir = conf.get(FileInputFormat.INPUT_DIR);
+      String indir = conf.get(JobConstants.HADOOP_INPUTDIR);
       FileSystem fs = FileSystem.get(conf);
 
       List<Path> paths = new LinkedList<Path>();
       for(FileStatus status : fs.listStatus(new Path(indir))) {
-        if(!status.isDirectory()) {
+        if(!status.isDir()) {
           paths.add(status.getPath());
         }
       }
@@ -143,7 +142,7 @@ public class HdfsExportPartitioner extends Partitioner {
   }
 
   private long getInputSize(Configuration conf) throws IOException {
-    String indir = conf.get(FileInputFormat.INPUT_DIR);
+    String indir = conf.get(JobConstants.HADOOP_INPUTDIR);
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] files = fs.listStatus(new Path(indir));
     long count = 0;
@@ -345,10 +344,11 @@ public class HdfsExportPartitioner extends Partitioner {
   private boolean isSplitable(Configuration conf, Path file) {
     final CompressionCodec codec =
         new CompressionCodecFactory(conf).getCodec(file);
-    if (null == codec) {
-      return true;
-    }
-    return codec instanceof SplittableCompressionCodec;
+
+    // This method might be improved for SplittableCompression codec when we
+    // drop support for Hadoop 1.0
+    return null == codec;
+
   }
 
   /**
