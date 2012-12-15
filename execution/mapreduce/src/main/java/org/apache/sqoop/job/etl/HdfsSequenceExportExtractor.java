@@ -85,6 +85,9 @@ public class HdfsSequenceExportExtractor extends Extractor {
     while (hasNext) {
       datawriter.writeCsvRecord(line.toString());
       hasNext = filereader.next(line);
+      if(filereader.getPosition() >= end && filereader.syncSeen()) {
+        break;
+      }
     }
   }
 

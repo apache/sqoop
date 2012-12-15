@@ -84,25 +84,16 @@ public class HdfsTextExportExtractor extends Extractor {
     FSDataInputStream filestream = fs.open(file);
     CompressionCodec codec = (new CompressionCodecFactory(conf)).getCodec(file);
     LineReader filereader;
-    Seekable fileseeker;
+    Seekable fileseeker = filestream;
 
-    if (codec == null) {
-      filestream.seek(start);
-      byte[] recordDelimiterBytes = String.valueOf(
-          Data.DEFAULT_RECORD_DELIMITER).getBytes(
-              Charset.forName(Data.CHARSET_NAME));
-      // Hadoop 1.0 do not have support for custom record delimiter and thus we
-      // are supporting only default one.
-      filereader = new LineReader(filestream, conf);
-      fileseeker = filestream;
+    // Hadoop 1.0 does not have support for custom record delimiter and thus we
+    // are supporting only default one.
     // We might add another "else if" case for SplittableCompressionCodec once
     // we drop support for Hadoop 1.0.
+    if (codec == null) {
+      filestream.seek(start);
+      filereader = new LineReader(filestream);
     } else {
-      byte[] recordDelimiterBytes = String.valueOf(
-          Data.DEFAULT_RECORD_DELIMITER).getBytes(
-              Charset.forName(Data.CHARSET_NAME));
-      // Hadoop 1.0 do not have support for custom record delimiter and thus we
-      // are supporting only default one.
       filereader = new LineReader(
           codec.createInputStream(filestream, codec.createDecompressor()), conf);
       fileseeker = filestream;
@@ -113,15 +104,20 @@ public class HdfsTextExportExtractor extends Extractor {
       // one extra line is read in previous split
       start += filereader.readLine(new Text(), 0);
     }
-
     Text line = new Text();
     int size;
-    while (fileseeker.getPos() <= end) {
+    LOG.info("Start position: " + String.valueOf(start));
+    long next = start;
+    while (next <= end) {
       size = filereader.readLine(line, Integer.MAX_VALUE);
       if (size == 0) {
         break;
       }
-
+      if (codec == null) {
+        next += size;
+      } else {
+        next = fileseeker.getPos();
+      }
       datawriter.writeCsvRecord(line.toString());
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
@@ -132,5 +128,4 @@ public class HdfsTextExportExtractor extends Extractor {
     // TODO need to return the rows read
     return 0;
   }
-
 }
