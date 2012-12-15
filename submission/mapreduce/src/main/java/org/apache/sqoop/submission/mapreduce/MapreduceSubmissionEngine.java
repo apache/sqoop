@@ -139,11 +139,19 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     // Serialize framework context into job configuration
     for(Map.Entry<String, String> entry: request.getFrameworkContext()) {
+      if (entry.getValue() == null) {
+        LOG.warn("Ignoring null framework context value for key " + entry.getKey());
+        continue;
+      }
       configuration.set(entry.getKey(), entry.getValue());
     }
 
     // Serialize connector context as a sub namespace
     for(Map.Entry<String, String> entry :request.getConnectorContext()) {
+      if (entry.getValue() == null) {
+        LOG.warn("Ignoring null connector context value for key " + entry.getKey());
+        continue;
+      }
       configuration.set(
         JobConstants.PREFIX_CONNECTOR_CONTEXT + entry.getKey(),
         entry.getValue());
