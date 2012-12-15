@@ -107,7 +107,7 @@ public class TestHdfsExtract extends TestCase {
   }
 
   @Test
-  public void testUncompressedSequence() throws Exception {
+  public void testCompressedSequence() throws Exception {
     FileUtils.delete(indir);
     FileUtils.mkdirs(indir);
     createSequenceInput(SqoopFileOutputFormat.DEFAULT_CODEC);
@@ -125,7 +125,7 @@ public class TestHdfsExtract extends TestCase {
   }
 
   @Test
-  public void testCompressedSequence() throws Exception {
+  public void testUncompressedSequence() throws Exception {
     FileUtils.delete(indir);
     FileUtils.mkdirs(indir);
     createSequenceInput(null);
@@ -241,9 +241,9 @@ public class TestHdfsExtract extends TestCase {
       int numbers = NUMBER_OF_FILES*NUMBER_OF_ROWS_PER_FILE;
 // This test is not currently working due to bug in HdfsExtractor.
 // Check SQOOP-761 for more details.
-//      assertEquals((1+numbers)*numbers/2, sum);
-//
-//      assertEquals(NUMBER_OF_FILES*NUMBER_OF_ROWS_PER_FILE, index-1);
+      assertEquals((1+numbers)*numbers/2, sum);
+
+      assertEquals(NUMBER_OF_FILES*NUMBER_OF_ROWS_PER_FILE, index-1);
     }
   }
 
