@@ -19,6 +19,7 @@ package org.apache.sqoop.validation;
 
 import org.apache.sqoop.common.SqoopException;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class Validation {
   Status status;
 
   // Status messages for various fields
-  Map<String, Message> messages;
+  Map<FormInput, Message> messages;
 
   private Validation() {
     klass = null;
@@ -44,9 +45,9 @@ public class Validation {
 
     this.klass = klass;
     status = Status.getDefault();
-    messages = new HashMap<String, Message>();
+    messages = new HashMap<FormInput, Message>();
   }
-  public Validation(Status status, Map<String, Message> messages) {
+  public Validation(Status status, Map<FormInput, Message> messages) {
     this();
 
     this.status = status;
@@ -57,25 +58,35 @@ public class Validation {
     return status;
   }
 
-  public Map<String, Message> getMessages() {
+  public Map<FormInput, Message> getMessages() {
     return messages;
   }
 
-  public void addMessage(Status status, String field, String message ) {
+  public void addMessage(Status status, String form, String field, String message ) {
     if( klass == null) {
       throw new SqoopException(ValidationError.VALIDATION_0001);
     }
 
-    // Verify that this is valid field in configuration object
+    Field formField;
+
+    // Verify that such form exists
     try {
-      klass.getDeclaredField(field);
+      formField = klass.getDeclaredField(form);
     } catch (NoSuchFieldException e) {
       throw new SqoopException(ValidationError.VALIDATION_0002,
-        "Field " + field + " is not present in " + klass.getName());
+        "Can't get form " + form + " from " + klass.getName(), e);
+    }
+
+    // Verify that such input exists on given form
+    try {
+      formField.getType().getDeclaredField(field);
+    } catch (NoSuchFieldException e) {
+      throw new SqoopException(ValidationError.VALIDATION_0002,
+        "Can't get input " + field + " from form" + formField.getType().getName(), e);
     }
 
     this.status = Status.getWorstStatus(this.status, status);
-    messages.put(field, new Message(status, message));
+    messages.put(new FormInput(form, field), new Message(status, message));
   }
 
   public static class Message {
@@ -119,6 +130,62 @@ public class Validation {
     @Override
     public String toString() {
       return "{" + status.name() + ": " + message + "}";
+    }
+  }
+
+  public static class FormInput {
+    private String form;
+    private String input;
+
+    public FormInput(String form, String input) {
+      this.form = form;
+      this.input = input;
+    }
+
+    public FormInput(String formInput) {
+      String []parts = formInput.split("\\.");
+      if(parts.length != 2) {
+        throw new SqoopException(ValidationError.VALIDATION_0003,
+          "Specification " + formInput + " is not in valid format form.input");
+      }
+
+      this.form = parts[0];
+      this.input = parts[1];
+    }
+
+    public String getForm() {
+      return form;
+    }
+
+    public String getInput() {
+      return input;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      FormInput formInput = (FormInput) o;
+
+      if (form != null ? !form.equals(formInput.form) : formInput.form != null)
+        return false;
+      if (input != null ? !input.equals(formInput.input) : formInput.input != null)
+        return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = form != null ? form.hashCode() : 0;
+      result = 31 * result + (input != null ? input.hashCode() : 0);
+      return result;
+    }
+
+    @Override
+    public String toString() {
+      return form + "." + input;
     }
   }
 }

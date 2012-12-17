@@ -52,19 +52,22 @@ public class TestValidationBean {
 
     assertNull(retrievedBean.getId());
 
+    Validation.FormInput fa = new Validation.FormInput("f", "i");
+    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
+
     Validation connector = retrievedBean.getConnectorValidation();
     assertEquals(Status.FINE, connector.getStatus());
     assertEquals(2, connector.getMessages().size());
-    assertTrue(connector.getMessages().containsKey("a"));
+    assertTrue(connector.getMessages().containsKey(fa));
     assertEquals(new Validation.Message(Status.FINE, "d"),
-      connector.getMessages().get("a"));
+      connector.getMessages().get(fa));
 
     Validation framework = retrievedBean.getFrameworkValidation();
     assertEquals(Status.UNACCEPTABLE, framework.getStatus());
     assertEquals(2, framework.getMessages().size());
-    assertTrue(framework.getMessages().containsKey("b"));
+    assertTrue(framework.getMessages().containsKey(fb));
     assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
-      framework.getMessages().get("b"));
+      framework.getMessages().get(fb));
   }
 
   @Test
@@ -89,11 +92,15 @@ public class TestValidationBean {
   }
 
   public Validation getValidation(Status status) {
-    Map<String, Validation.Message> messages =
-      new HashMap<String, Validation.Message>();
+    Map<Validation.FormInput, Validation.Message> messages =
+      new HashMap<Validation.FormInput, Validation.Message>();
 
-    messages.put("a", new Validation.Message(status, "d"));
-    messages.put("b", new Validation.Message(status, "c"));
+    messages.put(
+      new Validation.FormInput("f", "i"),
+      new Validation.Message(status, "d"));
+    messages.put(
+      new Validation.FormInput("f2", "i2"),
+      new Validation.Message(status, "c"));
 
     return new Validation(status, messages);
   }
