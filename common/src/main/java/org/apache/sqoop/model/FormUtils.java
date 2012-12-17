@@ -255,13 +255,13 @@ public class FormUtils {
    * @param validation Validation that we should apply
    */
   public static void applyValidation(List<MForm> forms, Validation validation) {
-    Map<String, Validation.Message> messages = validation.getMessages();
+    Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
 
     for(MForm form : forms) {
       for(MInput input : form.getInputs()) {
-        String inputName = input.getName();
-        if(messages.containsKey(inputName)){
-          Validation.Message message = messages.get(inputName);
+        Validation.FormInput fi = new Validation.FormInput(input.getName());
+        if(messages.containsKey(fi)) {
+          Validation.Message message = messages.get(fi);
 
           input.setValidationMessage(message.getStatus(), message.getMessage());
         } else {

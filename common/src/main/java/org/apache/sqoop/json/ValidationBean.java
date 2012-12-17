@@ -94,9 +94,9 @@ public class ValidationBean implements JsonBean {
     object.put(STATUS, validation.getStatus().name());
 
     JSONObject jsonMessages = new JSONObject();
-    Map<String, Validation.Message> messages = validation.getMessages();
+    Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
 
-    for(Map.Entry<String, Validation.Message> entry : messages.entrySet()) {
+    for(Map.Entry<Validation.FormInput, Validation.Message> entry : messages.entrySet()) {
       JSONObject jsonEntry = new JSONObject();
       jsonEntry.put(STATUS, entry.getValue().getStatus().name());
       jsonEntry.put(MESSAGE, entry.getValue().getMessage());
@@ -121,8 +121,8 @@ public class ValidationBean implements JsonBean {
 
   public Validation restoreValidation(JSONObject jsonObject) {
     JSONObject jsonMessages = (JSONObject) jsonObject.get(MESSAGES);
-    Map<String, Validation.Message> messages
-      = new HashMap<String, Validation.Message>();
+    Map<Validation.FormInput, Validation.Message> messages
+      = new HashMap<Validation.FormInput, Validation.Message>();
 
     for(Object key : jsonMessages.keySet()) {
       JSONObject jsonMessage = (JSONObject) jsonMessages.get(key);
@@ -133,11 +133,11 @@ public class ValidationBean implements JsonBean {
       Validation.Message message
         = new Validation.Message(status, stringMessage);
 
-      messages.put((String)key, message);
+      messages.put(new Validation.FormInput((String)key), message);
     }
 
     Status status = Status.valueOf((String) jsonObject.get(STATUS));
 
-    return new Validation(status,messages);
+    return new Validation(status, messages);
   }
 }

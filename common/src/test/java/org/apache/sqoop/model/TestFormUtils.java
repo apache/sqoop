@@ -115,11 +115,15 @@ public class TestFormUtils extends TestCase {
   }
 
   protected Validation getValidation() {
-    Map<String, Validation.Message> messages
-      = new HashMap<String, Validation.Message>();
+    Map<Validation.FormInput, Validation.Message> messages
+      = new HashMap<Validation.FormInput, Validation.Message>();
 
-    messages.put("aForm.a1", new Validation.Message(Status.ACCEPTABLE, "e1"));
-    messages.put("aForm.a2", new Validation.Message(Status.UNACCEPTABLE, "e2"));
+    messages.put(
+      new Validation.FormInput("aForm", "a1"),
+      new Validation.Message(Status.ACCEPTABLE, "e1"));
+    messages.put(
+      new Validation.FormInput("aForm", "a2"),
+      new Validation.Message(Status.UNACCEPTABLE, "e2"));
 
     return new Validation(Status.UNACCEPTABLE, messages);
   }
