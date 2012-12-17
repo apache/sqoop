@@ -22,13 +22,16 @@ import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.utils.StringUtils;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -128,10 +131,77 @@ public final class FormDisplayer {
       io.out.print(bundle.getString(input.getLabelKey()));
       io.out.print(": ");
       if(!input.isEmpty()) {
-        io.out.print(input.getUrlSafeValueString());
+        // Based on the input type, let's perform specific load
+        switch (input.getType()) {
+          case STRING:
+            displayInputString(io, (MStringInput) input);
+            break;
+          case INTEGER:
+            displayInputInteger(io, (MIntegerInput) input);
+            break;
+          case MAP:
+            displayInputMap(io, (MMapInput) input);
+            break;
+          case ENUM:
+            displayInputEnum(io, (MEnumInput) input);
+            break;
+          default:
+            io.out.println("Unsupported data type " + input.getType());
+            return;
+        }
       }
       io.out.println("");
     }
+  }
+
+  /**
+   * Display content of String input.
+   *
+   * @param io Shell's IO object
+   * @param input String input
+   */
+  private static void displayInputString(IO io, MStringInput input) {
+    if (input.isMasked()) {
+      io.out.print("(This input is sensitive)");
+    } else {
+      io.out.print(input.getValue());
+    }
+  }
+
+  /**
+   * Display content of Integer input.
+   *
+   * @param io Shell's IO object
+   * @param input Integer input
+   */
+  private static void displayInputInteger(IO io, MIntegerInput input) {
+    io.out.print(input.getValue());
+  }
+
+  /**
+   * Display content of Map input
+   *
+   * @param io Shell's IO object
+   * @param input Map input
+   */
+  private static void displayInputMap(IO io, MMapInput input) {
+    for(Map.Entry<String, String> entry : input.getValue().entrySet()) {
+      io.out.println();
+      io.out.print("      ");
+      io.out.print(entry.getKey());
+      io.out.print(" = ");
+      io.out.print(entry.getValue());
+    }
+  }
+
+  /**
+   * Display content of Enum input
+   *
+   * @param io Shell's IO object
+   * @param input Enum input
+   */
+  private static void displayInputEnum(IO io, MEnumInput input) {
+    io.out.print(input.getValue());
   }
 
   private FormDisplayer() {
