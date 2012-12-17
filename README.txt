@@ -24,6 +24,13 @@ following commands:
   mvn package # Build source artifact
   mvn package -Pbinary # Build binary artifact
 
+Sqoop is using Sphinx plugin to generate documentation that have higher memory
+requirements that might not fit into default maven configuration. You might need
+to increase maximal memory allowance to successfully execute package goal. This
+can done using following command:
+
+  export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m"
+
 Sqoop currently supports multiple Hadoop distributions. In order to compile Sqoop
 against a specific Hadoop version, please specify the hadoop.profile property in
 Maven commands. For example:
