@@ -105,7 +105,7 @@ public class CreateJobFunction extends  SqoopFunction {
 
     connectorBean = readConnector(String.valueOf(connection.getConnectorId()));
     MConnector connector = connectorBean.getConnectors().get(0);
-    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(connection.getPersistenceId());
+    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(connector.getPersistenceId());
 
     MJob.Type jobType = MJob.Type.valueOf(type.toUpperCase());
 
