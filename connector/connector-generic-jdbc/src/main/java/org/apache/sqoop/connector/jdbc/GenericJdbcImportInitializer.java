@@ -191,15 +191,15 @@ public class GenericJdbcImportInitializer extends Initializer {
 
       rs.next();
 
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE,
-          String.valueOf(rsmd.getColumnType(1)));
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE,
-          rs.getString(1));
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
-          rs.getString(2));
+      int columnType = rsmd.getColumnType(1);
+      String min = rs.getString(1);
+      String max = rs.getString(2);
+
+      LOG.info("Boundaries: min=" + min + ", max=" + max + ", columnType=" + columnType);
+
+      context.setInteger(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, columnType);
+      context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, min);
+      context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, max);
 
     } catch (SQLException e) {
       throw new SqoopException(
@@ -290,8 +290,10 @@ public class GenericJdbcImportInitializer extends Initializer {
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
     }
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
-        dataSql.toString());
+    LOG.info("Using dataSql: " + dataSql);
+    LOG.info("Field names: " + fieldNames);
+
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL, dataSql);
     context.setString(Constants.JOB_ETL_FIELD_NAMES, fieldNames);
   }
 }
