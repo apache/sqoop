@@ -207,95 +207,135 @@ This Apache Sqoop distribution includes the following sources/binaries.
 The use of these sources/binaries is subject to the terms and conditions
 of their respective licenses.
 
-For server/lib/catalina-tribes.jar:
+For catalina-tribes.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/catalina-ant.jar:
+For catalina-ant.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/catalina.jar:
+For catalina.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/jsp-api.jar:
+For jsp-api.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-i18n-fr.jar:
+For tomcat-i18n-fr.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/servlet-api.jar:
+For servlet-api.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/ecj-<version>.jar:
+For ecj-<version>.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/jasper-el.jar:
+For jasper-el.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/jasper.jar:
+For jasper.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-i18n-es.jar:
+For tomcat-i18n-es.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/el-api.jar:
+For el-api.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/annotations-api.jar:
+For annotations-api.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/catalina-ha.jar:
+For catalina-ha.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-i18n-ja.jar:
+For tomcat-i18n-ja.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-coyote.jar:
+For tomcat-coyote.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-dbcp.jar:
+For tomcat-dbcp.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/tomcat-juli.jar:
+For tomcat-juli.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/commons-daemon.jar:
+For commons-daemon.jar:
 
   The Apache License, Version 2.0
 
-For server/lib/bootstrap.jar:
+For bootstrap.jar:
 
   The Apache License, Version 2.0
 
-For client/lib/groovy-all-<version>.jar:
+For groovy-all-<version>.jar:
 
   The Apache License, Version 2.0
 
-For client/lib/commons-cli-<version>.jar:
+For commons-cli-<version>.jar:
 
   The Apache License, Version 2.0
 
-For client/lib/jansi-<version>.jar:
+For jansi-<version>.jar:
 
   The Apache License, Version 2.0
 
-For client/lib/hamcrest-core-<version>.jar:
+For commons-dbcp-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For commons-pool-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For derby-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For commons-lang-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For json-simple-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For log4j-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For guava-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jsr305-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jersey-core-<version>.jar
+
+  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
+
+For jersey-client-<version>.jar:
+
+  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
+
+For hamcrest-core-<version>.jar:
 
   BSD License
 
@@ -325,15 +365,7 @@ For client/lib/hamcrest-core-<version>.jar:
   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
   DAMAGE.
 
-For client/lib/json-simple-<version>.jar:
-
-  The Apache License, Version 2.0
-
-For client/lib/log4j-<version>.jar:
-
-  The Apache License, Version 2.0
-
-For client/lib/jline-<version>.jar:
+For jline-<version>.jar:
 
   BSD License
 
@@ -369,16 +401,4 @@ For client/lib/jline-<version>.jar:
   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
   IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
   OF THE POSSIBILITY OF SUCH DAMAGE.
-
-For client/lib/commons-lang-<version>.jar
-
-  The Apache License, Version 2.0
-
-For client/lib/jersey-core-<version>.jar
-
-  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
-
-For client/lib/jersey-client-<version>.jar:
-
-  COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
 
