@@ -231,6 +231,12 @@ do
       exit -1
     fi
     warPath=$1
+  else
+    echo
+    echo "Unknown argument: $1"
+    echo
+    printUsage
+    exit -1
   fi
 
   shift
