@@ -53,6 +53,15 @@ public class SqoopOutputFormatLoadExecutor {
   private Future<?> consumerFuture;
   private Semaphore filled = new Semaphore(0, true);
   private Semaphore free = new Semaphore(1, true);
+  private volatile boolean isTest = false;
+  private String loaderName;
+
+  SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName){
+    this.isTest = isTest;
+    this.loaderName = loaderName;
+    data = new Data();
+    producer = new SqoopRecordWriter();
+  }
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
     data = new Data();
@@ -168,10 +177,13 @@ public class SqoopOutputFormatLoadExecutor {
     public void run() {
       DataReader reader = new OutputFormatDataReader();
 
-      Configuration conf = context.getConfiguration();
+      Configuration conf = null;
+      if (!isTest) {
+        conf = context.getConfiguration();
 
 
-      String loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
+        loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
+      }
       Loader loader = (Loader) ClassUtils.instantiate(loaderName);
 
       // Objects that should be pass to the Executor execution
@@ -179,23 +191,25 @@ public class SqoopOutputFormatLoadExecutor {
       Object configConnection = null;
       Object configJob = null;
 
-      switch (ConfigurationUtils.getJobType(conf)) {
-        case EXPORT:
-          subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-          configConnection = ConfigurationUtils.getConnectorConnection(conf);
-          configJob = ConfigurationUtils.getConnectorJob(conf);
-          break;
-        case IMPORT:
-          subContext = new PrefixContext(conf, "");
-          configConnection = ConfigurationUtils.getFrameworkConnection(conf);
-          configJob = ConfigurationUtils.getFrameworkJob(conf);
-          break;
-        default:
-          readerFinished = true;
-          // Release so that the writer can tell the framework something went
-          // wrong.
-          free.release();
-          throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
+      if (!isTest) {
+        switch (ConfigurationUtils.getJobType(conf)) {
+          case EXPORT:
+            subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
+            configConnection = ConfigurationUtils.getConnectorConnection(conf);
+            configJob = ConfigurationUtils.getConnectorJob(conf);
+            break;
+          case IMPORT:
+            subContext = new PrefixContext(conf, "");
+            configConnection = ConfigurationUtils.getFrameworkConnection(conf);
+            configJob = ConfigurationUtils.getFrameworkJob(conf);
+            break;
+          default:
+            readerFinished = true;
+            // Release so that the writer can tell the framework something went
+            // wrong.
+            free.release();
+            throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
+        }
       }
 
       try {
