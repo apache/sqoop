@@ -104,11 +104,11 @@ public class HdfsTextExportExtractor extends Extractor {
       // one extra line is read in previous split
       start += filereader.readLine(new Text(), 0);
     }
-    Text line = new Text();
     int size;
     LOG.info("Start position: " + String.valueOf(start));
     long next = start;
     while (next <= end) {
+      Text line = new Text();
       size = filereader.readLine(line, Integer.MAX_VALUE);
       if (size == 0) {
         break;
