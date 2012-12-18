@@ -1,0 +1,284 @@
+Release 1.99.1
+
+  SUB-TASK
+
+    SQOOP-680: Re enable unit tests for map reduce execution engine
+
+    SQOOP-698: Document installation procedure for Sqoop 2
+
+    SQOOP-699: Create content for User guide for Sqoop 2
+
+    SQOOP-700: Provide examples to Sqoop 2 user guide
+
+    SQOOP-701: Create content for Sqoop 2 Developer guide
+
+    SQOOP-703: Move sqoop 2 documentation to top level directory in binary artefact
+
+    SQOOP-708: Create documentation for Sqoop 2 client
+
+    SQOOP-713: Introduce maven profiles for different Hadoop versions
+
+    SQOOP-714: Make map reduce related code to be compatible with Hadoop 1
+
+    SQOOP-715: Add support for Hadoop 1 to addtowar.sh script in Sqoop 2
+
+    SQOOP-742: Put 5 minutes demo on index page in Sqoop 2 documentation
+
+    SQOOP-753: Sqoop2: Update top level README file
+
+    SQOOP-755: Sqoop2: Provide license file with license information for all artifacts included in binary release
+
+    SQOOP-756: Sqoop2: Exclude junit jar from our binary artifact
+
+    SQOOP-757: Sqoop2: Disable maven reports project wise
+
+    SQOOP-758: Sqoop2: Generate documentation in package goal
+
+    SQOOP-786: Sqoop2: Include jars from WAR archive in LICENSE.txt file
+
+  BUG
+
+    SQOOP-511: Need to set persistent id for connector if in repository already
+
+    SQOOP-537: TestMPersistableEntity does not contain license header
+
+    SQOOP-596: Implement connection resource end-to-end
+
+    SQOOP-608: Implement job resource from end to end
+
+    SQOOP-631: Sqoop2 client is not working on Mac OS X
+
+    SQOOP-632: Sqoop 2 client help text contains link to old incubator page
+
+    SQOOP-644: Remove DISCLAMER.txt file from branch sqoop2
+
+    SQOOP-651: adding .gitattributes to prevent CRLF and LF mismatches for source and text files
+
+    SQOOP-655: Generic JDBC connector for export
+
+    SQOOP-671: Mapreduce counters are not used in generated mapreduce jobs
+
+    SQOOP-673: Mapreduce submission manager should not call update() on finished submissions
+
+    SQOOP-674: Sqoop2: Exceptions in special map reduce threads can cause mapreduce job to freeze
+
+    SQOOP-686: Empty job name will result in NPE during job submission
+
+    SQOOP-688: Add netbeans files to gitignore and rat
+
+    SQOOP-690: Fix threading issues in SqoopOutputFormatLoadExecutor
+
+    SQOOP-692: Move execution specific error codes from CoreError to it&#39;s own error codes class
+
+    SQOOP-693: Intermediate data format support for export
+
+    SQOOP-695: Change default host on client to &quot;localhost&quot;
+
+    SQOOP-696: Client command submission status will finish gracefully when executed for non existing job
+
+    SQOOP-702: Refactor OutputLoadExecutor
+
+    SQOOP-705: Framework-defined text/sequence partitioner/extractor for HDFS
+
+    SQOOP-707: Update developer list in Sqoop 2 pom file
+
+    SQOOP-710: Remove dependency on unreleased commons-cli 1.3 from Sqoop 2 client
+
+    SQOOP-727: We should use more strict regular expressions in addtowar.sh script
+
+    SQOOP-728: Increase varchar limits for external link and exceptions in Derby repository
+
+    SQOOP-729: SubmissionDisplayer should display Stack Trace only in Verbose mode
+
+    SQOOP-738: Sqoop is not importing all data in Sqoop 2
+
+    SQOOP-759: Sqoop2: Loading client resource file is failing on ResourceBundle not found exception
+
+    SQOOP-760: Sqoop2: Fix invalid \h escape sequence in client resource file
+
+    SQOOP-761: HDFSTextExportExtractor loses lines around partition boundaries
+
+    SQOOP-764: Sqoop2: Fix typo in client resource file &quot;prompt.conn_id&quot;
+
+    SQOOP-765: Sqoop2: JDBC repository is incorrectly checking if job exists in update handler
+
+    SQOOP-766: Sqoop2: Fix client resources
+
+    SQOOP-768: Sqoop2: Compilation on hadoop profile 100 will fail
+
+    SQOOP-770: Sqoop2: executable scripts in binary distribution tarball are not executable
+
+    SQOOP-771: Sqoop2: Improve addtowar.sh
+
+    SQOOP-774: Sqoop2: exception is thrown when creating a connection object if connectionString starts with an empty space
+
+    SQOOP-775: Sqoop2: addtowar.sh script is silently ignoring unknown arguments
+
+    SQOOP-778: Remove empty SqoopUserGuide and SqoopDeveloperGuide
+
+    SQOOP-779: Sqoop2: NPE when JobConnectorContext has a null value
+
+    SQOOP-780: Sqoop2: GENERIC_JDBC_CONNECTOR_0011:The type is not supported - 2
+
+    SQOOP-781: Sqoop2: Improve logging in GenericJdbcImportInitializer
+
+    SQOOP-782: Update comment to reflect that TestHdfsExtract works fine.
+
+    SQOOP-784: Sqoop2: Creating job for connection with id &gt; 1 will results in NullPointerException
+
+  IMPROVEMENT
+
+    SQOOP-306: Move to a maven build
+
+    SQOOP-347: Pull versions into properties in the pom.xml
+
+    SQOOP-507: Update dist/pom.xml so that maven doesn&#39;t download tomcat every time
+
+    SQOOP-525: Enable dist package build by default
+
+    SQOOP-534: Add ability to find out if MPersistableEntity do already have persistent ID 
+
+    SQOOP-545: Add IntelliJ IDEA files to RAT exclude
+
+    SQOOP-567: Support connection validation in JDBC repository
+
+    SQOOP-568: Configuration reload period should be configurable in PropertiesConfigurationProvider
+
+    SQOOP-573: Do not change working directory for client
+
+    SQOOP-581: Client should be sending used locale back to sqoop server to retrieve locale aware data
+
+    SQOOP-590: Switch Sqoop 2 to Apache Tomcat 6 For Better Integration With Apache Bigtop
+
+    SQOOP-612: Provide unit tests for derby metadata repository
+
+    SQOOP-618: Remove most important FindBugs warnings and errors in Sqoop 2
+
+    SQOOP-619: Display user persistent id of newly created connection and job objects
+
+    SQOOP-620: Introduce name to connection and job objects
+
+    SQOOP-625: Enforce checking advertised maximal size for MStringInput
+
+    SQOOP-629: Provide better exception handling during server-client communication
+
+    SQOOP-630: Check if connection/job is in use before deleting as deleting used entity might result in FK violations
+
+    SQOOP-642: Provide resource reading for both interactive and batch mode processing
+
+    SQOOP-645: Separate job engine to separate maven module
+
+    SQOOP-646: Provide support for &quot;set&quot; metadata in Sqoop 2
+
+    SQOOP-648: Move all string message in client to resource file for easy translation
+
+    SQOOP-662: Introduce pluggable configuration objects
+
+    SQOOP-667: We should persist in repository all properties of MSubmission metadata class
+
+    SQOOP-676: Add lastUpdateDate to MSubmission
+
+    SQOOP-677: Destroyer needs to be called from OutputCommitter
+
+    SQOOP-679: Wrap exception to MSubmission metadata object
+
+    SQOOP-681: Split configuration in Generic JDBC connector between job and connection
+
+    SQOOP-684: Encode type of the job into executed map reduce job
+
+    SQOOP-694: Introduce client &quot;verbose&quot; mode
+
+    SQOOP-704: Exclude patches from RAT checks in Sqoop2
+
+    SQOOP-719: Improve user experience with addtowar.sh script in Sqoop 2
+
+    SQOOP-722: Improve Sqoop 2 packaging
+
+    SQOOP-734: Change ConnectorBean to send JSON objects rather than sets of arrays
+
+    SQOOP-735: Introduce output format option to Sqoop 2 import
+
+    SQOOP-737: Give user option to set number of extractors and loaders
+
+    SQOOP-762: Sqoop2: Improve logging in mapreduce execution engine
+
+    SQOOP-776: Sqoop2: show connection command shows password in plain text
+
+  NEW FEATURE
+
+    SQOOP-531: Define connector execution lifecycle
+
+    SQOOP-532: Define intefaces for connector-defined execution classes
+
+    SQOOP-533: Intermediate data format support for import
+
+    SQOOP-588: MapReduce infrastructure for executing ETL framework
+
+    SQOOP-589: Framework-defined text/sequence loaders for HDFS
+
+    SQOOP-605: Generic JDBC connector for import
+
+    SQOOP-610: Job submission engine for import
+
+    SQOOP-613: Add support for integer type to metadata model
+
+    SQOOP-614: Provide client side ability to clone connection or job object
+
+    SQOOP-623: Add support for loading Map inputs in Sqoop2
+
+    SQOOP-624: Add test coverage plugin to root pom file
+
+    SQOOP-627: Convert forms structures on connector level to configuration classes
+
+    SQOOP-656: End to end submission engine
+
+    SQOOP-658: Solve hadoop dependency distribution/loading on server side
+
+    SQOOP-666: Introduce execution engine
+
+    SQOOP-712: Add support of Hadoop 1.x to Sqoop 2
+
+    SQOOP-716: Create server notification REST callback to get information if job has update
+
+    SQOOP-739: Connectors in Sqoop 2 should be versionable
+
+    SQOOP-740: Provide export submission engine implementation for Sqoop 2
+
+  TASK
+
+    SQOOP-491: Create configuration directory with documented configuration files under Sqoop2.
+
+    SQOOP-492: Implement a documentation system for Sqoop2
+
+    SQOOP-493: Distribution build for Sqoop2 should contain sources
+
+    SQOOP-494: Create client infrastructure to allow interactive selection of options of a command.
+
+    SQOOP-495: Support for parameter substitution in the client shell.
+
+    SQOOP-496: Refine the interface for Connector and Repository to support connection metadata
+
+    SQOOP-497: Enhance repository interface to support Connection CRUD
+
+    SQOOP-501: Infrastructure to support input of sensitive information like passwords in the client shell
+
+    SQOOP-502: Implement show connector command end-to-end
+
+    SQOOP-512: Intermediate data representation
+
+    SQOOP-514: Layout changes for Sqoop 2 distribution
+
+    SQOOP-544: Split job metadata for different job types (import, export)
+
+    SQOOP-576: Implement command &quot;show framework&quot; end to end
+
+    SQOOP-577: Design storage in derby repository for connect and job metadata
+
+    SQOOP-584: Create facility to validate user supplied connection and job forms
+
+    SQOOP-697: Put together documentation for Sqoop 2
+
+    SQOOP-733: Remove unnecessary version repetition in Sqoop 2 pom files
+
+    SQOOP-747: Sqoop 1.99.1 release preparation 
+
