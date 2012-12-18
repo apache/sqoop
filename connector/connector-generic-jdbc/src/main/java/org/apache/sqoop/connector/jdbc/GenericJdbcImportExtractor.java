@@ -59,8 +59,8 @@ public class GenericJdbcImportExtractor extends Extractor {
     try {
       ResultSetMetaData metaData = resultSet.getMetaData();
       int column = metaData.getColumnCount();
-      Object[] array = new Object[column];
       while (resultSet.next()) {
+        Object[] array = new Object[column];
         for (int i = 0; i< column; i++) {
           array[i] = resultSet.getObject(i+1);
         }
