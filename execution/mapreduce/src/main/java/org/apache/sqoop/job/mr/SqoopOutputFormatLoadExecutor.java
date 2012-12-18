@@ -75,8 +75,8 @@ public class SqoopOutputFormatLoadExecutor {
 
     @Override
     public void write(Data key, NullWritable value) throws InterruptedException {
-      checkIfConsumerThrew();
       free.acquire();
+      checkIfConsumerThrew();
       int type = key.getType();
       data.setContent(key.getContent(type), type);
       filled.release();
@@ -192,6 +192,9 @@ public class SqoopOutputFormatLoadExecutor {
           break;
         default:
           readerFinished = true;
+          // Release so that the writer can tell the framework something went
+          // wrong.
+          free.release();
           throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
       }
 
@@ -202,6 +205,9 @@ public class SqoopOutputFormatLoadExecutor {
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Error while loading data out of MR job.", t);
+        // Release so that the writer can tell the framework something went
+        // wrong.
+        free.release();
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
       }
 
@@ -211,6 +217,9 @@ public class SqoopOutputFormatLoadExecutor {
         // throw exception if data are not all consumed
         readerFinished = true;
         LOG.error("Reader terminated, but writer is still running!");
+        // Release so that the writer can tell the framework something went
+        // wrong.
+        free.release();
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
 
       }
