@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.TimeUnit;
 
 public class TestSqoopOutputFormatLoadExecutor {
 
@@ -165,10 +166,8 @@ public class TestSqoopOutputFormatLoadExecutor {
     writer.close(null);
   }
 
-  @Test
+  @Test (expected = SqoopException.class)
   public void testSuccessfulLoader() throws Throwable {
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
-    conf.set(JobConstants.JOB_ETL_LOADER, GoodLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, GoodLoader.class.getName());
     RecordWriter<Data, NullWritable> writer = executor.getRecordWriter();
@@ -182,6 +181,8 @@ public class TestSqoopOutputFormatLoadExecutor {
     }
     data.setContent(builder.toString(), Data.CSV_RECORD);
     writer.write(data, null);
+    //Allow writer to complete.
+    TimeUnit.SECONDS.sleep(5);
     writer.close(null);
   }
 
