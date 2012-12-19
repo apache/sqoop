@@ -132,6 +132,8 @@ Release 1.99.1
 
     SQOOP-789: Fix Hadoop-1 build
 
+    SQOOP-790: Remove flakiness from TestSqoopOutputformatLoadExecutor
+
   IMPROVEMENT
 
     SQOOP-306: Move to a maven build
