@@ -36,6 +36,8 @@ Release 1.99.1
 
     SQOOP-786: Sqoop2: Include jars from WAR archive in LICENSE.txt file
 
+    SQOOP-787: Sqoop2: Provide CHANGELOG.txt file
+
   BUG
 
     SQOOP-511: Need to set persistent id for connector if in repository already
@@ -125,6 +127,10 @@ Release 1.99.1
     SQOOP-782: Update comment to reflect that TestHdfsExtract works fine.
 
     SQOOP-784: Sqoop2: Creating job for connection with id &gt; 1 will results in NullPointerException
+
+    SQOOP-788: Sqoop2: Import sometimes duplicate some data
+
+    SQOOP-789: Fix Hadoop-1 build
 
   IMPROVEMENT
 
