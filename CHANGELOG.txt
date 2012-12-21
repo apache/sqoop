@@ -38,6 +38,8 @@ Release 1.99.1
 
     SQOOP-787: Sqoop2: Provide CHANGELOG.txt file
 
+    SQOOP-800: Sqoop2: Update NOTICE file
+
   BUG
 
     SQOOP-511: Need to set persistent id for connector if in repository already
@@ -111,6 +113,8 @@ Release 1.99.1
     SQOOP-770: Sqoop2: executable scripts in binary distribution tarball are not executable
 
     SQOOP-771: Sqoop2: Improve addtowar.sh
+
+    SQOOP-772: OutOfMemory from document generation
 
     SQOOP-774: Sqoop2: exception is thrown when creating a connection object if connectionString starts with an empty space
 
