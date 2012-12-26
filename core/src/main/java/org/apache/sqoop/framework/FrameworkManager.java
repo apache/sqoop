@@ -66,7 +66,45 @@ import java.util.ResourceBundle;
  */
 public final class FrameworkManager {
 
+  /**
+   * Logger object.
+   */
   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
+
+  /**
+   * Private instance to singleton of this class.
+   */
+  private static FrameworkManager instance;
+
+  /**
+   * Create default object by default.
+   *
+   * Every Sqoop server application needs one so this should not be performance issue.
+   */
+  static {
+    instance = new FrameworkManager();
+  }
+
+  /**
+   * Return current instance.
+   *
+   * @return Current instance
+   */
+  public static FrameworkManager getInstance() {
+    return instance;
+  }
+
+  /**
+   * Allows to set instance in case that it's need.
+   *
+   * This method should not be normally used as the default instance should be sufficient. One target
+   * user use case for this method are unit tests.
+   *
+   * @param newInstance New instance
+   */
+  public static void setInstance(FrameworkManager newInstance) {
+    instance = newInstance;
+  }
 
   /**
    * Default interval for purging old submissions from repository.
@@ -86,72 +124,72 @@ public final class FrameworkManager {
   /**
    * Framework metadata structures in MForm format
    */
-  private static MFramework mFramework;
+  private MFramework mFramework;
 
   /**
    * Validator instance
    */
-  private static final Validator validator;
+  private final Validator validator;
 
   /**
    * Configured submission engine instance
    */
-  private static SubmissionEngine submissionEngine;
+  private SubmissionEngine submissionEngine;
 
   /**
    * Configured execution engine instance
    */
-  private static ExecutionEngine executionEngine;
+  private ExecutionEngine executionEngine;
 
   /**
    * Purge thread that will periodically remove old submissions from repository.
    */
-  private static PurgeThread purgeThread = null;
+  private PurgeThread purgeThread = null;
 
   /**
    * Update thread that will periodically check status of running submissions.
    */
-  private static UpdateThread updateThread = null;
+  private UpdateThread updateThread = null;
 
   /**
    * Synchronization variable between threads.
    */
-  private static boolean running = true;
+  private boolean running = true;
 
   /**
    * Specifies how old submissions should be removed from repository.
    */
-  private static long purgeThreshold;
+  private long purgeThreshold;
 
   /**
    * Number of milliseconds for purge thread to sleep.
    */
-  private static long purgeSleep;
+  private long purgeSleep;
 
   /**
    * Number of milliseconds for update thread to slepp.
    */
-  private static long updateSleep;
+  private long updateSleep;
 
   /**
    * Mutex for creating new submissions. We're not allowing more then one
    * running submission for one job.
    */
-  private static final Object submissionMutex = new Object();
+  private final Object submissionMutex = new Object();
 
   /**
    * Base notification URL.
    *
    * Framework manager will always add job id.
    */
-  private static String notificationBaseUrl;
+  private String notificationBaseUrl;
 
   /**
    * Set notification base URL.
    *
    * @param url Base URL
    */
-  public static void setNotificationBaseUrl(String url) {
+  public void setNotificationBaseUrl(String url) {
     LOG.debug("Setting notification base URL to " + url);
     notificationBaseUrl = url;
   }
@@ -161,11 +199,11 @@ public final class FrameworkManager {
    *
    * @return String representation of the URL
    */
-  public static String getNotificationBaseUrl() {
+  public String getNotificationBaseUrl() {
     return notificationBaseUrl;
   }
 
-  static {
+  public FrameworkManager() {
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(getConnectionConfigurationClass())
     );
@@ -180,12 +218,12 @@ public final class FrameworkManager {
     validator = new Validator();
   }
 
-  public static synchronized void initialize() {
+  public synchronized void initialize() {
     LOG.trace("Begin submission engine manager initialization");
-    MapContext context = SqoopConfiguration.getContext();
+    MapContext context = SqoopConfiguration.getInstance().getContext();
 
     // Register framework metadata in repository
-    mFramework = RepositoryManager.getRepository().registerFramework(mFramework);
+    mFramework = RepositoryManager.getInstance().getRepository().registerFramework(mFramework);
 
     // Let's load configured submission engine
     String submissionEngineClassName =
@@ -241,7 +279,7 @@ public final class FrameworkManager {
     LOG.info("Submission manager initialized: OK");
   }
 
-  public static synchronized void destroy() {
+  public  synchronized void destroy() {
     LOG.trace("Begin submission engine manager destroy");
 
     running = false;
@@ -271,15 +309,15 @@ public final class FrameworkManager {
     }
   }
 
-  public static Validator getValidator() {
+  public Validator getValidator() {
     return validator;
   }
 
-  public static Class getConnectionConfigurationClass() {
+  public Class getConnectionConfigurationClass() {
     return ConnectionConfiguration.class;
   }
 
-  public static Class getJobConfigurationClass(MJob.Type jobType) {
+  public Class getJobConfigurationClass(MJob.Type jobType) {
     switch (jobType) {
       case IMPORT:
         return ImportJobConfiguration.class;
@@ -290,17 +328,17 @@ public final class FrameworkManager {
     }
   }
 
-  public static MFramework getFramework() {
+  public MFramework getFramework() {
     return mFramework;
   }
 
-  public static ResourceBundle getBundle(Locale locale) {
+  public ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(
         FrameworkConstants.RESOURCE_BUNDLE_NAME, locale);
   }
 
-  public static MSubmission submit(long jobId) {
-    Repository repository = RepositoryManager.getRepository();
+  public MSubmission submit(long jobId) {
+    Repository repository = RepositoryManager.getInstance().getRepository();
 
     MJob job = repository.findJob(jobId);
     if(job == null) {
@@ -309,7 +347,7 @@ public final class FrameworkManager {
     }
     MConnection connection = repository.findConnection(job.getConnectionId());
     SqoopConnector connector =
-      ConnectorManager.getConnector(job.getConnectorId());
+      ConnectorManager.getInstance().getConnector(job.getConnectorId());
 
     // Transform forms to connector specific classes
     Object connectorConnection = ClassUtils.instantiate(
@@ -434,7 +472,7 @@ public final class FrameworkManager {
     return summary;
   }
 
-  private static void prepareImportSubmission(SubmissionRequest request) {
+  private void prepareImportSubmission(SubmissionRequest request) {
     ImportJobConfiguration jobConfiguration = (ImportJobConfiguration) request.getConfigFrameworkJob();
 
     // Initialize the map-reduce part (all sort of required classes, ...)
@@ -450,7 +488,7 @@ public final class FrameworkManager {
     executionEngine.prepareImportSubmission(request);
   }
 
-  private static void prepareExportSubmission(SubmissionRequest request) {
+  private void prepareExportSubmission(SubmissionRequest request) {
     ExportJobConfiguration jobConfiguration = (ExportJobConfiguration) request.getConfigFrameworkJob();
 
     // We're directly moving configured number of extractors and loaders to
@@ -467,7 +505,7 @@ public final class FrameworkManager {
    * Callback that will be called only if we failed to submit the job to the
    * remote cluster.
    */
-  private static void destroySubmission(SubmissionRequest request) {
+  private void destroySubmission(SubmissionRequest request) {
     CallbackBase baseCallbacks = request.getConnectorCallbacks();
 
     Class<? extends Destroyer> destroyerClass = baseCallbacks.getDestroyer();
@@ -483,8 +521,8 @@ public final class FrameworkManager {
       request.getConfigConnectorConnection(), request.getConfigConnectorJob());
   }
 
-  public static MSubmission stop(long jobId) {
-    Repository repository = RepositoryManager.getRepository();
+  public MSubmission stop(long jobId) {
+    Repository repository = RepositoryManager.getInstance().getRepository();
     MSubmission submission = repository.findSubmissionLastForJob(jobId);
 
     if(!submission.getStatus().isRunning()) {
@@ -502,8 +540,8 @@ public final class FrameworkManager {
     return submission;
   }
 
-  public static MSubmission status(long jobId) {
-    Repository repository = RepositoryManager.getRepository();
+  public MSubmission status(long jobId) {
+    Repository repository = RepositoryManager.getInstance().getRepository();
     MSubmission submission = repository.findSubmissionLastForJob(jobId);
 
     if(submission == null) {
@@ -518,7 +556,7 @@ public final class FrameworkManager {
     return submission;
   }
 
-  private static void update(MSubmission submission) {
+  private void update(MSubmission submission) {
     double progress  = -1;
     Counters counters = null;
     String externalId = submission.getExternalId();
@@ -537,10 +575,10 @@ public final class FrameworkManager {
     submission.setExternalLink(externalLink);
     submission.setLastUpdateDate(new Date());
 
-    RepositoryManager.getRepository().updateSubmission(submission);
+    RepositoryManager.getInstance().getRepository().updateSubmission(submission);
   }
 
-  private static class PurgeThread extends Thread {
+  private class PurgeThread extends Thread {
     public PurgeThread() {
       super("PurgeThread");
     }
@@ -552,7 +590,7 @@ public final class FrameworkManager {
         try {
           LOG.info("Purging old submissions");
           Date threshold = new Date((new Date()).getTime() - purgeThreshold);
-          RepositoryManager.getRepository().purgeSubmissions(threshold);
+          RepositoryManager.getInstance().getRepository().purgeSubmissions(threshold);
           Thread.sleep(purgeSleep);
         } catch (InterruptedException e) {
           LOG.debug("Purge thread interrupted", e);
@@ -563,7 +601,7 @@ public final class FrameworkManager {
     }
   }
 
-  private static class UpdateThread extends Thread {
+  private class UpdateThread extends Thread {
      public UpdateThread() {
       super("UpdateThread");
     }
@@ -577,7 +615,7 @@ public final class FrameworkManager {
 
           // Let's get all running submissions from repository to check them out
           List<MSubmission> unfinishedSubmissions =
-            RepositoryManager.getRepository().findSubmissionsUnfinished();
+            RepositoryManager.getInstance().getRepository().findSubmissionsUnfinished();
 
           for(MSubmission submission : unfinishedSubmissions) {
             update(submission);
@@ -591,9 +629,5 @@ public final class FrameworkManager {
 
       LOG.info("Ending submission manager update thread");
     }
-  }
-
-  private FrameworkManager() {
-    // Instantiation of this class is prohibited
   }
 }

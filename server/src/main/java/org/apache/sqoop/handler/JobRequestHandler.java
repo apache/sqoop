@@ -98,7 +98,7 @@ public class JobRequestHandler implements RequestHandler {
     String sxid = ctx.getLastURLElement();
     long jid = Long.valueOf(sxid);
 
-    Repository repository = RepositoryManager.getRepository();
+    Repository repository = RepositoryManager.getInstance().getRepository();
     repository.deleteJob(jid);
 
     return JsonBean.EMPTY_BEAN;
@@ -139,9 +139,9 @@ public class JobRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MJobForms connectorForms
-      = ConnectorManager.getConnectorMetadata(job.getConnectorId())
+      = ConnectorManager.getInstance().getConnectorMetadata(job.getConnectorId())
       .getJobForms(job.getType());
-    MJobForms frameworkForms = FrameworkManager.getFramework()
+    MJobForms frameworkForms = FrameworkManager.getInstance().getFramework()
       .getJobForms(job.getType());
 
     if(!connectorForms.equals(job.getConnectorPart())
@@ -152,17 +152,17 @@ public class JobRequestHandler implements RequestHandler {
 
     // Responsible connector for this session
     SqoopConnector connector =
-      ConnectorManager.getConnector(job.getConnectorId());
+      ConnectorManager.getInstance().getConnector(job.getConnectorId());
 
     // Get validator objects
     Validator connectorValidator = connector.getValidator();
-    Validator frameworkValidator = FrameworkManager.getValidator();
+    Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
 
     // We need translate forms to configuration objects
     Object connectorConfig = ClassUtils.instantiate(
       connector.getJobConfigurationClass(job.getType()));
     Object frameworkConfig = ClassUtils.instantiate(
-      FrameworkManager.getJobConfigurationClass(job.getType()));
+      FrameworkManager.getInstance().getJobConfigurationClass(job.getType()));
 
     FormUtils.fromForms(job.getConnectorPart().getForms(), connectorConfig);
     FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
@@ -183,9 +183,9 @@ public class JobRequestHandler implements RequestHandler {
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
       if(update) {
-        RepositoryManager.getRepository().updateJob(job);
+        RepositoryManager.getInstance().getRepository().updateJob(job);
       } else {
-        RepositoryManager.getRepository().createJob(job);
+        RepositoryManager.getInstance().getRepository().createJob(job);
         outputBean.setId(job.getPersistenceId());
       }
 
@@ -199,7 +199,7 @@ public class JobRequestHandler implements RequestHandler {
     JobBean bean;
 
     Locale locale = ctx.getAcceptLanguageHeader();
-    Repository repository = RepositoryManager.getRepository();
+    Repository repository = RepositoryManager.getInstance().getRepository();
 
     if (sjid.equals("all")) {
 
@@ -211,7 +211,7 @@ public class JobRequestHandler implements RequestHandler {
         long connectorId = job.getConnectorId();
         if(!bean.hasConnectorBundle(connectorId)) {
           bean.addConnectorBundle(connectorId,
-            ConnectorManager.getResourceBundle(connectorId, locale));
+            ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
         }
       }
     } else {
@@ -223,11 +223,11 @@ public class JobRequestHandler implements RequestHandler {
       bean = new JobBean(job);
 
       bean.addConnectorBundle(connectorId,
-        ConnectorManager.getResourceBundle(connectorId, locale));
+        ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }
 
     // Sent framework resource bundle in all cases
-    bean.setFrameworkBundle(FrameworkManager.getBundle(locale));
+    bean.setFrameworkBundle(FrameworkManager.getInstance().getBundle(locale));
 
     return bean;
   }

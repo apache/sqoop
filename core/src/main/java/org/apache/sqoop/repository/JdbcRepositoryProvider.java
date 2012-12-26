@@ -61,7 +61,7 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
 
   @Override
   public synchronized void initialize(MapContext context) {
-    repoContext = new JdbcRepositoryContext(SqoopConfiguration.getContext());
+    repoContext = new JdbcRepositoryContext(SqoopConfiguration.getInstance().getContext());
 
     initializeRepositoryHandler();
 

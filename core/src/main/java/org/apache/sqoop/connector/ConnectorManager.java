@@ -40,16 +40,54 @@ import org.apache.sqoop.model.MConnector;
 
 public final class ConnectorManager {
 
+  /**
+   * Logger object.
+   */
   private static final Logger LOG = Logger.getLogger(ConnectorManager.class);
 
+  /**
+   * Private instance to singleton of this class.
+   */
+  private static ConnectorManager instance;
+
+  /**
+   * Create default object by default.
+   *
+   * Every Sqoop server application needs one so this should not be performance issue.
+   */
+  static {
+    instance = new ConnectorManager();
+  }
+
+  /**
+   * Return current instance.
+   *
+   * @return Current instance
+   */
+  public static ConnectorManager getInstance() {
+    return instance;
+  }
+
+  /**
+   * Allows to set instance in case that it's need.
+   *
+   * This method should not be normally used as the default instance should be sufficient. One target
+   * user use case for this method are unit tests.
+   *
+   * @param newInstance New instance
+   */
+  public static void setInstance(ConnectorManager newInstance) {
+    instance = newInstance;
+  }
+
   // key: connector id, value: connector name
-  private static Map<Long, String> nameMap = new HashMap<Long, String>();
+  private Map<Long, String> nameMap = new HashMap<Long, String>();
 
   // key: connector name, value: connector handler
-  private static Map<String, ConnectorHandler> handlerMap =
+  private Map<String, ConnectorHandler> handlerMap =
       new HashMap<String, ConnectorHandler>();
 
-  public static List<MConnector> getConnectorsMetadata() {
+  public List<MConnector> getConnectorsMetadata() {
     List<MConnector> connectors = new LinkedList<MConnector>();
     for(ConnectorHandler handler : handlerMap.values()) {
       connectors.add(handler.getMetadata());
@@ -57,11 +95,11 @@ public final class ConnectorManager {
     return connectors;
   }
 
-  public static Set<Long> getConnectorIds() {
+  public Set<Long> getConnectorIds() {
     return nameMap.keySet();
   }
 
-  public static Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
+  public Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
     Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
     for(ConnectorHandler handler : handlerMap.values()) {
       long id = handler.getMetadata().getPersistenceId();
@@ -71,13 +109,13 @@ public final class ConnectorManager {
     return bundles;
   }
 
-  public static ResourceBundle getResourceBundle(long connectorId,
+  public ResourceBundle getResourceBundle(long connectorId,
                                                  Locale locale) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     return  handler.getConnector().getBundle(locale);
   }
 
-  public static MConnector getConnectorMetadata(long connectorId) {
+  public MConnector getConnectorMetadata(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     if(handler == null) {
       return null;
@@ -86,12 +124,12 @@ public final class ConnectorManager {
     return handler.getMetadata();
   }
 
-  public static SqoopConnector getConnector(long connectorId) {
+  public SqoopConnector getConnector(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     return handler.getConnector();
   }
 
-  public static synchronized void initialize() {
+  public synchronized void initialize() {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");
     }
@@ -147,8 +185,8 @@ public final class ConnectorManager {
     }
   }
 
-  private static synchronized void registerConnectors() {
-    Repository repository = RepositoryManager.getRepository();
+  private synchronized void registerConnectors() {
+    Repository repository = RepositoryManager.getInstance().getRepository();
 
     RepositoryTransaction rtx = null;
     try {
@@ -185,11 +223,7 @@ public final class ConnectorManager {
     }
   }
 
-  public static synchronized void destroy() {
+  public synchronized void destroy() {
     // FIXME
-  }
-
-  private ConnectorManager() {
-    // Instantiation of this class is prohibited
   }
 }

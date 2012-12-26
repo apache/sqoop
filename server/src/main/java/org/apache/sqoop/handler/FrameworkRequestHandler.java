@@ -39,7 +39,7 @@ public class FrameworkRequestHandler  implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
-    return new FrameworkBean(FrameworkManager.getFramework(),
-      FrameworkManager.getBundle(ctx.getAcceptLanguageHeader()));
+    return new FrameworkBean(FrameworkManager.getInstance().getFramework(),
+      FrameworkManager.getInstance().getBundle(ctx.getAcceptLanguageHeader()));
   }
 }

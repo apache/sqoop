@@ -30,16 +30,57 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 
+/**
+ * Configuration manager that loads Sqoop configuration.
+ */
 public final class SqoopConfiguration {
 
+  /**
+   * Logger object.
+   */
   public static final Logger LOG = Logger.getLogger(SqoopConfiguration.class);
 
-  private static File configDir = null;
-  private static boolean initialized = false;
-  private static ConfigurationProvider provider = null;
-  private static Map<String, String> config = null;
+  /**
+   * Private instance to singleton of this class.
+   */
+  private static SqoopConfiguration instance;
 
-  public static synchronized void initialize() {
+  /**
+   * Create default object by default.
+   *
+   * Every Sqoop server application needs one so this should not be performance issue.
+   */
+  static {
+    instance = new SqoopConfiguration();
+  }
+
+  /**
+   * Return current instance.
+   *
+   * @return Current instance
+   */
+  public static SqoopConfiguration getInstance() {
+    return instance;
+  }
+
+  /**
+   * Allows to set instance in case that it's need.
+   *
+   * This method should not be normally used as the default instance should be sufficient. One target
+   * user use case for this method are unit tests.
+   *
+   * @param newInstance New instance
+   */
+  public static void setInstance(SqoopConfiguration newInstance) {
+    instance = newInstance;
+  }
+
+  private File configDir = null;
+  private boolean initialized = false;
+  private ConfigurationProvider provider = null;
+  private Map<String, String> config = null;
+
+  public synchronized void initialize() {
     if (initialized) {
       LOG.warn("Attempt to reinitialize the system, ignoring");
       return;
@@ -130,7 +171,7 @@ public final class SqoopConfiguration {
     initialized = true;
   }
 
-  public static synchronized MapContext getContext() {
+  public synchronized MapContext getContext() {
     if (!initialized) {
       throw new SqoopException(CoreError.CORE_0007);
     }
@@ -141,7 +182,7 @@ public final class SqoopConfiguration {
     return new MapContext(parameters);
   }
 
-  public static synchronized void destroy() {
+  public synchronized void destroy() {
     if (provider != null) {
       try {
         provider.destroy();
@@ -155,7 +196,7 @@ public final class SqoopConfiguration {
     initialized = false;
   }
 
-  private static synchronized void configureLogging() {
+  private synchronized void configureLogging() {
     Properties props = new Properties();
     for (String key : config.keySet()) {
       if (key.startsWith(ConfigurationConstants.PREFIX_LOG_CONFIG)) {
@@ -168,18 +209,12 @@ public final class SqoopConfiguration {
     PropertyConfigurator.configure(props);
   }
 
-  private static synchronized void refreshConfiguration()
-  {
+  private synchronized void refreshConfiguration() {
     config = provider.getConfiguration();
     configureLogging();
   }
 
-  private SqoopConfiguration() {
-    // Disable explicit object creation
-  }
-
-  public static class CoreConfigurationListener implements ConfigurationListener
-  {
+  public class CoreConfigurationListener implements ConfigurationListener {
     @Override
     public void configurationChanged() {
       refreshConfiguration();

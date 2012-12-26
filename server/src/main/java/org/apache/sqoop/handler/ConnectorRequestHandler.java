@@ -55,21 +55,21 @@ public class ConnectorRequestHandler implements RequestHandler {
     LOG.info("ConnectorRequestHandler handles cid: " + cid);
     if (cid.equals("all")) {
       // display all connectors
-      connectors = ConnectorManager.getConnectorsMetadata();
-      bundles = ConnectorManager.getResourceBundles(locale);
+      connectors = ConnectorManager.getInstance().getConnectorsMetadata();
+      bundles = ConnectorManager.getInstance().getResourceBundles(locale);
     } else {
       Long id = Long.parseLong(cid);
 
       // Check that user is not asking for non existing connector id
-      if(!ConnectorManager.getConnectorIds().contains(id)) {
+      if(!ConnectorManager.getInstance().getConnectorIds().contains(id)) {
         throw new SqoopException(ServerError.SERVER_0004, "Invalid id " + id);
       }
 
       connectors = new LinkedList<MConnector>();
       bundles = new HashMap<Long, ResourceBundle>();
 
-      connectors.add(ConnectorManager.getConnectorMetadata(id));
-      bundles.put(id, ConnectorManager.getResourceBundle(id, locale));
+      connectors.add(ConnectorManager.getInstance().getConnectorMetadata(id));
+      bundles.put(id, ConnectorManager.getInstance().getResourceBundle(id, locale));
     }
 
     return new ConnectorBean(connectors, bundles);

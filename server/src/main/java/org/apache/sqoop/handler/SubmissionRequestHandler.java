@@ -78,7 +78,7 @@ public class SubmissionRequestHandler implements RequestHandler {
 
   private JsonBean handleNotification(RequestContext ctx, String sjid) {
     logger.debug("Received notification request for job " + sjid);
-    FrameworkManager.status(Long.parseLong(sjid));
+    FrameworkManager.getInstance().status(Long.parseLong(sjid));
     return JsonBean.EMPTY_BEAN;
   }
 
@@ -90,9 +90,9 @@ public class SubmissionRequestHandler implements RequestHandler {
         return submissionStatus(jid);
       case POST:
         // TODO: This should be outsourced somewhere more suitable than here
-        if(FrameworkManager.getNotificationBaseUrl() == null) {
+        if(FrameworkManager.getInstance().getNotificationBaseUrl() == null) {
           String url = ctx.getRequest().getRequestURL().toString();
-          FrameworkManager.setNotificationBaseUrl(
+          FrameworkManager.getInstance().setNotificationBaseUrl(
             url.split("v1")[0] + "/v1/submission/notification/");
         }
         return submissionSubmit(jid);
@@ -104,17 +104,17 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean submissionStop(long jid) {
-    MSubmission submission = FrameworkManager.stop(jid);
+    MSubmission submission = FrameworkManager.getInstance().stop(jid);
     return new SubmissionBean(submission);
   }
 
   private JsonBean submissionSubmit(long jid) {
-    MSubmission submission = FrameworkManager.submit(jid);
+    MSubmission submission = FrameworkManager.getInstance().submit(jid);
     return new SubmissionBean(submission);
   }
 
   private JsonBean submissionStatus(long jid) {
-    MSubmission submission = FrameworkManager.status(jid);
+    MSubmission submission = FrameworkManager.getInstance().status(jid);
     return new SubmissionBean(submission);
   }
 }

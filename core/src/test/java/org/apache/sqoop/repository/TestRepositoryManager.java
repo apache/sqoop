@@ -39,8 +39,8 @@ public class TestRepositoryManager {
     Properties configProps = new Properties();
     TestUtils.setupTestConfigurationUsingProperties(bootProps, configProps);
     try {
-      SqoopConfiguration.initialize();
-      RepositoryManager.initialize();
+      SqoopConfiguration.getInstance().initialize();
+      RepositoryManager.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),

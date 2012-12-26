@@ -27,12 +27,50 @@ import org.apache.sqoop.utils.ClassUtils;
 
 public final class RepositoryManager {
 
+  /**
+   * Logger object.
+   */
   private static final Logger LOG = Logger.getLogger(RepositoryManager.class);
 
-  private static RepositoryProvider provider;
+  /**
+   * Private instance to singleton of this class.
+   */
+  private static RepositoryManager instance;
 
-  public static synchronized void initialize() {
-    MapContext context = SqoopConfiguration.getContext();
+  /**
+   * Create default object by default.
+   *
+   * Every Sqoop server application needs one so this should not be performance issue.
+   */
+  static {
+    instance = new RepositoryManager();
+  }
+
+  /**
+   * Return current instance.
+   *
+   * @return Current instance
+   */
+  public static RepositoryManager getInstance() {
+    return instance;
+  }
+
+  /**
+   * Allows to set instance in case that it's need.
+   *
+   * This method should not be normally used as the default instance should be sufficient. One target
+   * user use case for this method are unit tests.
+   *
+   * @param newInstance New instance
+   */
+  public static void setInstance(RepositoryManager newInstance) {
+    instance = newInstance;
+  }
+
+  private RepositoryProvider provider;
+
+  public synchronized void initialize() {
+    MapContext context = SqoopConfiguration.getInstance().getContext();
 
     Map<String, String> repoSysProps = context.getNestedProperties(
         RepoConfigurationConstants.SYSCFG_REPO_SYSPROP_PREFIX);
@@ -76,7 +114,7 @@ public final class RepositoryManager {
     LOG.info("Repository initialized: OK");
   }
 
-  public static synchronized void destroy() {
+  public synchronized void destroy() {
     try {
       provider.destroy();
     } catch (Exception ex) {
@@ -84,11 +122,7 @@ public final class RepositoryManager {
     }
   }
 
-  public static synchronized Repository getRepository() {
+  public synchronized Repository getRepository() {
     return provider.getRepository();
-  }
-
-  private RepositoryManager() {
-    // Instantiation of this class is prohibited
   }
 }

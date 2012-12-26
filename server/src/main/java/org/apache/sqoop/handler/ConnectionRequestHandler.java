@@ -98,7 +98,7 @@ public class ConnectionRequestHandler implements RequestHandler {
     String sxid = ctx.getLastURLElement();
     long xid = Long.valueOf(sxid);
 
-    Repository repository = RepositoryManager.getRepository();
+    Repository repository = RepositoryManager.getInstance().getRepository();
     repository.deleteConnection(xid);
 
     return JsonBean.EMPTY_BEAN;
@@ -138,9 +138,9 @@ public class ConnectionRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MConnectionForms connectorForms =
-      ConnectorManager.getConnectorMetadata(connection.getConnectorId())
+      ConnectorManager.getInstance().getConnectorMetadata(connection.getConnectorId())
       .getConnectionForms();
-    MConnectionForms frameworkForms = FrameworkManager.getFramework()
+    MConnectionForms frameworkForms = FrameworkManager.getInstance().getFramework()
       .getConnectionForms();
 
     if(!connectorForms.equals(connection.getConnectorPart())
@@ -151,17 +151,17 @@ public class ConnectionRequestHandler implements RequestHandler {
 
     // Responsible connector for this session
     SqoopConnector connector =
-      ConnectorManager.getConnector(connection.getConnectorId());
+      ConnectorManager.getInstance().getConnector(connection.getConnectorId());
 
     // Get validator objects
     Validator connectorValidator = connector.getValidator();
-    Validator frameworkValidator = FrameworkManager.getValidator();
+    Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
 
     // We need translate forms to configuration objects
     Object connectorConfig = ClassUtils.instantiate(
       connector.getConnectionConfigurationClass());
     Object frameworkConfig = ClassUtils.instantiate(
-      FrameworkManager.getConnectionConfigurationClass());
+      FrameworkManager.getInstance().getConnectionConfigurationClass());
 
     FormUtils.fromForms(
       connection.getConnectorPart().getForms(), connectorConfig);
@@ -184,9 +184,9 @@ public class ConnectionRequestHandler implements RequestHandler {
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
       if(update) {
-        RepositoryManager.getRepository().updateConnection(connection);
+        RepositoryManager.getInstance().getRepository().updateConnection(connection);
       } else {
-        RepositoryManager.getRepository().createConnection(connection);
+        RepositoryManager.getInstance().getRepository().createConnection(connection);
         outputBean.setId(connection.getPersistenceId());
       }
     }
@@ -199,7 +199,7 @@ public class ConnectionRequestHandler implements RequestHandler {
     ConnectionBean bean;
 
     Locale locale = ctx.getAcceptLanguageHeader();
-    Repository repository = RepositoryManager.getRepository();
+    Repository repository = RepositoryManager.getInstance().getRepository();
 
     if (sxid.equals("all")) {
 
@@ -211,7 +211,7 @@ public class ConnectionRequestHandler implements RequestHandler {
         long connectorId = connection.getConnectorId();
         if(!bean.hasConnectorBundle(connectorId)) {
           bean.addConnectorBundle(connectorId,
-            ConnectorManager.getResourceBundle(connectorId, locale));
+            ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
         }
       }
     } else {
@@ -223,11 +223,11 @@ public class ConnectionRequestHandler implements RequestHandler {
       bean = new ConnectionBean(connection);
 
       bean.addConnectorBundle(connectorId,
-        ConnectorManager.getResourceBundle(connectorId, locale));
+        ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }
 
     // Sent framework resource bundle in all cases
-    bean.setFrameworkBundle(FrameworkManager.getBundle(locale));
+    bean.setFrameworkBundle(FrameworkManager.getInstance().getBundle(locale));
 
     return bean;
   }

@@ -30,14 +30,14 @@ public class TestConfiguration {
   public void setUp() throws Exception {
     // Unset any configuration dir if it is set by another test
     System.getProperties().remove(ConfigurationConstants.SYSPROP_CONFIG_DIR);
-    SqoopConfiguration.destroy();
+    SqoopConfiguration.getInstance().destroy();
   }
 
   @Test
   public void testConfigurationInitFailure() {
     boolean success = false;
     try {
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -55,7 +55,7 @@ public class TestConfiguration {
       String configDirPath = TestUtils.createEmptyConfigDirectory();
       System.setProperty(ConfigurationConstants.SYSPROP_CONFIG_DIR,
           configDirPath);
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -73,7 +73,7 @@ public class TestConfiguration {
     bootProps.setProperty("foo", "bar");
     TestUtils.setupTestConfigurationUsingProperties(bootProps, null);
     try {
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -92,7 +92,7 @@ public class TestConfiguration {
         "foobar");
     TestUtils.setupTestConfigurationUsingProperties(bootProps, null);
     try {
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -112,7 +112,7 @@ public class TestConfiguration {
         MockInvalidConfigurationProvider.class.getCanonicalName());
     TestUtils.setupTestConfigurationUsingProperties(bootProps, null);
     try {
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -131,7 +131,7 @@ public class TestConfiguration {
         PropertiesConfigurationProvider.class.getCanonicalName());
     TestUtils.setupTestConfigurationUsingProperties(bootProps, null);
     try {
-      SqoopConfiguration.initialize();
+      SqoopConfiguration.getInstance().initialize();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -146,7 +146,7 @@ public class TestConfiguration {
   public void testSystemNotInitialized() throws Exception {
     boolean success = false;
     try {
-      SqoopConfiguration.getContext();
+      SqoopConfiguration.getInstance().getContext();
     } catch (Exception ex) {
       Assert.assertTrue(ex instanceof SqoopException);
       Assert.assertSame(((SqoopException) ex).getErrorCode(),
@@ -160,6 +160,6 @@ public class TestConfiguration {
   @Test
   public void testConfigurationInitSuccess() throws Exception {
     TestUtils.setupTestConfigurationWithExtraConfig(null, null);
-    SqoopConfiguration.initialize();
+    SqoopConfiguration.getInstance().initialize();
   }
 }

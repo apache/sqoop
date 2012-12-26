@@ -37,20 +37,20 @@ public class ServerInitializer implements ServletContextListener {
 
   public void contextDestroyed(ServletContextEvent arg0) {
     LOG.info("Shutting down Sqoop server");
-    FrameworkManager.destroy();
-    ConnectorManager.destroy();
-    RepositoryManager.destroy();
-    SqoopConfiguration.destroy();
+    FrameworkManager.getInstance().destroy();
+    ConnectorManager.getInstance().destroy();
+    RepositoryManager.getInstance().destroy();
+    SqoopConfiguration.getInstance().destroy();
     LOG.info("Sqoop server has been correctly terminated");
   }
 
   public void contextInitialized(ServletContextEvent arg0) {
     try {
       LOG.info("Booting up Sqoop server");
-      SqoopConfiguration.initialize();
-      RepositoryManager.initialize();
-      ConnectorManager.initialize();
-      FrameworkManager.initialize();
+      SqoopConfiguration.getInstance().initialize();
+      RepositoryManager.getInstance().initialize();
+      ConnectorManager.getInstance().initialize();
+      FrameworkManager.getInstance().initialize();
       LOG.info("Sqoop server has successfully boot up");
     } catch (Exception ex) {
       LOG.error("Server startup failure", ex);
