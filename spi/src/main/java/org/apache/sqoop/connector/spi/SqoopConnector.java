@@ -28,40 +28,40 @@ import org.apache.sqoop.validation.Validator;
 /**
  * Service provider interface for Sqoop Connectors.
  */
-public interface SqoopConnector {
+public abstract class SqoopConnector {
 
   /**
    * Retrieve connector version.
    *
    * @return Version encoded as a string
    */
-  String getVersion();
+  public abstract String getVersion();
 
   /**
    * @param locale
    * @return the resource bundle associated with the given locale.
    */
-  ResourceBundle getBundle(Locale locale);
+  public abstract ResourceBundle getBundle(Locale locale);
 
   /**
    * @return Get connection configuration class
    */
-  Class getConnectionConfigurationClass();
+  public abstract Class getConnectionConfigurationClass();
 
   /**
    * @return Get job configuration class for given type or null if not supported
    */
-  Class getJobConfigurationClass(MJob.Type jobType);
+  public abstract Class getJobConfigurationClass(MJob.Type jobType);
 
   /**
    * @return an <tt>Importer</tt> that provides classes for performing import.
    */
-  Importer getImporter();
+  public abstract Importer getImporter();
 
   /**
    * @return an <tt>Exporter</tt> that provides classes for performing export.
    */
-  Exporter getExporter();
+  public abstract Exporter getExporter();
 
   /**
    * Returns validation object that Sqoop framework can use to validate user
@@ -70,6 +70,6 @@ public interface SqoopConnector {
    *
    * @return Validator object
    */
-  Validator getValidator();
+  public abstract Validator getValidator();
 
 }

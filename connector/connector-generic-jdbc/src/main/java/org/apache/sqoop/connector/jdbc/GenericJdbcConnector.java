@@ -30,7 +30,7 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Validator;
 
-public class GenericJdbcConnector implements SqoopConnector {
+public class GenericJdbcConnector extends SqoopConnector {
 
   private static final Importer IMPORTER = new Importer(
       GenericJdbcImportInitializer.class,
