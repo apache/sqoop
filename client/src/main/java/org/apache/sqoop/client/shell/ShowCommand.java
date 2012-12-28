@@ -34,13 +34,14 @@ public class ShowCommand extends SqoopCommand
   private ShowJobFunction jobFunction;
   private ShowFrameworkFunction frameworkFunction;
   private ShowConnectionFunction connectionFunction;
+  private ShowOptionFunction optionFunction;
 
 
   protected ShowCommand(Shell shell) {
     super(shell, Constants.CMD_SHOW, Constants.CMD_SHOW_SC,
         new String[] {Constants.FN_SERVER, Constants.FN_VERSION,
           Constants.FN_CONNECTOR, Constants.FN_FRAMEWORK,
-          Constants.FN_CONNECTION, Constants.FN_JOB },
+          Constants.FN_CONNECTION, Constants.FN_JOB, Constants.FN_OPTION },
           Constants.PRE_SHOW, Constants.SUF_INFO);
   }
 
@@ -91,6 +92,11 @@ public class ShowCommand extends SqoopCommand
         jobFunction = new ShowJobFunction(io);
       }
       return jobFunction.execute(args);
+    } else if (func.equals(Constants.FN_OPTION)) {
+      if (optionFunction == null) {
+        optionFunction = new ShowOptionFunction(io);
+      }
+      return optionFunction.execute(args);
     } else {
       throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
     }
