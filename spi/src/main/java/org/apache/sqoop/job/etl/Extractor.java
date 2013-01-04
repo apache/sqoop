@@ -24,11 +24,11 @@ import org.apache.sqoop.job.io.DataWriter;
  * This allows connector to extract data from a source system
  * based on each partition.
  */
-public abstract class Extractor {
+public abstract class Extractor<ConnectionConfiguration, JobConfiguration> {
 
   public abstract void run(ImmutableContext context,
-                           Object connectionConfiguration,
-                           Object jobConfiguration,
+                           ConnectionConfiguration connectionConfiguration,
+                           JobConfiguration jobConfiguration,
                            Partition partition,
                            DataWriter writer);
 

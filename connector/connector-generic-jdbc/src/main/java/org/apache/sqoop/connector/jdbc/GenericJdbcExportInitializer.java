@@ -30,29 +30,24 @@ import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class GenericJdbcExportInitializer extends Initializer {
+public class GenericJdbcExportInitializer extends Initializer<ConnectionConfiguration, ExportJobConfiguration> {
 
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(MutableContext context, Object connectionConfiguration, Object jobConfiguration) {
-    ConnectionConfiguration connectionConfig = (ConnectionConfiguration)connectionConfiguration;
-    ExportJobConfiguration jobConfig = (ExportJobConfiguration)jobConfiguration;
-
-    configureJdbcProperties(context, connectionConfig, jobConfig);
+  public void initialize(MutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
+    configureJdbcProperties(context, connection, job);
     try {
-      configureTableProperties(context, connectionConfig, jobConfig);
-
+      configureTableProperties(context, connection, job);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(ImmutableContext context, Object connectionConfiguration, Object jobConfiguration) {
+  public List<String> getJars(ImmutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
     List<String> jars = new LinkedList<String>();
 
-    ConnectionConfiguration connection = (ConnectionConfiguration) connectionConfiguration;
     jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
 
     return jars;

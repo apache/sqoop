@@ -18,10 +18,12 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.io.DataReader;
 
-public class GenericJdbcExportLoader extends Loader {
+public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, ExportJobConfiguration> {
 
   public static final int DEFAULT_ROWS_PER_BATCH = 100;
   public static final int DEFAULT_BATCHES_PER_TRANSACTION = 100;
@@ -29,7 +31,7 @@ public class GenericJdbcExportLoader extends Loader {
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void load(ImmutableContext context, Object oc, Object oj, DataReader reader) throws Exception{
+  public void load(ImmutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job, DataReader reader) throws Exception{
     String driver = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
     String url = context.getString(

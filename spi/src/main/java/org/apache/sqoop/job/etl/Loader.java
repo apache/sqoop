@@ -23,7 +23,7 @@ import org.apache.sqoop.job.io.DataReader;
 /**
  * This allows connector to load data into a target system.
  */
-public abstract class Loader {
+public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
 
   /**
    * Load data to target.
@@ -35,8 +35,8 @@ public abstract class Loader {
    * @throws Exception
    */
   public abstract void load(ImmutableContext context,
-                            Object connectionConfiguration,
-                            Object jobConfiguration,
+                            ConnectionConfiguration connectionConfiguration,
+                            JobConfiguration jobConfiguration,
                             DataReader reader) throws Exception;
 
 }

@@ -24,17 +24,19 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.DataWriter;
 
-public class GenericJdbcImportExtractor extends Extractor {
+public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguration, ImportJobConfiguration> {
 
  public static final Logger LOG = Logger.getLogger(GenericJdbcImportExtractor.class);
 
  private long rowsRead = 0;
   @Override
-  public void run(ImmutableContext context, Object connectionC, Object jobC, Partition partition, DataWriter writer) {
+  public void run(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job, Partition partition, DataWriter writer) {
     String driver = context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
     String url = context.getString(

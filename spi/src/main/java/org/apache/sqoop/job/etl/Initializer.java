@@ -27,7 +27,7 @@ import java.util.List;
  * This allows connector to define initialization work for execution,
  * for example, context configuration.
  */
-public abstract class Initializer {
+public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
 
   /**
    * Initialize new submission based on given configuration properties. Any
@@ -39,8 +39,8 @@ public abstract class Initializer {
    * @param jobConfiguration Connector's job configuration object
    */
   public abstract void initialize(MutableContext context,
-                                  Object connectionConfiguration,
-                                  Object jobConfiguration);
+                                  ConnectionConfiguration connectionConfiguration,
+                                  JobConfiguration jobConfiguration);
 
   /**
    * Return list of all jars that this particular connector needs to operate
@@ -50,8 +50,8 @@ public abstract class Initializer {
    * @return
    */
   public List<String> getJars(ImmutableContext context,
-                              Object connectionConfiguration,
-                              Object jobConfiguration) {
+                              ConnectionConfiguration connectionConfiguration,
+                              JobConfiguration jobConfiguration) {
     return new LinkedList<String>();
   }
 

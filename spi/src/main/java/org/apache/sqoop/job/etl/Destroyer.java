@@ -23,7 +23,7 @@ import org.apache.sqoop.common.ImmutableContext;
  * This allows connector to define work to complete execution, for example,
  * resource cleaning.
  */
-public abstract class Destroyer {
+public abstract class Destroyer<ConnectionConfiguration, JobConfiguration> {
 
   /**
    * Callback to clean up after job execution.
@@ -35,7 +35,7 @@ public abstract class Destroyer {
    */
   public abstract void destroy(boolean success,
                                ImmutableContext context,
-                               Object connectionConfiguration,
-                               Object jobConfiguration);
+                               ConnectionConfiguration connectionConfiguration,
+                               JobConfiguration jobConfiguration);
 
 }

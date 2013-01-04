@@ -18,12 +18,14 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 
-public class GenericJdbcImportDestroyer extends Destroyer {
+public class GenericJdbcImportDestroyer extends Destroyer<ConnectionConfiguration, ImportJobConfiguration> {
 
   @Override
-  public void destroy(boolean success, ImmutableContext context, Object connectionConfig, Object jobConfig) {
+  public void destroy(boolean success, ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
     // No explicit action at the moment
   }
 

@@ -25,11 +25,11 @@ import java.util.List;
  * This allows connector to define how input data to be partitioned.
  * The number of data partitions also determines the degree of parallelism.
  */
-public abstract class Partitioner {
+public abstract class Partitioner<ConnectionConfiguration, JobConfiguration> {
 
   public abstract List<Partition> getPartitions(ImmutableContext context,
                                                 long maxPartitions,
-                                                Object connectionConfiguration,
-                                                Object jobConfiguration);
+                                                ConnectionConfiguration connectionConfiguration,
+                                                JobConfiguration jobConfiguration);
 
 }
