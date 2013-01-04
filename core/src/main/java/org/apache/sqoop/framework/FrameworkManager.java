@@ -566,7 +566,7 @@ public final class FrameworkManager {
     if(newStatus.isRunning()) {
       progress = submissionEngine.progress(externalId);
     } else {
-      counters = submissionEngine.stats(externalId);
+      counters = submissionEngine.counters(externalId);
     }
 
     submission.setStatus(newStatus);

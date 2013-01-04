@@ -91,13 +91,13 @@ public abstract class SubmissionEngine {
   /**
    * Return statistics for given submission id.
    *
-   * Sqoop framework will call stats only for submission in state SUCCEEDED,
+   * Sqoop framework will call counters only for submission in state SUCCEEDED,
    * it's consider exceptional state to call this method for other states.
    *
    * @param submissionId Submission internal id.
    * @return Submission statistics
    */
-  public Counters stats(String submissionId) {
+  public Counters counters(String submissionId) {
     return null;
   }
 

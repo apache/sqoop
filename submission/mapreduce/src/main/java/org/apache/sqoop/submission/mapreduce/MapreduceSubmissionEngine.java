@@ -35,6 +35,8 @@ import org.apache.sqoop.framework.SubmissionRequest;
 import org.apache.sqoop.framework.SubmissionEngine;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.submission.counter.Counter;
+import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.submission.SubmissionStatus;
 
@@ -307,9 +309,18 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * {@inheritDoc}
    */
   @Override
-  public Counters stats(String submissionId) {
-    //TODO(jarcec): Not supported yet
-    return super.stats(submissionId);
+  public Counters counters(String submissionId) {
+    try {
+      RunningJob runningJob = jobClient.getJob(JobID.forName(submissionId));
+      if(runningJob == null) {
+        // Return default value
+        return super.counters(submissionId);
+      }
+
+      return convertMapreduceCounters(runningJob.getCounters());
+    } catch (IOException e) {
+      throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
+    }
   }
 
   /**
@@ -352,4 +363,26 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0004,
       "Unknown status " + status);
   }
+
+  /**
+   * Convert Hadoop counters to Sqoop counters.
+   *
+   * @param hadoopCounters Hadoop counters
+   * @return Appropriate Sqoop counters
+   */
+  private Counters convertMapreduceCounters(org.apache.hadoop.mapred.Counters hadoopCounters) {
+    Counters sqoopCounters = new Counters();
+
+    for(org.apache.hadoop.mapred.Counters.Group hadoopGroup : hadoopCounters) {
+      CounterGroup sqoopGroup = new CounterGroup(hadoopGroup.getName());
+      for(org.apache.hadoop.mapred.Counters.Counter hadoopCounter : hadoopGroup) {
+        Counter sqoopCounter = new Counter(hadoopCounter.getName(), hadoopCounter.getValue());
+        sqoopGroup.addCounter(sqoopCounter);
+      }
+      sqoopCounters.addCounterGroup(sqoopGroup);
+    }
+
+    return sqoopCounters;
+  }
+
 }
