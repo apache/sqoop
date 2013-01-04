@@ -126,6 +126,8 @@ Available functions:
 +================+========================================================================================================+
 | ``server``     | Display connection information to the server (host, port, webapp)                                      |
 +----------------+--------------------------------------------------------------------------------------------------------+
+| ``option``     | Display various client side options                                                                    |
++----------------+--------------------------------------------------------------------------------------------------------+
 | ``version``    | Show version of both client and server (build numbers, supported protocols)                            |
 +----------------+--------------------------------------------------------------------------------------------------------+
 | ``connector``  | Show connector meta data - set of parameters that connectors needs to create connections and jobs      |
@@ -157,6 +159,23 @@ Show details about configuration connection to Sqoop server.
 Example: ::
 
   show server --all
+
+Show Option Function
+~~~~~~~~~~~~~~~~~~~~
+
+Show values of various client side options. This function will show all client options when called without arguments.
+
++-----------------------+--------------------------------------------------------------+
+| Argument              |  Description                                                 |
++=======================+==============================================================+
+| ``-n``, ``--name``    | Show client option value with given name                     |
++-----------------------+--------------------------------------------------------------+
+
+Please check table in `Set Option Function`_ section to get a list of all supported option names.
+
+Example: ::
+
+  show option --name verbose
 
 Show Version Function
 ~~~~~~~~~~~~~~~~~~~~~
