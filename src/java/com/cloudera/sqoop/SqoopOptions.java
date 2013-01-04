@@ -88,6 +88,10 @@ public class SqoopOptions
     org.apache.sqoop.SqoopOptions.clearNonceDir();
   }
 
+  public static String getHiveHomeDefault() {
+    return org.apache.sqoop.SqoopOptions.getHiveHomeDefault();
+  }
+
   /**
    * {@inheritDoc}.
    * @deprecated

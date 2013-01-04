@@ -766,14 +766,18 @@ public class SqoopOptions implements Cloneable {
     SqoopOptions.curNonce = null;
   }
 
+  public static String getHiveHomeDefault() {
+    // Set this with $HIVE_HOME, but -Dhive.home can override.
+    String hiveHome = System.getenv("HIVE_HOME");
+    return System.getProperty("hive.home", hiveHome);
+  }
+
   private void initDefaults(Configuration baseConfiguration) {
     // first, set the true defaults if nothing else happens.
     // default action is to run the full pipeline.
     this.hadoopHome = System.getenv("HADOOP_HOME");
 
-    // Set this with $HIVE_HOME, but -Dhive.home can override.
-    this.hiveHome = System.getenv("HIVE_HOME");
-    this.hiveHome = System.getProperty("hive.home", this.hiveHome);
+    this.hiveHome = getHiveHomeDefault();
 
     this.inputDelimiters = new DelimiterSet(
         DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR,

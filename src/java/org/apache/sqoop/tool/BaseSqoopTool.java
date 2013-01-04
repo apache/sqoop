@@ -991,14 +991,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
   protected void validateHiveOptions(SqoopOptions options)
       throws InvalidOptionsException {
-    // Empty; this method is present to maintain API consistency, and
-    // is reserved for future constraints on Hive options.
     if (options.getHiveDelimsReplacement() != null
             && options.doHiveDropDelims()) {
       throw new InvalidOptionsException("The " + HIVE_DROP_DELIMS_ARG
               + " option conflicts with the " + HIVE_DELIMS_REPLACEMENT_ARG
               + " option." + HELP_STR);
     }
+
     // Many users are reporting issues when they are trying to import data
     // directly into hive warehouse. This should prevent users from doing
     // so in case of a default location.
@@ -1017,6 +1016,31 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       LOG.warn("inserting data into hive. Please consider removing");
       LOG.warn("--target-dir or --warehouse-dir into /user/hive/warehouse in");
       LOG.warn("case that you will detect any issues.");
+    }
+
+    // Warn about using hive specific arguments without hive import itself
+    if (!options.doHiveImport()
+      && ((options.getHiveHome() != null
+            && options.getHiveHome().equals(SqoopOptions.getHiveHomeDefault()))
+        || options.doOverwriteHiveTable()
+        || options.doFailIfHiveTableExists()
+        || (options.getHiveTableName() != null
+            && !options.getHiveTableName().equals(options.getTableName()))
+        || options.getHivePartitionKey() != null
+        || options.getHivePartitionValue() != null
+        || options.getMapColumnHive().size() > 0)) {
+      LOG.warn("It seems that you've specified at least one of following:");
+      LOG.warn("\t--hive-home");
+      LOG.warn("\t--hive-overwrite");
+      LOG.warn("\t--create-hive-table");
+      LOG.warn("\t--hive-table");
+      LOG.warn("\t--hive-partition-key");
+      LOG.warn("\t--hive-partition-value");
+      LOG.warn("\t--map-column-hive");
+      LOG.warn("Without specifying parameter --hive-import. Please note that");
+      LOG.warn("those arguments will not be used in this session. Either");
+      LOG.warn("specify --hive-import to apply them correctly or remove them");
+      LOG.warn("from command line to remove this warning.");
     }
   }
 
