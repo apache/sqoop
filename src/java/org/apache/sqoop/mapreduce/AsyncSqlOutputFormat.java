@@ -19,10 +19,12 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.SynchronousQueue;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -30,6 +32,7 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.StringUtils;
+
 import com.cloudera.sqoop.lib.SqoopRecord;
 
 /**
@@ -240,6 +243,20 @@ public abstract class AsyncSqlOutputFormat<K extends SqoopRecord, V>
                   + " statements");
               this.conn.commit();
               this.curNumStatements = 0;
+            }
+          } catch (BatchUpdateException batchE) {
+            if (batchE.getNextException() != null) {
+              // if a statement in a batch causes an SQLException
+              // the database can either set it as the cause of
+              // the BatchUpdateException, or set it as the 'next'
+              // field of the BatchUpdateException (e.g. HSQLDB 1.8
+              // does the former and Postgres 8.4 does the latter).
+              // We'll check for this SQLException in both places,
+              // and use the 'next' one in preference.
+              setLastError(batchE.getNextException());
+            } else {
+              // same as SQLException block
+              setLastError(batchE);
             }
           } catch (SQLException sqlE) {
             setLastError(sqlE);
