@@ -40,7 +40,7 @@ public class SetCommand extends SqoopCommand
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg =  MessageFormat.format(getResource().getString(Constants
         .RES_SET_USAGE), getUsage());
 
@@ -49,7 +49,6 @@ public class SetCommand extends SqoopCommand
       io.out.println();
       return null;
     }
-    resolveVariables(args);
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_SERVER)) {
       if (serverFunction == null) {

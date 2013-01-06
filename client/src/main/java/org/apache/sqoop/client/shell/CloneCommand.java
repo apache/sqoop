@@ -42,7 +42,7 @@ public class CloneCommand extends SqoopCommand {
       Constants.PRE_CLONE, Constants.SUF_INFO);
   }
 
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_CLONE_USAGE), getUsage());
 

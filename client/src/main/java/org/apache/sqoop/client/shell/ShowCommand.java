@@ -47,7 +47,7 @@ public class ShowCommand extends SqoopCommand
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_SHOW_USAGE), getUsage());
     if (args.size() == 0) {

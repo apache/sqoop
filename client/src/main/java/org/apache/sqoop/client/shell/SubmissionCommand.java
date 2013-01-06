@@ -43,7 +43,7 @@ public class SubmissionCommand  extends SqoopCommand {
       Constants.PRE_SUBMISSION, Constants.SUF_INFO);
   }
 
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_SUBMISSION_USAGE), getUsage());
     if (args.size() == 0) {

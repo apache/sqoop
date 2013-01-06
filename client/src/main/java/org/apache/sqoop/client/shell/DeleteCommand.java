@@ -42,7 +42,7 @@ public class DeleteCommand extends SqoopCommand {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_DELETE_USAGE), getUsage());
     if (args.size() == 0) {

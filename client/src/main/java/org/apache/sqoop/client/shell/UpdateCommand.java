@@ -40,7 +40,7 @@ public class UpdateCommand extends SqoopCommand {
       Constants.PRE_UPDATE, Constants.SUF_INFO);
   }
 
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_UPDATE_USAGE), getUsage());
     if (args.size() == 0) {

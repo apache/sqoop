@@ -41,7 +41,7 @@ public class CreateCommand extends SqoopCommand {
       Constants.PRE_CREATE, Constants.SUF_INFO);
   }
 
-  public Object execute(List args) {
+  public Object executeCommand(List args) {
     String usageMsg = MessageFormat.format(getResource().getString(Constants
         .RES_CREATE_USAGE), getUsage());
 

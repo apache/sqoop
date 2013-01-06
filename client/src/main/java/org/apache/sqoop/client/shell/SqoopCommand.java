@@ -126,6 +126,22 @@ public abstract class SqoopCommand extends ComplexCommandSupport
     return help;
   }
 
+  /**
+   * Override execute method
+   */
+  @Override
+  public Object execute(List args) {
+    resolveVariables(args);
+    return executeCommand(args);
+  }
+
+  /**
+   * Abstract executeCommand
+   * @param args list
+   * @return Object
+   */
+  public abstract Object executeCommand(List args);
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void resolveVariables(List arg) {
     List temp = new ArrayList();
