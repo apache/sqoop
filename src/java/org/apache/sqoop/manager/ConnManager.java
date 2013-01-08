@@ -451,6 +451,16 @@ public abstract class ConnManager {
   }
 
   /**
+   * Return true if Sqoop common code should automatically escape table name
+   * when saving it to mapreduce configuration object when during export.
+   *
+   * @return True if table name should be escaped
+   */
+  public boolean escapeTableNameOnExport() {
+    return false;
+  }
+
+  /**
    * Perform any shutdown operations on the connection.
    */
   public abstract void close() throws SQLException;

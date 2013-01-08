@@ -81,6 +81,11 @@ public class PostgresqlManager
     return escapeIdentifier(tableName);
   }
 
+  @Override
+  public boolean escapeTableNameOnExport() {
+    return true;
+  }
+
   protected String escapeIdentifier(String identifier) {
     if (identifier == null) {
       return null;

@@ -129,7 +129,12 @@ public class JdbcExportJob extends ExportJobBase {
       if (null == colNames) {
         colNames = mgr.getColumnNames(tableName);
       }
-      DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), colNames);
+
+      if (mgr.escapeTableNameOnExport()) {
+        DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), colNames);
+      } else {
+        DBOutputFormat.setOutput(job, tableName, colNames);
+      }
 
       job.setOutputFormatClass(getOutputFormatClass());
       job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY, tableClassName);

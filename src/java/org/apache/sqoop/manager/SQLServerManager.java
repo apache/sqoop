@@ -157,6 +157,11 @@ public class SQLServerManager
     return escapeObjectName(tableName);
   }
 
+  @Override
+  public boolean escapeTableNameOnExport() {
+    return true;
+  }
+
   /**
    * Escape database object name (database, table, column, schema).
    *
