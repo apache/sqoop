@@ -31,6 +31,10 @@ public class ExportJobContext
     super(table, jar, opts);
   }
 
+  public void setConnManager(ConnManager mgr) {
+    super.setConnManager(mgr);
+  }
+
   public ConnManager getConnManager() {
     return (ConnManager)super.getConnManager();
   }

@@ -19,10 +19,23 @@
 package com.cloudera.sqoop.mapreduce;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import java.sql.SQLException;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
 public class ExportOutputFormat<K extends SqoopRecord, V>
     extends org.apache.sqoop.mapreduce.ExportOutputFormat<K, V> {
+
+  /** {@inheritDoc}. **/
+  public class ExportRecordWriter extends
+    org.apache.sqoop.mapreduce.ExportOutputFormat<K, V>.ExportRecordWriter {
+
+    public ExportRecordWriter(TaskAttemptContext context)
+      throws ClassNotFoundException, SQLException {
+      super(context);
+    }
+  }
 }
