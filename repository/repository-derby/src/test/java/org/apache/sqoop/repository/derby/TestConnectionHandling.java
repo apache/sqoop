@@ -147,6 +147,16 @@ public class TestConnectionHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 8);
   }
 
+  public void testInUseConnection() throws Exception {
+    loadConnections();
+
+    assertFalse(handler.inUseConnection(1, getDerbyConnection()));
+
+    loadJobs();
+
+    assertTrue(handler.inUseConnection(1, getDerbyConnection()));
+  }
+
   public void testUpdateConnection() throws Exception {
     loadConnections();
 

@@ -125,6 +125,16 @@ public class TestJobHandling extends DerbyTestCase {
     assertFalse(handler.existsJob(5, getDerbyConnection()));
   }
 
+  public void testInUseJob() throws Exception {
+    loadJobs();
+    loadSubmissions();
+
+    assertTrue(handler.inUseJob(1, getDerbyConnection()));
+    assertFalse(handler.inUseJob(2, getDerbyConnection()));
+    assertFalse(handler.inUseJob(3, getDerbyConnection()));
+    assertFalse(handler.inUseJob(4, getDerbyConnection()));
+  }
+
   public void testCreateJob() throws Exception {
     MJob job = getJob();
 

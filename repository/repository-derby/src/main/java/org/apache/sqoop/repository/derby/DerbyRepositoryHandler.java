@@ -717,8 +717,13 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
   @Override
   public boolean inUseJob(long jobId, Connection conn) {
-    // TODO(jarcec): This method will need to be upgraded once submission
-    // engine will be in place as we can't remove "running" job.
+    MSubmission submission = findSubmissionLastForJob(jobId, conn);
+
+    // We can't remove running job
+    if(submission.getStatus().isRunning()) {
+      return true;
+    }
+
     return false;
   }
 
