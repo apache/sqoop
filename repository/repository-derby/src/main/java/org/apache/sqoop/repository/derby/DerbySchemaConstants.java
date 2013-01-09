@@ -93,6 +93,10 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQN_CONNECTOR = "SQN_CONNECTOR";
 
+  public static final String COLUMN_SQN_CREATION_DATE = "SQN_CREATION_DATE";
+
+  public static final String COLUMN_SQN_UPDATE_DATE = "SQN_UPDATE_DATE";
+
   // SQ_JOB
 
   public static final String TABLE_SQ_JOB_NAME = "SQ_JOB";
@@ -107,6 +111,10 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQB_TYPE = "SQB_TYPE";
 
   public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
+
+  public static final String COLUMN_SQB_CREATION_DATE = "SQB_CREATION_DATE";
+
+  public static final String COLUMN_SQB_UPDATE_DATE = "SQB_UPDATE_DATE";
 
   // SQ_CONNECTION_INPUT
 

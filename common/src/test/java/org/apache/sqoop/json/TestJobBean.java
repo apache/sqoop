@@ -24,6 +24,8 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+import java.util.Date;
+
 import static junit.framework.Assert.assertEquals;
 import static org.apache.sqoop.json.TestUtil.getJob;
 
@@ -33,9 +35,13 @@ import static org.apache.sqoop.json.TestUtil.getJob;
 public class TestJobBean {
   @Test
   public void testSerialization() throws ParseException {
+    Date created = new Date();
+    Date updated = new Date();
     MJob job = getJob("ahoj", MJob.Type.IMPORT);
     job.setName("The big job");
     job.setPersistenceId(666);
+    job.setCreationDate(created);
+    job.setLastUpdateDate(updated);
 
     // Fill some data at the beginning
     MStringInput input = (MStringInput) job.getConnectorPart().getForms()
@@ -59,6 +65,8 @@ public class TestJobBean {
     assertEquals(666, target.getPersistenceId());
     assertEquals(MJob.Type.IMPORT, target.getType());
     assertEquals("The big job", target.getName());
+    assertEquals(created, target.getCreationDate());
+    assertEquals(updated, target.getLastUpdateDate());
 
     // Test that value was correctly moved
     MStringInput targetInput = (MStringInput) target.getConnectorPart()

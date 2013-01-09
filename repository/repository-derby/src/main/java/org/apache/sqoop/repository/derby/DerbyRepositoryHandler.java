@@ -424,6 +424,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, connection.getName());
       stmt.setLong(2, connection.getConnectorId());
+      stmt.setTimestamp(3, new Timestamp(connection.getCreationDate().getTime()));
+      stmt.setTimestamp(4, new Timestamp(connection.getLastUpdateDate().getTime()));
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -473,7 +475,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       // Update CONNECTION table
       updateStmt = conn.prepareStatement(STMT_UPDATE_CONNECTION);
       updateStmt.setString(1, connection.getName());
-      updateStmt.setLong(2, connection.getPersistenceId());
+      updateStmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+
+      updateStmt.setLong(3, connection.getPersistenceId());
       updateStmt.executeUpdate();
 
       // And reinsert new values
@@ -622,6 +626,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       stmt.setString(1, job.getName());
       stmt.setLong(2, job.getConnectionId());
       stmt.setString(3, job.getType().name());
+      stmt.setTimestamp(4, new Timestamp(job.getCreationDate().getTime()));
+      stmt.setTimestamp(5, new Timestamp(job.getLastUpdateDate().getTime()));
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -671,7 +677,9 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       // Update job table
       updateStmt = conn.prepareStatement(STMT_UPDATE_JOB);
       updateStmt.setString(1, job.getName());
-      updateStmt.setLong(2, job.getPersistenceId());
+      updateStmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+
+      updateStmt.setLong(3, job.getPersistenceId());
       updateStmt.executeUpdate();
 
       // And reinsert new values
@@ -1171,6 +1179,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
         long connectorId = rsConnection.getLong(3);
+        Date creationDate = rsConnection.getTimestamp(4);
+        Date lastUpdateDate = rsConnection.getTimestamp(5);
 
         formConnectorFetchStmt =
           conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
@@ -1203,6 +1213,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
         connection.setPersistenceId(id);
         connection.setName(name);
+        connection.setCreationDate(creationDate);
+        connection.setLastUpdateDate(lastUpdateDate);
 
         connections.add(connection);
       }
@@ -1233,6 +1245,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         String name = rsJob.getString(3);
         long connectionId = rsJob.getLong(4);
         String stringType = rsJob.getString(5);
+        Date creationDate = rsJob.getTimestamp(6);
+        Date lastUpdateDate = rsJob.getTimestamp(7);
 
         MJob.Type type = MJob.Type.valueOf(stringType);
 
@@ -1267,6 +1281,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
         job.setPersistenceId(id);
         job.setName(name);
+        job.setCreationDate(creationDate);
+        job.setLastUpdateDate(lastUpdateDate);
 
         jobs.add(job);
       }

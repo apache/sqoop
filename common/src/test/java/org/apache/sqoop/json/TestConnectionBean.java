@@ -23,6 +23,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
+import java.util.Date;
+
 import static junit.framework.Assert.*;
 import static org.apache.sqoop.json.TestUtil.*;
 
@@ -32,9 +34,13 @@ import static org.apache.sqoop.json.TestUtil.*;
 public class TestConnectionBean {
   @Test
   public void testSerialization() {
+    Date created = new Date();
+    Date updated = new Date();
     MConnection connection = getConnection("ahoj");
     connection.setName("Connection");
     connection.setPersistenceId(666);
+    connection.setCreationDate(created);
+    connection.setLastUpdateDate(updated);
 
     // Fill some data at the beginning
     MStringInput input = (MStringInput) connection.getConnectorPart().getForms()
@@ -57,6 +63,8 @@ public class TestConnectionBean {
     // Check id and name
     assertEquals(666, target.getPersistenceId());
     assertEquals("Connection", target.getName());
+    assertEquals(created, target.getCreationDate());
+    assertEquals(updated, target.getLastUpdateDate());
 
     // Test that value was correctly moved
     MStringInput targetInput = (MStringInput) target.getConnectorPart()

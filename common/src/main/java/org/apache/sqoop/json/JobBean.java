@@ -24,6 +24,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +107,8 @@ public class JobBean implements JsonBean {
       object.put(ID, job.getPersistenceId());
       object.put(NAME, job.getName());
       object.put(TYPE, job.getType().name());
+      object.put(CREATED, job.getCreationDate().getTime());
+      object.put(UPDATED, job.getLastUpdateDate().getTime());
       object.put(CONNECTION_ID, job.getConnectionId());
       object.put(CONNECTOR_ID, job.getConnectorId());
       object.put(CONNECTOR_PART,
@@ -166,6 +169,8 @@ public class JobBean implements JsonBean {
 
       job.setPersistenceId((Long) object.get(ID));
       job.setName((String) object.get(NAME));
+      job.setCreationDate(new Date((Long) object.get(CREATED)));
+      job.setLastUpdateDate(new Date((Long) object.get(UPDATED)));
 
       jobs.add(job);
     }

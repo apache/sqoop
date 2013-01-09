@@ -25,6 +25,7 @@ import org.apache.sqoop.model.MConnection;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -89,10 +90,16 @@ public class ShowConnectionFunction extends SqoopFunction {
 
     io.out.println(s);
 
+    DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+
     for (MConnection connection : connections) {
-      s =  MessageFormat.format(getResource().getString
-          (Constants.RES_SHOW_PROMPT_CONN_INFO), connection.getPersistenceId(),
-          connection.getName());
+      s =  MessageFormat.format(
+        getResource().getString(Constants.RES_SHOW_PROMPT_CONN_INFO),
+        connection.getPersistenceId(),
+        connection.getName(),
+        formatter.format(connection.getCreationDate()),
+        formatter.format(connection.getLastUpdateDate())
+      );
       io.out.println(s);
 
       long connectorId = connection.getConnectorId();

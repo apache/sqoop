@@ -23,7 +23,7 @@ import org.apache.sqoop.common.SqoopException;
  * Model describing entire job object including both connector and
  * framework part.
  */
-public class MJob extends MPersistableEntity {
+public class MJob extends MAccountableEntity {
 
   public static enum Type {
     IMPORT,

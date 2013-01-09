@@ -71,26 +71,30 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <p>
  * <strong>SQ_CONNECTION</strong>: Stored connections
  * <pre>
- *    +----------------------------+
- *    | SQ_CONNECTION              |
- *    +----------------------------+
- *    | SQN_ID: BIGINT PK AUTO-GEN |
- *    | SQN_NAME: VARCHAR(64)      |
- *    | SQN_CONNECTOR: BIGINT      | FK SQ_CONNECTOR(SQC_ID)
- *    +----------------------------+
+ *    +------------------------------+
+ *    | SQ_CONNECTION                |
+ *    +------------------------------+
+ *    | SQN_ID: BIGINT PK AUTO-GEN   |
+ *    | SQN_NAME: VARCHAR(64)        |
+ *    | SQN_CONNECTOR: BIGINT        | FK SQ_CONNECTOR(SQC_ID)
+ *    | SQN_CREATION_DATE: TIMESTAMP |
+ *    | SQN_UPDATE_DATE: TIMESTAMP   |
+ *    +------------------------------+
  * </pre>
  * </p>
  * <p>
  * <strong>SQ_JOB</strong>: Stored jobs
  * <pre>
- *    +----------------------------+
- *    | SQ_JOB                     |
- *    +----------------------------+
- *    | SQB_ID: BIGINT PK AUTO-GEN |
- *    | SQB_NAME: VARCHAR(64)      |
- *    | SQB_TYPE: VARCHAR(64)      |
- *    | SQB_CONNECTION: BIGINT     | FK SQ_CONNECTION(SQN_ID)
- *    +----------------------------+
+ *    +------------------------------+
+ *    | SQ_JOB                       |
+ *    +------------------------------+
+ *    | SQB_ID: BIGINT PK AUTO-GEN   |
+ *    | SQB_NAME: VARCHAR(64)        |
+ *    | SQB_TYPE: VARCHAR(64)        |
+ *    | SQB_CONNECTION: BIGINT       | FK SQ_CONNECTION(SQN_ID)
+ *    | SQB_CREATION_DATE: TIMESTAMP |
+ *    | SQB_UPDATE_DATE: TIMESTAMP   |
+ *    +------------------------------+
  * </pre>
  * </p>
  * <p>
@@ -222,6 +226,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQN_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
       + COLUMN_SQN_CONNECTOR + " BIGINT, "
       + COLUMN_SQN_NAME  + " VARCHAR(32),"
+      + COLUMN_SQN_CREATION_DATE + " TIMESTAMP,"
+      + COLUMN_SQN_UPDATE_DATE + " TIMESTAMP,"
       + " FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
@@ -232,6 +238,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQB_CONNECTION + " BIGINT, "
       + COLUMN_SQB_NAME + " VARCHAR(64), "
       + COLUMN_SQB_TYPE + " VARCHAR(64),"
+      + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
+      + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
       + " FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
 
@@ -384,18 +392,27 @@ public final class DerbySchemaQuery {
 
   // DML: Insert new connection
   public static final String STMT_INSERT_CONNECTION =
-    "INSERT INTO " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_NAME + ", "
-    + COLUMN_SQN_CONNECTOR + ") VALUES (?, ?)";
+    "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
+    + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_CREATION_DATE + ", "
+    + COLUMN_SQN_UPDATE_DATE
+    + ") VALUES (?, ?, ?, ?)";
 
   // DML: Insert new connection inputs
   public static final String STMT_INSERT_CONNECTION_INPUT =
-    "INSERT INTO " + TABLE_SQ_CONNECTION_INPUT + " (" + COLUMN_SQNI_CONNECTION
-    + ", " + COLUMN_SQNI_INPUT + ", " + COLUMN_SQNI_VALUE + ") "
-    + "VALUES (?, ?, ?)";
+    "INSERT INTO " + TABLE_SQ_CONNECTION_INPUT + " ("
+    + COLUMN_SQNI_CONNECTION + ", "
+    + COLUMN_SQNI_INPUT + ", "
+    + COLUMN_SQNI_VALUE
+    + ") VALUES (?, ?, ?)";
 
+  // DML: Update connection
   public static final String STMT_UPDATE_CONNECTION =
-    "UPDATE " + TABLE_SQ_CONNECTION + " SET " + COLUMN_SQN_NAME + " = ? WHERE "
-    + COLUMN_SQN_ID + " = ?";
+    "UPDATE " + TABLE_SQ_CONNECTION + " SET "
+    + COLUMN_SQN_NAME + " = ?, "
+    + COLUMN_SQN_UPDATE_DATE + " = ? "
+    + " WHERE " + COLUMN_SQN_ID + " = ?";
 
   // DML: Delete rows from connection input table
   public static final String STMT_DELETE_CONNECTION_INPUT =
@@ -408,14 +425,24 @@ public final class DerbySchemaQuery {
 
   // DML: Select one specific connection
   public static final String STMT_SELECT_CONNECTION_SINGLE =
-    "SELECT " + COLUMN_SQN_ID + ", " + COLUMN_SQN_NAME + ", "
-    + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION + " WHERE "
-    + COLUMN_SQN_ID + " = ?";
+    "SELECT "
+    + COLUMN_SQN_ID + ", "
+    + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_CREATION_DATE + ", "
+    + COLUMN_SQN_UPDATE_DATE
+    + " FROM " + TABLE_SQ_CONNECTION
+    + " WHERE " + COLUMN_SQN_ID + " = ?";
 
   // DML: Select all connections
   public static final String STMT_SELECT_CONNECTION_ALL =
-    "SELECT " + COLUMN_SQN_ID + ", " + COLUMN_SQN_NAME + ", "
-      + COLUMN_SQN_CONNECTOR + " FROM " + TABLE_SQ_CONNECTION;
+    "SELECT "
+    + COLUMN_SQN_ID + ", "
+    + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_CREATION_DATE + ", "
+    + COLUMN_SQN_UPDATE_DATE
+    + " FROM " + TABLE_SQ_CONNECTION;
 
   // DML: Check if given connection exists
   public static final String STMT_SELECT_CONNECTION_CHECK =
@@ -424,18 +451,27 @@ public final class DerbySchemaQuery {
 
   // DML: Insert new job
   public static final String STMT_INSERT_JOB =
-    "INSERT INTO " + TABLE_SQ_JOB + " (" + COLUMN_SQB_NAME + ", "
-      + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE + ") VALUES (?, ?, ?)";
+    "INSERT INTO " + TABLE_SQ_JOB + " ("
+    + COLUMN_SQB_NAME + ", "
+    + COLUMN_SQB_CONNECTION + ", "
+    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_CREATION_DATE + ", "
+    + COLUMN_SQB_UPDATE_DATE
+    + ") VALUES (?, ?, ?, ?, ?)";
 
   // DML: Insert new job inputs
   public static final String STMT_INSERT_JOB_INPUT =
-    "INSERT INTO " + TABLE_SQ_JOB_INPUT + " (" + COLUMN_SQBI_JOB
-    + ", " + COLUMN_SQBI_INPUT + ", " + COLUMN_SQBI_VALUE + ") "
-    + "VALUES (?, ?, ?)";
+    "INSERT INTO " + TABLE_SQ_JOB_INPUT + " ("
+    + COLUMN_SQBI_JOB + ", "
+    + COLUMN_SQBI_INPUT + ", "
+    + COLUMN_SQBI_VALUE
+    + ") VALUES (?, ?, ?)";
 
   public static final String STMT_UPDATE_JOB =
-    "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_NAME + " = ? WHERE "
-      + COLUMN_SQB_ID + " = ?";
+    "UPDATE " + TABLE_SQ_JOB + " SET "
+    + COLUMN_SQB_NAME + " = ?, "
+    + COLUMN_SQB_UPDATE_DATE + " = ? "
+    + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Delete rows from job input table
   public static final String STMT_DELETE_JOB_INPUT =
@@ -457,18 +493,29 @@ public final class DerbySchemaQuery {
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE =
-    "SELECT " + COLUMN_SQN_CONNECTOR + ", " + COLUMN_SQB_ID + ", "
-    + COLUMN_SQB_NAME + ", " + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE
-    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON "
-    + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID    + " WHERE "
-    + COLUMN_SQB_ID + " = ?";
+    "SELECT "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQB_ID + ", "
+    + COLUMN_SQB_NAME + ", "
+    + COLUMN_SQB_CONNECTION + ", "
+    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_CREATION_DATE + ", "
+    + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+    + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs
   public static final String STMT_SELECT_JOB_ALL =
-    "SELECT " + COLUMN_SQN_CONNECTOR + ", " + COLUMN_SQB_ID + ", "
-    + COLUMN_SQB_NAME + ", " + COLUMN_SQB_CONNECTION + ", " + COLUMN_SQB_TYPE
-    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON "
-    + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
+    "SELECT "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQB_ID + ", "
+    + COLUMN_SQB_NAME + ", "
+    + COLUMN_SQB_CONNECTION + ", "
+    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_CREATION_DATE + ", "
+    + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =

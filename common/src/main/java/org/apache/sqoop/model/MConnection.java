@@ -21,7 +21,7 @@ package org.apache.sqoop.model;
  * Model describing entire connection object including both connector and
  * framework part.
  */
-public class MConnection extends MPersistableEntity {
+public class MConnection extends MAccountableEntity {
   private long connectorId;
   private String name;
 

@@ -30,7 +30,7 @@ import java.util.Date;
  * Please note that not all properties are persisted in repository at the
  * moment.
  */
-public class MSubmission extends MPersistableEntity {
+public class MSubmission extends MAccountableEntity {
 
   /**
    * Job id that this submission object belongs.
@@ -41,20 +41,6 @@ public class MSubmission extends MPersistableEntity {
    * This property is required and will be always present.
    */
   private long jobId;
-
-  /**
-   * Point in time when we submitted this submission.
-   *
-   * This property is required and will be always present.
-   */
-  private Date creationDate;
-
-  /**
-   * Date of last update to this submission instance
-   *
-   * This property is required and will be always present.
-   */
-  private Date lastUpdateDate;
 
   /**
    * Last known submission status.
@@ -108,15 +94,11 @@ public class MSubmission extends MPersistableEntity {
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
     progress = -1;
-    creationDate = new Date();
-    lastUpdateDate = creationDate;
   }
 
   public MSubmission(long jobId, Date creationDate, SubmissionStatus status) {
     this();
     this.jobId = jobId;
-    this.creationDate = creationDate;
-    this.lastUpdateDate = creationDate;
     this.status = status;
   }
 
@@ -143,22 +125,6 @@ public class MSubmission extends MPersistableEntity {
 
   public long getJobId() {
     return jobId;
-  }
-
-  public void setCreationDate(Date submissionDate) {
-    this.creationDate = submissionDate;
-  }
-
-  public Date getCreationDate() {
-    return creationDate;
-  }
-
-  public void setLastUpdateDate(Date date) {
-    this.lastUpdateDate = date;
-  }
-
-  public Date getLastUpdateDate() {
-    return lastUpdateDate;
   }
 
   public void setStatus(SubmissionStatus status) {
@@ -232,8 +198,8 @@ public class MSubmission extends MPersistableEntity {
   public String toString() {
     return "MSubmission{" +
       "jobId=" + jobId +
-      ", creationDate=" + creationDate +
-      ", lastUpdateDate=" + lastUpdateDate +
+      ", creationDate=" + getCreationDate() +
+      ", lastUpdateDate=" + getLastUpdateDate() +
       ", status=" + status +
       ", externalId='" + externalId + '\'' +
       ", progress=" + progress +

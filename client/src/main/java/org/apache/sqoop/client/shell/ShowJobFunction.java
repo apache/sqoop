@@ -25,6 +25,7 @@ import org.apache.sqoop.model.MJob;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -84,10 +85,16 @@ public class ShowJobFunction extends SqoopFunction {
     String s = MessageFormat.format(getResource().getString(Constants.RES_SHOW_PROMPT_JOBS_TO_SHOW), jobs.size());
     io.out.println(s);
 
+    DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+
     for (MJob job : jobs) {
-      s = MessageFormat.format(getResource().getString
-          (Constants.RES_SHOW_PROMPT_JOB_INFO), job.getPersistenceId(),
-          job.getName());
+      s = MessageFormat.format(
+        getResource().getString(Constants.RES_SHOW_PROMPT_JOB_INFO),
+        job.getPersistenceId(),
+        job.getName(),
+        formatter.format(job.getCreationDate()),
+        formatter.format(job.getLastUpdateDate())
+      );
       io.out.println(s);
 
       long connectorId = job.getConnectorId();

@@ -24,6 +24,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,8 @@ public class ConnectionBean implements JsonBean {
 
       object.put(ID, connection.getPersistenceId());
       object.put(NAME, connection.getName());
+      object.put(CREATED, connection.getCreationDate().getTime());
+      object.put(UPDATED, connection.getLastUpdateDate().getTime());
       object.put(CONNECTOR_ID, connection.getConnectorId());
       object.put(CONNECTOR_PART,
         extractForms(connection.getConnectorPart().getForms()));
@@ -154,6 +157,8 @@ public class ConnectionBean implements JsonBean {
 
       connection.setPersistenceId((Long) object.get(ID));
       connection.setName((String) object.get(NAME));
+      connection.setCreationDate(new Date((Long) object.get(CREATED)));
+      connection.setLastUpdateDate(new Date((Long) object.get(UPDATED)));
 
       connections.add(connection);
     }
