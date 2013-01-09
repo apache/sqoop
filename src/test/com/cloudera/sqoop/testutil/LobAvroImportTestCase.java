@@ -200,10 +200,12 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     // Verify that the reference file is written in Avro bytes.
     ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
     String returnVal = new String(buf.array());
-    String expectedVal = "externalLob(lf,_lob/large_obj_task_local_000"
-        + getTableNum() + "_m_0000000.lob,68," + data.length() + ")";
+    String expectedStart = "externalLob(lf,_lob/large_obj";
+    String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
+      + data.length() + ")";
 
-    assertEquals(expectedVal, returnVal);
+    assertTrue(returnVal.startsWith(expectedStart));
+    assertTrue(returnVal.endsWith(expectedEnd));
 
     // Verify that blob data stored in the external lob file is correct.
     BlobRef br = BlobRef.parse(returnVal);
@@ -217,7 +219,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     assertEquals(chars, data.length());
 
     returnVal = new String(bufArray);
-    expectedVal = data;
+    String expectedVal = data;
 
     assertEquals(getColName(0), returnVal, expectedVal);
   }
@@ -286,10 +288,12 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     // Verify that the reference file is written in Avro bytes.
     ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
     String returnVal = new String(buf.array());
-    String expectedVal = "externalLob(lf,_lob/large_obj_task_local_000"
-        + getTableNum() + "_m_0000000.lob,68," + data.length() + ")";
+    String expectedStart = "externalLob(lf,_lob/large_obj";
+    String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
+      + data.length() + ")";
 
-    assertEquals(expectedVal, returnVal);
+    assertTrue(returnVal.startsWith(expectedStart));
+    assertTrue(returnVal.endsWith(expectedEnd));
 
     // Verify that blob data stored in the external lob file is correct.
     BlobRef br = BlobRef.parse(returnVal);
@@ -303,7 +307,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     assertEquals(chars, data.length());
 
     returnVal = new String(bufArray);
-    expectedVal = data;
+    String expectedVal = data;
 
     assertEquals(getColName(0), returnVal, expectedVal);
   }
