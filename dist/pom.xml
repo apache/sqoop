@@ -51,10 +51,6 @@ limitations under the License.
     </dependency>
   </dependencies>
 
-  <!--
-  TODO(jarcec): Binary tarball should publish build documentation
-  -->
-
   <profiles>
     <!-- Build source distribution (activated by default) -->
     <profile>
@@ -151,7 +147,7 @@ limitations under the License.
                       </fileset>
                     </copy>
 
-                    <!-- Copy generated documentation (must be generated prior packing by calling mvn site!) -->
+                    <!-- Copy generated documentation -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/docs" includeEmptyDirs="false" flatten="false">
                       <fileset dir="../docs/target/site">
                         <include name="**/*" />
