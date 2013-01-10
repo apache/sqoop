@@ -43,9 +43,13 @@ JAVA_HOME::
   e.g., +/usr/java/default+. Hadoop (and Sqoop) requires Sun Java 1.6 which
   can be downloaded from http://java.sun.com.
 
-HADOOP_HOME::
-  The location of the Hadoop jar files. If you installed Hadoop via RPM
-  or DEB, these are in +/usr/lib/hadoop-20+.
+HADOOP_COMMON_HOME::
+  The location of the Hadoop Common files (specifically the bin/hadoop executable).
+  If you installed Hadoop via RPM or DEB, this is in +/usr/lib/hadoop+.
+
+HADOOP_MAPRED_HOME::
+  The location of the Hadoop MapReduce files (specifically the JAR files).
+  If you installed Hadoop via RPM or DEB, this is in +/usr/lib/hadoop-mapreduce+.
 
 HIVE_HOME::
   If you are performing a Hive import, you must identify the location of

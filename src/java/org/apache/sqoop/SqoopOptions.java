@@ -119,7 +119,7 @@ public class SqoopOptions implements Cloneable {
   // explicitly set by the user (false). If the former, disregard any value
   // for jarOutputDir saved in the metastore.
   @StoredAsProperty("codegen.auto.compile.dir") private boolean jarDirIsAuto;
-  private String hadoopHome; // not serialized to metastore.
+  private String hadoopMapRedHome; // not serialized to metastore.
   @StoredAsProperty("db.split.column") private String splitByCol;
   @StoredAsProperty("db.where.clause") private String whereClause;
   @StoredAsProperty("db.query") private String sqlQuery;
@@ -775,7 +775,7 @@ public class SqoopOptions implements Cloneable {
   private void initDefaults(Configuration baseConfiguration) {
     // first, set the true defaults if nothing else happens.
     // default action is to run the full pipeline.
-    this.hadoopHome = System.getenv("HADOOP_HOME");
+    this.hadoopMapRedHome = System.getenv("HADOOP_MAPRED_HOME");
 
     this.hiveHome = getHiveHomeDefault();
 
@@ -1253,15 +1253,15 @@ public class SqoopOptions implements Cloneable {
   }
 
   /**
-   * Return the value of $HADOOP_HOME.
-   * @return $HADOOP_HOME, or null if it's not set.
+   * Return the value of $HADOOP_MAPRED_HOME.
+   * @return $HADOOP_MAPRED_HOME, or null if it's not set.
    */
-  public String getHadoopHome() {
-    return hadoopHome;
+  public String getHadoopMapRedHome() {
+    return hadoopMapRedHome;
   }
 
-  public void setHadoopHome(String home) {
-    this.hadoopHome = home;
+  public void setHadoopMapRedHome(String home) {
+    this.hadoopMapRedHome = home;
   }
 
   /**

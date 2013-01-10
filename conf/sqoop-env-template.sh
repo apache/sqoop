@@ -20,7 +20,10 @@
 # Set Hadoop-specific environment variables here.
 
 #Set path to where bin/hadoop is available
-#export HADOOP_HOME=
+#export HADOOP_COMMON_HOME=
+
+#Set path to where hadoop-*-core.jar is available
+#export HADOOP_MAPRED_HOME=
 
 #set the path to where bin/hbase is available
 #export HBASE_HOME=

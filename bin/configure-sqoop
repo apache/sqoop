@@ -40,17 +40,33 @@ fi
 
 # Find paths to our dependency systems. If they are unset, use CDH defaults.
 
-if [ -z "${HADOOP_HOME}" ]; then
-  HADOOP_HOME=/usr/lib/hadoop
+if [ -z "${HADOOP_COMMON_HOME}" ]; then
+  if [ -n "${HADOOP_HOME}" ]; then
+    HADOOP_COMMON_HOME=${HADOOP_HOME}
+  else
+    HADOOP_COMMON_HOME=/usr/lib/hadoop
+  fi
+fi
+if [ -z "${HADOOP_MAPRED_HOME}" ]; then
+  if [ -n "${HADOOP_HOME}" ]; then
+    HADOOP_MAPRED_HOME=${HADOOP_HOME}
+  else
+    HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+  fi
 fi
 if [ -z "${HBASE_HOME}" ]; then
   HBASE_HOME=/usr/lib/hbase
 fi
 
 # Check: If we can't find our dependencies, give up here.
-if [ ! -d "${HADOOP_HOME}" ]; then
-  echo "Error: $HADOOP_HOME does not exist!"
-  echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
+if [ ! -d "${HADOOP_COMMON_HOME}" ]; then
+  echo "Error: $HADOOP_COMMON_HOME does not exist!"
+  echo 'Please set $HADOOP_COMMON_HOME to the root of your Hadoop installation.'
+  exit 1
+fi
+if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
+  echo "Error: $HADOOP_MAPRED_HOME does not exist!"
+  echo 'Please set $HADOOP_MAPRED_HOME to the root of your Hadoop MapReduce installation.'
   exit 1
 fi
 
@@ -117,6 +133,7 @@ export SQOOP_CLASSPATH
 export SQOOP_CONF_DIR
 export SQOOP_JAR_DIR
 export HADOOP_CLASSPATH
-export HADOOP_HOME
+export HADOOP_COMMON_HOME
+export HADOOP_MAPRED_HOME
 export HBASE_HOME
 

@@ -71,28 +71,29 @@ public class CompilationManager {
   }
 
   /**
-   * locate the hadoop-*-core.jar in $HADOOP_HOME or --hadoop-home.
+   * locate the hadoop-*-core.jar in $HADOOP_MAPRED_HOME or
+   * --hadoop-mapred-home.
    * If that doesn't work, check our classpath.
    * @return the filename of the hadoop-*-core.jar file.
    */
   private String findHadoopCoreJar() {
-    String hadoopHome = options.getHadoopHome();
+    String hadoopMapRedHome = options.getHadoopMapRedHome();
 
-    if (null == hadoopHome) {
-      LOG.info("$HADOOP_HOME is not set");
+    if (null == hadoopMapRedHome) {
+      LOG.info("$HADOOP_MAPRED_HOME is not set");
       return Jars.getJarPathForClass(JobConf.class);
     }
 
-    if (!hadoopHome.endsWith(File.separator)) {
-      hadoopHome = hadoopHome + File.separator;
+    if (!hadoopMapRedHome.endsWith(File.separator)) {
+      hadoopMapRedHome = hadoopMapRedHome + File.separator;
     }
 
-    File hadoopHomeFile = new File(hadoopHome);
-    LOG.info("HADOOP_HOME is " + hadoopHomeFile.getAbsolutePath());
-    File [] entries = hadoopHomeFile.listFiles();
+    File hadoopMapRedHomeFile = new File(hadoopMapRedHome);
+    LOG.info("HADOOP_MAPRED_HOME is " + hadoopMapRedHomeFile.getAbsolutePath());
+    File [] entries = hadoopMapRedHomeFile.listFiles();
 
     if (null == entries) {
-      LOG.warn("HADOOP_HOME appears empty or missing");
+      LOG.warn("HADOOP_MAPRED_HOME appears empty or missing");
       return Jars.getJarPathForClass(JobConf.class);
     }
 

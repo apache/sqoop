@@ -25,10 +25,9 @@ tool you want to use and the arguments that control the tool.
 
 If Sqoop is compiled from its own source, you can run Sqoop without a formal
 installation process by running the +bin/sqoop+ program. Users
-of a packaged deployment of Sqoop (such as an RPM shipped with Cloudera's
-Distribution for Hadoop) will see this program installed as +/usr/bin/sqoop+.
-The remainder of this documentation will refer to this program as
-+sqoop+. For example:
+of a packaged deployment of Sqoop (such as an RPM shipped with Apache Bigtop)
+will see this program installed as +/usr/bin/sqoop+. The remainder of this
+documentation will refer to this program as +sqoop+. For example:
 
 ----
 $ sqoop tool-name [tool-arguments]
@@ -87,24 +86,29 @@ You invoke Sqoop through the program launch capability provided by
 Hadoop. The +sqoop+ command-line program is a wrapper which runs the
 +bin/hadoop+ script shipped with Hadoop. If you have multiple
 installations of Hadoop present on your machine, you can select the
-Hadoop installation by setting the +$HADOOP_HOME+ environment
-variable.
+Hadoop installation by setting the +$HADOOP_COMMON_HOME+ and
++$HADOOP_MAPRED_HOME+ environment variables.
 
 For example:
 
 ----
-$ HADOOP_HOME=/path/to/some/hadoop sqoop import --arguments...
+$ HADOOP_COMMON_HOME=/path/to/some/hadoop \
+  HADOOP_MAPRED_HOME=/path/to/some/hadoop-mapreduce \
+  sqoop import --arguments...
 ----
 
 or:
 
 ----
-$ export HADOOP_HOME=/some/path/to/hadoop
+$ export HADOOP_COMMON_HOME=/some/path/to/hadoop
+$ export HADOOP_MAPRED_HOME=/some/path/to/hadoop-mapreduce
 $ sqoop import --arguments...
 -----
 
-If +$HADOOP_HOME+ is not set, Sqoop will use the default installation
-location for Cloudera's Distribution for Hadoop, +/usr/lib/hadoop+.
+If either of these variables are not set, Sqoop will fall back to
++$HADOOP_HOME+. If it is not set either, Sqoop will use the default
+installation locations for Apache Bigtop, +/usr/lib/hadoop+ and
++/usr/lib/hadoop-mapreduce+, respectively.
 
 The active Hadoop configuration is loaded from +$HADOOP_HOME/conf/+,
 unless the +$HADOOP_CONF_DIR+ environment variable is set.
@@ -126,12 +130,13 @@ Common arguments:
    --connect <jdbc-uri>     Specify JDBC connect string
    --connect-manager <jdbc-uri>     Specify connection manager class to use
    --driver <class-name>    Manually specify JDBC driver class to use
-   --hadoop-home <dir>      Override $HADOOP_HOME
+   --hadoop-mapred-home <dir>+      Override $HADOOP_MAPRED_HOME
    --help                   Print usage instructions
 -P                          Read password from console
    --password <password>    Set authentication password
    --username <username>    Set authentication username
    --verbose                Print more information while working
+   --hadoop-home <dir>+     Deprecated. Override $HADOOP_HOME
 
 [...]
 

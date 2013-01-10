@@ -68,12 +68,13 @@ Common arguments:
    --connect <jdbc-uri>     Specify JDBC connect string
    --connection-manager <class-name>     Specify connection manager class to use
    --driver <class-name>    Manually specify JDBC driver class to use
-   --hadoop-home <dir>      Override $HADOOP_HOME
+   --hadoop-mapred-home <dir>            Override $HADOOP_MAPRED_HOME
    --help                   Print usage instructions
 -P                          Read password from console
    --password <password>    Set authentication password
    --username <username>    Set authentication username
    --verbose                Print more information while working
+   --hadoop-home <dir>      Deprecated. Override $HADOOP_HOME
 
 Import control arguments:
    --as-avrodatafile             Imports data to Avro Data Files

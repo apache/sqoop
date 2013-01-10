@@ -80,6 +80,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String SPLIT_BY_ARG = "split-by";
   public static final String WHERE_ARG = "where";
   public static final String HADOOP_HOME_ARG = "hadoop-home";
+  public static final String HADOOP_MAPRED_HOME_ARG = "hadoop-mapred-home";
   public static final String HIVE_HOME_ARG = "hive-home";
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
   public static final String TARGET_DIR_ARG = "target-dir";
@@ -385,8 +386,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .create(PASSWORD_PROMPT_ARG));
 
     commonOpts.addOption(OptionBuilder.withArgName("dir")
-        .hasArg().withDescription("Override $HADOOP_HOME")
-        .withLongOpt(HADOOP_HOME_ARG)
+        .hasArg().withDescription("Override $HADOOP_MAPRED_HOME_ARG")
+        .withLongOpt(HADOOP_MAPRED_HOME_ARG)
         .create());
 
     // misc (common)
@@ -750,7 +751,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     if (in.hasOption(HADOOP_HOME_ARG)) {
-      out.setHadoopHome(in.getOptionValue(HADOOP_HOME_ARG));
+      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_HOME_ARG));
+    }
+    if (in.hasOption(HADOOP_MAPRED_HOME_ARG)) {
+      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_MAPRED_HOME_ARG));
     }
 
   }

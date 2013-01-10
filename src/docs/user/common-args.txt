@@ -27,7 +27,7 @@ Argument                                  Description
                                           use
 +\--driver <class-name>+                  Manually specify JDBC driver class\
                                           to use
-+\--hadoop-home <dir>+                    Override $HADOOP_HOME
++\--hadoop-mapred-home <dir>+             Override $HADOOP_MAPRED_HOME
 +\--help+                                 Print usage instructions
 +-P+                                      Read password from console
 +\--password <password>+                  Set authentication password

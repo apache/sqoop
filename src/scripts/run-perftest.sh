@@ -37,5 +37,5 @@ source ${SQOOP_HOME}/bin/configure-sqoop "${bin}"
 PERFTEST_CLASSES=${SQOOP_HOME}/build/perftest/classes
 
 export HADOOP_CLASSPATH=${PERFTEST_CLASSES}:${SQOOP_JAR}:${HADOOP_CLASSPATH}
-${HADOOP_HOME}/bin/hadoop "$@"
+${HADOOP_COMMON_HOME}/bin/hadoop "$@"
 
