@@ -1021,7 +1021,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     // Warn about using hive specific arguments without hive import itself
     if (!options.doHiveImport()
       && ((options.getHiveHome() != null
-            && options.getHiveHome().equals(SqoopOptions.getHiveHomeDefault()))
+            && !options.getHiveHome().equals(SqoopOptions.getHiveHomeDefault()))
         || options.doOverwriteHiveTable()
         || options.doFailIfHiveTableExists()
         || (options.getHiveTableName() != null
