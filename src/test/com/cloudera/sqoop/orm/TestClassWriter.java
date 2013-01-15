@@ -465,4 +465,24 @@ public class TestClassWriter extends TestCase {
       ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
     }
   }
+
+  @Test
+  public void testBrokenUserMapping() throws Exception {
+
+    String [] argv = {
+        "--bindir", JAR_GEN_DIR,
+        "--outdir", CODE_GEN_DIR,
+        "--class-name", USERMAPPING_CLASS_AND_PACKAGE_NAME,
+        "--map-column-java", "INTFIELD1=NotARealClass",
+    };
+
+    try {
+      runGenerationTest(
+        argv,
+        USERMAPPING_CLASS_AND_PACKAGE_NAME);
+    } catch(IllegalArgumentException e) {
+      return;
+    }
+    fail("we shouldn't successfully generate code");
+  }
 }

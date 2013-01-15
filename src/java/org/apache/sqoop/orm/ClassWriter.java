@@ -443,8 +443,8 @@ public class ClassWriter {
       return "    " + LobSerializer.class.getCanonicalName()
           + ".writeBlob(this." + colName + ", " + outputObj + ");\n";
     } else {
-      LOG.error("No ResultSet method for Java type " + javaType);
-      return null;
+      throw new IllegalArgumentException(
+          "No ResultSet method for Java type " + javaType);
     }
   }
 
@@ -1101,8 +1101,11 @@ public class ClassWriter {
     if (mapping != null && !mapping.isEmpty()) {
       for(Object column : mapping.keySet()) {
         if (!uniqColNames.contains((String)column)) {
-        throw new IllegalArgumentException("No column by the name " + column
-                + "found while importing data");
+        throw new IllegalArgumentException(
+            "No column by the name "
+            + column
+            + "found while importing data; expecting one of "
+            + uniqColNames);
         }
       }
     }
