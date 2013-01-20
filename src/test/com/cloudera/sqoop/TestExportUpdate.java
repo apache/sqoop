@@ -98,7 +98,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    *    1   |   1   | 1foo1
    *    1   |   2   | 1foo2
    * </pre></p>
-   * @param firstKeyRange the number of
+   * @param aMax the number of
    * @throws SQLException
    */
   private void createMultiKeyTable(int aMax) throws SQLException {
@@ -640,6 +640,50 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("A", "1", "1", "foo2", "2");
     verifyRow("A", "8", "8", "foo16", "16");
     verifyRow("A", "9", "9", "foo18", "18");
+  }
+
+  /**
+   * Test updating only subset of the columns.
+   *
+   * @throws Exception
+   */
+  public void testUpdateColumnSubset() throws Exception {
+    populateDatabase(4);
+    createUpdateFiles(1, 3, 0);
+
+    runExport(getArgv(true, 2, 2, "-m", "1",
+      "--update-key", "A", "--columns", "A,B"));
+
+    verifyRowCount(4);
+
+    // First column should not have any changes (even though it was updated)
+    verifyRow("A", "0", "0", "foo0", "0");
+
+    // Second column have updated column B, but C should be left untouched
+    verifyRow("A", "1", "1", "foo2", "1");
+
+    // Third column have updated column B, but C should be left untouched
+    verifyRow("A", "2", "2", "foo4", "2");
+
+    // Last columns should be completely untouched
+    verifyRow("A", "3", "3", "foo3", "3");
+  }
+
+  /**
+   * Parameter --columns must be superset of --update-key in order for
+   * CompilationManager and other parts of the framework work correctly.
+   *
+   * @throws Exception
+   */
+  public void testUpdateColumnNotInColumns() throws Exception {
+    populateDatabase(1);
+    try {
+      runExport(getArgv(true, 2, 2, "-m", "1",
+        "--update-key", "A", "--columns", "B"));
+      fail("Expected IOException");
+    } catch (IOException e) {
+      assertTrue(true);
+    }
   }
 
 }

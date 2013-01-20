@@ -506,6 +506,17 @@ public abstract class ConnManager {
     // last, because the UPDATE-based OutputFormat will generate the SET
     // clause followed by the WHERE clause, and the SqoopRecord needs to
     // serialize to this layout.
+
+    // Check if user specified --columns parameter
+    Set<String> columns = null;
+    if (options.getColumns() != null && options.getColumns().length > 0) {
+      // If so, put all column in uppercase form into our help set
+      columns = new HashSet<String>();
+      for(String c : options.getColumns()) {
+        columns.add(c.toUpperCase());
+      }
+    }
+
     Set<String> updateKeys = new LinkedHashSet<String>();
     Set<String> updateKeysUppercase = new HashSet<String>();
     String updateKeyValue = options.getUpdateKeyCol();
@@ -513,8 +524,16 @@ public abstract class ConnManager {
     while (stok.hasMoreTokens()) {
       String nextUpdateColumn = stok.nextToken().trim();
       if (nextUpdateColumn.length() > 0) {
+        String upperCase = nextUpdateColumn.toUpperCase();
+
+        // We must make sure that --columns is super set of --update-key
+        if (columns != null && !columns.contains(upperCase)) {
+          throw new RuntimeException("You must specify all columns from "
+            + "--update-key parameter in --columns parameter.");
+        }
+
         updateKeys.add(nextUpdateColumn);
-        updateKeysUppercase.add(nextUpdateColumn.toUpperCase());
+        updateKeysUppercase.add(upperCase);
       } else {
         throw new RuntimeException("Invalid update key column value specified"
                     + ": '" + updateKeyValue + "'");
@@ -524,6 +543,11 @@ public abstract class ConnManager {
     List<String> dbOutCols = new ArrayList<String>();
     for (String col : allColNames) {
       if (!updateKeysUppercase.contains(col.toUpperCase())) {
+        // Skip columns that were not explicitly stated on command line
+        if (columns != null && !columns.contains(col.toUpperCase())) {
+          continue;
+        }
+
         dbOutCols.add(col); // add non-key columns to the output order list.
       }
     }
