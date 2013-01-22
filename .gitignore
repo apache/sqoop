@@ -3,6 +3,7 @@
 .settings
 target
 *.iml
+*.eml
 *.log
 .idea
 nb-configuration.xml
