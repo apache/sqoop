@@ -27,4 +27,5 @@
 /conf/tools.d
 .idea
 *.iml
+*.eml
 target
