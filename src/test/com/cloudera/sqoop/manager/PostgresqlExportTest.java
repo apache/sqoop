@@ -50,6 +50,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
   static final String DATABASE_USER = "sqooptest";
   static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
+  static final String PROCEDURE_NAME = "INSERT_AN_EMPLOYEE";
   static final String STAGING_TABLE_NAME = "STAGING";
   static final String SCHEMA_PUBLIC = "public";
   static final String SCHEMA_SPECIAL = "special";
@@ -80,6 +81,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     createTable(STAGING_TABLE_NAME, SCHEMA_PUBLIC);
     createTable(TABLE_NAME, SCHEMA_SPECIAL);
     createTable(STAGING_TABLE_NAME, SCHEMA_SPECIAL);
+    createProcedure(PROCEDURE_NAME, SCHEMA_PUBLIC);
 
     LOG.debug("setUp complete.");
   }
@@ -95,8 +97,86 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     }
   }
 
-  public void createTable(String tableName, String schema) {
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
+  private interface CreateIt {
+    void createIt(
+        Statement st,
+        String fullName,
+        ConnManager manager) throws SQLException;
+  }
+
+  private void createTable(String tableName, String schema) {
+    CreateIt createIt = new CreateIt() {
+      @Override
+      public void createIt(
+          Statement st,
+          String fullName,
+          ConnManager manager) throws SQLException {
+        st.executeUpdate("CREATE TABLE " + fullName + " ("
+          + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
+          + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
+          + manager.escapeColName("start_date") + " DATE, "
+          + manager.escapeColName("salary") + " FLOAT, "
+          + manager.escapeColName("dept") + " VARCHAR(32))");
+      }
+    };
+    create(tableName, "TABLE", schema, createIt);
+  }
+
+  private void createProcedure(String procedureName, String schema) {
+    CreateIt createIt = new CreateIt() {
+      @Override
+      public void createIt(
+          Statement st,
+          String fullName,
+          ConnManager manager) throws SQLException {
+        st.executeUpdate("CREATE OR REPLACE FUNCTION " + fullName + " ("
+          + "IN " + manager.escapeColName("id") + " INT,"
+          + "IN " + manager.escapeColName("name") + " VARCHAR(24),"
+          + "IN " + manager.escapeColName("start_date") + " DATE,"
+          + "IN " + manager.escapeColName("salary") + " FLOAT,"
+          + "IN " + manager.escapeColName("dept") + " VARCHAR(32)"
+          + ") "
+          + "RETURNS VOID "
+          + "AS $$ "
+          + "BEGIN "
+          + "INSERT INTO "
+          + escapeTableOrSchemaName(SCHEMA_PUBLIC)
+          + "."
+          + escapeTableOrSchemaName(TABLE_NAME)
+          + " ("
+          + manager.escapeColName("id")
+          +", "
+          + manager.escapeColName("name")
+          +", "
+          + manager.escapeColName("start_date")
+          +", "
+          + manager.escapeColName("salary")
+          +", "
+          + manager.escapeColName("dept")
+          + ") VALUES ("
+          + manager.escapeColName("id")
+          +", "
+          + manager.escapeColName("name")
+          +", "
+          + manager.escapeColName("start_date")
+          +", "
+          + manager.escapeColName("salary")
+          +", "
+          + manager.escapeColName("dept")
+          + ");"
+          + "END;"
+          + "$$ LANGUAGE plpgsql;");
+      }
+    };
+    create(procedureName, "FUNCTION", schema, createIt);
+  }
+
+  private void create(
+      String name,
+      String type,
+      String schema,
+      CreateIt createIt) {
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, name);
     options.setUsername(DATABASE_USER);
 
     ConnManager manager = null;
@@ -118,26 +198,24 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       }
 
       String fullTableName = escapeTableOrSchemaName(schema)
-        + "." + escapeTableOrSchemaName(tableName);
+        + "." + escapeTableOrSchemaName(name);
 
       try {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
         // get added until pg 8.3, so we just use "DROP TABLE" and ignore
         // any exception here if one occurs.
-        st.executeUpdate("DROP TABLE " + fullTableName);
+        st.executeUpdate("DROP " + type + " " + fullTableName);
       } catch (SQLException e) {
-        LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)",
+        LOG.info("Couldn't drop "
+            + type.toLowerCase()
+            + " " +fullTableName
+            + " (ok)",
           e);
         // Now we need to reset the transaction.
         connection.rollback();
       }
 
-      st.executeUpdate("CREATE TABLE " + fullTableName + " ("
-        + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
-        + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
-        + manager.escapeColName("start_date") + " DATE, "
-        + manager.escapeColName("salary") + " FLOAT, "
-        + manager.escapeColName("dept") + " VARCHAR(32))");
+      createIt.createIt(st, fullTableName, manager);
 
       connection.commit();
     } catch (SQLException sqlE) {
@@ -161,14 +239,19 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     LOG.debug("setUp complete.");
   }
 
-  private String [] getArgv(String tableName,
+  private String [] getArgv(boolean useTable,
                             String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
     CommonArgs.addHadoopFlags(args);
 
-    args.add("--table");
-    args.add(tableName);
+    if (useTable) {
+      args.add("--table");
+      args.add(TABLE_NAME);
+    } else {
+      args.add("--call");
+      args.add(PROCEDURE_NAME);
+    }
     args.add("--export-dir");
     args.add(getWarehouseDir());
     args.add("--fields-terminated-by");
@@ -208,7 +291,18 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       "3,Fred,2009-01-23,15,marketing",
     });
 
-    runExport(getArgv(TABLE_NAME));
+    runExport(getArgv(true));
+
+    assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
+  }
+
+  public void testExportUsingProcedure() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+        "2,Bob,2009-04-20,400,sales",
+        "3,Fred,2009-01-23,15,marketing",
+    });
+
+    runExport(getArgv(false));
 
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
@@ -221,7 +315,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
 
     String[] extra = new String[] {"--staging-table", STAGING_TABLE_NAME, };
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
@@ -234,7 +328,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
 
     String[] extra = new String[] {"--direct"};
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
@@ -250,7 +344,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       SCHEMA_SPECIAL,
     };
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2,
       escapeTableOrSchemaName(SCHEMA_SPECIAL)
@@ -272,7 +366,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       SCHEMA_SPECIAL,
     };
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2,
       escapeTableOrSchemaName(SCHEMA_SPECIAL)
@@ -296,7 +390,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       SCHEMA_SPECIAL,
     };
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2,
       escapeTableOrSchemaName(SCHEMA_SPECIAL)
@@ -317,7 +411,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       SCHEMA_SPECIAL,
     };
 
-    runExport(getArgv(TABLE_NAME, extra));
+    runExport(getArgv(true, extra));
 
     assertRowCount(2,
       escapeTableOrSchemaName(SCHEMA_SPECIAL)

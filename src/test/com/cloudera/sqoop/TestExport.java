@@ -795,6 +795,18 @@ public class TestExport extends ExportJobTestCase {
   }
 
   public void testColumnsExport() throws IOException, SQLException {
+    testColumnsExport("id,msg," + forIdx(0) + "," + forIdx(2));
+  }
+
+  /**
+   * It's possible to change the column string that
+   * {@link #testColumnsExport()} uses -  you might want to do
+   * this if your database randomly generates column names, instead
+   * of using the given ones (e.g. stored procedure parameter
+   * names in H2)
+   */
+  protected void testColumnsExport(
+      String columnsStr) throws IOException, SQLException {
     final int TOTAL_COLUMNS = 3;
     final int TOTAL_RECORDS = 10;
 
@@ -842,7 +854,6 @@ public class TestExport extends ExportJobTestCase {
     createTextFile(0, TOTAL_RECORDS, false, gen0, gen2);
     createTable(gen0, gen1, gen2);
 
-    String columnsStr = "id,msg," + forIdx(0) + "," + forIdx(2);
     runExport(getArgv(true, 10, 10, "--columns", columnsStr));
 
     ColumnGenerator genNull = new NullColumnGenerator();

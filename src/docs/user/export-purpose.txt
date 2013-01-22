@@ -25,6 +25,5 @@ user-specified delimiters.
 The default operation is to transform these into a set of +INSERT+
 statements that inject the records into the database. In "update mode,"
 Sqoop will generate +UPDATE+ statements that replace existing records
-in the database.
-
-
+in the database, and in "call mode" Sqoop will make a stored procedure
+call for each record.

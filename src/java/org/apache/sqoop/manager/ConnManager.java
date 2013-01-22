@@ -70,6 +70,15 @@ public abstract class ConnManager {
   public abstract String [] getColumnNames(String tableName);
 
   /**
+   * Return a list of stored procedure argument names in the order
+   * that they are declared.
+   */
+  public String [] getColumnNamesForProcedure(String procedureName) {
+    throw new UnsupportedOperationException(
+        "No stored procedure support for this database");
+  }
+
+  /**
    * Return a list of column names in query in the order returned by the db.
    */
   public String [] getColumnNamesForQuery(String query) {
@@ -244,6 +253,18 @@ public abstract class ConnManager {
    * The Integer type id is a constant from java.sql.Types
    */
   public abstract Map<String, Integer> getColumnTypes(String tableName);
+
+  /**
+   * Return an unordered mapping from colname to sqltype for
+   * all the input arguments for a stored procedure.
+   *
+   * The Integer type id is a constant from java.sql.Types
+   */
+  public Map<String, Integer> getColumnTypesForProcedure(
+      String procedureName) {
+    throw new UnsupportedOperationException(
+        "No stored procedure support for this database");
+  }
 
   /**
    * Return an unordered mapping from colname to sqltype for
@@ -472,6 +493,16 @@ public abstract class ConnManager {
   public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support exports");
+  }
+
+  /**
+   * Export data stored in HDFS into a table in a database. This calls a stored
+   * procedure to insert rows into the target table.
+   */
+  public void callTable(com.cloudera.sqoop.manager.ExportJobContext context)
+      throws IOException, ExportException {
+    throw new ExportException("This database does not support exports "
+        + "using stored procedures");
   }
 
   /**

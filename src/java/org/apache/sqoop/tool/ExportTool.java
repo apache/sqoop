@@ -73,6 +73,9 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         // Mixed update/insert export
         manager.upsertTable(context);
       }
+    } else if (options.getCall() != null) {
+      // Stored procedure-based export.
+        manager.callTable(context);
     } else {
       // INSERT-based export.
       manager.exportTable(context);
@@ -176,6 +179,12 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
             + "new rows are found with non-matching keys in database")
         .withLongOpt(UPDATE_MODE_ARG)
         .create());
+    exportOpts.addOption(OptionBuilder
+         .hasArg()
+         .withDescription("Populate the table using this stored "
+             + "procedure (one call per row)")
+         .withLongOpt(CALL_ARG)
+         .create());
 
     addValidationOpts(exportOpts);
 
@@ -273,6 +282,10 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         out.setClearStagingTable(true);
       }
 
+      if (in.hasOption(CALL_ARG)) {
+          out.setCall(in.getOptionValue(CALL_ARG));
+      }
+
       applyValidationOptions(in, out);
       applyNewUpdateOptions(in, out);
       applyInputFormatOptions(in, out);
@@ -290,8 +303,9 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    */
   protected void validateExportOptions(SqoopOptions options)
       throws InvalidOptionsException {
-    if (options.getTableName() == null) {
-      throw new InvalidOptionsException("Export requires a --table argument."
+    if (options.getTableName() == null && options.getCall() == null) {
+      throw new InvalidOptionsException(
+          "Export requires a --table or a --call argument."
           + HELP_STR);
     } else if (options.getExportDir() == null) {
       throw new InvalidOptionsException(
@@ -322,8 +336,25 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     } else if (options.doClearStagingTable()
         && options.getStagingTableName() == null) {
       // Option to clear staging table specified but not the staging table name
-      throw new InvalidOptionsException("Option to clear the staging table is "
+      throw new InvalidOptionsException(
+          "Option to clear the staging table is "
           + "specified but the staging table name is not.");
+    } else if (options.getCall() != null
+        && options.getStagingTableName() != null) {
+      // using a stored procedure to insert rows is incompatible with using
+      // a staging table (as we don't know where the procedure will put the
+      // data, or what transactions it'll perform)
+      throw new InvalidOptionsException(
+          "Option the use a staging table is "
+          + "specified as well as a call option.");
+    } else if (options.getCall() != null && options.getUpdateKeyCol() != null) {
+        throw new InvalidOptionsException(
+          "Option to call a stored procedure"
+          + "can't be used in update mode.");
+    } else if (options.getCall() != null && options.getTableName() != null) {
+        // we don't know if the stored procedure will insert rows into
+        // a given table
+        throw new InvalidOptionsException("Can't specify --call and --table.");
     }
   }
 

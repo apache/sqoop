@@ -68,8 +68,15 @@ public class JdbcExportJob extends ExportJobBase {
     if (fileType == FileType.AVRO_DATA_FILE) {
       LOG.debug("Configuring for Avro export");
       ConnManager connManager = context.getConnManager();
-      Map<String, Integer> columnTypeInts =
-        connManager.getColumnTypes(tableName, options.getSqlQuery());
+      Map<String, Integer> columnTypeInts;
+      if (options.getCall() == null) {
+        columnTypeInts = connManager.getColumnTypes(
+          tableName,
+          options.getSqlQuery());
+      } else {
+        columnTypeInts = connManager.getColumnTypesForProcedure(
+          options.getCall());
+      }
       MapWritable columnTypes = new MapWritable();
       for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
         Text columnName = new Text(e.getKey());

@@ -54,6 +54,7 @@ Argument                                 Description
 +-m,\--num-mappers <n>+                  Use 'n' map tasks to export in\
                                          parallel
 +\--table <table-name>+                  Table to populate
++\--call <stored-proc-name>+             Stored Procedure to call
 +\--update-key <col-name>+               Anchor column to use for updates.\
                                          Use a comma separated list of columns\
                                          if there are more than one column.
@@ -76,9 +77,10 @@ Argument                                 Description
                                          statement execution.
 ------------------------------------------------------------------------
 
-The +\--table+ and +\--export-dir+ arguments are required. These
-specify the table to populate in the database, and the
-directory in HDFS that contains the source data.
+The +\--export-dir+ argument and one of +\--table+ or +\--call+ are
+ required. These specify the table to populate in the database (or the
+ stored procedure to call), and the directory in HDFS that contains
+ the source data.
 
 You can control the number of mappers independently from the number of
 files present in the directory. Export performance depends on the
@@ -126,7 +128,8 @@ specified, Sqoop will delete all of the data before starting the export job.
 
 NOTE: Support for staging data prior to pushing it into the destination
 table is not available for +--direct+ exports. It is also not available when
-export is invoked using the +--update-key+ option for updating existing data.
+export is invoked using the +--update-key+ option for updating existing data,
+and when stored procedures are used to insert the data.
 
 
 Inserts vs. Updates
@@ -275,3 +278,12 @@ Another basic export to populate a table named +bar+ with validation enabled:
 $ sqoop export --connect jdbc:mysql://db.example.com/foo --table bar  \
     --export-dir /results/bar_data --validate
 ----
+
+An export that calls a stored procedure named +barproc+ for every record in
++/results/bar_data+ would look like:
+
+----
+$ sqoop export --connect jdbc:mysql://db.example.com/foo --call barproc \
+    --export-dir /results/bar_data
+----
+

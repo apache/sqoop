@@ -142,6 +142,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HELP_ARG = "help";
   public static final String UPDATE_KEY_ARG = "update-key";
   public static final String UPDATE_MODE_ARG = "update-mode";
+  public static final String CALL_ARG = "call";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";

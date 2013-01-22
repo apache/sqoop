@@ -122,6 +122,10 @@ public class TestConnFactory extends TestCase {
       return null;
     }
 
+    public String[] getColumnNamesForProcedure(String procedureName) {
+      return null;
+    }
+
     public String getPrimaryKey(String tableName) {
       return null;
     }
@@ -145,6 +149,12 @@ public class TestConnFactory extends TestCase {
     }
 
     public Map<String, Integer> getColumnTypes(String tableName) {
+      return null;
+    }
+
+    @Override
+    public Map<String, Integer> getColumnTypesForProcedure(
+        String procedureName) {
       return null;
     }
 

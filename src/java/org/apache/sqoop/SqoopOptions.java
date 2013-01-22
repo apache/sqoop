@@ -99,6 +99,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("db.username") private String username;
   @StoredAsProperty("db.export.staging.table") private String stagingTableName;
   @StoredAsProperty("db.clear.staging.table") private boolean clearStagingTable;
+  @StoredAsProperty("db.export.call") private String call;
   private Properties connectionParams; //Properties stored as db.connect.params
 
 
@@ -2011,5 +2012,13 @@ public class SqoopOptions implements Cloneable {
   public void setValidationFailureHandlerClass(
       Class validationFailureHandlerClazz) {
     this.validationFailureHandlerClass = validationFailureHandlerClazz;
+  }
+
+  public String getCall() {
+    return call;
+  }
+
+  public void setCall(String theCall) {
+    this.call = theCall;
   }
 }

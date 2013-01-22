@@ -45,12 +45,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.mapreduce.JdbcCallExportJob;
 import org.apache.sqoop.util.SqlTypeMap;
 
 /**
@@ -158,6 +161,48 @@ public abstract class SqlManager
       }
 
       release();
+    }
+  }
+
+  @Override
+  public String[] getColumnNamesForProcedure(String procedureName) {
+    List<String> ret = new ArrayList<String>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+          procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+              != DatabaseMetaData.procedureColumnReturn) {
+            int index = results.getInt("ORDINAL_POSITION") - 1;
+            if (index < 0) {
+              continue; // actually the return type
+            }
+            for(int i = ret.size(); i < index; ++i) {
+              ret.add(null);
+            }
+            String name = results.getString("COLUMN_NAME");
+            if (index == ret.size()) {
+              ret.add(name);
+            } else {
+              ret.set(index, name);
+            }
+          }
+        }
+        return ret.toArray(new String[ret.size()]);
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LOG.error("Error reading procedure metadata: "
+          + sqlException.toString());
+      return null;
     }
   }
 
@@ -319,6 +364,42 @@ public abstract class SqlManager
     // TODO(aaron): Implement this!
     LOG.error("Generic SqlManager.listDatabases() not implemented.");
     return null;
+  }
+
+  @Override
+  public Map<String, Integer> getColumnTypesForProcedure(String procedureName) {
+    Map<String, Integer> ret = new TreeMap<String, Integer>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+          procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+            != DatabaseMetaData.procedureColumnReturn
+          && results.getInt("ORDINAL_POSITION") > 0) {
+            // we don't care if we get several rows for the
+            // same ORDINAL_POSITION (e.g. like H2 gives us)
+            // as we'll just overwrite the entry in the map:
+            ret.put(
+              results.getString("COLUMN_NAME"),
+              results.getInt("DATA_TYPE"));
+          }
+        }
+        return ret.isEmpty() ? null : ret;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LOG.error("Error reading primary key metadata: "
+          + sqlException.toString());
+      return null;
+    }
   }
 
   @Override
@@ -689,6 +770,15 @@ public abstract class SqlManager
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context);
+    exportJob.runExport();
+  }
+
+  @Override
+  public void callTable(com.cloudera.sqoop.manager.ExportJobContext context)
+      throws IOException,
+      ExportException {
+    context.setConnManager(this);
+    JdbcCallExportJob exportJob = new JdbcCallExportJob(context);
     exportJob.runExport();
   }
 

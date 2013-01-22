@@ -1209,6 +1209,10 @@ public class ClassWriter {
       if (null != tableName) {
         // Table-based import. Read column names from table.
         colNames = connManager.getColumnNames(tableName);
+      } else if (options.getCall() != null) {
+        // Read procedure arguments from metadata
+        colNames = connManager.getColumnNamesForProcedure(
+            this.options.getCall());
       } else {
         // Infer/assign column names for arbitrary query.
         colNames = connManager.getColumnNamesForQuery(
@@ -1236,7 +1240,11 @@ public class ClassWriter {
   }
 
   protected Map<String, Integer> getColumnTypes() throws IOException {
-    return connManager.getColumnTypes(tableName, options.getSqlQuery());
+    if (options.getCall() == null) {
+      return connManager.getColumnTypes(tableName, options.getSqlQuery());
+    } else {
+      return connManager.getColumnTypesForProcedure(options.getCall());
+    }
   }
 
   /**

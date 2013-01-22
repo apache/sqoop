@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop;
 
+import org.apache.sqoop.TestExportUsingProcedure;
+
 import com.cloudera.sqoop.hive.TestHiveImport;
 import com.cloudera.sqoop.hive.TestTableDefWriter;
 import com.cloudera.sqoop.io.TestLobFile;
@@ -82,6 +84,7 @@ public final class SmokeTests {
     suite.addTestSuite(TestBooleanParser.class);
     suite.addTestSuite(TestMerge.class);
     suite.addTestSuite(TestToolPlugin.class);
+    suite.addTestSuite(TestExportUsingProcedure.class);
     suite.addTest(MapreduceTests.suite());
 
     return suite;

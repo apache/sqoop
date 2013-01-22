@@ -124,6 +124,11 @@ under the License.
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
+    <!-- We're only using H2 for tests as it supports stored
+         procedures; once we move to HSQLDB 2.x we can drop
+         this -->
+    <dependency org="com.h2database" name="h2" rev="${h2.version}"
+      conf="test->default"/>
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"

@@ -131,8 +131,10 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
       }
     }
 
-    args.add("--table");
-    args.add(getTableName());
+    if (usesSQLtable()) {
+      args.add("--table");
+      args.add(getTableName());
+    }
     args.add("--export-dir");
     args.add(getTablePath().toString());
     args.add("--connect");
@@ -150,6 +152,10 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
     }
 
     return args.toArray(new String[0]);
+  }
+
+  protected boolean usesSQLtable() {
+    return true;
   }
 
   /** When exporting text columns, what should the text contain? */
