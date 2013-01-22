@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.request.VersionRequest;
+import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.VersionBean;
 import org.codehaus.groovy.tools.shell.IO;
 
@@ -101,34 +102,49 @@ public class ShowVersionFunction extends SqoopFunction
   }
 
   private void showVersion(boolean server, boolean client, boolean protocol) {
+
+    // Print out client string if needed
+    String s;
+    if (client) {
+      s = MessageFormat.format(
+        getResource().getString(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER),
+        Constants.OPT_CLIENT,
+        VersionInfo.getVersion(),
+        VersionInfo.getRevision(),
+        VersionInfo.getUser(),
+        VersionInfo.getDate()
+      );
+      io.out.println(StringEscapeUtils.unescapeJava(s));
+    }
+
+    // If only client version was required we do not need to continue
+    if(!server && !protocol) {
+      return;
+    }
+
     if (versionRequest == null) {
       versionRequest = new VersionRequest();
     }
     VersionBean versionBean =
         versionRequest.doGet(Environment.getServerUrl());
-    MessageFormat msg;
-    String s;
 
     if (server) {
-      s = MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_VERSION_CLIENT_SERVER), Constants.OPT_SERVER,
-          versionBean.getVersion(), versionBean.getRevision(),
-          versionBean.getUser(), versionBean.getDate());
-      io.out.println(StringEscapeUtils.unescapeJava(s));
-    }
-
-    if (client) {
-      s = MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_VERSION_CLIENT_SERVER), Constants.OPT_CLIENT,
-          versionBean.getVersion(), versionBean.getRevision(),
-          versionBean.getUser(), versionBean.getDate());
+      s = MessageFormat.format(
+        getResource().getString(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER),
+        Constants.OPT_SERVER,
+        versionBean.getVersion(),
+        versionBean.getRevision(),
+        versionBean.getUser(),
+        versionBean.getDate()
+      );
       io.out.println(StringEscapeUtils.unescapeJava(s));
     }
 
     if (protocol) {
-      s = MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_VERSION_PROTOCOL), Arrays.toString(versionBean.
-          getProtocols()));
+      s = MessageFormat.format(
+        getResource().getString(Constants.RES_SHOW_PROMPT_VERSION_PROTOCOL),
+        Arrays.toString(versionBean.getProtocols())
+      );
       io.out.println(StringEscapeUtils.unescapeJava(s));
     }
 
