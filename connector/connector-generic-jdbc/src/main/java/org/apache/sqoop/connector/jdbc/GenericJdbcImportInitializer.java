@@ -73,29 +73,11 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
           "JDBC Driver");
     }
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
-        driver);
 
     if (url == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
           "Connection string");
-    }
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL,
-        url);
-
-    if (username != null) {
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_USERNAME,
-          username);
-    }
-
-    if (password != null) {
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PASSWORD,
-          password);
     }
 
     executor = new GenericJdbcExecutor(driver, url, username, password);

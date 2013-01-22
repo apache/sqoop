@@ -26,7 +26,6 @@ import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
-import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -64,29 +63,11 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
           "JDBC Driver");
     }
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
-        driver);
 
     if (url == null) {
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
           "Connection string");
-    }
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL,
-        url);
-
-    if (username != null) {
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_USERNAME,
-          username);
-    }
-
-    if (password != null) {
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PASSWORD,
-          password);
     }
 
     executor = new GenericJdbcExecutor(driver, url, username, password);

@@ -39,14 +39,10 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
   @Override
   public List<Partition> getPartitions(ImmutableContext context, long maxPartitions, ConnectionConfiguration connection, ImportJobConfiguration job) {
     numberPartitions = maxPartitions;
-    partitionColumnName = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME);
-    partitionColumnType = Integer.parseInt(context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE));
-    partitionMinValue = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE);
-    partitionMaxValue = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE);
+    partitionColumnName = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME);
+    partitionColumnType = context.getInt(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, -1);
+    partitionMinValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE);
+    partitionMaxValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE);
 
     switch (partitionColumnType) {
     case Types.TINYINT:

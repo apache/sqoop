@@ -37,24 +37,17 @@ public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguratio
  private long rowsRead = 0;
   @Override
   public void run(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job, Partition partition, DataWriter writer) {
-    String driver = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
-    String url = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL);
-    String username = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_USERNAME);
-    String password = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PASSWORD);
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(
-        driver, url, username, password);
+    String driver = connection.connection.jdbcDriver;
+    String url = connection.connection.connectionString;
+    String username = connection.connection.username;
+    String password = connection.connection.password;
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
-    String query = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
-    String conditions =
-        ((GenericJdbcImportPartition)partition).getConditions();
-    query = query.replace(
-        GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
-    LOG.debug("Using query: " + query);
+    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
+    String conditions = ((GenericJdbcImportPartition)partition).getConditions();
+    query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
+    LOG.info("Using query: " + query);
+
     rowsRead = 0;
     ResultSet resultSet = executor.executeQuery(query);
 

@@ -33,15 +33,6 @@ public final class GenericJdbcConnectorConstants {
   public static final String PREFIX_CONNECTOR_JDBC_CONFIG =
       "org.apache.sqoop.connector.jdbc.";
 
-  public static final String CONNECTOR_JDBC_DRIVER =
-      PREFIX_CONNECTOR_JDBC_CONFIG + "driver";
-  public static final String CONNECTOR_JDBC_URL =
-      PREFIX_CONNECTOR_JDBC_CONFIG + "url";
-  public static final String CONNECTOR_JDBC_USERNAME =
-      PREFIX_CONNECTOR_JDBC_CONFIG + "username";
-  public static final String CONNECTOR_JDBC_PASSWORD =
-      PREFIX_CONNECTOR_JDBC_CONFIG + "password";
-
   public static final String CONNECTOR_JDBC_PARTITION_COLUMNNAME =
       PREFIX_CONNECTOR_JDBC_CONFIG + "partition.columnname";
   public static final String CONNECTOR_JDBC_PARTITION_COLUMNTYPE =

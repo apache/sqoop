@@ -23,6 +23,8 @@ import junit.framework.TestCase;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.io.DataReader;
 
@@ -59,20 +61,20 @@ public class TestExportLoader extends TestCase {
   public void testInsert() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER,
-        GenericJdbcTestConstants.DRIVER);
-    context.setString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL,
-        GenericJdbcTestConstants.URL);
+    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+
+    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+
+    ExportJobConfiguration jobConfig = new ExportJobConfiguration();
+
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
-        "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES (?,?,?)");
+        "INSERT INTO " + executor.delimitIdentifier(tableName) + " VALUES (?,?,?)");
 
     Loader loader = new GenericJdbcExportLoader();
     DummyReader reader = new DummyReader();
 
-    loader.load(context, null, null, reader);
+    loader.load(context, connectionConfig, jobConfig, reader);
 
     int index = START;
     ResultSet rs = executor.executeQuery("SELECT * FROM "

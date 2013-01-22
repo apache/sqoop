@@ -32,19 +32,13 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
 
   @Override
   public void load(ImmutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job, DataReader reader) throws Exception{
-    String driver = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DRIVER);
-    String url = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_URL);
-    String username = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_USERNAME);
-    String password = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PASSWORD);
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(
-        driver, url, username, password);
+    String driver = connection.connection.jdbcDriver;
+    String url = connection.connection.connectionString;
+    String username = connection.connection.username;
+    String password = connection.connection.password;
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
-    String sql = context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
+    String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
     executor.beginBatch(sql);
     try {
       int numberOfRows = 0;
