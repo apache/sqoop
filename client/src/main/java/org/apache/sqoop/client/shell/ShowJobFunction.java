@@ -20,6 +20,7 @@ package org.apache.sqoop.client.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.utils.TableDisplayer;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
 import org.codehaus.groovy.tools.shell.IO;
@@ -27,6 +28,7 @@ import org.codehaus.groovy.tools.shell.IO;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
@@ -61,21 +63,41 @@ public class ShowJobFunction extends SqoopFunction {
   }
 
   public Object execute(List<String> args) {
-    if (args.size() == 1) {
-      printHelp(io.out);
-      io.out.println();
-      return null;
-    }
-
     CommandLine line = parseOptions(this, 1, args);
     if (line.hasOption(Constants.OPT_ALL)) {
       showJob(null);
-
     } else if (line.hasOption(Constants.OPT_JID)) {
       showJob(line.getOptionValue(Constants.OPT_JID));
+    } else {
+      showSummary();
     }
 
     return null;
+  }
+
+  private void showSummary() {
+    JobBean jobBean = readJob(null);
+    List<MJob> jobs = jobBean.getJobs();
+
+    List<String> header = new LinkedList<String>();
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_ID));
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_NAME));
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_TYPE));
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_CONNECTOR));
+
+    List<String> ids = new LinkedList<String>();
+    List<String> names = new LinkedList<String>();
+    List<String> types = new LinkedList<String>();
+    List<String> connectors = new LinkedList<String>();
+
+    for(MJob job : jobs) {
+      ids.add(String.valueOf(job.getPersistenceId()));
+      names.add(job.getName());
+      types.add(job.getType().toString());
+      connectors.add(String.valueOf(job.getConnectorId()));
+    }
+
+    TableDisplayer.display(io, header, ids, names, types, connectors);
   }
 
   private void showJob(String jid) {

@@ -20,6 +20,7 @@ package org.apache.sqoop.client.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.utils.TableDisplayer;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
 import org.codehaus.groovy.tools.shell.IO;
@@ -27,6 +28,7 @@ import org.codehaus.groovy.tools.shell.IO;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
@@ -63,21 +65,38 @@ public class ShowConnectionFunction extends SqoopFunction {
   }
 
   public Object execute(List<String> args) {
-    if (args.size() == 1) {
-      printHelp(io.out);
-      io.out.println();
-      return null;
-    }
-
     CommandLine line = parseOptions(this, 1, args);
     if (line.hasOption(Constants.OPT_ALL)) {
       showConnection(null);
-
     } else if (line.hasOption(Constants.OPT_XID)) {
       showConnection(line.getOptionValue(Constants.OPT_XID));
+    } else {
+      showSummary();
     }
 
     return null;
+  }
+
+  private void showSummary() {
+    ConnectionBean connectionBean = readConnection(null);
+    List<MConnection> connections = connectionBean.getConnections();
+
+    List<String> header = new LinkedList<String>();
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_ID));
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_NAME));
+    header.add(getResource().getString(Constants.RES_TABLE_HEADER_CONNECTOR));
+
+    List<String> ids = new LinkedList<String>();
+    List<String> names = new LinkedList<String>();
+    List<String> connectors = new LinkedList<String>();
+
+    for(MConnection connection : connections) {
+      ids.add(String.valueOf(connection.getPersistenceId()));
+      names.add(connection.getName());
+      connectors.add(String.valueOf(connection.getConnectorId()));
+    }
+
+    TableDisplayer.display(io, header, ids, names, connectors);
   }
 
   private void showConnection(String xid) {

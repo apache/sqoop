@@ -300,6 +300,20 @@ public class Constants {
       "update.job";
   public static final String RES_UPDATE_JOB_SUCCESSFUL =
       "update.job_successful";
+
+  public static final String RES_TABLE_HEADER_ID =
+      "table.header.id";
+  public static final String RES_TABLE_HEADER_NAME =
+      "table.header.name";
+  public static final String RES_TABLE_HEADER_VERSION =
+      "table.header.version";
+  public static final String RES_TABLE_HEADER_CLASS =
+      "table.header.class";
+  public static final String RES_TABLE_HEADER_TYPE =
+      "table.header.type";
+  public static final String RES_TABLE_HEADER_CONNECTOR =
+      "table.header.connector";
+
   private Constants() {
     // Instantiation is prohibited
   }
