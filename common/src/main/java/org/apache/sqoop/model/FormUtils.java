@@ -32,9 +32,7 @@ import java.util.Map;
 
 /**
  * Util class for transforming data from correctly annotated configuration
- * objects to form structures and vice-versa.
- *
- * TODO(jarcec): JSON methods needs rewrittion!
+ * objects to different structures and vice-versa.
  */
 public class FormUtils {
 
@@ -271,6 +269,13 @@ public class FormUtils {
     }
   }
 
+  /**
+   * Convert configuration object to JSON. Only filled properties are serialized,
+   * properties with null value are skipped.
+   *
+   * @param configuration Correctly annotated configuration object
+   * @return String of JSON representation
+   */
   @SuppressWarnings("unchecked")
   public static String toJson(Object configuration) {
     Class klass = configuration.getClass();
@@ -284,100 +289,161 @@ public class FormUtils {
         "Missing annotation Configuration on class " + klass.getName());
     }
 
-    JSONObject jsonObject = new JSONObject();
+    JSONObject jsonOutput = new JSONObject();
 
     // Iterate over all declared fields
-    for (Field field : klass.getDeclaredFields()) {
-      field.setAccessible(true);
-      String fieldName = field.getName();
+    for (Field formField : klass.getDeclaredFields()) {
+      formField.setAccessible(true);
+      String formName = formField.getName();
 
-      // Each field that should be part of user input should have Input
-      // annotation.
-      Input inputAnnotation = field.getAnnotation(Input.class);
+      // We're processing only form validations
+      Form formAnnotation = formField.getAnnotation(Form.class);
+      if(formAnnotation == null) {
+        continue;
+      }
 
-      Object value;
+      Object formValue;
       try {
-        value = field.get(configuration);
+        formValue = formField.get(configuration);
       } catch (IllegalAccessException e) {
         throw new SqoopException(ModelError.MODEL_005,
-          "Issue with field " + field.getName(), e);
+          "Issue with field " + formName, e);
       }
 
-      // Do not serialize all values
-      if(inputAnnotation != null && value != null) {
-        Class type = field.getType();
+      JSONObject jsonForm = new JSONObject();
 
-        // We need to support NULL, so we do not support primitive types
-        if(type.isPrimitive()) {
-          throw new SqoopException(ModelError.MODEL_007,
-            "Detected primitive type " + type + " for field " + fieldName);
+      // Now process each input on the form
+      for(Field inputField : formField.getType().getDeclaredFields()) {
+        inputField.setAccessible(true);
+        String inputName = inputField.getName();
+
+        Object value;
+        try {
+          value = inputField.get(formValue);
+        } catch (IllegalAccessException e) {
+          throw new SqoopException(ModelError.MODEL_005,
+            "Issue with field " + formName + "." + inputName, e);
         }
 
-        if(type == String.class) {
-          jsonObject.put(fieldName, value);
-        } else if (type.isAssignableFrom(Map.class)) {
-          JSONObject map = new JSONObject();
-          for(Object key : ((Map)value).keySet()) {
-            map.put(key, map.get(key));
+        Input inputAnnotation = inputField.getAnnotation(Input.class);
+
+        // Do not serialize all values
+        if(inputAnnotation != null && value != null) {
+          Class type = inputField.getType();
+
+          // We need to support NULL, so we do not support primitive types
+          if(type.isPrimitive()) {
+            throw new SqoopException(ModelError.MODEL_007,
+              "Detected primitive type " + type + " for field " + formName + "." + inputName);
           }
-          jsonObject.put(fieldName, map);
-        } else if(type == Integer.class) {
-          jsonObject.put(fieldName, value);
-        } else if(type.isEnum()) {
-          jsonObject.put(fieldName, value);
-        } else {
-          throw new SqoopException(ModelError.MODEL_004,
-            "Unsupported type " + type.getName() + " for input " + fieldName);
+
+          if(type == String.class) {
+            jsonForm.put(inputName, value);
+          } else if (type.isAssignableFrom(Map.class)) {
+            JSONObject map = new JSONObject();
+            for(Object key : ((Map)value).keySet()) {
+              map.put(key, ((Map)value).get(key));
+            }
+            jsonForm.put(inputName, map);
+          } else if(type == Integer.class) {
+            jsonForm.put(inputName, value);
+          } else if(type.isEnum()) {
+            jsonForm.put(inputName, value.toString());
+          } else {
+            throw new SqoopException(ModelError.MODEL_004,
+              "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
+          }
         }
       }
+
+      jsonOutput.put(formName, jsonForm);
     }
 
-    return jsonObject.toJSONString();
+    return jsonOutput.toJSONString();
   }
 
-  // TODO(jarcec): This method currently do not iterate over all fields and
-  // therefore some fields might have original values when original object will
-  // be reused. This is unfortunately not acceptable.
+  /**
+   * Parse given input JSON string and move it's values to given configuration
+   * object.
+   *
+   * @param json JSON representation of the configuration object
+   * @param configuration Configuration object to be filled
+   */
   public static void fillValues(String json, Object configuration) {
     Class klass = configuration.getClass();
 
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(json);
+    JSONObject jsonForms = (JSONObject) JSONValue.parse(json);
 
-    for(Object k : jsonObject.keySet()) {
-      String key = (String)k;
+    for(Field formField : klass.getDeclaredFields()) {
+      formField.setAccessible(true);
+      String formName = formField.getName();
 
-      Field field;
-      try {
-        field = klass.getDeclaredField(key);
-      } catch (NoSuchFieldException e) {
-        throw new SqoopException(ModelError.MODEL_006,
-          "Missing field " + key, e);
+      // We're processing only form validations
+      Form formAnnotation = formField.getAnnotation(Form.class);
+      if(formAnnotation == null) {
+        continue;
       }
 
-      // We need to access this field even if it would be declared as private
-      field.setAccessible(true);
-      Class type = field.getType();
-
       try {
-        if(type == String.class) {
-          field.set(configuration, jsonObject.get(key));
-        } else if (type.isAssignableFrom(Map.class)) {
-          Map<String, String> map = new HashMap<String, String>();
-          for(Object kk : jsonObject.keySet()) {
-            map.put((String)kk, (String)jsonObject.get(kk));
-          }
-          field.set(key, map);
-        } else if(type == Integer.class) {
-          field.set(configuration, jsonObject.get(key));
-        } else if(type == Integer.class) {
-          field.set(configuration, Enum.valueOf((Class<? extends Enum>)field.getType(), (String) jsonObject.get(key)));
-        } else {
-          throw new SqoopException(ModelError.MODEL_004,
-            "Unsupported type " + type.getName() + " for input " + key);
-        }
+        formField.set(configuration, formField.getType().newInstance());
+      } catch (Exception e) {
+        throw new SqoopException(ModelError.MODEL_005,
+          "Issue with field " + formName, e);
+      }
+
+      JSONObject jsonInputs = (JSONObject) jsonForms.get(formField.getName());
+      if(jsonInputs == null) {
+        continue;
+      }
+
+      Object formValue;
+      try {
+        formValue = formField.get(configuration);
       } catch (IllegalAccessException e) {
         throw new SqoopException(ModelError.MODEL_005,
-          "Issue with field " + field.getName(), e);
+          "Issue with field " + formName, e);
+      }
+
+      for(Field inputField : formField.getType().getDeclaredFields()) {
+        inputField.setAccessible(true);
+        String inputName = inputField.getName();
+
+        Input inputAnnotation = inputField.getAnnotation(Input.class);
+
+        if(inputAnnotation == null || jsonInputs.get(inputName) == null) {
+          try {
+            inputField.set(formValue, null);
+          } catch (IllegalAccessException e) {
+            throw new SqoopException(ModelError.MODEL_005,
+              "Issue with field " + formName + "." + inputName, e);
+          }
+          continue;
+        }
+
+        Class type = inputField.getType();
+
+        try {
+          if(type == String.class) {
+            inputField.set(formValue, jsonInputs.get(inputName));
+          } else if (type.isAssignableFrom(Map.class)) {
+            Map<String, String> map = new HashMap<String, String>();
+            JSONObject jsonObject = (JSONObject) jsonInputs.get(inputName);
+            for(Object key : jsonObject.keySet()) {
+              map.put((String)key, (String)jsonObject.get(key));
+            }
+            inputField.set(formValue, map);
+          } else if(type == Integer.class) {
+            inputField.set(formValue, ((Long)jsonInputs.get(inputName)).intValue());
+          } else if(type.isEnum()) {
+            inputField.set(formValue, Enum.valueOf((Class<? extends Enum>) inputField.getType(), (String) jsonInputs.get(inputName)));
+          } else {
+            throw new SqoopException(ModelError.MODEL_004,
+              "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
+          }
+        } catch (IllegalAccessException e) {
+          throw new SqoopException(ModelError.MODEL_005,
+            "Issue with field " + formName + "." + inputName, e);
+        }
       }
     }
   }

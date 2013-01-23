@@ -114,6 +114,39 @@ public class TestFormUtils extends TestCase {
       forms.get(0).getInputs().get(1).getValidationMessage());
   }
 
+  public void testJson() {
+    Config config = new Config();
+    config.aForm.a1 = "A";
+    config.bForm.b2 = "B";
+    config.cForm.intValue = 4;
+    config.cForm.map.put("C", "D");
+    config.cForm.enumeration = Enumeration.X;
+
+    String json = FormUtils.toJson(config);
+
+    Config targetConfig = new Config();
+
+    // Old values from should be always removed
+    targetConfig.aForm.a2 = "X";
+    targetConfig.bForm.b1 = "Y";
+    // Nulls in forms shouldn't be an issue either
+    targetConfig.cForm = null;
+
+    FormUtils.fillValues(json, targetConfig);
+
+    assertEquals("A", targetConfig.aForm.a1);
+    assertNull(targetConfig.aForm.a2);
+
+    assertNull(targetConfig.bForm.b1);
+    assertEquals("B", targetConfig.bForm.b2);
+
+    assertEquals((Integer)4, targetConfig.cForm.intValue);
+    assertEquals(1, targetConfig.cForm.map.size());
+    assertTrue(targetConfig.cForm.map.containsKey("C"));
+    assertEquals("D", targetConfig.cForm.map.get("C"));
+    assertEquals(Enumeration.X, targetConfig.cForm.enumeration);
+  }
+
   protected Validation getValidation() {
     Map<Validation.FormInput, Validation.Message> messages
       = new HashMap<Validation.FormInput, Validation.Message>();
@@ -153,6 +186,7 @@ public class TestFormUtils extends TestCase {
     inputs = new LinkedList<MInput<?>>();
     inputs.add(new MIntegerInput("cForm.intValue"));
     inputs.add(new MMapInput("cForm.map"));
+    inputs.add(new MEnumInput("cForm.enumeration", new String[]{"X", "Y"}));
     ret.add(new MForm("cForm", inputs));
 
     return ret;
@@ -193,6 +227,11 @@ public class TestFormUtils extends TestCase {
   public static class CForm {
     @Input Integer intValue;
     @Input Map<String, String> map;
+    @Input Enumeration enumeration;
+
+    public CForm() {
+      map = new HashMap<String, String>();
+    }
   }
 
   @FormClass
@@ -201,5 +240,10 @@ public class TestFormUtils extends TestCase {
   }
 
   public static class ConfigWithout {
+  }
+
+  enum Enumeration {
+    X,
+    Y,
   }
 }
