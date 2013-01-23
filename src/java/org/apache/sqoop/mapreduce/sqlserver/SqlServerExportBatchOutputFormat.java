@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  * Output format specific for Microsoft SQL Connector.
  */
 public class SqlServerExportBatchOutputFormat<K extends SqoopRecord, V>
-  extends ExportBatchOutputFormat {
+  extends ExportBatchOutputFormat<K, V> {
 
   private static final Log LOG =
     LogFactory.getLog(SqlServerExportBatchOutputFormat.class);
@@ -42,14 +42,15 @@ public class SqlServerExportBatchOutputFormat<K extends SqoopRecord, V>
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
-      return new SqlServerExportBatchRecordWriter(context);
+      return new SqlServerExportBatchRecordWriter<K, V>(context);
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   /** {@inheritDoc}. */
-  public class SqlServerExportBatchRecordWriter extends ExportBatchRecordWriter{
+  public class SqlServerExportBatchRecordWriter<K extends SqoopRecord, V>
+    extends ExportBatchRecordWriter<K, V>{
 
     public SqlServerExportBatchRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {

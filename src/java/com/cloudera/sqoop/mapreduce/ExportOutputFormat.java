@@ -30,7 +30,7 @@ public class ExportOutputFormat<K extends SqoopRecord, V>
     extends org.apache.sqoop.mapreduce.ExportOutputFormat<K, V> {
 
   /** {@inheritDoc}. **/
-  public class ExportRecordWriter extends
+  public class ExportRecordWriter<K extends SqoopRecord, V> extends
     org.apache.sqoop.mapreduce.ExportOutputFormat<K, V>.ExportRecordWriter {
 
     public ExportRecordWriter(TaskAttemptContext context)

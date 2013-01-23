@@ -45,7 +45,7 @@ public class ExportBatchOutputFormat<K extends SqoopRecord, V>
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
-      return new ExportBatchRecordWriter(context);
+      return new ExportBatchRecordWriter<K, V>(context);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -55,7 +55,8 @@ public class ExportBatchOutputFormat<K extends SqoopRecord, V>
    * RecordWriter to write the output to a row in a database table.
    * The actual database updates are executed in a second thread.
    */
-  public class ExportBatchRecordWriter extends ExportRecordWriter {
+  public class ExportBatchRecordWriter<K extends SqoopRecord, V>
+    extends ExportRecordWriter<K, V> {
 
     public ExportBatchRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {

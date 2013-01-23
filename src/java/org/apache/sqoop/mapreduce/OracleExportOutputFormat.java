@@ -36,7 +36,7 @@ public class OracleExportOutputFormat<K extends SqoopRecord, V>
   public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
       throws IOException {
     try {
-      return new OracleExportRecordWriter(context);
+      return new OracleExportRecordWriter<K, V>(context);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -46,7 +46,8 @@ public class OracleExportOutputFormat<K extends SqoopRecord, V>
    * RecordWriter to write the output to a row in a database table.
    * The actual database updates are executed in a second thread.
    */
-  public class OracleExportRecordWriter extends ExportRecordWriter {
+  public class OracleExportRecordWriter<K extends SqoopRecord, V>
+    extends ExportRecordWriter<K, V> {
 
     public OracleExportRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {
