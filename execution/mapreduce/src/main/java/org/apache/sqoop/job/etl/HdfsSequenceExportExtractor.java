@@ -27,12 +27,14 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
+import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
 
-public class HdfsSequenceExportExtractor extends Extractor {
+public class HdfsSequenceExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition> {
 
   public static final Log LOG =
     LogFactory.getLog(HdfsSequenceExportExtractor.class.getName());
@@ -47,19 +49,18 @@ public class HdfsSequenceExportExtractor extends Extractor {
   }
 
   @Override
-  public void run(ImmutableContext context, Object connectionConfiguration,
-      Object jobConfiguration, Partition partition, DataWriter writer) {
+  public void run(ImmutableContext context, ConnectionConfiguration connectionConfiguration,
+      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition, DataWriter writer) {
     writer.setFieldDelimiter(fieldDelimiter);
 
     conf = ((PrefixContext)context).getConfiguration();
     datawriter = writer;
 
     try {
-      HdfsExportPartition p = (HdfsExportPartition)partition;
-      LOG.info("Working on partition: " + p);
-      int numFiles = p.getNumberOfFiles();
+      LOG.info("Working on partition: " + partition);
+      int numFiles = partition.getNumberOfFiles();
       for (int i=0; i<numFiles; i++) {
-        extractFile(p.getFile(i), p.getOffset(i), p.getLength(i));
+        extractFile(partition.getFile(i), partition.getOffset(i), partition.getLength(i));
       }
     } catch (IOException e) {
       throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0017, e);

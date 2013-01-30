@@ -30,13 +30,13 @@ import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.io.DataWriter;
 
-public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguration, ImportJobConfiguration> {
+public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguration, ImportJobConfiguration, GenericJdbcImportPartition> {
 
  public static final Logger LOG = Logger.getLogger(GenericJdbcImportExtractor.class);
 
  private long rowsRead = 0;
   @Override
-  public void run(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job, Partition partition, DataWriter writer) {
+  public void run(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job, GenericJdbcImportPartition partition, DataWriter writer) {
     String driver = connection.connection.jdbcDriver;
     String url = connection.connection.connectionString;
     String username = connection.connection.username;
@@ -44,7 +44,7 @@ public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguratio
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
     String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
-    String conditions = ((GenericJdbcImportPartition)partition).getConditions();
+    String conditions = partition.getConditions();
     query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
     LOG.info("Using query: " + query);
 

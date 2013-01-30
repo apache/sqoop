@@ -33,12 +33,14 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
+import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.DataWriter;
 
-public class HdfsTextExportExtractor extends Extractor {
+public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition>  {
 
   public static final Log LOG =
     LogFactory.getLog(HdfsTextExportExtractor.class.getName());
@@ -53,8 +55,8 @@ public class HdfsTextExportExtractor extends Extractor {
   }
 
   @Override
-  public void run(ImmutableContext context, Object connectionConfiguration,
-      Object jobConfiguration, Partition partition, DataWriter writer) {
+  public void run(ImmutableContext context, ConnectionConfiguration connectionConfiguration,
+      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition, DataWriter writer) {
     writer.setFieldDelimiter(fieldDelimiter);
 
     conf = ((PrefixContext)context).getConfiguration();

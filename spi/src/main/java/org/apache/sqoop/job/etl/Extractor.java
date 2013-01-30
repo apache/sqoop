@@ -24,7 +24,7 @@ import org.apache.sqoop.job.io.DataWriter;
  * This allows connector to extract data from a source system
  * based on each partition.
  */
-public abstract class Extractor<ConnectionConfiguration, JobConfiguration> {
+public abstract class Extractor<ConnectionConfiguration, JobConfiguration, Partition> {
 
   public abstract void run(ImmutableContext context,
                            ConnectionConfiguration connectionConfiguration,
@@ -34,14 +34,14 @@ public abstract class Extractor<ConnectionConfiguration, JobConfiguration> {
 
   /**
    * Return the number of rows read by the last call to
-   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, org.apache.sqoop.job.etl.Partition, org.apache.sqoop.job.io.DataWriter) }
+   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, Partition, org.apache.sqoop.job.io.DataWriter) }
    * method. This method returns only the number of rows read in the last call,
    * and not a cumulative total of the number of rows read by this Extractor
    * since its creation. If no calls were made to the run method, this method's
    * behavior is undefined.
    *
    * @return the number of rows read by the last call to
-   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, org.apache.sqoop.job.etl.Partition, org.apache.sqoop.job.io.DataWriter) }
+   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, Partition, org.apache.sqoop.job.io.DataWriter) }
    */
   public abstract long getRowsRead();
 

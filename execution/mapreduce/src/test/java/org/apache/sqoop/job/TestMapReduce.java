@@ -133,7 +133,7 @@ public class TestMapReduce extends TestCase {
 
   public static class DummyExtractor extends Extractor {
     @Override
-    public void run(ImmutableContext context, Object oc, Object oj, Partition partition, DataWriter writer) {
+    public void run(ImmutableContext context, Object oc, Object oj, Object partition, DataWriter writer) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
         writer.writeArrayRecord(new Object[] {
