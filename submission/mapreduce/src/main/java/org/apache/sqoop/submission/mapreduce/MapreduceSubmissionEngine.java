@@ -115,6 +115,13 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
   @Override
   public void destroy() {
     LOG.info("Destroying Mapreduce Submission Engine");
+
+    // Closing job client
+    try {
+      jobClient.close();
+    } catch (IOException e) {
+      throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0005, e);
+    }
   }
 
   /**

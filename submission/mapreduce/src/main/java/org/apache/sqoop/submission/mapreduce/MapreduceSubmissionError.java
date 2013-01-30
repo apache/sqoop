@@ -32,6 +32,8 @@ public enum MapreduceSubmissionError implements ErrorCode {
 
   MAPREDUCE_0004("Unknown map reduce job status"),
 
+  MAPREDUCE_0005("Failure on submission engine destroy"),
+
   ;
 
   private final String message;
