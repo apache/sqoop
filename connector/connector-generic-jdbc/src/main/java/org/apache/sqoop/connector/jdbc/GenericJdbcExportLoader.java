@@ -37,6 +37,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
     String username = connection.connection.username;
     String password = connection.connection.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
+    executor.setAutoCommit(false);
 
     String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
     executor.beginBatch(sql);
