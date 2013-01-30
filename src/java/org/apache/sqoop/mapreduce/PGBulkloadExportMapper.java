@@ -206,11 +206,16 @@ public class PGBulkloadExportMapper
       thread.join();
     } finally {
       // block until the process is done.
-      int result = 0;
       if (null != process) {
         while (true) {
           try {
-            result = process.waitFor();
+            int returnValue = process.waitFor();
+
+            // Check pg_bulkload's process return value
+            if (returnValue != 0) {
+              throw new RuntimeException(
+                "Unexpected return value from pg_bulkload: "+ returnValue);
+            }
           } catch (InterruptedException ie) {
             // interrupted; loop around.
             continue;
