@@ -25,7 +25,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.utils.ClassUtils;
 
-public final class RepositoryManager {
+public class RepositoryManager {
 
   /**
    * Logger object.

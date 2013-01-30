@@ -33,7 +33,7 @@ import org.apache.sqoop.common.SqoopException;
 /**
  * Configuration manager that loads Sqoop configuration.
  */
-public final class SqoopConfiguration {
+public class SqoopConfiguration {
 
   /**
    * Logger object.

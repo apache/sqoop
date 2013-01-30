@@ -64,7 +64,7 @@ import java.util.ResourceBundle;
  * be the fastest way and we might want to introduce internal structures for
  * running jobs in case that this approach will be too slow.
  */
-public final class FrameworkManager {
+public class FrameworkManager {
 
   /**
    * Logger object.

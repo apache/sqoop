@@ -38,7 +38,7 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.repository.RepositoryTransaction;
 import org.apache.sqoop.model.MConnector;
 
-public final class ConnectorManager {
+public class ConnectorManager {
 
   /**
    * Logger object.
