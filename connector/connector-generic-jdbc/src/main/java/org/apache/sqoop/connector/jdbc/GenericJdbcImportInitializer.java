@@ -67,18 +67,8 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     String username = connectionConfig.connection.username;
     String password = connectionConfig.connection.password;
 
-    // TODO(jarcec): Those checks should be in validator and not here
-    if (driver == null) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          "JDBC Driver");
-    }
-
-    if (url == null) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0012,
-          "Connection string");
-    }
+    assert driver != null;
+    assert url != null;
 
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
