@@ -58,6 +58,14 @@ public class ImportJobBase extends JobBase {
   public static final Log LOG = LogFactory.getLog(
       ImportJobBase.class.getName());
 
+  /** Controls how java.math.BigDecimal values should be converted to Strings
+   *  If set to true (default) then will call toPlainString() method.
+   *  If set to false then will call toString() method.
+   */
+  public static final String PROPERTY_BIGDECIMAL_FORMAT =
+      "sqoop.bigdecimal.format.string";
+  public static final boolean PROPERTY_BIGDECIMAL_FORMAT_DEFAULT = true;
+
   public ImportJobBase() {
     this(null);
   }

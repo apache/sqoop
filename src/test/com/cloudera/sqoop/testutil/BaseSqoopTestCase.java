@@ -312,13 +312,9 @@ public abstract class BaseSqoopTestCase extends TestCase {
         for (int i = 0; i < colTypes.length; i++) {
           String colName = BASE_COL_NAME + Integer.toString(i);
           columnDefStr += colName + " " + colTypes[i];
-          columnListStr += colName;
-          valueListStr += vals[i];
           myColNames[i] = colName;
           if (i < colTypes.length - 1) {
             columnDefStr += ", ";
-            columnListStr += ", ";
-            valueListStr += ", ";
           }
         }
 
@@ -344,27 +340,37 @@ public abstract class BaseSqoopTestCase extends TestCase {
         }
       }
 
-      try {
-        String insertValsStr = "INSERT INTO " + getTableName()
-            + "(" + columnListStr + ")"
-            + " VALUES(" + valueListStr + ")";
-        LOG.info("Inserting values: " + insertValsStr);
-        statement = conn.prepareStatement(
-            insertValsStr,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.executeUpdate();
-      } catch (SQLException sqlException) {
-        fail("Could not create table: "
-            + StringUtils.stringifyException(sqlException));
-      } finally {
-        if (null != statement) {
-          try {
-            statement.close();
-          } catch (SQLException se) {
-            // Ignore exception on close.
+      if (vals!=null) {
+        for (int i = 0; i < colTypes.length; i++) {
+          columnListStr += myColNames[i];
+          valueListStr += vals[i];
+          if (i < colTypes.length - 1) {
+            columnListStr += ", ";
+            valueListStr += ", ";
           }
+        }
+        try {
+          String insertValsStr = "INSERT INTO " + getTableName()
+              + "(" + columnListStr + ")"
+              + " VALUES(" + valueListStr + ")";
+          LOG.info("Inserting values: " + insertValsStr);
+          statement = conn.prepareStatement(
+              insertValsStr,
+              ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+          statement.executeUpdate();
+        } catch (SQLException sqlException) {
+          fail("Could not create table: "
+              + StringUtils.stringifyException(sqlException));
+        } finally {
+          if (null != statement) {
+            try {
+              statement.close();
+            } catch (SQLException se) {
+              // Ignore exception on close.
+            }
 
-          statement = null;
+            statement = null;
+          }
         }
       }
 

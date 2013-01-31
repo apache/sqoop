@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
@@ -116,6 +117,7 @@ public class ClassWriter {
   private ConnManager connManager;
   private String tableName;
   private CompilationManager compileManager;
+  private boolean bigDecimalFormatString;
 
   /**
    * Creates a new ClassWriter to generate an ORM class for a table
@@ -131,6 +133,9 @@ public class ClassWriter {
     this.connManager = connMgr;
     this.tableName = table;
     this.compileManager = compMgr;
+    this.bigDecimalFormatString = this.options.getConf().getBoolean(
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
   }
 
   /**
@@ -316,6 +321,12 @@ public class ClassWriter {
       // Check if it is null, and write the null representation in such case
       String r = colName  + "==null?\"" + this.options.getNullStringValue()
           + "\":" + colName;
+      return r;
+    } else if (javaType.equals("java.math.BigDecimal")
+        && this.bigDecimalFormatString) {
+      // Use toPlainString method for BigDecimals if option is set
+      String r = colName  + "==null?\"" + this.options.getNullNonStringValue()
+          + "\":" + colName + ".toPlainString()";
       return r;
     } else {
       // This is an object type -- just call its toString() in a null-safe way.

@@ -30,6 +30,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroWrapper;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -51,13 +52,18 @@ public class AvroImportMapper
     new AvroWrapper<GenericRecord>();
   private Schema schema;
   private LargeObjectLoader lobLoader;
+  private boolean bigDecimalFormatString;
 
   @Override
   protected void setup(Context context)
       throws IOException, InterruptedException {
-    schema = AvroJob.getMapOutputSchema(context.getConfiguration());
-    lobLoader = new LargeObjectLoader(context.getConfiguration(),
+    Configuration conf = context.getConfiguration();
+    schema = AvroJob.getMapOutputSchema(conf);
+    lobLoader = new LargeObjectLoader(conf,
         FileOutputFormat.getWorkOutputPath(context));
+    bigDecimalFormatString = conf.getBoolean(
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
   }
 
   @Override
@@ -99,7 +105,11 @@ public class AvroImportMapper
    */
   private Object toAvro(Object o) {
     if (o instanceof BigDecimal) {
-      return o.toString();
+      if (bigDecimalFormatString) {
+        return ((BigDecimal)o).toPlainString();
+      } else {
+        return o.toString();
+      }
     } else if (o instanceof Date) {
       return ((Date) o).getTime();
     } else if (o instanceof Time) {

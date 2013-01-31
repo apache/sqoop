@@ -19,6 +19,7 @@
 package org.apache.sqoop.hbase;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class ToStringPutTransformer extends PutTransformer {
   // A mapping from field name -> bytes for that field name.
   // Used to cache serialization work done for fields names.
   private Map<String, byte[]> serializedFieldNames;
+  protected boolean bigDecimalFormatString;
 
   public ToStringPutTransformer() {
     serializedFieldNames = new TreeMap<String, byte[]>();
@@ -81,7 +83,7 @@ public class ToStringPutTransformer extends PutTransformer {
       return null;
     }
 
-    Put put = new Put(Bytes.toBytes(rowKey.toString()));
+    Put put = new Put(Bytes.toBytes(toHBaseString(rowKey)));
 
     for (Map.Entry<String, Object> fieldEntry : fields.entrySet()) {
       String colName = fieldEntry.getKey();
@@ -91,12 +93,22 @@ public class ToStringPutTransformer extends PutTransformer {
         Object val = fieldEntry.getValue();
         if (null != val) {
           put.add(colFamilyBytes, getFieldNameBytes(colName),
-              Bytes.toBytes(val.toString()));
+              Bytes.toBytes(toHBaseString(val)));
         }
       }
     }
 
     return Collections.singletonList(put);
+  }
+
+  private String toHBaseString(Object val) {
+    String valString;
+    if (val instanceof BigDecimal && bigDecimalFormatString) {
+      valString = ((BigDecimal) val).toPlainString();
+    } else {
+      valString = val.toString();
+    }
+    return valString;
   }
 
 }

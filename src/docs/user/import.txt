@@ -575,6 +575,40 @@ $ sqoop import --table SomeTable --jar-file mydatatypes.jar \
 
 This command will load the +SomeTableType+ class out of +mydatatypes.jar+.
 
+Additional Import Configuration Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are some additional properties which can be configured by modifying
++conf/sqoop-site.xml+. Properties can be specified the same as in Hadoop
+configuration files, for example:
+
+----
+  <property>
+    <name>property.name</name>
+    <value>property.value</value>
+  </property>
+----
+
+They can also be specified on the command line in the generic arguments, for
+example:
+
+----
+sqoop import -D property.name=property.value ...
+----
+
+.Additional import configuration properties:
+[grid="all"]
+`-------------------------------------`----------------------------------------
+Argument                               Description
+-------------------------------------------------------------------------------
++sqoop.bigdecimal.format.string+       Controls how BigDecimal columns will   \
+                                       formatted when stored as a String. A   \
+                                       value of +true+ (default) will use     \
+                                       toPlainString to store them without an \
+                                       exponent component (0.0000001); while  \
+                                       a value of +false+ will use toString   \
+                                       which may include an exponent (1E-7)
+-------------------------------------------------------------------------------
+
 
 Example Invocations
 ~~~~~~~~~~~~~~~~~~~

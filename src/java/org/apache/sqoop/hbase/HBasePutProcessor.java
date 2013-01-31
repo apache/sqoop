@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.lib.FieldMappable;
 import com.cloudera.sqoop.lib.FieldMapProcessor;
@@ -89,6 +90,12 @@ public class HBasePutProcessor implements Closeable, Configurable,
 
     this.putTransformer.setColumnFamily(conf.get(COL_FAMILY_KEY, null));
     this.putTransformer.setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
+
+    if (this.putTransformer instanceof ToStringPutTransformer) {
+      ((ToStringPutTransformer) this.putTransformer).bigDecimalFormatString =
+          conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+              ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+    }
 
     this.tableName = conf.get(TABLE_NAME_KEY, null);
     try {
