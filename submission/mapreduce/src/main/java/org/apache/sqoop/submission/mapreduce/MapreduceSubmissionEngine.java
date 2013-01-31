@@ -91,6 +91,11 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       }
     });
 
+    if(files == null) {
+      throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0002,
+        "Invalid Hadoop configuration directory (not a directory or permission issues): " + configDirectory);
+    }
+
     // Add each such file to our global configuration object
     for (String file : files) {
       LOG.info("Found hadoop configuration file " + file);
