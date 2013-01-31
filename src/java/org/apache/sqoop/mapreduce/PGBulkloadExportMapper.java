@@ -170,6 +170,7 @@ public class PGBulkloadExportMapper
       thread = new ReadThread(process.getErrorStream());
       thread.start();
     } catch (Exception e) {
+      LOG.error("Can't start up pg_bulkload process", e);
       cleanup(context);
       doExecuteUpdate("DROP TABLE " + tmpTableName);
       throw new IOException(e);
@@ -200,10 +201,17 @@ public class PGBulkloadExportMapper
     LongWritable taskid =
       new LongWritable(context.getTaskAttemptID().getTaskID().getId());
     context.write(taskid, new Text(tmpTableName));
-    writer.close();
-    out.close();
+
+    if (writer != null) {
+      writer.close();
+    }
+    if (out != null) {
+      out.close();
+    }
     try {
-      thread.join();
+      if (thread != null) {
+        thread.join();
+      }
     } finally {
       // block until the process is done.
       if (null != process) {
