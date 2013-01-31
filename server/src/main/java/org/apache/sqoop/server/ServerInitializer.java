@@ -17,14 +17,10 @@
  */
 package org.apache.sqoop.server;
 
+import org.apache.sqoop.core.SqoopServer;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import org.apache.log4j.Logger;
-import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.core.SqoopConfiguration;
-import org.apache.sqoop.framework.FrameworkManager;
-import org.apache.sqoop.repository.RepositoryManager;
 
 /**
  * Initializes the Sqoop server. This listener is also responsible for
@@ -32,29 +28,11 @@ import org.apache.sqoop.repository.RepositoryManager;
  */
 public class ServerInitializer implements ServletContextListener {
 
-  private static final Logger LOG =
-      Logger.getLogger(ServerInitializer.class);
-
   public void contextDestroyed(ServletContextEvent arg0) {
-    LOG.info("Shutting down Sqoop server");
-    FrameworkManager.getInstance().destroy();
-    ConnectorManager.getInstance().destroy();
-    RepositoryManager.getInstance().destroy();
-    SqoopConfiguration.getInstance().destroy();
-    LOG.info("Sqoop server has been correctly terminated");
+    SqoopServer.destroy();
   }
 
   public void contextInitialized(ServletContextEvent arg0) {
-    try {
-      LOG.info("Booting up Sqoop server");
-      SqoopConfiguration.getInstance().initialize();
-      RepositoryManager.getInstance().initialize();
-      ConnectorManager.getInstance().initialize();
-      FrameworkManager.getInstance().initialize();
-      LOG.info("Sqoop server has successfully boot up");
-    } catch (Exception ex) {
-      LOG.error("Server startup failure", ex);
-      throw new RuntimeException("Failure in server initialization", ex);
-    }
+    SqoopServer.initialize();
   }
 }
