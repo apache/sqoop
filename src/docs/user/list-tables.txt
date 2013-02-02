@@ -53,3 +53,10 @@ job_descriptions
 office_supplies
 ----
 
+In case of postgresql, list tables command with common arguments fetches only "public" schema. For custom schema, use --schema argument to list tables of particular schema
+Example
+----
+$ sqoop list-tables --connect jdbc:postgresql://localhost/corp  --username name -P -- --schema payrolldept
+employees
+expenses
+----

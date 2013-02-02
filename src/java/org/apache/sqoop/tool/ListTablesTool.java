@@ -80,7 +80,9 @@ public class ListTablesTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   /** {@inheritDoc} */
   public void validateOptions(SqoopOptions options)
       throws InvalidOptionsException {
-    if (hasUnrecognizedArgs(extraArguments)) {
+    options.setExtraArgs(getSubcommandArgs(extraArguments));
+    int dashPos = getDashPosition(extraArguments);
+    if (hasUnrecognizedArgs(extraArguments, 0, dashPos)) {
       throw new InvalidOptionsException(HELP_STR);
     }
 
