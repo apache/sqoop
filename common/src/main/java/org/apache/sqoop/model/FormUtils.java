@@ -256,16 +256,28 @@ public class FormUtils {
     Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
 
     for(MForm form : forms) {
-      for(MInput input : form.getInputs()) {
-        Validation.FormInput fi = new Validation.FormInput(input.getName());
-        if(messages.containsKey(fi)) {
-          Validation.Message message = messages.get(fi);
+      applyValidation(form, messages);
 
-          input.setValidationMessage(message.getStatus(), message.getMessage());
-        } else {
-          input.setValidationMessage(Status.getDefault(), null);
-        }
+      for(MInput input : form.getInputs()) {
+        applyValidation(input, messages);
       }
+    }
+  }
+
+  /**
+   * Apply validation on given validated element.
+   *
+   * @param element Element on what we're applying the validations
+   * @param messages Map of all validation messages
+   */
+  public static void applyValidation(MValidatedElement element, Map<Validation.FormInput, Validation.Message> messages) {
+    Validation.FormInput name = new Validation.FormInput(element.getName());
+
+    if(messages.containsKey(name)) {
+      Validation.Message message = messages.get(name);
+      element.setValidationMessage(message.getStatus(), message.getMessage());
+    } else {
+      element.setValidationMessage(Status.getDefault(), null);
     }
   }
 

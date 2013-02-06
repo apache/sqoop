@@ -27,6 +27,7 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MValidatedElement;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
@@ -147,6 +148,11 @@ public final class FormFiller {
                                  ResourceBundle bundle) throws IOException {
     io.out.println("");
     io.out.println(bundle.getString(form.getLabelKey()));
+
+    // Print out form validation
+    printValidationMessage(io, form);
+    io.out.println("");
+
     for (MInput input : form.getInputs()) {
       if(!fillInput(io, input, reader, bundle)) {
         return false;
@@ -160,19 +166,8 @@ public final class FormFiller {
                                   MInput input,
                                   ConsoleReader reader,
                                   ResourceBundle bundle) throws IOException {
-    // Print out warning or error message in case some validations were already
-    // performed.
-    switch (input.getValidationStatus()) {
-      case UNACCEPTABLE:
-        errorMessage(io, input.getValidationMessage());
-        break;
-      case ACCEPTABLE:
-        warningMessage(io, input.getValidationMessage());
-        break;
-      default:
-        // Simply ignore all other states for the moment
-        break;
-    }
+    // Print out validation
+    printValidationMessage(io, input);
 
     // Based on the input type, let's perform specific load
     switch (input.getType()) {
@@ -484,6 +479,26 @@ public final class FormFiller {
     fillInputString(io, nameInput, reader, Environment.getResourceBundle());
 
     return nameInput.getValue();
+  }
+
+  /**
+   * Print validation message in cases that it's not in state "FINE"
+   *
+   * @param io IO object to print out the message
+   * @param element Validated element
+   */
+  public static void printValidationMessage(IO io, MValidatedElement element) {
+    switch (element.getValidationStatus()) {
+      case UNACCEPTABLE:
+        errorMessage(io, element.getValidationMessage());
+        break;
+      case ACCEPTABLE:
+        warningMessage(io, element.getValidationMessage());
+        break;
+      default:
+        // Simply ignore all other states for the moment
+        break;
+    }
   }
 
   public static void errorMessage(IO io, String message) {

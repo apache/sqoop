@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Validation class.
  *
+ * This class represents validations to given configuration object.
  */
 public class Validation {
 
@@ -37,19 +39,13 @@ public class Validation {
   // Status messages for various fields
   Map<FormInput, Message> messages;
 
-  private Validation() {
-    klass = null;
-  }
   public Validation(Class klass) {
-    this();
-
     this.klass = klass;
     status = Status.getDefault();
     messages = new HashMap<FormInput, Message>();
   }
-  public Validation(Status status, Map<FormInput, Message> messages) {
-    this();
 
+  public Validation(Status status, Map<FormInput, Message> messages) {
     this.status = status;
     this.messages = messages;
   }
@@ -62,14 +58,37 @@ public class Validation {
     return messages;
   }
 
-  public void addMessage(Status status, String form, String field, String message ) {
+  /**
+   * Add message to form.
+   *
+   * @param status Severity of the message
+   * @param form Form name, must be defined in the class
+   * @param message Validation message
+   */
+  public void addMessage(Status status, String form, String message) {
+    addMessage(status, form, null, message);
+  }
+
+  /**
+   * Add message to input in one of the forms.
+   *
+   * @param status Severity of the message
+   * @param form Form name, must be defined in the class
+   * @param input Field name, must be defined in the form class
+   * @param message Validation message
+   */
+  public void addMessage(Status status, String form, String input, String message ) {
     if( klass == null) {
       throw new SqoopException(ValidationError.VALIDATION_0001);
     }
 
+    assert form != null;
+    assert message != null;
+
+    // Field for specified form
     Field formField;
 
-    // Verify that such form exists
+    // Load the form field and verify that it exists
     try {
       formField = klass.getDeclaredField(form);
     } catch (NoSuchFieldException e) {
@@ -77,16 +96,26 @@ public class Validation {
         "Can't get form " + form + " from " + klass.getName(), e);
     }
 
-    // Verify that such input exists on given form
-    try {
-      formField.getType().getDeclaredField(field);
-    } catch (NoSuchFieldException e) {
-      throw new SqoopException(ValidationError.VALIDATION_0002,
-        "Can't get input " + field + " from form" + formField.getType().getName(), e);
+    // If this is form message, just save the message and continue
+    if(input == null) {
+      setMessage(status, form, input, message);
+      return;
     }
 
+    // Verify that specified input exists on the form
+    try {
+      formField.getType().getDeclaredField(input);
+    } catch (NoSuchFieldException e) {
+      throw new SqoopException(ValidationError.VALIDATION_0002,
+        "Can't get input " + input + " from form" + formField.getType().getName(), e);
+    }
+
+    setMessage(status, form, input, message);
+  }
+
+  private void setMessage(Status status, String form, String input, String message) {
     this.status = Status.getWorstStatus(this.status, status);
-    messages.put(new FormInput(form, field), new Message(status, message));
+    messages.put(new FormInput(form, input), new Message(status, message));
   }
 
   public static class Message {
@@ -143,14 +172,18 @@ public class Validation {
     }
 
     public FormInput(String formInput) {
+      assert formInput != null;
       String []parts = formInput.split("\\.");
-      if(parts.length != 2) {
+
+      if(formInput.isEmpty() || (parts.length != 1 && parts.length != 2)) {
         throw new SqoopException(ValidationError.VALIDATION_0003,
           "Specification " + formInput + " is not in valid format form.input");
       }
 
       this.form = parts[0];
-      this.input = parts[1];
+      if(parts.length == 2) {
+        this.input = parts[1];
+      }
     }
 
     public String getForm() {
@@ -185,6 +218,10 @@ public class Validation {
 
     @Override
     public String toString() {
+      if(input == null) {
+        return form;
+      }
+
       return form + "." + input;
     }
   }

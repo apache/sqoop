@@ -25,6 +25,9 @@ import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 /**
  * Validator to ensure that user is supplying valid input
  */
@@ -51,8 +54,15 @@ public class GenericJdbcValidator extends Validator {
       validation.addMessage(Status.UNACCEPTABLE, "connection", "connectionString", "This do not seem as a valid JDBC URL");
     }
 
-    // TODO: Try to connect to database when form level validations will be supported
+    // See if we can connect to the database
+    try {
+      DriverManager.getConnection(config.connection.connectionString,
+        config.connection.username, config.connection.password);
+    } catch (SQLException e) {
+      validation.addMessage(Status.ACCEPTABLE, "connection", "Can't connect to the database with given credentials: " + e.getMessage());
+    }
 
+    // Return final validation object
     return validation;
   }
 
@@ -72,14 +82,11 @@ public class GenericJdbcValidator extends Validator {
     Validation validation = new Validation(ExportJobConfiguration.class);
     ExportJobConfiguration configuration = (ExportJobConfiguration)jobConfiguration;
 
-    // TODO: Move those message to form level when it will be supported
     if(configuration.table.tableName == null && configuration.table.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "tableName", "Either table name or SQL must be specified");
-      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "Either table name or SQL must be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");
     }
     if(configuration.table.tableName != null && configuration.table.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "tableName", "Both table name and SQL cannot be specified");
-      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "Both table name and SQL cannot be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
     }
 
     return validation;
@@ -89,14 +96,11 @@ public class GenericJdbcValidator extends Validator {
     Validation validation = new Validation(ImportJobConfiguration.class);
     ImportJobConfiguration configuration = (ImportJobConfiguration)jobConfiguration;
 
-    // TODO: Move those message to form level when it will be supported
     if(configuration.table.tableName == null && configuration.table.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "tableName", "Either table name or SQL must be specified");
-      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "Either table name or SQL must be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");
     }
     if(configuration.table.tableName != null && configuration.table.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "tableName", "Both table name and SQL cannot be specified");
-      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "Both table name and SQL cannot be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
     }
 
     return validation;
