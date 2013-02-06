@@ -215,7 +215,7 @@ public class FrameworkManager {
     mFramework = new MFramework(connectionForms, jobForms);
 
     // Build validator
-    validator = new Validator();
+    validator = new FrameworkValidator();
   }
 
   public synchronized void initialize() {
