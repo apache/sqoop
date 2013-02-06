@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.util.PostgreSQLUtils;
@@ -45,6 +46,7 @@ import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.JdbcUrl;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
 import com.cloudera.sqoop.util.PerfCounters;
+import org.apache.sqoop.util.SubstitutionUtils;
 
 /**
  * Manages direct dumps from Postgresql databases via psql COPY TO STDOUT
@@ -257,6 +259,14 @@ public class DirectPostgresqlManager
     sb.append(" TO STDOUT WITH DELIMITER E'\\");
     sb.append(Integer.toString((int) this.options.getOutputFieldDelim(), 8));
     sb.append("' CSV ");
+
+    if (this.options.getNullStringValue() != null) {
+      sb.append("NULL AS E'");
+      sb.append(SubstitutionUtils.removeEscapeCharacters(
+        this.options.getNullStringValue()));
+      sb.append("' ");
+    }
+
     if (this.options.getOutputEnclosedBy() != '\0') {
       sb.append("QUOTE E'\\");
       sb.append(Integer.toString((int) this.options.getOutputEnclosedBy(), 8));
@@ -277,7 +287,7 @@ public class DirectPostgresqlManager
     sb.append(";");
 
     String copyCmd = sb.toString();
-    LOG.debug("Copy command is " + copyCmd);
+    LOG.info("Copy command is " + copyCmd);
     return copyCmd;
   }
 
@@ -315,6 +325,14 @@ public class DirectPostgresqlManager
       LOG.warn("File import layout" + options.getFileLayout()
           + " is not supported by");
       LOG.warn("Postgresql direct import; import will proceed as text files.");
+    }
+
+    if (!StringUtils.equals(options.getNullStringValue(),
+      options.getNullNonStringValue())) {
+      throw new ImportException(
+        "Detected different values of --input-string and --input-non-string " +
+        "parameters. PostgreSQL direct manager do not support that. Please " +
+        "either use the same values or omit the --direct parameter.");
     }
 
     String commandFilename = null;

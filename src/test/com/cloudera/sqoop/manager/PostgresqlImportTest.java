@@ -92,6 +92,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   static final String DATABASE_USER = "sqooptest";
   static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
+  static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
   static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
   static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
   static final String SCHEMA_PUBLIC = "public";
@@ -109,14 +110,15 @@ public class PostgresqlImportTest extends ImportJobTestCase {
 
     LOG.debug("Setting up another postgresql test: " + CONNECT_STRING);
 
-    setUpData(TABLE_NAME, SCHEMA_PUBLIC);
-    setUpData(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC);
-    setUpData(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL);
+    setUpData(TABLE_NAME, SCHEMA_PUBLIC, false);
+    setUpData(NULL_TABLE_NAME, SCHEMA_PUBLIC, true);
+    setUpData(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC, false);
+    setUpData(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL, false);
 
     LOG.debug("setUp complete.");
   }
 
-  public void setUpData(String tableName, String schema) {
+  public void setUpData(String tableName, String schema, boolean nullEntry) {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
 
@@ -169,6 +171,11 @@ public class PostgresqlImportTest extends ImportJobTestCase {
           + " VALUES(2,'Bob','2009-04-20',400.00,'sales')");
       st.executeUpdate("INSERT INTO " + fullTableName
           + " VALUES(3,'Fred','2009-01-23',15.00,'marketing')");
+      if (nullEntry) {
+        st.executeUpdate("INSERT INTO " + fullTableName
+          + " VALUES(4,'Mike',NULL,NULL,NULL)");
+
+      }
       connection.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: " + sqlE);
@@ -346,5 +353,21 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     };
 
     doImportAndVerify(true, expectedResults, DIFFERENT_TABLE_NAME, extraArgs);
+  }
+
+  @Test
+  public void testNullEscapeCharacters() throws Exception {
+     String [] expectedResults = {
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
+      "4,Mike,\\N,\\N,\\N",
+    };
+
+    String [] extraArgs = {
+      "--null-string", "\\\\\\\\N",
+      "--null-non-string", "\\\\\\\\N",
+    };
+
+    doImportAndVerify(true, expectedResults, NULL_TABLE_NAME, extraArgs);
   }
 }
