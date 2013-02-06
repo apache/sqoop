@@ -199,10 +199,9 @@ public abstract class SqlManager
         results.close();
         getConnection().commit();
       }
-    } catch (SQLException sqlException) {
-      LOG.error("Error reading procedure metadata: "
-          + sqlException.toString());
-      return null;
+    } catch (SQLException e) {
+      LOG.error("Error reading procedure metadata: ", e);
+      throw new RuntimeException("Can't fetch column names for procedure.", e);
     }
   }
 
