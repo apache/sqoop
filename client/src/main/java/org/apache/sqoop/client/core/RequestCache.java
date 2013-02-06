@@ -105,10 +105,8 @@ public final class RequestCache {
     Validation connector = bean.getConnectorValidation();
     Validation framework = bean.getFrameworkValidation();
 
-    FormUtils.applyValidation(connection.getConnectorPart().getForms(),
-      connector);
-    FormUtils.applyValidation(connection.getFrameworkPart().getForms(),
-      connector);
+    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
 
     Long id = bean.getId();
     if(id != null) {
@@ -134,10 +132,8 @@ public final class RequestCache {
     Validation connector = bean.getConnectorValidation();
     Validation framework = bean.getFrameworkValidation();
 
-    FormUtils.applyValidation(connection.getConnectorPart().getForms(),
-      connector);
-    FormUtils.applyValidation(connection.getFrameworkPart().getForms(),
-      connector);
+    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
 
     Long id = bean.getId();
     if(id != null) {
@@ -161,10 +157,8 @@ public final class RequestCache {
     Validation connector = bean.getConnectorValidation();
     Validation framework = bean.getFrameworkValidation();
 
-    FormUtils.applyValidation(job.getConnectorPart().getForms(),
-      connector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(),
-      connector);
+    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
 
     Long id = bean.getId();
     if(id != null) {
@@ -188,10 +182,8 @@ public final class RequestCache {
     Validation connector = bean.getConnectorValidation();
     Validation framework = bean.getFrameworkValidation();
 
-    FormUtils.applyValidation(job.getConnectorPart().getForms(),
-      connector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(),
-      connector);
+    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
 
     Long id = bean.getId();
     if(id != null) {
