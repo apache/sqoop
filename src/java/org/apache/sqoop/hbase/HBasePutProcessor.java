@@ -66,6 +66,12 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public static final String TRANSFORMER_CLASS_KEY =
       "sqoop.hbase.insert.put.transformer.class";
 
+  /** Configuration key to specify whether to add the row key column into
+   *  HBase. Set to false by default.
+   */
+  public static final String ADD_ROW_KEY = "sqoop.hbase.add.row.key";
+  public static final boolean ADD_ROW_KEY_DEFAULT = false;
+
   private Configuration conf;
 
   // An object that can transform a map of fieldName->object
@@ -98,9 +104,14 @@ public class HBasePutProcessor implements Closeable, Configurable,
     this.putTransformer.setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
 
     if (this.putTransformer instanceof ToStringPutTransformer) {
-      ((ToStringPutTransformer) this.putTransformer).bigDecimalFormatString =
+      ToStringPutTransformer stringPutTransformer =
+          (ToStringPutTransformer) this.putTransformer;
+      stringPutTransformer.bigDecimalFormatString =
           conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
               ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+      stringPutTransformer.addRowKey =
+          conf.getBoolean(HBasePutProcessor.ADD_ROW_KEY,
+              HBasePutProcessor.ADD_ROW_KEY_DEFAULT);
     }
 
     this.tableName = conf.get(TABLE_NAME_KEY, null);

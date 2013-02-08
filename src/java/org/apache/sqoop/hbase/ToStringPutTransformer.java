@@ -44,6 +44,7 @@ public class ToStringPutTransformer extends PutTransformer {
   // Used to cache serialization work done for fields names.
   private Map<String, byte[]> serializedFieldNames;
   protected boolean bigDecimalFormatString;
+  protected boolean addRowKey;
 
   public ToStringPutTransformer() {
     serializedFieldNames = new TreeMap<String, byte[]>();
@@ -87,7 +88,7 @@ public class ToStringPutTransformer extends PutTransformer {
 
     for (Map.Entry<String, Object> fieldEntry : fields.entrySet()) {
       String colName = fieldEntry.getKey();
-      if (!colName.equals(rowKeyCol)) {
+      if (!colName.equals(rowKeyCol) || addRowKey) {
         // This is a regular field, not the row key.
         // Add it if it's not null.
         Object val = fieldEntry.getValue();

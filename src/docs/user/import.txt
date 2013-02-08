@@ -607,6 +607,12 @@ Argument                               Description
                                        exponent component (0.0000001); while  \
                                        a value of +false+ will use toString   \
                                        which may include an exponent (1E-7)
++sqoop.hbase.add.row.key+              When set to +false+ (default), Sqoop   \
+                                       will not add the column used as a row  \
+                                       key into the row data in HBase. When   \
+                                       set to +true+, the column used as a    \
+                                       row key will be added to the row data  \
+                                       in HBase.
 -------------------------------------------------------------------------------
 
 

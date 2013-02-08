@@ -127,4 +127,38 @@ public class HBaseImportTest extends HBaseTestCase {
     int rowCount = countHBaseTable("nullRowT", "nullRowF");
     assertEquals(0, rowCount);
   }
+
+  @Test
+  public void testAddRowKey() throws IOException {
+    String[] types = { "INT", "INT" };
+    String[] vals = { "0", "1" };
+    createTableWithColTypes(types, vals);
+
+    String[] otherArg = getArgv(true, "addRowKeyT", "addRowKeyF", true, null);
+    String[] argv = new String[otherArg.length + 2];
+    argv[0] = "-D";
+    argv[1] = "sqoop.hbase.add.row.key=true";
+    System.arraycopy(otherArg, 0, argv, 2, otherArg.length);
+
+    runImport(argv);
+
+    // Row key should have been added
+    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(0), "0");
+    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(1), "1");
+  }
+
+  @Test
+  public void testAddRowKeyDefault() throws IOException {
+    String[] types = { "INT", "INT" };
+    String[] vals = { "0", "1" };
+    createTableWithColTypes(types, vals);
+
+    String[] argv = getArgv(true, "addRowKeyDfT", "addRowKeyDfF", true, null);
+
+    runImport(argv);
+
+    // Row key should not be added by default
+    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(0), null);
+    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(1), "1");
+  }
 }
