@@ -23,10 +23,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
@@ -40,6 +43,9 @@ import com.cloudera.sqoop.lib.ProcessingException;
  */
 public class HBasePutProcessor implements Closeable, Configurable,
     FieldMapProcessor {
+
+  public static final Log LOG = LogFactory.getLog(
+      HBasePutProcessor.class.getName());
 
   /** Configuration key specifying the table to insert into. */
   public static final String TABLE_NAME_KEY = "sqoop.hbase.insert.table";
@@ -124,7 +130,14 @@ public class HBasePutProcessor implements Closeable, Configurable,
     List<Put> putList = putTransformer.getPutCommand(fields);
     if (null != putList) {
       for (Put put : putList) {
-        this.table.put(put);
+        if (put!=null) {
+          if (put.isEmpty()) {
+            LOG.warn("Could not insert row with no columns "
+                + "for row-key column: " + Bytes.toString(put.getRow()));
+          } else {
+            this.table.put(put);
+          }
+        }
       }
     }
   }

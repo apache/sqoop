@@ -112,4 +112,19 @@ public class HBaseImportTest extends HBaseTestCase {
 
     fail("should have gotten exception");
   }
+
+  @Test
+  public void testNullRow() throws IOException {
+    String [] argv = getArgv(true, "nullRowT", "nullRowF", true, null);
+    String [] types = { "INT", "INT" };
+    String [] vals = { "0", "null" };
+    createTableWithColTypes(types, vals);
+    runImport(argv);
+
+    // This cell should not be placed in the results..
+    verifyHBaseCell("nullRowT", "0", "nullRowF", getColName(1), null);
+
+    int rowCount = countHBaseTable("nullRowT", "nullRowF");
+    assertEquals(0, rowCount);
+  }
 }

@@ -36,6 +36,7 @@ import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import org.apache.hadoop.util.StringUtils;
@@ -233,5 +234,23 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       return tempDir;
     }
     throw new IllegalStateException("Failed to create directory");
+  }
+
+  protected int countHBaseTable(String tableName, String colFamily)
+      throws IOException {
+    int count = 0;
+    HTable table = new HTable(new Configuration(
+        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
+    try {
+      ResultScanner scanner = table.getScanner(Bytes.toBytes(colFamily));
+      for(Result result = scanner.next();
+          result != null;
+          result = scanner.next()) {
+        count++;
+      }
+    } finally {
+      table.close();
+    }
+    return count;
   }
 }

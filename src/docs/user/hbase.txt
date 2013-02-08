@@ -48,6 +48,7 @@ using the default parameters from your HBase configuration.
 Sqoop currently serializes all values to HBase by converting each field
 to its string representation (as if you were importing to HDFS in text
 mode), and then inserts the UTF-8 bytes of this string in the target
-cell.
+cell. Sqoop will skip all rows containing null values in all columns
+except the row key column.
 
 
