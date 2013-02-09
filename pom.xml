@@ -361,7 +361,7 @@ limitations under the License.
                   <exclude>.git/</exclude>
                   <exclude>.gitignore</exclude>
                   <exclude>.idea/</exclude>
-                  <exclude>*.iml</exclude>
+                  <exclude>**/*.iml</exclude>
                   <exclude>*.log</exclude>
                   <exclude>**/nb-configuration.xml</exclude>
                   <exclude>**.patch</exclude>
