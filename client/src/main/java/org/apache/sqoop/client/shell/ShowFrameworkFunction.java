@@ -66,7 +66,7 @@ public class ShowFrameworkFunction extends SqoopFunction {
     MFramework framework = frameworkBean.getFramework();
     ResourceBundle bundle = frameworkBean.getResourceBundle();
     io.out.println(StringEscapeUtils.unescapeJava(
-        MessageFormat.format(Constants.RES_SHOW_PROMPT_FRAMEWORK_OPTS,
+        MessageFormat.format(getResource().getString(Constants.RES_SHOW_PROMPT_FRAMEWORK_OPTS),
             framework.getPersistenceId())));
 
     displayFormMetadataDetails(io, framework, bundle);
