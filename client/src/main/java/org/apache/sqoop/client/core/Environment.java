@@ -33,7 +33,7 @@ public final class Environment
   private static boolean verbose;
 
   private static final String HOST_DEFAULT = "localhost";
-  private static final String PORT_DEFAULT = "8080";
+  private static final String PORT_DEFAULT = "12000";
   private static final String WEBAPP_DEFAULT = "sqoop";
   private static final boolean VERBOSE_DEFAULT = false;
 

@@ -31,7 +31,7 @@ Start client in interactive mode using following command: ::
 
 Configure client to use your Sqoop server: ::
 
-  sqoop:000> set server --host your.host.com --port 8080 --webapp sqoop
+  sqoop:000> set server --host your.host.com --port 12000 --webapp sqoop
 
 Verify that connection is working by simple version checking: ::
 
