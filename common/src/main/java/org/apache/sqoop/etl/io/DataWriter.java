@@ -15,23 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.etl.io;
 
 /**
- * This allows connector to load data into a target system.
+ * An intermediate layer for passing data from the ETL framework
+ * to the MR framework.
  */
-public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
+public abstract class DataWriter {
 
-  /**
-   * Load data to target.
-   *
-   * @param context Loader context object
-   * @param connectionConfiguration Connection configuration
-   * @param jobConfiguration Job configuration
-   * @throws Exception
-   */
-  public abstract void load(LoaderContext context,
-                            ConnectionConfiguration connectionConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
+  public abstract void writeArrayRecord(Object[] array);
+
+  public abstract void writeCsvRecord(String csv);
+
+  public abstract void writeContent(Object content, int type);
+
+  public abstract void setFieldDelimiter(char fieldDelimiter);
 
 }

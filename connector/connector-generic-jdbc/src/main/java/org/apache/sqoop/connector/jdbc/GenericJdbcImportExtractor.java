@@ -22,13 +22,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
-import org.apache.sqoop.job.etl.Partition;
+import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Extractor;
-import org.apache.sqoop.job.io.DataWriter;
 
 public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguration, ImportJobConfiguration, GenericJdbcImportPartition> {
 
@@ -36,7 +34,7 @@ public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguratio
 
  private long rowsRead = 0;
   @Override
-  public void run(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job, GenericJdbcImportPartition partition, DataWriter writer) {
+  public void extract(ExtractorContext context, ConnectionConfiguration connection, ImportJobConfiguration job, GenericJdbcImportPartition partition) {
     String driver = connection.connection.jdbcDriver;
     String url = connection.connection.connectionString;
     String username = connection.connection.username;
@@ -59,7 +57,7 @@ public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguratio
         for (int i = 0; i< column; i++) {
           array[i] = resultSet.getObject(i+1);
         }
-        writer.writeArrayRecord(array);
+        context.getDataWriter().writeArrayRecord(array);
         rowsRead++;
       }
     } catch (SQLException e) {

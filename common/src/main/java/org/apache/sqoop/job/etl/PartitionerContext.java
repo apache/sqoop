@@ -17,21 +17,31 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.ImmutableContext;
+
 /**
- * This allows connector to load data into a target system.
+ * Context implementation for Partitioner.
+ *
+ * This class is also wrapping number of maximal allowed partitions.
  */
-public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
+public class PartitionerContext extends ActorContext {
+
+  private long maxPartitions;
+
+  public PartitionerContext(ImmutableContext context, long maxPartitions) {
+    super(context);
+    this.maxPartitions = maxPartitions;
+  }
 
   /**
-   * Load data to target.
+   * Return maximal number of partitions.
    *
-   * @param context Loader context object
-   * @param connectionConfiguration Connection configuration
-   * @param jobConfiguration Job configuration
-   * @throws Exception
+   * Framework will ensure that number of returned partitions is not bigger
+   * than this number.
+   *
+   * @return
    */
-  public abstract void load(LoaderContext context,
-                            ConnectionConfiguration connectionConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
-
+  public long getMaxPartitions() {
+    return maxPartitions;
+  }
 }

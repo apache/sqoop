@@ -25,14 +25,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataWriter;
+import org.apache.sqoop.etl.io.DataWriter;
 
 public class HdfsSequenceExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition> {
 
@@ -40,7 +39,7 @@ public class HdfsSequenceExportExtractor extends Extractor<ConnectionConfigurati
     LogFactory.getLog(HdfsSequenceExportExtractor.class.getName());
 
   private Configuration conf;
-  private DataWriter datawriter;
+  private DataWriter dataWriter;
 
   private final char fieldDelimiter;
 
@@ -49,12 +48,12 @@ public class HdfsSequenceExportExtractor extends Extractor<ConnectionConfigurati
   }
 
   @Override
-  public void run(ImmutableContext context, ConnectionConfiguration connectionConfiguration,
-      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition, DataWriter writer) {
-    writer.setFieldDelimiter(fieldDelimiter);
+  public void extract(ExtractorContext context, ConnectionConfiguration connectionConfiguration,
+      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition) {
 
-    conf = ((PrefixContext)context).getConfiguration();
-    datawriter = writer;
+    conf = ((PrefixContext)context.getContext()).getConfiguration();
+    dataWriter = context.getDataWriter();
+    dataWriter.setFieldDelimiter(fieldDelimiter);
 
     try {
       LOG.info("Working on partition: " + partition);
@@ -84,7 +83,7 @@ public class HdfsSequenceExportExtractor extends Extractor<ConnectionConfigurati
     Text line = new Text();
     boolean hasNext = filereader.next(line);
     while (hasNext) {
-      datawriter.writeCsvRecord(line.toString());
+      dataWriter.writeCsvRecord(line.toString());
       line = new Text();
       hasNext = filereader.next(line);
       if(filereader.getPosition() >= end && filereader.syncSeen()) {

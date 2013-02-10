@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.io;
+package org.apache.sqoop.etl.io;
 
 /**
  * An intermediate layer for passing data from the MR framework

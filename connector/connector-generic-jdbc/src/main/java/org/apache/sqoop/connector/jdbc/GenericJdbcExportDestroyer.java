@@ -18,17 +18,17 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 
 public class GenericJdbcExportDestroyer extends Destroyer<ConnectionConfiguration, ExportJobConfiguration> {
 
   private static final Logger LOG = Logger.getLogger(GenericJdbcExportDestroyer.class);
 
   @Override
-  public void destroy(boolean success, ImmutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
+  public void destroy(DestroyerContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
     LOG.info("Running generic JDBC connector destroyer");
   }
 }

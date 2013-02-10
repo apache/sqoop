@@ -17,21 +17,30 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.MutableContext;
+
 /**
- * This allows connector to load data into a target system.
+ *
+ * Context implementation for Initializer.
+ *
+ * This class is returning mutable context instead of immutable.
  */
-public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
+public class InitializerContext extends ActorContext {
+
+  public InitializerContext(MutableContext context) {
+    super(context);
+  }
 
   /**
-   * Load data to target.
+   * Return mutable context.
    *
-   * @param context Loader context object
-   * @param connectionConfiguration Connection configuration
-   * @param jobConfiguration Job configuration
-   * @throws Exception
+   * Initializer can set up multiple properties that will be passed to each
+   * extractor and loader.
+   *
+   * @return Mutable context object
    */
-  public abstract void load(LoaderContext context,
-                            ConnectionConfiguration connectionConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
-
+  @Override
+  public MutableContext getContext() {
+    return (MutableContext)super.getContext();
+  }
 }

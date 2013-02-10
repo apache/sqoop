@@ -17,21 +17,30 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.etl.io.DataReader;
+
 /**
- * This allows connector to load data into a target system.
+ * Context implementation for Loader.
+ *
+ * This class is also wrapping reader object.
  */
-public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
+public class LoaderContext extends ActorContext {
+
+  DataReader reader;
+
+  public LoaderContext(ImmutableContext context, DataReader reader) {
+    super(context);
+    this.reader = reader;
+  }
 
   /**
-   * Load data to target.
+   * Return associated data reader object.
    *
-   * @param context Loader context object
-   * @param connectionConfiguration Connection configuration
-   * @param jobConfiguration Job configuration
-   * @throws Exception
+   * @return Data reader object for loader input
    */
-  public abstract void load(LoaderContext context,
-                            ConnectionConfiguration connectionConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
+  public DataReader getDataReader() {
+    return reader;
+  }
 
 }

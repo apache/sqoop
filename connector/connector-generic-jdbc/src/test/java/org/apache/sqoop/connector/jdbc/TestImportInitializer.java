@@ -27,6 +27,7 @@ import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
+import org.apache.sqoop.job.etl.InitializerContext;
 
 public class TestImportInitializer extends TestCase {
 
@@ -78,9 +79,10 @@ public class TestImportInitializer extends TestCase {
     jobConf.table.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
@@ -102,9 +104,10 @@ public class TestImportInitializer extends TestCase {
     jobConf.table.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "SELECT ICOL,VCOL FROM " + executor.delimitIdentifier(tableName)
@@ -126,9 +129,10 @@ public class TestImportInitializer extends TestCase {
     jobConf.table.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "SELECT * FROM " + executor.delimitIdentifier(tableName)
@@ -151,9 +155,10 @@ public class TestImportInitializer extends TestCase {
     jobConf.table.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcImportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "

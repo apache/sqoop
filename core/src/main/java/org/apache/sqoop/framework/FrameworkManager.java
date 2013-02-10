@@ -28,7 +28,9 @@ import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.CallbackBase;
 import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.job.etl.Initializer;
+import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -425,13 +427,16 @@ public class FrameworkManager {
         "Can't create initializer instance: " + initializerClass.getName());
     }
 
+    // Initializer context
+    InitializerContext initializerContext = new InitializerContext(request.getConnectorContext());
+
     // Initialize submission from connector perspective
-    initializer.initialize(request.getConnectorContext(),
+    initializer.initialize(initializerContext,
       request.getConfigConnectorConnection(),
       request.getConfigConnectorJob());
 
     // Add job specific jars to
-    request.addJars(initializer.getJars(request.getConnectorContext(),
+    request.addJars(initializer.getJars(initializerContext,
       request.getConfigConnectorConnection(),
       request.getConfigConnectorJob()));
 
@@ -516,9 +521,10 @@ public class FrameworkManager {
         "Can't create destroyer instance: " + destroyerClass.getName());
     }
 
+    DestroyerContext destroyerContext = new DestroyerContext(request.getConnectorContext(), false);
+
     // Initialize submission from connector perspective
-    destroyer.destroy(false, request.getConnectorContext(),
-      request.getConfigConnectorConnection(), request.getConfigConnectorJob());
+    destroyer.destroy(destroyerContext, request.getConfigConnectorConnection(), request.getConfigConnectorJob());
   }
 
   public MSubmission stop(long jobId) {

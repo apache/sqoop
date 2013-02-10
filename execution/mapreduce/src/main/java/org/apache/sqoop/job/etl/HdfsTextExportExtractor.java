@@ -18,7 +18,6 @@
 package org.apache.sqoop.job.etl;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,14 +30,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataWriter;
+import org.apache.sqoop.etl.io.DataWriter;
 
 public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition>  {
 
@@ -46,7 +44,7 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
     LogFactory.getLog(HdfsTextExportExtractor.class.getName());
 
   private Configuration conf;
-  private DataWriter datawriter;
+  private DataWriter dataWriter;
 
   private final char fieldDelimiter;
 
@@ -55,15 +53,15 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
   }
 
   @Override
-  public void run(ImmutableContext context, ConnectionConfiguration connectionConfiguration,
-      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition, DataWriter writer) {
-    writer.setFieldDelimiter(fieldDelimiter);
+  public void extract(ExtractorContext context, ConnectionConfiguration connectionConfiguration,
+      ExportJobConfiguration jobConfiguration, HdfsExportPartition partition) {
 
-    conf = ((PrefixContext)context).getConfiguration();
-    datawriter = writer;
+    conf = ((PrefixContext)context.getContext()).getConfiguration();
+    dataWriter = context.getDataWriter();
+    dataWriter.setFieldDelimiter(fieldDelimiter);
 
     try {
-      HdfsExportPartition p = (HdfsExportPartition)partition;
+      HdfsExportPartition p = partition;
       LOG.info("Working on partition: " + p);
       int numFiles = p.getNumberOfFiles();
       for (int i=0; i<numFiles; i++) {
@@ -120,7 +118,7 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
       } else {
         next = fileseeker.getPos();
       }
-      datawriter.writeCsvRecord(line.toString());
+      dataWriter.writeCsvRecord(line.toString());
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
   }

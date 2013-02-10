@@ -15,20 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job.io;
+package org.apache.sqoop.job.etl;
+
+import org.apache.sqoop.common.ImmutableContext;
 
 /**
- * An intermediate layer for passing data from the ETL framework
- * to the MR framework.
+ * Context implementation for Destroyer.
+ *
+ * This class is wrapping information if the run was successful or not.
  */
-public abstract class DataWriter {
+public class DestroyerContext extends ActorContext {
 
-  public abstract void writeArrayRecord(Object[] array);
+  private boolean success;
 
-  public abstract void writeCsvRecord(String csv);
+  public DestroyerContext(ImmutableContext context, boolean success) {
+    super(context);
+    this.success = success;
+  }
 
-  public abstract void writeContent(Object content, int type);
-
-  public abstract void setFieldDelimiter(char fieldDelimiter);
-
+  /**
+   * Return true if the job was successful.
+   *
+   * @return True if the job was successful
+   */
+  public boolean isSuccess() {
+    return success;
+  }
 }

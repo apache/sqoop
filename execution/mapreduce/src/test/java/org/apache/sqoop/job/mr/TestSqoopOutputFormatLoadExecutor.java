@@ -22,12 +22,11 @@ import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,9 +45,8 @@ public class TestSqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public void load(ImmutableContext context, Object connectionConfiguration,
-                     Object jobConfiguration, DataReader reader) throws Exception {
-      reader.readContent(Data.CSV_RECORD);
+    public void load(LoaderContext context, Object cc, Object jc) throws Exception {
+      context.getDataReader().readContent(Data.CSV_RECORD);
       throw new BrokenBarrierException();
     }
   }
@@ -59,12 +57,11 @@ public class TestSqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public void load(ImmutableContext context, Object connectionConfiguration,
-                     Object jobConfiguration, DataReader reader) throws Exception {
+    public void load(LoaderContext context, Object cc, Object jc) throws Exception {
       int runCount = 0;
       Object o;
       String[] arr;
-      while ((o = reader.readContent(Data.CSV_RECORD)) != null) {
+      while ((o = context.getDataReader().readContent(Data.CSV_RECORD)) != null) {
         arr = o.toString().split(",");
         Assert.assertEquals(100, arr.length);
         for (int i = 0; i < arr.length; i++) {
@@ -85,9 +82,8 @@ public class TestSqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public void load(ImmutableContext context, Object connectionConfiguration,
-                     Object jobConfiguration, DataReader reader) throws Exception {
-      String[] arr = reader.readContent(Data.CSV_RECORD).toString().split(",");
+    public void load(LoaderContext context, Object cc, Object jc) throws Exception {
+      String[] arr = context.getDataReader().readContent(Data.CSV_RECORD).toString().split(",");
       Assert.assertEquals(100, arr.length);
       for (int i = 0; i < arr.length; i++) {
         Assert.assertEquals(i, Integer.parseInt(arr[i]));
@@ -102,12 +98,11 @@ public class TestSqoopOutputFormatLoadExecutor {
     }
 
     @Override
-    public void load(ImmutableContext context, Object connectionConfiguration,
-                     Object jobConfiguration, DataReader reader) throws Exception {
+    public void load(LoaderContext context, Object cc, Object jc) throws Exception {
       int runCount = 0;
       Object o;
       String[] arr;
-      while ((o = reader.readContent(Data.CSV_RECORD)) != null) {
+      while ((o = context.getDataReader().readContent(Data.CSV_RECORD)) != null) {
         arr = o.toString().split(",");
         Assert.assertEquals(100, arr.length);
         for (int i = 0; i < arr.length; i++) {

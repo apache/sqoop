@@ -17,11 +17,10 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+import org.apache.sqoop.job.etl.LoaderContext;
 
 public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, ExportJobConfiguration> {
 
@@ -31,7 +30,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void load(ImmutableContext context, ConnectionConfiguration connection, ExportJobConfiguration job, DataReader reader) throws Exception{
+  public void load(LoaderContext context, ConnectionConfiguration connection, ExportJobConfiguration job) throws Exception{
     String driver = connection.connection.jdbcDriver;
     String url = connection.connection.connectionString;
     String username = connection.connection.username;
@@ -46,7 +45,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
       int numberOfBatches = 0;
       Object[] array;
 
-      while ((array = reader.readArrayRecord()) != null) {
+      while ((array = context.getDataReader().readArrayRecord()) != null) {
         numberOfRows++;
         executor.addBatch(array);
 

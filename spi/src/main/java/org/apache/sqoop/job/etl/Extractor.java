@@ -17,31 +17,35 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.ImmutableContext;
-import org.apache.sqoop.job.io.DataWriter;
-
 /**
  * This allows connector to extract data from a source system
  * based on each partition.
  */
 public abstract class Extractor<ConnectionConfiguration, JobConfiguration, Partition> {
 
-  public abstract void run(ImmutableContext context,
-                           ConnectionConfiguration connectionConfiguration,
-                           JobConfiguration jobConfiguration,
-                           Partition partition,
-                           DataWriter writer);
+  /**
+   * Extract data from source and pass them into the framework.
+   *
+   * @param context Extractor context object
+   * @param connectionConfiguration Connection configuration
+   * @param jobConfiguration Job configuration
+   * @param partition Partition that this extract should work on
+   */
+  public abstract void extract(ExtractorContext context,
+                               ConnectionConfiguration connectionConfiguration,
+                               JobConfiguration jobConfiguration,
+                               Partition partition);
 
   /**
    * Return the number of rows read by the last call to
-   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, Partition, org.apache.sqoop.job.io.DataWriter) }
+   * {@linkplain Extractor#extract(org.apache.sqoop.job.etl.ExtractorContext, java.lang.Object, java.lang.Object, Partition) }
    * method. This method returns only the number of rows read in the last call,
    * and not a cumulative total of the number of rows read by this Extractor
    * since its creation. If no calls were made to the run method, this method's
    * behavior is undefined.
    *
    * @return the number of rows read by the last call to
-   * {@linkplain Extractor#run(org.apache.sqoop.common.ImmutableContext, java.lang.Object, java.lang.Object, Partition, org.apache.sqoop.job.io.DataWriter) }
+   * {@linkplain Extractor#extract(org.apache.sqoop.job.etl.ExtractorContext, java.lang.Object, java.lang.Object, Partition) }
    */
   public abstract long getRowsRead();
 

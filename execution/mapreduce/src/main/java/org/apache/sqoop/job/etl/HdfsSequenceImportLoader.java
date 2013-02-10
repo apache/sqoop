@@ -27,12 +27,11 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataReader;
+import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class HdfsSequenceImportLoader extends Loader {
@@ -46,13 +45,13 @@ public class HdfsSequenceImportLoader extends Loader {
   }
 
   @Override
-  public void load(ImmutableContext context, Object oc, Object oj, DataReader reader) throws Exception{
+  public void load(LoaderContext context, Object oc, Object oj) throws Exception {
+    DataReader reader = context.getDataReader();
     reader.setFieldDelimiter(fieldDelimiter);
 
     Configuration conf = new Configuration();
 //    Configuration conf = ((EtlContext)context).getConfiguration();
-    String filename =
-        context.getString(JobConstants.JOB_MR_OUTPUT_FILE);
+    String filename = context.getString(JobConstants.JOB_MR_OUTPUT_FILE);
     String codecname = context.getString(JobConstants.JOB_MR_OUTPUT_CODEC);
 
     CompressionCodec codec = null;

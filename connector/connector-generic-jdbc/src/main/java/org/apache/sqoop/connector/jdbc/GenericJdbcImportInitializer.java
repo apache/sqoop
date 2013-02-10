@@ -25,13 +25,13 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
+import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class GenericJdbcImportInitializer extends Initializer<ConnectionConfiguration, ImportJobConfiguration> {
@@ -42,18 +42,18 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(MutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
-    configureJdbcProperties(context, connection, job);
+  public void initialize(InitializerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
+    configureJdbcProperties(context.getContext(), connection, job);
     try {
-      configurePartitionProperties(context, connection, job);
-      configureTableProperties(context, connection, job);
+      configurePartitionProperties(context.getContext(), connection, job);
+      configureTableProperties(context.getContext(), connection, job);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(ImmutableContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
+  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
     List<String> jars = new LinkedList<String>();
 
     jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));

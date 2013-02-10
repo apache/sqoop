@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.ImmutableContext;
-import org.apache.sqoop.common.MutableContext;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,11 +31,11 @@ public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
    * needed temporary values might be saved to context object and they will be
    * promoted to all other part of the workflow automatically.
    *
-   * @param context Changeable context object, purely for connector usage
+   * @param context Initializer context object
    * @param connectionConfiguration Connector's connection configuration object
    * @param jobConfiguration Connector's job configuration object
    */
-  public abstract void initialize(MutableContext context,
+  public abstract void initialize(InitializerContext context,
                                   ConnectionConfiguration connectionConfiguration,
                                   JobConfiguration jobConfiguration);
 
@@ -49,7 +46,7 @@ public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
    *
    * @return
    */
-  public List<String> getJars(ImmutableContext context,
+  public List<String> getJars(InitializerContext context,
                               ConnectionConfiguration connectionConfiguration,
                               JobConfiguration jobConfiguration) {
     return new LinkedList<String>();

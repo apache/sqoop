@@ -34,14 +34,14 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataWriter;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 
 public class TestHdfsLoad extends TestCase {
@@ -204,7 +204,7 @@ public class TestHdfsLoad extends TestCase {
 
   public static class DummyPartitioner extends Partitioner {
     @Override
-    public List<Partition> getPartitions(ImmutableContext context, long maxPartitions, Object oc, Object oj) {
+    public List<Partition> getPartitions(PartitionerContext context, Object oc, Object oj) {
       List<Partition> partitions = new LinkedList<Partition>();
       for (int id = START_ID; id <= NUMBER_OF_IDS; id++) {
         DummyPartition partition = new DummyPartition();
@@ -217,7 +217,7 @@ public class TestHdfsLoad extends TestCase {
 
   public static class DummyExtractor extends Extractor {
     @Override
-    public void run(ImmutableContext context, Object oc, Object oj, Object partition, DataWriter writer) {
+    public void extract(ExtractorContext context, Object oc, Object oj, Object partition) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_ID; row++) {
         Object[] array = new Object[] {
@@ -225,7 +225,7 @@ public class TestHdfsLoad extends TestCase {
           (double) (id * NUMBER_OF_ROWS_PER_ID + row),
           String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row)
         };
-        writer.writeArrayRecord(array);
+        context.getDataWriter().writeArrayRecord(array);
       }
     }
 

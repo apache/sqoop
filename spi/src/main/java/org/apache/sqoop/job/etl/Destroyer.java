@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.ImmutableContext;
-
 /**
  * This allows connector to define work to complete execution, for example,
  * resource cleaning.
@@ -28,13 +26,11 @@ public abstract class Destroyer<ConnectionConfiguration, JobConfiguration> {
   /**
    * Callback to clean up after job execution.
    *
-   * @param success True if the execution was successfull
-   * @param context Connector context object
+   * @param context Destroyer context
    * @param connectionConfiguration Connection configuration object
    * @param jobConfiguration Job configuration object
    */
-  public abstract void destroy(boolean success,
-                               ImmutableContext context,
+  public abstract void destroy(DestroyerContext context,
                                ConnectionConfiguration connectionConfiguration,
                                JobConfiguration jobConfiguration);
 

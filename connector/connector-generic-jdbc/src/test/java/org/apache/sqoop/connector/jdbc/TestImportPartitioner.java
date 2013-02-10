@@ -30,6 +30,7 @@ import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
 
 public class TestImportPartitioner extends TestCase {
 
@@ -55,7 +56,8 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.getPartitions(context, 5, connConf, jobConf);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -3",
@@ -85,7 +87,8 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.getPartitions(context, 3, connConf, jobConf);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -1",
@@ -113,7 +116,8 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.getPartitions(context, 13, connConf, jobConf);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 13);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -4",
@@ -148,7 +152,8 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.getPartitions(context, 5, connConf, jobConf);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -3.0",
@@ -179,7 +184,8 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    List<Partition> partitions = partitioner.getPartitions(context, 3, connConf, jobConf);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -1.6666666666666665",

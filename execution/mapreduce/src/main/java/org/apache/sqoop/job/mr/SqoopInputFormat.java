@@ -36,6 +36,7 @@ import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
@@ -65,8 +66,9 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
 
     long maxPartitions = conf.getLong(JobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
+    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions);
 
-    List<Partition> partitions = partitioner.getPartitions(connectorContext, maxPartitions, connectorConnection, connectorJob);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connectorConnection, connectorJob);
     List<InputSplit> splits = new LinkedList<InputSplit>();
     for (Partition partition : partitions) {
       LOG.debug("Partition: " + partition);

@@ -17,21 +17,29 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.etl.io.DataWriter;
+
 /**
- * This allows connector to load data into a target system.
+ * Context implementation for Extractor.
+ *
+ * This class is wrapping writer object.
  */
-public abstract class Loader<ConnectionConfiguration, JobConfiguration> {
+public class ExtractorContext extends ActorContext {
+
+  private DataWriter writer;
+
+  public ExtractorContext(ImmutableContext context, DataWriter writer) {
+    super(context);
+    this.writer = writer;
+  }
 
   /**
-   * Load data to target.
+   * Return associated data writer object.
    *
-   * @param context Loader context object
-   * @param connectionConfiguration Connection configuration
-   * @param jobConfiguration Job configuration
-   * @throws Exception
+   * @return Data writer object for extract output
    */
-  public abstract void load(LoaderContext context,
-                            ConnectionConfiguration connectionConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
-
+  public DataWriter getDataWriter() {
+    return writer;
+  }
 }

@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
@@ -54,8 +55,10 @@ public class SqoopDestroyerExecutor {
     Object configConnection = ConfigurationUtils.getConnectorConnection(configuration);
     Object configJob = ConfigurationUtils.getConnectorJob(configuration);
 
+    DestroyerContext destroyerContext = new DestroyerContext(subContext, success);
+
     LOG.info("Executing destroyer class " + destroyer.getClass());
-    destroyer.destroy(success, subContext, configConnection, configJob);
+    destroyer.destroy(destroyerContext, configConnection, configJob);
   }
 
   private SqoopDestroyerExecutor() {

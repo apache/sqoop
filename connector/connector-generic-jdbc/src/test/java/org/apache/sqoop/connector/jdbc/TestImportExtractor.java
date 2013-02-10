@@ -24,7 +24,8 @@ import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.Extractor;
-import org.apache.sqoop.job.io.DataWriter;
+import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.etl.io.DataWriter;
 
 public class TestImportExtractor extends TestCase {
 
@@ -80,18 +81,19 @@ public class TestImportExtractor extends TestCase {
 
     Extractor extractor = new GenericJdbcImportExtractor();
     DummyWriter writer = new DummyWriter();
+    ExtractorContext extractorContext = new ExtractorContext(context, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-16.6666666666666665 <= DCOL AND DCOL < 16.666666666666667");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("16.666666666666667 <= DCOL AND DCOL <= 50.0");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
   }
 
   public void testSubquery() throws Exception {
@@ -113,18 +115,19 @@ public class TestImportExtractor extends TestCase {
 
     Extractor extractor = new GenericJdbcImportExtractor();
     DummyWriter writer = new DummyWriter();
+    ExtractorContext extractorContext = new ExtractorContext(context, writer);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-16 <= ICOL AND ICOL < 17");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("17 <= ICOL AND ICOL < 50");
-    extractor.run(context, connectionConfig, jobConfig, partition, writer);
+    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
   }
 
   public class DummyWriter extends DataWriter {

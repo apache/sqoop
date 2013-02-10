@@ -29,8 +29,9 @@ import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataWriter;
+import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -72,11 +73,11 @@ public class SqoopMapper
     }
 
     SqoopSplit split = context.getCurrentKey();
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context));
 
     try {
       LOG.info("Running extractor class " + extractorName);
-      extractor.run(subContext, configConnection, configJob, split.getPartition(),
-        new MapDataWriter(context));
+      extractor.extract(extractorContext, configConnection, configJob, split.getPartition());
       LOG.info("Extractor has finished");
       context.getCounter(SqoopCounters.ROWS_READ)
               .increment(extractor.getRowsRead());

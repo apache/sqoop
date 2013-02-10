@@ -33,15 +33,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceExportExtractor;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.HdfsTextExportExtractor;
 import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataReader;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.junit.Test;
 
@@ -228,12 +226,11 @@ public class TestHdfsExtract extends TestCase {
 
   public static class DummyLoader extends Loader {
     @Override
-    public void load(ImmutableContext context, Object oc, Object oj, DataReader reader)
-        throws Exception {
+    public void load(LoaderContext context, Object oc, Object oj) throws Exception {
       int index = 1;
       int sum = 0;
       Object[] array;
-      while ((array = reader.readArrayRecord()) != null) {
+      while ((array = context.getDataReader().readArrayRecord()) != null) {
         sum += Integer.valueOf(array[0].toString());
         index++;
       };

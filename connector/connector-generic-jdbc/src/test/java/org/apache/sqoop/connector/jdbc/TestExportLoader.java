@@ -26,7 +26,8 @@ import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.io.DataReader;
+import org.apache.sqoop.job.etl.LoaderContext;
+import org.apache.sqoop.etl.io.DataReader;
 
 public class TestExportLoader extends TestCase {
 
@@ -73,8 +74,8 @@ public class TestExportLoader extends TestCase {
 
     Loader loader = new GenericJdbcExportLoader();
     DummyReader reader = new DummyReader();
-
-    loader.load(context, connectionConfig, jobConfig, reader);
+    LoaderContext loaderContext = new LoaderContext(context, reader);
+    loader.load(loaderContext, connectionConfig, jobConfig);
 
     int index = START;
     ResultSet rs = executor.executeQuery("SELECT * FROM "

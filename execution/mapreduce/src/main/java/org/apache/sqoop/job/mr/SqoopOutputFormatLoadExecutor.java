@@ -36,8 +36,9 @@ import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataReader;
+import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class SqoopOutputFormatLoadExecutor {
@@ -208,8 +209,11 @@ public class SqoopOutputFormatLoadExecutor {
           }
         }
 
+        // Create loader context
+        LoaderContext loaderContext = new LoaderContext(subContext, reader);
+
         LOG.info("Running loader class " + loaderName);
-        loader.load(subContext, configConnection, configJob, reader);
+        loader.load(loaderContext, configConnection, configJob);
         LOG.info("Loader has finished");
       } catch (Throwable t) {
         readerFinished = true;

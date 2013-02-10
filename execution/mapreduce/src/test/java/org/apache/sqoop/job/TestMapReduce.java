@@ -34,14 +34,14 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.io.DataReader;
-import org.apache.sqoop.job.io.DataWriter;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
@@ -120,7 +120,7 @@ public class TestMapReduce extends TestCase {
 
   public static class DummyPartitioner extends Partitioner {
     @Override
-    public List<Partition> getPartitions(ImmutableContext context, long maxPartitions, Object oc, Object oj) {
+    public List<Partition> getPartitions(PartitionerContext context, Object oc, Object oj) {
       List<Partition> partitions = new LinkedList<Partition>();
       for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
         DummyPartition partition = new DummyPartition();
@@ -133,10 +133,10 @@ public class TestMapReduce extends TestCase {
 
   public static class DummyExtractor extends Extractor {
     @Override
-    public void run(ImmutableContext context, Object oc, Object oj, Object partition, DataWriter writer) {
+    public void extract(ExtractorContext context, Object oc, Object oj, Object partition) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
-        writer.writeArrayRecord(new Object[] {
+        context.getDataWriter().writeArrayRecord(new Object[] {
             id * NUMBER_OF_ROWS_PER_PARTITION + row,
             (double) (id * NUMBER_OF_ROWS_PER_PARTITION + row),
             String.valueOf(id*NUMBER_OF_ROWS_PER_PARTITION+row)});
@@ -216,9 +216,9 @@ public class TestMapReduce extends TestCase {
     private Data actual = new Data();
 
     @Override
-    public void load(ImmutableContext context, Object oc, Object oj, DataReader reader) throws Exception{
+    public void load(LoaderContext context, Object oc, Object oj) throws Exception{
       Object[] array;
-      while ((array = reader.readArrayRecord()) != null) {
+      while ((array = context.getDataReader().readArrayRecord()) != null) {
         actual.setContent(array, Data.ARRAY_RECORD);
 
         expected.setContent(new Object[] {

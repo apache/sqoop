@@ -36,10 +36,8 @@ import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
-import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
@@ -66,13 +64,14 @@ public class HdfsExportPartitioner extends Partitioner {
       new HashMap<String, Set<String>>();
 
   @Override
-  public List<Partition> getPartitions(ImmutableContext context,
-      long numTasks, Object connectionConfiguration, Object jobConfiguration) {
-    Configuration conf = ((PrefixContext)context).getConfiguration();
+  public List<Partition> getPartitions(PartitionerContext context,
+      Object connectionConfiguration, Object jobConfiguration) {
+
+    Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
     try {
       long numInputBytes = getInputSize(conf);
-      maxSplitSize = numInputBytes / numTasks;
+      maxSplitSize = numInputBytes / context.getMaxPartitions();
 
       long minSizeNode = 0;
       long minSizeRack = 0;

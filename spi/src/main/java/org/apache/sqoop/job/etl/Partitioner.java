@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.common.ImmutableContext;
-
 import java.util.List;
 
 /**
@@ -27,8 +25,17 @@ import java.util.List;
  */
 public abstract class Partitioner<ConnectionConfiguration, JobConfiguration> {
 
-  public abstract List<Partition> getPartitions(ImmutableContext context,
-                                                long maxPartitions,
+  /**
+   * Partition input data into partitions.
+   *
+   * Each partition will be then processed in separate extractor.
+   *
+   * @param context Partitioner context object
+   * @param connectionConfiguration Connection configuration
+   * @param jobConfiguration Job configuration
+   * @return
+   */
+  public abstract List<Partition> getPartitions(PartitionerContext context,
                                                 ConnectionConfiguration connectionConfiguration,
                                                 JobConfiguration jobConfiguration);
 

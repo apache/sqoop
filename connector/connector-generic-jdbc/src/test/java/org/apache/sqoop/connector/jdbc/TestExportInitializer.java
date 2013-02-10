@@ -23,8 +23,8 @@ import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
-import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
+import org.apache.sqoop.job.etl.InitializerContext;
 
 public class TestExportInitializer extends TestCase {
 
@@ -66,9 +66,10 @@ public class TestExportInitializer extends TestCase {
     jobConf.table.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcExportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
@@ -85,9 +86,10 @@ public class TestExportInitializer extends TestCase {
     jobConf.table.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcExportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
@@ -103,9 +105,10 @@ public class TestExportInitializer extends TestCase {
     jobConf.table.sql = tableSql;
 
     MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
 
     Initializer initializer = new GenericJdbcExportInitializer();
-    initializer.initialize(context, connConf, jobConf);
+    initializer.initialize(initializerContext, connConf, jobConf);
 
     verifyResult(context,
         "INSERT INTO " + executor.delimitIdentifier(tableName)
