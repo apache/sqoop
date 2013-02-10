@@ -727,6 +727,11 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   public boolean inUseJob(long jobId, Connection conn) {
     MSubmission submission = findSubmissionLastForJob(jobId, conn);
 
+    // We have no submissions and thus job can't be in use
+    if(submission == null) {
+      return false;
+    }
+
     // We can't remove running job
     if(submission.getStatus().isRunning()) {
       return true;
