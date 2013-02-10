@@ -105,13 +105,13 @@ public final class ClassUtils {
       Constructor constructor = klass.getConstructor(argumentTypes);
       return constructor.newInstance(args);
     } catch (NoSuchMethodException e) {
-      LOG.error("Can't find such constructor.", e);
+      LOG.debug("Can't find such constructor.", e);
     } catch (InvocationTargetException e) {
-      LOG.error("Can't instantiate object.", e);
+      LOG.debug("Can't instantiate object.", e);
     } catch (InstantiationException e) {
-      LOG.error("Can't instantiate object.", e);
+      LOG.debug("Can't instantiate object.", e);
     } catch (IllegalAccessException e) {
-      LOG.error("Can't instantiate object.", e);
+      LOG.debug("Can't instantiate object.", e);
     }
 
     return null;
