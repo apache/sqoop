@@ -146,7 +146,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_COUNTER_GROUP           |
  *    +----------------------------+
  *    | SQG_ID: BIGINT PK          |
- *    | SQG_NAME: VARCHAR(50)      |
+ *    | SQG_NAME: VARCHAR(75)      |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -157,7 +157,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_COUNTER                 |
  *    +----------------------------+
  *    | SQR_ID: BIGINT PK          |
- *    | SQR_NAME: VARCHAR(50)      |
+ *    | SQR_NAME: VARCHAR(75)      |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -284,7 +284,7 @@ public final class DerbySchemaQuery {
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
     "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
     + COLUMN_SQG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-    + COLUMN_SQG_NAME + " VARCHAR(50), "
+    + COLUMN_SQG_NAME + " VARCHAR(75), "
     + "PRIMARY KEY (" + COLUMN_SQG_ID + "),"
     + "UNIQUE ( " + COLUMN_SQG_NAME + ")"
     + ")";
@@ -293,7 +293,7 @@ public final class DerbySchemaQuery {
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
     "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
     + COLUMN_SQR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-    + COLUMN_SQR_NAME + " VARCHAR(50), "
+    + COLUMN_SQR_NAME + " VARCHAR(75), "
     + "PRIMARY KEY (" + COLUMN_SQR_ID + "), "
     + "UNIQUE ( " + COLUMN_SQR_NAME + ")"
     + ")";
@@ -586,13 +586,13 @@ public final class DerbySchemaQuery {
     + COLUMN_SQG_ID + ", "
     + COLUMN_SQG_NAME + " "
     + "FROM " + TABLE_SQ_COUNTER_GROUP + " "
-    + "WHERE " + COLUMN_SQG_NAME + " = ?";
+    + "WHERE " + COLUMN_SQG_NAME + " = substr(?, 1, 75)";
 
   // DML: Insert new counter group
   public static final String STMT_INSERT_COUNTER_GROUP =
     "INSERT INTO " + TABLE_SQ_COUNTER_GROUP + " ("
     + COLUMN_SQG_NAME + ") "
-    + "VALUES (?)";
+    + "VALUES (substr(?, 1, 75))";
 
   // DML: Select counter
   public static final String STMT_SELECT_COUNTER =
@@ -600,13 +600,13 @@ public final class DerbySchemaQuery {
     + COLUMN_SQR_ID + ", "
     + COLUMN_SQR_NAME + " "
     + "FROM " + TABLE_SQ_COUNTER + " "
-    + "WHERE " + COLUMN_SQR_NAME + " = ?";
+    + "WHERE " + COLUMN_SQR_NAME + " = substr(?, 1, 75)";
 
   // DML: Insert new counter
   public static final String STMT_INSERT_COUNTER =
     "INSERT INTO " + TABLE_SQ_COUNTER + " ("
     + COLUMN_SQR_NAME + ") "
-    + "VALUES (?)";
+    + "VALUES (substr(?, 1, 75))";
 
   // DML: Insert new counter submission
   public static final String STMT_INSERT_COUNTER_SUBMISSION =
