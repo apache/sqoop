@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,8 @@ import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 
 public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfiguration, ImportJobConfiguration> {
+
+  private static final BigDecimal NUMERIC_MIN_INCREMENT = new BigDecimal(10000 * Double.MIN_VALUE);
 
   private long numberPartitions;
   private String partitionColumnName;
@@ -61,7 +64,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     case Types.NUMERIC:
     case Types.DECIMAL:
       // Decimal column
-      // TODO: Add partition function
+      return partitionNumericColumn();
 
     case Types.BIT:
     case Types.BOOLEAN:
@@ -161,6 +164,68 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     partitions.add(partition);
 
     return partitions;
+  }
+
+  protected List<Partition> partitionNumericColumn() {
+    List<Partition> partitions = new LinkedList<Partition>();
+
+    // All null valeus will result in single partition
+    if (partitionMinValue == null && partitionMaxValue == null) {
+      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      partition.setConditions(partitionColumnName + "IS NULL");
+      partitions.add(partition);
+      return partitions;
+    }
+
+    // Having one end in null is not supported
+    if (partitionMinValue == null || partitionMaxValue == null) {
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0015);
+    }
+
+    BigDecimal minValue = new BigDecimal(partitionMinValue);
+    BigDecimal maxValue = new BigDecimal(partitionMaxValue);
+
+    // Get all the split points together.
+    List<BigDecimal> splitPoints = new LinkedList<BigDecimal>();
+
+    BigDecimal splitSize = divide(maxValue.subtract(minValue), new BigDecimal(numberPartitions));
+    if (splitSize.compareTo(NUMERIC_MIN_INCREMENT) < 0) {
+      splitSize = NUMERIC_MIN_INCREMENT;
+    }
+
+    BigDecimal curVal = minValue;
+
+    while (curVal.compareTo(maxValue) <= 0) {
+      splitPoints.add(curVal);
+      curVal = curVal.add(splitSize);
+    }
+
+    if (splitPoints.get(splitPoints.size() - 1).compareTo(maxValue) != 0 || splitPoints.size() == 1) {
+      splitPoints.remove(splitPoints.size() - 1);
+      splitPoints.add(maxValue);
+    }
+
+    // Turn the split points into a set of intervals.
+    BigDecimal start = splitPoints.get(0);
+    for (int i = 1; i < splitPoints.size(); i++) {
+      BigDecimal end = splitPoints.get(i);
+
+      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      partition.setConditions(constructConditions(start, end, i == splitPoints.size() - 1));
+      partitions.add(partition);
+
+      start = end;
+    }
+
+    return partitions;
+  }
+
+  protected BigDecimal divide(BigDecimal numerator, BigDecimal denominator) {
+    try {
+      return numerator.divide(denominator);
+    } catch (ArithmeticException ae) {
+      return numerator.divide(denominator, BigDecimal.ROUND_HALF_UP);
+    }
   }
 
   protected String constructConditions(

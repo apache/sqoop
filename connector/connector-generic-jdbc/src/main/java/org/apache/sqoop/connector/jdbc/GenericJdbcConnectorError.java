@@ -65,7 +65,12 @@ public enum GenericJdbcConnectorError implements ErrorCode {
   /** The table columns cannot be specified when
    *  the table sql is specified during export. */
   GENERIC_JDBC_CONNECTOR_0014("The table columns cannot be specified "
-      + "when the table sql is specified during export");
+      + "when the table sql is specified during export"),
+
+  /** Unsupported values in partition column */
+  GENERIC_JDBC_CONNECTOR_0015("Partition column contains unsupported values"),
+
+  ;
 
   private final String message;
 

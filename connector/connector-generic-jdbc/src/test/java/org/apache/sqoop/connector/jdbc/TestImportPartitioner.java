@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
@@ -178,7 +179,6 @@ public class TestImportPartitioner extends TestCase {
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
-    context.setString(Constants.JOB_ETL_NUMBER_PARTITIONS, "3");
 
     ConnectionConfiguration connConf = new ConnectionConfiguration();
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
@@ -191,6 +191,50 @@ public class TestImportPartitioner extends TestCase {
         "-5.0 <= DCOL AND DCOL < -1.6666666666666665",
         "-1.6666666666666665 <= DCOL AND DCOL < 1.666666666666667",
         "1.666666666666667 <= DCOL AND DCOL <= 5.0"
+    });
+  }
+
+  public void testNumericEvenPartition() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "ICOL");
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.NUMERIC));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(START));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(START + NUMBER_OF_ROWS - 1));
+
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    Partitioner partitioner = new GenericJdbcImportPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
+    verifyResult(partitions, new String[] {
+        "-5 <= ICOL AND ICOL < -3",
+        "-3 <= ICOL AND ICOL < -1",
+        "-1 <= ICOL AND ICOL < 1",
+        "1 <= ICOL AND ICOL < 3",
+        "3 <= ICOL AND ICOL <= 5"
+    });
+  }
+
+  public void testNumericUnevenPartition() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.NUMERIC));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START + NUMBER_OF_ROWS - 1)));
+
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    Partitioner partitioner = new GenericJdbcImportPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
+    verifyResult(partitions, new String[]{
+      "-5 <= DCOL AND DCOL < -2",
+      "-2 <= DCOL AND DCOL < 1",
+      "1 <= DCOL AND DCOL <= 5"
     });
   }
 
