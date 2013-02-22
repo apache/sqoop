@@ -203,7 +203,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQF_NAME + " VARCHAR(64), "
       + COLUMN_SQF_TYPE + " VARCHAR(32), "
       + COLUMN_SQF_INDEX + " SMALLINT, "
-      + " FOREIGN KEY (" + COLUMN_SQF_CONNECTOR+ ") REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + " FOREIGN KEY (" + COLUMN_SQF_CONNECTOR+ ")"
+        + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
   // DDL: Create table SQ_INPUT
@@ -217,7 +218,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQI_STRMASK + " BOOLEAN, "
       + COLUMN_SQI_STRLENGTH + " SMALLINT, "
       + COLUMN_SQI_ENUMVALS + " VARCHAR(100),"
-      + " FOREIGN KEY (" + COLUMN_SQI_FORM + ") REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
+      + " FOREIGN KEY (" + COLUMN_SQI_FORM + ")"
+        + " REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
       + ")";
 
   // DDL: Create table SQ_CONNECTION
@@ -228,7 +230,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQN_NAME  + " VARCHAR(32),"
       + COLUMN_SQN_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQN_UPDATE_DATE + " TIMESTAMP,"
-      + " FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + " FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ")"
+        + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
   // DDL: Create table SQ_JOB
@@ -240,7 +243,8 @@ public final class DerbySchemaQuery {
       + COLUMN_SQB_TYPE + " VARCHAR(64),"
       + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
-      + " FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
+      + " FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ")"
+        + " REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
 
   // DDL: Create table SQ_CONNECTION_INPUT
@@ -250,8 +254,10 @@ public final class DerbySchemaQuery {
       + COLUMN_SQNI_INPUT + " BIGINT, "
       + COLUMN_SQNI_VALUE + " LONG VARCHAR,"
       + " PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "),"
-      + " FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ") REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
-      + " FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+      + " FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ")"
+        + " REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
+      + " FOREIGN KEY (" + COLUMN_SQNI_INPUT + ")"
+        + " REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
       + ")";
 
   // DDL: Create table SQ_JOB_INPUT
@@ -261,8 +267,11 @@ public final class DerbySchemaQuery {
       + COLUMN_SQBI_INPUT + " BIGINT, "
       + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
       + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
-      + " FOREIGN KEY (" + COLUMN_SQBI_JOB + ") REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
-      + " FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + "))";
+      + " FOREIGN KEY (" + COLUMN_SQBI_JOB + ")"
+        + " REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
+      + " FOREIGN KEY (" + COLUMN_SQBI_INPUT + ")"
+        + " REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+      + ")";
 
   // DDL: Create table SQ_SUBMISSION
   public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
@@ -277,7 +286,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
     + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
     + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
+    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ")"
+      + " REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
     +  ")";
 
   // DDL: Create table SQ_COUNTER_GROUP
@@ -306,9 +316,12 @@ public final class DerbySchemaQuery {
     + COLUMN_SQRS_SUBMISSION + " BIGINT, "
     + COLUMN_SQRS_VALUE + " BIGINT, "
     + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
+    + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ")"
+      + " REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
+    + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ")"
+      + " REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
+    + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ")"
+      + " REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
     + ")";
 
   // DML: Fetch connector Given Name
@@ -324,50 +337,85 @@ public final class DerbySchemaQuery {
 
   // DML: Fetch all forms for a given connector
   public static final String STMT_FETCH_FORM_CONNECTOR =
-      "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
-      + ", " + COLUMN_SQF_INDEX + " FROM " + TABLE_SQ_FORM + " WHERE "
-      + COLUMN_SQF_CONNECTOR + " = ? ORDER BY " + COLUMN_SQF_INDEX;
+      "SELECT "
+      + COLUMN_SQF_ID + ", "
+      + COLUMN_SQF_CONNECTOR + ", "
+      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_NAME + ", "
+      + COLUMN_SQF_TYPE + ", "
+      + COLUMN_SQF_INDEX
+      + " FROM " + TABLE_SQ_FORM
+      + " WHERE " + COLUMN_SQF_CONNECTOR + " = ? "
+      + " ORDER BY " + COLUMN_SQF_INDEX;
 
   // DML: Fetch all framework forms
   public static final String STMT_FETCH_FORM_FRAMEWORK =
-      "SELECT " + COLUMN_SQF_ID + ", " + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
-      + ", " + COLUMN_SQF_INDEX + " FROM " + TABLE_SQ_FORM + " WHERE " +
-      COLUMN_SQF_CONNECTOR + " IS NULL ORDER BY " + COLUMN_SQF_INDEX;
+      "SELECT "
+      + COLUMN_SQF_ID + ", "
+      + COLUMN_SQF_CONNECTOR + ", "
+      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_NAME + ", "
+      + COLUMN_SQF_TYPE + ", "
+      + COLUMN_SQF_INDEX
+      + " FROM " + TABLE_SQ_FORM
+      + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL "
+      + " ORDER BY " + COLUMN_SQF_INDEX;
 
   // DML: Fetch inputs for a given form
   public static final String STMT_FETCH_INPUT =
-      "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS + ", cast(null as varchar(100)) FROM "
-      + TABLE_SQ_INPUT + " WHERE " + COLUMN_SQI_FORM + " = ? ORDER BY "
-      + COLUMN_SQI_INDEX;
+      "SELECT "
+      + COLUMN_SQI_ID + ", "
+      + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", "
+      + COLUMN_SQI_INDEX + ", "
+      + COLUMN_SQI_TYPE + ", "
+      + COLUMN_SQI_STRMASK + ", "
+      + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS + ", "
+      + "cast(null as varchar(100))"
+      + " FROM " + TABLE_SQ_INPUT
+      + " WHERE " + COLUMN_SQI_FORM + " = ?"
+      + " ORDER BY " + COLUMN_SQI_INDEX;
 
   // DML: Fetch inputs and values for a given connection
   public static final String STMT_FETCH_CONNECTION_INPUT =
-      "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ","
-      + COLUMN_SQI_ENUMVALS + ", " + COLUMN_SQNI_VALUE + " FROM "
-      + TABLE_SQ_INPUT + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT
-      + " ON " + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID + " AND "
-      + COLUMN_SQNI_CONNECTION + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND ("
-      + COLUMN_SQNI_CONNECTION + " = ? OR " + COLUMN_SQNI_CONNECTION
-      + " IS NULL) ORDER BY " + COLUMN_SQI_INDEX;
+      "SELECT "
+      + COLUMN_SQI_ID + ", "
+      + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", "
+      + COLUMN_SQI_INDEX + ", "
+      + COLUMN_SQI_TYPE + ", "
+      + COLUMN_SQI_STRMASK + ", "
+      + COLUMN_SQI_STRLENGTH + ","
+      + COLUMN_SQI_ENUMVALS + ", "
+      + COLUMN_SQNI_VALUE
+      + " FROM " + TABLE_SQ_INPUT
+      + " LEFT OUTER JOIN " + TABLE_SQ_CONNECTION_INPUT
+        + " ON " + COLUMN_SQNI_INPUT + " = " + COLUMN_SQI_ID
+        + " AND " + COLUMN_SQNI_CONNECTION + " = ?"
+      + " WHERE " + COLUMN_SQI_FORM + " = ?"
+        + " AND (" + COLUMN_SQNI_CONNECTION + " = ?" + " OR " + COLUMN_SQNI_CONNECTION + " IS NULL)"
+      + " ORDER BY " + COLUMN_SQI_INDEX;
 
   // DML: Fetch inputs and values for a given job
   public static final String STMT_FETCH_JOB_INPUT =
-      "SELECT " + COLUMN_SQI_ID + ", " + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS + ", " + COLUMN_SQBI_VALUE + " FROM "
-      + TABLE_SQ_INPUT + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT + " ON "
-      + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID + " AND  " + COLUMN_SQBI_JOB
-      + " = ? WHERE " + COLUMN_SQI_FORM + " = ? AND (" + COLUMN_SQBI_JOB
-      + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL) ORDER BY "
-      + COLUMN_SQI_INDEX;
+      "SELECT "
+      + COLUMN_SQI_ID + ", "
+      + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", "
+      + COLUMN_SQI_INDEX + ", "
+      + COLUMN_SQI_TYPE + ", "
+      + COLUMN_SQI_STRMASK + ", "
+      + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS + ", "
+      + COLUMN_SQBI_VALUE
+      + " FROM " + TABLE_SQ_INPUT
+      + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT
+        + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
+        + " AND  " + COLUMN_SQBI_JOB + " = ?"
+      + " WHERE " + COLUMN_SQI_FORM + " = ?" +
+        " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
+      + " ORDER BY " + COLUMN_SQI_INDEX;
 
   // DML: Insert connector base
   public static final String STMT_INSERT_CONNECTOR_BASE =
@@ -379,16 +427,25 @@ public final class DerbySchemaQuery {
 
   // DML: Insert form base
   public static final String STMT_INSERT_FORM_BASE =
-      "INSERT INTO " + TABLE_SQ_FORM + " (" + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", " + COLUMN_SQF_NAME + ", " + COLUMN_SQF_TYPE
-      + ", " + COLUMN_SQF_INDEX + ") VALUES ( ?, ?, ?, ?, ?)";
+      "INSERT INTO " + TABLE_SQ_FORM + " ("
+      + COLUMN_SQF_CONNECTOR + ", "
+      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_NAME + ", "
+      + COLUMN_SQF_TYPE + ", "
+      + COLUMN_SQF_INDEX
+      + ") VALUES ( ?, ?, ?, ?, ?)";
 
   // DML: Insert form input
   public static final String STMT_INSERT_INPUT_BASE =
-      "INSERT INTO " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_FORM + ", " + COLUMN_SQI_INDEX + ", " + COLUMN_SQI_TYPE
-      + ", " + COLUMN_SQI_STRMASK + ", " + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS + ") " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+      "INSERT INTO " + TABLE_SQ_INPUT + " ("
+      + COLUMN_SQI_NAME + ", "
+      + COLUMN_SQI_FORM + ", "
+      + COLUMN_SQI_INDEX + ", "
+      + COLUMN_SQI_TYPE + ", "
+      + COLUMN_SQI_STRMASK + ", "
+      + COLUMN_SQI_STRLENGTH + ", "
+      + COLUMN_SQI_ENUMVALS
+      + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new connection
   public static final String STMT_INSERT_CONNECTION =
@@ -416,12 +473,13 @@ public final class DerbySchemaQuery {
 
   // DML: Delete rows from connection input table
   public static final String STMT_DELETE_CONNECTION_INPUT =
-    "DELETE FROM " + TABLE_SQ_CONNECTION_INPUT + " WHERE "
-    + COLUMN_SQNI_CONNECTION + " = ?";
+    "DELETE FROM " + TABLE_SQ_CONNECTION_INPUT
+    + " WHERE " + COLUMN_SQNI_CONNECTION + " = ?";
 
   // DML: Delete row from connection table
   public static final String STMT_DELETE_CONNECTION =
-    "DELETE FROM " + TABLE_SQ_CONNECTION + " WHERE " + COLUMN_SQN_ID + " = ?";
+    "DELETE FROM " + TABLE_SQ_CONNECTION
+    + " WHERE " + COLUMN_SQN_ID + " = ?";
 
   // DML: Select one specific connection
   public static final String STMT_SELECT_CONNECTION_SINGLE =
@@ -446,8 +504,8 @@ public final class DerbySchemaQuery {
 
   // DML: Check if given connection exists
   public static final String STMT_SELECT_CONNECTION_CHECK =
-    "SELECT count(*) FROM " + TABLE_SQ_CONNECTION + " WHERE " + COLUMN_SQN_ID
-    + " = ?";
+    "SELECT count(*) FROM " + TABLE_SQ_CONNECTION
+    + " WHERE " + COLUMN_SQN_ID + " = ?";
 
   // DML: Insert new job
   public static final String STMT_INSERT_JOB =
@@ -475,21 +533,27 @@ public final class DerbySchemaQuery {
 
   // DML: Delete rows from job input table
   public static final String STMT_DELETE_JOB_INPUT =
-    "DELETE FROM " + TABLE_SQ_JOB_INPUT + " WHERE " + COLUMN_SQBI_JOB + " = ?";
+    "DELETE FROM " + TABLE_SQ_JOB_INPUT
+    + " WHERE " + COLUMN_SQBI_JOB + " = ?";
 
   // DML: Delete row from job table
   public static final String STMT_DELETE_JOB =
-    "DELETE FROM " + TABLE_SQ_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+    "DELETE FROM " + TABLE_SQ_JOB
+    + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Check if given job exists
   public static final String STMT_SELECT_JOB_CHECK =
-    "SELECT count(*) FROM " + TABLE_SQ_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+    "SELECT count(*) FROM " + TABLE_SQ_JOB
+    + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Check if there are jobs for given connection
   public static final String STMT_SELECT_JOBS_FOR_CONNECTION_CHECK =
-    "SELECT count(*) FROM " + TABLE_SQ_JOB + " JOIN " + TABLE_SQ_CONNECTION
-    + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID + " WHERE "
-    + COLUMN_SQN_ID + " = ? ";
+    "SELECT"
+    + " count(*)"
+    + " FROM " + TABLE_SQ_JOB
+    + " JOIN " + TABLE_SQ_CONNECTION
+      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+    + " WHERE " + COLUMN_SQN_ID + " = ? ";
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE =
@@ -502,7 +566,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_CREATION_DATE + ", "
     + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
-    + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION
+      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs
@@ -515,7 +580,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_TYPE + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
     + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " LEFT JOIN " + TABLE_SQ_CONNECTION + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
+    + " FROM " + TABLE_SQ_JOB
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION
+      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =
@@ -541,8 +608,10 @@ public final class DerbySchemaQuery {
 
   // DML: Check if given submission exists
   public static final String STMT_SELECT_SUBMISSION_CHECK =
-    "SELECT count(*) FROM " + TABLE_SQ_SUBMISSION + " WHERE " + COLUMN_SQS_ID
-      + " = ?";
+    "SELECT"
+    + " count(*)"
+    + " FROM " + TABLE_SQ_SUBMISSION
+    + " WHERE " + COLUMN_SQS_ID + " = ?";
 
   // DML: Purge old entries
   public static final String STMT_PURGE_SUBMISSIONS =
@@ -624,8 +693,10 @@ public final class DerbySchemaQuery {
     + COLUMN_SQR_NAME + ", "
     + COLUMN_SQRS_VALUE + " "
     + "FROM " + TABLE_SQ_COUNTER_SUBMISSION + " "
-    + "LEFT JOIN " + TABLE_SQ_COUNTER_GROUP + " ON " + COLUMN_SQRS_GROUP + " = " + COLUMN_SQG_ID + " "
-    + "LEFT JOIN " + TABLE_SQ_COUNTER + " ON " + COLUMN_SQRS_COUNTER + " = " + COLUMN_SQR_ID + " "
+    + "LEFT JOIN " + TABLE_SQ_COUNTER_GROUP
+      + " ON " + COLUMN_SQRS_GROUP + " = " + COLUMN_SQG_ID + " "
+    + "LEFT JOIN " + TABLE_SQ_COUNTER
+      + " ON " + COLUMN_SQRS_COUNTER + " = " + COLUMN_SQR_ID + " "
     + "WHERE " + COLUMN_SQRS_SUBMISSION + " = ? ";
 
   // DML: Delete rows from counter submission table
