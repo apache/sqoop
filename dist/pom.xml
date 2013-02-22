@@ -21,13 +21,6 @@ limitations under the License.
 
   <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <tomcat.majorVersion>6</tomcat.majorVersion>
-    <tomcat.minorVersion>0.36</tomcat.minorVersion>
-    <tomcat.version>${tomcat.majorVersion}.${tomcat.minorVersion}</tomcat.version>
-  </properties>
-
-
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>sqoop</artifactId>
@@ -155,7 +148,7 @@ limitations under the License.
                      </copy>
 
                     <!-- Build server directory -->
-                    <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.majorVersion}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
+                    <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
                          dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
                     <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
                     <move file="target/apache-tomcat-${tomcat.version}" tofile="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server"/>
