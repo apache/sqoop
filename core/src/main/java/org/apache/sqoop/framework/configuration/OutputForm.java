@@ -30,5 +30,5 @@ public class OutputForm {
 
   @Input public OutputFormat outputFormat;
 
-  @Input(size = 25) public String outputDirectory;
+  @Input(size = 255) public String outputDirectory;
 }

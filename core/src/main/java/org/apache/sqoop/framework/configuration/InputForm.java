@@ -26,5 +26,5 @@ import org.apache.sqoop.model.Input;
 @FormClass
 public class InputForm {
 
-  @Input(size = 50) public String inputDirectory;
+  @Input(size = 255) public String inputDirectory;
 }
