@@ -216,12 +216,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     } else if (tableSql != null) {
       // when table sql is specified:
 
-      if (tableSql.indexOf(
-          GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN) == -1) {
-        // make sure substitute token for conditions is in the specified sql
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0010);
-      }
+      assert tableSql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
 
       if (tableColumns == null) {
         dataSql = tableSql;

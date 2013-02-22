@@ -103,6 +103,11 @@ public class GenericJdbcValidator extends Validator {
       validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
     }
 
+    if(configuration.table.sql != null && !configuration.table.sql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)) {
+      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "SQL statement must contain placeholder for auto generated "
+        + "conditions - " + GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
+    }
+
     return validation;
   }
 }
