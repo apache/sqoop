@@ -47,9 +47,6 @@ import java.util.Locale;
 /**
  * Connection request handler is supporting following resources:
  *
- * GET /v1/connection
- * Get brief list of all connections present in the system.
- *
  * GET /v1/connection/:xid
  * Return details about one particular connection with id :xid or about all of
  * them if :xid equals to "all".
@@ -62,6 +59,12 @@ import java.util.Locale;
  *
  * DELETE /v1/connection/:xid
  * Remove connection with id :xid
+ *
+ * Planned resources:
+ *
+ * GET /v1/connection
+ * Get brief list of all connections present in the system.
+ *
  */
 public class ConnectionRequestHandler implements RequestHandler {
 

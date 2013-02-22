@@ -47,9 +47,6 @@ import java.util.Locale;
 /**
  * Job request handler is supporting following resources:
  *
- * GET /v1/job
- * Get brief list of all jobs present in the system.
- *
  * GET /v1/job/:jid
  * Return details about one particular job with id :jid or about all of
  * them if :jid equals to "all".
@@ -62,6 +59,12 @@ import java.util.Locale;
  *
  * DELETE /v1/job/:jid
  * Remove job with id :jid
+ *
+ * Planned resources:
+ *
+ * GET /v1/job
+ * Get brief list of all jobs present in the system. This resource is not yet
+ * implemented.
  */
 public class JobRequestHandler implements RequestHandler {
 

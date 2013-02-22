@@ -18,7 +18,7 @@
 package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
+
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.JsonBean;
@@ -26,7 +26,10 @@ import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 
 /**
+ * Framework request handler is supporting following resources:
  *
+ * GET /v1/framework
+ * Get framework metadata.
  */
 public class FrameworkRequestHandler  implements RequestHandler {
 

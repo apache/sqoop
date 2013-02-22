@@ -19,12 +19,17 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 
+/**
+ * Version request handler is supporting following resources:
+ *
+ * GET /version
+ * Get server version and supported protocol versions.
+ */
 public class VersionRequestHandler implements RequestHandler {
 
   private static final Logger LOG =

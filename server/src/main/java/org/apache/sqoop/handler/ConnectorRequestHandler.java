@@ -34,6 +34,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+/**
+ * Connector request handler is supporting following resources:
+ *
+ * GET /v1/connector/:cid
+ * Return details about one particular connector with id :cid or about all of
+ * them if :cid equals to "all".
+ *
+ * Planned resources:
+ *
+ * GET /v1/connector
+ * Get brief list of all connectors present in the system. This resource is not
+ * yet implemented.
+ *
+ */
 public class ConnectorRequestHandler implements RequestHandler {
 
   private static final Logger LOG =
