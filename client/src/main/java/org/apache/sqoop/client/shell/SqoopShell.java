@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.utils.ThrowableDisplayer;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.codehaus.groovy.tools.shell.Command;
@@ -104,6 +105,9 @@ public final class SqoopShell {
     shell.register(new CloneCommand(shell));
     shell.register(new SubmissionCommand(shell));
 
+    // We're running in batch mode by default
+    Environment.setInteractive(false);
+
     // Let's see if user do have resource file with initial commands that he
     // would like to apply.
     String homeDir = System.getProperty(Constants.PROP_HOMEDIR);
@@ -122,6 +126,9 @@ public final class SqoopShell {
       shell.getIo().out.println(clientResource.getString(Constants
           .RES_SQOOP_SHELL_BANNER));
       shell.getIo().out.println();
+
+      // Switch to interactive mode
+      Environment.setInteractive(true);
       shell.run(args);
 
     } else {

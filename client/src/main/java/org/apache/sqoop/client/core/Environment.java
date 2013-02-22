@@ -32,6 +32,8 @@ public final class Environment
 
   private static boolean verbose;
 
+  private static boolean interactive;
+
   private static final String HOST_DEFAULT = "localhost";
   private static final String PORT_DEFAULT = "12000";
   private static final String WEBAPP_DEFAULT = "sqoop";
@@ -87,5 +89,13 @@ public final class Environment
 
   public static boolean isVerboose() {
     return verbose;
+  }
+
+  public static void setInteractive(boolean newValue) {
+    interactive = newValue;
+  }
+
+  public static boolean isInteractive() {
+    return interactive;
   }
 }

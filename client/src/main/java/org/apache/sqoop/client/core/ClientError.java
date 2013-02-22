@@ -42,6 +42,9 @@ public enum ClientError implements ErrorCode {
   /** There occurred exception on server side **/
   CLIENT_0006("Server has returned exception"),
 
+  /** Command not compatible with batch mode */
+  CLIENT_0007("Command not compatible with batch mode"),
+
   ;
 
   private final String message;

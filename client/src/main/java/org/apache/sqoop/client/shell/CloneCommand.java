@@ -19,6 +19,7 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
@@ -43,8 +44,11 @@ public class CloneCommand extends SqoopCommand {
   }
 
   public Object executeCommand(List args) {
-    String usageMsg = MessageFormat.format(getResource().getString(Constants
-        .RES_CLONE_USAGE), getUsage());
+    if(!Environment.isInteractive()) {
+      throw new SqoopException(ClientError.CLIENT_0007, "clone");
+    }
+
+    String usageMsg = MessageFormat.format(getResource().getString(Constants.RES_CLONE_USAGE), getUsage());
 
     if (args.size() == 0) {
       io.out.println(usageMsg);
