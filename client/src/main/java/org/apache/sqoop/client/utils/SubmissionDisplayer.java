@@ -34,7 +34,7 @@ public final class SubmissionDisplayer {
 
   public static void display(IO io, MSubmission submission) {
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss z");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
     io.out.println("@|bold Submission details|@");
 
     io.out.print("Job id: ");

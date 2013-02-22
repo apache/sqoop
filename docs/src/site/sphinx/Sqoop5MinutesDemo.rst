@@ -128,8 +128,8 @@ When all meta data objects are in place we can start moving data around. You can
   Submission details
   Job id: 1
   Status: BOOTING
-  Creation date: 2012-20-23 13:20:34 PST
-  Last update date: 2012-20-23 13:20:34 PST
+  Creation date: 2012-12-23 13:20:34 PST
+  Last update date: 2012-12-23 13:20:34 PST
   External Id: job_1353136146286_0004
           http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
   Progress: Progress is not available
@@ -140,8 +140,8 @@ You can iteratively check your running job status with ``submission status`` com
   Submission details
   Job id: 1
   Status: RUNNING
-  Creation date: 2012-21-23 13:21:45 PST
-  Last update date: 2012-21-23 13:21:56 PST
+  Creation date: 2012-12-23 13:21:45 PST
+  Last update date: 2012-12-23 13:21:56 PST
   External Id: job_1353136146286_0005
           http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
   Progress: 0.00 %
@@ -152,8 +152,8 @@ And finally you can stop running job at any time using ``submission stop`` comma
   Submission details
   Job id: 1
   Status: FAILED
-  Creation date: 2012-22-23 13:22:39 PST
-  Last update date: 2012-22-23 13:22:42 PST
+  Creation date: 2012-12-23 13:22:39 PST
+  Last update date: 2012-12-23 13:22:42 PST
   External Id: job_1353136146286_0006
           http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
 
