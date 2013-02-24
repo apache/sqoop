@@ -20,6 +20,9 @@ package org.apache.sqoop.framework;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.framework.configuration.InputForm;
+import org.apache.sqoop.framework.configuration.OutputForm;
+import org.apache.sqoop.framework.configuration.ThrottlingForm;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
@@ -54,9 +57,8 @@ public class FrameworkValidator extends Validator {
     Validation validation = new Validation(ExportJobConfiguration.class);
     ExportJobConfiguration configuration = (ExportJobConfiguration)jobConfiguration;
 
-    if(configuration.input.inputDirectory == null || configuration.input.inputDirectory.isEmpty()) {
-      validation.addMessage(Status.UNACCEPTABLE, "input", "inputDirectory", "Input directory is empty");
-    }
+    validateInputForm(validation, configuration.input);
+    validateThrottingForm(validation, configuration.throttling);
 
     return validation;
   }
@@ -65,10 +67,31 @@ public class FrameworkValidator extends Validator {
     Validation validation = new Validation(ImportJobConfiguration.class);
     ImportJobConfiguration configuration = (ImportJobConfiguration)jobConfiguration;
 
-    if(configuration.output.outputDirectory == null || configuration.output.outputDirectory.isEmpty()) {
-      validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Input directory is empty");
-    }
+    validateOutputForm(validation, configuration.output);
+    validateThrottingForm(validation, configuration.throttling);
 
     return validation;
+  }
+
+  private void validateInputForm(Validation validation, InputForm input) {
+    if(input.inputDirectory == null || input.inputDirectory.isEmpty()) {
+      validation.addMessage(Status.UNACCEPTABLE, "input", "inputDirectory", "Input directory is empty");
+    }
+  }
+
+  private void validateOutputForm(Validation validation, OutputForm output) {
+    if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
+      validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Input directory is empty");
+    }
+  }
+
+  private void validateThrottingForm(Validation validation, ThrottlingForm throttling) {
+    if(throttling.extractors != null && throttling.extractors < 1) {
+      validation.addMessage(Status.UNACCEPTABLE, "throttling", "extractors", "You need to specify more than one extractor");
+    }
+
+    if(throttling.loaders != null && throttling.loaders < 1) {
+      validation.addMessage(Status.UNACCEPTABLE, "throttling", "loaders", "You need to specify more than one loader");
+    }
   }
 }

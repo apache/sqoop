@@ -31,6 +31,7 @@ public class ExportJobConfiguration {
   @Form public ThrottlingForm throttling;
 
   public ExportJobConfiguration() {
+    input = new InputForm();
     throttling = new ThrottlingForm();
   }
 }
