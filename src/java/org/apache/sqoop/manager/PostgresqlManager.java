@@ -196,7 +196,7 @@ public class PostgresqlManager
    * @param args Extra arguments array
    * @throws ParseException
    */
-  void parseExtraArgs(String[] args) throws ParseException {
+  private void parseExtraArgs(String[] args) throws ParseException {
     // No-op when no extra arguments are present
     if (args == null || args.length == 0) {
       return;
@@ -207,6 +207,11 @@ public class PostgresqlManager
     CommandLineParser parser = new GnuParser();
     CommandLine cmdLine = parser.parse(getExtraOptions(), args, true);
 
+    // Apply parsed arguments
+    applyExtraArguments(cmdLine);
+  }
+
+  protected void applyExtraArguments(CommandLine cmdLine) {
     // Apply extra options
     if (cmdLine.hasOption(SCHEMA)) {
       String schemaName = cmdLine.getOptionValue(SCHEMA);
@@ -222,7 +227,7 @@ public class PostgresqlManager
    * @return
    */
   @SuppressWarnings("static-access")
-  private RelatedOptions getExtraOptions() {
+  protected RelatedOptions getExtraOptions() {
     // Connection args (common)
     RelatedOptions extraOptions =
       new RelatedOptions("PostgreSQL extra options:");

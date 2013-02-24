@@ -98,6 +98,22 @@ Argument                                 Description
                                          Default is "public".
 ---------------------------------------------------------------------------------
 
+The direct connector (used when specified +\--direct+ parameter), offers also
+additional extra arguments:
+
+.Additional supported PostgreSQL extra arguments in direct mode:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--boolean-true-string <str>+           String that will be used to encode \
+                                         +true+ value of +boolean+ columns.
+                                         Default is "TRUE".
++\--boolean-false-string <str>+          String that will be used to encode \
+                                         +false+ value of +boolean+ columns.
+                                         Default is "FALSE".
+---------------------------------------------------------------------------------
+
 Schema support
 ^^^^^^^^^^^^^^
 

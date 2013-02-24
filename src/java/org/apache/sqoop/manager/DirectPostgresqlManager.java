@@ -30,9 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.util.PostgreSQLUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -54,14 +57,32 @@ import org.apache.sqoop.util.SubstitutionUtils;
  */
 public class DirectPostgresqlManager
     extends com.cloudera.sqoop.manager.PostgresqlManager {
+
   public static final Log LOG = LogFactory.getLog(
       DirectPostgresqlManager.class.getName());
 
+  public static final String BOOLEAN_TRUE_STRING = "boolean-true-string";
+  public static final String DEFAULT_BOOLEAN_TRUE_STRING = "TRUE";
+
+  public static final String BOOLEAN_FALSE_STRING = "boolean-false-string";
+  public static final String DEFAULT_BOOLEAN_FALSE_STRING = "FALSE";
+
   public DirectPostgresqlManager(final SqoopOptions opts) {
     super(opts);
+
+    if (this.booleanFalseString == null) {
+      this.booleanFalseString = DEFAULT_BOOLEAN_FALSE_STRING;
+    }
+    if (booleanTrueString == null) {
+      this.booleanTrueString = DEFAULT_BOOLEAN_TRUE_STRING;
+    }
   }
 
   private static final String PSQL_CMD = "psql";
+
+  private String booleanTrueString;
+
+  private String booleanFalseString;
 
   /** Copies data directly into HDFS, adding the user's chosen line terminator
       char to each record.
@@ -196,12 +217,18 @@ public class DirectPostgresqlManager
         sb.append(col);
       } else {
         if ("bool".equalsIgnoreCase(columnTypes.get(col))) {
-          sb.append(String.format("case when %s=true then 'TRUE' "
-          + "when %s=false then 'FALSE' end as %s",
+          sb.append(String.format("case when %s=true then "
+          + "'" + booleanTrueString + "' "
+          + "when %s=false then "
+          +  "'" + booleanFalseString + "'"
+          +  " end as %s",
           colEscaped, colEscaped, colEscaped));
         } else if ("bit".equalsIgnoreCase(columnTypes.get(col))) {
-          sb.append(String.format("case when %s=B'1' then 'TRUE' "
-          + "when %s=B'0' then 'FALSE' end as %s",
+          sb.append(String.format("case when %s=B'1' then "
+          + "'" + booleanTrueString + "' "
+          + "when %s=B'0' then "
+          +  "'" + booleanFalseString + "'"
+          +  " end as %s",
           colEscaped, colEscaped, colEscaped));
         } else {
           sb.append(colEscaped);
@@ -508,4 +535,38 @@ public class DirectPostgresqlManager
     return false;
   }
   // CHECKSTYLE:ON
+
+  /** {@inheritDoc}. */
+  @Override
+  protected void applyExtraArguments(CommandLine cmdLine) {
+    super.applyExtraArguments(cmdLine);
+
+    if (cmdLine.hasOption(BOOLEAN_TRUE_STRING)) {
+      String arg = cmdLine.getOptionValue(BOOLEAN_TRUE_STRING);
+      LOG.info("Loaded TRUE encoding string " + arg);
+      this.booleanTrueString = arg;
+    }
+    if (cmdLine.hasOption(BOOLEAN_FALSE_STRING)) {
+      String arg = cmdLine.getOptionValue(BOOLEAN_FALSE_STRING);
+      LOG.info("Loaded FALSE encoding string " + arg);
+      this.booleanFalseString = arg;
+    }
+  }
+
+  /** {@inheritDoc}. */
+  @Override
+  @SuppressWarnings("static-access")
+  protected RelatedOptions getExtraOptions() {
+    RelatedOptions extraOptions = super.getExtraOptions();
+
+    extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
+      .withDescription("String to encode TRUE value")
+      .withLongOpt(BOOLEAN_TRUE_STRING).create());
+
+    extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
+      .withDescription("String to encode FALSE value")
+      .withLongOpt(BOOLEAN_FALSE_STRING).create());
+
+    return extraOptions;
+  }
 }

@@ -139,12 +139,13 @@ public class PostgresqlImportTest extends ImportJobTestCase {
         connection.commit();
       } catch (SQLException e) {
          LOG.info("Couldn't create schema " + schema + " (is o.k. as long as"
-           + "the schema already exists.", e);
+           + "the schema already exists.");
         connection.rollback();
       }
 
       String fullTableName = manager.escapeTableName(schema)
         + "." + manager.escapeTableName(tableName);
+      LOG.info("Creating table: " + fullTableName);
 
       try {
         // Try to remove the table first. DROP TABLE IF EXISTS didn't
@@ -152,8 +153,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
         // any exception here if one occurs.
         st.executeUpdate("DROP TABLE " + fullTableName);
       } catch (SQLException e) {
-        LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)",
-          e);
+        LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)");
         // Now we need to reset the transaction.
         connection.rollback();
       }
@@ -163,17 +163,18 @@ public class PostgresqlImportTest extends ImportJobTestCase {
           + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
           + manager.escapeColName("start_date") + " DATE, "
           + manager.escapeColName("Salary") + " FLOAT, "
+          + manager.escapeColName("Fired") + " BOOL, "
           + manager.escapeColName("dept") + " VARCHAR(32))");
 
       st.executeUpdate("INSERT INTO " + fullTableName
-          + " VALUES(1,'Aaron','2009-05-14',1000000.00,'engineering')");
+          + " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,'engineering')");
       st.executeUpdate("INSERT INTO " + fullTableName
-          + " VALUES(2,'Bob','2009-04-20',400.00,'sales')");
+          + " VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales')");
       st.executeUpdate("INSERT INTO " + fullTableName
-          + " VALUES(3,'Fred','2009-01-23',15.00,'marketing')");
+          + " VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing')");
       if (nullEntry) {
         st.executeUpdate("INSERT INTO " + fullTableName
-          + " VALUES(4,'Mike',NULL,NULL,NULL)");
+          + " VALUES(4,'Mike',NULL,NULL,NULL,NULL)");
 
       }
       connection.commit();
@@ -276,8 +277,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   @Test
   public void testJdbcBasedImport() throws IOException {
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400.0,sales",
-      "3,Fred,2009-01-23,15.0,marketing",
+      "2,Bob,2009-04-20,400.0,true,sales",
+      "3,Fred,2009-01-23,15.0,false,marketing",
     };
 
     doImportAndVerify(false, expectedResults, TABLE_NAME);
@@ -286,8 +287,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   @Test
   public void testDirectImport() throws IOException {
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
+      "2,Bob,2009-04-20,400,TRUE,sales",
+      "3,Fred,2009-01-23,15,FALSE,marketing",
     };
 
     doImportAndVerify(true, expectedResults, TABLE_NAME);
@@ -309,8 +310,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   @Test
   public void testTableNameWithSpecialCharacter() throws IOException {
     String [] expectedResults = {
-        "2,Bob,2009-04-20,400.0,sales",
-        "3,Fred,2009-01-23,15.0,marketing",
+        "2,Bob,2009-04-20,400.0,true,sales",
+        "3,Fred,2009-01-23,15.0,false,marketing",
     };
 
     doImportAndVerify(false, expectedResults, SPECIAL_TABLE_NAME);
@@ -330,8 +331,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
  @Test
   public void testDifferentSchemaImport() throws IOException {
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400.0,sales",
-      "3,Fred,2009-01-23,15.0,marketing",
+      "2,Bob,2009-04-20,400.0,true,sales",
+      "3,Fred,2009-01-23,15.0,false,marketing",
     };
 
     String [] extraArgs = { "--",
@@ -344,8 +345,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   @Test
   public void testDifferentSchemaImportDirect() throws IOException {
     String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
+      "2,Bob,2009-04-20,400,TRUE,sales",
+      "3,Fred,2009-01-23,15,FALSE,marketing",
     };
 
     String [] extraArgs = { "--",
@@ -358,9 +359,9 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   @Test
   public void testNullEscapeCharacters() throws Exception {
      String [] expectedResults = {
-      "2,Bob,2009-04-20,400,sales",
-      "3,Fred,2009-01-23,15,marketing",
-      "4,Mike,\\N,\\N,\\N",
+      "2,Bob,2009-04-20,400,TRUE,sales",
+      "3,Fred,2009-01-23,15,FALSE,marketing",
+      "4,Mike,\\N,\\N,\\N,\\N",
     };
 
     String [] extraArgs = {
@@ -369,5 +370,21 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     };
 
     doImportAndVerify(true, expectedResults, NULL_TABLE_NAME, extraArgs);
+  }
+
+  @Test
+  public void testDifferentBooleanValues() throws Exception {
+    String [] expectedResults = {
+      "2,Bob,2009-04-20,400,REAL_TRUE,sales",
+      "3,Fred,2009-01-23,15,REAL_FALSE,marketing",
+    };
+
+    String [] extraArgs = {
+      "--",
+      "--boolean-true-string", "REAL_TRUE",
+      "--boolean-false-string", "REAL_FALSE",
+    };
+
+    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
   }
 }
