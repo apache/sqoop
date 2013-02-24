@@ -336,6 +336,16 @@ limitations under the License.
         <version>${derby.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbynet</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbyclient</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-core-container-tomcat</artifactId>
         <version>${cargo.version}</version>

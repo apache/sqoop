@@ -73,6 +73,16 @@ limitations under the License.
       <artifactId>cargo-core-container-tomcat</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbynet</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyclient</artifactId>
+    </dependency>
+
   </dependencies>
 
   <!-- Add classifier name to the JAR name -->

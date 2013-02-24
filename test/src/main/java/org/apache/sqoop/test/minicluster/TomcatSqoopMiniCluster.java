@@ -86,12 +86,13 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     List<String> extraClassPath = new LinkedList<String>();
     String []classpath = System.getProperty("java.class.path").split(":");
     for(String jar : classpath) {
-      System.out.println("JAR: " + jar);
       if(jar.contains("hadoop-")  || // Hadoop jars
          jar.contains("commons-") || // Apache Commons libraries
          jar.contains("log4j-")   || // Log4j
          jar.contains("slf4j-")   || // Slf4j
          jar.contains("jackson-") || // Jackson
+         jar.contains("derby")    || // Derby drivers
+         jar.contains("avro-")    || // Avro
          jar.contains("google")      // Google libraries (guava, ...)
        ) {
         extraClassPath.add(jar);
@@ -129,7 +130,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     properties.put("org.apache.sqoop.log4j.appender.file.MaxFileSize", "25MB");
     properties.put("org.apache.sqoop.log4j.appender.file.MaxBackupIndex", "5");
     properties.put("org.apache.sqoop.log4j.appender.file.layout", "org.apache.log4j.PatternLayout");
-    properties.put("org.apache.sqoop.log4j.appender.file.layout.ConversionPattern", "%d{ISO8601} %-5p %c{2} [%l] %m%n");
+    properties.put("org.apache.sqoop.log4j.appender.file.layout.ConversionPattern", "%d{ISO8601} %-5p %c{2} [%l] %m%n\\n");
     properties.put("org.apache.sqoop.log4j.debug", "true");
     properties.put("org.apache.sqoop.log4j.rootCategory", "WARN, file");
     properties.put("org.apache.sqoop.log4j.category.org.apache.sqoop", "DEBUG");
