@@ -226,6 +226,12 @@ public class PGBulkloadExportMapper
             }
           } catch (InterruptedException ie) {
             // interrupted; loop around.
+            LOG.debug("Caught interrupted exception waiting for process "
+                + "pg_bulkload.bin to exit");
+            //Clear the interrupted flag.   We have to call Thread.interrupted
+            //to clear for interrupted exceptions from process.waitFor
+            //See http://bugs.sun.com/view_bug.do?bug_id=6420270 for more info
+            Thread.interrupted();
             continue;
           }
           break;
