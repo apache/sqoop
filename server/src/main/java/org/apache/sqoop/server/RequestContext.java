@@ -18,6 +18,7 @@
 package org.apache.sqoop.server;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.server.common.ServerError;
 
 import javax.servlet.http.HttpServletRequest;
@@ -98,5 +99,14 @@ public class RequestContext {
    */
   public Locale getAcceptLanguageHeader() {
     return new Locale(request.getHeader("Accept-Language"));
+  }
+
+  /**
+   * Get username specified by custom username HTTP header.
+   *
+   * @return Name of user sending the request
+   */
+  public String getUserName() {
+	return request.getHeader(SqoopProtocolConstants.HEADER_SQOOP_USERNAME);
   }
 }

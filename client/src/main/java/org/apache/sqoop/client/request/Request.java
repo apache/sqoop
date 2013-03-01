@@ -50,6 +50,8 @@ public class Request
     resource.addFilter(serverExceptionFilter);
 
     return resource
+      // Provide name of user executing request.
+      .header(SqoopProtocolConstants.HEADER_SQOOP_USERNAME, System.getProperty("user.name"))
       // Sqoop is using JSON for data transfers
       .accept(MediaType.APPLICATION_JSON_TYPE)
       // Transfer client locale to return client specific data
