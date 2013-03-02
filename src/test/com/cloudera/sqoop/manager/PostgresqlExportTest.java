@@ -44,11 +44,17 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       PostgresqlExportTest.class.getName());
 
   static final String HOST_URL = System.getProperty(
-      "sqoop.test.postgresql.connectstring.host_url",
-      "jdbc:postgresql://localhost/");
+    "sqoop.test.postgresql.connectstring.host_url",
+    "jdbc:postgresql://localhost/");
+  static final String DATABASE_USER = System.getProperty(
+    "sqoop.test.postgresql.connectstring.username",
+    "sqooptest");
+  static final String DATABASE_NAME = System.getProperty(
+    "sqoop.test.postgresql.connectstring.database",
+    "sqooptest");
+  static final String PASSWORD = System.getProperty(
+    "sqoop.test.postgresql.connectstring.password");
 
-  static final String DATABASE_USER = "sqooptest";
-  static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String PROCEDURE_NAME = "INSERT_AN_EMPLOYEE";
   static final String STAGING_TABLE_NAME = "STAGING";
@@ -70,7 +76,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     LOG.debug("Setting up postgresql test: " + CONNECT_STRING);
 
     try {
-      connection = DriverManager.getConnection(HOST_URL, DATABASE_USER, null);
+      connection = DriverManager.getConnection(CONNECT_STRING, DATABASE_USER, PASSWORD);
       connection.setAutoCommit(false);
     } catch (SQLException ex) {
       LOG.error("Can't create connection", ex);

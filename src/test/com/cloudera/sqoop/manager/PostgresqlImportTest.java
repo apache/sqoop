@@ -86,11 +86,17 @@ public class PostgresqlImportTest extends ImportJobTestCase {
       PostgresqlImportTest.class.getName());
 
   static final String HOST_URL = System.getProperty(
-      "sqoop.test.postgresql.connectstring.host_url",
-      "jdbc:postgresql://localhost/");
+    "sqoop.test.postgresql.connectstring.host_url",
+    "jdbc:postgresql://localhost/");
+  static final String DATABASE_USER = System.getProperty(
+    "sqoop.test.postgresql.connectstring.username",
+    "sqooptest");
+  static final String DATABASE_NAME = System.getProperty(
+    "sqoop.test.postgresql.connectstring.database",
+    "sqooptest");
+  static final String PASSWORD = System.getProperty(
+    "sqoop.test.postgresql.connectstring.password");
 
-  static final String DATABASE_USER = "sqooptest";
-  static final String DATABASE_NAME = "sqooptest";
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
   static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
@@ -121,6 +127,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   public void setUpData(String tableName, String schema, boolean nullEntry) {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
+    options.setPassword(PASSWORD);
 
     ConnManager manager = null;
     Connection connection = null;
