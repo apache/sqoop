@@ -107,7 +107,7 @@ public class DBRecordReader<T extends DBWritable> extends
       statement.setFetchSize(fetchSize);
     }
 
-    LOG.debug("Executing query: " + query);
+    LOG.info("Executing query: " + query);
     return statement.executeQuery();
   }
 
@@ -233,6 +233,7 @@ public class DBRecordReader<T extends DBWritable> extends
       }
       if (null == this.results) {
         // First time into this method, run the query.
+        LOG.info("Working on split: " + split);
         this.results = executeQuery(getSelectQuery());
       }
       if (!results.next()) {

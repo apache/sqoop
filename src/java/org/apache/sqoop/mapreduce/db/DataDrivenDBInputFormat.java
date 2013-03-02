@@ -352,6 +352,11 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     public String getUpperClause() {
       return upperBoundClause;
     }
+
+    @Override
+    public String toString() {
+      return this.lowerBoundClause + " AND " + this.upperBoundClause;
+    }
   }
 
 }
