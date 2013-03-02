@@ -67,7 +67,7 @@ public final class SubmissionDisplayer {
       if(progress == -1) {
         io.out.println("Progress is not available");
       } else {
-        io.out.println(String.format("%.2f %%", progress));
+        io.out.println(String.format("%.2f %%", progress * 100));
       }
     }
 
