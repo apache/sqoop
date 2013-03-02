@@ -63,13 +63,17 @@ abstract public class TomcatTestCase {
 
   @Before
   public void startServer() throws Exception {
-    cluster = new TomcatSqoopMiniCluster(TMP_PATH);
+    cluster = new TomcatSqoopMiniCluster(getTemporaryPath());
     cluster.start();
   }
 
   @After
   public void stopServer() throws Exception {
     cluster.stop();
+  }
+
+  public String getTemporaryPath() {
+    return TMP_PATH;
   }
 
   /**
@@ -87,7 +91,7 @@ abstract public class TomcatTestCase {
    * @return
    */
   public String getMapreduceDirectory() {
-    return cluster.getTemporaryPath() + "/mapreduce-job-io";
+    return getTemporaryPath() + "/mapreduce-job-io";
   }
 
   /**

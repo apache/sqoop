@@ -46,8 +46,6 @@ public class DerbyProvider extends DatabaseProvider {
       throw new RuntimeException("Can't derby server", e);
     }
 
-    // Load JDBC driver and create connection
-    loadClass(DRIVER);
     super.start();
   }
 
@@ -80,6 +78,11 @@ public class DerbyProvider extends DatabaseProvider {
 
   public String escape(String entity) {
     return "\"" + entity + "\"";
+  }
+
+  @Override
+  public String getJdbcDriver() {
+    return DRIVER;
   }
 
   @Override

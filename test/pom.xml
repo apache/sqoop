@@ -83,6 +83,16 @@ limitations under the License.
       <artifactId>derbyclient</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
   </dependencies>
 
   <!-- Add classifier name to the JAR name -->

@@ -104,10 +104,18 @@ abstract public class DatabaseProvider {
     return "NULL";
   }
 
+  public String getJdbcDriver() {
+    return null;
+  }
+
   /**
    * Start the handler.
    */
   public void start() {
+    if(getJdbcDriver() != null) {
+      loadClass(getJdbcDriver());
+    }
+
     // Create connection to the database server
     try {
       setConnection(DriverManager.getConnection(getConnectionUrl(), getConnectionUsername(), getConnectionPassword()));

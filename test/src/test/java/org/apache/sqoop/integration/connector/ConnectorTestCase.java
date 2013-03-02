@@ -17,9 +17,10 @@
  */
 package org.apache.sqoop.integration.connector;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.integration.TomcatTestCase;
 import org.apache.sqoop.test.db.DatabaseProvider;
-import org.apache.sqoop.test.db.DerbyProvider;
+import org.apache.sqoop.test.db.DatabaseProviderFactory;
 import org.junit.After;
 import org.junit.Before;
 
@@ -30,11 +31,14 @@ import org.junit.Before;
  */
 abstract public class ConnectorTestCase extends TomcatTestCase {
 
+  private static final Logger LOG = Logger.getLogger(ConnectorTestCase.class);
+
   protected DatabaseProvider provider;
 
   @Before
-  public void startProvider() {
-    provider = new DerbyProvider();
+  public void startProvider() throws Exception {
+    provider = DatabaseProviderFactory.getProvider(System.getProperties());
+    LOG.info("Starting database provider: " + provider.getClass().getName());
     provider.start();
   }
 

@@ -36,12 +36,13 @@ import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.test.db.DerbyProvider;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validation;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -82,8 +83,10 @@ public class TableImportTest extends ConnectorTestCase {
                                              framework.getConnectionForms());
 
     // Connector values
-    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(0))).setValue(DerbyProvider.DRIVER);
+    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(0))).setValue(provider.getJdbcDriver());
     ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(1))).setValue(provider.getConnectionUrl());
+    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(2))).setValue(provider.getConnectionUsername());
+    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(3))).setValue(provider.getConnectionPassword());
     // Framework values
     // No need to set anything
 
@@ -124,7 +127,7 @@ public class TableImportTest extends ConnectorTestCase {
 
     // Wait until the job finish
     do {
-      Thread.sleep(1000);
+      Thread.sleep(5000);
       submission = submissionRequest.read(getServerUrl(), "" + job.getPersistenceId()).getSubmission();
     } while(submission.getStatus().isRunning());
 

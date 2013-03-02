@@ -106,6 +106,8 @@ limitations under the License.
     <tomcat.major.version>6</tomcat.major.version>
     <tomcat.minor.version>0.36</tomcat.minor.version>
     <tomcat.version>${tomcat.major.version}.${tomcat.minor.version}</tomcat.version>
+    <jdbc.mysql.version>5.1.23</jdbc.mysql.version>
+    <jdbc.postgresql.version>9.1-901.jdbc4</jdbc.postgresql.version>
   </properties>
 
   <dependencies>
@@ -349,6 +351,16 @@ limitations under the License.
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-core-container-tomcat</artifactId>
         <version>${cargo.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${jdbc.mysql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${jdbc.postgresql.version}</version>
       </dependency>
    </dependencies>
   </dependencyManagement>
