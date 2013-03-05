@@ -96,7 +96,7 @@ public class PostgresqlManager
   @Override
   public void close() throws SQLException {
     if (this.hasOpenConnection()) {
-      this.getConnection().commit(); // Commit any changes made thus far.
+      this.getConnection().rollback(); // rollback any pending changes.
     }
 
     super.close();
