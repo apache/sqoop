@@ -243,3 +243,70 @@ or map tasks fail.
 When reduce task fails,
 staging table for the task are left for manual retry and
 users must take care of it.
+
+Netezza Connector
+~~~~~~~~~~~~~~~~~
+
+Extra arguments
+^^^^^^^^^^^^^^^
+
+List of all extra arguments supported by Netezza Connector is shown below:
+
+.Supported Netezza extra arguments:
+[grid="all"]
+`-------------------------------------`----------------------------------------
+Argument                              Description
+-------------------------------------------------------------------------------
++--partitioned-access+                Whether each mapper acts on a subset\
+                                      of data slices of a table or all\
+                                      Default is "false" for standard mode\
+                                      and "true" for direct mode.
++--max-errors+                        Applicable only in direct mode.\
+                                      This option specifies the error threshold\
+                                      per mapper while transferring data. If\
+                                      the number of errors encountered exceed\
+                                      this threshold then the job will fail.
+                                      Default value is 1.
++--log-dir+                           Applicable only in direct mode.\
+                                      Specifies the directory where Netezza\
+                                      external table operation logs are stored.\
+                                      Default value is /tmp.
+--------------------------------------------------------------------------------
+
+
+Direct Mode
+^^^^^^^^^^^
+Netezza connector supports an optimized data transfer facility using the
+Netezza external tables feature.  Each map tasks of Netezza connector's import
+job will work on a subset of the Netezza partitions and transparently create
+and use an external table to transport data.  Similarly, export jobs will use
+the external table to push data fast onto the NZ system.   Direct mode does
+not support staging tables, upsert options etc.
+
+Here is an example of complete command line for import using the Netezza
+external table feature.
+
+----
+$ sqoop import \
+    --direct \
+    --connect jdbc:netezza://nzhost:5480/sqoop \
+    --table nztable \
+    --username nzuser \
+    --password nzpass \
+    --target-dir hdfsdir
+
+----
+
+Here is an example of complete command line for export with tab as the field
+terminator character.
+
+----
+$ sqoop export \
+    --direct \
+    --connect jdbc:netezza://nzhost:5480/sqoop \
+    --table nztable \
+    --username nzuser \
+    --password nzpass \
+    --export-dir hdfsdir \
+    --input-fields-terminated-by "\t"
+----

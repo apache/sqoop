@@ -33,8 +33,19 @@ public class DelimiterSet implements Cloneable {
 
   // If true, then the enclosed-by character is applied to every
   // field, not just ones containing embedded delimiters.
+
   private boolean encloseRequired;
 
+  public static final String OUTPUT_FIELD_DELIM_KEY =
+      "sqoop.output.field.delim";
+  public static final String OUTPUT_RECORD_DELIM_KEY =
+      "sqoop.output.record.delim";
+  public static final String OUTPUT_ENCLOSED_BY_KEY =
+      "sqoop.output.enclosed.by";
+  public static final String OUTPUT_ESCAPED_BY_KEY =
+      "sqoop.output.escaped.by";
+  public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
+      "sqoop.output.enclose.required";
   /**
    * Create a delimiter set with the default delimiters
    * (comma for fields, newline for records).

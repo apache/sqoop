@@ -68,6 +68,12 @@ public class DefaultManagerFactory
       return new SQLServerManager(options);
     } else if (scheme.startsWith("jdbc:db2:")) {
       return new Db2Manager(options);
+    } else if (scheme.startsWith("jdbc:netezza:")) {
+      if (options.isDirect()) {
+        return new DirectNetezzaManager(options);
+      } else {
+        return new NetezzaManager(options);
+      }
     } else {
       return null;
     }

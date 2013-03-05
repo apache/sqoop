@@ -33,6 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.config.ConfigurationConstants;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.util.DirectImportUtils;
+import org.apache.sqoop.lib.DelimiterSet;
 
 /**
  * Helper methods and constants for MySQL imports/exports.
@@ -48,15 +49,16 @@ public final class MySQLUtils {
   public static final String MYSQL_IMPORT_CMD = "mysqlimport";
 
   public static final String OUTPUT_FIELD_DELIM_KEY =
-      "sqoop.output.field.delim";
+      DelimiterSet.OUTPUT_FIELD_DELIM_KEY;
   public static final String OUTPUT_RECORD_DELIM_KEY =
-      "sqoop.output.record.delim";
+      DelimiterSet.OUTPUT_RECORD_DELIM_KEY;
   public static final String OUTPUT_ENCLOSED_BY_KEY =
-      "sqoop.output.enclosed.by";
+      DelimiterSet.OUTPUT_ENCLOSED_BY_KEY;
   public static final String OUTPUT_ESCAPED_BY_KEY =
-      "sqoop.output.escaped.by";
+      DelimiterSet.OUTPUT_ESCAPED_BY_KEY;
   public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
-      "sqoop.output.enclose.required";
+      DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY;
+
   public static final String TABLE_NAME_KEY =
       ConfigurationHelper.getDbInputTableNameProperty();
   public static final String CONNECT_STRING_KEY =
@@ -67,6 +69,7 @@ public final class MySQLUtils {
       ConfigurationHelper.getDbPasswordProperty();
   public static final String WHERE_CLAUSE_KEY =
       ConfigurationHelper.getDbInputConditionsProperty();
+
   public static final String EXTRA_ARGS_KEY =
       "sqoop.mysql.extra.args";
 
@@ -117,4 +120,3 @@ public final class MySQLUtils {
     return tempFile.toString();
   }
 }
-
