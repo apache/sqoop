@@ -1071,6 +1071,10 @@ public class ClassWriter {
   public void generate() throws IOException {
     Map<String, Integer> columnTypes = getColumnTypes();
 
+    if (columnTypes == null) {
+      throw new IOException("No columns to generate for ClassWriter");
+    }
+
     String[] colNames = getColumnNames(columnTypes);
 
     // Translate all the column names into names that are safe to
