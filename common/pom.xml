@@ -59,7 +59,7 @@ limitations under the License.
               <target>
                 <mkdir dir="${project.build.directory}/generated-sources/java"/>
                 <exec executable="sh">
-                  <arg line="${basedir}/src/saveVersion.sh ${project.version} ${project.build.directory}/generated-sources/java"/>
+                  <arg line="'${basedir}/src/saveVersion.sh' ${project.version} '${project.build.directory}/generated-sources/java'"/>
                 </exec>
               </target>
             </configuration>
