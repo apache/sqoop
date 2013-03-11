@@ -26,7 +26,6 @@ import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.StringUtils;
 
 /**
  * Utility methods to format and print ResultSet objects.
@@ -111,8 +110,7 @@ public class ResultSetPrinter {
 
       pw.print(sbPad.toString());
     } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: "
-          + StringUtils.stringifyException(sqlException));
+      LoggingUtils.logAll(LOG, "Error reading from database: ", sqlException);
     }
   }
 

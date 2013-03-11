@@ -30,13 +30,13 @@ import java.util.Map;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
 import org.apache.sqoop.mapreduce.mysql.MySQLUpsertOutputFormat;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Manages connections to MySQL databases.
@@ -213,8 +213,7 @@ public class MySQLManager
       // Explicitly setting fetchSize to zero disables streaming.
       results = super.execute(s, 0);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: "
-          + StringUtils.stringifyException(sqlE));
+      LoggingUtils.logAll(LOG, "Error executing statement: ", sqlE);
       release();
       return;
     }

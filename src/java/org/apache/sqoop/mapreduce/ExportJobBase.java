@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.PerfCounters;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
@@ -396,9 +397,9 @@ public class ExportJobBase extends JobBase {
         LOG.info("Starting to migrate data from staging table to destination.");
         cmgr.migrateData(stagingTableName, outputTableName);
       } catch (SQLException ex) {
-        LOG.error("Failed to move data from staging table ("
-            + stagingTableName + ") to target table ("
-            + outputTableName + ")", ex);
+        LoggingUtils.logAll(LOG, "Failed to move data from staging table ("
+          + stagingTableName + ") to target table ("
+          + outputTableName + ")", ex);
         throw new ExportException(
             "Failed to move data from staging table", ex);
       }

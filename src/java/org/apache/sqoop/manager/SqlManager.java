@@ -52,8 +52,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
+import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqlTypeMap;
 
 /**
@@ -128,7 +128,8 @@ public abstract class SqlManager
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
+      LoggingUtils.logAll(LOG, "Error executing statement: " + sqlE.toString(),
+        sqlE);
       release();
       return null;
     }
@@ -149,7 +150,7 @@ public abstract class SqlManager
       }
       return columns.toArray(new String[0]);
     } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: "
+      LoggingUtils.logAll(LOG, "Error reading from database: "
           + sqlException.toString(), sqlException);
       return null;
     } finally {
@@ -157,7 +158,8 @@ public abstract class SqlManager
         results.close();
         getConnection().commit();
       } catch (SQLException sqlE) {
-        LOG.warn("SQLException closing ResultSet: " + sqlE.toString(), sqlE);
+        LoggingUtils.logAll(LOG, "SQLException closing ResultSet: "
+          + sqlE.toString(), sqlE);
       }
 
       release();
@@ -200,7 +202,7 @@ public abstract class SqlManager
         getConnection().commit();
       }
     } catch (SQLException e) {
-      LOG.error("Error reading procedure metadata: ", e);
+      LoggingUtils.logAll(LOG, "Error reading procedure metadata: ", e);
       throw new RuntimeException("Can't fetch column names for procedure.", e);
     }
   }
@@ -234,7 +236,8 @@ public abstract class SqlManager
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
+      LoggingUtils.logAll(LOG, "Error executing statement: " + sqlE.toString(),
+        sqlE);
       release();
       return null;
     }
@@ -262,14 +265,16 @@ public abstract class SqlManager
 
       return colTypes;
     } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: " + sqlException.toString());
+      LoggingUtils.logAll(LOG, "Error reading from database: "
+        + sqlException.toString(), sqlException);
       return null;
     } finally {
       try {
         results.close();
         getConnection().commit();
       } catch (SQLException sqlE) {
-        LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
+        LoggingUtils.logAll(LOG,
+          "SQLException closing ResultSet: " + sqlE.toString(), sqlE);
       }
 
       release();
@@ -294,7 +299,8 @@ public abstract class SqlManager
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: " + sqlE.toString(), sqlE);
+      LoggingUtils.logAll(LOG, "Error executing statement: " + sqlE.toString(),
+        sqlE);
       release();
       return null;
     }
@@ -317,14 +323,16 @@ public abstract class SqlManager
 
       return colTypeNames;
     } catch (SQLException sqlException) {
-      LOG.error("Error reading from database: " + sqlException.toString());
+      LoggingUtils.logAll(LOG, "Error reading from database: "
+        + sqlException.toString(), sqlException);
       return null;
     } finally {
       try {
         results.close();
         getConnection().commit();
       } catch (SQLException sqlE) {
-        LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
+        LoggingUtils.logAll(LOG, "SQLException closing ResultSet: "
+          + sqlE.toString(), sqlE);
       }
 
       release();
@@ -395,8 +403,8 @@ public abstract class SqlManager
         getConnection().commit();
       }
     } catch (SQLException sqlException) {
-      LOG.error("Error reading primary key metadata: "
-          + sqlException.toString());
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+          + sqlException.toString(), sqlException);
       return null;
     }
   }
@@ -410,8 +418,8 @@ public abstract class SqlManager
         DatabaseMetaData metaData = this.getConnection().getMetaData();
         results = metaData.getTables(null, null, null, tableTypes);
       } catch (SQLException sqlException) {
-        LOG.error("Error reading database metadata: "
-            + sqlException.toString());
+        LoggingUtils.logAll(LOG, "Error reading database metadata: "
+            + sqlException.toString(), sqlException);
         return null;
       }
 
@@ -428,7 +436,8 @@ public abstract class SqlManager
 
         return tables.toArray(new String[0]);
       } catch (SQLException sqlException) {
-        LOG.error("Error reading from database: " + sqlException.toString());
+        LoggingUtils.logAll(LOG, "Error reading from database: "
+          + sqlException.toString(), sqlException);
         return null;
       }
     } finally {
@@ -437,7 +446,8 @@ public abstract class SqlManager
           results.close();
           getConnection().commit();
         } catch (SQLException sqlE) {
-          LOG.warn("Exception closing ResultSet: " + sqlE.toString());
+          LoggingUtils.logAll(LOG, "Exception closing ResultSet: "
+            + sqlE.toString(), sqlE);
         }
       }
     }
@@ -463,8 +473,8 @@ public abstract class SqlManager
         getConnection().commit();
       }
     } catch (SQLException sqlException) {
-      LOG.error("Error reading primary key metadata: "
-          + sqlException.toString());
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+          + sqlException.toString(), sqlException);
       return null;
     }
   }
@@ -656,7 +666,8 @@ public abstract class SqlManager
           }
         }
       } catch (SQLException sqlE) {
-        LOG.error("SQLException reading result metadata: " + sqlE.toString());
+        LoggingUtils.logAll(LOG, "SQLException reading result metadata: "
+          + sqlE.toString(), sqlE);
       }
 
       try {
@@ -670,7 +681,8 @@ public abstract class SqlManager
         results.close();
         getConnection().commit();
       } catch (SQLException sqlE) {
-        LOG.warn("SQLException closing ResultSet: " + sqlE.toString());
+        LoggingUtils.logAll(LOG, "SQLException closing ResultSet: "
+          + sqlE.toString(), sqlE);
       }
 
       release();
@@ -686,8 +698,7 @@ public abstract class SqlManager
     try {
       results = execute(s);
     } catch (SQLException sqlE) {
-      LOG.error("Error executing statement: "
-          + StringUtils.stringifyException(sqlE));
+      LoggingUtils.logAll(LOG, "Error executing statement: ", sqlE);
       release();
       return;
     }
@@ -786,7 +797,8 @@ public abstract class SqlManager
       try {
         this.lastStatement.close();
       } catch (SQLException e) {
-        LOG.warn("Exception closing executed Statement: " + e);
+        LoggingUtils.logAll(LOG, "Exception closing executed Statement: "
+          + e, e);
       }
 
       this.lastStatement = null;
@@ -831,7 +843,8 @@ public abstract class SqlManager
 
       return rs.getTimestamp(1);
     } catch (SQLException sqlE) {
-      LOG.warn("SQL exception accessing current timestamp: " + sqlE);
+      LoggingUtils.logAll(LOG, "SQL exception accessing current timestamp: "
+        + sqlE, sqlE);
       return null;
     } finally {
       try {
@@ -839,7 +852,8 @@ public abstract class SqlManager
           rs.close();
         }
       } catch (SQLException sqlE) {
-        LOG.warn("SQL Exception closing resultset: " + sqlE);
+        LoggingUtils.logAll(LOG, "SQL Exception closing resultset: "
+          + sqlE, sqlE);
       }
 
       try {
@@ -847,7 +861,8 @@ public abstract class SqlManager
           s.close();
         }
       } catch (SQLException sqlE) {
-        LOG.warn("SQL Exception closing statement: " + sqlE);
+        LoggingUtils.logAll(LOG, "SQL Exception closing statement: "
+          + sqlE, sqlE);
       }
     }
   }
@@ -870,21 +885,22 @@ public abstract class SqlManager
       rset.next();
       result = rset.getLong(1);
     } catch (SQLException ex) {
-      LOG.error("Unable to query count * for table " + tableName, ex);
+      LoggingUtils.logAll(LOG, "Unable to query count * for table "
+        + tableName, ex);
       throw ex;
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close result set", ex);
+          LoggingUtils.logAll(LOG, "Unable to close result set", ex);
         }
       }
       if (stmt != null) {
         try {
           stmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
+          LoggingUtils.logAll(LOG, "Unable to close statement", ex);
         }
       }
     }
@@ -907,14 +923,15 @@ public abstract class SqlManager
       conn.commit();
       LOG.info("Deleted " + updateCount + " records from " + tableName);
     } catch (SQLException ex) {
-      LOG.error("Unable to execute delete query: "  + deleteQuery, ex);
+      LoggingUtils.logAll(LOG, "Unable to execute delete query: "
+        + deleteQuery, ex);
       throw ex;
     } finally {
       if (stmt != null) {
         try {
           stmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
+          LoggingUtils.logAll(LOG, "Unable to close statement", ex);
         }
       }
     }
@@ -953,7 +970,7 @@ public abstract class SqlManager
       }
       conn.commit();
     } catch (SQLException ex) {
-      LOG.error("Unable to migrate data from "
+      LoggingUtils.logAll(LOG, "Unable to migrate data from "
           + fromTable + " to " + toTable, ex);
       throw ex;
     } finally {
@@ -961,7 +978,7 @@ public abstract class SqlManager
         try {
           stmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
+          LoggingUtils.logAll(LOG, "Unable to close statement", ex);
         }
       }
     }

@@ -38,6 +38,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.PostgreSQLUtils;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.JdbcUrl;
@@ -103,13 +104,13 @@ public class PGBulkloadExportMapper
       LOG.error("Unable to load JDBC driver class", ex);
       throw new IOException(ex);
     } catch (SQLException ex) {
-      LOG.error("Unable to execute statement", ex);
+      LoggingUtils.logAll(LOG, "Unable to execute statement", ex);
       throw new IOException(ex);
     } finally {
       try {
         conn.close();
       } catch (SQLException ex) {
-        LOG.error("Unable to close connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to close connection", ex);
       }
     }
 
@@ -257,7 +258,7 @@ public class PGBulkloadExportMapper
       LOG.error("Unable to load JDBC driver class", ex);
       throw new IOException(ex);
     } catch (SQLException ex) {
-      LOG.error("Unable to connect to database", ex);
+      LoggingUtils.logAll(LOG, "Unable to connect to database", ex);
       throw new IOException(ex);
     }
     Statement stmt = null;
@@ -267,20 +268,20 @@ public class PGBulkloadExportMapper
       conn.commit();
       return ret;
     } catch (SQLException ex) {
-      LOG.error("Unable to execute query: "  + query, ex);
+      LoggingUtils.logAll(LOG, "Unable to execute query: "  + query, ex);
       throw new IOException(ex);
     } finally {
       if (stmt != null) {
         try {
           stmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
+          LoggingUtils.logAll(LOG, "Unable to close statement", ex);
         }
       }
       try {
         conn.close();
       } catch (SQLException ex) {
-        LOG.error("Unable to close connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to close connection", ex);
       }
     }
   }

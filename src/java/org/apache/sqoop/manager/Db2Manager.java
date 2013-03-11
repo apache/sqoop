@@ -33,6 +33,7 @@ import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Manages connections to DB2 databases. Requires the DB2 JDBC driver.
@@ -106,16 +107,16 @@ public class Db2Manager
           conn.rollback();
         }
       } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list databases", sqle);
+      LoggingUtils.logAll(LOG, "Failed to list databases", sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", re);
         }
       }
     }

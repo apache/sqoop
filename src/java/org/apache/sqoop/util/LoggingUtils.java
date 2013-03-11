@@ -32,11 +32,15 @@ public final class LoggingUtils {
   private LoggingUtils() { }
 
   /**
-   * Log every exception in the chain if
-   * the exception is a chain of exceptions.
+   * Log entire chain of SQLExceptions using old SQLException.getNextException
+   * interface instead of new Throwable.getCause().
    */
   public static void logAll(Log log, SQLException e) {
-    log.error("Top level exception: ", e);
+    logAll(log, null, e);
+  }
+
+  public static void logAll(Log log, String message, SQLException e) {
+    log.error(message == null ? "Top level exception: " : message, e);
     e = e.getNextException();
     int indx = 1;
     while (e != null) {

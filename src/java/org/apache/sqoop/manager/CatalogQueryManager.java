@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Database manager that queries catalog tables directly
@@ -66,23 +67,23 @@ public abstract class CatalogQueryManager
           c.rollback();
         }
       } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list databases", sqle);
+      LoggingUtils.logAll(LOG, "Failed to list databases", sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rs != null) {
         try {
           rs.close();
         } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", re);
         }
       }
       if (s != null) {
         try {
           s.close();
         } catch (SQLException se) {
-          LOG.error("Failed to close statement", se);
+          LoggingUtils.logAll(LOG, "Failed to close statement", se);
         }
       }
     }
@@ -111,23 +112,23 @@ public abstract class CatalogQueryManager
           c.rollback();
         }
       } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list tables", sqle);
+      LoggingUtils.logAll(LOG, "Failed to list tables", sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rs != null) {
         try {
           rs.close();
         } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", re);
         }
       }
       if (s != null) {
         try {
           s.close();
         } catch (SQLException se) {
-          LOG.error("Failed to close statement", se);
+          LoggingUtils.logAll(LOG, "Failed to close statement", se);
         }
       }
     }
@@ -157,23 +158,24 @@ public abstract class CatalogQueryManager
           c.rollback();
         }
       } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list columns from query: " + listColumnsQuery, sqle);
+      LoggingUtils.logAll(LOG, "Failed to list columns from query: "
+        + listColumnsQuery, sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rs != null) {
         try {
           rs.close();
         } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", re);
         }
       }
       if (s != null) {
         try {
           s.close();
         } catch (SQLException se) {
-          LOG.error("Failed to close statement", se);
+          LoggingUtils.logAll(LOG, "Failed to close statement", se);
         }
       }
     }
@@ -206,23 +208,23 @@ public abstract class CatalogQueryManager
           c.rollback();
         }
       } catch (SQLException ce) {
-        LOG.error("Failed to rollback transaction", ce);
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
       }
-      LOG.error("Failed to list primary key", sqle);
+      LoggingUtils.logAll(LOG, "Failed to list primary key", sqle);
       throw new RuntimeException(sqle);
     } finally {
       if (rs != null) {
         try {
           rs.close();
         } catch (SQLException re) {
-          LOG.error("Failed to close resultset", re);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", re);
         }
       }
       if (s != null) {
         try {
           s.close();
         } catch (SQLException se) {
-          LOG.error("Failed to close statement", se);
+          LoggingUtils.logAll(LOG, "Failed to close statement", se);
         }
       }
     }

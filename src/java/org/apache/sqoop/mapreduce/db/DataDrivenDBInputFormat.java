@@ -158,7 +158,10 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
 
       DBSplitter splitter = getSplitter(sqlDataType);
       if (null == splitter) {
-        throw new IOException("Sqoop does not have the splitter for the given SQL data type. Please use either different split column (argument --split-by) or lower the number of mappers to 1. Unknown SQL data type: " + sqlDataType);
+        throw new IOException("Sqoop does not have the splitter for the given"
+          + " SQL data type. Please use either different split column (argument"
+          + " --split-by) or lower the number of mappers to 1. Unknown SQL data"
+          + " type: " + sqlDataType);
       }
 
       return splitter.split(job.getConfiguration(), results,

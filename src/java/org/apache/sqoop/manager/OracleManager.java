@@ -50,6 +50,7 @@ import com.cloudera.sqoop.mapreduce.OracleUpsertOutputFormat;
 import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Manages connections to Oracle databases.
@@ -337,7 +338,7 @@ public class OracleManager
               "setSessionTimeZone", new Class [] {String.class});
     } catch (Exception ex) {
       LOG.error("Could not find method setSessionTimeZone in "
-          + conn.getClass().getName(), ex);
+        + conn.getClass().getName(), ex);
       // rethrow SQLException
       throw new SQLException(ex);
     }
@@ -613,8 +614,8 @@ public class OracleManager
     } catch (SQLException e) {
       try {
         conn.rollback();
-      } catch (Exception ex) {
-        LOG.error("Failed to rollback transaction", ex);
+      } catch (SQLException ex) {
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
       }
 
       if (e.getErrorCode() == ERROR_TABLE_OR_VIEW_DOES_NOT_EXIST) {
@@ -623,28 +624,28 @@ public class OracleManager
             + "Please check privileges and try again.");
         LOG.debug("Full trace for ORA-00942 exception", e);
       } else {
-        LOG.error("Failed to list databases", e);
+        LoggingUtils.logAll(LOG, "Failed to list databases", e);
       }
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close resultset", ex);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
         }
       }
       if (stmt != null) {
         try {
           stmt.close();
-        } catch (Exception ex) {
-          LOG.error("Failed to close statement", ex);
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
 
       try {
         close();
       } catch (SQLException ex) {
-        LOG.error("Unable to discard connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to discard connection", ex);
       }
     }
 
@@ -676,30 +677,30 @@ public class OracleManager
     } catch (SQLException e) {
       try {
         conn.rollback();
-      } catch (Exception ex) {
-        LOG.error("Failed to rollback transaction", ex);
+      } catch (SQLException ex) {
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
       }
-      LOG.error("Failed to list tables", e);
+      LoggingUtils.logAll(LOG, "Failed to list tables", e);
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close resultset", ex);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
         }
       }
       if (pStmt != null) {
         try {
           pStmt.close();
-        } catch (Exception ex) {
-          LOG.error("Failed to close statement", ex);
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
 
       try {
         close();
       } catch (SQLException ex) {
-        LOG.error("Unable to discard connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to discard connection", ex);
       }
     }
 
@@ -739,30 +740,30 @@ public class OracleManager
     } catch (SQLException e) {
       try {
         conn.rollback();
-      } catch (Exception ex) {
-        LOG.error("Failed to rollback transaction", ex);
+      } catch (SQLException ex) {
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
       }
-      LOG.error("Failed to list columns", e);
+      LoggingUtils.logAll(LOG, "Failed to list columns", e);
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close resultset", ex);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
         }
       }
       if (pStmt != null) {
         try {
           pStmt.close();
-        } catch (Exception ex) {
-          LOG.error("Failed to close statement", ex);
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
 
       try {
         close();
       } catch (SQLException ex) {
-        LOG.error("Unable to discard connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to discard connection", ex);
       }
     }
 
@@ -800,30 +801,30 @@ public class OracleManager
     } catch (SQLException e) {
       try {
         conn.rollback();
-      } catch (Exception ex) {
-        LOG.error("Failed to rollback transaction", ex);
+      } catch (SQLException ex) {
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
       }
-      LOG.error("Failed to list columns", e);
+      LoggingUtils.logAll(LOG, "Failed to list columns", e);
     } finally {
       if (rset != null) {
         try {
           rset.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close resultset", ex);
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
         }
       }
       if (pStmt != null) {
         try {
           pStmt.close();
-        } catch (Exception ex) {
-          LOG.error("Failed to close statement", ex);
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
 
       try {
         close();
       } catch (SQLException ex) {
-        LOG.error("Unable to discard connection", ex);
+        LoggingUtils.logAll(LOG, "Unable to discard connection", ex);
       }
     }
 

@@ -29,6 +29,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.util.LoggingUtils;
 
 
 /**
@@ -60,7 +61,7 @@ public class PGBulkloadExportReducer
       LOG.error("Unable to load JDBC driver class", ex);
       throw new IOException(ex);
     } catch (SQLException ex) {
-      LOG.error("Unable to connect to database", ex);
+      LoggingUtils.logAll(LOG, "Unable to connect to database", ex);
       throw new IOException(ex);
     }
   }
@@ -79,14 +80,14 @@ public class PGBulkloadExportReducer
       }
       conn.commit();
     } catch (SQLException ex) {
-      LOG.error("Unable to execute create query.", ex);
+      LoggingUtils.logAll(LOG, "Unable to execute create query.", ex);
       throw new IOException(ex);
     } finally {
       if (stmt != null) {
         try {
           stmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
+          LoggingUtils.logAll(LOG, "Unable to close statement", ex);
         }
       }
     }
@@ -98,7 +99,7 @@ public class PGBulkloadExportReducer
     try {
       conn.close();
     } catch (SQLException ex) {
-      LOG.error("Unable to load JDBC driver class", ex);
+      LoggingUtils.logAll(LOG, "Unable to load JDBC driver class", ex);
       throw new IOException(ex);
     }
   }

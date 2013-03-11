@@ -37,6 +37,7 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * A OutputFormat that sends the reduce output to a SQL table.
@@ -218,7 +219,7 @@ public class DBOutputFormat<K extends DBWritable, V>
           statement.close();
           connection.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close connection", ex);
+          LoggingUtils.logAll(LOG, "Unable to close connection", ex);
         }
       }
     }
@@ -230,7 +231,7 @@ public class DBOutputFormat<K extends DBWritable, V>
         key.write(statement);
         statement.addBatch();
       } catch (SQLException e) {
-        LOG.error("Exception encountered", e);
+        LoggingUtils.logAll(LOG, "Exception encountered", e);
       }
     }
   }

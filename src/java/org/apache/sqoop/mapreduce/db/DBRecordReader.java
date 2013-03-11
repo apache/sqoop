@@ -36,7 +36,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.util.LoggingUtils;
+import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * A RecordReader that reads records from a SQL table.
@@ -252,14 +252,14 @@ public class DBRecordReader<T extends DBWritable> extends
         try {
           statement.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close statement", ex);
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
       if (this.connection != null) {
         try {
           connection.close();
         } catch (SQLException ex) {
-          LOG.error("Failed to close connection", ex);
+          LoggingUtils.logAll(LOG, "Failed to close connection", ex);
         }
       }
 
