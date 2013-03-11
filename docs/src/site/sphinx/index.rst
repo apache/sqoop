@@ -48,9 +48,14 @@ Overview
 - `Sqoop Issue Tracking (JIRA) <https://issues.apache.org/jira/browse/SQOOP>`_
 - `Sqoop Source Code <https://git-wip-us.apache.org/repos/asf?p=sqoop.git;a=summary>`_
 
-Documentation
--------------
+User Documentation
+------------------
 
 - `Installation <Installation.html>`_
 - `5 Minutes Demo <Sqoop5MinutesDemo.html>`_
 - `Command Line Client <CommandLineClient.html>`_
+
+Developer Guide
+---------------
+
+- `Building Sqoop2 <BuildingSqoop2.html>`_
