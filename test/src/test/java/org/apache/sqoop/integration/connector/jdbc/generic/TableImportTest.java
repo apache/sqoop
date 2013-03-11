@@ -22,10 +22,9 @@ import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.framework.configuration.StorageType;
 import org.apache.sqoop.integration.connector.ConnectorTestCase;
 import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MEnumInput;
+import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
@@ -64,11 +63,13 @@ public class TableImportTest extends ConnectorTestCase {
     // Connection creation
     MConnection connection = getClient().newConnection(1L);
 
+    MFormList forms;
     // Connector values
-    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(0))).setValue(provider.getJdbcDriver());
-    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(1))).setValue(provider.getConnectionUrl());
-    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(2))).setValue(provider.getConnectionUsername());
-    ((MStringInput) (connection.getConnectorPart().getForms().get(0).getInputs().get(3))).setValue(provider.getConnectionPassword());
+    forms = connection.getConnectorPart();
+    forms.getStringInput("connection.jdbcDriver").setValue(provider.getJdbcDriver());
+    forms.getStringInput("connection.connectionString").setValue(provider.getConnectionUrl());
+    forms.getStringInput("connection.username").setValue(provider.getConnectionUsername());
+    forms.getStringInput("connection.password").setValue(provider.getConnectionPassword());
     // Framework values
     // No need to set anything
 
@@ -79,12 +80,14 @@ public class TableImportTest extends ConnectorTestCase {
     MJob job = getClient().newJob(connection.getPersistenceId(), MJob.Type.IMPORT);
 
     // Connector values
-    ((MStringInput) (job.getConnectorPart().getForms().get(0).getInputs().get(0))).setValue(provider.escapeTableName(getTableName()));
-    ((MStringInput) (job.getConnectorPart().getForms().get(0).getInputs().get(3))).setValue(provider.escapeColumnName("id"));
+    forms = job.getConnectorPart();
+    forms.getStringInput("table.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("table.partitionColumn").setValue(provider.escapeColumnName("id"));
     // Framework values
-    ((MEnumInput) (job.getFrameworkPart().getForms().get(0).getInputs().get(0))).setValue(StorageType.HDFS.toString());
-    ((MEnumInput) (job.getFrameworkPart().getForms().get(0).getInputs().get(1))).setValue(OutputFormat.TEXT_FILE.toString());
-    ((MStringInput) (job.getFrameworkPart().getForms().get(0).getInputs().get(2))).setValue(getMapreduceDirectory());
+    forms = job.getFrameworkPart();
+    forms.getEnumInput("output.storageType").setValue(StorageType.HDFS);
+    forms.getEnumInput("output.outputFormat").setValue(OutputFormat.TEXT_FILE);
+    forms.getStringInput("output.outputDirectory").setValue(getMapreduceDirectory());
 
     assertEquals(Status.FINE, getClient().createJob(job));
     assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());

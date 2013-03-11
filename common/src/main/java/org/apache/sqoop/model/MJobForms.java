@@ -24,29 +24,24 @@ import java.util.List;
  * object for one part. Both connector and framework need to supply this object
  * to build up entire job.
  */
-public class MJobForms {
+public class MJobForms extends MFormList {
 
   private final MJob.Type type;
-  private final List<MForm> forms;
 
   public MJobForms(MJob.Type type, List<MForm> forms) {
+    super(forms);
     this.type = type;
-    this.forms = forms;
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("job type:").append(type.name());
-    sb.append(", forms: ").append(forms);
+    StringBuilder sb = new StringBuilder("Job type: ").append(type.name());
+    sb.append(super.toString());
     return sb.toString();
   }
 
   public MJob.Type getType() {
     return type;
-  }
-
-  public List<MForm> getForms() {
-    return forms;
   }
 
   @Override
@@ -60,17 +55,13 @@ public class MJobForms {
     }
 
     MJobForms mj = (MJobForms) other;
-    return type.equals(mj.type) && forms.equals(mj.forms);
+    return type.equals(mj.type) && super.equals(mj);
   }
 
   @Override
   public int hashCode() {
     int result = super.hashCode();
     result = 31 * result + type.hashCode();
-    for(MForm form : forms) {
-      result = 31 * result + form.hashCode();
-    }
-
     return result;
   }
 }

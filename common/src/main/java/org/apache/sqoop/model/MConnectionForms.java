@@ -24,22 +24,16 @@ import java.util.List;
  * object for one part. Both connector and framework need to supply this object
  * to build up entire connection.
  */
-public class MConnectionForms {
-
-  private final List<MForm> forms;
+public class MConnectionForms extends MFormList {
 
   public MConnectionForms(List<MForm> forms) {
-    this.forms = forms;
-  }
-
-  public List<MForm> getForms() {
-    return forms;
+    super(forms);
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("connection, forms:");
-    sb.append(forms);
+    StringBuilder sb = new StringBuilder("Connection: ");
+    sb.append(super.toString());
     return sb.toString();
   }
 
@@ -49,21 +43,6 @@ public class MConnectionForms {
       return true;
     }
 
-    if (!(other instanceof MConnectionForms)) {
-      return false;
-    }
-
-    MConnectionForms mc = (MConnectionForms) other;
-    return forms.equals(mc.forms);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    for(MForm form : forms) {
-      result = 31 * result + form.hashCode();
-    }
-
-    return result;
+    return super.equals(other);
   }
 }

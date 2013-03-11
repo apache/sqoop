@@ -65,4 +65,24 @@ public class TestMForm {
     MForm mform2 = new MForm("form", list2);
     assertEquals(mform2, mform1);
   }
+
+  @Test
+  public void testGetInputs() {
+    MIntegerInput intInput = new MIntegerInput("Form.A");
+    MMapInput mapInput = new MMapInput("Form.B");
+    MStringInput stringInput = new MStringInput("Form.C", false, (short)3);
+    MEnumInput enumInput = new MEnumInput("Form.D", new String[] {"I", "V"});
+
+    List<MInput<?>> inputs = new ArrayList<MInput<?>>();
+    inputs.add(intInput);
+    inputs.add(mapInput);
+    inputs.add(stringInput);
+    inputs.add(enumInput);
+
+    MForm form = new MForm("Form", inputs);
+    assertEquals(intInput, form.getIntegerInput("Form.A"));
+    assertEquals(mapInput, form.getMapInput("Form.B"));
+    assertEquals(stringInput, form.getStringInput("Form.C"));
+    assertEquals(enumInput, form.getEnumInput("Form.D"));
+  }
 }

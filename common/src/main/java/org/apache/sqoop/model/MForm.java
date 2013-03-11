@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.common.SqoopException;
+
 import java.util.List;
 
 /**
@@ -36,6 +38,32 @@ public final class MForm extends MValidatedElement {
 
   public List<MInput<?>> getInputs() {
     return inputs;
+  }
+
+  public MInput<?> getInput(String inputName) {
+    for(MInput<?> input: inputs) {
+      if(inputName.equals(input.getName())) {
+        return input;
+      }
+    }
+
+    throw new SqoopException(ModelError.MODEL_011, "Input name: " + inputName);
+  }
+
+  public MStringInput getStringInput(String inputName) {
+    return (MStringInput)getInput(inputName);
+  }
+
+  public MEnumInput getEnumInput(String inputName) {
+    return (MEnumInput)getInput(inputName);
+  }
+
+  public MIntegerInput getIntegerInput(String inputName) {
+    return (MIntegerInput)getInput(inputName);
+  }
+
+  public MMapInput getMapInput(String inputName) {
+    return (MMapInput)getInput(inputName);
   }
 
   @Override

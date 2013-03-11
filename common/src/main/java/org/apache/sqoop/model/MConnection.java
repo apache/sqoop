@@ -64,4 +64,12 @@ public class MConnection extends MAccountableEntity {
   public MConnectionForms getFrameworkPart() {
     return frameworkPart;
   }
+
+  public MForm getConnectorForm(String formName) {
+    return connectorPart.getForm(formName);
+  }
+
+  public MForm getFrameworkForm(String formName) {
+    return frameworkPart.getForm(formName);
+  }
 }

@@ -42,6 +42,10 @@ public enum ModelError implements ErrorCode {
 
   MODEL_009("Invalid input name"),
 
+  MODEL_010("Form do not exist"),
+
+  MODEL_011("Input do not exist"),
+
   ;
 
   private final String message;

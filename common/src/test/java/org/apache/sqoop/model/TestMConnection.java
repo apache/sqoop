@@ -43,6 +43,8 @@ public class TestMConnection {
     assertFalse(connector1().equals(connection.getFrameworkPart()));
     connection.setName("NAME");
     assertEquals("NAME", connection.getName());
+    assertEquals(connector1().getForms().get(0), connection.getConnectorForm("FORMNAME"));
+    assertEquals(connector2().getForms().get(0), connection.getFrameworkForm("form"));
   }
 
   private MConnectionForms connector1() {

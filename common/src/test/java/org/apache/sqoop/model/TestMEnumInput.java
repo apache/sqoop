@@ -25,6 +25,8 @@ import org.junit.Test;
  * Test class for org.apache.sqoop.model.MEnumInput
  */
 public class TestMEnumInput {
+
+  public enum Enumeration { value1, value2}
   /**
    * Test for class initialization
    */
@@ -41,5 +43,9 @@ public class TestMEnumInput {
     String[] testVal = { "val", "test" };
     MEnumInput input2 = new MEnumInput("NAME1", testVal);
     assertFalse(input1.equals(input2));
+
+    MEnumInput input3 = new MEnumInput("NAME", values);
+    input3.setValue(Enumeration.value1);
+    assertEquals("value1", input3.getValue());
   }
 }

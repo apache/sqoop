@@ -62,6 +62,10 @@ public class MEnumInput extends MInput<String> {
       "Invalid value " + value);
   }
 
+  public void setValue(Enum value) {
+    setValue(value.toString());
+  }
+
   @Override
   public String getUrlSafeValueString() {
     return getValue();
@@ -118,6 +122,6 @@ public class MEnumInput extends MInput<String> {
 
   @Override
   public void setEmpty() {
-    setValue(null);
+    setValue((String)null);
   }
 }
