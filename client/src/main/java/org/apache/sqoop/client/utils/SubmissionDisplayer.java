@@ -17,94 +17,94 @@
  */
 package org.apache.sqoop.client.utils;
 
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.text.SimpleDateFormat;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
  */
 public final class SubmissionDisplayer {
 
-  public static void display(IO io, MSubmission submission) {
+  public static void display(MSubmission submission) {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    io.out.println("@|bold Submission details|@");
+    println("@|bold Submission details|@");
 
-    io.out.print("Job id: ");
-    io.out.println(submission.getJobId());
+    print("Job id: ");
+    println(submission.getJobId());
 
-    io.out.print("Status: ");
-    printColoredStatus(io, submission.getStatus());
-    io.out.println();
+    print("Status: ");
+    printColoredStatus(submission.getStatus());
+    println();
 
-    io.out.print("Creation date: ");
-    io.out.println(dateFormat.format(submission.getCreationDate()));
+    print("Creation date: ");
+    println(dateFormat.format(submission.getCreationDate()));
 
-    io.out.print("Last update date: ");
-    io.out.println(dateFormat.format(submission.getLastUpdateDate()));
+    print("Last update date: ");
+    println(dateFormat.format(submission.getLastUpdateDate()));
 
     String externalId = submission.getExternalId();
     if(externalId != null) {
-      io.out.print("External Id: ");
-      io.out.println(externalId);
+      print("External Id: ");
+      println(externalId);
 
       String externalLink = submission.getExternalLink();
       if(externalLink != null) {
-        io.out.println("\t" + externalLink);
+        println("\t" + externalLink);
       }
     }
 
     if(submission.getStatus().isRunning()) {
       double progress = submission.getProgress();
-      io.out.print("Progress: ");
+      print("Progress: ");
       if(progress == -1) {
-        io.out.println("Progress is not available");
+        println("Progress is not available");
       } else {
-        io.out.println(String.format("%.2f %%", progress * 100));
+        println(String.format("%.2f %%", progress * 100));
       }
     }
 
     Counters counters = submission.getCounters();
     if(counters != null) {
-      io.out.println("Counters:");
+      println("Counters:");
       for(CounterGroup group : counters) {
-        io.out.print("\t");
-        io.out.println(group.getName());
+        print("\t");
+        println(group.getName());
         for(Counter counter : group) {
-          io.out.print("\t\t");
-          io.out.print(counter.getName());
-          io.out.print(": ");
-          io.out.println(counter.getValue());
+          print("\t\t");
+          print(counter.getName());
+          print(": ");
+          println(counter.getValue());
         }
       }
     }
 
     // Exception handling
     if(submission.getExceptionInfo() != null) {
-      io.out.print("@|red Exception: |@");
-      io.out.println(submission.getExceptionInfo());
+      print("@|red Exception: |@");
+      println(submission.getExceptionInfo());
 
-      if(Environment.isVerboose() && submission.getExceptionStackTrace() != null) {
-        io.out.print("@|bold Stack trace: |@");
-        io.out.println(submission.getExceptionStackTrace());
+      if(isVerboose() && submission.getExceptionStackTrace() != null) {
+        print("@|bold Stack trace: |@");
+        println(submission.getExceptionStackTrace());
       }
     }
   }
 
-  public static void printColoredStatus(IO io, SubmissionStatus status) {
+  public static void printColoredStatus(SubmissionStatus status) {
     if(status.isRunning()) {
-      io.out.print("@|green " + status.toString() + " |@");
+      print("@|green " + status.toString() + " |@");
     } else if(status.isFailure()) {
-      io.out.print("@|red " + status.toString() + " |@");
+      print("@|red " + status.toString() + " |@");
     } else {
-      io.out.print(status.toString());
+      print(status.toString());
     }
   }
 }

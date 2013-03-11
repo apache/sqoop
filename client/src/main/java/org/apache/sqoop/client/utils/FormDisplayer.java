@@ -27,181 +27,174 @@ import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.utils.StringUtils;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+
 /**
  * Convenience static methods for displaying form related information
  */
 public final class FormDisplayer {
 
-  public static void displayFormMetadataDetails(IO io,
-                                                MFramework framework,
+  public static void displayFormMetadataDetails(MFramework framework,
                                                 ResourceBundle bundle) {
-    io.out.print("  Supported job types: ");
-    io.out.println(framework.getAllJobsForms().keySet().toString());
+    print("  Supported job types: ");
+    println(framework.getAllJobsForms().keySet().toString());
 
-    displayFormsMetadata(io,
+    displayFormsMetadata(
       framework.getConnectionForms().getForms(),
       "Connection",
       bundle);
 
     for (MJobForms jobForms : framework.getAllJobsForms().values()) {
-      io.out.print("  Forms for job type ");
-      io.out.print(jobForms.getType().name());
-      io.out.println(":");
+      print("  Forms for job type ");
+      print(jobForms.getType().name());
+      println(":");
 
-      displayFormsMetadata(io, jobForms.getForms(), "Job", bundle);
+      displayFormsMetadata(jobForms.getForms(), "Job", bundle);
     }
   }
 
-  public static void displayFormsMetadata(IO io,
-                                         List<MForm> forms,
+  public static void displayFormsMetadata(List<MForm> forms,
                                          String type,
                                          ResourceBundle bundle) {
     Iterator<MForm> fiter = forms.iterator();
     int findx = 1;
     while (fiter.hasNext()) {
-      io.out.print("    ");
-      io.out.print(type);
-      io.out.print(" form ");
-      io.out.print(findx++);
-      io.out.println(":");
+      print("    ");
+      print(type);
+      print(" form ");
+      print(findx++);
+      println(":");
 
       MForm form = fiter.next();
-      io.out.print("      Name: ");
-      io.out.println(form.getName());
+      print("      Name: ");
+      println(form.getName());
 
       // Label
-      io.out.print("      Label: ");
-      io.out.println(bundle.getString(form.getLabelKey()));
+      print("      Label: ");
+      println(bundle.getString(form.getLabelKey()));
 
       // Help text
-      io.out.print("      Help: ");
-      io.out.println(bundle.getString(form.getHelpKey()));
+      print("      Help: ");
+      println(bundle.getString(form.getHelpKey()));
 
       List<MInput<?>> inputs = form.getInputs();
       Iterator<MInput<?>> iiter = inputs.iterator();
       int iindx = 1;
       while (iiter.hasNext()) {
-        io.out.print("      Input ");
-        io.out.print(iindx++);
-        io.out.println(":");
+        print("      Input ");
+        print(iindx++);
+        println(":");
 
         MInput<?> input = iiter.next();
-        io.out.print("        Name: ");
-        io.out.println(input.getName());
-        io.out.print("        Label: ");
-        io.out.println(bundle.getString(input.getLabelKey()));
-        io.out.print("        Help: ");
-        io.out.println(bundle.getString(input.getHelpKey()));
-        io.out.print("        Type: ");
-        io.out.println(input.getType());
+        print("        Name: ");
+        println(input.getName());
+        print("        Label: ");
+        println(bundle.getString(input.getLabelKey()));
+        print("        Help: ");
+        println(bundle.getString(input.getHelpKey()));
+        print("        Type: ");
+        println(input.getType());
         if (input.getType() == MInputType.STRING) {
-          io.out.print("        Mask: ");
-          io.out.println(((MStringInput)input).isMasked());
-          io.out.print("        Size: ");
-          io.out.println(((MStringInput)input).getMaxLength());
+          print("        Mask: ");
+          println(((MStringInput)input).isMasked());
+          print("        Size: ");
+          println(((MStringInput)input).getMaxLength());
         } else if(input.getType() == MInputType.ENUM) {
-          io.out.print("        Possible values: ");
-          io.out.println(StringUtils.join(((MEnumInput)input).getValues(), ","));
+          print("        Possible values: ");
+          println(StringUtils.join(((MEnumInput)input).getValues(), ","));
         }
       }
     }
   }
 
-  public static void displayForms(IO io,
-                                  List<MForm> forms,
-                                  ResourceBundle bundle) {
+  public static void displayForms(List<MForm> forms, ResourceBundle bundle) {
     for(MForm form : forms) {
-      displayForm(io, form, bundle);
+      displayForm(form, bundle);
     }
   }
 
-  private static void displayForm(IO io, MForm form, ResourceBundle bundle) {
-    io.out.print("  ");
-    io.out.println(bundle.getString(form.getLabelKey()));
+  private static void displayForm(MForm form, ResourceBundle bundle) {
+    print("  ");
+    println(bundle.getString(form.getLabelKey()));
 
     for (MInput<?> input : form.getInputs()) {
-      io.out.print("    ");
-      io.out.print(bundle.getString(input.getLabelKey()));
-      io.out.print(": ");
+      print("    ");
+      print(bundle.getString(input.getLabelKey()));
+      print(": ");
       if(!input.isEmpty()) {
         // Based on the input type, let's perform specific load
         switch (input.getType()) {
           case STRING:
-            displayInputString(io, (MStringInput) input);
+            displayInputString((MStringInput) input);
             break;
           case INTEGER:
-            displayInputInteger(io, (MIntegerInput) input);
+            displayInputInteger((MIntegerInput) input);
             break;
           case MAP:
-            displayInputMap(io, (MMapInput) input);
+            displayInputMap((MMapInput) input);
             break;
           case ENUM:
-            displayInputEnum(io, (MEnumInput) input);
+            displayInputEnum((MEnumInput) input);
             break;
           default:
-            io.out.println("Unsupported data type " + input.getType());
+            println("Unsupported data type " + input.getType());
             return;
         }
       }
-      io.out.println("");
+      println("");
     }
   }
 
   /**
    * Display content of String input.
    *
-   * @param io Shell's IO object
    * @param input String input
    */
-  private static void displayInputString(IO io, MStringInput input) {
+  private static void displayInputString(MStringInput input) {
     if (input.isMasked()) {
-      io.out.print("(This input is sensitive)");
+      print("(This input is sensitive)");
     } else {
-      io.out.print(input.getValue());
+      print(input.getValue());
     }
   }
 
   /**
    * Display content of Integer input.
    *
-   * @param io Shell's IO object
    * @param input Integer input
    */
-  private static void displayInputInteger(IO io, MIntegerInput input) {
-    io.out.print(input.getValue());
+  private static void displayInputInteger(MIntegerInput input) {
+    print(input.getValue());
   }
 
   /**
    * Display content of Map input
    *
-   * @param io Shell's IO object
    * @param input Map input
    */
-  private static void displayInputMap(IO io, MMapInput input) {
+  private static void displayInputMap(MMapInput input) {
     for(Map.Entry<String, String> entry : input.getValue().entrySet()) {
-      io.out.println();
-      io.out.print("      ");
-      io.out.print(entry.getKey());
-      io.out.print(" = ");
-      io.out.print(entry.getValue());
+      println();
+      print("      ");
+      print(entry.getKey());
+      print(" = ");
+      print(entry.getValue());
     }
   }
 
   /**
    * Display content of Enum input
    *
-   * @param io Shell's IO object
    * @param input Enum input
    */
-  private static void displayInputEnum(IO io, MEnumInput input) {
-    io.out.print(input.getValue());
+  private static void displayInputEnum(MEnumInput input) {
+    print(input.getValue());
   }
 
   private FormDisplayer() {

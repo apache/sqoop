@@ -31,7 +31,7 @@ public class SubmissionRequest extends  Request {
 
   public static final String ACTION = RESOURCE + "action/";
 
-  public SubmissionBean read(String serverUrl, String jid) {
+  public SubmissionBean read(String serverUrl, Long jid) {
     String response = super.get(serverUrl + ACTION + jid);
 
     JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
@@ -42,7 +42,7 @@ public class SubmissionRequest extends  Request {
     return submissionBean;
   }
 
-  public SubmissionBean create(String serverUrl, String jid) {
+  public SubmissionBean create(String serverUrl, Long jid) {
     String response = super.post(serverUrl + ACTION + jid, null);
 
     SubmissionBean submissionBean = new SubmissionBean();
@@ -51,7 +51,7 @@ public class SubmissionRequest extends  Request {
     return submissionBean;
   }
 
-  public SubmissionBean delete(String serverUrl, String id) {
+  public SubmissionBean delete(String serverUrl, Long id) {
      String response = super.delete(serverUrl + ACTION + id);
 
     SubmissionBean submissionBean = new SubmissionBean();

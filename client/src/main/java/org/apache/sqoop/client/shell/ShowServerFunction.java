@@ -17,62 +17,40 @@
  */
 package org.apache.sqoop.client.shell;
 
-import java.io.PrintWriter;
-import java.text.MessageFormat;
-import java.util.List;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
-import org.codehaus.groovy.tools.shell.IO;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 @SuppressWarnings("serial")
-public class ShowServerFunction extends SqoopFunction
-{
-
-  private IO io;
-
-
+public class ShowServerFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected ShowServerFunction(IO io) {
-    this.io = io;
-
+  protected ShowServerFunction() {
     this.addOption(OptionBuilder
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_SERVER_HOST))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_SERVER_HOST))
         .withLongOpt(Constants.OPT_HOST)
         .create(Constants.OPT_HOST_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_SERVER_PORT))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_SERVER_PORT))
         .withLongOpt(Constants.OPT_PORT)
         .create(Constants.OPT_PORT_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_SERVER_WEBAPP))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_SERVER_WEBAPP))
         .withLongOpt(Constants.OPT_WEBAPP)
         .create(Constants.OPT_WEBAPP_CHAR));
   }
 
-  public void printHelp(PrintWriter out) {
-    out.println(getResource().getString(Constants.RES_SHOW_SERVER_USAGE));
-    super.printHelp(out);
-  }
-
-  public Object execute(List<String> args) {
-    if (args.size() == 1) {
-      printHelp(io.out);
-      io.out.println();
+  public Object executeFunction(CommandLine line) {
+    if (line.getArgs().length == 1) {
+      printlnResource(Constants.RES_SHOW_SERVER_USAGE);
       return null;
     }
 
-    CommandLine line = parseOptions(this, 1, args);
     if (line.hasOption(Constants.OPT_ALL)) {
       showServer(true, true, true, true);
 
@@ -94,27 +72,17 @@ public class ShowServerFunction extends SqoopFunction
     return null;
   }
 
-  private void showServer(boolean host, boolean port, boolean webapp,
-      boolean version) {
-    String s;
+  private void showServer(boolean host, boolean port, boolean webapp, boolean version) {
     if (host) {
-      s =  MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_SERVER_HOST), Environment.getServerHost());
-      io.out.println(s);
+      printlnResource(Constants.RES_SHOW_PROMPT_SERVER_HOST, getServerHost());
     }
 
     if (port) {
-      s = MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_SERVER_PORT), Environment.getServerPort());
-      io.out.println(s);
+      printlnResource(Constants.RES_SHOW_PROMPT_SERVER_PORT, getServerPort());
     }
 
     if (webapp) {
-      s = MessageFormat.format(getResource().getString(Constants
-          .RES_SHOW_PROMPT_SERVER_WEBAPP), Environment.getServerWebapp());
-      io.out.println(s);
+      printlnResource(Constants.RES_SHOW_PROMPT_SERVER_WEBAPP, getServerWebapp());
     }
-
-    io.out.println();
   }
 }

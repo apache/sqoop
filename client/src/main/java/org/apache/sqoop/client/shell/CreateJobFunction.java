@@ -23,64 +23,48 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.FrameworkBean;
-import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 import static org.apache.sqoop.client.utils.FormFiller.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  * Handles creation of new job objects.
  */
 public class CreateJobFunction extends  SqoopFunction {
-
-
-  private IO io;
-
   @SuppressWarnings("static-access")
-  public CreateJobFunction(IO io) {
-    this.io = io;
-
+  public CreateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_XID)
       .hasArg()
       .create(Constants.OPT_XID_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_TYPE))
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_TYPE))
       .withLongOpt(Constants.OPT_TYPE)
       .hasArg()
       .create(Constants.OPT_TYPE_CHAR)
     );
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
+      printlnResource(Constants.RES_ARGS_XID_MISSING);
       return null;
     }
     if (!line.hasOption(Constants.OPT_TYPE)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_TYPE_MISSING));
+      printlnResource(Constants.RES_ARGS_TYPE_MISSING);
       return null;
     }
 
     try {
-      createJob(line.getOptionValue(Constants.OPT_XID),
-          line.getOptionValue(Constants.OPT_TYPE));
+      createJob(getLong(line, Constants.OPT_XID),
+                        line.getOptionValue(Constants.OPT_TYPE));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -88,56 +72,34 @@ public class CreateJobFunction extends  SqoopFunction {
     return null;
   }
 
-  private void createJob(String connectionId, String type) throws IOException {
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_CREATE_CREATING_JOB), connectionId));
+  private void createJob(Long connectionId, String type) throws IOException {
+    printlnResource(Constants.RES_CREATE_CREATING_JOB, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
+    MJob job = client.newJob(connectionId, MJob.Type.valueOf(type));
 
-    FrameworkBean frameworkBean = readFramework();
-    ConnectionBean connectionBean = readConnection(connectionId);
-    ConnectorBean connectorBean;
-
-    MFramework framework = frameworkBean.getFramework();
-    ResourceBundle frameworkBundle = frameworkBean.getResourceBundle();
-
-    MConnection connection = connectionBean.getConnections().get(0);
-
-    connectorBean = readConnector(String.valueOf(connection.getConnectorId()));
-    MConnector connector = connectorBean.getConnectors().get(0);
-    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(connector.getPersistenceId());
-
-    MJob.Type jobType = MJob.Type.valueOf(type.toUpperCase());
-
-    MJob job = new MJob(
-      connector.getPersistenceId(),
-      connection.getPersistenceId(),
-      jobType,
-      connector.getJobForms(jobType),
-      framework.getJobForms(jobType)
-    );
+    ResourceBundle connectorBundle = client.getResourceBundle(job.getConnectorId());
+    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
 
-    io.out.println(getResource().getString(Constants.RES_PROMPT_FILL_JOB_METADATA));
+    printlnResource(Constants.RES_PROMPT_FILL_JOB_METADATA);
 
     do {
       // Print error introduction if needed
       if( !status.canProceed() ) {
-        errorIntroduction(io);
+        errorIntroduction();
       }
 
       // Fill in data from user
-      if(!fillJob(io, reader, job, connectorBundle, frameworkBundle)) {
+      if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = createJobApplyValidations(job);
+      status = client.createJob(job);
     } while(!status.canProceed());
 
-    io.out.println(MessageFormat.format(getResource()
-        .getString(Constants.RES_CREATE_JOB_SUCCESSFUL), status.name(),
-        job.getPersistenceId()));
+    printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
   }
 }

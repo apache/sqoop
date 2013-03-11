@@ -30,8 +30,8 @@ public class ConnectorRequest extends Request
 {
   public static final String RESOURCE = "v1/connector/";
 
-  public ConnectorBean read(String serverUrl, String cid) {
-    String response = null;
+  public ConnectorBean read(String serverUrl, Long cid) {
+    String response;
     if (cid == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {

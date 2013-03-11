@@ -17,10 +17,8 @@
  */
 package org.apache.sqoop.client.shell;
 
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -29,26 +27,26 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+
 @SuppressWarnings("serial")
-public class SqoopFunction extends Options
-{
-  private static final ResourceBundle clientResource =
-      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
+abstract public class SqoopFunction extends Options {
 
-  public void printHelp(PrintWriter out) {
+  public void printHelp() {
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printOptions(out, formatter.getWidth(), this, 0, 4);
+    formatter.printOptions(getIo().out, formatter.getWidth(), this, 0, 4);
   }
 
-  protected  ResourceBundle getResource() {
-    return clientResource;
+  public abstract Object executeFunction(CommandLine line);
+
+  public Object execute(List<String> args) {
+    CommandLine line = parseOptions(this, 1, args);
+    return executeFunction(line);
   }
 
-  protected CommandLine parseOptions(Options options,
-      int start, List<String> arglist) {
+  protected CommandLine parseOptions(Options options, int start, List<String> arglist) {
     Iterator<String> iterator = arglist.iterator();
     int i = 0;
     for (; i < start; i ++) {
@@ -68,5 +66,9 @@ public class SqoopFunction extends Options
       throw new SqoopException(ClientError.CLIENT_0003, e.getMessage(), e);
     }
     return line;
+  }
+
+  protected long getLong(CommandLine line, String parameterName) {
+    return Long.parseLong(line.getOptionValue(parameterName));
   }
 }

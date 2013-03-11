@@ -23,48 +23,36 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
  */
 public class UpdateJobFunction extends SqoopFunction {
-
-
-  private IO io;
-
-
   @SuppressWarnings("static-access")
-  public UpdateJobFunction(IO io) {
-    this.io = io;
-
+  public UpdateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
       .withLongOpt(Constants.OPT_JID)
       .hasArg()
       .create(Constants.OPT_JID_CHAR));
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_JID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_JID_MISSING));
+      printlnResource(Constants.RES_ARGS_JID_MISSING);
       return null;
     }
 
     try {
-      updateJob(line.getOptionValue(Constants.OPT_JID));
+      updateJob(getLong(line, Constants.OPT_JID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -72,41 +60,35 @@ public class UpdateJobFunction extends SqoopFunction {
     return null;
   }
 
-  private void updateJob(String jobId) throws IOException {
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_UPDATE_UPDATING_JOB), jobId));
+  private void updateJob(Long jobId) throws IOException {
+    printlnResource(Constants.RES_UPDATE_UPDATING_JOB, jobId);
 
     ConsoleReader reader = new ConsoleReader();
 
-    JobBean jobBean = readJob(jobId);
+    MJob job = client.getJob(jobId);
 
-    // TODO(jarcec): Check that we have expected data
-    MJob job = jobBean.getJobs().get(0);
-    ResourceBundle frameworkBundle
-      = jobBean.getFrameworkBundle();
-    ResourceBundle connectorBundle
-      = jobBean.getConnectorBundle(job.getConnectorId());
+    ResourceBundle connectorBundle = client.getResourceBundle(job.getConnectorId());
+    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
 
-    io.out.println(getResource().getString(Constants.RES_PROMPT_UPDATE_JOB_METADATA));
+    printlnResource(Constants.RES_PROMPT_UPDATE_JOB_METADATA);
 
     do {
       // Print error introduction if needed
       if( !status.canProceed() ) {
-        errorIntroduction(io);
+        errorIntroduction();
       }
 
       // Fill in data from user
-      if(!fillJob(io, reader, job, connectorBundle, frameworkBundle)) {
+      if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = updateJobApplyValidations(job);
+      status = client.updateJob(job);
     } while(!status.canProceed());
 
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_UPDATE_JOB_SUCCESSFUL), status.name()));
+    printlnResource(Constants.RES_UPDATE_JOB_SUCCESSFUL, status.name());
   }
 }

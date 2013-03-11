@@ -23,52 +23,38 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 import static org.apache.sqoop.client.utils.FormFiller.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
  */
 public class CloneConnectionFunction extends SqoopFunction {
-
-
-
-  private IO io;
-
-
-
   @SuppressWarnings("static-access")
-  public CloneConnectionFunction(IO io) {
-    this.io = io;
-
+  public CloneConnectionFunction() {
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_XID)
       .hasArg()
       .create(Constants.OPT_XID_CHAR)
     );
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
+      printlnResource(Constants.RES_ARGS_XID_MISSING);
       return null;
     }
 
     try {
-      cloneConnection(line.getOptionValue(Constants.OPT_XID));
+      cloneConnection(getLong(line, Constants.OPT_XID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -76,48 +62,35 @@ public class CloneConnectionFunction extends SqoopFunction {
     return null;
   }
 
-  private void cloneConnection(String connectionId) throws IOException {
-
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_CLONE_CLONING_CONN), connectionId ));
+  private void cloneConnection(Long connectionId) throws IOException {
+    printlnResource(Constants.RES_CLONE_CLONING_CONN, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
 
-    ConnectionBean connectionBean = readConnection(connectionId);
-
-    // TODO(jarcec): Check that we have expected data
-    MConnection connection = connectionBean.getConnections().get(0);
-    ResourceBundle frameworkBundle
-      = connectionBean.getFrameworkBundle();
-    ResourceBundle connectorBundle
-      = connectionBean.getConnectorBundle(connection.getConnectorId());
-
+    MConnection connection = client.getConnection(connectionId);
     // Remove persistent id as we're making a clone
     connection.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     Status status = Status.FINE;
+    printlnResource(Constants.RES_PROMPT_UPDATE_CONN_METADATA);
 
-    io.out.println(getResource().getString(Constants
-       .RES_PROMPT_UPDATE_CONN_METADATA));
-
+    ResourceBundle connectorBundle = client.getResourceBundle(connection.getConnectorId());
+    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
     do {
       // Print error introduction if needed
       if( !status.canProceed() ) {
-        errorIntroduction(io);
+        errorIntroduction();
       }
 
       // Fill in data from user
-      if(!fillConnection(io, reader, connection,
-                         connectorBundle, frameworkBundle)) {
+      if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
         return;
       }
 
-      status = createConnectionApplyValidations(connection);
+      status = client.createConnection(connection);
 
     } while(!status.canProceed());
 
-    io.out.println(MessageFormat.format(getResource()
-        .getString(Constants.RES_CLONE_CONN_SUCCESSFUL),
-        status.name(), connection.getPersistenceId()));
+    printlnResource(Constants.RES_CLONE_CONN_SUCCESSFUL, status.name(), connection.getPersistenceId());
   }
 }

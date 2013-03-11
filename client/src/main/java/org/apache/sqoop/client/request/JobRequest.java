@@ -31,8 +31,8 @@ public class JobRequest extends Request {
 
   public static final String RESOURCE = "v1/job/";
 
-  public JobBean read(String serverUrl, String xid) {
-    String response = null;
+  public JobBean read(String serverUrl, Long xid) {
+    String response;
     if (xid == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {
@@ -74,7 +74,7 @@ public class JobRequest extends Request {
     return validationBean;
   }
 
-  public void delete(String serverUrl, String id) {
+  public void delete(String serverUrl, Long id) {
      super.delete(serverUrl + RESOURCE + id);
   }
 }

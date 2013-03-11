@@ -19,26 +19,14 @@ package org.apache.sqoop.client.utils;
 
 import groovy.lang.MissingPropertyException;
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.common.SqoopException;
-import org.codehaus.groovy.tools.shell.IO;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Pretty printing of Throwable objects
  */
 public class ThrowableDisplayer {
-
-  /**
-   * Associated shell IO object.
-   *
-   * This objects needs to be set explicitly as some of the methods are called
-   * by Groovy shell without ability to pass additional arguments.
-   */
-  private static IO io;
-
-  public static void setIo(IO ioObject) {
-    io = ioObject;
-  }
 
   /**
    * Error hook installed to Groovy shell.
@@ -52,48 +40,46 @@ public class ThrowableDisplayer {
    * @param t Throwable to be displayed
    */
   public static void errorHook(Throwable t) {
-    io.out.println("@|red Exception has occurred during processing command |@");
+    println("@|red Exception has occurred during processing command |@");
 
     // If this is server exception from server
     if(t instanceof SqoopException
       && ((SqoopException)t).getErrorCode() == ClientError.CLIENT_0006) {
-      io.out.print("@|red Server has returned exception: |@");
-      printThrowable(io, t.getCause(), Environment.isVerboose());
+      print("@|red Server has returned exception: |@");
+      printThrowable(t.getCause(), isVerboose());
     } else if(t.getClass() == MissingPropertyException.class) {
-      io.out.print("@|red Unknown command: |@");
-      io.out.println(t.getMessage());
+      print("@|red Unknown command: |@");
+      println(t.getMessage());
     } else {
-      printThrowable(io, t, Environment.isVerboose());
+      printThrowable(t, isVerboose());
     }
   }
 
   /**
    * Pretty print Throwable instance including stack trace and causes.
    *
-   * @param io IO object to use for generating output
    * @param t Throwable to display
    */
-  protected static void printThrowable(IO io, Throwable t, boolean verbose) {
-    io.out.print("@|red Exception: |@");
-    io.out.print(t.getClass().getName());
-    io.out.print(" @|red Message: |@");
-    io.out.print(t.getMessage());
-    io.out.println();
+  protected static void printThrowable(Throwable t, boolean verbose) {
+    print("@|red Exception: |@");
+    print(t.getClass().getName());
+    print(" @|red Message: |@");
+    print(t.getMessage());
+    println();
 
     if(verbose) {
-      io.out.println("Stack trace:");
+      println("Stack trace:");
       for(StackTraceElement e : t.getStackTrace()) {
-        io.out.print("\t @|bold at |@ ");
-        io.out.print(e.getClassName());
-        io.out.print(" (@|bold " + e.getFileName() + ":"
-          + e.getLineNumber() + ") |@ ");
-        io.out.println();
+        print("\t @|bold at |@ ");
+        print(e.getClassName());
+        print(" (@|bold " + e.getFileName() + ":" + e.getLineNumber() + ") |@ ");
+        println();
       }
 
       Throwable cause = t.getCause();
       if(cause != null) {
-        io.out.print("Caused by: ");
-        printThrowable(io, cause, verbose);
+        print("Caused by: ");
+        printThrowable(cause, verbose);
       }
     }
   }

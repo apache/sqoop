@@ -15,13 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.client.core;
+package org.apache.sqoop.client.request;
 
-import org.apache.sqoop.client.request.ConnectionRequest;
-import org.apache.sqoop.client.request.ConnectorRequest;
-import org.apache.sqoop.client.request.FrameworkRequest;
-import org.apache.sqoop.client.request.JobRequest;
-import org.apache.sqoop.client.request.SubmissionRequest;
 import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
@@ -31,22 +26,27 @@ import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 
 /**
- *  Client wise caching of various request objects
+ * Unified class for all request objects.
  */
-public final class RequestCache {
+public class SqoopRequests {
 
-  private static FrameworkRequest frameworkRequest;
-  private static ConnectorRequest connectorRequest;
-  private static ConnectionRequest connectionRequest;
-  private static JobRequest jobRequest;
-  private static SubmissionRequest submissionRequest;
+  private String serverUrl;
 
-  public static FrameworkRequest getFrameworkRequest() {
+  private FrameworkRequest frameworkRequest;
+  private ConnectorRequest connectorRequest;
+  private ConnectionRequest connectionRequest;
+  private JobRequest jobRequest;
+  private SubmissionRequest submissionRequest;
+
+  public void setServerUrl(String serverUrl) {
+    this.serverUrl = serverUrl;
+  }
+
+  public FrameworkRequest getFrameworkRequest() {
     if (frameworkRequest == null) {
       frameworkRequest = new FrameworkRequest();
     }
@@ -54,7 +54,7 @@ public final class RequestCache {
     return frameworkRequest;
   }
 
-  public static ConnectorRequest getConnectorRequest() {
+  public ConnectorRequest getConnectorRequest() {
     if (connectorRequest == null) {
       connectorRequest = new ConnectorRequest();
     }
@@ -62,7 +62,7 @@ public final class RequestCache {
     return connectorRequest;
   }
 
-  public static ConnectionRequest getConnectionRequest() {
+  public ConnectionRequest getConnectionRequest() {
     if (connectionRequest == null) {
       connectionRequest = new ConnectionRequest();
     }
@@ -70,7 +70,7 @@ public final class RequestCache {
     return connectionRequest;
   }
 
-  public static JobRequest getJobRequest() {
+  public JobRequest getJobRequest() {
     if (jobRequest == null) {
       jobRequest = new JobRequest();
     }
@@ -78,7 +78,7 @@ public final class RequestCache {
     return jobRequest;
   }
 
-  public static SubmissionRequest getSubmissionRequest() {
+  public SubmissionRequest getSubmissionRequest() {
     if (submissionRequest == null) {
       submissionRequest = new SubmissionRequest();
     }
@@ -86,20 +86,19 @@ public final class RequestCache {
     return submissionRequest;
   }
 
-  public static FrameworkBean readFramework() {
-    return getFrameworkRequest().read(Environment.getServerUrl());
+  public FrameworkBean readFramework() {
+    return getFrameworkRequest().read(serverUrl);
   }
 
-  public static ConnectorBean readConnector(String cid) {
-    return getConnectorRequest().read(Environment.getServerUrl(), cid);
+  public ConnectorBean readConnector(Long cid) {
+    return getConnectorRequest().read(serverUrl, cid);
   }
 
-  public static ValidationBean createConnection(MConnection connection) {
-    return getConnectionRequest()
-      .create(Environment.getServerUrl(), connection);
+  public ValidationBean createConnection(MConnection connection) {
+    return getConnectionRequest().create(serverUrl, connection);
   }
 
-  public static Status createConnectionApplyValidations(MConnection connection) {
+  public Status createConnectionApplyValidations(MConnection connection) {
     ValidationBean bean = createConnection(connection);
 
     Validation connector = bean.getConnectorValidation();
@@ -116,17 +115,15 @@ public final class RequestCache {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  public static ConnectionBean readConnection(String connectionId) {
-    return getConnectionRequest()
-      .read(Environment.getServerUrl(), connectionId);
+  public ConnectionBean readConnection(Long connectionId) {
+    return getConnectionRequest().read(serverUrl, connectionId);
   }
 
-  public static ValidationBean updateConnection(MConnection connection) {
-    return getConnectionRequest()
-      .update(Environment.getServerUrl(), connection);
+  public ValidationBean updateConnection(MConnection connection) {
+    return getConnectionRequest().update(serverUrl, connection);
   }
 
-  public static Status updateConnectionApplyValidations(MConnection connection){
+  public Status updateConnectionApplyValidations(MConnection connection){
     ValidationBean bean = updateConnection(connection);
 
     Validation connector = bean.getConnectorValidation();
@@ -143,15 +140,15 @@ public final class RequestCache {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  public static void deleteConnection(String xid) {
-    getConnectionRequest().delete(Environment.getServerUrl(), xid);
+  public void deleteConnection(Long xid) {
+    getConnectionRequest().delete(serverUrl, xid);
   }
 
-  public static ValidationBean createJob(MJob job) {
-    return getJobRequest().create(Environment.getServerUrl(), job);
+  public ValidationBean createJob(MJob job) {
+    return getJobRequest().create(serverUrl, job);
   }
 
-  public static Status createJobApplyValidations(MJob job) {
+  public Status createJobApplyValidations(MJob job) {
     ValidationBean bean = createJob(job);
 
     Validation connector = bean.getConnectorValidation();
@@ -168,15 +165,15 @@ public final class RequestCache {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  public static JobBean readJob(String jobId) {
-    return getJobRequest().read(Environment.getServerUrl(), jobId);
+  public JobBean readJob(Long jobId) {
+    return getJobRequest().read(serverUrl, jobId);
   }
 
-  public static ValidationBean updateJob(MJob job) {
-    return getJobRequest().update(Environment.getServerUrl(), job);
+  public ValidationBean updateJob(MJob job) {
+    return getJobRequest().update(serverUrl, job);
   }
 
-  public static Status updateJobApplyValidations(MJob job) {
+  public Status updateJobApplyValidations(MJob job) {
     ValidationBean bean = updateJob(job);
 
     Validation connector = bean.getConnectorValidation();
@@ -193,29 +190,19 @@ public final class RequestCache {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  public static void deleteJob(String jid) {
-    getJobRequest().delete(Environment.getServerUrl(), jid);
+  public void deleteJob(Long jid) {
+    getJobRequest().delete(serverUrl, jid);
   }
 
-  public static MSubmission readSubmission(String jid) {
-    return getSubmissionRequest()
-      .read(Environment.getServerUrl(), jid)
-      .getSubmission();
+  public SubmissionBean readSubmission(Long jid) {
+    return getSubmissionRequest().read(serverUrl, jid);
   }
 
-  public static MSubmission createSubmission(String jid) {
-    return getSubmissionRequest()
-      .create(Environment.getServerUrl(), jid)
-      .getSubmission();
+  public SubmissionBean createSubmission(Long jid) {
+    return getSubmissionRequest().create(serverUrl, jid);
   }
 
-  public static MSubmission deleteSubmission(String jid) {
-    return getSubmissionRequest()
-      .delete(Environment.getServerUrl(), jid)
-      .getSubmission();
-  }
-
-  private RequestCache() {
-    // Instantiation is prohibited
+  public SubmissionBean deleteSubmission(Long jid) {
+    return getSubmissionRequest().delete(serverUrl, jid);
   }
 }

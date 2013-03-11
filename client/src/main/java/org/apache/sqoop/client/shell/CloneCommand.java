@@ -19,13 +19,12 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Client side cloning of connection and job objects.
@@ -35,8 +34,6 @@ public class CloneCommand extends SqoopCommand {
   private CloneConnectionFunction connectionFunction;
   private CloneJobFunction jobFunction;
 
-
-
   public CloneCommand(Shell shell) {
     super(shell, Constants.CMD_CLONE, Constants.CMD_CLONE_SC,
       new String[] {Constants.FN_CONNECTION, Constants.FN_JOB},
@@ -44,31 +41,29 @@ public class CloneCommand extends SqoopCommand {
   }
 
   public Object executeCommand(List args) {
-    if(!Environment.isInteractive()) {
+    if(!isInteractive()) {
       throw new SqoopException(ClientError.CLIENT_0007, "clone");
     }
 
-    String usageMsg = MessageFormat.format(getResource().getString(Constants.RES_CLONE_USAGE), getUsage());
-
     if (args.size() == 0) {
-      io.out.println(usageMsg);
-      io.out.println();
+      printlnResource(Constants.RES_CLONE_USAGE, getUsage());
       return null;
     }
 
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
-        connectionFunction = new CloneConnectionFunction(io);
+        connectionFunction = new CloneConnectionFunction();
       }
       return connectionFunction.execute(args);
     } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
-        jobFunction = new CloneJobFunction(io);
+        jobFunction = new CloneJobFunction();
       }
       return jobFunction.execute(args);
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

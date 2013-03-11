@@ -17,14 +17,13 @@
  */
 package org.apache.sqoop.client.shell;
 
-import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
@@ -35,7 +34,6 @@ public class SubmissionCommand  extends SqoopCommand {
   private SubmissionStopFunction stopFunction;
   private SubmissionStatusFunction statusFunction;
 
-
   public SubmissionCommand(Shell shell) {
     super(shell, Constants.CMD_SUBMISSION, Constants.CMD_SUBMISSION_SC,
       new String[] {Constants.FN_START, Constants.FN_STOP,
@@ -44,32 +42,31 @@ public class SubmissionCommand  extends SqoopCommand {
   }
 
   public Object executeCommand(List args) {
-    String usageMsg = MessageFormat.format(getResource().getString(Constants
-        .RES_SUBMISSION_USAGE), getUsage());
+    String usageMsg = MessageFormat.format(resource.getString(Constants.RES_SUBMISSION_USAGE), getUsage());
     if (args.size() == 0) {
-      io.out.println(usageMsg);
-      io.out.println();
+      println(usageMsg);
       return null;
     }
 
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_START)) {
       if (startFunction == null) {
-        startFunction = new SubmissionStartFunction(io);
+        startFunction = new SubmissionStartFunction();
       }
       return startFunction.execute(args);
     } else if (func.equals(Constants.FN_STOP)) {
         if (stopFunction == null) {
-          stopFunction = new SubmissionStopFunction(io);
+          stopFunction = new SubmissionStopFunction();
         }
         return stopFunction.execute(args);
     } else if (func.equals(Constants.FN_STATUS)) {
       if (statusFunction == null) {
-        statusFunction = new SubmissionStatusFunction(io);
+        statusFunction = new SubmissionStatusFunction();
       }
       return statusFunction.execute(args);
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

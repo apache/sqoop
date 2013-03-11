@@ -17,20 +17,17 @@
  */
 package org.apache.sqoop.client.shell;
 
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
 
-import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
-public class SetCommand extends SqoopCommand
-{
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+
+public class SetCommand extends SqoopCommand {
+
   private SetServerFunction serverFunction;
   private SetOptionFunction optionFunction;
-
 
   protected SetCommand(Shell shell) {
     super(shell, Constants.CMD_SET, Constants.CMD_SET_SC,
@@ -41,29 +38,27 @@ public class SetCommand extends SqoopCommand
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Object executeCommand(List args) {
-    String usageMsg =  MessageFormat.format(getResource().getString(Constants
-        .RES_SET_USAGE), getUsage());
 
     if (args.size() == 0) {
-      io.out.println(usageMsg);
-      io.out.println();
+      printlnResource(Constants.RES_SET_USAGE, getUsage());
       return null;
     }
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_SERVER)) {
       if (serverFunction == null) {
-        serverFunction = new SetServerFunction(io);
+        serverFunction = new SetServerFunction();
       }
       return serverFunction.execute(args);
 
     } else if (func.equals(Constants.FN_OPTION)) {
       if (optionFunction == null) {
-        optionFunction = new SetOptionFunction(io);
+        optionFunction = new SetOptionFunction();
       }
       return optionFunction.execute(args);
 
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

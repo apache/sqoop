@@ -21,19 +21,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ResourceBundle;
 
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.client.utils.ThrowableDisplayer;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.codehaus.groovy.tools.shell.Command;
 import org.codehaus.groovy.tools.shell.CommandRegistry;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.codehaus.groovy.tools.shell.IO.Verbosity;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Main entry point to Sqoop client.
@@ -48,14 +47,9 @@ public final class SqoopShell {
    */
   private static final String RC_FILE = ".sqoop2rc";
 
-
-
-  private static final ResourceBundle clientResource =
-      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
   /**
    * Banner message that is displayed in interactive mode after client start.
    */
-
 
   /**
    * Hash of commands that we want to have in history in all cases.
@@ -74,15 +68,12 @@ public final class SqoopShell {
    * @param args Command line arguments
    * @throws Exception
    */
-  public static void main (String[] args) throws Exception
-  {
+  public static void main (String[] args) throws Exception {
     System.setProperty("groovysh.prompt", Constants.SQOOP_PROMPT);
     Groovysh shell = new Groovysh();
 
     // Install our error hook (exception handling)
-    shell.setErrorHook(
-      new MethodClosure(ThrowableDisplayer.class, "errorHook"));
-    ThrowableDisplayer.setIo(shell.getIo());
+    shell.setErrorHook(new MethodClosure(ThrowableDisplayer.class, "errorHook"));
 
     CommandRegistry registry = shell.getRegistry();
     @SuppressWarnings("unchecked")
@@ -105,8 +96,11 @@ public final class SqoopShell {
     shell.register(new CloneCommand(shell));
     shell.register(new SubmissionCommand(shell));
 
+    // Configure shared shell io object
+    setIo(shell.getIo());
+
     // We're running in batch mode by default
-    Environment.setInteractive(false);
+    setInteractive(false);
 
     // Let's see if user do have resource file with initial commands that he
     // would like to apply.
@@ -114,21 +108,19 @@ public final class SqoopShell {
     File rcFile = new File(homeDir, RC_FILE);
 
     if(rcFile.exists()) {
-      shell.getIo().out.println(MessageFormat.format(clientResource.getString
-          (Constants.RES_SQOOP_PROMPT_SHELL_LOADRC), RC_FILE));
+      printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADRC, RC_FILE);
       interpretFileContent(rcFile, shell);
-      shell.getIo().out.println(clientResource.getString(Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC));
+      printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC);
     }
 
     if (args.length == 0) {
       // Interactive mode:
-      shell.getIo().setVerbosity(Verbosity.QUIET);
-      shell.getIo().out.println(clientResource.getString(Constants
-          .RES_SQOOP_SHELL_BANNER));
-      shell.getIo().out.println();
+      getIo().setVerbosity(Verbosity.QUIET);
+      printlnResource(Constants.RES_SQOOP_SHELL_BANNER);
+      println();
 
       // Switch to interactive mode
-      Environment.setInteractive(true);
+      setInteractive(true);
       shell.run(args);
 
     } else {
@@ -163,13 +155,13 @@ public final class SqoopShell {
       }
 
       // Render shell and command to get user perception that it was run as usual
-      shell.getIo().out.print(shell.renderPrompt());
-      shell.getIo().out.println(line);
+      print(shell.renderPrompt());
+      println(line);
 
       // Manually trigger command line parsing
       Object result = shell.execute(line);
       if (result != null) {
-        shell.getIo().out.println(result);
+        println(result);
       }
     }
   }

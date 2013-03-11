@@ -23,34 +23,21 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 import static org.apache.sqoop.client.utils.FormFiller.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
  */
 public class CreateConnectionFunction extends SqoopFunction {
-
-
-  private IO io;
-
   @SuppressWarnings("static-access")
-  public CreateConnectionFunction(IO io) {
-    this.io = io;
-
+  public CreateConnectionFunction() {
     this.addOption(OptionBuilder
       .withDescription(Constants.RES_CONNECTOR_ID)
       .withLongOpt(Constants.OPT_CID)
@@ -58,15 +45,14 @@ public class CreateConnectionFunction extends SqoopFunction {
       .create(Constants.OPT_CID_CHAR));
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_CID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_CID_MISSING));
+      printlnResource(Constants.RES_ARGS_CID_MISSING);
       return null;
     }
 
     try {
-      createConnection(line.getOptionValue(Constants.OPT_CID));
+      createConnection(getLong(line, Constants.OPT_CID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -74,48 +60,33 @@ public class CreateConnectionFunction extends SqoopFunction {
     return null;
   }
 
-  private void createConnection(String connectorId) throws IOException {
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_CREATE_CREATING_CONN), connectorId));
+  private void createConnection(long connectorId) throws IOException {
+    printlnResource(Constants.RES_CREATE_CREATING_CONN, connectorId);
 
     ConsoleReader reader = new ConsoleReader();
 
-    FrameworkBean frameworkBean = readFramework();
-    ConnectorBean connectorBean = readConnector(connectorId);
+    MConnection connection = client.newConnection(connectorId);
 
-    MFramework framework = frameworkBean.getFramework();
-    ResourceBundle frameworkBundle = frameworkBean.getResourceBundle();
-
-    MConnector connector = connectorBean.getConnectors().get(0);
-    ResourceBundle connectorBundle = connectorBean.getResourceBundles().get(connector.getPersistenceId());
-
-    MConnection connection = new MConnection(connector.getPersistenceId(),
-                                             connector.getConnectionForms(),
-                                             framework.getConnectionForms());
+    ResourceBundle connectorBundle = client.getResourceBundle(connectorId);
+    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
-
-    io.out.println(getResource().getString(Constants.RES_PROMPT_FILL_CONN_METADATA));
-
+    printlnResource(Constants.RES_PROMPT_FILL_CONN_METADATA);
     do {
       // Print error introduction if needed
       if( !status.canProceed() ) {
-        errorIntroduction(io);
+        errorIntroduction();
       }
 
       // Fill in data from user
-      if(!fillConnection(io, reader, connection,
-                         connectorBundle, frameworkBundle)) {
+      if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = createConnectionApplyValidations(connection);
+      status = client.createConnection(connection);
     } while(!status.canProceed());
 
-
-    io.out.println(MessageFormat.format(getResource()
-        .getString(Constants.RES_CREATE_CONN_SUCCESSFUL), status.name(),
-        connection.getPersistenceId()));
+    printlnResource(Constants.RES_CREATE_CONN_SUCCESSFUL, status.name(), connection.getPersistenceId());
   }
 }

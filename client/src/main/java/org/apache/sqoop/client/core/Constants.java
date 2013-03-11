@@ -112,6 +112,8 @@ public class Constants {
 
   // Resource Keys for various messages
 
+  public static final String RES_FUNCTION_UNKNOWN =
+      "args.function.unknown";
   public static final String RES_ARGS_XID_MISSING =
       "args.xid_missing";
   public static final String RES_ARGS_JID_MISSING =

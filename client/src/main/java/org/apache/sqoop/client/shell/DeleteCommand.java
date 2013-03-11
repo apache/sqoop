@@ -17,14 +17,11 @@
  */
 package org.apache.sqoop.client.shell;
 
-import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
-
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
@@ -43,27 +40,25 @@ public class DeleteCommand extends SqoopCommand {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeCommand(List args) {
-    String usageMsg = MessageFormat.format(getResource().getString(Constants
-        .RES_DELETE_USAGE), getUsage());
     if (args.size() == 0) {
-      io.out.println(usageMsg);
-      io.out.println();
+      printlnResource(Constants.RES_DELETE_USAGE, getUsage());
       return null;
     }
 
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
-        connectionFunction = new DeleteConnectionFunction(io);
+        connectionFunction = new DeleteConnectionFunction();
       }
       return connectionFunction.execute(args);
     } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
-        jobFunction = new DeleteJobFunction(io);
+        jobFunction = new DeleteJobFunction();
       }
       return jobFunction.execute(args);
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

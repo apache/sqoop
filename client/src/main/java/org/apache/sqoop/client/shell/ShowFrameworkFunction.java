@@ -17,41 +17,26 @@
  */
 package org.apache.sqoop.client.shell;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.cli.CommandLine;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MFramework;
-import org.codehaus.groovy.tools.shell.IO;
 
-import java.io.PrintWriter;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
  */
 public class ShowFrameworkFunction extends SqoopFunction {
-
-  private IO io;
-
   @SuppressWarnings("static-access")
-  protected ShowFrameworkFunction(IO io) {
-    this.io = io;
+  protected ShowFrameworkFunction() {
   }
 
-  public void printHelp(PrintWriter out) {
-    out.println(getResource().getString(Constants.RES_SHOW_FRAMEWORK_USAGE));
-    super.printHelp(out);
-  }
-
-  public Object execute(List<String> args) {
-    if (args.size() != 1) {
-      printHelp(io.out);
-      io.out.println();
+  public Object executeFunction(CommandLine line) {
+    if (line.getArgs().length != 1) {
+      printlnResource(Constants.RES_SHOW_FRAMEWORK_USAGE);
       return null;
     }
 
@@ -61,16 +46,10 @@ public class ShowFrameworkFunction extends SqoopFunction {
   }
 
   private void showFramework() {
-    FrameworkBean frameworkBean = readFramework();
+    MFramework framework = client.getFramework();
+    ResourceBundle bundle = client.getFrameworkResourceBundle();
 
-    MFramework framework = frameworkBean.getFramework();
-    ResourceBundle bundle = frameworkBean.getResourceBundle();
-    io.out.println(StringEscapeUtils.unescapeJava(
-        MessageFormat.format(getResource().getString(Constants.RES_SHOW_PROMPT_FRAMEWORK_OPTS),
-            framework.getPersistenceId())));
-
-    displayFormMetadataDetails(io, framework, bundle);
-
-    io.out.println();
+    printlnResource(Constants.RES_SHOW_PROMPT_FRAMEWORK_OPTS, framework.getPersistenceId());
+    displayFormMetadataDetails(framework, bundle);
   }
 }

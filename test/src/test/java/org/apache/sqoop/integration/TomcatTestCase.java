@@ -19,6 +19,7 @@ package org.apache.sqoop.integration;
 
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.junit.After;
 import org.junit.Before;
@@ -61,15 +62,31 @@ abstract public class TomcatTestCase {
    */
   private TomcatSqoopMiniCluster cluster;
 
+  /**
+   * Sqoop client API.
+   */
+  private SqoopClient client;
+
   @Before
   public void startServer() throws Exception {
     cluster = new TomcatSqoopMiniCluster(getTemporaryPath());
     cluster.start();
+
+    client = new SqoopClient(getServerUrl());
   }
 
   @After
   public void stopServer() throws Exception {
     cluster.stop();
+  }
+
+  /**
+   * Return SqoopClient configured to talk to testing server.
+   *
+   * @return
+   */
+  public SqoopClient getClient() {
+    return client;
   }
 
   public String getTemporaryPath() {

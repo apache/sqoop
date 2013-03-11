@@ -20,47 +20,34 @@ package org.apache.sqoop.client.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
-import org.codehaus.groovy.tools.shell.IO;
 
-import java.util.List;
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Show client internal options
  */
 public class ShowOptionFunction extends SqoopFunction {
-
-  private IO io;
-
   /**
    * Construct new object.
-   *
-   * @param io Shell's associated IO object
    */
   @SuppressWarnings("static-access")
-  protected ShowOptionFunction(IO io) {
-    this.io = io;
-
+  protected ShowOptionFunction() {
     this.addOption(OptionBuilder
         .hasArg().withArgName(Constants.OPT_NAME)
-        .withDescription(getResource().getString(Constants.RES_SET_PROMPT_OPT_NAME))
+        .withDescription(resource.getString(Constants.RES_SET_PROMPT_OPT_NAME))
         .withLongOpt(Constants.OPT_NAME)
         .create(Constants.OPT_NAME_CHAR));
   }
 
   /**
    * Execute this function from parsed command line.
-   *
-   * @param args Arguments passed to this function.
-   * @return Null
    */
-  public Object execute(List<String> args) {
-    if (args.size() == 1) {
+  public Object executeFunction(CommandLine line) {
+    if (line.getArgs().length == 1) {
       printAllOptions();
       return null;
     }
 
-    CommandLine line = parseOptions(this, 1, args);
     if (line.hasOption(Constants.OPT_NAME)) {
       String optionName = line.getOptionValue(Constants.OPT_NAME);
 
@@ -83,7 +70,7 @@ public class ShowOptionFunction extends SqoopFunction {
    * Print verbose option.
    */
   private void printVerbose() {
-    io.out.print("Verbose = ");
-    io.out.println(Environment.isVerboose());
+    print("Verbose = ");
+    println(String.valueOf(isVerboose()));
   }
 }

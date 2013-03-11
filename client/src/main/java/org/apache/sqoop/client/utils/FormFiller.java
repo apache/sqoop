@@ -18,7 +18,6 @@
 package org.apache.sqoop.client.utils;
 
 import jline.ConsoleReader;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -28,13 +27,14 @@ import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MValidatedElement;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Convenient methods for retrieving user input.
@@ -45,13 +45,11 @@ public final class FormFiller {
    * Internal input that will be reused for loading names for connection and
    * job objects.
    */
-  private static MStringInput nameInput =
-    new MStringInput("object-name", false, (short)25);
+  private static MStringInput nameInput = new MStringInput("object-name", false, (short)25);
 
   /**
    * Fill job object based on user input.
    *
-   * @param io Shell's io object
    * @param reader Associated console reader object
    * @param job Job that user is suppose to fill in
    * @param connectorBundle Connector resource bundle
@@ -59,18 +57,16 @@ public final class FormFiller {
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
-  public static boolean fillJob(IO io,
-                                ConsoleReader reader,
+  public static boolean fillJob(ConsoleReader reader,
                                 MJob job,
                                 ResourceBundle connectorBundle,
                                 ResourceBundle frameworkBundle)
                                 throws IOException {
 
-    job.setName(getName(io, reader, job.getName()));
+    job.setName(getName(reader, job.getName()));
 
     // Fill in data from user
-     return fillForms(io,
-                      reader,
+     return fillForms(reader,
                       job.getConnectorPart().getForms(),
                       connectorBundle,
                       job.getFrameworkPart().getForms(),
@@ -80,7 +76,6 @@ public final class FormFiller {
   /**
    * Fill connection object based on user input.
    *
-   * @param io Shell's io object
    * @param reader Associated console reader object
    * @param connection Connection that user is suppose to fill in
    * @param connectorBundle Connector resource bundle
@@ -88,26 +83,23 @@ public final class FormFiller {
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
-  public static boolean fillConnection(IO io,
-                                       ConsoleReader reader,
+  public static boolean fillConnection(ConsoleReader reader,
                                        MConnection connection,
                                        ResourceBundle connectorBundle,
                                        ResourceBundle frameworkBundle)
                                        throws IOException {
 
-    connection.setName(getName(io, reader, connection.getName()));
+    connection.setName(getName(reader, connection.getName()));
 
     // Fill in data from user
-     return fillForms(io,
-                      reader,
+     return fillForms(reader,
                       connection.getConnectorPart().getForms(),
                       connectorBundle,
                       connection.getFrameworkPart().getForms(),
                       frameworkBundle);
   }
 
-  public static boolean fillForms(IO io,
-                                  ConsoleReader reader,
+  public static boolean fillForms(ConsoleReader reader,
                                   List<MForm> connectorForms,
                                   ResourceBundle connectorBundle,
                                   List<MForm> frameworkForms,
@@ -116,25 +108,24 @@ public final class FormFiller {
 
 
     // Query connector forms
-    if(!fillForms(io, connectorForms, reader, connectorBundle)) {
+    if(!fillForms(connectorForms, reader, connectorBundle)) {
       return false;
     }
 
     // Query framework forms
-    if(!fillForms(io, frameworkForms, reader, frameworkBundle)) {
+    if(!fillForms(frameworkForms, reader, frameworkBundle)) {
       return false;
     }
 
     return true;
   }
 
-  public static boolean fillForms(IO io,
-                                  List<MForm> forms,
+  public static boolean fillForms(List<MForm> forms,
                                   ConsoleReader reader,
                                   ResourceBundle bundle)
     throws IOException {
     for (MForm form : forms) {
-      if(!fillForm(io, form, reader, bundle)) {
+      if(!fillForm(form, reader, bundle)) {
         return false;
       }
     }
@@ -142,19 +133,18 @@ public final class FormFiller {
     return true;
   }
 
-  public static boolean fillForm(IO io,
-                                 MForm form,
+  public static boolean fillForm(MForm form,
                                  ConsoleReader reader,
                                  ResourceBundle bundle) throws IOException {
-    io.out.println("");
-    io.out.println(bundle.getString(form.getLabelKey()));
+    println("");
+    println(bundle.getString(form.getLabelKey()));
 
     // Print out form validation
-    printValidationMessage(io, form);
-    io.out.println("");
+    printValidationMessage(form);
+    println("");
 
     for (MInput input : form.getInputs()) {
-      if(!fillInput(io, input, reader, bundle)) {
+      if(!fillInput(input, reader, bundle)) {
         return false;
       }
     }
@@ -162,25 +152,24 @@ public final class FormFiller {
     return true;
   }
 
-  public static boolean fillInput(IO io,
-                                  MInput input,
+  public static boolean fillInput(MInput input,
                                   ConsoleReader reader,
                                   ResourceBundle bundle) throws IOException {
     // Print out validation
-    printValidationMessage(io, input);
+    printValidationMessage(input);
 
     // Based on the input type, let's perform specific load
     switch (input.getType()) {
       case STRING:
-        return fillInputString(io, (MStringInput) input, reader, bundle);
+        return fillInputString((MStringInput) input, reader, bundle);
       case INTEGER:
-        return fillInputInteger(io, (MIntegerInput) input, reader, bundle);
+        return fillInputInteger((MIntegerInput) input, reader, bundle);
       case MAP:
-        return fillInputMap(io, (MMapInput) input, reader, bundle);
+        return fillInputMap((MMapInput) input, reader, bundle);
       case ENUM:
-        return fillInputEnum(io, (MEnumInput) input, reader, bundle);
+        return fillInputEnum((MEnumInput) input, reader, bundle);
       default:
-        io.out.println("Unsupported data type " + input.getType());
+        println("Unsupported data type " + input.getType());
         return true;
     }
   }
@@ -191,20 +180,18 @@ public final class FormFiller {
    * Print out numbered list of all available options and let user choose one
    * item from that.
    *
-   * @param io Shell's IO object
    * @param input Input that we should read or edit
    * @param reader Associated console reader
    * @param bundle Resource bundle
    * @return True if user with to continue with loading addtional inputs
    * @throws IOException
    */
-  private static boolean fillInputEnum(IO io,
-                                       MEnumInput input,
+  private static boolean fillInputEnum(MEnumInput input,
                                        ConsoleReader reader,
                                        ResourceBundle bundle)
                                        throws IOException {
     // Prompt in enum case
-    io.out.println(bundle.getString(input.getLabelKey()) + ": ");
+    println(bundle.getString(input.getLabelKey()) + ": ");
 
     // Indexes
     int i = -1;
@@ -214,7 +201,7 @@ public final class FormFiller {
     for(String value : input.getValues()) {
       i++;
 
-      io.out.println("  " + i  + " : " + value);
+      println("  " + i  + " : " + value);
 
       if(!input.isEmpty() && value.equals(input.getValue())) {
         lastChoice = i;
@@ -242,14 +229,14 @@ public final class FormFiller {
         index = Integer.valueOf(userTyped);
 
         if(index < 0 || index >= input.getValues().length) {
-          errorMessage(io, "Invalid index");
-          return fillInputEnum(io, input, reader, bundle);
+          errorMessage("Invalid index");
+          return fillInputEnum(input, reader, bundle);
         }
 
         input.setValue(input.getValues()[index]);
       } catch (NumberFormatException ex) {
-        errorMessage(io, "Input is not valid integer number");
-        return fillInputEnum(io, input, reader, bundle);
+        errorMessage("Input is not valid integer number");
+        return fillInputEnum(input, reader, bundle);
       }
     }
 
@@ -268,20 +255,18 @@ public final class FormFiller {
    * Please note that following code do not supports equal sign in property
    * name. It's however perfectly fine to have equal sign in value.
    *
-   * @param io Shell's IO object
    * @param input Input that we should read or edit
    * @param reader Associated console reader
    * @param bundle Resource bundle
    * @return True if user wish to continue with loading additional inputs
    * @throws IOException
    */
-  private static boolean fillInputMap(IO io,
-                                      MMapInput input,
+  private static boolean fillInputMap(MMapInput input,
                                       ConsoleReader reader,
                                       ResourceBundle bundle)
                                       throws IOException {
     // Special prompt in Map case
-    io.out.println(bundle.getString(input.getLabelKey()) + ": ");
+    println(bundle.getString(input.getLabelKey()) + ": ");
 
     // Internal loading map
     Map<String, String> values = input.getValue();
@@ -293,10 +278,9 @@ public final class FormFiller {
 
     while(true) {
       // Print all current items in each iteration
-      io.out.println("There are currently " + values.size()
-        + " values in the map:");
+      println("There are currently " + values.size() + " values in the map:");
       for(Map.Entry<String, String> entry : values.entrySet()) {
-        io.out.println(entry.getKey() + " = " + entry.getValue());
+        println(entry.getKey() + " = " + entry.getValue());
       }
 
       // Special prompt for Map entry
@@ -329,7 +313,7 @@ public final class FormFiller {
           if(values.containsKey(key)) {
             values.remove(key);
           } else {
-            errorMessage(io, "Don't know what to do with " + userTyped);
+            errorMessage("Don't know what to do with " + userTyped);
           }
         }
       }
@@ -374,8 +358,7 @@ public final class FormFiller {
     return input;
   }
 
-  private static boolean fillInputInteger(IO io,
-                                          MIntegerInput input,
+  private static boolean fillInputInteger(MIntegerInput input,
                                           ConsoleReader reader,
                                           ResourceBundle bundle)
                                           throws IOException {
@@ -398,8 +381,8 @@ public final class FormFiller {
         value = Integer.valueOf(userTyped);
         input.setValue(value);
       } catch (NumberFormatException ex) {
-        errorMessage(io, "Input is not valid integer number");
-        return fillInputInteger(io, input, reader, bundle);
+        errorMessage("Input is not valid integer number");
+        return fillInputInteger(input, reader, bundle);
       }
 
       input.setValue(Integer.valueOf(userTyped));
@@ -411,15 +394,13 @@ public final class FormFiller {
   /**
    * Load string input from the user.
    *
-   * @param io Shell's IO object
    * @param input Input that we should load in
    * @param reader Associated console reader
    * @param bundle Resource bundle for this input
    * @return
    * @throws IOException
    */
-  public static boolean fillInputString(IO io,
-                                        MStringInput input,
+  public static boolean fillInputString(MStringInput input,
                                         ConsoleReader reader,
                                         ResourceBundle bundle)
                                         throws IOException {
@@ -451,9 +432,9 @@ public final class FormFiller {
 
       // Check that it did not exceeds maximal allowance for given input
       if(userTyped.length() > input.getMaxLength()) {
-        errorMessage(io, "Size of input exceeds allowance for this input"
+        errorMessage("Size of input exceeds allowance for this input"
           + " field. Maximal allowed size is " + input.getMaxLength());
-        return fillInputString(io, input, reader, bundle);
+        return fillInputString(input, reader, bundle);
       }
     }
 
@@ -468,7 +449,7 @@ public final class FormFiller {
     reader.flushConsole();
   }
 
-  public static String getName(IO io, ConsoleReader reader,
+  public static String getName(ConsoleReader reader,
                                String name) throws IOException {
     if(name == null) {
       nameInput.setEmpty();
@@ -476,7 +457,7 @@ public final class FormFiller {
       nameInput.setValue(name);
     }
 
-    fillInputString(io, nameInput, reader, Environment.getResourceBundle());
+    fillInputString(nameInput, reader, getResourceBundle());
 
     return nameInput.getValue();
   }
@@ -484,16 +465,15 @@ public final class FormFiller {
   /**
    * Print validation message in cases that it's not in state "FINE"
    *
-   * @param io IO object to print out the message
    * @param element Validated element
    */
-  public static void printValidationMessage(IO io, MValidatedElement element) {
+  public static void printValidationMessage(MValidatedElement element) {
     switch (element.getValidationStatus()) {
       case UNACCEPTABLE:
-        errorMessage(io, element.getValidationMessage());
+        errorMessage(element.getValidationMessage());
         break;
       case ACCEPTABLE:
-        warningMessage(io, element.getValidationMessage());
+        warningMessage(element.getValidationMessage());
         break;
       default:
         // Simply ignore all other states for the moment
@@ -501,18 +481,17 @@ public final class FormFiller {
     }
   }
 
-  public static void errorMessage(IO io, String message) {
-    io.out.println("Error message: @|red " + message + " |@");
+  public static void errorMessage(String message) {
+    println("Error message: @|red " + message + " |@");
   }
 
-  public static void warningMessage(IO io, String message) {
-    io.out.println("Warning message: @|yellow " + message + " |@");
+  public static void warningMessage(String message) {
+    println("Warning message: @|yellow " + message + " |@");
   }
 
-  public static void errorIntroduction(IO io) {
-    io.out.println();
-    io.out.println("@|red There are issues with entered data, please"
-      + " revise your input:|@");
+  public static void errorIntroduction() {
+    println();
+    println("@|red There are issues with entered data, please revise your input:|@");
   }
 
   private FormFiller() {

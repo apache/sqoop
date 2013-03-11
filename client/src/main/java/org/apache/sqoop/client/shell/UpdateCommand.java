@@ -19,13 +19,12 @@ package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
 
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
@@ -42,30 +41,29 @@ public class UpdateCommand extends SqoopCommand {
   }
 
   public Object executeCommand(List args) {
-    if(!Environment.isInteractive()) {
+    if(!isInteractive()) {
       throw new SqoopException(ClientError.CLIENT_0007, "update");
     }
 
-    String usageMsg = MessageFormat.format(getResource().getString(Constants.RES_UPDATE_USAGE), getUsage());
     if (args.size() == 0) {
-      io.out.println(usageMsg);
-      io.out.println();
+      printlnResource(Constants.RES_UPDATE_USAGE, getUsage());
       return null;
     }
 
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
-        connectionFunction = new UpdateConnectionFunction(io);
+        connectionFunction = new UpdateConnectionFunction();
       }
       return connectionFunction.execute(args);
     } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
-        jobFunction = new UpdateJobFunction(io);
+        jobFunction = new UpdateJobFunction();
       }
       return jobFunction.execute(args);
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

@@ -24,7 +24,6 @@ import groovy.lang.Script;
 import java.util.*;
 
 import org.apache.sqoop.client.core.ClientError;
-import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.ComplexCommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
@@ -37,13 +36,6 @@ public abstract class SqoopCommand extends ComplexCommandSupport
   private String description;
   private String usage;
   private String help;
-
-  private static final ResourceBundle clientResource =
-      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
-
-  protected  ResourceBundle getResource() {
-    return clientResource;
-  }
 
   @SuppressWarnings("unchecked")
   protected SqoopCommand(Shell shell, String name, String shortcut,

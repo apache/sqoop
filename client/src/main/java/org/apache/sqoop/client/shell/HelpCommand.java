@@ -21,7 +21,6 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.core.ClientError;
@@ -32,10 +31,9 @@ import org.codehaus.groovy.tools.shell.CommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
 import org.codehaus.groovy.tools.shell.util.SimpleCompletor;
 
-public class HelpCommand extends CommandSupport
-{
-  private static final ResourceBundle clientResource =
-      ResourceBundle.getBundle(Constants.RESOURCE_NAME);
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+
+public class HelpCommand extends CommandSupport {
 
   protected HelpCommand(Shell shell) {
     super(shell, Constants.CMD_HELP, Constants.CMD_HELP_SC);
@@ -43,17 +41,17 @@ public class HelpCommand extends CommandSupport
 
   @Override
   public String getDescription() {
-    return clientResource.getString(Constants.RES_HELP_DESCRIPTION);
+    return resourceString(Constants.RES_HELP_DESCRIPTION);
   }
 
   @Override
   public String getUsage() {
-    return clientResource.getString(Constants.RES_HELP_USAGE);
+    return resourceString(Constants.RES_HELP_USAGE);
   }
 
   @Override
   public String getHelp() {
-    return clientResource.getString(Constants.RES_HELP_MESSAGE);
+    return resourceString(Constants.RES_HELP_MESSAGE);
   }
 
   @SuppressWarnings("rawtypes")
@@ -90,12 +88,12 @@ public class HelpCommand extends CommandSupport
         maxShortcut = command.getShortcut().length();
       }
     }
-    
-    io.out.println(clientResource.getString(Constants.RES_HELP_INFO));
-    io.out.println();
+
+    printlnResource(Constants.RES_HELP_INFO);
+    println();
 
     // List the commands we know about
-    io.out.println(clientResource.getString(Constants.RES_HELP_AVAIL_COMMANDS));
+    printlnResource(Constants.RES_HELP_AVAIL_COMMANDS);
 
     iterator = shell.getRegistry().commands().iterator();
     while (iterator.hasNext()) {
@@ -104,39 +102,35 @@ public class HelpCommand extends CommandSupport
         continue;
       }
 
-      String paddedName =
-          StringUtils.rightPad(command.getName(), maxName);
-      String paddedShortcut =
-          StringUtils.rightPad(command.getShortcut(), maxShortcut);
-        
+      String paddedName = StringUtils.rightPad(command.getName(), maxName);
+      String paddedShortcut = StringUtils.rightPad(command.getShortcut(), maxShortcut);
+
       String description = command.getDescription();
 
       StringBuilder sb = new StringBuilder();
       sb.append("  ")
-         .append(MessageFormat.format(clientResource.getString(Constants
+         .append(MessageFormat.format(resource.getString(Constants
              .RES_HELP_CMD_DESCRIPTION), paddedName,
              paddedShortcut, description));
-      io.out.println(sb);
+      println(sb.toString());
     }
-    
-    io.out.println();
-    io.out.println(clientResource.getString(Constants.RES_HELP_SPECIFIC_CMD_INFO));
-    io.out.println();
+
+    println();
+    printlnResource(Constants.RES_HELP_SPECIFIC_CMD_INFO);
+    println();
   }
 
   private void help(String name) {
     Command command = shell.getRegistry().find(name);
     if (command == null) {
-      String msg = MessageFormat.format(clientResource.getString(Constants
+      String msg = MessageFormat.format(resource.getString(Constants
           .RES_UNRECOGNIZED_CMD), name);
       throw new SqoopException(ClientError.CLIENT_0001, msg);
     }
-    io.out.println(MessageFormat.format(clientResource.getString
-        (Constants.RES_HELP_CMD_USAGE), command.getName(),
-        command.getUsage()));
-    io.out.println();
-    io.out.println(command.getHelp());
-    io.out.println();
+    printlnResource(Constants.RES_HELP_CMD_USAGE, command.getName(), command.getUsage());
+    println();
+    println(command.getHelp());
+    println();
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })

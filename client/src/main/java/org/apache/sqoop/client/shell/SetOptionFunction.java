@@ -20,50 +20,37 @@ package org.apache.sqoop.client.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.core.Environment;
-import org.codehaus.groovy.tools.shell.IO;
 
-import java.text.MessageFormat;
-import java.util.List;
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
  */
 public class SetOptionFunction extends SqoopFunction {
-
-
-  private IO io;
-
-
   @SuppressWarnings("static-access")
-  protected SetOptionFunction(IO io) {
-    this.io = io;
-
+  protected SetOptionFunction() {
     this.addOption(OptionBuilder.hasArg()
-      .withDescription(getResource().getString(Constants.RES_SET_PROMPT_OPT_NAME))
+      .withDescription(resourceString(Constants.RES_SET_PROMPT_OPT_NAME))
       .withLongOpt(Constants.OPT_NAME)
       .create(Constants.OPT_NAME_CHAR));
     this.addOption(OptionBuilder.hasArg()
-      .withDescription(getResource().getString(Constants.RES_SET_PROMPT_OPT_VALUE))
+      .withDescription(resourceString(Constants.RES_SET_PROMPT_OPT_VALUE))
       .withLongOpt(Constants.OPT_VALUE)
       .create(Constants.OPT_VALUE_CHAR));
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_NAME)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_NAME_MISSING));
+      printlnResource(Constants.RES_ARGS_NAME_MISSING);
       return null;
     }
     if (!line.hasOption(Constants.OPT_VALUE)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_VALUE_MISSING));
+      printlnResource(Constants.RES_ARGS_VALUE_MISSING);
       return null;
     }
 
-    handleOptionSetting(line.getOptionValue(Constants.OPT_NAME),
-        line.getOptionValue(Constants.OPT_VALUE));
+    handleOptionSetting(line.getOptionValue(Constants.OPT_NAME), line.getOptionValue(Constants.OPT_VALUE));
 
-    io.out.println();
     return null;
   }
 
@@ -75,13 +62,11 @@ public class SetOptionFunction extends SqoopFunction {
         newValue = true;
       }
 
-      Environment.setVerbose(newValue);
-      io.out.println(MessageFormat.format(getResource().getString(Constants
-          .RES_SET_VERBOSE_CHANGED), newValue));
+      setVerbose(newValue);
+      printlnResource(Constants.RES_SET_VERBOSE_CHANGED, newValue);
       return;
     }
 
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_SET_UNKNOWN_OPT_IGNORED), name));
+    printlnResource(Constants.RES_SET_UNKNOWN_OPT_IGNORED, name);
   }
 }

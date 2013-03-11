@@ -23,48 +23,36 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.client.utils.FormFiller.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  *
  */
 public class UpdateConnectionFunction extends SqoopFunction {
-
-
-  private IO io;
-
-
   @SuppressWarnings("static-access")
-  public UpdateConnectionFunction(IO io) {
-    this.io = io;
-
+  public UpdateConnectionFunction() {
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_CONN_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_XID)
       .hasArg()
       .create(Constants.OPT_XID_CHAR));
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_XID_MISSING));
+      printlnResource(Constants.RES_ARGS_XID_MISSING);
       return null;
     }
 
     try {
-      updateConnection(line.getOptionValue(Constants.OPT_XID));
+      updateConnection(getLong(line, Constants.OPT_XID));
     } catch (IOException ex) {
       throw new SqoopException(ClientError.CLIENT_0005, ex);
     }
@@ -72,44 +60,36 @@ public class UpdateConnectionFunction extends SqoopFunction {
     return null;
   }
 
-  private void updateConnection(String connectionId) throws IOException {
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_UPDATE_UPDATING_CONN), connectionId));
+  private void updateConnection(Long connectionId) throws IOException {
+    printlnResource(Constants.RES_UPDATE_UPDATING_CONN, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
 
-    ConnectionBean connectionBean = readConnection(connectionId);
+    MConnection connection = client.getConnection(connectionId);
 
-    // TODO(jarcec): Check that we have expected data
-    MConnection connection = connectionBean.getConnections().get(0);
-    ResourceBundle frameworkBundle
-      = connectionBean.getFrameworkBundle();
-    ResourceBundle connectorBundle
-      = connectionBean.getConnectorBundle(connection.getConnectorId());
+    ResourceBundle connectorBundle = client.getResourceBundle(connection.getConnectorId());
+    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
 
-    io.out.println(getResource().getString(Constants
-        .RES_PROMPT_UPDATE_CONN_METADATA));
+    printlnResource(Constants.RES_PROMPT_UPDATE_CONN_METADATA);
 
     do {
       // Print error introduction if needed
       if( !status.canProceed() ) {
-        errorIntroduction(io);
+        errorIntroduction();
       }
 
       // Fill in data from user
-      if(!fillConnection(io, reader, connection,
-                         connectorBundle, frameworkBundle)) {
+      if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
         return;
       }
 
       // Try to create
-      status = updateConnectionApplyValidations(connection);
+      status = client.updateConnection(connection);
     } while(!status.canProceed());
 
-    io.out.println(MessageFormat.format(getResource().getString(Constants
-        .RES_UPDATE_CONN_SUCCESSFUL), status.name()));
+    printlnResource(Constants.RES_UPDATE_CONN_SUCCESSFUL, status.name());
   }
 
 

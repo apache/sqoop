@@ -21,37 +21,28 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.request.JobRequest;
-import org.codehaus.groovy.tools.shell.IO;
 
-import java.util.List;
-
-import static org.apache.sqoop.client.core.RequestCache.*;
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Handles deletion of a job object.
  */
 public class DeleteJobFunction extends SqoopFunction {
 
-  private IO io;
-
   private JobRequest jobRequest;
 
-
   @SuppressWarnings("static-access")
-  public DeleteJobFunction(IO io) {
-    this.io = io;
-
+  public DeleteJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(getResource().getString(Constants.RES_PROMPT_JOB_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
       .withLongOpt(Constants.OPT_JID)
       .hasArg()
       .create('j'));
   }
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (!line.hasOption(Constants.OPT_JID)) {
-      io.out.println(getResource().getString(Constants.RES_ARGS_JID_MISSING));
+      printlnResource(Constants.RES_ARGS_JID_MISSING);
       return null;
     }
 
@@ -59,7 +50,7 @@ public class DeleteJobFunction extends SqoopFunction {
       jobRequest = new JobRequest();
     }
 
-    deleteJob(line.getOptionValue(Constants.OPT_JID));
+    client.deleteJob(getLong(line, Constants.OPT_JID));
 
     return null;
   }

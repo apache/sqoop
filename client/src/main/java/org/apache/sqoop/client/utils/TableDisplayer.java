@@ -18,10 +18,11 @@
 package org.apache.sqoop.client.utils;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.tools.shell.IO;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
  * Display table based data
@@ -31,13 +32,10 @@ public class TableDisplayer {
   /**
    * Display given columns in nice table structure to given IO object.
    *
-   * @param io Shell's IO object
    * @param headers List of headers
    * @param columns Array of columns
    */
-  public static void display(IO io, List<String> headers, List<String> ...columns) {
-
-    assert io != null;
+  public static void display(List<String> headers, List<String> ...columns) {
     assert headers != null;
     assert columns != null;
     assert headers.size() == columns.length;
@@ -52,50 +50,49 @@ public class TableDisplayer {
     }
 
     // First line is border
-    drawLine(io, widths);
+    drawLine(widths);
 
     // Print out header (text is centralised)
-    io.out.print("| ");
+    print("| ");
     for(int i = 0 ; i < columnCount; i++) {
-      io.out.print(StringUtils.center(headers.get(i), widths.get(i), ' '));
-      io.out.print((i == columnCount -1) ? " |" : " | ");
+      print(StringUtils.center(headers.get(i), widths.get(i), ' '));
+      print((i == columnCount -1) ? " |" : " | ");
     }
-    io.out.println();
+    println();
 
     // End up header by border
-    drawLine(io, widths);
+    drawLine(widths);
 
     // Number of rows in the table
     int rows = getMaximalRows(columns);
 
     // Print out each row
     for(int row = 0 ; row < rows; row++) {
-      io.out.print("| ");
+      print("| ");
       for(int i = 0 ; i < columnCount; i++) {
-        io.out.print(StringUtils.rightPad(columns[i].get(row), widths.get(i), ' '));
-        io.out.print((i == columnCount -1) ? " |" : " | ");
+        print(StringUtils.rightPad(columns[i].get(row), widths.get(i), ' '));
+        print((i == columnCount -1) ? " |" : " | ");
       }
-      io.out.println();
+      println();
     }
 
     // End table by final border
-    drawLine(io, widths);
+    drawLine(widths);
   }
 
   /**
    * Draw border line
    *
-   * @param io Shell's associated IO object
    * @param widths List of widths of each column
    */
-  private static void drawLine(IO io, List<Integer> widths) {
+  private static void drawLine(List<Integer> widths) {
     int last = widths.size() - 1;
-    io.out.print("+-");
+    print("+-");
     for(int i = 0; i < widths.size(); i++) {
-      io.out.print(StringUtils.repeat("-", widths.get(i)));
-      io.out.print((i == last) ? "-+" : "-+-");
+      print(StringUtils.repeat("-", widths.get(i)));
+      print((i == last) ? "-+" : "-+-");
     }
-    io.out.println();
+    println();
   }
 
   /**

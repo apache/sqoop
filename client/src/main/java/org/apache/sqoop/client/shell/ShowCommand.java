@@ -17,14 +17,11 @@
  */
 package org.apache.sqoop.client.shell;
 
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
-
-import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.Shell;
+
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 public class ShowCommand extends SqoopCommand
 {
@@ -48,57 +45,55 @@ public class ShowCommand extends SqoopCommand
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Object executeCommand(List args) {
-    String usageMsg = MessageFormat.format(getResource().getString(Constants
-        .RES_SHOW_USAGE), getUsage());
     if (args.size() == 0) {
-      shell.getIo().out.println(usageMsg);
-      io.out.println();
+      printlnResource(Constants.RES_SHOW_USAGE, getUsage());
       return null;
     }
 
     String func = (String)args.get(0);
     if (func.equals(Constants.FN_SERVER)) {
       if (serverFunction == null) {
-        serverFunction = new ShowServerFunction(io);
+        serverFunction = new ShowServerFunction();
       }
       return serverFunction.execute(args);
 
     } else if (func.equals(Constants.FN_VERSION)) {
       if (versionFunction == null) {
-        versionFunction = new ShowVersionFunction(io);
+        versionFunction = new ShowVersionFunction();
       }
       return versionFunction.execute(args);
 
     } else if (func.equals(Constants.FN_CONNECTOR)) {
       if (connectorFunction == null) {
-        connectorFunction = new ShowConnectorFunction(io);
+        connectorFunction = new ShowConnectorFunction();
       }
       return connectorFunction.execute(args);
 
     } else if (func.equals(Constants.FN_FRAMEWORK)) {
       if (frameworkFunction == null) {
-        frameworkFunction = new ShowFrameworkFunction(io);
+        frameworkFunction = new ShowFrameworkFunction();
       }
       return frameworkFunction.execute(args);
 
     } else if (func.equals(Constants.FN_CONNECTION)) {
       if (connectionFunction == null) {
-        connectionFunction = new ShowConnectionFunction(io);
+        connectionFunction = new ShowConnectionFunction();
       }
       return connectionFunction.execute(args);
 
     } else if (func.equals(Constants.FN_JOB)) {
       if (jobFunction == null) {
-        jobFunction = new ShowJobFunction(io);
+        jobFunction = new ShowJobFunction();
       }
       return jobFunction.execute(args);
     } else if (func.equals(Constants.FN_OPTION)) {
       if (optionFunction == null) {
-        optionFunction = new ShowOptionFunction(io);
+        optionFunction = new ShowOptionFunction();
       }
       return optionFunction.execute(args);
     } else {
-      throw new SqoopException(ClientError.CLIENT_0002, usageMsg);
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+      return null;
     }
   }
 }

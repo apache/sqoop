@@ -21,55 +21,36 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.TableDisplayer;
-import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.model.MConnection;
-import org.codehaus.groovy.tools.shell.IO;
 
-import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 import static org.apache.sqoop.client.utils.FormDisplayer.*;
-import static org.apache.sqoop.client.core.RequestCache.*;
 
 /**
  *
  */
 public class ShowConnectionFunction extends SqoopFunction {
-
-
-  private IO io;
-
-
   @SuppressWarnings("static-access")
-  protected ShowConnectionFunction(IO io) {
-    this.io = io;
-
+  protected ShowConnectionFunction() {
     this.addOption(OptionBuilder
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_ALL_CONNS))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_CONNS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_XID)
-        .withDescription(getResource().getString(Constants
-            .RES_SHOW_PROMPT_DISPLAY_CONN_XID))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONN_XID))
         .withLongOpt(Constants.OPT_XID)
         .create(Constants.OPT_XID_CHAR));
   }
 
-  public void printHelp(PrintWriter out) {
-    out.println(getResource().getString(Constants.RES_SHOW_CONN_USAGE));
-    super.printHelp(out);
-  }
-
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
+  public Object executeFunction(CommandLine line) {
     if (line.hasOption(Constants.OPT_ALL)) {
-      showConnection(null);
+      showConnections();
     } else if (line.hasOption(Constants.OPT_XID)) {
-      showConnection(line.getOptionValue(Constants.OPT_XID));
+      showConnection(getLong(line, Constants.OPT_XID));
     } else {
       showSummary();
     }
@@ -78,13 +59,12 @@ public class ShowConnectionFunction extends SqoopFunction {
   }
 
   private void showSummary() {
-    ConnectionBean connectionBean = readConnection(null);
-    List<MConnection> connections = connectionBean.getConnections();
+    List<MConnection> connections = client.getConnections();
 
     List<String> header = new LinkedList<String>();
-    header.add(getResource().getString(Constants.RES_TABLE_HEADER_ID));
-    header.add(getResource().getString(Constants.RES_TABLE_HEADER_NAME));
-    header.add(getResource().getString(Constants.RES_TABLE_HEADER_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
@@ -96,40 +76,43 @@ public class ShowConnectionFunction extends SqoopFunction {
       connectors.add(String.valueOf(connection.getConnectorId()));
     }
 
-    TableDisplayer.display(io, header, ids, names, connectors);
+    TableDisplayer.display(header, ids, names, connectors);
   }
 
-  private void showConnection(String xid) {
-    ConnectionBean connectionBean = readConnection(xid);
+  private void showConnections() {
+    List<MConnection> connections = client.getConnections();
 
-    List<MConnection> connections = connectionBean.getConnections();
-
-    String s = MessageFormat.format(getResource().getString(Constants
-        .RES_SHOW_PROMPT_CONNS_TO_SHOW), connections.size());
-
-    io.out.println(s);
-
-    DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+    printlnResource(Constants.RES_SHOW_PROMPT_CONNS_TO_SHOW, connections.size());
 
     for (MConnection connection : connections) {
-      s =  MessageFormat.format(
-        getResource().getString(Constants.RES_SHOW_PROMPT_CONN_INFO),
-        connection.getPersistenceId(),
-        connection.getName(),
-        formatter.format(connection.getCreationDate()),
-        formatter.format(connection.getLastUpdateDate())
-      );
-      io.out.println(s);
-
-      long connectorId = connection.getConnectorId();
-
-      // Display connector part
-      displayForms(io,
-                   connection.getConnectorPart().getForms(),
-                   connectionBean.getConnectorBundle(connectorId));
-      displayForms(io,
-                   connection.getFrameworkPart().getForms(),
-                   connectionBean.getFrameworkBundle());
+      displayConnection(connection);
     }
+  }
+
+  private void showConnection(Long xid) {
+    MConnection connection = client.getConnection(xid);
+
+    printlnResource(Constants.RES_SHOW_PROMPT_CONNS_TO_SHOW, 1);
+
+    displayConnection(connection);
+  }
+
+  private void displayConnection(MConnection connection) {
+    DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+
+    printlnResource(Constants.RES_SHOW_PROMPT_CONN_INFO,
+      connection.getPersistenceId(),
+      connection.getName(),
+      formatter.format(connection.getCreationDate()),
+      formatter.format(connection.getLastUpdateDate())
+    );
+
+    long connectorId = connection.getConnectorId();
+
+    // Display connector part
+    displayForms(connection.getConnectorPart().getForms(),
+                 client.getResourceBundle(connectorId));
+    displayForms(connection.getFrameworkPart().getForms(),
+                 client.getFrameworkResourceBundle());
   }
 }
