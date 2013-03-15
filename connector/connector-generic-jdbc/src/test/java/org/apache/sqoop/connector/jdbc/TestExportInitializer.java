@@ -28,15 +28,21 @@ import org.apache.sqoop.job.etl.InitializerContext;
 
 public class TestExportInitializer extends TestCase {
 
+  private final String schemaName;
   private final String tableName;
+  private final String schemalessTableName;
   private final String tableSql;
+  private final String schemalessTableSql;
   private final String tableColumns;
 
   private GenericJdbcExecutor executor;
 
   public TestExportInitializer() {
-    tableName = getClass().getSimpleName().toUpperCase();
+    schemaName = getClass().getSimpleName().toUpperCase() + "SCHEMA";
+    tableName = getClass().getSimpleName().toUpperCase() + "TABLEWITHSCHEMA";
+    schemalessTableName = getClass().getSimpleName().toUpperCase() + "TABLE";
     tableSql = "INSERT INTO " + tableName + " VALUES (?,?,?)";
+    schemalessTableSql = "INSERT INTO " + schemalessTableName + " VALUES (?,?,?)";
     tableColumns = "ICOL,VCOL";
   }
 
@@ -45,10 +51,15 @@ public class TestExportInitializer extends TestCase {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
 
+    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
     if (!executor.existTable(tableName)) {
-      executor.executeUpdate("CREATE TABLE "
-          + executor.delimitIdentifier(tableName)
-          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
+      executor.executeUpdate("CREATE SCHEMA " + executor.delimitIdentifier(schemaName));
+      executor.executeUpdate("CREATE TABLE " + fullTableName + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
+    }
+
+    fullTableName = executor.delimitIdentifier(schemalessTableName);
+    if (!executor.existTable(schemalessTableName)) {
+      executor.executeUpdate("CREATE TABLE " + fullTableName + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
     }
   }
 
@@ -57,62 +68,131 @@ public class TestExportInitializer extends TestCase {
     executor.close();
   }
 
+  @SuppressWarnings("unchecked")
   public void testTableName() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 
+    String fullTableName = executor.delimitIdentifier(schemalessTableName);
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.table.tableName = tableName;
+    jobConf.table.tableName = schemalessTableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
 
+    @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcExportInitializer();
     initializer.initialize(initializerContext, connConf, jobConf);
 
-    verifyResult(context,
-        "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES (?,?,?)");
+    verifyResult(context, "INSERT INTO " + fullTableName + " VALUES (?,?,?)");
   }
 
+  @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 
+    String fullTableName = executor.delimitIdentifier(schemalessTableName);
+
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.table.tableName = tableName;
+    jobConf.table.tableName = schemalessTableName;
     jobConf.table.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
 
+    @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcExportInitializer();
     initializer.initialize(initializerContext, connConf, jobConf);
 
-    verifyResult(context,
-        "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " (" + tableColumns + ") VALUES (?,?)");
+    verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
   }
 
+  @SuppressWarnings("unchecked")
   public void testTableSql() throws Exception {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
     ExportJobConfiguration jobConf = new ExportJobConfiguration();
 
     connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.sql = schemalessTableSql;
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcExportInitializer();
+    initializer.initialize(initializerContext, connConf, jobConf);
+
+    verifyResult(context, "INSERT INTO " + executor.delimitIdentifier(schemalessTableName) + " VALUES (?,?,?)");
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testTableNameWithSchema() throws Exception {
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
+    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.schemaName = schemaName;
+    jobConf.table.tableName = tableName;
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcExportInitializer();
+    initializer.initialize(initializerContext, connConf, jobConf);
+
+    verifyResult(context, "INSERT INTO " + fullTableName + " VALUES (?,?,?)");
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testTableNameWithTableColumnsWithSchema() throws Exception {
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
+    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.schemaName = schemaName;
+    jobConf.table.tableName = tableName;
+    jobConf.table.columns = tableColumns;
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcExportInitializer();
+    initializer.initialize(initializerContext, connConf, jobConf);
+
+    verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testTableSqlWithSchema() throws Exception {
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ExportJobConfiguration jobConf = new ExportJobConfiguration();
+
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.schemaName = schemaName;
     jobConf.table.sql = tableSql;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
 
+    @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcExportInitializer();
     initializer.initialize(initializerContext, connConf, jobConf);
 
-    verifyResult(context,
-        "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES (?,?,?)");
+    verifyResult(context, "INSERT INTO " + executor.delimitIdentifier(tableName) + " VALUES (?,?,?)");
   }
 
   private void verifyResult(MutableContext context, String dataSql) {

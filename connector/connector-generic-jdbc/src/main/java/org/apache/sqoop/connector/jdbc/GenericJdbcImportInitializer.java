@@ -104,6 +104,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
+      String schemaName = jobConfig.table.schemaName;
       String tableName = jobConfig.table.tableName;
       String tableSql = jobConfig.table.sql;
 
@@ -114,13 +115,17 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
 
       } else if (tableName != null) {
         // when table name is specified:
+
+        // For databases that support schemas (IE: postgresql).
+        String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+
         String column = partitionColumnName;
         builder.append("SELECT MIN(");
         builder.append(column);
         builder.append("), MAX(");
         builder.append(column);
         builder.append(") FROM ");
-        builder.append(executor.delimitIdentifier(tableName));
+        builder.append(fullTableName);
 
       } else if (tableSql != null) {
         String column = executor.qualify(
@@ -177,6 +182,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     String dataSql;
     String fieldNames;
 
+    String schemaName = jobConfig.table.schemaName;
     String tableName = jobConfig.table.tableName;
     String tableSql = jobConfig.table.sql;
     String tableColumns = jobConfig.table.columns;
@@ -189,10 +195,13 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     } else if (tableName != null) {
       // when table name is specified:
 
+      // For databases that support schemas (IE: postgresql).
+      String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+
       if (tableColumns == null) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT * FROM ");
-        builder.append(executor.delimitIdentifier(tableName));
+        builder.append(fullTableName);
         builder.append(" WHERE ");
         builder.append(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
         dataSql = builder.toString();
@@ -206,7 +215,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
         builder.append("SELECT ");
         builder.append(tableColumns);
         builder.append(" FROM ");
-        builder.append(executor.delimitIdentifier(tableName));
+        builder.append(fullTableName);
         builder.append(" WHERE ");
         builder.append(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
         dataSql = builder.toString();

@@ -25,6 +25,7 @@ import org.apache.sqoop.model.Input;
  */
 @FormClass
 public class ImportTableForm {
+  @Input(size = 50) public String schemaName;
   @Input(size = 50) public String tableName;
   @Input(size = 50) public String sql;
   @Input(size = 50) public String columns;

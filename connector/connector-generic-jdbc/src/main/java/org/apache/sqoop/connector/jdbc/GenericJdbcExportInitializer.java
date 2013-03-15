@@ -67,6 +67,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
   private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ExportJobConfiguration jobConfig) {
     String dataSql;
 
+    String schemaName = jobConfig.table.schemaName;
     String tableName = jobConfig.table.tableName;
     String tableSql = jobConfig.table.sql;
     String tableColumns = jobConfig.table.columns;
@@ -79,12 +80,15 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
     } else if (tableName != null) {
       // when table name is specified:
 
+      // For databases that support schemas (IE: postgresql).
+      String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+
       if (tableColumns == null) {
         String[] columns = executor.getQueryColumns("SELECT * FROM "
-            + executor.delimitIdentifier(tableName) + " WHERE 1 = 0");
+            + fullTableName + " WHERE 1 = 0");
         StringBuilder builder = new StringBuilder();
         builder.append("INSERT INTO ");
-        builder.append(executor.delimitIdentifier(tableName));
+        builder.append(fullTableName);
         builder.append(" VALUES (?");
         for (int i = 1; i < columns.length; i++) {
           builder.append(",?");
@@ -96,7 +100,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
         String[] columns = StringUtils.split(tableColumns, ',');
         StringBuilder builder = new StringBuilder();
         builder.append("INSERT INTO ");
-        builder.append(executor.delimitIdentifier(tableName));
+        builder.append(fullTableName);
         builder.append(" (");
         builder.append(tableColumns);
         builder.append(") VALUES (?");
