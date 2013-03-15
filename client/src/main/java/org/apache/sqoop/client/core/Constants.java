@@ -316,6 +316,37 @@ public class Constants {
   public static final String RES_TABLE_HEADER_CONNECTOR =
       "table.header.connector";
 
+  public static final String RES_FORMDISPLAYER_SUPPORTED_JOBTYPE =
+      "formdisplayer.supported_job_types";
+  public static final String RES_FORMDISPLAYER_CONNECTION =
+      "formdisplayer.connection";
+  public static final String RES_FORMDISPLAYER_JOB =
+      "formdisplayer.job";
+  public static final String RES_FORMDISPLAYER_FORM_JOBTYPE =
+      "formdisplayer.forms_jobtype";
+  public static final String RES_FORMDISPLAYER_FORM =
+      "formdisplayer.form";
+  public static final String RES_FORMDISPLAYER_NAME =
+      "formdisplayer.name";
+  public static final String RES_FORMDISPLAYER_LABEL =
+      "formdisplayer.label";
+  public static final String RES_FORMDISPLAYER_HELP =
+      "formdisplayer.help";
+  public static final String RES_FORMDISPLAYER_INPUT =
+      "formdisplayer.input";
+  public static final String RES_FORMDISPLAYER_TYPE =
+      "formdisplayer.type";
+  public static final String RES_FORMDISPLAYER_MASK =
+      "formdisplayer.mask";
+  public static final String RES_FORMDISPLAYER_SIZE =
+      "formdisplayer.size";
+  public static final String RES_FORMDISPLAYER_POSSIBLE_VALUES =
+      "formdisplayer.possible_values";
+  public static final String RES_FORMDISPLAYER_UNSUPPORTED_DATATYPE =
+      "formdisplayer.unsupported_datatype";
+  public static final String RES_FORMDISPLAYER_INPUT_SENSITIVE =
+      "formdisplayer.input_sensitive";
+
   private Constants() {
     // Instantiation is prohibited
   }

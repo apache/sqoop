@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.utils;
 
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
@@ -42,20 +43,20 @@ public final class FormDisplayer {
 
   public static void displayFormMetadataDetails(MFramework framework,
                                                 ResourceBundle bundle) {
-    print("  Supported job types: ");
+    print("  %s: ", resourceString(Constants.RES_FORMDISPLAYER_SUPPORTED_JOBTYPE));
     println(framework.getAllJobsForms().keySet().toString());
 
     displayFormsMetadata(
       framework.getConnectionForms().getForms(),
-      "Connection",
+      resourceString(Constants.RES_FORMDISPLAYER_CONNECTION),
       bundle);
 
     for (MJobForms jobForms : framework.getAllJobsForms().values()) {
-      print("  Forms for job type ");
+      print("  %s ", resourceString(Constants.RES_FORMDISPLAYER_FORM_JOBTYPE));
       print(jobForms.getType().name());
       println(":");
 
-      displayFormsMetadata(jobForms.getForms(), "Job", bundle);
+      displayFormsMetadata(jobForms.getForms(), resourceString(Constants.RES_FORMDISPLAYER_JOB), bundle);
     }
   }
 
@@ -67,46 +68,46 @@ public final class FormDisplayer {
     while (fiter.hasNext()) {
       print("    ");
       print(type);
-      print(" form ");
+      print(" %s ", resourceString(Constants.RES_FORMDISPLAYER_FORM));
       print(findx++);
       println(":");
 
       MForm form = fiter.next();
-      print("      Name: ");
+      print("      %s: ", resourceString(Constants.RES_FORMDISPLAYER_NAME));
       println(form.getName());
 
       // Label
-      print("      Label: ");
+      print("      %s: ", resourceString(Constants.RES_FORMDISPLAYER_LABEL));
       println(bundle.getString(form.getLabelKey()));
 
       // Help text
-      print("      Help: ");
+      print("      %s: ", resourceString(Constants.RES_FORMDISPLAYER_HELP));
       println(bundle.getString(form.getHelpKey()));
 
       List<MInput<?>> inputs = form.getInputs();
       Iterator<MInput<?>> iiter = inputs.iterator();
       int iindx = 1;
       while (iiter.hasNext()) {
-        print("      Input ");
+        print("      %s ", resourceString(Constants.RES_FORMDISPLAYER_INPUT));
         print(iindx++);
         println(":");
 
         MInput<?> input = iiter.next();
-        print("        Name: ");
+        print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_NAME));
         println(input.getName());
-        print("        Label: ");
+        print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_LABEL));
         println(bundle.getString(input.getLabelKey()));
-        print("        Help: ");
+        print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_HELP));
         println(bundle.getString(input.getHelpKey()));
-        print("        Type: ");
+        print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_TYPE));
         println(input.getType());
         if (input.getType() == MInputType.STRING) {
-          print("        Mask: ");
+          print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_MASK));
           println(((MStringInput)input).isMasked());
-          print("        Size: ");
+          print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_SIZE));
           println(((MStringInput)input).getMaxLength());
         } else if(input.getType() == MInputType.ENUM) {
-          print("        Possible values: ");
+          print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_POSSIBLE_VALUES));
           println(StringUtils.join(((MEnumInput)input).getValues(), ","));
         }
       }
@@ -143,7 +144,7 @@ public final class FormDisplayer {
             displayInputEnum((MEnumInput) input);
             break;
           default:
-            println("Unsupported data type " + input.getType());
+            print("\n%s " + input.getType(), resourceString(Constants.RES_FORMDISPLAYER_UNSUPPORTED_DATATYPE));
             return;
         }
       }
@@ -158,7 +159,7 @@ public final class FormDisplayer {
    */
   private static void displayInputString(MStringInput input) {
     if (input.isMasked()) {
-      print("(This input is sensitive)");
+      print("(%s)", resourceString(Constants.RES_FORMDISPLAYER_INPUT_SENSITIVE));
     } else {
       print(input.getValue());
     }

@@ -144,4 +144,8 @@ public final class ShellEnvironment {
   public static void print(Object obj) {
     io.out.print(obj);
   }
+
+  public static void print(String format, Object... args) {
+    io.out.printf(format, args);
+  }
 }
