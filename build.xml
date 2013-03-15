@@ -460,14 +460,13 @@
 
     <!-- move the license in trunk to a temporary location and copy
          appropriate license in the trunk, ultimately in the package. -->
-    <move file="${basedir}/LICENSE.txt" tofile="${base.src.dir}/licenses/LICENSE-TEMP.txt"/>
+    <move file="${basedir}/LICENSE.txt" tofile="${build.dir}/LICENSE-TEMP.txt"/>
     <copy file="${base.src.dir}/licenses/LICENSE-BIN.txt" tofile="${basedir}/LICENSE.txt"/>
     <!-- copy in various components of the initial source layout
          so that the redistributable can bootstrap itself. -->
     <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="false">
       <fileset dir="${basedir}">
         <include name="**/*" />
-        <exclude name="src/licenses/**" />
         <exclude name="build/**" />
         <exclude name="lib/**" />
         <exclude name=".git/**" />
@@ -479,7 +478,7 @@
       </fileset>
     </copy>
     <!-- move back the license in trunk -->
-    <move file="${base.src.dir}/licenses/LICENSE-TEMP.txt" tofile="${basedir}/LICENSE.txt"/>
+    <move file="${build.dir}/LICENSE-TEMP.txt" tofile="${basedir}/LICENSE.txt"/>
 
     <!-- copy the dependency libraries from ivy into the output lib dir -->
     <mkdir dir="${dist.dir}/lib"/>
