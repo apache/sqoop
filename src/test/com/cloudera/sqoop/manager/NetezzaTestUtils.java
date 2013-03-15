@@ -45,7 +45,7 @@ public final class NetezzaTestUtils {
   public static final String NZ_DB_NAME = System.getProperty(
       "sqoop.test.netezza.db.name", "SQOOP");
   public static final String TABLE_NAME = System.getProperty(
-      "sqoop.test.netezza.table.name", "EMP");
+      "sqoop.test.netezza.table.name", "EMPNZ");
 
 
   private NetezzaTestUtils() { }
