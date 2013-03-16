@@ -76,7 +76,7 @@ public class CreateJobFunction extends  SqoopFunction {
     printlnResource(Constants.RES_CREATE_CREATING_JOB, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.newJob(connectionId, MJob.Type.valueOf(type));
+    MJob job = client.newJob(connectionId, MJob.Type.valueOf(type.toUpperCase()));
 
     ResourceBundle connectorBundle = client.getResourceBundle(job.getConnectorId());
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
