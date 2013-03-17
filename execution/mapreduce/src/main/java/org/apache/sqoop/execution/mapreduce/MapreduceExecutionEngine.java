@@ -29,9 +29,9 @@ import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.etl.Exporter;
+import org.apache.sqoop.job.etl.HdfsExportExtractor;
 import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
-import org.apache.sqoop.job.etl.HdfsTextExportExtractor;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.job.io.Data;
@@ -128,8 +128,8 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(JobConstants.JOB_ETL_LOADER, exporter.getLoader().getName());
     context.setString(JobConstants.JOB_ETL_DESTROYER, exporter.getDestroyer().getName());
 
-    // We should make one extractor that will be able to read all supported file types
-    context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsTextExportExtractor.class.getName());
+    // Extractor that will be able to read all supported file types
+    context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsExportExtractor.class.getName());
     context.setString(JobConstants.HADOOP_INPUTDIR, jobConf.input.inputDirectory);
 
     if(request.getExtractors() != null) {

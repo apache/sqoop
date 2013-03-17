@@ -26,37 +26,43 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.Seekable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.etl.io.DataWriter;
 
-public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition>  {
+/**
+ * Extract from HDFS.
+ * Default field delimiter of a record is comma.
+ */
+public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition> {
 
-  public static final Log LOG =
-    LogFactory.getLog(HdfsTextExportExtractor.class.getName());
+  public static final Log LOG = LogFactory.getLog(HdfsExportExtractor.class.getName());
 
   private Configuration conf;
   private DataWriter dataWriter;
+  private long rowRead = 0;
 
   private final char fieldDelimiter;
 
-  public HdfsTextExportExtractor() {
+  public HdfsExportExtractor() {
     fieldDelimiter = Data.DEFAULT_FIELD_DELIMITER;
   }
 
   @Override
-  public void extract(ExtractorContext context, ConnectionConfiguration connectionConfiguration,
+  public void extract(ExtractorContext context,
+      ConnectionConfiguration connectionConfiguration,
       ExportJobConfiguration jobConfiguration, HdfsExportPartition partition) {
 
-    conf = ((PrefixContext)context.getContext()).getConfiguration();
+    conf = ((PrefixContext) context.getContext()).getConfiguration();
     dataWriter = context.getDataWriter();
     dataWriter.setFieldDelimiter(fieldDelimiter);
 
@@ -64,7 +70,7 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
       HdfsExportPartition p = partition;
       LOG.info("Working on partition: " + p);
       int numFiles = p.getNumberOfFiles();
-      for (int i=0; i<numFiles; i++) {
+      for (int i = 0; i < numFiles; i++) {
         extractFile(p.getFile(i), p.getOffset(i), p.getLength(i));
       }
     } catch (IOException e) {
@@ -79,14 +85,64 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
     LOG.info("\t from offset " + start);
     LOG.info("\t to offset " + end);
     LOG.info("\t of length " + length);
+    if(isSequenceFile(file)) {
+      extractSequenceFile(file, start, length);
+    } else {
+      extractTextFile(file, start, length);
+    }
+  }
 
+  /**
+   * Extracts Sequence file
+   * @param file
+   * @param start
+   * @param length
+   * @throws IOException
+   */
+  private void extractSequenceFile(Path file, long start, long length)
+      throws IOException {
+    LOG.info("Extracting sequence file");
+    long end = start + length;
+    SequenceFile.Reader filereader = new SequenceFile.Reader(
+        file.getFileSystem(conf), file, conf);
+
+    if (start > filereader.getPosition()) {
+      filereader.sync(start); // sync to start
+    }
+
+    Text line = new Text();
+    boolean hasNext = filereader.next(line);
+    while (hasNext) {
+      rowRead++;
+      dataWriter.writeCsvRecord(line.toString());
+      line = new Text();
+      hasNext = filereader.next(line);
+      if (filereader.getPosition() >= end && filereader.syncSeen()) {
+        break;
+      }
+    }
+    filereader.close();
+  }
+
+  /**
+   * Extracts Text file
+   * @param file
+   * @param start
+   * @param length
+   * @throws IOException
+   */
+  private void extractTextFile(Path file, long start, long length)
+      throws IOException {
+    LOG.info("Extracting text file");
+    long end = start + length;
     FileSystem fs = file.getFileSystem(conf);
     FSDataInputStream filestream = fs.open(file);
     CompressionCodec codec = (new CompressionCodecFactory(conf)).getCodec(file);
     LineReader filereader;
     Seekable fileseeker = filestream;
 
-    // Hadoop 1.0 does not have support for custom record delimiter and thus we
+    // Hadoop 1.0 does not have support for custom record delimiter and thus
+    // we
     // are supporting only default one.
     // We might add another "else if" case for SplittableCompressionCodec once
     // we drop support for Hadoop 1.0.
@@ -94,11 +150,10 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
       filestream.seek(start);
       filereader = new LineReader(filestream);
     } else {
-      filereader = new LineReader(
-          codec.createInputStream(filestream, codec.createDecompressor()), conf);
+      filereader = new LineReader(codec.createInputStream(filestream,
+          codec.createDecompressor()), conf);
       fileseeker = filestream;
     }
-
     if (start != 0) {
       // always throw away first record because
       // one extra line is read in previous split
@@ -118,14 +173,31 @@ public class HdfsTextExportExtractor extends Extractor<ConnectionConfiguration, 
       } else {
         next = fileseeker.getPos();
       }
+      rowRead++;
       dataWriter.writeCsvRecord(line.toString());
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
+    filestream.close();
   }
 
   @Override
   public long getRowsRead() {
-    // TODO need to return the rows read
-    return 0;
+    return rowRead;
+  }
+
+  /**
+   * Returns true if given file is sequence
+   * @param file
+   * @return boolean
+   */
+  private boolean isSequenceFile(Path file) {
+    SequenceFile.Reader filereader = null;
+    try {
+      filereader = new SequenceFile.Reader(file.getFileSystem(conf), file, conf);
+      filereader.close();
+    } catch (IOException e) {
+      return false;
+    }
+    return true;
   }
 }

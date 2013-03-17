@@ -33,10 +33,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.job.etl.HdfsExportExtractor;
 import org.apache.sqoop.job.etl.HdfsExportPartitioner;
-import org.apache.sqoop.job.etl.HdfsSequenceExportExtractor;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
-import org.apache.sqoop.job.etl.HdfsTextExportExtractor;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
@@ -66,7 +65,7 @@ public class TestHdfsExtract extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsTextExportExtractor.class.getName());
+        HdfsExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
@@ -84,7 +83,7 @@ public class TestHdfsExtract extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsTextExportExtractor.class.getName());
+        HdfsExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
@@ -97,7 +96,7 @@ public class TestHdfsExtract extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsTextExportExtractor.class.getName());
+        HdfsExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
@@ -115,7 +114,7 @@ public class TestHdfsExtract extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsSequenceExportExtractor.class.getName());
+        HdfsExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
@@ -133,7 +132,7 @@ public class TestHdfsExtract extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsSequenceExportExtractor.class.getName());
+        HdfsExportExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
