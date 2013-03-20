@@ -71,10 +71,24 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       // This code generator is being invoked as part of an import or export
       // process, and the user has pre-specified a jar and class to use.
       // Don't generate.
+      if (manager.isORMFacilitySelfManaged()) {
+        // No need to generated any ORM.  Ignore any jar file given on
+        // command line also.
+        LOG.info("The connection manager declares that it self manages mapping"
+            + " between records & fields and rows & columns.  The jar file "
+            + " provided will have no effect");
+      }
       LOG.info("Using existing jar: " + existingJar);
       return existingJar;
     }
-
+    if (manager.isORMFacilitySelfManaged()) {
+      // No need to generated any ORM.  Ignore any jar file given on
+      // command line also.
+      LOG.info("The connection manager declares that it self manages mapping"
+          + " between records & fields and rows & columns.  No class will"
+          + " will be generated.");
+      return null;
+    }
     LOG.info("Beginning code generation");
     CompilationManager compileMgr = new CompilationManager(options);
     ClassWriter classWriter = new ClassWriter(options, manager, tableName,

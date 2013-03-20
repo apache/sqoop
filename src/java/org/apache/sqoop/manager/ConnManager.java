@@ -639,5 +639,20 @@ public abstract class ConnManager {
   public String getInputBoundsQuery(String splitByCol, String sanitizedQuery) {
       return null;
   }
+
+  /**
+   * This method allows the ConnManager to override the generation of ORM
+   * classes if the SQOOP generated classes are not used by it.
+   * A return value of false from this method means that the SQOOP ORM
+   * classes are needed to use with the connector.
+   * A return value of true indicates that the connection manager does not
+   * use the SQOOP ORM classes.   For example, in the Direct mode of some of
+   * the connectors, the text files are directly processed by DB specific
+   * facilities without even being passed through the SQOOP process and
+   * in those circumstances, it makes sense to disable the ORM generation.
+   */
+  public boolean isORMFacilitySelfManaged() {
+    return false;
+  }
 }
 

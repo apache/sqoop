@@ -1064,13 +1064,24 @@ public class ClassWriter {
     return cleanedColNames;
   }
 
+  /**
+   * Made this a separate method to overcome the 150 line limit of checkstyle.
+   */
+  private void logORMSelfGenerationMessage() {
+    LOG.info("The connection manager declares that it self manages mapping"
+        + " between records & fields and rows & columns.  No class will"
+        + " will be generated.");
+  }
 
   /**
    * Generate the ORM code for the class.
    */
   public void generate() throws IOException {
     Map<String, Integer> columnTypes = getColumnTypes();
-
+    if (connManager.isORMFacilitySelfManaged()) {
+      logORMSelfGenerationMessage();
+      return;
+    }
     if (columnTypes == null) {
       throw new IOException("No columns to generate for ClassWriter");
     }
@@ -1110,7 +1121,6 @@ public class ClassWriter {
       }
       columnTypes.put(identifier, type);
     }
-
     // Check that all explicitly mapped columns are present in result set
     Properties mapping = options.getMapColumnJava();
     if (mapping != null && !mapping.isEmpty()) {
@@ -1207,7 +1217,6 @@ public class ClassWriter {
           // ignored because we're closing.
         }
       }
-
       if (null != ostream) {
         try {
           ostream.close();

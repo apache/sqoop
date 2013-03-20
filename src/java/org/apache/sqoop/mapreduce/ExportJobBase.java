@@ -321,8 +321,14 @@ public class ExportJobBase extends JobBase {
       }
     }
 
-    String tableClassName =
-        new TableClassName(options).getClassForTable(outputTableName);
+
+    String tableClassName = null;
+    if (!cmgr.isORMFacilitySelfManaged()) {
+        tableClassName =
+            new TableClassName(options).getClassForTable(outputTableName);
+    }
+    // For ORM self managed, we leave the tableClassName to null so that
+    // we don't check for non-existing classes.
     String ormJarFile = context.getJarFile();
 
     LOG.info("Beginning export of " + outputTableName);

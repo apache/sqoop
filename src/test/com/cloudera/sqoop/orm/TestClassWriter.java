@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.TestConnFactory.DummyManager;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.testutil.DirUtil;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
@@ -484,5 +485,52 @@ public class TestClassWriter extends TestCase {
       return;
     }
     fail("we shouldn't successfully generate code");
+  }
+
+  private void runFailedGenerationTest(String [] argv,
+      String classNameToCheck) {
+    File codeGenDirFile = new File(CODE_GEN_DIR);
+    File classGenDirFile = new File(JAR_GEN_DIR);
+
+    try {
+      options = new ImportTool().parseArguments(argv,
+          null, options, true);
+    } catch (Exception e) {
+      LOG.error("Could not parse options: " + e.toString());
+    }
+
+    CompilationManager compileMgr = new CompilationManager(options);
+    ClassWriter writer = new ClassWriter(options, manager,
+        HsqldbTestServer.getTableName(), compileMgr);
+
+    try {
+      writer.generate();
+      compileMgr.compile();
+      fail("ORM class file generation succeeded when it was expected to fail");
+    } catch (IOException ioe) {
+      LOG.error("Got IOException from ORM generation as expected : "
+        + ioe.toString());
+    }
+  }
+  /**
+   * A dummy manager that declares that it ORM is self managed.
+   */
+  public static class DummyDirectManager extends DummyManager {
+    @Override
+    public boolean isORMFacilitySelfManaged() {
+      return true;
+    }
+  }
+
+  @Test
+  public void testNoClassGeneration() throws Exception {
+    manager = new DummyDirectManager();
+    String [] argv = {
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+    };
+    runFailedGenerationTest(argv, HsqldbTestServer.getTableName());
   }
 }

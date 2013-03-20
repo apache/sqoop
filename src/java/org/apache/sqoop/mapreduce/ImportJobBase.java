@@ -196,9 +196,14 @@ public class ImportJobBase extends JobBase {
     } else {
       LOG.info("Beginning query import.");
     }
+    String tableClassName = null;
+    if (!getContext().getConnManager().isORMFacilitySelfManaged()) {
+        tableClassName =
+            new TableClassName(options).getClassForTable(tableName);
+    }
+    // For ORM self managed, we leave the tableClassName to null so that
+    // we don't check for non-existing classes.
 
-    String tableClassName =
-        new TableClassName(options).getClassForTable(tableName);
     loadJars(conf, ormJarFile, tableClassName);
 
     Job job = new Job(conf);

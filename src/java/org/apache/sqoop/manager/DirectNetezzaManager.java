@@ -246,4 +246,9 @@ public class DirectNetezzaManager extends NetezzaManager {
   public boolean supportsStagingForExport() {
     return false;
   }
+
+  @Override
+  public boolean isORMFacilitySelfManaged() {
+    return true;
+  }
 }

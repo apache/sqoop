@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.manager;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.util.Jars;
+
 import com.cloudera.sqoop.SqoopOptions;
 
 /**
@@ -35,6 +38,10 @@ public class ExportJobContext {
       final SqoopOptions opts) {
     this.tableName = table;
     this.jarFile = jar;
+    if (this.jarFile == null) {
+      // Set the jarFile to the hadoop core jar file.
+      this.jarFile = Jars.getJarPathForClass(Configuration.class);
+    }
     this.options = opts;
   }
 

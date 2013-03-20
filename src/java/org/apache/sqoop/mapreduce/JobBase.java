@@ -220,6 +220,7 @@ public class JobBase {
    */
   protected void loadJars(Configuration conf, String ormJarFile,
       String tableClassName) throws IOException {
+ 
     boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
         || "local".equals(conf.get("mapred.job.tracker"));
     if (isLocal) {
