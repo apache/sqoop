@@ -29,6 +29,8 @@ Argument                                  Description
                                           to use
 +\--hadoop-mapred-home <dir>+             Override $HADOOP_MAPRED_HOME
 +\--help+                                 Print usage instructions
++\--password-file+                        Set path for a file containing the\
+                                          authentication password
 +-P+                                      Read password from console
 +\--password <password>+                  Set authentication password
 +\--username <username>+                  Set authentication username

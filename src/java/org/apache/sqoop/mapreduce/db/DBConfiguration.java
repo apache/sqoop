@@ -25,10 +25,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrTokenizer;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.mapreduce.DBWritable;
 
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
@@ -49,6 +53,9 @@ import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
  */
 public class DBConfiguration {
 
+  public static final Log LOG =
+    LogFactory.getLog(DBConfiguration.class.getName());
+
   /** The JDBC Driver class name. */
   public static final String DRIVER_CLASS_PROPERTY =
     "mapreduce.jdbc.driver.class";
@@ -61,6 +68,8 @@ public class DBConfiguration {
 
   /** Password to access the database. */
   public static final String PASSWORD_PROPERTY = "mapreduce.jdbc.password";
+  private static final Text PASSWORD_SECRET_KEY =
+    new Text(DBConfiguration.PASSWORD_PROPERTY);
 
   /** JDBC connection parameters. */
   public static final String CONNECTION_PARAMS_PROPERTY =
@@ -132,7 +141,7 @@ public class DBConfiguration {
       conf.set(USERNAME_PROPERTY, userName);
     }
     if (passwd != null) {
-      conf.set(PASSWORD_PROPERTY, passwd);
+      setPassword((JobConf) conf, passwd);
     }
     if (fetchSize != null) {
       conf.setInt(FETCH_SIZE, fetchSize);
@@ -141,6 +150,13 @@ public class DBConfiguration {
       conf.set(CONNECTION_PARAMS_PROPERTY,
                propertiesToString(connectionParams));
     }
+  }
+
+  // set the password in the secure credentials object
+  private static void setPassword(JobConf configuration, String password) {
+    LOG.debug("Securing password into job credentials store");
+    configuration.getCredentials().addSecretKey(
+      PASSWORD_SECRET_KEY, password.getBytes());
   }
 
   /**
@@ -253,7 +269,7 @@ public class DBConfiguration {
     Class.forName(conf.get(DBConfiguration.DRIVER_CLASS_PROPERTY));
 
     String username = conf.get(DBConfiguration.USERNAME_PROPERTY);
-    String password = conf.get(DBConfiguration.PASSWORD_PROPERTY);
+    String password = getPassword((JobConf) conf);
     String connectString = conf.get(DBConfiguration.URL_PROPERTY);
     String connectionParamsStr =
       conf.get(DBConfiguration.CONNECTION_PARAMS_PROPERTY);
@@ -280,6 +296,14 @@ public class DBConfiguration {
       }
     }
     return connection;
+  }
+
+  // retrieve the password from the credentials object
+  private static String getPassword(JobConf configuration) {
+    LOG.debug("Fetching password from job credentials store");
+    byte[] secret = configuration.getCredentials().getSecretKey(
+      PASSWORD_SECRET_KEY);
+    return secret != null ? new String(secret) : null;
   }
 
   public Configuration getConf() {

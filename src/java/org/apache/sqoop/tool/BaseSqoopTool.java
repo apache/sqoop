@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
@@ -30,8 +31,11 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.ConnFactory;
@@ -71,6 +75,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String USERNAME_ARG = "username";
   public static final String PASSWORD_ARG = "password";
   public static final String PASSWORD_PROMPT_ARG = "P";
+  public static final String PASSWORD_PATH_ARG = "password-file";
   public static final String DIRECT_ARG = "direct";
   public static final String BATCH_ARG = "batch";
   public static final String TABLE_ARG = "table";
@@ -381,6 +386,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     commonOpts.addOption(OptionBuilder.withArgName("password")
         .hasArg().withDescription("Set authentication password")
         .withLongOpt(PASSWORD_ARG)
+        .create());
+    commonOpts.addOption(OptionBuilder.withArgName(PASSWORD_PATH_ARG)
+        .hasArg().withDescription("Set authentication password file path")
+        .withLongOpt(PASSWORD_PATH_ARG)
         .create());
     commonOpts.addOption(OptionBuilder
         .withDescription("Read password from console")
@@ -732,6 +741,18 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setDriverClassName(in.getOptionValue(DRIVER_ARG));
     }
 
+    applyCredentialsOptions(in, out);
+
+    if (in.hasOption(HADOOP_HOME_ARG)) {
+      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_HOME_ARG));
+    }
+    if (in.hasOption(HADOOP_MAPRED_HOME_ARG)) {
+      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_MAPRED_HOME_ARG));
+    }
+  }
+
+  private void applyCredentialsOptions(CommandLine in, SqoopOptions out)
+    throws InvalidOptionsException {
     if (in.hasOption(USERNAME_ARG)) {
       out.setUsername(in.getOptionValue(USERNAME_ARG));
       if (null == out.getPassword()) {
@@ -751,13 +772,56 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setPasswordFromConsole();
     }
 
-    if (in.hasOption(HADOOP_HOME_ARG)) {
-      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_HOME_ARG));
+    if (in.hasOption(PASSWORD_PATH_ARG)) {
+      if (in.hasOption(PASSWORD_ARG) || in.hasOption(PASSWORD_PROMPT_ARG)) {
+        throw new InvalidOptionsException("Either password or path to a "
+          + "password file must be specified but not both.");
+      }
+
+      try {
+        out.setPasswordFilePath(in.getOptionValue(PASSWORD_PATH_ARG));
+        // apply password from file into password in options
+        out.setPassword(fetchPasswordFromFile(out));
+      } catch (IOException ex) {
+        LOG.warn("Failed to load connection parameter file", ex);
+        throw new InvalidOptionsException(
+          "Error while loading connection parameter file: "
+            + ex.getMessage());
+      }
     }
-    if (in.hasOption(HADOOP_MAPRED_HOME_ARG)) {
-      out.setHadoopMapRedHome(in.getOptionValue(HADOOP_MAPRED_HOME_ARG));
+  }
+
+  private String fetchPasswordFromFile(SqoopOptions options)
+    throws IOException {
+    String passwordFilePath = options.getPasswordFilePath();
+    if (passwordFilePath == null) {
+      return options.getPassword();
     }
 
+    LOG.debug("Fetching password from specified path: " + passwordFilePath);
+    FileSystem fs = FileSystem.get(options.getConf());
+    Path path = new Path(passwordFilePath);
+
+    if (!fs.exists(path)) {
+      throw new IOException("The password file does not exist! "
+        + passwordFilePath);
+    }
+
+    if (!fs.isFile(path)) {
+      throw new IOException("The password file cannot be a directory! "
+        + passwordFilePath);
+    }
+
+    InputStream is = fs.open(path);
+    StringWriter writer = new StringWriter();
+    try {
+      IOUtils.copy(is, writer);
+      return writer.toString();
+    } finally {
+      IOUtils.closeQuietly(is);
+      IOUtils.closeQuietly(writer);
+      fs.close();
+    }
   }
 
   protected void applyHiveOptions(CommandLine in, SqoopOptions out)

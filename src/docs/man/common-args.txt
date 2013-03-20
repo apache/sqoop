@@ -39,6 +39,11 @@ Database connection and common options
 --help::
   Print usage instructions
 
+--password-file (file containing the password)::
+  Set authentication password in a file on the users home
+  directory with 400 permissions
+  (Note: This is very secure and a preferred way of entering credentials)
+
 --password (password)::
   Set authentication password
   (Note: This is very insecure. You should use -P instead.)

@@ -70,7 +70,8 @@ Common arguments:
    --driver <class-name>    Manually specify JDBC driver class to use
    --hadoop-mapred-home <dir>            Override $HADOOP_MAPRED_HOME
    --help                   Print usage instructions
--P                          Read password from console
+   --password-file          Set path for file containing authentication password
+   -P                       Read password from console
    --password <password>    Set authentication password
    --username <username>    Set authentication username
    --verbose                Print more information while working

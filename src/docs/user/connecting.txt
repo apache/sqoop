@@ -42,21 +42,40 @@ the full hostname or IP address of the database host that can be seen
 by all your remote nodes.
 
 You might need to authenticate against the database before you can
-access it. You can use the +\--username+ and +\--password+ or +-P+ parameters
-to supply a username and a password to the database. For example:
+access it. You can use the +\--username+ to supply a username to the database.
+Sqoop provides couple of different ways to supply a password,
+secure and non-secure, to the database which is detailed below.
+
+.Secure way of supplying password to the database
+You should save the password in a file on the users home directory with 400
+permissions and specify the path to that file using the *+--password-file+*
+argument, and is the preferred method of entering credentials. Sqoop will
+then read the password from the file and pass it to the MapReduce cluster
+using secure means with out exposing the password in the job configuration.
+The file containing the password can either be on the Local FS or HDFS.
+For example:
+
+----
+$ sqoop import --connect jdbc:mysql://database.example.com/employees \
+    --username venkatesh --passwordFile ${user.home}/.password
+----
+
+Another way of supplying passwords is using the +-P+ argument which will
+read a password from a console prompt.
+
+.Non-secure way of passing password
+
+WARNING: The +\--password+ parameter is insecure, as other users may
+be able to read your password from the command-line arguments via
+the output of programs such as `ps`. The *+-P+* argument is the preferred
+method over using the +\--password+ argument. Credentials may still be
+transferred between nodes of the MapReduce cluster using insecure means.
+For example:
 
 ----
 $ sqoop import --connect jdbc:mysql://database.example.com/employees \
     --username aaron --password 12345
 ----
-
-.Password security
-WARNING: The +\--password+ parameter is insecure, as other users may
-be able to read your password from the command-line arguments via
-the output of programs such as `ps`. The *+-P+* argument will read
-a password from a console prompt, and is the preferred method of
-entering credentials. Credentials may still be transferred between
-nodes of the MapReduce cluster using insecure means.
 
 Sqoop automatically supports several databases, including MySQL.  Connect
 strings beginning with +jdbc:mysql://+ are handled automatically in Sqoop.  (A

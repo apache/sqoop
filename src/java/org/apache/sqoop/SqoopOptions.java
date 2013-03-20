@@ -22,6 +22,7 @@ import com.cloudera.sqoop.SqoopOptions.FileLayout;
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
+import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
 import org.apache.sqoop.validation.LogOnFailureHandler;
@@ -107,6 +109,10 @@ public class SqoopOptions implements Cloneable {
   // db.require.password is used to determine whether 'some' password is
   // used. If so, it is stored as 'db.password'.
   private String password;
+
+  // This represents path to a file on ${user.home} containing the password
+  // with 400 permissions so its only readable by user executing the tool
+  @StoredAsProperty("db.password.file") private String passwordFilePath;
 
   @StoredAsProperty("null.string") private String nullStringValue;
   @StoredAsProperty("input.null.string") private String inNullStringValue;
@@ -535,13 +541,7 @@ public class SqoopOptions implements Cloneable {
     // Now load properties that were stored with special types, or require
     // additional logic to set.
 
-    if (getBooleanProperty(props, "db.require.password", false)) {
-      // The user's password was stripped out from the metastore.
-      // Require that the user enter it now.
-      setPasswordFromConsole();
-    } else {
-      this.password = props.getProperty("db.password", this.password);
-    }
+    loadPasswordProperty(props);
 
     if (this.jarDirIsAuto) {
       // We memoized a user-specific nonce dir for compilation to the data
@@ -580,6 +580,27 @@ public class SqoopOptions implements Cloneable {
     // If we loaded true verbose flag, we need to apply it
     if (this.verbose) {
       LoggingUtils.setDebugLevel();
+    }
+  }
+
+  private void loadPasswordProperty(Properties props) {
+    passwordFilePath = props.getProperty("db.password.file");
+    if (passwordFilePath != null) {
+      try {
+        password = CredentialsUtil.fetchPasswordFromFile(
+                getConf(), passwordFilePath);
+        return; // short-circuit
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to fetch password from file.", e);
+      }
+    }
+
+    if (getBooleanProperty(props, "db.require.password", false)) {
+      // The user's password was stripped out from the metastore.
+      // Require that the user enter it now.
+      setPasswordFromConsole();
+    } else {
+      this.password = props.getProperty("db.password", this.password);
     }
   }
 
@@ -625,20 +646,7 @@ public class SqoopOptions implements Cloneable {
           iae);
     }
 
-
-    if (this.getConf().getBoolean(
-        METASTORE_PASSWORD_KEY, METASTORE_PASSWORD_DEFAULT)) {
-      // If the user specifies, we may store the password in the metastore.
-      putProperty(props, "db.password", this.password);
-      putProperty(props, "db.require.password", "false");
-    } else if (this.password != null) {
-      // Otherwise, if the user has set a password, we just record
-      // a flag stating that the password will need to be reentered.
-      putProperty(props, "db.require.password", "true");
-    } else {
-      // No password saved or required.
-      putProperty(props, "db.require.password", "false");
-    }
+    writePasswordProperty(props);
 
     putProperty(props, "db.column.list", arrayToList(this.columns));
     setDelimiterProperties(props, "codegen.input.delimiters",
@@ -655,6 +663,27 @@ public class SqoopOptions implements Cloneable {
     setPropertiesAsNestedProperties(props,
             "map.column.java", this.mapColumnJava);
     return props;
+  }
+
+  private void writePasswordProperty(Properties props) {
+    if (getPasswordFilePath() != null) { // short-circuit
+      putProperty(props, "db.password.file", getPasswordFilePath());
+      return;
+    }
+
+    if (this.getConf().getBoolean(
+      METASTORE_PASSWORD_KEY, METASTORE_PASSWORD_DEFAULT)) {
+      // If the user specifies, we may store the password in the metastore.
+      putProperty(props, "db.password", this.password);
+      putProperty(props, "db.require.password", "false");
+    } else if (this.password != null) {
+      // Otherwise, if the user has set a password, we just record
+      // a flag stating that the password will need to be reentered.
+      putProperty(props, "db.require.password", "true");
+    } else {
+      // No password saved or required.
+      putProperty(props, "db.require.password", "false");
+    }
   }
 
   @Override
@@ -1035,6 +1064,14 @@ public class SqoopOptions implements Cloneable {
 
   public String getPassword() {
     return password;
+  }
+
+  public String getPasswordFilePath() {
+    return passwordFilePath;
+  }
+
+  public void setPasswordFilePath(String passwdFilePath) {
+    this.passwordFilePath = passwdFilePath;
   }
 
   protected void parseColumnMapping(String mapping,
