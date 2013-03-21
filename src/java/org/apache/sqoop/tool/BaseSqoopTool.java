@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
@@ -31,11 +30,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.ConnFactory;
@@ -47,6 +43,7 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -447,7 +444,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .create());
     hiveOpts.addOption(OptionBuilder
         .withDescription("Drop Hive record \\0x01 and row delimiters "
-            + "(\\n\\r) from imported string fields")
+          + "(\\n\\r) from imported string fields")
         .withLongOpt(HIVE_DROP_DELIMS_ARG)
         .create());
     hiveOpts.addOption(OptionBuilder
@@ -510,7 +507,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .create());
     formatOpts.addOption(OptionBuilder
         .withDescription("Uses MySQL's default delimiter set: "
-        + "fields: ,  lines: \\n  escaped-by: \\  optionally-enclosed-by: '")
+          + "fields: ,  lines: \\n  escaped-by: \\  optionally-enclosed-by: '")
         .withLongOpt(MYSQL_DELIMITERS_ARG)
         .create());
 
@@ -781,46 +778,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       try {
         out.setPasswordFilePath(in.getOptionValue(PASSWORD_PATH_ARG));
         // apply password from file into password in options
-        out.setPassword(fetchPasswordFromFile(out));
+        out.setPassword(CredentialsUtil.fetchPasswordFromFile(out));
       } catch (IOException ex) {
         LOG.warn("Failed to load connection parameter file", ex);
         throw new InvalidOptionsException(
           "Error while loading connection parameter file: "
             + ex.getMessage());
       }
-    }
-  }
-
-  private String fetchPasswordFromFile(SqoopOptions options)
-    throws IOException {
-    String passwordFilePath = options.getPasswordFilePath();
-    if (passwordFilePath == null) {
-      return options.getPassword();
-    }
-
-    LOG.debug("Fetching password from specified path: " + passwordFilePath);
-    FileSystem fs = FileSystem.get(options.getConf());
-    Path path = new Path(passwordFilePath);
-
-    if (!fs.exists(path)) {
-      throw new IOException("The password file does not exist! "
-        + passwordFilePath);
-    }
-
-    if (!fs.isFile(path)) {
-      throw new IOException("The password file cannot be a directory! "
-        + passwordFilePath);
-    }
-
-    InputStream is = fs.open(path);
-    StringWriter writer = new StringWriter();
-    try {
-      IOUtils.copy(is, writer);
-      return writer.toString();
-    } finally {
-      IOUtils.closeQuietly(is);
-      IOUtils.closeQuietly(writer);
-      fs.close();
     }
   }
 
