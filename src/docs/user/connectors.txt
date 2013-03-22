@@ -310,3 +310,59 @@ $ sqoop export \
     --export-dir hdfsdir \
     --input-fields-terminated-by "\t"
 ----
+
+Null string handling
+^^^^^^^^^^^^^^^^^^^^
+
+Netezza direct connector supports the null-string features of Sqoop.  The null
+string values are converted to appropriate external table options during export
+and import operations.
+
+.Supported export control arguments:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--input-null-string <null-string>+     The string to be interpreted as\
+                                         null for string columns.
++\--input-null-non-string <null-string>+ The string to be interpreted as\
+                                         null for non string columns.
+---------------------------------------------------------------------------------
+
+In the case of Netezza direct mode connector, both the arguments must be
+left to the default values or explicitly set to the same value.  Furthermore
+the null string value is restricted to 0-4 utf8 characters.
+
+On export, for non-string columns, if the chosen null value is a valid
+representation in the column domain, then the column might not be loaded as
+null.  For example, if the null string value is specified as "1", then on
+export, any occurrence of "1" in the input file will be loaded as value 1
+instead of NULL for int columns.
+
+It is suggested that the null value be specified as empty string for
+performance and consistency.
+
+.Supported import control arguments:
+[grid="all"]
+`----------------------------------------`---------------------------------------
+Argument                                 Description
+---------------------------------------------------------------------------------
++\--null-string <null-string>+           The string to be interpreted as\
+                                         null for string columns.
++\--null-non-string <null-string>+       The string to be interpreted as\
+                                         null for non string columns.
+---------------------------------------------------------------------------------
+
+In the case of Netezza direct mode connector, both the arguments must be
+left to the default values or explicitly set to the same value.  Furthermore
+the null string value is restricted to 0-4 utf8 characters.
+
+On import, for non-string columns, the chosen null value in current
+implementations the null value representation is ignored for non character
+columns.  For example, if the null string value is specified as "\N", then on
+import, any occurrence of NULL for non-char columns in the table will be
+imported as an empty string instead of '\N', the chosen null string
+representation.
+
+It is suggested that the null value be specified as empty string for
+performance and consistency.
