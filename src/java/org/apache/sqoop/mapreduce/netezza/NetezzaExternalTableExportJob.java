@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.netezza;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -28,6 +29,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.DBWritable;
 import
   org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableRecordExportMapper;
@@ -52,29 +54,41 @@ public class NetezzaExternalTableExportJob extends ExportJobBase {
   }
 
   @Override
+  protected void propagateOptionsToJob(Job job) {
+    Configuration conf = job.getConfiguration();
+    String nullValue = options.getInNullStringValue();
+    if (nullValue != null) {
+      conf.set(DirectNetezzaManager.NETEZZA_NULL_VALUE,
+          StringEscapeUtils.unescapeJava(nullValue));
+    }
+    conf.setInt(DelimiterSet.INPUT_FIELD_DELIM_KEY,
+        options.getInputFieldDelim());
+    conf.setInt(DelimiterSet.INPUT_RECORD_DELIM_KEY,
+        options.getInputRecordDelim());
+    conf.setInt(DelimiterSet.INPUT_ENCLOSED_BY_KEY,
+        options.getInputEnclosedBy());
+    // Netezza uses \ as the escape character. Force the use of it
+    int escapeChar = options.getInputEscapedBy();
+    if (escapeChar > 0) {
+      if (escapeChar != '\\') {
+        LOG.info(
+            "Setting escaped char to \\ for Netezza external table export");
+      }
+      conf.setInt(DelimiterSet.INPUT_ESCAPED_BY_KEY, '\\');
+    }
+    conf.setBoolean(DelimiterSet.INPUT_ENCLOSE_REQUIRED_KEY,
+        options.isOutputEncloseRequired());
+  }
   /**
    * Configure the inputformat to use for the job.
    */
+  @Override
   protected void configureInputFormat(Job job, String tableName,
       String tableClassName, String splitByCol) throws ClassNotFoundException,
       IOException {
 
     // Configure the delimiters, etc.
     Configuration conf = job.getConfiguration();
-    conf.setInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY,
-        options.getInputFieldDelim());
-    conf.setInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY,
-        options.getInputRecordDelim());
-    conf.setInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY,
-        options.getInputEnclosedBy());
-    // Netezza uses \ as the escape character. Force the use of it
-    int escapeChar = options.getOutputEscapedBy();
-    if (escapeChar > 0 && escapeChar != '\\') {
-      LOG.info("Setting escaped char to \\ for Netezza external table import");
-      conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\\');
-    }
-    conf.setBoolean(DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY,
-        options.isOutputEncloseRequired());
 
     ConnManager mgr = context.getConnManager();
     String username = options.getUsername();

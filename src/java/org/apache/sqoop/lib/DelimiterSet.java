@@ -46,6 +46,20 @@ public class DelimiterSet implements Cloneable {
       "sqoop.output.escaped.by";
   public static final String OUTPUT_ENCLOSE_REQUIRED_KEY =
       "sqoop.output.enclose.required";
+
+  /**
+   * Create the input variations for export instead of overloading them.
+   */
+  public static final String INPUT_FIELD_DELIM_KEY =
+      "sqoop.input.field.delim";
+  public static final String INPUT_RECORD_DELIM_KEY =
+      "sqoop.input.record.delim";
+  public static final String INPUT_ENCLOSED_BY_KEY =
+      "sqoop.input.enclosed.by";
+  public static final String INPUT_ESCAPED_BY_KEY =
+      "sqoop.input.escaped.by";
+  public static final String INPUT_ENCLOSE_REQUIRED_KEY =
+      "sqoop.input.enclose.required";
   /**
    * Create a delimiter set with the default delimiters
    * (comma for fields, newline for records).

@@ -25,13 +25,9 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.manager.DirectNetezzaManager;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestExport.ColumnGenerator;
 
 /**
  * Test the DirectNetezzaManager implementation's exportJob() functionality.
@@ -162,7 +158,59 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
     runNetezzaTest(getTableName(), argv);
   }
 
+  @Test
+  public void testNullStringExport() throws Exception {
 
+    String [] extraArgs = {
+        "--input-null-string", "\\\\N",
+        "--input-null-non-string", "\\\\N",
+        "--input-escaped-by", "\\",
+    };
+    ColumnGenerator[] extraCols = new ColumnGenerator[] {
+       new NullColumnGenerator(),
+    };
+
+    String[] argv = getArgv(true, 10, 10, extraArgs);
+    runNetezzaTest(getTableName(), argv, extraCols);
+  }
+
+
+  public void testDifferentNullStrings() throws IOException, SQLException {
+    ColumnGenerator[] extraCols = new ColumnGenerator[] {
+        new NullColumnGenerator(),
+    };
+
+    String [] extraArgs = {
+       "--input-null-string", "\\N",
+       "--input-null-non-string", "\\M",
+    };
+    String[] argv = getArgv(true, 10, 10, extraArgs);
+    try {
+      runNetezzaTest(getTableName(), argv, extraCols);
+      fail("Expected failure for different null strings");
+    } catch(IOException ioe) {
+      // success
+    }
+  }
+
+  @Test(expected = java.io.IOException.class)
+  public void testLongNullStrings() throws IOException, SQLException {
+    ColumnGenerator[] extraCols = new ColumnGenerator[] {
+        new NullColumnGenerator(),
+    };
+
+    String [] extraArgs = {
+       "--input-null-string", "morethan4chars",
+       "--input-null-non-string", "morethan4chars",
+    };
+    String[] argv = getArgv(true, 10, 10, extraArgs);
+    try {
+      runNetezzaTest(getTableName(), argv, extraCols);
+      fail("Expected failure for long null strings");
+    } catch(IOException ioe) {
+      // success
+    }
+  }
 
   @Override
   public void testMultiMapTextExportWithStaging() throws IOException,

@@ -28,6 +28,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -59,13 +61,39 @@ public class DirectNetezzaManager extends NetezzaManager {
   private static final String QUERY_CHECK_DICTIONARY_FOR_TABLE =
       "SELECT 1 FROM _V_OBJECTS WHERE OWNER= ? "
       + " AND OBJNAME = ? and OBJTYPE = 'TABLE'";
-
+  public static final String NETEZZA_NULL_VALUE =
+      "netezza.exttable.null.value";
   public DirectNetezzaManager(SqoopOptions opts) {
     super(opts);
     try {
       handleNetezzaExtraArgs(options);
-    } catch (ParseException ioe) {
-      throw  new RuntimeException(ioe.getMessage(), ioe);
+    } catch (ParseException pe) {
+      throw  new RuntimeException(pe.getMessage(), pe);
+    }
+  }
+
+  private void checkNullValueStrings(String nullStrValue,
+      String nullNonStrValue) throws IOException {
+
+    if (!StringUtils.equals(nullStrValue, nullNonStrValue)) {
+        throw new IOException(
+          "Detected different values of --input-string and --input-non-string "
+          + "parameters. Netezza direct manager does not support that. Please "
+          + "either use the same values or omit the --direct parameter.");
+    }
+
+
+    // Null String values cannot be more 4 chars in length in the case
+    // Netezza external tables.
+
+    if (nullStrValue != null)  {
+      nullStrValue = StringEscapeUtils.unescapeJava(nullStrValue);
+      if (nullStrValue.length() > 4) {
+        throw new IOException(
+            "Null string (and null non string) values for Netezza direct mode"
+          + " manager must be less than 4 characters in length");
+      }
+      options.getConf().set(NETEZZA_NULL_VALUE, nullStrValue);
     }
   }
 
@@ -131,12 +159,13 @@ public class DirectNetezzaManager extends NetezzaManager {
     options = context.getOptions();
     context.setConnManager(this);
 
-
     checkTable(); // Throws excpetion as necessary
     NetezzaExternalTableExportJob exporter = null;
 
     char qc = (char) options.getInputEnclosedBy();
     char ec = (char) options.getInputEscapedBy();
+    checkNullValueStrings(options.getInNullStringValue(),
+        options.getInNullNonStringValue());
 
     if (qc > 0 && !(qc == '"' || qc == '\'')) {
       throw new ExportException("Input enclosed-by character must be '\"' "
@@ -172,6 +201,9 @@ public class DirectNetezzaManager extends NetezzaManager {
       throw
         new IOException("Null tableName for Netezza external table import.");
     }
+
+    checkNullValueStrings(options.getNullStringValue(),
+        options.getNullNonStringValue());
 
     char qc = options.getOutputEnclosedBy();
     char ec = options.getOutputEscapedBy();

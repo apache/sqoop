@@ -243,4 +243,17 @@ public class NetezzaExportManualTest extends TestExport {
     w.close();
     os.close();
   }
+
+  protected class NullColumnGenerator implements ColumnGenerator {
+    public String getExportText(int rowNum) {
+      return "\\N";
+    }
+    public String getVerifyText(int rowNum) {
+      return null;
+    }
+
+    public String getType() {
+      return "INTEGER";
+    }
+  }
 }

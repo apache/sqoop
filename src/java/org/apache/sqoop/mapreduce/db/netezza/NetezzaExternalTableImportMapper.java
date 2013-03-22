@@ -66,6 +66,9 @@ public class NetezzaExternalTableImportMapper extends
     char fd = (char) conf.getInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY, ',');
     char qc = (char) conf.getInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY, 0);
     char ec = (char) conf.getInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, 0);
+
+    String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
+
     int errorThreshold = conf.getInt(
         DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
     String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
@@ -86,7 +89,13 @@ public class NetezzaExternalTableImportMapper extends
     }
     sqlStmt.append(" FORMAT 'Text' ");
     sqlStmt.append(" INCLUDEZEROSECONDS TRUE ");
-    sqlStmt.append(" NULLVALUE 'null' ");
+    sqlStmt.append(" NULLVALUE '");
+    if (nullValue != null) {
+      sqlStmt.append(nullValue);
+    } else {
+      sqlStmt.append("null");
+    }
+    sqlStmt.append("' ");
     if (qc > 0) {
       switch (qc) {
         case '\'':

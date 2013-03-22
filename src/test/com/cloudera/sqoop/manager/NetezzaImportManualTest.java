@@ -205,13 +205,14 @@ public class NetezzaImportManualTest extends ImportJobTestCase {
 
   private String[] getDirectModeExpectedResultsWithNulls() {
     String [] expectedResults = {
-        "1,Aaron,2009-05-14,1000000,T,engineering,nvl,1",
-        "2,Bob,2009-04-20,400,T,sales,nvl,2",
-        "3,Fred,2009-01-23,15,F,marketing,nvl,3",
+        "1,Aaron,2009-05-14,1000000,T,engineering,\\N,1",
+        "2,Bob,2009-04-20,400,T,sales,\\N,2",
+        "3,Fred,2009-01-23,15,F,marketing,\\N,3",
       };
 
     return expectedResults;
   }
+
   private String[] getArgv(boolean isDirect, String tableName,
       String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
@@ -325,7 +326,7 @@ public class NetezzaImportManualTest extends ImportJobTestCase {
   }
 
   @Test
-  public void testNullEscapeCharacters() throws Exception {
+  public void testNullStringValue() throws Exception {
 
 
      String [] extraArgs = {
@@ -355,4 +356,5 @@ public class NetezzaImportManualTest extends ImportJobTestCase {
     runNetezzaTest(true, tableName, expectedResults,
        extraArgs);
   }
+
 }

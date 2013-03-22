@@ -20,10 +20,12 @@ package org.apache.sqoop.mapreduce.netezza;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.RawKeyTextOutputFormat;
@@ -47,10 +49,37 @@ public class NetezzaExternalTableImportJob extends ImportJobBase {
         context);
   }
 
+  @Override
+  protected void propagateOptionsToJob(Job job) {
+    Configuration conf = job.getConfiguration();
+    String nullValue = options.getNullStringValue();
+    if (nullValue != null) {
+      conf.set(DirectNetezzaManager.NETEZZA_NULL_VALUE,
+          StringEscapeUtils.unescapeJava(nullValue));
+    }
+    conf.setInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY,
+        options.getOutputFieldDelim());
+    conf.setInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY,
+        options.getOutputRecordDelim());
+    conf.setInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY,
+        options.getOutputEnclosedBy());
+    // Netezza uses \ as the escape character. Force the use of it
+    int escapeChar = options.getOutputEscapedBy();
+    if (escapeChar > 0) {
+      if (escapeChar != '\\') {
+        LOG.info(
+            "Setting escaped char to \\ for Netezza external table import");
+      }
+      conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\\');
+    }
+    conf.setBoolean(DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY,
+        options.isOutputEncloseRequired());
+
+  }
   /**
    * Configure the inputformat to use for the job.
    */
-
+  @Override
   protected void configureInputFormat(Job job, String tableName,
       String tableClassName, String splitByCol) throws ClassNotFoundException,
       IOException {
@@ -88,22 +117,6 @@ public class NetezzaExternalTableImportJob extends ImportJobBase {
     // Note that mysqldump also does *not* want a quoted table name.
     DataDrivenDBInputFormat.setInput(job, DBWritable.class, tableName,
         whereClause, mgr.escapeColName(splitByCol), sqlColNames);
-
-    Configuration conf = job.getConfiguration();
-    conf.setInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY,
-        options.getOutputFieldDelim());
-    conf.setInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY,
-        options.getOutputRecordDelim());
-    conf.setInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY,
-        options.getOutputEnclosedBy());
-    // Netezza uses \ as the escape character. Force the use of it
-    int escapeChar = options.getOutputEscapedBy();
-    if (escapeChar > 0 && escapeChar != '\\') {
-      LOG.info("Setting escaped char to \\ for Netezza external table import");
-      conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\\');
-    }
-    conf.setBoolean(DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY,
-        options.isOutputEncloseRequired());
 
     LOG.debug("Using InputFormat: " + inputFormatClass);
     job.setInputFormatClass(getInputFormatClass());
