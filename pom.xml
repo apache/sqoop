@@ -108,6 +108,8 @@ limitations under the License.
     <tomcat.version>${tomcat.major.version}.${tomcat.minor.version}</tomcat.version>
     <jdbc.mysql.version>5.1.23</jdbc.mysql.version>
     <jdbc.postgresql.version>9.1-901.jdbc4</jdbc.postgresql.version>
+    <jdbc.oracle.version>11.2.0.3</jdbc.oracle.version>
+    <jdbc.sqlserver.version>4.0</jdbc.sqlserver.version>
   </properties>
 
   <dependencies>
@@ -361,6 +363,16 @@ limitations under the License.
         <groupId>postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${jdbc.postgresql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>ojdbc14</artifactId>
+        <version>${jdbc.oracle.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.microsoft</groupId>
+        <artifactId>sqljdbc4</artifactId>
+        <version>${jdbc.sqlserver.version}</version>
       </dependency>
    </dependencies>
   </dependencyManagement>

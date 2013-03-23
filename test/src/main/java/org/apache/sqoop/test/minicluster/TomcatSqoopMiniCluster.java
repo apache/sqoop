@@ -95,6 +95,8 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
          jar.contains("avro-")    || // Avro
          jar.contains("mysql")    || // MySQL JDBC driver
          jar.contains("postgre")  || // PostgreSQL JDBC driver
+         jar.contains("oracle")   || // Oracle driver
+         jar.contains("sqljdbc")  || // Microsoft SQL Server driver
          jar.contains("google")      // Google libraries (guava, ...)
        ) {
         extraClassPath.add(jar);

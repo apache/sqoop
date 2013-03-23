@@ -228,6 +228,53 @@ limitations under the License.
       </dependencies>
 
     </profile>
+
+    <!-- Special JDBC Drivers -->
+
+    <!--
+      Oracle JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14  -Dversion=11.2.0.3 -Dpackaging=jar -Dfile=/path/to/the/jar/ojdbc6.jar
+      Usage: mvn integration-test -Djdbc.oracle
+    -->
+    <profile>
+      <id>jdbc-oracle</id>
+
+      <activation>
+        <property>
+          <name>jdbc.oracle</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>ojdbc14</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Microsoft SQL Server JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.microsoft -DartifactId=sqljdbc4  -Dversion=4.0 -Dpackaging=jar -Dfile=/path/to/the/jar/sqljdbc4.jar
+      Usage: mvn integration-test -Djdbc.sqlserver
+    -->
+    <profile>
+      <id>jdbc-sqlserver</id>
+
+      <activation>
+        <property>
+          <name>jdbc.sqlserver</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.microsoft</groupId>
+          <artifactId>sqljdbc4</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
   </profiles>
 
 </project>
