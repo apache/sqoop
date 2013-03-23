@@ -44,7 +44,7 @@ public class TestFrameworkBean {
 
     // Serialize it to JSON object
     FrameworkBean bean = new FrameworkBean(framework, getResourceBundle());
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();

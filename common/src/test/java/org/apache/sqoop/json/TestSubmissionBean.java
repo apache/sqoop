@@ -158,7 +158,7 @@ public class TestSubmissionBean extends TestCase {
    */
   private MSubmission transfer(MSubmission submission) {
     SubmissionBean bean = new SubmissionBean(submission);
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     String string = json.toString();
 

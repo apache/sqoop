@@ -75,10 +75,12 @@ public class TestUtil {
 
     input = new MStringInput("username", false, (short) 10);
     input.setPersistenceId(2);
+    input.setValue("test");
     inputs.add(input);
 
-    input = new MStringInput("password", false, (short) 10);
+    input = new MStringInput("password", true, (short) 10);
     input.setPersistenceId(3);
+    input.setValue("test");
     inputs.add(input);
 
     form = new MForm("connection", inputs);

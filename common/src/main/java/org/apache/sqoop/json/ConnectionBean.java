@@ -96,7 +96,7 @@ public class ConnectionBean implements JsonBean {
 
   @Override
   @SuppressWarnings("unchecked")
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONArray array = new JSONArray();
 
     for(MConnection connection : connections) {
@@ -108,9 +108,9 @@ public class ConnectionBean implements JsonBean {
       object.put(UPDATED, connection.getLastUpdateDate().getTime());
       object.put(CONNECTOR_ID, connection.getConnectorId());
       object.put(CONNECTOR_PART,
-        extractForms(connection.getConnectorPart().getForms()));
+        extractForms(connection.getConnectorPart().getForms(), skipSensitive));
       object.put(FRAMEWORK_PART,
-        extractForms(connection.getFrameworkPart().getForms()));
+        extractForms(connection.getFrameworkPart().getForms(), skipSensitive));
 
       array.add(object);
     }

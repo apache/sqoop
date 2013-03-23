@@ -62,7 +62,7 @@ public class ConnectorBean implements JsonBean {
 
   @SuppressWarnings("unchecked")
   @Override
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
 
     JSONArray array = new JSONArray();
 
@@ -73,11 +73,11 @@ public class ConnectorBean implements JsonBean {
       object.put(NAME, connector.getUniqueName());
       object.put(CLASS, connector.getClassName());
       object.put(VERSION, connector.getVersion());
-      object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms()));
+      object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms(), skipSensitive));
 
       JSONObject jobForms = new JSONObject();
       for (MJobForms job : connector.getAllJobsForms().values()) {
-        jobForms.put(job.getType().name(), extractForms(job.getForms()));
+        jobForms.put(job.getType().name(), extractForms(job.getForms(), skipSensitive));
       }
       object.put(JOB_FORMS, jobForms);
 

@@ -98,7 +98,7 @@ public class JobBean implements JsonBean {
 
   @Override
   @SuppressWarnings("unchecked")
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONArray array = new JSONArray();
 
     for(MJob job : jobs) {
@@ -112,9 +112,9 @@ public class JobBean implements JsonBean {
       object.put(CONNECTION_ID, job.getConnectionId());
       object.put(CONNECTOR_ID, job.getConnectorId());
       object.put(CONNECTOR_PART,
-        extractForms(job.getConnectorPart().getForms()));
+        extractForms(job.getConnectorPart().getForms(), skipSensitive));
       object.put(FRAMEWORK_PART,
-        extractForms(job.getFrameworkPart().getForms()));
+        extractForms(job.getFrameworkPart().getForms(), skipSensitive));
 
       array.add(object);
     }

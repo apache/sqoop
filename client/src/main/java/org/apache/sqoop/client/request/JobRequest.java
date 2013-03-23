@@ -49,7 +49,9 @@ public class JobRequest extends Request {
   public ValidationBean create(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
-    JSONObject jobJson = jobBean.extract();
+
+    // Extract all form inputs including sensitive inputs
+    JSONObject jobJson = jobBean.extract(false);
 
     String response = super.post(serverUrl + RESOURCE,
       jobJson.toJSONString());
@@ -63,7 +65,9 @@ public class JobRequest extends Request {
   public ValidationBean update(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
-    JSONObject jobJson = jobBean.extract();
+
+    // Extract all form inputs including sensitive inputs
+    JSONObject jobJson = jobBean.extract(false);
 
     String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
                                 jobJson.toJSONString());

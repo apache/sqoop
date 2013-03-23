@@ -55,7 +55,7 @@ public class TestConnectorBean {
 
     // Serialize it to JSON object
     ConnectorBean bean = new ConnectorBean(connectors, bundles);
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();

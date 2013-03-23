@@ -108,7 +108,7 @@ public class SqoopProtocolServlet extends HttpServlet {
     response.setStatus(HttpServletResponse.SC_OK);
     setContentType(response);
     setHeaders(response, SqoopResponseCode.SQOOP_1000);
-    String responseString = bean.extract().toJSONString();
+    String responseString = bean.extract(true).toJSONString();
     response.getWriter().write(responseString);
     response.getWriter().flush();
   }
@@ -139,7 +139,7 @@ public class SqoopProtocolServlet extends HttpServlet {
       ThrowableBean throwableBean = new ThrowableBean(ex);
 
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getWriter().write(throwableBean.extract().toJSONString());
+      response.getWriter().write(throwableBean.extract(true).toJSONString());
     } else {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

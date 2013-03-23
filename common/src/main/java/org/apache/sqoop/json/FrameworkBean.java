@@ -64,13 +64,13 @@ public class FrameworkBean implements JsonBean {
 
   @SuppressWarnings("unchecked")
   @Override
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONArray conForms =
-      extractForms(framework.getConnectionForms().getForms());
+      extractForms(framework.getConnectionForms().getForms(), skipSensitive);
     JSONObject jobForms = new JSONObject();
 
     for (MJobForms job : framework.getAllJobsForms().values()) {
-      jobForms.put(job.getType().name(), extractForms(job.getForms()));
+      jobForms.put(job.getType().name(), extractForms(job.getForms(), skipSensitive));
     }
 
     JSONObject result = new JSONObject();

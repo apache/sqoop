@@ -40,7 +40,7 @@ public class TestValidationBean {
       getValidation(Status.FINE),
       getValidation(Status.UNACCEPTABLE)
     );
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();
@@ -78,7 +78,7 @@ public class TestValidationBean {
       getValidation(Status.FINE)
     );
     bean.setId((long) 10);
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();

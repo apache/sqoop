@@ -73,7 +73,7 @@ public class ValidationBean implements JsonBean {
   }
 
   @SuppressWarnings("unchecked")
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONObject object = new JSONObject();
 
     // Optionally transfer id

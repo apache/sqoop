@@ -54,7 +54,7 @@ public class ThrowableBean implements JsonBean {
 
   @Override
   @SuppressWarnings("unchecked")
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONObject result = new JSONObject();
 
     result.put(MESSAGE, throwable.getMessage());
@@ -77,7 +77,7 @@ public class ThrowableBean implements JsonBean {
     Throwable cause = throwable.getCause();
     if(cause != null) {
       ThrowableBean causeBean = new ThrowableBean(cause);
-      result.put(CAUSE, causeBean.extract());
+      result.put(CAUSE, causeBean.extract(skipSensitive));
     }
 
     return result;

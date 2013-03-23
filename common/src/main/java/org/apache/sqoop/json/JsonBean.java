@@ -21,14 +21,14 @@ import org.json.simple.JSONObject;
 
 public interface JsonBean {
 
-  JSONObject extract();
+  JSONObject extract(boolean skipSensitive);
 
   void restore(JSONObject jsonObject);
 
   public static final JsonBean EMPTY_BEAN = new JsonBean() {
 
     @Override
-    public JSONObject extract() {
+    public JSONObject extract(boolean skipSensitive) {
       return new JSONObject();
     }
 

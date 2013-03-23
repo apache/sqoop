@@ -61,7 +61,7 @@ public class SubmissionBean implements JsonBean {
 
   @Override
   @SuppressWarnings("unchecked")
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONObject ret = new JSONObject();
 
     ret.put(JOB, submission.getJobId());

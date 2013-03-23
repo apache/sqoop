@@ -49,7 +49,9 @@ public class ConnectionRequest extends Request {
   public ValidationBean create(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
-    JSONObject connectionJson = connectionBean.extract();
+
+    // Extract all form inputs including sensitive inputs
+    JSONObject connectionJson = connectionBean.extract(false);
 
     String response = super.post(serverUrl + RESOURCE,
                                  connectionJson.toJSONString());
@@ -63,7 +65,9 @@ public class ConnectionRequest extends Request {
   public ValidationBean update(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
-    JSONObject connectionJson = connectionBean.extract();
+
+    // Extract all form inputs including sensitive inputs
+    JSONObject connectionJson = connectionBean.extract(false);
 
     String response = super.put(serverUrl + RESOURCE
                                   + connection.getPersistenceId(),

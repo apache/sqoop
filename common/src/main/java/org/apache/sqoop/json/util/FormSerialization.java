@@ -64,11 +64,11 @@ public final class FormSerialization {
    * @return JSON object with serialized form of the list.
    */
   @SuppressWarnings("unchecked")
-  public static JSONArray extractForms(List<MForm> mForms) {
+  public static JSONArray extractForms(List<MForm> mForms, boolean skipSensitive) {
     JSONArray forms = new JSONArray();
 
     for (MForm mForm : mForms) {
-      forms.add(extractForm(mForm));
+      forms.add(extractForm(mForm, skipSensitive));
     }
 
     return forms;
@@ -78,10 +78,11 @@ public final class FormSerialization {
    * Transform given form to JSON Object.
    *
    * @param mForm Given MForm instance
+   * @param skipSensitive conditionally add sensitive input values
    * @return Serialized JSON object.
    */
   @SuppressWarnings("unchecked")
-  public static JSONObject extractForm(MForm mForm) {
+  public static JSONObject extractForm(MForm mForm, boolean skipSensitive) {
     JSONObject form = new JSONObject();
     form.put(ID, mForm.getPersistenceId());
     form.put(FORM_NAME, mForm.getName());
@@ -91,7 +92,6 @@ public final class FormSerialization {
 
     for (MInput<?> mInput : mForm.getInputs()) {
       JSONObject input = new JSONObject();
-      mInputs.add(input);
       input.put(ID, mInput.getPersistenceId());
       input.put(FORM_INPUT_NAME, mInput.getName());
       input.put(FORM_INPUT_TYPE, mInput.getType().toString());
@@ -111,9 +111,12 @@ public final class FormSerialization {
       }
 
       // Serialize value if is there
-      if(!mInput.isEmpty()) {
+      // Skip if sensitive
+      if (!mInput.isEmpty() && !(skipSensitive && ((MStringInput)mInput).isMasked())) {
         input.put(FORM_INPUT_VALUE, mInput.getUrlSafeValueString());
       }
+
+      mInputs.add(input);
     }
 
     return form;

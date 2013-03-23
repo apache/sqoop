@@ -20,6 +20,7 @@ package org.apache.sqoop.json;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class TestConnectionBean {
 
     // Serialize it to JSON object
     ConnectionBean bean = new ConnectionBean(connection);
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();
@@ -70,5 +71,48 @@ public class TestConnectionBean {
     MStringInput targetInput = (MStringInput) target.getConnectorPart()
       .getForms().get(0).getInputs().get(0);
     assertEquals("Hi there!", targetInput.getValue());
+  }
+
+  @Test
+  public void testSensitivityFilter() {
+    Date created = new Date();
+    Date updated = new Date();
+    MConnection connection = getConnection("ahoj");
+    connection.setName("Connection");
+    connection.setPersistenceId(666);
+    connection.setCreationDate(created);
+    connection.setLastUpdateDate(updated);
+
+    // Fill some data at the beginning
+    MStringInput input = (MStringInput) connection.getConnectorPart().getForms()
+      .get(0).getInputs().get(0);
+    input.setValue("Hi there!");
+
+    // Serialize it to JSON object
+    ConnectionBean bean = new ConnectionBean(connection);
+    JSONObject json = bean.extract(false);
+    JSONObject jsonFiltered = bean.extract(true);
+
+    // Sensitive values should exist
+    JSONArray all = (JSONArray)json.get("all");
+    JSONObject allItem = (JSONObject)all.get(0);
+    JSONArray connectors = (JSONArray)allItem.get("connector");
+    JSONObject connector = (JSONObject)connectors.get(0);
+    JSONArray inputs = (JSONArray)connector.get("inputs");
+    assertEquals(3, inputs.size());
+    // Inputs are ordered when creating connection
+    JSONObject password = (JSONObject)inputs.get(2);
+    assertTrue(password.containsKey("value"));
+
+    // Sensitive values should not exist
+    all = (JSONArray)jsonFiltered.get("all");
+    allItem = (JSONObject)all.get(0);
+    connectors = (JSONArray)allItem.get("connector");
+    connector = (JSONObject)connectors.get(0);
+    inputs = (JSONArray)connector.get("inputs");
+    assertEquals(3, inputs.size());
+    // Inputs are ordered when creating connection
+    password = (JSONObject)inputs.get(2);
+    assertFalse(password.containsKey("value"));
   }
 }

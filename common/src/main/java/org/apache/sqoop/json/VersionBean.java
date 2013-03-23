@@ -54,7 +54,7 @@ public class VersionBean implements JsonBean {
 
   @SuppressWarnings("unchecked")
   @Override
-  public JSONObject extract() {
+  public JSONObject extract(boolean skipSensitive) {
     JSONObject result = new JSONObject();
     result.put(VERSION, version);
     result.put(REVISION, revision);

@@ -31,7 +31,7 @@ public class TestThrowableBean extends TestCase {
 
     // Serialize it to JSON object
     ThrowableBean bean = new ThrowableBean(ex);
-    JSONObject json = bean.extract();
+    JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
     String string = json.toJSONString();
