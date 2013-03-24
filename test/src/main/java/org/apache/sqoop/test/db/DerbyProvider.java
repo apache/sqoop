@@ -76,6 +76,11 @@ public class DerbyProvider extends DatabaseProvider {
     return "'" + value + "'";
   }
 
+  @Override
+  public boolean isSupportingScheme() {
+    return true;
+  }
+
   public String escape(String entity) {
     return "\"" + entity + "\"";
   }

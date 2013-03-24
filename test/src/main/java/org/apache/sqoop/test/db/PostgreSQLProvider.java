@@ -73,6 +73,11 @@ public class PostgreSQLProvider extends DatabaseProvider {
   }
 
   @Override
+  public boolean isSupportingScheme() {
+    return true;
+  }
+
+  @Override
   public String getJdbcDriver() {
     return DRIVER;
   }

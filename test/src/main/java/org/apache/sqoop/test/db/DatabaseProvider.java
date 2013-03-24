@@ -104,6 +104,15 @@ abstract public class DatabaseProvider {
     return "NULL";
   }
 
+  /**
+   * True if the underlying database supports custom schemes (namespaces).
+   *
+   * @return
+   */
+  public boolean isSupportingScheme() {
+    return false;
+  }
+
   public String getJdbcDriver() {
     return null;
   }
