@@ -32,7 +32,7 @@ public class TestMValidatedElement {
    */
   @Test
   public void testInitialization() {
-    MValidatedElement input = new MIntegerInput("input");
+    MValidatedElement input = new MIntegerInput("input", false);
     assertEquals("input", input.getName());
     assertEquals(Status.FINE, input.getValidationStatus());
   }
@@ -42,7 +42,7 @@ public class TestMValidatedElement {
    */
   @Test
   public void testValidationMessageStatus() {
-    MValidatedElement input = new MIntegerInput("input");
+    MValidatedElement input = new MIntegerInput("input", false);
     // Default status
     assertEquals(Status.FINE, input.getValidationStatus());
     // Set status and user message

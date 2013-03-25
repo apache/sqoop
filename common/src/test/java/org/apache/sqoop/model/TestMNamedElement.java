@@ -31,7 +31,7 @@ public class TestMNamedElement {
    */
   @Test
   public void testInitialization() {
-    MNamedElement named = new MIntegerInput("SQOOP");
+    MNamedElement named = new MIntegerInput("SQOOP", false);
     assertEquals("SQOOP", named.getName());
     assertEquals("SQOOP.label", named.getLabelKey());
     assertEquals("SQOOP.help", named.getHelpKey());

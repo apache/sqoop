@@ -49,7 +49,7 @@ public class TestMConnection {
 
   private MConnectionForms connector1() {
     List<MForm> forms = new ArrayList<MForm>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT");
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MForm form = new MForm("FORMNAME", list);
@@ -59,7 +59,7 @@ public class TestMConnection {
 
   private MConnectionForms connector2() {
     List<MForm> forms = new ArrayList<MForm>();
-    MMapInput input = new MMapInput("MAP-INPUT");
+    MMapInput input = new MMapInput("MAP-INPUT", false);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MForm form = new MForm("form", list);

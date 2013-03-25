@@ -36,7 +36,7 @@ public class TestMAccountableEntity {
   @Test
   public void testInitialization() {
     List<MForm> forms = new ArrayList<MForm>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT");
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MForm form = new MForm("FORMNAME", list);

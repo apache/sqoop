@@ -52,7 +52,7 @@ public final class FormSerialization {
   public static final String FORM_INPUTS = "inputs";
   public static final String FORM_INPUT_NAME = "name";
   public static final String FORM_INPUT_TYPE = "type";
-  public static final String FORM_INPUT_MASK = "mask";
+  public static final String FORM_INPUT_SENSITIVE = "sensitive";
   public static final String FORM_INPUT_SIZE = "size";
   public static final String FORM_INPUT_VALUE = "value";
   public static final String FORM_INPUT_VALUES = "values";
@@ -95,11 +95,10 @@ public final class FormSerialization {
       input.put(ID, mInput.getPersistenceId());
       input.put(FORM_INPUT_NAME, mInput.getName());
       input.put(FORM_INPUT_TYPE, mInput.getType().toString());
+      input.put(FORM_INPUT_SENSITIVE, mInput.isSensitive());
 
       // String specific serialization
       if (mInput.getType() == MInputType.STRING) {
-        input.put(FORM_INPUT_MASK,
-            ((MStringInput)mInput).isMasked());
         input.put(FORM_INPUT_SIZE,
             ((MStringInput)mInput).getMaxLength());
       }
@@ -112,7 +111,7 @@ public final class FormSerialization {
 
       // Serialize value if is there
       // Skip if sensitive
-      if (!mInput.isEmpty() && !(skipSensitive && ((MStringInput)mInput).isMasked())) {
+      if (!mInput.isEmpty() && !(skipSensitive && mInput.isSensitive())) {
         input.put(FORM_INPUT_VALUE, mInput.getUrlSafeValueString());
       }
 
@@ -153,25 +152,25 @@ public final class FormSerialization {
       MInputType type =
           MInputType.valueOf((String) input.get(FORM_INPUT_TYPE));
       String name = (String) input.get(FORM_INPUT_NAME);
+      Boolean sensitive = (Boolean) input.get(FORM_INPUT_SENSITIVE);
       MInput mInput = null;
       switch (type) {
         case STRING: {
-          boolean mask = (Boolean) input.get(FORM_INPUT_MASK);
           long size = (Long) input.get(FORM_INPUT_SIZE);
-          mInput = new MStringInput(name, mask, (short) size);
+          mInput = new MStringInput(name, sensitive.booleanValue(), (short) size);
           break;
         }
         case MAP: {
-          mInput = new MMapInput(name);
+          mInput = new MMapInput(name, sensitive.booleanValue());
           break;
         }
         case INTEGER: {
-          mInput = new MIntegerInput(name);
+          mInput = new MIntegerInput(name, sensitive.booleanValue());
           break;
         }
         case ENUM: {
           String values = (String) input.get(FORM_INPUT_VALUES);
-          mInput = new MEnumInput(name, values.split(","));
+          mInput = new MEnumInput(name, sensitive.booleanValue(), values.split(","));
           break;
         }
       }

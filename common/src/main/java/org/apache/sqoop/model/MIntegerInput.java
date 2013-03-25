@@ -24,8 +24,8 @@ package org.apache.sqoop.model;
  */
 public class MIntegerInput extends MInput<Integer> {
 
-  public MIntegerInput(String name) {
-    super(name);
+  public MIntegerInput(String name, boolean sensitive) {
+    super(name, sensitive);
   }
 
   @Override

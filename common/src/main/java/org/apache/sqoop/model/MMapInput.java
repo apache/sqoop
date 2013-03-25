@@ -24,8 +24,8 @@ import org.apache.sqoop.utils.UrlSafeUtils;
 
 public final class MMapInput extends MInput<Map<String, String>> {
 
-  public MMapInput(String name) {
-    super(name);
+  public MMapInput(String name, boolean sensitive) {
+    super(name, sensitive);
   }
 
   @Override

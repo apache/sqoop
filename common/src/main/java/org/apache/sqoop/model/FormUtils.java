@@ -139,11 +139,11 @@ public class FormUtils {
         if(type == String.class) {
           input = new MStringInput(inputName, sensitive, maxLen);
         } else if (type.isAssignableFrom(Map.class)) {
-          input = new MMapInput(inputName);
+          input = new MMapInput(inputName, sensitive);
         } else if(type == Integer.class) {
-          input = new MIntegerInput(inputName);
+          input = new MIntegerInput(inputName, sensitive);
         } else if(type.isEnum()) {
-          input = new MEnumInput(inputName, ClassUtils.getEnumStrings(type));
+          input = new MEnumInput(inputName, sensitive, ClassUtils.getEnumStrings(type));
         } else {
           throw new SqoopException(ModelError.MODEL_004,
             "Unsupported type " + type.getName() + " for input " + fieldName);

@@ -101,9 +101,9 @@ public final class FormDisplayer {
         println(bundle.getString(input.getHelpKey()));
         print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_TYPE));
         println(input.getType());
+        print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_SENSITIVE));
+        println(input.isSensitive());
         if (input.getType() == MInputType.STRING) {
-          print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_MASK));
-          println(((MStringInput)input).isMasked());
           print("        %s: ", resourceString(Constants.RES_FORMDISPLAYER_SIZE));
           println(((MStringInput)input).getMaxLength());
         } else if(input.getType() == MInputType.ENUM) {
@@ -129,23 +129,27 @@ public final class FormDisplayer {
       print(bundle.getString(input.getLabelKey()));
       print(": ");
       if(!input.isEmpty()) {
-        // Based on the input type, let's perform specific load
-        switch (input.getType()) {
-          case STRING:
-            displayInputString((MStringInput) input);
-            break;
-          case INTEGER:
-            displayInputInteger((MIntegerInput) input);
-            break;
-          case MAP:
-            displayInputMap((MMapInput) input);
-            break;
-          case ENUM:
-            displayInputEnum((MEnumInput) input);
-            break;
-          default:
-            print("\n%s " + input.getType(), resourceString(Constants.RES_FORMDISPLAYER_UNSUPPORTED_DATATYPE));
-            return;
+        if (input.isSensitive()) {
+          print("(%s)", resourceString(Constants.RES_FORMDISPLAYER_INPUT_SENSITIVE));
+        } else {
+          // Based on the input type, let's perform specific load
+          switch (input.getType()) {
+            case STRING:
+              displayInputString((MStringInput) input);
+              break;
+            case INTEGER:
+              displayInputInteger((MIntegerInput) input);
+              break;
+            case MAP:
+              displayInputMap((MMapInput) input);
+              break;
+            case ENUM:
+              displayInputEnum((MEnumInput) input);
+              break;
+            default:
+              print("\n%s " + input.getType(), resourceString(Constants.RES_FORMDISPLAYER_UNSUPPORTED_DATATYPE));
+              return;
+          }
         }
       }
       println("");
@@ -158,11 +162,7 @@ public final class FormDisplayer {
    * @param input String input
    */
   private static void displayInputString(MStringInput input) {
-    if (input.isMasked()) {
-      print("(%s)", resourceString(Constants.RES_FORMDISPLAYER_INPUT_SENSITIVE));
-    } else {
-      print(input.getValue());
-    }
+    print(input.getValue());
   }
 
   /**

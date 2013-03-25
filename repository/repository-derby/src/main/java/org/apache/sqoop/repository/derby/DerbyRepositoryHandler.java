@@ -1369,13 +1369,12 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       baseInputStmt.setLong(2, formId);
       baseInputStmt.setShort(3, inputIndex++);
       baseInputStmt.setString(4, input.getType().name());
+      baseInputStmt.setBoolean(5, input.isSensitive());
       // String specific column(s)
       if (input.getType().equals(MInputType.STRING)) {
         MStringInput	strInput = (MStringInput) input;
-        baseInputStmt.setBoolean(5, strInput.isMasked());
         baseInputStmt.setShort(6, strInput.getMaxLength());
       } else {
-        baseInputStmt.setNull(5, Types.BOOLEAN);
         baseInputStmt.setNull(6, Types.INTEGER);
       }
       // Enum specific column(s)
@@ -1494,7 +1493,7 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         long inputForm = rsetInput.getLong(3);
         short inputIndex = rsetInput.getShort(4);
         String inputType = rsetInput.getString(5);
-        boolean inputStrMask = rsetInput.getBoolean(6);
+        boolean inputSensitivity = rsetInput.getBoolean(6);
         short inputStrLength = rsetInput.getShort(7);
         String inputEnumValues = rsetInput.getString(8);
         String value = rsetInput.getString(9);
@@ -1504,16 +1503,16 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         MInput input = null;
         switch (mit) {
         case STRING:
-          input = new MStringInput(inputName, inputStrMask, inputStrLength);
+          input = new MStringInput(inputName, inputSensitivity, inputStrLength);
           break;
         case MAP:
-          input = new MMapInput(inputName);
+          input = new MMapInput(inputName, inputSensitivity);
           break;
         case INTEGER:
-          input = new MIntegerInput(inputName);
+          input = new MIntegerInput(inputName, inputSensitivity);
           break;
         case ENUM:
-          input = new MEnumInput(inputName, inputEnumValues.split(","));
+          input = new MEnumInput(inputName, inputSensitivity, inputEnumValues.split(","));
           break;
         default:
           throw new SqoopException(DerbyRepoError.DERBYREPO_0006,

@@ -34,7 +34,7 @@ public class TestMStringInput {
     short len = 6;
     MStringInput input = new MStringInput("sqoopsqoop", true, len);
     assertEquals("sqoopsqoop", input.getName());
-    assertEquals(true, input.isMasked());
+    assertEquals(true, input.isSensitive());
     assertEquals(len, input.getMaxLength());
     assertEquals(MInputType.STRING, input.getType());
   }

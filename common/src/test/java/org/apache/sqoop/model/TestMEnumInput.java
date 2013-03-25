@@ -33,19 +33,31 @@ public class TestMEnumInput {
   @Test
   public void testInitialization() {
     String[] values = { "value1", "value2" };
-    MEnumInput input = new MEnumInput("NAME", values);
+    MEnumInput input = new MEnumInput("NAME", false, values);
     assertEquals("NAME", input.getName());
     assertArrayEquals(values, input.getValues());
     assertEquals(MInputType.ENUM, input.getType());
 
-    MEnumInput input1 = new MEnumInput("NAME", values);
+    MEnumInput input1 = new MEnumInput("NAME", false, values);
     assertEquals(input1, input);
     String[] testVal = { "val", "test" };
-    MEnumInput input2 = new MEnumInput("NAME1", testVal);
+    MEnumInput input2 = new MEnumInput("NAME1", false, testVal);
     assertFalse(input1.equals(input2));
 
-    MEnumInput input3 = new MEnumInput("NAME", values);
+    MEnumInput input3 = new MEnumInput("NAME", false, values);
     input3.setValue(Enumeration.value1);
     assertEquals("value1", input3.getValue());
+  }
+
+  /**
+   * Test for sensitivity
+   */
+  @Test
+  public void testSensitivity() {
+    String[] values = { "value1", "value2" };
+    MEnumInput input1 = new MEnumInput("NAME", false, values);
+    MEnumInput input2 = new MEnumInput("NAME", true, values);
+    assertFalse(input1.isSensitive());
+    assertTrue(input2.isSensitive());
   }
 }

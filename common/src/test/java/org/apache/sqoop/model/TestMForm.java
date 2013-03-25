@@ -50,15 +50,15 @@ public class TestMForm {
    */
   @Test
   public void testEquals() {
-    MInput<Integer> input1 = new MIntegerInput("sqoopsqoop1");
-    MInput<Integer> input2 = new MIntegerInput("sqoopsqoop2");
+    MInput<Integer> input1 = new MIntegerInput("sqoopsqoop1", false);
+    MInput<Integer> input2 = new MIntegerInput("sqoopsqoop2", false);
     List<MInput<?>> list1 = new ArrayList<MInput<?>>();
     list1.add(input1);
     list1.add(input2);
     MForm mform1 = new MForm("form", list1);
 
-    MInput<Integer> input3 = new MIntegerInput("sqoopsqoop1");
-    MInput<Integer> input4 = new MIntegerInput("sqoopsqoop2");
+    MInput<Integer> input3 = new MIntegerInput("sqoopsqoop1", false);
+    MInput<Integer> input4 = new MIntegerInput("sqoopsqoop2", false);
     List<MInput<?>> list2 = new ArrayList<MInput<?>>();
     list2.add(input3);
     list2.add(input4);
@@ -68,10 +68,10 @@ public class TestMForm {
 
   @Test
   public void testGetInputs() {
-    MIntegerInput intInput = new MIntegerInput("Form.A");
-    MMapInput mapInput = new MMapInput("Form.B");
+    MIntegerInput intInput = new MIntegerInput("Form.A", false);
+    MMapInput mapInput = new MMapInput("Form.B", false);
     MStringInput stringInput = new MStringInput("Form.C", false, (short)3);
-    MEnumInput enumInput = new MEnumInput("Form.D", new String[] {"I", "V"});
+    MEnumInput enumInput = new MEnumInput("Form.D", false, new String[] {"I", "V"});
 
     List<MInput<?>> inputs = new ArrayList<MInput<?>>();
     inputs.add(intInput);

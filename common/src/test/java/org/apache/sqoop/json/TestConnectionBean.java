@@ -19,6 +19,7 @@ package org.apache.sqoop.json;
 
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MStringInput;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
@@ -51,6 +52,16 @@ public class TestConnectionBean {
     // Serialize it to JSON object
     ConnectionBean bean = new ConnectionBean(connection);
     JSONObject json = bean.extract(false);
+
+    // Check for sensitivity
+    JSONArray all = (JSONArray)json.get("all");
+    JSONObject allItem = (JSONObject)all.get(0);
+    JSONArray connectors = (JSONArray)allItem.get("connector");
+    JSONObject connector = (JSONObject)connectors.get(0);
+    JSONArray inputs = (JSONArray)connector.get("inputs");
+    for (Object input1 : inputs) {
+      assertTrue(((JSONObject)input1).containsKey("sensitive"));
+    }
 
     // "Move" it across network in text form
     String string = json.toJSONString();

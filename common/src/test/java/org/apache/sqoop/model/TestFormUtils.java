@@ -184,9 +184,9 @@ public class TestFormUtils extends TestCase {
 
     // Form C
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MIntegerInput("cForm.intValue"));
-    inputs.add(new MMapInput("cForm.map"));
-    inputs.add(new MEnumInput("cForm.enumeration", new String[]{"X", "Y"}));
+    inputs.add(new MIntegerInput("cForm.intValue", false));
+    inputs.add(new MMapInput("cForm.map", false));
+    inputs.add(new MEnumInput("cForm.enumeration", false, new String[]{"X", "Y"}));
     ret.add(new MForm("cForm", inputs));
 
     return ret;

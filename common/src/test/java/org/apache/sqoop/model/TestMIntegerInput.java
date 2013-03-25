@@ -33,7 +33,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testInitialization() {
-    MIntegerInput input = new MIntegerInput("sqoopsqoop");
+    MIntegerInput input = new MIntegerInput("sqoopsqoop", false);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.INTEGER, input.getType());
   }
@@ -44,13 +44,13 @@ public class TestMIntegerInput {
   @Test
   public void testEquals() {
     // Positive test
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop");
-    MIntegerInput input2 = new MIntegerInput("sqoopsqoop");
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input2 = new MIntegerInput("sqoopsqoop", false);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MIntegerInput input3 = new MIntegerInput("sqoopsqoop");
-    MIntegerInput input4 = new MIntegerInput("sqoopsqoop1");
+    MIntegerInput input3 = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input4 = new MIntegerInput("sqoopsqoop1", false);
     assertFalse(input3.equals(input4));
   }
 
@@ -59,7 +59,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testValue() {
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop");
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
     input1.setValue(99);
     assertEquals(new Integer(99), input1.getValue());
     input1.setEmpty();
@@ -71,7 +71,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testUrlSafe() {
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop");
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
     input1.setValue(1001);
     // Getting URL safe string
     String tmp = input1.getUrlSafeValueString();
@@ -88,5 +88,16 @@ public class TestMIntegerInput {
     MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
+  }
+
+  /**
+   * Test for sensitivity
+   */
+  @Test
+  public void testSensitivity() {
+    MIntegerInput input1 = new MIntegerInput("NAME", false);
+    MIntegerInput input2 = new MIntegerInput("NAME", true);
+    assertFalse(input1.isSensitive());
+    assertTrue(input2.isSensitive());
   }
 }

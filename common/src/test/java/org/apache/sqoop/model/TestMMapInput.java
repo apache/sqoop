@@ -36,7 +36,7 @@ public class TestMMapInput {
    */
   @Test
   public void testInitialization() {
-    MMapInput input = new MMapInput("sqoopsqoop");
+    MMapInput input = new MMapInput("sqoopsqoop", false);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.MAP, input.getType());
   }
@@ -47,13 +47,13 @@ public class TestMMapInput {
   @Test
   public void testEquals() {
     // Positive test
-    MMapInput input1 = new MMapInput("sqoopsqoop");
-    MMapInput input2 = new MMapInput("sqoopsqoop");
+    MMapInput input1 = new MMapInput("sqoopsqoop", false);
+    MMapInput input2 = new MMapInput("sqoopsqoop", false);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MMapInput input3 = new MMapInput("sqoopsqoop");
-    MMapInput input4 = new MMapInput("sqoopsqoop1");
+    MMapInput input3 = new MMapInput("sqoopsqoop", false);
+    MMapInput input4 = new MMapInput("sqoopsqoop1", false);
     assertFalse(input3.equals(input4));
   }
 
@@ -62,7 +62,7 @@ public class TestMMapInput {
    */
   @Test
   public void testValue() {
-    MMapInput input1 = new MMapInput("sqoopsqoop");
+    MMapInput input1 = new MMapInput("sqoopsqoop", false);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     assertEquals(map1, input1.getValue());
@@ -75,7 +75,7 @@ public class TestMMapInput {
    */
   @Test
   public void testUrlSafe() {
-    MMapInput input1 = new MMapInput("sqoopsqoop");
+    MMapInput input1 = new MMapInput("sqoopsqoop", false);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     // Getting URL safe string
@@ -93,5 +93,16 @@ public class TestMMapInput {
     MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
+  }
+
+  /**
+   * Test for sensitivity
+   */
+  @Test
+  public void testSensitivity() {
+    MMapInput input1 = new MMapInput("NAME", false);
+    MMapInput input2 = new MMapInput("NAME", true);
+    assertFalse(input1.isSensitive());
+    assertTrue(input2.isSensitive());
   }
 }

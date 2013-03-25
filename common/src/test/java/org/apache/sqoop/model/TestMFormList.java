@@ -33,8 +33,8 @@ public class TestMFormList {
   public void testGetInputs() {
     List<MForm> forms = new LinkedList<MForm>();
 
-    MIntegerInput intInput = new MIntegerInput("Form1.A");
-    MMapInput mapInput = new MMapInput("Form1.B");
+    MIntegerInput intInput = new MIntegerInput("Form1.A", false);
+    MMapInput mapInput = new MMapInput("Form1.B", false);
 
     List<MInput<?>> inputs = new ArrayList<MInput<?>>();
     inputs.add(intInput);
@@ -42,7 +42,7 @@ public class TestMFormList {
     forms.add(new MForm("Form1", inputs));
 
     MStringInput stringInput = new MStringInput("Form2.C", false, (short)3);
-    MEnumInput enumInput = new MEnumInput("Form2.D", new String[] {"I", "V"});
+    MEnumInput enumInput = new MEnumInput("Form2.D", false, new String[] {"I", "V"});
 
     inputs = new ArrayList<MInput<?>>();
     inputs.add(stringInput);

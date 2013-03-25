@@ -336,8 +336,8 @@ public class Constants {
       "formdisplayer.input";
   public static final String RES_FORMDISPLAYER_TYPE =
       "formdisplayer.type";
-  public static final String RES_FORMDISPLAYER_MASK =
-      "formdisplayer.mask";
+  public static final String RES_FORMDISPLAYER_SENSITIVE =
+      "formdisplayer.sensitive";
   public static final String RES_FORMDISPLAYER_SIZE =
       "formdisplayer.size";
   public static final String RES_FORMDISPLAYER_POSSIBLE_VALUES =

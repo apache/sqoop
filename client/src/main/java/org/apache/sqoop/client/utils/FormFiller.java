@@ -203,7 +203,8 @@ public final class FormFiller {
 
       println("  " + i  + " : " + value);
 
-      if(!input.isEmpty() && value.equals(input.getValue())) {
+      // Only show last choice if not sensitive
+      if(!input.isEmpty() && value.equals(input.getValue()) && !input.isSensitive()) {
         lastChoice = i;
       }
     }
@@ -217,7 +218,12 @@ public final class FormFiller {
     }
 
     reader.flushConsole();
-    String userTyped = reader.readLine();
+    String userTyped;
+    if(input.isSensitive()) {
+      userTyped = reader.readLine('*');
+    } else {
+      userTyped = reader.readLine();
+    }
 
     if (userTyped == null) {
       return false;
@@ -278,16 +284,23 @@ public final class FormFiller {
 
     while(true) {
       // Print all current items in each iteration
+      // However do not printout if this input contains sensitive information.
       println("There are currently " + values.size() + " values in the map:");
-      for(Map.Entry<String, String> entry : values.entrySet()) {
-        println(entry.getKey() + " = " + entry.getValue());
+      if (!input.isSensitive()) {
+        for(Map.Entry<String, String> entry : values.entrySet()) {
+          println(entry.getKey() + " = " + entry.getValue());
+        }
       }
 
       // Special prompt for Map entry
       reader.printString("entry# ");
       reader.flushConsole();
 
-      userTyped = reader.readLine();
+      if(input.isSensitive()) {
+        userTyped = reader.readLine('*');
+      } else {
+        userTyped = reader.readLine();
+      }
 
       if(userTyped == null) {
         // Finish loading and return back to Sqoop shell
@@ -365,11 +378,18 @@ public final class FormFiller {
     generatePrompt(reader, bundle, input);
 
     // Fill already filled data when available
-    if(!input.isEmpty()) {
+    // However do not printout if this input contains sensitive information.
+    if(!input.isEmpty() && !input.isSensitive()) {
       reader.putString(input.getValue().toString());
     }
 
-    String userTyped = reader.readLine();
+    // Get the data
+    String userTyped;
+    if(input.isSensitive()) {
+      userTyped = reader.readLine('*');
+    } else {
+      userTyped = reader.readLine();
+    }
 
     if (userTyped == null) {
       return false;
@@ -408,13 +428,13 @@ public final class FormFiller {
 
     // Fill already filled data when available
     // However do not printout if this input contains sensitive information.
-    if(!input.isEmpty() && !input.isMasked()) {
+    if(!input.isEmpty() && !input.isSensitive()) {
       reader.putString(input.getValue());
     }
 
     // Get the data
     String userTyped;
-    if(input.isMasked()) {
+    if(input.isSensitive()) {
        userTyped = reader.readLine('*');
     } else {
       userTyped = reader.readLine();

@@ -32,8 +32,8 @@ public class MEnumInput extends MInput<String> {
    */
   String []values;
 
-  public MEnumInput(String name, String[] values) {
-    super(name);
+  public MEnumInput(String name, boolean sensitive, String[] values) {
+    super(name, sensitive);
     this.values = values;
   }
 

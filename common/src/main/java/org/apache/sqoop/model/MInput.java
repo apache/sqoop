@@ -21,12 +21,16 @@ package org.apache.sqoop.model;
  * Represents a parameter input used by the connector for creating a connection
  * or a job object.
  * @param <T> the value type associated with this parameter
+ * @param boolean whether or not the field contains sensitive information
  */
 public abstract class MInput<T> extends MValidatedElement {
+  private final boolean sensitive;
+
   private T value;
 
-  protected MInput(String name) {
+  protected MInput(String name, boolean sensitive) {
     super(name);
+    this.sensitive = sensitive;
   }
 
   /**
@@ -41,6 +45,13 @@ public abstract class MInput<T> extends MValidatedElement {
    */
   public T getValue() {
     return value;
+  }
+
+  /**
+   * @return <tt>true</tt> if this string represents sensitive information
+   */
+  public boolean isSensitive() {
+    return sensitive;
   }
 
   /**

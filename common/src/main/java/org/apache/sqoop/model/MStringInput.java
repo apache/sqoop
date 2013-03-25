@@ -20,33 +20,23 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.utils.UrlSafeUtils;
 
 /**
- * Represents a <tt>String</tt> input. The boolean flag <tt>mask</tt> supplied
+ * Represents a <tt>String</tt> input. The boolean flag <tt>sensitive</tt> supplied
  * to its constructor can be used to indicate if the string should be masked
  * from user-view. This is helpful for creating input strings that represent
  * sensitive information such as passwords.
  */
 public final class MStringInput extends MInput<String> {
 
-  private final boolean mask;
   private final short maxLength;
 
   /**
    * @param name the parameter name
-   * @param mask a flag indicating if the string should be masked
+   * @param sensitive a flag indicating if the string should be masked
    * @param maxLength the maximum length of the string
    */
-  public MStringInput(String name, boolean mask, short maxLength) {
-    super(name);
-    this.mask = mask;
+  public MStringInput(String name, boolean sensitive, short maxLength) {
+    super(name, sensitive);
     this.maxLength = maxLength;
-  }
-
-  /**
-   * @return <tt>true</tt> if this string represents sensitive information that
-   * should be masked
-   */
-  public boolean isMasked() {
-    return mask;
   }
 
   /**
@@ -78,7 +68,7 @@ public final class MStringInput extends MInput<String> {
 
   @Override
   public String getExtraInfoToString() {
-    return isMasked() + ":" + getMaxLength();
+    return Short.toString(getMaxLength());
   }
 
   @Override
@@ -93,14 +83,14 @@ public final class MStringInput extends MInput<String> {
 
     MStringInput msi = (MStringInput) other;
     return getName().equals(msi.getName())
-        && (mask == msi.mask)
+        && (isSensitive() == msi.isSensitive())
         && (maxLength == msi.maxLength);
   }
 
   @Override
   public int hashCode() {
     int result = 23 + 31 * getName().hashCode();
-    result = 31 * result + (mask ? 1 : 0);
+    result = 31 * result + (isSensitive() ? 1 : 0);
     result = 31 * result + maxLength;
     return result;
   }
