@@ -23,6 +23,8 @@ import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,17 +47,29 @@ abstract public class TomcatTestCase {
 
   private static final Logger LOG = Logger.getLogger(TomcatTestCase.class);
 
+  @Rule public TestName name = new TestName();
+
   /**
-   * Temporary path that will be used for this test.
+   * Temporary base path that will be used for tests.
    *
-   * By default we will take look for sqoop.integration.tmpdir property that is
+   * By default we will take a look for sqoop.integration.tmpdir property that is
    * filled up by maven. If the test is not started from maven (IDE) we will
    * pick up configured java.io.tmpdir value. The last results is /tmp/ directory
    * in case that no property is set.
    */
-  private final String TMP_PATH =
-    System.getProperty("sqoop.integration.tmpdir", System.getProperty("java.io.tmpdir", "/tmp"))
-      + "/sqoop-cargo-tests/" + getClass().getName() + "/";
+  private static final String TMP_PATH_BASE =
+    System.getProperty("sqoop.integration.tmpdir", System.getProperty("java.io.tmpdir", "/tmp")) + "/sqoop-cargo-tests/";
+
+  /**
+   * Temporary directory that will be used by the test.
+   *
+   * We will take TMP_PATH_BASE and append two subdirectories. First will be named
+   * after fully qualified class name of current test class, second directory will
+   * be named after current test method name. For example:
+   *
+   * TMP_PATH_BASE/org.apache.sqoop.TestClass/testMethod/
+   */
+  private String tmpPath;
 
   /**
    * Tomcat based Sqoop mini cluster
@@ -69,9 +83,14 @@ abstract public class TomcatTestCase {
 
   @Before
   public void startServer() throws Exception {
+    // Set up the temporary path
+    tmpPath = TMP_PATH_BASE + getClass().getName() + "/" + name.getMethodName() + "/";
+
+    // Set up and start server
     cluster = new TomcatSqoopMiniCluster(getTemporaryPath());
     cluster.start();
 
+    // Initialize Sqoop Client API
     client = new SqoopClient(getServerUrl());
   }
 
@@ -90,7 +109,7 @@ abstract public class TomcatTestCase {
   }
 
   public String getTemporaryPath() {
-    return TMP_PATH;
+    return tmpPath;
   }
 
   /**

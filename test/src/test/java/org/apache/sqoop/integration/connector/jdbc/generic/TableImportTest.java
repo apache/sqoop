@@ -24,78 +24,43 @@ import org.apache.sqoop.integration.connector.ConnectorTestCase;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.validation.Status;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Proof of concept implementation of first "real" integration test.
- *
- * Will be improved when client API will be created.
+ * Import simple table with various configurations.
  */
 public class TableImportTest extends ConnectorTestCase {
 
   private static final Logger LOG = Logger.getLogger(TableImportTest.class);
 
-  /**
-   * This test is proof of concept.
-   *
-   * It will be refactored once we will create reasonable client interface.
-   */
   @Test
-  public void testBasicTableImport() throws Exception {
-    createTable("id",
-      "id", "int",
-      "txt", "varchar(50)"
-    );
-    insertRow(1, "San Francisco");
-    insertRow(2, "Sunnyvale");
-    insertRow(3, "Brno");
-
-    // Connection creation and job submission will be refactored once
-    // the client API for embedding Sqoop client will be ready.
+  public void testBasicImport() throws Exception {
+    createAndLoadTableCities();
 
     // Connection creation
     MConnection connection = getClient().newConnection(1L);
-
-    MFormList forms;
-    // Connector values
-    forms = connection.getConnectorPart();
-    forms.getStringInput("connection.jdbcDriver").setValue(provider.getJdbcDriver());
-    forms.getStringInput("connection.connectionString").setValue(provider.getConnectionUrl());
-    forms.getStringInput("connection.username").setValue(provider.getConnectionUsername());
-    forms.getStringInput("connection.password").setValue(provider.getConnectionPassword());
-    // Framework values
-    // No need to set anything
-
-    assertEquals(Status.FINE, getClient().createConnection(connection));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, connection.getPersistenceId());
+    fillConnectionForm(connection);
+    createConnection(connection);
 
     // Job creation
     MJob job = getClient().newJob(connection.getPersistenceId(), MJob.Type.IMPORT);
 
     // Connector values
-    forms = job.getConnectorPart();
+    MFormList forms = job.getConnectorPart();
     forms.getStringInput("table.tableName").setValue(provider.escapeTableName(getTableName()));
     forms.getStringInput("table.partitionColumn").setValue(provider.escapeColumnName("id"));
     // Framework values
-    forms = job.getFrameworkPart();
-    forms.getEnumInput("output.storageType").setValue(StorageType.HDFS);
-    forms.getEnumInput("output.outputFormat").setValue(OutputFormat.TEXT_FILE);
-    forms.getStringInput("output.outputDirectory").setValue(getMapreduceDirectory());
-
-    assertEquals(Status.FINE, getClient().createJob(job));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
+    fillOutputForm(job, StorageType.HDFS, OutputFormat.TEXT_FILE);
+    createJob(job);
 
     MSubmission submission = getClient().startSubmission(job.getPersistenceId());
     assertTrue(submission.getStatus().isRunning());
 
-    // Wait until the job finish
+    // Wait until the job finish - this active waiting will be removed once
+    // Sqoop client API will get blocking support.
     do {
       Thread.sleep(5000);
       submission = getClient().getSubmissionStatus(job.getPersistenceId());
@@ -103,13 +68,57 @@ public class TableImportTest extends ConnectorTestCase {
 
     // Assert correct output
     assertMapreduceOutput(
-      "1,'San Francisco'",
-      "2,'Sunnyvale'",
-      "3,'Brno'"
+      "1,'USA','San Francisco'",
+      "2,'USA','Sunnyvale'",
+      "3,'Czech Republic','Brno'",
+      "4,'USA','Palo Alto'"
     );
 
     // Clean up testing table
     dropTable();
   }
 
+  @Test
+  public void testColumns() throws Exception {
+    createAndLoadTableCities();
+
+    // Connection creation
+    MConnection connection = getClient().newConnection(1L);
+    fillConnectionForm(connection);
+
+    createConnection(connection);
+
+    // Job creation
+    MJob job = getClient().newJob(connection.getPersistenceId(), MJob.Type.IMPORT);
+
+    // Connector values
+    MFormList forms = job.getConnectorPart();
+    forms.getStringInput("table.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("table.partitionColumn").setValue(provider.escapeColumnName("id"));
+    forms.getStringInput("table.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
+    // Framework values
+    fillOutputForm(job, StorageType.HDFS, OutputFormat.TEXT_FILE);
+    createJob(job);
+
+    MSubmission submission = getClient().startSubmission(job.getPersistenceId());
+    assertTrue(submission.getStatus().isRunning());
+
+    // Wait until the job finish - this active waiting will be removed once
+    // Sqoop client API will get blocking support.
+    do {
+      Thread.sleep(5000);
+      submission = getClient().getSubmissionStatus(job.getPersistenceId());
+    } while(submission.getStatus().isRunning());
+
+    // Assert correct output
+    assertMapreduceOutput(
+      "1,'USA'",
+      "2,'USA'",
+      "3,'Czech Republic'",
+      "4,'USA'"
+    );
+
+    // Clean up testing table
+    dropTable();
+  }
 }
