@@ -98,46 +98,12 @@ public class SqoopRequests {
     return getConnectionRequest().create(serverUrl, connection);
   }
 
-  public Status createConnectionApplyValidations(MConnection connection) {
-    ValidationBean bean = createConnection(connection);
-
-    Validation connector = bean.getConnectorValidation();
-    Validation framework = bean.getFrameworkValidation();
-
-    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
-
-    Long id = bean.getId();
-    if(id != null) {
-      connection.setPersistenceId(id);
-    }
-
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
-  }
-
   public ConnectionBean readConnection(Long connectionId) {
     return getConnectionRequest().read(serverUrl, connectionId);
   }
 
   public ValidationBean updateConnection(MConnection connection) {
     return getConnectionRequest().update(serverUrl, connection);
-  }
-
-  public Status updateConnectionApplyValidations(MConnection connection){
-    ValidationBean bean = updateConnection(connection);
-
-    Validation connector = bean.getConnectorValidation();
-    Validation framework = bean.getFrameworkValidation();
-
-    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
-
-    Long id = bean.getId();
-    if(id != null) {
-      connection.setPersistenceId(id);
-    }
-
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
   public void deleteConnection(Long xid) {
@@ -148,46 +114,12 @@ public class SqoopRequests {
     return getJobRequest().create(serverUrl, job);
   }
 
-  public Status createJobApplyValidations(MJob job) {
-    ValidationBean bean = createJob(job);
-
-    Validation connector = bean.getConnectorValidation();
-    Validation framework = bean.getFrameworkValidation();
-
-    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
-
-    Long id = bean.getId();
-    if(id != null) {
-      job.setPersistenceId(id);
-    }
-
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
-  }
-
   public JobBean readJob(Long jobId) {
     return getJobRequest().read(serverUrl, jobId);
   }
 
   public ValidationBean updateJob(MJob job) {
     return getJobRequest().update(serverUrl, job);
-  }
-
-  public Status updateJobApplyValidations(MJob job) {
-    ValidationBean bean = updateJob(job);
-
-    Validation connector = bean.getConnectorValidation();
-    Validation framework = bean.getFrameworkValidation();
-
-    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
-
-    Long id = bean.getId();
-    if(id != null) {
-      job.setPersistenceId(id);
-    }
-
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
   public void deleteJob(Long jid) {

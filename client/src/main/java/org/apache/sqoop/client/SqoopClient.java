@@ -18,12 +18,15 @@
 package org.apache.sqoop.client;
 
 import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validation;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -138,7 +141,7 @@ public class SqoopClient {
    * @return
    */
   public Status createConnection(MConnection connection) {
-    return requests.createConnectionApplyValidations(connection);
+    return applyValidations(requests.createConnection(connection), connection);
   }
 
   /**
@@ -148,7 +151,7 @@ public class SqoopClient {
    * @return
    */
   public Status updateConnection(MConnection connection) {
-    return requests.updateConnectionApplyValidations(connection);
+    return applyValidations(requests.updateConnection(connection), connection);
   }
 
   /**
@@ -205,7 +208,7 @@ public class SqoopClient {
    * @return
    */
   public Status createJob(MJob job) {
-    return requests.createJobApplyValidations(job);
+    return applyValidations(requests.createJob(job), job);
   }
 
   /**
@@ -214,7 +217,7 @@ public class SqoopClient {
    * @return
    */
   public Status updateJob(MJob job) {
-    return requests.updateJobApplyValidations(job);
+    return applyValidations(requests.updateJob(job), job);
   }
 
   /**
@@ -254,5 +257,35 @@ public class SqoopClient {
    */
   public MSubmission getSubmissionStatus(long jid) {
     return requests.readSubmission(jid).getSubmission();
+  }
+
+  private Status applyValidations(ValidationBean bean, MConnection connection) {
+    Validation connector = bean.getConnectorValidation();
+    Validation framework = bean.getFrameworkValidation();
+
+    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
+
+    Long id = bean.getId();
+    if(id != null) {
+      connection.setPersistenceId(id);
+    }
+
+    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
+  }
+
+  private Status applyValidations(ValidationBean bean, MJob job) {
+    Validation connector = bean.getConnectorValidation();
+    Validation framework = bean.getFrameworkValidation();
+
+    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
+
+    Long id = bean.getId();
+    if(id != null) {
+      job.setPersistenceId(id);
+    }
+
+    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 }
