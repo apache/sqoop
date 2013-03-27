@@ -18,17 +18,22 @@
 package org.apache.sqoop.client.utils;
 
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.model.MAccountableEntity;
+import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.utils.StringUtils;
+import org.apache.sqoop.validation.Status;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +122,33 @@ public final class FormDisplayer {
   public static void displayForms(List<MForm> forms, ResourceBundle bundle) {
     for(MForm form : forms) {
       displayForm(form, bundle);
+    }
+  }
+
+  /**
+   * Method prints the warning message of ACCEPTABLE status
+   * @param entity - connection or job instance
+   */
+  public static void displayFormWarning(MAccountableEntity entity) {
+    List<MForm> formList = new ArrayList<MForm>();
+    boolean showMessage = true;
+    if (entity instanceof MConnection) {
+      MConnection connection = (MConnection) entity;
+      formList.addAll(connection.getConnectorPart().getForms());
+      formList.addAll(connection.getFrameworkPart().getForms());
+    } else if(entity instanceof MJob) {
+      MJob job = (MJob) entity;
+      formList.addAll(job.getConnectorPart().getForms());
+      formList.addAll(job.getFrameworkPart().getForms());
+    }
+    for(MForm form : formList) {
+      if(form.getValidationStatus() == Status.ACCEPTABLE) {
+        if(showMessage) {
+          print("\n@|yellow %s|@\n", resourceString(Constants.RES_FORMDISPLAYER_FORM_WARNING));
+          showMessage = false;
+        }
+        FormFiller.warningMessage(form.getValidationMessage());
+      }
     }
   }
 

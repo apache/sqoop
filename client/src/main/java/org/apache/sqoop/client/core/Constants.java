@@ -347,6 +347,9 @@ public class Constants {
   public static final String RES_FORMDISPLAYER_INPUT_SENSITIVE =
       "formdisplayer.input_sensitive";
 
+  public static final String RES_FORMDISPLAYER_FORM_WARNING =
+      "formdisplayer.warning_message";
+
   private Constants() {
     // Instantiation is prohibited
   }

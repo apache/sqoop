@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.utils.FormDisplayer;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
@@ -99,7 +100,7 @@ public class CreateJobFunction extends  SqoopFunction {
       // Try to create
       status = client.createJob(job);
     } while(!status.canProceed());
-
+    FormDisplayer.displayFormWarning(job);
     printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
   }
 }

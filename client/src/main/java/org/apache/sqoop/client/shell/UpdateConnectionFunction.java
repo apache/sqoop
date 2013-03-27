@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.client.utils.FormDisplayer;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.validation.Status;
@@ -88,7 +89,7 @@ public class UpdateConnectionFunction extends SqoopFunction {
       // Try to create
       status = client.updateConnection(connection);
     } while(!status.canProceed());
-
+    FormDisplayer.displayFormWarning(connection);
     printlnResource(Constants.RES_UPDATE_CONN_SUCCESSFUL, status.name());
   }
 
