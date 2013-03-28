@@ -56,11 +56,14 @@ Argument                     Description
 +\--warehouse-dir <dir>+     HDFS parent for table destination
 +-z,\--compress+             Enable compression
 +\--compression-codec <c>+   Use Hadoop codec (default gzip)
++\--exclude-tables <tables>+ Comma separated list of tables to exclude\
+                             from import process
 ---------------------------------------------------------------------
 
 These arguments behave in the same manner as they do when used for the
 +sqoop-import+ tool, but the +\--table+, +\--split-by+, +\--columns+,
 and +\--where+ arguments are invalid for +sqoop-import-all-tables+.
+The +\--exclude-tables argument is for +sqoop-import-all-tables+ only.
 
 include::output-args.txt[]
 

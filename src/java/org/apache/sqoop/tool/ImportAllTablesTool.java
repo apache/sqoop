@@ -19,12 +19,19 @@
 package org.apache.sqoop.tool;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.util.ImportException;
 
@@ -41,9 +48,36 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
   }
 
   @Override
+  @SuppressWarnings("static-access")
+  /** {@inheritDoc} */
+  protected RelatedOptions getImportOptions() {
+    // Imports
+    RelatedOptions importOpts = super.getImportOptions();
+
+    importOpts.addOption(OptionBuilder.withArgName("tables")
+        .hasArg().withDescription("Tables to exclude when importing all tables")
+        .withLongOpt(ALL_TABLE_EXCLUDES_ARG)
+        .create());
+
+    return importOpts;
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public void applyOptions(CommandLine in, SqoopOptions out)
+      throws InvalidOptionsException {
+    super.applyOptions(in, out);
+
+    if (in.hasOption(ALL_TABLE_EXCLUDES_ARG)) {
+      out.setAllTablesExclude(in.getOptionValue(ALL_TABLE_EXCLUDES_ARG));
+    }
+  }
+
+  @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
     HiveImport hiveImport = null;
+    Set<String> excludes = new HashSet<String>();
 
     if (!init(options)) {
       return 1;
@@ -54,6 +88,10 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
         hiveImport = new HiveImport(options, manager, options.getConf(), false);
       }
 
+      if (options.getAllTablesExclude() != null) {
+        excludes.addAll(Arrays.asList(options.getAllTablesExclude().split(",")));
+      }
+
       String [] tables = manager.listTables();
       if (null == tables) {
         System.err.println("Could not retrieve tables list from server");
@@ -61,7 +99,11 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
         return 1;
       } else {
         for (String tableName : tables) {
-          importTable(options, tableName, hiveImport);
+          if (excludes.contains(tableName)) {
+            System.out.println("Skipping table: " + tableName);
+          } else {
+            importTable(options, tableName, hiveImport);
+          }
         }
       }
     } catch (IOException ioe) {

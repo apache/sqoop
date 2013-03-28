@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -42,7 +43,7 @@ public class TestAllTables extends ImportJobTestCase {
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
-  private String [] getArgv(boolean includeHadoopFlags) {
+  private String [] getArgv(boolean includeHadoopFlags, String[] excludeTables) {
     ArrayList<String> args = new ArrayList<String>();
 
     if (includeHadoopFlags) {
@@ -57,6 +58,10 @@ public class TestAllTables extends ImportJobTestCase {
     args.add("1");
     args.add("--escaped-by");
     args.add("\\");
+    if (excludeTables != null) {
+      args.add("--exclude-tables");
+      args.add(StringUtils.join(excludeTables, ","));
+    }
 
     return args.toArray(new String[0]);
   }
@@ -106,7 +111,7 @@ public class TestAllTables extends ImportJobTestCase {
   }
 
   public void testMultiTableImport() throws IOException {
-    String [] argv = getArgv(true);
+    String [] argv = getArgv(true, null);
     runImport(new ImportAllTablesTool(), argv);
 
     Path warehousePath = new Path(this.getWarehouseDir());
@@ -129,6 +134,54 @@ public class TestAllTables extends ImportJobTestCase {
       } else {
         FileSystem dfs = FileSystem.get(getConf());
         FSDataInputStream dis = dfs.open(filePath);
+        reader = new BufferedReader(new InputStreamReader(dis));
+      }
+      try {
+        String line = reader.readLine();
+        assertEquals("Table " + tableName + " expected a different string",
+            expectedVal, line);
+      } finally {
+        IOUtils.closeStream(reader);
+      }
+    }
+  }
+
+  public void testMultiTableImportWithExclude() throws IOException {
+    String exclude = this.tableNames.get(0);
+    String [] argv = getArgv(true, new String[]{ exclude });
+    runImport(new ImportAllTablesTool(), argv);
+
+    Path warehousePath = new Path(this.getWarehouseDir());
+    int i = 0;
+    for (String tableName : this.tableNames) {
+      Path tablePath = new Path(warehousePath, tableName);
+      Path filePath = new Path(tablePath, "part-m-00000");
+
+      // dequeue the expected value for this table. This
+      // list has the same order as the tableNames list.
+      String expectedVal = Integer.toString(i++) + ","
+          + this.expectedStrings.get(0);
+      this.expectedStrings.remove(0);
+
+      BufferedReader reader = null;
+      if (!isOnPhysicalCluster()) {
+        reader = new BufferedReader(
+            new InputStreamReader(new FileInputStream(
+                new File(filePath.toString()))));
+      } else {
+        FSDataInputStream dis;
+        FileSystem dfs = FileSystem.get(getConf());
+        if (tableName.equals(exclude)) {
+          try {
+            dis = dfs.open(filePath);
+            assertFalse(true);
+          } catch (FileNotFoundException e) {
+            // Success
+            continue;
+          }
+        } else {
+          dis = dfs.open(filePath);
+        }
         reader = new BufferedReader(new InputStreamReader(dis));
       }
       try {

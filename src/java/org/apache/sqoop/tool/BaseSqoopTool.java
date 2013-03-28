@@ -159,6 +159,9 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String INCREMENT_COL_ARG = "check-column";
   public static final String INCREMENT_LAST_VAL_ARG = "last-value";
 
+  // Arguments for all table imports.
+  public static final String ALL_TABLE_EXCLUDES_ARG = "exclude-tables";
+
   // HBase arguments.
   public static final String HBASE_TABLE_ARG = "hbase-table";
   public static final String HBASE_COL_FAM_ARG = "column-family";

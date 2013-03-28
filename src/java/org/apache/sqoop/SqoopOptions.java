@@ -225,6 +225,10 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("incremental.last.value")
   private String incrementalLastValue;
 
+  // exclude these tables when importing all tables.
+  @StoredAsProperty("import.all_tables.exclude")
+  private String allTablesExclude;
+
   // HDFS paths for "old" and "new" datasets in merge tool.
   @StoredAsProperty("merge.old.path") private String mergeOldPath;
   @StoredAsProperty("merge.new.path") private String mergeNewPath;
@@ -1870,6 +1874,20 @@ public class SqoopOptions implements Cloneable {
    */
   public String getIncrementalLastValue() {
     return this.incrementalLastValue;
+  }
+
+  /**
+   * Set the tables to be excluded when doing all table import.
+   */
+  public void setAllTablesExclude(String exclude) {
+    this.allTablesExclude = exclude;
+  }
+
+  /**
+   * Get the tables to be excluded when doing all table import.
+   */
+  public String getAllTablesExclude() {
+    return this.allTablesExclude;
   }
 
   /**

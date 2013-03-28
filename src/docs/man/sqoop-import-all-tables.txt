@@ -60,6 +60,9 @@ Import control options
 --compression-codec (codec)::
   Uses the Hadoop +codec+ class to compress data as it is written to HDFS.
 
+--exclude-tables (codec)::
+  Comma separated list of tables to exclude from import process.
+
 
 include::output-args.txt[]
 
