@@ -23,9 +23,10 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * A specific implementation of ValidationFailureHandler that logs the failure
- * message and the reason with the configured logger.
+ * message and the reason with the configured logger. A note of caution in
+ * using this since it fails silently by logging the failure to a log file.
  *
- * This is used as the default handler unless overridden in configuration.
+ * This is mostly used for testing purposes since this fails silently.
  */
 public class LogOnFailureHandler implements ValidationFailureHandler {
   private static final Log LOG =

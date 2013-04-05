@@ -37,7 +37,7 @@ public class RowCountValidator implements Validator {
   public boolean validate(ValidationContext context)
     throws ValidationException {
     return validate(context,
-      AbsoluteValidationThreshold.INSTANCE, LogOnFailureHandler.INSTANCE);
+      AbsoluteValidationThreshold.INSTANCE, AbortOnFailureHandler.INSTANCE);
   }
 
   @Override

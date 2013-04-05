@@ -90,7 +90,7 @@ described below.
  Description:      Responsible for handling failures, must implement
                    org.apache.sqoop.validation.ValidationFailureHandler
  Supported values: The value has to be a fully qualified class name.
- Default value:    org.apache.sqoop.validation.LogOnFailureHandler
+ Default value:    org.apache.sqoop.validation.AbortOnFailureHandler
 
 
 Limitations
@@ -132,5 +132,5 @@ $ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
     --validation-threshold \
           org.apache.sqoop.validation.AbsoluteValidationThreshold \
     --validation-failurehandler \
-          org.apache.sqoop.validation.LogOnFailureHandler
+          org.apache.sqoop.validation.AbortOnFailureHandler
 ----

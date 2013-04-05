@@ -18,8 +18,10 @@
 
 package org.apache.sqoop.validation;
 
+import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.tool.ImportTool;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,22 +39,11 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
   }
 
   /**
-   * Test the implementation for AbsoluteValidationThreshold.
-   * Both arguments should be same else fail.
-   */
-  public void testAbsoluteValidationThreshold() {
-    ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
-    assertTrue(validationThreshold.compare(100, 100));
-    assertFalse(validationThreshold.compare(100, 90));
-    assertFalse(validationThreshold.compare(90, 100));
-  }
-
-  /**
-   * Test if teh --validate flag actually made it through the options.
+   * Test if the --validate flag actually made it through the options.
    *
    * @throws Exception
    */
-  public void testValidateOptionIsEnabled() throws Exception {
+  public void testValidateOptionIsEnabledInCLI() throws Exception {
     String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
     String[] insertVals = {"1", "'Bob'", "'sales'"};
 
@@ -65,6 +56,112 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
       assertTrue("Validate option missing.", argsList.contains("--validate"));
     } finally {
       dropTableIfExists(getTableName());
+    }
+  }
+
+  public void testValidationOptionsParsedCorrectly() throws Exception {
+    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"1", "'Bob'", "'sales'"};
+
+    try {
+      createTableWithColTypes(types, insertVals);
+
+      String[] args = getArgv(true, null, getConf());
+      ArrayList<String> argsList = new ArrayList<String>();
+      argsList.add("--validator");
+      argsList.add("org.apache.sqoop.validation.RowCountValidator");
+      argsList.add("--validation-threshold");
+      argsList.add("org.apache.sqoop.validation.AbsoluteValidationThreshold");
+      argsList.add("--validation-failurehandler");
+      argsList.add("org.apache.sqoop.validation.AbortOnFailureHandler");
+      Collections.addAll(argsList, args);
+
+      assertTrue("Validate option missing.", argsList.contains("--validate"));
+      assertTrue("Validator option missing.", argsList.contains("--validator"));
+
+      String[] optionArgs = toStringArray(argsList);
+
+      SqoopOptions validationOptions = new ImportTool().parseArguments(
+        optionArgs, getConf(), getSqoopOptions(getConf()), true);
+      assertEquals(RowCountValidator.class,
+        validationOptions.getValidatorClass());
+      assertEquals(AbsoluteValidationThreshold.class,
+        validationOptions.getValidationThresholdClass());
+      assertEquals(AbortOnFailureHandler.class,
+        validationOptions.getValidationFailureHandlerClass());
+    } catch (Exception e) {
+      fail("The validation options are passed correctly: " + e.getMessage());
+    } finally {
+      dropTableIfExists(getTableName());
+    }
+  }
+
+  public void testInvalidValidationOptions() throws Exception {
+    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"1", "'Bob'", "'sales'"};
+
+    try {
+      createTableWithColTypes(types, insertVals);
+
+      String[] args = getArgv(true, null, getConf());
+      ArrayList<String> argsList = new ArrayList<String>();
+      argsList.add("--validator");
+      argsList.add("org.apache.sqoop.validation.NullValidator");
+      argsList.add("--validation-threshold");
+      argsList.add("org.apache.sqoop.validation.NullValidationThreshold");
+      argsList.add("--validation-failurehandler");
+      argsList.add("org.apache.sqoop.validation.NullFailureHandler");
+      Collections.addAll(argsList, args);
+
+      String[] optionArgs = toStringArray(argsList);
+
+      new ImportTool().parseArguments(optionArgs, getConf(),
+        getSqoopOptions(getConf()), true);
+      fail("The validation options are incorrect and must throw an exception");
+    } catch (Exception e) {
+      System.out.println("e.getMessage() = " + e.getMessage());
+      System.out.println("e.getClass() = " + e.getClass());
+      assertEquals(
+        com.cloudera.sqoop.SqoopOptions.InvalidOptionsException.class,
+        e.getClass());
+    } finally {
+      dropTableIfExists(getTableName());
+    }
+  }
+
+  private String[] toStringArray(ArrayList<String> argsList) {
+    String[] optionArgs = new String[argsList.size()];
+    for (int i = 0; i < argsList.size(); i++) {
+      optionArgs[i] = argsList.get(i);
+    }
+    return optionArgs;
+  }
+
+  /**
+   * Negative case where the row counts do NOT match.
+   */
+  public void testValidatorWithDifferentRowCounts() {
+    try {
+      Validator validator = new RowCountValidator();
+      validator.validate(new ValidationContext(100, 90));
+      fail("FailureHandler should have thrown an exception");
+    } catch (ValidationException e) {
+      assertEquals("Validation failed by RowCountValidator. "
+        + "Reason: The expected counter value was 100 but the actual value "
+        + "was 90, Row Count at Source: 100, Row Count at Target: 90",
+        e.getMessage());
+    }
+  }
+
+  /**
+   * Positive case where the row counts match.
+   */
+  public void testValidatorWithMatchingRowCounts() {
+    try {
+      Validator validator = new RowCountValidator();
+      validator.validate(new ValidationContext(100, 100));
+    } catch (ValidationException e) {
+      fail("FailureHandler should NOT have thrown an exception");
     }
   }
 

@@ -18,19 +18,21 @@
 
 package org.apache.sqoop.validation;
 
+import junit.framework.TestCase;
+
 /**
- * An implementation of Exception that is used to propagate
- * validation related errors or failures.
+ * Tests for AbsoluteValidationThreshold.
  */
-public class ValidationException extends Exception {
+public class AbsoluteValidationThresholdTest extends TestCase {
 
-  public ValidationException(String message) {
-    super(message);
-  }
-
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? "ValidationException" : msg;
+  /**
+   * Test the implementation for AbsoluteValidationThreshold.
+   * Both arguments should be same else fail.
+   */
+  public void testAbsoluteValidationThreshold() {
+    ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
+    assertTrue(validationThreshold.compare(100, 100));
+    assertFalse(validationThreshold.compare(100, 90));
+    assertFalse(validationThreshold.compare(90, 100));
   }
 }

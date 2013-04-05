@@ -41,8 +41,8 @@ import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.validation.AbortOnFailureHandler;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
-import org.apache.sqoop.validation.LogOnFailureHandler;
 import org.apache.sqoop.validation.RowCountValidator;
 
 /**
@@ -870,7 +870,7 @@ public class SqoopOptions implements Cloneable {
     this.isValidationEnabled = false; // validation is disabled by default
     this.validatorClass = RowCountValidator.class;
     this.validationThresholdClass = AbsoluteValidationThreshold.class;
-    this.validationFailureHandlerClass = LogOnFailureHandler.class;
+    this.validationFailureHandlerClass = AbortOnFailureHandler.class;
   }
 
   /**
