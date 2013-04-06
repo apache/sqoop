@@ -29,11 +29,13 @@ import java.io.OutputStreamWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
 
 import com.cloudera.sqoop.config.ConfigurationConstants;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.util.DirectImportUtils;
 import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 /**
  * Helper methods and constants for MySQL imports/exports.
@@ -65,8 +67,6 @@ public final class MySQLUtils {
       ConfigurationHelper.getDbUrlProperty();
   public static final String USERNAME_KEY =
       ConfigurationHelper.getDbUsernameProperty();
-  public static final String PASSWORD_KEY =
-      ConfigurationHelper.getDbPasswordProperty();
   public static final String WHERE_CLAUSE_KEY =
       ConfigurationHelper.getDbInputConditionsProperty();
 
@@ -110,7 +110,7 @@ public final class MySQLUtils {
     // thing, and returns the correct exit status. But given our inability to
     // re-read the permissions associated with a file, we'll have to make do
     // with this.
-    String password = conf.get(PASSWORD_KEY);
+    String password = DBConfiguration.getPassword((JobConf) conf);
     BufferedWriter w = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(tempFile)));
     w.write("[client]\n");

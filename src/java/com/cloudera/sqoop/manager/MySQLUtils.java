@@ -49,8 +49,6 @@ public final class MySQLUtils {
       org.apache.sqoop.manager.MySQLUtils.CONNECT_STRING_KEY;
   public static final String USERNAME_KEY =
       org.apache.sqoop.manager.MySQLUtils.USERNAME_KEY;
-  public static final String PASSWORD_KEY =
-      org.apache.sqoop.manager.MySQLUtils.PASSWORD_KEY;
   public static final String WHERE_CLAUSE_KEY =
       org.apache.sqoop.manager.MySQLUtils.WHERE_CLAUSE_KEY;
   public static final String EXTRA_ARGS_KEY =

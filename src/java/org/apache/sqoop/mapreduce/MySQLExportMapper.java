@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.LoggingAsyncSink;
@@ -138,7 +139,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
     }
 
     args.add(MySQLUtils.MYSQL_IMPORT_CMD); // needs to be on the path.
-    String password = conf.get(MySQLUtils.PASSWORD_KEY);
+    String password = DBConfiguration.getPassword((JobConf) conf);
 
     if (null != password && password.length() > 0) {
       passwordFile = new File(MySQLUtils.writePasswordFile(conf));

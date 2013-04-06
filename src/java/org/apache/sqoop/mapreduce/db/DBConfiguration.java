@@ -299,7 +299,7 @@ public class DBConfiguration {
   }
 
   // retrieve the password from the credentials object
-  private static String getPassword(JobConf configuration) {
+  public static String getPassword(JobConf configuration) {
     LOG.debug("Fetching password from job credentials store");
     byte[] secret = configuration.getCredentials().getSecretKey(
       PASSWORD_SECRET_KEY);

@@ -30,9 +30,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.PerfCounters;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.RecordParser;
@@ -345,7 +347,7 @@ public class MySQLDumpMapper
 
     args.add(MySQLUtils.MYSQL_DUMP_CMD); // requires that this is on the path.
 
-    String password = conf.get(MySQLUtils.PASSWORD_KEY);
+    String password = DBConfiguration.getPassword((JobConf) conf);
     String passwordFile = null;
 
     Process p = null;
