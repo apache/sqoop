@@ -59,3 +59,4 @@ Developer Guide
 ---------------
 
 - `Building Sqoop2 <BuildingSqoop2.html>`_
+- `Development Environment Setup <DevEnv.html>`_
