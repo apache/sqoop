@@ -23,13 +23,38 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.sqoop.job.io.Data;
 
+import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * A reducer to perform reduce function.
  */
-public class SqoopReducer
-    extends Reducer<Data, NullWritable, Data, NullWritable> {
+public class SqoopReducer extends Reducer<Data, NullWritable, Data, NullWritable> {
 
-  public static final Log LOG =
-      LogFactory.getLog(SqoopReducer.class.getName());
+  public static final Log LOG = LogFactory.getLog(SqoopReducer.class);
 
+  /**
+   * Service for reporting progress to mapreduce.
+   */
+  private final ScheduledExecutorService progressService = Executors.newSingleThreadScheduledExecutor();
+
+  @Override
+  public void run(Context context) throws IOException, InterruptedException {
+    try {
+      LOG.info("Starting progress service");
+      progressService.scheduleAtFixedRate(new ProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
+
+      // Delegating all functionality to our parent
+      super.run(context);
+    } finally {
+      LOG.info("Stopping progress service");
+      progressService.shutdown();
+      if(!progressService.awaitTermination(5, TimeUnit.SECONDS)) {
+        LOG.info("Stopping progress service with shutdownNow");
+        progressService.shutdownNow();
+      }
+    }
+  }
 }

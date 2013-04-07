@@ -18,6 +18,9 @@
 package org.apache.sqoop.job.mr;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,11 +41,14 @@ import org.apache.sqoop.utils.ClassUtils;
 /**
  * A mapper to perform map function.
  */
-public class SqoopMapper
-    extends Mapper<SqoopSplit, NullWritable, Data, NullWritable> {
+public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWritable> {
 
-  public static final Log LOG =
-      LogFactory.getLog(SqoopMapper.class.getName());
+  public static final Log LOG = LogFactory.getLog(SqoopMapper.class);
+
+  /**
+   * Service for reporting progress to mapreduce.
+   */
+  private final ScheduledExecutorService progressService = Executors.newSingleThreadScheduledExecutor();
 
   @Override
   public void run(Context context) throws IOException, InterruptedException {
@@ -76,6 +82,9 @@ public class SqoopMapper
     ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context));
 
     try {
+      LOG.info("Starting progress service");
+      progressService.scheduleAtFixedRate(new ProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
+
       LOG.info("Running extractor class " + extractorName);
       extractor.extract(extractorContext, configConnection, configJob, split.getPartition());
       LOG.info("Extractor has finished");
@@ -83,6 +92,13 @@ public class SqoopMapper
               .increment(extractor.getRowsRead());
     } catch (Exception e) {
       throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0017, e);
+    } finally {
+      LOG.info("Stopping progress service");
+      progressService.shutdown();
+      if(!progressService.awaitTermination(5, TimeUnit.SECONDS)) {
+        LOG.info("Stopping progress service with shutdownNow");
+        progressService.shutdownNow();
+      }
     }
   }
 
