@@ -1180,6 +1180,10 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     try {
       rsConnection = stmt.executeQuery();
 
+      formConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
+      formFrameworkFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_FRAMEWORK);
+      inputFetchStmt = conn.prepareStatement(STMT_FETCH_CONNECTION_INPUT);
+
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
@@ -1187,14 +1191,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
         Date creationDate = rsConnection.getTimestamp(4);
         Date lastUpdateDate = rsConnection.getTimestamp(5);
 
-        formConnectorFetchStmt =
-          conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
         formConnectorFetchStmt.setLong(1, connectorId);
 
-        formFrameworkFetchStmt =
-          conn.prepareStatement(STMT_FETCH_FORM_FRAMEWORK);
-
-        inputFetchStmt = conn.prepareStatement(STMT_FETCH_CONNECTION_INPUT);
         inputFetchStmt.setLong(1, id);
         //inputFetchStmt.setLong(2, XXX); // Will be filled by loadForms
         inputFetchStmt.setLong(3, id);
@@ -1244,6 +1242,10 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     try {
       rsJob = stmt.executeQuery();
 
+      formConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
+      formFrameworkFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_FRAMEWORK);
+      inputFetchStmt = conn.prepareStatement(STMT_FETCH_JOB_INPUT);
+
       while(rsJob.next()) {
         long connectorId = rsJob.getLong(1);
         long id = rsJob.getLong(2);
@@ -1255,14 +1257,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
 
         MJob.Type type = MJob.Type.valueOf(stringType);
 
-        formConnectorFetchStmt =
-          conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
         formConnectorFetchStmt.setLong(1, connectorId);
 
-        formFrameworkFetchStmt =
-          conn.prepareStatement(STMT_FETCH_FORM_FRAMEWORK);
-
-        inputFetchStmt = conn.prepareStatement(STMT_FETCH_JOB_INPUT);
         inputFetchStmt.setLong(1, id);
         //inputFetchStmt.setLong(1, XXX); // Will be filled by loadForms
         inputFetchStmt.setLong(3, id);
