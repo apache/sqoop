@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -38,6 +39,8 @@ import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
+import org.apache.sqoop.job.etl.Partition;
+import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.junit.Test;
@@ -52,6 +55,32 @@ public class TestHdfsExtract extends TestCase {
 
   public TestHdfsExtract() {
     indir = INPUT_ROOT + getClass().getSimpleName();
+  }
+
+  /**
+   * Test case for validating the number of partitions creation
+   * based on input.
+   * Success if the partitions list size is less or equal to
+   * given max partition.
+   * @throws Exception
+   */
+  @Test
+  public void testHdfsExportPartitioner() throws Exception {
+    FileUtils.delete(indir);
+    FileUtils.mkdirs(indir);
+    createTextInput(null);
+    Configuration conf = new Configuration();
+    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
+
+    HdfsExportPartitioner partitioner = new HdfsExportPartitioner();
+    PrefixContext prefixContext = new PrefixContext(conf, "");
+    int[] partitionValues = {2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 17};
+
+    for(int maxPartitions : partitionValues) {
+      PartitionerContext partCont = new PartitionerContext(prefixContext, maxPartitions);
+      List<Partition> partitionList = partitioner.getPartitions(partCont, null, null);
+      assertTrue(partitionList.size()<=maxPartitions);
+    }
   }
 
   @Test

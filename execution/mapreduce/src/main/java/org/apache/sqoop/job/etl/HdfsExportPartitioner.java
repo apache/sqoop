@@ -73,6 +73,10 @@ public class HdfsExportPartitioner extends Partitioner {
       long numInputBytes = getInputSize(conf);
       maxSplitSize = numInputBytes / context.getMaxPartitions();
 
+      if(numInputBytes % context.getMaxPartitions() != 0 ) {
+        maxSplitSize += 1;
+       }
+
       long minSizeNode = 0;
       long minSizeRack = 0;
       long maxSize = 0;
