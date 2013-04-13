@@ -60,3 +60,4 @@ Developer Guide
 
 - `Building Sqoop2 <BuildingSqoop2.html>`_
 - `Development Environment Setup <DevEnv.html>`_
+- `Java Client API Guide <ClientAPI.html>`_

@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Apache Sqoop'
-copyright = '2009-2012 The Apache Software Foundation'
+copyright = '2009-2013 The Apache Software Foundation'
 
 keep_warnings = True
 
