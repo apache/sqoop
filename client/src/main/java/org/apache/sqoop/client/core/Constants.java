@@ -43,6 +43,8 @@ public class Constants {
   public static final String OPT_SERVER = "server";
   public static final String OPT_CLIENT = "client";
   public static final String OPT_PROTOCOL = "protocol";
+  public static final String OPT_SYNCHRONOUS = "synchronous";
+  public static final String OPT_POLL_TIMEOUT = "poll-timeout";
 
   public static final char OPT_XID_CHAR = 'x';
   public static final char OPT_ALL_CHAR = 'a';
@@ -295,6 +297,10 @@ public class Constants {
 
   public static final String RES_SUBMISSION_USAGE =
       "submission.usage";
+  public static final String RES_PROMPT_SYNCHRONOUS =
+      "submission.prompt_synchronous";
+  public static final String RES_PROMPT_POLL_TIMEOUT =
+      "submission.prompt_poll_timeout";
 
   public static final String RES_UPDATE_USAGE =
       "update.usage";
