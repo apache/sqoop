@@ -258,6 +258,17 @@
   <property name="java.security.krb5.kdc"
             value="kdc0.ox.ac.uk:kdc1.ox.ac.uk"/>
 
+  <condition property="windows">
+    <os family="windows" />
+  </condition>
+
+  <condition property="skip-real-docs">
+    <or>
+      <isset property="docs.uptodate" />
+      <os family="windows" />
+    </or>
+  </condition>
+
   <if>
     <isset property="sqoop.test.msserver.connector.factory"/>
     <then>
@@ -326,12 +337,25 @@
 
   <!-- generate the version information class. -->
   <target name="gen-version" depends="init">
-    <exec executable="${script.src.dir}/write-version-info.sh"
-        dir="${basedir}" failonerror="true">
-      <arg value="${build.dir}" />
-      <arg value="${version}" />
-      <arg value="${git.hash}" />
-    </exec>
+    <if>
+      <equals arg1="${windows}" arg2="true" />
+      <then>
+        <exec executable="${script.src.dir}/write-version-info.cmd"
+            dir="${basedir}" failonerror="true">
+          <arg value="${build.dir}" />
+          <arg value="${version}" />
+          <arg value="${git.hash}" />
+        </exec>
+      </then>
+      <else>
+        <exec executable="${script.src.dir}/write-version-info.sh"
+            dir="${basedir}" failonerror="true">
+          <arg value="${build.dir}" />
+          <arg value="${version}" />
+          <arg value="${git.hash}" />
+        </exec>
+      </else>
+    </if>
   </target>
 
   <!-- Compile core classes for the project -->
@@ -421,21 +445,43 @@
          the wrapper scripts to invoke each of these.
       -->
     <mkdir dir="${build.bin.dir}" />
-    <java classname="com.cloudera.sqoop.Sqoop"
-        fork="true"
-        failonerror="true"
-        output="${build.dir}/tools-list"
-        error="/dev/null">
-      <jvmarg value="-Dhadoop.security.log.file=./build/security-audit.log" />
-      <arg value="help" />
-      <classpath refid="compile.classpath"/>
-    </java>
-    <exec executable="${script.src.dir}/create-tool-scripts.sh"
-        dir="${basedir}" failonerror="true">
-      <arg value="${build.bin.dir}" />
-      <arg value="${script.src.dir}/tool-script.sh.template" />
-      <arg value="${build.dir}/tools-list" />
-    </exec>
+    <if>
+      <equals arg1="${windows}" arg2="true" />
+      <then>
+        <java classname="com.cloudera.sqoop.Sqoop"
+            fork="true"
+            failonerror="true"
+            output="${build.dir}/tools-list"
+            error="NUL">
+          <jvmarg value="-Dhadoop.security.log.file=./build/security-audit.log" />
+          <arg value="help" />
+          <classpath refid="compile.classpath"/>
+        </java>
+        <exec executable="${script.src.dir}/create-tool-scripts.cmd"
+            dir="${basedir}" failonerror="true">
+          <arg value="${build.bin.dir}" />
+          <arg value="${script.src.dir}/tool-script.cmd.template" />
+          <arg value="${build.dir}/tools-list" />
+        </exec>
+      </then>
+      <else>
+        <java classname="com.cloudera.sqoop.Sqoop"
+            fork="true"
+            failonerror="true"
+            output="${build.dir}/tools-list"
+            error="/dev/null">
+          <jvmarg value="-Dhadoop.security.log.file=./build/security-audit.log" />
+          <arg value="help" />
+          <classpath refid="compile.classpath"/>
+        </java>
+        <exec executable="${script.src.dir}/create-tool-scripts.sh"
+            dir="${basedir}" failonerror="true">
+          <arg value="${build.bin.dir}" />
+          <arg value="${script.src.dir}/tool-script.sh.template" />
+          <arg value="${build.dir}/tools-list" />
+        </exec>
+      </else>
+    </if>
   </target>
 
   <target name="package"
@@ -935,7 +981,7 @@
   <target name="docs" depends="real-docs,relnotes,javadoc"
       description="Build documentation"/>
 
-  <target name="real-docs" depends="docs-uptodate,init" unless="docs.uptodate">
+  <target name="real-docs" depends="docs-uptodate,init" unless="skip-real-docs">
     <exec executable="make" failonerror="true">
       <arg value="-C" />
       <arg value="${basedir}/src/docs" />
