@@ -40,7 +40,7 @@ public class CreateConnectionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateConnectionFunction() {
     this.addOption(OptionBuilder
-      .withDescription(Constants.RES_CONNECTOR_ID)
+      .withDescription(resourceString(Constants.RES_CONNECTOR_ID))
       .withLongOpt(Constants.OPT_CID)
       .hasArg()
       .create(Constants.OPT_CID_CHAR));

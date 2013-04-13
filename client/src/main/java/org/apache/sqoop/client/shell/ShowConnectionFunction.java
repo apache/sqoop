@@ -108,6 +108,7 @@ public class ShowConnectionFunction extends SqoopFunction {
     );
 
     long connectorId = connection.getConnectorId();
+    printlnResource(Constants.RES_SHOW_PROMPT_CONN_CID_INFO, connectorId);
 
     // Display connector part
     displayForms(connection.getConnectorPart().getForms(),

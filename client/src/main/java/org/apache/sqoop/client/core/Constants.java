@@ -222,6 +222,8 @@ public class Constants {
       "show.prompt_conns_to_show";
   public static final String RES_SHOW_PROMPT_CONN_INFO =
       "show.prompt_conn_info";
+  public static final String RES_SHOW_PROMPT_CONN_CID_INFO =
+      "show.prompt_conn_cid_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS =
       "show.prompt_display_all_connectors";
@@ -249,6 +251,8 @@ public class Constants {
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
       "show.prompt_job_info";
+  public static final String RES_SHOW_PROMPT_JOB_XID_CID_INFO =
+      "show.prompt_job_xid_cid_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS =
       "show.prompt_display_all_servers";

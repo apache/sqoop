@@ -108,6 +108,9 @@ public class ShowJobFunction extends SqoopFunction {
       formatter.format(job.getCreationDate()),
       formatter.format(job.getLastUpdateDate())
     );
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_XID_CID_INFO,
+        job.getConnectionId(),
+        job.getConnectorId());
 
     // Display connector part
     displayForms(job.getConnectorPart().getForms(),
