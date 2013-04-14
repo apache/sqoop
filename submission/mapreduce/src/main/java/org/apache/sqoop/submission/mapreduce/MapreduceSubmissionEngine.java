@@ -19,6 +19,7 @@ package org.apache.sqoop.submission.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobID;
@@ -26,6 +27,7 @@ import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.security.Credentials;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -181,16 +183,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     configuration.set(JobConstants.JOB_CONFIG_CLASS_FRAMEWORK_JOB,
       request.getConfigFrameworkJob().getClass().getName());
 
-    // And finally configuration data
-    configuration.set(JobConstants.JOB_CONFIG_CONNECTOR_CONNECTION,
-      FormUtils.toJson(request.getConfigConnectorConnection()));
-    configuration.set(JobConstants.JOB_CONFIG_CONNECTOR_JOB,
-      FormUtils.toJson(request.getConfigConnectorJob()));
-    configuration.set(JobConstants.JOB_CONFIG_FRAMEWORK_CONNECTION,
-      FormUtils.toJson(request.getConfigFrameworkConnection()));
-    configuration.set(JobConstants.JOB_CONFIG_FRAMEWORK_JOB,
-      FormUtils.toJson(request.getConfigFrameworkConnection()));
-
     // Set up notification URL if it's available
     if(request.getNotificationUrl() != null) {
       configuration.set("job.end.notification.url", request.getNotificationUrl());
@@ -216,6 +208,17 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     try {
       Job job = new Job(configuration);
+
+      // And finally put all configuration objects to credentials cache
+      Credentials credentials = job.getCredentials();
+      credentials.addSecretKey(JobConstants.JOB_CONFIG_CONNECTOR_CONNECTION_KEY,
+        FormUtils.toJson(request.getConfigConnectorConnection()).getBytes());
+      credentials.addSecretKey(JobConstants.JOB_CONFIG_CONNECTOR_JOB_KEY,
+        FormUtils.toJson(request.getConfigConnectorJob()).getBytes());
+      credentials.addSecretKey(JobConstants.JOB_CONFIG_FRAMEWORK_CONNECTION_KEY,
+        FormUtils.toJson(request.getConfigFrameworkConnection()).getBytes());
+      credentials.addSecretKey(JobConstants.JOB_CONFIG_FRAMEWORK_JOB_KEY,
+        FormUtils.toJson(request.getConfigFrameworkConnection()).getBytes());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

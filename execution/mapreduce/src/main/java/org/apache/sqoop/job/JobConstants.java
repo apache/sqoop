@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.job;
 
+import org.apache.hadoop.io.Text;
 import org.apache.sqoop.core.ConfigurationConstants;
 
 public final class JobConstants extends Constants {
@@ -67,14 +68,26 @@ public final class JobConstants extends Constants {
   public static final String JOB_CONFIG_CONNECTOR_CONNECTION =
     PREFIX_JOB_CONFIG + "config.connector.connection";
 
+  public static final Text JOB_CONFIG_CONNECTOR_CONNECTION_KEY =
+    new Text(JOB_CONFIG_CONNECTOR_CONNECTION);
+
   public static final String JOB_CONFIG_CONNECTOR_JOB =
     PREFIX_JOB_CONFIG + "config.connector.job";
+
+  public static final Text JOB_CONFIG_CONNECTOR_JOB_KEY =
+    new Text(JOB_CONFIG_CONNECTOR_JOB);
 
   public static final String JOB_CONFIG_FRAMEWORK_CONNECTION =
     PREFIX_JOB_CONFIG + "config.framework.connection";
 
+  public static final Text JOB_CONFIG_FRAMEWORK_CONNECTION_KEY =
+    new Text(JOB_CONFIG_FRAMEWORK_CONNECTION);
+
   public static final String JOB_CONFIG_FRAMEWORK_JOB =
     PREFIX_JOB_CONFIG + "config.framework.job";
+
+  public static final Text JOB_CONFIG_FRAMEWORK_JOB_KEY =
+    new Text(JOB_CONFIG_FRAMEWORK_JOB);
 
   public static final String PREFIX_CONNECTOR_CONTEXT =
     PREFIX_JOB_CONFIG + "connector.context.";

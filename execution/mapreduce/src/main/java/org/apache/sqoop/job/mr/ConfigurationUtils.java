@@ -18,6 +18,8 @@
 package org.apache.sqoop.job.mr;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MJob;
@@ -33,48 +35,49 @@ public final class ConfigurationUtils {
   }
 
   public static Object getConnectorConnection(Configuration configuration) {
-    return loadConfiguration(configuration,
+    return loadConfiguration((JobConf) configuration,
       JobConstants.JOB_CONFIG_CLASS_CONNECTOR_CONNECTION,
-      JobConstants.JOB_CONFIG_CONNECTOR_CONNECTION);
+      JobConstants.JOB_CONFIG_CONNECTOR_CONNECTION_KEY);
   }
 
   public static Object getConnectorJob(Configuration configuration) {
-    return loadConfiguration(configuration,
+    return loadConfiguration((JobConf) configuration,
       JobConstants.JOB_CONFIG_CLASS_CONNECTOR_JOB,
-      JobConstants.JOB_CONFIG_CONNECTOR_JOB);
+      JobConstants.JOB_CONFIG_CONNECTOR_JOB_KEY);
   }
 
   public static Object getFrameworkConnection(Configuration configuration) {
-    return loadConfiguration(configuration,
+    return loadConfiguration((JobConf) configuration,
       JobConstants.JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION,
-      JobConstants.JOB_CONFIG_FRAMEWORK_CONNECTION);
+      JobConstants.JOB_CONFIG_FRAMEWORK_CONNECTION_KEY);
   }
 
   public static Object getFrameworkJob(Configuration configuration) {
-    return loadConfiguration(configuration,
+    return loadConfiguration((JobConf) configuration,
       JobConstants.JOB_CONFIG_CLASS_FRAMEWORK_JOB,
-      JobConstants.JOB_CONFIG_FRAMEWORK_JOB);
+      JobConstants.JOB_CONFIG_FRAMEWORK_JOB_KEY);
   }
 
   /**
-   * Load configuration instance serialized in Hadoop configuration object
-   * @param configuration Hadoop configuration object associated with the job
+   * Load configuration instance serialized in Hadoop credentials cache.
+   *
+   * @param configuration JobConf object associated with the job
    * @param classProperty Property with stored configuration class name
    * @param valueProperty Property with stored JSON representation of the
    *                      configuration object
    * @return New instance with loaded data
    */
-  private static Object loadConfiguration(Configuration configuration,
-                                          String classProperty,
-                                          String valueProperty) {
+  private static Object loadConfiguration(JobConf configuration, String classProperty, Text valueProperty) {
     // Create new instance of configuration class
     Object object = ClassUtils.instantiate(configuration.get(classProperty));
     if(object == null) {
       return null;
     }
 
+    String json = new String(configuration.getCredentials().getSecretKey(valueProperty));
+
     // Fill it with JSON data
-    FormUtils.fillValues(configuration.get(valueProperty), object);
+    FormUtils.fillValues(json, object);
 
     // And give it back
     return object;
