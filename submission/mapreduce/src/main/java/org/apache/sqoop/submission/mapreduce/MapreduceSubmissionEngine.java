@@ -114,6 +114,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     } catch (IOException e) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0002, e);
     }
+
+    if(isLocal()) {
+      LOG.info("Detected MapReduce local mode, some methods might not work correctly.");
+    }
   }
 
   /**
@@ -249,7 +253,14 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       job.setOutputKeyClass(request.getOutputKeyClass());
       job.setOutputValueClass(request.getOutputValueClass());
 
-      job.submit();
+      // If we're in local mode than wait on completion. Local job runner do not
+      // seems to be exposing API to get previously submitted job which makes
+      // other methods of the submission engine quite useless.
+      if(isLocal()) {
+        job.waitForCompletion(true);
+      } else {
+        job.submit();
+      }
 
       String jobId = job.getJobID().toString();
       request.getSummary().setExternalId(jobId);
@@ -400,4 +411,13 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     return sqoopCounters;
   }
 
+  /**
+   * Detect MapReduce local mode.
+   *
+   * @return True if we're running in local mode
+   */
+  private boolean isLocal() {
+    return "local".equals(globalConfiguration.get("mapreduce.jobtracker.address"))
+        || "local".equals(globalConfiguration.get("mapred.job.tracker"));
+  }
 }
