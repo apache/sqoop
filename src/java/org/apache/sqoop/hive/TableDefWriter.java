@@ -132,11 +132,15 @@ public class TableDefWriter {
     String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
     if (options.doFailIfHiveTableExists()) {
-      sb.append("CREATE TABLE `").append(outputTableName).append("` ( ");
+      sb.append("CREATE TABLE `");
     } else {
       sb.append("CREATE TABLE IF NOT EXISTS `");
-      sb.append(outputTableName).append("` ( ");
     }
+
+    if(options.getHiveDatabaseName() != null) {
+      sb.append(options.getHiveDatabaseName()).append("`.`");
+    }
+    sb.append(outputTableName).append("` ( ");
 
     // Check that all explicitly mapped columns are present in result set
     for(Object column : userMapping.keySet()) {
@@ -232,6 +236,9 @@ public class TableDefWriter {
       sb.append(" OVERWRITE");
     }
     sb.append(" INTO TABLE `");
+    if(options.getHiveDatabaseName() != null) {
+      sb.append(options.getHiveDatabaseName()).append("`.`");
+    }
     sb.append(outputTableName);
     sb.append('`');
 

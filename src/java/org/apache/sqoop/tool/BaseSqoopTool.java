@@ -99,6 +99,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String FMT_AVRODATAFILE_ARG = "as-avrodatafile";
   public static final String HIVE_IMPORT_ARG = "hive-import";
   public static final String HIVE_TABLE_ARG = "hive-table";
+  public static final String HIVE_DATABASE_ARG = "hive-database";
   public static final String HIVE_OVERWRITE_ARG = "hive-overwrite";
   public static final String HIVE_DROP_DELIMS_ARG = "hive-drop-import-delims";
   public static final String HIVE_DELIMS_REPLACEMENT_ARG =
@@ -445,6 +446,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Sets the table name to use when importing to hive")
         .withLongOpt(HIVE_TABLE_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder.withArgName("database-name")
+      .hasArg()
+      .withDescription("Sets the database name to use when importing to hive")
+      .withLongOpt(HIVE_DATABASE_ARG)
+      .create());
     hiveOpts.addOption(OptionBuilder
         .withDescription("Drop Hive record \\0x01 and row delimiters "
           + "(\\n\\r) from imported string fields")
@@ -812,6 +818,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (in.hasOption(HIVE_TABLE_ARG)) {
       out.setHiveTableName(in.getOptionValue(HIVE_TABLE_ARG));
+    }
+
+    if(in.hasOption(HIVE_DATABASE_ARG)) {
+      out.setHiveDatabaseName(in.getOptionValue(HIVE_DATABASE_ARG));
     }
 
     if (in.hasOption(HIVE_DROP_DELIMS_ARG)) {

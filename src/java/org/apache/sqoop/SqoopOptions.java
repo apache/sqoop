@@ -145,6 +145,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.fail.table.exists")
   private boolean failIfHiveTableExists;
   @StoredAsProperty("hive.table.name") private String hiveTableName;
+  @StoredAsProperty("hive.database.name") private String hiveDatabaseName;
   @StoredAsProperty("hive.drop.delims") private boolean hiveDropDelims;
   @StoredAsProperty("hive.delims.replacement")
   private String hiveDelimsReplacement;
@@ -1616,6 +1617,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setHiveTableName(String name) {
     this.hiveTableName = name;
+  }
+
+  public String getHiveDatabaseName() {
+    return this.hiveDatabaseName;
+  }
+
+  public void setHiveDatabaseName(String name) {
+    this.hiveDatabaseName = name;
   }
 
   public String getHivePartitionKey() {

@@ -212,4 +212,26 @@ public class TestTableDefWriter extends TestCase {
       // Expected, ok
     }
   }
+
+  public void testHiveDatabase() throws Exception {
+    String[] args = {
+        "--hive-database", "db",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+      new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+    assertNotNull(createTable);
+    assertTrue(createTable.contains("`db`.`outputTable`"));
+
+    String loadStmt = writer.getLoadDataStmt();
+    assertNotNull(loadStmt);
+    assertTrue(createTable.contains("`db`.`outputTable`"));
+  }
 }
