@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.shell;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class ShowConnectorFunction extends SqoopFunction {
   }
 
   private void showSummary() {
-    List<MConnector> connectors = client.getConnectors();
+    Collection<MConnector> connectors = client.getConnectors();
 
     List<String> header = new LinkedList<String>();
     header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
@@ -80,7 +81,7 @@ public class ShowConnectorFunction extends SqoopFunction {
   }
 
   private void showConnectors() {
-    List<MConnector> connectors = client.getConnectors();
+    Collection<MConnector> connectors = client.getConnectors();
 
     printlnResource(Constants.RES_SHOW_PROMPT_CONNECTORS_TO_SHOW, connectors.size());
 

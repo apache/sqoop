@@ -18,6 +18,8 @@
 package org.apache.sqoop.client;
 
 import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
@@ -28,30 +30,90 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
  * Sqoop client API.
  *
- * High level Sqoop client API to communicate with Sqoop server.
+ * High level Sqoop client API to communicate with Sqoop server. Current
+ * implementation is not thread safe.
+ *
+ * SqoopClient is keeping cache of objects that are unlikely to be changed
+ * (Resources, Connector structures). Volatile structures (Connections, Jobs)
+ * are not cached.
  */
 public class SqoopClient {
 
+  /**
+   * Underlying request object to fetch data from Sqoop server.
+   */
   private SqoopRequests requests;
+
+  /**
+   * True if user retrieved all connectors at once.
+   */
+  private boolean allConnectors;
+
+  /**
+   * All cached bundles for all connectors.
+   */
+  private Map<Long, ResourceBundle> bundles;
+
+  /**
+   * Cached framework bundle.
+   */
+  private ResourceBundle frameworkBundle;
+
+  /**
+   * All cached connectors.
+   */
+  private Map<Long, MConnector> connectors;
+
+  /**
+   * Cached framework.
+   */
+  private MFramework framework;
 
   public SqoopClient(String serverUrl) {
     requests = new SqoopRequests();
-    requests.setServerUrl(serverUrl);
+    setServerUrl(serverUrl);
   }
 
   /**
    * Set new server URL.
    *
+   * Setting new URL will also clear all caches used by the client.
+   *
    * @param serverUrl Server URL
    */
   public void setServerUrl(String serverUrl) {
     requests.setServerUrl(serverUrl);
+    clearCache();
+  }
+
+  /**
+   * Set arbitrary request object.
+   *
+   * @param requests SqoopRequests object
+   */
+  public void setSqoopRequests(SqoopRequests requests) {
+    this.requests = requests;
+    clearCache();
+  }
+
+  /**
+   * Clear internal cache.
+   */
+  public void clearCache() {
+    bundles = new HashMap<Long, ResourceBundle>();
+    frameworkBundle = null;
+    connectors = new HashMap<Long, MConnector>();
+    framework = null;
+    allConnectors = false;
   }
 
   /**
@@ -61,7 +123,23 @@ public class SqoopClient {
    * @return
    */
   public MConnector getConnector(long cid) {
-    return requests.readConnector(cid).getConnectors().get(0);
+    if(connectors.containsKey(cid)) {
+      return connectors.get(cid);
+    }
+
+    retrieveConnector(cid);
+    return connectors.get(cid);
+  }
+
+  /**
+   * Retrieve connector structure from server and cache it.
+   *
+   * @param cid Connector id
+   */
+  private void retrieveConnector(long cid) {
+    ConnectorBean request = requests.readConnector(cid);
+    connectors.put(cid, request.getConnectors().get(0));
+    bundles.put(cid, request.getResourceBundles().get(cid));
   }
 
   /**
@@ -69,18 +147,34 @@ public class SqoopClient {
    *
    * @return
    */
-  public List<MConnector> getConnectors() {
-    return requests.readConnector(null).getConnectors();
+  public Collection<MConnector> getConnectors() {
+    if(allConnectors) {
+      return connectors.values();
+    }
+
+    ConnectorBean bean = requests.readConnector(null);
+    allConnectors = true;
+    for(MConnector connector : bean.getConnectors()) {
+      connectors.put(connector.getPersistenceId(), connector);
+    }
+    bundles = bean.getResourceBundles();
+
+    return connectors.values();
   }
 
   /**
-   * Get resouce bundle for given connector.
+   * Get resource bundle for given connector.
    *
    * @param cid Connector id.
    * @return
    */
   public ResourceBundle getResourceBundle(long cid) {
-    return requests.readConnector(cid).getResourceBundles().get(cid);
+    if(bundles.containsKey(cid)) {
+      return bundles.get(cid);
+    }
+
+    retrieveConnector(cid);
+    return bundles.get(cid);
   }
 
   /**
@@ -89,7 +183,22 @@ public class SqoopClient {
    * @return
    */
   public MFramework getFramework() {
-    return requests.readFramework().getFramework();
+    if(framework != null) {
+      return framework;
+    }
+
+    retrieveFramework();
+    return framework;
+
+  }
+
+  /**
+   * Retrieve framework structure and cache it.
+   */
+  private void retrieveFramework() {
+    FrameworkBean request =  requests.readFramework();
+    framework = request.getFramework();
+    frameworkBundle = request.getResourceBundle();
   }
 
   /**
@@ -98,7 +207,12 @@ public class SqoopClient {
    * @return
    */
   public ResourceBundle getFrameworkResourceBundle() {
-    return requests.readFramework().getResourceBundle();
+    if(frameworkBundle != null) {
+      return frameworkBundle;
+    }
+
+    retrieveFramework();
+    return frameworkBundle;
   }
 
   /**
