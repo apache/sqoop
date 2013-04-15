@@ -108,6 +108,9 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       }
     }
 
+    // Save our own property inside the job to easily identify Sqoop jobs
+    globalConfiguration.setBoolean(Constants.SQOOP_JOB, true);
+
     // Create job client
     try {
       jobClient = new JobClient(new JobConf(globalConfiguration));
