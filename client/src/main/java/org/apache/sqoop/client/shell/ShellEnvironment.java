@@ -35,9 +35,9 @@ public final class ShellEnvironment {
     // using static API.
   }
 
-  private static String serverHost = "localhost";
-  private static String serverPort = "12000";
-  private static String serverWebapp = "sqoop";
+  private static String serverHost = getEnv(Constants.ENV_HOST, "localhost");
+  private static String serverPort = getEnv(Constants.ENV_PORT, "12000");
+  private static String serverWebapp = getEnv(Constants.ENV_WEBAPP, "sqoop");
 
   private static boolean verbose = false;
   private static boolean interactive = false;
@@ -45,6 +45,11 @@ public final class ShellEnvironment {
   static ResourceBundle resource = ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
   static SqoopClient client = new SqoopClient(getServerUrl());
   static IO io;
+
+  public static String getEnv(String variable, String defaultValue) {
+    String value = System.getenv(variable);
+    return value != null ? value : defaultValue;
+  }
 
   public static SqoopClient getClient() {
     return client;

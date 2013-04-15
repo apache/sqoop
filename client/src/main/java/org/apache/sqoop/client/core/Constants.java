@@ -27,6 +27,11 @@ public class Constants {
   public static final String BOLD_STR_SEQUENCE = "@|bold";
   public static final String END_STR_SEQUENCE = "|@";
 
+  // Environmental variables
+  public static final String ENV_HOST = "SQOOP2_HOST";
+  public static final String ENV_PORT = "SQOOP2_PORT";
+  public static final String ENV_WEBAPP = "SQOOP2_WEBAPP";
+
   // Options
 
   public static final String OPT_XID = "xid";
