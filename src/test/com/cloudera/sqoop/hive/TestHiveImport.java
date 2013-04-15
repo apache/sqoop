@@ -188,9 +188,10 @@ public class TestHiveImport extends ImportJobTestCase {
     SqoopOptions options = getSqoopOptions(args, tool);
     String hiveHome = options.getHiveHome();
     assertNotNull("hive.home was not set", hiveHome);
-    Path testDataPath = new Path(new Path(hiveHome),
-        "scripts/" + verificationScript);
-    System.setProperty("expected.script", testDataPath.toString());
+    String testDataPath = new Path(new Path(hiveHome),
+        "scripts/" + verificationScript).toString();
+    System.setProperty("expected.script",
+        new File(testDataPath).getAbsolutePath());
 
     // verify that we can import it correctly into hive.
     runImport(tool, args);

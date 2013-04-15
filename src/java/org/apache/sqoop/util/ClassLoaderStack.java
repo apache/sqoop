@@ -75,7 +75,7 @@ public final class ClassLoaderStack {
       }
     }
 
-    String urlPath = "jar:file://" + new File(jarFile).getAbsolutePath() + "!/";
+    String urlPath = "jar:" + new File(jarFile).toURI().toURL() + "!/";
     LOG.debug("Attempting to load jar through URL: " + urlPath);
     LOG.debug("Previous classloader is " + prevClassLoader);
     URL [] jarUrlArray = {new URL(urlPath)};

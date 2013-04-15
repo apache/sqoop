@@ -35,6 +35,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.util.Tool;
 import org.apache.sqoop.io.CodecMap;
@@ -82,18 +83,19 @@ public class HiveImport {
     // Fall back to just plain 'hive' and hope it's in the path.
 
     String hiveHome = options.getHiveHome();
+    String hiveCommand = Shell.WINDOWS ? "hive.cmd" : "hive";
     if (null == hiveHome) {
-      return "hive";
+      return hiveCommand;
     }
 
     Path p = new Path(hiveHome);
     p = new Path(p, "bin");
-    p = new Path(p, "hive");
+    p = new Path(p, hiveCommand);
     String hiveBinStr = p.toString();
     if (new File(hiveBinStr).exists()) {
       return hiveBinStr;
     } else {
-      return "hive";
+      return hiveCommand;
     }
   }
 

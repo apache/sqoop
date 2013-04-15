@@ -33,6 +33,7 @@ import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.util.Shell;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,6 +174,11 @@ public class TestClassWriter extends TestCase {
     // check that the .class file made it into the .jar by enumerating
     // available entries in the jar file.
     boolean foundCompiledClass = false;
+    if (Shell.WINDOWS) {
+        // In Windows OS, elements in jar files still need to have a path
+        // separator of '/' rather than the default File.separator which is '\'
+        classFileNameToCheck = classFileNameToCheck.replace(File.separator, "/");
+    }
     try {
       JarInputStream jis = new JarInputStream(new FileInputStream(jarFile));
 

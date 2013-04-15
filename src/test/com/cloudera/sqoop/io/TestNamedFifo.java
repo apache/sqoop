@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.Shell;
 
 /**
  * Test the named fifo utility.
@@ -157,6 +158,13 @@ public class TestNamedFifo extends TestCase {
   }
 
   public void testNamedFifo() throws Exception {
+
+    if (Shell.WINDOWS) {
+      // NamedFifo uses Linux specific commands like mknod
+      // and mkfifo, so skip the test on Windows OS
+      LOG.warn("Named FIFO is not supported on Windows. Skipping test");
+      return;
+    }
 
     File root = new File(TEMP_BASE_DIR.toString());
     File fifo = new File(root, "foo-fifo");

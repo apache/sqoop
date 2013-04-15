@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.util.Shell;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.FileListing;
@@ -289,6 +290,11 @@ public class CompilationManager {
 
         if (include) {
           // include this file.
+          if (Shell.WINDOWS) {
+            // In Windows OS, elements in jar files still need to have a path
+            // separator of '/' rather than the default File.separator which is '\'
+            chompedPath = chompedPath.replace(File.separator, "/");
+          }
           LOG.debug("Got classfile: " + entry.getPath() + " -> " + chompedPath);
           ZipEntry ze = new ZipEntry(chompedPath);
           jstream.putNextEntry(ze);

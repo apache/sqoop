@@ -88,7 +88,7 @@ public class TestBlobRef extends TestCase {
       FileSystem fs = FileSystem.getLocal(conf);
       String tmpDir = System.getProperty("test.build.data", "/tmp/");
       Path lobDir = new Path(new Path(tmpDir), "_lob");
-      fs.delete(lobDir, false);
+      fs.delete(lobDir, true);
     }
   }
 
