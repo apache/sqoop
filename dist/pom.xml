@@ -172,6 +172,7 @@ limitations under the License.
                       <fileset dir="../client/target/lib">
                         <include name="*.jar" />
                         <exclude name="junit-*.jar" />
+                        <exclude name="mockito-*.jar" />
                       </fileset>
                     </copy>
                     <copy file="../client/target/sqoop-client-${project.version}.jar"
