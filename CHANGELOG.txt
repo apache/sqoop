@@ -1,3 +1,193 @@
+Release 1.99.2
+
+  SUB-TASK
+
+    SQOOP-831: Unit test for common module
+
+    SQOOP-861: Sqoop2: Integration: Create basic integration infrastructure
+
+    SQOOP-882: Sqoop2 integration: Auxiliary classes for various database support
+
+    SQOOP-896: Sqoop2: Remove PrefixContext dependency in Execution engine
+
+    SQOOP-908: Sqoop2 integration: Create MySQL and PostgreSQL database providers
+
+    SQOOP-909: Sqoop2 integration: Create Oracle and Microsoft SQL Server database providers
+
+    SQOOP-925: Sqoop2: Devguide: Describe client API for embedding Sqoop client in applications
+
+    SQOOP-930: Sqoop2: Devguide: Building and setting up developer environment
+
+    SQOOP-939: Sqoop2: devguide: Document how to open project in Eclipse
+
+    SQOOP-946: Sqoop2: Integration: Enhance the POC test case
+
+    SQOOP-953: Sqoop2: Integration: Schema support
+
+  BUG
+
+    SQOOP-746: Sqoop2: Mapreduce job should have running with speculative execution disabled
+
+    SQOOP-783: Sqoop2: Merge HdfsSequenceExportExtractor and HdfsTextExportExtractor to one Extractor
+
+    SQOOP-799: Sqoop2: Change SqoopConnector interface to abstract class
+
+    SQOOP-802: Sqoop2: Convert main &quot;Manager&quot; classes to singletons.
+
+    SQOOP-811: Client shell variable substitution for recent commands
+
+    SQOOP-812: Sqoop2: Serialization of Configuration objects to and from json is not working properly
+
+    SQOOP-813: Sqoop2: LoaderExecutor might get into deadlock when exception is raised outside Loader itself
+
+    SQOOP-815: Sqoop2: Get version for client requires working connection to server
+
+    SQOOP-822: Sqoop2: Git repository revision is not fetched
+
+    SQOOP-835: Sqoop2: Do not recreate package-info.java each compilation
+
+    SQOOP-843: Sqoop2: Generic JDBC connector is committing transaction on export with autoCommit on
+
+    SQOOP-844: Sqoop2: HdfsExportPartitioner is not always respecting maximal number of partitions
+
+    SQOOP-845: Sqoop2: Improve Generic JDBC validator
+
+    SQOOP-850: Sqoop2: Move server initialization from server module to core
+
+    SQOOP-851: Sqoop2: NullPointerException in Mapreduce Submission engine initialization
+
+    SQOOP-852: Sqoop2: Mapreduce submission engine is not closing opened JobClient object
+
+    SQOOP-858: Sqoop2: Add validation messages on form level
+
+    SQOOP-865: Sqoop2: Client request cache is incorrectly setting the framework validations
+
+    SQOOP-867: Sqoop2 client shows wrong msg
+
+    SQOOP-868: Mismatched msg in sqoop2 client
+
+    SQOOP-871: Connector-level job-specific prop gives wrong help msg
+
+    SQOOP-872: sqoop2 client &#39;show framework&#39; command isn&#39;t resolving the show.prompt_framework_opts prop
+
+    SQOOP-873: Sqoop2 build should ignore Intellij files
+
+    SQOOP-874: Sqoop2: Provide log4j configuration for client
+
+    SQOOP-875: Sqoop2: ClassUtils.instantiate class should not be logging on ERROR level
+
+    SQOOP-879: Sqoop2: NPE when deleting job object that do not have associated any submissions
+
+    SQOOP-880: Sqoop2: NPE when stopping job that was never executed
+
+    SQOOP-881: Sqoop2: Change default port from 8080
+
+    SQOOP-884: Sqoop2: Disable interactive client commands in batch mode
+
+    SQOOP-887: Sqoop2: Move string constants from FormDisplayer to resource file
+
+    SQOOP-888: Sqoop2: Move out checking of special condition token to Validator in Generic JDBC Manager
+
+    SQOOP-889: Sqoop2: Move tomcat related properties from dist/pom.xml to root pom.xml
+
+    SQOOP-892: Sqoop2: Validate acceptable number of mappers and reducers
+
+    SQOOP-893: Fix job submission progress percentage
+
+    SQOOP-894: Sqoop2: Increase counter and group size in derby repository
+
+    SQOOP-905: Sqoop 2: Job submission shows wrong date format in client console
+
+    SQOOP-941: Sqoop2: Do not send sensitive values from server to client
+
+    SQOOP-942: Sqoop2: Refactore code repetition in SqoopRequests objects
+
+    SQOOP-952: Sqoop2: Create job function requires uppercased type name
+
+    SQOOP-966: Sqoop2: Remove placeholder class IgnoredForm
+
+    SQOOP-980: Sqoop2: Show connection and job command hung
+
+  IMPROVEMENT
+
+    SQOOP-647: Provide facility to cache server responses on client side
+
+    SQOOP-660: Improve user experience in displaying connection/job metadata
+
+    SQOOP-678: Sqoop2: Add counters handling to map reduce submission engine
+
+    SQOOP-682: Sqoop2: Use templating in job.etl classes
+
+    SQOOP-723: Add possibility to have synchronous submissions in Sqoop 2
+
+    SQOOP-750: Sqoop2: Introduce show option client command
+
+    SQOOP-803: Sqoop2: Add gpg profile to pom file so that we can easily deploy artifacts to mvn repository
+
+    SQOOP-806: Sqoop2: Put &quot;creation&quot; and &quot;lastUpdate&quot; date to Connection and Job objects
+
+    SQOOP-807: Sqoop2: Verify whether job object can be safely removed prior removing
+
+    SQOOP-814: Sqoop2: Start using configuration objects in Generic JDBC Connector
+
+    SQOOP-826: Sqoop2: Add log4j test configuration to all maven modules
+
+    SQOOP-833: add *.eml &quot;ant eclipse&quot; (IntelliJ import) generated file, to .gitignore
+
+    SQOOP-841: Sqoop2: Remove final keyword from manager classes
+
+    SQOOP-842: Sqoop2: Put partition to template in Extractor as well
+
+    SQOOP-863: Sqoop2: Introduce ProgressThread into Extractor and Loader
+
+    SQOOP-864: Sqoop2: Introduce ETL context objects
+
+    SQOOP-866: Sqoop2: Introduce framework validations
+
+    SQOOP-876: Expose the xid and cid when show status of job in sqoop2 client
+
+    SQOOP-877: Sqoop2: Increase field size of output.outputDirectory property value from 25 to 50
+
+    SQOOP-899: Sqoop2: Properly document REST endpoints in the server handler classes
+
+    SQOOP-900: Sqoop2: Introduce human readable coding style for queries stored in DerbySchemaQuery
+
+    SQOOP-919: Sqoop2: Improve Form API for simple java handling
+
+    SQOOP-920: Sqoop2: Print out warnings in client shell for objects created with status ACCEPTABLE
+
+    SQOOP-922: Sqoop2: Shell commands are throwing exceptions when invalid function is specified
+
+    SQOOP-947: Sqoop2: Introduce the concept of &quot;sensitivity&quot; input to all supported metadata structures
+
+    SQOOP-967: Sqoop2: Introduce dummy configuration key to easily identify Sqoop2 job
+
+    SQOOP-972: Sqoop2: Load server URL from environment in shell
+
+    SQOOP-975: Sqoop2: Port conflict problems in tomcat
+
+    SQOOP-986: Sqoop2: Add detection of local mode to mapreduce submission engine
+
+  NEW FEATURE
+
+    SQOOP-643: Sqoop2: Implement simple listings for connector and job objects
+
+    SQOOP-664: Send user name as HTTP header in client to server communication
+
+    SQOOP-785: Sqoop2: Add splitter implementation for NUMERIC/DECIMAL type
+
+    SQOOP-895: Sqoop2: Do not serialize framework and connector configurations into mapreduce configuration object
+
+    SQOOP-903: Sqoop2: Add schema support to Generic JDBC Connector
+
+    SQOOP-918: Sqoop2: Introduce client API and change Sqoop shell to use it
+
+  TASK
+
+    SQOOP-805: Sqoop2: Document show option function in CommandClientGuide
+
+    SQOOP-809: Sqoop2: Remove old deprecated comments from distribution pom file
+
 Release 1.99.1
 
   SUB-TASK
