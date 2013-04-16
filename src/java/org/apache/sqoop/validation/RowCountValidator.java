@@ -51,6 +51,7 @@ public class RowCountValidator implements Validator {
 
     if (validationThreshold.compare(validationContext.getSourceRowCount(),
       validationContext.getTargetRowCount())) {
+      LOG.info("Data successfully validated");
       return true;
     }
 

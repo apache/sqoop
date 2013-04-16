@@ -18,23 +18,29 @@
 
 package com.cloudera.sqoop.mapreduce;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.SqoopOptions;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.manager.ConnManager;
-import org.apache.sqoop.validation.*;
+import org.apache.sqoop.validation.ValidationContext;
+import org.apache.sqoop.validation.ValidationException;
+import org.apache.sqoop.validation.ValidationFailureHandler;
+import org.apache.sqoop.validation.ValidationThreshold;
+import org.apache.sqoop.validation.Validator;
 
-import java.io.IOException;
-import java.sql.SQLException;
+import com.cloudera.sqoop.SqoopOptions;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
+@Deprecated
 public class JobBase
     extends org.apache.sqoop.mapreduce.JobBase {
 
@@ -75,6 +81,16 @@ public class JobBase
         ReflectionUtils.newInstance(options.getValidationFailureHandlerClass(),
           conf);
 
+    StringBuilder sb = new StringBuilder();
+    sb.append("Validating the integrity of the import using the "
+      + "following configuration\n");
+    sb.append("\tValidator : ").append(validator.getClass().getName())
+      .append('\n');
+    sb.append("\tThreshold Specifier : ")
+      .append(threshold.getClass().getName()).append('\n');
+    sb.append("\tFailure Handler : ")
+      .append(failureHandler.getClass().getName()).append('\n');
+    LOG.info(sb.toString());
     validator.validate(validationContext, threshold, failureHandler);
   }
 }
