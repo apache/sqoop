@@ -24,6 +24,8 @@ Release 1.99.2
 
     SQOOP-953: Sqoop2: Integration: Schema support
 
+    SQOOP-987: Exclude mockito jars from being copied into the sqoop2 distribution
+
   BUG
 
     SQOOP-746: Sqoop2: Mapreduce job should have running with speculative execution disabled
