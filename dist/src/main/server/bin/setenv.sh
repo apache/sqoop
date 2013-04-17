@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-JAVA_OPTS=-Dsqoop.config.dir=`dirname $0`/../conf
+JAVA_OPTS="$JAVA_OPTS -Dsqoop.config.dir=`dirname $0`/../conf"
