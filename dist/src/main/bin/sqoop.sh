@@ -44,8 +44,13 @@ case $COMMAND in
       echo "Usage: sqoop.sh server <start/stop>"
       exit
     fi
+    actionCmd=$2
+    # Remove the first 2 command line arguments so we can pass
+    # the rest to catalina.sh script
+    shift
+    shift
 
-    $CATALINA_BIN/catalina.sh $2
+    $CATALINA_BIN/catalina.sh $actionCmd "$@"
     ;;
 
   client)
