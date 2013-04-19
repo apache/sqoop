@@ -167,6 +167,7 @@
   <property name="src.tar.file" location="${build.dir}/${src.artifact.name}.tar.gz" />
 
   <!-- compilation -->
+  <property name="targetJavaVersion" value="1.6" />
   <property name="javac.deprecation" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="build.encoding" value="ISO-8859-1"/>
@@ -374,6 +375,7 @@
         includes="**/*.java"
         destdir="${build.classes}"
         debug="${javac.debug}"
+        target="${targetJavaVersion}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
     </javac>
@@ -385,6 +387,7 @@
         includes="**/*.java"
         destdir="${build.classes}"
         debug="${javac.debug}"
+        target="${targetJavaVersion}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
     </javac>
@@ -399,6 +402,7 @@
         srcdir="${test.dir}"
         includes="**/*.java"
         destdir="${build.test.classes}"
+        target="${targetJavaVersion}"
         debug="${javac.debug}">
       <classpath>
         <path refid="test.classpath"/>
@@ -415,6 +419,7 @@
         srcdir="${perftest.src.dir}"
         includes="**/*.java"
         destdir="${build.perftest.classes}"
+        target="${targetJavaVersion}"
         debug="${javac.debug}">
       <classpath>
         <path refid="test.classpath"/>
