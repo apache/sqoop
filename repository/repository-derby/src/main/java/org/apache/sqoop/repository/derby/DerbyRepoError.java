@@ -161,6 +161,8 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't retrieve unfinished submissions **/
   DERBYREPO_0037("Can't retrieve unfinished submissions"),
 
+  DERBYREPO_0038("Update of connector failed"),
+
   ;
 
   private final String message;

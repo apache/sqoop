@@ -24,6 +24,7 @@ import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
+import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -92,6 +93,11 @@ public class GenericJdbcConnector extends SqoopConnector {
   public Validator getValidator() {
     // TODO(jarcec): Cache this object eventually
     return new GenericJdbcValidator();
+  }
+
+  @Override
+  public MetadataUpgrader getMetadataUpgrader() {
+    return new GenericJdbcConnectorMetadataUpgrader();
   }
 
 }

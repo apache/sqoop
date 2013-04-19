@@ -447,6 +447,30 @@ public final class DerbySchemaQuery {
       + COLUMN_SQI_ENUMVALS
       + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+  // Delete all forms for a given connector
+  public static final String STMT_DELETE_FORMS_FOR_CONNECTOR =
+    "DELETE FROM " + TABLE_SQ_FORM
+    + " WHERE " + COLUMN_SQN_CONNECTOR + " = ?";
+
+  // Delete all inputs for a given connector
+  public static final String STMT_DELETE_INPUTS_FOR_CONNECTOR =
+    "DELETE FROM " + TABLE_SQ_INPUT
+    + " WHERE "
+    + COLUMN_SQI_FORM
+    + " IN (SELECT "
+    + COLUMN_SQF_ID
+    + " FROM " + TABLE_SQ_FORM
+    + " WHERE "
+    + COLUMN_SQF_CONNECTOR + " = ?)";
+
+  // Update the connector
+  public static final String STMT_UPDATE_CONNECTOR =
+    "UPDATE " + TABLE_SQ_CONNECTOR
+    + " SET " + COLUMN_SQC_NAME + " = ?, "
+    + COLUMN_SQC_CLASS + " = ?, "
+    + COLUMN_SQC_VERSION + " = ? "
+    + " WHERE " + COLUMN_SQC_ID + " = ?";
+
   // DML: Insert new connection
   public static final String STMT_INSERT_CONNECTION =
     "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
@@ -501,6 +525,17 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_CREATION_DATE + ", "
     + COLUMN_SQN_UPDATE_DATE
     + " FROM " + TABLE_SQ_CONNECTION;
+
+  // DML: Select all connections for a specific connector.
+  public static final String STMT_SELECT_CONNECTION_FOR_CONNECTOR =
+    "SELECT "
+    + COLUMN_SQN_ID + ", "
+    + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_CREATION_DATE + ", "
+    + COLUMN_SQN_UPDATE_DATE
+    + " FROM " + TABLE_SQ_CONNECTION
+    + " WHERE " + COLUMN_SQN_CONNECTOR + " = ?";
 
   // DML: Check if given connection exists
   public static final String STMT_SELECT_CONNECTION_CHECK =
@@ -567,7 +602,7 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+    + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs
@@ -583,6 +618,21 @@ public final class DerbySchemaQuery {
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
       + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
+
+  // DML: Select all jobs for a Connector
+  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR =
+    "SELECT "
+    + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQB_ID + ", "
+    + COLUMN_SQB_NAME + ", "
+    + COLUMN_SQB_CONNECTION + ", "
+    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_CREATION_DATE + ", "
+    + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION
+      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+      + " AND " + COLUMN_SQN_CONNECTOR + " = ? ";
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =

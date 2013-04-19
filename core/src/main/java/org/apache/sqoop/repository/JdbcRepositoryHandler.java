@@ -30,14 +30,14 @@ import org.apache.sqoop.model.MSubmission;
 /**
  * Set of methods required from each JDBC based repository.
  */
-public interface JdbcRepositoryHandler {
+public abstract class JdbcRepositoryHandler {
 
   /**
    * Initialize JDBC based repository.
    *
    * @param repoContext Context for this instance
    */
-  void initialize(JdbcRepositoryContext repoContext);
+  public abstract void initialize(JdbcRepositoryContext repoContext);
 
   /**
    * Search for connector with given name in repository.
@@ -49,7 +49,7 @@ public interface JdbcRepositoryHandler {
    * @return null if connector is not yet registered in repository or
    *   loaded representation.
    */
-  MConnector findConnector(String shortName, Connection conn);
+  public abstract MConnector findConnector(String shortName, Connection conn);
 
   /**
    * Register given connector in repository.
@@ -60,7 +60,42 @@ public interface JdbcRepositoryHandler {
    * @param mc Connector that should be registered.
    * @param conn JDBC connection for querying repository.
    */
-  void registerConnector(MConnector mc, Connection conn);
+  public abstract void registerConnector(MConnector mc, Connection conn);
+
+
+  /**
+   * Retrieve connections which use the given connector.
+   * @param connectorID Connector ID whose connections should be fetched
+   * @param conn JDBC connection for querying repository
+   * @return List of MConnections that use <code>connectorID</code>.
+   */
+  public abstract List<MConnection> findConnectionsForConnector(long
+    connectorID, Connection conn);
+
+  /**
+   * Retrieve jobs which use the given connection.
+   *
+   * @param connectorID Connector ID whose jobs should be fetched
+   * @param conn JDBC connection for querying repository
+   * @return List of MJobs that use <code>connectionID</code>.
+   */
+  public abstract List<MJob> findJobsForConnector(long connectorID,
+    Connection conn);
+
+  /**
+   * Update the connector with the new data supplied in the <tt>newConnector</tt>.
+   * Also Update all forms associated with this connector in the repository
+   * with the forms specified in <tt>mConnector</tt>. <tt>mConnector </tt> must
+   * minimally have the connectorID and all required forms (including ones
+   * which may not have changed). After this operation the repository is
+   * guaranteed to only have the new forms specified in this object.
+   *
+   * @param mConnector The new data to be inserted into the repository for
+   *                     this connector.
+   * @param conn JDBC connection for querying repository
+   */
+
+  public abstract void updateConnector(MConnector mConnector, Connection conn);
 
   /**
    * Search for framework metadata in the repository.
@@ -69,7 +104,7 @@ public interface JdbcRepositoryHandler {
    * @return null if framework metadata are not yet present in repository or
    *  loaded representation.
    */
-  MFramework findFramework(Connection conn);
+  public abstract MFramework findFramework(Connection conn);
 
   /**
    * Register framework metadata in repository.
@@ -80,26 +115,26 @@ public interface JdbcRepositoryHandler {
    * @param mf Framework metadata that should be registered.
    * @param conn JDBC connection for querying repository.
    */
-  void registerFramework(MFramework mf, Connection conn);
+  public abstract void registerFramework(MFramework mf, Connection conn);
 
   /**
    * Check if schema is already present in the repository.
    *
    * @return true if schema is already present or false if it's not
    */
-  boolean schemaExists();
+  public abstract boolean schemaExists();
 
   /**
    * Create required schema in repository.
    */
-  void createSchema();
+  public abstract void createSchema();
 
   /**
    * Termination callback for repository.
    *
    * Should clean up all resources and commit all uncommitted data.
    */
-  void shutdown();
+  public abstract void shutdown();
 
   /**
    * Specify query that Sqoop framework can use to validate connection to
@@ -108,7 +143,7 @@ public interface JdbcRepositoryHandler {
    * @return Query or NULL in case that this repository do not support or do not
    *   want to validate live connections.
    */
-  String validationQuery();
+  public abstract String validationQuery();
 
   /**
    * Save given connection to repository. This connection must not be already
@@ -117,7 +152,8 @@ public interface JdbcRepositoryHandler {
    * @param connection Connection object to serialize into repository.
    * @param conn Connection to metadata repository
    */
-  void createConnection(MConnection connection, Connection conn);
+  public abstract void createConnection(MConnection connection,
+    Connection conn);
 
   /**
    * Update given connection representation in repository. This connection
@@ -127,7 +163,8 @@ public interface JdbcRepositoryHandler {
    * @param connection Connection object that should be updated in repository.
    * @param conn Connection to metadata repository
    */
-  void updateConnection(MConnection connection, Connection conn);
+  public abstract void updateConnection(MConnection connection,
+    Connection conn);
 
   /**
    * Check if given connection exists in metastore.
@@ -136,7 +173,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return True if the connection exists
    */
-  boolean existsConnection(long connetionId, Connection conn);
+  public abstract boolean existsConnection(long connetionId, Connection conn);
 
   /**
    * Check if given Connection id is referenced somewhere and thus can't
@@ -146,7 +183,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return
    */
-  boolean inUseConnection(long connectionId, Connection conn);
+  public abstract boolean inUseConnection(long connectionId, Connection conn);
 
   /**
    * Delete connection with given id from metadata repository.
@@ -154,8 +191,15 @@ public interface JdbcRepositoryHandler {
    * @param connectionId Connection object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  void deleteConnection(long connectionId, Connection conn);
+  public abstract void deleteConnection(long connectionId, Connection conn);
 
+  /**
+   * Delete the input values for the connection with given id from the
+   * repository.
+   * @param id Connection object whose inputs should be removed from repository
+   * @param conn Connection to metadata repository
+   */
+  public abstract void deleteConnectionInputs(long id, Connection conn);
   /**
    * Find connection with given id in repository.
    *
@@ -163,7 +207,8 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return Deserialized form of the connection that is saved in repository
    */
-  MConnection findConnection(long connectionId, Connection conn);
+  public abstract MConnection findConnection(long connectionId,
+    Connection conn);
 
   /**
    * Get all connection objects.
@@ -171,7 +216,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return List will all saved connection objects
    */
-  List<MConnection> findConnections(Connection conn);
+  public abstract List<MConnection> findConnections(Connection conn);
 
 
   /**
@@ -181,7 +226,7 @@ public interface JdbcRepositoryHandler {
    * @param job Job object to serialize into repository.
    * @param conn Connection to metadata repository
    */
-  void createJob(MJob job, Connection conn);
+  public abstract void createJob(MJob job, Connection conn);
 
   /**
    * Update given job representation in repository. This job object must
@@ -191,7 +236,7 @@ public interface JdbcRepositoryHandler {
    * @param job Job object that should be updated in repository.
    * @param conn Connection to metadata repository
    */
-  void updateJob(MJob job, Connection conn);
+  public abstract void updateJob(MJob job, Connection conn);
 
   /**
    * Check if given job exists in metastore.
@@ -200,7 +245,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return True if the job exists
    */
-  boolean existsJob(long jobId, Connection conn);
+  public abstract boolean existsJob(long jobId, Connection conn);
 
   /**
    * Check if given job id is referenced somewhere and thus can't
@@ -210,15 +255,23 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return
    */
-  boolean inUseJob(long jobId, Connection conn);
+  public abstract boolean inUseJob(long jobId, Connection conn);
+
 
   /**
-   * Delete job with given id from metadata repository.
+   * Delete the input values for the job with given id from the repository.
+   * @param id Job object whose inputs should be removed from repository
+   * @param conn Connection to metadata repository
+   */
+  public abstract void deleteJobInputs(long id, Connection conn);
+  /**
+   * Delete job with given id from metadata repository. This method will
+   * delete all inputs for this job also.
    *
    * @param jobId Job object that should be removed from repository
    * @param conn Connection to metadata repository
    */
-  void deleteJob(long jobId, Connection conn);
+  public abstract void deleteJob(long jobId, Connection conn);
 
   /**
    * Find job with given id in repository.
@@ -227,7 +280,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return Deserialized form of the job that is present in the repository
    */
-  MJob findJob(long jobId, Connection conn);
+  public abstract MJob findJob(long jobId, Connection conn);
 
   /**
    * Get all job objects.
@@ -235,7 +288,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return List will all saved job objects
    */
-  List<MJob> findJobs(Connection conn);
+  public abstract List<MJob> findJobs(Connection conn);
 
   /**
    * Save given submission in repository.
@@ -243,7 +296,8 @@ public interface JdbcRepositoryHandler {
    * @param submission Submission object
    * @param conn Connection to metadata repository
    */
-  void createSubmission(MSubmission submission, Connection conn);
+  public abstract void createSubmission(MSubmission submission,
+    Connection conn);
 
   /**
    * Check if submission with given id already exists in repository.
@@ -251,7 +305,7 @@ public interface JdbcRepositoryHandler {
    * @param submissionId Submission internal id
    * @param conn Connection to metadata repository
    */
-  boolean existsSubmission(long submissionId, Connection conn);
+  public abstract boolean existsSubmission(long submissionId, Connection conn);
 
   /**
    * Update given submission in repository.
@@ -259,7 +313,8 @@ public interface JdbcRepositoryHandler {
    * @param submission Submission object
    * @param conn Connection to metadata repository
    */
-  void updateSubmission(MSubmission submission, Connection conn);
+  public abstract void updateSubmission(MSubmission submission,
+    Connection conn);
 
   /**
    * Remove submissions older then threshold from repository.
@@ -267,7 +322,7 @@ public interface JdbcRepositoryHandler {
    * @param threshold Threshold date
    * @param conn Connection to metadata repository
    */
-  void purgeSubmissions(Date threshold, Connection conn);
+  public abstract void purgeSubmissions(Date threshold, Connection conn);
 
   /**
    * Return list of unfinished submissions (as far as repository is concerned).
@@ -275,7 +330,7 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return List of unfinished submissions.
    */
-  List<MSubmission> findSubmissionsUnfinished(Connection conn);
+  public abstract List<MSubmission> findSubmissionsUnfinished(Connection conn);
 
   /**
    * Find last submission for given jobId.
@@ -284,5 +339,6 @@ public interface JdbcRepositoryHandler {
    * @param conn Connection to metadata repository
    * @return Most recent submission
    */
-  MSubmission findSubmissionLastForJob(long jobId, Connection conn);
+  public abstract MSubmission findSubmissionLastForJob(long jobId,
+    Connection conn);
 }

@@ -67,7 +67,7 @@ import org.apache.sqoop.utils.StringUtils;
  *
  * Repository implementation for Derby database.
  */
-public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
+public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   private static final Logger LOG =
       Logger.getLogger(DerbyRepositoryHandler.class);
@@ -86,15 +86,54 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   public void registerConnector(MConnector mc, Connection conn) {
     if (mc.hasPersistenceId()) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0011,
-          mc.getUniqueName());
+        mc.getUniqueName());
     }
+    mc.setPersistenceId(getConnectorId(mc, conn));
+    insertFormsForConnector(mc, conn);
+  }
 
-    PreparedStatement baseConnectorStmt = null;
+  /**
+   * Helper method to insert the forms from the MConnector into the
+   * repository. The job and connector forms within <code>mc</code> will get
+   * updated with the id of the forms when this function returns.
+   * @param mc The connector to use for updating forms
+   * @param conn JDBC connection to use for updating the forms
+   */
+  private void insertFormsForConnector (MConnector mc, Connection conn) {
+    long connectorId = mc.getPersistenceId();
     PreparedStatement baseFormStmt = null;
     PreparedStatement baseInputStmt = null;
+    try{
+      baseFormStmt = conn.prepareStatement(STMT_INSERT_FORM_BASE,
+        Statement.RETURN_GENERATED_KEYS);
+
+      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
+        Statement.RETURN_GENERATED_KEYS);
+
+      // Register connector forms
+      registerForms(connectorId, null, mc.getConnectionForms().getForms(),
+        MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
+
+      // Register all jobs
+      for (MJobForms jobForms : mc.getAllJobsForms().values()) {
+        registerForms(connectorId, jobForms.getType(), jobForms.getForms(),
+          MFormType.JOB.name(), baseFormStmt, baseInputStmt);
+      }
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
+        mc.toString(), ex);
+    } finally {
+      closeStatements(baseFormStmt, baseInputStmt);
+    }
+
+  }
+
+  private long getConnectorId(MConnector mc, Connection conn) {
+    PreparedStatement baseConnectorStmt = null;
     try {
       baseConnectorStmt = conn.prepareStatement(STMT_INSERT_CONNECTOR_BASE,
-          Statement.RETURN_GENERATED_KEYS);
+        Statement.RETURN_GENERATED_KEYS);
       baseConnectorStmt.setString(1, mc.getUniqueName());
       baseConnectorStmt.setString(2, mc.getClassName());
       baseConnectorStmt.setString(3, mc.getVersion());
@@ -110,31 +149,12 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       if (!rsetConnectorId.next()) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
       }
-
-      long connectorId = rsetConnectorId.getLong(1);
-      mc.setPersistenceId(connectorId);
-
-      baseFormStmt = conn.prepareStatement(STMT_INSERT_FORM_BASE,
-          Statement.RETURN_GENERATED_KEYS);
-
-      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
-          Statement.RETURN_GENERATED_KEYS);
-
-      // Register connector forms
-      registerForms(connectorId, null, mc.getConnectionForms().getForms(),
-        MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
-
-      // Register all jobs
-      for (MJobForms jobForms : mc.getAllJobsForms().values()) {
-        registerForms(connectorId, jobForms.getType(), jobForms.getForms(),
-          MFormType.JOB.name(), baseFormStmt, baseInputStmt);
-      }
-
+      return rsetConnectorId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
-          mc.toString(), ex);
+        mc.toString(), ex);
     } finally {
-      closeStatements(baseConnectorStmt, baseFormStmt, baseInputStmt);
+      closeStatements(baseConnectorStmt);
     }
   }
 
@@ -227,7 +247,6 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
       }
       String sqoopSchemaId = rset.getString(1);
       LOG.debug("SQOOP schema ID: " + sqoopSchemaId);
-
       connection.commit();
     } catch (SQLException ex) {
       if (connection != null) {
@@ -550,21 +569,33 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   @Override
   public void deleteConnection(long id, Connection conn) {
     PreparedStatement dltConn = null;
-    PreparedStatement dltConnInput = null;
+
     try {
-      dltConnInput = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
+      deleteConnectionInputs(id, conn);
       dltConn = conn.prepareStatement(STMT_DELETE_CONNECTION);
-
-      dltConnInput.setLong(1, id);
       dltConn.setLong(1, id);
-
-      dltConnInput.executeUpdate();
       dltConn.executeUpdate();
-
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0022, ex);
     } finally {
-      closeStatements(dltConn, dltConnInput);
+      closeStatements(dltConn);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteConnectionInputs(long id, Connection conn) {
+    PreparedStatement dltConnInput = null;
+    try {
+      dltConnInput = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
+      dltConnInput.setLong(1, id);
+      dltConnInput.executeUpdate();
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0022, ex);
+    } finally {
+      closeStatements(dltConnInput);
     }
   }
 
@@ -611,6 +642,63 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     } finally {
       closeStatements(stmt);
     }
+  }
+
+
+  /**
+   *
+   * {@inheritDoc}
+   *
+   */
+  @Override
+  public List<MConnection> findConnectionsForConnector(long
+    connectorID, Connection conn) {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_CONNECTION_FOR_CONNECTOR);
+      stmt.setLong(1, connectorID);
+
+      return loadConnections(stmt, conn);
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateConnector(MConnector mConnector, Connection conn) {
+    PreparedStatement updateConnectorStatement = null;
+    PreparedStatement deleteForm = null;
+    PreparedStatement deleteInput = null;
+    try {
+      updateConnectorStatement = conn.prepareStatement(STMT_UPDATE_CONNECTOR);
+      deleteInput = conn.prepareStatement(STMT_DELETE_INPUTS_FOR_CONNECTOR);
+      deleteForm = conn.prepareStatement(STMT_DELETE_FORMS_FOR_CONNECTOR);
+      updateConnectorStatement.setString(1, mConnector.getUniqueName());
+      updateConnectorStatement.setString(2, mConnector.getClassName());
+      updateConnectorStatement.setString(3, mConnector.getVersion());
+      updateConnectorStatement.setLong(4, mConnector.getPersistenceId());
+
+      if (updateConnectorStatement.executeUpdate() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0038);
+      }
+      deleteInput.setLong(1, mConnector.getPersistenceId());
+      deleteForm.setLong(1, mConnector.getPersistenceId());
+      deleteInput.executeUpdate();
+      deleteForm.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
+    } finally {
+      closeStatements(updateConnectorStatement, deleteForm, deleteInput);
+    }
+    insertFormsForConnector(mConnector, conn);
+
   }
 
   /**
@@ -746,21 +834,32 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   @Override
   public void deleteJob(long id, Connection conn) {
     PreparedStatement dlt = null;
-    PreparedStatement dltInput = null;
     try {
-      dltInput = conn.prepareStatement(STMT_DELETE_JOB_INPUT);
+      deleteJobInputs(id, conn);
       dlt = conn.prepareStatement(STMT_DELETE_JOB);
-
-      dltInput.setLong(1, id);
       dlt.setLong(1, id);
-
-      dltInput.executeUpdate();
       dlt.executeUpdate();
-
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0028, ex);
     } finally {
-      closeStatements(dlt, dltInput);
+      closeStatements(dlt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteJobInputs(long id, Connection conn) {
+    PreparedStatement dltInput = null;
+    try {
+      dltInput = conn.prepareStatement(STMT_DELETE_JOB_INPUT);
+      dltInput.setLong(1, id);
+      dltInput.executeUpdate();
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0028, ex);
+    } finally {
+      closeStatements(dltInput);
     }
   }
 
@@ -800,6 +899,24 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
     try {
       stmt = conn.prepareStatement(STMT_SELECT_JOB_ALL);
 
+      return loadJobs(stmt, conn);
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0031, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_ALL_JOBS_FOR_CONNECTOR);
+      stmt.setLong(1, connectorId);
       return loadJobs(stmt, conn);
 
     } catch (SQLException ex) {
@@ -1297,7 +1414,8 @@ public class DerbyRepositoryHandler implements JdbcRepositoryHandler {
   }
 
   /**
-   * Register forms in derby database.
+   * Register forms in derby database. This method will insert the ids
+   * generated by the repository into the forms passed in itself.
    *
    * Use given prepared statements to create entire form structure in database.
    *

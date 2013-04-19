@@ -72,4 +72,11 @@ public abstract class SqoopConnector {
    */
   public abstract Validator getValidator();
 
+  /**
+   * Returns an {@linkplain MetadataUpgrader} object that can upgrade the
+   * connection and job metadata.
+   * @return MetadataUpgrader object
+   */
+  public abstract MetadataUpgrader getMetadataUpgrader();
+
 }

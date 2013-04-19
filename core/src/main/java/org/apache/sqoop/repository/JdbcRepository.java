@@ -29,7 +29,7 @@ import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 
-public class JdbcRepository implements Repository {
+public class JdbcRepository extends Repository {
 
   private static final Logger LOG =
       Logger.getLogger(JdbcRepository.class);
@@ -58,27 +58,42 @@ public class JdbcRepository implements Repository {
     Object doIt(Connection conn) throws Exception;
   }
 
+  private Object doWithConnection(DoWithConnection delegator) {
+    return doWithConnection(delegator, null);
+  }
+
   /**
    * Handle transaction and connection functionality and delegate action to
    * given delegator.
    *
    * @param delegator Code for specific action
+   * @param tx The transaction to use for the operation. If a transaction is
+   *           specified, this method will not commit, rollback or close it.
+   *           If null, a new transaction will be created - which will be
+   *           committed/closed/rolled back.
    * @return Arbitrary value
    */
-  private Object doWithConnection(DoWithConnection delegator) {
-    JdbcRepositoryTransaction tx = null;
+  private Object doWithConnection(DoWithConnection delegator,
+    JdbcRepositoryTransaction tx) {
+    boolean shouldCloseTxn = false;
 
     try {
       // Get transaction and connection
-      tx = getTransaction();
-      tx.begin();
-      Connection conn = tx.getConnection();
+      Connection conn;
+      if (tx == null) {
+        tx = getTransaction();
+        shouldCloseTxn = true;
+        tx.begin();
+      }
+      conn = tx.getConnection();
 
       // Delegate the functionality to our delegator
       Object returnValue = delegator.doIt(conn);
 
-      // Commit transaction
-      tx.commit();
+      if (shouldCloseTxn) {
+        // Commit transaction
+        tx.commit();
+      }
 
       // Return value that the underlying code needs to return
       return returnValue;
@@ -86,12 +101,12 @@ public class JdbcRepository implements Repository {
     } catch (SqoopException ex) {
       throw  ex;
     } catch (Exception ex) {
-      if (tx != null) {
+      if (tx != null && shouldCloseTxn) {
         tx.rollback();
       }
       throw new SqoopException(RepositoryError.JDBCREPO_0012, ex);
     } finally {
-      if (tx != null) {
+      if (tx != null && shouldCloseTxn) {
         tx.close();
       }
     }
@@ -121,14 +136,36 @@ public class JdbcRepository implements Repository {
           handler.registerConnector(mConnector, conn);
           return mConnector;
         } else {
+          // Same connector, check if the version is the same.
+          // For now, use the "string" versions itself - later we should
+          // probably include a build number or something that is
+          // monotonically increasing.
+          if (result.getUniqueName().equals(mConnector.getUniqueName()) &&
+            mConnector.getVersion().compareTo(result.getVersion()) > 0) {
+            upgradeConnector(result, mConnector);
+            return mConnector;
+          }
           if (!result.equals(mConnector)) {
             throw new SqoopException(RepositoryError.JDBCREPO_0013,
               "Connector: " + mConnector.getUniqueName()
-              + " given: " + mConnector
-              + " found: " + result);
+                + " given: " + mConnector
+                + " found: " + result);
           }
           return result;
         }
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConnector findConnector(final String shortName) {
+    return (MConnector) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findConnector(shortName, conn);
       }
     });
   }
@@ -179,6 +216,15 @@ public class JdbcRepository implements Repository {
    */
   @Override
   public void updateConnection(final MConnection connection) {
+    updateConnection(connection, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateConnection(final MConnection connection,
+    RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
@@ -193,7 +239,7 @@ public class JdbcRepository implements Repository {
         handler.updateConnection(connection, conn);
         return null;
       }
-    });
+    }, (JdbcRepositoryTransaction) tx);
   }
 
   /**
@@ -269,6 +315,14 @@ public class JdbcRepository implements Repository {
    */
   @Override
   public void updateJob(final MJob job) {
+    updateJob(job, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateJob(final MJob job, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
@@ -283,7 +337,7 @@ public class JdbcRepository implements Repository {
         handler.updateJob(job, conn);
         return null;
       }
-    });
+    }, (JdbcRepositoryTransaction) tx);
   }
 
   /**
@@ -419,5 +473,72 @@ public class JdbcRepository implements Repository {
         return handler.findSubmissionLastForJob(jobId, conn);
       }
     });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MConnection> findConnectionsForConnector(final long
+    connectorID) {
+    return (List<MConnection>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findConnectionsForConnector(connectorID, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MJob> findJobsForConnector(final long connectorID) {
+    return (List<MJob>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findJobsForConnector(connectorID, conn);
+      }
+    });
+  }
+
+  @Override
+  protected void deleteJobInputs(final long jobID, RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        handler.deleteJobInputs(jobID, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
+
+  }
+
+  @Override
+  protected void deleteConnectionInputs(final long connectionID,
+    RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        handler.deleteConnectionInputs(connectionID, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
+
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  protected void updateConnector(final MConnector newConnector,
+    RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        handler.updateConnector(newConnector, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
   }
 }

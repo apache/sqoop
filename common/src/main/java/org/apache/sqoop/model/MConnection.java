@@ -57,6 +57,18 @@ public class MConnection extends MAccountableEntity {
     return connectorId;
   }
 
+  public void setConnectorPart(MConnectionForms connectorPart) {
+    this.connectorPart = connectorPart;
+  }
+
+  public void setFrameworkPart(MConnectionForms frameworkPart) {
+    this.frameworkPart = frameworkPart;
+  }
+
+  public void setConnectorId(long connectorId) {
+    this.connectorId = connectorId;
+  }
+
   public MConnectionForms getConnectorPart() {
     return connectorPart;
   }

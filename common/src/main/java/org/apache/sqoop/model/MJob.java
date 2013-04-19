@@ -98,8 +98,16 @@ public class MJob extends MAccountableEntity {
     return connectionId;
   }
 
+  public void setConnectionId(long connectionId) {
+    this.connectionId = connectionId;
+  }
+
   public long getConnectorId() {
     return connectorId;
+  }
+
+  public void setConnectorId(long connectorId) {
+    this.connectorId = connectorId;
   }
 
   public MJobForms getConnectorPart() {
@@ -109,6 +117,15 @@ public class MJob extends MAccountableEntity {
   public MJobForms getFrameworkPart() {
     return frameworkPart;
   }
+
+  public void setConnectorPart(MJobForms connectorPart) {
+    this.connectorPart = connectorPart;
+  }
+
+  public void setFrameworkPart(MJobForms frameworkPart) {
+    this.frameworkPart = frameworkPart;
+  }
+
 
   public Type getType() {
     return type;
