@@ -14,4 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Set Sqoop specific environment variables here
+
 JAVA_OPTS="$JAVA_OPTS -Dsqoop.config.dir=`dirname $0`/../conf"
+
+# The port Sqoop server runs
+#
+# export SQOOP_HTTP_PORT=12000
+
+# Sqoop Admin port
+#
+# export SQOOP_ADMIN_PORT=12001

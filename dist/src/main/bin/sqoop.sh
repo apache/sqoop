@@ -37,6 +37,19 @@ echo "Sqoop home directory: ${CUR_DIR}..."
 CATALINA_BIN=${CATALINA_BIN:-server/bin}
 CLIENT_LIB=${CLIENT_LIB:-client/lib}
 
+setup_catalina_opts() {
+  # The Java System properties 'sqoop.http.port' and 'sqoop.admin.port' are
+  # not used by Sqoop. They are used in Tomcat's server.xml configuration file
+  echo "Using   CATALINA_OPTS:       ${CATALINA_OPTS}"
+
+  catalina_opts="-Dsqoop.http.port=${SQOOP_HTTP_PORT}";
+  catalina_opts="${catalina_opts} -Dsqoop.admin.port=${SQOOP_ADMIN_PORT}";
+
+  echo "Adding to CATALINA_OPTS:    ${catalina_opts}"
+
+  export CATALINA_OPTS="${CATALINA_OPTS} ${catalina_opts}"
+}
+
 COMMAND=$1
 case $COMMAND in
   server)
@@ -45,7 +58,34 @@ case $COMMAND in
       exit
     fi
     actionCmd=$2
-    # Remove the first 2 command line arguments so we can pass
+
+    # resolve links - $0 may be a softlink
+    PRG="${0}"
+
+    while [ -h "${PRG}" ]; do
+      ls=`ls -ld "${PRG}"`
+      link=`expr "$ls" : '.*-> \(.*\)$'`
+      if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+      else
+        PRG=`dirname "${PRG}"`/"$link"
+      fi
+    done
+
+    BASEDIR=`dirname ${PRG}`
+    BASEDIR=`cd ${BASEDIR}/..;pwd`
+
+    source ${BASEDIR}/bin/sqoop-sys.sh
+    setup_catalina_opts
+
+    # There seems to be a bug in catalina.sh whereby catalina.sh doesn't respect
+    # CATALINA_OPTS when stopping the tomcat server. Consequently, we have to hack around
+    # by specifying the CATALINA_OPTS properties in JAVA_OPTS variable
+    if [ "$actionCmd" == "stop" ]; then
+      export JAVA_OPTS="$JAVA_OPTS $CATALINA_OPTS"
+    fi
+
+    # Remove the first 2 command line arguments (server and action command (start/stop)) so we can pass
     # the rest to catalina.sh script
     shift
     shift
