@@ -513,8 +513,8 @@ public class TestClassWriter extends TestCase {
       writer.generate();
       compileMgr.compile();
       fail("ORM class file generation succeeded when it was expected to fail");
-    } catch (IOException ioe) {
-      LOG.error("Got IOException from ORM generation as expected : "
+    } catch (Exception ioe) {
+      LOG.error("Got Exception from ORM generation as expected : "
         + ioe.toString());
     }
   }
