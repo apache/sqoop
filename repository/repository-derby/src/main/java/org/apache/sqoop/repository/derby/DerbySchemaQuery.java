@@ -450,7 +450,7 @@ public final class DerbySchemaQuery {
   // Delete all forms for a given connector
   public static final String STMT_DELETE_FORMS_FOR_CONNECTOR =
     "DELETE FROM " + TABLE_SQ_FORM
-    + " WHERE " + COLUMN_SQN_CONNECTOR + " = ?";
+    + " WHERE " + COLUMN_SQF_CONNECTOR + " = ?";
 
   // Delete all inputs for a given connector
   public static final String STMT_DELETE_INPUTS_FOR_CONNECTOR =
