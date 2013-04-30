@@ -129,6 +129,10 @@ public class ConnectorManager {
     return handler.getConnector();
   }
 
+  public SqoopConnector getConnector(String uniqueName) {
+    return handlerMap.get(uniqueName).getConnector();
+  }
+
   public synchronized void initialize() {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");

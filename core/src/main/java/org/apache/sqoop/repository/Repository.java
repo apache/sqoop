@@ -308,8 +308,9 @@ public abstract class Repository {
      */
     RepositoryTransaction tx = null;
     try {
-      SqoopConnector connector = ConnectorManager.getInstance().getConnector(
-        connectorID);
+      SqoopConnector connector =
+        ConnectorManager.getInstance().getConnector(newConnector
+          .getUniqueName());
       MetadataUpgrader upgrader = connector.getMetadataUpgrader();
       List<MConnection> connections = findConnectionsForConnector(
         connectorID);
