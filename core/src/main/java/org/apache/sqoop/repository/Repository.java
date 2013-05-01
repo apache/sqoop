@@ -349,6 +349,7 @@ public abstract class Repository {
         upgrader.upgrade(job.getConnectorPart(), newJobForms);
         MJob newJob = new MJob(connectorID, job.getConnectionId(),
           job.getType(), newJobForms, job.getFrameworkPart());
+        newJob.setPersistenceId(job.getPersistenceId());
         updateJob(newJob, tx);
       }
       tx.commit();
