@@ -18,6 +18,8 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
@@ -30,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 public class GenericJdbcConnectorMetadataUpgrader extends MetadataUpgrader {
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcConnectorMetadataUpgrader.class);
+
   /*
    * For now, there is no real upgrade. So copy all data over,
    * set the validation messages and error messages to be the same as for the
@@ -62,8 +67,13 @@ public class GenericJdbcConnectorMetadataUpgrader extends MetadataUpgrader {
       List<MInput<?>> inputs = form.getInputs();
       MForm originalForm = formMap.get(form.getName());
       for (MInput input : inputs) {
-        MInput originalInput = originalForm.getInput(input.getName());
-        input.setValue(originalInput.getValue());
+        try {
+          MInput originalInput = originalForm.getInput(input.getName());
+          input.setValue(originalInput.getValue());
+        } catch (SqoopException ex) {
+          LOG.warn("Input: " + input.getName() + " not present in old " +
+            "connector. So it will not be transferred by the upgrader.");
+        }
       }
     }
   }
