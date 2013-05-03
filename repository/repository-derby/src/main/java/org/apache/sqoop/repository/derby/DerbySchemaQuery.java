@@ -463,6 +463,24 @@ public final class DerbySchemaQuery {
     + " WHERE "
     + COLUMN_SQF_CONNECTOR + " = ?)";
 
+  // Delete all framework inputs
+  public static final String STMT_DELETE_FRAMEWORK_INPUTS =
+    "DELETE FROM " + TABLE_SQ_INPUT
+    + " WHERE "
+    + COLUMN_SQI_FORM
+    + " IN (SELECT "
+    + COLUMN_SQF_ID
+    + " FROM " + TABLE_SQ_FORM
+    + " WHERE "
+    + COLUMN_SQF_CONNECTOR + " IS NULL)";
+
+  // Delete all framework forms
+  public static final String STMT_DELETE_FRAMEWORK_FORMS =
+    "DELETE FROM " + TABLE_SQ_FORM
+    + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL";
+
+
+
   // Update the connector
   public static final String STMT_UPDATE_CONNECTOR =
     "UPDATE " + TABLE_SQ_CONNECTOR

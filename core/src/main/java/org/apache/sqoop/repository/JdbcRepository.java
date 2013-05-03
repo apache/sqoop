@@ -183,10 +183,7 @@ public class JdbcRepository extends Repository {
           handler.registerFramework(mFramework, conn);
           return mFramework;
         } else {
-          if (!result.equals(mFramework)) {
-            throw new SqoopException(RepositoryError.JDBCREPO_0014,
-             "Framework: given: " + mFramework + " found:" + result);
-          }
+          upgradeFramework(mFramework);
           return result;
         }
       }
@@ -537,6 +534,18 @@ public class JdbcRepository extends Repository {
       @Override
       public Object doIt(Connection conn) throws Exception {
         handler.updateConnector(newConnector, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
+  }
+
+
+  protected void updateFramework(final MFramework mFramework,
+    RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        handler.updateFramework(mFramework, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

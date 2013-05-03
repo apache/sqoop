@@ -17,11 +17,11 @@
  */
 package org.apache.sqoop.repository;
 
-import org.apache.sqoop.common.ErrorCode;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
@@ -258,6 +258,27 @@ public abstract class Repository {
   protected abstract void updateConnector(MConnector newConnector,
     RepositoryTransaction tx);
 
+
+  /**
+   * Update the framework with the new data supplied in the
+   * <tt>mFramework</tt>. Also Update all forms associated with the framework
+   * in the repository with the forms specified in
+   * <tt>mFramework</tt>. <tt>mFramework </tt> must
+   * minimally have the connectorID and all required forms (including ones
+   * which may not have changed). After this operation the repository is
+   * guaranteed to only have the new forms specified in this object.
+   *
+   * @param mFramework The new data to be inserted into the repository for
+   *                     the framework.
+   * @param tx The repository transaction to use to push the data to the
+   *           repository. If this is null, a new transaction will be created.
+   *           method will not call begin, commit,
+   *           rollback or close on this transaction.
+   */
+  protected abstract void updateFramework(MFramework mFramework,
+    RepositoryTransaction tx);
+
+
   /**
    * Delete all inputs for a job
    * @param jobId The id of the job whose inputs are to be deleted.
@@ -278,6 +299,16 @@ public abstract class Repository {
    */
   protected abstract void deleteConnectionInputs(long connectionID,
     RepositoryTransaction tx);
+
+  private void deleteConnectionsAndJobs(List<MConnection> connections,
+    List<MJob> jobs, RepositoryTransaction tx) {
+    for (MJob job : jobs) {
+      deleteJobInputs(job.getPersistenceId(), tx);
+    }
+    for (MConnection connection : connections) {
+      deleteConnectionInputs(connection.getPersistenceId(), tx);
+    }
+  }
 
   /**
    * Upgrade the connector with the same {@linkplain MConnector#uniqueName}
@@ -318,12 +349,7 @@ public abstract class Repository {
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      for (MJob job : jobs) {
-        deleteJobInputs(job.getPersistenceId(), tx);
-      }
-      for (MConnection connection : connections) {
-        deleteConnectionInputs(connection.getPersistenceId(), tx);
-      }
+      deleteConnectionsAndJobs(connections, jobs, tx);
       updateConnector(newConnector, tx);
       for (MConnection connection : connections) {
         long connectionID = connection.getPersistenceId();
@@ -349,6 +375,59 @@ public abstract class Repository {
         upgrader.upgrade(job.getConnectorPart(), newJobForms);
         MJob newJob = new MJob(connectorID, job.getConnectionId(),
           job.getType(), newJobForms, job.getFrameworkPart());
+        newJob.setPersistenceId(job.getPersistenceId());
+        updateJob(newJob, tx);
+      }
+      tx.commit();
+    } catch (Exception ex) {
+      if(tx != null) {
+        tx.rollback();
+      }
+      throw new SqoopException(RepositoryError.JDBCREPO_0000, ex);
+    } finally {
+      if(tx != null) {
+        tx.close();
+      }
+    }
+  }
+
+  public final void upgradeFramework(MFramework framework) {
+    RepositoryTransaction tx = null;
+    try {
+      MetadataUpgrader upgrader = FrameworkManager.getInstance()
+        .getMetadataUpgrader();
+      List<MConnection> connections = findConnections();
+      List<MJob> jobs = findJobs();
+
+      // -- BEGIN TXN --
+      tx = getTransaction();
+      tx.begin();
+      deleteConnectionsAndJobs(connections, jobs, tx);
+      updateFramework(framework, tx);
+      for (MConnection connection : connections) {
+        long connectionID = connection.getPersistenceId();
+        // Make a new copy of the forms from the connector,
+        // else the values will get set in the forms in the connector for
+        // each connection.
+        List<MForm> forms = cloneForms(framework.getConnectionForms()
+          .getForms());
+        MConnectionForms newConnectionForms = new MConnectionForms(forms);
+        upgrader.upgrade(connection.getFrameworkPart(), newConnectionForms);
+        MConnection newConnection = new MConnection(connection.getConnectorId(),
+          connection.getConnectorPart(), newConnectionForms);
+        newConnection.setPersistenceId(connectionID);
+        updateConnection(newConnection, tx);
+      }
+      for (MJob job : jobs) {
+        // Make a new copy of the forms from the framework,
+        // else the values will get set in the forms in the connector for
+        // each connection.
+        List<MForm> forms = cloneForms(framework.getJobForms(job.getType())
+          .getForms());
+        MJobForms newJobForms = new MJobForms(job.getType(), forms);
+        upgrader.upgrade(job.getFrameworkPart(), newJobForms);
+        MJob newJob = new MJob(job.getConnectorId(), job.getConnectionId(),
+          job.getType(), job.getConnectorPart(), newJobForms);
         newJob.setPersistenceId(job.getPersistenceId());
         updateJob(newJob, tx);
       }

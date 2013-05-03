@@ -93,6 +93,40 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
+   * Helper method to insert the forms from the  into the
+   * repository. The job and connector forms within <code>mc</code> will get
+   * updated with the id of the forms when this function returns.
+   * @param mf The MFramework instance to use to upgrade.
+   * @param conn JDBC connection to use for updating the forms
+   */
+  private void insertFormsForFramework(MFramework mf, Connection conn) {
+    PreparedStatement baseFormStmt = null;
+    PreparedStatement baseInputStmt = null;
+    try{
+      baseFormStmt = conn.prepareStatement(STMT_INSERT_FORM_BASE,
+        Statement.RETURN_GENERATED_KEYS);
+
+      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
+        Statement.RETURN_GENERATED_KEYS);
+
+      // Register connector forms
+      registerForms(null, null, mf.getConnectionForms().getForms(),
+        MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
+
+      // Register all jobs
+      for (MJobForms jobForms : mf.getAllJobsForms().values()) {
+        registerForms(null, jobForms.getType(), jobForms.getForms(),
+          MFormType.JOB.name(), baseFormStmt, baseInputStmt);
+      }
+
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0014, mf.toString(), ex);
+    } finally {
+      closeStatements(baseFormStmt, baseInputStmt);
+    }
+  }
+
+  /**
    * Helper method to insert the forms from the MConnector into the
    * repository. The job and connector forms within <code>mc</code> will get
    * updated with the id of the forms when this function returns.
@@ -698,6 +732,29 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeStatements(updateConnectorStatement, deleteForm, deleteInput);
     }
     insertFormsForConnector(mConnector, conn);
+
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateFramework(MFramework mFramework, Connection conn) {
+    PreparedStatement deleteForm = null;
+    PreparedStatement deleteInput = null;
+    try {
+      deleteInput = conn.prepareStatement(STMT_DELETE_FRAMEWORK_INPUTS);
+      deleteForm = conn.prepareStatement(STMT_DELETE_FRAMEWORK_FORMS);
+
+      deleteInput.executeUpdate();
+      deleteForm.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
+    } finally {
+      closeStatements(deleteForm, deleteInput);
+    }
+    insertFormsForFramework(mFramework, conn);
 
   }
 

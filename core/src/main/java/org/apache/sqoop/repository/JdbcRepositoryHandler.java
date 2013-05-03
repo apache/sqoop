@@ -97,6 +97,23 @@ public abstract class JdbcRepositoryHandler {
 
   public abstract void updateConnector(MConnector mConnector, Connection conn);
 
+
+  /**
+   * Update the framework with the new data supplied in the
+   * <tt>mFramework</tt>.
+   * Also Update all forms in the repository
+   * with the forms specified in <tt>mFramework</tt>. <tt>mFramework </tt> must
+   * minimally have the connectorID and all required forms (including ones
+   * which may not have changed). After this operation the repository is
+   * guaranteed to only have the new forms specified in this object.
+   *
+   * @param mFramework The new data to be inserted into the repository for
+   *                     the framework.
+   * @param conn JDBC connection for querying repository
+   */
+  public abstract void updateFramework(MFramework mFramework, Connection conn);
+
+
   /**
    * Search for framework metadata in the repository.
    *

@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
@@ -134,6 +135,11 @@ public class FrameworkManager {
   private final Validator validator;
 
   /**
+   * Upgrader instance
+   */
+  private final MetadataUpgrader upgrader;
+
+  /**
    * Configured submission engine instance
    */
   private SubmissionEngine submissionEngine;
@@ -218,6 +224,9 @@ public class FrameworkManager {
 
     // Build validator
     validator = new FrameworkValidator();
+
+    // Build upgrader
+    upgrader = new FrameworkMetadataUpgrader();
   }
 
   public synchronized void initialize() {
@@ -313,6 +322,10 @@ public class FrameworkManager {
 
   public Validator getValidator() {
     return validator;
+  }
+
+  public MetadataUpgrader getMetadataUpgrader() {
+    return upgrader;
   }
 
   public Class getConnectionConfigurationClass() {
