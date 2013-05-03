@@ -33,6 +33,8 @@ import org.apache.sqoop.validation.Validator;
 
 public class GenericJdbcConnector extends SqoopConnector {
 
+  private static GenericJdbcValidator genericJdbcValidator = new GenericJdbcValidator();
+
   private static final Importer IMPORTER = new Importer(
       GenericJdbcImportInitializer.class,
       GenericJdbcImportPartitioner.class,
@@ -91,8 +93,7 @@ public class GenericJdbcConnector extends SqoopConnector {
 
   @Override
   public Validator getValidator() {
-    // TODO(jarcec): Cache this object eventually
-    return new GenericJdbcValidator();
+    return genericJdbcValidator;
   }
 
   @Override
