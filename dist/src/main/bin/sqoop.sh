@@ -30,9 +30,25 @@ if [ $# = 0 ]; then
 fi
 
 OLD_DIR=`pwd`
-CUR_DIR=`cd $(dirname $(which $0))/..; pwd`
-cd ${CUR_DIR}
-echo "Sqoop home directory: ${CUR_DIR}..."
+
+# resolve links - $0 may be a softlink
+PRG="${0}"
+
+while [ -h "${PRG}" ]; do
+  ls=`ls -ld "${PRG}"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "${PRG}"`/"$link"
+  fi
+done
+
+BASEDIR=`dirname ${PRG}`
+BASEDIR=`cd ${BASEDIR}/..;pwd`
+
+cd ${BASEDIR}
+echo "Sqoop home directory: ${BASEDIR}"
 
 CATALINA_BIN=${CATALINA_BIN:-server/bin}
 CLIENT_LIB=${CLIENT_LIB:-client/lib}
@@ -59,22 +75,6 @@ case $COMMAND in
     fi
     actionCmd=$2
 
-    # resolve links - $0 may be a softlink
-    PRG="${0}"
-
-    while [ -h "${PRG}" ]; do
-      ls=`ls -ld "${PRG}"`
-      link=`expr "$ls" : '.*-> \(.*\)$'`
-      if expr "$link" : '/.*' > /dev/null; then
-        PRG="$link"
-      else
-        PRG=`dirname "${PRG}"`/"$link"
-      fi
-    done
-
-    BASEDIR=`dirname ${PRG}`
-    BASEDIR=`cd ${BASEDIR}/..;pwd`
-
     source ${BASEDIR}/bin/sqoop-sys.sh
     setup_catalina_opts
 
@@ -96,7 +96,7 @@ case $COMMAND in
   client)
     # Build class path with full path to each library
     for f in $CLIENT_LIB/*.jar; do
-      CLASSPATH="${CLASSPATH}:$CUR_DIR/$f"
+      CLASSPATH="${CLASSPATH}:${BASEDIR}/$f"
     done
 
     # We need to change current directory back to original as optional user side script
