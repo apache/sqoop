@@ -166,7 +166,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     String query;
 
     sb.append("SELECT MAX(");
-    sb.append(options.getIncrementalTestColumn());
+    sb.append(manager.escapeTableName(options.getIncrementalTestColumn()));
     sb.append(") FROM ");
 
     if (options.getTableName() != null) {
