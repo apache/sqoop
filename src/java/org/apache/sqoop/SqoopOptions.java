@@ -202,6 +202,9 @@ public class SqoopOptions implements Cloneable {
 
   //Column of the input to use as the timestamp.
   @StoredAsProperty("hbase.timestamp.col") private String hbaseTimeStampCol;
+  
+  //Temp dir of the input to use as the hbase bulk dir.
+  @StoredAsProperty("hbase.bulk.load.dir") private String hbaseBulkLoadDir;
 
   // if true, create tables/col families.
   @StoredAsProperty("hbase.create.table") private boolean hbaseCreateTable;
@@ -1762,6 +1765,20 @@ public class SqoopOptions implements Cloneable {
    */
   public void setHBaseTimeStampColumn(String col) {
     this.hbaseTimeStampCol = col;
+  }
+  
+  /**
+   * Gets the column to use as the timestamp in an hbase import.
+   */
+  public String getHBaseBulkLoadDir() {
+    return this.hbaseBulkLoadDir;
+  }
+  
+  /**
+   * Sets the temp dir to use as the bulk load dir in an hbase import.
+   */
+  public void setHBaseBulkLoadDir(String dir) {
+    this.hbaseBulkLoadDir = dir;
   }
 
   /**

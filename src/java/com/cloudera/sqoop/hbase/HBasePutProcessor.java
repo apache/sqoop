@@ -32,6 +32,8 @@ public class HBasePutProcessor
       org.apache.sqoop.hbase.HBasePutProcessor.ROW_KEY_COLUMN_KEY;
   public static final String TIMESTAMP_COLUMN_KEY =
       org.apache.sqoop.hbase.HBasePutProcessor.TIMESTAMP_COLUMN_KEY;
+  public static final String BULK_LOAD_DIR_KEY =
+      org.apache.sqoop.hbase.HBasePutProcessor.BULK_LOAD_DIR_KEY;
   public static final String TRANSFORMER_CLASS_KEY =
       org.apache.sqoop.hbase.HBasePutProcessor.TRANSFORMER_CLASS_KEY;
 

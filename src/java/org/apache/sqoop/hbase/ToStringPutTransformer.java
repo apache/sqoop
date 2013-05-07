@@ -105,11 +105,21 @@ public class ToStringPutTransformer extends PutTransformer {
         Object val = fieldEntry.getValue();
         if (null != val) {
           if (timeStamp == null) {
-            put.add(colFamilyBytes, getFieldNameBytes(colName),
-                Bytes.toBytes(val.toString()));
+              if ( val instanceof byte[]) {
+                put.add(colFamilyBytes, getFieldNameBytes(colName),
+                    (byte[])val);
+              } else {
+                put.add(colFamilyBytes, getFieldNameBytes(colName),
+                    Bytes.toBytes(val.toString()));
+              }
           } else {
-            put.add(colFamilyBytes, getFieldNameBytes(colName), (Long)timeStamp,
-                Bytes.toBytes(val.toString()));
+              if ( val instanceof byte[]) {
+                put.add(colFamilyBytes, getFieldNameBytes(colName), (Long)timeStamp,
+                    (byte[])val);
+              } else {
+                put.add(colFamilyBytes, getFieldNameBytes(colName), (Long)timeStamp,
+                    Bytes.toBytes(val.toString()));
+              }
           }
         }
       }

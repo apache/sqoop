@@ -151,6 +151,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HBASE_COL_FAM_ARG = "column-family";
   public static final String HBASE_ROW_KEY_ARG = "hbase-row-key";
   public static final String HBASE_TIMESTAMP_ARG = "hbase-timestamp-column";
+  public static final String HBASE_BULK_LOAD_DIR_ARG = "bulk-load-dir";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
 
@@ -617,6 +618,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Specifies which input column to use as the timestamp")
         .withLongOpt(HBASE_TIMESTAMP_ARG)
         .create());
+    hbaseOpts.addOption(OptionBuilder.withArgName("bulk-load-dir")
+        .hasArg()
+        .withDescription("Specifies the temp dir for hbase bulk load")
+        .withLongOpt(HBASE_BULK_LOAD_DIR_ARG)
+        .create());
     hbaseOpts.addOption(OptionBuilder
         .withDescription("If specified, create missing HBase tables")
         .withLongOpt(HBASE_CREATE_TABLE_ARG)
@@ -890,6 +896,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setHBaseTimeStampColumn(in.getOptionValue(HBASE_TIMESTAMP_ARG));
     }
 
+    if (in.hasOption(HBASE_BULK_LOAD_DIR_ARG)) {
+      out.setHBaseBulkLoadDir(in.getOptionValue(HBASE_BULK_LOAD_DIR_ARG));
+    }
+    
     if (in.hasOption(HBASE_CREATE_TABLE_ARG)) {
       out.setCreateHBaseTable(true);
     }

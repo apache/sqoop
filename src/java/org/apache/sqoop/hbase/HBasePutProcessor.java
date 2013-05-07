@@ -65,6 +65,12 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public static final String TRANSFORMER_CLASS_KEY =
       "sqoop.hbase.insert.put.transformer.class";
 
+  /**
+   *  Configuration key specifying the BulkLoad temp directory to use.
+   */
+  public static final String BULK_LOAD_DIR_KEY = 
+      "sqoop.hbase.bulk.load.tmp.dir";
+
   private Configuration conf;
 
   // An object that can transform a map of fieldName->object
