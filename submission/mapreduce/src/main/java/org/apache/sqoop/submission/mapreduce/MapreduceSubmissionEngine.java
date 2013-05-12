@@ -402,6 +402,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
   private Counters convertMapreduceCounters(org.apache.hadoop.mapred.Counters hadoopCounters) {
     Counters sqoopCounters = new Counters();
 
+    if(hadoopCounters == null) {
+      return sqoopCounters;
+    }
+
     for(org.apache.hadoop.mapred.Counters.Group hadoopGroup : hadoopCounters) {
       CounterGroup sqoopGroup = new CounterGroup(hadoopGroup.getName());
       for(org.apache.hadoop.mapred.Counters.Counter hadoopCounter : hadoopGroup) {
