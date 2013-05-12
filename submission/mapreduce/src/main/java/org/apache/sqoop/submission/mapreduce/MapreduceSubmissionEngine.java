@@ -424,6 +424,12 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * @return True if we're running in local mode
    */
   private boolean isLocal() {
+    // If framework is set to YARN, then we can't be running in local mode
+    if("yarn".equals(globalConfiguration.get("mapreduce.framework.name"))) {
+      return false;
+    }
+
+    // If job tracker address is "local" then we're running in local mode
     return "local".equals(globalConfiguration.get("mapreduce.jobtracker.address"))
         || "local".equals(globalConfiguration.get("mapred.job.tracker"));
   }
