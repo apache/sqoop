@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.repository;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
@@ -48,6 +49,8 @@ import java.util.List;
  * Jobs in the system.
  */
 public abstract class Repository {
+
+  private static final Logger LOG = Logger.getLogger(Repository.class);
 
   public abstract RepositoryTransaction getTransaction();
 
@@ -321,8 +324,8 @@ public abstract class Repository {
    * @param newConnector New properties for the Connector that should be
    *                     upgraded.
    */
-  public final void upgradeConnector(MConnector oldConnector,
-    MConnector newConnector) {
+  public final void upgradeConnector(MConnector oldConnector, MConnector newConnector) {
+    LOG.info("Upgrading metadata for connector: " + oldConnector.getUniqueName());
     long connectorID = oldConnector.getPersistenceId();
     newConnector.setPersistenceId(connectorID);
     /* Algorithms:
@@ -388,10 +391,12 @@ public abstract class Repository {
       if(tx != null) {
         tx.close();
       }
+      LOG.info("Metadata upgrade finished for connector: " + oldConnector.getUniqueName());
     }
   }
 
   public final void upgradeFramework(MFramework framework) {
+    LOG.info("Upgrading framework metadata");
     RepositoryTransaction tx = null;
     try {
       MetadataUpgrader upgrader = FrameworkManager.getInstance()
@@ -441,6 +446,7 @@ public abstract class Repository {
       if(tx != null) {
         tx.close();
       }
+      LOG.info("Framework metadata upgrade finished");
     }
   }
 
