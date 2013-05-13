@@ -183,7 +183,12 @@ public class JdbcRepository extends Repository {
           handler.registerFramework(mFramework, conn);
           return mFramework;
         } else {
-          upgradeFramework(mFramework);
+          // We're currently not serializing framework version into repository
+          // so let's just compare the structure to see if we need upgrade.
+          if(!mFramework.equals(result)) {
+            upgradeFramework(mFramework);
+            return mFramework;
+          }
           return result;
         }
       }
