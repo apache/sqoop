@@ -203,8 +203,9 @@ public final class DerbySchemaQuery {
       + COLUMN_SQF_NAME + " VARCHAR(64), "
       + COLUMN_SQF_TYPE + " VARCHAR(32), "
       + COLUMN_SQF_INDEX + " SMALLINT, "
-      + " FOREIGN KEY (" + COLUMN_SQF_CONNECTOR+ ")"
-        + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + "CONSTRAINT " + CONSTRAINT_SQF_SQC + " "
+        + "FOREIGN KEY (" + COLUMN_SQF_CONNECTOR + ") "
+          + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
   // DDL: Create table SQ_INPUT
@@ -218,8 +219,9 @@ public final class DerbySchemaQuery {
       + COLUMN_SQI_STRMASK + " BOOLEAN, "
       + COLUMN_SQI_STRLENGTH + " SMALLINT, "
       + COLUMN_SQI_ENUMVALS + " VARCHAR(100),"
-      + " FOREIGN KEY (" + COLUMN_SQI_FORM + ")"
-        + " REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
+      + "CONSTRAINT " + CONSTRAINT_SQI_SQF + " "
+        + "FOREIGN KEY (" + COLUMN_SQI_FORM + ") "
+          + "REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
       + ")";
 
   // DDL: Create table SQ_CONNECTION
@@ -230,8 +232,9 @@ public final class DerbySchemaQuery {
       + COLUMN_SQN_NAME  + " VARCHAR(32),"
       + COLUMN_SQN_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQN_UPDATE_DATE + " TIMESTAMP,"
-      + " FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ")"
-        + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + "CONSTRAINT " + CONSTRAINT_SQN_SQC + " "
+        + "FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") "
+          + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
   // DDL: Create table SQ_JOB
@@ -243,8 +246,9 @@ public final class DerbySchemaQuery {
       + COLUMN_SQB_TYPE + " VARCHAR(64),"
       + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
-      + " FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ")"
-        + " REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
+      + "CONSTRAINT " + CONSTRAINT_SQB_SQN + " "
+        + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
+          + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
 
   // DDL: Create table SQ_CONNECTION_INPUT
@@ -253,11 +257,13 @@ public final class DerbySchemaQuery {
       + COLUMN_SQNI_CONNECTION + " BIGINT, "
       + COLUMN_SQNI_INPUT + " BIGINT, "
       + COLUMN_SQNI_VALUE + " LONG VARCHAR,"
-      + " PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "),"
-      + " FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ")"
-        + " REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
-      + " FOREIGN KEY (" + COLUMN_SQNI_INPUT + ")"
-        + " REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+      + "PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "), "
+      + "CONSTRAINT " + CONSTRAINT_SQNI_SQN + " "
+        + "FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ") "
+          + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
+      + "CONSTRAINT " + CONSTRAINT_SQNI_SQI + " "
+        + "FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") "
+          + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
       + ")";
 
   // DDL: Create table SQ_JOB_INPUT
@@ -267,10 +273,12 @@ public final class DerbySchemaQuery {
       + COLUMN_SQBI_INPUT + " BIGINT, "
       + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
       + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
-      + " FOREIGN KEY (" + COLUMN_SQBI_JOB + ")"
-        + " REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
-      + " FOREIGN KEY (" + COLUMN_SQBI_INPUT + ")"
-        + " REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+      + " CONSTRAINT " + CONSTRAINT_SQBI_SQB + " "
+        + "FOREIGN KEY (" + COLUMN_SQBI_JOB + ") "
+        +  "REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
+      + " CONSTRAINT " + CONSTRAINT_SQBI_SQI + " "
+        + "FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") "
+          + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
       + ")";
 
   // DDL: Create table SQ_SUBMISSION
@@ -286,8 +294,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
     + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
     + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQS_JOB + ")"
-      + " REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
+    + "CONSTRAINT " + CONSTRAINT_SQS_SQB + " "
+      + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") "
+        + "REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
     +  ")";
 
   // DDL: Create table SQ_COUNTER_GROUP
@@ -316,12 +325,15 @@ public final class DerbySchemaQuery {
     + COLUMN_SQRS_SUBMISSION + " BIGINT, "
     + COLUMN_SQRS_VALUE + " BIGINT, "
     + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ")"
-      + " REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ")"
-      + " REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
-    + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ")"
-      + " REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
+    + "CONSTRAINT " + CONSTRAINT_SQRS_SQG + " "
+      + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") "
+        + "REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
+    + "CONSTRAINT " + CONSTRAINT_SQRS_SQR + " "
+      + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") "
+        + "REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
+    + "CONSTRAINT " + CONSTRAINT_SQRS_SQS + " "
+      + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") "
+        + "REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
     + ")";
 
   // DML: Fetch connector Given Name
