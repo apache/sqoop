@@ -103,10 +103,13 @@ public class TableDisplayer {
    * @return Maximal
    */
   private static int getMaximalWidth(String header, List<String> column) {
+    assert header != null;
+    assert column != null;
+
     int max = header.length();
 
     for(String value : column) {
-      if(value.length() > max) {
+      if(value != null && value.length() > max) {
         max = value.length();
       }
     }
