@@ -351,6 +351,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0005, shortName);
       }
     } catch (SQLException ex) {
+      logException(ex, shortName);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0004, shortName, ex);
     } finally {
       closeStatements(baseConnectorFetchStmt,
@@ -393,8 +394,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       // represented as NULL in the database.
       mf.setPersistenceId(1);
     } catch (SQLException ex) {
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
-          mf.toString(), ex);
+      logException(ex, mf);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0014, ex);
     } finally {
       closeStatements(baseFormStmt, baseInputStmt);
     }
@@ -506,6 +507,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       connection.setPersistenceId(connectionId);
 
     } catch (SQLException ex) {
+      logException(ex, connection);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0019, ex);
     } finally {
       closeStatements(stmt);
@@ -544,6 +546,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         conn);
 
     } catch (SQLException ex) {
+      logException(ex, connection);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0021, ex);
     } finally {
       closeStatements(deleteStmt, updateStmt);
@@ -567,6 +570,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       return rs.getLong(1) == 1;
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0025, ex);
     } finally {
       closeResultSets(rs);
@@ -590,6 +594,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return rs.getLong(1) != 0;
 
     } catch (SQLException e) {
+      logException(e, connectionId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0032, e);
     } finally {
       closeResultSets(rs);
@@ -610,6 +615,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       dltConn.setLong(1, id);
       dltConn.executeUpdate();
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0022, ex);
     } finally {
       closeStatements(dltConn);
@@ -627,6 +633,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       dltConnInput.setLong(1, id);
       dltConnInput.executeUpdate();
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0022, ex);
     } finally {
       closeStatements(dltConnInput);
@@ -654,6 +661,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return connections.get(0);
 
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
       closeStatements(stmt);
@@ -672,6 +680,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return loadConnections(stmt, conn);
 
     } catch (SQLException ex) {
+      logException(ex);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
       closeStatements(stmt);
@@ -685,8 +694,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    */
   @Override
-  public List<MConnection> findConnectionsForConnector(long
-    connectorID, Connection conn) {
+  public List<MConnection> findConnectionsForConnector(long connectorID, Connection conn) {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_SELECT_CONNECTION_FOR_CONNECTOR);
@@ -695,6 +703,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return loadConnections(stmt, conn);
 
     } catch (SQLException ex) {
+      logException(ex, connectorID);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
       closeStatements(stmt);
@@ -727,6 +736,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       deleteForm.executeUpdate();
 
     } catch (SQLException e) {
+      logException(e, mConnector);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
     } finally {
       closeStatements(updateConnectorStatement, deleteForm, deleteInput);
@@ -750,6 +760,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       deleteForm.executeUpdate();
 
     } catch (SQLException e) {
+      logException(e, mFramework);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
     } finally {
       closeStatements(deleteForm, deleteInput);
@@ -800,6 +811,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       job.setPersistenceId(jobId);
 
     } catch (SQLException ex) {
+      logException(ex, job);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0026, ex);
     } finally {
       closeStatements(stmt);
@@ -838,6 +850,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                         conn);
 
     } catch (SQLException ex) {
+      logException(ex, job);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0027, ex);
     } finally {
       closeStatements(deleteStmt, updateStmt);
@@ -861,6 +874,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       return rs.getLong(1) == 1;
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0029, ex);
     } finally {
       closeResultSets(rs);
@@ -897,6 +911,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       dlt.setLong(1, id);
       dlt.executeUpdate();
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0028, ex);
     } finally {
       closeStatements(dlt);
@@ -914,6 +929,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       dltInput.setLong(1, id);
       dltInput.executeUpdate();
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0028, ex);
     } finally {
       closeStatements(dltInput);
@@ -941,6 +957,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return jobs.get(0);
 
     } catch (SQLException ex) {
+      logException(ex, id);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0031, ex);
     } finally {
       closeStatements(stmt);
@@ -959,6 +976,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return loadJobs(stmt, conn);
 
     } catch (SQLException ex) {
+      logException(ex);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0031, ex);
     } finally {
       closeStatements(stmt);
@@ -977,6 +995,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return loadJobs(stmt, conn);
 
     } catch (SQLException ex) {
+      logException(ex, connectorId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0031, ex);
     } finally {
       closeStatements(stmt);
@@ -1024,6 +1043,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       submission.setPersistenceId(submissionId);
 
     } catch (SQLException ex) {
+      logException(ex, submission);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0034, ex);
     } finally {
       closeStatements(stmt);
@@ -1047,6 +1067,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       return rs.getLong(1) == 1;
     } catch (SQLException ex) {
+      logException(ex, submissionId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0033, ex);
     } finally {
       closeResultSets(rs);
@@ -1083,6 +1104,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
 
     } catch (SQLException ex) {
+      logException(ex, submission);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0035, ex);
     } finally {
       closeStatements(stmt, deleteStmt);
@@ -1101,6 +1123,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt.executeUpdate();
 
     } catch (SQLException ex) {
+      logException(ex, threshold);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0036, ex);
     } finally {
       closeStatements(stmt);
@@ -1130,6 +1153,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         rs = null;
       }
     } catch (SQLException ex) {
+      logException(ex);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
     } finally {
       closeResultSets(rs);
@@ -1158,6 +1182,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       return loadSubmission(rs, conn);
     } catch (SQLException ex) {
+      logException(ex, jobId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
     } finally {
       closeResultSets(rs);
@@ -1826,7 +1851,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Any occurring exception is silently ignored and logged.
    *
    * @param stmts Statements to close
-   */  private void closeStatements(Statement... stmts) {
+   */
+  private void closeStatements(Statement... stmts) {
     for (Statement stmt : stmts) {
       if(stmt != null) {
         try {
@@ -1835,6 +1861,23 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           LOG.error("Exception during closing statement", ex);
         }
       }
+    }
+  }
+
+  /**
+   * Log exception and all String variant of arbitrary number of objects.
+   *
+   * This method is useful to log SQLException with all objects that were
+   * used in the query generation to see where is the issue.
+   *
+   * @param throwable Arbitrary throwable object
+   * @param objects Arbitrary array of associated objects
+   */
+  private void logException(Throwable throwable, Object ...objects) {
+    LOG.error("Exception in repository operation", throwable);
+    LOG.error("Associated objects: "+ objects.length);
+    for(Object object : objects) {
+      LOG.error("\t" + object.getClass().getSimpleName() + ": " + object.toString());
     }
   }
 }
