@@ -169,7 +169,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
   protected List<Partition> partitionNumericColumn() {
     List<Partition> partitions = new LinkedList<Partition>();
 
-    // All null valeus will result in single partition
+    // All null values will result in single partition
     if (partitionMinValue == null && partitionMaxValue == null) {
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
       partition.setConditions(partitionColumnName + "IS NULL");
@@ -184,6 +184,13 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     BigDecimal minValue = new BigDecimal(partitionMinValue);
     BigDecimal maxValue = new BigDecimal(partitionMaxValue);
+
+    // Having one single value means that we can create only one single split
+    if(minValue.equals(maxValue)) {
+      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      partition.setConditions(constructConditions(minValue));
+      partitions.add(partition);
+    }
 
     // Get all the split points together.
     List<BigDecimal> splitPoints = new LinkedList<BigDecimal>();
@@ -239,5 +246,14 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     conditions.append(lastOne ? " <= " : " < ");
     conditions.append(upperBound);
     return conditions.toString();
+  }
+
+  protected String constructConditions(Object value) {
+    return new StringBuilder()
+      .append(partitionColumnName)
+      .append(" = ")
+      .append(value)
+      .toString()
+     ;
   }
 }

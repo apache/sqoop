@@ -238,6 +238,25 @@ public class TestImportPartitioner extends TestCase {
     });
   }
 
+  public void testNumericSinglePartition() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.NUMERIC));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START)));
+
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    Partitioner partitioner = new GenericJdbcImportPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
+    verifyResult(partitions, new String[]{
+      "DCOL = -5",
+    });
+  }
+
   private void verifyResult(List<Partition> partitions,
       String[] expected) {
     assertEquals(expected.length, partitions.size());
