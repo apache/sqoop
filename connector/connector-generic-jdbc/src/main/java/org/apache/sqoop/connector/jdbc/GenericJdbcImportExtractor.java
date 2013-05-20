@@ -55,7 +55,8 @@ public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguratio
       while (resultSet.next()) {
         Object[] array = new Object[column];
         for (int i = 0; i< column; i++) {
-          array[i] = resultSet.getObject(i+1);
+          array[i] = resultSet.getObject(i + 1) == null ? GenericJdbcConnectorConstants.SQL_NULL_VALUE
+              : resultSet.getObject(i + 1);
         }
         context.getDataWriter().writeArrayRecord(array);
         rowsRead++;

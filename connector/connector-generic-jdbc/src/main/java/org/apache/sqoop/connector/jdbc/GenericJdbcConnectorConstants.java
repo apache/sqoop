@@ -51,6 +51,8 @@ public final class GenericJdbcConnectorConstants {
 
   public static final String SUBQUERY_ALIAS = "SQOOP_SUBQUERY_ALIAS";
 
+  public static final String SQL_NULL_VALUE = "null";
+
   private GenericJdbcConnectorConstants() {
     // Disable explicit object creation
   }
