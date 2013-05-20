@@ -290,6 +290,9 @@ Job submission requires a job id. On successful submission, getStatus() method r
   //Stop a running job
   submission.stopSubmission(jid);
 
+Above code block, job submission is asynchronous. For synchronous job submission, use startSubmission(jid, callback, pollTime) method. If user is not interested in getting submission status, then invoke method with null for callback parameter and returns final submission status. Polltime is request interval for getting submission status from sqoop server and value should be greater than zero. Frequently hit the sqoop server if the low value is set to pollTime.
+When a synchronous job is submission started with callback, first invokes the callback's submitted(MSubmission) method on successful submission, after every poll time interval invokes updated(MSubmission) and finally on finished executing the job invokes finished(MSubmission) method.
+
 Describe Forms
 ==========================
 

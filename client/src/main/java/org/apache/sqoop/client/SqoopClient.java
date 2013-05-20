@@ -17,7 +17,9 @@
  */
 package org.apache.sqoop.client;
 
+import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.ValidationBean;
@@ -77,6 +79,15 @@ public class SqoopClient {
    * Cached framework.
    */
   private MFramework framework;
+
+  /**
+   * Status flags used when updating the submission callback status
+   */
+  private enum SubmissionStatus {
+    SUBMITTED,
+    UPDATED,
+    FINISHED
+  };
 
   public SqoopClient(String serverUrl) {
     requests = new SqoopRequests();
@@ -351,6 +362,60 @@ public class SqoopClient {
    */
   public MSubmission startSubmission(long jid) {
     return requests.createSubmission(jid).getSubmission();
+  }
+
+  /**
+   * Method used for synchronous job submission.
+   * Pass null to callback parameter if submission status is not required and after completion
+   * job execution returns MSubmission which contains final status of submission.
+   * @param jid - Job ID
+   * @param callback - User may set null if submission status is not required, else callback methods invoked
+   * @param pollTime - Server poll time
+   * @return MSubmission - Final status of job submission
+   * @throws InterruptedException
+   */
+  public MSubmission startSubmission(long jid, SubmissionCallback callback, long pollTime) throws InterruptedException {
+    if(pollTime <= 0) {
+      throw new SqoopException(ClientError.CLIENT_0008);
+    }
+    boolean first = true;
+    MSubmission submission = requests.createSubmission(jid).getSubmission();
+    while(submission.getStatus().isRunning()) {
+      if(first) {
+        submissionCallback(callback, submission, SubmissionStatus.SUBMITTED);
+        first = false;
+      } else {
+        submissionCallback(callback, submission, SubmissionStatus.UPDATED);
+      }
+      Thread.sleep(pollTime);
+      submission = getSubmissionStatus(jid);
+    }
+    submissionCallback(callback, submission, SubmissionStatus.FINISHED);
+    return submission;
+  }
+
+  /**
+   * Invokes the callback's methods with MSubmission object
+   * based on SubmissionStatus. If callback is null, no operation performed.
+   * @param callback
+   * @param submission
+   * @param status
+   */
+  private void submissionCallback(SubmissionCallback callback,
+      MSubmission submission, SubmissionStatus status) {
+    if(callback == null) {
+      return;
+    }
+    switch (status) {
+    case SUBMITTED:
+      callback.submitted(submission);
+      break;
+    case UPDATED:
+      callback.updated(submission);
+      break;
+    case FINISHED:
+      callback.finished(submission);
+    }
   }
 
   /**

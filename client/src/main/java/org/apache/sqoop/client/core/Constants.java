@@ -64,6 +64,8 @@ public class Constants {
   public static final char OPT_SERVER_CHAR = 's';
   public static final char OPT_CLIENT_CHAR = 'c';
   public static final char OPT_PROTOCOL_CHAR = 'p';
+  public static final char OPT_SYNCHRONOUS_CHAR = 's';
+  public static final char OPT_POLL_TIMEOUT_CHAR = 'p';
 
   // Resource keys for various commands, command options,
   // functions and descriptions

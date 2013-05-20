@@ -45,6 +45,8 @@ public enum ClientError implements ErrorCode {
   /** Command not compatible with batch mode */
   CLIENT_0007("Command not compatible with batch mode"),
 
+  /** Polling time of submission status cannot be negative */
+  CLIENT_0008("Polling time of submission status cannot be negative"),
   ;
 
   private final String message;

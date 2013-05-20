@@ -20,6 +20,7 @@ package org.apache.sqoop.client.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.SubmissionDisplayer;
 import org.apache.sqoop.model.MSubmission;
@@ -43,12 +44,12 @@ public class SubmissionStartFunction extends SqoopFunction {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_SYNCHRONOUS))
       .withLongOpt(Constants.OPT_SYNCHRONOUS)
-      .create());
+      .create(Constants.OPT_SYNCHRONOUS_CHAR));
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_POLL_TIMEOUT))
       .withLongOpt(Constants.OPT_POLL_TIMEOUT)
       .hasArg()
-      .create());
+      .create(Constants.OPT_POLL_TIMEOUT_CHAR));
   }
 
   public Object executeFunction(CommandLine line) {
@@ -57,26 +58,36 @@ public class SubmissionStartFunction extends SqoopFunction {
       return null;
     }
 
-    MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
-    SubmissionDisplayer.display(submission);
-
     // Poll until finished
     if (line.hasOption(Constants.OPT_SYNCHRONOUS)) {
       long pollTimeout = POLL_TIMEOUT;
-      if (line.hasOption(Constants.OPT_POLL_TIMEOUT)) {
-        pollTimeout = Long.getLong(line.getOptionValue(Constants.OPT_POLL_TIMEOUT)).longValue();
-      }
-      while (submission.getStatus().isRunning()) {
-        submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
-        SubmissionDisplayer.display(submission);
-
-        // Wait some time
-        try {
-          Thread.sleep(pollTimeout);
-        } catch (InterruptedException e) {
-          LOG.error("Could not sleep");
+      SubmissionCallback callback = new SubmissionCallback() {
+        @Override
+        public void submitted(MSubmission submission) {
+          SubmissionDisplayer.display(submission);
         }
+
+        @Override
+        public void updated(MSubmission submission) {
+          SubmissionDisplayer.display(submission);
+        }
+
+        @Override
+        public void finished(MSubmission submission) {
+          SubmissionDisplayer.display(submission);
+        }
+      };
+      if (line.hasOption(Constants.OPT_POLL_TIMEOUT)) {
+        pollTimeout = getLong(line,Constants.OPT_POLL_TIMEOUT);
       }
+      try {
+        client.startSubmission(getLong(line, Constants.OPT_JID), callback, pollTimeout);
+      } catch (InterruptedException e) {
+        LOG.error("Could not sleep");
+      }
+    } else {
+      MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
+      SubmissionDisplayer.display(submission);
     }
     return null;
   }
