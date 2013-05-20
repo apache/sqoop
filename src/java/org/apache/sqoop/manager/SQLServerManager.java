@@ -143,6 +143,13 @@ public class SQLServerManager
   }
 
   @Override
+  protected String getListColumnsQuery(String tableName) {
+    return
+      super.getListColumnsQuery(tableName)
+    + "  ORDER BY ORDINAL_POSITION";
+  }
+  
+  @Override
   public String escapeColName(String colName) {
     return escapeObjectName(colName);
   }
