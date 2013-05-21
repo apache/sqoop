@@ -56,6 +56,9 @@ public class SQLServerManager
   private static final String DRIVER_CLASS =
       "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
+  // Define SQL Server specific types that are not covered by parent classes
+  private static final int DATETIMEOFFSET = -155;
+
   /**
    * Schema name that we will use.
    */
@@ -77,6 +80,28 @@ public class SQLServerManager
     }
   }
 
+  /**
+   * Resolve MS SQL Server specific database type to the Java type that should
+   * contain it.
+   * @param sqlType     sql type
+   * @return the name of a Java type to hold the sql datatype, or null if none.
+   */
+  @Override
+  public String toJavaType(int sqlType) {
+    String javaType;
+
+    if (sqlType == DATETIMEOFFSET) {
+      // We cannot use the TimeStamp class to represent MS SQL Server datetimeoffset
+      // data type since it does not preserve time zone offset values, so use String
+      // instead which would work for import/export
+      javaType = "String";
+    }else {
+      //If none of the above data types match, it returns parent method's
+      //status, which can be null.
+      javaType = super.toJavaType(sqlType);
+    }
+    return javaType;
+  }
 
   /**
    * {@inheritDoc}
