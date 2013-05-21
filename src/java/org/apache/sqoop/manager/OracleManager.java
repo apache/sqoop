@@ -21,6 +21,7 @@ package org.apache.sqoop.manager;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,8 +39,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.util.LoggingUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
@@ -50,7 +53,6 @@ import com.cloudera.sqoop.mapreduce.OracleUpsertOutputFormat;
 import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
-import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Manages connections to Oracle databases.
@@ -705,6 +707,50 @@ public class OracleManager
     }
 
     return tables.toArray(new String[tables.size()]);
+  }
+
+  @Override
+  public String[] getColumnNamesForProcedure(String procedureName) {
+    List<String> ret = new ArrayList<String>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+        procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+          != DatabaseMetaData.procedureColumnReturn) {
+            int index = results.getInt("ORDINAL_POSITION");
+            if (index < 0) {
+              continue; // actually the return type
+            }
+            for (int i = ret.size(); i < index; ++i) {
+              ret.add(null);
+            }
+            String name = results.getString("COLUMN_NAME");
+            if (index == ret.size()) {
+              ret.add(name);
+            } else {
+              ret.set(index, name);
+            }
+          }
+        }
+        String[] result = ret.toArray(new String[ret.size()]);
+        LOG.debug("getColumnsNamesForProcedure returns "
+          + StringUtils.join(ret, ","));
+        return result;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException e) {
+      LoggingUtils.logAll(LOG, "Error reading procedure metadata: ", e);
+      throw new RuntimeException("Can't fetch column names for procedure.", e);
+    }
   }
 
   @Override
