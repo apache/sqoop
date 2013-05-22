@@ -163,8 +163,8 @@ public class TestCompression extends ImportJobTestCase {
 
     if (codec == null) {
       codec = new GzipCodec();
-      ReflectionUtils.setConf(codec, getConf());
     }
+    ReflectionUtils.setConf(codec, getConf());
     Path p = new Path(getDataFilePath().toString()
         + codec.getDefaultExtension());
     InputStream is = codec.createInputStream(fs.open(p));
