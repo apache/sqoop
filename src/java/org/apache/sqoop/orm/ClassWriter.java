@@ -966,6 +966,15 @@ public class ClassWriter {
       sb.append("      this." + colName + " = ClobRef.parse(__cur_str);\n");
     } else if (javaType.equals(BlobRef.class.getName())) {
       sb.append("      this." + colName + " = BlobRef.parse(__cur_str);\n");
+    } else if (javaType.equals(BytesWritable.class.getName())) {
+      // Get the unsigned byte[] from the hex string representation
+      // We cannot use Byte.parse() which always assumes a signed decimal byte
+      sb.append("      String[] strByteVal = __cur_str.trim().split(\" \");\n");
+      sb.append("      byte [] byteVal = new byte[strByteVal.length];\n");
+      sb.append("      for (int i = 0; i < byteVal.length; ++i) {\n");
+      sb.append("          byteVal[i] = (byte)Integer.parseInt(strByteVal[i], 16);\n"); 
+      sb.append("      }\n");
+      sb.append("      this." + colName + " = new BytesWritable(byteVal);\n");
     } else {
       LOG.error("No parser available for Java type " + javaType);
     }

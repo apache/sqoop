@@ -55,6 +55,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
   static final String DATABASE_PASSWORD = "PASSWORD";
   static final String SCHEMA_DBO = "dbo";
   static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";
+  static final String DBO_BINARY_TABLE_NAME = "BINARYTYPE_MSSQL";
   static final String SCHEMA_SCH = "sch";
   static final String SCH_TABLE_NAME = "PRIVATE_TABLE";
   static final String CONNECT_STRING = HOST_URL
@@ -155,6 +156,75 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
           + "salary FLOAT, "
           + "dept VARCHAR(32), "
           + "PRIMARY KEY (id))");
+      conn.commit();
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: ", sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when running test setUp(): " + sqlE);
+    } finally {
+      try {
+        if (null != stmt) {
+          stmt.close();
+        }
+      } catch (Exception ex) {
+        LOG.warn("Exception while closing connection/stmt", ex);
+      }
+    }
+  }
+
+  public void createSQLServerBinaryTypeTable(String schema, String table) {
+    String fulltableName = manager.escapeObjectName(schema)
+      + "." + manager.escapeObjectName(table);
+
+    Statement stmt = null;
+
+    // Create schema if needed
+    try {
+    conn = manager.getConnection();
+    stmt = conn.createStatement();
+    stmt.execute("CREATE SCHEMA " + schema);
+    conn.commit();
+    } catch (SQLException sqlE) {
+      LOG.info("Can't create schema: " + sqlE.getMessage());
+    } finally {
+      try {
+        if (null != stmt) {
+          stmt.close();
+        }
+      } catch (Exception ex) {
+        LOG.warn("Exception while closing stmt", ex);
+      }
+    }
+
+    // Drop the existing table, if there is one.
+    try {
+      conn = manager.getConnection();
+      stmt = conn.createStatement();
+      stmt.execute("DROP TABLE " + fulltableName);
+      conn.commit();
+    } catch (SQLException sqlE) {
+      LOG.info("Table was not dropped: " + sqlE.getMessage());
+    } finally {
+      try {
+        if (null != stmt) {
+          stmt.close();
+        }
+      } catch (Exception ex) {
+        LOG.warn("Exception while closing stmt", ex);
+      }
+    }
+
+    // Create and populate table
+    try {
+      conn = manager.getConnection();
+      conn.setAutoCommit(false);
+      stmt = conn.createStatement();
+
+      // create the database table and populate it with data.
+      stmt.executeUpdate("CREATE TABLE " + fulltableName + " ("
+          + "id INT PRIMARY KEY, "
+          + "b1 BINARY(10), "
+          + "b2 VARBINARY(10))");
       conn.commit();
     } catch (SQLException sqlE) {
       LOG.error("Encountered SQL Exception: ", sqlE);
@@ -281,6 +351,45 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     };
     runExport(getArgv(DBO_TABLE_NAME, extra));
     assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
+  }
+
+  public void testSQLServerBinaryType() throws IOException, SQLException {
+    createSQLServerBinaryTypeTable(SCHEMA_DBO, DBO_BINARY_TABLE_NAME);
+    createTestFile("inputFile", new String[] {
+      "1,73 65 63 72 65 74 00 00 00 00,73 65 63 72 65 74"
+    });
+    String[] expectedContent = {"73656372657400000000", "736563726574"};
+    runExport(getArgv(DBO_BINARY_TABLE_NAME));
+    assertRowCount(1, escapeObjectName(DBO_BINARY_TABLE_NAME), conn);
+    checkSQLBinaryTableContent(expectedContent, escapeObjectName(DBO_BINARY_TABLE_NAME), conn);
+  }
+
+  public static void checkSQLBinaryTableContent(String[] expected, String tableName, Connection connection){
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT TOP 1 [b1], [b2] FROM " + tableName);
+      rs.next();
+      assertEquals(expected[0], rs.getString("b1"));
+      assertEquals(expected[1], rs.getString("b2"));
+    } catch (SQLException e) {
+        LOG.error("Can't verify table content", e);
+        fail();
+    } finally {
+      try {
+        connection.commit();
+
+        if (stmt != null) {
+          stmt.close();
+        }
+        if (rs != null) {
+          rs.close();
+        }
+      } catch (SQLException ex) {
+        LOG.info("Ignored exception in finally block.");
+      }
+    }
   }
 
   public static void assertRowCount(long expected,
