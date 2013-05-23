@@ -1050,6 +1050,18 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
               + " option." + HELP_STR);
     }
 
+    if(options.doHiveImport()
+        && options.getFileLayout() == SqoopOptions.FileLayout.AvroDataFile) {
+      throw new InvalidOptionsException("Hive import is not compatible with "
+        + "importing into AVRO format.");
+    }
+
+    if(options.doHiveImport()
+        && options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
+      throw new InvalidOptionsException("Hive import is not compatible with "
+        + "importing into SequenceFile format.");
+    }
+
     // Many users are reporting issues when they are trying to import data
     // directly into hive warehouse. This should prevent users from doing
     // so in case of a default location.
