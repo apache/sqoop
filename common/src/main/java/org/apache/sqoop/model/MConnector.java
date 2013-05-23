@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -93,5 +94,22 @@ public final class MConnector extends MFramework {
     result = 31 * result + className.hashCode();
 
     return result;
+  }
+
+  @Override
+  public MConnector clone(boolean cloneWithValue) {
+    //Connector never have any values filled
+    cloneWithValue = false;
+    List<MJobForms> copyJobForms = null;
+    if(this.getAllJobsForms()!=null) {
+      copyJobForms = new ArrayList<MJobForms>();
+      for(MJobForms entry: this.getAllJobsForms().values()) {
+        copyJobForms.add(entry.clone(cloneWithValue));
+      }
+    }
+    MConnector copy = new MConnector(this.getUniqueName(), this.getClassName(), this.getVersion(),
+        this.getConnectionForms().clone(cloneWithValue), copyJobForms);
+    copy.setPersistenceId(this.getPersistenceId());
+    return copy;
   }
 }

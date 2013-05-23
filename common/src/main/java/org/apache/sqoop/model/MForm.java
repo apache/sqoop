@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import org.apache.sqoop.common.SqoopException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ import java.util.List;
  * input gathering process to be broken down into multiple steps that can be
  * then paged through by the user interface.
  */
-public final class MForm extends MValidatedElement {
+public final class MForm extends MValidatedElement implements MClonable {
 
   private final List<MInput<?>> inputs;
 
@@ -98,5 +99,15 @@ public final class MForm extends MValidatedElement {
     }
 
     return result;
+  }
+
+  @Override
+  public MForm clone(boolean cloneWithValue) {
+    List<MInput<?>> copyInputs = new ArrayList<MInput<?>>();
+    for(MInput<?> itr : this.getInputs()) {
+      copyInputs.add((MInput<?>)itr.clone(cloneWithValue));
+    }
+    MForm copyForm = new MForm(this.getName(), copyInputs);
+    return copyForm;
   }
 }

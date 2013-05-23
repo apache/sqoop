@@ -64,4 +64,10 @@ public class MJobForms extends MFormList {
     result = 31 * result + type.hashCode();
     return result;
   }
+
+  @Override
+  public MJobForms clone(boolean cloneWithValue) {
+    MJobForms copy = new MJobForms(this.type, super.clone(cloneWithValue).getForms());
+    return copy;
+  }
 }

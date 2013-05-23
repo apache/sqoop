@@ -124,4 +124,15 @@ public class MEnumInput extends MInput<String> {
   public void setEmpty() {
     setValue((String)null);
   }
+
+  @Override
+  public MEnumInput clone(boolean cloneWithValue) {
+    MEnumInput copy = new MEnumInput(this.getName(),
+        this.isSensitive(), this.getValues());
+    copy.setPersistenceId(this.getPersistenceId());
+    if(cloneWithValue) {
+      copy.setValue(this.getValue());
+    }
+    return copy;
+  }
 }

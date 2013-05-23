@@ -79,4 +79,14 @@ public class MIntegerInput extends MInput<Integer> {
   public void setEmpty() {
     setValue(null);
   }
+
+  @Override
+  public MIntegerInput clone(boolean cloneWithValue) {
+    MIntegerInput copy = new MIntegerInput(this.getName(), this.isSensitive());
+    copy.setPersistenceId(this.getPersistenceId());
+    if(cloneWithValue) {
+      copy.setValue(this.getValue());
+    }
+    return copy;
+  }
 }

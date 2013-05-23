@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import org.apache.sqoop.common.SqoopException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Map;
  * Metadata describing framework options for connection and job for each
  * supported job type.
  */
-public class MFramework extends MPersistableEntity {
+public class MFramework extends MPersistableEntity implements MClonable {
 
   private final MConnectionForms connectionForms;
   private final Map<MJob.Type, MJobForms> jobs;
@@ -94,6 +95,22 @@ public class MFramework extends MPersistableEntity {
 
   public MJobForms getJobForms(MJob.Type type) {
     return jobs.get(type);
+  }
+
+  @Override
+  public MFramework clone(boolean cloneWithValue) {
+    //Framework never have any values filled
+    cloneWithValue = false;
+    List<MJobForms> copyJobForms = null;
+    if(this.getAllJobsForms()!=null) {
+      copyJobForms = new ArrayList<MJobForms>();
+      for(MJobForms entry: this.getAllJobsForms().values()) {
+        copyJobForms.add(entry.clone(cloneWithValue));
+      }
+    }
+    MFramework copy = new MFramework(this.getConnectionForms().clone(cloneWithValue), copyJobForms);
+    copy.setPersistenceId(this.getPersistenceId());
+    return copy;
   }
 }
 

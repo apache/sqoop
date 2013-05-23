@@ -47,11 +47,37 @@ public class TestMConnection {
     assertEquals(connector2().getForms().get(0), connection.getFrameworkForm("form"));
   }
 
+  @Test
+  public void testClone() {
+    MConnectionForms connectorPart = connector1();
+    MConnectionForms frameworkPart = connector2();
+    MConnection connection = new MConnection(123l, connectorPart, frameworkPart);
+    connection.setPersistenceId(12l);
+    MForm originalForm = connection.getConnectorPart().getForms().get(0);
+    MConnection clone1 = connection.clone(true);
+    assertEquals(123l, clone1.getConnectorId());
+    MForm clonedForm1 = clone1.getConnectorPart().getForms().get(0);
+    assertEquals(clonedForm1.getInputs().get(0).getValue(), originalForm.getInputs().get(0).getValue());
+    assertEquals(clonedForm1.getInputs().get(1).getValue(), originalForm.getInputs().get(1).getValue());
+    assertNotNull(clonedForm1.getInputs().get(0).getValue());
+    assertNotNull(clonedForm1.getInputs().get(1).getValue());
+    assertEquals(connection, clone1);
+    MConnection cloneCopy = clone1.clone(true);
+    assertEquals(clone1, cloneCopy);
+    //Clone without values
+    MConnection clone2 = connection.clone(false);
+    assertNotSame(connection, clone2);
+  }
+
   private MConnectionForms connector1() {
     List<MForm> forms = new ArrayList<MForm>();
     MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+    input.setValue(100);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
+    strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
+    list.add(strInput);
     MForm form = new MForm("FORMNAME", list);
     forms.add(form);
     return new MConnectionForms(forms);

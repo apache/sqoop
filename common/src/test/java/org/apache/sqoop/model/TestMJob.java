@@ -45,4 +45,52 @@ public class TestMJob {
     assertEquals(jobform1, job.getConnectorPart());
     assertEquals(jobform2, job.getFrameworkPart());
   }
+
+  @Test
+  public void testClone() {
+    List<MForm> forms = new ArrayList<MForm>();
+    forms.add(getInputValues());
+    MJobForms jobform1 = new MJobForms(MJob.Type.EXPORT, forms);
+    List<MForm> forms2 = new ArrayList<MForm>();
+    forms2.add(getInputValues());
+    MJobForms jobform2 = new MJobForms(MJob.Type.EXPORT, forms2);
+    MJob job = new MJob(123l, 456l, MJob.Type.EXPORT, jobform1, jobform2);
+    job.setPersistenceId(12l);
+
+    MForm originalForm = job.getConnectorPart().getForms().get(0);
+    //Clone job
+    MJob cloneJob = job.clone(true);
+    assertEquals(12l, cloneJob.getPersistenceId());
+    assertEquals(123l, cloneJob.getConnectorId());
+    assertEquals(456l, cloneJob.getConnectionId());
+    assertEquals(MJob.Type.EXPORT, cloneJob.getType());
+    MForm clonedForm = cloneJob.getConnectorPart().getForms().get(0);
+    assertEquals(clonedForm.getInputs().get(0).getValue(), originalForm.getInputs().get(0).getValue());
+    assertEquals(clonedForm.getInputs().get(1).getValue(), originalForm.getInputs().get(1).getValue());
+    assertNotNull(clonedForm.getInputs().get(0).getValue());
+    assertNotNull(clonedForm.getInputs().get(1).getValue());
+    assertEquals(job, cloneJob);
+
+    //Clone job without value
+    MJob cloneJob1 = job.clone(false);
+    assertEquals(123l, cloneJob1.getConnectorId());
+    assertEquals(456l, cloneJob1.getConnectionId());
+    assertEquals(MJob.Type.EXPORT, cloneJob1.getType());
+    clonedForm = cloneJob1.getConnectorPart().getForms().get(0);
+    assertNull(clonedForm.getInputs().get(0).getValue());
+    assertNull(clonedForm.getInputs().get(1).getValue());
+    assertNotSame(job, cloneJob1);
+  }
+
+  private MForm getInputValues() {
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+    input.setValue(100);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
+    strInput.setValue("TEST-VALUE");
+    List<MInput<?>> list = new ArrayList<MInput<?>>();
+    list.add(input);
+    list.add(strInput);
+    MForm form = new MForm("FORMNAME", list);
+    return form;
+  }
 }

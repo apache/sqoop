@@ -104,4 +104,15 @@ public final class MStringInput extends MInput<String> {
   public void setEmpty() {
     setValue(null);
   }
+
+  @Override
+  public MStringInput clone(boolean cloneWithValue) {
+    MStringInput copy = new MStringInput(this.getName(),
+        this.isSensitive(), this.getMaxLength());
+    copy.setPersistenceId(this.getPersistenceId());
+    if(cloneWithValue) {
+      copy.setValue(this.getValue());
+    }
+    return copy;
+  }
 }

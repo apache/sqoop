@@ -23,7 +23,7 @@ package org.apache.sqoop.model;
  * @param <T> the value type associated with this parameter
  * @param boolean whether or not the field contains sensitive information
  */
-public abstract class MInput<T> extends MValidatedElement {
+public abstract class MInput<T> extends MValidatedElement implements MClonable {
   private final boolean sensitive;
 
   private T value;

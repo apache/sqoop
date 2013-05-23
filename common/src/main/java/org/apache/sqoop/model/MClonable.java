@@ -17,38 +17,12 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.List;
-
-/**
- * Metadata describing all required information to build up an connection
- * object for one part. Both connector and framework need to supply this object
- * to build up entire connection.
- */
-public class MConnectionForms extends MFormList {
-
-  public MConnectionForms(List<MForm> forms) {
-    super(forms);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("Connection: ");
-    sb.append(super.toString());
-    return sb.toString();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    return super.equals(other);
-  }
-
-  @Override
-  public MConnectionForms clone(boolean cloneWithValue) {
-    MConnectionForms copy = new MConnectionForms(super.clone(cloneWithValue).getForms());
-    return copy;
-  }
+public interface MClonable {
+  /**
+   * Clone object
+   * Invoke with value true for cloning value
+   * @param cloneWithValue
+   * @return
+   */
+  public Object clone(boolean cloneWithValue);
 }

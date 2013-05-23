@@ -23,7 +23,7 @@ import org.apache.sqoop.common.SqoopException;
  * Model describing entire job object including both connector and
  * framework part.
  */
-public class MJob extends MAccountableEntity {
+public class MJob extends MAccountableEntity implements MClonable {
 
   public static enum Type {
     IMPORT,
@@ -129,5 +129,36 @@ public class MJob extends MAccountableEntity {
 
   public Type getType() {
     return type;
+  }
+
+  @Override
+  public MJob clone(boolean cloneWithValue) {
+    MJob copy = new MJob(this.connectorId, this.connectionId, this.type,
+        this.getConnectorPart().clone(cloneWithValue),
+        this.getFrameworkPart().clone(cloneWithValue));
+    if(cloneWithValue) {
+      copy.setPersistenceId(this.getPersistenceId());
+      copy.setName(this.getName());
+    }
+    return copy;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if(object == this) {
+      return true;
+    }
+
+    if(!(object instanceof MJob)) {
+      return false;
+    }
+
+    MJob job = (MJob)object;
+    return (job.connectorId == this.connectorId)
+        && (job.connectionId == this.connectionId)
+        && (job.getPersistenceId() == this.getPersistenceId())
+        && (job.type.equals(this.type))
+        && (job.connectorPart.equals(this.connectorPart))
+        && (job.frameworkPart.equals(this.frameworkPart));
   }
 }

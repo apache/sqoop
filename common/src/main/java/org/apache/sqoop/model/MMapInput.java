@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.sqoop.utils.UrlSafeUtils;
 
@@ -102,5 +103,20 @@ public final class MMapInput extends MInput<Map<String, String>> {
   @Override
   public void setEmpty() {
     setValue(null);
+  }
+
+  @Override
+  public MMapInput clone(boolean cloneWithValue) {
+    MMapInput copy = new MMapInput(this.getName(), this.isSensitive());
+    copy.setPersistenceId(this.getPersistenceId());
+    if(cloneWithValue && this.getValue() != null) {
+      Map<String, String> copyMap = new HashMap<String, String>();
+      Set<Map.Entry<String, String>> entry = this.getValue().entrySet();
+      for(Map.Entry<String, String> itr : entry) {
+        copyMap.put(itr.getKey(), itr.getValue());
+      }
+      copy.setValue(copyMap);
+    }
+    return copy;
   }
 }

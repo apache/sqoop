@@ -19,12 +19,13 @@ package org.apache.sqoop.model;
 
 import org.apache.sqoop.common.SqoopException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Arbitrary list of forms.
  */
-public class MFormList {
+public class MFormList implements MClonable {
 
   private final List<MForm> forms;
 
@@ -100,5 +101,20 @@ public class MFormList {
       sb.append(form.toString());
     }
     return sb.toString();
+  }
+
+  @Override
+  public MFormList clone(boolean cloneWithValue) {
+    List<MForm> copyForms = null;
+    if(this.getForms() != null) {
+      copyForms = new ArrayList<MForm>();
+      for(MForm itr : this.getForms()) {
+        MForm newForm = itr.clone(cloneWithValue);
+        newForm.setPersistenceId(itr.getPersistenceId());
+        copyForms.add(newForm);
+      }
+    }
+    MFormList copyFormList = new MFormList(copyForms);
+    return copyFormList;
   }
 }

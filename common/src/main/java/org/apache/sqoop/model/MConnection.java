@@ -21,7 +21,7 @@ package org.apache.sqoop.model;
  * Model describing entire connection object including both connector and
  * framework part.
  */
-public class MConnection extends MAccountableEntity {
+public class MConnection extends MAccountableEntity implements MClonable {
   private long connectorId;
   private String name;
 
@@ -83,5 +83,34 @@ public class MConnection extends MAccountableEntity {
 
   public MForm getFrameworkForm(String formName) {
     return frameworkPart.getForm(formName);
+  }
+
+  @Override
+  public MConnection clone(boolean cloneWithValue) {
+    MConnection copy = new MConnection(this.getConnectorId(),
+        this.getConnectorPart().clone(cloneWithValue),
+        this.getFrameworkPart().clone(cloneWithValue));
+    if(cloneWithValue) {
+      copy.setPersistenceId(this.getPersistenceId());
+      copy.setName(this.getName());
+    }
+    return copy;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if(object == this) {
+      return true;
+    }
+
+    if(!(object instanceof MConnection)) {
+      return false;
+    }
+
+    MConnection mc = (MConnection)object;
+    return (mc.connectorId == this.connectorId)
+        && (mc.getPersistenceId() == this.getPersistenceId())
+        && (mc.connectorPart.equals(this.connectorPart))
+        && (mc.frameworkPart.equals(this.frameworkPart));
   }
 }
