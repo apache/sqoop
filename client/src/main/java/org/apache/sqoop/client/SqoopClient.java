@@ -135,11 +135,11 @@ public class SqoopClient {
    */
   public MConnector getConnector(long cid) {
     if(connectors.containsKey(cid)) {
-      return connectors.get(cid);
+      return connectors.get(cid).clone(false);
     }
 
     retrieveConnector(cid);
-    return connectors.get(cid);
+    return connectors.get(cid).clone(false);
   }
 
   /**
@@ -195,11 +195,11 @@ public class SqoopClient {
    */
   public MFramework getFramework() {
     if(framework != null) {
-      return framework;
+      return framework.clone(false);
     }
 
     retrieveFramework();
-    return framework;
+    return framework.clone(false);
 
   }
 
