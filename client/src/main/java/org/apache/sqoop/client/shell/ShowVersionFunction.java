@@ -82,6 +82,11 @@ public class ShowVersionFunction extends SqoopFunction {
 
   private void showVersion(boolean server, boolean client, boolean protocol) {
 
+    // If no option has been given, print out client version as default
+    if (!client && !server && !protocol) {
+      client = true;
+    }
+
     // Print out client string if needed
     if (client) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,
