@@ -22,11 +22,12 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.SubmissionDisplayer;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.submission.SubmissionStatus;
 
 import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
- *
+ * Class used to print submission status function
  */
 public class SubmissionStatusFunction extends  SqoopFunction {
   @SuppressWarnings("static-access")
@@ -45,7 +46,13 @@ public class SubmissionStatusFunction extends  SqoopFunction {
     }
 
     MSubmission submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
-    SubmissionDisplayer.display(submission);
+    if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayFooter(submission);
+    } else {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayProgress(submission);
+    }
     return null;
   }
 }

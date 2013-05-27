@@ -26,7 +26,7 @@ import org.apache.sqoop.model.MSubmission;
 import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
- *
+ * Class used to perform the submission stop function
  */
 public class SubmissionStopFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
@@ -45,7 +45,12 @@ public class SubmissionStopFunction extends SqoopFunction {
     }
 
     MSubmission submission = client.stopSubmission(getLong(line, Constants.OPT_JID));
-    SubmissionDisplayer.display(submission);
+    if(submission.getStatus().isFailure()) {
+      SubmissionDisplayer.displayFooter(submission);
+    } else {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayProgress(submission);
+    }
     return null;
   }
 }

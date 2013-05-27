@@ -367,6 +367,23 @@ public class Constants {
   public static final String RES_FORMDISPLAYER_FORM_WARNING =
       "formdisplayer.warning_message";
 
+  public static final String RES_SUBMISSION_SUBMISSION_DETAIL =
+      "submission.submission_detail";
+  public static final String RES_SUBMISSION_JOB_ID =
+      "submission.job_id";
+  public static final String RES_SUBMISSION_CREATION_DATE =
+      "submission.creation_date";
+  public static final String RES_SUBMISSION_EXTERNAL_ID =
+      "submission.external_id";
+  public static final String RES_SUBMISSION_PROGRESS_NOT_AVAIL =
+      "submission.progress_not_available";
+  public static final String RES_SUBMISSION_COUNTERS =
+      "submission.counters";
+  public static final String RES_SUBMISSION_EXECUTED_SUCCESS =
+      "submission.executed_success";
+  public static final String RES_SUBMISSION_SERVER_URL =
+      "submission.server_url";
+
   private Constants() {
     // Instantiation is prohibited
   }

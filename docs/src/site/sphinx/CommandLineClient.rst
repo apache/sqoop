@@ -440,15 +440,21 @@ Submission Start Function
 
 Start job (submit new submission). Starting already running job is considered as invalid operation.
 
-+-----------------------+---------------------------+
-| Argument              |  Description              |
-+=======================+===========================+
-| ``-j``, ``--jid <x>`` | Start job with id ``<x>`` |
-+-----------------------+---------------------------+
++----------------------------+----------------------------+
+| Argument                   |  Description               |
++============================+============================+
+| ``-j``, ``--jid <x>``      | Start job with id ``<x>``  |
++----------------------------+----------------------------+
+| ``-s``, ``--synchronous``  | Synchoronous job execution |
++----------------------------+----------------------------+
+| ``-p``, ``--poll-timeout`` | Server poll timeout        |
++----------------------------+----------------------------+
 
 Example: ::
 
   submission start --jid 1
+  submission start --jid 1 --synchronous
+  submission start --jid 1 --synchronous --poll-timeout 10000
 
 
 Submission Stop Function

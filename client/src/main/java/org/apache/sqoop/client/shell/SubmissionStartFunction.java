@@ -28,7 +28,7 @@ import org.apache.sqoop.model.MSubmission;
 import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
- *
+ * Class used to perform the submission start function
  */
 public class SubmissionStartFunction extends SqoopFunction {
   public static final Logger LOG = Logger.getLogger(SubmissionStartFunction.class);
@@ -64,17 +64,18 @@ public class SubmissionStartFunction extends SqoopFunction {
       SubmissionCallback callback = new SubmissionCallback() {
         @Override
         public void submitted(MSubmission submission) {
-          SubmissionDisplayer.display(submission);
+          SubmissionDisplayer.displayHeader(submission);
+          SubmissionDisplayer.displayProgress(submission);
         }
 
         @Override
         public void updated(MSubmission submission) {
-          SubmissionDisplayer.display(submission);
+          SubmissionDisplayer.displayProgress(submission);
         }
 
         @Override
         public void finished(MSubmission submission) {
-          SubmissionDisplayer.display(submission);
+          SubmissionDisplayer.displayFooter(submission);
         }
       };
       if (line.hasOption(Constants.OPT_POLL_TIMEOUT)) {
@@ -87,7 +88,12 @@ public class SubmissionStartFunction extends SqoopFunction {
       }
     } else {
       MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
-      SubmissionDisplayer.display(submission);
+      if(submission.getStatus().isFailure()) {
+        SubmissionDisplayer.displayFooter(submission);
+      } else {
+        SubmissionDisplayer.displayHeader(submission);
+        SubmissionDisplayer.displayProgress(submission);
+      }
     }
     return null;
   }

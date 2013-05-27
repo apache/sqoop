@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.utils;
 
+import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -28,31 +29,31 @@ import java.text.SimpleDateFormat;
 import static org.apache.sqoop.client.shell.ShellEnvironment.*;
 
 /**
- *
+ * Class used for displaying or printing the submission details
  */
 public final class SubmissionDisplayer {
 
-  public static void display(MSubmission submission) {
+  private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    println("@|bold Submission details|@");
+  /**
+   * On job submission, displays the initial job info
+   * @param submission
+   */
+  public static void displayHeader(MSubmission submission) {
+    println("@|bold "+ resourceString(Constants.RES_SUBMISSION_SUBMISSION_DETAIL) +"|@");
 
-    print("Job id: ");
+    print(resourceString(Constants.RES_SUBMISSION_JOB_ID)+": ");
     println(submission.getJobId());
 
-    print("Status: ");
-    printColoredStatus(submission.getStatus());
-    println();
+    print(resourceString(Constants.RES_SUBMISSION_SERVER_URL)+": ");
+    println(getServerUrl());
 
-    print("Creation date: ");
+    print(resourceString(Constants.RES_SUBMISSION_CREATION_DATE)+": ");
     println(dateFormat.format(submission.getCreationDate()));
-
-    print("Last update date: ");
-    println(dateFormat.format(submission.getLastUpdateDate()));
 
     String externalId = submission.getExternalId();
     if(externalId != null) {
-      print("External Id: ");
+      print(resourceString(Constants.RES_SUBMISSION_EXTERNAL_ID)+": ");
       println(externalId);
 
       String externalLink = submission.getExternalLink();
@@ -60,51 +61,68 @@ public final class SubmissionDisplayer {
         println("\t" + externalLink);
       }
     }
-
-    if(submission.getStatus().isRunning()) {
-      double progress = submission.getProgress();
-      print("Progress: ");
-      if(progress == -1) {
-        println("Progress is not available");
-      } else {
-        println(String.format("%.2f %%", progress * 100));
-      }
-    }
-
-    Counters counters = submission.getCounters();
-    if(counters != null) {
-      println("Counters:");
-      for(CounterGroup group : counters) {
-        print("\t");
-        println(group.getName());
-        for(Counter counter : group) {
-          print("\t\t");
-          print(counter.getName());
-          print(": ");
-          println(counter.getValue());
-        }
-      }
-    }
-
-    // Exception handling
-    if(submission.getExceptionInfo() != null) {
-      print("@|red Exception: |@");
-      println(submission.getExceptionInfo());
-
-      if(isVerboose() && submission.getExceptionStackTrace() != null) {
-        print("@|bold Stack trace: |@");
-        println(submission.getExceptionStackTrace());
-      }
-    }
   }
 
-  public static void printColoredStatus(SubmissionStatus status) {
-    if(status.isRunning()) {
-      print("@|green " + status.toString() + " |@");
-    } else if(status.isFailure()) {
-      print("@|red " + status.toString() + " |@");
+  /**
+   * Displays the progress of the executing job
+   * @param submission
+   */
+  public static void displayProgress(MSubmission submission) {
+    StringBuilder sb = new StringBuilder();
+    if(submission.getStatus().isRunning()) {
+      sb.append(dateFormat.format(submission.getLastUpdateDate())+": @|green "+submission.getStatus()+ " |@");
+      double progress = submission.getProgress();
+      sb.append(" - ");
+      if(progress == -1) {
+        sb.append(resourceString(Constants.RES_SUBMISSION_PROGRESS_NOT_AVAIL));
+      } else {
+        sb.append(String.format("%.2f %%", progress * 100));
+      }
     } else {
-      print(status.toString());
+      sb.append(dateFormat.format(submission.getLastUpdateDate())+": "+submission.getStatus());
+    }
+
+    println(sb.toString());
+  }
+
+  /**
+   * On successfull or error, method is invoked
+   * @param submission
+   */
+  public static void displayFooter(MSubmission submission) {
+    if (submission.getStatus().toString().equals(SubmissionStatus.SUCCEEDED.toString())) {
+      println(dateFormat.format(submission.getLastUpdateDate())+": @|green "+submission.getStatus()+ " |@");
+      Counters counters = submission.getCounters();
+      if (counters != null) {
+        println(resourceString(Constants.RES_SUBMISSION_COUNTERS) + ":");
+        for (CounterGroup group : counters) {
+          print("\t");
+          println(group.getName());
+          for (Counter counter : group) {
+            print("\t\t");
+            print(counter.getName());
+            print(": ");
+            println(counter.getValue());
+          }
+        }
+        println(resourceString(Constants.RES_SUBMISSION_EXECUTED_SUCCESS));
+      }
+    } else {
+      if (submission.getStatus().isFailure()) {
+        println(dateFormat.format(submission.getLastUpdateDate())+": @|red "+submission.getStatus()+ " |@");
+      } else {
+        println(dateFormat.format(submission.getLastUpdateDate())+": "+submission.getStatus());
+      }
+      // Exception handling
+      if (submission.getExceptionInfo() != null) {
+        print("@|red Exception: |@");
+        println(submission.getExceptionInfo());
+
+        if (isVerboose() && submission.getExceptionStackTrace() != null) {
+          print("@|bold Stack trace: |@");
+          println(submission.getExceptionStackTrace());
+        }
+      }
     }
   }
 }
