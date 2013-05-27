@@ -38,8 +38,8 @@
       <echo message="Use Hadoop ${hadoopversion}" />
     </then>
     <else>
-      <echo message="Use Hadoop 0.23 by default" />
-      <property name="hadoopversion" value="23" />
+      <echo message="Use Hadoop 100 by default" />
+      <property name="hadoopversion" value="100" />
     </else>
   </if>
 
