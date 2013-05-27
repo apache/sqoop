@@ -948,8 +948,9 @@ public abstract class SqlManager
     fromTable = escapeTableName(fromTable);
     toTable = escapeTableName(toTable);
 
-    String updateQuery = "INSERT INTO " + toTable
-          + " ( SELECT * FROM " + fromTable + " )";
+    String updateQuery = String.format("INSERT INTO %s (%s) (SELECT %s FROM %s)",
+            toTable, StringUtils.join(options.getDbOutputColumns(),","),
+            StringUtils.join(options.getDbOutputColumns(),","), fromTable);
 
     String deleteQuery = "DELETE FROM " + fromTable;
     Statement stmt = null;

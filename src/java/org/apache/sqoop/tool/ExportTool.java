@@ -96,6 +96,10 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       manager.configureDbOutputColumns(options);
     }
 
+    if (options.getColumns() != null) {
+        options.setDbOutputColumns(options.getColumns());
+    }
+
     try {
       exportTable(options, options.getTableName());
     } catch (IOException ioe) {
