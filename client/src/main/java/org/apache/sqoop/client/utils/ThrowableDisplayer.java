@@ -46,12 +46,12 @@ public class ThrowableDisplayer {
     if(t instanceof SqoopException
       && ((SqoopException)t).getErrorCode() == ClientError.CLIENT_0006) {
       print("@|red Server has returned exception: |@");
-      printThrowable(t.getCause(), isVerboose());
+      printThrowable(t.getCause(), isVerbose());
     } else if(t.getClass() == MissingPropertyException.class) {
       print("@|red Unknown command: |@");
       println(t.getMessage());
     } else {
-      printThrowable(t, isVerboose());
+      printThrowable(t, isVerbose());
     }
   }
 

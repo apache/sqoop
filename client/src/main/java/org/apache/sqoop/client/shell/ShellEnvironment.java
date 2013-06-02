@@ -102,7 +102,7 @@ public final class ShellEnvironment {
     verbose = newValue;
   }
 
-  public static boolean isVerboose() {
+  public static boolean isVerbose() {
     return verbose;
   }
 

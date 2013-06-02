@@ -71,6 +71,6 @@ public class ShowOptionFunction extends SqoopFunction {
    */
   private void printVerbose() {
     print("Verbose = ");
-    println(String.valueOf(isVerboose()));
+    println(String.valueOf(isVerbose()));
   }
 }

@@ -118,7 +118,7 @@ public final class SubmissionDisplayer {
         print("@|red Exception: |@");
         println(submission.getExceptionInfo());
 
-        if (isVerboose() && submission.getExceptionStackTrace() != null) {
+        if (isVerbose() && submission.getExceptionStackTrace() != null) {
           print("@|bold Stack trace: |@");
           println(submission.getExceptionStackTrace());
         }
