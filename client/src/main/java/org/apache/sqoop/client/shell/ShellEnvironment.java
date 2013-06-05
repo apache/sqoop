@@ -18,9 +18,13 @@
 package org.apache.sqoop.client.shell;
 
 import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
+import org.apache.sqoop.common.SqoopException;
 import org.codehaus.groovy.tools.shell.IO;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -37,9 +41,13 @@ public final class ShellEnvironment {
 
   private static final long DEFAULT_POLL_TIMEOUT = 10000;
 
-  private static String serverHost = getEnv(Constants.ENV_HOST, "localhost");
-  private static String serverPort = getEnv(Constants.ENV_PORT, "12000");
-  private static String serverWebapp = getEnv(Constants.ENV_WEBAPP, "sqoop");
+  private static String DEFAULT_SERVER_HOST = getEnv(Constants.ENV_HOST, "localhost");
+  private static String DEFAULT_SERVER_PORT = getEnv(Constants.ENV_PORT, "12000");
+  private static String DEFAULT_SERVER_WEBAPP = getEnv(Constants.ENV_WEBAPP, "sqoop");
+
+  private static String serverHost = DEFAULT_SERVER_HOST;
+  private static String serverPort = DEFAULT_SERVER_PORT;
+  private static String serverWebapp = DEFAULT_SERVER_WEBAPP;
 
   private static boolean verbose = false;
   private static boolean interactive = false;
@@ -91,6 +99,38 @@ public final class ShellEnvironment {
 
   public static String getServerWebapp() {
     return serverWebapp;
+  }
+
+  public static void setServerUrl(String ustr){
+    try {
+      URL url = new URL(ustr);
+
+      String host = url.getHost();
+      if (host.length() > 0) {
+        serverHost = host;
+      }
+
+      int port = url.getPort();
+      if (port != -1) {
+        serverPort = Integer.toString(port);
+      } else {
+        // use default port number
+        serverPort = DEFAULT_SERVER_PORT;
+      }
+
+      String webapp = url.getFile();
+      if (webapp.length() > 1) {
+        // get rid of the first slash
+        serverWebapp = webapp.substring(1);
+      } else {
+        // use default webapp name
+        serverWebapp = DEFAULT_SERVER_WEBAPP;
+      }
+
+      client.setServerUrl(getServerUrl());
+    } catch (MalformedURLException ex) {
+      throw new SqoopException(ClientError.CLIENT_0003, ex);
+    }
   }
 
   public static String getServerUrl() {
@@ -165,3 +205,4 @@ public final class ShellEnvironment {
     io.out.printf(format, args);
   }
 }
+

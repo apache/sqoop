@@ -39,6 +39,10 @@ public class SetServerFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_WEBAPP_DESCRIPTION))
         .withLongOpt(Constants.OPT_WEBAPP)
         .create(Constants.OPT_WEBAPP_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_URL)
+        .withDescription(resourceString(Constants.RES_URL_DESCRIPTION))
+        .withLongOpt(Constants.OPT_URL)
+        .create(Constants.OPT_URL_CHAR));
   }
 
   public Object executeFunction(CommandLine line) {
@@ -47,14 +51,25 @@ public class SetServerFunction extends SqoopFunction {
       return null;
     }
 
-    if (line.hasOption(Constants.OPT_HOST)) {
-      setServerHost(line.getOptionValue(Constants.OPT_HOST));
-    }
-    if (line.hasOption(Constants.OPT_PORT)) {
-      setServerPort(line.getOptionValue(Constants.OPT_PORT));
-    }
-    if (line.hasOption(Constants.OPT_WEBAPP)) {
-      setServerWebapp(line.getOptionValue(Constants.OPT_WEBAPP));
+    if (line.hasOption(Constants.OPT_URL)) {
+      setServerUrl(line.getOptionValue(Constants.OPT_URL));
+
+      // ignore --host, --port and --webapp option
+      if (line.hasOption(Constants.OPT_HOST)
+       || line.hasOption(Constants.OPT_PORT)
+       || line.hasOption(Constants.OPT_WEBAPP)) {
+        printlnResource(Constants.RES_SET_SERVER_IGNORED);
+      }
+    } else {
+      if (line.hasOption(Constants.OPT_HOST)) {
+          setServerHost(line.getOptionValue(Constants.OPT_HOST));
+      }
+      if (line.hasOption(Constants.OPT_PORT)) {
+        setServerPort(line.getOptionValue(Constants.OPT_PORT));
+      }
+      if (line.hasOption(Constants.OPT_WEBAPP)) {
+        setServerWebapp(line.getOptionValue(Constants.OPT_WEBAPP));
+      }
     }
 
     printlnResource(Constants.RES_SET_SERVER_SUCCESSFUL);

@@ -45,6 +45,7 @@ public class Constants {
   public static final String OPT_HOST = "host";
   public static final String OPT_PORT = "port";
   public static final String OPT_WEBAPP = "webapp";
+  public static final String OPT_URL = "url";
   public static final String OPT_SERVER = "server";
   public static final String OPT_CLIENT = "client";
   public static final String OPT_PROTOCOL = "protocol";
@@ -61,6 +62,7 @@ public class Constants {
   public static final char OPT_HOST_CHAR = 'h';
   public static final char OPT_PORT_CHAR = 'p';
   public static final char OPT_WEBAPP_CHAR = 'w';
+  public static final char OPT_URL_CHAR = 'u';
   public static final char OPT_SERVER_CHAR = 's';
   public static final char OPT_CLIENT_CHAR = 'c';
   public static final char OPT_PROTOCOL_CHAR = 'p';
@@ -216,10 +218,14 @@ public class Constants {
       "set.port_description";
   public static final String RES_WEBAPP_DESCRIPTION =
       "set.webapp_description";
+  public static final String RES_URL_DESCRIPTION =
+      "set.url_description";
   public static final String RES_SET_SERVER_USAGE =
       "set.server_usage";
   public static final String RES_SET_SERVER_SUCCESSFUL =
       "set.server_successful";
+  public static final String RES_SET_SERVER_IGNORED =
+      "set.server_ignored";
 
   public static final String RES_SHOW_USAGE =
       "show.usage";

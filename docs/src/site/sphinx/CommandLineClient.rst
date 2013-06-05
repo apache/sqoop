@@ -94,10 +94,18 @@ Configure connection to Sqoop server - host port and web application name. Avail
 +-----------------------+---------------+--------------------------------------------------+
 | ``-w``, ``--webapp``  | sqoop         | Tomcat's web application name                    |
 +-----------------------+---------------+--------------------------------------------------+
+| ``-u``, ``--url``     |               | Sqoop Server in url format                       |
++-----------------------+---------------+--------------------------------------------------+
 
 Example: ::
 
   set server --host sqoop2.company.net --port 80 --webapp sqoop
+
+or ::
+
+  set server --url http://sqoop2.company.net:80/sqoop
+
+Note: When ``--url`` option is given, ``--host``, ``--port`` or ``--webapp`` option will be ignored.
 
 Set Option Function
 ~~~~~~~~~~~~~~~~~~~
