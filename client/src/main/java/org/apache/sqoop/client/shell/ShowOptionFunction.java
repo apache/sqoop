@@ -54,6 +54,10 @@ public class ShowOptionFunction extends SqoopFunction {
       if(optionName.equals(Constants.OPT_VERBOSE)) {
         printVerbose();
       }
+
+      if(optionName.equals(Constants.OPT_POLL_TIMEOUT)) {
+        printPollTimeout();
+      }
     }
 
     return null;
@@ -64,6 +68,7 @@ public class ShowOptionFunction extends SqoopFunction {
    */
   private void printAllOptions() {
     printVerbose();
+    printPollTimeout();
   }
 
   /**
@@ -72,5 +77,13 @@ public class ShowOptionFunction extends SqoopFunction {
   private void printVerbose() {
     print("Verbose = ");
     println(String.valueOf(isVerbose()));
+  }
+
+  /**
+   * Print poll-timeout option.
+   */
+  private void printPollTimeout() {
+    print("Poll-timeout = ");
+    println(String.valueOf(getPollTimeout()));
   }
 }

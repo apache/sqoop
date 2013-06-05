@@ -67,6 +67,21 @@ public class SetOptionFunction extends SqoopFunction {
       return;
     }
 
+    if (name.equals(Constants.OPT_POLL_TIMEOUT)) {
+      long newValue = 0;
+
+      try {
+        newValue = Long.parseLong(value);
+      } catch (NumberFormatException ex) {
+        // make the value stay the same
+        newValue = getPollTimeout();
+      }
+
+      setPollTimeout(newValue);
+      printlnResource(Constants.RES_SET_POLL_TIMEOUT_CHANGED, newValue);
+      return;
+    }
+
     printlnResource(Constants.RES_SET_UNKNOWN_OPT_IGNORED, name);
   }
 }

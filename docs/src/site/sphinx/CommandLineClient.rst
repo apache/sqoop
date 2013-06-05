@@ -109,10 +109,13 @@ Configure Sqoop client related options. This function have two required argument
 +===================+===============+=====================================================================+
 | ``verbose``       | false         | Client will print additional information if verbose mode is enabled |
 +-------------------+---------------+---------------------------------------------------------------------+
+| ``poll-timeout``  | 10000         | Server poll timeout in milliseconds                                 |
++-------------------+---------------+---------------------------------------------------------------------+
 
 Example: ::
 
   set option --name verbose --value true
+  set option --name poll-timeout --value 20000
 
 Show Command
 ------------
@@ -447,14 +450,11 @@ Start job (submit new submission). Starting already running job is considered as
 +----------------------------+----------------------------+
 | ``-s``, ``--synchronous``  | Synchoronous job execution |
 +----------------------------+----------------------------+
-| ``-p``, ``--poll-timeout`` | Server poll timeout        |
-+----------------------------+----------------------------+
 
 Example: ::
 
   submission start --jid 1
   submission start --jid 1 --synchronous
-  submission start --jid 1 --synchronous --poll-timeout 10000
 
 
 Submission Stop Function

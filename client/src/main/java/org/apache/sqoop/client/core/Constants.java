@@ -206,6 +206,8 @@ public class Constants {
       "set.prompt_opt_value";
   public static final String RES_SET_VERBOSE_CHANGED =
       "set.verbose_changed";
+  public static final String RES_SET_POLL_TIMEOUT_CHANGED =
+      "set.poll_timeout_changed";
   public static final String RES_SET_UNKNOWN_OPT_IGNORED =
       "set.unknown_opt_ignored";
   public static final String RES_SET_HOST_DESCRIPTION =
@@ -306,8 +308,6 @@ public class Constants {
       "submission.usage";
   public static final String RES_PROMPT_SYNCHRONOUS =
       "submission.prompt_synchronous";
-  public static final String RES_PROMPT_POLL_TIMEOUT =
-      "submission.prompt_poll_timeout";
 
   public static final String RES_UPDATE_USAGE =
       "update.usage";

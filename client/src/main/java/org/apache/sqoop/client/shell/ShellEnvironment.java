@@ -35,12 +35,15 @@ public final class ShellEnvironment {
     // using static API.
   }
 
+  private static final long DEFAULT_POLL_TIMEOUT = 10000;
+
   private static String serverHost = getEnv(Constants.ENV_HOST, "localhost");
   private static String serverPort = getEnv(Constants.ENV_PORT, "12000");
   private static String serverWebapp = getEnv(Constants.ENV_WEBAPP, "sqoop");
 
   private static boolean verbose = false;
   private static boolean interactive = false;
+  private static long pollTimeout = DEFAULT_POLL_TIMEOUT;
 
   static ResourceBundle resource = ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
   static SqoopClient client = new SqoopClient(getServerUrl());
@@ -112,6 +115,14 @@ public final class ShellEnvironment {
 
   public static boolean isInteractive() {
     return interactive;
+  }
+
+  public static void setPollTimeout(long timeout) {
+    pollTimeout = timeout;
+  }
+
+  public static long getPollTimeout() {
+    return pollTimeout;
   }
 
   public static String resourceString(String resourceName) {

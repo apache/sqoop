@@ -32,7 +32,6 @@ import static org.apache.sqoop.client.shell.ShellEnvironment.*;
  */
 public class SubmissionStartFunction extends SqoopFunction {
   public static final Logger LOG = Logger.getLogger(SubmissionStartFunction.class);
-  public static final long POLL_TIMEOUT = 10000;
 
   @SuppressWarnings("static-access")
   public SubmissionStartFunction() {
@@ -45,11 +44,6 @@ public class SubmissionStartFunction extends SqoopFunction {
       .withDescription(resourceString(Constants.RES_PROMPT_SYNCHRONOUS))
       .withLongOpt(Constants.OPT_SYNCHRONOUS)
       .create(Constants.OPT_SYNCHRONOUS_CHAR));
-    this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_POLL_TIMEOUT))
-      .withLongOpt(Constants.OPT_POLL_TIMEOUT)
-      .hasArg()
-      .create(Constants.OPT_POLL_TIMEOUT_CHAR));
   }
 
   public Object executeFunction(CommandLine line) {
@@ -60,7 +54,7 @@ public class SubmissionStartFunction extends SqoopFunction {
 
     // Poll until finished
     if (line.hasOption(Constants.OPT_SYNCHRONOUS)) {
-      long pollTimeout = POLL_TIMEOUT;
+      long pollTimeout = getPollTimeout();
       SubmissionCallback callback = new SubmissionCallback() {
         @Override
         public void submitted(MSubmission submission) {
@@ -78,9 +72,7 @@ public class SubmissionStartFunction extends SqoopFunction {
           SubmissionDisplayer.displayFooter(submission);
         }
       };
-      if (line.hasOption(Constants.OPT_POLL_TIMEOUT)) {
-        pollTimeout = getLong(line,Constants.OPT_POLL_TIMEOUT);
-      }
+
       try {
         client.startSubmission(getLong(line, Constants.OPT_JID), callback, pollTimeout);
       } catch (InterruptedException e) {
