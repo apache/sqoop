@@ -81,7 +81,7 @@ public class FrameworkValidator extends Validator {
 
   private void validateOutputForm(Validation validation, OutputForm output) {
     if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
-      validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Input directory is empty");
+      validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Output directory is empty");
     }
   }
 
