@@ -215,6 +215,7 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .create());
 
     toolOptions.addUniqueOptions(codeGenOpts);
+    toolOptions.addUniqueOptions(getHCatalogOptions());
   }
 
   @Override
@@ -291,6 +292,7 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyCodeGenOptions(in, out, false);
+      applyHCatOptions(in, out);
     } catch (NumberFormatException nfe) {
       throw new InvalidOptionsException("Error: expected numeric argument.\n"
           + "Try --help for usage.");
@@ -307,9 +309,11 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throw new InvalidOptionsException(
           "Export requires a --table or a --call argument."
           + HELP_STR);
-    } else if (options.getExportDir() == null) {
+    } else if (options.getExportDir() == null
+      && options.getHCatTableName() == null) {
       throw new InvalidOptionsException(
-          "Export requires an --export-dir argument."
+          "Export requires an --export-dir argument or "
+          + "--hcatalog-table argument."
           + HELP_STR);
     } else if (options.getExistingJarName() != null
         && options.getClassName() == null) {
@@ -382,6 +386,7 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     validateOutputFormatOptions(options);
     validateCommonOptions(options);
     validateCodeGenOptions(options);
+    validateHCatalogOptions(options);
   }
 
   private void applyNewUpdateOptions(CommandLine in, SqoopOptions out)

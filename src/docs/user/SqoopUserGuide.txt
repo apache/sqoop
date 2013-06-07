@@ -72,6 +72,8 @@ include::help.txt[]
 
 include::version.txt[]
 
+include::hcatalog.txt[]
+
 include::compatibility.txt[]
 
 include::connectors.txt[]

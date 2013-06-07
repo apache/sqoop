@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
@@ -65,7 +66,11 @@ public class JdbcExportJob extends ExportJobBase {
 
     super.configureInputFormat(job, tableName, tableClassName, splitByCol);
 
-    if (fileType == FileType.AVRO_DATA_FILE) {
+    if (isHCatJob) {
+      SqoopHCatUtilities.configureExportInputFormat(options, job,
+        context.getConnManager(), tableName, job.getConfiguration());
+      return;
+    } else if (fileType == FileType.AVRO_DATA_FILE) {
       LOG.debug("Configuring for Avro export");
       ConnManager connManager = context.getConnManager();
       Map<String, Integer> columnTypeInts;
@@ -93,6 +98,9 @@ public class JdbcExportJob extends ExportJobBase {
   @Override
   protected Class<? extends InputFormat> getInputFormatClass()
       throws ClassNotFoundException {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getInputFormatClass();
+    }
     if (fileType == FileType.AVRO_DATA_FILE) {
       return AvroInputFormat.class;
     }
@@ -101,6 +109,9 @@ public class JdbcExportJob extends ExportJobBase {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getExportMapperClass();
+    }
     switch (fileType) {
       case SEQUENCE_FILE:
         return SequenceFileExportMapper.class;

@@ -55,6 +55,15 @@ if not defined HADOOP_MAPRED_HOME (
     exit /b 1
   )
 )
+
+:: We are setting HADOOP_HOME to HADOOP_COMMON_HOME if it is not set
+:: so that hcat script works correctly on BigTop
+if not defined HADOOP_HOME (
+  if defined HADOOP_COMMON_HOME (
+    set HADOOP_HOME=%HADOOP_COMMON_HOME%
+  )
+)
+
 :: Check for HBase dependency
 if not defined HBASE_HOME (
   if defined HBASE_VERSION (

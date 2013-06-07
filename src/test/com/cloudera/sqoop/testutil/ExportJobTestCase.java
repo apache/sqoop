@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudera.sqoop.SqoopOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -34,6 +33,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.junit.Before;
 
 import com.cloudera.sqoop.Sqoop;
+import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
 import com.cloudera.sqoop.tool.ExportTool;
 
@@ -113,7 +113,7 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
         }
       }
     }
-
+    boolean isHCatJob = false;
     // The sqoop-specific additional args are then added.
     if (null != additionalArgv) {
       boolean prevIsFlag = false;
@@ -126,6 +126,9 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
           continue;
         } else {
           // normal argument.
+          if (!isHCatJob && arg.equals("--hcatalog-table")) {
+            isHCatJob = true;
+          }
           args.add(arg);
         }
       }
@@ -135,8 +138,11 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
       args.add("--table");
       args.add(getTableName());
     }
-    args.add("--export-dir");
-    args.add(getTablePath().toString());
+    // Only add export-dir if hcatalog-table is not there in additional argv
+    if (!isHCatJob) {
+      args.add("--export-dir");
+      args.add(getTablePath().toString());
+    }
     args.add("--connect");
     args.add(getConnectString());
     args.add("--fields-terminated-by");

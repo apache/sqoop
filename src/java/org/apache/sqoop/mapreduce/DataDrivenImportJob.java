@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -30,6 +31,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
@@ -63,6 +65,13 @@ public class DataDrivenImportJob extends ImportJobBase {
   @Override
   protected void configureMapper(Job job, String tableName,
       String tableClassName) throws IOException {
+    if (isHCatJob) {
+      LOG.info("Configuring mapper for HCatalog import job");
+      job.setOutputKeyClass(LongWritable.class);
+      job.setOutputValueClass(SqoopHCatUtilities.getImportValueClass());
+      job.setMapperClass(SqoopHCatUtilities.getImportMapperClass());
+      return;
+    }
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       // For text files, specify these as the output types; for
       // other types, we just use the defaults.
@@ -82,6 +91,9 @@ public class DataDrivenImportJob extends ImportJobBase {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
+    if (options.getHCatTableName() != null) {
+      return SqoopHCatUtilities.getImportMapperClass();
+    }
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return TextImportMapper.class;
     } else if (options.getFileLayout()
@@ -98,6 +110,10 @@ public class DataDrivenImportJob extends ImportJobBase {
   @Override
   protected Class<? extends OutputFormat> getOutputFormatClass()
       throws ClassNotFoundException {
+    if (isHCatJob) {
+      LOG.debug("Returning HCatOutputFormat for output format");
+      return SqoopHCatUtilities.getOutputFormatClass();
+    }
     if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return RawKeyTextOutputFormat.class;
     } else if (options.getFileLayout()

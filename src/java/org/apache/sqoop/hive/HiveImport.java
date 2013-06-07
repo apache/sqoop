@@ -60,6 +60,15 @@ public class HiveImport {
   private ConnManager connManager;
   private Configuration configuration;
   private boolean generateOnly;
+  private static boolean testMode = false;
+
+  public static boolean getTestMode() {
+    return testMode;
+  }
+
+  public static void setTestMode(boolean mode) {
+    testMode = mode;
+  }
 
   /** Entry point through which Hive invocation should be attempted. */
   private static final String HIVE_MAIN_CLASS =
@@ -284,6 +293,14 @@ public class HiveImport {
   private void executeScript(String filename, List<String> env)
       throws IOException {
     SubprocessSecurityManager subprocessSM = null;
+
+    if (testMode) {
+      // We use external mock hive process for test mode as
+      // HCatalog dependency would have brought in Hive classes.
+      LOG.debug("Using external Hive process in test mode.");
+      executeExternalHiveScript(filename, env);
+      return;
+    }
 
     try {
       Class cliDriverClass = Class.forName(HIVE_MAIN_CLASS);

@@ -54,8 +54,21 @@ if [ -z "${HADOOP_MAPRED_HOME}" ]; then
     HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
   fi
 fi
+
+# We are setting HADOOP_HOME to HADOOP_COMMON_HOME if it is not set
+# so that hcat script works correctly on BigTop
+if [ -z "${HADOOP_HOME}" ]; then
+  if [ -n "${HADOOP_COMMON_HOME}" ]; then
+     HADOOP_HOME=${HADOOP_COMMON_HOME}
+     export HADOOP_HOME
+  fi
+fi
+
 if [ -z "${HBASE_HOME}" ]; then
   HBASE_HOME=/usr/lib/hbase
+fi
+if [ -z "${HCAT_HOME}" ]; then
+  HCAT_HOME=/usr/lib/hcatalog
 fi
 
 # Check: If we can't find our dependencies, give up here.
@@ -74,6 +87,12 @@ fi
 if [ ! -d "${HBASE_HOME}" ]; then
   echo "Warning: $HBASE_HOME does not exist! HBase imports will fail."
   echo 'Please set $HBASE_HOME to the root of your HBase installation.'
+fi
+
+## Moved to be a runtime check in sqoop.
+if [ ! -d "${HCAT_HOME}" ]; then
+  echo "Warning: $HCAT_HOME does not exist! HCatalog jobs will fail."
+  echo 'Please set $HCAT_HOME to the root of your HCatalog installation.'
 fi
 
 # Where to find the main Sqoop jar
@@ -103,6 +122,15 @@ fi
 # Add HBase to dependency list
 if [ -e "$HBASE_HOME/bin/hbase" ]; then
   TMP_SQOOP_CLASSPATH=${SQOOP_CLASSPATH}:`$HBASE_HOME/bin/hbase classpath`
+  SQOOP_CLASSPATH=${TMP_SQOOP_CLASSPATH}
+fi
+
+# Add HCatalog to dependency list
+if [ -e "${HCAT_HOME}/bin/hcat" ]; then
+  TMP_SQOOP_CLASSPATH=${SQOOP_CLASSPATH}:`${HCAT_HOME}/bin/hcat -classpath`
+  if [ -z "${HIVE_CONF_DIR}" ]; then
+    TMP_SQOOP_CLASSPATH=${TMP_SQOOP_CLASSPATH}:${HIVE_CONF_DIR}
+  fi
   SQOOP_CLASSPATH=${TMP_SQOOP_CLASSPATH}
 fi
 
@@ -136,4 +164,6 @@ export HADOOP_CLASSPATH
 export HADOOP_COMMON_HOME
 export HADOOP_MAPRED_HOME
 export HBASE_HOME
+export HCAT_HOME
+export HIVE_CONF_DIR
 

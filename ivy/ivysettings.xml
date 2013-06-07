@@ -42,6 +42,9 @@ under the License.
   <property name="releases.cloudera.com"
       value="https://repository.cloudera.com/content/repositories/releases/"
       override="false"/>
+  <property name="www.datanucleus.org"
+      value="http://www.datanucleus.org/downloads/maven2/"
+      override="false"/>
   <property name="maven2.pattern"
       value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier])"/>
   <property name="repo.dir" value="${user.home}/.m2/repository"/>
@@ -51,6 +54,8 @@ under the License.
 
   <resolvers>
     <ibiblio name="maven2" root="${repo.maven.org}"
+        pattern="${maven2.pattern.ext}" m2compatible="true"/>
+    <ibiblio name="datanucleus" root="${www.datanucleus.org}"
         pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="cloudera-releases" root="${releases.cloudera.com}"
         pattern="${maven2.pattern.ext}" m2compatible="true"/>
@@ -67,16 +72,18 @@ under the License.
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
       <resolver ref="fs"/>
-      <resolver ref="apache-snapshot"/> 
+      <resolver ref="apache-snapshot"/>
+      <resolver ref="datanucleus"/>
       <resolver ref="cloudera-releases"/>
-      <resolver ref="cloudera-staging"/> 
+      <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
     </chain>
 
     <chain name="internal" dual="true">
       <resolver ref="fs"/>
-      <resolver ref="apache-snapshot"/> 
-      <resolver ref="cloudera-staging"/> 
+      <resolver ref="apache-snapshot"/>
+      <resolver ref="datanucleus"/>
+      <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
     </chain>
 

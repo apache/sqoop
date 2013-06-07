@@ -60,6 +60,18 @@ public final class ConfigurationConstants {
   public static final String PROP_MAPRED_JOB_TRACKER_ADDRESS =
                                 "mapred.job.tracker";
 
+   /**
+   * The Configuration property identifying the job tracker address (new).
+   */
+  public static final String PROP_MAPREDUCE_JOB_TRACKER_ADDRESS =
+    "mapreduce.jobtracker.address";
+
+  /**
+   * The Configuration property identifying the framework name. If set to YARN
+   * then we will not be in local mode.
+   */
+  public static final String PROP_MAPREDUCE_FRAMEWORK_NAME =
+    "mapreduce.framework.name";
   /**
    * The group name of task counters.
    */
@@ -77,6 +89,11 @@ public final class ConfigurationConstants {
    */
   public static final String COUNTER_MAP_INPUT_RECORDS =
                                 "MAP_INPUT_RECORDS";
+
+  /**
+   * The name of the parameter for ToolRunner to set jars to add to distcache.
+   */
+  public static final String MAPRED_DISTCACHE_CONF_PARAM = "tmpjars";
 
   private ConfigurationConstants() {
     // Disable Explicit Object Creation

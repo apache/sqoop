@@ -413,7 +413,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
   protected void removeTableDir() {
     File tableDirFile = new File(getTablePath().toString());
     if (tableDirFile.exists()) {
-      // Remove the director where the table will be imported to,
+      // Remove the directory where the table will be imported to,
       // prior to running the MapReduce job.
       if (!DirUtil.deleteDir(tableDirFile)) {
         LOG.warn("Could not delete table directory: "

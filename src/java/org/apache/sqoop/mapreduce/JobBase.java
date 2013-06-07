@@ -56,6 +56,7 @@ public class JobBase {
   private Job mrJob;
 
   private ClassLoader prevClassLoader = null;
+  protected final boolean isHCatJob;
 
   public static final String PROPERTY_VERBOSE = "sqoop.verbose";
 
@@ -76,6 +77,7 @@ public class JobBase {
     this.mapperClass = mapperClass;
     this.inputFormatClass = inputFormatClass;
     this.outputFormatClass = outputFormatClass;
+    isHCatJob = options.getHCatTableName() != null;
   }
 
   /**
@@ -220,7 +222,7 @@ public class JobBase {
    */
   protected void loadJars(Configuration conf, String ormJarFile,
       String tableClassName) throws IOException {
- 
+
     boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
         || "local".equals(conf.get("mapred.job.tracker"));
     if (isLocal) {

@@ -1,0 +1,26 @@
+<configuration>
+  <property>
+    <name>hive.metastore.local</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>${test.build.data}/sqoop/warehouse</value>
+  </property>
+  <property>
+    <name>hive.metastore.uris</name>
+    <value></value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:derby:;databaseName=${test.build.data}/sqoop/metastore_db;create=true</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+  </property>
+  <property>
+    <name>hive.querylog.location</name>
+    <value>${test.build.data}/sqoop/logs</value>
+  </property>
+</configuration>

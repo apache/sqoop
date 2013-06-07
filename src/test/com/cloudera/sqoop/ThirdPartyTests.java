@@ -18,6 +18,9 @@
 
 package com.cloudera.sqoop;
 
+import org.apache.sqoop.hcat.HCatalogExportTest;
+import org.apache.sqoop.hcat.HCatalogImportTest;
+
 import com.cloudera.sqoop.hbase.HBaseImportTest;
 import com.cloudera.sqoop.hbase.HBaseQueryImportTest;
 import com.cloudera.sqoop.hbase.HBaseUtilTest;
@@ -70,6 +73,10 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(HBaseImportTest.class);
     suite.addTestSuite(HBaseQueryImportTest.class);
     suite.addTestSuite(HBaseUtilTest.class);
+
+    // HCatalog
+    suite.addTestSuite(HCatalogImportTest.class);
+    suite.addTestSuite(HCatalogExportTest.class);
 
     return suite;
   }

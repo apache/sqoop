@@ -37,10 +37,15 @@ under the License.
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
     <conf name="hbase" visibility="private" />
-    <conf name="hadoop23" visibility="private" extends="common,runtime,hbase" />
-    <conf name="hadoop20" visibility="private" extends="common,runtime,hbase" />
-    <conf name="hadoop100" visibility="private" extends="common,runtime,hbase" />
-    <conf name="hadoop200" visibility="private" extends="common,runtime,hbase" />
+    <conf name="hcatalog" visibility="private" />
+    <conf name="hadoop23" visibility="private"
+      extends="common,runtime,hbase,hcatalog" />
+    <conf name="hadoop20" visibility="private"
+      extends="common,runtime,hbase,hcatalog" />
+    <conf name="hadoop100" visibility="private"
+      extends="common,runtime,hbase,hcatalog" />
+    <conf name="hadoop200" visibility="private"
+      extends="common,runtime,hbase,hcatalog" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -170,6 +175,11 @@ under the License.
       <exclude org="log4j" module="log4j"/>
       <exclude org="org.apache.hadoop" module="hadoop-core" />
       <exclude org="com.cloudera.cdh" module="zookeeper-ant" />
+    </dependency>
+
+    <dependency org="org.apache.hcatalog" name="hcatalog-core"
+      rev="${hcatalog.version}" conf="hcatalog->default">
+      <artifact name="hcatalog-core" type="jar"/>
     </dependency>
 
     <exclude org="org.apache.hadoop" module="avro"/>

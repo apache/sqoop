@@ -108,6 +108,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
   public static final String CREATE_HIVE_TABLE_ARG =
       "create-hive-table";
+  public static final String HCATALOG_TABLE_ARG = "hcatalog-table";
+  public static final String HCATALOG_DATABASE_ARG = "hcatalog-database";
+  public static final String CREATE_HCATALOG_TABLE_ARG =
+    "create-hcatalog-table";
+  public static final String HCATALOG_STORAGE_STANZA_ARG =
+    "hcatalog-storage-stanza";
+  public static final String HCATALOG_HOME_ARG = "hcatalog-home";
   public static final String MAPREDUCE_JOB_NAME = "mapreduce-job-name";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
@@ -488,6 +495,66 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     return hiveOpts;
   }
 
+   /**
+   * @return options governing interaction with HCatalog.
+   */
+  protected RelatedOptions getHCatalogOptions() {
+    RelatedOptions hCatOptions = new RelatedOptions("HCatalog arguments");
+    hCatOptions.addOption(OptionBuilder
+      .hasArg()
+      .withDescription("HCatalog table name")
+      .withLongOpt(HCATALOG_TABLE_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder
+      .hasArg()
+      .withDescription("HCatalog database name")
+      .withLongOpt(HCATALOG_DATABASE_ARG)
+      .create());
+
+    hCatOptions.addOption(OptionBuilder.withArgName("dir")
+      .hasArg().withDescription("Override $HIVE_HOME")
+      .withLongOpt(HIVE_HOME_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder.withArgName("hdir")
+      .hasArg().withDescription("Override $HCAT_HOME")
+      .withLongOpt(HCATALOG_HOME_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder.withArgName("partition-key")
+      .hasArg()
+      .withDescription("Sets the partition key to use when importing to hive")
+      .withLongOpt(HIVE_PARTITION_KEY_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder.withArgName("partition-value")
+      .hasArg()
+      .withDescription("Sets the partition value to use when importing "
+        + "to hive")
+      .withLongOpt(HIVE_PARTITION_VALUE_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder
+      .hasArg()
+      .withDescription("Override mapping for specific column to hive"
+        + " types.")
+      .withLongOpt(MAP_COLUMN_HIVE)
+      .create());
+
+    return hCatOptions;
+  }
+
+  protected RelatedOptions getHCatImportOnlyOptions() {
+    RelatedOptions hCatOptions = new RelatedOptions(
+      "HCatalog import specific options");
+    hCatOptions.addOption(OptionBuilder
+      .withDescription("Create HCatalog before import")
+      .withLongOpt(CREATE_HCATALOG_TABLE_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder
+      .hasArg()
+      .withDescription("HCatalog storage stanza for table creation")
+      .withLongOpt(HCATALOG_STORAGE_STANZA_ARG)
+      .create());
+    return hCatOptions;
+  }
+
   /**
    * @return options governing output format delimiters
    */
@@ -826,7 +893,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setHiveTableName(in.getOptionValue(HIVE_TABLE_ARG));
     }
 
-    if(in.hasOption(HIVE_DATABASE_ARG)) {
+    if (in.hasOption(HIVE_DATABASE_ARG)) {
       out.setHiveDatabaseName(in.getOptionValue(HIVE_DATABASE_ARG));
     }
 
@@ -852,38 +919,79 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
   }
 
+  protected void applyHCatOptions(CommandLine in, SqoopOptions out) {
+    if (in.hasOption(HCATALOG_TABLE_ARG)) {
+      out.setHCatTableName(in.getOptionValue(HCATALOG_TABLE_ARG));
+    }
+
+    if (in.hasOption(HCATALOG_DATABASE_ARG)) {
+      out.setHCatDatabaseName(in.getOptionValue(HCATALOG_DATABASE_ARG));
+    }
+
+    if (in.hasOption(HCATALOG_STORAGE_STANZA_ARG)) {
+      out.setHCatStorageStanza(in.getOptionValue(HCATALOG_STORAGE_STANZA_ARG));
+    }
+
+    if (in.hasOption(CREATE_HCATALOG_TABLE_ARG)) {
+      out.setCreateHCatalogTable(true);
+    }
+
+    if (in.hasOption(HCATALOG_HOME_ARG)) {
+      out.setHCatHome(in.getOptionValue(HCATALOG_HOME_ARG));
+    }
+
+    // Allow some of the hive options also
+
+    if (in.hasOption(HIVE_HOME_ARG)) {
+      out.setHiveHome(in.getOptionValue(HIVE_HOME_ARG));
+    }
+
+    if (in.hasOption(HIVE_PARTITION_KEY_ARG)) {
+      out.setHivePartitionKey(in.getOptionValue(HIVE_PARTITION_KEY_ARG));
+    }
+
+    if (in.hasOption(HIVE_PARTITION_VALUE_ARG)) {
+      out.setHivePartitionValue(in.getOptionValue(HIVE_PARTITION_VALUE_ARG));
+    }
+
+    if (in.hasOption(MAP_COLUMN_HIVE)) {
+      out.setMapColumnHive(in.getOptionValue(MAP_COLUMN_HIVE));
+    }
+  }
+
+
   protected void applyOutputFormatOptions(CommandLine in, SqoopOptions out)
       throws InvalidOptionsException {
     if (in.hasOption(FIELDS_TERMINATED_BY_ARG)) {
       out.setFieldsTerminatedBy(SqoopOptions.toChar(
           in.getOptionValue(FIELDS_TERMINATED_BY_ARG)));
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
 
     if (in.hasOption(LINES_TERMINATED_BY_ARG)) {
       out.setLinesTerminatedBy(SqoopOptions.toChar(
           in.getOptionValue(LINES_TERMINATED_BY_ARG)));
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
 
     if (in.hasOption(OPTIONALLY_ENCLOSED_BY_ARG)) {
       out.setEnclosedBy(SqoopOptions.toChar(
           in.getOptionValue(OPTIONALLY_ENCLOSED_BY_ARG)));
       out.setOutputEncloseRequired(false);
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
 
     if (in.hasOption(ENCLOSED_BY_ARG)) {
       out.setEnclosedBy(SqoopOptions.toChar(
           in.getOptionValue(ENCLOSED_BY_ARG)));
       out.setOutputEncloseRequired(true);
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
 
     if (in.hasOption(ESCAPED_BY_ARG)) {
       out.setEscapedBy(SqoopOptions.toChar(
           in.getOptionValue(ESCAPED_BY_ARG)));
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
 
     if (in.hasOption(MYSQL_DELIMITERS_ARG)) {
@@ -892,7 +1000,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setLinesTerminatedBy('\n');
       out.setEscapedBy('\\');
       out.setEnclosedBy('\'');
-      out.setExplicitDelims(true);
+      out.setExplicitOutputDelims(true);
     }
   }
 
@@ -901,28 +1009,33 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     if (in.hasOption(INPUT_FIELDS_TERMINATED_BY_ARG)) {
       out.setInputFieldsTerminatedBy(SqoopOptions.toChar(
           in.getOptionValue(INPUT_FIELDS_TERMINATED_BY_ARG)));
+      out.setExplicitInputDelims(true);
     }
 
     if (in.hasOption(INPUT_LINES_TERMINATED_BY_ARG)) {
       out.setInputLinesTerminatedBy(SqoopOptions.toChar(
           in.getOptionValue(INPUT_LINES_TERMINATED_BY_ARG)));
+      out.setExplicitInputDelims(true);
     }
 
     if (in.hasOption(INPUT_OPTIONALLY_ENCLOSED_BY_ARG)) {
       out.setInputEnclosedBy(SqoopOptions.toChar(
           in.getOptionValue(INPUT_OPTIONALLY_ENCLOSED_BY_ARG)));
       out.setInputEncloseRequired(false);
+      out.setExplicitInputDelims(true);
     }
 
     if (in.hasOption(INPUT_ENCLOSED_BY_ARG)) {
       out.setInputEnclosedBy(SqoopOptions.toChar(
           in.getOptionValue(INPUT_ENCLOSED_BY_ARG)));
       out.setInputEncloseRequired(true);
+      out.setExplicitInputDelims(true);
     }
 
     if (in.hasOption(INPUT_ESCAPED_BY_ARG)) {
       out.setInputEscapedBy(SqoopOptions.toChar(
           in.getOptionValue(INPUT_ESCAPED_BY_ARG)));
+      out.setExplicitInputDelims(true);
     }
   }
 
@@ -1021,7 +1134,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   protected void validateOutputFormatOptions(SqoopOptions options)
       throws InvalidOptionsException {
     if (options.doHiveImport()) {
-      if (!options.explicitDelims()) {
+      if (!options.explicitOutputDelims()) {
         // user hasn't manually specified delimiters, and wants to import
         // straight to Hive. Use Hive-style delimiters.
         LOG.info("Using Hive-specific delimiters for output. You can override");
@@ -1048,6 +1161,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException("The " + HIVE_DROP_DELIMS_ARG
               + " option conflicts with the " + HIVE_DELIMS_REPLACEMENT_ARG
               + " option." + HELP_STR);
+    }
+
+    // Make sure that one of hCatalog or hive jobs are used
+    String hCatTable = options.getHCatTableName();
+    if (hCatTable != null && options.doHiveImport()) {
+      throw new InvalidOptionsException("The " + HCATALOG_TABLE_ARG
+        + " option conflicts with the " + HIVE_IMPORT_ARG
+        + " option." + HELP_STR);
     }
 
     if(options.doHiveImport()
@@ -1083,16 +1204,19 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     // Warn about using hive specific arguments without hive import itself
+    // In HCatalog support some of the Hive options are reused
     if (!options.doHiveImport()
       && ((options.getHiveHome() != null
-            && !options.getHiveHome().equals(SqoopOptions.getHiveHomeDefault()))
+        && !options.getHiveHome().
+          equals(SqoopOptions.getHiveHomeDefault())
+          && hCatTable == null))
         || options.doOverwriteHiveTable()
         || options.doFailIfHiveTableExists()
         || (options.getHiveTableName() != null
             && !options.getHiveTableName().equals(options.getTableName()))
-        || options.getHivePartitionKey() != null
-        || options.getHivePartitionValue() != null
-        || options.getMapColumnHive().size() > 0)) {
+        || (options.getHivePartitionKey() != null && hCatTable == null)
+        || (options.getHivePartitionValue() != null && hCatTable == null)
+        || (options.getMapColumnHive().size() > 0 && hCatTable == null)) {
       LOG.warn("It seems that you've specified at least one of following:");
       LOG.warn("\t--hive-home");
       LOG.warn("\t--hive-overwrite");
@@ -1105,6 +1229,89 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       LOG.warn("those arguments will not be used in this session. Either");
       LOG.warn("specify --hive-import to apply them correctly or remove them");
       LOG.warn("from command line to remove this warning.");
+      LOG.info("Please note that --hive-home, --hive-partition-key, ");
+      LOG.info("\t hive-partition-value and --map-column-hive options are ");
+      LOG.info("\t are also valid for HCatalog imports and exports");
+    }
+  }
+
+  protected void validateHCatalogOptions(SqoopOptions options)
+    throws InvalidOptionsException {
+    // Make sure that one of hCatalog or hive jobs are used
+    String hCatTable = options.getHCatTableName();
+    if (hCatTable == null) {
+      if (options.getHCatHome() != null && !options.getHCatHome().
+        equals(SqoopOptions.getHCatHomeDefault())) {
+        LOG.warn("--hcatalog-home option will be ignored in "
+          + "non-HCatalog jobs");
+      }
+      if (options.getHCatDatabaseName() != null) {
+        LOG.warn("--hcatalog-database option will be ignored  "
+          + "without --hcatalog-table");
+      }
+
+      if (options.getHCatStorageStanza() != null) {
+        LOG.warn("--hcatalog-storage-stanza option will be ignored "
+          + "without --hatalog-table");
+      }
+      return;
+    }
+
+    if (options.explicitInputDelims()) {
+      LOG.warn("Input field/record delimiter options are not "
+        + "used in HCatalog jobs unless the format is text.   It is better "
+        + "to use --hive-import in those cases.  For text formats");
+    }
+    if (options.explicitOutputDelims()
+      || options.getHiveDelimsReplacement() != null
+      || options.doHiveDropDelims()) {
+      LOG.warn("Output field/record delimiter options are not useful"
+        + " in HCatalog jobs for most of the output types except text based "
+        + " formats is text. It is better "
+        + "to use --hive-import in those cases.  For non text formats, ");
+    }
+    if (options.doHiveImport()) {
+      throw new InvalidOptionsException("The " + HCATALOG_TABLE_ARG
+        + " option conflicts with the " + HIVE_IMPORT_ARG
+        + " option." + HELP_STR);
+    }
+    if (options.getTargetDir() != null) {
+      throw new InvalidOptionsException("The " + TARGET_DIR_ARG
+        + " option conflicts with the " + HCATALOG_TABLE_ARG
+        + " option." + HELP_STR);
+    }
+    if (options.getWarehouseDir() != null) {
+      throw new InvalidOptionsException("The " + WAREHOUSE_DIR_ARG
+        + " option conflicts with the " + HCATALOG_TABLE_ARG
+        + " option." + HELP_STR);
+    }
+    if (options.isDirect()) {
+      throw new InvalidOptionsException("Direct import is incompatible with "
+        + "HCatalog. Please remove the parameter --direct");
+    }
+    if (options.isAppendMode()) {
+      throw new InvalidOptionsException("Append mode for imports is not "
+        + " compatible with HCatalog. Please remove the parameter"
+        + "--append-mode");
+    }
+    if (options.getExportDir() != null) {
+      throw new InvalidOptionsException("The " + EXPORT_PATH_ARG
+        + " option conflicts with the " + HCATALOG_TABLE_ARG
+        + " option." + HELP_STR);
+    }
+
+    if (options.getFileLayout() == SqoopOptions.FileLayout.AvroDataFile) {
+      throw new InvalidOptionsException("HCatalog job is not compatible with "
+        + " AVRO format option " + FMT_AVRODATAFILE_ARG
+        + " option." + HELP_STR);
+
+    }
+
+    if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
+      throw new InvalidOptionsException("HCatalog job  is not compatible with "
+        + "SequenceFile format option " + FMT_SEQUENCEFILE_ARG
+        + " option." + HELP_STR);
+
     }
   }
 

@@ -59,6 +59,10 @@ public class SqoopOptions implements Cloneable {
   public static final String METASTORE_PASSWORD_KEY =
       "sqoop.metastore.client.record.password";
 
+  // Default hive and hcat locations.
+  public static final String DEF_HIVE_HOME = "/usr/lib/hive";
+  public static final String DEF_HCAT_HOME = "/usr/lib/hcatalog";
+
   public static final boolean METASTORE_PASSWORD_DEFAULT = false;
 
   /**
@@ -151,6 +155,15 @@ public class SqoopOptions implements Cloneable {
   private String hiveDelimsReplacement;
   @StoredAsProperty("hive.partition.key") private String hivePartitionKey;
   @StoredAsProperty("hive.partition.value") private String hivePartitionValue;
+  @StoredAsProperty("hcatalog.table.name")
+  private String hCatTableName;
+  @StoredAsProperty("hcatalog.database.name")
+  private String hCatDatabaseName;
+  @StoredAsProperty("hcatalog.create.table")
+  private boolean hCatCreateTable;
+  @StoredAsProperty("hcatalog.storage.stanza")
+  private String hCatStorageStanza;
+  private String hCatHome; // not serialized to metastore.
 
   // User explicit mapping of types
   private Properties mapColumnJava; // stored as map.colum.java
@@ -197,7 +210,9 @@ public class SqoopOptions implements Cloneable {
 
   private DelimiterSet inputDelimiters; // codegen.input.delimiters.
   private DelimiterSet outputDelimiters; // codegen.output.delimiters.
-  private boolean areDelimsManuallySet;
+
+  private boolean areOutputDelimsManuallySet;
+  private boolean areInputDelimsManuallySet;
 
   private Configuration conf;
 
@@ -580,7 +595,8 @@ public class SqoopOptions implements Cloneable {
 
     // Delimiters were previously memoized; don't let the tool override
     // them with defaults.
-    this.areDelimsManuallySet = true;
+    this.areOutputDelimsManuallySet = true;
+    this.areInputDelimsManuallySet = true;
 
     // If we loaded true verbose flag, we need to apply it
     if (this.verbose) {
@@ -804,7 +820,21 @@ public class SqoopOptions implements Cloneable {
   public static String getHiveHomeDefault() {
     // Set this with $HIVE_HOME, but -Dhive.home can override.
     String hiveHome = System.getenv("HIVE_HOME");
-    return System.getProperty("hive.home", hiveHome);
+    hiveHome = System.getProperty("hive.home", hiveHome);
+    if (hiveHome == null) {
+      hiveHome = DEF_HIVE_HOME;
+    }
+    return hiveHome;
+  }
+
+  public static String getHCatHomeDefault() {
+    // Set this with $HCAT_HOME, but -Dhcatalog.home can override.
+    String hcatHome = System.getenv("HCAT_HOME");
+    hcatHome = System.getProperty("hcat.home", hcatHome);
+    if (hcatHome == null) {
+      hcatHome = DEF_HCAT_HOME;
+    }
+    return hcatHome;
   }
 
   private void initDefaults(Configuration baseConfiguration) {
@@ -813,6 +843,7 @@ public class SqoopOptions implements Cloneable {
     this.hadoopMapRedHome = System.getenv("HADOOP_MAPRED_HOME");
 
     this.hiveHome = getHiveHomeDefault();
+    this.hCatHome = getHCatHomeDefault();
 
     this.inputDelimiters = new DelimiterSet(
         DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR,
@@ -834,7 +865,8 @@ public class SqoopOptions implements Cloneable {
     this.jarDirIsAuto = true;
     this.layout = FileLayout.TextFile;
 
-    this.areDelimsManuallySet = false;
+    this.areOutputDelimsManuallySet = false;
+    this.areInputDelimsManuallySet = false;
 
     this.numMappers = DEFAULT_NUM_MAPPERS;
     this.useCompression = false;
@@ -1263,6 +1295,47 @@ public class SqoopOptions implements Cloneable {
     this.failIfHiveTableExists = fail;
   }
 
+  // HCatalog support
+  public void setHCatTableName(String ht) {
+    this.hCatTableName = ht;
+  }
+
+  public String getHCatTableName() {
+    return this.hCatTableName;
+  }
+
+  public void setHCatDatabaseName(String hd) {
+    this.hCatDatabaseName = hd;
+  }
+
+  public String getHCatDatabaseName() {
+    return this.hCatDatabaseName;
+  }
+
+
+  public String getHCatHome() {
+    return hCatHome;
+  }
+
+  public void setHCatHome(String home) {
+    this.hCatHome = home;
+  }
+
+  public boolean doCreateHCatalogTable() {
+    return hCatCreateTable;
+  }
+
+  public void setCreateHCatalogTable(boolean create) {
+    this.hCatCreateTable = create;
+  }
+
+  public void setHCatStorageStanza(String stanza) {
+    this.hCatStorageStanza = stanza;
+  }
+
+  public String getHCatStorageStanza() {
+    return this.hCatStorageStanza;
+  }
   /**
    * @return location where .java files go; guaranteed to end with '/'.
    */
@@ -1673,18 +1746,32 @@ public class SqoopOptions implements Cloneable {
     this.fetchSize = size;
   }
 
-  /**
-   * @return true if the delimiters have been explicitly set by the user.
+  /*
+   * @return true if the output delimiters have been explicitly set by the user
    */
-  public boolean explicitDelims() {
-    return areDelimsManuallySet;
+  public boolean explicitOutputDelims() {
+    return areOutputDelimsManuallySet;
   }
 
   /**
-   * Flag the delimiter settings as explicit user settings, or implicit.
+   * Flag the output delimiter settings as explicit user settings, or implicit.
    */
-  public void setExplicitDelims(boolean explicit) {
-    this.areDelimsManuallySet = explicit;
+  public void setExplicitOutputDelims(boolean explicit) {
+    this.areOutputDelimsManuallySet = explicit;
+  }
+
+  /**
+   * @return true if the input delimiters have been explicitly set by the user.
+   */
+  public boolean explicitInputDelims() {
+    return areInputDelimsManuallySet;
+  }
+
+  /**
+   * Flag the input delimiter settings as explicit user settings, or implicit.
+    */
+  public void setExplicitInputDelims(boolean explicit) {
+    this.areInputDelimsManuallySet = explicit;
   }
 
   public Configuration getConf() {

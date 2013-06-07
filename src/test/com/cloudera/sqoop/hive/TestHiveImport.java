@@ -51,6 +51,16 @@ public class TestHiveImport extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       TestHiveImport.class.getName());
 
+  public void setUp() {
+    super.setUp();
+    HiveImport.setTestMode(true);
+  }
+
+  public void tearDown() {
+    super.tearDown();
+    HiveImport.setTestMode(false);
+  }
+
   /**
    * Sets the expected number of columns in the table being manipulated
    * by the test. Under the hood, this sets the expected column names
