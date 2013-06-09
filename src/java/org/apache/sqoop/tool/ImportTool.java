@@ -241,7 +241,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         || (columnType == Types.TIME);
   }
 
-  /**
+    /**
    * Initialize the constraints which set the incremental import range.
    * @return false if an import is not necessary, because the dataset has not
    * changed.
@@ -270,6 +270,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           nextIncrementalValue = (nextVal == null) ? null
             : manager.datetimeToQueryString(nextVal.toString(),
                                             checkColumnType);
+        } else if (manager.isCharColumn(checkColumnType)) {
+          throw new ImportException("Character column "
+            + "(" + options.getIncrementalTestColumn() + ") can not be used "
+            + "to determine which rows to incrementally import.");
         } else {
           nextIncrementalValue = (nextVal == null) ? null : nextVal.toString();
         }

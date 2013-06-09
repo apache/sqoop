@@ -312,7 +312,10 @@ The following arguments control incremental imports:
 Argument                      Description
 ---------------------------------------------------------------------
 +\--check-column (col)+       Specifies the column to be examined \
-                              when determining which rows to import.
+                              when determining which rows to import.\
+                              (the column should not be of type \
+                              CHAR/NCHAR/VARCHAR/VARNCHAR/\
+                              LONGVARCHAR/LONGNVARCHAR)
 +\--incremental (mode)+       Specifies how Sqoop determines which \
                               rows are new. Legal values for +mode+\
                               include +append+ and +lastmodified+.

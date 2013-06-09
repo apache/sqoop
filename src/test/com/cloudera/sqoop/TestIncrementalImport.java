@@ -170,6 +170,30 @@ public class TestIncrementalImport extends TestCase {
   }
 
   /**
+   * Insert rows with id = [low, hi) into tableName with
+   * id converted to string.
+   */
+  private void insertIdVarcharRows(String tableName, int low, int hi)
+      throws SQLException {
+    LOG.info("Inserting rows in [" + low + ", " + hi + ")");
+    SqoopOptions options = new SqoopOptions();
+    options.setConnectString(SOURCE_DB_URL);
+    HsqldbManager manager = new HsqldbManager(options);
+    Connection c = manager.getConnection();
+    PreparedStatement s = null;
+    try {
+      s = c.prepareStatement("INSERT INTO " + tableName + " VALUES(?)");
+      for (int i = low; i < hi; i++) {
+        s.setString(1, Integer.toString(i));
+        s.executeUpdate();
+      }
+      c.commit();
+    } finally {
+      s.close();
+    }
+  }
+
+  /**
    * Create a table with an 'id' column full of integers.
    */
   private void createIdTable(String tableName, int insertRows)
@@ -206,6 +230,27 @@ public class TestIncrementalImport extends TestCase {
       s.executeUpdate();
       c.commit();
       insertIdTimestampRows(tableName, 0, insertRows, baseTime);
+    } finally {
+      s.close();
+    }
+  }
+
+  /**
+   * Create a table with an 'id' column of type varchar(20)
+   */
+  private void createIdVarcharTable(String tableName,
+       int insertRows) throws SQLException {
+    SqoopOptions options = new SqoopOptions();
+    options.setConnectString(SOURCE_DB_URL);
+    HsqldbManager manager = new HsqldbManager(options);
+    Connection c = manager.getConnection();
+    PreparedStatement s = null;
+    try {
+      s = c.prepareStatement("CREATE TABLE " + tableName
+          + "(id varchar(20) NOT NULL)");
+      s.executeUpdate();
+      c.commit();
+      insertIdVarcharRows(tableName, 0, insertRows);
     } finally {
       s.close();
     }
@@ -752,6 +797,25 @@ public class TestIncrementalImport extends TestCase {
     // Import only those rows.
     runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
+  }
+
+  public void testAppendWithString() throws Exception {
+    // Create a table with string column in it;
+    // incrementally import it on the string column - it should fail.
+
+    final String TABLE_NAME = "appendString";
+    createIdVarcharTable(TABLE_NAME, 10);
+
+    List<String> args = getArgListForTable(TABLE_NAME, false, true);
+    args.add("--append");
+    createJob(TABLE_NAME, args);
+    try {
+      runJob(TABLE_NAME);
+      //the above line should throw an exception otherwise the test has failed
+      fail("Expected incremental import on varchar column to fail.");
+    } catch(RuntimeException e) {
+      //expected
+    }
   }
 
   public void testModifyWithTimestamp() throws Exception {

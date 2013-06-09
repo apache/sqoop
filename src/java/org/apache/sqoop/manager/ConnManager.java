@@ -718,5 +718,20 @@ public abstract class ConnManager {
   public boolean isORMFacilitySelfManaged() {
     return false;
   }
+
+  /**
+   * Determine if a column is char or a char-variant type.
+   * @return true if column type is CHAR, VARCHAR, LONGVARCHAR
+   * or their N version. These are used to store strings.
+   */
+  public boolean isCharColumn(int columnType) {
+    return (columnType == Types.VARCHAR)
+        || (columnType == Types.NVARCHAR)
+        || (columnType == Types.CHAR)
+        || (columnType == Types.NCHAR)
+        || (columnType == Types.LONGVARCHAR)
+        || (columnType == Types.LONGNVARCHAR);
+  }
+
 }
 
