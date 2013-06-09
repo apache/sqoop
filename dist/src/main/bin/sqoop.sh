@@ -102,7 +102,12 @@ case $COMMAND in
     # We need to change current directory back to original as optional user side script
     # might be specified with relative path.
     cd ${OLD_DIR}
-    java -classpath ${CLASSPATH} org.apache.sqoop.client.shell.SqoopShell $2
+
+    EXEC_JAVA='java'
+    if [ -n "${JAVA_HOME}" ] ; then
+        EXEC_JAVA="${JAVA_HOME}/bin/java"
+    fi
+    ${EXEC_JAVA} -classpath ${CLASSPATH} org.apache.sqoop.client.shell.SqoopShell $2
     ;;
 
   *)
