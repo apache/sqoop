@@ -290,18 +290,24 @@ public abstract class BaseSqoopTestCase extends TestCase {
   }
 
   /**
-   * Create a table with a set of columns and add a row of values.
+   * Create a table with a set of columns with their names and add a row of values.
+   * @param colNames Column names
    * @param colTypes the types of the columns to make
    * @param vals the SQL text for each value to insert
    */
-  protected void createTableWithColTypes(String [] colTypes, String [] vals) {
+  protected void createTableWithColTypesAndNames(String[] colNames,
+                                                 String[] colTypes,
+                                                 String[] vals) {
+    assert colNames != null;
+    assert colTypes != null;
+    assert colNames.length == colTypes.length;
+
     Connection conn = null;
     PreparedStatement statement = null;
     String createTableStr = null;
     String columnDefStr = "";
     String columnListStr = "";
     String valueListStr = "";
-    String [] myColNames = new String[colTypes.length];
 
     try {
       try {
@@ -310,9 +316,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
         conn = getManager().getConnection();
 
         for (int i = 0; i < colTypes.length; i++) {
-          String colName = BASE_COL_NAME + Integer.toString(i);
-          columnDefStr += colName + " " + colTypes[i];
-          myColNames[i] = colName;
+          columnDefStr += colNames[i] + " " + colTypes[i];
           if (i < colTypes.length - 1) {
             columnDefStr += ", ";
           }
@@ -342,7 +346,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
 
       if (vals!=null) {
         for (int i = 0; i < colTypes.length; i++) {
-          columnListStr += myColNames[i];
+          columnListStr += colNames[i];
           valueListStr += vals[i];
           if (i < colTypes.length - 1) {
             columnListStr += ", ";
@@ -375,7 +379,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
       }
 
       conn.commit();
-      this.colNames = myColNames;
+      this.colNames = colNames;
     } catch (SQLException se) {
       if (null != conn) {
         try {
@@ -386,6 +390,19 @@ public abstract class BaseSqoopTestCase extends TestCase {
       }
       fail("Could not create table: " + StringUtils.stringifyException(se));
     }
+  }
+
+  /**
+   * Create a table with a set of columns and add a row of values.
+   * @param colTypes the types of the columns to make
+   * @param vals the SQL text for each value to insert
+   */
+  protected void createTableWithColTypes(String [] colTypes, String [] vals) {
+    String[] colNames = new String[colTypes.length];
+    for( int i = 0; i < colTypes.length; i++) {
+      colNames[i] = BASE_COL_NAME + Integer.toString(i);
+    }
+    createTableWithColTypesAndNames(colNames, colTypes, vals);
   }
 
   /**

@@ -181,6 +181,27 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("DATA_COL0", new Utf8("10"), record1.get("DATA_COL0"));
   }
 
+  public void testFirstUnderscoreInColumnName() throws IOException {
+    String [] names = { "_NAME" };
+    String [] types = { "INT" };
+    String [] vals = { "1987" };
+    createTableWithColTypesAndNames(names, types, vals);
+
+    runImport(getOutputArgv(true, null));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    Schema schema = reader.getSchema();
+    assertEquals(Schema.Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+
+    checkField(fields.get(0), "__NAME", Type.INT);
+
+    GenericRecord record1 = reader.next();
+    assertEquals("__NAME", 1987, record1.get("__NAME"));
+  }
+
   private void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());
