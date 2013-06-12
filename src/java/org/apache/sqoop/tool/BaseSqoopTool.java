@@ -87,6 +87,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String WAREHOUSE_DIR_ARG = "warehouse-dir";
   public static final String TARGET_DIR_ARG = "target-dir";
   public static final String APPEND_ARG = "append";
+  public static final String DELETE_ARG = "delete-target-dir";
   public static final String NULL_STRING = "null-string";
   public static final String INPUT_NULL_STRING = "input-null-string";
   public static final String NULL_NON_STRING = "null-non-string";

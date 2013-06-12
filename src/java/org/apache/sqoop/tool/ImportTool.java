@@ -50,6 +50,7 @@ import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileSystem;
 
 /**
  * Tool that performs database imports to HDFS.
@@ -403,6 +404,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       return false;
     }
 
+    if (options.isDeleteMode()) {
+      deleteTargetDir(context);
+    }
+
     if (null != tableName) {
       manager.importTable(context);
     } else {
@@ -422,6 +427,22 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     saveIncrementalState(options);
 
     return true;
+  }
+
+  private void deleteTargetDir(ImportJobContext context) throws IOException {
+
+    SqoopOptions options = context.getOptions();
+    FileSystem fs = FileSystem.get(options.getConf());
+    Path destDir = context.getDestination();
+
+    if (fs.exists(destDir)) {
+      fs.delete(destDir, true);
+      LOG.info("Destination directory " + destDir + " deleted.");
+      return;
+    } else {
+      LOG.info("Destination directory " + destDir + " is not present, "
+        + "hence not deleting.");
+    }
   }
 
   /**
@@ -543,6 +564,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       importOpts.addOption(OptionBuilder
           .withDescription("Imports data in append mode")
           .withLongOpt(APPEND_ARG)
+          .create());
+      importOpts.addOption(OptionBuilder
+          .withDescription("Imports data in delete mode")
+          .withLongOpt(DELETE_ARG)
           .create());
       importOpts.addOption(OptionBuilder.withArgName("dir")
           .hasArg().withDescription("HDFS plain table destination")
@@ -758,6 +783,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           out.setAppendMode(true);
         }
 
+        if (in.hasOption(DELETE_ARG)) {
+          out.setDeleteMode(true);
+        }
+
         if (in.hasOption(SQL_QUERY_ARG)) {
           out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
         }
@@ -905,6 +934,13 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       && options.getHCatTableName() != null) {
       throw new InvalidOptionsException("--hcatalog-table cannot be used "
         + " --warehouse-dir or --target-dir options");
+     } else if (options.isDeleteMode() && options.isAppendMode()) {
+       throw new InvalidOptionsException("--append and --delete-target-dir can"
+         + " not be used together.");
+     } else if (options.isDeleteMode() && options.getIncrementalMode()
+         != SqoopOptions.IncrementalMode.None) {
+       throw new InvalidOptionsException("--delete-target-dir can not be used"
+         + " with incremental imports.");
      }
   }
 

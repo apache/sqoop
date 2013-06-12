@@ -21,13 +21,20 @@ package com.cloudera.sqoop.mapreduce;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -231,6 +238,81 @@ public class TestImportJob extends ImportJobTestCase {
     try {
       int ret = Sqoop.runSqoop(importer, argv);
       assertTrue("Expected job to fail!", 1 == ret);
+    } catch (Exception e) {
+      // In debug mode, ImportException is wrapped in RuntimeException.
+      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+    }
+  }
+
+  // helper method to get contents of a given dir containing sequence files
+  private String[] getContent(Configuration conf, Path path) throws Exception {
+    FileSystem fs = FileSystem.getLocal(conf);
+    FileStatus[] stats = fs.listStatus(path);
+    String [] fileNames = new String[stats.length];
+    for (int i = 0; i < stats.length; i++) {
+      fileNames[i] = stats[i].getPath().toString();
+    }
+
+    // Read all the files adding the value lines to the list.
+    List<String> strings = new ArrayList<String>();
+    for (String fileName : fileNames) {
+      if (fileName.startsWith("_") || fileName.startsWith(".")) {
+        continue;
+      }
+
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+      WritableComparable key = (WritableComparable)
+          reader.getKeyClass().newInstance();
+      Writable value = (Writable) reader.getValueClass().newInstance();
+      while (reader.next(key, value)) {
+        strings.add(value.toString());
+      }
+    }
+    return strings.toArray(new String[0]);
+  }
+
+  public void testDeleteTargetDir() throws Exception {
+    // Make sure that if a MapReduce job to do the import fails due
+    // to an IOException, we tell the user about it.
+
+    // Create a table to attempt to import.
+    createTableForColType("VARCHAR(32)", "'meep'");
+
+    Configuration conf = new Configuration();
+
+    // Make the output dir does not exist
+    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.delete(outputPath, true);
+    assertTrue(!fs.exists(outputPath));
+
+    String[] argv = getArgv(true, new String[] { "DATA_COL0" }, conf);
+    argv = Arrays.copyOf(argv, argv.length + 1);
+    argv[argv.length - 1] = "--delete-target-dir";
+
+    Sqoop importer = new Sqoop(new ImportTool());
+    try {
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to go through if target directory"
+        + " does not exist.", 0 == ret);
+      assertTrue(fs.exists(outputPath));
+      // expecting one _SUCCESS file and one file containing data
+      assertTrue("Expecting two files in the directory.",
+          fs.listStatus(outputPath).length == 2);
+      String[] output = getContent(conf, outputPath);
+      assertEquals("Expected output and actual output should be same.", "meep",
+          output[0]);
+
+      ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to go through if target directory exists.",
+        0 == ret);
+      assertTrue(fs.exists(outputPath));
+      // expecting one _SUCCESS file and one file containing data
+      assertTrue("Expecting two files in the directory.",
+          fs.listStatus(outputPath).length == 2);
+      output = getContent(conf, outputPath);
+      assertEquals("Expected output and actual output should be same.", "meep",
+          output[0]);
     } catch (Exception e) {
       // In debug mode, ImportException is wrapped in RuntimeException.
       LOG.info("Got exceptional return (expected: ok). msg is: " + e);

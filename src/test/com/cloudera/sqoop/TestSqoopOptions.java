@@ -22,8 +22,10 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.ArrayUtils;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
 
 /**
  * Test aspects of the SqoopOptions class.
@@ -377,5 +379,58 @@ public class TestSqoopOptions extends TestCase {
 	assertEquals("/usr/lib/hadoop", opts.getHadoopMapRedHome());
   }
 
+
+  //helper method to validate given import options
+  private void validateImportOptions(String[] extraArgs) throws Exception {
+    String [] args = {
+      "--connect", HsqldbTestServer.getUrl(),
+      "--table", "test",
+      "-m", "1",
+    };
+    ImportTool importTool = new ImportTool();
+    SqoopOptions opts = importTool.parseArguments(
+        (String []) ArrayUtils.addAll(args, extraArgs), null, null, false);
+    importTool.validateOptions(opts);
+  }
+
+  //test compatability of --detele-target-dir with import
+  public void testDeteleTargetDir() throws Exception {
+    String [] extraArgs = {
+      "--delete-target-dir",
+    };
+    try {
+      validateImportOptions(extraArgs);
+    } catch(SqoopOptions.InvalidOptionsException ioe) {
+      fail("Unexpected InvalidOptionsException" + ioe);
+    }
+  }
+
+  //test incompatability of --delete-target-dir & --append with import
+  public void testDeleteTargetDirWithAppend() throws Exception {
+    String [] extraArgs = {
+      "--append",
+      "--delete-target-dir",
+    };
+    try {
+      validateImportOptions(extraArgs);
+      fail("Expected InvalidOptionsException");
+    } catch(SqoopOptions.InvalidOptionsException ioe) {
+      // Expected
+    }
+  }
+
+  //test incompatability of --delete-target-dir with incremental import
+  public void testDeleteWithIncrementalImport() throws Exception {
+    String [] extraArgs = {
+      "--incremental", "append",
+      "--delete-target-dir",
+    };
+    try {
+      validateImportOptions(extraArgs);
+      fail("Expected InvalidOptionsException");
+    } catch(SqoopOptions.InvalidOptionsException ioe) {
+      // Expected
+    }
+  }
 
 }

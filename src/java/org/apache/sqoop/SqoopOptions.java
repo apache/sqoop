@@ -139,6 +139,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hdfs.warehouse.dir") private String warehouseDir;
   @StoredAsProperty("hdfs.target.dir") private String targetDir;
   @StoredAsProperty("hdfs.append.dir") private boolean append;
+  @StoredAsProperty("hdfs.delete-target.dir") private boolean delete;
   @StoredAsProperty("hdfs.file.format") private FileLayout layout;
   @StoredAsProperty("direct.import") private boolean direct; // "direct mode."
   @StoredAsProperty("db.batch") private boolean batchMode;
@@ -1435,6 +1436,14 @@ public class SqoopOptions implements Cloneable {
 
   public boolean isAppendMode() {
     return this.append;
+  }
+
+  public void setDeleteMode(boolean doDelete) {
+    this.delete = doDelete;
+  }
+
+  public boolean isDeleteMode() {
+    return this.delete;
   }
 
   /**

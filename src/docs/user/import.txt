@@ -62,6 +62,8 @@ Argument                          Description
 +\--as-textfile+                  Imports data as plain text (default)
 +\--boundary-query <statement>+   Boundary query to use for creating splits
 +\--columns <col,col,col...>+     Columns to import from table
++\--delete-target-dir+            Delete the import target directory\
+                                  if it exists
 +\--direct+                       Use direct import fast path
 +\--direct-split-size <n>+        Split the input stream every 'n' bytes\
                                   when importing in direct mode
