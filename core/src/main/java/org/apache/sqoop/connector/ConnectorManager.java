@@ -228,6 +228,7 @@ public class ConnectorManager {
   }
 
   public synchronized void destroy() {
-    // FIXME
+      handlerMap = null;
+      nameMap = null;
   }
 }
