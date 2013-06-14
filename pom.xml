@@ -111,6 +111,7 @@ limitations under the License.
     <jdbc.postgresql.version>9.1-901.jdbc4</jdbc.postgresql.version>
     <jdbc.oracle.version>11.2.0.3</jdbc.oracle.version>
     <jdbc.sqlserver.version>4.0</jdbc.sqlserver.version>
+    <jdbc.teradata.version>14.00.00.21</jdbc.teradata.version>
   </properties>
 
   <dependencies>
@@ -374,6 +375,16 @@ limitations under the License.
         <groupId>com.microsoft</groupId>
         <artifactId>sqljdbc4</artifactId>
         <version>${jdbc.sqlserver.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.teradata</groupId>
+        <artifactId>tdgssconfig</artifactId>
+        <version>${jdbc.teradata.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.teradata</groupId>
+        <artifactId>terajdbc4</artifactId>
+        <version>${jdbc.teradata.version}</version>
       </dependency>
      <dependency>
       <groupId>org.mockito</groupId>

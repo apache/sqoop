@@ -107,7 +107,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    */
   protected void createAndLoadTableCities() {
     createTable("id",
-      "id", "int",
+      "id", "int not null",
       "country", "varchar(50)",
       "city", "varchar(50)"
     );

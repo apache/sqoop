@@ -275,6 +275,34 @@ limitations under the License.
       </dependencies>
     </profile>
 
+    <!--
+      Teradata JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.teradata -DartifactId=tdgssconfig  -Dversion=14.00.00.21 -Dpackaging=jar -Dfile=/path/to/the/jar/tdgssconfig.jar
+               mvn install:install-file -DgroupId=com.teradata -DartifactId=terajdbc4  -Dversion=14.00.00.21 -Dpackaging=jar -Dfile=/path/to/the/jar/terajdbc4.jar
+      Usage: mvn integration-test -Djdbc.teradata
+    -->
+    <profile>
+      <id>jdbc-teradata</id>
+
+      <activation>
+        <property>
+          <name>jdbc.teradata</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.teradata</groupId>
+          <artifactId>tdgssconfig</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>com.teradata</groupId>
+          <artifactId>terajdbc4</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
   </profiles>
 
 </project>
