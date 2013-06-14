@@ -70,31 +70,6 @@ public class HBaseImportTest extends HBaseTestCase {
   }
 
   @Test
-  public void testStrings() throws IOException {
-    String [] argv = getArgv(true, "stringT", "stringF", true, null);
-    String [] types = { "INT", "VARCHAR(32)" };
-    String [] vals = { "0", "'abc'" };
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyHBaseCell("stringT", "0", "stringF", getColName(1), "abc");
-  }
-
-  @Test
-  public void testNulls() throws IOException {
-    String [] argv = getArgv(true, "nullT", "nullF", true, null);
-    String [] types = { "INT", "INT", "INT" };
-    String [] vals = { "0", "42", "null" };
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-
-    // This cell should import correctly.
-    verifyHBaseCell("nullT", "0", "nullF", getColName(1), "42");
-
-    // This cell should not be placed in the results..
-    verifyHBaseCell("nullT", "0", "nullF", getColName(2), null);
-  }
-
-  @Test
   public void testExitFailure() throws IOException {
     String [] types = { "INT", "INT", "INT" };
     String [] vals = { "0", "42", "43" };
@@ -113,52 +88,4 @@ public class HBaseImportTest extends HBaseTestCase {
     fail("should have gotten exception");
   }
 
-  @Test
-  public void testNullRow() throws IOException {
-    String [] argv = getArgv(true, "nullRowT", "nullRowF", true, null);
-    String [] types = { "INT", "INT" };
-    String [] vals = { "0", "null" };
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-
-    // This cell should not be placed in the results..
-    verifyHBaseCell("nullRowT", "0", "nullRowF", getColName(1), null);
-
-    int rowCount = countHBaseTable("nullRowT", "nullRowF");
-    assertEquals(0, rowCount);
-  }
-
-  @Test
-  public void testAddRowKey() throws IOException {
-    String[] types = { "INT", "INT" };
-    String[] vals = { "0", "1" };
-    createTableWithColTypes(types, vals);
-
-    String[] otherArg = getArgv(true, "addRowKeyT", "addRowKeyF", true, null);
-    String[] argv = new String[otherArg.length + 2];
-    argv[0] = "-D";
-    argv[1] = "sqoop.hbase.add.row.key=true";
-    System.arraycopy(otherArg, 0, argv, 2, otherArg.length);
-
-    runImport(argv);
-
-    // Row key should have been added
-    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(0), "0");
-    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(1), "1");
-  }
-
-  @Test
-  public void testAddRowKeyDefault() throws IOException {
-    String[] types = { "INT", "INT" };
-    String[] vals = { "0", "1" };
-    createTableWithColTypes(types, vals);
-
-    String[] argv = getArgv(true, "addRowKeyDfT", "addRowKeyDfF", true, null);
-
-    runImport(argv);
-
-    // Row key should not be added by default
-    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(0), null);
-    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(1), "1");
-  }
 }
