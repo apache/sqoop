@@ -47,7 +47,7 @@ import org.junit.Test;
 
 public class TestHdfsExtract extends TestCase {
 
-  private static final String INPUT_ROOT = "/tmp/sqoop/warehouse/";
+  private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_FILES = 5;
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
 

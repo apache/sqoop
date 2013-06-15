@@ -46,7 +46,7 @@ import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 
 public class TestHdfsLoad extends TestCase {
 
-  private static final String OUTPUT_ROOT = "/tmp/sqoop/warehouse/";
+  private static final String OUTPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final String OUTPUT_FILE = "part-r-00000";
   private static final int START_ID = 1;
   private static final int NUMBER_OF_IDS = 9;
