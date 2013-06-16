@@ -31,8 +31,12 @@ import org.apache.sqoop.validation.Status;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.fail;
 
 /**
  * Base test case for connector testing.
@@ -74,6 +78,10 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     provider.insertRow(getTableName(), values);
   }
 
+  protected long rowCount() {
+    return provider.rowCount(getTableName());
+  }
+
   /**
    * Fill connection form based on currently active provider.
    *
@@ -103,18 +111,76 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   }
 
   /**
+   * Fill input form. Mapreduce input directory will be set to default test value.
+   *
+   * @param job MJOb object to fill
+   */
+  protected void fillInputForm(MJob job) {
+    MFormList forms = job.getFrameworkPart();
+    forms.getStringInput("input.inputDirectory").setValue(getMapreduceDirectory());
+  }
+
+  /**
    * Create table cities.
    */
+  protected void createTableCities() {
+     createTable("id",
+       "id", "int",
+       "country", "varchar(50)",
+       "city", "varchar(50)"
+     );
+  }
+
+  /**
+   * Create table cities and load few rows.
+   */
   protected void createAndLoadTableCities() {
-    createTable("id",
-      "id", "int not null",
-      "country", "varchar(50)",
-      "city", "varchar(50)"
-    );
+    createTableCities();
     insertRow(1, "USA", "San Francisco");
     insertRow(2, "USA", "Sunnyvale");
     insertRow(3, "Czech Republic", "Brno");
     insertRow(4, "USA", "Palo Alto");
+  }
+
+  /**
+   * Assert row in testing table.
+   *
+   * @param conditions Conditions in form that are expected by the database provider
+   * @param values Values that are expected in the table (with corresponding types)
+   */
+  protected void assertRow(Object []conditions, Object ...values) {
+    ResultSet rs = provider.getRows(getTableName(), conditions);
+
+    try {
+      if(! rs.next()) {
+        fail("No rows found.");
+      }
+
+      int i = 1;
+      for(Object expectedValue : values) {
+        Object actualValue = rs.getObject(i);
+        assertEquals("Columns do not match on position: " + i, expectedValue, actualValue);
+        i++;
+      }
+
+      if(rs.next()) {
+        fail("Found more than one row.");
+      }
+    } catch (SQLException e) {
+      LOG.error("Unexpected SQLException", e);
+      fail("Unexpected SQLException: " + e);
+    } finally {
+      provider.closeResultSetWithStatement(rs);
+    }
+  }
+
+  /**
+   * Assert row in table "cities".
+   *
+   * @param values Values that are expected
+   */
+  protected void assertRowInCitiesTable(Object ... values) {
+    assertRow(new Object[]{"id", values[0]}, values);
   }
 
   /**

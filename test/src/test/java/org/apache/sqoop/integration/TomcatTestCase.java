@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.SqoopClient;
@@ -180,5 +181,17 @@ abstract public class TomcatTestCase {
       LOG.error("\t" + StringUtils.join(notFound, "\n\t"));
       fail("Output do not match expectations.");
     }
+  }
+
+  /**
+   * Create mapreduce input file with specified content.
+   *
+   * @param filename Input file name
+   * @param lines Individual lines that should be written into the file
+   * @throws IOException
+   */
+  protected void createInputMapreduceFile(String filename, String...lines) throws IOException {
+    File outputFile = new File(getMapreduceDirectory(), filename);
+    FileUtils.writeLines(outputFile, Arrays.asList(lines));
   }
 }
