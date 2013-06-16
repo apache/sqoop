@@ -80,7 +80,7 @@ def jira_get_defect(result, defect, username, password):
 def jira_post_comment(result, defect, branch, username, password):
   url = "%s/rest/api/2/issue/%s/comment" % (BASE_JIRA_URL, defect)
   body = [ "Here are the results of testing the latest attachment" ]
-  body += [ "%s against %s." % (result.attachment, branch) ]
+  body += [ "%s against branch %s." % (result.attachment, branch) ]
   body += [ "" ]
   if result._fatal:
     result._error = [ result._fatal ] + result._error
