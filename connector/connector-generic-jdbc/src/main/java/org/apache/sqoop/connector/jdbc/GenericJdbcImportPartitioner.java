@@ -22,8 +22,11 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
@@ -106,27 +109,39 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     long minDateValue = 0;
     long maxDateValue = 0;
-
+    SimpleDateFormat sdf = null;
     switch(partitionColumnType) {
       case Types.DATE:
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
         minDateValue = Date.valueOf(partitionMinValue).getTime();
         maxDateValue = Date.valueOf(partitionMaxValue).getTime();
         break;
       case Types.TIME:
+        sdf = new SimpleDateFormat("HH:mm:ss");
         minDateValue = Time.valueOf(partitionMinValue).getTime();
         maxDateValue = Time.valueOf(partitionMaxValue).getTime();
         break;
       case Types.TIMESTAMP:
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         minDateValue = Timestamp.valueOf(partitionMinValue).getTime();
         maxDateValue = Timestamp.valueOf(partitionMaxValue).getTime();
         break;
     }
+
+    long tzOffset = TimeZone.getDefault().getRawOffset();
+
+    minDateValue += tzOffset;
+    maxDateValue += tzOffset;
+
+    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
     long interval =  (maxDateValue - minDateValue) / numberPartitions;
     long remainder = (maxDateValue - minDateValue) % numberPartitions;
 
     if (interval == 0) {
       numberPartitions = (int)remainder;
     }
+
     long lowerBound;
     long upperBound = minDateValue;
 
@@ -146,6 +161,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
         case Types.TIME:
           objLB = new Time(lowerBound);
           objUB = new Time(upperBound);
+
           break;
         case Types.TIMESTAMP:
           objLB = new Timestamp(lowerBound);
@@ -155,9 +171,10 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
       partition.setConditions(
-          constructDateConditions(objLB, objUB, false));
+          constructDateConditions(sdf, objLB, objUB, false));
       partitions.add(partition);
     }
+
     switch(partitionColumnType) {
       case Types.DATE:
         objLB = new Date(upperBound);
@@ -172,9 +189,11 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
         objUB = new Timestamp(maxDateValue);
         break;
     }
+
+
     GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
     partition.setConditions(
-        constructDateConditions(objLB, objUB, true));
+        constructDateConditions(sdf, objLB, objUB, true));
     partitions.add(partition);
     return partitions;
   }
@@ -461,16 +480,16 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
      ;
   }
 
-  protected String constructDateConditions(
+  protected String constructDateConditions(SimpleDateFormat sdf,
       Object lowerBound, Object upperBound, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
-    conditions.append('\'').append(lowerBound.toString()).append('\'');
+    conditions.append('\'').append(sdf.format((java.util.Date)lowerBound)).append('\'');
     conditions.append(" <= ");
     conditions.append(partitionColumnName);
     conditions.append(" AND ");
     conditions.append(partitionColumnName);
     conditions.append(lastOne ? " <= " : " < ");
-    conditions.append('\'').append(upperBound.toString()).append('\'');
+    conditions.append('\'').append(sdf.format((java.util.Date)upperBound)).append('\'');
     return conditions.toString();
   }
 

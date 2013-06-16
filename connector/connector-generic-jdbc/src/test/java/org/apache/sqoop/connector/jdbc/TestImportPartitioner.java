@@ -333,9 +333,9 @@ public class TestImportPartitioner extends TestCase {
         3);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
     verifyResult(partitions, new String[]{
-        "'2013-01-01 01:01:01.123' <= TSCOL AND TSCOL < '2013-05-02 13:14:17.634'",
-        "'2013-05-02 13:14:17.634' <= TSCOL AND TSCOL < '2013-09-01 00:27:34.144'",
-        "'2013-09-01 00:27:34.144' <= TSCOL AND TSCOL <= '2013-12-31 10:40:50.654'",
+        "'2013-01-01 01:01:01.123' <= TSCOL AND TSCOL < '2013-05-02 12:14:17.634'",
+        "'2013-05-02 12:14:17.634' <= TSCOL AND TSCOL < '2013-08-31 23:27:34.144'",
+        "'2013-08-31 23:27:34.144' <= TSCOL AND TSCOL <= '2013-12-31 10:40:50.654'",
     });
   }
 
