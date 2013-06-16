@@ -24,10 +24,33 @@
 # Original version was copied from FLUME project.
 #
 import sys, os, re, urllib2, base64, subprocess, tempfile, shutil
+import json
 from optparse import OptionParser
 
 tmp_dir = None
 BASE_JIRA_URL = 'https://issues.apache.org/jira'
+
+# Guess branch for given versions
+#
+# Return None if detects that JIRA belongs to more than one branch
+def sqoop_guess_branch(versions):
+  branch = None
+
+  for v in versions:
+    tmp_branch = None
+
+    if v.startswith("1.99") or v.startswith("2.0"):
+      tmp_branch = "sqoop2"
+    else:
+      tmp_branch = "trunk"
+
+    if not branch:
+      branch = tmp_branch
+    else:
+      if branch != tmp_branch:
+        return None
+
+  return branch
 
 def execute(cmd, log=True):
   if log:
@@ -103,6 +126,13 @@ def jira_get_attachment(result, defect, username, password):
     return  "%s%s" % (BASE_JIRA_URL, matches.pop())
   return None
 
+# Get versions from JIRA JSON object
+def json_get_version(json):
+  versions = []
+  for version in json.get("fields").get("versions"):
+    versions = versions + [version.get("name")]
+  return versions
+
 def git_cleanup():
   rc = execute("git clean -d -f", False)
   if rc != 0:
@@ -112,6 +142,10 @@ def git_cleanup():
     print "ERROR: git reset failed"
 
 def git_checkout(result, branch):
+  if not branch:
+    result.fatal("Branch wasn't specified nor was correctly guessed")
+    return
+
   if execute("git checkout %s" % (branch)) != 0:
     result.fatal("git checkout %s failed" % branch)
   if execute("git clean -d -f") != 0:
@@ -210,7 +244,7 @@ class Result(object):
 usage = "usage: %prog [options]"
 parser = OptionParser(usage)
 parser.add_option("--branch", dest="branch",
-                  help="Local git branch to test against", metavar="trunk", default="SQOOP-1082")
+                  help="Local git branch to test against", metavar="trunk")
 parser.add_option("--defect", dest="defect",
                   help="Defect name", metavar="FLUME-1787")
 parser.add_option("--file", dest="filename",
@@ -286,18 +320,34 @@ if output_dir.endswith("/"):
 if options.output_dir and not os.path.isdir(options.output_dir):
   os.makedirs(options.output_dir)
 
+# If defect parameter is specified let's download the latest attachment
 if defect:
   jira_json = jira_get_defect(result, defect, username, password)
+  json = json.loads(jira_json)
+
+  # JIRA must be in Patch Available state
   if '"Patch Available"' not in jira_json:
     print "ERROR: Defect %s not in patch available state" % (defect)
     sys.exit(1)
+
+  # If branch is not specified, let's try to guess it from JIRA details
+  if not branch:
+    versions = json_get_version(json)
+    branch = sqoop_guess_branch(versions)
+    if not branch:
+      print "ERROR: Can't guess branch name from %s" % (versions)
+      sys.exit(1)
+
   attachment = jira_get_attachment(result, defect, username, password)
   if not attachment:
     print "ERROR: No attachments found for %s" % (defect)
     sys.exit(1)
+
   result.attachment = attachment
+
   patch_contents = jira_request(result, result.attachment, username, password, None, {}).read()
   patch_file = "%s/%s.patch" % (output_dir, defect)
+
   with open(patch_file, 'a') as fh:
     fh.write(patch_contents)
 elif options.filename:
