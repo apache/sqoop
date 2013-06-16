@@ -17,6 +17,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+
+#
+# Pre Commit Hook for running tests and updating JIRA
+#
+# Original version was copied from FLUME project.
+#
 import sys, os, re, urllib2, base64, subprocess, tempfile, shutil
 from optparse import OptionParser
 
