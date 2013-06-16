@@ -187,7 +187,7 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
     if output:
       print output
   else:
-    result.fatal("failed to apply patch (exit code %d):\n%s\n" % (rc, output))
+    result.fatal("failed to apply patch (exit code %d):\n{code}%s{code}\n" % (rc, output))
 
 def mvn_clean(result, output_dir):
   rc = execute("mvn clean 1>%s/clean.txt 2>&1" % output_dir)
