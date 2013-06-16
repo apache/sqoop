@@ -362,6 +362,7 @@ else:
 # Verify that we are on supported branch
 if not sqoop_verify_branch(branch):
   print "ERROR: Unsupported branch %s" % (branch)
+  sys.exit(1)
 
 mvn_clean(result, output_dir)
 git_checkout(result, branch)
