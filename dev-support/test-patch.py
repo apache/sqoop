@@ -183,6 +183,7 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
     with open(output_file) as fh:
       output = fh.read()
   if rc == 0:
+    result.success("Patch applied correctly")
     if output:
       print output
   else:
@@ -190,12 +191,16 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
 
 def mvn_clean(result, output_dir):
   rc = execute("mvn clean 1>%s/clean.txt 2>&1" % output_dir)
-  if rc != 0:
+  if rc == 0:
+    result.success("Clean was successful")
+  else:
     result.fatal("failed to clean project (exit code %d)" % (rc))
 
 def mvn_install(result, output_dir):
   rc = execute("mvn install -DskipTests 1>%s/install.txt 2>&1" % output_dir)
-  if rc != 0:
+  if rc == 0:
+    result.success("Patch compiled")
+  else:
     result.fatal("failed to build with patch (exit code %d)" % (rc))
 
 def find_all_files(top):
@@ -206,7 +211,7 @@ def find_all_files(top):
 def mvn_test(result, output_dir):
   rc = execute("mvn test 1>%s/test.txt 2>&1" % output_dir)
   if rc == 0:
-    result.success("all tests passed")
+    result.success("All tests passed")
   else:
     result.error("mvn test exited %d" % (rc))
     failed_tests = []
@@ -384,11 +389,11 @@ if not sqoop_verify_branch(branch):
 
 mvn_clean(result, output_dir)
 git_checkout(result, branch)
-#git_apply(result, patch_cmd, patch_file, strip, output_dir)
-#mvn_install(result, output_dir)
-#if run_tests:
-#  mvn_test(result, output_dir)
-#else:
-#  result.info("patch applied and built but tests did not execute")
+git_apply(result, patch_cmd, patch_file, strip, output_dir)
+mvn_install(result, output_dir)
+if run_tests:
+  mvn_test(result, output_dir)
+else:
+  result.info("patch applied and built but tests did not execute")
 
 result.exit_handler()
