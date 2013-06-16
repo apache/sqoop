@@ -30,6 +30,11 @@ from optparse import OptionParser
 tmp_dir = None
 BASE_JIRA_URL = 'https://issues.apache.org/jira'
 
+# Write output to file
+def write_file(filename, content):
+  with open(filename, "w") as text_file:
+      text_file.write(content)
+
 # Guess branch for given versions
 #
 # Return None if detects that JIRA belongs to more than one branch
@@ -77,8 +82,7 @@ def jira_get_defect(result, defect, username, password):
   url = "%s/rest/api/2/issue/%s" % (BASE_JIRA_URL, defect)
   return jira_request(result, url, username, password, None, {}).read()
 
-def jira_post_comment(result, defect, branch, username, password):
-  url = "%s/rest/api/2/issue/%s/comment" % (BASE_JIRA_URL, defect)
+def jira_generate_comment(result, branch):
   body = [ "Here are the results of testing the latest attachment" ]
   body += [ "%s against branch %s." % (result.attachment, branch) ]
   body += [ "" ]
@@ -104,7 +108,17 @@ def jira_post_comment(result, defect, branch, username, password):
     body += [ "Console output: %sconsole" % (os.environ['BUILD_URL']) ]
   body += [ "" ]
   body += [ "This message is automatically generated." ]
-  body = "{\"body\": \"%s\"}" % ("\\n".join(body))
+  return "\\n".join(body)
+
+def jira_post_comment(result, defect, branch, username, password):
+  url = "%s/rest/api/2/issue/%s/comment" % (BASE_JIRA_URL, defect)
+
+  # Generate body for the comment and save it to a file
+  body = jira_generate_comment(result, branch)
+  write_file("%s/jira-comment.txt" % output_dir, body.replace("\\n", "\n"))
+
+  # Send the comment to the JIRA
+  body = "{\"body\": \"%s\"}" % body
   headers = {'Content-Type' : 'application/json'}
   response = jira_request(result, url, username, password, body, headers)
   body = response.read()
@@ -295,7 +309,11 @@ result = Result()
 if os.path.isdir(options.output_dir):
   clean_folder(options.output_dir)
 
+# Default exit handler in case that we do not want to submit results to JIRA
 def log_and_exit():
+  # Write down comment generated for jira (won't be posted)
+  write_file("%s/jira-comment.txt" % output_dir, jira_generate_comment(result, branch).replace("\\n", "\n"))
+
   if result._fatal:
     print "FATAL: %s" % (result._fatal)
   for error in result._error:
@@ -366,11 +384,11 @@ if not sqoop_verify_branch(branch):
 
 mvn_clean(result, output_dir)
 git_checkout(result, branch)
-git_apply(result, patch_cmd, patch_file, strip, output_dir)
-mvn_install(result, output_dir)
-if run_tests:
-  mvn_test(result, output_dir)
-else:
-  result.info("patch applied and built but tests did not execute")
+#git_apply(result, patch_cmd, patch_file, strip, output_dir)
+#mvn_install(result, output_dir)
+#if run_tests:
+#  mvn_test(result, output_dir)
+#else:
+#  result.info("patch applied and built but tests did not execute")
 
 result.exit_handler()
