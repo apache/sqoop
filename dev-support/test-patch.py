@@ -349,6 +349,7 @@ if options.output_dir and not os.path.isdir(options.output_dir):
 
 # If defect parameter is specified let's download the latest attachment
 if defect:
+  print "Defect: %s" % defect
   jira_json = jira_get_defect(result, defect, username, password)
   json = json.loads(jira_json)
 
