@@ -52,6 +52,10 @@ def sqoop_guess_branch(versions):
 
   return branch
 
+# Verify supported branch
+def sqoop_verify_branch(branch):
+  return branch in {"sqoop2", "SQOOP-1082"}
+
 def execute(cmd, log=True):
   if log:
     print "INFO: Executing %s" % (cmd)
@@ -354,6 +358,10 @@ elif options.filename:
   patch_file = options.filename
 else:
   raise Exception("Not reachable")
+
+# Verify that we are on supported branch
+if not sqoop_verify_branch(branch):
+  print "ERROR: Unsupported branch %s" % (branch)
 
 mvn_clean(result, output_dir)
 git_checkout(result, branch)
