@@ -303,6 +303,28 @@ limitations under the License.
       </dependencies>
     </profile>
 
+    <!--
+      Netezza JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.ibm.netezza -DartifactId=nzjdbc3 -Dversion=6.0 -Dpackaging=jar -Dfile=/path/to/the/jar/nzjdbc3.jar
+      Usage: mvn integration-test -Djdbc.netezza
+    -->
+    <profile>
+      <id>jdbc-netezza</id>
+
+      <activation>
+        <property>
+          <name>jdbc.netezza</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.ibm.netezza</groupId>
+          <artifactId>nzjdbc3</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
   </profiles>
 
 </project>

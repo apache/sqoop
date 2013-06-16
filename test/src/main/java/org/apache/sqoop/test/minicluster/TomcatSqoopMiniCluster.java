@@ -98,6 +98,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
          jar.contains("oracle")   || // Oracle driver
          jar.contains("terajdbc") || // Teradata driver
          jar.contains("tdgs")     || // Teradata driver
+         jar.contains("nzjdbc")   || // Netezza driver
          jar.contains("sqljdbc")  || // Microsoft SQL Server driver
          jar.contains("google")      // Google libraries (guava, ...)
        ) {
