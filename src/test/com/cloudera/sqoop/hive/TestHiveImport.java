@@ -20,6 +20,7 @@ package com.cloudera.sqoop.hive;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,13 +68,18 @@ public class TestHiveImport extends ImportJobTestCase {
    * to DATA_COLi for 0 &lt;= i &lt; numCols.
    * @param numCols the number of columns to be created.
    */
-  private void setNumCols(int numCols) {
+  protected void setNumCols(int numCols) {
     String [] cols = new String[numCols];
     for (int i = 0; i < numCols; i++) {
       cols[i] = "DATA_COL" + i;
     }
 
     setColNames(cols);
+  }
+
+  protected String[] getTypesNewLineTest() {
+    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    return types;
   }
 
   /**
@@ -98,7 +104,7 @@ public class TestHiveImport extends ImportJobTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
     args.add("--hive-import");
     String [] colNames = getColNames();
     if (null != colNames) {
@@ -135,7 +141,7 @@ public class TestHiveImport extends ImportJobTestCase {
     args.add("--table");
     args.add(getTableName());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
 
     return args.toArray(new String[0]);
   }
@@ -149,7 +155,7 @@ public class TestHiveImport extends ImportJobTestCase {
     args.add("--table");
     args.add(getTableName());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
     args.add("--hive-import");
 
     return args.toArray(new String[0]);
@@ -164,7 +170,7 @@ public class TestHiveImport extends ImportJobTestCase {
     args.add("--table");
     args.add(getTableName());
     args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    args.add(getConnectString());
 
     if (null != extraArgs) {
       for (String arg : extraArgs) {
@@ -357,7 +363,7 @@ public class TestHiveImport extends ImportJobTestCase {
     LOG.info("Doing import of single row into FIELD_WITH_NL_HIVE_IMPORT table");
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String[] types = getTypesNewLineTest();
     String[] vals = { "'test with \n new lines \n'", "42",
         "'oh no " + '\01' + " field delims " + '\01' + "'", };
     String[] moreArgs = { "--"+ BaseSqoopTool.HIVE_DROP_DELIMS_ARG };
@@ -406,7 +412,7 @@ public class TestHiveImport extends ImportJobTestCase {
         + "FIELD_WITH_NL_REPLACEMENT_HIVE_IMPORT table");
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String[] types = getTypesNewLineTest();
     String[] vals = { "'test with\nnew lines\n'", "42",
         "'oh no " + '\01' + " field delims " + '\01' + "'", };
     String[] moreArgs = { "--"+BaseSqoopTool.HIVE_DELIMS_REPLACEMENT_ARG, " "};

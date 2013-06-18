@@ -41,6 +41,18 @@ import com.cloudera.sqoop.manager.OracleManagerTest;
 import com.cloudera.sqoop.manager.OracleCompatTest;
 import com.cloudera.sqoop.manager.PostgresqlExportTest;
 import com.cloudera.sqoop.manager.PostgresqlImportTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportDelimitedFileManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportSequenceFileManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeImportDelimitedFileManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeImportSequenceFileManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerHiveImportManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerManagerManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerMultiColsManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerMultiMapsManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerParseMethodsManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerQueryManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerSplitByManualTest;
+import org.apache.sqoop.manager.sqlserver.SQLServerWhereManualTest;
 
 /**
  * Test battery including all tests of vendor-specific ConnManager
@@ -67,6 +79,20 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(OracleExportTest.class);
     suite.addTestSuite(OracleManagerTest.class);
     suite.addTestSuite(OracleCompatTest.class);
+
+    // SQL Server
+    suite.addTestSuite(SQLServerDatatypeExportDelimitedFileManualTest.class);
+    suite.addTestSuite(SQLServerDatatypeExportSequenceFileManualTest.class);
+    suite.addTestSuite(SQLServerDatatypeImportDelimitedFileManualTest.class);
+    suite.addTestSuite(SQLServerDatatypeImportSequenceFileManualTest.class);
+    suite.addTestSuite(SQLServerHiveImportManualTest.class);
+    suite.addTestSuite(SQLServerManagerManualTest.class);
+    suite.addTestSuite(SQLServerMultiColsManualTest.class);
+    suite.addTestSuite(SQLServerMultiMapsManualTest.class);
+    suite.addTestSuite(SQLServerParseMethodsManualTest.class);
+    suite.addTestSuite(SQLServerQueryManualTest.class);
+    suite.addTestSuite(SQLServerSplitByManualTest.class);
+    suite.addTestSuite(SQLServerWhereManualTest.class);
 
     // PostgreSQL
     suite.addTestSuite(PostgresqlImportTest.class);

@@ -262,6 +262,12 @@
 
   <property name="java.security.krb5.kdc"
             value="kdc0.ox.ac.uk:kdc1.ox.ac.uk"/>
+  <property name="ms.sqlserver.username"
+            value="SQOOPUSER"/>
+
+  <property name="ms.sqlserver.password"
+            value="PASSWORD"/>
+
 
   <condition property="windows">
     <os family="windows" />
@@ -743,6 +749,15 @@
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
+
+      <!-- microsoft sqlserver manual test related properties-->
+      <sysproperty key="test.data.dir" value="${basedir}/testdata"/>
+      <sysproperty key="ms.datatype.test.data.file.export" value="DatatypeTestData-export-lite.txt"/>
+      <sysproperty key="ms.datatype.test.data.file.import" value="DatatypeTestData-import-lite.txt"/>
+      <sysproperty key="ms.datatype.test.data.file.delim" value=","/>
+      <sysproperty key="ms.datatype.test.hdfsprefix" value="file:///"/>
+      <sysproperty key="ms.sqlserver.username" value="${ms.sqlserver.username}"/>
+      <sysproperty key="ms.sqlserver.password" value="${ms.sqlserver.password}"/>
 
       <sysproperty key="net.sourceforge.cobertura.datafile"
           value="${cobertura.dir}/cobertura-${cobertura.testset}.ser" />
