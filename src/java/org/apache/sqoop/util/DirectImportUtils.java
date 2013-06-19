@@ -86,7 +86,7 @@ public final class DirectImportUtils {
 
     // This Writer will be closed by the caller.
     return new SplittableBufferedWriter(
-        new SplittingOutputStream(conf, destDir, "data-",
+        new SplittingOutputStream(conf, destDir, "part-m-",
         options.getDirectSplitSize(), getCodec(conf, options)));
   }
 
