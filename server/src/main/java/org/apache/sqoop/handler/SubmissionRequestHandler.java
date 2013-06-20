@@ -20,6 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.FrameworkManager;
+import org.apache.sqoop.framework.JobManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MSubmission;
@@ -78,7 +79,7 @@ public class SubmissionRequestHandler implements RequestHandler {
 
   private JsonBean handleNotification(RequestContext ctx, String sjid) {
     logger.debug("Received notification request for job " + sjid);
-    FrameworkManager.getInstance().status(Long.parseLong(sjid));
+    JobManager.getInstance().status(Long.parseLong(sjid));
     return JsonBean.EMPTY_BEAN;
   }
 
@@ -90,9 +91,9 @@ public class SubmissionRequestHandler implements RequestHandler {
         return submissionStatus(jid);
       case POST:
         // TODO: This should be outsourced somewhere more suitable than here
-        if(FrameworkManager.getInstance().getNotificationBaseUrl() == null) {
+        if(JobManager.getInstance().getNotificationBaseUrl() == null) {
           String url = ctx.getRequest().getRequestURL().toString();
-          FrameworkManager.getInstance().setNotificationBaseUrl(
+          JobManager.getInstance().setNotificationBaseUrl(
             url.split("v1")[0] + "/v1/submission/notification/");
         }
         return submissionSubmit(jid);
@@ -104,17 +105,17 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean submissionStop(long jid) {
-    MSubmission submission = FrameworkManager.getInstance().stop(jid);
+    MSubmission submission = JobManager.getInstance().stop(jid);
     return new SubmissionBean(submission);
   }
 
   private JsonBean submissionSubmit(long jid) {
-    MSubmission submission = FrameworkManager.getInstance().submit(jid);
+    MSubmission submission = JobManager.getInstance().submit(jid);
     return new SubmissionBean(submission);
   }
 
   private JsonBean submissionStatus(long jid) {
-    MSubmission submission = FrameworkManager.getInstance().status(jid);
+    MSubmission submission = JobManager.getInstance().status(jid);
     return new SubmissionBean(submission);
   }
 }
