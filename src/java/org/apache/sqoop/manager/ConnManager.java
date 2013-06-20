@@ -485,6 +485,14 @@ public abstract class ConnManager {
   public abstract Connection getConnection() throws SQLException;
 
   /**
+   * discard the database connection.
+   */
+  public void discardConnection(boolean doClose) {
+    throw new UnsupportedOperationException("No discard connection support "
+      + "for this database");
+  }
+
+  /**
    * @return a string identifying the driver class to load for this
    * JDBC connection type.
    */

@@ -179,6 +179,8 @@ public class HiveImport {
     }
 
     // generate the HQL statements to run.
+    // reset the connection as it might have timed out
+    connManager.discardConnection(true);
     TableDefWriter tableWriter = new TableDefWriter(options, connManager,
         inputTableName, outputTableName,
         configuration, !debugMode);

@@ -65,9 +65,12 @@ public class GenericJdbcManager
    * connection first.
    * @param doClose if true, try to close the connection before forgetting it.
    */
-  protected void discardConnection(boolean doClose) throws SQLException {
+  public void discardConnection(boolean doClose) {
     if (doClose && hasOpenConnection()) {
-      this.connection.close();
+      try {
+        this.connection.close();
+      } catch(SQLException sqe) {
+      }
     }
 
     this.connection = null;
