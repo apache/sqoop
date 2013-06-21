@@ -60,4 +60,26 @@ public class HBaseImportAddRowKeyTest extends HBaseTestCase {
     verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(0), null);
     verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(1), "1");
   }
+
+  @Test
+  public void testAddCompositeKey() throws IOException {
+    String[] types = { "INT", "INT" };
+    String[] vals = { "0", "1" };
+    createTableWithColTypes(types, vals);
+
+    String[] otherArg = getArgv(true, "addRowKeyT", "addRowKeyF", true, null);
+    String[] argv = new String[otherArg.length + 4];
+    argv[0]="-D";
+    argv[1]="sqoop.hbase.add.row.key=true";
+    System.arraycopy(otherArg, 0, argv, 2, otherArg.length);
+    argv[argv.length - 2] = "--hbase-row-key";
+    argv[argv.length - 1] = getColName(0)+","+getColName(1);
+
+    runImport(argv);
+
+    // Row key should have been added
+    verifyHBaseCell("addRowKeyT", "0_1", "addRowKeyF", getColName(0), "0");
+    verifyHBaseCell("addRowKeyT", "0_1", "addRowKeyF", getColName(1), "1");
+  }
+
 }

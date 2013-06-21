@@ -29,6 +29,9 @@ HBase options
 
 --hbase-row-key (col)::
   Specifies which input column to use as the row key
+  If input table contains composite key, value of
+  (col) must be a comma-separated list of composite
+  key attributes
 
 --hbase-table (table-name)::
   Specifies an HBase table to use as the target instead of HDFS

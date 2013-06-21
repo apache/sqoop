@@ -27,6 +27,10 @@ Argument                      Description
 +\--hbase-create-table+       If specified, create missing HBase tables
 +\--hbase-row-key <col>+      Specifies which input column to use as the\
                               row key
+                              In case, if input table contains composite
+                              key, then <col> must be in the form of a
+                              comma-separated list of composite key
+                              attributes
 +\--hbase-table <table-name>+ Specifies an HBase table to use as the \
                               target instead of HDFS
 --------------------------------------------------------------------------

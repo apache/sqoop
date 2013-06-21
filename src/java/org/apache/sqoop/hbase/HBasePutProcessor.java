@@ -112,6 +112,7 @@ public class HBasePutProcessor implements Closeable, Configurable,
       stringPutTransformer.addRowKey =
           conf.getBoolean(HBasePutProcessor.ADD_ROW_KEY,
               HBasePutProcessor.ADD_ROW_KEY_DEFAULT);
+      stringPutTransformer.detectCompositeKey();
     }
 
     this.tableName = conf.get(TABLE_NAME_KEY, null);
