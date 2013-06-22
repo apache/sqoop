@@ -136,12 +136,6 @@ public class JobManager {
    private long updateSleep;
 
    /**
-    * Mutex for creating new submissions. We're not allowing more then one
-    * running submission for one job.
-    */
-   private final Object submissionMutex = new Object();
-
-   /**
     * Base notification URL.
     *
     * Framework manager will always add job id.
@@ -372,7 +366,7 @@ public class JobManager {
 
        // Make sure that this job id is not currently running and submit the job
        // only if it's not.
-       synchronized (submissionMutex) {
+       synchronized (getClass()) {
            MSubmission lastSubmission = repository.findSubmissionLastForJob(jobId);
            if(lastSubmission != null && lastSubmission.getStatus().isRunning()) {
                throw new SqoopException(FrameworkError.FRAMEWORK_0002,
