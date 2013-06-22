@@ -26,7 +26,9 @@ import org.apache.sqoop.submission.counter.Counters;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -35,6 +37,11 @@ public class TestSubmissionBean extends TestCase {
 
   public void testTransferUnknown() {
     transfer(MSubmission.UNKNOWN);
+
+    List<MSubmission> submissions = new ArrayList<MSubmission>();
+    submissions.add(MSubmission.UNKNOWN);
+    submissions.add(MSubmission.UNKNOWN);
+    transfer(submissions);
   }
 
   public void testTransferJobId() {
@@ -43,6 +50,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals(666, target.getJobId());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setJobId(777);
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setJobId(888);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals(777, targets.get(0).getJobId());
+    assertNotNull(targets.get(1));
+    assertEquals(888, targets.get(1).getJobId());
   }
 
   public void testTransferCreationDate() {
@@ -52,6 +73,22 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals(date, target.getCreationDate());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    Date datex = new Date(1000);
+    sourcex.setCreationDate(datex);
+    sources.add(sourcex);
+    Date datey = new Date(2000);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setCreationDate(datey);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals(datex, targets.get(0).getCreationDate());
+    assertNotNull(targets.get(1));
+    assertEquals(datey, targets.get(1).getCreationDate());
   }
 
   public void testTransferLastUpdateDate() {
@@ -61,6 +98,22 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals(date, target.getLastUpdateDate());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    Date datex = new Date(1000);
+    sourcex.setLastUpdateDate(datex);
+    sources.add(sourcex);
+    Date datey = new Date(2000);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setLastUpdateDate(datey);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals(datex, targets.get(0).getLastUpdateDate());
+    assertNotNull(targets.get(1));
+    assertEquals(datey, targets.get(1).getLastUpdateDate());
   }
 
   public void testTransferStatus() {
@@ -69,6 +122,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals(SubmissionStatus.SUCCEEDED, target.getStatus());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setStatus(SubmissionStatus.RUNNING);
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setStatus(SubmissionStatus.BOOTING);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals(SubmissionStatus.RUNNING, targets.get(0).getStatus());
+    assertNotNull(targets.get(1));
+    assertEquals(SubmissionStatus.BOOTING, targets.get(1).getStatus());
   }
 
   public void testTransferExternalId() {
@@ -77,6 +144,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals("Job-x", target.getExternalId());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setExternalId("Job-y");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setExternalId("Job-z");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("Job-y", targets.get(0).getExternalId());
+    assertNotNull(targets.get(1));
+    assertEquals("Job-z", targets.get(1).getExternalId());
   }
 
   public void testTransferExternalLink() {
@@ -85,6 +166,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals("http://", target.getExternalLink());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setExternalLink("http://localhost:80");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setExternalLink("http://localhost:8080");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("http://localhost:80", targets.get(0).getExternalLink());
+    assertNotNull(targets.get(1));
+    assertEquals("http://localhost:8080", targets.get(1).getExternalLink());
   }
 
   public void testTransferException() {
@@ -93,6 +188,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals("EndOfTheWorldException", target.getExceptionInfo());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setExceptionInfo("TheNewEraException");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setExceptionInfo("EndOfTheWorldAgainException");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("TheNewEraException", targets.get(0).getExceptionInfo());
+    assertNotNull(targets.get(1));
+    assertEquals("EndOfTheWorldAgainException", targets.get(1).getExceptionInfo());
   }
 
   public void testTransferExceptionTrace() {
@@ -101,6 +210,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals("void.java(3): line infinity", target.getExceptionStackTrace());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setExceptionStackTrace("void.java(4): segment fault in Java");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setExceptionStackTrace("void.java(5): core dumps in Java");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("void.java(4): segment fault in Java", targets.get(0).getExceptionStackTrace());
+    assertNotNull(targets.get(1));
+    assertEquals("void.java(5): core dumps in Java", targets.get(1).getExceptionStackTrace());
   }
 
   public void testTransferProgress() {
@@ -109,6 +232,20 @@ public class TestSubmissionBean extends TestCase {
 
     MSubmission target = transfer(source);
     assertEquals(25.0, target.getProgress());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setProgress(50.0);
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setProgress(99.9);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals(50.0, targets.get(0).getProgress());
+    assertNotNull(targets.get(1));
+    assertEquals(99.9, targets.get(1).getProgress());
   }
 
   public void testTransferCounters() {
@@ -148,6 +285,75 @@ public class TestSubmissionBean extends TestCase {
     counter = group.getCounter("YY");
     assertNotNull(counter);
     assertEquals(22, counter.getValue());
+
+    Counters countersx = new Counters();
+    countersx.addCounterGroup(new CounterGroup("C")
+      .addCounter(new Counter("XXX", 111))
+      .addCounter(new Counter("YYY", 222))
+    );
+    countersx.addCounterGroup(new CounterGroup("D")
+      .addCounter(new Counter("XXXX", 1111))
+      .addCounter(new Counter("YYYY", 2222))
+    );
+
+    Counters countersy = new Counters();
+    countersy.addCounterGroup(new CounterGroup("E")
+      .addCounter(new Counter("XXXXX", 11111))
+      .addCounter(new Counter("YYYYY", 22222))
+    );
+    countersy.addCounterGroup(new CounterGroup("F")
+      .addCounter(new Counter("XXXXXX", 111111))
+      .addCounter(new Counter("YYYYYY", 222222))
+    );
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setCounters(countersx);
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setCounters(countersy);
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    target = targets.get(0).getCounters();
+    group = target.getCounterGroup("C");
+    assertNotNull(group);
+    counter = group.getCounter("XXX");
+    assertNotNull(counter);
+    assertEquals(111, counter.getValue());
+    counter = group.getCounter("YYY");
+    assertNotNull(counter);
+    assertEquals(222, counter.getValue());
+
+    group = target.getCounterGroup("D");
+    assertNotNull(group);
+    counter = group.getCounter("XXXX");
+    assertNotNull(counter);
+    assertEquals(1111, counter.getValue());
+    counter = group.getCounter("YYYY");
+    assertNotNull(counter);
+    assertEquals(2222, counter.getValue());
+
+    assertNotNull(targets.get(1));
+    target = targets.get(1).getCounters();
+    group = target.getCounterGroup("E");
+    assertNotNull(group);
+    counter = group.getCounter("XXXXX");
+    assertNotNull(counter);
+    assertEquals(11111, counter.getValue());
+    counter = group.getCounter("YYYYY");
+    assertNotNull(counter);
+    assertEquals(22222, counter.getValue());
+
+    group = target.getCounterGroup("F");
+    assertNotNull(group);
+    counter = group.getCounter("XXXXXX");
+    assertNotNull(counter);
+    assertEquals(111111, counter.getValue());
+    counter = group.getCounter("YYYYYY");
+    assertNotNull(counter);
+    assertEquals(222222, counter.getValue());
   }
 
   /**
@@ -166,8 +372,26 @@ public class TestSubmissionBean extends TestCase {
     SubmissionBean retrievedBean = new SubmissionBean();
     retrievedBean.restore(retrievedJson);
 
-    return retrievedBean.getSubmission();
+    return retrievedBean.getSubmissions().get(0);
   }
 
+  /**
+   * Simulate transfer of a list of MSubmission structures using SubmissionBean
+   *
+   * @param submissions Submissions to transfer
+   * @return
+   */
+  private List<MSubmission> transfer(List<MSubmission> submissions) {
+    SubmissionBean bean = new SubmissionBean(submissions);
+    JSONObject json = bean.extract(false);
+
+    String string = json.toString();
+
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    SubmissionBean retrievedBean = new SubmissionBean();
+    retrievedBean.restore(retrievedJson);
+
+    return retrievedBean.getSubmissions();
+  }
 }
 

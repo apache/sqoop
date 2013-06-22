@@ -126,6 +126,10 @@ public class SqoopRequests {
     getJobRequest().delete(serverUrl, jid);
   }
 
+  public SubmissionBean readHistory(Long jid) {
+    return getSubmissionRequest().readHistory(serverUrl, jid);
+  }
+
   public SubmissionBean readSubmission(Long jid) {
     return getSubmissionRequest().read(serverUrl, jid);
   }

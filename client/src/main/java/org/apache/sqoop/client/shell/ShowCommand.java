@@ -29,6 +29,7 @@ public class ShowCommand extends SqoopCommand
   private ShowVersionFunction versionFunction;
   private ShowConnectorFunction connectorFunction;
   private ShowJobFunction jobFunction;
+  private ShowSubmissionFunction submissionFunction;
   private ShowFrameworkFunction frameworkFunction;
   private ShowConnectionFunction connectionFunction;
   private ShowOptionFunction optionFunction;
@@ -38,7 +39,7 @@ public class ShowCommand extends SqoopCommand
     super(shell, Constants.CMD_SHOW, Constants.CMD_SHOW_SC,
         new String[] {Constants.FN_SERVER, Constants.FN_VERSION,
           Constants.FN_CONNECTOR, Constants.FN_FRAMEWORK,
-          Constants.FN_CONNECTION, Constants.FN_JOB, Constants.FN_OPTION },
+          Constants.FN_CONNECTION, Constants.FN_JOB, Constants.FN_SUBMISSION, Constants.FN_OPTION },
           Constants.PRE_SHOW, Constants.SUF_INFO);
   }
 
@@ -86,6 +87,11 @@ public class ShowCommand extends SqoopCommand
         jobFunction = new ShowJobFunction();
       }
       return jobFunction.execute(args);
+    } else if (func.equals(Constants.FN_SUBMISSION)) {
+      if (submissionFunction == null) {
+        submissionFunction = new ShowSubmissionFunction();
+      }
+      return submissionFunction.execute(args);
     } else if (func.equals(Constants.FN_OPTION)) {
       if (optionFunction == null) {
         optionFunction = new ShowOptionFunction();

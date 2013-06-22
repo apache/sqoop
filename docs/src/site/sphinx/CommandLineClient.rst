@@ -271,6 +271,25 @@ Example: ::
 
   show job --all
 
+Show Submission Function
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Show persisted submission objects.
+
++-----------------------+---------------------------------------------+
+| Argument              |  Description                                |
++=======================+=============================================+
+| ``-j``, ``--jid <x>`` | Show available submissions for given job    |
++-----------------------+---------------------------------------------+
+| ``-d``, ``--detail``  | Show jobs in full details                   |
++-----------------------+---------------------------------------------+
+
+Example: ::
+
+  show submission
+  show submission --jid 1
+  show submission --jid 1 --detail
+
 Create Command
 --------------
 

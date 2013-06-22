@@ -22,9 +22,12 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +36,7 @@ import java.util.Set;
  */
 public class SubmissionBean implements JsonBean {
 
+  private static final String ALL = "all";
   private static final String JOB = "job";
   private static final String CREATION_DATE = "creation-date";
   private static final String LAST_UPDATE_DATE = "last-update-date";
@@ -44,15 +48,22 @@ public class SubmissionBean implements JsonBean {
   private static final String PROGRESS = "progress";
   private static final String COUNTERS = "counters";
 
-  private MSubmission submission;
+  private List<MSubmission> submissions;
 
-  public MSubmission getSubmission() {
-    return submission;
+  public List<MSubmission> getSubmissions() {
+    return submissions;
   }
 
   // For "extract"
   public SubmissionBean(MSubmission submission) {
-    this.submission = submission;
+    this();
+    this.submissions = new ArrayList<MSubmission>();
+    this.submissions.add(submission);
+  }
+
+  public SubmissionBean(List<MSubmission> submissions) {
+    this();
+    this.submissions = submissions;
   }
 
   // For "restore"
@@ -62,35 +73,44 @@ public class SubmissionBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject ret = new JSONObject();
+    JSONArray array = new JSONArray();
 
-    ret.put(JOB, submission.getJobId());
-    ret.put(STATUS, submission.getStatus().name());
-    ret.put(PROGRESS, submission.getProgress());
+    for(MSubmission submission : this.submissions) {
+      JSONObject object = new JSONObject();
 
-    if(submission.getCreationDate() != null) {
-      ret.put(CREATION_DATE, submission.getCreationDate().getTime());
-    }
-    if(submission.getLastUpdateDate() != null) {
-      ret.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
-    }
-    if(submission.getExternalId() != null) {
-      ret.put(EXTERNAL_ID, submission.getExternalId());
-    }
-    if(submission.getExternalLink() != null) {
-      ret.put(EXTERNAL_LINK, submission.getExternalLink());
-    }
-    if(submission.getExceptionInfo() != null) {
-      ret.put(EXCEPTION, submission.getExceptionInfo());
-    }
-    if(submission.getExceptionStackTrace() != null) {
-      ret.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
-    }
-    if(submission.getCounters() != null) {
-      ret.put(COUNTERS, extractCounters(submission.getCounters()));
+      object.put(JOB, submission.getJobId());
+      object.put(STATUS, submission.getStatus().name());
+      object.put(PROGRESS, submission.getProgress());
+
+      if(submission.getCreationDate() != null) {
+        object.put(CREATION_DATE, submission.getCreationDate().getTime());
+      }
+      if(submission.getLastUpdateDate() != null) {
+        object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
+      }
+      if(submission.getExternalId() != null) {
+        object.put(EXTERNAL_ID, submission.getExternalId());
+      }
+      if(submission.getExternalLink() != null) {
+        object.put(EXTERNAL_LINK, submission.getExternalLink());
+      }
+      if(submission.getExceptionInfo() != null) {
+        object.put(EXCEPTION, submission.getExceptionInfo());
+      }
+      if(submission.getExceptionStackTrace() != null) {
+        object.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
+      }
+      if(submission.getCounters() != null) {
+        object.put(COUNTERS, extractCounters(submission.getCounters()));
+      }
+
+      array.add(object);
     }
 
-    return ret;
+    JSONObject all = new JSONObject();
+    all.put(ALL, array);
+
+    return all;
   }
 
   @SuppressWarnings("unchecked")
@@ -110,32 +130,41 @@ public class SubmissionBean implements JsonBean {
 
   @Override
   public void restore(JSONObject json) {
+    this.submissions = new ArrayList<MSubmission>();
 
-    submission = new MSubmission();
-    submission.setJobId((Long) json.get(JOB));
-    submission.setStatus(SubmissionStatus.valueOf((String) json.get(STATUS)));
-    submission.setProgress((Double) json.get(PROGRESS));
+    JSONArray array = (JSONArray) json.get(ALL);
 
-    if(json.containsKey(CREATION_DATE)) {
-      submission.setCreationDate(new Date((Long) json.get(CREATION_DATE)));
-    }
-    if(json.containsKey(LAST_UPDATE_DATE)) {
-      submission.setLastUpdateDate(new Date((Long) json.get(LAST_UPDATE_DATE)));
-    }
-    if(json.containsKey(EXTERNAL_ID)) {
-      submission.setExternalId((String) json.get(EXTERNAL_ID));
-    }
-    if(json.containsKey(EXTERNAL_LINK)) {
-      submission.setExternalLink((String) json.get(EXTERNAL_LINK));
-    }
-    if(json.containsKey(EXCEPTION)) {
-      submission.setExceptionInfo((String) json.get(EXCEPTION));
-    }
-    if(json.containsKey(EXCEPTION_TRACE)) {
-      submission.setExceptionStackTrace((String) json.get(EXCEPTION_TRACE));
-    }
-    if(json.containsKey(COUNTERS)) {
-      submission.setCounters(restoreCounters((JSONObject) json.get(COUNTERS)));
+    for (Object obj : array) {
+      JSONObject object = (JSONObject) obj;
+      MSubmission submission = new MSubmission();
+
+      submission.setJobId((Long) object.get(JOB));
+      submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
+      submission.setProgress((Double) object.get(PROGRESS));
+
+      if(object.containsKey(CREATION_DATE)) {
+        submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+      }
+      if(object.containsKey(LAST_UPDATE_DATE)) {
+        submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
+      }
+      if(object.containsKey(EXTERNAL_ID)) {
+        submission.setExternalId((String) object.get(EXTERNAL_ID));
+      }
+      if(object.containsKey(EXTERNAL_LINK)) {
+        submission.setExternalLink((String) object.get(EXTERNAL_LINK));
+      }
+      if(object.containsKey(EXCEPTION)) {
+        submission.setExceptionInfo((String) object.get(EXCEPTION));
+      }
+      if(object.containsKey(EXCEPTION_TRACE)) {
+        submission.setExceptionStackTrace((String) object.get(EXCEPTION_TRACE));
+      }
+      if(object.containsKey(COUNTERS)) {
+        submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
+      }
+
+      this.submissions.add(submission);
     }
   }
 

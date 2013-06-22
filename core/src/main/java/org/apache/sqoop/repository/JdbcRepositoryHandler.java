@@ -350,6 +350,22 @@ public abstract class JdbcRepositoryHandler {
   public abstract List<MSubmission> findSubmissionsUnfinished(Connection conn);
 
   /**
+   * Return list of all submissions from metadata repository.
+   *
+   * @param conn Connection to metadata repository
+   * @return List of all submissions.
+   */
+  public abstract List<MSubmission> findSubmissions(Connection conn);
+
+  /**
+   * Return list of submissions from metadata repository for given jobId.
+   * @param jobId Job id
+   * @param conn Connection to metadata repository
+   * @return List of submissions
+   */
+  public abstract List<MSubmission> findSubmissionsForJob(long jobId, Connection conn);
+
+  /**
    * Find last submission for given jobId.
    *
    * @param jobId Job id

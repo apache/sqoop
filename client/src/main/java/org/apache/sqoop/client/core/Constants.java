@@ -51,6 +51,7 @@ public class Constants {
   public static final String OPT_PROTOCOL = "protocol";
   public static final String OPT_SYNCHRONOUS = "synchronous";
   public static final String OPT_POLL_TIMEOUT = "poll-timeout";
+  public static final String OPT_DETAIL = "detail";
 
   public static final char OPT_XID_CHAR = 'x';
   public static final char OPT_ALL_CHAR = 'a';
@@ -68,6 +69,7 @@ public class Constants {
   public static final char OPT_PROTOCOL_CHAR = 'p';
   public static final char OPT_SYNCHRONOUS_CHAR = 's';
   public static final char OPT_POLL_TIMEOUT_CHAR = 'p';
+  public static final char OPT_DETAIL_CHAR = 'd';
 
   // Resource keys for various commands, command options,
   // functions and descriptions
@@ -97,6 +99,7 @@ public class Constants {
 
   public static final String FN_CONNECTION = "connection";
   public static final String FN_JOB = "job";
+  public static final String FN_SUBMISSION = "submission";
   public static final String FN_SERVER = "server";
   public static final String FN_OPTION = "option";
   public static final String FN_CONNECTOR = "connector";
@@ -271,6 +274,11 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_JOB_XID_CID_INFO =
       "show.prompt_job_xid_cid_info";
 
+  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS =
+      "show.prompt_display_all_submissions";
+  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS_JOB_ID =
+      "show.prompt_display_all_submissions_jid";
+
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS =
       "show.prompt_display_all_servers";
   public static final String RES_SHOW_PROMPT_DISPLAY_SERVER_HOST =
@@ -338,6 +346,14 @@ public class Constants {
       "table.header.type";
   public static final String RES_TABLE_HEADER_CONNECTOR =
       "table.header.connector";
+  public static final String RES_TABLE_HEADER_JOB_ID =
+      "table.header.jid";
+  public static final String RES_TABLE_HEADER_EXTERNAL_ID =
+      "table.header.eid";
+  public static final String RES_TABLE_HEADER_STATUS =
+      "table.header.status";
+  public static final String RES_TABLE_HEADER_DATE =
+      "table.header.date";
 
   public static final String RES_FORMDISPLAYER_SUPPORTED_JOBTYPE =
       "formdisplayer.supported_job_types";

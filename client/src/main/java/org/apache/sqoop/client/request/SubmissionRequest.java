@@ -31,6 +31,24 @@ public class SubmissionRequest extends  Request {
 
   public static final String ACTION = RESOURCE + "action/";
 
+  public static final String HISTORY = RESOURCE + "history/";
+
+  public SubmissionBean readHistory(String serverUrl, Long jid) {
+    String response;
+    if (jid == null) {
+      response = super.get(serverUrl + HISTORY + "all");
+    } else {
+      response = super.get(serverUrl + HISTORY + jid);
+    }
+
+    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+
+    SubmissionBean submissionBean = new SubmissionBean();
+    submissionBean.restore(jsonObject);
+
+    return submissionBean;
+  }
+
   public SubmissionBean read(String serverUrl, Long jid) {
     String response = super.get(serverUrl + ACTION + jid);
 

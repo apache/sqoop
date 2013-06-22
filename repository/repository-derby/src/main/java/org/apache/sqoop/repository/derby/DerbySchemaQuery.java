@@ -713,8 +713,23 @@ public final class DerbySchemaQuery {
     + " FROM " + TABLE_SQ_SUBMISSION
     + " WHERE " + COLUMN_SQS_STATUS + " = ?";
 
-  // DML: Last submission for a job
-  public static final String STMT_SELECT_SUBMISSION_LAST_FOR_JOB =
+  // DML : Get all submissions
+  public static final String STMT_SELECT_SUBMISSIONS =
+    "SELECT "
+    + COLUMN_SQS_ID + ", "
+    + COLUMN_SQS_JOB + ", "
+    + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_DATE + ", "
+    + COLUMN_SQS_EXTERNAL_ID + ", "
+    + COLUMN_SQS_EXTERNAL_LINK + ", "
+    + COLUMN_SQS_EXCEPTION + ", "
+    + COLUMN_SQS_EXCEPTION_TRACE
+    + " FROM " + TABLE_SQ_SUBMISSION
+    + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";
+
+  // DML: Get submissions for a job
+  public static final String STMT_SELECT_SUBMISSIONS_FOR_JOB =
     "SELECT "
     + COLUMN_SQS_ID + ", "
     + COLUMN_SQS_JOB + ", "

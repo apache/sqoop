@@ -46,13 +46,8 @@ public class SubmissionStatusFunction extends  SqoopFunction {
     }
 
     MSubmission submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
-    if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
-      SubmissionDisplayer.displayHeader(submission);
-      SubmissionDisplayer.displayFooter(submission);
-    } else {
-      SubmissionDisplayer.displayHeader(submission);
-      SubmissionDisplayer.displayProgress(submission);
-    }
+    SubmissionDisplayer.displaySubmission(submission);
+
     return null;
   }
 }

@@ -361,7 +361,7 @@ public class SqoopClient {
    * @return
    */
   public MSubmission startSubmission(long jid) {
-    return requests.createSubmission(jid).getSubmission();
+    return requests.createSubmission(jid).getSubmissions().get(0);
   }
 
   /**
@@ -379,7 +379,7 @@ public class SqoopClient {
       throw new SqoopException(ClientError.CLIENT_0008);
     }
     boolean first = true;
-    MSubmission submission = requests.createSubmission(jid).getSubmission();
+    MSubmission submission = requests.createSubmission(jid).getSubmissions().get(0);
     while(submission.getStatus().isRunning()) {
       if(first) {
         submissionCallback(callback, submission, SubmissionStatus.SUBMITTED);
@@ -425,7 +425,7 @@ public class SqoopClient {
    * @return
    */
   public MSubmission stopSubmission(long jid) {
-    return requests.deleteSubmission(jid).getSubmission();
+    return requests.deleteSubmission(jid).getSubmissions().get(0);
   }
 
   /**
@@ -435,7 +435,26 @@ public class SqoopClient {
    * @return
    */
   public MSubmission getSubmissionStatus(long jid) {
-    return requests.readSubmission(jid).getSubmission();
+    return requests.readSubmission(jid).getSubmissions().get(0);
+  }
+
+  /**
+   * Retrieve list of all submissions.
+   *
+   * @return
+   */
+  public List<MSubmission> getSubmissions() {
+    return requests.readHistory(null).getSubmissions();
+  }
+
+  /**
+   * Retrieve list of submissions for given jobId.
+   *
+   * @param jid Job id
+   * @return
+   */
+  public List<MSubmission> getSubmissionsForJob(long jid) {
+    return requests.readHistory(jid).getSubmissions();
   }
 
   private Status applyValidations(ValidationBean bean, MConnection connection) {

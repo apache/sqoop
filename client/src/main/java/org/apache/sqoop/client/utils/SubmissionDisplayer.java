@@ -125,4 +125,14 @@ public final class SubmissionDisplayer {
       }
     }
   }
+
+  public static void displaySubmission(MSubmission submission) {
+    if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayFooter(submission);
+    } else {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayProgress(submission);
+    }
+  }
 }

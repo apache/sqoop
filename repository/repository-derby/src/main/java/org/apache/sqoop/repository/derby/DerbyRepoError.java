@@ -163,6 +163,12 @@ public enum DerbyRepoError implements ErrorCode {
 
   DERBYREPO_0038("Update of connector failed"),
 
+  /** Can't retrieve all submissions **/
+  DERBYREPO_0039("Can't retrieve all submissions"),
+
+  /** Can't retrieve submissions for a job **/
+  DERBYREPO_0040("Can't retrieve submissions for a job"),
+
   ;
 
   private final String message;

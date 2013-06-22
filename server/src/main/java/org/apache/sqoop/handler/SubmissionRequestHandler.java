@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.handler;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.FrameworkManager;
@@ -24,6 +26,7 @@ import org.apache.sqoop.framework.JobManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
@@ -73,6 +76,10 @@ public class SubmissionRequestHandler implements RequestHandler {
       return handleNotification(ctx, urlElements[length - 1]);
     }
 
+    if(action.equals("history")) {
+      return handleHistoryEvent(ctx, urlElements[length - 1]);
+    }
+
     throw new SqoopException(ServerError.SERVER_0003,
       "Do not know what to do.");
   }
@@ -104,6 +111,14 @@ public class SubmissionRequestHandler implements RequestHandler {
     return null;
   }
 
+  private JsonBean handleHistoryEvent(RequestContext ctx, String sjid) {
+    if (sjid.equals("all")) {
+      return getSubmissions();
+    } else {
+      return getSubmissionsForJob(Long.parseLong(sjid));
+    }
+  }
+
   private JsonBean submissionStop(long jid) {
     MSubmission submission = JobManager.getInstance().stop(jid);
     return new SubmissionBean(submission);
@@ -117,5 +132,15 @@ public class SubmissionRequestHandler implements RequestHandler {
   private JsonBean submissionStatus(long jid) {
     MSubmission submission = JobManager.getInstance().status(jid);
     return new SubmissionBean(submission);
+  }
+
+  private JsonBean getSubmissions() {
+    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository().findSubmissions();
+    return new SubmissionBean(submissions);
+  }
+
+  private JsonBean getSubmissionsForJob(long jid) {
+    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository().findSubmissionsForJob(jid);
+    return new SubmissionBean(submissions);
   }
 }

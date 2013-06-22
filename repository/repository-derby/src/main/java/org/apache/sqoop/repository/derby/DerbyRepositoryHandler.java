@@ -1167,11 +1167,67 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
+  public List<MSubmission> findSubmissions(Connection conn) {
+    List<MSubmission> submissions = new LinkedList<MSubmission>();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSIONS);
+      rs = stmt.executeQuery();
+
+      while(rs.next()) {
+        submissions.add(loadSubmission(rs, conn));
+      }
+
+      rs.close();
+      rs = null;
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0039, ex);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+
+    return submissions;
+  }
+
+  @Override
+  public List<MSubmission> findSubmissionsForJob(long jobId, Connection conn) {
+    List<MSubmission> submissions = new LinkedList<MSubmission>();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSIONS_FOR_JOB);
+      stmt.setLong(1, jobId);
+      rs = stmt.executeQuery();
+
+      while(rs.next()) {
+        submissions.add(loadSubmission(rs, conn));
+      }
+
+      rs.close();
+      rs = null;
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0040, ex);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+
+    return submissions;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public MSubmission findSubmissionLastForJob(long jobId, Connection conn) {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSION_LAST_FOR_JOB);
+      stmt = conn.prepareStatement(STMT_SELECT_SUBMISSIONS_FOR_JOB);
       stmt.setLong(1, jobId);
       stmt.setMaxRows(1);
       rs = stmt.executeQuery();
@@ -1183,7 +1239,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       return loadSubmission(rs, conn);
     } catch (SQLException ex) {
       logException(ex, jobId);
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0037, ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0040, ex);
     } finally {
       closeResultSets(rs);
       closeStatements(stmt);

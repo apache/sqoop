@@ -218,6 +218,20 @@ public abstract class Repository {
   public abstract List<MSubmission> findSubmissionsUnfinished();
 
   /**
+   * Return all submissions from repository
+   *
+   * @return List of all submissions
+   */
+  public abstract List<MSubmission> findSubmissions();
+
+  /**
+   * Return all submissions for given jobId.
+   *
+   * @return List of of submissions
+   */
+  public abstract List<MSubmission> findSubmissionsForJob(long jobId);
+
+  /**
    * Find last submission for given jobId.
    *
    * @param jobId Job id

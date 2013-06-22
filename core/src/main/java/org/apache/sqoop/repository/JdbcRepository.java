@@ -463,6 +463,38 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MSubmission> findSubmissions() {
+    return (List<MSubmission>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findSubmissions(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MSubmission> findSubmissionsForJob(final long jobId) {
+    return (List<MSubmission>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        if(!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020,
+            "Invalid id: " + jobId);
+        }
+        return handler.findSubmissionsForJob(jobId, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public MSubmission findSubmissionLastForJob(final long jobId) {
     return (MSubmission) doWithConnection(new DoWithConnection() {
