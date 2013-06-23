@@ -31,8 +31,7 @@ import org.apache.sqoop.model.MSubmission;
 
 public class JdbcRepository extends Repository {
 
-  private static final Logger LOG =
-      Logger.getLogger(JdbcRepository.class);
+  private static final Logger LOG = Logger.getLogger(JdbcRepository.class);
 
   private final JdbcRepositoryHandler handler;
   private final JdbcRepositoryContext repoContext;
@@ -118,6 +117,37 @@ public class JdbcRepository extends Repository {
   @Override
   public JdbcRepositoryTransaction getTransaction() {
     return repoContext.getTransactionFactory().get();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createOrUpdateInternals() {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        if (!handler.schemaExists()) {
+          LOG.info("Creating repository schema objects");
+          handler.createSchema();
+        }
+
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean haveSuitableInternals() {
+    return (Boolean) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.schemaExists();
+      }
+    });
   }
 
   /**

@@ -43,19 +43,18 @@ public final class RepoConfigurationConstants {
       + "provider";
 
   /**
+   * Boolean property defining whether repository is allowed to make changes
+   * on disk structures (schema in databases, changing file format, ...).
+   */
+  public static final String SYSCFG_REPO_SCHEMA_IMMUTABLE=
+    PREFIX_REPO_CONFIG + "schema.immutable";
+
+  /**
    * Class name for the JDBC repository handler specified by:
    * <tt>org.apache.sqoop.repository.jdbc.handler</tt>.
    */
   public static final String SYSCFG_REPO_JDBC_HANDLER = PREFIX_REPO_CONFIG
       + "jdbc.handler";
-
-  /**
-   * Indicates if the repository should create the schema objects as necessary,
-   * specified as a boolean value for the key:
-   * <tt>org.apache.sqoop.repository.jdbc.create.schema</tt>
-   */
-  public static final String SYSCFG_REPO_JDBC_CREATE_SCHEMA =
-      PREFIX_REPO_CONFIG + "jdbc.create.schema";
 
   /**
    * JDBC connection URL specified by:

@@ -111,6 +111,15 @@ public class RepositoryManager {
 
     provider.initialize(context);
 
+    if(!context.getBoolean(RepoConfigurationConstants.SYSCFG_REPO_SCHEMA_IMMUTABLE, true)) {
+      LOG.info("Creating or upgrading on disk structures if necessary");
+      provider.getRepository().createOrUpdateInternals();
+    }
+
+    if(!provider.getRepository().haveSuitableInternals()) {
+      throw new SqoopException(RepositoryError.REPO_0002);
+    }
+
     LOG.info("Repository initialized: OK");
   }
 

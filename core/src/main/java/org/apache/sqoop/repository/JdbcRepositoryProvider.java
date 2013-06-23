@@ -40,8 +40,7 @@ import org.apache.sqoop.utils.ClassUtils;
 
 public class JdbcRepositoryProvider implements RepositoryProvider {
 
-  private static final Logger LOG =
-      Logger.getLogger(JdbcRepositoryProvider.class);
+  private static final Logger LOG = Logger.getLogger(JdbcRepositoryProvider.class);
 
   private JdbcRepositoryContext repoContext;
 
@@ -155,13 +154,6 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
     repoContext.initialize(dataSource, txFactory);
 
     handler.initialize(repoContext);
-
-    if (repoContext.shouldCreateSchema()) {
-      if (!handler.schemaExists()) {
-        LOG.info("Creating repository schema objects");
-        handler.createSchema();
-      }
-    }
 
     repository = new JdbcRepository(handler, repoContext);
 

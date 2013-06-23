@@ -56,6 +56,26 @@ public abstract class Repository {
   public abstract RepositoryTransaction getTransaction();
 
   /**
+   * Create or update disk data structures.
+   *
+   * This method will be called only if Sqoop server is enabled with changing
+   * repository on disk structures. Repository should not change its disk structures
+   * outside of this method. This method must be no-op in case that the structures
+   * do not need any maintenance.
+   */
+  public abstract void createOrUpdateInternals();
+
+  /**
+   * Return true if internal repository structures exists and are suitable for use.
+   *
+   * This method should return false in case that the structures do exists, but
+   * are not suitable for use or if they requires upgrade.
+   *
+   * @return Boolean values if internal structures are suitable for use
+   */
+  public abstract boolean haveSuitableInternals();
+
+  /**
    * Registers given connector in the repository and return registered
    * variant. This method might return an exception in case that metadata for
    * given connector are already registered with different structure.

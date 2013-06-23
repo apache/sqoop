@@ -169,11 +169,11 @@ public abstract class SqoopMiniCluster {
     Map<String, String> properties = new HashMap<String, String>();
 
     properties.put("org.apache.sqoop.repository.provider", "org.apache.sqoop.repository.JdbcRepositoryProvider");
+    properties.put("org.apache.sqoop.repository.schema.immutable", "false");
     properties.put("org.apache.sqoop.repository.jdbc.handler", "org.apache.sqoop.repository.derby.DerbyRepositoryHandler");
     properties.put("org.apache.sqoop.repository.jdbc.transaction.isolation", "READ_COMMITTED");
     properties.put("org.apache.sqoop.repository.jdbc.maximum.connections", "10");
     properties.put("org.apache.sqoop.repository.jdbc.url=jdbc:derby:memory:myDB;create", "true");
-    properties.put("org.apache.sqoop.repository.jdbc.create.schema", "true");
     properties.put("org.apache.sqoop.repository.jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
     properties.put("org.apache.sqoop.repository.jdbc.user", "sa");
     properties.put("org.apache.sqoop.repository.jdbc.password", "");

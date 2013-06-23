@@ -34,7 +34,6 @@ public final class JdbcRepositoryContext {
 
   private final MapContext context;
   private final String handlerClassName;
-  private final boolean createSchema;
   private final String connectionUrl;
   private final String driverClassName;
   private final Properties connectionProperties;
@@ -54,9 +53,6 @@ public final class JdbcRepositoryContext {
       throw new SqoopException(RepositoryError.JDBCREPO_0001,
           RepoConfigurationConstants.SYSCFG_REPO_JDBC_HANDLER);
     }
-
-    createSchema = context.getBoolean(
-        RepoConfigurationConstants.SYSCFG_REPO_JDBC_CREATE_SCHEMA, false);
 
     connectionUrl = context.getString(
         RepoConfigurationConstants.SYSCFG_REPO_JDBC_URL);
@@ -132,7 +128,6 @@ public final class JdbcRepositoryContext {
     if (LOG.isInfoEnabled()) {
       StringBuilder sb = new StringBuilder("[repo-ctx] ");
       sb.append("handler=").append(handlerClassName).append(", ");
-      sb.append("create-schema=").append(createSchema).append(", ");
       sb.append("conn-url=").append(connectionUrl).append(", ");
       sb.append("driver=").append(driverClassName).append(", ");
       sb.append("user=").append(jdbcUserName).append(", ");
@@ -187,10 +182,6 @@ public final class JdbcRepositoryContext {
 
   public String getDriverClass() {
     return driverClassName;
-  }
-
-  public boolean shouldCreateSchema() {
-    return createSchema;
   }
 
   public JdbcTransactionIsolation getTransactionIsolation() {
