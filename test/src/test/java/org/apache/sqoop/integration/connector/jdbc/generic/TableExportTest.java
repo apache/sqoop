@@ -18,7 +18,7 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.integration.connector.ConnectorTestCase;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
@@ -70,10 +70,10 @@ public class TableExportTest extends ConnectorTestCase {
     } while(submission.getStatus().isRunning());
 
     assertEquals(4L, rowCount());
-    assertRowInCitiesTable(1, "USA", "San Francisco");
-    assertRowInCitiesTable(2, "USA", "Sunnyvale");
-    assertRowInCitiesTable(3, "Czech Republic", "Brno");
-    assertRowInCitiesTable(4, "USA", "Palo Alto");
+    assertRowInCities(1, "USA", "San Francisco");
+    assertRowInCities(2, "USA", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "Brno");
+    assertRowInCities(4, "USA", "Palo Alto");
 
     // Clean up testing table
     dropTable();

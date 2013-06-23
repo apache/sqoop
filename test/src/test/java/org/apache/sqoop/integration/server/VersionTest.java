@@ -19,7 +19,7 @@ package org.apache.sqoop.integration.server;
 
 import org.apache.sqoop.client.request.VersionRequest;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.integration.TomcatTestCase;
+import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.json.VersionBean;
 import org.junit.Test;
 

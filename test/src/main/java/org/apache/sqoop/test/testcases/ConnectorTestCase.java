@@ -15,33 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.integration.connector;
+package org.apache.sqoop.test.testcases;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.framework.configuration.StorageType;
-import org.apache.sqoop.integration.TomcatTestCase;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.test.asserts.ProviderAsserts;
+import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.db.DatabaseProvider;
 import org.apache.sqoop.test.db.DatabaseProviderFactory;
 import org.apache.sqoop.validation.Status;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.fail;
 
 /**
- * Base test case for connector testing.
+ * Base test case suitable for connector testing.
  *
- * It will create and initialize database provider prior every test execution.
+ * In addition to pure Tomcat based test case it will also create and initialize
+ * the database provider prior every test execution.
  */
 abstract public class ConnectorTestCase extends TomcatTestCase {
 
@@ -124,22 +122,14 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * Create table cities.
    */
   protected void createTableCities() {
-     createTable("id",
-       "id", "int",
-       "country", "varchar(50)",
-       "city", "varchar(50)"
-     );
+    new Cities(provider, getTableName()).createTables();
   }
 
   /**
    * Create table cities and load few rows.
    */
   protected void createAndLoadTableCities() {
-    createTableCities();
-    insertRow(1, "USA", "San Francisco");
-    insertRow(2, "USA", "Sunnyvale");
-    insertRow(3, "Czech Republic", "Brno");
-    insertRow(4, "USA", "Palo Alto");
+    new Cities(provider, getTableName()).createTables().loadBasicData();
   }
 
   /**
@@ -149,29 +139,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param values Values that are expected in the table (with corresponding types)
    */
   protected void assertRow(Object []conditions, Object ...values) {
-    ResultSet rs = provider.getRows(getTableName(), conditions);
-
-    try {
-      if(! rs.next()) {
-        fail("No rows found.");
-      }
-
-      int i = 1;
-      for(Object expectedValue : values) {
-        Object actualValue = rs.getObject(i);
-        assertEquals("Columns do not match on position: " + i, expectedValue, actualValue);
-        i++;
-      }
-
-      if(rs.next()) {
-        fail("Found more than one row.");
-      }
-    } catch (SQLException e) {
-      LOG.error("Unexpected SQLException", e);
-      fail("Unexpected SQLException: " + e);
-    } finally {
-      provider.closeResultSetWithStatement(rs);
-    }
+    ProviderAsserts.assertRow(provider, getTableName(), conditions, values);
   }
 
   /**
@@ -179,7 +147,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    *
    * @param values Values that are expected
    */
-  protected void assertRowInCitiesTable(Object ... values) {
+  protected void assertRowInCities(Object... values) {
     assertRow(new Object[]{"id", values[0]}, values);
   }
 

@@ -15,30 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.integration;
+package org.apache.sqoop.test.testcases;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
+import org.apache.sqoop.test.utils.HdfsUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.fail;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in external Tomcat
@@ -132,21 +121,6 @@ abstract public class TomcatTestCase {
   }
 
   /**
-   * Return list of file names that are outputs of mapreduce job.
-   *
-   * @return
-   */
-  public String[] getOutputFilesMapreduce() {
-    File dir = new File(getMapreduceDirectory());
-    return dir.list(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.startsWith("part-");
-      }
-    });
-  }
-
-  /**
    * Assert that mapreduce has generated following lines.
    *
    * As the lines can be spread between multiple files the ordering do not make
@@ -156,31 +130,7 @@ abstract public class TomcatTestCase {
    * @throws IOException
    */
   protected void assertMapreduceOutput(String... lines) throws IOException {
-    Set<String> setLines = new HashSet<String>(Arrays.asList(lines));
-    List<String> notFound = new LinkedList<String>();
-
-    String []files = getOutputFilesMapreduce();
-
-    for(String file : files) {
-      String filePath = getMapreduceDirectory() + "/" + file;
-      BufferedReader br = new BufferedReader(new FileReader((filePath)));
-
-      String line;
-      while ((line = br.readLine()) != null) {
-        if (!setLines.remove(line)) {
-          notFound.add(line);
-        }
-      }
-      br.close();
-    }
-
-    if(!setLines.isEmpty() || !notFound.isEmpty()) {
-      LOG.error("Expected lines that weren't present in the files:");
-      LOG.error("\t" + StringUtils.join(setLines, "\n\t"));
-      LOG.error("Extra lines in files that weren't expected:");
-      LOG.error("\t" + StringUtils.join(notFound, "\n\t"));
-      fail("Output do not match expectations.");
-    }
+    HdfsAsserts.assertMapreduceOutput(getMapreduceDirectory(), lines);
   }
 
   /**
@@ -191,7 +141,6 @@ abstract public class TomcatTestCase {
    * @throws IOException
    */
   protected void createInputMapreduceFile(String filename, String...lines) throws IOException {
-    File outputFile = new File(getMapreduceDirectory(), filename);
-    FileUtils.writeLines(outputFile, Arrays.asList(lines));
+    HdfsUtils.createFile(getMapreduceDirectory(), filename, lines);
   }
 }
