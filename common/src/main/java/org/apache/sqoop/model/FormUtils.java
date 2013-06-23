@@ -142,6 +142,8 @@ public class FormUtils {
           input = new MMapInput(inputName, sensitive);
         } else if(type == Integer.class) {
           input = new MIntegerInput(inputName, sensitive);
+        } else if(type == Boolean.class) {
+          input = new MBooleanInput(inputName, sensitive);
         } else if(type.isEnum()) {
           input = new MEnumInput(inputName, sensitive, ClassUtils.getEnumStrings(type));
         } else {

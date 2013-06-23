@@ -42,17 +42,11 @@ Sqoop server supports multiple Hadoop versions. However as Hadoop major versions
 Installing Dependencies
 -----------------------
 
-You need to install Hadoop libraries into Sqoop server war file. Sqoop provides convenience script ``addtowar.sh`` to do so. If you have installed Hadoop in usual location in ``/usr/lib`` and executable ``hadoop`` is in your path, you can use automatic Hadoop installation procedure: ::
+Hadoop libraries must be available on node where you are planning to run Sqoop server with proper configuration for major services - ``NameNode`` and either ``JobTracker`` or ``ResourceManager`` depending whether you are running Hadoop 1 or 2. There is no need to run any Hadoop service on the same node as Sqoop server, just the libraries and configuration must be available. 
 
-  ./bin/addtowar.sh -hadoop-auto
+Path to Hadoop libraries is stored in file ``catalina.properties`` inside directory ``server/conf``. You need to change property called ``common.loader`` to contain all directories with your Hadoop libraries. The default expected locations are ``/usr/lib/hadoop`` and ``/usr/lib/hadoop/lib/``. Please check out the comments in the file for further description how to configure different locations.
 
-In case that you have Hadoop installed in different location, you will need to manually specify Hadoop version and path to Hadoop libraries. You can use parameter ``-hadoop-version`` for specifying Hadoop major version, we're currently support versions 1.x and 2.x. Path to Hadoop libraries can be specified using ``-hadoop-path`` parameter. In case that your Hadoop libraries are in multiple different folders, you can specify all of them separated by ``:``.  Example of manual installation: ::
-
-  ./bin/addtowar.sh -hadoop-version 2.0 -hadoop-path /usr/lib/hadoop-common:/usr/lib/hadoop-hdfs:/usr/lib/hadoop-yarn
-
-Lastly you might need to install JDBC drivers that are not bundled with Sqoop because of incompatible licenses. You can add any arbitrary java jar file to Sqoop server using script ``addtowar.sh`` with ``-jars`` parameter. Similarly as in case of hadoop path you can enter multiple jars separated with ``:``. Example of installing MySQL JDBC driver to Sqoop server: ::
-
-  ./bin/addtowar.sh -jars /path/to/jar/mysql-connector-java-*-bin.jar
+Lastly you might need to install JDBC drivers that are not bundled with Sqoop because of incompatible licenses. You can add any arbitrary Java jar file to Sqoop server by copying it into ``lib/`` directory. You can create this directory if it do not exists already.
 
 Configuring Server
 ------------------

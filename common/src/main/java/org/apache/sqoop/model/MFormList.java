@@ -72,6 +72,10 @@ public class MFormList implements MClonable {
     return (MMapInput)getInput(name);
   }
 
+  public MBooleanInput getBooleanInput(String name) {
+    return (MBooleanInput)getInput(name);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

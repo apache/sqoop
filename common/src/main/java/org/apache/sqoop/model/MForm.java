@@ -63,6 +63,10 @@ public final class MForm extends MValidatedElement implements MClonable {
     return (MIntegerInput)getInput(inputName);
   }
 
+  public MBooleanInput getBooleanInput(String inputName) {
+    return (MBooleanInput)getInput(inputName);
+  }
+
   public MMapInput getMapInput(String inputName) {
     return (MMapInput)getInput(inputName);
   }

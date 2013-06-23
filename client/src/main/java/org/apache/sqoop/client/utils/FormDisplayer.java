@@ -19,6 +19,7 @@ package org.apache.sqoop.client.utils;
 
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.model.MAccountableEntity;
+import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -172,6 +173,9 @@ public final class FormDisplayer {
             case INTEGER:
               displayInputInteger((MIntegerInput) input);
               break;
+            case BOOLEAN:
+              displayInputBoolean((MBooleanInput) input);
+              break;
             case MAP:
               displayInputMap((MMapInput) input);
               break;
@@ -203,6 +207,15 @@ public final class FormDisplayer {
    * @param input Integer input
    */
   private static void displayInputInteger(MIntegerInput input) {
+    print(input.getValue());
+  }
+
+  /**
+   * Display content of Boolean input.
+   *
+   * @param input Boolean input
+   */
+  private static void displayInputBoolean(MBooleanInput input) {
     print(input.getValue());
   }
 

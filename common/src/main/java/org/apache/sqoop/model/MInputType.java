@@ -34,6 +34,9 @@ public enum MInputType {
   /** Integer input type */
   INTEGER,
 
+  /** Boolean input type */
+  BOOLEAN,
+
   /** String based input that can contain only predefined values **/
   ENUM,
 

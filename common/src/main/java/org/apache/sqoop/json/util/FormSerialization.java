@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
@@ -166,6 +167,10 @@ public final class FormSerialization {
         }
         case INTEGER: {
           mInput = new MIntegerInput(name, sensitive.booleanValue());
+          break;
+        }
+        case BOOLEAN: {
+          mInput = new MBooleanInput(name, sensitive.booleanValue());
           break;
         }
         case ENUM: {

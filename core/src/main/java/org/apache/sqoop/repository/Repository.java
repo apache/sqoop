@@ -23,6 +23,7 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
+import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
@@ -483,6 +484,8 @@ public abstract class Repository {
             ((MEnumInput) input).getValues());
         } else if (input instanceof MMapInput) {
           newInput = new MMapInput(input.getName(), input.isSensitive());
+        } else if (input instanceof MBooleanInput) {
+          newInput = new MBooleanInput(input.getName(), input.isSensitive());
         } else if(input instanceof MStringInput) {
           newInput = new MStringInput(input.getName(), input.isSensitive(),
             ((MStringInput) input).getMaxLength());

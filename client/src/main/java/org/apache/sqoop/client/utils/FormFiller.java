@@ -18,6 +18,7 @@
 package org.apache.sqoop.client.utils;
 
 import jline.ConsoleReader;
+import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -164,6 +165,8 @@ public final class FormFiller {
         return fillInputString((MStringInput) input, reader, bundle);
       case INTEGER:
         return fillInputInteger((MIntegerInput) input, reader, bundle);
+      case BOOLEAN:
+        return fillInputBoolean((MBooleanInput) input, reader, bundle);
       case MAP:
         return fillInputMap((MMapInput) input, reader, bundle);
       case ENUM:
@@ -456,6 +459,49 @@ public final class FormFiller {
           + " field. Maximal allowed size is " + input.getMaxLength());
         return fillInputString(input, reader, bundle);
       }
+    }
+
+    return true;
+  }
+
+  /**
+   * Load boolean input from the user.
+   *
+   * @param input Input that we should load in
+   * @param reader Associated console reader
+   * @param bundle Resource bundle for this input
+   * @return
+   * @throws IOException
+   */
+  public static boolean fillInputBoolean(MBooleanInput input,
+                                         ConsoleReader reader,
+                                         ResourceBundle bundle)
+                                         throws IOException {
+    generatePrompt(reader, bundle, input);
+
+    // Fill already filled data when available
+    // However do not printout if this input contains sensitive information.
+    if(!input.isEmpty() && !input.isSensitive()) {
+      reader.putString(input.getValue().toString());
+    }
+
+    // Get the data
+    String userTyped;
+    if(input.isSensitive()) {
+       userTyped = reader.readLine('*');
+    } else {
+      userTyped = reader.readLine();
+    }
+
+    if (userTyped == null) {
+      // Propagate end of loading process
+      return false;
+    } else if (userTyped.isEmpty()) {
+      // Empty input in case that nothing was given
+      input.setEmpty();
+    } else {
+      // Set value that user has entered
+      input.setValue(Boolean.valueOf(userTyped));
     }
 
     return true;

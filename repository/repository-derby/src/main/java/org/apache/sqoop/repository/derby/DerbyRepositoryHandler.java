@@ -38,6 +38,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MEnumInput;
@@ -1759,6 +1760,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           break;
         case MAP:
           input = new MMapInput(inputName, inputSensitivity);
+          break;
+        case BOOLEAN:
+          input = new MBooleanInput(inputName, inputSensitivity);
           break;
         case INTEGER:
           input = new MIntegerInput(inputName, inputSensitivity);
