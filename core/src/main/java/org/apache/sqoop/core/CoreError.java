@@ -51,6 +51,9 @@ public enum CoreError implements ErrorCode {
   /** The configuration system has not been initialized correctly. */
   CORE_0007("System not initialized"),
 
+  /** The system has not been reconfigured */
+  CORE_0008("System not reconfigured");
+
   ;
 
   private final String message;

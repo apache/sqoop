@@ -22,10 +22,12 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class RepositoryManager {
+public class RepositoryManager implements Reconfigurable {
 
   /**
    * Logger object.
@@ -120,6 +122,8 @@ public class RepositoryManager {
       throw new SqoopException(RepositoryError.REPO_0002);
     }
 
+    SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
+
     LOG.info("Repository initialized: OK");
   }
 
@@ -134,4 +138,29 @@ public class RepositoryManager {
   public synchronized Repository getRepository() {
     return provider.getRepository();
   }
+
+  @Override
+  public synchronized void configurationChanged() {
+    LOG.info("Begin repository manager reconfiguring");
+    MapContext newContext = SqoopConfiguration.getInstance().getContext();
+    MapContext oldContext = SqoopConfiguration.getInstance().getOldContext();
+
+    String newProviderClassName = newContext.getString(RepoConfigurationConstants.SYSCFG_REPO_PROVIDER);
+    if (newProviderClassName == null
+        || newProviderClassName.trim().length() == 0) {
+      throw new SqoopException(RepositoryError.REPO_0001,
+          RepoConfigurationConstants.SYSCFG_REPO_PROVIDER);
+    }
+
+    String oldProviderClassName = oldContext.getString(RepoConfigurationConstants.SYSCFG_REPO_PROVIDER);
+    if (!newProviderClassName.equals(oldProviderClassName)) {
+      LOG.warn("Repository provider cannot be replaced at the runtime. " +
+               "You might need to restart the server.");
+    }
+
+    provider.configurationChanged();
+
+    LOG.info("Repository manager reconfigured.");
+  }
+
 }

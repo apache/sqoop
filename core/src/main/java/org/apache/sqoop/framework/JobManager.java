@@ -22,7 +22,9 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.etl.*;
@@ -40,7 +42,7 @@ import org.json.simple.JSONValue;
 import java.util.Date;
 import java.util.List;
 
-public class JobManager {
+public class JobManager implements Reconfigurable {
    /**
     * Logger object.
     */
@@ -247,6 +249,8 @@ public class JobManager {
 
        updateThread = new UpdateThread();
        updateThread.start();
+
+       SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
        LOG.info("Submission manager initialized: OK");
    }
@@ -495,6 +499,57 @@ public class JobManager {
        RepositoryManager.getInstance().getRepository().updateSubmission(submission);
    }
 
+   @Override
+   public synchronized void configurationChanged() {
+     LOG.info("Begin submission engine manager reconfiguring");
+     MapContext newContext = SqoopConfiguration.getInstance().getContext();
+     MapContext oldContext = SqoopConfiguration.getInstance().getOldContext();
+
+     String newSubmissionEngineClassName = newContext.getString(FrameworkConstants.SYSCFG_SUBMISSION_ENGINE);
+     if (newSubmissionEngineClassName == null
+         || newSubmissionEngineClassName.trim().length() == 0) {
+       throw new SqoopException(FrameworkError.FRAMEWORK_0001,
+           newSubmissionEngineClassName);
+     }
+
+     String oldSubmissionEngineClassName = oldContext.getString(FrameworkConstants.SYSCFG_SUBMISSION_ENGINE);
+     if (!newSubmissionEngineClassName.equals(oldSubmissionEngineClassName)) {
+       LOG.warn("Submission engine cannot be replaced at the runtime. " +
+                "You might need to restart the server.");
+     }
+
+     String newExecutionEngineClassName = newContext.getString(FrameworkConstants.SYSCFG_EXECUTION_ENGINE);
+     if (newExecutionEngineClassName == null
+         || newExecutionEngineClassName.trim().length() == 0) {
+       throw new SqoopException(FrameworkError.FRAMEWORK_0007,
+           newExecutionEngineClassName);
+     }
+
+     String oldExecutionEngineClassName = oldContext.getString(FrameworkConstants.SYSCFG_EXECUTION_ENGINE);
+     if (!newExecutionEngineClassName.equals(oldExecutionEngineClassName)) {
+       LOG.warn("Execution engine cannot be replaced at the runtime. " +
+                "You might need to restart the server.");
+     }
+
+     // Set up worker threads
+     purgeThreshold = newContext.getLong(
+       FrameworkConstants.SYSCFG_SUBMISSION_PURGE_THRESHOLD,
+       DEFAULT_PURGE_THRESHOLD
+     );
+     purgeSleep = newContext.getLong(
+       FrameworkConstants.SYSCFG_SUBMISSION_PURGE_SLEEP,
+       DEFAULT_PURGE_SLEEP
+     );
+     purgeThread.interrupt();
+
+     updateSleep = newContext.getLong(
+       FrameworkConstants.SYSCFG_SUBMISSION_UPDATE_SLEEP,
+       DEFAULT_UPDATE_SLEEP
+     );
+     updateThread.interrupt();
+
+     LOG.info("Submission engine manager reconfigured.");
+   }
 
    private class PurgeThread extends Thread {
        public PurgeThread() {

@@ -164,4 +164,103 @@ public class JdbcRepositoryProvider implements RepositoryProvider {
   public synchronized Repository getRepository() {
     return repository;
   }
+
+  @Override
+  public void configurationChanged() {
+    LOG.info("Begin JdbcRepository reconfiguring.");
+    JdbcRepositoryContext oldRepoContext = repoContext;
+    repoContext = new JdbcRepositoryContext(SqoopConfiguration.getInstance().getContext());
+
+    // reconfigure jdbc handler
+    String newJdbcHandlerClassName = repoContext.getHandlerClassName();
+    if (newJdbcHandlerClassName == null
+        || newJdbcHandlerClassName.trim().length() == 0) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0001,
+          newJdbcHandlerClassName);
+    }
+
+    String oldJdbcHandlerClassName = oldRepoContext.getHandlerClassName();
+    if (!newJdbcHandlerClassName.equals(oldJdbcHandlerClassName)) {
+      LOG.warn("Repository JDBC handler cannot be replaced at the runtime. " +
+               "You might need to restart the server.");
+    }
+
+    // reconfigure jdbc driver
+    String newJdbcDriverClassName = repoContext.getDriverClass();
+    if (newJdbcDriverClassName == null
+        || newJdbcDriverClassName.trim().length() == 0) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0003,
+              newJdbcDriverClassName);
+    }
+
+    String oldJdbcDriverClassName = oldRepoContext.getDriverClass();
+    if (!newJdbcDriverClassName.equals(oldJdbcDriverClassName)) {
+      LOG.warn("Repository JDBC driver cannot be replaced at the runtime. " +
+               "You might need to restart the server.");
+    }
+
+    // reconfigure max connection
+    connectionPool.setMaxActive(repoContext.getMaximumConnections());
+
+    // reconfigure the url of repository
+    String connectUrl = repoContext.getConnectionUrl();
+    String oldurl = oldRepoContext.getConnectionUrl();
+    if (connectUrl != null && !connectUrl.equals(oldurl)) {
+      LOG.warn("Repository URL cannot be replaced at the runtime. " +
+               "You might need to restart the server.");
+    }
+
+    // if connection properties or transaction isolation option changes
+    boolean connFactoryChanged = false;
+
+    // compare connection properties
+    if (!connFactoryChanged) {
+      Properties oldProp = oldRepoContext.getConnectionProperties();
+      Properties newProp = repoContext.getConnectionProperties();
+
+      if (newProp.size() != oldProp.size()) {
+        connFactoryChanged = true;
+      } else {
+        for (Object key : newProp.keySet()) {
+          if (!newProp.getProperty((String) key).equals(oldProp.getProperty((String) key))) {
+            connFactoryChanged = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // compare the transaction isolation option
+    if (!connFactoryChanged) {
+      String oldTxOption = oldRepoContext.getTransactionIsolation().toString();
+      String newTxOption = repoContext.getTransactionIsolation().toString();
+
+      if (!newTxOption.equals(oldTxOption)) {
+        connFactoryChanged = true;
+      }
+    }
+
+    if (connFactoryChanged) {
+      // try to reconfigure connection factory
+      try {
+        LOG.info("Reconfiguring Connection Factory.");
+        Properties jdbcProps = repoContext.getConnectionProperties();
+
+        ConnectionFactory connFactory =
+            new DriverManagerConnectionFactory(connectUrl, jdbcProps);
+
+        new PoolableConnectionFactory(connFactory, connectionPool, statementPool,
+                handler.validationQuery(), false, false,
+                repoContext.getTransactionIsolation().getCode());
+      } catch (IllegalStateException ex) {
+        // failed to reconfigure connection factory
+        LOG.warn("Repository connection cannot be reconfigured currently. " +
+                 "You might need to restart the server.");
+      }
+    }
+
+    // ignore the create schema option, because the repo url is not allowed to change
+
+    LOG.info("JdbcRepository reconfigured.");
+  }
 }

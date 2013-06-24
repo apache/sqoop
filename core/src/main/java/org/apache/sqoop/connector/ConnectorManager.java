@@ -33,12 +33,15 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.core.Reconfigurable;
+import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.repository.RepositoryTransaction;
 import org.apache.sqoop.model.MConnector;
 
-public class ConnectorManager {
+public class ConnectorManager implements Reconfigurable {
 
   /**
    * Logger object.
@@ -184,6 +187,8 @@ public class ConnectorManager {
 
     registerConnectors();
 
+    SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
+
     if (LOG.isInfoEnabled()) {
       LOG.info("Connectors loaded: " + handlerMap);
     }
@@ -231,4 +236,13 @@ public class ConnectorManager {
       handlerMap = null;
       nameMap = null;
   }
+
+  @Override
+  public synchronized void configurationChanged() {
+    LOG.info("Begin connector manager reconfiguring");
+    // If there are configuration options for ConnectorManager,
+    // implement the reconfiguration procedure right here.
+    LOG.info("Connector manager reconfigured");
+  }
+
 }

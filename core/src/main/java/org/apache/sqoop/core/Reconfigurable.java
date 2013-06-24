@@ -15,17 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.repository;
+package org.apache.sqoop.core;
 
-import org.apache.sqoop.common.MapContext;
-import org.apache.sqoop.core.Reconfigurable;
-
-public interface RepositoryProvider extends Reconfigurable {
-
-  void initialize(MapContext context);
-
-  void destroy();
-
-  Repository getRepository();
-
+/**
+ * Interface that make Sqoop Server components sensitive to
+ * configuration file changes at the runtime
+ */
+public interface Reconfigurable {
+  /**
+   * Method to notify each reconfigurable components
+   */
+  public void configurationChanged();
 }

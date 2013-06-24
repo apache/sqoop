@@ -19,6 +19,9 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
+import org.apache.sqoop.core.Reconfigurable;
+import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
@@ -45,7 +48,7 @@ import java.util.ResourceBundle;
  * be the fastest way and we might want to introduce internal structures for
  * running jobs in case that this approach will be too slow.
  */
-public class FrameworkManager {
+public class FrameworkManager implements Reconfigurable {
 
   /**
    * Logger object.
@@ -141,6 +144,8 @@ public class FrameworkManager {
     // Register framework metadata in repository
     mFramework = RepositoryManager.getInstance().getRepository().registerFramework(mFramework);
 
+    SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
+
     LOG.info("Submission manager initialized: OK");
   }
 
@@ -165,4 +170,11 @@ public class FrameworkManager {
         FrameworkConstants.RESOURCE_BUNDLE_NAME, locale);
   }
 
+  @Override
+  public void configurationChanged() {
+    LOG.info("Begin framework manager reconfiguring");
+    // If there are configuration options for FrameworkManager,
+    // implement the reconfiguration procedure right here.
+    LOG.info("Framework manager reconfigured");
+  }
 }

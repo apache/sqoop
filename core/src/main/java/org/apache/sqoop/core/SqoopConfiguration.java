@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,7 +32,7 @@ import org.apache.sqoop.common.SqoopException;
 /**
  * Configuration manager that loads Sqoop configuration.
  */
-public class SqoopConfiguration {
+public class SqoopConfiguration implements Reconfigurable {
 
   /**
    * Logger object.
@@ -79,6 +78,7 @@ public class SqoopConfiguration {
   private boolean initialized = false;
   private ConfigurationProvider provider = null;
   private Map<String, String> config = null;
+  private Map<String, String> oldConfig = null;
 
   public synchronized void initialize() {
     if (initialized) {
@@ -165,8 +165,9 @@ public class SqoopConfiguration {
 
     // Initialize the configuration provider
     provider.initialize(configDir, bootstrapProperties);
-    refreshConfiguration();
-    provider.registerListener(new CoreConfigurationListener());
+    configurationChanged();
+
+    provider.registerListener(new CoreConfigurationListener(SqoopConfiguration.getInstance()));
 
     initialized = true;
   }
@@ -176,10 +177,19 @@ public class SqoopConfiguration {
       throw new SqoopException(CoreError.CORE_0007);
     }
 
-    Map<String,String> parameters = new HashMap<String, String>();
-    parameters.putAll(config);
+    return new MapContext(config);
+  }
 
-    return new MapContext(parameters);
+  public synchronized MapContext getOldContext() {
+    if (!initialized) {
+      throw new SqoopException(CoreError.CORE_0007);
+    }
+
+    if (oldConfig == null) {
+      throw new SqoopException(CoreError.CORE_0008);
+    }
+
+    return new MapContext(oldConfig);
   }
 
   public synchronized void destroy() {
@@ -193,6 +203,7 @@ public class SqoopConfiguration {
     provider = null;
     configDir = null;
     config = null;
+    oldConfig = null;
     initialized = false;
   }
 
@@ -209,15 +220,28 @@ public class SqoopConfiguration {
     PropertyConfigurator.configure(props);
   }
 
-  private synchronized void refreshConfiguration() {
+  public ConfigurationProvider getProvider() {
+    return provider;
+  }
+
+  @Override
+  public synchronized void configurationChanged() {
+    oldConfig = config;
     config = provider.getConfiguration();
     configureLogging();
   }
 
-  public class CoreConfigurationListener implements ConfigurationListener {
+  public static class CoreConfigurationListener implements ConfigurationListener {
+
+    private Reconfigurable listener;
+
+    public CoreConfigurationListener(Reconfigurable target) {
+      listener = target;
+    }
+
     @Override
     public void configurationChanged() {
-      refreshConfiguration();
+      listener.configurationChanged();
     }
   }
 }
