@@ -45,7 +45,7 @@ def sqoop_guess_branch(versions):
     tmp_branch = None
 
     if v.startswith("1.99") or v.startswith("2.0"):
-      tmp_branch = "sqoop"
+      tmp_branch = "sqoop2"
     else:
       tmp_branch = "trunk"
 
