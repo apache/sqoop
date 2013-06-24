@@ -394,8 +394,7 @@ public abstract class Repository {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = cloneForms(newConnector.getConnectionForms()
-          .getForms());
+        List<MForm> forms = newConnector.getConnectionForms().clone(false).getForms();
         MConnectionForms newConnectionForms = new MConnectionForms(forms);
         upgrader.upgrade(connection.getConnectorPart(), newConnectionForms);
         MConnection newConnection = new MConnection(connectorID,
@@ -407,8 +406,7 @@ public abstract class Repository {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = cloneForms(newConnector.getJobForms(job.getType())
-          .getForms());
+        List<MForm> forms = newConnector.getJobForms(job.getType()).clone(false).getForms();
         MJobForms newJobForms = new MJobForms(job.getType(), forms);
         upgrader.upgrade(job.getConnectorPart(), newJobForms);
         MJob newJob = new MJob(connectorID, job.getConnectionId(),
@@ -449,8 +447,7 @@ public abstract class Repository {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = cloneForms(framework.getConnectionForms()
-          .getForms());
+        List<MForm> forms = framework.getConnectionForms().clone(false).getForms();
         MConnectionForms newConnectionForms = new MConnectionForms(forms);
         upgrader.upgrade(connection.getFrameworkPart(), newConnectionForms);
         MConnection newConnection = new MConnection(connection.getConnectorId(),
@@ -462,8 +459,7 @@ public abstract class Repository {
         // Make a new copy of the forms from the framework,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = cloneForms(framework.getJobForms(job.getType())
-          .getForms());
+        List<MForm> forms = framework.getJobForms(job.getType()).clone(false).getForms();
         MJobForms newJobForms = new MJobForms(job.getType(), forms);
         upgrader.upgrade(job.getFrameworkPart(), newJobForms);
         MJob newJob = new MJob(job.getConnectorId(), job.getConnectionId(),
@@ -483,42 +479,5 @@ public abstract class Repository {
       }
       LOG.info("Framework metadata upgrade finished");
     }
-  }
-
-  /**
-   * Clones the forms, but does not set the actual data,
-   * validation message etc in the inputs, but only the persistence id of the
-   * inputs.
-   * @param mForms MForms which must be cloned
-   * @return Cloned MForms
-   * @throws Exception
-   */
-  private List<MForm> cloneForms(List<MForm> mForms) throws Exception {
-    List<MForm> forms = new ArrayList<MForm>();
-    for(MForm mForm : mForms) {
-      List<MInput<?>> inputs = new ArrayList<MInput<?>>();
-      for (MInput<?> input : mForm.getInputs()) {
-        MInput newInput;
-        if(input instanceof MEnumInput) {
-          newInput = new MEnumInput(input.getName(), input.isSensitive(),
-            ((MEnumInput) input).getValues());
-        } else if (input instanceof MMapInput) {
-          newInput = new MMapInput(input.getName(), input.isSensitive());
-        } else if (input instanceof MBooleanInput) {
-          newInput = new MBooleanInput(input.getName(), input.isSensitive());
-        } else if(input instanceof MStringInput) {
-          newInput = new MStringInput(input.getName(), input.isSensitive(),
-            ((MStringInput) input).getMaxLength());
-        } else if (input instanceof MIntegerInput) {
-          newInput = new MIntegerInput(input.getName(), input.isSensitive());
-        } else {
-          throw new SqoopException(ModelError.MODEL_003);
-        }
-        newInput.setPersistenceId(input.getPersistenceId());
-        inputs.add(newInput);
-      }
-      forms.add(new MForm(mForm.getName(), inputs));
-    }
-    return forms;
   }
 }
