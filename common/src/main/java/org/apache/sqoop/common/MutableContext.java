@@ -45,4 +45,12 @@ public interface MutableContext extends ImmutableContext {
    * @param value New value
    */
   public void setInteger(String key, int value);
+
+  /**
+   * Set boolean value for given key.
+   *
+   * @param key Key
+   * @param value New value
+   */
+  public void setBoolean(String key, boolean value);
 }

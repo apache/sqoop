@@ -53,6 +53,11 @@ public class MutableMapContext extends MapContext implements Iterable<Map.Entry<
   }
 
   @Override
+  public void setBoolean(String key, boolean value) {
+    getOptions().put(key, Boolean.toString(value));
+  }
+
+  @Override
   public Iterator<Map.Entry<String, String>> iterator() {
     return getOptions().entrySet().iterator();
   }
