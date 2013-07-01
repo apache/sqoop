@@ -19,6 +19,9 @@ package org.apache.sqoop.json;
 
 import junit.framework.TestCase;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Decimal;
+import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -354,6 +357,31 @@ public class TestSubmissionBean extends TestCase {
     counter = group.getCounter("YYYYYY");
     assertNotNull(counter);
     assertEquals(222222, counter.getValue());
+  }
+
+  public void testTransferConnectorSchema() {
+    MSubmission source = new MSubmission();
+    source.setConnectorSchema(getSchema());
+
+    Schema target = transfer(source).getConnectorSchema();
+    assertNotNull(target);
+    assertEquals(getSchema(), target);
+  }
+
+  public void testTransferHioSchema() {
+    MSubmission source = new MSubmission();
+    source.setHioSchema(getSchema());
+
+    Schema target = transfer(source).getHioSchema();
+    assertNotNull(target);
+    assertEquals(getSchema(), target);
+  }
+
+  private Schema getSchema() {
+    return new Schema("schema")
+      .addColumn(new Text("col1"))
+      .addColumn(new Decimal("col2"))
+    ;
   }
 
   /**

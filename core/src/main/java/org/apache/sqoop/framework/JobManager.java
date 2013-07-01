@@ -355,6 +355,13 @@ public class JobManager implements Reconfigurable {
                request.getConfigConnectorConnection(),
                request.getConfigConnectorJob()));
 
+       // Retrieve and persist the schema
+       request.getSummary().setConnectorSchema(initializer.getSchema(
+           initializerContext,
+           request.getConfigConnectorConnection(),
+           request.getConfigConnectorJob()
+       ));
+
        // Bootstrap job from framework perspective
        switch (job.getType()) {
            case IMPORT:

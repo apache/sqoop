@@ -70,6 +70,9 @@ public enum GenericJdbcConnectorError implements ErrorCode {
   /** Unsupported values in partition column */
   GENERIC_JDBC_CONNECTOR_0015("Partition column contains unsupported values"),
 
+  /** Can't fetch schema */
+  GENERIC_JDBC_CONNECTOR_0016("Can't fetch schema"),
+
   ;
 
   private final String message;

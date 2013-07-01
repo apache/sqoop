@@ -405,6 +405,10 @@ public class Constants {
       "submission.executed_success";
   public static final String RES_SUBMISSION_SERVER_URL =
       "submission.server_url";
+  public static final String RES_CONNECTOR_SCHEMA =
+      "submission.connector_schema";
+  public static final String RES_HIO_SCHEMA =
+    "submission.hio_schema";
 
   private Constants() {
     // Instantiation is prohibited

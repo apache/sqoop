@@ -28,6 +28,10 @@ import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
+import org.apache.sqoop.schema.type.Text;
 
 public class TestImportInitializer extends TestCase {
 
@@ -85,6 +89,20 @@ public class TestImportInitializer extends TestCase {
         executor.executeUpdate(sql);
       }
     }
+  }
+
+  /**
+   * Return Schema representation for the testing table.
+   *
+   * @param name Name that should be used for the generated schema.
+   * @return
+   */
+  public Schema getSchema(String name) {
+    return new Schema(name)
+      .addColumn(new FixedPoint("ICOL"))
+      .addColumn(new FloatingPoint("DCOL"))
+      .addColumn(new Text("VCOL"))
+    ;
   }
 
   @Override
@@ -288,6 +306,49 @@ public class TestImportInitializer extends TestCase {
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
+  }
+
+
+  @SuppressWarnings("unchecked")
+  public void testGetSchemaForTable() throws Exception {
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.schemaName = schemaName;
+    jobConf.table.tableName = tableName;
+    jobConf.table.partitionColumn = "DCOL";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcImportInitializer();
+    initializer.initialize(initializerContext, connConf, jobConf);
+    Schema schema = initializer.getSchema(initializerContext, connConf, jobConf);
+    assertEquals(getSchema(tableName), schema);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testGetSchemaForSql() throws Exception {
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+
+    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.table.schemaName = schemaName;
+    jobConf.table.sql = tableSql;
+    jobConf.table.partitionColumn = "DCOL";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcImportInitializer();
+    initializer.initialize(initializerContext, connConf, jobConf);
+    Schema schema = initializer.getSchema(initializerContext, connConf, jobConf);
+    assertEquals(getSchema("Query"), schema);
   }
 
   @SuppressWarnings("unchecked")

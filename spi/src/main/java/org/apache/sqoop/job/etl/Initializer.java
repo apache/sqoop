@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.schema.Schema;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,5 +53,9 @@ public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
                               JobConfiguration jobConfiguration) {
     return new LinkedList<String>();
   }
+
+  public abstract Schema getSchema(InitializerContext context,
+                                   ConnectionConfiguration connectionConfiguration,
+                                   JobConfiguration jobConfiguration);
 
 }

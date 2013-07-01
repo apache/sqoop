@@ -61,6 +61,16 @@ public final class SubmissionDisplayer {
         println("\t" + externalLink);
       }
     }
+
+    if(isVerbose() && submission.getConnectorSchema() != null) {
+      print(resourceString(Constants.RES_CONNECTOR_SCHEMA)+": ");
+      println(submission.getConnectorSchema());
+    }
+
+    if(isVerbose() && submission.getHioSchema() != null) {
+      print(resourceString(Constants.RES_HIO_SCHEMA)+": ");
+      println(submission.getHioSchema());
+    }
   }
 
   /**

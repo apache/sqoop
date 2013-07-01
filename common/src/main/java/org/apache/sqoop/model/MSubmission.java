@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 
@@ -90,6 +91,22 @@ public class MSubmission extends MAccountableEntity {
    * This is optional property that is not serialized in metastore.
    */
   String exceptionStackTrace;
+
+  /**
+   * Schema that was reported by the connector.
+   *
+   * This is optional property that is currently not serialized into metastore.
+   */
+  Schema connectorSchema;
+
+  /**
+   * Optional schema that reported by the underlying I/O implementation. Please
+   * note that this property might be empty and in such case the connector
+   * schema will use also on Hadoop I/O side.
+   *
+   * This is optional property that is currently not serialized into metastore.
+   */
+  Schema hioSchema;
 
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
@@ -194,6 +211,22 @@ public class MSubmission extends MAccountableEntity {
     this.setExceptionStackTrace(writer.toString());
   }
 
+  public Schema getConnectorSchema() {
+    return connectorSchema;
+  }
+
+  public void setConnectorSchema(Schema connectorSchema) {
+    this.connectorSchema = connectorSchema;
+  }
+
+  public Schema getHioSchema() {
+    return hioSchema;
+  }
+
+  public void setHioSchema(Schema hioSchema) {
+    this.hioSchema = hioSchema;
+  }
+
   @Override
   public String toString() {
     return "MSubmission{" +
@@ -207,6 +240,8 @@ public class MSubmission extends MAccountableEntity {
       ", externalLink='" + externalLink + '\'' +
       ", exceptionInfo='" + exceptionInfo + '\'' +
       ", exceptionStackTrace='" + exceptionStackTrace + '\'' +
+      ", connectorSchema='" + connectorSchema + '\'' +
+      ", hioSchema='" + hioSchema + '\'' +
       '}';
   }
 
