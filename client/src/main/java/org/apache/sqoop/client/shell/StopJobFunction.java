@@ -17,40 +17,37 @@
  */
 package org.apache.sqoop.client.shell;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.client;
+import static org.apache.sqoop.client.shell.ShellEnvironment.resourceString;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.SubmissionDisplayer;
 import org.apache.sqoop.model.MSubmission;
 
-import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+public class StopJobFunction extends SqoopFunction {
 
-/**
- * Class used to perform the submission stop function
- */
-public class SubmissionStopFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  public SubmissionStopFunction() {
-    this.addOption(OptionBuilder
-        .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-        .withLongOpt(Constants.OPT_JID)
-        .hasArg()
-        .create(Constants.OPT_JID_CHAR));
+  public StopJobFunction() {
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
+       .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
+       .withLongOpt(Constants.OPT_JID)
+       .create(Constants.OPT_JID_CHAR));
   }
 
+  @Override
   public Object executeFunction(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_JID)) {
-      printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return null;
+    if (line.hasOption(Constants.OPT_JID)) {
+      MSubmission submission = client.stopSubmission(getLong(line, Constants.OPT_JID));
+      if(submission.getStatus().isFailure()) {
+        SubmissionDisplayer.displayFooter(submission);
+      } else {
+        SubmissionDisplayer.displayHeader(submission);
+        SubmissionDisplayer.displayProgress(submission);
+      }
     }
 
-    MSubmission submission = client.stopSubmission(getLong(line, Constants.OPT_JID));
-    if(submission.getStatus().isFailure()) {
-      SubmissionDisplayer.displayFooter(submission);
-    } else {
-      SubmissionDisplayer.displayHeader(submission);
-      SubmissionDisplayer.displayProgress(submission);
-    }
     return null;
   }
 }

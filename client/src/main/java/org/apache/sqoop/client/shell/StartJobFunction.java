@@ -17,43 +17,39 @@
  */
 package org.apache.sqoop.client.shell;
 
+import static org.apache.sqoop.client.shell.ShellEnvironment.client;
+import static org.apache.sqoop.client.shell.ShellEnvironment.getPollTimeout;
+import static org.apache.sqoop.client.shell.ShellEnvironment.resourceString;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
+import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.client.utils.SubmissionDisplayer;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MSubmission;
 
-import static org.apache.sqoop.client.shell.ShellEnvironment.*;
-
-/**
- * Class used to perform the submission start function
- */
-public class SubmissionStartFunction extends SqoopFunction {
-  public static final Logger LOG = Logger.getLogger(SubmissionStartFunction.class);
+public class StartJobFunction extends SqoopFunction {
+  public static final Logger LOG = Logger.getLogger(StartJobFunction.class);
 
   @SuppressWarnings("static-access")
-  public SubmissionStartFunction() {
+  public StartJobFunction() {
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
+       .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
+       .withLongOpt(Constants.OPT_JID)
+       .create(Constants.OPT_JID_CHAR));
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
-      .hasArg()
-      .create(Constants.OPT_JID_CHAR));
-    this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_SYNCHRONOUS))
-      .withLongOpt(Constants.OPT_SYNCHRONOUS)
-      .create(Constants.OPT_SYNCHRONOUS_CHAR));
+       .withDescription(resourceString(Constants.RES_PROMPT_SYNCHRONOUS))
+       .withLongOpt(Constants.OPT_SYNCHRONOUS)
+       .create(Constants.OPT_SYNCHRONOUS_CHAR));
   }
 
+  @Override
   public Object executeFunction(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_JID)) {
-      printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return null;
-    }
-
     // Poll until finished
-    if (line.hasOption(Constants.OPT_SYNCHRONOUS)) {
+    if (line.hasOption(Constants.OPT_SYNCHRONOUS) && line.hasOption(Constants.OPT_JID)) {
       long pollTimeout = getPollTimeout();
       SubmissionCallback callback = new SubmissionCallback() {
         @Override
@@ -76,9 +72,9 @@ public class SubmissionStartFunction extends SqoopFunction {
       try {
         client.startSubmission(getLong(line, Constants.OPT_JID), callback, pollTimeout);
       } catch (InterruptedException e) {
-        LOG.error("Could not sleep");
+        throw new SqoopException(ClientError.CLIENT_0009, e);
       }
-    } else {
+    } else if (line.hasOption(Constants.OPT_JID)) {
       MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
       if(submission.getStatus().isFailure()) {
         SubmissionDisplayer.displayFooter(submission);
@@ -87,6 +83,7 @@ public class SubmissionStartFunction extends SqoopFunction {
         SubmissionDisplayer.displayProgress(submission);
       }
     }
+
     return null;
   }
 }

@@ -447,26 +447,13 @@ Example: ::
 
   clone job --jid 1
 
+Start Command
+-------------
 
-Submission Command
-------------------
+Start command will begin execution of an existing Sqoop job.
 
-Submission command is entry point for executing actual data transfers. It allows you to start, stop and retrieve status of currently running jobs.
-
-Available functions:
-
-+----------------+-------------------------------------------------+
-| Function       | Description                                     |
-+================+=================================================+
-| ``start``      | Start job                                       |
-+----------------+-------------------------------------------------+
-| ``stop``       | Interrupt running job                           |
-+----------------+-------------------------------------------------+
-| ``status``     | Retrieve status for given job                   |
-+----------------+-------------------------------------------------+
-
-Submission Start Function
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Start Job Function
+~~~~~~~~~~~~~~~~~~
 
 Start job (submit new submission). Starting already running job is considered as invalid operation.
 
@@ -480,12 +467,16 @@ Start job (submit new submission). Starting already running job is considered as
 
 Example: ::
 
-  submission start --jid 1
-  submission start --jid 1 --synchronous
+  start job --jid 1
+  start job --jid 1 --synchronous
 
+Stop Command
+------------
 
-Submission Stop Function
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Stop command will interrupt an job execution.
+
+Stop Job Function
+~~~~~~~~~~~~~~~~~
 
 Interrupt running job.
 
@@ -497,10 +488,15 @@ Interrupt running job.
 
 Example: ::
 
-  submission stop --jid 1
+  stop job --jid 1
 
-Submission Status Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Status Command
+--------------
+
+Status command will retrieve the last status of a job.
+
+Status Job Function
+~~~~~~~~~~~~~~~~~~~
 
 Retrieve last status for given job.
 
@@ -512,5 +508,5 @@ Retrieve last status for given job.
 
 Example: ::
 
-  submission status --jid 1
+  status job --jid 1
 

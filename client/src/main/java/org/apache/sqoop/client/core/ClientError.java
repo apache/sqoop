@@ -47,6 +47,10 @@ public enum ClientError implements ErrorCode {
 
   /** Polling time of submission status cannot be negative */
   CLIENT_0008("Polling time of submission status cannot be negative"),
+
+  /** Job Submission : Cannot sleep */
+  CLIENT_0009("Cannot sleep"),
+
   ;
 
   private final String message;

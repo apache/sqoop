@@ -91,11 +91,17 @@ public class Constants {
   public static final String CMD_SHOW = "show";
   public static final String CMD_SHOW_SC = "\\sh";
 
-  public static final String CMD_SUBMISSION = "submission";
-  public static final String CMD_SUBMISSION_SC = "\\sub";
-
   public static final String CMD_UPDATE = "update";
   public static final String CMD_UPDATE_SC = "\\up";
+
+  public static final String CMD_START = "start";
+  public static final String CMD_START_SC = "\\sta";
+
+  public static final String CMD_STOP = "stop";
+  public static final String CMD_STOP_SC = "\\stp";
+
+  public static final String CMD_STATUS = "status";
+  public static final String CMD_STATUS_SC = "\\stu";
 
   public static final String FN_CONNECTION = "connection";
   public static final String FN_JOB = "job";
@@ -105,17 +111,16 @@ public class Constants {
   public static final String FN_CONNECTOR = "connector";
   public static final String FN_VERSION = "version";
   public static final String FN_FRAMEWORK = "framework";
-  public static final String FN_START = "start";
-  public static final String FN_STOP = "stop";
-  public static final String FN_STATUS = "status";
 
   public static final String PRE_CLONE = "Clone";
   public static final String PRE_CREATE = "Create";
   public static final String PRE_DELETE = "Delete";
   public static final String PRE_SET = "Set";
   public static final String PRE_SHOW = "Show";
-  public static final String PRE_SUBMISSION = "Submission";
   public static final String PRE_UPDATE = "Update";
+  public static final String PRE_START = "Start";
+  public static final String PRE_STATUS = "Status";
+  public static final String PRE_STOP = "Stop";
   public static final String SUF_INFO = "Info";
 
 
@@ -311,17 +316,23 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_VERSION_PROTOCOL =
       "show.prompt_version_protocol";
 
+  public static final String RES_START_USAGE =
+      "start.usage";
+
+  public static final String RES_STATUS_USAGE =
+      "status.usage";
+  public static final String RES_PROMPT_SYNCHRONOUS =
+      "start.prompt_synchronous";
+
+  public static final String RES_STOP_USAGE =
+      "stop.usage";
+
   public static final String RES_SQOOP_SHELL_BANNER =
       "sqoop.shell_banner";
   public static final String RES_SQOOP_PROMPT_SHELL_LOADRC =
       "sqoop.prompt_shell_loadrc";
   public static final String RES_SQOOP_PROMPT_SHELL_LOADEDRC =
       "sqoop.prompt_shell_loadedrc";
-
-  public static final String RES_SUBMISSION_USAGE =
-      "submission.usage";
-  public static final String RES_PROMPT_SYNCHRONOUS =
-      "submission.prompt_synchronous";
 
   public static final String RES_UPDATE_USAGE =
       "update.usage";

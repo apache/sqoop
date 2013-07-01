@@ -94,7 +94,9 @@ public final class SqoopShell {
     shell.register(new DeleteCommand(shell));
     shell.register(new UpdateCommand(shell));
     shell.register(new CloneCommand(shell));
-    shell.register(new SubmissionCommand(shell));
+    shell.register(new StartCommand(shell));
+    shell.register(new StopCommand(shell));
+    shell.register(new StatusCommand(shell));
 
     // Configure shared shell io object
     setIo(shell.getIo());

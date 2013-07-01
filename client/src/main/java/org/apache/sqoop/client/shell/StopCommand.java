@@ -17,37 +17,38 @@
  */
 package org.apache.sqoop.client.shell;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
+import java.util.List;
+
 import org.apache.sqoop.client.core.Constants;
-import org.apache.sqoop.client.utils.SubmissionDisplayer;
-import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.submission.SubmissionStatus;
+import org.codehaus.groovy.tools.shell.Shell;
 
-import static org.apache.sqoop.client.shell.ShellEnvironment.*;
+import static org.apache.sqoop.client.shell.ShellEnvironment.printlnResource;
 
-/**
- * Class used to print submission status function
- */
-public class SubmissionStatusFunction extends  SqoopFunction {
+public class StopCommand extends SqoopCommand {
+
+  private StopJobFunction stopJobFunction;
+
   @SuppressWarnings("static-access")
-  public SubmissionStatusFunction() {
-    this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
-      .hasArg()
-      .create(Constants.OPT_JID_CHAR));
+  protected StopCommand(Shell shell) {
+    super(shell, Constants.CMD_STOP, Constants.CMD_STOP_SC,
+        new String[] { Constants.FN_JOB }, Constants.PRE_STOP, null);
   }
-
-  public Object executeFunction(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_JID)) {
-      printlnResource(Constants.RES_ARGS_JID_MISSING);
+  @Override
+  public Object executeCommand(List args) {
+    if (args.size() == 0) {
+      printlnResource(Constants.RES_STOP_USAGE, getUsage());
       return null;
     }
 
-    MSubmission submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
-    SubmissionDisplayer.displaySubmission(submission);
-
+    String func = (String) args.get(0);
+    if (func.equals(Constants.FN_JOB)) {
+      if (stopJobFunction == null) {
+        stopJobFunction = new StopJobFunction();
+      }
+      return stopJobFunction.execute(args);
+    } else {
+      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
+    }
     return null;
   }
 }
