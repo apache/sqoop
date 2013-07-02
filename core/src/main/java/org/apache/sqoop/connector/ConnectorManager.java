@@ -54,6 +54,11 @@ public class ConnectorManager implements Reconfigurable {
   private static ConnectorManager instance;
 
   /**
+   * Default connector auto upgrade option value
+   */
+  private static boolean DEFAULT_AUTO_UPGRADE = false;
+
+  /**
    * Create default object by default.
    *
    * Every Sqoop server application needs one so this should not be performance issue.
@@ -185,7 +190,9 @@ public class ConnectorManager implements Reconfigurable {
       throw new SqoopException(ConnectorError.CONN_0001, ex);
     }
 
-    registerConnectors();
+    boolean autoUpgrade = SqoopConfiguration.getInstance().getContext().getBoolean(
+        ConfigurationConstants.CONNECTOR_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE);
+    registerConnectors(autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
@@ -194,7 +201,7 @@ public class ConnectorManager implements Reconfigurable {
     }
   }
 
-  private synchronized void registerConnectors() {
+  private synchronized void registerConnectors(boolean autoUpgrade) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     RepositoryTransaction rtx = null;
@@ -205,7 +212,7 @@ public class ConnectorManager implements Reconfigurable {
         ConnectorHandler handler = handlerMap.get(name);
         MConnector connectorMetadata = handler.getMetadata();
         MConnector registeredMetadata =
-            repository.registerConnector(connectorMetadata);
+            repository.registerConnector(connectorMetadata, autoUpgrade);
 
         // Set registered metadata instead of connector metadata as they will
         // have filled persistent ids. We should be confident at this point that

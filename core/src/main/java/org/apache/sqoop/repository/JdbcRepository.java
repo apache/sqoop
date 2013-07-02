@@ -154,7 +154,7 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MConnector registerConnector(final MConnector mConnector) {
+  public MConnector registerConnector(final MConnector mConnector, final boolean autoUpgrade) {
 
     return (MConnector) doWithConnection(new DoWithConnection() {
       @Override
@@ -172,8 +172,13 @@ public class JdbcRepository extends Repository {
           // monotonically increasing.
           if (result.getUniqueName().equals(mConnector.getUniqueName()) &&
             mConnector.getVersion().compareTo(result.getVersion()) > 0) {
-            upgradeConnector(result, mConnector);
-            return mConnector;
+            if (autoUpgrade) {
+              upgradeConnector(result, mConnector);
+              return mConnector;
+            } else {
+              throw new SqoopException(RepositoryError.JDBCREPO_0026,
+                "Connector: " + mConnector.getUniqueName());
+            }
           }
           if (!result.equals(mConnector)) {
             throw new SqoopException(RepositoryError.JDBCREPO_0013,
@@ -204,7 +209,7 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MFramework registerFramework(final MFramework mFramework) {
+  public MFramework registerFramework(final MFramework mFramework, final boolean autoUpgrade) {
     return (MFramework) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
@@ -216,8 +221,13 @@ public class JdbcRepository extends Repository {
           // We're currently not serializing framework version into repository
           // so let's just compare the structure to see if we need upgrade.
           if(!mFramework.equals(result)) {
-            upgradeFramework(mFramework);
-            return mFramework;
+            if (autoUpgrade) {
+              upgradeFramework(mFramework);
+              return mFramework;
+            } else {
+              throw new SqoopException(RepositoryError.JDBCREPO_0026,
+                "Framework: " + mFramework.getPersistenceId());
+            }
           }
           return result;
         }

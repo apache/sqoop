@@ -19,6 +19,7 @@ package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
+import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
@@ -105,6 +106,10 @@ public class FrameworkManager implements Reconfigurable {
    */
   private final MetadataUpgrader upgrader;
 
+  /**
+   * Default framework auto upgrade option value
+   */
+  private static final boolean DEFAULT_AUTO_UPGRADE = false;
 
   public Class getJobConfigurationClass(MJob.Type jobType) {
       switch (jobType) {
@@ -142,7 +147,9 @@ public class FrameworkManager implements Reconfigurable {
     LOG.trace("Begin submission engine manager initialization");
 
     // Register framework metadata in repository
-    mFramework = RepositoryManager.getInstance().getRepository().registerFramework(mFramework);
+    boolean autoUpgrade = SqoopConfiguration.getInstance().getContext().getBoolean(
+        ConfigurationConstants.FRAMEWORK_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE);
+    mFramework = RepositoryManager.getInstance().getRepository().registerFramework(mFramework, autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 

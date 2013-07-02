@@ -118,6 +118,9 @@ public enum RepositoryError implements ErrorCode {
   /** Invalid submission id **/
   JDBCREPO_0025("Given submission id is invalid"),
 
+  /** Upgrade required but not allowed **/
+  JDBCREPO_0026("Upgrade required but not allowed");
+
   ;
 
   private final String message;

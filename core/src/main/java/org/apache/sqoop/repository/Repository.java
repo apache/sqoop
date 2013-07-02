@@ -81,9 +81,10 @@ public abstract class Repository {
    * given connector are already registered with different structure.
    *
    * @param mConnector the connector metadata to be registered
+   * autoupgrade whether to upgrade framework automatically
    * @return Registered connector structure
    */
-  public abstract MConnector registerConnector(MConnector mConnector);
+  public abstract MConnector registerConnector(MConnector mConnector, boolean autoUpgrade);
 
   /**
    * Search for connector with given name in repository.
@@ -103,9 +104,10 @@ public abstract class Repository {
    * given framework are already registered with different structure.
    *
    * @param mFramework framework metadata to be registered
+   * autoupgrade whether to upgrade framework automatically
    * @return Registered connector structure
    */
-  public abstract MFramework registerFramework(MFramework mFramework);
+  public abstract MFramework registerFramework(MFramework mFramework, boolean autoUpgrade);
 
   /**
    * Save given connection to repository. This connection must not be already

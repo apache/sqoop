@@ -70,6 +70,11 @@ public final class ConfigurationConstants {
   public static final String PROPERTIES_PROVIDER_SLEEP =
     PREFIX_PROPERTIES_PROVIDER_CONFIG + "sleep";
 
+  public static final String CONNECTOR_AUTO_UPGRADE =
+      "org.apache.sqoop.connector.autoupgrade";
+
+  public static final String FRAMEWORK_AUTO_UPGRADE =
+      "org.apache.sqoop.framework.autoupgrade";
 
   private ConfigurationConstants() {
     // Disable explicit object creation
