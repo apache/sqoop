@@ -268,9 +268,10 @@ public class TestImportPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.DATE));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE,
-        Date.valueOf("2013-01-01").toString());
+        Date.valueOf("2004-10-20").toString());
     context.setString(GenericJdbcConnectorConstants
-        .CONNECTOR_JDBC_PARTITION_MAXVALUE, Date.valueOf("2013-12-31").toString());
+        .CONNECTOR_JDBC_PARTITION_MAXVALUE, Date.valueOf("2013-10-17")
+        .toString());
 
 
     ConnectionConfiguration connConf = new ConnectionConfiguration();
@@ -280,10 +281,12 @@ public class TestImportPartitioner extends TestCase {
     PartitionerContext partitionerContext = new PartitionerContext(context,
         3);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
+
     verifyResult(partitions, new String[]{
-        "'2013-01-01' <= DCOL AND DCOL < '2013-05-02'",
-        "'2013-05-02' <= DCOL AND DCOL < '2013-08-31'",
-        "'2013-08-31' <= DCOL AND DCOL <= '2013-12-31'",
+        "'2004-10-20' <= DCOL AND DCOL < '2007-10-19'",
+        "'2007-10-19' <= DCOL AND DCOL < '2010-10-18'",
+        "'2010-10-18' <= DCOL AND DCOL <= '2013-10-17'",
     });
 
   }
@@ -307,6 +310,7 @@ public class TestImportPartitioner extends TestCase {
     PartitionerContext partitionerContext = new PartitionerContext(context,
         3);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
     verifyResult(partitions, new String[]{
         "'01:01:01' <= TCOL AND TCOL < '04:14:17'",
         "'04:14:17' <= TCOL AND TCOL < '07:27:33'",

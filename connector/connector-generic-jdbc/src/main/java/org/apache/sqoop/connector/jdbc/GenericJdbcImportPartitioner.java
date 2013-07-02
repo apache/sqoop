@@ -128,10 +128,9 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
         break;
     }
 
-    long tzOffset = TimeZone.getDefault().getRawOffset();
 
-    minDateValue += tzOffset;
-    maxDateValue += tzOffset;
+    minDateValue += TimeZone.getDefault().getOffset(minDateValue);
+    maxDateValue += TimeZone.getDefault().getOffset(maxDateValue);
 
     sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
