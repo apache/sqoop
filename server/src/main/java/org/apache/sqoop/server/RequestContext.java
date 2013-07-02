@@ -98,7 +98,11 @@ public class RequestContext {
    * @return First specified locale
    */
   public Locale getAcceptLanguageHeader() {
-    return new Locale(request.getHeader("Accept-Language"));
+    String lang = request.getHeader("Accept-Language");
+    if (lang == null) {
+      lang = Locale.getDefault().getLanguage();
+    }
+    return new Locale(lang);
   }
 
   /**
