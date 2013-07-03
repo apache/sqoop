@@ -455,6 +455,7 @@ limitations under the License.
                   <exclude>**/nb-configuration.xml</exclude>
                   <exclude>**.patch</exclude>
                   <exclude>patch-process/*</exclude>
+                  <exclude>.metadata/</exclude>
                 </excludes>
               </configuration>
             </execution>
