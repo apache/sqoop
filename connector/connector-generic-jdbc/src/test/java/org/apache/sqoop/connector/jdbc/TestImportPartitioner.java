@@ -414,6 +414,24 @@ public class TestImportPartitioner extends TestCase {
         "'Y' <= VCCOL AND VCCOL <= 'Z'",
     });
   }
+  public void testVarcharPartition2() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants
+      .CONNECTOR_JDBC_PARTITION_COLUMNNAME, "VCCOL");
+    context.setString(GenericJdbcConnectorConstants
+      .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.VARCHAR));
+    context.setString(GenericJdbcConnectorConstants
+      .CONNECTOR_JDBC_PARTITION_MINVALUE, "Breezy Badger");
+    context.setString(GenericJdbcConnectorConstants
+      .CONNECTOR_JDBC_PARTITION_MAXVALUE, "Warty Warthog");
+
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    Partitioner partitioner = new GenericJdbcImportPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    assertEquals(partitions.size(), 5);
+  }
 
   public void testVarcharPartitionWithCommonPrefix() throws Exception {
     MutableContext context = new MutableMapContext();

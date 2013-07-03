@@ -244,9 +244,16 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     BigDecimal curVal = minStringBD;
 
-    while (curVal.compareTo(maxStringBD) <= 0) {
+    int parts = 0;
+
+    while (curVal.compareTo(maxStringBD) <= 0 && parts < numberPartitions) {
       splitPoints.add(curVal);
       curVal = curVal.add(splitSize);
+      // bigDecimalToText approximates to next comparison location.
+      // Make sure we are still in range
+      String text = bigDecimalToText(curVal);
+      curVal = textToBigDecimal(text);
+      ++parts;
     }
 
     if (splitPoints.size() == 0
@@ -530,7 +537,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
    *  is restricted to prevent repeating fractions and rounding errors
    *  towards the higher fraction positions.
    */
-  private static final BigDecimal UNITS_BASE = new BigDecimal(2097152);
+  private static final BigDecimal UNITS_BASE = new BigDecimal(0x200000);
   private static final int MAX_CHARS_TO_CONVERT = 4;
 
   private BigDecimal textToBigDecimal(String str) {
@@ -557,12 +564,28 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     for (int n = 0; n < MAX_CHARS_TO_CONVERT; ++n) {
       curVal = curVal.multiply(UNITS_BASE);
       int cp = curVal.intValue();
-      if (0 == cp) {
+      if (0 >= cp) {
         break;
+      }
+
+      if (!Character.isDefined(cp)) {
+        int t_cp = Character.MAX_CODE_POINT < cp ? 1 : cp;
+        // We are guaranteed to find at least one character
+        while(!Character.isDefined(t_cp)) {
+          ++t_cp;
+          if (t_cp == cp) {
+            break;
+          }
+          if (t_cp >= Character.MAX_CODE_POINT || t_cp <= 0)  {
+            t_cp = 1;
+          }
+        }
+        cp = t_cp;
       }
       curVal = curVal.subtract(new BigDecimal(cp));
       sb.append(Character.toChars(cp));
     }
+
     return sb.toString();
   }
 
