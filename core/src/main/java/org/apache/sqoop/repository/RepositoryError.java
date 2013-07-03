@@ -119,7 +119,10 @@ public enum RepositoryError implements ErrorCode {
   JDBCREPO_0025("Given submission id is invalid"),
 
   /** Upgrade required but not allowed **/
-  JDBCREPO_0026("Upgrade required but not allowed");
+  JDBCREPO_0026("Upgrade required but not allowed"),
+
+  /** Invalid connections or jobs when upgrading connector **/
+  JDBCREPO_0027("Invalid connections or jobs when upgrading connector");
 
   ;
 
