@@ -35,21 +35,27 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.mapreduce.ExportInputFormat;
+import org.apache.sqoop.mapreduce.postgresql.PostgreSQLCopyExportJob;
 import org.apache.sqoop.util.PostgreSQLUtils;
+import org.apache.sqoop.util.SubstitutionUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.io.SplittableBufferedWriter;
+import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.util.AsyncSink;
 import com.cloudera.sqoop.util.DirectImportUtils;
 import com.cloudera.sqoop.util.ErrorableAsyncSink;
 import com.cloudera.sqoop.util.ErrorableThread;
+import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.Executor;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.JdbcUrl;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
 import com.cloudera.sqoop.util.PerfCounters;
-import org.apache.sqoop.util.SubstitutionUtils;
+
 
 /**
  * Manages direct dumps from Postgresql databases via psql COPY TO STDOUT
@@ -532,7 +538,7 @@ public class DirectPostgresqlManager
 
   @Override
   public boolean supportsStagingForExport() {
-    return false;
+    return true;
   }
   // CHECKSTYLE:ON
 
@@ -568,5 +574,16 @@ public class DirectPostgresqlManager
       .withLongOpt(BOOLEAN_FALSE_STRING).create());
 
     return extraOptions;
+  }
+
+  public void exportTable(ExportJobContext context)
+    throws IOException, ExportException {
+    context.setConnManager(this);
+    PostgreSQLCopyExportJob job =
+      new PostgreSQLCopyExportJob(context,
+                                  null,
+                                  ExportInputFormat.class,
+                                  NullOutputFormat.class);
+    job.runExport();
   }
 }
