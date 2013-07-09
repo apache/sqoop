@@ -464,6 +464,11 @@ public abstract class Repository {
 
         throw new SqoopException(RepositoryError.JDBCREPO_0027, msg);
       }
+    } catch (SqoopException ex) {
+      if(tx != null) {
+        tx.rollback();
+      }
+      throw ex;
     } catch (Exception ex) {
       if(tx != null) {
         tx.rollback();
@@ -558,6 +563,11 @@ public abstract class Repository {
 
         throw new SqoopException(RepositoryError.JDBCREPO_0027, msg);
       }
+    } catch (SqoopException ex) {
+      if(tx != null) {
+        tx.rollback();
+      }
+      throw ex;
     } catch (Exception ex) {
       if(tx != null) {
         tx.rollback();
