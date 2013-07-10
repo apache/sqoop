@@ -51,7 +51,7 @@ public class TestConfigurationUtils {
   }
 
   public void setUpJob() throws Exception {
-    job = Job.getInstance();
+    job = new Job();
   }
 
   public void setUpJobConf() throws Exception {
