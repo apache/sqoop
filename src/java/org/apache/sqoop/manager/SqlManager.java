@@ -235,6 +235,7 @@ public abstract class SqlManager
    */
   protected Map<String, Integer> getColumnTypesForRawQuery(String stmt) {
     ResultSet results;
+    LOG.debug("Execute getColumnTypesRawQuery : " + stmt);
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
@@ -399,6 +400,8 @@ public abstract class SqlManager
               results.getInt("DATA_TYPE"));
           }
         }
+        LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));
+        LOG.debug("Types returned = " + StringUtils.join(ret.values(), ","));
         return ret.isEmpty() ? null : ret;
       } finally {
         results.close();
@@ -407,6 +410,46 @@ public abstract class SqlManager
     } catch (SQLException sqlException) {
       LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
           + sqlException.toString(), sqlException);
+      return null;
+    }
+  }
+
+  @Override
+  public Map<String, String>
+    getColumnTypeNamesForProcedure(String procedureName) {
+    Map<String, String> ret = new TreeMap<String, String>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+        procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+              != DatabaseMetaData.procedureColumnReturn
+            && results.getInt("ORDINAL_POSITION") > 0) {
+            // we don't care if we get several rows for the
+            // same ORDINAL_POSITION (e.g. like H2 gives us)
+            // as we'll just overwrite the entry in the map:
+            ret.put(
+              results.getString("COLUMN_NAME"),
+              results.getString("TYPE_NAME"));
+          }
+        }
+        LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));
+        LOG.debug(
+          "Type names returned = " + StringUtils.join(ret.values(), ","));
+        return ret.isEmpty() ? null : ret;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+        + sqlException.toString(), sqlException);
       return null;
     }
   }

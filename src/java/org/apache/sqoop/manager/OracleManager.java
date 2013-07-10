@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -482,7 +483,8 @@ public class OracleManager
    */
   private String toDbSpecificJavaType(String tableName, String colName) {
     if (columnTypeNames == null) {
-      columnTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
+      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
+        options.getSqlQuery());
     }
 
     String colTypeName = columnTypeNames.get(colName);
@@ -490,7 +492,13 @@ public class OracleManager
       if (colTypeName.equalsIgnoreCase("BINARY_FLOAT")) {
         return "Float";
       }
+      if (colTypeName.equalsIgnoreCase("FLOAT")) {
+        return "Float";
+      }
       if (colTypeName.equalsIgnoreCase("BINARY_DOUBLE")) {
+        return "Double";
+      }
+      if (colTypeName.equalsIgnoreCase("DOUBLE")) {
         return "Double";
       }
       if (colTypeName.toUpperCase().startsWith("TIMESTAMP")) {
@@ -508,8 +516,14 @@ public class OracleManager
    */
   private String toDbSpecificHiveType(String tableName, String colName) {
     if (columnTypeNames == null) {
-      columnTypeNames = getColumnTypeNames(tableName, options.getSqlQuery());
+      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
+        options.getSqlQuery());
     }
+    LOG.debug("Column Types and names returned = ("
+      + StringUtils.join(columnTypeNames.keySet(), ",")
+      + ")=>("
+      + StringUtils.join(columnTypeNames.values(), ",")
+      + ")");
 
     String colTypeName = columnTypeNames.get(colName);
     if (colTypeName != null) {
@@ -750,6 +764,91 @@ public class OracleManager
     } catch (SQLException e) {
       LoggingUtils.logAll(LOG, "Error reading procedure metadata: ", e);
       throw new RuntimeException("Can't fetch column names for procedure.", e);
+    }
+  }
+
+  @Override
+  public Map<String, Integer>
+    getColumnTypesForProcedure(String procedureName) {
+    Map<String, Integer> ret = new TreeMap<String, Integer>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+        procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+          != DatabaseMetaData.procedureColumnReturn) {
+            int index = results.getInt("ORDINAL_POSITION");
+            if (index < 0) {
+              continue; // actually the return type
+            }
+            // we don't care if we get several rows for the
+            // same ORDINAL_POSITION (e.g. like H2 gives us)
+            // as we'll just overwrite the entry in the map:
+            ret.put(
+              results.getString("COLUMN_NAME"),
+              results.getInt("DATA_TYPE"));
+          }
+        }
+        LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));
+        LOG.debug("Types returned = " + StringUtils.join(ret.values(), ","));
+        return ret.isEmpty() ? null : ret;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+        + sqlException.toString(), sqlException);
+      return null;
+    }
+  }
+
+  @Override
+  public Map<String, String>
+    getColumnTypeNamesForProcedure(String procedureName) {
+    Map<String, String> ret = new TreeMap<String, String>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getProcedureColumns(null, null,
+        procedureName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          if (results.getInt("COLUMN_TYPE")
+          != DatabaseMetaData.procedureColumnReturn) {
+            int index = results.getInt("ORDINAL_POSITION");
+            if (index < 0) {
+              continue; // actually the return type
+            }
+            // we don't care if we get several rows for the
+            // same ORDINAL_POSITION (e.g. like H2 gives us)
+            // as we'll just overwrite the entry in the map:
+            ret.put(
+              results.getString("COLUMN_NAME"),
+              results.getString("TYPE_NAME"));
+          }
+        }
+        LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));
+        LOG.debug(
+          "Type names returned = " + StringUtils.join(ret.values(), ","));
+        return ret.isEmpty() ? null : ret;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+        + sqlException.toString(), sqlException);
+      return null;
     }
   }
 

@@ -41,6 +41,9 @@ import com.cloudera.sqoop.manager.OracleManagerTest;
 import com.cloudera.sqoop.manager.OracleCompatTest;
 import com.cloudera.sqoop.manager.PostgresqlExportTest;
 import com.cloudera.sqoop.manager.PostgresqlImportTest;
+
+import org.apache.sqoop.manager.mysql.MySqlCallExportTest;
+import org.apache.sqoop.manager.oracle.OracleCallExportTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportDelimitedFileManualTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportSequenceFileManualTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeImportDelimitedFileManualTest;
@@ -109,6 +112,10 @@ public final class ThirdPartyTests extends TestCase {
     // HCatalog
     suite.addTestSuite(HCatalogImportTest.class);
     suite.addTestSuite(HCatalogExportTest.class);
+
+    // Call Export tests
+    suite.addTestSuite(MySqlCallExportTest.class);
+    suite.addTestSuite(OracleCallExportTest.class);
 
     return suite;
   }

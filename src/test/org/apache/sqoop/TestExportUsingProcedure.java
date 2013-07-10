@@ -74,7 +74,7 @@ public class TestExportUsingProcedure extends TestExport {
     createProcedure(names, types);
   }
 
-  private void createProcedure(String[] extraNames, String[] extraTypes)
+  protected void createProcedure(String[] extraNames, String[] extraTypes)
       throws SQLException {
     StringBuilder drop = new StringBuilder("DROP ALIAS IF EXISTS ");
     drop.append(PROCEDURE_NAME);

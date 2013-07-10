@@ -368,8 +368,17 @@ public abstract class ConnManager {
   }
 
   /**
-   * Return an unordered mapping from colname to sql type name for
-   * all columns in a query.
+   * Return an unordered mapping from colname to sql type name for all columns
+   * in a procedure.
+   */
+  public Map<String, String> getColumnTypeNamesForProcedure(String callName) {
+    LOG.error("This database does not support procedure param type names.");
+    return null;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sql type name for all columns
+   * in a query.
    */
   public Map<String, String> getColumnTypeNamesForQuery(String query) {
     LOG.error("This database does not support free-form query"
@@ -385,11 +394,29 @@ public abstract class ConnManager {
    * @param sqlQuery the SQL query to use if tableName is null
    */
   public Map<String, String> getColumnTypeNames(String tableName,
-      String sqlQuery) {
+    String sqlQuery) {
+    return getColumnTypeNames(tableName, null, sqlQuery);
+  }
+
+  /**
+   * Return an unordered mapping from colname to sql type name for all columns
+   * in a table or query.
+   *
+   * @param tableName
+   *          the name of the table
+   * @param callName
+   *          the name of the procedure
+   * @param sqlQuery
+   *          the SQL query to use if tableName is null
+   */
+  public Map<String, String> getColumnTypeNames(String tableName,
+    String callName, String sqlQuery) {
     Map<String, String> columnTypeNames;
     if (null != tableName) {
       // We're generating a class based on a table import.
       columnTypeNames = getColumnTypeNamesForTable(tableName);
+    } else if (null != callName) {
+      columnTypeNames = getColumnTypeNamesForProcedure(callName);
     } else {
       // This is based on an arbitrary query.
       String query = sqlQuery;
