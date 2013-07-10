@@ -240,13 +240,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, tableName);
-
-    Path filePath;
-    if (isDirect) {
-      filePath = new Path(tablePath, "data-00000");
-    } else {
-      filePath = new Path(tablePath, "part-m-00000");
-    }
+    Path filePath = new Path(tablePath, "part-m-00000");
 
     File tableFile = new File(tablePath.toString());
     if (tableFile.exists() && tableFile.isDirectory()) {
