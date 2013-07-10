@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce;
+package org.apache.sqoop.mapreduce.postgresql;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.sqoop.mapreduce.AutoProgressReducer;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.LoggingUtils;
 

@@ -26,7 +26,7 @@ import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.mapreduce.ExportInputFormat;
-import org.apache.sqoop.mapreduce.PGBulkloadExportJob;
+import org.apache.sqoop.mapreduce.postgresql.PGBulkloadExportJob;
 
 
 

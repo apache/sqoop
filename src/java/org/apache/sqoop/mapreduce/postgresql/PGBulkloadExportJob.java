@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce;
+package org.apache.sqoop.mapreduce.postgresql;
 
 import java.io.IOException;
 import com.cloudera.sqoop.manager.ExportJobContext;
@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.mapreduce.ExportJobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.orm.TableClassName;
 

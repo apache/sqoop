@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce;
+package org.apache.sqoop.mapreduce.postgresql;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,6 +37,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.PostgreSQLUtils;
