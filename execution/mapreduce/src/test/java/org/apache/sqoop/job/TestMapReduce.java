@@ -42,10 +42,12 @@ import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
+import org.apache.sqoop.model.MJob;
 
 public class TestMapReduce extends TestCase {
 
@@ -55,7 +57,7 @@ public class TestMapReduce extends TestCase {
 
   public void testInputFormat() throws Exception {
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     Job job = new Job(conf);
 
@@ -72,7 +74,7 @@ public class TestMapReduce extends TestCase {
 
   public void testMapper() throws Exception {
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
 
@@ -82,7 +84,7 @@ public class TestMapReduce extends TestCase {
 
   public void testOutputFormat() throws Exception {
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());

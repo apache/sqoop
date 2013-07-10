@@ -18,6 +18,7 @@
 package org.apache.sqoop.job.etl;
 
 import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.schema.Schema;
 
 /**
  * Context implementation for Partitioner.
@@ -28,9 +29,12 @@ public class PartitionerContext extends ActorContext {
 
   private long maxPartitions;
 
-  public PartitionerContext(ImmutableContext context, long maxPartitions) {
+  private Schema schema;
+
+  public PartitionerContext(ImmutableContext context, long maxPartitions, Schema schema) {
     super(context);
     this.maxPartitions = maxPartitions;
+    this.schema = schema;
   }
 
   /**
@@ -43,5 +47,14 @@ public class PartitionerContext extends ActorContext {
    */
   public long getMaxPartitions() {
     return maxPartitions;
+  }
+
+  /**
+   * Return schema associated with this step.
+   *
+   * @return
+   */
+  public Schema getSchema() {
+    return schema;
   }
 }

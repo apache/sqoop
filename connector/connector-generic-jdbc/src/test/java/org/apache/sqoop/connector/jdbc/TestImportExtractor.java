@@ -81,7 +81,7 @@ public class TestImportExtractor extends TestCase {
 
     Extractor extractor = new GenericJdbcImportExtractor();
     DummyWriter writer = new DummyWriter();
-    ExtractorContext extractorContext = new ExtractorContext(context, writer);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
@@ -115,7 +115,7 @@ public class TestImportExtractor extends TestCase {
 
     Extractor extractor = new GenericJdbcImportExtractor();
     DummyWriter writer = new DummyWriter();
-    ExtractorContext extractorContext = new ExtractorContext(context, writer);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
 
     partition = new GenericJdbcImportPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");

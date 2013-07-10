@@ -24,6 +24,7 @@ import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
@@ -52,10 +53,14 @@ public class SqoopDestroyerExecutor {
 
     // Objects that should be pass to the Destroyer execution
     PrefixContext subContext = new PrefixContext(configuration, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-    Object configConnection = ConfigurationUtils.getConnectorConnection(configuration);
-    Object configJob = ConfigurationUtils.getConnectorJob(configuration);
+    Object configConnection = ConfigurationUtils.getConfigConnectorConnection(configuration);
+    Object configJob = ConfigurationUtils.getConfigConnectorJob(configuration);
 
-    DestroyerContext destroyerContext = new DestroyerContext(subContext, success);
+    // Propagate connector schema in every case for now
+    // TODO: Change to coditional choosing between HIO and Connector schema
+    Schema schema = ConfigurationUtils.getConnectorSchema(configuration);
+
+    DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 
     LOG.info("Executing destroyer class " + destroyer.getClass());
     destroyer.destroy(destroyerContext, configConnection, configJob);

@@ -19,6 +19,7 @@ package org.apache.sqoop.job.etl;
 
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.etl.io.DataReader;
+import org.apache.sqoop.schema.Schema;
 
 /**
  * Context implementation for Loader.
@@ -27,11 +28,14 @@ import org.apache.sqoop.etl.io.DataReader;
  */
 public class LoaderContext extends ActorContext {
 
-  DataReader reader;
+  private DataReader reader;
 
-  public LoaderContext(ImmutableContext context, DataReader reader) {
+  private Schema schema;
+
+  public LoaderContext(ImmutableContext context, DataReader reader, Schema schema) {
     super(context);
     this.reader = reader;
+    this.schema = schema;
   }
 
   /**
@@ -43,4 +47,12 @@ public class LoaderContext extends ActorContext {
     return reader;
   }
 
+  /**
+   * Return schema associated with this step.
+   *
+   * @return
+   */
+  public Schema getSchema() {
+    return schema;
+  }
 }

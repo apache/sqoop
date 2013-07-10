@@ -19,6 +19,7 @@ package org.apache.sqoop.job.etl;
 
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.etl.io.DataWriter;
+import org.apache.sqoop.schema.Schema;
 
 /**
  * Context implementation for Extractor.
@@ -29,9 +30,12 @@ public class ExtractorContext extends ActorContext {
 
   private DataWriter writer;
 
-  public ExtractorContext(ImmutableContext context, DataWriter writer) {
+  private Schema schema;
+
+  public ExtractorContext(ImmutableContext context, DataWriter writer, Schema schema) {
     super(context);
     this.writer = writer;
+    this.schema = schema;
   }
 
   /**
@@ -41,5 +45,14 @@ public class ExtractorContext extends ActorContext {
    */
   public DataWriter getDataWriter() {
     return writer;
+  }
+
+  /**
+   * Return schema associated with this step.
+   *
+   * @return
+   */
+  public Schema getSchema() {
+    return schema;
   }
 }

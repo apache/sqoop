@@ -37,6 +37,7 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
@@ -62,11 +63,12 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Partitioner partitioner = (Partitioner) ClassUtils.instantiate(partitionerName);
 
     PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-    Object connectorConnection = ConfigurationUtils.getConnectorConnection(conf);
-    Object connectorJob = ConfigurationUtils.getConnectorJob(conf);
+    Object connectorConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
+    Object connectorJob = ConfigurationUtils.getConfigConnectorJob(conf);
+    Schema schema = ConfigurationUtils.getConnectorSchema(conf);
 
     long maxPartitions = conf.getLong(JobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
-    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions);
+    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, schema);
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connectorConnection, connectorJob);
     List<InputSplit> splits = new LinkedList<InputSplit>();

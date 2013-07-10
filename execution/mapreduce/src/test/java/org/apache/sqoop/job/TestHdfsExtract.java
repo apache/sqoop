@@ -42,7 +42,9 @@ import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
+import org.apache.sqoop.model.MJob;
 import org.junit.Test;
 
 public class TestHdfsExtract extends TestCase {
@@ -77,7 +79,7 @@ public class TestHdfsExtract extends TestCase {
     int[] partitionValues = {2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 17};
 
     for(int maxPartitions : partitionValues) {
-      PartitionerContext partCont = new PartitionerContext(prefixContext, maxPartitions);
+      PartitionerContext partCont = new PartitionerContext(prefixContext, maxPartitions, null);
       List<Partition> partitionList = partitioner.getPartitions(partCont, null, null);
       assertTrue(partitionList.size()<=maxPartitions);
     }
@@ -90,7 +92,7 @@ public class TestHdfsExtract extends TestCase {
     createTextInput(null);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
@@ -108,7 +110,7 @@ public class TestHdfsExtract extends TestCase {
     createTextInput(SqoopFileOutputFormat.DEFAULT_CODEC);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
@@ -139,7 +141,7 @@ public class TestHdfsExtract extends TestCase {
     createSequenceInput(SqoopFileOutputFormat.DEFAULT_CODEC);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,
@@ -157,7 +159,7 @@ public class TestHdfsExtract extends TestCase {
     createSequenceInput(null);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR,

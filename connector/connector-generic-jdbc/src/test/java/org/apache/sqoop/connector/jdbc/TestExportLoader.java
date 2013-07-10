@@ -74,7 +74,7 @@ public class TestExportLoader extends TestCase {
 
     Loader loader = new GenericJdbcExportLoader();
     DummyReader reader = new DummyReader();
-    LoaderContext loaderContext = new LoaderContext(context, reader);
+    LoaderContext loaderContext = new LoaderContext(context, reader, null);
     loader.load(loaderContext, connectionConfig, jobConfig);
 
     int index = START;

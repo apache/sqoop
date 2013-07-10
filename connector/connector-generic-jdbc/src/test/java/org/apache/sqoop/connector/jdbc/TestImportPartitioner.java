@@ -61,7 +61,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -92,7 +92,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -121,7 +121,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 13);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 13, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -157,7 +157,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -188,7 +188,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -209,7 +209,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -232,7 +232,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[]{
@@ -253,7 +253,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[]{
@@ -278,8 +278,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
 
@@ -307,8 +306,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[]{
@@ -333,8 +331,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
     verifyResult(partitions, new String[]{
         "'2013-01-01 01:01:01.123' <= TSCOL AND TSCOL < '2013-05-02 12:14:17.634'",
@@ -358,8 +355,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        3);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
     verifyResult(partitions, new String[]{
       "BCOL = TRUE",
@@ -382,8 +378,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        25);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 25, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 
     verifyResult(partitions, new String[] {
@@ -428,7 +423,7 @@ public class TestImportPartitioner extends TestCase {
     ConnectionConfiguration connConf = new ConnectionConfiguration();
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
     assertEquals(partitions.size(), 5);
   }
@@ -448,8 +443,7 @@ public class TestImportPartitioner extends TestCase {
     ImportJobConfiguration jobConf = new ImportJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcImportPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context,
-        5);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
 

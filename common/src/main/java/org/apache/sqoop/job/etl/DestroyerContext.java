@@ -18,6 +18,7 @@
 package org.apache.sqoop.job.etl;
 
 import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.schema.Schema;
 
 /**
  * Context implementation for Destroyer.
@@ -28,9 +29,12 @@ public class DestroyerContext extends ActorContext {
 
   private boolean success;
 
-  public DestroyerContext(ImmutableContext context, boolean success) {
+  private Schema schema;
+
+  public DestroyerContext(ImmutableContext context, boolean success, Schema schema) {
     super(context);
     this.success = success;
+    this.schema = schema;
   }
 
   /**
@@ -40,5 +44,14 @@ public class DestroyerContext extends ActorContext {
    */
   public boolean isSuccess() {
     return success;
+  }
+
+  /**
+   * Return schema associated with this step.
+   *
+   * @return
+   */
+  public Schema getSchema() {
+    return schema;
   }
 }

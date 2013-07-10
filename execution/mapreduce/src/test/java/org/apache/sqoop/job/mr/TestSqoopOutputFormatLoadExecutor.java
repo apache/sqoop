@@ -27,6 +27,7 @@ import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.model.MJob;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -123,7 +124,7 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   @Test(expected = BrokenBarrierException.class)
   public void testWhenLoaderThrows() throws Throwable {
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_LOADER, ThrowingLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, ThrowingLoader.class.getName());
@@ -141,7 +142,7 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   @Test
   public void testSuccessfulContinuousLoader() throws Throwable {
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_LOADER, GoodContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, GoodContinuousLoader.class.getName());
@@ -184,7 +185,7 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   @Test(expected = ConcurrentModificationException.class)
   public void testThrowingContinuousLoader() throws Throwable {
-    conf.set(JobConstants.JOB_TYPE, "EXPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
     conf.set(JobConstants.JOB_ETL_LOADER, ThrowingContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, ThrowingContinuousLoader.class.getName());

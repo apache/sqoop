@@ -42,7 +42,9 @@ import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
+import org.apache.sqoop.model.MJob;
 
 public class TestHdfsLoad extends TestCase {
 
@@ -62,7 +64,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
@@ -80,7 +82,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
@@ -123,7 +125,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
@@ -141,7 +143,7 @@ public class TestHdfsLoad extends TestCase {
     FileUtils.delete(outdir);
 
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_TYPE, "IMPORT");
+    ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());

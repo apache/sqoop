@@ -19,7 +19,6 @@ package org.apache.sqoop.submission.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobID;
@@ -27,7 +26,6 @@ import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.security.Credentials;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -36,7 +34,7 @@ import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
 import org.apache.sqoop.framework.SubmissionEngine;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
@@ -54,7 +52,6 @@ import java.util.Map;
  * submission engine.
  */
 public class MapreduceSubmissionEngine extends SubmissionEngine {
-
 
   private static Logger LOG = Logger.getLogger(MapreduceSubmissionEngine.class);
 
@@ -158,7 +155,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     Configuration configuration = new Configuration(globalConfiguration);
 
     // Serialize job type as it will be needed by underlying execution engine
-    configuration.set(JobConstants.JOB_TYPE, request.getJobType().name());
+    ConfigurationUtils.setJobType(configuration, request.getJobType());
 
     // Serialize framework context into job configuration
     for(Map.Entry<String, String> entry: request.getFrameworkContext()) {
@@ -179,16 +176,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         JobConstants.PREFIX_CONNECTOR_CONTEXT + entry.getKey(),
         entry.getValue());
     }
-
-    // Serialize configuration objects - Firstly configuration classes
-    configuration.set(JobConstants.JOB_CONFIG_CLASS_CONNECTOR_CONNECTION,
-      request.getConfigConnectorConnection().getClass().getName());
-    configuration.set(JobConstants.JOB_CONFIG_CLASS_CONNECTOR_JOB,
-      request.getConfigConnectorJob().getClass().getName());
-    configuration.set(JobConstants.JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION,
-      request.getConfigFrameworkConnection().getClass().getName());
-    configuration.set(JobConstants.JOB_CONFIG_CLASS_FRAMEWORK_JOB,
-      request.getConfigFrameworkJob().getClass().getName());
 
     // Set up notification URL if it's available
     if(request.getNotificationUrl() != null) {
@@ -217,15 +204,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       Job job = new Job(configuration);
 
       // And finally put all configuration objects to credentials cache
-      Credentials credentials = job.getCredentials();
-      credentials.addSecretKey(JobConstants.JOB_CONFIG_CONNECTOR_CONNECTION_KEY,
-        FormUtils.toJson(request.getConfigConnectorConnection()).getBytes());
-      credentials.addSecretKey(JobConstants.JOB_CONFIG_CONNECTOR_JOB_KEY,
-        FormUtils.toJson(request.getConfigConnectorJob()).getBytes());
-      credentials.addSecretKey(JobConstants.JOB_CONFIG_FRAMEWORK_CONNECTION_KEY,
-        FormUtils.toJson(request.getConfigFrameworkConnection()).getBytes());
-      credentials.addSecretKey(JobConstants.JOB_CONFIG_FRAMEWORK_JOB_KEY,
-        FormUtils.toJson(request.getConfigFrameworkConnection()).getBytes());
+      ConfigurationUtils.setConfigConnectorConnection(job, request.getConfigConnectorConnection());
+      ConfigurationUtils.setConfigConnectorJob(job, request.getConfigConnectorJob());
+      ConfigurationUtils.setConfigFrameworkConnection(job, request.getConfigFrameworkConnection());
+      ConfigurationUtils.setConfigFrameworkJob(job, request.getConfigFrameworkJob());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

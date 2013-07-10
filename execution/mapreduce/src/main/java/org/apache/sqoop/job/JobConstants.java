@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.job;
 
-import org.apache.hadoop.io.Text;
 import org.apache.sqoop.core.ConfigurationConstants;
 
 public final class JobConstants extends Constants {
@@ -27,8 +26,6 @@ public final class JobConstants extends Constants {
    */
   public static final String PREFIX_JOB_CONFIG =
       ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "job.";
-
-  public static final String JOB_TYPE = PREFIX_JOB_CONFIG + "type";
 
   public static final String JOB_ETL_PARTITIONER = PREFIX_JOB_CONFIG
       + "etl.partitioner";
@@ -52,42 +49,6 @@ public final class JobConstants extends Constants {
 
   public static final String JOB_ETL_EXTRACTOR_NUM = PREFIX_JOB_CONFIG
     + "etl.extractor.count";
-
-  public static final String JOB_CONFIG_CLASS_CONNECTOR_CONNECTION =
-    PREFIX_JOB_CONFIG + "config.class.connector.connection";
-
-  public static final String JOB_CONFIG_CLASS_CONNECTOR_JOB =
-    PREFIX_JOB_CONFIG + "config.class.connector.job";
-
-  public static final String JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION =
-    PREFIX_JOB_CONFIG + "config.class.framework.connection";
-
-  public static final String JOB_CONFIG_CLASS_FRAMEWORK_JOB =
-    PREFIX_JOB_CONFIG + "config.class.framework.job";
-
-  public static final String JOB_CONFIG_CONNECTOR_CONNECTION =
-    PREFIX_JOB_CONFIG + "config.connector.connection";
-
-  public static final Text JOB_CONFIG_CONNECTOR_CONNECTION_KEY =
-    new Text(JOB_CONFIG_CONNECTOR_CONNECTION);
-
-  public static final String JOB_CONFIG_CONNECTOR_JOB =
-    PREFIX_JOB_CONFIG + "config.connector.job";
-
-  public static final Text JOB_CONFIG_CONNECTOR_JOB_KEY =
-    new Text(JOB_CONFIG_CONNECTOR_JOB);
-
-  public static final String JOB_CONFIG_FRAMEWORK_CONNECTION =
-    PREFIX_JOB_CONFIG + "config.framework.connection";
-
-  public static final Text JOB_CONFIG_FRAMEWORK_CONNECTION_KEY =
-    new Text(JOB_CONFIG_FRAMEWORK_CONNECTION);
-
-  public static final String JOB_CONFIG_FRAMEWORK_JOB =
-    PREFIX_JOB_CONFIG + "config.framework.job";
-
-  public static final Text JOB_CONFIG_FRAMEWORK_JOB_KEY =
-    new Text(JOB_CONFIG_FRAMEWORK_JOB);
 
   public static final String PREFIX_CONNECTOR_CONTEXT =
     PREFIX_JOB_CONFIG + "connector.context.";

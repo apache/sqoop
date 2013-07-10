@@ -35,6 +35,7 @@ import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.etl.io.DataWriter;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -62,24 +63,28 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWrit
     Object configConnection = null;
     Object configJob = null;
 
+    // Propagate connector schema in every case for now
+    // TODO: Change to coditional choosing between HIO and Connector schema
+    Schema schema = ConfigurationUtils.getConnectorSchema(conf);
+
     // Executor is in connector space for IMPORT and in framework space for EXPORT
     switch (ConfigurationUtils.getJobType(conf)) {
       case IMPORT:
         subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-        configConnection = ConfigurationUtils.getConnectorConnection(conf);
-        configJob = ConfigurationUtils.getConnectorJob(conf);
+        configConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
+        configJob = ConfigurationUtils.getConfigConnectorJob(conf);
         break;
       case EXPORT:
         subContext = new PrefixContext(conf, "");
-        configConnection = ConfigurationUtils.getFrameworkConnection(conf);
-        configJob = ConfigurationUtils.getFrameworkJob(conf);
+        configConnection = ConfigurationUtils.getConfigFrameworkConnection(conf);
+        configJob = ConfigurationUtils.getConfigFrameworkJob(conf);
         break;
       default:
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
     }
 
     SqoopSplit split = context.getCurrentKey();
-    ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context));
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context), schema);
 
     try {
       LOG.info("Starting progress service");

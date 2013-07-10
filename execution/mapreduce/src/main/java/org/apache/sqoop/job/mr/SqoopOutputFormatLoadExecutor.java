@@ -39,6 +39,7 @@ import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.etl.io.DataReader;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class SqoopOutputFormatLoadExecutor {
@@ -191,18 +192,23 @@ public class SqoopOutputFormatLoadExecutor {
         PrefixContext subContext = null;
         Object configConnection = null;
         Object configJob = null;
+        Schema schema = null;
 
         if (!isTest) {
+          // Propagate connector schema in every case for now
+          // TODO: Change to coditional choosing between HIO and Connector schema
+          schema = ConfigurationUtils.getConnectorSchema(conf);
+
           switch (ConfigurationUtils.getJobType(conf)) {
             case EXPORT:
               subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-              configConnection = ConfigurationUtils.getConnectorConnection(conf);
-              configJob = ConfigurationUtils.getConnectorJob(conf);
+              configConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
+              configJob = ConfigurationUtils.getConfigConnectorJob(conf);
               break;
             case IMPORT:
               subContext = new PrefixContext(conf, "");
-              configConnection = ConfigurationUtils.getFrameworkConnection(conf);
-              configJob = ConfigurationUtils.getFrameworkJob(conf);
+              configConnection = ConfigurationUtils.getConfigFrameworkConnection(conf);
+              configJob = ConfigurationUtils.getConfigFrameworkJob(conf);
               break;
             default:
               throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
@@ -210,7 +216,7 @@ public class SqoopOutputFormatLoadExecutor {
         }
 
         // Create loader context
-        LoaderContext loaderContext = new LoaderContext(subContext, reader);
+        LoaderContext loaderContext = new LoaderContext(subContext, reader, schema);
 
         LOG.info("Running loader class " + loaderName);
         loader.load(loaderContext, configConnection, configJob);

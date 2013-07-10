@@ -443,7 +443,7 @@ public class JobManager implements Reconfigurable {
                    "Can't create destroyer instance: " + destroyerClass.getName());
        }
 
-       DestroyerContext destroyerContext = new DestroyerContext(request.getConnectorContext(), false);
+       DestroyerContext destroyerContext = new DestroyerContext(request.getConnectorContext(), false, request.getSummary().getConnectorSchema());
 
        // Initialize submission from connector perspective
        destroyer.destroy(destroyerContext, request.getConfigConnectorConnection(), request.getConfigConnectorJob());
