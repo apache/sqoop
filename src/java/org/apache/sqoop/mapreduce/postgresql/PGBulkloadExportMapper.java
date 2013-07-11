@@ -125,8 +125,10 @@ public class PGBulkloadExportMapper
           + JdbcUrl.getDatabaseName(conf.get(DBConfiguration.URL_PROPERTY)));
       args.add("--host="
           + JdbcUrl.getHostName(conf.get(DBConfiguration.URL_PROPERTY)));
-      args.add("--port="
-          + JdbcUrl.getPort(conf.get(DBConfiguration.URL_PROPERTY)));
+      int port = JdbcUrl.getPort(conf.get(DBConfiguration.URL_PROPERTY));
+      if (port != -1) {
+        args.add("--port=" + port);
+      }
       args.add("--input=stdin");
       args.add("--output=" + tmpTableName);
       args.add("-o");

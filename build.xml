@@ -254,6 +254,18 @@
   <property name="sqoop.test.postgresql.connectstring.host_url"
             value="jdbc:postgresql://localhost/"/>
 
+  <property name="sqoop.test.postgresql.database"
+            value="sqooptest" />
+
+  <property name="sqoop.test.postgresql.tablespace"
+            value="sqooptest" />
+
+  <property name="sqoop.test.postgresql.username"
+            value="sqooptest" />
+
+  <property name="sqoop.test.postgresql.pg_bulkload"
+            value="pg_bulkload" />
+
   <property name="sqoop.test.sqlserver.connectstring.host_url"
             value="jdbc:sqlserver://sqlserverhost:1433"/>
 
@@ -817,6 +829,18 @@
 
       <sysproperty key="sqoop.test.postgresql.connectstring.host_url"
                    value="${sqoop.test.postgresql.connectstring.host_url}"/>
+
+      <sysproperty key="sqoop.test.postgresql.database"
+                   value="${sqoop.test.postgresql.database}" />
+
+      <sysproperty key="sqoop.test.postgresql.tablespace"
+                   value="${sqoop.test.postgresql.tablespace}" />
+
+      <sysproperty key="sqoop.test.postgresql.username"
+                   value="${sqoop.test.postgresql.username}" />
+
+      <sysproperty key="sqoop.test.postgresql.pg_bulkload"
+                   value="${sqoop.test.postgresql.pg_bulkload}" />
 
       <sysproperty key="sqoop.test.sqlserver.connectstring.host_url"
                    value="${sqoop.test.sqlserver.connectstring.host_url}"/>

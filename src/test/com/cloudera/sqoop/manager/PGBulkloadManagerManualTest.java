@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 
@@ -64,10 +64,21 @@ public class PGBulkloadManagerManualTest extends TestExport {
   public static final Log LOG =
       LogFactory.getLog(PGBulkloadManagerManualTest.class.getName());
   private DBConfiguration dbConf;
-
+  static final String HOST_URL =
+    System.getProperty("sqoop.test.postgresql.connectstring.host_url",
+                       "jdbc:postgresql://localhost/");
+  static final String DATABASE =
+    System.getProperty("sqoop.test.postgresql.database", "sqooptest");
+  static final String TABLESPACE =
+    System.getProperty("sqoop.test.postgresql.tablespace", "sqooptest");
+  static final String USERNAME =
+    System.getProperty("sqoop.test.postgresql.username", "sqooptest");
+  static final String PG_BULKLOAD =
+    System.getProperty("sqoop.test.postgresql.pg_bulkload", "pg_bulkload");
+  static final String CONNECT_STRING = HOST_URL + DATABASE;
 
   public PGBulkloadManagerManualTest() {
-    Configuration conf = getConf();
+    JobConf conf = new JobConf(getConf());
     DBConfiguration.configureDB(conf,
                                 "org.postgresql.Driver",
                                 getConnectString(),
@@ -85,12 +96,12 @@ public class PGBulkloadManagerManualTest extends TestExport {
 
   @Override
   protected String getConnectString() {
-    return "jdbc:postgresql://localhost:5432/sqooptest";
+    return CONNECT_STRING;
   }
 
 
   protected String getUserName() {
-    return "sqooptest";
+    return USERNAME;
   }
 
 
@@ -144,6 +155,8 @@ public class PGBulkloadManagerManualTest extends TestExport {
                              String... additionalArgv) {
     ArrayList<String> args =
         new ArrayList<String>(Arrays.asList(additionalArgv));
+    args.add("-D");
+    args.add("pgbulkload.bin=" + PG_BULKLOAD);
     args.add("--username");
     args.add(getUserName());
     args.add("--connection-manager");
@@ -181,7 +194,7 @@ public class PGBulkloadManagerManualTest extends TestExport {
 
   public void testExportWithTablespace() throws IOException, SQLException {
     String[] genericargs =
-      newStrArray(null, "-Dpgbulkload.staging.tablespace=sqooptest");
+      newStrArray(null, "-Dpgbulkload.staging.tablespace=" + TABLESPACE);
     multiFileTestWithGenericArgs(1, 10, 1, genericargs);
   }
 

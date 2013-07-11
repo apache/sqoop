@@ -148,7 +148,6 @@ public class PGBulkloadExportJob extends ExportJobBase {
 
   @Override
   public void runExport() throws ExportException, IOException {
-    ConnManager cmgr = context.getConnManager();
     SqoopOptions options = context.getOptions();
     Configuration conf = options.getConf();
     DBConfiguration dbConf = null;
