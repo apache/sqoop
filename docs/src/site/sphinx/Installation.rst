@@ -69,6 +69,7 @@ Similarly you can stop server using following command: ::
 
   ./bin/sqoop.sh server stop
 
+By default Sqoop server daemons use ports 12000 and 12001. You can set ``SQOOP_HTTP_PORT`` and ``SQOOP_ADMIN_PORT`` in configuration file ``server/bin/setenv.sh`` to use different ports.
 
 Client installation
 ===================
