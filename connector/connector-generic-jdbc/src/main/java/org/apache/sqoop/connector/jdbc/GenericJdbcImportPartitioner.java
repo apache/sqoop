@@ -57,7 +57,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     if (partitionMinValue == null && partitionMaxValue == null) {
       List<Partition> partitions = new LinkedList<Partition>();
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
-      partition.setConditions(partitionColumnName + "IS NULL");
+      partition.setConditions(partitionColumnName + " IS NULL");
       partitions.add(partition);
       return partitions;
     }
