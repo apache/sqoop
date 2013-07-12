@@ -74,6 +74,7 @@ public class MBooleanInput extends MInput<Boolean> {
   @Override
   public Object clone(boolean cloneWithValue) {
     MBooleanInput copy = new MBooleanInput(getName(), isSensitive());
+    copy.setPersistenceId(this.getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(getValue());
     }
