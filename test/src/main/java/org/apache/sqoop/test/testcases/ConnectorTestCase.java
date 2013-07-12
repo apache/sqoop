@@ -18,12 +18,14 @@
 package org.apache.sqoop.test.testcases;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.framework.configuration.OutputFormat;
 import org.apache.sqoop.framework.configuration.StorageType;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.asserts.ProviderAsserts;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.db.DatabaseProvider;
@@ -46,6 +48,26 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   private static final Logger LOG = Logger.getLogger(ConnectorTestCase.class);
 
   protected static DatabaseProvider provider;
+
+  /**
+   * Default submission callbacks that are printing various status about the submission.
+   */
+  protected static SubmissionCallback DEFAULT_SUBMISSION_CALLBACKS = new SubmissionCallback() {
+    @Override
+    public void submitted(MSubmission submission) {
+      LOG.info("Submission submitted: " + submission);
+    }
+
+    @Override
+    public void updated(MSubmission submission) {
+      LOG.info("Submission updated: " + submission);
+    }
+
+    @Override
+    public void finished(MSubmission submission) {
+      LOG.info("Submission finished: " + submission);
+    }
+  };
 
   @BeforeClass
   public static void startProvider() throws Exception {
@@ -173,5 +195,25 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
  protected void createJob(MJob job) {
     assertEquals(Status.FINE, getClient().createJob(job));
     assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
+  }
+
+  /**
+   * Run job with given jid.
+   *
+   * @param jid Job id
+   * @throws Exception
+   */
+  protected void runJob(long jid) throws Exception {
+    getClient().startSubmission(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+  }
+
+  /**
+   * Run given job.
+   *
+   * @param job Job object
+   * @throws Exception
+   */
+  protected void runJob(MJob job) throws Exception {
+    runJob(job.getPersistenceId());
   }
 }

@@ -56,15 +56,7 @@ public class TableImportTest extends ConnectorTestCase {
     fillOutputForm(job, StorageType.HDFS, OutputFormat.TEXT_FILE);
     createJob(job);
 
-    MSubmission submission = getClient().startSubmission(job.getPersistenceId());
-    assertTrue(submission.getStatus().isRunning());
-
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getSubmissionStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
+    runJob(job);
 
     // Assert correct output
     assertMapreduceOutput(

@@ -59,15 +59,7 @@ public class TableExportTest extends ConnectorTestCase {
     fillInputForm(job);
     createJob(job);
 
-    MSubmission submission = getClient().startSubmission(job.getPersistenceId());
-    assertTrue("Unexpected value: " + submission.getStatus(), submission.getStatus().isRunning());
-
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getSubmissionStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
+    runJob(job);
 
     assertEquals(4L, rowCount());
     assertRowInCities(1, "USA", "San Francisco");
