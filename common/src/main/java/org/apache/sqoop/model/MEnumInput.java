@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.utils.StringUtils;
 
 import java.util.Arrays;
 

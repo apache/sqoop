@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.utils;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.core.Constants;
 import org.apache.sqoop.model.MAccountableEntity;
 import org.apache.sqoop.model.MBooleanInput;
@@ -31,7 +32,6 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.utils.StringUtils;
 import org.apache.sqoop.validation.Status;
 
 import java.util.ArrayList;

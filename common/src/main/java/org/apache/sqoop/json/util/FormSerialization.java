@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -26,7 +27,6 @@ import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.utils.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
