@@ -25,7 +25,8 @@ import org.apache.sqoop.job.etl.DestroyerContext;
 
 public class GenericJdbcImportDestroyer extends Destroyer<ConnectionConfiguration, ImportJobConfiguration> {
 
-  private static final Logger LOG = Logger.getLogger(GenericJdbcExportDestroyer.class);
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcImportDestroyer.class);
 
   @Override
   public void destroy(DestroyerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {

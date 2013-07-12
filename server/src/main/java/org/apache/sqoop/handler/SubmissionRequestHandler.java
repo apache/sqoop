@@ -50,10 +50,11 @@ import org.apache.sqoop.server.common.ServerError;
  */
 public class SubmissionRequestHandler implements RequestHandler {
 
-  private final Logger logger = Logger.getLogger(getClass());
+  private static final Logger LOG =
+    Logger.getLogger(SubmissionRequestHandler.class);
 
   public SubmissionRequestHandler() {
-    logger.info("SubmissionRequestHandler initialized");
+    LOG.info("SubmissionRequestHandler initialized");
   }
 
   @Override
@@ -85,7 +86,7 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean handleNotification(RequestContext ctx, String sjid) {
-    logger.debug("Received notification request for job " + sjid);
+    LOG.debug("Received notification request for job " + sjid);
     JobManager.getInstance().status(Long.parseLong(sjid));
     return JsonBean.EMPTY_BEAN;
   }

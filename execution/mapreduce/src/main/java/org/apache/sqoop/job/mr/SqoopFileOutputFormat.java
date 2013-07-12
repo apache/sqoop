@@ -20,8 +20,6 @@ package org.apache.sqoop.job.mr;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -34,6 +32,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.io.Data;
 
@@ -43,8 +42,8 @@ import org.apache.sqoop.job.io.Data;
 public class SqoopFileOutputFormat
     extends FileOutputFormat<Data, NullWritable> {
 
-  public static final Log LOG =
-      LogFactory.getLog(SqoopFileOutputFormat.class.getName());
+  public static final Logger LOG =
+    Logger.getLogger(SqoopFileOutputFormat.class);
 
   public static final Class<? extends CompressionCodec> DEFAULT_CODEC =
       DefaultCodec.class;

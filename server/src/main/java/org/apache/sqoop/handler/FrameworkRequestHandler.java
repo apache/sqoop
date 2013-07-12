@@ -34,7 +34,7 @@ import org.apache.sqoop.server.RequestHandler;
 public class FrameworkRequestHandler  implements RequestHandler {
 
   private static final Logger LOG =
-      Logger.getLogger(ConnectorRequestHandler.class);
+      Logger.getLogger(FrameworkRequestHandler.class);
 
   public FrameworkRequestHandler() {
     LOG.info("FrameworkRequestHandler initialized");

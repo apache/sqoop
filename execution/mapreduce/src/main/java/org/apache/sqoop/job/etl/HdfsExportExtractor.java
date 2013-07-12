@@ -19,8 +19,6 @@ package org.apache.sqoop.job.etl;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,6 +29,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
@@ -45,7 +44,7 @@ import org.apache.sqoop.job.io.Data;
  */
 public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, ExportJobConfiguration, HdfsExportPartition> {
 
-  public static final Log LOG = LogFactory.getLog(HdfsExportExtractor.class.getName());
+  public static final Logger LOG = Logger.getLogger(HdfsExportExtractor.class);
 
   private Configuration conf;
   private DataWriter dataWriter;

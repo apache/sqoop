@@ -17,10 +17,9 @@
  */
 package org.apache.sqoop.job.mr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.job.io.Data;
 
 import java.io.IOException;
@@ -33,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SqoopReducer extends Reducer<Data, NullWritable, Data, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(SqoopReducer.class);
+  public static final Logger LOG = Logger.getLogger(SqoopReducer.class);
 
   /**
    * Service for reporting progress to mapreduce.

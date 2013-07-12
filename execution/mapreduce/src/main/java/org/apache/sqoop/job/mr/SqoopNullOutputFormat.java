@@ -18,8 +18,6 @@
 
 package org.apache.sqoop.job.mr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -28,6 +26,7 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.io.Data;
 
@@ -38,8 +37,8 @@ import java.io.IOException;
  */
 public class SqoopNullOutputFormat extends OutputFormat<Data, NullWritable> {
 
-  public static final Log LOG =
-      LogFactory.getLog(SqoopNullOutputFormat.class.getName());
+  public static final Logger LOG =
+    Logger.getLogger(SqoopNullOutputFormat.class);
 
   @Override
   public void checkOutputSpecs(JobContext context) {

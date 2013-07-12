@@ -17,9 +17,8 @@
  */
 package org.apache.sqoop.job.mr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Destroyer;
@@ -32,8 +31,8 @@ import org.apache.sqoop.utils.ClassUtils;
  */
 public class SqoopDestroyerExecutor {
 
-  public static final Log LOG =
-    LogFactory.getLog(SqoopNullOutputFormat.class.getName());
+  public static final Logger LOG =
+    Logger.getLogger(SqoopDestroyerExecutor.class);
 
   /**
    * Execute destroyer.

@@ -69,7 +69,7 @@ import java.util.Locale;
 public class ConnectionRequestHandler implements RequestHandler {
 
   private static final Logger LOG =
-      Logger.getLogger(ConnectorRequestHandler.class);
+      Logger.getLogger(ConnectionRequestHandler.class);
 
   public ConnectionRequestHandler() {
     LOG.info("ConnectionRequestHandler initialized");

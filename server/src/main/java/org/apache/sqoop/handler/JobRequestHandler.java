@@ -69,7 +69,7 @@ import java.util.Locale;
 public class JobRequestHandler implements RequestHandler {
 
   private static final Logger LOG =
-      Logger.getLogger(ConnectorRequestHandler.class);
+      Logger.getLogger(JobRequestHandler.class);
 
   public JobRequestHandler() {
     LOG.info("JobRequestHandler initialized");

@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TableExportTest extends ConnectorTestCase {
 
-  private static final Logger LOG = Logger.getLogger(TableImportTest.class);
+  private static final Logger LOG = Logger.getLogger(TableExportTest.class);
 
   @Test
   public void testBasicImport() throws Exception {

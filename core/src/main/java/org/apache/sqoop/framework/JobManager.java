@@ -46,7 +46,7 @@ public class JobManager implements Reconfigurable {
    /**
     * Logger object.
     */
-   private static final Logger LOG = Logger.getLogger(FrameworkManager.class);
+   private static final Logger LOG = Logger.getLogger(JobManager.class);
 
    /**
     * Private instance to singleton of this class.

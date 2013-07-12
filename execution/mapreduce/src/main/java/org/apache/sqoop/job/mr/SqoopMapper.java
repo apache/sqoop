@@ -22,11 +22,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
@@ -44,7 +43,7 @@ import org.apache.sqoop.utils.ClassUtils;
  */
 public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWritable> {
 
-  public static final Log LOG = LogFactory.getLog(SqoopMapper.class);
+  public static final Logger LOG = Logger.getLogger(SqoopMapper.class);
 
   /**
    * Service for reporting progress to mapreduce.

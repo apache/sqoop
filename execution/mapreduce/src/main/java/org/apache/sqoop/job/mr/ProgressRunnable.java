@@ -17,10 +17,8 @@
  */
 package org.apache.sqoop.job.mr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -28,7 +26,7 @@ import org.apache.hadoop.mapreduce.TaskInputOutputContext;
   */
 public class ProgressRunnable implements Runnable {
 
-  public static final Log LOG = LogFactory.getLog(ProgressRunnable.class);
+  public static final Logger LOG = Logger.getLogger(ProgressRunnable.class);
 
   /**
    * Context class that we should use for reporting progress.
