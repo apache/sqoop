@@ -127,11 +127,8 @@ public class JdbcRepository extends Repository {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        if (!handler.schemaExists()) {
-          LOG.info("Creating repository schema objects");
-          handler.createSchema();
-        }
-
+        LOG.info("Creating repository schema objects");
+        handler.createOrUpdateInternals(conn);
         return null;
       }
     });
@@ -145,7 +142,7 @@ public class JdbcRepository extends Repository {
     return (Boolean) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.schemaExists();
+        return handler.haveSuitableInternals(conn);
       }
     });
   }

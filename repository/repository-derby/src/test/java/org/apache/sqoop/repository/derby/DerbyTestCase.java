@@ -98,6 +98,8 @@ abstract public class DerbyTestCase extends TestCase {
     runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP);
     runQuery(QUERY_CREATE_TABLE_SQ_COUNTER);
     runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION);
+    runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM);
+    runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '2')");
   }
 
   /**

@@ -135,16 +135,24 @@ public abstract class JdbcRepositoryHandler {
   public abstract void registerFramework(MFramework mf, Connection conn);
 
   /**
-   * Check if schema is already present in the repository.
+   * Return true if repository tables exists and are suitable for use.
    *
-   * @return true if schema is already present or false if it's not
+   * This method should return false in case that the tables do exists, but
+   * are not suitable for use or if they requires upgrade.
+   *
+   * @return Boolean values if internal structures are suitable for use
    */
-  public abstract boolean schemaExists();
+  public abstract boolean haveSuitableInternals(Connection conn);
 
   /**
-   * Create required schema in repository.
+   * Create or update tables in the repository.
+   *
+   * This method will be called only if Sqoop server is enabled with changing
+   * repository on disk structures. Repository should not change its disk structures
+   * outside of this method. This method must be no-op in case that the structures
+   * do not need any maintenance.
    */
-  public abstract void createSchema();
+  public abstract void createOrUpdateInternals(Connection conn);
 
   /**
    * Termination callback for repository.

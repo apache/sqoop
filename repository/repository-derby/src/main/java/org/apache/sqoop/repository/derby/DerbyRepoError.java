@@ -169,6 +169,9 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't retrieve submissions for a job **/
   DERBYREPO_0040("Can't retrieve submissions for a job"),
 
+  /** Can't detect version of the database structures **/
+  DERBYREPO_0041("Can't detect version of repository storage"),
+
   ;
 
   private final String message;

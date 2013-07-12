@@ -22,7 +22,18 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
 /**
  * DDL queries that create the Sqoop repository schema in Derby database. These
  * queries create the following tables:
- *
+ * <p>
+ * <strong>SQ_SYSTEM</strong>: Store for various state information
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_SYSTEM                  |
+ *    +----------------------------+
+ *    | SQM_ID: BIGINT PK          |
+ *    | SQM_KEY: VARCHAR(64)       |
+ *    | SQM_VALUE: VARCHAR(64)     |
+ *    +----------------------------+
+ * </pre>
+ * </p>
  * <p>
  * <strong>SQ_CONNECTOR</strong>: Connector registration.
  * <pre>
@@ -185,6 +196,14 @@ public final class DerbySchemaQuery {
     "SELECT SCHEMAID FROM SYS.SYSSCHEMAS WHERE SCHEMANAME = '"
     + SCHEMA_SQOOP + "'";
 
+  // DDL: Create table SQ_SYSTEM
+  public static final String QUERY_CREATE_TABLE_SQ_SYSTEM =
+    "CREATE TABLE " + TABLE_SQ_SYSTEM + " ("
+    + COLUMN_SQM_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+    + COLUMN_SQM_KEY + " VARCHAR(64), "
+    + COLUMN_SQM_VALUE + " VARCHAR(64) "
+    + ")";
+
   // DDL: Create table SQ_CONNECTOR
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
       "CREATE TABLE " + TABLE_SQ_CONNECTOR + " ("
@@ -335,6 +354,25 @@ public final class DerbySchemaQuery {
       + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") "
         + "REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
     + ")";
+
+  // DML: Get system key
+  public static final String STMT_SELECT_SYSTEM =
+    "SELECT "
+    + COLUMN_SQM_VALUE
+    + " FROM " + TABLE_SQ_SYSTEM
+    + " WHERE " + COLUMN_SQM_KEY + " = ?";
+
+  // DML: Remove system key
+  public static final String STMT_DELETE_SYSTEM =
+    "DELETE FROM "  + TABLE_SQ_SYSTEM
+    + " WHERE " + COLUMN_SQM_KEY + " = ?";
+
+  // DML: Insert new system key
+  public static final String STMT_INSERT_SYSTEM =
+    "INSERT INTO " + TABLE_SQ_SYSTEM + "("
+    + COLUMN_SQM_KEY + ", "
+    + COLUMN_SQM_VALUE + ") "
+    + "VALUES(?, ?)";
 
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =

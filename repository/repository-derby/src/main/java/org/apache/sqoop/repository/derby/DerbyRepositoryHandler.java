@@ -30,9 +30,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -246,63 +248,125 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
+   * Detect version of underlying database structures.
+   *
+   * @param conn JDBC Connection
+   * @return
+   */
+  public int detectVersion(Connection conn) {
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+
+    // First release went out without system table, so we have to detect
+    // this version differently.
+    try {
+      rs = conn.getMetaData().getTables(null, null, null, null);
+
+      Set<String> tableNames = new HashSet<String>();
+      while(rs.next()) {
+        tableNames.add(rs.getString("TABLE_NAME"));
+      }
+      closeResultSets(rs);
+
+      LOG.debug("Detecting old version of repository");
+      boolean foundAll = true;
+      for( String expectedTable : DerbySchemaConstants.tablesV1) {
+        if(!tableNames.contains(expectedTable)) {
+          foundAll = false;
+          LOG.debug("Missing table " + expectedTable);
+        }
+      }
+
+      // If we find all expected tables, then we are on version 1
+      if(foundAll && !tableNames.contains(DerbySchemaConstants.TABLE_SQ_SYSTEM_NAME)) {
+        return 1;
+      }
+
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0041, e);
+    } finally {
+      closeResultSets(rs);
+    }
+
+    // Normal version detection, select and return the version
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
+      rs = stmt.executeQuery();
+
+      if(!rs.next()) {
+        return 0;
+      }
+
+      return rs.getInt(1);
+    } catch (SQLException e) {
+      LOG.info("Can't fetch repository structure version.", e);
+      return 0;
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
+
+
+  /**
    * {@inheritDoc}
    */
   @Override
-  public void createSchema() {
-    runQuery(QUERY_CREATE_SCHEMA_SQOOP);
-    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR);
-    runQuery(QUERY_CREATE_TABLE_SQ_FORM);
-    runQuery(QUERY_CREATE_TABLE_SQ_INPUT);
-    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION);
-    runQuery(QUERY_CREATE_TABLE_SQ_JOB);
-    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
-    runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
-    runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
-    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP);
-    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER);
-    runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION);
+  public void createOrUpdateInternals(Connection conn) {
+    int version = detectVersion(conn);
+
+    if(version <= 0) {
+      runQuery(QUERY_CREATE_SCHEMA_SQOOP, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_FORM, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_INPUT, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_JOB, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION, conn);
+    }
+    if(version <= 1) {
+      runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
+    }
+
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
+      stmt.executeUpdate();
+
+      closeStatements(stmt);
+
+      stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
+      stmt.setString(2, "" + DerbyRepoConstants.VERSION);
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      LOG.error("Can't persist the repository version", e);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public boolean schemaExists() {
-    Connection connection = null;
-    Statement stmt = null;
-    try {
-      connection = dataSource.getConnection();
-      stmt = connection.createStatement();
-      ResultSet rset = stmt.executeQuery(QUERY_SYSSCHEMA_SQOOP);
+  public boolean haveSuitableInternals(Connection conn) {
+    int version = detectVersion(conn);
 
-      if (!rset.next()) {
-        LOG.warn("Schema for SQOOP does not exist");
-        return false;
-      }
-      String sqoopSchemaId = rset.getString(1);
-      LOG.debug("SQOOP schema ID: " + sqoopSchemaId);
-      connection.commit();
-    } catch (SQLException ex) {
-      if (connection != null) {
-        try {
-          connection.rollback();
-        } catch (SQLException ex2) {
-          LOG.error("Unable to rollback transaction", ex2);
-        }
-      }
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0001, ex);
-    } finally {
-      closeStatements(stmt);
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (SQLException ex) {
-          LOG.error("Unable to close connection", ex);
-        }
-      }
+    if(version != DerbyRepoConstants.VERSION) {
+      return false;
     }
 
+    // TODO(jarcec): Verify that all structures are present (e.g. something like corruption validation)
     return true;
   }
 
@@ -1656,52 +1720,27 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   /**
    * Execute given query on database.
    *
-   * Passed query will be executed in it's own transaction
-   *
    * @param query Query that should be executed
    */
-  private void runQuery(String query) {
-    Connection connection = null;
+  private void runQuery(String query, Connection conn) {
     Statement stmt = null;
     try {
-      connection = dataSource.getConnection();
-      stmt = connection.createStatement();
+      stmt = conn.createStatement();
       if (stmt.execute(query)) {
         ResultSet rset = stmt.getResultSet();
         int count = 0;
         while (rset.next()) {
           count++;
         }
-        LOG.info("QUERY(" + query + ") produced unused resultset with "
-            + count + " rows");
+        LOG.info("QUERY(" + query + ") produced unused resultset with "+ count + " rows");
       } else {
         int updateCount = stmt.getUpdateCount();
         LOG.info("QUERY(" + query + ") Update count: " + updateCount);
       }
-      connection.commit();
     } catch (SQLException ex) {
-      try {
-        connection.rollback();
-      } catch (SQLException ex2) {
-        LOG.error("Unable to rollback transaction", ex2);
-      }
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0003,
-          query, ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0003, query, ex);
     } finally {
-      if (stmt != null) {
-        try {
-          stmt.close();
-        } catch (SQLException ex) {
-          LOG.error("Unable to close statement", ex);
-        }
-        if (connection != null) {
-          try {
-            connection.close();
-          } catch (SQLException ex) {
-            LOG.error("Unable to close connection", ex);
-          }
-        }
-      }
+      closeStatements(stmt);
     }
   }
 

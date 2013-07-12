@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public final class DerbySchemaConstants {
 
   public static final String SCHEMA_SQOOP = "SQOOP";
@@ -24,6 +27,19 @@ public final class DerbySchemaConstants {
   private static final String SCHEMA_PREFIX = SCHEMA_SQOOP + ".";
 
   private static final String CONSTRAINT_PREFIX = "FK_";
+
+  // SQ_SYSTEM
+
+  public static final String TABLE_SQ_SYSTEM_NAME = "SQ_SYSTEM";
+
+  public static final String TABLE_SQ_SYSTEM = SCHEMA_PREFIX
+    + TABLE_SQ_SYSTEM_NAME;
+
+  public static final String COLUMN_SQM_ID = "SQM_ID";
+
+  public static final String COLUMN_SQM_KEY = "SQM_KEY";
+
+  public static final String COLUMN_SQM_VALUE = "SQM_VALUE";
 
   // SQ_CONNECTOR
 
@@ -259,6 +275,26 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQRS_SQS_NAME = CONSTRAINT_PREFIX + "SQRS_SQS";
 
   public static final String CONSTRAINT_SQRS_SQS = SCHEMA_PREFIX + CONSTRAINT_SQRS_SQS_NAME;
+
+  /**
+   * List of expected tables for first version;
+   * This list here is for backward compatibility.
+   */
+  public static final Set<String> tablesV1;
+  static {
+    tablesV1 = new HashSet<String>();
+    tablesV1.add(TABLE_SQ_CONNECTOR_NAME);
+    tablesV1.add(TABLE_SQ_CONNECTION_NAME);
+    tablesV1.add(TABLE_SQ_CONNECTION_INPUT_NAME);
+    tablesV1.add(TABLE_SQ_COUNTER_NAME);
+    tablesV1.add(TABLE_SQ_COUNTER_GROUP_NAME);
+    tablesV1.add(TABLE_SQ_COUNTER_SUBMISSION_NAME);
+    tablesV1.add(TABLE_SQ_FORM_NAME);
+    tablesV1.add(TABLE_SQ_INPUT_NAME);
+    tablesV1.add(TABLE_SQ_JOB_NAME);
+    tablesV1.add(TABLE_SQ_JOB_INPUT_NAME);
+    tablesV1.add(TABLE_SQ_SUBMISSION_NAME);
+  }
 
   private DerbySchemaConstants() {
     // Disable explicit object creation
