@@ -306,8 +306,6 @@ public abstract class BaseSqoopTestCase extends TestCase {
     PreparedStatement statement = null;
     String createTableStr = null;
     String columnDefStr = "";
-    String columnListStr = "";
-    String valueListStr = "";
 
     try {
       try {
@@ -344,10 +342,13 @@ public abstract class BaseSqoopTestCase extends TestCase {
         }
       }
 
-      if (vals!=null) {
+      for (int count=0; vals != null && count < vals.length/colTypes.length;
+           ++count ) {
+        String columnListStr = "";
+        String valueListStr = "";
         for (int i = 0; i < colTypes.length; i++) {
           columnListStr += colNames[i];
-          valueListStr += vals[i];
+          valueListStr += vals[count * colTypes.length + i];
           if (i < colTypes.length - 1) {
             columnListStr += ", ";
             valueListStr += ", ";

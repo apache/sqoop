@@ -283,7 +283,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       }
       break;
     case DateLastModified:
-      checkColumnType = Types.TIMESTAMP;
+      checkColumnType = manager.getColumnTypes(options.getTableName(),
+        options.getSqlQuery()).get(options.getIncrementalTestColumn());
       nextVal = manager.getCurrentDbTimestamp();
       if (null == nextVal) {
         throw new IOException("Could not get current time from database");

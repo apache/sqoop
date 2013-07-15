@@ -424,7 +424,7 @@ public class TestIncrementalImport extends TestCase {
       args.add("--incremental");
       args.add("lastmodified");
       args.add("--check-column");
-      args.add("last_modified");
+      args.add("LAST_MODIFIED");
     }
     args.add("--columns");
     args.add("id");

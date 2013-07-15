@@ -160,7 +160,7 @@ public class TestMerge extends BaseSqoopTestCase {
     // Do an import of this data into the "old" dataset.
     options.setTargetDir(new Path(warehouse, "merge-old").toString());
     options.setIncrementalMode(IncrementalMode.DateLastModified);
-    options.setIncrementalTestColumn("lastmod");
+    options.setIncrementalTestColumn("LASTMOD");
 
     ImportTool importTool = new ImportTool();
     Sqoop importer = new Sqoop(importTool, options.getConf(), options);
@@ -204,7 +204,7 @@ public class TestMerge extends BaseSqoopTestCase {
     options.setNumMappers(1);
     options.setTargetDir(new Path(warehouse, "merge-new").toString());
     options.setIncrementalMode(IncrementalMode.DateLastModified);
-    options.setIncrementalTestColumn("lastmod");
+    options.setIncrementalTestColumn("LASTMOD");
     options.setIncrementalLastValue(new Timestamp(prevImportEnd).toString());
 
     importTool = new ImportTool();

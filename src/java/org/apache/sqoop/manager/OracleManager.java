@@ -593,6 +593,9 @@ public class OracleManager
     if (columnType == Types.TIMESTAMP) {
       return "TO_TIMESTAMP('" + datetime + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
     } else if (columnType == Types.DATE) {
+      // converting timestamp of the form 2012-11-11 11:11:11.00 to
+      // date of the form 2011:11:11 11:11:11
+      datetime = datetime.split("\\.")[0];
       return "TO_DATE('" + datetime + "', 'YYYY-MM-DD HH24:MI:SS')";
     } else {
       String msg = "Column type is neither timestamp nor date!";

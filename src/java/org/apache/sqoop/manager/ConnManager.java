@@ -721,6 +721,11 @@ public abstract class ConnManager {
    * be inserted into a SQL statement, representing that date/time.
    */
   public String datetimeToQueryString(String datetime, int columnType) {
+    if (columnType != Types.TIMESTAMP && columnType != Types.DATE) {
+      String msg = "Column type is neither timestamp nor date!";
+      LOG.error(msg);
+      throw new RuntimeException(msg);
+    }
     return "'" + datetime + "'";
   }
 
