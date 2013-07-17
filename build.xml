@@ -280,6 +280,11 @@
   <property name="ms.sqlserver.password"
             value="PASSWORD"/>
 
+  <property name="sqoop.test.db2.connectstring.host_url" value="jdbc:db2://db2host:50000" />
+  <property name="sqoop.test.db2.connectstring.database" value="SQOOP" />
+  <property name="sqoop.test.db2.connectstring.username" value="SQOOP" />
+  <property name="sqoop.test.db2.connectstring.password" value="SQOOP" />
+
 
   <condition property="windows">
     <os family="windows" />
@@ -853,6 +858,11 @@
 
       <sysproperty key="java.security.krb5.kdc"
                    value="${java.security.krb5.kdc}"/>
+
+      <sysproperty key="sqoop.test.db2.connectstring.host_url" value="${sqoop.test.db2.connectstring.host_url}" />
+      <sysproperty key="sqoop.test.db2.connectstring.database" value="${sqoop.test.db2.connectstring.database}" />
+      <sysproperty key="sqoop.test.db2.connectstring.username" value="${sqoop.test.db2.connectstring.username}" />
+      <sysproperty key="sqoop.test.db2.connectstring.password" value="${sqoop.test.db2.connectstring.password}" />
 
       <!-- Location of Hive logs -->
       <!--<sysproperty key="hive.log.dir"

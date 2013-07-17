@@ -45,7 +45,7 @@ import com.cloudera.sqoop.util.FileListing;
  *
  * This uses JDBC to import data from an DB2 database into HDFS.
  *
- * Since this requires an DB2 SErver installation,
+ * Since this requires an DB2 Server installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
  * -Dtestcase=DB2ManagerImportManualTest
@@ -69,14 +69,24 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
           "sqoop.test.db2.connectstring.host_url",
           "jdbc:db2://db2host:50000");
 
-  static final String DATABASE_NAME = "SQOOP";
-  static final String DATABASE_USER = "SQOOP";
-  static final String DATABASE_PASSWORD = "PASSWORD";
+  static final String DATABASE_NAME = System.getProperty(
+          "sqoop.test.db2.connectstring.database",
+          "SQOOP");
+  static final String DATABASE_USER = System.getProperty(
+          "sqoop.test.db2.connectstring.username",
+          "SQOOP");
+  static final String DATABASE_PASSWORD = System.getProperty(
+          "sqoop.test.db2.connectstring.password",
+          "SQOOP");
   static final String TABLE_NAME = "EMPLOYEES_DB2";
-  static final String QUALIFIED_TABLE_NAME = "PREFIX.EMPLOYEES_DB2";
+  static final String QUALIFIED_TABLE_NAME = DATABASE_USER + ".EMPLOYEES_DB2";
   static final String CONNECT_STRING = HOST_URL
               + "/" + DATABASE_NAME
               + ":currentSchema=" + DATABASE_USER +";";
+
+  static {
+    LOG.info("Using DB2 CONNECT_STRING: " + CONNECT_STRING);
+  }
 
   // instance variables populated during setUp, used during tests
   private Db2Manager manager;

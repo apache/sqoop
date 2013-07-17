@@ -21,6 +21,7 @@ package com.cloudera.sqoop;
 import com.cloudera.sqoop.hbase.HBaseImportAddRowKeyTest;
 import com.cloudera.sqoop.hbase.HBaseImportNullTest;
 import com.cloudera.sqoop.hbase.HBaseImportTypesTest;
+import com.cloudera.sqoop.manager.DB2ManagerImportManualTest;
 import org.apache.sqoop.hcat.HCatalogExportTest;
 import org.apache.sqoop.hcat.HCatalogImportTest;
 
@@ -102,6 +103,9 @@ public final class ThirdPartyTests extends TestCase {
     // PostgreSQL
     suite.addTestSuite(PostgresqlImportTest.class);
     suite.addTestSuite(PostgresqlExportTest.class);
+
+    // DB2
+    suite.addTestSuite(DB2ManagerImportManualTest.class);
 
     // Hbase
     suite.addTestSuite(HBaseImportTest.class);
