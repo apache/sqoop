@@ -101,10 +101,10 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="1.4.4-SNAPSHOT" />
+  <property name="version" value="1.4.5-SNAPSHOT" />
 
   <!-- The last version released. -->
-  <property name="oldversion" value="1.4.3" />
+  <property name="oldversion" value="1.4.4" />
   <!-- The point when we branched for the previous release. -->
   <property name="prev.git.hash"
       value="166417fdb0afd3141c6fd0fdc50043b5e13c2a97" />
