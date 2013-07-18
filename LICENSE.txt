@@ -242,3 +242,7 @@ For lib/ant-contrib-<version>.jar:
 For lib/ant-eclipse-<version>.jar:
 
   The Apache License, Version 2.0
+
+For lib/ivy-<version>.jar:
+
+  The Apache License, Version 2.0

@@ -1,3 +1,81 @@
+
+Changelog - Sqoop - Version 1.4.4 - 07-18-2013
+
+** New Feature
+    * [SQOOP-931] - Integrate HCatalog with Sqoop
+    * [SQOOP-999] - Support bulk load from HDFS to PostgreSQL using COPY ... FROM
+    * [SQOOP-1038] - Add support for composite keys in HBase import
+
+** Improvement
+    * [SQOOP-885] - Allow excluding some tables from import-all-tables tools
+    * [SQOOP-912] - Add ability to specify --hive-database parameter
+    * [SQOOP-914] - Securing passwords in sqoop 1.x
+    * [SQOOP-916] - Add an abort validation handler
+    * [SQOOP-933] - Properly log SQLExceptions using getNextException() method for chaining exceptions
+    * [SQOOP-934] - JDBC Connection can timeout after import but before hive import
+    * [SQOOP-937] - Dont generate ORM files for  Direct mode connectors
+    * [SQOOP-1140] - Enable overriding username, password and database in DB2 test
+
+** Task
+    * [SQOOP-1010] - Change default Hadoop profile to 2.x
+    * [SQOOP-1118] - Move PostgreSQL specific MR codes to org.apache.sqoop.mapreduce.posgresql
+
+** Sub-task
+    * [SQOOP-838] - Stored procedures: MySQL
+    * [SQOOP-839] - Stored procedures: Oracle
+    * [SQOOP-847] - Provide direct support
+    * [SQOOP-848] - Unit tests for Netezza connector
+    * [SQOOP-849] - documentation for netezza connector
+    * [SQOOP-949] - Allow Sqoop to build on Windows OS
+    * [SQOOP-954] - Create Sqoop runtime scripts to run Sqoop on Windows
+    * [SQOOP-955] - Fix Sqoop unit test failures on Windows
+    * [SQOOP-962] - Document null string behavior
+    * [SQOOP-970] - Explicit delimiter configuration information should be available for exports also
+    * [SQOOP-1011] - Allow automatic creation of HCatalog tables
+    * [SQOOP-1020] - Fix Hive Unit tests to work in the presence of Hive classes
+    * [SQOOP-1050] - Add documentation for HCatalog Integration
+    * [SQOOP-1127] - Some database specific types are not properly handled during exports
+
+** Bug
+    * [SQOOP-846] - Provide a connector for Netezza appliances
+    * [SQOOP-856] - PGBulkLoadExportMapper has an infinite waitFor without any logging in the event of Interrupted exceptions
+    * [SQOOP-859] - PostgreSQL: Test cases have hard coded username and password
+    * [SQOOP-883] - Remove input directory prior Sqoop import
+    * [SQOOP-891] - Sqoop export from S3 to MySQL fails when S3 is not default filesystem.
+    * [SQOOP-906] - Sqoop is always calling ConnectionManager.datetimeToQueryString with TIMESTAMP column type
+    * [SQOOP-907] - Print out queries executed by Sqoop on mapreduce job side
+    * [SQOOP-928] - PostgresqlManager should rollback any pending changes instead of commit when closing connections
+    * [SQOOP-929] - Add more Netezza direct mode tests
+    * [SQOOP-932] - Netezza direct manager is ignoring --null-*-string arguments
+    * [SQOOP-936] - Classwriter should check if columnNames generated are null before accessing them
+    * [SQOOP-950] - Can't build package from provided binary artifacts
+    * [SQOOP-959] - Use CredentialsUtil.fetchPasswordFromFile in BaseSqoopTool
+    * [SQOOP-968] - Cannot build when in a directory with spaces
+    * [SQOOP-976] - Incorrect SQL when incremental criteria is text column
+    * [SQOOP-979] - MySQL direct connector is not working correct after moving password to credential cache
+    * [SQOOP-981] - The --hadoop-home command line parameter is no longer accepted
+    * [SQOOP-988] - Validation option should provide some output that validation is being done
+    * [SQOOP-992] - Allow to set target java version during compilation
+    * [SQOOP-1006] - Update year in the notice file to 2013
+    * [SQOOP-1008] - Test TestClassWriter.testNoClassGeneration is failing on JDK7
+    * [SQOOP-1027] - Incremental import is not properly escaping table name when loading maximal value
+    * [SQOOP-1029] - Oracle export using procedures does not work
+    * [SQOOP-1030] - Enable column types Binary and Varbinary parsing in Sqoop for export
+    * [SQOOP-1031] - Provide default Java type mapping for MS Sql Datetimeoffset type
+    * [SQOOP-1033] - CombineFileInputFormat does not work with paths not on default FS like ASV
+    * [SQOOP-1034] - Fix SQL Azure database may return table columns in inconsistent order
+    * [SQOOP-1052] - Hive import is not compatible with Avro and SequenceFile but no errors are thrown
+    * [SQOOP-1053] - Fix sqoop to work with Hadoop 2.0.4 alpha
+    * [SQOOP-1071] - Avro import is failing when columns are starting with underscore
+    * [SQOOP-1078] - incremental import from database in direct mode
+    * [SQOOP-1083] - Split HBaseImportTest into multiple independent tests
+    * [SQOOP-1097] - Export using procedures feature needs fixes for working with mysql
+    * [SQOOP-1124] - Direct export to PostgreSQL with PGBulkloadManager fails without explicit port number settings
+    * [SQOOP-1129] - PostgreSQL direct test are failing on trunk
+
+** Test
+    * [SQOOP-1035] - Add MS Sqoop Connecter tests
+
 Changelog - Sqoop - Version 1.4.3 - 02/20/2012
 
 ** New Feature
