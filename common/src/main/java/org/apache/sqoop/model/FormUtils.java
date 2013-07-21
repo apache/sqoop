@@ -363,7 +363,9 @@ public class FormUtils {
             jsonForm.put(inputName, value);
           } else if(type.isEnum()) {
             jsonForm.put(inputName, value.toString());
-          } else {
+          } else if(type == Boolean.class) {
+            jsonForm.put(inputName, value);
+          }else {
             throw new SqoopException(ModelError.MODEL_004,
               "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
           }
@@ -450,7 +452,9 @@ public class FormUtils {
             inputField.set(formValue, ((Long)jsonInputs.get(inputName)).intValue());
           } else if(type.isEnum()) {
             inputField.set(formValue, Enum.valueOf((Class<? extends Enum>) inputField.getType(), (String) jsonInputs.get(inputName)));
-          } else {
+          } else if(type == Boolean.class) {
+            inputField.set(formValue, (Boolean) jsonInputs.get(inputName));
+          }else {
             throw new SqoopException(ModelError.MODEL_004,
               "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
           }

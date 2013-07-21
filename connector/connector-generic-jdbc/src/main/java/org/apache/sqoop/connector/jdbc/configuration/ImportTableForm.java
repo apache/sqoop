@@ -30,5 +30,6 @@ public class ImportTableForm {
   @Input(size = 2000) public String sql;
   @Input(size = 50)   public String columns;
   @Input(size = 50)   public String partitionColumn;
+  @Input              public Boolean partitionColumnNull;
   @Input(size = 50)   public String boundaryQuery;
 }

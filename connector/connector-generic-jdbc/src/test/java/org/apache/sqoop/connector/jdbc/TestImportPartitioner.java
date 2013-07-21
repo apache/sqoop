@@ -457,6 +457,36 @@ public class TestImportPartitioner extends TestCase {
 
   }
 
+  public void testPatitionWithNullValues() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants
+        .CONNECTOR_JDBC_PARTITION_COLUMNNAME, "VCCOL");
+    context.setString(GenericJdbcConnectorConstants
+        .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.VARCHAR));
+    context.setString(GenericJdbcConnectorConstants
+        .CONNECTOR_JDBC_PARTITION_MINVALUE, "AAA");
+    context.setString(GenericJdbcConnectorConstants
+        .CONNECTOR_JDBC_PARTITION_MAXVALUE, "AAE");
+
+    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.table.partitionColumnNull = true;
+
+    Partitioner partitioner = new GenericJdbcImportPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+
+    verifyResult(partitions, new String[] {
+        "VCCOL IS NULL",
+        "'AAA' <= VCCOL AND VCCOL < 'AAB'",
+        "'AAB' <= VCCOL AND VCCOL < 'AAC'",
+        "'AAC' <= VCCOL AND VCCOL < 'AAD'",
+        "'AAD' <= VCCOL AND VCCOL <= 'AAE'",
+    });
+
+  }
+
   private void verifyResult(List<Partition> partitions,
       String[] expected) {
     assertEquals(expected.length, partitions.size());

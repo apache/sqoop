@@ -45,21 +45,35 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
   private int partitionColumnType;
   private String partitionMinValue;
   private String partitionMaxValue;
+  private Boolean partitionColumnNull;
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,ConnectionConfiguration connection, ImportJobConfiguration job) {
+    List<Partition> partitions = new LinkedList<Partition>();
+
     numberPartitions = context.getMaxPartitions();
     partitionColumnName = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME);
     partitionColumnType = context.getInt(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, -1);
     partitionMinValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE);
     partitionMaxValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE);
 
+    partitionColumnNull = job.table.partitionColumnNull;
+    if (partitionColumnNull == null) {
+      partitionColumnNull = false;
+    }
+
     if (partitionMinValue == null && partitionMaxValue == null) {
-      List<Partition> partitions = new LinkedList<Partition>();
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
       partition.setConditions(partitionColumnName + " IS NULL");
       partitions.add(partition);
       return partitions;
+    }
+
+    if (partitionColumnNull) {
+      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      partition.setConditions(partitionColumnName + " IS NULL");
+      partitions.add(partition);
+      numberPartitions -= 1;
     }
 
     switch (partitionColumnType) {
@@ -68,18 +82,21 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     case Types.INTEGER:
     case Types.BIGINT:
       // Integer column
-      return partitionIntegerColumn();
+      partitions.addAll(partitionIntegerColumn());
+      break;
 
     case Types.REAL:
     case Types.FLOAT:
     case Types.DOUBLE:
       // Floating point column
-      return partitionFloatingPointColumn();
+      partitions.addAll(partitionFloatingPointColumn());
+      break;
 
     case Types.NUMERIC:
     case Types.DECIMAL:
       // Decimal column
-      return partitionNumericColumn();
+      partitions.addAll(partitionNumericColumn());
+      break;
 
     case Types.BIT:
     case Types.BOOLEAN:
@@ -90,20 +107,25 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     case Types.TIME:
     case Types.TIMESTAMP:
       // Date time column
-      return partitionDateTimeColumn();
+      partitions.addAll(partitionDateTimeColumn());
+      break;
 
     case Types.CHAR:
     case Types.VARCHAR:
     case Types.LONGVARCHAR:
       // Text column
-      return partitionTextColumn();
+      partitions.addAll(partitionTextColumn());
+      break;
 
     default:
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0011,
           String.valueOf(partitionColumnType));
     }
+
+    return partitions;
   }
+
   protected List<Partition> partitionDateTimeColumn() {
     List<Partition> partitions = new LinkedList<Partition>();
 
