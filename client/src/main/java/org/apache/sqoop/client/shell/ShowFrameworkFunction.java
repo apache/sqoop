@@ -35,7 +35,7 @@ public class ShowFrameworkFunction extends SqoopFunction {
   }
 
   public Object executeFunction(CommandLine line) {
-    if (line.getArgs().length != 1) {
+    if (line.getArgs().length != 0) {
       printlnResource(Constants.RES_SHOW_FRAMEWORK_USAGE);
       return null;
     }
