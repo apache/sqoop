@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -72,6 +73,57 @@ public class TestFormSerialization {
     assertEquals(1, (int)retrieved.getIntegerInput("Integer").getValue());
     assertEquals(true, retrieved.getBooleanInput("Boolean").getValue());
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
+  }
+
+  @Test
+  public void testMapDataType() {
+    MForm form = getMapForm();
+
+    // Inserted values
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("A", "B");
+    form.getMapInput("Map").setValue(map);
+
+    // Serialize
+    JSONObject jsonObject = FormSerialization.extractForm(form, false);
+    String serializedJson = jsonObject.toJSONString();
+
+    // Deserialize
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(serializedJson);
+    MForm retrieved = FormSerialization.restoreForm(retrievedJson);
+    assertEquals(map, retrieved.getMapInput("Map").getValue());
+  }
+
+  @Test(expected=SqoopException.class)
+  public void testMapDataTypeException() {
+    MForm form = getMapForm();
+
+    // Inserted values
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("A", "B");
+    form.getMapInput("Map").setValue(map);
+
+    // Serialize
+    JSONObject jsonObject = FormSerialization.extractForm(form, false);
+    String serializedJson = jsonObject.toJSONString();
+
+    // Replace map value with a fake string to force exception
+    String badSerializedJson = serializedJson.replace("{\"A\":\"B\"}", "\"nonsensical string\"");
+    System.out.println(badSerializedJson);
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(badSerializedJson);
+    FormSerialization.restoreForm(retrievedJson);
+  }
+
+  protected MForm getMapForm() {
+    List<MInput<?>> inputs;
+    MInput input;
+
+    inputs = new LinkedList<MInput<?>>();
+
+    input = new MMapInput("Map", false);
+    inputs.add(input);
+
+    return new MForm("f", inputs);
   }
 
   /**

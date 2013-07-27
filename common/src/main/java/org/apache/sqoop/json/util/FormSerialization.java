@@ -18,6 +18,7 @@
 package org.apache.sqoop.json.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
@@ -32,6 +33,7 @@ import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Convenient static methods for serializing forms.
@@ -113,7 +115,11 @@ public final class FormSerialization {
       // Serialize value if is there
       // Skip if sensitive
       if (!mInput.isEmpty() && !(skipSensitive && mInput.isSensitive())) {
-        input.put(FORM_INPUT_VALUE, mInput.getUrlSafeValueString());
+        if (mInput.getType() == MInputType.MAP) {
+          input.put(FORM_INPUT_VALUE, mInput.getValue());
+        } else {
+          input.put(FORM_INPUT_VALUE, mInput.getUrlSafeValueString());
+        }
       }
 
       mInputs.add(input);
@@ -185,8 +191,19 @@ public final class FormSerialization {
 
       // Propagate form optional value
       if(input.containsKey(FORM_INPUT_VALUE)) {
-        mInput.restoreFromUrlSafeValueString(
-          (String) input.get(FORM_INPUT_VALUE));
+        switch (type) {
+        case MAP:
+          try {
+            mInput.setValue((Map<String, String>)input.get(FORM_INPUT_VALUE));
+          } catch (ClassCastException e) {
+            throw new SqoopException(SerializationError.SERIALIZATION_001, name + " requires a 'map' value.");
+          }
+          break;
+        default:
+          mInput.restoreFromUrlSafeValueString(
+              (String) input.get(FORM_INPUT_VALUE));
+          break;
+        }
       }
       mInputs.add(mInput);
     }
