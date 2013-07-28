@@ -57,6 +57,12 @@ import java.util.Locale;
  * PUT /v1/job/:jid
  * Update job with id :jid.
  *
+ * PUT /v1/job/:jid/enable
+ * Enable job with id :jid
+ *
+ * PUT /v1/job/:jid/disable
+ * Disable job with id :jid
+ *
  * DELETE /v1/job/:jid
  * Remove job with id :jid
  *
@@ -71,6 +77,9 @@ public class JobRequestHandler implements RequestHandler {
   private static final Logger LOG =
       Logger.getLogger(JobRequestHandler.class);
 
+  private static final String ENABLE = "enable";
+  private static final String DISABLE = "disable";
+
   public JobRequestHandler() {
     LOG.info("JobRequestHandler initialized");
   }
@@ -81,9 +90,15 @@ public class JobRequestHandler implements RequestHandler {
       case GET:
         return getJobs(ctx);
       case POST:
-        return createUpdateJob(ctx, false);
+          return createUpdateJob(ctx, false);
       case PUT:
-        return createUpdateJob(ctx, true);
+        if (ctx.getLastURLElement().equals(ENABLE)) {
+          return enableJob(ctx, true);
+        } else if (ctx.getLastURLElement().equals(DISABLE)) {
+          return enableJob(ctx, false);
+        } else {
+          return createUpdateJob(ctx, true);
+        }
       case DELETE:
         return deleteJob(ctx);
     }
@@ -233,5 +248,16 @@ public class JobRequestHandler implements RequestHandler {
     bean.setFrameworkBundle(FrameworkManager.getInstance().getBundle(locale));
 
     return bean;
+  }
+
+  private JsonBean enableJob(RequestContext ctx, boolean enabled) {
+    String[] elements = ctx.getUrlElements();
+    String sjid = elements[elements.length - 2];
+    long xid = Long.valueOf(sjid);
+
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    repository.enableJob(xid, enabled);
+
+    return JsonBean.EMPTY_BEAN;
   }
 }

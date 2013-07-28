@@ -106,6 +106,7 @@ public class ConnectionBean implements JsonBean {
       object.put(NAME, connection.getName());
       object.put(CREATED, connection.getCreationDate().getTime());
       object.put(UPDATED, connection.getLastUpdateDate().getTime());
+      object.put(ENABLED, connection.getEnabled());
       object.put(CONNECTOR_ID, connection.getConnectorId());
       object.put(CONNECTOR_PART,
         extractForms(connection.getConnectorPart().getForms(), skipSensitive));
@@ -159,6 +160,7 @@ public class ConnectionBean implements JsonBean {
       connection.setName((String) object.get(NAME));
       connection.setCreationDate(new Date((Long) object.get(CREATED)));
       connection.setLastUpdateDate(new Date((Long) object.get(UPDATED)));
+      connection.setEnabled((Boolean) object.get(ENABLED));
 
       connections.add(connection);
     }

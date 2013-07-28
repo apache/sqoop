@@ -109,6 +109,7 @@ public class JobBean implements JsonBean {
       object.put(TYPE, job.getType().name());
       object.put(CREATED, job.getCreationDate().getTime());
       object.put(UPDATED, job.getLastUpdateDate().getTime());
+      object.put(ENABLED, job.getEnabled());
       object.put(CONNECTION_ID, job.getConnectionId());
       object.put(CONNECTOR_ID, job.getConnectorId());
       object.put(CONNECTOR_PART,
@@ -171,6 +172,7 @@ public class JobBean implements JsonBean {
       job.setName((String) object.get(NAME));
       job.setCreationDate(new Date((Long) object.get(CREATED)));
       job.setLastUpdateDate(new Date((Long) object.get(UPDATED)));
+      job.setEnabled((Boolean) object.get(ENABLED));
 
       jobs.add(job);
     }

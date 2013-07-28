@@ -211,6 +211,15 @@ public abstract class JdbcRepositoryHandler {
   public abstract boolean inUseConnection(long connectionId, Connection conn);
 
   /**
+   * Enable or disable connection with given id from metadata repository
+   *
+   * @param connectionId Connection object that is going to be enabled or disabled
+   * @param enabled Enable or disable
+   * @param conn Connection to metadata repository
+   */
+  public abstract void enableConnection(long connectionId, boolean enabled, Connection conn);
+
+  /**
    * Delete connection with given id from metadata repository.
    *
    * @param connectionId Connection object that should be removed from repository
@@ -282,6 +291,14 @@ public abstract class JdbcRepositoryHandler {
    */
   public abstract boolean inUseJob(long jobId, Connection conn);
 
+  /**
+   * Enable or disable job with given id from the repository
+   *
+   * @param jobId Job id
+   * @param enabled Enable or disable
+   * @param conn Connection to metadata repository
+   */
+  public abstract void enableJob(long jobId, boolean enabled, Connection conn);
 
   /**
    * Delete the input values for the job with given id from the repository.

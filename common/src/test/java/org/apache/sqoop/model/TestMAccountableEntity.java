@@ -49,7 +49,9 @@ public class TestMAccountableEntity {
     Date testLastUpdateDate = new Date();
     connection.setCreationDate(testCreationDate);
     connection.setLastUpdateDate(testLastUpdateDate);
+    connection.setEnabled(false);
     assertEquals(testCreationDate, connection.getCreationDate());
     assertEquals(testLastUpdateDate, connection.getLastUpdateDate());
+    assertEquals(false, connection.getEnabled());
   }
 }

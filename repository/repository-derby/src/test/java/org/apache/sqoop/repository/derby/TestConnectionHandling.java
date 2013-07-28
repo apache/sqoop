@@ -20,6 +20,7 @@ package org.apache.sqoop.repository.derby;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 
 import java.util.List;
@@ -186,6 +187,24 @@ public class TestConnectionHandling extends DerbyTestCase {
 
     forms = retrieved.getFrameworkPart().getForms();
     assertEquals("Injected", forms.get(1).getInputs().get(1).getValue());
+  }
+
+  public void testEnableAndDisableConnection() throws Exception {
+    loadConnections();
+
+    // disable connection 1
+    handler.enableConnection(1, false, getDerbyConnection());
+
+    MConnection retrieved = handler.findConnection(1, getDerbyConnection());
+    assertNotNull(retrieved);
+    assertEquals(false, retrieved.getEnabled());
+
+    // enable connection 1
+    handler.enableConnection(1, true, getDerbyConnection());
+
+    retrieved = handler.findConnection(1, getDerbyConnection());
+    assertNotNull(retrieved);
+    assertEquals(true, retrieved.getEnabled());
   }
 
   public void testDeleteConnection() throws Exception {

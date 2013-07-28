@@ -143,6 +143,14 @@ public abstract class Repository {
     RepositoryTransaction tx);
 
   /**
+   * Enable or disable connection with given id from metadata repository
+   *
+   * @param id Connection object that is going to be enabled or disabled
+   * @param enabled enable or disable
+   */
+  public abstract void enableConnection(long id, boolean enabled);
+
+  /**
    * Delete connection with given id from metadata repository.
    *
    * @param id Connection object that should be removed from repository
@@ -191,6 +199,14 @@ public abstract class Repository {
    *           rollback or close on this transaction.
    */
   public abstract void updateJob(MJob job, RepositoryTransaction tx);
+
+  /**
+   * Enable or disable job with given id from metadata repository
+   *
+   * @param id Job object that is going to be enabled or disabled
+   * @param enabled Enable or disable
+   */
+  public abstract void enableJob(long id, boolean enabled);
 
   /**
    * Delete job with given id from metadata repository.

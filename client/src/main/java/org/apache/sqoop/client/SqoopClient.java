@@ -280,6 +280,16 @@ public class SqoopClient {
   }
 
   /**
+   * Enable/disable connection with given id
+   *
+   * @param xid Connection id
+   * @param enabled Enable or disable
+   */
+  public void enableConnection(long xid, boolean enabled) {
+    requests.enableConnection(xid, enabled);
+  }
+
+  /**
    * Delete connection with given id.
    *
    * @param xid Connection id
@@ -343,6 +353,16 @@ public class SqoopClient {
    */
   public Status updateJob(MJob job) {
     return applyValidations(requests.updateJob(job), job);
+  }
+
+  /**
+   * Enable/disable job with given id
+   *
+   * @param jid Job that is going to be enabled/disabled
+   * @param enabled Enable or disable
+   */
+  public void enableJob(long jid, boolean enabled) {
+    requests.enableJob(jid, enabled);
   }
 
   /**

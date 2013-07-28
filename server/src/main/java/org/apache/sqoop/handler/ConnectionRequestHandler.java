@@ -57,6 +57,12 @@ import java.util.Locale;
  * PUT /v1/connection/:xid
  * Update connection with id :xid.
  *
+ * PUT /v1/connection/:xid/enable
+ * Enable connection with id :xid
+ *
+ * PUT /v1/connection/:xid/disable
+ * Disable connection with id :xid
+ *
  * DELETE /v1/connection/:xid
  * Remove connection with id :xid
  *
@@ -71,6 +77,9 @@ public class ConnectionRequestHandler implements RequestHandler {
   private static final Logger LOG =
       Logger.getLogger(ConnectionRequestHandler.class);
 
+  private static final String ENABLE = "enable";
+  private static final String DISABLE = "disable";
+
   public ConnectionRequestHandler() {
     LOG.info("ConnectionRequestHandler initialized");
   }
@@ -81,9 +90,15 @@ public class ConnectionRequestHandler implements RequestHandler {
       case GET:
         return getConnections(ctx);
       case POST:
-        return createUpdateConnection(ctx, false);
+          return createUpdateConnection(ctx, false);
       case PUT:
-        return createUpdateConnection(ctx, true);
+        if (ctx.getLastURLElement().equals(ENABLE)) {
+          return enableConnection(ctx, true);
+        } else if (ctx.getLastURLElement().equals(DISABLE)) {
+          return enableConnection(ctx, false);
+        } else {
+          return createUpdateConnection(ctx, true);
+        }
       case DELETE:
         return deleteConnection(ctx);
     }
@@ -233,5 +248,16 @@ public class ConnectionRequestHandler implements RequestHandler {
     bean.setFrameworkBundle(FrameworkManager.getInstance().getBundle(locale));
 
     return bean;
+  }
+
+  private JsonBean enableConnection(RequestContext ctx, boolean enabled) {
+    String[] elements = ctx.getUrlElements();
+    String sxid = elements[elements.length - 2];
+    long xid = Long.valueOf(sxid);
+
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    repository.enableConnection(xid, enabled);
+
+    return JsonBean.EMPTY_BEAN;
   }
 }

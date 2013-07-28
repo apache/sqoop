@@ -285,6 +285,25 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
+  public void enableConnection(final long connectionId, final boolean enabled) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(!handler.existsConnection(connectionId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017,
+            "Invalid id: " + connectionId);
+        }
+
+        handler.enableConnection(connectionId, enabled, conn);
+        return null;
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void deleteConnection(final long connectionId) {
     doWithConnection(new DoWithConnection() {
       @Override
@@ -377,6 +396,25 @@ public class JdbcRepository extends Repository {
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void enableJob(final long id, final boolean enabled) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(!handler.existsJob(id, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020,
+            "Invalid id: " + id);
+        }
+
+        handler.enableJob(id, enabled, conn);
+        return null;
+      }
+    });
   }
 
   /**

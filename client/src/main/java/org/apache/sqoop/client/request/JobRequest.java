@@ -31,6 +31,9 @@ public class JobRequest extends Request {
 
   public static final String RESOURCE = "v1/job/";
 
+  private static final String ENABLE = "/enable";
+  private static final String DISABLE = "/disable";
+
   public JobBean read(String serverUrl, Long xid) {
     String response;
     if (xid == null) {
@@ -80,5 +83,13 @@ public class JobRequest extends Request {
 
   public void delete(String serverUrl, Long id) {
      super.delete(serverUrl + RESOURCE + id);
+  }
+
+  public void enable(String serverUrl, Long id, Boolean enabled) {
+    if (enabled) {
+      super.put(serverUrl + RESOURCE + id + ENABLE, null);
+    } else {
+      super.put(serverUrl + RESOURCE + id + DISABLE, null);
+    }
   }
 }

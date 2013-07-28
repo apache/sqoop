@@ -66,20 +66,23 @@ public class ShowJobFunction extends SqoopFunction {
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_TYPE));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
     List<String> types = new LinkedList<String>();
     List<String> connectors = new LinkedList<String>();
+    List<String> availabilities = new LinkedList<String>();
 
     for(MJob job : jobs) {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
       types.add(job.getType().toString());
       connectors.add(String.valueOf(job.getConnectorId()));
+      availabilities.add(String.valueOf(job.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, types, connectors);
+    TableDisplayer.display(header, ids, names, types, connectors, availabilities);
   }
 
   private void showJobs() {
@@ -105,6 +108,7 @@ public class ShowJobFunction extends SqoopFunction {
       Constants.RES_SHOW_PROMPT_JOB_INFO,
       job.getPersistenceId(),
       job.getName(),
+      job.getEnabled(),
       formatter.format(job.getCreationDate()),
       formatter.format(job.getLastUpdateDate())
     );

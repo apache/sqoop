@@ -47,6 +47,7 @@ public final class FormSerialization {
   public static final String CLASS = "class";
   public static final String CREATED = "created";
   public static final String UPDATED = "updated";
+  public static final String ENABLED = "enabled";
   public static final String CON_FORMS = "con-forms";
   public static final String JOB_FORMS = "job-forms";
 

@@ -270,7 +270,19 @@ public class JobManager implements Reconfigurable {
       throw new SqoopException(FrameworkError.FRAMEWORK_0004,
         "Unknown job id " + jobId);
     }
+
+    if (!job.getEnabled()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0009,
+        "Job id: " + job.getPersistenceId());
+    }
+
     MConnection connection = repository.findConnection(job.getConnectionId());
+
+    if (!connection.getEnabled()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0010,
+        "Connection id: " + connection.getPersistenceId());
+    }
+
     SqoopConnector connector =
       ConnectorManager.getInstance().getConnector(job.getConnectorId());
 

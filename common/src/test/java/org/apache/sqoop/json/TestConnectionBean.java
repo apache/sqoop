@@ -43,6 +43,7 @@ public class TestConnectionBean {
     connection.setPersistenceId(666);
     connection.setCreationDate(created);
     connection.setLastUpdateDate(updated);
+    connection.setEnabled(false);
 
     // Fill some data at the beginning
     MStringInput input = (MStringInput) connection.getConnectorPart().getForms()
@@ -77,6 +78,7 @@ public class TestConnectionBean {
     assertEquals("Connection", target.getName());
     assertEquals(created, target.getCreationDate());
     assertEquals(updated, target.getLastUpdateDate());
+    assertEquals(false, target.getEnabled());
 
     // Test that value was correctly moved
     MStringInput targetInput = (MStringInput) target.getConnectorPart()
@@ -93,6 +95,7 @@ public class TestConnectionBean {
     connection.setPersistenceId(666);
     connection.setCreationDate(created);
     connection.setLastUpdateDate(updated);
+    connection.setEnabled(true);
 
     // Fill some data at the beginning
     MStringInput input = (MStringInput) connection.getConnectorPart().getForms()

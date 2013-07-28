@@ -65,18 +65,21 @@ public class ShowConnectionFunction extends SqoopFunction {
     header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
     List<String> connectors = new LinkedList<String>();
+    List<String> availabilities = new LinkedList<String>();
 
     for(MConnection connection : connections) {
       ids.add(String.valueOf(connection.getPersistenceId()));
       names.add(connection.getName());
       connectors.add(String.valueOf(connection.getConnectorId()));
+      availabilities.add(String.valueOf(connection.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, connectors);
+    TableDisplayer.display(header, ids, names, connectors, availabilities);
   }
 
   private void showConnections() {
@@ -103,6 +106,7 @@ public class ShowConnectionFunction extends SqoopFunction {
     printlnResource(Constants.RES_SHOW_PROMPT_CONN_INFO,
       connection.getPersistenceId(),
       connection.getName(),
+      connection.getEnabled(),
       formatter.format(connection.getCreationDate()),
       formatter.format(connection.getLastUpdateDate())
     );

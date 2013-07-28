@@ -332,6 +332,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
     if(version <= 1) {
       runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED, conn);
     }
 
     ResultSet rs = null;
@@ -545,6 +547,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt.setLong(2, connection.getConnectorId());
       stmt.setTimestamp(3, new Timestamp(connection.getCreationDate().getTime()));
       stmt.setTimestamp(4, new Timestamp(connection.getLastUpdateDate().getTime()));
+      stmt.setBoolean(5, connection.getEnabled());
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -664,6 +667,23 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     } finally {
       closeResultSets(rs);
       closeStatements(stmt);
+    }
+  }
+
+  @Override
+  public void enableConnection(long connectionId, boolean enabled, Connection conn) {
+    PreparedStatement enableConn = null;
+
+    try {
+      enableConn = conn.prepareStatement(STMT_ENABLE_CONNECTION);
+      enableConn.setBoolean(1, enabled);
+      enableConn.setLong(2, connectionId);
+      enableConn.executeUpdate();
+    } catch (SQLException ex) {
+      logException(ex, connectionId);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0042, ex);
+    } finally {
+      closeStatements(enableConn);
     }
   }
 
@@ -849,6 +869,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt.setString(3, job.getType().name());
       stmt.setTimestamp(4, new Timestamp(job.getCreationDate().getTime()));
       stmt.setTimestamp(5, new Timestamp(job.getLastUpdateDate().getTime()));
+      stmt.setBoolean(6, job.getEnabled());
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -962,6 +983,23 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
 
     return false;
+  }
+
+  @Override
+  public void enableJob(long jobId, boolean enabled, Connection conn) {
+    PreparedStatement enableConn = null;
+
+    try {
+      enableConn = conn.prepareStatement(STMT_ENABLE_JOB);
+      enableConn.setBoolean(1, enabled);
+      enableConn.setLong(2, jobId);
+      enableConn.executeUpdate();
+    } catch (SQLException ex) {
+      logException(ex, jobId);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0043, ex);
+    } finally {
+      closeStatements(enableConn);
+    }
   }
 
   /**
@@ -1510,6 +1548,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         long connectorId = rsConnection.getLong(3);
         Date creationDate = rsConnection.getTimestamp(4);
         Date lastUpdateDate = rsConnection.getTimestamp(5);
+        boolean enabled = rsConnection.getBoolean(6);
 
         formConnectorFetchStmt.setLong(1, connectorId);
 
@@ -1538,6 +1577,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         connection.setName(name);
         connection.setCreationDate(creationDate);
         connection.setLastUpdateDate(lastUpdateDate);
+        connection.setEnabled(enabled);
 
         connections.add(connection);
       }
@@ -1574,6 +1614,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         String stringType = rsJob.getString(5);
         Date creationDate = rsJob.getTimestamp(6);
         Date lastUpdateDate = rsJob.getTimestamp(7);
+        boolean enabled = rsJob.getBoolean(8);
 
         MJob.Type type = MJob.Type.valueOf(stringType);
 
@@ -1604,6 +1645,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         job.setName(name);
         job.setCreationDate(creationDate);
         job.setLastUpdateDate(lastUpdateDate);
+        job.setEnabled(enabled);
 
         jobs.add(job);
       }

@@ -172,6 +172,12 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't detect version of the database structures **/
   DERBYREPO_0041("Can't detect version of repository storage"),
 
+  /** Can't enable/disable connection **/
+  DERBYREPO_0042("Can't enable/disable connection"),
+
+  /** Can't enable/disable job **/
+  DERBYREPO_0043("Can't enable/disable job"),
+
   ;
 
   private final String message;

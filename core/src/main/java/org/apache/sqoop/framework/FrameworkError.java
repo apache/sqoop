@@ -42,6 +42,10 @@ public enum FrameworkError implements ErrorCode {
 
   FRAMEWORK_0008("Invalid combination of submission and execution engines"),
 
+  FRAMEWORK_0009("Job has been disabled. Cannot submit this job."),
+
+  FRAMEWORK_0010("Connection for this job has been disabled. Cannot submit this job."),
+
   ;
 
   private final String message;

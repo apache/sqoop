@@ -123,6 +123,8 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQN_UPDATE_DATE = "SQN_UPDATE_DATE";
 
+  public static final String COLUMN_SQN_ENABLED = "SQN_ENABLED";
+
   public static final String CONSTRAINT_SQN_SQC_NAME = CONSTRAINT_PREFIX + "SQN_SQC";
 
   public static final String CONSTRAINT_SQN_SQC = SCHEMA_PREFIX + CONSTRAINT_SQN_SQC_NAME;
@@ -145,6 +147,8 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQB_CREATION_DATE = "SQB_CREATION_DATE";
 
   public static final String COLUMN_SQB_UPDATE_DATE = "SQB_UPDATE_DATE";
+
+  public static final String COLUMN_SQB_ENABLED = "SQB_ENABLED";
 
   public static final String CONSTRAINT_SQB_SQN_NAME = CONSTRAINT_PREFIX + "SQB_SQN";
 

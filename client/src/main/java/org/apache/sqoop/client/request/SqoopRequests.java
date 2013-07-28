@@ -106,6 +106,10 @@ public class SqoopRequests {
     return getConnectionRequest().update(serverUrl, connection);
   }
 
+  public void enableConnection(Long xid, Boolean enabled) {
+    getConnectionRequest().enable(serverUrl, xid, enabled);
+  }
+
   public void deleteConnection(Long xid) {
     getConnectionRequest().delete(serverUrl, xid);
   }
@@ -120,6 +124,10 @@ public class SqoopRequests {
 
   public ValidationBean updateJob(MJob job) {
     return getJobRequest().update(serverUrl, job);
+  }
+
+  public void enableJob(Long jid, Boolean enabled) {
+    getJobRequest().enable(serverUrl, jid, enabled);
   }
 
   public void deleteJob(Long jid) {

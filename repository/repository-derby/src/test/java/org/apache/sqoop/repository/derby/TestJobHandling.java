@@ -205,6 +205,24 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals("Injected", forms.get(1).getInputs().get(1).getValue());
   }
 
+  public void testEnableAndDisableJob() throws Exception {
+    loadJobs();
+
+    // disable job 1
+    handler.enableJob(1, false, getDerbyConnection());
+
+    MJob retrieved = handler.findJob(1, getDerbyConnection());
+    assertNotNull(retrieved);
+    assertEquals(false, retrieved.getEnabled());
+
+    // enable job 1
+    handler.enableJob(1, true, getDerbyConnection());
+
+    retrieved = handler.findJob(1, getDerbyConnection());
+    assertNotNull(retrieved);
+    assertEquals(true, retrieved.getEnabled());
+  }
+
   public void testDeleteJob() throws Exception {
     loadJobs();
 

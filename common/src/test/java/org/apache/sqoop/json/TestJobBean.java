@@ -42,6 +42,7 @@ public class TestJobBean {
     job.setPersistenceId(666);
     job.setCreationDate(created);
     job.setLastUpdateDate(updated);
+    job.setEnabled(false);
 
     // Fill some data at the beginning
     MStringInput input = (MStringInput) job.getConnectorPart().getForms()
@@ -67,6 +68,7 @@ public class TestJobBean {
     assertEquals("The big job", target.getName());
     assertEquals(created, target.getCreationDate());
     assertEquals(updated, target.getLastUpdateDate());
+    assertEquals(false, target.getEnabled());
 
     // Test that value was correctly moved
     MStringInput targetInput = (MStringInput) target.getConnectorPart()

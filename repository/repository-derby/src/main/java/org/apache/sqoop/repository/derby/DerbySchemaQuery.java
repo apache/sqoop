@@ -90,6 +90,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQN_CONNECTOR: BIGINT        | FK SQ_CONNECTOR(SQC_ID)
  *    | SQN_CREATION_DATE: TIMESTAMP |
  *    | SQN_UPDATE_DATE: TIMESTAMP   |
+ *    | SQN_ENABLED: BOOLEAN         |
  *    +------------------------------+
  * </pre>
  * </p>
@@ -105,6 +106,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQB_CONNECTION: BIGINT       | FK SQ_CONNECTION(SQN_ID)
  *    | SQB_CREATION_DATE: TIMESTAMP |
  *    | SQB_UPDATE_DATE: TIMESTAMP   |
+ *    | SQB_ENABLED: BOOLEAN         |
  *    +------------------------------+
  * </pre>
  * </p>
@@ -256,6 +258,12 @@ public final class DerbySchemaQuery {
           + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
+  // DDL: Add enabled column to table SQ_CONNECTION
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_ENABLED + " BOOLEAN "
+      + "DEFAULT TRUE";
+
   // DDL: Create table SQ_JOB
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
       "CREATE TABLE " + TABLE_SQ_JOB + " ("
@@ -269,6 +277,12 @@ public final class DerbySchemaQuery {
         + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
           + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
+
+  // DDL: Add enabled column to table SQ_JOB
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+      + COLUMN_SQB_ENABLED + " BOOLEAN "
+      + "DEFAULT TRUE";
 
   // DDL: Create table SQ_CONNECTION_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
@@ -545,8 +559,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE
-    + ") VALUES (?, ?, ?, ?)";
+    + COLUMN_SQN_UPDATE_DATE + ", "
+    + COLUMN_SQN_ENABLED
+    + ") VALUES (?, ?, ?, ?, ?)";
 
   // DML: Insert new connection inputs
   public static final String STMT_INSERT_CONNECTION_INPUT =
@@ -561,6 +576,12 @@ public final class DerbySchemaQuery {
     "UPDATE " + TABLE_SQ_CONNECTION + " SET "
     + COLUMN_SQN_NAME + " = ?, "
     + COLUMN_SQN_UPDATE_DATE + " = ? "
+    + " WHERE " + COLUMN_SQN_ID + " = ?";
+
+  // DML: Enable or disable connection
+  public static final String STMT_ENABLE_CONNECTION =
+    "UPDATE " + TABLE_SQ_CONNECTION + " SET "
+    + COLUMN_SQN_ENABLED + " = ? "
     + " WHERE " + COLUMN_SQN_ID + " = ?";
 
   // DML: Delete rows from connection input table
@@ -580,7 +601,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE
+    + COLUMN_SQN_UPDATE_DATE + ", "
+    + COLUMN_SQN_ENABLED
     + " FROM " + TABLE_SQ_CONNECTION
     + " WHERE " + COLUMN_SQN_ID + " = ?";
 
@@ -591,7 +613,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE
+    + COLUMN_SQN_UPDATE_DATE + ", "
+    + COLUMN_SQN_ENABLED
     + " FROM " + TABLE_SQ_CONNECTION;
 
   // DML: Select all connections for a specific connector.
@@ -601,7 +624,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE
+    + COLUMN_SQN_UPDATE_DATE + ", "
+    + COLUMN_SQN_ENABLED
     + " FROM " + TABLE_SQ_CONNECTION
     + " WHERE " + COLUMN_SQN_CONNECTOR + " = ?";
 
@@ -617,8 +641,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE
-    + ") VALUES (?, ?, ?, ?, ?)";
+    + COLUMN_SQB_UPDATE_DATE + ", "
+    + COLUMN_SQB_ENABLED
+    + ") VALUES (?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new job inputs
   public static final String STMT_INSERT_JOB_INPUT =
@@ -632,6 +657,12 @@ public final class DerbySchemaQuery {
     "UPDATE " + TABLE_SQ_JOB + " SET "
     + COLUMN_SQB_NAME + " = ?, "
     + COLUMN_SQB_UPDATE_DATE + " = ? "
+    + " WHERE " + COLUMN_SQB_ID + " = ?";
+
+  // DML: Enable or disable job
+  public static final String STMT_ENABLE_JOB =
+    "UPDATE " + TABLE_SQ_JOB + " SET "
+    + COLUMN_SQB_ENABLED + " = ? "
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Delete rows from job input table
@@ -667,7 +698,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE
+    + COLUMN_SQB_UPDATE_DATE + ", "
+    + COLUMN_SQB_ENABLED
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
     + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
@@ -682,7 +714,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE
+    + COLUMN_SQB_UPDATE_DATE + ", "
+    + COLUMN_SQB_ENABLED
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
       + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
@@ -696,7 +729,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE
+    + COLUMN_SQB_UPDATE_DATE + ", "
+    + COLUMN_SQB_ENABLED
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
       + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID

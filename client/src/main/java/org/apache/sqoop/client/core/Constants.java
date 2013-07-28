@@ -103,6 +103,12 @@ public class Constants {
   public static final String CMD_STATUS = "status";
   public static final String CMD_STATUS_SC = "\\stu";
 
+  public static final String CMD_ENABLE = "enable";
+  public static final String CMD_ENABLE_SC = "\\en";
+
+  public static final String CMD_DISABLE = "disable";
+  public static final String CMD_DISABLE_SC = "\\di";
+
   public static final String FN_CONNECTION = "connection";
   public static final String FN_JOB = "job";
   public static final String FN_SUBMISSION = "submission";
@@ -121,6 +127,8 @@ public class Constants {
   public static final String PRE_START = "Start";
   public static final String PRE_STATUS = "Status";
   public static final String PRE_STOP = "Stop";
+  public static final String PRE_ENABLE = "Enable";
+  public static final String PRE_DISABLE = "Disable";
   public static final String SUF_INFO = "Info";
 
 
@@ -187,6 +195,20 @@ public class Constants {
 
   public static final String RES_DELETE_USAGE =
       "delete.usage";
+
+  public static final String RES_DISABLE_USAGE =
+      "disable.usage";
+  public static final String RES_DISABLE_CONNECTION_SUCCESSFUL =
+      "disable.conn_successful";
+  public static final String RES_DISABLE_JOB_SUCCESSFUL =
+      "disable.job_successful";
+
+  public static final String RES_ENABLE_USAGE =
+      "enable.usage";
+  public static final String RES_ENABLE_CONNECTION_SUCCESSFUL =
+      "enable.conn_successful";
+  public static final String RES_ENABLE_JOB_SUCCESSFUL =
+      "enable.job_successful";
 
   public static final String RES_HELP_USAGE =
       "help.usage";
@@ -365,6 +387,8 @@ public class Constants {
       "table.header.status";
   public static final String RES_TABLE_HEADER_DATE =
       "table.header.date";
+  public static final String RES_TABLE_HEADER_ENABLED =
+      "table.header.enabled";
 
   public static final String RES_FORMDISPLAYER_SUPPORTED_JOBTYPE =
       "formdisplayer.supported_job_types";

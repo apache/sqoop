@@ -25,6 +25,8 @@ import java.util.Date;
  */
 abstract public class MAccountableEntity extends MPersistableEntity {
 
+  private final boolean DEFAULT_ENABLED = true;
+
   /**
    * Date when the entity was created.
    */
@@ -35,9 +37,15 @@ abstract public class MAccountableEntity extends MPersistableEntity {
    */
   private Date lastUpdateDate;
 
+  /**
+   * Whether enabled
+   */
+  private boolean enabled;
+
   public MAccountableEntity() {
     this.creationDate = new Date();
     this.lastUpdateDate = this.creationDate;
+    this.enabled = DEFAULT_ENABLED;
   }
 
   public void setCreationDate(Date createDate) {
@@ -54,5 +62,13 @@ abstract public class MAccountableEntity extends MPersistableEntity {
 
   public Date getLastUpdateDate() {
     return lastUpdateDate;
+  }
+
+  public void setEnabled(boolean enable) {
+    this.enabled = enable;
+  }
+
+  public boolean getEnabled() {
+    return this.enabled;
   }
 }
