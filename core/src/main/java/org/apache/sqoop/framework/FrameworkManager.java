@@ -111,6 +111,8 @@ public class FrameworkManager implements Reconfigurable {
    */
   private static final boolean DEFAULT_AUTO_UPGRADE = false;
 
+  public static final String CURRENT_FRAMEWORK_VERSION = "1";
+
   public Class getJobConfigurationClass(MJob.Type jobType) {
       switch (jobType) {
           case IMPORT:
@@ -134,7 +136,8 @@ public class FrameworkManager implements Reconfigurable {
       FormUtils.toForms(getJobConfigurationClass(MJob.Type.IMPORT))));
     jobForms.add(new MJobForms(MJob.Type.EXPORT,
       FormUtils.toForms(getJobConfigurationClass(MJob.Type.EXPORT))));
-    mFramework = new MFramework(connectionForms, jobForms);
+    mFramework = new MFramework(connectionForms, jobForms,
+      CURRENT_FRAMEWORK_VERSION);
 
     // Build validator
     validator = new FrameworkValidator();

@@ -23,6 +23,8 @@ public final class DerbyRepoConstants {
 
   public static final String SYSKEY_VERSION = "version";
 
+  public static final String SYSKEY_FRAMEWORK_VERSION = "framework.version";
+
   /**
    * Expected version of the repository structures.
    *

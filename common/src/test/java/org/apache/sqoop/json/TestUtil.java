@@ -44,7 +44,7 @@ public class TestUtil {
   }
 
   public static MFramework getFramework() {
-    return new MFramework(getConnectionForms(), getAllJobForms());
+    return new MFramework(getConnectionForms(), getAllJobForms(), "1");
   }
 
   public static MConnection getConnection(String name) {

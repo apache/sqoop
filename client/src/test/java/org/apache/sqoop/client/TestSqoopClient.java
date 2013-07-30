@@ -184,7 +184,8 @@ public class TestSqoopClient {
   }
 
   private MFramework framework() {
-    MFramework framework = new MFramework(new MConnectionForms(null), new LinkedList<MJobForms>());
+    MFramework framework = new MFramework(new MConnectionForms(null),
+      new LinkedList<MJobForms>(), "1");
     framework.setPersistenceId(1);
     return framework;
   }

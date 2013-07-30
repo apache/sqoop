@@ -178,6 +178,7 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't enable/disable job **/
   DERBYREPO_0043("Can't enable/disable job"),
 
+  DERBYREPO_0044("Update of framework failed"),
   ;
 
   private final String message;

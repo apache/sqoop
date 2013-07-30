@@ -37,7 +37,7 @@ public class TestMFramework {
     jobForms.add(new MJobForms(MJob.Type.IMPORT, new ArrayList<MForm>()));
 
     try {
-      new MFramework(connectionForms, jobForms);
+      new MFramework(connectionForms, jobForms, "1");
       fail("We we're expecting exception for invalid usage");
     } catch(Exception ex) {
       // Expected case

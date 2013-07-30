@@ -30,11 +30,10 @@ public final class MConnector extends MFramework {
 
   private final String uniqueName;
   private final String className;
-  private final String version;
 
   public MConnector(String uniqueName, String className, String version,
       MConnectionForms connectionForms, List<MJobForms> jobForms) {
-    super(connectionForms, jobForms);
+    super(connectionForms, jobForms, version);
 
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
@@ -42,7 +41,6 @@ public final class MConnector extends MFramework {
 
     this.uniqueName = uniqueName;
     this.className = className;
-    this.version = version;
   }
 
   public String getUniqueName() {
@@ -51,10 +49,6 @@ public final class MConnector extends MFramework {
 
   public String getClassName() {
     return className;
-  }
-
-  public String getVersion() {
-    return version;
   }
 
   @Override

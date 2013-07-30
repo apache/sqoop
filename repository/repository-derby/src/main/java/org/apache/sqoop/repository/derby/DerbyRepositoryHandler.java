@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -308,6 +309,59 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  /**
+   * Detect version of the framework
+   *
+   * @param conn Connection to metadata repository
+   * @return Version of the MFramework
+   */
+  private String detectFrameworkVersion (Connection conn) {
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(DerbySchemaQuery.STMT_SELECT_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
+      rs = stmt.executeQuery();
+      if(!rs.next()) {
+        return null;
+      }
+      return rs.getString(1);
+    } catch (SQLException e) {
+      LOG.info("Can't fetch framework version.", e);
+      return null;
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * Create or update framework version
+   * @param conn Connection to the metadata repository
+   * @param mFramework
+   */
+  private void createOrUpdateFrameworkVersion(Connection conn,
+      MFramework mFramework) {
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
+      stmt.executeUpdate();
+      closeStatements(stmt);
+
+      stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
+      stmt.setString(2, mFramework.getVersion());
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      logException(e);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0044, e);
+    } finally {
+      closeResultSets(rs);
+      closeStatements(stmt);
+    }
+  }
 
   /**
    * {@inheritDoc}
@@ -466,6 +520,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     } finally {
       closeStatements(baseFormStmt, baseInputStmt);
     }
+    createOrUpdateFrameworkVersion(conn, mf);
   }
 
   /**
@@ -493,7 +548,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
 
       mf = new MFramework(new MConnectionForms(connectionForms),
-        convertToJobList(jobForms));
+        convertToJobList(jobForms), detectFrameworkVersion(conn));
 
       // We're using hardcoded value for framework metadata as they are
       // represented as NULL in the database.
@@ -846,10 +901,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
     } catch (SQLException e) {
       logException(e, mFramework);
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0044, e);
     } finally {
       closeStatements(deleteForm, deleteInput);
     }
+    createOrUpdateFrameworkVersion(conn, mFramework);
     insertFormsForFramework(mFramework, conn);
 
   }
@@ -1975,6 +2031,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param resultSets Result sets to close
    */
   private void closeResultSets(ResultSet ... resultSets) {
+    if(resultSets == null) {
+      return;
+    }
     for (ResultSet rs : resultSets) {
       if(rs != null) {
         try {
@@ -1994,6 +2053,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param stmts Statements to close
    */
   private void closeStatements(Statement... stmts) {
+    if(stmts == null) {
+      return;
+    }
     for (Statement stmt : stmts) {
       if(stmt != null) {
         try {

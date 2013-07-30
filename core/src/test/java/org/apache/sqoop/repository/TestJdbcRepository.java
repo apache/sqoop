@@ -924,7 +924,7 @@ public class TestJdbcRepository {
     doNothing().when(repoHandler).updateFramework(any(MFramework.class), any(Connection.class));
     doReturn(true).when(repoHandler).existsConnection(anyLong(), any(Connection.class));
     doReturn(true).when(repoHandler).existsJob(anyLong(), any(Connection.class));
-    doNothing().when(repoHandler).updateConnection(any(MConnection.class), any(Connection.class));;
+    doNothing().when(repoHandler).updateConnection(any(MConnection.class), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "update job error.");
@@ -969,13 +969,14 @@ public class TestJdbcRepository {
     jobForms.add(new MJobForms(MJob.Type.IMPORT, FormUtils.toForms(ImportJobConfiguration.class)));
 
     MFramework framework = new MFramework(new MConnectionForms(new LinkedList<MForm>()),
-        jobForms);
+      jobForms, FrameworkManager.CURRENT_FRAMEWORK_VERSION);
     framework.setPersistenceId(1);
     return framework;
   }
 
   private MFramework anotherFramework() {
-    MFramework framework = new MFramework(null, new LinkedList<MJobForms>());
+    MFramework framework = new MFramework(null, new LinkedList<MJobForms>(),
+      FrameworkManager.CURRENT_FRAMEWORK_VERSION);
     framework.setPersistenceId(1);
     return framework;
   }

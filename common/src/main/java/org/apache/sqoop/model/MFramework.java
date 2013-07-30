@@ -32,8 +32,11 @@ public class MFramework extends MPersistableEntity implements MClonable {
 
   private final MConnectionForms connectionForms;
   private final Map<MJob.Type, MJobForms> jobs;
+  String version;
 
-  public MFramework(MConnectionForms connectionForms, List<MJobForms> jobForms) {
+  public MFramework(MConnectionForms connectionForms, List<MJobForms> jobForms,
+    String version) {
+    this.version = version;
     this.connectionForms = connectionForms;
     this.jobs = new HashMap<MJob.Type, MJobForms>();
 
@@ -52,6 +55,7 @@ public class MFramework extends MPersistableEntity implements MClonable {
   public String toString() {
     StringBuilder sb = new StringBuilder("framework-");
     sb.append(getPersistenceId()).append(":");
+    sb.append("version = " + version);
     sb.append(", ").append(connectionForms.toString());
     for(MJobForms entry: jobs.values()) {
       sb.append(entry.toString());
@@ -71,7 +75,9 @@ public class MFramework extends MPersistableEntity implements MClonable {
     }
 
     MFramework mo = (MFramework) other;
-    return connectionForms.equals(mo.connectionForms) && jobs.equals(mo.jobs);
+    return version.equals(mo.getVersion()) &&
+      connectionForms.equals(mo.connectionForms) &&
+      jobs.equals(mo.jobs);
   }
 
   @Override
@@ -81,7 +87,7 @@ public class MFramework extends MPersistableEntity implements MClonable {
     for(MJobForms entry: jobs.values()) {
       result = 31 * result + entry.hashCode();
     }
-
+    result = 31 * result + version.hashCode();
     return result;
   }
 
@@ -108,9 +114,19 @@ public class MFramework extends MPersistableEntity implements MClonable {
         copyJobForms.add(entry.clone(cloneWithValue));
       }
     }
-    MFramework copy = new MFramework(this.getConnectionForms().clone(cloneWithValue), copyJobForms);
+    MFramework copy = new MFramework(this.getConnectionForms().clone(cloneWithValue),
+      copyJobForms, this.version);
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
 }
 

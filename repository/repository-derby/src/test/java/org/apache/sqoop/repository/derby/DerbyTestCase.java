@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository.derby;
 
 import junit.framework.TestCase;
+import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
@@ -102,6 +103,8 @@ abstract public class DerbyTestCase extends TestCase {
     runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED);
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '2')");
+    runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) " +
+      "VALUES('framework.version', '1')");
   }
 
   /**
@@ -303,7 +306,8 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   protected MFramework getFramework() {
-    return new MFramework(getConnectionForms(), getJobForms());
+    return new MFramework(getConnectionForms(), getJobForms(),
+      FrameworkManager.CURRENT_FRAMEWORK_VERSION);
   }
 
   protected void fillConnection(MConnection connection) {

@@ -75,6 +75,7 @@ public class FrameworkBean implements JsonBean {
 
     JSONObject result = new JSONObject();
     result.put(ID, framework.getPersistenceId());
+    result.put(FRAMEWORK_VERSION, framework.getVersion());
     result.put(CON_FORMS, conForms);
     result.put(JOB_FORMS, jobForms);
     result.put(RESOURCES, extractResourceBundle(bundle));
@@ -85,6 +86,7 @@ public class FrameworkBean implements JsonBean {
   @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
     long id = (Long) jsonObject.get(ID);
+    String frameworkVersion = (String) jsonObject.get(FRAMEWORK_VERSION);
 
     List<MForm> connForms = restoreForms((JSONArray) jsonObject.get(CON_FORMS));
 
@@ -101,7 +103,8 @@ public class FrameworkBean implements JsonBean {
       jobs.add(new MJobForms(type, job));
     }
 
-    framework = new MFramework(new MConnectionForms(connForms), jobs);
+    framework = new MFramework(new MConnectionForms(connForms), jobs,
+      frameworkVersion);
     framework.setPersistenceId(id);
 
     bundle = restoreResourceBundle((JSONObject) jsonObject.get(RESOURCES));
