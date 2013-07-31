@@ -250,7 +250,8 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     // Having one single value means that we can create only one single split
     if(minStringBD.equals(maxStringBD)) {
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
-      partition.setConditions(constructTextConditions(prefix, maxStringBD));
+      partition.setConditions(constructTextConditions(prefix, 0, 0,
+        partitionMinValue, partitionMaxValue, true, true));
       partitions.add(partition);
       return partitions;
     }
@@ -294,8 +295,8 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
       BigDecimal end = splitPoints.get(i);
 
       GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
-      partition.setConditions(constructTextConditions(prefix, start,
-          end, i == splitPoints.size() - 1));
+      partition.setConditions(constructTextConditions(prefix, start, end,
+        partitionMinValue, partitionMaxValue, i == 1, i == splitPoints.size() - 1));
       partitions.add(partition);
 
       start = end;
@@ -521,30 +522,20 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     return conditions.toString();
   }
 
-  protected String constructTextConditions(String prefix,
-      Object lowerBound, Object upperBound, boolean lastOne) {
+  protected String constructTextConditions(String prefix, Object lowerBound, Object upperBound,
+      String lowerStringBound, String upperStringBound, boolean firstOne, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
     String lbString = prefix + bigDecimalToText((BigDecimal)lowerBound);
     String ubString = prefix + bigDecimalToText((BigDecimal)upperBound);
-    conditions.append('\'').append(lbString).append('\'');
+    conditions.append('\'').append(firstOne ? lowerStringBound : lbString).append('\'');
     conditions.append(" <= ");
     conditions.append(partitionColumnName);
     conditions.append(" AND ");
     conditions.append(partitionColumnName);
     conditions.append(lastOne ? " <= " : " < ");
-    conditions.append('\'').append(ubString).append('\'');
+    conditions.append('\'').append(lastOne ? upperStringBound : ubString).append('\'');
     return conditions.toString();
   }
-
-  protected String constructTextConditions(String prefix, Object value) {
-    return new StringBuilder()
-      .append(partitionColumnName)
-      .append(" = ").append('\'')
-      .append(prefix + bigDecimalToText((BigDecimal)value))
-      .append('\'').toString()
-     ;
-  }
-
 
   /**
    *  Converts a string to a BigDecimal representation in Base 2^21 format.

@@ -409,6 +409,7 @@ public class TestImportPartitioner extends TestCase {
         "'Y' <= VCCOL AND VCCOL <= 'Z'",
     });
   }
+
   public void testVarcharPartition2() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -426,6 +427,10 @@ public class TestImportPartitioner extends TestCase {
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
     assertEquals(partitions.size(), 5);
+    // First partition needs to contain entire upper bound
+    assertTrue(partitions.get(0).toString().contains("Breezy Badger"));
+    // Last partition needs to contain entire lower bound
+    assertTrue(partitions.get(4).toString().contains("Warty Warthog"));
   }
 
   public void testVarcharPartitionWithCommonPrefix() throws Exception {
