@@ -134,6 +134,15 @@ abstract public class TomcatTestCase {
   }
 
   /**
+   * Verify number of output mapreduce files.
+   *
+   * @param expectedFiles Expected number of files
+   */
+  protected void assertMapreduceOutputFiles(int expectedFiles) {
+    HdfsAsserts.assertMapreduceOutputFiles(getMapreduceDirectory(), expectedFiles);
+  }
+
+  /**
    * Create mapreduce input file with specified content.
    *
    * @param filename Input file name

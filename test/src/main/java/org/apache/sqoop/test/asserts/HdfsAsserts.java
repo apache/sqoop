@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -76,6 +77,16 @@ public class HdfsAsserts {
     }
   }
 
+  /**
+   * Verify number of output mapreduce files.
+   *
+   * @param directory Mapreduce output directory
+   * @param expectedFiles Expected number of files
+   */
+  public static void assertMapreduceOutputFiles(String directory, int expectedFiles) {
+    String []files = HdfsUtils.getOutputMapreduceFiles(directory);
+    assertEquals(expectedFiles, files.length);
+  }
 
   private HdfsAsserts() {
     // Instantiation is prohibited

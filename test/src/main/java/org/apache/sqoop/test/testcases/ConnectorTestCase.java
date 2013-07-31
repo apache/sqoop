@@ -28,6 +28,7 @@ import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.asserts.ProviderAsserts;
 import org.apache.sqoop.test.data.Cities;
+import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.db.DatabaseProvider;
 import org.apache.sqoop.test.db.DatabaseProviderFactory;
 import org.apache.sqoop.validation.Status;
@@ -152,6 +153,20 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    */
   protected void createAndLoadTableCities() {
     new Cities(provider, getTableName()).createTables().loadBasicData();
+  }
+
+  /**
+   * Create table for ubuntu releases.
+   */
+  protected void createTableUbuntuReleases() {
+    new UbuntuReleases(provider, getTableName()).createTables();
+  }
+
+  /**
+   * Create table for ubuntu releases.
+   */
+  protected void createAndLoadTableUbuntuReleases() {
+    new UbuntuReleases(provider, getTableName()).createTables().loadBasicData();
   }
 
   /**
