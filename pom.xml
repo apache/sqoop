@@ -280,6 +280,11 @@ limitations under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>connector-sdk</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.sqoop.connector</groupId>
         <artifactId>sqoop-connector-generic-jdbc</artifactId>
         <version>${project.version}</version>
