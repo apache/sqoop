@@ -25,7 +25,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.ClientFilter;
-import org.apache.sqoop.client.core.ClientError;
+
+import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.json.ThrowableBean;
@@ -99,7 +100,7 @@ public class Request
           JSONObject json = (JSONObject) JSONValue.parse(responseText);
           ex.restore(json);
 
-          throw new SqoopException(ClientError.CLIENT_0006, ex.getThrowable());
+          throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());
         }
       }
 

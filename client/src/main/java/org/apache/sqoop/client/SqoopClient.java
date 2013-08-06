@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.client;
 
-import org.apache.sqoop.client.core.ClientError;
 import org.apache.sqoop.client.request.SqoopRequests;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
@@ -396,7 +395,7 @@ public class SqoopClient {
    */
   public MSubmission startSubmission(long jid, SubmissionCallback callback, long pollTime) throws InterruptedException {
     if(pollTime <= 0) {
-      throw new SqoopException(ClientError.CLIENT_0008);
+      throw new SqoopException(ClientError.CLIENT_0002);
     }
     boolean first = true;
     MSubmission submission = requests.createSubmission(jid).getSubmissions().get(0);

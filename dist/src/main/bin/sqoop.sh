@@ -51,7 +51,7 @@ cd ${BASEDIR}
 echo "Sqoop home directory: ${BASEDIR}"
 
 CATALINA_BIN=${CATALINA_BIN:-server/bin}
-CLIENT_LIB=${CLIENT_LIB:-client/lib}
+CLIENT_LIB=${CLIENT_LIB:-shell/lib}
 
 setup_catalina_opts() {
   # The Java System properties 'sqoop.http.port' and 'sqoop.admin.port' are
@@ -107,7 +107,7 @@ case $COMMAND in
     if [ -n "${JAVA_HOME}" ] ; then
         EXEC_JAVA="${JAVA_HOME}/bin/java"
     fi
-    ${EXEC_JAVA} -classpath ${CLASSPATH} org.apache.sqoop.client.shell.SqoopShell $2
+    ${EXEC_JAVA} -classpath ${CLASSPATH} org.apache.sqoop.shell.SqoopShell $2
     ;;
 
   *)

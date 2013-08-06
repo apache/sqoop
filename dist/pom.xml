@@ -40,7 +40,7 @@ limitations under the License.
     </dependency>
     <dependency>
       <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-client</artifactId>
+      <artifactId>sqoop-shell</artifactId>
     </dependency>
   </dependencies>
 
@@ -167,16 +167,16 @@ limitations under the License.
                     <copy file="../server/target/sqoop.war"
                       toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps"/>
 
-                    <!-- Build client directory -->
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/client/lib">
-                      <fileset dir="../client/target/lib">
+                    <!-- Build shell client directory -->
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/shell/lib">
+                      <fileset dir="../shell/target/lib">
                         <include name="*.jar" />
                         <exclude name="junit-*.jar" />
                         <exclude name="mockito-*.jar" />
                       </fileset>
                     </copy>
-                    <copy file="../client/target/sqoop-client-${project.version}.jar"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/client/lib"/>
+                    <copy file="../shell/target/sqoop-shell-${project.version}.jar"
+                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/shell/lib"/>
 
                     <!-- Build "bin" directory -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/bin">
