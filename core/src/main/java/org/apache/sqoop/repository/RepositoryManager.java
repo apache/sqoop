@@ -113,7 +113,8 @@ public class RepositoryManager implements Reconfigurable {
 
     provider.initialize(context);
 
-    if(!context.getBoolean(RepoConfigurationConstants.SYSCFG_REPO_SCHEMA_IMMUTABLE, true)) {
+    if(!context.getBoolean(RepoConfigurationConstants
+      .SYSCFG_REPO_SCHEMA_IMMUTABLE, false)) {
       LOG.info("Creating or upgrading on disk structures if necessary");
       provider.getRepository().createOrUpdateInternals();
     }
