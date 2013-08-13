@@ -43,25 +43,57 @@
     </else>
   </if>
 
-	<!-- Set variables per target hadoop version -->
+  <!--
+    Set default HBase profile if not set
+
+    HBase 0.95 has broken one big monolithic archive into smaller pieces, so
+    that the build dependencies are different between HBase 0.94 and 0.95.
+    In addition, HBase since 0.95 is providing artifacts compatible with Hadoop 2.0.
+
+    For HBase 0.95 on Hadoop 2.0.0:
+    ant -Dhadoopversion=200 -Dhbaseprofile=95
+
+    For HBase 0.95 on Hadoop 1.0.0:
+    ant -Dhadoopversion=100 -Dhbaseprofile=95
+
+    For HBase 0.94 on Hadoop 1.0.0:
+    ant -Dhadoopversion=100
+
+    For HBase 0.94 on Hadoop 2.0.0:
+    - upstream HBase did not published Hadoop 2 compatible artifacts
+  -->
+  <if>
+    <isset property="hbaseprofile" />
+    <then>
+      <echo message="Use HBase profile ${hbaseprofile}" />
+    </then>
+    <else>
+      <echo message="Use HBase profile 0.94 by default" />
+      <property name="hbaseprofile" value="94" />
+    </else>
+  </if>
+
+	<!-- Set dependency versions per target Hadoop version -->
   <if>
     <equals arg1="${hadoopversion}" arg2="20" />
     <then>
       <property name="hadoop.version" value="0.20.2-cdh3u1" />
-      <property name="hbase.version" value="0.90.3-cdh3u1" />
+      <property name="hbase94.version" value="0.90.3-cdh3u1" />
       <property name="zookeeper.version" value="3.3.3-cdh3u1" />
       <property name="hadoop.version.full" value="0.20" />
       <property name="hcatalog.version" value="0.11.0" />
+      <property name="hbasecompatprofile" value="1" />
     </then>
 
     <elseif>
       <equals arg1="${hadoopversion}" arg2="23" />
       <then>
         <property name="hadoop.version" value="0.23.1" />
-        <property name="hbase.version" value="0.92.0" />
+        <property name="hbase94.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="0.23" />
         <property name="hcatalog.version" value="0.11.0" />
+        <property name="hbasecompatprofile" value="2" />
       </then>
     </elseif>
 
@@ -69,10 +101,11 @@
       <equals arg1="${hadoopversion}" arg2="100" />
       <then>
         <property name="hadoop.version" value="1.0.0" />
-        <property name="hbase.version" value="0.92.0" />
+        <property name="hbase94.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="1.0.0" />
         <property name="hcatalog.version" value="0.11.0" />
+        <property name="hbasecompatprofile" value="1" />
       </then>
     </elseif>
 
@@ -80,10 +113,11 @@
       <equals arg1="${hadoopversion}" arg2="200" />
       <then>
         <property name="hadoop.version" value="2.0.4-alpha" />
-        <property name="hbase.version" value="0.94.2" />
+        <property name="hbase94.version" value="0.94.2" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="2.0.4-alpha" />
         <property name="hcatalog.version" value="0.11.0" />
+        <property name="hbasecompatprofile" value="2" />
       </then>
     </elseif>
 
@@ -91,6 +125,9 @@
       <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100 or 200." />
     </else>
   </if>
+
+  <!-- Set dependency versions that are working with all Hadoop versions-->
+  <property name="hbase95.version" value="0.95.2-hadoop${hbasecompatprofile}-SNAPSHOT" />
 
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->

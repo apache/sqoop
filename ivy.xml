@@ -36,16 +36,19 @@ under the License.
     <conf name="common" visibility="private"
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
-    <conf name="hbase" visibility="private" />
+    <conf name="hbase94" visibility="private" />
+    <conf name="hbase95" visibility="private" extends="hbasecompat${hbasecompatprofile}" />
+    <conf name="hbasecompat1" visibility="private" />
+    <conf name="hbasecompat2" visibility="private" />
     <conf name="hcatalog" visibility="private" />
     <conf name="hadoop23" visibility="private"
-      extends="common,runtime,hbase,hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
     <conf name="hadoop20" visibility="private"
-      extends="common,runtime,hbase,hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
     <conf name="hadoop100" visibility="private"
-      extends="common,runtime,hbase,hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
     <conf name="hadoop200" visibility="private"
-      extends="common,runtime,hbase,hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -164,8 +167,8 @@ under the License.
     <dependency org="commons-collections" name="commons-collections"
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
-    <dependency org="org.apache.hbase" name="hbase"
-      rev="${hbase.version}" conf="hbase->default">
+    <!-- HBase 0.94 -->
+    <dependency org="org.apache.hbase" name="hbase" rev="${hbase94.version}" conf="hbase94->default">
       <artifact name="hbase" type="jar"/>
       <artifact name="hbase" type="test-jar" ext="jar" m:classifier="tests"/>
       <exclude org="com.sun.jersey" module="jersey-core"/>
@@ -176,6 +179,72 @@ under the License.
       <exclude org="org.apache.hadoop" module="hadoop-core" />
       <exclude org="com.cloudera.cdh" module="zookeeper-ant" />
     </dependency>
+
+    <!-- HBase 0.95 -->
+    <dependency org="org.apache.hbase" name="hbase-client" rev="${hbase95.version}" conf="hbase95->default">
+      <artifact name="hbase-client" type="jar"/>
+      <artifact name="hbase-client" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-common" rev="${hbase95.version}" conf="hbase95->default">
+      <artifact name="hbase-common" type="jar"/>
+      <artifact name="hbase-common" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-server" rev="${hbase95.version}" conf="hbase95->default">
+      <artifact name="hbase-server" type="jar"/>
+      <artifact name="hbase-server" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-hadoop-compat" rev="${hbase95.version}" conf="hbase95->default">
+      <artifact name="hbase-hadoop-compat" type="jar"/>
+      <artifact name="hbase-hadoop-compat" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-hadoop-compat" rev="${hbase95.version}" conf="hbase95->default">
+      <artifact name="hbase-hadoop-compat" type="jar"/>
+      <artifact name="hbase-hadoop-compat" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-hadoop1-compat" rev="${hbase95.version}" conf="hbasecompat1->default">
+      <artifact name="hbase-hadoop1-compat" type="jar"/>
+      <artifact name="hbase-hadoop1-compat" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+    <dependency org="org.apache.hbase" name="hbase-hadoop2-compat" rev="${hbase95.version}" conf="hbasecompat2->default">
+      <artifact name="hbase-hadoop2-compat" type="jar"/>
+      <artifact name="hbase-hadoop2-compat" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="org.apache.thrift" module="thrift"/>
+      <exclude org="log4j" module="log4j"/>
+    </dependency>
+
 
     <dependency org="org.apache.hcatalog" name="hcatalog-core"
       rev="${hcatalog.version}" conf="hcatalog->default">
