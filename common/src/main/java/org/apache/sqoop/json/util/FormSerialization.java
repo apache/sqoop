@@ -46,9 +46,11 @@ public final class FormSerialization {
   public static final String VERSION = "version";
   public static final String FRAMEWORK_VERSION = "framework-version";
   public static final String CLASS = "class";
-  public static final String CREATED = "created";
-  public static final String UPDATED = "updated";
   public static final String ENABLED = "enabled";
+  public static final String CREATION_USER = "creation-user";
+  public static final String CREATION_DATE = "creation-date";
+  public static final String UPDATE_USER = "update-user";
+  public static final String UPDATE_DATE = "update-date";
   public static final String CON_FORMS = "con-forms";
   public static final String JOB_FORMS = "job-forms";
 

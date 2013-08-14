@@ -107,7 +107,9 @@ public class ShowConnectionFunction extends SqoopFunction {
       connection.getPersistenceId(),
       connection.getName(),
       connection.getEnabled(),
+      connection.getCreationUser(),
       formatter.format(connection.getCreationDate()),
+      connection.getLastUpdateUser(),
       formatter.format(connection.getLastUpdateDate())
     );
 

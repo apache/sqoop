@@ -48,8 +48,14 @@ public final class SubmissionDisplayer {
     print(resourceString(Constants.RES_SUBMISSION_SERVER_URL)+": ");
     println(getServerUrl());
 
+    print(resourceString(Constants.RES_SUBMISSION_CREATION_USER) + ": ");
+    println(submission.getCreationUser());
+
     print(resourceString(Constants.RES_SUBMISSION_CREATION_DATE)+": ");
     println(dateFormat.format(submission.getCreationDate()));
+
+    print(resourceString(Constants.RES_SUBMISSION_UPDATE_USER) + ": ");
+    println(submission.getLastUpdateUser());
 
     String externalId = submission.getExternalId();
     if(externalId != null) {

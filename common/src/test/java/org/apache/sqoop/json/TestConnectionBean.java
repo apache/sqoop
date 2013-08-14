@@ -41,7 +41,9 @@ public class TestConnectionBean {
     MConnection connection = getConnection("ahoj");
     connection.setName("Connection");
     connection.setPersistenceId(666);
+    connection.setCreationUser("admin");
     connection.setCreationDate(created);
+    connection.setLastUpdateUser("user");
     connection.setLastUpdateDate(updated);
     connection.setEnabled(false);
 
@@ -76,7 +78,9 @@ public class TestConnectionBean {
     // Check id and name
     assertEquals(666, target.getPersistenceId());
     assertEquals("Connection", target.getName());
+    assertEquals("admin", target.getCreationUser());
     assertEquals(created, target.getCreationDate());
+    assertEquals("user", target.getLastUpdateUser());
     assertEquals(updated, target.getLastUpdateDate());
     assertEquals(false, target.getEnabled());
 
@@ -93,7 +97,9 @@ public class TestConnectionBean {
     MConnection connection = getConnection("ahoj");
     connection.setName("Connection");
     connection.setPersistenceId(666);
+    connection.setCreationUser("admin");
     connection.setCreationDate(created);
+    connection.setLastUpdateUser("user");
     connection.setLastUpdateDate(updated);
     connection.setEnabled(true);
 

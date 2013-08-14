@@ -28,6 +28,7 @@ import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
@@ -95,6 +96,10 @@ public class SubmissionRequestHandler implements RequestHandler {
   private JsonBean handleActionEvent(RequestContext ctx, String sjid) {
     long jid = Long.parseLong(sjid);
 
+    String username = ctx.getUserName();
+    HttpEventContext ectx = new HttpEventContext();
+    ectx.setUsername(username);
+
     switch (ctx.getMethod()) {
       case GET:
         AuditLoggerManager.getInstance()
@@ -114,13 +119,13 @@ public class SubmissionRequestHandler implements RequestHandler {
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
             "submit", "submission", String.valueOf(jid));
 
-        return submissionSubmit(jid);
+        return submissionSubmit(jid, ectx);
       case DELETE:
         AuditLoggerManager.getInstance()
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
             "stop", "submission", String.valueOf(jid));
 
-        return submissionStop(jid);
+        return submissionStop(jid, ectx);
     }
 
     return null;
@@ -138,13 +143,13 @@ public class SubmissionRequestHandler implements RequestHandler {
     }
   }
 
-  private JsonBean submissionStop(long jid) {
-    MSubmission submission = JobManager.getInstance().stop(jid);
+  private JsonBean submissionStop(long jid, HttpEventContext ctx) {
+    MSubmission submission = JobManager.getInstance().stop(jid, ctx);
     return new SubmissionBean(submission);
   }
 
-  private JsonBean submissionSubmit(long jid) {
-    MSubmission submission = JobManager.getInstance().submit(jid);
+  private JsonBean submissionSubmit(long jid, HttpEventContext ctx) {
+    MSubmission submission = JobManager.getInstance().submit(jid, ctx);
     return new SubmissionBean(submission);
   }
 

@@ -82,32 +82,36 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <p>
  * <strong>SQ_CONNECTION</strong>: Stored connections
  * <pre>
- *    +------------------------------+
- *    | SQ_CONNECTION                |
- *    +------------------------------+
- *    | SQN_ID: BIGINT PK AUTO-GEN   |
- *    | SQN_NAME: VARCHAR(64)        |
- *    | SQN_CONNECTOR: BIGINT        | FK SQ_CONNECTOR(SQC_ID)
- *    | SQN_CREATION_DATE: TIMESTAMP |
- *    | SQN_UPDATE_DATE: TIMESTAMP   |
- *    | SQN_ENABLED: BOOLEAN         |
- *    +------------------------------+
+ *    +--------------------------------+
+ *    | SQ_CONNECTION                  |
+ *    +--------------------------------+
+ *    | SQN_ID: BIGINT PK AUTO-GEN     |
+ *    | SQN_NAME: VARCHAR(64)          |
+ *    | SQN_CONNECTOR: BIGINT          | FK SQ_CONNECTOR(SQC_ID)
+ *    | SQN_CREATION_USER: VARCHAR(32) |
+ *    | SQN_CREATION_DATE: TIMESTAMP   |
+ *    | SQN_UPDATE_USER: VARCHAR(32)   |
+ *    | SQN_UPDATE_DATE: TIMESTAMP     |
+ *    | SQN_ENABLED: BOOLEAN           |
+ *    +--------------------------------+
  * </pre>
  * </p>
  * <p>
  * <strong>SQ_JOB</strong>: Stored jobs
  * <pre>
- *    +------------------------------+
- *    | SQ_JOB                       |
- *    +------------------------------+
- *    | SQB_ID: BIGINT PK AUTO-GEN   |
- *    | SQB_NAME: VARCHAR(64)        |
- *    | SQB_TYPE: VARCHAR(64)        |
- *    | SQB_CONNECTION: BIGINT       | FK SQ_CONNECTION(SQN_ID)
- *    | SQB_CREATION_DATE: TIMESTAMP |
- *    | SQB_UPDATE_DATE: TIMESTAMP   |
- *    | SQB_ENABLED: BOOLEAN         |
- *    +------------------------------+
+ *    +--------------------------------+
+ *    | SQ_JOB                         |
+ *    +--------------------------------+
+ *    | SQB_ID: BIGINT PK AUTO-GEN     |
+ *    | SQB_NAME: VARCHAR(64)          |
+ *    | SQB_TYPE: VARCHAR(64)          |
+ *    | SQB_CONNECTION: BIGINT         | FK SQ_CONNECTION(SQN_ID)
+ *    | SQB_CREATION_USER: VARCHAR(32) |
+ *    | SQB_CREATION_DATE: TIMESTAMP   |
+ *    | SQB_UPDATE_USER: VARCHAR(32)   |
+ *    | SQB_UPDATE_DATE: TIMESTAMP     |
+ *    | SQB_ENABLED: BOOLEAN           |
+ *    +--------------------------------+
  * </pre>
  * </p>
  * <p>
@@ -143,7 +147,9 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQS_ID: BIGINT PK                 |
  *    | SQS_JOB: BIGINT                   | FK SQ_JOB(SQB_ID)
  *    | SQS_STATUS: VARCHAR(20)           |
+ *    | SQS_CREATION_USER: VARCHAR(32)    |
  *    | SQS_CREATION_DATE: TIMESTAMP      |
+ *    | SQS_UPDATE_USER: VARCHAR(32)      |
  *    | SQS_UPDATE_DATE: TIMESTAMP        |
  *    | SQS_EXTERNAL_ID: VARCHAR(25)      |
  *    | SQS_EXTERNAL_LINK: VARCHAR(150)   |
@@ -264,6 +270,18 @@ public final class DerbySchemaQuery {
       + COLUMN_SQN_ENABLED + " BOOLEAN "
       + "DEFAULT TRUE";
 
+  // DDL: Add creation_user column to table SQ_CONNECTION
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_CREATION_USER =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_CREATION_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
+
+  // DDL: Add update_user column to table SQ_CONNECTION
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_UPDATE_USER =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_UPDATE_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
+
   // DDL: Create table SQ_JOB
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
       "CREATE TABLE " + TABLE_SQ_JOB + " ("
@@ -283,6 +301,18 @@ public final class DerbySchemaQuery {
       "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
       + COLUMN_SQB_ENABLED + " BOOLEAN "
       + "DEFAULT TRUE";
+
+  // DDL: Add creation_user column to table SQ_JOB
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+      + COLUMN_SQB_CREATION_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
+
+  // DDL: Add update_user column to table SQ_JOB
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+      + COLUMN_SQB_UPDATE_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
 
   // DDL: Create table SQ_CONNECTION_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
@@ -331,6 +361,18 @@ public final class DerbySchemaQuery {
       + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") "
         + "REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
     +  ")";
+
+  // DDL: Add creation_user column to table SQ_SUBMISSION
+  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER =
+      "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
+      + COLUMN_SQS_CREATION_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
+
+  // DDL: Add update_user column to table SQ_SUBMISSION
+  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER =
+      "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
+      + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) "
+      + "DEFAULT NULL";
 
   // DDL: Create table SQ_COUNTER_GROUP
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
@@ -558,10 +600,12 @@ public final class DerbySchemaQuery {
     "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_ENABLED + ", "
+    + COLUMN_SQN_CREATION_USER + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE + ", "
-    + COLUMN_SQN_ENABLED
-    + ") VALUES (?, ?, ?, ?, ?)";
+    + COLUMN_SQN_UPDATE_USER + ", "
+    + COLUMN_SQN_UPDATE_DATE
+    + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new connection inputs
   public static final String STMT_INSERT_CONNECTION_INPUT =
@@ -575,6 +619,7 @@ public final class DerbySchemaQuery {
   public static final String STMT_UPDATE_CONNECTION =
     "UPDATE " + TABLE_SQ_CONNECTION + " SET "
     + COLUMN_SQN_NAME + " = ?, "
+    + COLUMN_SQN_UPDATE_USER + " = ?, "
     + COLUMN_SQN_UPDATE_DATE + " = ? "
     + " WHERE " + COLUMN_SQN_ID + " = ?";
 
@@ -600,9 +645,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_ID + ", "
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_ENABLED + ", "
+    + COLUMN_SQN_CREATION_USER + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE + ", "
-    + COLUMN_SQN_ENABLED
+    + COLUMN_SQN_UPDATE_USER + ", "
+    + COLUMN_SQN_UPDATE_DATE
     + " FROM " + TABLE_SQ_CONNECTION
     + " WHERE " + COLUMN_SQN_ID + " = ?";
 
@@ -612,9 +659,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_ID + ", "
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_ENABLED + ", "
+    + COLUMN_SQN_CREATION_USER + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE + ", "
-    + COLUMN_SQN_ENABLED
+    + COLUMN_SQN_UPDATE_USER + ", "
+    + COLUMN_SQN_UPDATE_DATE
     + " FROM " + TABLE_SQ_CONNECTION;
 
   // DML: Select all connections for a specific connector.
@@ -623,9 +672,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_ID + ", "
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_CREATION_USER + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_UPDATE_DATE + ", "
-    + COLUMN_SQN_ENABLED
+    + COLUMN_SQN_ENABLED + ", "
+    + COLUMN_SQN_UPDATE_USER + ", "
+    + COLUMN_SQN_UPDATE_DATE
     + " FROM " + TABLE_SQ_CONNECTION
     + " WHERE " + COLUMN_SQN_CONNECTOR + " = ?";
 
@@ -640,10 +691,12 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_NAME + ", "
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_ENABLED + ", "
+    + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE + ", "
-    + COLUMN_SQB_ENABLED
-    + ") VALUES (?, ?, ?, ?, ?, ?)";
+    + COLUMN_SQB_UPDATE_USER + ", "
+    + COLUMN_SQB_UPDATE_DATE
+    + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new job inputs
   public static final String STMT_INSERT_JOB_INPUT =
@@ -656,6 +709,7 @@ public final class DerbySchemaQuery {
   public static final String STMT_UPDATE_JOB =
     "UPDATE " + TABLE_SQ_JOB + " SET "
     + COLUMN_SQB_NAME + " = ?, "
+    + COLUMN_SQB_UPDATE_USER + " = ?, "
     + COLUMN_SQB_UPDATE_DATE + " = ? "
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
@@ -697,9 +751,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_NAME + ", "
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_ENABLED + ", "
+    + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE + ", "
-    + COLUMN_SQB_ENABLED
+    + COLUMN_SQB_UPDATE_USER + ", "
+    + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
     + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
@@ -713,9 +769,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_NAME + ", "
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_ENABLED + ", "
+    + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE + ", "
-    + COLUMN_SQB_ENABLED
+    + COLUMN_SQB_UPDATE_USER + ", "
+    + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
       + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
@@ -728,9 +786,11 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_NAME + ", "
     + COLUMN_SQB_CONNECTION + ", "
     + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_ENABLED + ", "
+    + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_DATE + ", "
-    + COLUMN_SQB_ENABLED
+    + COLUMN_SQB_UPDATE_USER + ", "
+    + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
       + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
@@ -741,18 +801,21 @@ public final class DerbySchemaQuery {
     "INSERT INTO " + TABLE_SQ_SUBMISSION + "("
     + COLUMN_SQS_JOB + ", "
     + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_USER + ", "
     + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_USER + ", "
     + COLUMN_SQS_UPDATE_DATE + ", "
     + COLUMN_SQS_EXTERNAL_ID + ", "
     + COLUMN_SQS_EXTERNAL_LINK + ", "
     + COLUMN_SQS_EXCEPTION + ", "
     + COLUMN_SQS_EXCEPTION_TRACE + ") "
-    + " VALUES(?, ?, ?, ?, ?, substr(?, 1, 150) , substr(?, 1, 150), substr(?, 1, 750))";
+    + " VALUES(?, ?, ?, ?, ?, ?, ?, substr(?, 1, 150) , substr(?, 1, 150), substr(?, 1, 750))";
 
   // DML: Update existing submission
   public static final String STMT_UPDATE_SUBMISSION =
     "UPDATE " + TABLE_SQ_SUBMISSION + " SET "
     + COLUMN_SQS_STATUS + " = ?, "
+    + COLUMN_SQS_UPDATE_USER + " = ?, "
     + COLUMN_SQS_UPDATE_DATE + " = ?, "
     + COLUMN_SQS_EXCEPTION + " = ?, "
     + COLUMN_SQS_EXCEPTION_TRACE + " = ?"
@@ -776,7 +839,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_ID + ", "
     + COLUMN_SQS_JOB + ", "
     + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_USER + ", "
     + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_USER + ", "
     + COLUMN_SQS_UPDATE_DATE + ", "
     + COLUMN_SQS_EXTERNAL_ID + ", "
     + COLUMN_SQS_EXTERNAL_LINK + ", "
@@ -791,7 +856,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_ID + ", "
     + COLUMN_SQS_JOB + ", "
     + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_USER + ", "
     + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_USER + ", "
     + COLUMN_SQS_UPDATE_DATE + ", "
     + COLUMN_SQS_EXTERNAL_ID + ", "
     + COLUMN_SQS_EXTERNAL_LINK + ", "
@@ -806,7 +873,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_ID + ", "
     + COLUMN_SQS_JOB + ", "
     + COLUMN_SQS_STATUS + ", "
+    + COLUMN_SQS_CREATION_USER + ", "
     + COLUMN_SQS_CREATION_DATE + ", "
+    + COLUMN_SQS_UPDATE_USER + ", "
     + COLUMN_SQS_UPDATE_DATE + ", "
     + COLUMN_SQS_EXTERNAL_ID + ", "
     + COLUMN_SQS_EXTERNAL_LINK + ", "

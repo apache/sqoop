@@ -138,6 +138,8 @@ public class JobRequestHandler implements RequestHandler {
 //    String sxid = ctx.getLastURLElement();
 //    long xid = Long.valueOf(sxid);
 
+    String username = ctx.getUserName();
+
     JobBean bean = new JobBean();
 
     try {
@@ -210,8 +212,11 @@ public class JobRequestHandler implements RequestHandler {
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
             "update", "job", String.valueOf(job.getPersistenceId()));
 
+        job.setLastUpdateUser(username);
         RepositoryManager.getInstance().getRepository().updateJob(job);
       } else {
+        job.setCreationUser(username);
+        job.setLastUpdateUser(username);
         RepositoryManager.getInstance().getRepository().createJob(job);
         outputBean.setId(job.getPersistenceId());
 

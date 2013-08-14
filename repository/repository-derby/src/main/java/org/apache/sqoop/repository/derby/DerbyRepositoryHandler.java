@@ -388,6 +388,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_CREATION_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_UPDATE_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER, conn);
     }
 
     ResultSet rs = null;
@@ -600,9 +606,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, connection.getName());
       stmt.setLong(2, connection.getConnectorId());
-      stmt.setTimestamp(3, new Timestamp(connection.getCreationDate().getTime()));
-      stmt.setTimestamp(4, new Timestamp(connection.getLastUpdateDate().getTime()));
-      stmt.setBoolean(5, connection.getEnabled());
+      stmt.setBoolean(3, connection.getEnabled());
+      stmt.setString(4, connection.getCreationUser());
+      stmt.setTimestamp(5, new Timestamp(connection.getCreationDate().getTime()));
+      stmt.setString(6, connection.getLastUpdateUser());
+      stmt.setTimestamp(7, new Timestamp(connection.getLastUpdateDate().getTime()));
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -653,9 +661,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       // Update CONNECTION table
       updateStmt = conn.prepareStatement(STMT_UPDATE_CONNECTION);
       updateStmt.setString(1, connection.getName());
-      updateStmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+      updateStmt.setString(2, connection.getLastUpdateUser());
+      updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
 
-      updateStmt.setLong(3, connection.getPersistenceId());
+      updateStmt.setLong(4, connection.getPersistenceId());
       updateStmt.executeUpdate();
 
       // And reinsert new values
@@ -923,9 +932,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt.setString(1, job.getName());
       stmt.setLong(2, job.getConnectionId());
       stmt.setString(3, job.getType().name());
-      stmt.setTimestamp(4, new Timestamp(job.getCreationDate().getTime()));
-      stmt.setTimestamp(5, new Timestamp(job.getLastUpdateDate().getTime()));
-      stmt.setBoolean(6, job.getEnabled());
+      stmt.setBoolean(4, job.getEnabled());
+      stmt.setString(5, job.getCreationUser());
+      stmt.setTimestamp(6, new Timestamp(job.getCreationDate().getTime()));
+      stmt.setString(7, job.getLastUpdateUser());
+      stmt.setTimestamp(8, new Timestamp(job.getLastUpdateDate().getTime()));
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -976,9 +987,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       // Update job table
       updateStmt = conn.prepareStatement(STMT_UPDATE_JOB);
       updateStmt.setString(1, job.getName());
-      updateStmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+      updateStmt.setString(2, job.getLastUpdateUser());
+      updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
 
-      updateStmt.setLong(3, job.getPersistenceId());
+      updateStmt.setLong(4, job.getPersistenceId());
       updateStmt.executeUpdate();
 
       // And reinsert new values
@@ -1173,12 +1185,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         Statement.RETURN_GENERATED_KEYS);
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
-      stmt.setTimestamp(3, new Timestamp(submission.getCreationDate().getTime()));
-      stmt.setTimestamp(4, new Timestamp(submission.getLastUpdateDate().getTime()));
-      stmt.setString(5, submission.getExternalId());
-      stmt.setString(6, submission.getExternalLink());
-      stmt.setString(7, submission.getExceptionInfo());
-      stmt.setString(8, submission.getExceptionStackTrace());
+      stmt.setString(3, submission.getCreationUser());
+      stmt.setTimestamp(4, new Timestamp(submission.getCreationDate().getTime()));
+      stmt.setString(5, submission.getLastUpdateUser());
+      stmt.setTimestamp(6, new Timestamp(submission.getLastUpdateDate().getTime()));
+      stmt.setString(7, submission.getExternalId());
+      stmt.setString(8, submission.getExternalLink());
+      stmt.setString(9, submission.getExceptionInfo());
+      stmt.setString(10, submission.getExceptionStackTrace());
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -1245,11 +1259,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       //  Update properties in main table
       stmt = conn.prepareStatement(STMT_UPDATE_SUBMISSION);
       stmt.setString(1, submission.getStatus().name());
-      stmt.setTimestamp(2, new Timestamp(submission.getLastUpdateDate().getTime()));
-      stmt.setString(3, submission.getExceptionInfo());
-      stmt.setString(4, submission.getExceptionStackTrace());
+      stmt.setString(2, submission.getLastUpdateUser());
+      stmt.setTimestamp(3, new Timestamp(submission.getLastUpdateDate().getTime()));
+      stmt.setString(4, submission.getExceptionInfo());
+      stmt.setString(5, submission.getExceptionStackTrace());
 
-      stmt.setLong(5, submission.getPersistenceId());
+      stmt.setLong(6, submission.getPersistenceId());
       stmt.executeUpdate();
 
       // Delete previous counters
@@ -1534,12 +1549,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     submission.setPersistenceId(rs.getLong(1));
     submission.setJobId(rs.getLong(2));
     submission.setStatus(SubmissionStatus.valueOf(rs.getString(3)));
-    submission.setCreationDate(rs.getTimestamp(4));
-    submission.setLastUpdateDate(rs.getTimestamp(5));
-    submission.setExternalId(rs.getString(6));
-    submission.setExternalLink(rs.getString(7));
-    submission.setExceptionInfo(rs.getString(8));
-    submission.setExceptionStackTrace(rs.getString(9));
+    submission.setCreationUser(rs.getString(4));
+    submission.setCreationDate(rs.getTimestamp(5));
+    submission.setLastUpdateUser(rs.getString(6));
+    submission.setLastUpdateDate(rs.getTimestamp(7));
+    submission.setExternalId(rs.getString(8));
+    submission.setExternalLink(rs.getString(9));
+    submission.setExceptionInfo(rs.getString(10));
+    submission.setExceptionStackTrace(rs.getString(11));
 
     Counters counters = loadCountersSubmission(rs.getLong(1), conn);
     submission.setCounters(counters);
@@ -1602,9 +1619,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
         long connectorId = rsConnection.getLong(3);
-        Date creationDate = rsConnection.getTimestamp(4);
-        Date lastUpdateDate = rsConnection.getTimestamp(5);
-        boolean enabled = rsConnection.getBoolean(6);
+        boolean enabled = rsConnection.getBoolean(4);
+        String creationUser = rsConnection.getString(5);
+        Date creationDate = rsConnection.getTimestamp(6);
+        String updateUser = rsConnection.getString(7);
+        Date lastUpdateDate = rsConnection.getTimestamp(8);
 
         formConnectorFetchStmt.setLong(1, connectorId);
 
@@ -1631,7 +1650,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
         connection.setPersistenceId(id);
         connection.setName(name);
+        connection.setCreationUser(creationUser);
         connection.setCreationDate(creationDate);
+        connection.setLastUpdateUser(updateUser);
         connection.setLastUpdateDate(lastUpdateDate);
         connection.setEnabled(enabled);
 
@@ -1668,9 +1689,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         String name = rsJob.getString(3);
         long connectionId = rsJob.getLong(4);
         String stringType = rsJob.getString(5);
-        Date creationDate = rsJob.getTimestamp(6);
-        Date lastUpdateDate = rsJob.getTimestamp(7);
-        boolean enabled = rsJob.getBoolean(8);
+        boolean enabled = rsJob.getBoolean(6);
+        String createBy = rsJob.getString(7);
+        Date creationDate = rsJob.getTimestamp(8);
+        String updateBy = rsJob.getString(9);
+        Date lastUpdateDate = rsJob.getTimestamp(10);
 
         MJob.Type type = MJob.Type.valueOf(stringType);
 
@@ -1699,7 +1722,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
         job.setPersistenceId(id);
         job.setName(name);
+        job.setCreationUser(createBy);
         job.setCreationDate(creationDate);
+        job.setLastUpdateUser(updateBy);
         job.setLastUpdateDate(lastUpdateDate);
         job.setEnabled(enabled);
 

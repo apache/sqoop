@@ -119,7 +119,11 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQN_CONNECTOR = "SQN_CONNECTOR";
 
+  public static final String COLUMN_SQN_CREATION_USER = "SQN_CREATION_USER";
+
   public static final String COLUMN_SQN_CREATION_DATE = "SQN_CREATION_DATE";
+
+  public static final String COLUMN_SQN_UPDATE_USER = "SQN_UPDATE_USER";
 
   public static final String COLUMN_SQN_UPDATE_DATE = "SQN_UPDATE_DATE";
 
@@ -144,7 +148,11 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
 
+  public static final String COLUMN_SQB_CREATION_USER = "SQB_CREATION_USER";
+
   public static final String COLUMN_SQB_CREATION_DATE = "SQB_CREATION_DATE";
+
+  public static final String COLUMN_SQB_UPDATE_USER = "SQB_UPDATE_USER";
 
   public static final String COLUMN_SQB_UPDATE_DATE = "SQB_UPDATE_DATE";
 
@@ -212,7 +220,11 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQS_STATUS = "SQS_STATUS";
 
+  public static final String COLUMN_SQS_CREATION_USER = "SQS_CREATION_USER";
+
   public static final String COLUMN_SQS_CREATION_DATE = "SQS_CREATION_DATE";
+
+  public static final String COLUMN_SQS_UPDATE_USER = "SQS_UPDATE_USER";
 
   public static final String COLUMN_SQS_UPDATE_DATE = "SQS_UPDATE_DATE";
 

@@ -69,6 +69,29 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(888, targets.get(1).getJobId());
   }
 
+  public void testTransferCreationUser() {
+    String username = "admin";
+    MSubmission source = new MSubmission();
+    source.setCreationUser(username);
+
+    MSubmission target = transfer(source);
+    assertEquals("admin", target.getCreationUser());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setCreationUser("userA");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setCreationUser("userB");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("userA", targets.get(0).getCreationUser());
+    assertNotNull(targets.get(1));
+    assertEquals("userB", targets.get(1).getCreationUser());
+  }
+
   public void testTransferCreationDate() {
     Date date = new Date();
     MSubmission source = new MSubmission();
@@ -92,6 +115,29 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(datex, targets.get(0).getCreationDate());
     assertNotNull(targets.get(1));
     assertEquals(datey, targets.get(1).getCreationDate());
+  }
+
+  public void testTransferLastUpdateUser() {
+    String username = "admin";
+    MSubmission source = new MSubmission();
+    source.setLastUpdateUser(username);
+
+    MSubmission target = transfer(source);
+    assertEquals("admin", target.getLastUpdateUser());
+
+    List<MSubmission> sources = new ArrayList<MSubmission>();
+    MSubmission sourcex = new MSubmission();
+    sourcex.setLastUpdateUser("userA");
+    sources.add(sourcex);
+    MSubmission sourcey = new MSubmission();
+    sourcey.setLastUpdateUser("userB");
+    sources.add(sourcey);
+
+    List<MSubmission> targets = transfer(sources);
+    assertNotNull(targets.get(0));
+    assertEquals("userA", targets.get(0).getLastUpdateUser());
+    assertNotNull(targets.get(1));
+    assertEquals("userB", targets.get(1).getLastUpdateUser());
   }
 
   public void testTransferLastUpdateDate() {

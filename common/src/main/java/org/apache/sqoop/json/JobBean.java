@@ -107,9 +107,11 @@ public class JobBean implements JsonBean {
       object.put(ID, job.getPersistenceId());
       object.put(NAME, job.getName());
       object.put(TYPE, job.getType().name());
-      object.put(CREATED, job.getCreationDate().getTime());
-      object.put(UPDATED, job.getLastUpdateDate().getTime());
       object.put(ENABLED, job.getEnabled());
+      object.put(CREATION_USER, job.getCreationUser());
+      object.put(CREATION_DATE, job.getCreationDate().getTime());
+      object.put(UPDATE_USER, job.getLastUpdateUser());
+      object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
       object.put(CONNECTION_ID, job.getConnectionId());
       object.put(CONNECTOR_ID, job.getConnectorId());
       object.put(CONNECTOR_PART,
@@ -170,9 +172,11 @@ public class JobBean implements JsonBean {
 
       job.setPersistenceId((Long) object.get(ID));
       job.setName((String) object.get(NAME));
-      job.setCreationDate(new Date((Long) object.get(CREATED)));
-      job.setLastUpdateDate(new Date((Long) object.get(UPDATED)));
       job.setEnabled((Boolean) object.get(ENABLED));
+      job.setCreationUser((String) object.get(CREATION_USER));
+      job.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+      job.setLastUpdateUser((String) object.get(UPDATE_USER));
+      job.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
 
       jobs.add(job);
     }

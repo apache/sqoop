@@ -428,8 +428,12 @@ public class Constants {
       "submission.submission_detail";
   public static final String RES_SUBMISSION_JOB_ID =
       "submission.job_id";
+  public static final String RES_SUBMISSION_CREATION_USER =
+      "submission.creation_user";
   public static final String RES_SUBMISSION_CREATION_DATE =
       "submission.creation_date";
+  public static final String RES_SUBMISSION_UPDATE_USER =
+      "submission.update_user";
   public static final String RES_SUBMISSION_EXTERNAL_ID =
       "submission.external_id";
   public static final String RES_SUBMISSION_PROGRESS_NOT_AVAIL =

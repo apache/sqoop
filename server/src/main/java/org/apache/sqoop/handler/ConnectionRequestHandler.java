@@ -138,11 +138,14 @@ public class ConnectionRequestHandler implements RequestHandler {
 //    String sxid = ctx.getLastURLElement();
 //    long xid = Long.valueOf(sxid);
 
+    String username = ctx.getUserName();
+
     ConnectionBean bean = new ConnectionBean();
 
     try {
       JSONObject json =
         (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
+
       bean.restore(json);
     } catch (IOException e) {
       throw new SqoopException(ServerError.SERVER_0003,
@@ -211,8 +214,11 @@ public class ConnectionRequestHandler implements RequestHandler {
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
             "update", "connection", String.valueOf(connection.getPersistenceId()));
 
+        connection.setLastUpdateUser(username);
         RepositoryManager.getInstance().getRepository().updateConnection(connection);
       } else {
+        connection.setCreationUser(username);
+        connection.setLastUpdateUser(username);
         RepositoryManager.getInstance().getRepository().createConnection(connection);
         outputBean.setId(connection.getPersistenceId());
 

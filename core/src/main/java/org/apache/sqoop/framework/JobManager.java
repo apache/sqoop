@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
@@ -262,7 +263,9 @@ public class JobManager implements Reconfigurable {
     LOG.info("Submission manager initialized: OK");
   }
 
-  public MSubmission submit(long jobId) {
+  public MSubmission submit(long jobId, HttpEventContext ctx) {
+    String username = ctx.getUsername();
+
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     MJob job = repository.findJob(jobId);
@@ -309,6 +312,9 @@ public class JobManager implements Reconfigurable {
     // Create request object
     MSubmission summary = new MSubmission(jobId);
     SubmissionRequest request = executionEngine.createSubmissionRequest();
+
+    summary.setCreationUser(username);
+    summary.setLastUpdateUser(username);
 
     // Save important variables to the submission request
     request.setSummary(summary);
@@ -477,7 +483,9 @@ public class JobManager implements Reconfigurable {
       request.getConfigConnectorJob());
   }
 
-  public MSubmission stop(long jobId) {
+  public MSubmission stop(long jobId, HttpEventContext ctx) {
+    String username = ctx.getUsername();
+
     Repository repository = RepositoryManager.getInstance().getRepository();
     MSubmission submission = repository.findSubmissionLastForJob(jobId);
 
@@ -488,6 +496,8 @@ public class JobManager implements Reconfigurable {
 
     String externalId = submission.getExternalId();
     submissionEngine.stop(externalId);
+
+    submission.setLastUpdateUser(username);
 
     // Fetch new information to verify that the stop command has actually worked
     update(submission);

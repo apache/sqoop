@@ -109,7 +109,9 @@ public class ShowJobFunction extends SqoopFunction {
       job.getPersistenceId(),
       job.getName(),
       job.getEnabled(),
+      job.getCreationUser(),
       formatter.format(job.getCreationDate()),
+      job.getLastUpdateUser(),
       formatter.format(job.getLastUpdateDate())
     );
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_XID_CID_INFO,

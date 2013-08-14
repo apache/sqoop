@@ -28,9 +28,19 @@ abstract public class MAccountableEntity extends MPersistableEntity {
   private final boolean DEFAULT_ENABLED = true;
 
   /**
+   * The user who creates the entity
+   */
+  private String creationUser;
+
+  /**
    * Date when the entity was created.
    */
   private Date creationDate;
+
+  /**
+   * The user who lastly updates the entity
+   */
+  private String lastUpdateUser;
 
   /**
    * Date when the entity was lastly updated.
@@ -43,9 +53,19 @@ abstract public class MAccountableEntity extends MPersistableEntity {
   private boolean enabled;
 
   public MAccountableEntity() {
+    this.creationUser = null;
     this.creationDate = new Date();
+    this.lastUpdateUser = this.creationUser;
     this.lastUpdateDate = this.creationDate;
     this.enabled = DEFAULT_ENABLED;
+  }
+
+  public void setCreationUser(String name) {
+    this.creationUser = name;
+  }
+
+  public String getCreationUser() {
+    return creationUser;
   }
 
   public void setCreationDate(Date createDate) {
@@ -54,6 +74,14 @@ abstract public class MAccountableEntity extends MPersistableEntity {
 
   public Date getCreationDate() {
     return creationDate;
+  }
+
+  public void setLastUpdateUser(String name) {
+    this.lastUpdateUser = name;
+  }
+
+  public String getLastUpdateUser() {
+    return lastUpdateUser;
   }
 
   public void setLastUpdateDate(Date lastUpdateDate) {

@@ -41,7 +41,9 @@ public class SubmissionBean implements JsonBean {
 
   private static final String ALL = "all";
   private static final String JOB = "job";
+  private static final String CREATION_USER = "creation-user";
   private static final String CREATION_DATE = "creation-date";
+  private static final String LAST_UPDATE_USER = "last-udpate-user";
   private static final String LAST_UPDATE_DATE = "last-update-date";
   private static final String STATUS = "status";
   private static final String EXTERNAL_ID = "external-id";
@@ -87,8 +89,14 @@ public class SubmissionBean implements JsonBean {
       object.put(STATUS, submission.getStatus().name());
       object.put(PROGRESS, submission.getProgress());
 
+      if(submission.getCreationUser() != null) {
+        object.put(CREATION_USER, submission.getCreationUser());
+      }
       if(submission.getCreationDate() != null) {
         object.put(CREATION_DATE, submission.getCreationDate().getTime());
+      }
+      if(submission.getLastUpdateUser() != null) {
+        object.put(LAST_UPDATE_USER, submission.getLastUpdateUser());
       }
       if(submission.getLastUpdateDate() != null) {
         object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
@@ -153,8 +161,14 @@ public class SubmissionBean implements JsonBean {
       submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
       submission.setProgress((Double) object.get(PROGRESS));
 
+      if(object.containsKey(CREATION_USER)) {
+        submission.setCreationUser((String) object.get(CREATION_USER));
+      }
       if(object.containsKey(CREATION_DATE)) {
         submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+      }
+      if(object.containsKey(LAST_UPDATE_USER)) {
+        submission.setLastUpdateUser((String) object.get(LAST_UPDATE_USER));
       }
       if(object.containsKey(LAST_UPDATE_DATE)) {
         submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
