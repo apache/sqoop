@@ -19,6 +19,7 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.VersionInfo;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.server.RequestContext;
@@ -53,6 +54,9 @@ public class VersionRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "show", "version", "");
     return versionBean;
   }
 }

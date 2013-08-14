@@ -18,6 +18,7 @@
 package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -116,6 +117,10 @@ public class JobRequestHandler implements RequestHandler {
     String sxid = ctx.getLastURLElement();
     long jid = Long.valueOf(sxid);
 
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "delete", "job", sxid);
+
     Repository repository = RepositoryManager.getInstance().getRepository();
     repository.deleteJob(jid);
 
@@ -201,10 +206,18 @@ public class JobRequestHandler implements RequestHandler {
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
       if(update) {
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "update", "job", String.valueOf(job.getPersistenceId()));
+
         RepositoryManager.getInstance().getRepository().updateJob(job);
       } else {
         RepositoryManager.getInstance().getRepository().createJob(job);
         outputBean.setId(job.getPersistenceId());
+
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "create", "job", String.valueOf(job.getPersistenceId()));
       }
 
     }
@@ -215,6 +228,10 @@ public class JobRequestHandler implements RequestHandler {
   private JsonBean getJobs(RequestContext ctx) {
     String sjid = ctx.getLastURLElement();
     JobBean bean;
+
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "get", "job", sjid);
 
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();

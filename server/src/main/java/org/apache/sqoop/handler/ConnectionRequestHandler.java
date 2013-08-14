@@ -18,6 +18,7 @@
 package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -116,6 +117,10 @@ public class ConnectionRequestHandler implements RequestHandler {
     String sxid = ctx.getLastURLElement();
     long xid = Long.valueOf(sxid);
 
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "delete", "connection", sxid);
+
     Repository repository = RepositoryManager.getInstance().getRepository();
     repository.deleteConnection(xid);
 
@@ -202,10 +207,18 @@ public class ConnectionRequestHandler implements RequestHandler {
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
       if(update) {
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "update", "connection", String.valueOf(connection.getPersistenceId()));
+
         RepositoryManager.getInstance().getRepository().updateConnection(connection);
       } else {
         RepositoryManager.getInstance().getRepository().createConnection(connection);
         outputBean.setId(connection.getPersistenceId());
+
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "create", "connection", String.valueOf(connection.getPersistenceId()));
       }
     }
 
@@ -215,6 +228,10 @@ public class ConnectionRequestHandler implements RequestHandler {
   private JsonBean getConnections(RequestContext ctx) {
     String sxid = ctx.getLastURLElement();
     ConnectionBean bean;
+
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "get", "connection", sxid);
 
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();

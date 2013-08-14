@@ -20,6 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.model.MConnector;
@@ -71,6 +72,10 @@ public class ConnectorRequestHandler implements RequestHandler {
       // display all connectors
       connectors = ConnectorManager.getInstance().getConnectorsMetadata();
       bundles = ConnectorManager.getInstance().getResourceBundles(locale);
+
+      AuditLoggerManager.getInstance()
+          .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+          "get", "connector", "all");
     } else {
       Long id = Long.parseLong(cid);
 
@@ -84,6 +89,10 @@ public class ConnectorRequestHandler implements RequestHandler {
 
       connectors.add(ConnectorManager.getInstance().getConnectorMetadata(id));
       bundles.put(id, ConnectorManager.getInstance().getResourceBundle(id, locale));
+
+      AuditLoggerManager.getInstance()
+          .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+          "get", "connector", String.valueOf(id));
     }
 
     return new ConnectorBean(connectors, bundles);

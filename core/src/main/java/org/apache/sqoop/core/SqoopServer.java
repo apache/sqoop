@@ -18,6 +18,7 @@
 package org.apache.sqoop.core;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.framework.JobManager;
@@ -36,6 +37,7 @@ public class SqoopServer {
     FrameworkManager.getInstance().destroy();
     ConnectorManager.getInstance().destroy();
     RepositoryManager.getInstance().destroy();
+    AuditLoggerManager.getInstance().destroy();
     SqoopConfiguration.getInstance().destroy();
     LOG.info("Sqoop server has been correctly terminated");
   }
@@ -44,6 +46,7 @@ public class SqoopServer {
     try {
       LOG.info("Booting up Sqoop server");
       SqoopConfiguration.getInstance().initialize();
+      AuditLoggerManager.getInstance().initialize();
       RepositoryManager.getInstance().initialize();
       ConnectorManager.getInstance().initialize();
       FrameworkManager.getInstance().initialize();

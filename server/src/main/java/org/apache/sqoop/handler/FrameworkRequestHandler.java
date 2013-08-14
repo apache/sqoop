@@ -19,6 +19,7 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.JsonBean;
@@ -42,6 +43,10 @@ public class FrameworkRequestHandler  implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "get", "framework", "");
+
     return new FrameworkBean(FrameworkManager.getInstance().getFramework(),
       FrameworkManager.getInstance().getBundle(ctx.getAcceptLanguageHeader()));
   }

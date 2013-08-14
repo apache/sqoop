@@ -20,6 +20,7 @@ package org.apache.sqoop.handler;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.framework.JobManager;
@@ -96,6 +97,10 @@ public class SubmissionRequestHandler implements RequestHandler {
 
     switch (ctx.getMethod()) {
       case GET:
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "status", "submission", String.valueOf(jid));
+
         return submissionStatus(jid);
       case POST:
         // TODO: This should be outsourced somewhere more suitable than here
@@ -104,8 +109,17 @@ public class SubmissionRequestHandler implements RequestHandler {
           JobManager.getInstance().setNotificationBaseUrl(
             url.split("v1")[0] + "/v1/submission/notification/");
         }
+
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "submit", "submission", String.valueOf(jid));
+
         return submissionSubmit(jid);
       case DELETE:
+        AuditLoggerManager.getInstance()
+            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+            "stop", "submission", String.valueOf(jid));
+
         return submissionStop(jid);
     }
 
@@ -113,6 +127,10 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean handleHistoryEvent(RequestContext ctx, String sjid) {
+    AuditLoggerManager.getInstance()
+        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
+        "get", "submission", sjid);
+
     if (sjid.equals("all")) {
       return getSubmissions();
     } else {
