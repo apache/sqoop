@@ -808,7 +808,7 @@ public class ClassWriter {
       String [] colNames, StringBuilder sb) {
 
     // Save the delimiters to the class.
-    sb.append("  private final DelimiterSet __outputDelimiters = ");
+    sb.append("  private static final DelimiterSet __outputDelimiters = ");
     sb.append(options.getOutputDelimiters().formatConstructor() + ";\n");
 
     // The default toString() method itself follows. This just calls
@@ -972,7 +972,7 @@ public class ClassWriter {
       sb.append("      String[] strByteVal = __cur_str.trim().split(\" \");\n");
       sb.append("      byte [] byteVal = new byte[strByteVal.length];\n");
       sb.append("      for (int i = 0; i < byteVal.length; ++i) {\n");
-      sb.append("          byteVal[i] = (byte)Integer.parseInt(strByteVal[i], 16);\n"); 
+      sb.append("          byteVal[i] = (byte)Integer.parseInt(strByteVal[i], 16);\n");
       sb.append("      }\n");
       sb.append("      this." + colName + " = new BytesWritable(byteVal);\n");
     } else {
@@ -995,7 +995,7 @@ public class ClassWriter {
     // records.  Note that these can differ from the delims to use as output
     // via toString(), if the user wants to use this class to convert one
     // format to another.
-    sb.append("  private final DelimiterSet __inputDelimiters = ");
+    sb.append("  private static final DelimiterSet __inputDelimiters = ");
     sb.append(options.getInputDelimiters().formatConstructor() + ";\n");
 
     // The parser object which will do the heavy lifting for field splitting.
