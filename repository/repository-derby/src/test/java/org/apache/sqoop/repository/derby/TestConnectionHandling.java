@@ -21,9 +21,12 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test connection methods on Derby repository.
@@ -166,10 +169,16 @@ public class TestConnectionHandling extends DerbyTestCase {
     List<MForm> forms;
 
     forms = connection.getConnectorPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(1)).setValue("Injected");
+    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(null);
+    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)forms.get(1).getInputs().get(1)).setValue(null);
 
     forms = connection.getFrameworkPart().getForms();
-    ((MStringInput)forms.get(1).getInputs().get(1)).setValue("Injected");
+    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
+    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)forms.get(1).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
 
     connection.setName("name");
 
@@ -183,10 +192,18 @@ public class TestConnectionHandling extends DerbyTestCase {
     assertEquals("name", connection.getName());
 
     forms = retrieved.getConnectorPart().getForms();
-    assertEquals("Injected", forms.get(0).getInputs().get(1).getValue());
+    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
+    assertNull(forms.get(0).getInputs().get(1).getValue());
+    assertEquals("Updated", forms.get(1).getInputs().get(0).getValue());
+    assertNull(forms.get(1).getInputs().get(1).getValue());
 
     forms = retrieved.getFrameworkPart().getForms();
-    assertEquals("Injected", forms.get(1).getInputs().get(1).getValue());
+    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
+    assertNotNull(forms.get(0).getInputs().get(1).getValue());
+    assertEquals(((Map)forms.get(0).getInputs().get(1).getValue()).size(), 0);
+    assertEquals("Updated", forms.get(1).getInputs().get(0).getValue());
+    assertNotNull(forms.get(1).getInputs().get(1).getValue());
+    assertEquals(((Map)forms.get(1).getInputs().get(1).getValue()).size(), 0);
   }
 
   public void testEnableAndDisableConnection() throws Exception {

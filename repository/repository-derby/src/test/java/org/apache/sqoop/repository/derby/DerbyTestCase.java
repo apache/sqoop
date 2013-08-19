@@ -27,6 +27,7 @@ import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 
 import java.sql.Connection;
@@ -197,7 +198,7 @@ abstract public class DerbyTestCase extends TestCase {
         + " VALUES('I1', " + (x * 6 + i * 2 + 1) + ", 0, 'STRING', false, 30)");
         runQuery("INSERT INTO SQOOP.SQ_INPUT"
         +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('I2', " + (x * 6 + i * 2 + 1) + ", 1, 'STRING', false, 30)");
+        + " VALUES('I2', " + (x * 6 + i * 2 + 1) + ", 1, 'MAP', false, 30)");
 
         // Second form
         runQuery("INSERT INTO SQOOP.SQ_INPUT"
@@ -205,7 +206,7 @@ abstract public class DerbyTestCase extends TestCase {
         + " VALUES('I3', " + (x * 6 + i * 2 + 2) + ", 0, 'STRING', false, 30)");
         runQuery("INSERT INTO SQOOP.SQ_INPUT"
         +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('I4', " + (x * 6 + i * 2 + 2) + ", 1, 'STRING', false, 30)");
+        + " VALUES('I4', " + (x * 6 + i * 2 + 2) + ", 1, 'MAP', false, 30)");
       }
     }
   }
@@ -360,14 +361,14 @@ abstract public class DerbyTestCase extends TestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput("I1", false, (short)30);
     inputs.add(input);
-    input = new MStringInput("I2", false, (short)30);
+    input = new MMapInput("I2", false);
     inputs.add(input);
     forms.add(new MForm("F1", inputs));
 
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput("I3", false, (short)30);
     inputs.add(input);
-    input = new MStringInput("I4", false, (short)30);
+    input = new MMapInput("I4", false);
     inputs.add(input);
     forms.add(new MForm("F2", inputs));
 

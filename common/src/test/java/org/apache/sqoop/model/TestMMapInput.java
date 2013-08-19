@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -82,7 +83,13 @@ public class TestMMapInput {
     String tmp = input1.getUrlSafeValueString();
     // Restore to actual value
     input1.restoreFromUrlSafeValueString(tmp);
-    assertEquals(null, input1.getValue());
+    assertNotNull(input1.getValue());
+    assertEquals(0, input1.getValue().size());
+
+    input1.setValue(null);
+    tmp = input1.getUrlSafeValueString();
+    input1.restoreFromUrlSafeValueString(tmp);
+    assertNull(input1.getValue());
   }
 
   /**

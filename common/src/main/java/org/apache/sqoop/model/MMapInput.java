@@ -32,8 +32,8 @@ public final class MMapInput extends MInput<Map<String, String>> {
   @Override
   public String getUrlSafeValueString() {
     Map<String, String> valueMap = getValue();
-    if (valueMap == null || valueMap.size() == 0) {
-      return "";
+    if (valueMap == null) {
+      return null;
     }
     boolean first = true;
     StringBuilder vsb = new StringBuilder();
@@ -51,24 +51,27 @@ public final class MMapInput extends MInput<Map<String, String>> {
 
   @Override
   public void restoreFromUrlSafeValueString(String valueString) {
-    Map<String, String> valueMap = null;
-    if (valueString != null && valueString.trim().length() > 0) {
-      valueMap = new HashMap<String, String>();
-      String[] valuePairs = valueString.split("&");
-      for (String pair : valuePairs) {
-        String[] nameAndVal = pair.split("=");
-        if (nameAndVal.length > 0) {
-          String name = nameAndVal[0];
-          String value = null;
-          if (nameAndVal.length > 1) {
-            value = nameAndVal[1];
-          }
+    if (valueString == null) {
+      setValue(null);
+    } else {
+      Map<String, String> valueMap = new HashMap<String, String>();
+      if (valueString.trim().length() > 0) {
+        String[] valuePairs = valueString.split("&");
+        for (String pair : valuePairs) {
+          String[] nameAndVal = pair.split("=");
+          if (nameAndVal.length > 0) {
+            String name = nameAndVal[0];
+            String value = null;
+            if (nameAndVal.length > 1) {
+              value = nameAndVal[1];
+            }
 
-          valueMap.put(name, value);
+            valueMap.put(name, value);
+          }
         }
       }
+      setValue(valueMap);
     }
-    setValue(valueMap);
   }
 
   @Override
