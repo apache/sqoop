@@ -672,9 +672,9 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_ID + ", "
     + COLUMN_SQN_NAME + ", "
     + COLUMN_SQN_CONNECTOR + ", "
+    + COLUMN_SQN_ENABLED + ", "
     + COLUMN_SQN_CREATION_USER + ", "
     + COLUMN_SQN_CREATION_DATE + ", "
-    + COLUMN_SQN_ENABLED + ", "
     + COLUMN_SQN_UPDATE_USER + ", "
     + COLUMN_SQN_UPDATE_DATE
     + " FROM " + TABLE_SQ_CONNECTION
