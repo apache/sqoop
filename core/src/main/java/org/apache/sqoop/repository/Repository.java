@@ -23,21 +23,16 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
-import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.model.ModelError;
+import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
@@ -431,7 +426,11 @@ public abstract class Repository {
           newConnectionForms, connection.getFrameworkPart());
         newConnection.setPersistenceId(connectionID);
 
-        Validation validation = validator.validateConnection(newConnection);
+        // Transform form structures to objects for validations
+        Object newConfigurationObject = ClassUtils.instantiate(connector.getConnectionConfigurationClass());
+        FormUtils.fromForms(newConnection.getConnectorPart().getForms(), newConfigurationObject);
+
+        Validation validation = validator.validateConnection(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateConnection(newConnection, tx);
         } else {
@@ -449,7 +448,11 @@ public abstract class Repository {
           job.getType(), newJobForms, job.getFrameworkPart());
         newJob.setPersistenceId(job.getPersistenceId());
 
-        Validation validation = validator.validateJob(newJob.getType(), newJob);
+        // Transform form structures to objects for validations
+        Object newConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(job.getType()));
+        FormUtils.fromForms(newJob.getConnectorPart().getForms(), newConfigurationObject);
+
+        Validation validation = validator.validateJob(newJob.getType(), newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {
@@ -530,7 +533,11 @@ public abstract class Repository {
           connection.getConnectorPart(), newConnectionForms);
         newConnection.setPersistenceId(connectionID);
 
-        Validation validation = validator.validateConnection(newConnection);
+        // Transform form structures to objects for validations
+        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getConnectionConfigurationClass());
+        FormUtils.fromForms(newConnection.getFrameworkPart().getForms(), newConfigurationObject);
+
+        Validation validation = validator.validateConnection(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateConnection(newConnection, tx);
         } else {
@@ -548,7 +555,11 @@ public abstract class Repository {
           job.getType(), job.getConnectorPart(), newJobForms);
         newJob.setPersistenceId(job.getPersistenceId());
 
-        Validation validation = validator.validateJob(newJob.getType(), newJob);
+        // Transform form structures to objects for validations
+        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass(job.getType()));
+        FormUtils.fromForms(newJob.getFrameworkPart().getForms(), newConfigurationObject);
+
+        Validation validation = validator.validateJob(newJob.getType(), newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {

@@ -29,6 +29,7 @@ import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -201,6 +202,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(sqconnector.getValidator()).thenReturn(validator);
     when(sqconnector.getMetadataUpgrader()).thenReturn(upgrader);
+    when(sqconnector.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(sqconnector.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
     when(connectorMgr.getConnector(anyString())).thenReturn(sqconnector);
 
     // prepare the connections and jobs
@@ -258,6 +261,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(invalid);
     when(sqconnector.getValidator()).thenReturn(validator);
     when(sqconnector.getMetadataUpgrader()).thenReturn(upgrader);
+    when(sqconnector.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(sqconnector.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
     when(connectorMgr.getConnector(anyString())).thenReturn(sqconnector);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
@@ -316,6 +321,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(frameworkMgr.getValidator()).thenReturn(validator);
     when(frameworkMgr.getMetadataUpgrader()).thenReturn(upgrader);
+    when(frameworkMgr.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(frameworkMgr.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
     List<MJob> jobList = jobs(job(1,1,1), job(2,1,2));
@@ -368,6 +375,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(invalid);
     when(frameworkMgr.getValidator()).thenReturn(validator);
     when(frameworkMgr.getMetadataUpgrader()).thenReturn(upgrader);
+    when(frameworkMgr.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(frameworkMgr.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
     List<MJob> jobList = jobs(job(1,1,1), job(2,1,2));
@@ -608,6 +617,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(sqconnector.getValidator()).thenReturn(validator);
     when(sqconnector.getMetadataUpgrader()).thenReturn(upgrader);
+    when(sqconnector.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(sqconnector.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
     when(connectorMgr.getConnector(anyString())).thenReturn(sqconnector);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
@@ -655,6 +666,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(sqconnector.getValidator()).thenReturn(validator);
     when(sqconnector.getMetadataUpgrader()).thenReturn(upgrader);
+    when(sqconnector.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(sqconnector.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
     when(connectorMgr.getConnector(anyString())).thenReturn(sqconnector);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
@@ -870,6 +883,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(frameworkMgr.getValidator()).thenReturn(validator);
     when(frameworkMgr.getMetadataUpgrader()).thenReturn(upgrader);
+    when(frameworkMgr.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(frameworkMgr.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
     List<MJob> jobList = jobs(job(1,1,1), job(2,1,2));
@@ -914,6 +929,8 @@ public class TestJdbcRepository {
     when(validator.validateJob(any(MJob.Type.class), any(MJob.class))).thenReturn(valid);
     when(frameworkMgr.getValidator()).thenReturn(validator);
     when(frameworkMgr.getMetadataUpgrader()).thenReturn(upgrader);
+    when(frameworkMgr.getConnectionConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
+    when(frameworkMgr.getJobConfigurationClass(any(MJob.Type.class))).thenReturn(ImportJobConfiguration.class);
 
     List<MConnection> connectionList = connections(connection(1,1), connection(2,1));
     List<MJob> jobList = jobs(job(1,1,1), job(2,1,2));
@@ -1005,5 +1022,9 @@ public class TestJdbcRepository {
     List<MJob> jobs = new ArrayList<MJob>();
     Collections.addAll(jobs, js);
     return jobs;
+  }
+
+  @ConfigurationClass
+  public static class EmptyConfigurationClass {
   }
 }
