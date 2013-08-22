@@ -1207,17 +1207,17 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     // Warn about using hive specific arguments without hive import itself
     // In HCatalog support some of the Hive options are reused
     if (!options.doHiveImport()
-      && ((options.getHiveHome() != null
+      && (((options.getHiveHome() != null
         && !options.getHiveHome().
           equals(SqoopOptions.getHiveHomeDefault())
           && hCatTable == null))
-        || options.doOverwriteHiveTable()
-        || options.doFailIfHiveTableExists()
-        || (options.getHiveTableName() != null
-            && !options.getHiveTableName().equals(options.getTableName()))
+      || options.doOverwriteHiveTable()
+      || options.doFailIfHiveTableExists()
+      || (options.getHiveTableName() != null
+        && !options.getHiveTableName().equals(options.getTableName()))
         || (options.getHivePartitionKey() != null && hCatTable == null)
         || (options.getHivePartitionValue() != null && hCatTable == null)
-        || (options.getMapColumnHive().size() > 0 && hCatTable == null)) {
+        || (options.getMapColumnHive().size() > 0 && hCatTable == null))) {
       LOG.warn("It seems that you've specified at least one of following:");
       LOG.warn("\t--hive-home");
       LOG.warn("\t--hive-overwrite");
