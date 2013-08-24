@@ -62,3 +62,4 @@ Developer Guide
 - `Development Environment Setup <DevEnv.html>`_
 - `Java Client API Guide <ClientAPI.html>`_
 - `Developping Connector <ConnectorDevelopment.html>`_
+- `REST API Guide <RESTAPI.html>`_
