@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.json.util.SchemaSerialization;
 import org.apache.sqoop.model.FormUtils;
@@ -29,6 +30,9 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Helper class to store and load various information in/from MapReduce configuration
@@ -260,5 +264,18 @@ public final class ConfigurationUtils {
 
   private ConfigurationUtils() {
     // Instantiation is prohibited
+  }
+
+  public static void configureLogging() {
+    try {
+      Properties props = new Properties();
+      InputStream resourceAsStream =
+          SqoopMapper.class.getResourceAsStream("/META-INF/log4j.properties");
+      props.load(resourceAsStream);
+      PropertyConfigurator.configure(props);
+    } catch (Exception e) {
+      System.err.println("Encountered exception while configuring logging " +
+        "for sqoop: " + e);
+    }
   }
 }

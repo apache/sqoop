@@ -32,6 +32,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class SqoopReducer extends Reducer<Data, NullWritable, Data, NullWritable> {
 
+  static {
+    ConfigurationUtils.configureLogging();
+  }
   public static final Logger LOG = Logger.getLogger(SqoopReducer.class);
 
   /**

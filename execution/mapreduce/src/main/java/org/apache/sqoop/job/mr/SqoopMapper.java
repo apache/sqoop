@@ -43,6 +43,9 @@ import org.apache.sqoop.utils.ClassUtils;
  */
 public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWritable> {
 
+  static {
+    ConfigurationUtils.configureLogging();
+  }
   public static final Logger LOG = Logger.getLogger(SqoopMapper.class);
 
   /**
