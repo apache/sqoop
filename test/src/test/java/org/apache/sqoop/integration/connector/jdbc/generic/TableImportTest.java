@@ -41,7 +41,7 @@ public class TableImportTest extends ConnectorTestCase {
     createAndLoadTableCities();
 
     // Connection creation
-    MConnection connection = getClient().newConnection(1L);
+    MConnection connection = getClient().newConnection("generic-jdbc-connector");
     fillConnectionForm(connection);
     createConnection(connection);
 

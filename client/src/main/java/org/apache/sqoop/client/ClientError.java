@@ -30,6 +30,8 @@ public enum ClientError implements ErrorCode {
   /** Polling time of submission status cannot be negative */
   CLIENT_0002("Polling time of submission status cannot be negative"),
 
+  /** Given connector is not known to the server **/
+  CLIENT_0003("Connector do not exists"),
   ;
 
   private final String message;

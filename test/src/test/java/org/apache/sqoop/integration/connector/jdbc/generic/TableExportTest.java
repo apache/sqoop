@@ -46,7 +46,7 @@ public class TableExportTest extends ConnectorTestCase {
     );
 
     // Connection creation
-    MConnection connection = getClient().newConnection(1L);
+    MConnection connection = getClient().newConnection("generic-jdbc-connector");
     fillConnectionForm(connection);
     createConnection(connection);
 

@@ -18,6 +18,7 @@
 package org.apache.sqoop.client;
 
 import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.model.MConnectionForms;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 public class TestSqoopClient {
@@ -64,6 +66,19 @@ public class TestSqoopClient {
     client.getResourceBundle(1L);
 
     verify(requests, times(1)).readConnector(1L);
+  }
+
+  @Test
+  public void testGetConnectorByString() {
+    when(requests.readConnector(null)).thenReturn(connectorBean(connector(1)));
+    MConnector connector = client.getConnector("A1");
+    assertEquals(1, connector.getPersistenceId());
+    assertEquals("A1", connector.getUniqueName());
+
+    client.getResourceBundle(1L);
+
+    verify(requests, times(0)).readConnector(1L);
+    verify(requests, times(1)).readConnector(null);
   }
 
   /**
@@ -132,6 +147,17 @@ public class TestSqoopClient {
     connectors = client.getConnectors();
     assertEquals(2, connectors.size());
 
+    connector = client.getConnector("A1");
+    assertEquals(1, connector.getPersistenceId());
+    assertEquals("A1", connector.getUniqueName());
+
+    connector = client.getConnector("A2");
+    assertEquals(2, connector.getPersistenceId());
+    assertEquals("A2", connector.getUniqueName());
+
+    connector = client.getConnector("A3");
+    assertNull(connector);
+
     verify(requests, times(1)).readConnector(null);
     verifyNoMoreInteractions(requests);
   }
@@ -161,6 +187,15 @@ public class TestSqoopClient {
     verify(requests, times(1)).readConnector(1L);
     verify(requests, times(1)).readConnector(2L);
     verifyNoMoreInteractions(requests);
+  }
+
+  /**
+   * Connection for non-existing connector can't be created.
+   */
+  @Test(expected = SqoopException.class)
+  public void testNewConnection() {
+    when(requests.readConnector(null)).thenReturn(connectorBean(connector(1)));
+    client.newConnection("non existing connector");
   }
 
   private ConnectorBean connectorBean(MConnector...connectors) {

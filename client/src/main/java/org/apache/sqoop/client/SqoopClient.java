@@ -86,7 +86,7 @@ public class SqoopClient {
     SUBMITTED,
     UPDATED,
     FINISHED
-  };
+  }
 
   public SqoopClient(String serverUrl) {
     requests = new SqoopRequests();
@@ -139,6 +139,44 @@ public class SqoopClient {
 
     retrieveConnector(cid);
     return connectors.get(cid).clone(false);
+  }
+
+  /**
+   * Return connector with given name.
+   *
+   * @param connectorName Connector name
+   * @return Connector model or NULL if the connector do not exists.
+   */
+  public MConnector getConnector(String connectorName) {
+    // Firstly try if we have this connector already in cache
+    MConnector connector = getConnectorFromCache(connectorName);
+    if(connector != null) return connector;
+
+    // If the connector wasn't in cache and we have all connectors,
+    // it simply do not exists.
+    if(allConnectors) return null;
+
+    // Retrieve all connectors from server
+    getConnectors();
+    return getConnectorFromCache(connectorName);
+  }
+
+  /**
+   * Iterate over cached connectors and return connector of given name.
+   * This method will not contact server in case that the connector is
+   * not found in the cache.
+   *
+   * @param connectorName Connector name
+   * @return
+   */
+  private MConnector getConnectorFromCache(String connectorName) {
+    for(MConnector connector : connectors.values()) {
+      if(connector.getUniqueName().equals(connectorName)) {
+        return connector;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -237,6 +275,21 @@ public class SqoopClient {
       getConnector(cid).getConnectionForms(),
       getFramework().getConnectionForms()
     );
+  }
+
+  /**
+   * Create new connection object for given connector.
+   *
+   * @param connectorName Connector name
+   * @return
+   */
+  public MConnection newConnection(String connectorName) {
+    MConnector connector = getConnector(connectorName);
+    if(connector == null) {
+      throw new SqoopException(ClientError.CLIENT_0003, connectorName);
+    }
+
+    return newConnection(connector.getPersistenceId());
   }
 
   /**

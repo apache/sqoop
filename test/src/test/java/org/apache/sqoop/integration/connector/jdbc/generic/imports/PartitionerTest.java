@@ -76,7 +76,7 @@ public class PartitionerTest extends ConnectorTestCase {
     createAndLoadTableUbuntuReleases();
 
     // Connection creation
-    MConnection connection = getClient().newConnection(1L);
+    MConnection connection = getClient().newConnection("generic-jdbc-connector");
     fillConnectionForm(connection);
     createConnection(connection);
 
