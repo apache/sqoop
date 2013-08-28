@@ -31,6 +31,7 @@ import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Validation;
@@ -39,6 +40,7 @@ import org.apache.sqoop.validation.Validator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -401,9 +403,7 @@ public abstract class Repository {
 
       Validator validator = connector.getValidator();
 
-      // lists to buffer invalid connections and jobs
-      List<MConnection> invalidConnections = new ArrayList<MConnection>();
-      List<MJob> invalidJobs = new ArrayList<MJob>();
+      boolean upgradeSuccessful = true;
 
       MetadataUpgrader upgrader = connector.getMetadataUpgrader();
       List<MConnection> connections = findConnectionsForConnector(
@@ -434,7 +434,8 @@ public abstract class Repository {
         if (validation.getStatus().canProceed()) {
           updateConnection(newConnection, tx);
         } else {
-          invalidConnections.add(newConnection);
+          logInvalidModelObject("connection", newConnection, validation);
+          upgradeSuccessful = false;
         }
       }
       for (MJob job : jobs) {
@@ -456,32 +457,15 @@ public abstract class Repository {
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {
-          invalidJobs.add(newJob);
+          logInvalidModelObject("job", newJob, validation);
+          upgradeSuccessful = false;
         }
       }
 
-      if (invalidConnections.size() == 0 && invalidJobs.size() == 0) {
+      if (upgradeSuccessful) {
         tx.commit();
       } else {
-        String msg = "Metadata upgrade for connector failed because of invalid Connections or Jobs.\n";
-
-        if (invalidConnections.size() > 0) {
-          msg += "Connections: ";
-          for (MConnection connection : invalidConnections) {
-            msg += connection.getPersistenceId() + ", ";
-          }
-          msg += "\n";
-        }
-
-        if (invalidJobs.size() > 0) {
-          msg += "Jobs: ";
-          for (MJob job : invalidJobs) {
-            msg += job.getPersistenceId() + ", ";
-          }
-          msg += "\n";
-        }
-
-        throw new SqoopException(RepositoryError.JDBCREPO_0027, msg);
+        throw new SqoopException(RepositoryError.JDBCREPO_0027);
       }
     } catch (SqoopException ex) {
       if(tx != null) {
@@ -512,9 +496,7 @@ public abstract class Repository {
 
       Validator validator = FrameworkManager.getInstance().getValidator();
 
-      // lists to buffer invalid connections and jobs
-      List<MConnection> invalidConnections = new ArrayList<MConnection>();
-      List<MJob> invalidJobs = new ArrayList<MJob>();
+      boolean upgradeSuccessful = true;
 
       // -- BEGIN TXN --
       tx = getTransaction();
@@ -541,7 +523,8 @@ public abstract class Repository {
         if (validation.getStatus().canProceed()) {
           updateConnection(newConnection, tx);
         } else {
-          invalidConnections.add(newConnection);
+          logInvalidModelObject("connection", newConnection, validation);
+          upgradeSuccessful = false;
         }
       }
       for (MJob job : jobs) {
@@ -563,32 +546,15 @@ public abstract class Repository {
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {
-          invalidJobs.add(newJob);
+          logInvalidModelObject("job", newJob, validation);
+          upgradeSuccessful = false;
         }
       }
 
-      if (invalidConnections.size() == 0 && invalidJobs.size() == 0) {
+      if (upgradeSuccessful) {
         tx.commit();
       } else {
-        String msg = "Metadata upgrade for job failed because of invalid Connections or Jobs.\n";
-
-        if (invalidConnections.size() > 0) {
-          msg += "Connections: ";
-          for (MConnection connection : invalidConnections) {
-            msg += connection.getPersistenceId() + ", ";
-          }
-          msg += "\n";
-        }
-
-        if (invalidJobs.size() > 0) {
-          msg += "Jobs: ";
-          for (MJob job : invalidJobs) {
-            msg += job.getPersistenceId() + ", ";
-          }
-          msg += "\n";
-        }
-
-        throw new SqoopException(RepositoryError.JDBCREPO_0027, msg);
+        throw new SqoopException(RepositoryError.JDBCREPO_0027);
       }
     } catch (SqoopException ex) {
       if(tx != null) {
@@ -605,6 +571,14 @@ public abstract class Repository {
         tx.close();
       }
       LOG.info("Framework metadata upgrade finished");
+    }
+  }
+
+  private void logInvalidModelObject(String objectType, MPersistableEntity entity, Validation validation) {
+    LOG.error("Upgrader created invalid " + objectType + " with id" + entity.getPersistenceId());
+
+    for(Map.Entry<Validation.FormInput, Validation.Message> entry : validation.getMessages().entrySet()) {
+      LOG.error("\t" + entry.getKey() + ": " + entry.getValue());
     }
   }
 }
