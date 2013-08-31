@@ -18,6 +18,8 @@
 
 package com.cloudera.sqoop.testutil;
 
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -40,6 +42,7 @@ import org.apache.sqoop.lib.BlobRef;
 /**
  * Tests BLOB/CLOB import for Avro.
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class LobAvroImportTestCase extends ImportJobTestCase {
 
   private Log log;
