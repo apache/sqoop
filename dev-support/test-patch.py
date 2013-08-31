@@ -189,6 +189,14 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
   else:
     result.fatal("failed to apply patch (exit code %d):\n{code}%s{code}\n" % (rc, output))
 
+def static_test(result, patch_file, output_dir):
+  output_file = "%s/static-test.txt" % (output_dir)
+  rc = execute("grep '^+++.*/test' %s 1>%s 2>&1" % (patch_file, output_file))
+  if rc == 0:
+    result.success("Patch add/modify test case")
+  else:
+    result.error("Patch does not add/modifny any test case")
+
 def mvn_clean(result, output_dir):
   rc = execute("mvn clean 1>%s/clean.txt 2>&1" % output_dir)
   if rc == 0:
@@ -391,6 +399,7 @@ if not sqoop_verify_branch(branch):
 mvn_clean(result, output_dir)
 git_checkout(result, branch)
 git_apply(result, patch_cmd, patch_file, strip, output_dir)
+static_test(result, patch_file, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
   mvn_test(result, output_dir)
