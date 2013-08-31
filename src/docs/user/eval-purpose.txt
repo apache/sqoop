@@ -22,3 +22,4 @@ a database; results are printed to the console. This allows users to
 preview their import queries to ensure they import the data they
 expect.
 
+WARNING: The +eval+ tool is provided for evaluation purpose only. You can use it to verify database connection from within the Sqoop or to test simple queries. It's not suppose to be used in production workflows.
