@@ -1030,11 +1030,16 @@ public class ClassWriter {
     // method is type-dependent for the fields.
     sb.append("  private void __loadFromFields(List<String> fields) {\n");
     sb.append("    Iterator<String> __it = fields.listIterator();\n");
-    sb.append("    String __cur_str;\n");
+    sb.append("    String __cur_str = null;\n");
+    sb.append("    try {\n");
     for (String colName : colNames) {
       int colType = columnTypes.get(colName);
       parseColumn(colName, colType, sb);
     }
+    sb.append("    } catch (RuntimeException e) {");
+    sb.append("    throw new RuntimeException("
+      + "\"Can't parse input data: '\" + __cur_str + \"'\", e);");
+    sb.append("    }");
     sb.append("  }\n\n");
   }
 
