@@ -59,7 +59,6 @@ import org.apache.hcatalog.data.schema.HCatSchema;
 import org.apache.hcatalog.mapreduce.HCatInputFormat;
 import org.apache.hcatalog.mapreduce.HCatOutputFormat;
 import org.apache.hcatalog.mapreduce.OutputJobInfo;
-import org.apache.hcatalog.shims.HCatHadoopShims;
 import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.ConnManager;
@@ -851,8 +850,57 @@ public final class SqoopHCatUtilities {
 
   public void invokeOutputCommitterForLocalMode(Job job) throws IOException {
     if (isLocalJobTracker(job) && isHadoop1()) {
-      LOG.info("Explicitly committing job in local mode");
-      HCatHadoopShims.Instance.get().commitJob(new HCatOutputFormat(), job);
+      // HCatalog 0.11- do have special class HCatHadoopShims, however this
+      // class got merged into Hive Shim layer in 0.12+. Following method will
+      // try to find correct implementation via reflection.
+
+      // Final Shim layer
+      Object shimLayer = null;
+      Class shimClass = null;
+
+      // Let's try Hive 0.11-
+      try {
+        shimClass = Class.forName("org.apache.hcatalog.shims.HCatHadoopShims");
+
+        Class shimInstanceClass = Class.forName("org.apache.hcatalog.shims.HCatHadoopShims$Instance");
+        Method getMethod = shimInstanceClass.getMethod("get");
+
+        shimLayer = getMethod.invoke(null);
+      } catch (Exception e) {
+        LOG.debug("Not found HCatalog 0.11- implementation of the Shim layer", e);
+      }
+
+      // For Hive 0.12+
+      if (shimClass == null || shimLayer == null) {
+        try {
+          shimClass = Class.forName("org.apache.hadoop.hive.shims.HadoopShims$HCatHadoopShims");
+
+          Class shimLoader = Class.forName("org.apache.hadoop.hive.shims.ShimLoader");
+          Method getHadoopShims = shimLoader.getMethod("getHadoopShims");
+
+          Object hadoopShims = getHadoopShims.invoke(null);
+
+          Class hadoopShimClass = Class.forName("org.apache.hadoop.hive.shims.HadoopShims");
+          Method getHCatShim = hadoopShimClass.getMethod("getHCatShim");
+
+          shimLayer = getHCatShim.invoke(hadoopShims);
+        } catch (Exception e) {
+          LOG.debug("Not found HCatalog 0.12+ implementation of the Shim layer", e);
+        }
+      }
+
+      if (shimClass == null || shimLayer == null) {
+        throw new IOException("Did not found HCatalog shim layer to commit the job");
+      }
+
+      // Part that is the same for both shim layer implementations
+      try {
+        Method commitJobMethod = shimClass.getMethod("commitJob", OutputFormat.class, Job.class);
+        LOG.info("Explicitly committing job in local mode");
+        commitJobMethod.invoke(shimLayer, new HCatOutputFormat(), job);
+      } catch (Exception e) {
+        throw new RuntimeException("Can't explicitly commit job", e);
+      }
     }
   }
 
