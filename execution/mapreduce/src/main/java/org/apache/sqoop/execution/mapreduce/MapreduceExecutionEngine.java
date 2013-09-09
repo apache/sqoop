@@ -96,6 +96,35 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
       throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
         "Format: " + jobConf.output.outputFormat);
     }
+    if(getCompressionCodecName(jobConf) != null) {
+      context.setString(JobConstants.HADOOP_COMPRESS_CODEC,
+        getCompressionCodecName(jobConf));
+      context.setBoolean(JobConstants.HADOOP_COMPRESS, true);
+    }
+  }
+
+  private String getCompressionCodecName(ImportJobConfiguration jobConf) {
+    if(jobConf.output.compression == null)
+      return null;
+    switch(jobConf.output.compression) {
+      case NONE:
+        return null;
+      case DEFAULT:
+        return "org.apache.hadoop.io.compress.DefaultCodec";
+      case DEFLATE:
+        return "org.apache.hadoop.io.compress.DeflateCodec";
+      case GZIP:
+        return "org.apache.hadoop.io.compress.GzipCodec";
+      case BZIP2:
+        return "org.apache.hadoop.io.compress.BZip2Codec";
+      case LZO:
+        return "com.hadoop.compression.lzo.LzoCodec";
+      case LZ4:
+        return "org.apache.hadoop.io.compress.Lz4Codec";
+      case SNAPPY:
+        return "org.apache.hadoop.io.compress.SnappyCodec";
+    }
+    return null;
   }
 
   /**

@@ -17,20 +17,16 @@
  */
 package org.apache.sqoop.framework.configuration;
 
-import org.apache.sqoop.model.FormClass;
-import org.apache.sqoop.model.Input;
-
 /**
- *
+ * Supported compressions
  */
-@FormClass
-public class OutputForm {
-
-  @Input public StorageType storageType;
-
-  @Input public OutputFormat outputFormat;
-
-  @Input public OutputCompression compression;
-
-  @Input(size = 255) public String outputDirectory;
+public enum OutputCompression {
+  NONE,
+  DEFAULT,
+  DEFLATE,
+  GZIP,
+  BZIP2,
+  LZO,
+  LZ4,
+  SNAPPY,
 }
