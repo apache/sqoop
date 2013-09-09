@@ -315,6 +315,16 @@ public class ExportJobBase extends JobBase {
 
     String tableName = outputTableName;
     boolean stagingEnabled = false;
+
+    // Check if there are runtime error checks to do
+    if (isHCatJob && options.isDirect()
+        && !context.getConnManager().isDirectModeHCatSupported()) {
+      throw new IOException("Direct import is not compatible with "
+        + "HCatalog operations using the connection manager "
+        + context.getConnManager().getClass().getName()
+        + ". Please remove the parameter --direct");
+    }
+
     if (stagingTableName != null) { // user has specified the staging table
       if (cmgr.supportsStagingForExport()) {
         LOG.info("Data will be staged in the table: " + stagingTableName);

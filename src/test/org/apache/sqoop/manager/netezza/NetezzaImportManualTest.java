@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.netezza;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.util.FileListing;

@@ -22,14 +22,22 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.RawKeyTextOutputFormat;
-import org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableImportMapper;
+import
+  org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableHCatImportMapper;
+import
+  org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableTextImportMapper;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
@@ -44,7 +52,7 @@ public class NetezzaExternalTableImportJob extends ImportJobBase {
 
   public NetezzaExternalTableImportJob(final SqoopOptions opts,
       ImportJobContext context) {
-    super(opts, NetezzaExternalTableImportMapper.class,
+    super(opts, NetezzaExternalTableTextImportMapper.class,
         NetezzaExternalTableInputFormat.class, RawKeyTextOutputFormat.class,
         context);
   }
@@ -120,6 +128,12 @@ public class NetezzaExternalTableImportJob extends ImportJobBase {
 
     LOG.debug("Using InputFormat: " + inputFormatClass);
     job.setInputFormatClass(getInputFormatClass());
+
+    if (isHCatJob) {
+      LOG.debug("Using table class: " + tableClassName);
+      job.getConfiguration().set(ConfigurationHelper.getDbInputClassProperty(),
+        tableClassName);
+    }
   }
 
   /**
@@ -128,9 +142,34 @@ public class NetezzaExternalTableImportJob extends ImportJobBase {
    */
   protected void configureMapper(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
+    super.configureMapper(job, tableName, tableClassName);
     job.setMapperClass(getMapperClass());
+    if (isHCatJob) {
+      LOG.info("Configuring mapper for HCatalog import job");
+      job.setOutputKeyClass(LongWritable.class);
+      job.setOutputValueClass(SqoopHCatUtilities.getImportValueClass());
+      return;
+    }
     job.setOutputKeyClass(String.class);
     job.setOutputValueClass(NullWritable.class);
   }
 
+  @Override
+  protected Class<? extends OutputFormat> getOutputFormatClass()
+      throws ClassNotFoundException {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getOutputFormatClass();
+    } else {
+      return RawKeyTextOutputFormat.class;
+    }
+  }
+
+  @Override
+  protected Class<? extends Mapper> getMapperClass() {
+    if (isHCatJob) {
+      return NetezzaExternalTableHCatImportMapper.class;
+    } else {
+      return NetezzaExternalTableTextImportMapper.class;
+    }
+  }
 }

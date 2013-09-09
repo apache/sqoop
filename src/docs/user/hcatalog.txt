@@ -24,8 +24,8 @@ HCatalog Background
 ~~~~~~~~~~~~~~~~~~~
 
 HCatalog is a table and storage management service for Hadoop that enables
-users with different data processing tools – Pig, MapReduce, and Hive –
-to more easily read and write data on the grid. HCatalog’s table abstraction
+users with different data processing tools Pig, MapReduce, and Hive
+to more easily read and write data on the grid. HCatalog's table abstraction
 presents users with a relational view of data in the Hadoop distributed
 file system (HDFS) and ensures that users need not worry about where or
 in what format their data is stored: RCFile format, text files, or
@@ -106,6 +106,17 @@ type STRING. There can be only one static partitioning key.
 +--hive-partition-value+::
 The value associated with the partition.
 
+Direct Mode support
+^^^^^^^^^^^^^^^^^^^
+
+HCatalog integration in Sqoop has been enhanced to support direct mode
+connectors (which are high performance connectors specific to a database).
+Netezza direct mode connector has been enhanced to take advatange of this
+feature.
+
+IMPORTANT: Only Netezza direct mode connector is currently enabled to work
+with HCatalog.
+
 Unsupported Sqoop Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -122,7 +133,6 @@ Unsupported Sqoop Export and Import Options
 
 The following Sqoop export and import options are not supported with HCatalog jobs.
 
-* +--direct+
 * +--export-dir+
 * +--target-dir+
 * +--warehouse-dir+
@@ -231,8 +241,8 @@ Schema Mapping
 Sqoop currently does not support column name mapping. However, the user
 is allowed to override the type mapping. Type mapping loosely follows
 the Hive type mapping already present in Sqoop except that SQL types
-“FLOAT” and “REAL” are mapped to HCatalog type “float”. In the Sqoop type
-mapping for Hive, these two are mapped to “double”. Type mapping is primarily
+FLOAT and REAL are mapped to HCatalog type float. In the Sqoop type
+mapping for Hive, these two are mapped to double. Type mapping is primarily
 used for checking the column definition correctness only and can be overridden
 with the --map-column-hive option.
 

@@ -102,7 +102,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     utils.assertSqlColValForRowId(conn, table, maxId, colName, expectedMax);
   }
 
-  private void runHCatExport(List<String> addlArgsArray,
+  protected void runHCatExport(List<String> addlArgsArray,
     final int totalRecords, String table,
     ColumnGenerator[] cols) throws Exception {
     utils.createHCatTable(CreateMode.CREATE_AND_LOAD,
@@ -241,7 +241,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-        "char(10)", Types.CHAR, HCatFieldSchema.Type.STRING, "string to test",
+        "char(14)", Types.CHAR, HCatFieldSchema.Type.STRING, "string to test",
         "string to test", KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
         "longvarchar", Types.LONGVARCHAR, HCatFieldSchema.Type.STRING,

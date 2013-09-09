@@ -773,5 +773,13 @@ public abstract class ConnManager {
         || (columnType == Types.LONGNVARCHAR);
   }
 
+  /**
+   * Determine if HCat integration from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HCat
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeHCatSupported() {
+    return false;
+  }
 }
 

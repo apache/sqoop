@@ -51,7 +51,7 @@ public class NetezzaJDBCStatementRunner extends Thread {
     }
   }
 
-  public Throwable getExcepton() {
+  public Throwable getException() {
     if (!hasExceptions()) {
       return null;
     }

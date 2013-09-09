@@ -1286,10 +1286,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + " option conflicts with the " + HCATALOG_TABLE_ARG
         + " option." + HELP_STR);
     }
-    if (options.isDirect()) {
-      throw new InvalidOptionsException("Direct import is incompatible with "
-        + "HCatalog. Please remove the parameter --direct");
-    }
+
     if (options.isAppendMode()) {
       throw new InvalidOptionsException("Append mode for imports is not "
         + " compatible with HCatalog. Please remove the parameter"

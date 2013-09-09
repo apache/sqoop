@@ -16,11 +16,17 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.netezza;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.cloudera.sqoop.TestExport.ColumnGenerator;
 
 /**
  * Utilities for Netezza tests.
@@ -28,27 +34,27 @@ import org.apache.commons.logging.LogFactory;
 public final class NetezzaTestUtils {
 
   public static final Log LOG = LogFactory.getLog(
-      NetezzaTestUtils.class.getName());
+    NetezzaTestUtils.class.getName());
 
   public static final String NZ_HOST = System.getProperty(
-      "sqoop.test.netezza.host", "nz-host");
+    "sqoop.test.netezza.host", "nz-host");
   public static final String NZ_PORT = System.getProperty(
-      "sqoop.test.netezza.port", "5480");
+    "sqoop.test.netezza.port", "5480");
   public static final String NZ_JDBC_URL_PREFIX = "jdbc:netezza:";
 
   public static final String NZ_DB_USER = System.getProperty(
-      "sqoop.test.netezza.username", "ADMIN");
+    "sqoop.test.netezza.username", "ADMIN");
 
   public static final String NZ_DB_PASSWORD = System.getProperty(
-      "sqoop.test.netezza.password", "password");
+    "sqoop.test.netezza.password", "password");
 
   public static final String NZ_DB_NAME = System.getProperty(
-      "sqoop.test.netezza.db.name", "SQOOP");
+    "sqoop.test.netezza.db.name", "SQOOP");
   public static final String TABLE_NAME = System.getProperty(
-      "sqoop.test.netezza.table.name", "EMPNZ");
+    "sqoop.test.netezza.table.name", "EMPNZ");
 
-
-  private NetezzaTestUtils() { }
+  private NetezzaTestUtils() {
+  }
 
   /** @return the current username. */
   public static String getNZUser() {
@@ -68,6 +74,7 @@ public final class NetezzaTestUtils {
     }
     return nzPass;
   }
+
   public static String getNZConnectString() {
     String nzHost = System.getenv("NZ_HOST");
     if (nzHost == null) {
@@ -89,5 +96,48 @@ public final class NetezzaTestUtils {
 
     LOG.info("NZ Connect string generated : " + url.toString());
     return url.toString();
+  }
+
+  public static String getNZDropTableStatement(String tableName) {
+    return "DROP TABLE " + tableName;
+  }
+
+  public static void createTableNZ(Connection conn, String tableName,
+    ColumnGenerator... extraCols)
+    throws SQLException {
+    String sqlStatement = getNZDropTableStatement(tableName);
+    conn.rollback();
+    LOG.info("Executing drop statement : " + sqlStatement);
+    PreparedStatement statement = conn.prepareStatement(
+      sqlStatement, ResultSet.TYPE_FORWARD_ONLY,
+      ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } catch (SQLException sqle) {
+      conn.rollback();
+    } finally {
+      statement.close();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("CREATE TABLE ");
+    sb.append(tableName);
+    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    int colNum = 0;
+    for (ColumnGenerator gen : extraCols) {
+      sb.append(", col").append(colNum++).append(' ').append(gen.getType());
+    }
+    sb.append(")");
+    sqlStatement = sb.toString();
+    LOG.info("Executing create statement : " + sqlStatement);
+    statement = conn.prepareStatement(sqlStatement,
+      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
   }
 }

@@ -203,6 +203,14 @@ public class ImportJobBase extends JobBase {
    */
   public void runImport(String tableName, String ormJarFile, String splitByCol,
       Configuration conf) throws IOException, ImportException {
+    // Check if there are runtime error checks to do
+    if (isHCatJob && options.isDirect()
+        && !context.getConnManager().isDirectModeHCatSupported()) {
+      throw new IOException("Direct import is not compatible with "
+        + "HCatalog operations using the connection manager "
+        + context.getConnManager().getClass().getName()
+        + ". Please remove the parameter --direct");
+    }
 
     if (null != tableName) {
       LOG.info("Beginning import of " + tableName);

@@ -600,7 +600,7 @@ public final class HCatalogTestUtils {
    * @return the SQL statement to drop that table.
    */
   public static String getSqlDropTableStatement(String tableName) {
-    return "DROP TABLE " + tableName + " IF EXISTS";
+    return "DROP TABLE " + tableName;
   }
 
   public static String getSqlCreateTableStatement(String tableName,
@@ -648,6 +648,8 @@ public final class HCatalogTestUtils {
     try {
       statement.executeUpdate();
       conn.commit();
+    } catch (SQLException sqle) {
+      conn.rollback();
     } finally {
       statement.close();
     }

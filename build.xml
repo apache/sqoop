@@ -322,6 +322,13 @@
   <property name="sqoop.test.db2.connectstring.username" value="SQOOP" />
   <property name="sqoop.test.db2.connectstring.password" value="SQOOP" />
 
+  <property name="sqoop.test.netezza.host" value="nz-host" />
+  <property name="sqoop.test.netezza.port" value="5480" />
+  <property name="sqoop.test.netezza.username" value="ADMIN" />
+  <property name="sqoop.test.netezza.password" value="password" />
+  <property name="sqoop.test.netezza.db.name" value="SQOOP" />
+  <property name="sqoop.test.netezza.table.name" value="EMPNZ" />
+
 
   <condition property="windows">
     <os family="windows" />
@@ -900,6 +907,13 @@
       <sysproperty key="sqoop.test.db2.connectstring.database" value="${sqoop.test.db2.connectstring.database}" />
       <sysproperty key="sqoop.test.db2.connectstring.username" value="${sqoop.test.db2.connectstring.username}" />
       <sysproperty key="sqoop.test.db2.connectstring.password" value="${sqoop.test.db2.connectstring.password}" />
+
+      <sysproperty key="sqoop.test.netezza.host" value="${sqoop.test.netezza.host}" />
+      <sysproperty key="sqoop.test.netezza.port" value="${sqoop.test.netezza.port}" />
+      <sysproperty key="sqoop.test.netezza.username" value="${sqoop.test.netezza.username}" />
+      <sysproperty key="sqoop.test.netezza.password" value="${sqoop.test.netezza.password}" />
+      <sysproperty key="sqoop.test.netezza.db.name" value="${sqoop.test.netezza.db.name}" />
+      <sysproperty key="sqoop.test.netezza.table.name" value="${sqoop.test.netezza.table.name}" />
 
       <!-- Location of Hive logs -->
       <!--<sysproperty key="hive.log.dir"

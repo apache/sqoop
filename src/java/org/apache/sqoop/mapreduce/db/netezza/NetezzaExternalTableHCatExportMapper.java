@@ -15,46 +15,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.sqoop.mapreduce.hcat;
+package org.apache.sqoop.mapreduce.db.netezza;
 
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hcatalog.data.HCatRecord;
+import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.SqoopRecord;
-import org.apache.sqoop.mapreduce.SqoopMapper;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatExportHelper;
 
 /**
- * A mapper for HCatalog import.
+ * Netezza export mapper using external tables for HCat integration.
  */
-public class SqoopHCatImportMapper extends
-  SqoopMapper<WritableComparable, SqoopRecord,
-  WritableComparable, HCatRecord> {
+public class NetezzaExternalTableHCatExportMapper extends
+  NetezzaExternalTableExportMapper<LongWritable, HCatRecord> {
+  private SqoopHCatExportHelper helper;
   public static final Log LOG = LogFactory
-    .getLog(SqoopHCatImportMapper.class.getName());
-  private SqoopHCatImportHelper helper;
+    .getLog(NetezzaExternalTableHCatExportMapper.class.getName());
 
   @Override
   protected void setup(Context context)
     throws IOException, InterruptedException {
+    super.setup(context);
     Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatImportHelper(conf);
+    helper = new SqoopHCatExportHelper(conf);
+    // Force escaped by
+    conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\'');
+
   }
 
   @Override
-  public void map(WritableComparable key, SqoopRecord value,
-    Context context)
+  public void map(LongWritable key, HCatRecord hcr, Context context)
     throws IOException, InterruptedException {
-    context.write(key, helper.convertToHCatRecord(value));
+    SqoopRecord sqr = helper.convertToSqoopRecord(hcr);
+    writeSqoopRecord(sqr);
+    context.progress();
   }
-
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    helper.cleanup();
-  }
-
 }

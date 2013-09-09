@@ -164,24 +164,6 @@ public class TestHCatalogBasic extends TestCase {
     }
   }
 
-  public void testHCatImportWithDirect() throws Exception {
-    String[] args = {
-      "--connect",
-      "jdbc:db:url",
-      "--table",
-      "dbtable",
-      "--hcatalog-table",
-      "table",
-      "--direct",
-    };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
-  }
 
   public void testHCatImportWithSequenceFile() throws Exception {
     String[] args = {
@@ -191,7 +173,7 @@ public class TestHCatalogBasic extends TestCase {
       "dbtable",
       "--hcatalog-table",
       "table",
-      "--as-sequencefile"
+      "--as-sequencefile",
     };
     try {
       SqoopOptions opts = parseImportArgs(args);
@@ -210,7 +192,7 @@ public class TestHCatalogBasic extends TestCase {
       "dbtable",
       "--hcatalog-table",
       "table",
-      "--as-avrofile"
+      "--as-avrofile",
     };
     try {
       SqoopOptions opts = parseImportArgs(args);

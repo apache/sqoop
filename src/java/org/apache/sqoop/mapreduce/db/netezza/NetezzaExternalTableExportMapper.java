@@ -45,7 +45,7 @@ import com.cloudera.sqoop.lib.DelimiterSet;
  * Netezza export mapper using external tables.
  */
 public abstract class NetezzaExternalTableExportMapper<K, V> extends
-    SqoopMapper<K, V, NullWritable, NullWritable> {
+  SqoopMapper<K, V, NullWritable, NullWritable> {
   /**
    * Create a named FIFO, and start the Netezza JDBC thread connected to that
    * FIFO. A File object representing the FIFO is in 'fifoFile'.
@@ -57,27 +57,27 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   private Connection con;
   private OutputStream recordWriter;
   public static final Log LOG = LogFactory
-      .getLog(NetezzaExternalTableImportMapper.class.getName());
+    .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
   private DelimiterSet outputDelimiters;
 
-  private String getSqlStatement() throws IOException {
+  private String getSqlStatement(DelimiterSet delimiters) throws IOException {
 
-    char fd = (char) conf.getInt(DelimiterSet.INPUT_FIELD_DELIM_KEY, ',');
-    char qc = (char) conf.getInt(DelimiterSet.INPUT_ENCLOSED_BY_KEY, 0);
-    char ec = (char) conf.getInt(DelimiterSet.INPUT_ESCAPED_BY_KEY, 0);
+    char fd = delimiters.getFieldsTerminatedBy();
+    char qc = delimiters.getEnclosedBy();
+    char ec = delimiters.getEscapedBy();
 
     String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
 
     int errorThreshold = conf.getInt(
-        DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
+      DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
     String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
 
     StringBuilder sqlStmt = new StringBuilder(2048);
 
     sqlStmt.append("INSERT INTO ");
-    sqlStmt.append(dbc.getInputTableName());
+    sqlStmt.append(dbc.getOutputTableName());
     sqlStmt.append(" SELECT * FROM EXTERNAL '");
     sqlStmt.append(fifoFile.getAbsolutePath());
     sqlStmt.append("' USING (REMOTESOURCE 'JDBC' ");
@@ -133,11 +133,16 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   }
 
   private void initNetezzaExternalTableExport(Context context)
-      throws IOException {
+    throws IOException {
     this.conf = context.getConfiguration();
     dbc = new DBConfiguration(conf);
     File taskAttemptDir = TaskId.getLocalWorkPath(conf);
-    this.outputDelimiters = new DelimiterSet(',', '\n', '\000', '\\', false);
+
+    char fd = (char) conf.getInt(DelimiterSet.INPUT_FIELD_DELIM_KEY, ',');
+    char qc = (char) conf.getInt(DelimiterSet.INPUT_ENCLOSED_BY_KEY, 0);
+    char ec = (char) conf.getInt(DelimiterSet.INPUT_ESCAPED_BY_KEY, 0);
+
+    this.outputDelimiters = new DelimiterSet(fd, '\n', qc, ec, false);
     this.fifoFile = new File(taskAttemptDir, ("nzexttable-export.txt"));
     String filename = fifoFile.toString();
     NamedFifo nf;
@@ -150,14 +155,14 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
       LOG.error("Could not create FIFO file " + filename);
       this.fifoFile = null;
       throw new IOException(
-          "Could not create FIFO for netezza external table import", ioe);
+        "Could not create FIFO for netezza external table import", ioe);
     }
-    String sqlStmt = getSqlStatement();
+    String sqlStmt = getSqlStatement(outputDelimiters);
     boolean cleanup = false;
     try {
       con = dbc.getConnection();
       extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
-          con, sqlStmt);
+        con, sqlStmt);
     } catch (SQLException sqle) {
       cleanup = true;
       throw new IOException(sqle);
@@ -204,14 +209,14 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
         LOG.info("Transferred " + counter.toString());
         if (extTableThread.hasExceptions()) {
           extTableThread.printException();
-          throw new IOException(extTableThread.getExcepton());
+          throw new IOException(extTableThread.getException());
         }
       }
     }
   }
 
   protected void writeTextRecord(Text record) throws IOException,
-      InterruptedException {
+    InterruptedException {
     String outputStr = record.toString() + "\n";
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);
@@ -219,7 +224,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   }
 
   protected void writeSqoopRecord(SqoopRecord sqr) throws IOException,
-      InterruptedException {
+    InterruptedException {
     String outputStr = sqr.toString(this.outputDelimiters);
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);

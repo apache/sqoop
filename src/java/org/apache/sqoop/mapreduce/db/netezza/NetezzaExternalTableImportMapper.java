@@ -35,16 +35,17 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.io.NamedFifo;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
-import org.apache.sqoop.mapreduce.SqoopMapper;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
+import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+
 /**
  * Netezza import mapper using external tables.
  */
-public class NetezzaExternalTableImportMapper extends
-    SqoopMapper<Integer, NullWritable, Text, NullWritable> {
+public abstract class NetezzaExternalTableImportMapper<K, V> extends
+  AutoProgressMapper<Integer, NullWritable, K, V> {
   /**
    * Create a named FIFO, and start Netezza import connected to that FIFO. A
    * File object representing the FIFO is in 'fifoFile'.
@@ -57,7 +58,7 @@ public class NetezzaExternalTableImportMapper extends
   private Connection con;
   private BufferedReader recordReader;
   public static final Log LOG = LogFactory
-      .getLog(NetezzaExternalTableImportMapper.class.getName());
+    .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
 
@@ -70,7 +71,7 @@ public class NetezzaExternalTableImportMapper extends
     String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
 
     int errorThreshold = conf.getInt(
-        DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
+      DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
     String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
     String[] cols = dbc.getOutputFieldNames();
     String inputConds = dbc.getInputConditions();
@@ -142,7 +143,7 @@ public class NetezzaExternalTableImportMapper extends
 
     String stmt = sqlStmt.toString();
     LOG.debug("SQL generated for external table import for data slice " + myId
-        + "=" + stmt);
+      + "=" + stmt);
     return stmt;
   }
 
@@ -162,14 +163,14 @@ public class NetezzaExternalTableImportMapper extends
       LOG.error("Could not create FIFO file " + filename);
       this.fifoFile = null;
       throw new IOException(
-          "Could not create FIFO for netezza external table import", ioe);
+        "Could not create FIFO for netezza external table import", ioe);
     }
     String sqlStmt = getSqlStatement(myId);
     boolean cleanup = false;
     try {
       con = dbc.getConnection();
       extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
-          con, sqlStmt);
+        con, sqlStmt);
     } catch (SQLException sqle) {
       cleanup = true;
       throw new IOException(sqle);
@@ -187,12 +188,16 @@ public class NetezzaExternalTableImportMapper extends
     }
     extTableThread.start();
     // We need to start the reader end first
+
     recordReader = new BufferedReader(new InputStreamReader(
-        new FileInputStream(nf.getFile())));
+      new FileInputStream(nf.getFile())));
   }
 
+  abstract protected void writeRecord(Text text, Context context)
+    throws IOException, InterruptedException;
+
   public void map(Integer dataSliceId, NullWritable val, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     conf = context.getConfiguration();
     dbc = new DBConfiguration(conf);
     numMappers = ConfigurationHelper.getConfNumMaps(conf);
@@ -214,7 +219,7 @@ public class NetezzaExternalTableImportMapper extends
           // May be we should set the output to be String for faster performance
           // There is no real benefit in changing it to Text and then
           // converting it back in our case
-          context.write(outputRecord, NullWritable.get());
+          writeRecord(outputRecord, context);
           counter.addBytes(1 + inputRecord.length());
           inputRecord = recordReader.readLine();
         }
@@ -225,7 +230,7 @@ public class NetezzaExternalTableImportMapper extends
         LOG.info("Transferred " + counter.toString());
         if (extTableThread.hasExceptions()) {
           extTableThread.printException();
-          throw new IOException(extTableThread.getExcepton());
+          throw new IOException(extTableThread.getException());
         }
       }
     }

@@ -15,15 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.netezza;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
@@ -35,7 +33,6 @@ import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.manager.NetezzaManager;
 import org.junit.Before;
 
-
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
@@ -44,7 +41,7 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 /**
  * Test the Netezza implementation.
  *
- * This uses JDBC to export data from an Netezza database into HDFS.  See
+ * This uses JDBC to export data from an Netezza database into HDFS. See
  * DirectNetezzaExportManualTest for external table methods.
  *
  * Since this requires an Netezza Server installation, this class is named in
@@ -54,12 +51,11 @@ import com.cloudera.sqoop.testutil.CommonArgs;
  */
 public class NetezzaExportManualTest extends TestExport {
   public static final Log LOG = LogFactory.getLog(NetezzaExportManualTest.class
-      .getName());
+    .getName());
   static final String TABLE_PREFIX = "EMPNZ_EXP_";
   // instance variables populated during setUp, used during tests
   protected NetezzaManager manager;
   protected Connection conn;
-
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -74,7 +70,6 @@ public class NetezzaExportManualTest extends TestExport {
   protected Connection getConnection() {
     return conn;
   }
-
 
   @Override
   protected String getConnectString() {
@@ -91,44 +86,6 @@ public class NetezzaExportManualTest extends TestExport {
     return "DROP TABLE " + tableName;
   }
 
-  protected void createTableNZ(String tableName, ColumnGenerator...extraCols)
-      throws SQLException {
-      String sqlStatement = getDropTableStatement(tableName);
-      conn.rollback();
-      LOG.info("Executing drop statement : " + sqlStatement);
-      PreparedStatement statement = conn.prepareStatement(
-          sqlStatement, ResultSet.TYPE_FORWARD_ONLY,
-          ResultSet.CONCUR_READ_ONLY);
-      try {
-        statement.executeUpdate();
-        conn.commit();
-      } catch (SQLException sqle) {
-        conn.rollback();
-      } finally {
-        statement.close();
-      }
-
-      StringBuilder sb = new StringBuilder();
-      sb.append("CREATE TABLE ");
-      sb.append(tableName);
-      sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
-      int colNum = 0;
-      for (ColumnGenerator gen : extraCols) {
-        sb.append(", " + forIdx(colNum++) + " " + gen.getType());
-      }
-      sb.append(")");
-      sqlStatement = sb.toString();
-      LOG.info("Executing create statement : " + sqlStatement);
-      statement = conn.prepareStatement(sqlStatement,
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      try {
-        statement.executeUpdate();
-        conn.commit();
-      } finally {
-        statement.close();
-      }
-    }
-
   /**
    * Create the table definition to export to, removing any prior table. By
    * specifying ColumnGenerator arguments, you can add extra columns to the
@@ -137,27 +94,28 @@ public class NetezzaExportManualTest extends TestExport {
   @Override
   public void createTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    createTableNZ(getTableName(), extraColumns);
+    NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
   }
 
   /**
    * Creates the staging table.
-   * @param extraColumns extra columns that go in the staging table
-   * @throws SQLException if an error occurs during export
+   *
+   * @param extraColumns
+   *          extra columns that go in the staging table
+   * @throws SQLException
+   *           if an error occurs during export
    */
   @Override
   public void createStagingTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    createTableNZ(getStagingTableName(), extraColumns);
+    NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
   }
-
-
 
   @Before
   public void setUp() {
     super.setUp();
     SqoopOptions options = new SqoopOptions(
-        NetezzaTestUtils.getNZConnectString(), getTableName());
+      NetezzaTestUtils.getNZConnectString(), getTableName());
     options.setUsername(NetezzaTestUtils.getNZUser());
     options.setPassword(NetezzaTestUtils.getNZPassword());
     if (isDirectMode()) {
@@ -176,23 +134,21 @@ public class NetezzaExportManualTest extends TestExport {
     }
   }
 
-
-
   @Override
   protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
-      int statementsPerTx, String... additionalArgv) {
+    int statementsPerTx, String... additionalArgv) {
 
     String[] argV = super.getArgv(includeHadoopFlags,
-        rowsPerStatement, statementsPerTx);
+      rowsPerStatement, statementsPerTx);
     String[] subArgV = newStrArray(argV,
-      "--username",  NetezzaTestUtils.getNZUser(), "--password",
+      "--username", NetezzaTestUtils.getNZUser(), "--password",
       NetezzaTestUtils.getNZPassword());
     String[] newArgV = new String[subArgV.length + additionalArgv.length];
     int i = 0;
     for (String s : subArgV) {
       newArgV[i++] = s;
     }
-    for (String s: additionalArgv) {
+    for (String s : additionalArgv) {
       newArgV[i++] = s;
     }
     return newArgV;
@@ -202,7 +158,7 @@ public class NetezzaExportManualTest extends TestExport {
   protected String[] getCodeGenArgv(String... extraArgs) {
     String[] moreArgs;
 
-    moreArgs = new String[extraArgs.length  + 4];
+    moreArgs = new String[extraArgs.length + 4];
 
     int i = 0;
     for (i = 0; i < extraArgs.length; i++) {
@@ -218,8 +174,8 @@ public class NetezzaExportManualTest extends TestExport {
     return super.getCodeGenArgv(moreArgs);
   }
 
-  protected void createExportFile(ColumnGenerator...extraCols)
-    throws IOException, SQLException {
+  protected void createExportFile(ColumnGenerator... extraCols)
+    throws IOException {
     String ext = ".txt";
 
     Path tablePath = getTablePath();
@@ -233,12 +189,11 @@ public class NetezzaExportManualTest extends TestExport {
     fs.mkdirs(tablePath);
     OutputStream os = fs.create(filePath);
 
-
     BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
     for (int i = 0; i < 3; i++) {
-     String line = getRecordLine(i, extraCols);
-     w.write(line);
-     LOG.debug("Create Export file - Writing line : " + line);
+      String line = getRecordLine(i, extraCols);
+      w.write(line);
+      LOG.debug("Create Export file - Writing line : " + line);
     }
     w.close();
     os.close();
@@ -248,6 +203,7 @@ public class NetezzaExportManualTest extends TestExport {
     public String getExportText(int rowNum) {
       return "\\N";
     }
+
     public String getVerifyText(int rowNum) {
       return null;
     }

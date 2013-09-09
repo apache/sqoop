@@ -22,12 +22,14 @@ import com.cloudera.sqoop.hbase.HBaseImportAddRowKeyTest;
 import com.cloudera.sqoop.hbase.HBaseImportNullTest;
 import com.cloudera.sqoop.hbase.HBaseImportTypesTest;
 import com.cloudera.sqoop.manager.DB2ManagerImportManualTest;
+
 import org.apache.sqoop.hcat.HCatalogExportTest;
 import org.apache.sqoop.hcat.HCatalogImportTest;
 
 import com.cloudera.sqoop.hbase.HBaseImportTest;
 import com.cloudera.sqoop.hbase.HBaseQueryImportTest;
 import com.cloudera.sqoop.hbase.HBaseUtilTest;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -44,6 +46,11 @@ import com.cloudera.sqoop.manager.PostgresqlExportTest;
 import com.cloudera.sqoop.manager.PostgresqlImportTest;
 
 import org.apache.sqoop.manager.mysql.MySqlCallExportTest;
+import org.apache.sqoop.manager.netezza.DirectNetezzaExportManualTest;
+import org.apache.sqoop.manager.netezza.DirectNetezzaHCatExportManualTest;
+import org.apache.sqoop.manager.netezza.DirectNetezzaHCatImportManualTest;
+import org.apache.sqoop.manager.netezza.NetezzaExportManualTest;
+import org.apache.sqoop.manager.netezza.NetezzaImportManualTest;
 import org.apache.sqoop.manager.oracle.OracleCallExportTest;
 import org.apache.sqoop.manager.oracle.OracleIncrementalImportTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportDelimitedFileManualTest;
@@ -122,6 +129,13 @@ public final class ThirdPartyTests extends TestCase {
     // Call Export tests
     suite.addTestSuite(MySqlCallExportTest.class);
     suite.addTestSuite(OracleCallExportTest.class);
+
+    // Netezza
+    suite.addTestSuite(NetezzaExportManualTest.class);
+    suite.addTestSuite(NetezzaImportManualTest.class);
+    suite.addTestSuite(DirectNetezzaExportManualTest.class);
+    suite.addTestSuite(DirectNetezzaHCatExportManualTest.class);
+    suite.addTestSuite(DirectNetezzaHCatImportManualTest.class);
 
     return suite;
   }

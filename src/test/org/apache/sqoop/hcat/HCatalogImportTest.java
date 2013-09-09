@@ -99,7 +99,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     return codeGenArgv.toArray(new String[0]);
   }
 
-  private void setExtraArgs(List<String> args) {
+  protected void setExtraArgs(List<String> args) {
     extraTestArgs.clear();
     if (args != null && args.size() > 0) {
       extraTestArgs.addAll(args);
@@ -123,13 +123,6 @@ public class HCatalogImportTest extends ImportJobTestCase {
       addlArgsArray.addAll(extraTestArgs);
     }
     Map<String, String> addlArgsMap = utils.getAddlTestArgs();
-    String[] argv = {};
-
-    if (addlArgsMap.containsKey("-libjars")) {
-      argv = new String[2];
-      argv[0] = "-libjars";
-      argv[1] = addlArgsMap.get("-libjars");
-    }
     addlArgsArray.add("-m");
     addlArgsArray.add("1");
     addlArgsArray.add("--hcatalog-table");
@@ -246,13 +239,13 @@ public class HCatalogImportTest extends ImportJobTestCase {
     }
   }
 
-  private void runHCatImport(List<String> addlArgsArray,
+  protected void runHCatImport(List<String> addlArgsArray,
     int totalRecords, String table, ColumnGenerator[] cols,
     String[] cNames) throws Exception {
     runHCatImport(addlArgsArray, totalRecords, table, cols, cNames, false);
   }
 
-  private void runHCatImport(List<String> addlArgsArray,
+  protected void runHCatImport(List<String> addlArgsArray,
     int totalRecords, String table, ColumnGenerator[] cols,
     String[] cNames, boolean dontCreate) throws Exception {
     CreateMode mode = CreateMode.CREATE;
@@ -268,17 +261,6 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("1");
     addlArgsArray.add("--hcatalog-table");
     addlArgsArray.add(table);
-    if (addlArgsMap.containsKey("-libjars")) {
-      argv = new String[2];
-      argv[0] = "-libjars";
-      argv[1] = addlArgsMap.get("-libjars");
-    }
-    for (String k : addlArgsMap.keySet()) {
-      if (!k.equals("-libjars")) {
-        addlArgsArray.add(k);
-        addlArgsArray.add(addlArgsMap.get(k));
-      }
-    }
     String[] colNames = null;
     if (cNames != null) {
       colNames = cNames;
@@ -408,7 +390,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-        "char(10)", Types.CHAR, HCatFieldSchema.Type.STRING, "string to test",
+        "char(14)", Types.CHAR, HCatFieldSchema.Type.STRING, "string to test",
         "string to test", KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
         "longvarchar", Types.LONGVARCHAR, HCatFieldSchema.Type.STRING,

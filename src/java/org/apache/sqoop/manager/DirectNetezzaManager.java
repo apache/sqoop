@@ -281,6 +281,14 @@ public class DirectNetezzaManager extends NetezzaManager {
 
   @Override
   public boolean isORMFacilitySelfManaged() {
+    if (options.getHCatTableName() != null) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean isDirectModeHCatSupported() {
     return true;
   }
 }

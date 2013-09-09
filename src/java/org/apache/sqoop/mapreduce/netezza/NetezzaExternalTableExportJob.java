@@ -24,22 +24,25 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.sqoop.lib.DelimiterSet;
-import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DirectNetezzaManager;
-import org.apache.sqoop.mapreduce.DBWritable;
+import
+  org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableHCatExportMapper;
 import
   org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableRecordExportMapper;
 import
   org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableTextExportMapper;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
+import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 
 /**
  * Class that runs an export job using netezza external tables in the mapper.
@@ -79,49 +82,73 @@ public class NetezzaExternalTableExportJob extends ExportJobBase {
     conf.setBoolean(DelimiterSet.INPUT_ENCLOSE_REQUIRED_KEY,
         options.isOutputEncloseRequired());
   }
-  /**
-   * Configure the inputformat to use for the job.
-   */
+
+  @Override
+  protected Class<? extends InputFormat> getInputFormatClass()
+      throws ClassNotFoundException {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getInputFormatClass();
+    }
+    return super.getInputFormatClass();
+  }
+
   @Override
   protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws ClassNotFoundException,
-      IOException {
-
-    // Configure the delimiters, etc.
-    Configuration conf = job.getConfiguration();
-
+     String tableClassName, String splitCol)
+     throws ClassNotFoundException, IOException {
+    super.configureInputFormat(job, tableName, tableClassName, splitCol);
+    if (isHCatJob) {
+      SqoopHCatUtilities.configureExportInputFormat(options, job,
+          context.getConnManager(), tableName, job.getConfiguration());
+      return;
+    }
+  }
+  @Override
+  protected void configureOutputFormat(Job job, String tableName,
+                                       String tableClassName)
+      throws ClassNotFoundException, IOException {
     ConnManager mgr = context.getConnManager();
-    String username = options.getUsername();
-    if (null == username || username.length() == 0) {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString());
-    } else {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-          options.getConnectString(), username, options.getPassword());
-    }
-
-    String[] colNames = options.getColumns();
-    if (null == colNames) {
-      colNames = mgr.getColumnNames(tableName);
-    }
-
-    String[] sqlColNames = null;
-    if (null != colNames) {
-      sqlColNames = new String[colNames.length];
-      for (int i = 0; i < colNames.length; i++) {
-        sqlColNames[i] = mgr.escapeColName(colNames[i]);
+    try {
+      String username = options.getUsername();
+      if (null == username || username.length() == 0) {
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(),
+            options.getConnectString(),
+            options.getConnectionParams());
+      } else {
+        DBConfiguration.configureDB(job.getConfiguration(),
+            mgr.getDriverClass(),
+            options.getConnectString(),
+            username, options.getPassword(),
+            options.getConnectionParams());
       }
+
+      String [] colNames = options.getColumns();
+      if (null == colNames) {
+        colNames = mgr.getColumnNames(tableName);
+      }
+
+      if (mgr.escapeTableNameOnExport()) {
+        DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), colNames);
+      } else {
+        DBOutputFormat.setOutput(job, tableName, colNames);
+      }
+
+      job.setOutputFormatClass(getOutputFormatClass());
+      if (isHCatJob) {
+        job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY,
+          tableClassName);
+      }
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException("Could not load OutputFormat", cnfe);
     }
-
-    DataDrivenDBInputFormat.setInput(job, DBWritable.class, tableName, null,
-        null, sqlColNames);
-
-    // Configure the actual InputFormat to use.
-    super.configureInputFormat(job, tableName, tableClassName, splitByCol);
   }
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
+    if (isHCatJob) {
+      return NetezzaExternalTableHCatExportMapper.class;
+    }
     if (inputIsSequenceFiles()) {
       return NetezzaExternalTableRecordExportMapper.class;
     } else {

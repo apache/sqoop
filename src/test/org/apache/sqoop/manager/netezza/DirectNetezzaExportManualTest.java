@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.netezza;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -96,7 +96,7 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
   @Override
   public void createTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    createTableNZ(getTableName(), extraColumns);
+    NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
   }
 
   /**
@@ -107,10 +107,12 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
   @Override
   public void createStagingTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    createTableNZ(getStagingTableName(), extraColumns);
+    NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
   }
 
-  private void runNetezzaTest(String tableName, String[] argv,
+
+
+  protected void runNetezzaTest(String tableName, String[] argv,
     ColumnGenerator...extraCols) throws IOException {
     SqoopOptions options = new SqoopOptions(
         NetezzaTestUtils.getNZConnectString(), getTableName());
@@ -211,6 +213,7 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
       // success
     }
   }
+
 
   @Override
   public void testMultiMapTextExportWithStaging() throws IOException,
