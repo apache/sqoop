@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
@@ -33,6 +34,8 @@ import org.apache.sqoop.utils.ClassUtils;
 public class GenericJdbcExportInitializer extends Initializer<ConnectionConfiguration, ExportJobConfiguration> {
 
   private GenericJdbcExecutor executor;
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcExportInitializer.class);
 
   @Override
   public void initialize(InitializerContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
@@ -75,6 +78,11 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
 
     String schemaName = jobConfig.table.schemaName;
     String tableName = jobConfig.table.tableName;
+    String stageTableName = jobConfig.table.stageTableName;
+    boolean clearStageTable = jobConfig.table.clearStageTable == null ?
+      false : jobConfig.table.clearStageTable;
+    final boolean stageEnabled =
+      stageTableName != null && stageTableName.length() > 0;
     String tableSql = jobConfig.table.sql;
     String tableColumns = jobConfig.table.columns;
 
@@ -85,9 +93,28 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
 
     } else if (tableName != null) {
       // when table name is specified:
+      if(stageEnabled) {
+        LOG.info("Stage has been enabled.");
+        LOG.info("Use stageTable: " + stageTableName +
+          " with clearStageTable: " + clearStageTable);
+
+        if(clearStageTable) {
+          executor.deleteTableData(stageTableName);
+        } else {
+          long stageRowCount = executor.getTableRowCount(stageTableName);
+          if(stageRowCount > 0) {
+            throw new SqoopException(
+              GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0017);
+          }
+        }
+      }
 
       // For databases that support schemas (IE: postgresql).
-      String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+      final String tableInUse = stageEnabled ? stageTableName : tableName;
+      String fullTableName = (schemaName == null) ?
+        executor.delimitIdentifier(tableInUse) :
+        executor.delimitIdentifier(schemaName) +
+          "." + executor.delimitIdentifier(tableInUse);
 
       if (tableColumns == null) {
         String[] columns = executor.getQueryColumns("SELECT * FROM "

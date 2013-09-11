@@ -26,9 +26,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 
 public class GenericJdbcExecutor {
+
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcExecutor.class);
 
   private Connection connection;
   private PreparedStatement preparedStatement;
@@ -66,6 +70,77 @@ public class GenericJdbcExecutor {
       connection.setAutoCommit(autoCommit);
     } catch (SQLException e) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public void deleteTableData(String tableName) {
+    LOG.info("Deleting all the rows from: " + tableName);
+    executeUpdate("DELETE FROM " + tableName);
+  }
+
+  public void migrateData(String fromTable, String toTable) {
+    String insertQuery = "INSERT INTO " + toTable +
+      " ( SELECT * FROM " + fromTable + " )";
+    Statement stmt = null;
+    Boolean oldAutoCommit = null;
+    try {
+      final long expectedInsertCount = getTableRowCount(fromTable);
+      oldAutoCommit = connection.getAutoCommit();
+      connection.setAutoCommit(false);
+      stmt = connection.createStatement();
+      final int actualInsertCount = stmt.executeUpdate(insertQuery);
+      if(expectedInsertCount == actualInsertCount) {
+        LOG.info("Transferred " + actualInsertCount + " rows of staged data " +
+          "from: " + fromTable + " to: " + toTable);
+        connection.commit();
+        deleteTableData(fromTable);
+        connection.commit();
+      } else {
+        LOG.error("Rolling back as number of rows inserted into table: " +
+          toTable + " was: " + actualInsertCount + " expected: " +
+          expectedInsertCount);
+        connection.rollback();
+        throw new SqoopException(
+          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0018);
+      }
+    } catch(SQLException e) {
+      LOG.error("Got SQLException while migrating data from: " + fromTable +
+        " to: " + toTable, e);
+      throw new SqoopException(
+        GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0018, e);
+    } finally {
+      if(stmt != null) {
+        try {
+          stmt.close();
+        } catch(SQLException e) {
+          LOG.warn("Got SQLException at the time of closing statement.", e);
+        }
+      }
+      if(oldAutoCommit != null) {
+        try {
+          connection.setAutoCommit(oldAutoCommit);
+        } catch(SQLException e) {
+          LOG.warn("Got SQLException while setting autoCommit mode.", e);
+        }
+      }
+    }
+  }
+
+  public long getTableRowCount(String tableName) {
+    ResultSet resultSet = executeQuery("SELECT COUNT(1) FROM " + tableName);
+    try {
+      resultSet.next();
+      return resultSet.getLong(1);
+    } catch(SQLException e) {
+      throw new SqoopException(
+        GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0004, e);
+    } finally {
+      try {
+        if(resultSet != null)
+          resultSet.close();
+      } catch(SQLException e) {
+        LOG.warn("Got SQLException while closing resultset.", e);
+      }
     }
   }
 

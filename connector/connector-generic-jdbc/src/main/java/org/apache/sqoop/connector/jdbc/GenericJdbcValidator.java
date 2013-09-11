@@ -88,6 +88,17 @@ public class GenericJdbcValidator extends Validator {
     if(configuration.table.tableName != null && configuration.table.sql != null) {
       validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
     }
+    if(configuration.table.tableName == null &&
+        configuration.table.stageTableName != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "table",
+        "Stage table name cannot be specified without specifying table name");
+    }
+    if(configuration.table.stageTableName == null &&
+        configuration.table.clearStageTable != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "table",
+        "Clear stage table cannot be specified without specifying name of " +
+        "the stage table.");
+    }
 
     return validation;
   }

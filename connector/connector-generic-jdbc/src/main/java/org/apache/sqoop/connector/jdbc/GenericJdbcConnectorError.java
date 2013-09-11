@@ -73,6 +73,11 @@ public enum GenericJdbcConnectorError implements ErrorCode {
   /** Can't fetch schema */
   GENERIC_JDBC_CONNECTOR_0016("Can't fetch schema"),
 
+  /** Neither the table name nor the table sql are specified. */
+  GENERIC_JDBC_CONNECTOR_0017("The stage table is not empty."),
+
+  GENERIC_JDBC_CONNECTOR_0018("Error occurred while transferring data from " +
+    "stage table to destination table."),
   ;
 
   private final String message;

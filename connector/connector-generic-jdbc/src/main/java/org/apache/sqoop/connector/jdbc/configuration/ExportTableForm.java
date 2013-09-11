@@ -29,4 +29,6 @@ public class ExportTableForm {
   @Input(size = 2000) public String tableName;
   @Input(size = 50)   public String sql;
   @Input(size = 50)   public String columns;
+  @Input(size = 2000) public String stageTableName;
+  @Input              public Boolean clearStageTable;
 }
