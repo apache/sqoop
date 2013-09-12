@@ -121,8 +121,20 @@
       </then>
     </elseif>
 
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="210" />
+      <then>
+        <property name="hadoop.version" value="2.1.0-beta" />
+        <property name="hbase94.version" value="0.94.2" />
+        <property name="zookeeper.version" value="3.4.2" />
+        <property name="hadoop.version.full" value="2.1.0-beta" />
+        <property name="hcatalog.version" value="0.11.0" />
+        <property name="hbasecompatprofile" value="2" />
+      </then>
+    </elseif>
+
     <else>
-      <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100 or 200." />
+      <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100, 200 or 210." />
     </else>
   </if>
 
