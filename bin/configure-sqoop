@@ -44,14 +44,22 @@ if [ -z "${HADOOP_COMMON_HOME}" ]; then
   if [ -n "${HADOOP_HOME}" ]; then
     HADOOP_COMMON_HOME=${HADOOP_HOME}
   else
-    HADOOP_COMMON_HOME=/usr/lib/hadoop
+    if [ -d "/usr/lib/hadoop" ]; then
+      HADOOP_COMMON_HOME=/usr/lib/hadoop
+    else
+      HADOOP_COMMON_HOME=${SQOOP_HOME}/../hadoop
+    fi
   fi
 fi
 if [ -z "${HADOOP_MAPRED_HOME}" ]; then
   if [ -n "${HADOOP_HOME}" ]; then
     HADOOP_MAPRED_HOME=${HADOOP_HOME}
   else
-    HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+    if [ -d "/usr/lib/hadoop-mapreduce" ]; then
+      HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+    else
+      HADOOP_MAPRED_HOME=${SQOOP_HOME}/../hadoop-mapreduce
+    fi
   fi
 fi
 
@@ -65,10 +73,18 @@ if [ -z "${HADOOP_HOME}" ]; then
 fi
 
 if [ -z "${HBASE_HOME}" ]; then
-  HBASE_HOME=/usr/lib/hbase
+  if [ -d "/usr/lib/hbase" ]; then
+    HBASE_HOME=/usr/lib/hbase
+  else
+    HBASE_HOME=${SQOOP_HOME}/../hbase
+  fi
 fi
 if [ -z "${HCAT_HOME}" ]; then
-  HCAT_HOME=/usr/lib/hcatalog
+  if [ -d "/usr/lib/hive-hcatalog" ]; then
+    HCAT_HOME=/usr/lib/hive-hcatalog
+  else
+    HCAT_HOME=${SQOOP_HOME}/../hive-hcatalog
+  fi
 fi
 
 # Check: If we can't find our dependencies, give up here.
