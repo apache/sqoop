@@ -1,3 +1,237 @@
+Release 1.99.3
+
+  SUB-TASK
+
+    SQOOP-659: Design metadata upgrade procedure
+
+    SQOOP-924: Sqoop2: Devguide: Describe wire protocol
+
+    SQOOP-945: Sqoop2: Integration: Auxiliary methods that will support export functionality
+
+    SQOOP-994: Sqoop2: Upgrade: Add calling validation to the upgrade method
+
+    SQOOP-996: Sqoop2: Upgrade: Create upgrade tests
+
+    SQOOP-997: Sqoop2: Upgrade: Provide ability to disable the automatic upgrade
+
+    SQOOP-998: Sqoop2: Upgrade: Add framework upgrader
+
+    SQOOP-1009: Sqoop2: Integration: Create Teradata provider
+
+    SQOOP-1014: Sqoop2: Splitter: Add Bit/Boolean based implementation
+
+    SQOOP-1015: Sqoop2: Splitter: Add Datetime based implementation
+
+    SQOOP-1016: Sqoop2: Splitter: Add text char implementation
+
+    SQOOP-1022: Metadata upgrade fails with NPE getConnector method
+
+    SQOOP-1023: STMT_DELETE_FORMS_FOR_CONNECTOR query in DerbySchemaSquery looks for incorrect column
+
+    SQOOP-1024: GenericJdbcConnectorUpgrader must ignore inputs which may not exist in old version
+
+    SQOOP-1025: Sqoop metadata upgrade must set job id in the new job being created
+
+    SQOOP-1077: Sqoop2: Integration: Create Netezza provider
+
+    SQOOP-1087: Sqoop2: Integration: Abstract common functionality into src module
+
+    SQOOP-1091: Sqoop2: Submission history API - provide SqoopClient programming API
+
+    SQOOP-1092: Sqoop2: Submission history API - provide client shell function `show submission`
+
+    SQOOP-1101: Sqoop2: Basic schema: Provide implementation of the proposed data types
+
+    SQOOP-1102: Sqoop2: Basic schema: Generate the schema on import in Generic JDBC Connector
+
+    SQOOP-1103: Sqoop2: Basic schema: Provide facility transfer Schema  from server to client
+
+    SQOOP-1114: Sqoop2: Integration: Add tests for various Generic JDBC Connector splitters
+
+    SQOOP-1115: Sqoop2: Integration: Provide helper methods for synchronous job submission
+
+    SQOOP-1200: Sqoop2 1.99.3 Pom files version change on release branch
+
+    SQOOP-1201: Sqoop2: Update docs to reflect correct version on the release branch
+
+  BUG
+
+    SQOOP-515: Sqoop2: Datatype support
+
+    SQOOP-827: Sqoop2: MMapInput is null while retrieving from DB if pass empty map on write
+
+    SQOOP-897: Sqoop2: Remove script addtowar.sh and use catalina&#39;s common.loader instead
+
+    SQOOP-958: Sqoop2: fix version tests in Mac OS X
+
+    SQOOP-974: Sqoop2: Add staging table support to generic jdbc export job
+
+    SQOOP-982: Sqoop2: Allow user to pass custom parameters to catalina.sh
+
+    SQOOP-989: Sqoop2: setenv.sh overrides value of JAVA_OPTS
+
+    SQOOP-993: Sqoop2: Metadata upgrade
+
+    SQOOP-995: Sqoop2: Add cloning ability to model classes
+
+    SQOOP-1002: Sqoop2: Mapreduce local mode detection is not working correctly on Hadoop 2.x
+
+    SQOOP-1003: Sqoop2: sqoop.sh execution error
+
+    SQOOP-1005: Sqoop2: Update year in the notice file to 2013
+
+    SQOOP-1019: Sqoop2: Client side caching input forms
+
+    SQOOP-1036: Sqoop2: JobClient.getCounters can return NULL
+
+    SQOOP-1039: Sqoop2: show version with no args should show something
+
+    SQOOP-1040: Sqoop2: NPE in TableDisplayer 
+
+    SQOOP-1041: Sqoop2: Framework upgrade in JdbcRepository returns the outdated value
+
+    SQOOP-1046: Sqoop2: Importing single row using decimal splitter will not import anything
+
+    SQOOP-1048: Sqoop2: NPE when importing NULL value 
+
+    SQOOP-1049: Sqoop2: Record not imported if partition column value is NULL
+
+    SQOOP-1062: Misspell in &quot;isVerboose()&quot; method, it should be &quot;isVerbose()&quot;
+
+    SQOOP-1069: Sqoop2: Incorrect error message from FrameworkValidator
+
+    SQOOP-1070: Shell scripts should not rely on $PATH if $JAVA_HOME is set
+
+    SQOOP-1080: Sqoop2: Investigate Jenkins test failures
+
+    SQOOP-1081: destroy() method of ConnectorManager has not been implemented yet.
+
+    SQOOP-1082: Implement pre-commit testing with Jenkins
+
+    SQOOP-1088: Sqoop2: Submission history API
+
+    SQOOP-1089: Sqoop2: Accept Language header default
+
+    SQOOP-1095: Sqoop2: PreCommit Hook have incorrect branch name
+
+    SQOOP-1100: Sqoop2: Missing setBoolean() method for MutableContext interface
+
+    SQOOP-1104: Sqoop2: Allow versioned patches in the PreCommit hook
+
+    SQOOP-1105: Sqoop2: Remove our implementation of StringUtils
+
+    SQOOP-1112: Sqoop2: Date splitter might return splits omitting some boundaries
+
+    SQOOP-1113: Sqoop2: Text splitter will fail on interval &quot;Breezy Badger&quot;&quot; to &quot;Warty Warthog&quot;&quot;
+
+    SQOOP-1121: Sqoop2: Serialize schema and make them available in the MR job.
+
+    SQOOP-1123: Sqoop2: Add eclipse project metadata folder excluded from maven
+
+    SQOOP-1128: Sqoop2: SqoopException being nested into another SqoopException in Repository
+
+    SQOOP-1130: Sqoop2: Sqoop MapReduce Job Failed when max and min boundary are both null
+
+    SQOOP-1131: New test added in SQOOP-1121 is using unsupported API in Hadoop 100
+
+    SQOOP-1136: Sqoop2: MBooleanInput forget to copy persistenceId when do clone()
+
+    SQOOP-1139: Sqoop2: JobManager.java indentation is inconsistent with rest of the codebase
+
+    SQOOP-1145: Sqoop2: Use JSON object for serializing MAP input type
+
+    SQOOP-1147: Sqoop2: show framework function does not behave as expected
+
+    SQOOP-1154: Sqoop2: Text partitioner might miss or include edge values
+
+    SQOOP-1169: Sqoop2: org.apache.sqoop.repository.schema.immutable should default to false
+
+    SQOOP-1178: Sqoop2: get connections for connector columns out of order
+
+    SQOOP-1180: Sqoop2: Metadata upgrade is calling validators with Model classes instead of configuration objects
+
+  IMPROVEMENT
+
+    SQOOP-675: Sqoop2: Substitute submission command with top level commands start, stop and status
+
+    SQOOP-921: Sqoop2: Create standalone shell package
+
+    SQOOP-943: Sqoop2: Repository wide configuration of immutable disk structures
+
+    SQOOP-971: Sqoop2: Component reconfigurability
+
+    SQOOP-973: Sqoop2: Merge host, port and app to single server URL in Sqoop shell
+
+    SQOOP-983: Sqoop2: Document client synchronous mode
+
+    SQOOP-984: Sqoop2: Improve user experience on synchronous job submission
+
+    SQOOP-985: Sqoop2: Introduce synchronous job submission to Client API
+
+    SQOOP-990: Sqoop2: Allow users to override Sqoop2&#39;s default http port and admin port
+
+    SQOOP-1012: Sqoop2: Generic JDBC Connector should have one static instance of validator
+
+    SQOOP-1017: Sqoop2: Split FrameworkManager into two classes
+
+    SQOOP-1028: Remove poll timeout parameter from Sqoop shell synchronous submission
+
+    SQOOP-1042: Sqoop2: Name constraints in Derby repository
+
+    SQOOP-1043: Sqoop2: Improve error messages in Derby repository
+
+    SQOOP-1044: Sqoop2: Improve logging in metadata upgrade methods
+
+    SQOOP-1059: Sqoop2: Remove ad hoc modle cloning methods in common module
+
+    SQOOP-1060: Sqoop2: Increase maximal size of custom query in Generic JDBC Connector
+
+    SQOOP-1065: Sqoop2: Remove special lock object in FrameworkManager
+
+    SQOOP-1067: Sqoop2: Tests should not use /tmp/ directory for storing data
+
+    SQOOP-1073: Sqoop2: Introduce schema for transferred data
+
+    SQOOP-1075: Sqoop2: Persist Framework metadata version in repository
+
+    SQOOP-1111: Sqoop2: Implement version detection and structure updates into Derby repository 
+
+    SQOOP-1141: Sqoop2: Provide ability to enable/disable connections and jobs
+
+    SQOOP-1142: Sqoop2: Provide creater and last edited by to metadata structures
+
+    SQOOP-1143: Sqoop2: Provide server audit log for operations upon metadata structures
+
+    SQOOP-1182: Expose compression options for Sqoop2 import
+
+    SQOOP-1183: Sqoop2: Add getConnector(String) to the client API
+
+    SQOOP-1184: Sqoop2: Improve error messages during metadata upgrade
+
+  NEW FEATURE
+
+    SQOOP-663: Sqoop2: Introduce connector SDK
+
+    SQOOP-1013: Sqoop2: Provide splitters for additional data types to Generic JDBC Connector
+
+    SQOOP-1076: Sqoop2: Introduce Boolean model type
+
+    SQOOP-1155: Sqoop 2 documentation for connector development
+
+  TASK
+
+    SQOOP-672: Unify logger usage across entire code base
+
+    SQOOP-744: Sqoop2: Supply log4j configuration for generated mapreduce job 
+
+    SQOOP-745: Sqoop2: Change &quot;submit&quot; client command to &quot;submission&quot;
+
+    SQOOP-1001: Sqoop2: Document methods for overriding server port
+
+    SQOOP-1109: Sqoop2: Add new committers to root pom.xml file
+
+    SQOOP-1110: Sqoop2: Precommit: Add routine to detect if patch touch test
+
 Release 1.99.2
 
   SUB-TASK
