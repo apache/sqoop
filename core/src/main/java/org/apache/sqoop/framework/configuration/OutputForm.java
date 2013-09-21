@@ -32,5 +32,7 @@ public class OutputForm {
 
   @Input public OutputCompression compression;
 
+  @Input(size = 255) public String customCompression;
+
   @Input(size = 255) public String outputDirectory;
 }

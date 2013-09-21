@@ -21,6 +21,7 @@ import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.framework.configuration.InputForm;
+import org.apache.sqoop.framework.configuration.OutputCompression;
 import org.apache.sqoop.framework.configuration.OutputForm;
 import org.apache.sqoop.framework.configuration.ThrottlingForm;
 import org.apache.sqoop.model.MJob;
@@ -82,6 +83,19 @@ public class FrameworkValidator extends Validator {
   private void validateOutputForm(Validation validation, OutputForm output) {
     if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Output directory is empty");
+    }
+    if(output.customCompression != null &&
+      output.customCompression.trim().length() > 0  &&
+      output.compression != OutputCompression.CUSTOM) {
+      validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
+        "custom compression should be blank as " + output.compression + " is being used.");
+    }
+    if(output.compression == OutputCompression.CUSTOM &&
+      (output.customCompression == null ||
+        output.customCompression.trim().length() == 0)
+      ) {
+      validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
+        "custom compression is blank.");
     }
   }
 

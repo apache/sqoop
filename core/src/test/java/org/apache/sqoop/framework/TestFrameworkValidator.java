@@ -20,6 +20,7 @@ package org.apache.sqoop.framework;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.framework.configuration.OutputCompression;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
@@ -115,5 +116,53 @@ public class TestFrameworkValidator {
     assertEquals(Status.UNACCEPTABLE, validation.getStatus());
     assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.extractors")));
     assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.loaders")));
+
+    // specifying both compression as well as customCompression is
+    // unacceptable
+    configuration = new ImportJobConfiguration();
+    configuration.output.outputDirectory = "/czech/republic";
+    configuration.throttling.extractors = 2;
+    configuration.throttling.loaders = 2;
+    configuration.output.compression = OutputCompression.BZIP2;
+    configuration.output.customCompression = "some.compression.codec";
+
+    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
+    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
+    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
+
+    // specifying a customCompression is fine
+    configuration = new ImportJobConfiguration();
+    configuration.output.outputDirectory = "/czech/republic";
+    configuration.throttling.extractors = 2;
+    configuration.throttling.loaders = 2;
+    configuration.output.compression = OutputCompression.CUSTOM;
+    configuration.output.customCompression = "some.compression.codec";
+
+    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
+    assertEquals(Status.FINE, validation.getStatus());
+
+    // specifying a customCompression without codec name is unacceptable
+    configuration = new ImportJobConfiguration();
+    configuration.output.outputDirectory = "/czech/republic";
+    configuration.throttling.extractors = 2;
+    configuration.throttling.loaders = 2;
+    configuration.output.compression = OutputCompression.CUSTOM;
+    configuration.output.customCompression = "";
+
+    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
+    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
+    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
+
+    configuration = new ImportJobConfiguration();
+    configuration.output.outputDirectory = "/czech/republic";
+    configuration.throttling.extractors = 2;
+    configuration.throttling.loaders = 2;
+    configuration.output.compression = OutputCompression.CUSTOM;
+    configuration.output.customCompression = null;
+
+    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
+    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
+    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
+
   }
 }

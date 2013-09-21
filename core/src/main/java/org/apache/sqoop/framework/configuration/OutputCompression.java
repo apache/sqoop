@@ -29,4 +29,5 @@ public enum OutputCompression {
   LZO,
   LZ4,
   SNAPPY,
+  CUSTOM,
 }

@@ -83,4 +83,30 @@ public class MapreduceExecutionEngineTest {
     assertEquals("Unexpected codec flag was returned", obtainedCodecFlag,
       expectedCompressionFlag);
   }
+
+  @Test
+  public void testCustomCompression() {
+    MapreduceExecutionEngine executionEngine = new MapreduceExecutionEngine();
+    final String customCodecName = "custom.compression";
+    SubmissionRequest request = executionEngine.createSubmissionRequest();
+    ImportJobConfiguration jobConf = new ImportJobConfiguration();
+    jobConf.output.outputFormat = OutputFormat.TEXT_FILE;
+    jobConf.output.compression = OutputCompression.CUSTOM;
+    jobConf.output.customCompression = customCodecName;
+    request.setConfigFrameworkJob(jobConf);
+    request.setConnectorCallbacks(new Importer(Initializer.class,
+      Partitioner.class, Extractor.class, Destroyer.class) {
+    });
+    executionEngine.prepareImportSubmission(request);
+
+    MutableMapContext context = request.getFrameworkContext();
+    final String obtainedCodecName = context.getString(
+      JobConstants.HADOOP_COMPRESS_CODEC);
+    final boolean obtainedCodecFlag =
+      context.getBoolean(JobConstants.HADOOP_COMPRESS, false);
+    assertEquals("Unexpected codec name was returned", obtainedCodecName,
+      customCodecName);
+    assertEquals("Unexpected codec flag was returned", obtainedCodecFlag, true);
+  }
+
 }

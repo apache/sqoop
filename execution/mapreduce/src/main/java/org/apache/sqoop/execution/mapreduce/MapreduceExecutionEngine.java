@@ -123,6 +123,8 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
         return "org.apache.hadoop.io.compress.Lz4Codec";
       case SNAPPY:
         return "org.apache.hadoop.io.compress.SnappyCodec";
+      case CUSTOM:
+        return jobConf.output.customCompression.trim();
     }
     return null;
   }
