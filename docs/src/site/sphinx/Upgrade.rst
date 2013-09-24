@@ -1,0 +1,49 @@
+.. Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF lANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+=======
+Upgrade
+=======
+
+This page describes procedure that you need to take in order to upgrade Sqoop from one release to a higher release. Upgrading both client and server component will be discussed separately.
+
+.. note:: Only updates from one Sqoop 2 release to another are covered, starting with upgrades from version 1.99.2. This guide do not contain general information how to upgrade from Sqoop 1 to Sqoop 2.
+
+Upgrading Server
+================
+
+As Sqoop server is using external repository for persisting connection and job objects, this repository needs to be updated in addition to updating the server bits. The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the upgrade procedure by stopping the server: ::
+
+  ./bin/sqoop.sh server stop
+
+It's strongly advised to back up the repository before moving on to next steps. Precise back-up instructions depends on the repository implementation that is in use, please follow the repository owns instructions to back it up.
+
+Now you can update server bits. Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary during Sqoop Server boot up procedure. You need to set following properties in configuration file ``sqoop.properties``::
+
+  org.apache.sqoop.repository.schema.immutable=false
+  org.apache.sqoop.connector.autoupgrade=true
+  org.apache.sqoop.framework.autoupgrade=true
+
+When all properties are set, start server using following command::
+
+  ./bin/sqoop.sh server start
+
+All required actions will be performed automatically during the server bootstrap procedure. It's strongly advised to set all three properties to their original values once the server has been successfully started.
+
+Upgrading Client
+================
+
+Client do not require any manual steps during upgrade. Replacing the binaries with updated version is sufficient.
