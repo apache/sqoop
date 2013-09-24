@@ -52,6 +52,7 @@ User Documentation
 ------------------
 
 - `Installation <Installation.html>`_
+- `Upgrade <Upgrade.html>`_
 - `5 Minutes Demo <Sqoop5MinutesDemo.html>`_
 - `Command Line Client <CommandLineClient.html>`_
 
