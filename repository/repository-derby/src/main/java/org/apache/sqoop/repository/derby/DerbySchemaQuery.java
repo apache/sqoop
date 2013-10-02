@@ -151,7 +151,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQS_CREATION_DATE: TIMESTAMP      |
  *    | SQS_UPDATE_USER: VARCHAR(32)      |
  *    | SQS_UPDATE_DATE: TIMESTAMP        |
- *    | SQS_EXTERNAL_ID: VARCHAR(25)      |
+ *    | SQS_EXTERNAL_ID: VARCHAR(50)      |
  *    | SQS_EXTERNAL_LINK: VARCHAR(150)   |
  *    | SQS_EXCEPTION: VARCHAR(150)       |
  *    | SQS_EXCEPTION_TRACE: VARCHAR(750) |
@@ -352,7 +352,7 @@ public final class DerbySchemaQuery {
     + COLUMN_SQS_STATUS + " VARCHAR(20), "
     + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
     + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
-    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(25), "
+    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
     + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
     + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
     + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
@@ -373,6 +373,11 @@ public final class DerbySchemaQuery {
       "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
       + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) "
       + "DEFAULT NULL";
+
+  //DDL: Add update_user column to table SQ_SUBMISSION
+  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50 =
+     "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ALTER COLUMN "
+     + COLUMN_SQS_EXTERNAL_ID + " SET DATA TYPE VARCHAR(50)";
 
   // DDL: Create table SQ_COUNTER_GROUP
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
