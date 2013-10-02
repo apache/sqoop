@@ -166,9 +166,16 @@ public class SqoopOutputFormatLoadExecutor {
       if (writerFinished) {
         return null;
       }
-      Object content = data.getContent(type);
-      free.release();
-      return content;
+      try {
+        Object content = data.getContent(type);
+        return content;
+      } catch (Throwable t) {
+        readerFinished = true;
+        LOG.error("Caught exception e while getting content ", t);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+      } finally {
+        free.release();
+      }
     }
   }
 
