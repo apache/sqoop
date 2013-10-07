@@ -43,7 +43,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQC_ID: BIGINT PK AUTO-GEN |
  *    | SQC_NAME: VARCHAR(64)      |
  *    | SQC_CLASS: VARCHAR(255)    |
- *    | SQC_VERSION: VARCHAR(25)   |
+ *    | SQC_VERSION: VARCHAR(64)   |
  *    +----------------------------+
  * </pre>
  * </p>
@@ -218,7 +218,7 @@ public final class DerbySchemaQuery {
       + COLUMN_SQC_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
       + COLUMN_SQC_NAME + " VARCHAR(64), "
       + COLUMN_SQC_CLASS + " VARCHAR(255), "
-      + COLUMN_SQC_VERSION + " VARCHAR(25) "
+      + COLUMN_SQC_VERSION + " VARCHAR(64) "
       + ")";
 
   // DDL: Create table SQ_FORM
@@ -945,6 +945,10 @@ public final class DerbySchemaQuery {
     "DELETE FROM " + TABLE_SQ_COUNTER_SUBMISSION
     + " WHERE " + COLUMN_SQRS_SUBMISSION + " = ?";
 
+  // DDL: Increased size of SQ_CONNECTOR.SQC_VERSION to 64
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64 =
+    "ALTER TABLE " + TABLE_SQ_CONNECTOR + " ALTER COLUMN "
+      + COLUMN_SQC_VERSION + " SET DATA TYPE VARCHAR(64)";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

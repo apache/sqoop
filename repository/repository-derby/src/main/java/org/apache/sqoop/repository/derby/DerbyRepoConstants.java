@@ -31,12 +31,15 @@ public final class DerbyRepoConstants {
    * History:
    * 0 - empty/unknown state
    * 1 - First two releases (1.99.1, 1.99.2)
-   * 2 - added SQ_SYSTEM, SQ_CONNECTION add column ENABLED,
+   * 2 - Version 1.99.3
+   *     added SQ_SYSTEM, SQ_CONNECTION add column ENABLED,
    *     SQ_CONNECTION add column CREATION_USER, SQ_CONNECTION add column UPDATE_USER,
    *     SQ_JOB add column ENABLED, SQ_JOB add column CREATION_USER,
    *     SQ_JOB add column UPDATE_USER, SQ_SUBMISSION add column CREATION_USER,
    *     SQ_SUBMISSION add column UPDATE_USER
-   * 3 - SQ_SUBMISSION modified SQS_EXTERNAL_ID varchar(50)
+   * 3 - Version 1.99.4
+   *     SQ_SUBMISSION modified SQS_EXTERNAL_ID varchar(50)
+   *     Increased size of SQ_CONNECTOR.SQC_VERSION to 64
    */
   public static final int VERSION = 3;
 
