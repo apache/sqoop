@@ -57,8 +57,8 @@ public final class CredentialsUtil {
                                              String passwordFilePath)
     throws IOException {
     LOG.debug("Fetching password from specified path: " + passwordFilePath);
-    FileSystem fs = FileSystem.get(conf);
     Path path = new Path(passwordFilePath);
+    FileSystem fs = path.getFileSystem(conf);
 
     if (!fs.exists(path)) {
       throw new IOException("The password file does not exist! "
