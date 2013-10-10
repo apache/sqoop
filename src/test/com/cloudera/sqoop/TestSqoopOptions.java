@@ -20,6 +20,7 @@ package com.cloudera.sqoop;
 
 import java.util.Properties;
 
+import com.cloudera.sqoop.tool.BaseSqoopTool;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -433,4 +434,32 @@ public class TestSqoopOptions extends TestCase {
     }
   }
 
+  // test that hbase bulk load import with table name and target dir
+  // passes validation
+  public void testHBaseBulkLoad() throws Exception {
+    String [] extraArgs = {
+        longArgument(BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG),
+        longArgument(BaseSqoopTool.TARGET_DIR_ARG), "./test",
+        longArgument(BaseSqoopTool.HBASE_TABLE_ARG), "test_table",
+        longArgument(BaseSqoopTool.HBASE_COL_FAM_ARG), "d"};
+
+    validateImportOptions(extraArgs);
+  }
+
+  // test that hbase bulk load import with a missing --hbase-table fails
+  public void testHBaseBulkLoadMissingHbaseTable() throws Exception {
+    String [] extraArgs = {
+        longArgument(BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG),
+        longArgument(BaseSqoopTool.TARGET_DIR_ARG), "./test"};
+    try {
+      validateImportOptions(extraArgs);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // Expected
+    }
+  }
+
+  private static String longArgument(String argument) {
+    return String.format("--%s", argument);
+  }
 }

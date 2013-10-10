@@ -249,6 +249,8 @@ public class ImportJobBase extends JobBase {
         throw new ImportException("Import job failed!");
       }
 
+      completeImport(job);
+
       if (options.isValidationEnabled()) {
         validateImport(tableName, conf, job);
       }
@@ -260,6 +262,13 @@ public class ImportJobBase extends JobBase {
       unloadJars();
       jobTeardown(job);
     }
+  }
+
+  /**
+   * Perform any operation that needs to be done post map/reduce job to
+   * complete the import.
+   */
+  protected void completeImport(Job job) throws IOException, ImportException {
   }
 
   protected void validateImport(String tableName, Configuration conf, Job job)

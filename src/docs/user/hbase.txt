@@ -58,4 +58,5 @@ mode), and then inserts the UTF-8 bytes of this string in the target
 cell. Sqoop will skip all rows containing null values in all columns
 except the row key column.
 
-
+To decrease the load on hbase, Sqoop can do bulk loading as opposed to
+direct writes. To use bulk loading, enable it using +\--hbase-bulkload+.

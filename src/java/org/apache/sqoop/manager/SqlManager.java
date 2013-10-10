@@ -41,7 +41,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
+import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.util.SqlTypeMap;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -587,7 +589,11 @@ public abstract class SqlManager
         throw new ImportException("HBase jars are not present in "
             + "classpath, cannot import to HBase!");
       }
-      importer = new HBaseImportJob(opts, context);
+      if(!opts.isBulkLoadEnabled()){
+        importer = new HBaseImportJob(opts, context);
+      } else {
+        importer = new HBaseBulkImportJob(opts, context);
+      }
     } else {
       // Import to HDFS.
       importer = new DataDrivenImportJob(opts, context.getInputFormat(),
@@ -619,7 +625,11 @@ public abstract class SqlManager
         throw new ImportException("HBase jars are not present in classpath,"
             + " cannot import to HBase!");
       }
-      importer = new HBaseImportJob(opts, context);
+      if(!opts.isBulkLoadEnabled()){
+        importer = new HBaseImportJob(opts, context);
+      } else {
+        importer = new HBaseBulkImportJob(opts, context);
+      }
     } else {
       // Import to HDFS.
       importer = new DataDrivenImportJob(opts, context.getInputFormat(),

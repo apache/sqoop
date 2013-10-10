@@ -66,6 +66,12 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public static final String TRANSFORMER_CLASS_KEY =
       "sqoop.hbase.insert.put.transformer.class";
 
+  /**
+   *  Configuration key to enable/disable hbase bulkLoad.
+   */
+  public static final String BULK_LOAD_ENABLED_KEY =
+      "sqoop.hbase.bulk.load.enabled";
+
   /** Configuration key to specify whether to add the row key column into
    *  HBase. Set to false by default.
    */

@@ -33,5 +33,6 @@ Argument                      Description
                               attributes
 +\--hbase-table <table-name>+ Specifies an HBase table to use as the \
                               target instead of HDFS
++\--hbase-bulkload+           Enables bulk loading
 --------------------------------------------------------------------------
 

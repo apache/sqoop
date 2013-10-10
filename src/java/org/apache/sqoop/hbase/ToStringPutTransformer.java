@@ -181,8 +181,13 @@ public class ToStringPutTransformer extends PutTransformer {
         // check addRowKey flag before including rowKey field.
         Object val = fieldEntry.getValue();
         if (null != val) {
-          put.add(colFamilyBytes, getFieldNameBytes(colName),
-              Bytes.toBytes(toHBaseString(val)));
+          if ( val instanceof byte[]) {
+            put.add(colFamilyBytes, getFieldNameBytes(colName),
+                (byte[])val);
+          } else {
+	          put.add(colFamilyBytes, getFieldNameBytes(colName),
+	              Bytes.toBytes(toHBaseString(val)));
+          }
         }
       }
     }

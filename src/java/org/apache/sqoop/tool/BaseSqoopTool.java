@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.cloudera.sqoop.util.ImportException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -175,6 +176,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HBASE_TABLE_ARG = "hbase-table";
   public static final String HBASE_COL_FAM_ARG = "column-family";
   public static final String HBASE_ROW_KEY_ARG = "hbase-row-key";
+  public static final String HBASE_BULK_LOAD_ENABLED_ARG =
+      "hbase-bulkload";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
 
@@ -710,6 +713,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withLongOpt(HBASE_ROW_KEY_ARG)
         .create());
     hbaseOpts.addOption(OptionBuilder
+        .withDescription("Enables HBase bulk loading")
+        .withLongOpt(HBASE_BULK_LOAD_ENABLED_ARG)
+        .create());
+    hbaseOpts.addOption(OptionBuilder
         .withDescription("If specified, create missing HBase tables")
         .withLongOpt(HBASE_CREATE_TABLE_ARG)
         .create());
@@ -1076,6 +1083,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setHBaseRowKeyColumn(in.getOptionValue(HBASE_ROW_KEY_ARG));
     }
 
+    out.setHBaseBulkLoadEnabled(in.hasOption(HBASE_BULK_LOAD_ENABLED_ARG));
+
     if (in.hasOption(HBASE_CREATE_TABLE_ARG)) {
       out.setCreateHBaseTable(true);
     }
@@ -1325,6 +1334,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     if (options.getHBaseTable() != null && options.isDirect()) {
       throw new InvalidOptionsException("Direct import is incompatible with "
         + "HBase. Please remove parameter --direct");
+    }
+
+    if (options.isBulkLoadEnabled() && options.getHBaseTable() == null) {
+      String validationMessage = String.format("Can't run import with %s " +
+          "without %s",
+          BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG,
+          BaseSqoopTool.HBASE_TABLE_ARG);
+      throw new InvalidOptionsException(validationMessage);
     }
   }
 

@@ -230,6 +230,9 @@ public class SqoopOptions implements Cloneable {
   // Column of the input to use as the row key.
   @StoredAsProperty("hbase.row.key.col") private String hbaseRowKeyCol;
 
+  // if true, bulk loading will be used.
+  @StoredAsProperty("hbase.bulk.load.enabled") private boolean hbaseBulkLoadEnabled;
+
   // if true, create tables/col families.
   @StoredAsProperty("hbase.create.table") private boolean hbaseCreateTable;
 
@@ -1921,6 +1924,20 @@ public class SqoopOptions implements Cloneable {
    */
   public void setHBaseRowKeyColumn(String col) {
     this.hbaseRowKeyCol = col;
+  }
+
+  /**
+   * @return true if bulk load is enabled and false otherwise.
+   */
+  public boolean isBulkLoadEnabled() {
+    return this.hbaseBulkLoadEnabled;
+  }
+
+  /**
+   * Sets the temp dir to use as the bulk load dir in an hbase import.
+   */
+  public void setHBaseBulkLoadEnabled(boolean hbaseBulkLoadEnabled) {
+    this.hbaseBulkLoadEnabled = hbaseBulkLoadEnabled;
   }
 
   /**
