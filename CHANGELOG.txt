@@ -150,6 +150,10 @@ Release 1.99.3
 
     SQOOP-1180: Sqoop2: Metadata upgrade is calling validators with Model classes instead of configuration objects
 
+    SQOOP-1205: Sqoop2: Provide upgrade guide for end users
+
+    SQOOP-1210: Exporting data with malformed records causes sqoop2 jobs to hang until killed or they timeout
+
   IMPROVEMENT
 
     SQOOP-675: Sqoop2: Substitute submission command with top level commands start, stop and status
