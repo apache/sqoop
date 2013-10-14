@@ -208,6 +208,19 @@ multi-column indices. If your table has no index column, or has a
 multi-column key, then you must also manually choose a splitting
 column.
 
+Controlling Distributed Cache
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop will copy the jars in $SQOOP_HOME/lib folder to job cache every
+time when start a Sqoop job. When launched by Oozie this is unnecessary
+since Oozie use its own Sqoop share lib which keeps Sqoop dependencies
+in the distributed cache. Oozie will do the localization on each
+worker node for the Sqoop dependencies only once during the first Sqoop
+job and reuse the jars on worker node for subsquencial jobs. Using
+option +--skip-dist-cache+ in Sqoop command when launched by Oozie will
+skip the step which Sqoop copies its dependencies to job cache and save
+massive I/O.
+
 Controlling the Import Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

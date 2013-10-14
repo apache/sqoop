@@ -280,6 +280,12 @@ public class TestSqoopOptions extends TestCase {
     assertEquals("String", mapping.get("id"));
   }
 
+  public void testSkipDistCacheOption() throws Exception {
+    String[] args = {"--skip-dist-cache"};
+    SqoopOptions opts = parse(args);
+    assertTrue(opts.isSkipDistCache());
+  }
+
   public void testPropertySerialization1() {
     // Test that if we write a SqoopOptions out to a Properties,
     // and then read it back in, we get all the same results.

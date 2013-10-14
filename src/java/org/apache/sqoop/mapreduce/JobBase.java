@@ -133,6 +133,10 @@ public class JobBase {
    */
   protected void cacheJars(Job job, ConnManager mgr)
       throws IOException {
+    if (options.isSkipDistCache()) {
+      LOG.info("Not adding sqoop jars to distributed cache as requested");
+      return;
+    }
 
     Configuration conf = job.getConfiguration();
     FileSystem fs = FileSystem.getLocal(conf);

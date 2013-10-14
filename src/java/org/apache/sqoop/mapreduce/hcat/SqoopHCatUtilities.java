@@ -730,6 +730,10 @@ public final class SqoopHCatUtilities {
       LOG.info("Not adding hcatalog jars to distributed cache in local mode");
       return;
     }
+    if (options.isSkipDistCache()) {
+      LOG.info("Not adding hcatalog jars to distributed cache as requested");
+      return;
+    }
     Configuration conf = job.getConfiguration();
     String hiveHome = null;
     String hCatHome = null;

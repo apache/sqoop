@@ -155,6 +155,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String UPDATE_KEY_ARG = "update-key";
   public static final String UPDATE_MODE_ARG = "update-mode";
   public static final String CALL_ARG = "call";
+  public static final String SKIP_DISTCACHE_ARG = "skip-dist-cache";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";
@@ -416,6 +417,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
             .hasArg().withDescription("Override $HADOOP_MAPRED_HOME_ARG")
             .withLongOpt(HADOOP_HOME_ARG)
             .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Skip copying jars to distributed cache")
+        .withLongOpt(SKIP_DISTCACHE_ARG)
+        .create());
 
     // misc (common)
     commonOpts.addOption(OptionBuilder
@@ -825,6 +830,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (in.hasOption(DRIVER_ARG)) {
       out.setDriverClassName(in.getOptionValue(DRIVER_ARG));
+    }
+
+    if (in.hasOption(SKIP_DISTCACHE_ARG)) {
+      LOG.debug("Disabling dist cache");
+      out.setSkipDistCache(true);
     }
 
     applyCredentialsOptions(in, out);

@@ -165,6 +165,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hcatalog.storage.stanza")
   private String hCatStorageStanza;
   private String hCatHome; // not serialized to metastore.
+  private boolean skipDistCache;
 
   // User explicit mapping of types
   private Properties mapColumnJava; // stored as map.colum.java
@@ -2197,5 +2198,13 @@ public class SqoopOptions implements Cloneable {
 
   public void setCall(String theCall) {
     this.call = theCall;
+  }
+
+  public void setSkipDistCache(boolean skip) {
+    this.skipDistCache = skip;
+  }
+
+  public boolean isSkipDistCache() {
+    return this.skipDistCache;
   }
 }

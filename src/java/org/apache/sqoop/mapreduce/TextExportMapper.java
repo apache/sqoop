@@ -109,8 +109,7 @@ public class TextExportMapper
       LOG.error("due to the batching nature of export.");
       LOG.error("");
 
-      throw new IOException("Can't export data, please check task tracker logs",
-        e);
+      throw new IOException("Can't export data, please check failed map task logs", e);
     }
   }
 }
