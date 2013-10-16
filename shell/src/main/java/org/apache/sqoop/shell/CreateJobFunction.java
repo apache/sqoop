@@ -20,14 +20,15 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.FormDisplayer;
+import org.apache.sqoop.shell.utils.FormOptions;
+import org.apache.sqoop.shell.utils.JobDynamicFormOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -36,6 +37,7 @@ import static org.apache.sqoop.shell.utils.FormFiller.*;
 /**
  * Handles creation of new job objects.
  */
+@SuppressWarnings("serial")
 public class CreateJobFunction extends  SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateJobFunction() {
@@ -53,27 +55,29 @@ public class CreateJobFunction extends  SqoopFunction {
     );
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
       printlnResource(Constants.RES_ARGS_XID_MISSING);
-      return null;
+      return false;
     }
     if (!line.hasOption(Constants.OPT_TYPE)) {
       printlnResource(Constants.RES_ARGS_TYPE_MISSING);
-      return null;
+      return false;
     }
-
-    try {
-      createJob(getLong(line, Constants.OPT_XID),
-                        line.getOptionValue(Constants.OPT_TYPE));
-    } catch (IOException ex) {
-      throw new SqoopException(ShellError.SHELL_0005, ex);
-    }
-
-    return null;
+    return true;
   }
 
-  private void createJob(Long connectionId, String type) throws IOException {
+  @Override
+  @SuppressWarnings("unchecked")
+  public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
+    return createJob(getLong(line, Constants.OPT_XID),
+                     line.getOptionValue(Constants.OPT_TYPE),
+                     line.getArgList(),
+                     isInteractive);
+  }
+
+  private Status createJob(Long connectionId, String type, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CREATE_CREATING_JOB, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
@@ -84,23 +88,42 @@ public class CreateJobFunction extends  SqoopFunction {
 
     Status status = Status.FINE;
 
-    printlnResource(Constants.RES_PROMPT_FILL_JOB_METADATA);
+    if (isInteractive) {
+      printlnResource(Constants.RES_PROMPT_FILL_JOB_METADATA);
 
-    do {
-      // Print error introduction if needed
-      if( !status.canProceed() ) {
-        errorIntroduction();
+      do {
+        // Print error introduction if needed
+        if( !status.canProceed() ) {
+          errorIntroduction();
+        }
+
+        // Fill in data from user
+        if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
+          return null;
+        }
+
+        // Try to create
+        status = client.createJob(job);
+      } while(!status.canProceed());
+    } else {
+      JobDynamicFormOptions options = new JobDynamicFormOptions();
+      options.prepareOptions(job);
+      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
+      if (fillJob(line, job)) {
+        status = client.createJob(job);
+        if (!status.canProceed()) {
+          printJobValidationMessages(job);
+          return null;
+        }
+      } else {
+        printJobValidationMessages(job);
+        return null;
       }
+    }
 
-      // Fill in data from user
-      if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
-        return;
-      }
-
-      // Try to create
-      status = client.createJob(job);
-    } while(!status.canProceed());
     FormDisplayer.displayFormWarning(job);
     printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
+
+    return status;
   }
 }

@@ -26,8 +26,10 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.SubmissionDisplayer;
 import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.validation.Status;
 
-public class StatusJobFunction extends SqoopFunction{
+@SuppressWarnings("serial")
+public class StatusJobFunction extends SqoopFunction {
 
   @SuppressWarnings("static-access")
   public StatusJobFunction() {
@@ -38,7 +40,7 @@ public class StatusJobFunction extends SqoopFunction{
   }
 
   @Override
-  public Object executeFunction(CommandLine line) {
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_JID)) {
       MSubmission submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
       if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
@@ -48,8 +50,10 @@ public class StatusJobFunction extends SqoopFunction{
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayProgress(submission);
       }
+    } else {
+      return null;
     }
 
-    return null;
+    return Status.FINE;
   }
 }

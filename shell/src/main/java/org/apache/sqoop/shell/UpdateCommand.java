@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.shell;
 
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Shell;
 
@@ -41,10 +39,6 @@ public class UpdateCommand extends SqoopCommand {
   }
 
   public Object executeCommand(List args) {
-    if(!isInteractive()) {
-      throw new SqoopException(ShellError.SHELL_0007, "update");
-    }
-
     if (args.size() == 0) {
       printlnResource(Constants.RES_UPDATE_USAGE, getUsage());
       return null;

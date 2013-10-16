@@ -20,12 +20,14 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  *
  */
+@SuppressWarnings("serial")
 public class SetOptionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   protected SetOptionFunction() {
@@ -39,7 +41,21 @@ public class SetOptionFunction extends SqoopFunction {
       .create(Constants.OPT_VALUE_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
+    if (!line.hasOption(Constants.OPT_NAME)) {
+      printlnResource(Constants.RES_ARGS_NAME_MISSING);
+      return false;
+    }
+    if (!line.hasOption(Constants.OPT_VALUE)) {
+      printlnResource(Constants.RES_ARGS_VALUE_MISSING);
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (!line.hasOption(Constants.OPT_NAME)) {
       printlnResource(Constants.RES_ARGS_NAME_MISSING);
       return null;
@@ -49,12 +65,10 @@ public class SetOptionFunction extends SqoopFunction {
       return null;
     }
 
-    handleOptionSetting(line.getOptionValue(Constants.OPT_NAME), line.getOptionValue(Constants.OPT_VALUE));
-
-    return null;
+    return handleOptionSetting(line.getOptionValue(Constants.OPT_NAME), line.getOptionValue(Constants.OPT_VALUE));
   }
 
-  private void handleOptionSetting(String name, String value) {
+  private Status handleOptionSetting(String name, String value) {
     if(name.equals(Constants.OPT_VERBOSE)) {
       boolean newValue = false;
 
@@ -64,7 +78,7 @@ public class SetOptionFunction extends SqoopFunction {
 
       setVerbose(newValue);
       printlnResource(Constants.RES_SET_VERBOSE_CHANGED, newValue);
-      return;
+      return Status.FINE;
     }
 
     if (name.equals(Constants.OPT_POLL_TIMEOUT)) {
@@ -79,9 +93,10 @@ public class SetOptionFunction extends SqoopFunction {
 
       setPollTimeout(newValue);
       printlnResource(Constants.RES_SET_POLL_TIMEOUT_CHANGED, newValue);
-      return;
+      return Status.FINE;
     }
 
     printlnResource(Constants.RES_SET_UNKNOWN_OPT_IGNORED, name);
+    return null;
   }
 }

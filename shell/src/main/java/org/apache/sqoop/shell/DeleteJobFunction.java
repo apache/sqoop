@@ -19,17 +19,16 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  * Handles deletion of a job object.
  */
+@SuppressWarnings("serial")
 public class DeleteJobFunction extends SqoopFunction {
-
-  private JobRequest jobRequest;
 
   @SuppressWarnings("static-access")
   public DeleteJobFunction() {
@@ -40,19 +39,18 @@ public class DeleteJobFunction extends SqoopFunction {
       .create('j'));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_JID)) {
       printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return null;
+      return false;
     }
-
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-
-    client.deleteJob(getLong(line, Constants.OPT_JID));
-
-    return null;
+    return true;
   }
 
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
+    client.deleteJob(getLong(line, Constants.OPT_JID));
+    return Status.FINE;
+  }
 }

@@ -30,7 +30,6 @@ public class StartCommand extends SqoopCommand {
 
   private StartJobFunction startJobFunction;
 
-  @SuppressWarnings("static-access")
   protected StartCommand(Shell shell) {
     super(shell, Constants.CMD_START, Constants.CMD_START_SC,
         new String[] {Constants.FN_JOB}, Constants.PRE_START, null);

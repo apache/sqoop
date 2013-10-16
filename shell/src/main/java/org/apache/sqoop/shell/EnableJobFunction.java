@@ -19,17 +19,16 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.request.JobRequest;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  * Handles disabling of a job object.
  */
+@SuppressWarnings("serial")
 public class EnableJobFunction extends SqoopFunction {
-
-  private JobRequest jobRequest;
 
   @SuppressWarnings("static-access")
   public EnableJobFunction() {
@@ -40,18 +39,18 @@ public class EnableJobFunction extends SqoopFunction {
       .create('j'));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_JID)) {
       printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return null;
+      return false;
     }
+    return true;
+  }
 
-    if (jobRequest == null) {
-      jobRequest = new JobRequest();
-    }
-
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     client.enableJob(getLong(line, Constants.OPT_JID), true);
-
-    return null;
+    return Status.FINE;
   }
 }

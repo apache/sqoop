@@ -20,14 +20,15 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.utils.ConnectionDynamicFormOptions;
+import org.apache.sqoop.shell.utils.FormOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -36,6 +37,7 @@ import static org.apache.sqoop.shell.utils.FormFiller.*;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class CloneConnectionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CloneConnectionFunction() {
@@ -47,22 +49,22 @@ public class CloneConnectionFunction extends SqoopFunction {
     );
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
       printlnResource(Constants.RES_ARGS_XID_MISSING);
-      return null;
+      return false;
     }
-
-    try {
-      cloneConnection(getLong(line, Constants.OPT_XID));
-    } catch (IOException ex) {
-      throw new SqoopException(ShellError.SHELL_0005, ex);
-    }
-
-    return null;
+    return true;
   }
 
-  private void cloneConnection(Long connectionId) throws IOException {
+  @Override
+  @SuppressWarnings("unchecked")
+  public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
+    return cloneConnection(getLong(line, Constants.OPT_XID), line.getArgList(), isInteractive);
+  }
+
+  private Status cloneConnection(Long connectionId, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CLONE_CLONING_CONN, connectionId);
 
     ConsoleReader reader = new ConsoleReader();
@@ -72,25 +74,44 @@ public class CloneConnectionFunction extends SqoopFunction {
     connection.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     Status status = Status.FINE;
-    printlnResource(Constants.RES_PROMPT_UPDATE_CONN_METADATA);
 
     ResourceBundle connectorBundle = client.getResourceBundle(connection.getConnectorId());
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
-    do {
-      // Print error introduction if needed
-      if( !status.canProceed() ) {
-        errorIntroduction();
+
+    if (isInteractive) {
+      printlnResource(Constants.RES_PROMPT_UPDATE_CONN_METADATA);
+
+      do {
+        // Print error introduction if needed
+        if( !status.canProceed() ) {
+          errorIntroduction();
+        }
+
+        // Fill in data from user
+        if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
+          return null;
+        }
+
+        status = client.createConnection(connection);
+      } while(!status.canProceed());
+    } else {
+      ConnectionDynamicFormOptions options = new ConnectionDynamicFormOptions();
+      options.prepareOptions(connection);
+      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
+      if (fillConnection(line, connection)) {
+        status = client.createConnection(connection);
+        if (!status.canProceed()) {
+          printConnectionValidationMessages(connection);
+          return null;
+        }
+      } else {
+        printConnectionValidationMessages(connection);
+        return null;
       }
-
-      // Fill in data from user
-      if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
-        return;
-      }
-
-      status = client.createConnection(connection);
-
-    } while(!status.canProceed());
+    }
 
     printlnResource(Constants.RES_CLONE_CONN_SUCCESSFUL, status.name(), connection.getPersistenceId());
+
+    return status;
   }
 }

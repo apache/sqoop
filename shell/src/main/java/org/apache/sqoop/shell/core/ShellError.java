@@ -42,11 +42,8 @@ public enum ShellError implements ErrorCode {
   /** There occurred exception on server side **/
   SHELL_0006("Server has returned exception"),
 
-  /** Command not compatible with batch mode */
-  SHELL_0007("Command not compatible with batch mode"),
-
   /** Job Submission : Cannot sleep */
-  SHELL_0008("Cannot sleep"),
+  SHELL_0007("Cannot sleep"),
 
   ;
 

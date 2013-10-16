@@ -164,8 +164,9 @@ public final class SqoopShell {
 
       // Manually trigger command line parsing
       Object result = shell.execute(line);
-      if (result != null) {
-        println(result);
+
+      if (result == null) {
+        break;
       }
     }
   }

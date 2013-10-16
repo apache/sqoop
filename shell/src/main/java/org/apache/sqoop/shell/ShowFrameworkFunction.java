@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import java.util.ResourceBundle;
 
@@ -29,20 +30,24 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class ShowFrameworkFunction extends SqoopFunction {
-  @SuppressWarnings("static-access")
   protected ShowFrameworkFunction() {
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (line.getArgs().length != 0) {
       printlnResource(Constants.RES_SHOW_FRAMEWORK_USAGE);
-      return null;
+      return false;
     }
+    return true;
+  }
 
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     showFramework();
-
-    return null;
+    return Status.FINE;
   }
 
   private void showFramework() {

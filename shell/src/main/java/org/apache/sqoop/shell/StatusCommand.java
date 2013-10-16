@@ -28,7 +28,6 @@ public class StatusCommand extends SqoopCommand {
 
   private StatusJobFunction statusJobFunction;
 
-  @SuppressWarnings("static-access")
   protected StatusCommand(Shell shell) {
     super(shell, Constants.CMD_STATUS, Constants.CMD_STATUS_SC,
         new String[] { Constants.FN_JOB }, Constants.PRE_STATUS, null);

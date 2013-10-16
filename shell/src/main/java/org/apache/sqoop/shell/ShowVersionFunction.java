@@ -25,6 +25,7 @@ import org.apache.sqoop.client.request.VersionRequest;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -53,7 +54,8 @@ public class ShowVersionFunction extends SqoopFunction {
         .create(Constants.OPT_PROTOCOL_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.getArgs().length == 1) {
       printlnResource(Constants.RES_SHOW_VERSION_USAGE);
       return null;
@@ -77,7 +79,7 @@ public class ShowVersionFunction extends SqoopFunction {
       showVersion(server, client, protocol);
     }
 
-    return null;
+    return Status.FINE;
   }
 
   private void showVersion(boolean server, boolean client, boolean protocol) {

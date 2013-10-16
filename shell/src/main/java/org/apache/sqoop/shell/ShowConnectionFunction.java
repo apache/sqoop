@@ -22,6 +22,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
+import org.apache.sqoop.validation.Status;
 
 import java.text.DateFormat;
 import java.util.LinkedList;
@@ -33,6 +34,7 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class ShowConnectionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   protected ShowConnectionFunction() {
@@ -46,7 +48,8 @@ public class ShowConnectionFunction extends SqoopFunction {
         .create(Constants.OPT_XID_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showConnections();
     } else if (line.hasOption(Constants.OPT_XID)) {
@@ -55,7 +58,7 @@ public class ShowConnectionFunction extends SqoopFunction {
       showSummary();
     }
 
-    return null;
+    return Status.FINE;
   }
 
   private void showSummary() {

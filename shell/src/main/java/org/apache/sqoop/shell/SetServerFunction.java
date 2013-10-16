@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -45,12 +46,17 @@ public class SetServerFunction extends SqoopFunction {
         .create(Constants.OPT_URL_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (line.getArgs().length == 1) {
       printlnResource(Constants.RES_SET_SERVER_USAGE);
-      return null;
+      return false;
     }
+    return true;
+  }
 
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_URL)) {
       setServerUrl(line.getOptionValue(Constants.OPT_URL));
 
@@ -73,6 +79,7 @@ public class SetServerFunction extends SqoopFunction {
     }
 
     printlnResource(Constants.RES_SET_SERVER_SUCCESSFUL);
-    return null;
+
+    return Status.FINE;
   }
 }

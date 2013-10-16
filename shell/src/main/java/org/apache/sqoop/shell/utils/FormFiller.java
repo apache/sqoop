@@ -18,6 +18,9 @@
 package org.apache.sqoop.shell.utils;
 
 import jline.ConsoleReader;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
@@ -26,6 +29,7 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MNamedElement;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MValidatedElement;
 
@@ -38,7 +42,7 @@ import java.util.ResourceBundle;
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
- * Convenient methods for retrieving user input.
+ * Convenient methods for retrieving user input and CLI options.
  */
 public final class FormFiller {
 
@@ -47,6 +51,26 @@ public final class FormFiller {
    * job objects.
    */
   private static MStringInput nameInput = new MStringInput("object-name", false, (short)25);
+
+  /**
+   * Fill job object based on CLI options.
+   *
+   * @param reader Associated console reader object
+   * @param job Job that user is suppose to fill in
+   * @return True if we filled all inputs, false if user has stopped processing
+   * @throws IOException
+   */
+  public static boolean fillJob(CommandLine line,
+                                MJob job)
+                                throws IOException {
+
+    job.setName(line.getOptionValue("name"));
+
+    // Fill in data from user
+    return fillForms(line,
+                     job.getConnectorPart().getForms(),
+                     job.getFrameworkPart().getForms());
+  }
 
   /**
    * Fill job object based on user input.
@@ -67,11 +91,31 @@ public final class FormFiller {
     job.setName(getName(reader, job.getName()));
 
     // Fill in data from user
-     return fillForms(reader,
-                      job.getConnectorPart().getForms(),
-                      connectorBundle,
-                      job.getFrameworkPart().getForms(),
-                      frameworkBundle);
+    return fillForms(reader,
+                     job.getConnectorPart().getForms(),
+                     connectorBundle,
+                     job.getFrameworkPart().getForms(),
+                     frameworkBundle);
+  }
+
+  /**
+   * Fill connection object based on CLI options.
+   *
+   * @param line Associated command line options
+   * @param connection Connection that user is suppose to fill in
+   * @return True if we filled all inputs, false if user has stopped processing
+   * @throws IOException
+   */
+  public static boolean fillConnection(CommandLine line,
+                                       MConnection connection)
+                                       throws IOException {
+
+    connection.setName(line.getOptionValue("name"));
+
+    // Fill in data from user
+    return fillForms(line,
+                     connection.getConnectorPart().getForms(),
+                     connection.getFrameworkPart().getForms());
   }
 
   /**
@@ -93,11 +137,250 @@ public final class FormFiller {
     connection.setName(getName(reader, connection.getName()));
 
     // Fill in data from user
-     return fillForms(reader,
-                      connection.getConnectorPart().getForms(),
-                      connectorBundle,
-                      connection.getFrameworkPart().getForms(),
-                      frameworkBundle);
+    return fillForms(reader,
+                     connection.getConnectorPart().getForms(),
+                     connectorBundle,
+                     connection.getFrameworkPart().getForms(),
+                     frameworkBundle);
+  }
+
+  /**
+   * Load CLI options for framework forms and connector forms.
+   *
+   * @param line CLI options container
+   * @param connectorForms Connector forms to read or edit
+   * @param frameworkForms Framework forms to read or edit
+   * @return
+   * @throws IOException
+   */
+  public static boolean fillForms(CommandLine line,
+                                  List<MForm> connectorForms,
+                                  List<MForm> frameworkForms)
+                                      throws IOException {
+    // Query connector forms and framework forms
+    return fillForms("connector", connectorForms, line)
+        && fillForms("framework", frameworkForms, line);
+  }
+
+  /**
+   * Load all CLI options for a list of forms.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param forms Forms to read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  public static boolean fillForms(String prefix,
+                                  List<MForm> forms,
+                                  CommandLine line)
+                                  throws IOException {
+    for (MForm form : forms) {
+      if (!fillForm(prefix, form, line)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Load all CLI options for a particular form.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param form Form to read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  @SuppressWarnings("rawtypes")
+  public static boolean fillForm(String prefix,
+                                 MForm form,
+                                 CommandLine line) throws IOException {
+    for (MInput input : form.getInputs()) {
+      if (!fillInput(prefix, input, line)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Load CLI option.
+   * Chooses the appropriate 'fill' method to use based on input type.
+   *
+   * Keys for CLI options are automatically created from the 'prefix' argument
+   * and 'input' argument: <prefix>-<form name>-<input name>
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  @SuppressWarnings("rawtypes")
+  public static boolean fillInput(String prefix,
+                                  MInput input,
+                                  CommandLine line) throws IOException {
+    // Based on the input type, let's perform specific load
+    switch (input.getType()) {
+    case STRING:
+      return fillInputString(prefix, (MStringInput) input, line);
+    case INTEGER:
+      return fillInputInteger(prefix, (MIntegerInput) input, line);
+    case BOOLEAN:
+      return fillInputBoolean(prefix, (MBooleanInput) input, line);
+    case MAP:
+      return fillInputMap(prefix, (MMapInput) input, line);
+    case ENUM:
+      return fillInputEnum(prefix, (MEnumInput) input, line);
+    default:
+      println("Unsupported data type " + input.getType());
+      return true;
+    }
+  }
+
+  /**
+   * Load CLI option for enum type.
+   *
+   * Currently only supports numeric values.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputEnum(String prefix,
+                                       MEnumInput input,
+                                       CommandLine line)
+                                       throws IOException {
+    String opt = FormOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      String value = line.getOptionValue(opt);
+      int index = java.util.Arrays.asList(input.getValues()).indexOf(value);
+
+      if(index < 0) {
+        errorMessage(input, String.format("Invalid option %s. Please use one of %s.", value, StringUtils.join(input.getValues(), ", ")));
+        return false;
+      }
+
+      input.setValue(value);
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  /**
+   * Load CLI options for map type.
+   *
+   * Parses Key-Value pairs that take the form "<key>=<value>&<key>=<value>&...".
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputMap(String prefix,
+                                      MMapInput input,
+                                      CommandLine line)
+                                      throws IOException {
+    String opt = FormOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      String value = line.getOptionValue(opt);
+      Map<String, String> values = new HashMap<String, String>();
+      String[] entries = value.split("&");
+      for (String entry : entries) {
+        if (entry.contains("=")) {
+          String[] keyValue = entry.split("=");
+          values.put(keyValue[0], keyValue[1]);
+        } else {
+          errorMessage(input, "Don't know what to do with " + entry);
+          return false;
+        }
+      }
+      input.setValue(values);
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  /**
+   * Load integer input from CLI option.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputInteger(String prefix,
+                                          MIntegerInput input,
+                                          CommandLine line)
+                                          throws IOException {
+    String opt = FormOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      try {
+        input.setValue(Integer.valueOf(line.getOptionValue(FormOptions.getOptionKey(prefix, input))));
+      } catch (NumberFormatException ex) {
+        errorMessage(input, "Input is not valid integer number");
+        return false;
+      }
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  /**
+   * Load string input from CLI option.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  public static boolean fillInputString(String prefix,
+                                        MStringInput input,
+                                        CommandLine line)
+                                        throws IOException {
+    String opt = FormOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      String value = line.getOptionValue(FormOptions.getOptionKey(prefix, input));
+      if(value.length() > input.getMaxLength()) {
+        errorMessage(input, "Size of input exceeds allowance for this input"
+          + " field. Maximal allowed size is " + input.getMaxLength());
+      }
+      input.setValue(value);
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  /**
+   * Load boolean input from CLI option.
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  public static boolean fillInputBoolean(String prefix,
+                                         MBooleanInput input,
+                                         CommandLine line)
+                                         throws IOException {
+    String opt = FormOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      input.setValue(Boolean.valueOf(line.getOptionValue(FormOptions.getOptionKey(prefix, input))));
+    } else {
+      input.setEmpty();
+    }
+    return true;
   }
 
   public static boolean fillForms(ConsoleReader reader,
@@ -134,6 +417,7 @@ public final class FormFiller {
     return true;
   }
 
+  @SuppressWarnings("rawtypes")
   public static boolean fillForm(MForm form,
                                  ConsoleReader reader,
                                  ResourceBundle bundle) throws IOException {
@@ -141,7 +425,7 @@ public final class FormFiller {
     println(bundle.getString(form.getLabelKey()));
 
     // Print out form validation
-    printValidationMessage(form);
+    printValidationMessage(form, false);
     println("");
 
     for (MInput input : form.getInputs()) {
@@ -153,11 +437,12 @@ public final class FormFiller {
     return true;
   }
 
+  @SuppressWarnings("rawtypes")
   public static boolean fillInput(MInput input,
                                   ConsoleReader reader,
                                   ResourceBundle bundle) throws IOException {
     // Print out validation
-    printValidationMessage(input);
+    printValidationMessage(input, false);
 
     // Based on the input type, let's perform specific load
     switch (input.getType()) {
@@ -507,6 +792,7 @@ public final class FormFiller {
     return true;
   }
 
+  @SuppressWarnings("rawtypes")
   public static void generatePrompt(ConsoleReader reader,
                                     ResourceBundle bundle,
                                     MInput input)
@@ -533,13 +819,21 @@ public final class FormFiller {
    *
    * @param element Validated element
    */
-  public static void printValidationMessage(MValidatedElement element) {
+  public static void printValidationMessage(MValidatedElement element, boolean includeInputPrefix) {
     switch (element.getValidationStatus()) {
       case UNACCEPTABLE:
-        errorMessage(element.getValidationMessage());
+        if (includeInputPrefix) {
+          errorMessage(element, element.getValidationMessage());
+        } else {
+          errorMessage(element.getValidationMessage());
+        }
         break;
       case ACCEPTABLE:
-        warningMessage(element.getValidationMessage());
+        if (includeInputPrefix) {
+          warningMessage(element, element.getValidationMessage());
+        } else {
+          warningMessage(element.getValidationMessage());
+        }
         break;
       default:
         // Simply ignore all other states for the moment
@@ -551,13 +845,51 @@ public final class FormFiller {
     println("Error message: @|red " + message + " |@");
   }
 
+  public static void errorMessage(MNamedElement input, String message) {
+    print(input.getName());
+    print(": ");
+    errorMessage(message);
+  }
+
   public static void warningMessage(String message) {
     println("Warning message: @|yellow " + message + " |@");
+  }
+
+  public static void warningMessage(MNamedElement input, String message) {
+    print(input.getName());
+    print(": ");
+    warningMessage(message);
   }
 
   public static void errorIntroduction() {
     println();
     println("@|red There are issues with entered data, please revise your input:|@");
+  }
+
+  public static void printConnectionValidationMessages(MConnection connection) {
+    for (MForm form : connection.getConnectorPart().getForms()) {
+      for (MInput<?> input : form.getInputs()) {
+        printValidationMessage(input, true);
+      }
+    }
+    for (MForm form : connection.getFrameworkPart().getForms()) {
+      for (MInput<?> input : form.getInputs()) {
+        printValidationMessage(input, true);
+      }
+    }
+  }
+
+  public static void printJobValidationMessages(MJob job) {
+    for (MForm form : job.getConnectorPart().getForms()) {
+      for (MInput<?> input : form.getInputs()) {
+        printValidationMessage(input, true);
+      }
+    }
+    for (MForm form : job.getFrameworkPart().getForms()) {
+      for (MInput<?> input : form.getInputs()) {
+        printValidationMessage(input, true);
+      }
+    }
   }
 
   private FormFiller() {

@@ -20,14 +20,15 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.FormDisplayer;
+import org.apache.sqoop.shell.utils.FormOptions;
+import org.apache.sqoop.shell.utils.JobDynamicFormOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -36,6 +37,7 @@ import static org.apache.sqoop.shell.utils.FormFiller.*;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class UpdateJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public UpdateJobFunction() {
@@ -46,22 +48,22 @@ public class UpdateJobFunction extends SqoopFunction {
       .create(Constants.OPT_JID_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_JID)) {
       printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return null;
+      return false;
     }
-
-    try {
-      updateJob(getLong(line, Constants.OPT_JID));
-    } catch (IOException ex) {
-      throw new SqoopException(ShellError.SHELL_0005, ex);
-    }
-
-    return null;
+    return true;
   }
 
-  private void updateJob(Long jobId) throws IOException {
+  @Override
+  @SuppressWarnings("unchecked")
+  public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
+    return updateJob(getLong(line, Constants.OPT_JID), line.getArgList(), isInteractive);
+  }
+
+  private Status updateJob(Long jobId, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_UPDATE_UPDATING_JOB, jobId);
 
     ConsoleReader reader = new ConsoleReader();
@@ -73,23 +75,42 @@ public class UpdateJobFunction extends SqoopFunction {
 
     Status status = Status.FINE;
 
-    printlnResource(Constants.RES_PROMPT_UPDATE_JOB_METADATA);
+    if (isInteractive) {
+      printlnResource(Constants.RES_PROMPT_UPDATE_JOB_METADATA);
 
-    do {
-      // Print error introduction if needed
-      if( !status.canProceed() ) {
-        errorIntroduction();
+      do {
+        // Print error introduction if needed
+        if( !status.canProceed() ) {
+          errorIntroduction();
+        }
+
+        // Fill in data from user
+        if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
+          return status;
+        }
+
+        // Try to create
+        status = client.updateJob(job);
+      } while(!status.canProceed());
+    } else {
+      JobDynamicFormOptions options = new JobDynamicFormOptions();
+      options.prepareOptions(job);
+      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
+      if (fillJob(line, job)) {
+        status = client.updateJob(job);
+        if (!status.canProceed()) {
+          printJobValidationMessages(job);
+          return status;
+        }
+      } else {
+        printJobValidationMessages(job);
+        return null;
       }
+    }
 
-      // Fill in data from user
-      if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
-        return;
-      }
-
-      // Try to create
-      status = client.updateJob(job);
-    } while(!status.canProceed());
     FormDisplayer.displayFormWarning(job);
     printlnResource(Constants.RES_UPDATE_JOB_SUCCESSFUL, status.name());
+
+    return status;
   }
 }

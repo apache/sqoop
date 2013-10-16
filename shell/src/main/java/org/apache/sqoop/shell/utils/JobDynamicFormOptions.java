@@ -15,41 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
+package org.apache.sqoop.shell.utils;
 
-import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.shell.core.Constants;
-import org.apache.sqoop.validation.Status;
-
-import static org.apache.sqoop.shell.ShellEnvironment.*;
+import org.apache.sqoop.model.MJob;
 
 /**
- *
+ * Automatically create dynamic options for jobs.
  */
 @SuppressWarnings("serial")
-public class DeleteConnectionFunction extends SqoopFunction {
+public class JobDynamicFormOptions extends DynamicFormOptions<MJob> {
+
   @SuppressWarnings("static-access")
-  public DeleteConnectionFunction() {
+  @Override
+  public void prepareOptions(MJob job) {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
-      .withLongOpt(Constants.OPT_XID)
-      .hasArg()
-      .create('x'));
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_XID)) {
-      printlnResource(Constants.RES_ARGS_XID_MISSING);
-      return false;
+                  .withLongOpt("name")
+                  .hasArg()
+                  .create());
+    for (Option option : FormOptions.getFormsOptions("connector", job.getConnectorPart().getForms())) {
+      this.addOption(option);
     }
-    return true;
-  }
-
-  @Override
-  public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.deleteConnection(getLong(line, Constants.OPT_XID));
-    return Status.FINE;
+    for (Option option : FormOptions.getFormsOptions("framework", job.getFrameworkPart().getForms())) {
+      this.addOption(option);
+    }
   }
 }

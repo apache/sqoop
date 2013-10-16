@@ -20,14 +20,15 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.utils.ConnectionDynamicFormOptions;
 import org.apache.sqoop.shell.utils.FormDisplayer;
+import org.apache.sqoop.shell.utils.FormOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -36,6 +37,7 @@ import static org.apache.sqoop.shell.utils.FormFiller.*;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class CreateConnectionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateConnectionFunction() {
@@ -46,22 +48,22 @@ public class CreateConnectionFunction extends SqoopFunction {
       .create(Constants.OPT_CID_CHAR));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_CID)) {
       printlnResource(Constants.RES_ARGS_CID_MISSING);
-      return null;
+      return false;
     }
-
-    try {
-      createConnection(getLong(line, Constants.OPT_CID));
-    } catch (IOException ex) {
-      throw new SqoopException(ShellError.SHELL_0005, ex);
-    }
-
-    return null;
+    return true;
   }
 
-  private void createConnection(long connectorId) throws IOException {
+  @Override
+  @SuppressWarnings("unchecked")
+  public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
+    return createConnection(getLong(line, Constants.OPT_CID), line.getArgList(), isInteractive);
+  }
+
+  private Status createConnection(long connectorId, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CREATE_CREATING_CONN, connectorId);
 
     ConsoleReader reader = new ConsoleReader();
@@ -72,22 +74,43 @@ public class CreateConnectionFunction extends SqoopFunction {
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
-    printlnResource(Constants.RES_PROMPT_FILL_CONN_METADATA);
-    do {
-      // Print error introduction if needed
-      if( !status.canProceed() ) {
-        errorIntroduction();
-      }
 
-      // Fill in data from user
-      if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
-        return;
-      }
+    if (isInteractive) {
+      printlnResource(Constants.RES_PROMPT_FILL_CONN_METADATA);
 
-      // Try to create
-      status = client.createConnection(connection);
-    } while(!status.canProceed());
+      do {
+        // Print error introduction if needed
+        if( !status.canProceed() ) {
+          errorIntroduction();
+        }
+
+        // Fill in data from user
+        if(!fillConnection(reader, connection, connectorBundle, frameworkBundle)) {
+          return null;
+        }
+
+        // Try to create
+        status = client.createConnection(connection);
+      } while(!status.canProceed());
+    } else {
+      ConnectionDynamicFormOptions options = new ConnectionDynamicFormOptions();
+      options.prepareOptions(connection);
+      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
+      if (fillConnection(line, connection)) {
+        status = client.createConnection(connection);
+        if (!status.canProceed()) {
+          printConnectionValidationMessages(connection);
+          return null;
+        }
+      } else {
+        printConnectionValidationMessages(connection);
+        return null;
+      }
+    }
+
     FormDisplayer.displayFormWarning(connection);
     printlnResource(Constants.RES_CREATE_CONN_SUCCESSFUL, status.name(), connection.getPersistenceId());
+
+    return status;
   }
 }

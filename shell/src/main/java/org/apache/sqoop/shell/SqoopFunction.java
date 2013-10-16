@@ -17,17 +17,15 @@
  */
 package org.apache.sqoop.shell;
 
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.ShellError;
+import org.apache.sqoop.shell.utils.FormOptions;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -39,33 +37,24 @@ abstract public class SqoopFunction extends Options {
     formatter.printOptions(getIo().out, formatter.getWidth(), this, 0, 4);
   }
 
-  public abstract Object executeFunction(CommandLine line);
+  public abstract Object executeFunction(CommandLine line, boolean isInteractive) throws IOException;
 
-  public Object execute(List<String> args) {
-    CommandLine line = parseOptions(this, 1, args);
-    return executeFunction(line);
+  public boolean validateArgs(CommandLine line) {
+    return true;
   }
 
-  protected CommandLine parseOptions(Options options, int start, List<String> arglist) {
-    Iterator<String> iterator = arglist.iterator();
-    int i = 0;
-    for (; i < start; i ++) {
-      iterator.next();
-    }
+  public Object execute(List<String> args) {
+    CommandLine line = FormOptions.parseOptions(this, 1, args, true);
 
-    String[] args = new String[arglist.size() - start];
-    for (; i < arglist.size(); i ++) {
-      args[i - start] = iterator.next();
-    }
-
-    CommandLineParser parser = new GnuParser();
-    CommandLine line;
     try {
-      line = parser.parse(options, args);
-    } catch (ParseException e) {
-      throw new SqoopException(ShellError.SHELL_0003, e.getMessage(), e);
+      if (validateArgs(line)) {
+        return executeFunction(line, isInteractive());
+      } else {
+        return null;
+      }
+    } catch (IOException ex) {
+      throw new SqoopException(ShellError.SHELL_0005, ex);
     }
-    return line;
   }
 
   protected long getLong(CommandLine line, String parameterName) {

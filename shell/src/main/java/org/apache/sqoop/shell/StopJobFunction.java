@@ -25,9 +25,10 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.SubmissionDisplayer;
+import org.apache.sqoop.validation.Status;
 
+@SuppressWarnings("serial")
 public class StopJobFunction extends SqoopFunction {
-
   @SuppressWarnings("static-access")
   public StopJobFunction() {
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
@@ -37,7 +38,7 @@ public class StopJobFunction extends SqoopFunction {
   }
 
   @Override
-  public Object executeFunction(CommandLine line) {
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_JID)) {
       MSubmission submission = client.stopSubmission(getLong(line, Constants.OPT_JID));
       if(submission.getStatus().isFailure()) {
@@ -46,8 +47,10 @@ public class StopJobFunction extends SqoopFunction {
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayProgress(submission);
       }
+    } else {
+      return null;
     }
 
-    return null;
+    return Status.FINE;
   }
 }

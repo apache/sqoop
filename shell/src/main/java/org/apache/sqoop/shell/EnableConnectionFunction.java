@@ -20,12 +20,14 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  * Handles enabling of a connection object
  */
+@SuppressWarnings("serial")
 public class EnableConnectionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public EnableConnectionFunction() {
@@ -36,14 +38,18 @@ public class EnableConnectionFunction extends SqoopFunction {
       .create('x'));
   }
 
-  public Object executeFunction(CommandLine line) {
+  @Override
+  public boolean validateArgs(CommandLine line) {
     if (!line.hasOption(Constants.OPT_XID)) {
       printlnResource(Constants.RES_ARGS_XID_MISSING);
-      return null;
+      return false;
     }
+    return true;
+  }
 
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     client.enableConnection(getLong(line, Constants.OPT_XID), true);
-
-    return null;
+    return Status.FINE;
   }
 }

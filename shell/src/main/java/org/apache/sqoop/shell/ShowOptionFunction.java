@@ -20,12 +20,14 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  * Show client internal options
  */
+@SuppressWarnings("serial")
 public class ShowOptionFunction extends SqoopFunction {
   /**
    * Construct new object.
@@ -39,15 +41,20 @@ public class ShowOptionFunction extends SqoopFunction {
         .create(Constants.OPT_NAME_CHAR));
   }
 
+  @Override
+  public boolean validateArgs(CommandLine line) {
+    if (line.getArgs().length == 1) {
+      printAllOptions();
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Execute this function from parsed command line.
    */
-  public Object executeFunction(CommandLine line) {
-    if (line.getArgs().length == 1) {
-      printAllOptions();
-      return null;
-    }
-
+  @Override
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_NAME)) {
       String optionName = line.getOptionValue(Constants.OPT_NAME);
 
@@ -58,9 +65,12 @@ public class ShowOptionFunction extends SqoopFunction {
       if(optionName.equals(Constants.OPT_POLL_TIMEOUT)) {
         printPollTimeout();
       }
+    } else {
+      printAllOptions();
+      return null;
     }
 
-    return null;
+    return Status.FINE;
   }
 
   /**

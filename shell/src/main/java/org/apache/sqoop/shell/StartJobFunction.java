@@ -30,7 +30,9 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.SubmissionDisplayer;
+import org.apache.sqoop.validation.Status;
 
+@SuppressWarnings("serial")
 public class StartJobFunction extends SqoopFunction {
   public static final Logger LOG = Logger.getLogger(StartJobFunction.class);
 
@@ -47,7 +49,7 @@ public class StartJobFunction extends SqoopFunction {
   }
 
   @Override
-  public Object executeFunction(CommandLine line) {
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     // Poll until finished
     if (line.hasOption(Constants.OPT_SYNCHRONOUS) && line.hasOption(Constants.OPT_JID)) {
       long pollTimeout = getPollTimeout();
@@ -72,7 +74,7 @@ public class StartJobFunction extends SqoopFunction {
       try {
         client.startSubmission(getLong(line, Constants.OPT_JID), callback, pollTimeout);
       } catch (InterruptedException e) {
-        throw new SqoopException(ShellError.SHELL_0008, e);
+        throw new SqoopException(ShellError.SHELL_0007, e);
       }
     } else if (line.hasOption(Constants.OPT_JID)) {
       MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
@@ -82,8 +84,10 @@ public class StartJobFunction extends SqoopFunction {
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayProgress(submission);
       }
+    } else {
+      return null;
     }
 
-    return null;
+    return Status.FINE;
   }
 }

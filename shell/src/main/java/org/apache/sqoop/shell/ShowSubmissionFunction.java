@@ -26,9 +26,11 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.SubmissionDisplayer;
 import org.apache.sqoop.shell.utils.TableDisplayer;
+import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
+@SuppressWarnings("serial")
 public class ShowSubmissionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   protected ShowSubmissionFunction() {
@@ -43,7 +45,7 @@ public class ShowSubmissionFunction extends SqoopFunction {
   }
 
   @Override
-  public Object executeFunction(CommandLine line) {
+  public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_DETAIL)) {
       if (line.hasOption(Constants.OPT_JID)) {
         showSubmissions(getLong(line, Constants.OPT_JID));
@@ -58,7 +60,7 @@ public class ShowSubmissionFunction extends SqoopFunction {
       }
     }
 
-    return null;
+    return Status.FINE;
   }
 
   private void showSummary(Long jid) {

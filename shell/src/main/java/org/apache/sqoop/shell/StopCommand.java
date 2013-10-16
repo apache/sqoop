@@ -28,7 +28,6 @@ public class StopCommand extends SqoopCommand {
 
   private StopJobFunction stopJobFunction;
 
-  @SuppressWarnings("static-access")
   protected StopCommand(Shell shell) {
     super(shell, Constants.CMD_STOP, Constants.CMD_STOP_SC,
         new String[] { Constants.FN_JOB }, Constants.PRE_STOP, null);
