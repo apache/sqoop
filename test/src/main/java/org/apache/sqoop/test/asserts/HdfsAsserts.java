@@ -18,12 +18,14 @@
 package org.apache.sqoop.test.asserts;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.test.utils.HdfsUtils;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,8 +37,6 @@ import static org.junit.Assert.fail;
 
 /**
  * Assert methods suitable for checking HDFS files and directories.
- *
- * TODO: This module will require clean up to work on MiniCluster/Real cluster.
  */
 public class HdfsAsserts {
 
@@ -49,15 +49,13 @@ public class HdfsAsserts {
    * @param lines Expected lines
    * @throws IOException
    */
-  public static void assertMapreduceOutput(String directory, String... lines) throws IOException {
+  public static void assertMapreduceOutput(FileSystem fs, String directory, String... lines) throws IOException {
     Set<String> setLines = new HashSet<String>(Arrays.asList(lines));
     List<String> notFound = new LinkedList<String>();
 
-    String []files = HdfsUtils.getOutputMapreduceFiles(directory);
-
-    for(String file : files) {
-      String filePath = directory + "/" + file;
-      BufferedReader br = new BufferedReader(new FileReader((filePath)));
+    Path[] files = HdfsUtils.getOutputMapreduceFiles(fs, directory);
+    for(Path file : files) {
+      BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(file)));
 
       String line;
       while ((line = br.readLine()) != null) {
@@ -83,8 +81,8 @@ public class HdfsAsserts {
    * @param directory Mapreduce output directory
    * @param expectedFiles Expected number of files
    */
-  public static void assertMapreduceOutputFiles(String directory, int expectedFiles) {
-    String []files = HdfsUtils.getOutputMapreduceFiles(directory);
+  public static void assertMapreduceOutputFiles(FileSystem fs, String directory, int expectedFiles) throws IOException {
+    Path[] files = HdfsUtils.getOutputMapreduceFiles(fs, directory);
     assertEquals(expectedFiles, files.length);
   }
 

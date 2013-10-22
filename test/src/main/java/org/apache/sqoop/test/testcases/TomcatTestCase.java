@@ -17,24 +17,30 @@
  */
 package org.apache.sqoop.test.testcases;
 
+import java.io.IOException;
+
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.test.asserts.HdfsAsserts;
+import org.apache.sqoop.test.hadoop.HadoopRunner;
+import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
+import org.apache.sqoop.test.hadoop.HadoopLocalRunner;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
-
-import java.io.IOException;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in external Tomcat
  * process.
  */
 abstract public class TomcatTestCase {
-
   private static final Logger LOG = Logger.getLogger(TomcatTestCase.class);
 
   @Rule public TestName name = new TestName();
@@ -47,7 +53,7 @@ abstract public class TomcatTestCase {
    * pick up configured java.io.tmpdir value. The last results is /tmp/ directory
    * in case that no property is set.
    */
-  private static final String TMP_PATH_BASE =
+  protected static final String TMP_PATH_BASE =
     System.getProperty("sqoop.integration.tmpdir", System.getProperty("java.io.tmpdir", "/tmp")) + "/sqoop-cargo-tests/";
 
   /**
@@ -62,6 +68,16 @@ abstract public class TomcatTestCase {
   private String tmpPath;
 
   /**
+   * Hadoop cluster
+   */
+  protected static HadoopRunner hadoopCluster;
+
+  /**
+   * Hadoop client
+   */
+  protected static FileSystem hdfsClient;
+
+  /**
    * Tomcat based Sqoop mini cluster
    */
   private TomcatSqoopMiniCluster cluster;
@@ -71,13 +87,27 @@ abstract public class TomcatTestCase {
    */
   private SqoopClient client;
 
+  @BeforeClass
+  public static void startHadoop() throws Exception {
+    // Start Hadoop Clusters
+    hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopLocalRunner.class);
+    hadoopCluster.setTemporaryPath(TMP_PATH_BASE);
+    hadoopCluster.setConfiguration( hadoopCluster.prepareConfiguration(new JobConf()) );
+    hadoopCluster.start();
+
+    // Initialize Hdfs Client
+    hdfsClient = FileSystem.get(hadoopCluster.getConfiguration());
+    LOG.debug("HDFS Client: " + hdfsClient);
+  }
+
   @Before
   public void startServer() throws Exception {
-    // Set up the temporary path
-    tmpPath = TMP_PATH_BASE + getClass().getName() + "/" + name.getMethodName() + "/";
+    // Get and set temporary path in hadoop cluster.
+    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name.getMethodName());
+    LOG.debug("Temporary Directory: " + tmpPath);
 
-    // Set up and start server
-    cluster = new TomcatSqoopMiniCluster(getTemporaryPath());
+    // Start server
+    cluster = new TomcatSqoopMiniCluster(tmpPath, hadoopCluster.getConfiguration());
     cluster.start();
 
     // Initialize Sqoop Client API
@@ -87,6 +117,11 @@ abstract public class TomcatTestCase {
   @After
   public void stopServer() throws Exception {
     cluster.stop();
+  }
+
+  @AfterClass
+  public static void stopHadoop() throws Exception {
+    hadoopCluster.stop();
   }
 
   /**
@@ -112,12 +147,12 @@ abstract public class TomcatTestCase {
   }
 
   /**
-   * Get input/output directory for mapreduce job.
+   * Return mapreduce base directory.
    *
    * @return
    */
   public String getMapreduceDirectory() {
-    return getTemporaryPath() + "/mapreduce-job-io";
+    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), name.getMethodName());
   }
 
   /**
@@ -130,7 +165,7 @@ abstract public class TomcatTestCase {
    * @throws IOException
    */
   protected void assertMapreduceOutput(String... lines) throws IOException {
-    HdfsAsserts.assertMapreduceOutput(getMapreduceDirectory(), lines);
+    HdfsAsserts.assertMapreduceOutput(hdfsClient, getMapreduceDirectory(), lines);
   }
 
   /**
@@ -138,8 +173,8 @@ abstract public class TomcatTestCase {
    *
    * @param expectedFiles Expected number of files
    */
-  protected void assertMapreduceOutputFiles(int expectedFiles) {
-    HdfsAsserts.assertMapreduceOutputFiles(getMapreduceDirectory(), expectedFiles);
+  protected void assertMapreduceOutputFiles(int expectedFiles) throws IOException {
+    HdfsAsserts.assertMapreduceOutputFiles(hdfsClient, getMapreduceDirectory(), expectedFiles);
   }
 
   /**
@@ -150,6 +185,6 @@ abstract public class TomcatTestCase {
    * @throws IOException
    */
   protected void createInputMapreduceFile(String filename, String...lines) throws IOException {
-    HdfsUtils.createFile(getMapreduceDirectory(), filename, lines);
+    HdfsUtils.createFile(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), filename), lines);
   }
 }

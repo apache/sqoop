@@ -164,6 +164,11 @@ limitations under the License.
             <version>${hadoop.1.version}</version>
           </dependency>
 
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-minicluster</artifactId>
+            <version>${hadoop.1.version}</version>
+          </dependency>
         </dependencies>
       </dependencyManagement>
     </profile>
@@ -485,7 +490,7 @@ limitations under the License.
           <version>2.12</version>
           <configuration>
             <forkMode>always</forkMode>
-            <forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <argLine>-Xms256m -Xmx1g</argLine>
           </configuration>
