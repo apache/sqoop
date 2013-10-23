@@ -18,6 +18,7 @@
 
 package com.cloudera.sqoop;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
@@ -157,6 +158,8 @@ public class TestAvroImport extends ImportJobTestCase {
     if (codec != null) {
       assertEquals(codec, reader.getMetaString(DataFileConstants.CODEC));
     }
+
+    checkSchemaFile(schema);
   }
 
   public void testOverrideTypeMapping() throws IOException {
@@ -235,4 +238,9 @@ public class TestAvroImport extends ImportJobTestCase {
     return new DataFileReader<GenericRecord>(fsInput, datumReader);
   }
 
+  private void checkSchemaFile(final Schema schema) throws IOException {
+    final File schemaFile = new File(schema.getName() + ".avsc");
+    assertTrue(schemaFile.exists());
+    assertEquals(schema, new Schema.Parser().parse(schemaFile));
+  }
 }

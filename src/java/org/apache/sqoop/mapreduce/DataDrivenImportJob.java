@@ -18,9 +18,12 @@
 
 package org.apache.sqoop.mapreduce;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+
 import org.apache.avro.Schema;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.LongWritable;
@@ -32,6 +35,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
@@ -83,10 +87,33 @@ public class DataDrivenImportJob extends ImportJobBase {
       AvroSchemaGenerator generator = new AvroSchemaGenerator(options,
           connManager, tableName);
       Schema schema = generator.generate();
+
+      try {
+        writeAvroSchema(schema);
+      } catch (final IOException e) {
+        LOG.error("Error while writing Avro schema.", e);
+      }
+
       AvroJob.setMapOutputSchema(job.getConfiguration(), schema);
     }
 
     job.setMapperClass(getMapperClass());
+  }
+
+  private void writeAvroSchema(final Schema schema) throws IOException {
+    // Generate schema in JAR output directory.
+    final File schemaFile = new File(options.getJarOutputDir(), schema.getName() + ".avsc");
+
+    LOG.info("Writing Avro schema file: " + schemaFile);
+    FileUtils.forceMkdir(schemaFile.getParentFile());
+    FileUtils.writeStringToFile(schemaFile, schema.toString(true), null);
+
+    // Copy schema to code output directory.
+    try {
+      FileUtils.moveFileToDirectory(schemaFile, new File(options.getCodeOutputDir()), true);
+    } catch (final IOException e) {
+      LOG.debug("Could not move Avro schema file to code output directory.", e);
+    }
   }
 
   @Override
