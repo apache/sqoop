@@ -26,8 +26,19 @@ public abstract class MPersistableEntity {
 
   private long persistenceId = PERSISTANCE_ID_DEFAULT;
 
+  /**
+   * Default constructor.
+   */
   protected MPersistableEntity() {
-    // Default constructor
+  }
+
+  /**
+   * Constructor building as a copy of other persistable entity.
+   *
+   * @param other Persistable entity to copy
+   */
+  protected MPersistableEntity(MPersistableEntity other) {
+    this.persistenceId = other.persistenceId;
   }
 
   public void setPersistenceId(long persistenceId) {

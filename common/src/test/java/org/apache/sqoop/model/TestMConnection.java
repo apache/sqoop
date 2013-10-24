@@ -34,42 +34,68 @@ public class TestMConnection {
    */
   @Test
   public void testInitialization() {
-    MConnectionForms connectorPart = connector1();
-    MConnectionForms frameworkPart = connector2();
-    MConnection connection = new MConnection(123l, connectorPart, frameworkPart);
+    // Test default constructor
+    MConnection connection = connection();
     assertEquals(123l, connection.getConnectorId());
-    assertEquals(connector1(), connection.getConnectorPart());
-    assertEquals(connector2(), connection.getFrameworkPart());
-    assertFalse(connector1().equals(connection.getFrameworkPart()));
-    connection.setName("NAME");
-    assertEquals("NAME", connection.getName());
-    assertEquals(connector1().getForms().get(0), connection.getConnectorForm("FORMNAME"));
-    assertEquals(connector2().getForms().get(0), connection.getFrameworkForm("form"));
+    assertEquals("Vampire", connection.getName());
+    assertEquals("Buffy", connection.getCreationUser());
+    assertEquals(forms1(), connection.getConnectorPart());
+    assertEquals(forms2(), connection.getFrameworkPart());
+
+    // Test copy constructor
+    MConnection copy = new MConnection(connection);
+    assertEquals(123l, copy.getConnectorId());
+    assertEquals("Vampire", copy.getName());
+    assertEquals("Buffy", copy.getCreationUser());
+    assertEquals(connection.getCreationDate(), copy.getCreationDate());
+    assertEquals(forms1(), copy.getConnectorPart());
+    assertEquals(forms2(), copy.getFrameworkPart());
+
+    // Test constructor for metadata upgrade (the order of forms is different)
+    MConnection upgradeCopy = new MConnection(connection, forms2(), forms1());
+    assertEquals(123l, upgradeCopy.getConnectorId());
+    assertEquals("Vampire", upgradeCopy.getName());
+    assertEquals("Buffy", upgradeCopy.getCreationUser());
+    assertEquals(connection.getCreationDate(), upgradeCopy.getCreationDate());
+    assertEquals(forms2(), upgradeCopy.getConnectorPart());
+    assertEquals(forms1(), upgradeCopy.getFrameworkPart());
   }
 
   @Test
   public void testClone() {
-    MConnectionForms connectorPart = connector1();
-    MConnectionForms frameworkPart = connector2();
-    MConnection connection = new MConnection(123l, connectorPart, frameworkPart);
-    connection.setPersistenceId(12l);
-    MForm originalForm = connection.getConnectorPart().getForms().get(0);
-    MConnection clone1 = connection.clone(true);
-    assertEquals(123l, clone1.getConnectorId());
-    MForm clonedForm1 = clone1.getConnectorPart().getForms().get(0);
-    assertEquals(clonedForm1.getInputs().get(0).getValue(), originalForm.getInputs().get(0).getValue());
-    assertEquals(clonedForm1.getInputs().get(1).getValue(), originalForm.getInputs().get(1).getValue());
-    assertNotNull(clonedForm1.getInputs().get(0).getValue());
-    assertNotNull(clonedForm1.getInputs().get(1).getValue());
-    assertEquals(connection, clone1);
-    MConnection cloneCopy = clone1.clone(true);
-    assertEquals(clone1, cloneCopy);
-    //Clone without values
-    MConnection clone2 = connection.clone(false);
-    assertNotSame(connection, clone2);
+    MConnection connection = connection();
+
+    // Clone without value
+    MConnection withoutValue = connection.clone(false);
+    assertEquals(connection, withoutValue);
+    assertEquals(MPersistableEntity.PERSISTANCE_ID_DEFAULT, withoutValue.getPersistenceId());
+    assertNull(withoutValue.getName());
+    assertNull(withoutValue.getCreationUser());
+    assertEquals(forms1(), withoutValue.getConnectorPart());
+    assertEquals(forms2(), withoutValue.getFrameworkPart());
+    assertNull(withoutValue.getConnectorPart().getForm("FORMNAME").getInput("INTEGER-INPUT").getValue());
+    assertNull(withoutValue.getConnectorPart().getForm("FORMNAME").getInput("STRING-INPUT").getValue());
+
+    // Clone with value
+    MConnection withValue = connection.clone(true);
+    assertEquals(connection, withValue);
+    assertEquals(connection.getPersistenceId(), withValue.getPersistenceId());
+    assertEquals(connection.getName(), withValue.getName());
+    assertEquals(connection.getCreationUser(), withValue.getCreationUser());
+    assertEquals(forms1(), withValue.getConnectorPart());
+    assertEquals(forms2(), withValue.getFrameworkPart());
+    assertEquals(100, withValue.getConnectorPart().getForm("FORMNAME").getInput("INTEGER-INPUT").getValue());
+    assertEquals("TEST-VALUE", withValue.getConnectorPart().getForm("FORMNAME").getInput("STRING-INPUT").getValue());
   }
 
-  private MConnectionForms connector1() {
+  private MConnection connection() {
+    MConnection connection = new MConnection(123l, forms1(), forms2());
+    connection.setName("Vampire");
+    connection.setCreationUser("Buffy");
+    return connection;
+  }
+
+  private MConnectionForms forms1() {
     List<MForm> forms = new ArrayList<MForm>();
     MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
     input.setValue(100);
@@ -83,7 +109,7 @@ public class TestMConnection {
     return new MConnectionForms(forms);
   }
 
-  private MConnectionForms connector2() {
+  private MConnectionForms forms2() {
     List<MForm> forms = new ArrayList<MForm>();
     MMapInput input = new MMapInput("MAP-INPUT", false);
     List<MInput<?>> list = new ArrayList<MInput<?>>();

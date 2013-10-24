@@ -37,12 +37,12 @@ public class MJob extends MAccountableEntity implements MClonable {
    * dependency through connection object, but having this dependency explicitly
    * carried along helps a lot.
    */
-  private long connectorId;
+  private final long connectorId;
 
   /**
    * Corresponding connection object.
    */
-  private long connectionId;
+  private final long connectionId;
 
   /**
    * User name for this object
@@ -52,11 +52,20 @@ public class MJob extends MAccountableEntity implements MClonable {
   /**
    * Job type
    */
-  private Type type;
+  private final Type type;
 
-  private MJobForms connectorPart;
-  private MJobForms frameworkPart;
+  private final MJobForms connectorPart;
+  private final MJobForms frameworkPart;
 
+  /**
+   * Default constructor to build  new MJob model.
+   *
+   * @param connectorId Connector id
+   * @param connectionId Connection id
+   * @param type Job type
+   * @param connectorPart Connector forms
+   * @param frameworkPart Framework forms
+   */
   public MJob(long connectorId,
               long connectionId,
               Type type,
@@ -67,13 +76,45 @@ public class MJob extends MAccountableEntity implements MClonable {
     this.type = type;
     this.connectorPart = connectorPart;
     this.frameworkPart = frameworkPart;
+    verifyFormsOfSameType();
+  }
 
-    // Check that we're operating on forms with same type
+  /**
+   * Constructor to create deep copy of another MJob model.
+   *
+   * @param other MConnection model to copy
+   */
+  public MJob(MJob other) {
+    this(other, other.connectorPart.clone(true), other.frameworkPart.clone(true));
+  }
+
+  /**
+   * Construct new MJob model as a copy of another with replaced forms.
+   *
+   * This method is suitable only for metadata upgrade path and should not be
+   * used otherwise.
+   *
+   * @param other MJob model to copy
+   * @param connectorPart Connector forms
+   * @param frameworkPart Framework forms
+   */
+  public MJob(MJob other, MJobForms connectorPart, MJobForms frameworkPart) {
+    super(other);
+    this.connectionId = other.connectionId;
+    this.connectorId = other.connectorId;
+    this.type = other.type;
+    this.name = other.name;
+    this.connectorPart = connectorPart;
+    this.frameworkPart = frameworkPart;
+    verifyFormsOfSameType();
+  }
+
+  private void verifyFormsOfSameType() {
     if (type != connectorPart.getType() || type != frameworkPart.getType()) {
       throw new SqoopException(ModelError.MODEL_002,
         "Incompatible types, job: " + type.name()
-        + ", connector part: " + connectorPart.getType().name()
-        + ", framework part: " + frameworkPart.getType().name()
+          + ", connector part: " + connectorPart.getType().name()
+          + ", framework part: " + frameworkPart.getType().name()
       );
     }
   }
@@ -98,16 +139,8 @@ public class MJob extends MAccountableEntity implements MClonable {
     return connectionId;
   }
 
-  public void setConnectionId(long connectionId) {
-    this.connectionId = connectionId;
-  }
-
   public long getConnectorId() {
     return connectorId;
-  }
-
-  public void setConnectorId(long connectorId) {
-    this.connectorId = connectorId;
   }
 
   public MJobForms getConnectorPart() {
@@ -118,29 +151,17 @@ public class MJob extends MAccountableEntity implements MClonable {
     return frameworkPart;
   }
 
-  public void setConnectorPart(MJobForms connectorPart) {
-    this.connectorPart = connectorPart;
-  }
-
-  public void setFrameworkPart(MJobForms frameworkPart) {
-    this.frameworkPart = frameworkPart;
-  }
-
-
   public Type getType() {
     return type;
   }
 
   @Override
   public MJob clone(boolean cloneWithValue) {
-    MJob copy = new MJob(this.connectorId, this.connectionId, this.type,
-        this.getConnectorPart().clone(cloneWithValue),
-        this.getFrameworkPart().clone(cloneWithValue));
     if(cloneWithValue) {
-      copy.setPersistenceId(this.getPersistenceId());
-      copy.setName(this.getName());
+      return new MJob(this);
+    } else {
+      return new MJob(connectorId, connectionId, type, connectorPart.clone(false), frameworkPart.clone(false));
     }
-    return copy;
   }
 
   @Override

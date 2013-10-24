@@ -25,13 +25,47 @@ public class MConnection extends MAccountableEntity implements MClonable {
   private long connectorId;
   private String name;
 
-  private MConnectionForms connectorPart;
-  private MConnectionForms frameworkPart;
+  private final MConnectionForms connectorPart;
+  private final MConnectionForms frameworkPart;
 
+  /**
+   * Default constructor to build new MConnection model.
+   *
+   * @param connectorId Connector id
+   * @param connectorPart Connector forms
+   * @param frameworkPart Framework forms
+   */
   public MConnection(long connectorId,
                      MConnectionForms connectorPart,
                      MConnectionForms frameworkPart) {
     this.connectorId = connectorId;
+    this.connectorPart = connectorPart;
+    this.frameworkPart = frameworkPart;
+  }
+
+  /**
+   * Constructor to create deep copy of another MConnection model.
+   *
+   * @param other MConnection model to copy
+   */
+  public MConnection(MConnection other) {
+    this(other, other.connectorPart.clone(true), other.frameworkPart.clone(true));
+  }
+
+  /**
+   * Construct new MConnection model as a copy of another with replaced forms.
+   *
+   * This method is suitable only for metadata upgrade path and should not be
+   * used otherwise.
+   *
+   * @param other MConnection model to copy
+   * @param connectorPart Connector forms
+   * @param frameworkPart Framework forms
+   */
+  public MConnection(MConnection other, MConnectionForms connectorPart, MConnectionForms frameworkPart) {
+    super(other);
+    this.connectorId = other.connectorId;
+    this.name = other.name;
     this.connectorPart = connectorPart;
     this.frameworkPart = frameworkPart;
   }
@@ -57,14 +91,6 @@ public class MConnection extends MAccountableEntity implements MClonable {
     return connectorId;
   }
 
-  public void setConnectorPart(MConnectionForms connectorPart) {
-    this.connectorPart = connectorPart;
-  }
-
-  public void setFrameworkPart(MConnectionForms frameworkPart) {
-    this.frameworkPart = frameworkPart;
-  }
-
   public void setConnectorId(long connectorId) {
     this.connectorId = connectorId;
   }
@@ -87,14 +113,11 @@ public class MConnection extends MAccountableEntity implements MClonable {
 
   @Override
   public MConnection clone(boolean cloneWithValue) {
-    MConnection copy = new MConnection(this.getConnectorId(),
-        this.getConnectorPart().clone(cloneWithValue),
-        this.getFrameworkPart().clone(cloneWithValue));
     if(cloneWithValue) {
-      copy.setPersistenceId(this.getPersistenceId());
-      copy.setName(this.getName());
+      return new MConnection(this);
+    } else {
+      return new MConnection(connectorId, connectorPart.clone(false), frameworkPart.clone(false));
     }
-    return copy;
   }
 
   @Override

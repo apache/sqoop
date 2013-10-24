@@ -415,16 +415,13 @@ public abstract class Repository {
       deleteConnectionsAndJobs(connections, jobs, tx);
       updateConnector(newConnector, tx);
       for (MConnection connection : connections) {
-        long connectionID = connection.getPersistenceId();
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
         List<MForm> forms = newConnector.getConnectionForms().clone(false).getForms();
         MConnectionForms newConnectionForms = new MConnectionForms(forms);
         upgrader.upgrade(connection.getConnectorPart(), newConnectionForms);
-        MConnection newConnection = new MConnection(connectorID,
-          newConnectionForms, connection.getFrameworkPart());
-        newConnection.setPersistenceId(connectionID);
+        MConnection newConnection = new MConnection(connection, newConnectionForms, connection.getFrameworkPart());
 
         // Transform form structures to objects for validations
         Object newConfigurationObject = ClassUtils.instantiate(connector.getConnectionConfigurationClass());
@@ -445,9 +442,7 @@ public abstract class Repository {
         List<MForm> forms = newConnector.getJobForms(job.getType()).clone(false).getForms();
         MJobForms newJobForms = new MJobForms(job.getType(), forms);
         upgrader.upgrade(job.getConnectorPart(), newJobForms);
-        MJob newJob = new MJob(connectorID, job.getConnectionId(),
-          job.getType(), newJobForms, job.getFrameworkPart());
-        newJob.setPersistenceId(job.getPersistenceId());
+        MJob newJob = new MJob(job, newJobForms, job.getFrameworkPart());
 
         // Transform form structures to objects for validations
         Object newConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(job.getType()));
@@ -504,16 +499,13 @@ public abstract class Repository {
       deleteConnectionsAndJobs(connections, jobs, tx);
       updateFramework(framework, tx);
       for (MConnection connection : connections) {
-        long connectionID = connection.getPersistenceId();
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
         List<MForm> forms = framework.getConnectionForms().clone(false).getForms();
         MConnectionForms newConnectionForms = new MConnectionForms(forms);
         upgrader.upgrade(connection.getFrameworkPart(), newConnectionForms);
-        MConnection newConnection = new MConnection(connection.getConnectorId(),
-          connection.getConnectorPart(), newConnectionForms);
-        newConnection.setPersistenceId(connectionID);
+        MConnection newConnection = new MConnection(connection, connection.getConnectorPart(), newConnectionForms);
 
         // Transform form structures to objects for validations
         Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getConnectionConfigurationClass());
@@ -534,9 +526,7 @@ public abstract class Repository {
         List<MForm> forms = framework.getJobForms(job.getType()).clone(false).getForms();
         MJobForms newJobForms = new MJobForms(job.getType(), forms);
         upgrader.upgrade(job.getFrameworkPart(), newJobForms);
-        MJob newJob = new MJob(job.getConnectorId(), job.getConnectionId(),
-          job.getType(), job.getConnectorPart(), newJobForms);
-        newJob.setPersistenceId(job.getPersistenceId());
+        MJob newJob = new MJob(job, job.getConnectorPart(), newJobForms);
 
         // Transform form structures to objects for validations
         Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass(job.getType()));

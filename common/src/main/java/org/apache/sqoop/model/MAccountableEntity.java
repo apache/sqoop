@@ -52,12 +52,32 @@ abstract public class MAccountableEntity extends MPersistableEntity {
    */
   private boolean enabled;
 
+  /**
+   * Default constructor.
+   *
+   * Set creation and last update date to now and users as null. By default
+   * the accountable entity is enabled.
+   */
   public MAccountableEntity() {
     this.creationUser = null;
     this.creationDate = new Date();
     this.lastUpdateUser = this.creationUser;
     this.lastUpdateDate = this.creationDate;
     this.enabled = DEFAULT_ENABLED;
+  }
+
+  /**
+   * Create new accountable entity as copy of other accountable entity.
+   *
+   * @param other Accountable entity to copy
+   */
+  public MAccountableEntity(MAccountableEntity other) {
+    super(other);
+    this.creationDate = other.creationDate;
+    this.creationUser = other.creationUser;
+    this.lastUpdateDate = other.lastUpdateDate;
+    this.lastUpdateUser = other.lastUpdateUser;
+    this.enabled = other.enabled;
   }
 
   public void setCreationUser(String name) {

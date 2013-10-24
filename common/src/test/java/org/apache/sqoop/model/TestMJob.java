@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.sqoop.common.SqoopException;
 import org.junit.Test;
 
 /**
@@ -33,56 +34,83 @@ public class TestMJob {
    */
   @Test
   public void testInitialization() {
-    List<MForm> forms = new ArrayList<MForm>();
-    MJobForms jobform1 = new MJobForms(MJob.Type.EXPORT, forms);
-    List<MForm> forms2 = new ArrayList<MForm>();
-    MJobForms jobform2 = new MJobForms(MJob.Type.EXPORT, forms2);
-    MJob job = new MJob(123l, 456l, MJob.Type.EXPORT, jobform1, jobform2);
-
+    // Test default constructor
+    MJob job = job(MJob.Type.IMPORT);
     assertEquals(123l, job.getConnectorId());
-    assertEquals(456l, job.getConnectionId());
-    assertEquals(MJob.Type.EXPORT, job.getType());
-    assertEquals(jobform1, job.getConnectorPart());
-    assertEquals(jobform2, job.getFrameworkPart());
+    assertEquals(MJob.Type.IMPORT, job.getType());
+    assertEquals("Buffy", job.getCreationUser());
+    assertEquals("Vampire", job.getName());
+    assertEquals(forms1(MJob.Type.IMPORT), job.getConnectorPart());
+    assertEquals(forms2(MJob.Type.IMPORT), job.getFrameworkPart());
+
+    // Test copy constructor
+    MJob copy = new MJob(job);
+    assertEquals(123l, copy.getConnectorId());
+    assertEquals(MJob.Type.IMPORT, copy.getType());
+    assertEquals("Vampire", copy.getName());
+    assertEquals("Buffy", copy.getCreationUser());
+    assertEquals(job.getCreationDate(), copy.getCreationDate());
+    assertEquals(forms1(MJob.Type.IMPORT), copy.getConnectorPart());
+    assertEquals(forms2(MJob.Type.IMPORT), copy.getFrameworkPart());
+
+    // Test constructor for metadata upgrade (the order of forms is different)
+    MJob upgradeCopy = new MJob(job, forms2(MJob.Type.IMPORT), forms1(MJob.Type.IMPORT));
+    assertEquals(123l, upgradeCopy.getConnectorId());
+    assertEquals(MJob.Type.IMPORT, upgradeCopy.getType());
+    assertEquals("Vampire", upgradeCopy.getName());
+    assertEquals("Buffy", upgradeCopy.getCreationUser());
+    assertEquals(job.getCreationDate(), upgradeCopy.getCreationDate());
+    assertEquals(forms2(MJob.Type.IMPORT), upgradeCopy.getConnectorPart());
+    assertEquals(forms1(MJob.Type.IMPORT), upgradeCopy.getFrameworkPart());
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testIncorrectDefaultConstructor() {
+    new MJob(1l, 1l, MJob.Type.IMPORT, forms1(MJob.Type.IMPORT), forms2(MJob.Type.EXPORT));
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testIncorrectUpgradeConstructor() {
+    new MJob(job(MJob.Type.EXPORT), forms1(MJob.Type.IMPORT), forms2(MJob.Type.IMPORT));
   }
 
   @Test
   public void testClone() {
-    List<MForm> forms = new ArrayList<MForm>();
-    forms.add(getInputValues());
-    MJobForms jobform1 = new MJobForms(MJob.Type.EXPORT, forms);
-    List<MForm> forms2 = new ArrayList<MForm>();
-    forms2.add(getInputValues());
-    MJobForms jobform2 = new MJobForms(MJob.Type.EXPORT, forms2);
-    MJob job = new MJob(123l, 456l, MJob.Type.EXPORT, jobform1, jobform2);
-    job.setPersistenceId(12l);
+    MJob job = job(MJob.Type.IMPORT);
 
-    MForm originalForm = job.getConnectorPart().getForms().get(0);
-    //Clone job
-    MJob cloneJob = job.clone(true);
-    assertEquals(12l, cloneJob.getPersistenceId());
-    assertEquals(123l, cloneJob.getConnectorId());
-    assertEquals(456l, cloneJob.getConnectionId());
-    assertEquals(MJob.Type.EXPORT, cloneJob.getType());
-    MForm clonedForm = cloneJob.getConnectorPart().getForms().get(0);
-    assertEquals(clonedForm.getInputs().get(0).getValue(), originalForm.getInputs().get(0).getValue());
-    assertEquals(clonedForm.getInputs().get(1).getValue(), originalForm.getInputs().get(1).getValue());
-    assertNotNull(clonedForm.getInputs().get(0).getValue());
-    assertNotNull(clonedForm.getInputs().get(1).getValue());
-    assertEquals(job, cloneJob);
+    // Clone without value
+    MJob withoutValue = job.clone(false);
+    assertEquals(job, withoutValue);
+    assertEquals(MPersistableEntity.PERSISTANCE_ID_DEFAULT, withoutValue.getPersistenceId());
+    assertEquals(MJob.Type.IMPORT, withoutValue.getType());
+    assertNull(withoutValue.getName());
+    assertNull(withoutValue.getCreationUser());
+    assertEquals(forms1(MJob.Type.IMPORT), withoutValue.getConnectorPart());
+    assertEquals(forms2(MJob.Type.IMPORT), withoutValue.getFrameworkPart());
+    assertNull(withoutValue.getConnectorPart().getForm("FORMNAME").getInput("INTEGER-INPUT").getValue());
+    assertNull(withoutValue.getConnectorPart().getForm("FORMNAME").getInput("STRING-INPUT").getValue());
 
-    //Clone job without value
-    MJob cloneJob1 = job.clone(false);
-    assertEquals(123l, cloneJob1.getConnectorId());
-    assertEquals(456l, cloneJob1.getConnectionId());
-    assertEquals(MJob.Type.EXPORT, cloneJob1.getType());
-    clonedForm = cloneJob1.getConnectorPart().getForms().get(0);
-    assertNull(clonedForm.getInputs().get(0).getValue());
-    assertNull(clonedForm.getInputs().get(1).getValue());
-    assertNotSame(job, cloneJob1);
+    // Clone with value
+    MJob withValue = job.clone(true);
+    assertEquals(job, withValue);
+    assertEquals(job.getPersistenceId(), withValue.getPersistenceId());
+    assertEquals(MJob.Type.IMPORT, withValue.getType());
+    assertEquals(job.getName(), withValue.getName());
+    assertEquals(job.getCreationUser(), withValue.getCreationUser());
+    assertEquals(forms1(MJob.Type.IMPORT), withValue.getConnectorPart());
+    assertEquals(forms2(MJob.Type.IMPORT), withValue.getFrameworkPart());
+    assertEquals(100, withValue.getConnectorPart().getForm("FORMNAME").getInput("INTEGER-INPUT").getValue());
+    assertEquals("TEST-VALUE", withValue.getConnectorPart().getForm("FORMNAME").getInput("STRING-INPUT").getValue());  }
+
+  private MJob job(MJob.Type type) {
+    MJob job = new MJob(123l, 456l, type, forms1(type), forms2(type));
+    job.setName("Vampire");
+    job.setCreationUser("Buffy");
+    return job;
   }
 
-  private MForm getInputValues() {
+  private MJobForms forms1(MJob.Type type) {
+    List<MForm> forms = new ArrayList<MForm>();
     MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
     input.setValue(100);
     MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
@@ -91,6 +119,17 @@ public class TestMJob {
     list.add(input);
     list.add(strInput);
     MForm form = new MForm("FORMNAME", list);
-    return form;
+    forms.add(form);
+    return new MJobForms(type, forms);
+  }
+
+  private MJobForms forms2(MJob.Type type) {
+    List<MForm> forms = new ArrayList<MForm>();
+    MMapInput input = new MMapInput("MAP-INPUT", false);
+    List<MInput<?>> list = new ArrayList<MInput<?>>();
+    list.add(input);
+    MForm form = new MForm("form", list);
+    forms.add(form);
+    return new MJobForms(type, forms);
   }
 }
