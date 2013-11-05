@@ -532,4 +532,18 @@ public class OracleManagerTest extends ImportJobTestCase {
 
     m2.close(); // Close the manager's active connection again.
   }
+
+  public void testSessionUserName() throws Exception {
+    SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
+      TABLE_NAME);
+    OracleUtils.setOracleAuth(options);
+
+    // Create a connection manager and get a connection
+    OracleManager m1 = new OracleManager(options);
+    Connection c1 = m1.getConnection();
+    // Make sure that the session username is the same as the Oracle
+    // sqoop user name
+    String sessionUserName = m1.getSessionUser(c1);
+    assertEquals(OracleUtils.ORACLE_USER_NAME, sessionUserName);
+  }
 }

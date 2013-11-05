@@ -109,6 +109,13 @@ public class OracleManager
      + "ALL_CONS_COLUMNS.TABLE_NAME = ? AND "
      + "ALL_CONS_COLUMNS.OWNER = ?";
 
+  /**
+   * Query to get the current user for the DB session.   Used in case of
+   * wallet logins.
+   */
+  public static final String QUERY_GET_SESSIONUSER =
+     "SELECT USER FROM DUAL";
+
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
 
@@ -284,6 +291,7 @@ public class OracleManager
     String password = options.getPassword();
     String connectStr = options.getConnectString();
 
+
     connection = CACHE.getConnection(connectStr, username);
     if (null == connection) {
       // Couldn't pull one from the cache. Get a new one.
@@ -324,6 +332,44 @@ public class OracleManager
     setSessionTimeZone(connection);
 
     return connection;
+  }
+
+  public String getSessionUser(Connection conn) {
+    Statement stmt = null;
+    ResultSet rset = null;
+    String user = null;
+    try {
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+              ResultSet.CONCUR_READ_ONLY);
+      rset = stmt.executeQuery(QUERY_GET_SESSIONUSER);
+
+      if (rset.next()) {
+        user = rset.getString(1);
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (SQLException ex) {
+        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
+      }
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
+        }
+      }
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
+        }
+      }
+    }
+    return user;
   }
 
   /**
@@ -677,11 +723,12 @@ public class OracleManager
     PreparedStatement pStmt = null;
     ResultSet rset = null;
     List<String> tables = new ArrayList<String>();
-    String tableOwner = this.options.getUsername();
+    String tableOwner = null;
 
 
     try {
       conn = getConnection();
+      tableOwner = getSessionUser(conn);
       pStmt = conn.prepareStatement(QUERY_LIST_TABLES,
           ResultSet.TYPE_FORWARD_ONLY,
               ResultSet.CONCUR_READ_ONLY);
@@ -862,7 +909,7 @@ public class OracleManager
     ResultSet rset = null;
     List<String> columns = new ArrayList<String>();
 
-    String tableOwner = this.options.getUsername();
+    String tableOwner = null;
     String shortTableName = tableName;
     int qualifierIndex = tableName.indexOf('.');
     if (qualifierIndex != -1) {
@@ -872,6 +919,10 @@ public class OracleManager
 
     try {
       conn = getConnection();
+
+      if (tableOwner == null) {
+        tableOwner = getSessionUser(conn);
+      }
 
       pStmt = conn.prepareStatement(QUERY_COLUMNS_FOR_TABLE,
                   ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -925,7 +976,7 @@ public class OracleManager
     ResultSet rset = null;
     List<String> columns = new ArrayList<String>();
 
-    String tableOwner = this.options.getUsername();
+    String tableOwner = null;
     String shortTableName = tableName;
     int qualifierIndex = tableName.indexOf('.');
     if (qualifierIndex != -1) {
@@ -935,6 +986,10 @@ public class OracleManager
 
     try {
       conn = getConnection();
+
+      if (tableOwner == null) {
+        tableOwner = getSessionUser(conn);
+      }
 
       pStmt = conn.prepareStatement(QUERY_PRIMARY_KEY_FOR_TABLE,
                   ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -948,7 +1003,9 @@ public class OracleManager
       conn.commit();
     } catch (SQLException e) {
       try {
-        conn.rollback();
+        if (conn != null) {
+          conn.rollback();
+        }
       } catch (SQLException ex) {
         LoggingUtils.logAll(LOG, "Failed to rollback transaction", ex);
       }
