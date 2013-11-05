@@ -29,10 +29,17 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.ImportTool;
+import org.apache.sqoop.util.password.CryptoFileLoader;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -314,18 +321,93 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     return args.toArray(new String[0]);
   }
 
+  public void testCryptoFileLoader() throws Exception {
+    // Current implementation is limited to ECB mode
+    Object[][] ciphers = {
+//      {"AES/CBC/NoPadding", 128},
+//      {"AES/CBC/PKCS5Padding", 128},
+      {"AES/ECB/NoPadding", 128},
+      {"AES/ECB/PKCS5Padding", 128},
+//      {"DES/CBC/NoPadding", 56},
+//      {"DES/CBC/PKCS5Padding", 56},
+      {"DES/ECB/NoPadding", 64},
+      {"DES/ECB/PKCS5Padding", 64},
+//      {"DESede/CBC/NoPadding", 168},
+//      {"DESede/CBC/PKCS5Padding", 168},
+      {"DESede/ECB/NoPadding", 192},
+      {"DESede/ECB/PKCS5Padding", 192}
+    };
+
+    String [] passphrases = {
+      "Simple  password",
+      "!@#$%^&*()_+<>?:"
+    };
+
+    // Execute all ciphers with all pass phrases
+    for(Object [] cipher : ciphers) {
+      for(String pass : passphrases) {
+        executeCipherTest(pass, pass, (String)cipher[0], (Integer)cipher[1]);
+      }
+    }
+  }
+
+  public void executeCipherTest(String password, String passphrase, String cipher, int keySize) throws Exception {
+    LOG.info("Using cipher: " + cipher + " with keySize " + keySize + " and passphrase " + passphrase );
+    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    createTempFile(passwordFilePath);
+    writeToFile(passwordFilePath, encryptPassword(password, passphrase, cipher, 10000, keySize));
+    LOG.info("Generated encrypted password file in: " + passwordFilePath);
+
+    ArrayList<String> extraArgs = new ArrayList<String>();
+    extraArgs.add("--username");
+    extraArgs.add("username");
+    extraArgs.add("--password-file");
+    extraArgs.add(passwordFilePath);
+    String[] commonArgs = getCommonArgs(false, extraArgs);
+
+    Configuration conf = getConf();
+    conf.set("org.apache.sqoop.credentials.loader.class", CryptoFileLoader.class.getCanonicalName());
+    conf.set("org.apache.sqoop.credentials.loader.crypto.alg", cipher);
+    conf.set("org.apache.sqoop.credentials.loader.crypto.passphrase", passphrase);
+    conf.setInt("org.apache.sqoop.credentials.loader.crypto.salt.key.len", keySize);
+
+    SqoopOptions in = getSqoopOptions(conf);
+    ImportTool importTool = new ImportTool();
+
+    SqoopOptions out = importTool.parseArguments(commonArgs, conf, in, true);
+    assertNotNull(out.getPasswordFilePath());
+    assertNotNull(out.getPassword());
+    assertEquals(passphrase, out.getPassword());
+  }
+
+  private byte[] encryptPassword(String password, String passPhrase, String alg, int iterations, int keySize) throws Exception {
+    String algOnly = alg.split("/")[0];
+
+    SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+    SecretKey secKey =  factory.generateSecret(new PBEKeySpec(passPhrase.toCharArray(), "SALT".getBytes(), iterations, keySize));
+    SecretKeySpec key = new SecretKeySpec(secKey.getEncoded(), algOnly);
+
+    Cipher crypto = Cipher.getInstance(alg);
+    crypto.init(Cipher.ENCRYPT_MODE, key);
+
+    return crypto.doFinal(password.getBytes());
+  }
+
   private void createTempFile(String filePath) throws IOException {
     File pwdFile = new File(filePath);
     pwdFile.createNewFile();
   }
 
-  private void writeToFile(String filePath, String contents)
-    throws IOException {
+  private void writeToFile(String filePath, String contents) throws IOException {
+    writeToFile(filePath, contents.getBytes());
+  }
+
+  private void writeToFile(String filePath, byte [] contents) throws IOException {
     File pwdFile = new File(filePath);
     FileOutputStream fos = null;
     try {
       fos = new FileOutputStream(pwdFile);
-      fos.write(contents.getBytes());
+      fos.write(contents);
     } finally {
       if (fos != null) {
         fos.close();

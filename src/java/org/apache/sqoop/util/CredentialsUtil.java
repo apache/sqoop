@@ -21,64 +21,91 @@
 package org.apache.sqoop.util;
 
 import com.cloudera.sqoop.SqoopOptions;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.util.password.FilePasswordLoader;
+import org.apache.sqoop.util.password.PasswordLoader;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 
 /**
  * A utility class for fetching passwords from a file.
  */
 public final class CredentialsUtil {
 
-  public static final Log LOG = LogFactory.getLog(
-    CredentialsUtil.class.getName());
+  /**
+   * Property for specifying which loader should be used to fetch the password.
+   */
+  private static String PROPERTY_LOADER_CLASSS = "org.apache.sqoop.credentials.loader.class";
+
+  /**
+   * The default loader is a FilePasswordLoader that will fetch the password from a file.
+   */
+  private static String DEFAULT_PASSWORD_LOADER = FilePasswordLoader.class.getCanonicalName();
+
+  public static final Log LOG = LogFactory.getLog(CredentialsUtil.class.getName());
 
   private CredentialsUtil() {
   }
 
-  public static String fetchPasswordFromFile(SqoopOptions options)
+  /**
+   * Return password that was specified (either on command line or via other facilities).
+   *
+   * @param options Sqoop Options
+   * @return Password
+   * @throws IOException
+   */
+  public static String fetchPassword(SqoopOptions options)
     throws IOException {
     String passwordFilePath = options.getPasswordFilePath();
     if (passwordFilePath == null) {
       return options.getPassword();
     }
 
-    return fetchPasswordFromFile(options.getConf(), passwordFilePath);
+    return fetchPasswordFromLoader(options.getPasswordFilePath(), options.getConf());
   }
 
-  public static String fetchPasswordFromFile(Configuration conf,
-                                             String passwordFilePath)
-    throws IOException {
-    LOG.debug("Fetching password from specified path: " + passwordFilePath);
-    Path path = new Path(passwordFilePath);
-    FileSystem fs = path.getFileSystem(conf);
+  /**
+   * Return password via --password-file argument.
+   *
+   * Given loader can be overridden using PROPERTY_LOADER_CLASSS.
+   *
+   * @param path Path with the password file.
+   * @param conf Configuration
+   * @return Password
+   * @throws IOException
+   */
+  public static String fetchPasswordFromLoader(String path, Configuration conf) throws IOException {
+    PasswordLoader loader = getLoader(conf);
+    return loader.loadPassword(path, conf);
+  }
 
-    if (!fs.exists(path)) {
-      throw new IOException("The password file does not exist! "
-        + passwordFilePath);
-    }
+  /**
+   * Remove any potentially sensitive information from the configuration object.
+   *
+   * @param configuration Associated configuration object.
+   * @throws IOException
+   */
+  public static void cleanUpSensitiveProperties(Configuration configuration) throws IOException {
+    PasswordLoader loader = getLoader(configuration);
+    loader.cleanUpConfiguration(configuration);
+  }
 
-    if (!fs.isFile(path)) {
-      throw new IOException("The password file cannot be a directory! "
-        + passwordFilePath);
-    }
+  /**
+   * Instantiate configured PasswordLoader class.
+   *
+   * @param configuration Associated configuration object.
+   * @return
+   * @throws IOException
+   */
+  public static PasswordLoader getLoader(Configuration configuration) throws IOException {
+    String loaderClass = configuration.get(PROPERTY_LOADER_CLASSS, DEFAULT_PASSWORD_LOADER);
 
-    InputStream is = fs.open(path);
-    StringWriter writer = new StringWriter();
     try {
-      IOUtils.copy(is, writer);
-      return writer.toString();
-    } finally {
-      IOUtils.closeQuietly(is);
-      IOUtils.closeQuietly(writer);
-      fs.close();
+      return (PasswordLoader) Class.forName(loaderClass).newInstance();
+    } catch (Exception e) {
+      throw new IOException(e);
     }
   }
 }

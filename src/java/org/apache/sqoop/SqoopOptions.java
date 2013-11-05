@@ -613,8 +613,7 @@ public class SqoopOptions implements Cloneable {
     passwordFilePath = props.getProperty("db.password.file");
     if (passwordFilePath != null) {
       try {
-        password = CredentialsUtil.fetchPasswordFromFile(
-                getConf(), passwordFilePath);
+        password = CredentialsUtil.fetchPasswordFromLoader(passwordFilePath, getConf());
         return; // short-circuit
       } catch (IOException e) {
         throw new RuntimeException("Unable to fetch password from file.", e);

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
 
-import com.cloudera.sqoop.util.ImportException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -878,7 +877,9 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       try {
         out.setPasswordFilePath(in.getOptionValue(PASSWORD_PATH_ARG));
         // apply password from file into password in options
-        out.setPassword(CredentialsUtil.fetchPasswordFromFile(out));
+        out.setPassword(CredentialsUtil.fetchPassword(out));
+        // And allow the PasswordLoader to clean up any sensitive properties
+        CredentialsUtil.cleanUpSensitiveProperties(out.getConf());
       } catch (IOException ex) {
         LOG.warn("Failed to load connection parameter file", ex);
         throw new InvalidOptionsException(
