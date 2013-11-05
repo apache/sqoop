@@ -106,7 +106,7 @@ public class DataDrivenImportJob extends ImportJobBase {
 
     LOG.info("Writing Avro schema file: " + schemaFile);
     FileUtils.forceMkdir(schemaFile.getParentFile());
-    FileUtils.writeStringToFile(schemaFile, schema.toString(true), null);
+    FileUtils.writeStringToFile(schemaFile, schema.toString(true));
 
     // Copy schema to code output directory.
     try {
