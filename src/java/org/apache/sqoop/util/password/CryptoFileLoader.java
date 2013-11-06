@@ -156,9 +156,13 @@ public class CryptoFileLoader extends FilePasswordLoader {
 
   @Override
   public void cleanUpConfiguration(Configuration configuration) {
-    configuration.unset(PROPERTY_CRYPTO_PASSPHRASE);
-    configuration.unset(PROPERTY_CRYPTO_SALT);
-    configuration.unset(PROPERTY_CRYPTO_KEY_LEN);
-    configuration.unset(PROPERTY_CRYPTO_ITERATIONS);
+    // Usage of Configuration#unset would be much better here, sadly
+    // this particular API is not available in Hadoop 0.20 and < 1.2.0
+    // that we are still supporting. Hence we are overriding the configs
+    // with default values.
+    configuration.set(PROPERTY_CRYPTO_PASSPHRASE, "REMOVED");
+    configuration.set(PROPERTY_CRYPTO_SALT, DEFAULT_SALT);
+    configuration.setInt(PROPERTY_CRYPTO_KEY_LEN, DEFAULT_KEY_LEN);
+    configuration.setInt(PROPERTY_CRYPTO_ITERATIONS, DEFAULT_ITERATIONS);
   }
 }
