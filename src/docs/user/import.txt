@@ -554,6 +554,9 @@ include::hive.txt[]
 include::hbase-args.txt[]
 include::hbase.txt[]
 
+include::accumulo-args.txt[]
+include::accumulo.txt[]
+
 include::codegen-args.txt[]
 
 As mentioned earlier, a byproduct of importing a table to HDFS is a

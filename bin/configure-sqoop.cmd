@@ -72,6 +72,14 @@ if not defined HBASE_HOME (
     echo Warning: HBASE_HOME and HBASE_VERSION not set.
   )
 )
+::
+:: Check for Accumulo dependency
+if not defined ACCUMULO_HOME (
+  echo Warning: ACCUMULO_HOME not set.
+)
+if not defined ZOOKEEPER_HOME (
+  echo Warning: ZOOKEEPER_HOME not set.
+)
 
 :: Check: If we can't find our dependencies, give up here.
 
@@ -90,6 +98,14 @@ if not exist %HADOOP_MAPRED_HOME% (
 if not exist "%HBASE_HOME%" (
   echo Warning: HBASE_HOME does not exist! HBase imports will fail.
   echo Please set HBASE_HOME to the root of your HBase installation.
+)
+if not exist "%ACCUMULO_HOME%" (
+  echo Warning: ACCUMULO_HOME does not exist! Accumulo imports will fail.
+  echo Please set ACCUMULO_HOME to the root of your Accumulo installation.
+)
+if not exist "%ZOOKEEPER_HOME%" (
+  echo Warning: ZOOKEEPER_HOME does not exist! Accumulo imports will fail.
+  echo Please set ZOOKEEPER_HOME to the root of your Zookeeper installation.
 )
 
 :: Add sqoop dependencies to classpath
@@ -113,6 +129,12 @@ if exist "%SQOOP_HOME%\lib" (
 if exist "%HBASE_HOME%" (
   call :add_dir_to_classpath %HBASE_HOME%
   call :add_dir_to_classpath %HBASE_HOME%\lib
+)
+::
+:: Add Accumulo to dependency list
+if exist "%ACCUMULO_HOME%" (
+  call :add_dir_to_classpath %ACCUMULO_HOME%
+  call :add_dir_to_classpath %ACCUMULO_HOME%\lib
 )
 
 if not defined ZOOCFGDIR (

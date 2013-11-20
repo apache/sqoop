@@ -36,21 +36,22 @@ under the License.
     <conf name="common" visibility="private"
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
+    <conf name="accumulo" visibility="private" />
     <conf name="hbase94" visibility="private" />
     <conf name="hbase95" visibility="private" extends="hbasecompat${hbasecompatprofile}" />
     <conf name="hbasecompat1" visibility="private" />
     <conf name="hbasecompat2" visibility="private" />
     <conf name="hcatalog" visibility="private" />
     <conf name="hadoop23" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
     <conf name="hadoop20" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
     <conf name="hadoop100" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
     <conf name="hadoop200" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
     <conf name="hadoop210" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -184,6 +185,14 @@ under the License.
       rev="${commons-lang.version}" conf="releaseaudit->default"/>
     <dependency org="commons-collections" name="commons-collections"
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
+
+    <!-- Accumulo 1.5.0 -->
+    <dependency org="org.apache.accumulo" name="accumulo-core" rev="1.5.0"
+                conf="accumulo->default">
+    </dependency>
+    <dependency org="org.apache.accumulo" name="accumulo-minicluster" rev="1.5.0"
+                conf="accumulo->default">
+    </dependency>
 
     <!-- HBase 0.94 -->
     <dependency org="org.apache.hbase" name="hbase" rev="${hbase94.version}" conf="hbase94->default">

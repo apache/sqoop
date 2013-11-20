@@ -101,7 +101,7 @@ The following are the limitations in the current implementation:
 
 * all-tables option
 * free-form query option
-* Data imported into Hive or HBase
+* Data imported into Hive, HBase or Accumulo
 * table import with --where argument
 * incremental imports
 

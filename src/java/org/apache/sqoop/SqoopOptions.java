@@ -39,6 +39,7 @@ import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
+import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.validation.AbortOnFailureHandler;
@@ -257,6 +258,46 @@ public class SqoopOptions implements Cloneable {
   // "key" column for the merge operation.
   @StoredAsProperty("merge.key.col") private String mergeKeyCol;
 
+  // Accumulo home directory
+  private String accumuloHome; // not serialized to metastore.
+  // Zookeeper home directory
+  private String zookeeperHome; // not serialized to metastore.
+
+  // Accumulo table to import into.
+  @StoredAsProperty("accumulo.table") private String accumuloTable;
+
+  // Column family to prepend to inserted cols.
+  @StoredAsProperty("accumulo.col.family") private String accumuloColFamily;
+
+  // Column of the input to use as the row key.
+  @StoredAsProperty("accumulo.row.key.col") private String accumuloRowKeyCol;
+  //
+  // Visibility token to be applied to each row imported.
+  @StoredAsProperty("accumulo.visibility") private String accumuloVisibility;
+
+  // Size of the write buffer.
+  @StoredAsProperty("accumulo.batch.size")
+  private long accumuloBatchSize;
+
+  // Maximum latency for batch writer.
+  @StoredAsProperty("accumulo.max.latency")
+  private long accumuloMaxLatency;
+
+  // if true, create table.
+  @StoredAsProperty("accumulo.create.table")
+  private boolean accumuloCreateTable;
+
+  // Accumulo user name
+  @StoredAsProperty("accumulo.user") private String accumuloUser;
+
+  // Accumulo password
+  @StoredAsProperty("accumulo.password") private String accumuloPassword;
+
+  // Accumulo instance
+  @StoredAsProperty("accumulo.instance") private String accumuloInstance;
+
+  // Accumulo zookeeper
+  @StoredAsProperty("accumulo.zookeepers") private String accumuloZookeepers;
 
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
@@ -846,6 +887,8 @@ public class SqoopOptions implements Cloneable {
     // default action is to run the full pipeline.
     this.hadoopMapRedHome = System.getenv("HADOOP_MAPRED_HOME");
 
+    this.accumuloHome = getAccumuloHomeDefault();
+    this.zookeeperHome = getZookeeperHomeDefault();
     this.hiveHome = getHiveHomeDefault();
     this.hCatHome = getHCatHomeDefault();
 
@@ -901,6 +944,11 @@ public class SqoopOptions implements Cloneable {
     // Creating instances for user specific mapping
     this.mapColumnHive = new Properties();
     this.mapColumnJava = new Properties();
+
+    // Set Accumulo batch size defaults, since 0 is not the same
+    // as "not set"
+    this.accumuloBatchSize = AccumuloConstants.DEFAULT_BATCH_SIZE;
+    this.accumuloMaxLatency = AccumuloConstants.DEFAULT_LATENCY;
 
     // We do not want to be verbose too much if not explicitly needed
     this.verbose = false;
@@ -2098,6 +2146,195 @@ public class SqoopOptions implements Cloneable {
   /** Return the name of the column used to merge an old and new dataset. */
   public String getMergeKeyCol() {
     return this.mergeKeyCol;
+  }
+
+  public static String getAccumuloHomeDefault() {
+    // Set this with $ACCUMULO_HOME, but -Daccumulo.home can override.
+    String accumuloHome = System.getenv("ACCUMULO_HOME");
+    accumuloHome = System.getProperty("accumulo.home", accumuloHome);
+    return accumuloHome;
+  }
+
+  public static String getZookeeperHomeDefault() {
+    // Set this with $ZOOKEEPER_HOME, but -Dzookeeper.home can override.
+    String zookeeperHome = System.getenv("ZOOKEEPER_HOME");
+    zookeeperHome = System.getProperty("zookeeper.home", zookeeperHome);
+    return zookeeperHome;
+  }
+
+  public String getAccumuloHome() {
+    return accumuloHome;
+  }
+
+  public void setAccumuloHome(String home) {
+    this.accumuloHome = home;
+  }
+
+  public String getZookeeperHome() {
+    return zookeeperHome;
+  }
+
+  public void setZookeeperHome(String home) {
+    this.zookeeperHome = home;
+  }
+
+  /**
+   * Set whether we should create missing Accumulo tables.
+   */
+  public void setCreateAccumuloTable(boolean create) {
+    this.accumuloCreateTable = create;
+  }
+
+  /**
+   * Returns true if we should create Accumulo tables/column families
+   * that are missing.
+   */
+  public boolean getCreateAccumuloTable() {
+    return this.accumuloCreateTable;
+  }
+
+  /**
+   * Sets the Accumulo batch size (in bytes).
+   */
+  public void setAccumuloBatchSize(long batchSize) {
+    this.accumuloBatchSize = batchSize;
+  }
+
+  /**
+   * Gets the Accumulo batch size (in bytes).
+   */
+  public long getAccumuloBatchSize() {
+    return this.accumuloBatchSize;
+  }
+
+  /**
+   * Sets the Accumulo target column family.
+   */
+  public void setAccumuloColFamily(String colFamily) {
+    this.accumuloColFamily = colFamily;
+  }
+
+  /**
+   * Gets the Accumulo import target column family.
+   */
+  public String getAccumuloColFamily() {
+    return this.accumuloColFamily;
+  }
+
+  /**
+   * Sets the Accumulo max latency.
+   */
+  public void setAccumuloMaxLatency(long maxLatency) {
+    this.accumuloMaxLatency = maxLatency;
+  }
+
+  /**
+   * Gets the Accumulo max latency.
+   */
+  public long getAccumuloMaxLatency() {
+    return this.accumuloMaxLatency;
+  }
+
+  /**
+   * Gets the column to use as the row id in an Accumulo import.
+   * If null, use the primary key column.
+   */
+  public String getAccumuloRowKeyColumn() {
+    return this.accumuloRowKeyCol;
+  }
+
+ /**
+  * Sets the column to use as the row id in an Accumulo import.
+  *
+  */
+  public void setAccumuloRowKeyColumn(String col) {
+    this.accumuloRowKeyCol = col;
+  }
+
+  /**
+   * Gets the visibility token to use.
+   * If null, don't assign a visibility.
+   */
+  public String getAccumuloVisibility() {
+    return this.accumuloVisibility;
+  }
+
+ /**
+  * Sets the visibility token to use.
+  *
+  */
+  public void setAccumuloVisibility(String vis) {
+    this.accumuloVisibility = vis;
+  }
+
+  /**
+   * Gets the target Accumulo table name, if any.
+   */
+  public String getAccumuloTable() {
+    return this.accumuloTable;
+  }
+
+  /**
+   * Sets the target Accumulo table name.
+   */
+  public void setAccumuloTable(String table) {
+    this.accumuloTable = table;
+  }
+
+  /**
+   * Gets the target Accumulo user name, if any.
+   */
+  public String getAccumuloUser() {
+    return this.accumuloUser;
+  }
+
+  /**
+   * Sets the target Accumulo user name for an import.
+   */
+  public void setAccumuloUser(String user) {
+    this.accumuloUser = user;
+  }
+
+  /**
+   * Gets the target Accumulo password, if any.
+   */
+  public String getAccumuloPassword() {
+    return this.accumuloPassword;
+  }
+
+  /**
+   * Sets the target Accumulo password for an import.
+   */
+  public void setAccumuloPassword(String passwd) {
+    this.accumuloPassword = passwd;
+  }
+
+  /**
+   * Gets the target Accumulo instance, if any.
+   */
+  public String getAccumuloInstance() {
+    return this.accumuloInstance;
+  }
+
+  /**
+   * Sets the target Accumulo instance for an import.
+   */
+  public void setAccumuloInstance(String instance) {
+    this.accumuloInstance = instance;
+  }
+
+  /**
+   * Gets the target Accumulo zookeeper instance, if any.
+   */
+  public String getAccumuloZookeepers() {
+    return this.accumuloZookeepers;
+  }
+
+  /**
+   ** Sets the target Accumulo zookeeper instance for an import.
+   **/
+  public void setAccumuloZookeepers(String zookeepers) {
+    this.accumuloZookeepers = zookeepers;
   }
 
   public void setConnManagerClassName(String connManagerClass) {

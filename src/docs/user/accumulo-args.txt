@@ -1,0 +1,50 @@
+
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+
+.Accumulo arguments:
+[grid="all"]
+`-------------------------------------`-----------------------------------
+Argument                              Description
+--------------------------------------------------------------------------
++\--accumulo-table <table-nam>+       Specifies an Accumulo table to use\
+                                      as the target instead of HDFS
++\--accumulo-column-family <family>+  Sets the target column family for\
+                                      the import
++\--accumulo-create-table+            If specified, create missing\
+                                      Accumulo tables
++\--accumulo-row-key <col>+           Specifies which input column to use\
+                                      as the row key
++\--accumulo-visibility <vis>+        (Optional) Specifies a visibility\
+                                      token to apply to all rows inserted\
+                                      into Accumulo.  Default is the\
+                                      empty string.
++\--accumulo-batch-size <size>+       (Optional) Sets the size in bytes\
+                                      of Accumulo's write buffer. Default\
+                                      is 4MB.
++\--accumulo-max-latency <ms>+        (Optional) Sets the max latency in\
+                                      milliseconds for the Accumulo\
+                                      batch writer.  Default is 0.
++\--accumulo-zookeepers <host:port>+  Comma-separated list of Zookeeper\
+                                      servers used by the Accumulo instance
++\--accumulo-instance <table-name>+   Name of the target Accumulo instance
++\--accumulo-user <username>+         Name of the Accumulo user to import as
++\--accumulo-password <password>+     Password for the Accumulo user
+--------------------------------------------------------------------------
+

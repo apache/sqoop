@@ -180,6 +180,20 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       "hbase-bulkload";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
+  //Accumulo arguments.
+  public static final String ACCUMULO_TABLE_ARG = "accumulo-table";
+  public static final String ACCUMULO_COL_FAM_ARG = "accumulo-column-family";
+  public static final String ACCUMULO_ROW_KEY_ARG = "accumulo-row-key";
+  public static final String ACCUMULO_VISIBILITY_ARG = "accumulo-visibility";
+  public static final String ACCUMULO_CREATE_TABLE_ARG
+      = "accumulo-create-table";
+  public static final String ACCUMULO_BATCH_SIZE_ARG = "accumulo-batch-size";
+  public static final String ACCUMULO_MAX_LATENCY_ARG = "accumulo-max-latency";
+  public static final String ACCUMULO_ZOOKEEPERS_ARG = "accumulo-zookeepers";
+  public static final String ACCUMULO_INSTANCE_ARG = "accumulo-instance";
+  public static final String ACCUMULO_USER_ARG = "accumulo-user";
+  public static final String ACCUMULO_PASSWORD_ARG = "accumulo-password";
+
 
   // Arguments for the saved job management system.
   public static final String STORAGE_METASTORE_ARG = "meta-connect";
@@ -728,6 +742,116 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     return hbaseOpts;
   }
 
+  protected RelatedOptions getAccumuloOptions() {
+    RelatedOptions accumuloOpts =
+      new RelatedOptions("Accumulo arguments");
+    accumuloOpts.addOption(OptionBuilder.withArgName("table")
+      .hasArg()
+      .withDescription("Import to <table> in Accumulo")
+      .withLongOpt(ACCUMULO_TABLE_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("family")
+      .hasArg()
+      .withDescription("Sets the target column family for the import")
+      .withLongOpt(ACCUMULO_COL_FAM_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("col")
+      .hasArg()
+      .withDescription("Specifies which input column to use as the row key")
+      .withLongOpt(ACCUMULO_ROW_KEY_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("vis")
+      .hasArg()
+      .withDescription("Visibility token to be applied to all rows imported")
+      .withLongOpt(ACCUMULO_VISIBILITY_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder
+      .withDescription("If specified, create missing Accumulo tables")
+      .withLongOpt(ACCUMULO_CREATE_TABLE_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("size")
+      .hasArg()
+      .withDescription("Batch size in bytes")
+      .withLongOpt(ACCUMULO_BATCH_SIZE_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("latency")
+      .hasArg()
+      .withDescription("Max write latency in milliseconds")
+      .withLongOpt(ACCUMULO_MAX_LATENCY_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("zookeepers")
+      .hasArg()
+      .withDescription("Comma-separated list of zookeepers (host:port)")
+      .withLongOpt(ACCUMULO_ZOOKEEPERS_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("instance")
+      .hasArg()
+      .withDescription("Accumulo instance name.")
+      .withLongOpt(ACCUMULO_INSTANCE_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("user")
+      .hasArg()
+      .withDescription("Accumulo user name.")
+      .withLongOpt(ACCUMULO_USER_ARG)
+      .create());
+    accumuloOpts.addOption(OptionBuilder.withArgName("password")
+      .hasArg()
+      .withDescription("Accumulo password.")
+      .withLongOpt(ACCUMULO_PASSWORD_ARG)
+      .create());
+
+    return accumuloOpts;
+  }
+
+  protected void applyAccumuloOptions(CommandLine in, SqoopOptions out) {
+    if (in.hasOption(ACCUMULO_TABLE_ARG)) {
+      out.setAccumuloTable(in.getOptionValue(ACCUMULO_TABLE_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_COL_FAM_ARG)) {
+      out.setAccumuloColFamily(in.getOptionValue(ACCUMULO_COL_FAM_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_ROW_KEY_ARG)) {
+      out.setAccumuloRowKeyColumn(in.getOptionValue(ACCUMULO_ROW_KEY_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_VISIBILITY_ARG)) {
+      out.setAccumuloVisibility(in.getOptionValue(ACCUMULO_VISIBILITY_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_CREATE_TABLE_ARG)) {
+      out.setCreateAccumuloTable(true);
+    }
+
+    if (in.hasOption(ACCUMULO_BATCH_SIZE_ARG)) {
+      out.setAccumuloBatchSize(Long.parseLong(
+        in.getOptionValue(ACCUMULO_BATCH_SIZE_ARG)));
+    }
+
+    if (in.hasOption(ACCUMULO_MAX_LATENCY_ARG)) {
+      out.setAccumuloMaxLatency(Long.parseLong(
+        in.getOptionValue(ACCUMULO_MAX_LATENCY_ARG)));
+    }
+
+    if (in.hasOption(ACCUMULO_ZOOKEEPERS_ARG)) {
+      out.setAccumuloZookeepers(in.getOptionValue(ACCUMULO_ZOOKEEPERS_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_INSTANCE_ARG)) {
+      out.setAccumuloInstance(in.getOptionValue(ACCUMULO_INSTANCE_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_USER_ARG)) {
+      out.setAccumuloUser(in.getOptionValue(ACCUMULO_USER_ARG));
+    }
+
+    if (in.hasOption(ACCUMULO_PASSWORD_ARG)) {
+      out.setAccumuloPassword(in.getOptionValue(ACCUMULO_PASSWORD_ARG));
+    }
+  }
+
+
   @SuppressWarnings("static-access")
   protected void addValidationOpts(RelatedOptions validationOptions) {
     validationOptions.addOption(OptionBuilder
@@ -1253,6 +1377,52 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       LOG.info("Please note that --hive-home, --hive-partition-key, ");
       LOG.info("\t hive-partition-value and --map-column-hive options are ");
       LOG.info("\t are also valid for HCatalog imports and exports");
+    }
+  }
+
+  protected void validateAccumuloOptions(SqoopOptions options)
+      throws InvalidOptionsException {
+    if ((options.getAccumuloColFamily() != null
+        && options.getAccumuloTable() == null)
+        || (options.getAccumuloColFamily() == null
+        && options.getAccumuloTable() != null)) {
+      throw new InvalidOptionsException(
+          "Both --accumulo-table and --accumulo-column-family must be set."
+          + HELP_STR);
+    }
+    if (options.getAccumuloTable() != null && options.isDirect()) {
+      throw new InvalidOptionsException("Direct import is incompatible with "
+            + "Accumulo. Please remove parameter --direct");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getHBaseTable() != null) {
+      throw new InvalidOptionsException("HBase import is incompatible with "
+            + "Accumulo import.");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
+      throw new InvalidOptionsException("Accumulo import is not compatible "
+        + "with importing into file format.");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getHBaseColFamily() != null) {
+      throw new InvalidOptionsException("Use --accumulo-column-family with "
+            + "Accumulo import.");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getAccumuloUser() == null) {
+      throw
+        new InvalidOptionsException("Must specify Accumulo user.");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getAccumuloInstance() == null) {
+      throw new
+        InvalidOptionsException("Must specify Accumulo instance.");
+    }
+    if (options.getAccumuloTable() != null
+        && options.getAccumuloZookeepers() == null) {
+      throw new
+        InvalidOptionsException("Must specify Zookeeper server(s).");
     }
   }
 

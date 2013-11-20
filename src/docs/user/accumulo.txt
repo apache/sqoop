@@ -1,0 +1,65 @@
+
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+
+Importing Data Into Accumulo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop supports importing records into a table in Accumulo
+
+By specifying +\--accumulo-table+, you instruct Sqoop to import
+to a table in Accumulo rather than a directory in HDFS. Sqoop will
+import data to the table specified as the argument to +\--accumulo-table+.
+Each row of the input table will be transformed into an Accumulo
++Mutation+ operation to a row of the output table. The key for each row is
+taken from a column of the input. By default Sqoop will use the split-by
+column as the row key column. If that is not specified, it will try to
+identify the primary key column, if any, of the source table. You can
+manually specify the row key column with +\--accumulo-row-key+. Each output
+column will be placed in the same column family, which must be specified
+with +\--accumulo-column-family+.
+
+NOTE: This function is incompatible with direct import (parameter
++\--direct+), and cannot be used in the same operation as an HBase import.
+
+If the target table does not exist, the Sqoop job will
+exit with an error, unless the +--accumulo-create-table+ parameter is
+specified. Otherwise, you should create the target table before running
+an import.
+
+Sqoop currently serializes all values to Accumulo by converting each field
+to its string representation (as if you were importing to HDFS in text
+mode), and then inserts the UTF-8 bytes of this string in the target
+cell.
+
+By default, no visibility is applied to the resulting cells in Accumulo,
+so the data will be visible to any Accumulo user. Use the
++\--accumulo-visibility+ parameter to specify a visibility token to
+apply to all rows in the import job.
+
+For performance tuning, use the optional +\--accumulo-buffer-size\+ and
++\--accumulo-max-latency+ parameters. See Accumulo's documentation for
+an explanation of the effects of these parameters.
+
+In order to connect to an Accumulo instance, you must specify the location
+of a Zookeeper ensemble using the +\--accumulo-zookeepers+ parameter,
+the name of the Accumulo instance (+\--accumulo-instance+), and the
+username and password to connect with (+\--accumulo-user+ and
++\--accumulo-password+ respectively).
+
