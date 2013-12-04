@@ -165,7 +165,8 @@ public class HBaseImportJob extends DataDrivenImportJob {
     */
     try {
       // Get method isSecurityEnabled
-      Method isSecurityEnabled = User.class.getMethod("isSecurityEnabled");
+      Method isHBaseSecurityEnabled = User.class.getMethod(
+          "isHBaseSecurityEnabled", Configuration.class);
 
       // Get method obtainAuthTokenForJob
       Method obtainAuthTokenForJob = User.class.getMethod(
@@ -175,7 +176,7 @@ public class HBaseImportJob extends DataDrivenImportJob {
       User user = User.getCurrent();
 
       // Obtain security token if needed
-      if ((Boolean)isSecurityEnabled.invoke(null)) {
+      if ((Boolean)isHBaseSecurityEnabled.invoke(null, conf)) {
         obtainAuthTokenForJob.invoke(user, conf, job);
       }
     } catch (NoSuchMethodException e) {
