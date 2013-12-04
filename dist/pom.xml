@@ -166,6 +166,8 @@ limitations under the License.
                     </copy>
                     <copy file="../server/target/sqoop.war"
                       toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps"/>
+                    <copy file="../tomcat/target/sqoop-tomcat-${project.version}.jar"
+                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/lib"/>
 
                     <!-- Build shell client directory -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/shell/lib">

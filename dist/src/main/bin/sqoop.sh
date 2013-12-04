@@ -68,6 +68,20 @@ setup_catalina_opts() {
 
 COMMAND=$1
 case $COMMAND in
+  tool)
+    if [ $# = 1 ]; then
+      echo "Usage: sqoop.sh tool TOOL_NAME [TOOL_ARGS]"
+      exit
+    fi
+
+    source ${BASEDIR}/bin/sqoop-sys.sh
+    setup_catalina_opts
+
+    # Remove the "tool" keyword from the command line and pass the rest
+    shift
+
+    $CATALINA_BIN/tool-wrapper.sh -server org.apache.sqoop.tomcat.TomcatToolRunner $@
+    ;;
   server)
     if [ $# = 1 ]; then
       echo "Usage: sqoop.sh server <start/stop>"
