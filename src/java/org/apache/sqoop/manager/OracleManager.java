@@ -331,6 +331,12 @@ public class OracleManager
     // Setting session time zone
     setSessionTimeZone(connection);
 
+    // Rest of the Sqoop code expects that the connection will have be running
+    // without autoCommit, so we need to explicitly set it to false. This is
+    // usually done directly by SqlManager in the makeConnection method, but
+    // since we are overriding it, we have to do it ourselves.
+    connection.setAutoCommit(false);
+
     return connection;
   }
 
