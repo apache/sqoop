@@ -173,6 +173,48 @@ public class HCatalogImportTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  protected String[] getQueryArgv(boolean includeHadoopFlags, String[] colNames,
+    Configuration conf) {
+
+    String columnsString = "";
+    String splitByCol = null;
+    if (colNames != null) {
+      splitByCol = colNames[0];
+      columnsString = colNames[0];
+      for (int c = 1; c < colNames.length; ++c) {
+        columnsString +=  "," + colNames[c];
+      }
+    }
+    ArrayList<String> args = new ArrayList<String>();
+
+    if (includeHadoopFlags) {
+      CommonArgs.addHadoopFlags(args);
+    }
+    args.addAll(getConfigParams());
+    args.add("--query");
+    StringBuilder query = new StringBuilder("select ");
+    if (colNames != null) {
+      query.append(columnsString);
+    } else {
+      query.append('*');
+    }
+    query.append(' ');
+    query.append("from ").append(getTableName());
+    query.append(" where $CONDITIONS");
+    args.add(query.toString());
+    if (colNames != null) {
+      args.add("--split-by");
+      args.add(splitByCol);
+    }
+    args.add("--hcatalog-table");
+    args.add(getTableName());
+    args.add("--connect");
+    args.add(getConnectString());
+    args.addAll(getExtraArgs(conf));
+
+    return args.toArray(new String[0]);
+  }
+
   private void validateHCatRecords(final List<HCatRecord> recs,
     final HCatSchema schema, int expectedCount,
     ColumnGenerator... cols) throws IOException {
@@ -242,12 +284,20 @@ public class HCatalogImportTest extends ImportJobTestCase {
   protected void runHCatImport(List<String> addlArgsArray,
     int totalRecords, String table, ColumnGenerator[] cols,
     String[] cNames) throws Exception {
-    runHCatImport(addlArgsArray, totalRecords, table, cols, cNames, false);
+    runHCatImport(addlArgsArray, totalRecords, table, cols,
+      cNames, false, false);
+  }
+
+  protected void runHCatQueryImport(List<String> addlArgsArray,
+    int totalRecords, String table, ColumnGenerator[] cols,
+    String[] cNames) throws Exception {
+    runHCatImport(addlArgsArray, totalRecords, table, cols,
+      cNames, false, true);
   }
 
   protected void runHCatImport(List<String> addlArgsArray,
     int totalRecords, String table, ColumnGenerator[] cols,
-    String[] cNames, boolean dontCreate) throws Exception {
+    String[] cNames, boolean dontCreate, boolean isQuery) throws Exception {
     CreateMode mode = CreateMode.CREATE;
     if (dontCreate) {
       mode = CreateMode.NO_CREATION;
@@ -255,8 +305,6 @@ public class HCatalogImportTest extends ImportJobTestCase {
     HCatSchema tblSchema =
       utils.createHCatTable(mode, totalRecords, table, cols);
     utils.createSqlTable(getConnection(), false, totalRecords, table, cols);
-    Map<String, String> addlArgsMap = utils.getAddlTestArgs();
-    String[] argv = {};
     addlArgsArray.add("-m");
     addlArgsArray.add("1");
     addlArgsArray.add("--hcatalog-table");
@@ -272,7 +320,12 @@ public class HCatalogImportTest extends ImportJobTestCase {
         colNames[2 + i] = cols[i].getName().toUpperCase();
       }
     }
-    String[] importArgs = getArgv(true, colNames, new Configuration());
+    String[] importArgs;
+    if (isQuery) {
+      importArgs = getQueryArgv(true, colNames, new Configuration());
+    } else {
+      importArgs = getArgv(true, colNames, new Configuration());
+    }
     LOG.debug("Import args = " + Arrays.toString(importArgs));
     SqoopHCatUtilities.instance().setConfigured(false);
     runImport(new ImportTool(), importArgs);
@@ -569,7 +622,8 @@ public class HCatalogImportTest extends ImportJobTestCase {
     List<String> addlArgsArray = new ArrayList<String>();
     addlArgsArray.add("--create-hcatalog-table");
     setExtraArgs(addlArgsArray);
-    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+      null, true, false);
   }
 
   public void testTableCreationWithPartition() throws Exception {
@@ -590,7 +644,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("2");
     addlArgsArray.add("--create-hcatalog-table");
     setExtraArgs(addlArgsArray);
-    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
   }
 
   public void testTableCreationWithStorageStanza() throws Exception {
@@ -613,7 +667,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("--hcatalog-storage-stanza");
     addlArgsArray.add(HCatalogTestUtils.STORED_AS_TEXT);
     setExtraArgs(addlArgsArray);
-    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
   }
 
   public void testHiveDropDelims() throws Exception {
@@ -667,6 +721,22 @@ public class HCatalogImportTest extends ImportJobTestCase {
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
   }
 
+  public void testQueryImport() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, "1",
+        "1", KeyType.NOT_A_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, "2",
+        "2", KeyType.DYNAMIC_KEY), };
+    List<String> addlArgsArray = new ArrayList<String>();
+    setExtraArgs(addlArgsArray);
+
+    runHCatQueryImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
+  }
+
   public void testCreateTableWithPreExistingTable() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -683,7 +753,8 @@ public class HCatalogImportTest extends ImportJobTestCase {
     try {
       // Precreate table
       utils.createHCatTable(CreateMode.CREATE, TOTAL_RECORDS, table, cols);
-      runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true);
+      runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+        null, true, false);
       fail("HCatalog job with --create-hcatalog-table and pre-existing"
         + " table should fail");
     } catch (Exception e) {
