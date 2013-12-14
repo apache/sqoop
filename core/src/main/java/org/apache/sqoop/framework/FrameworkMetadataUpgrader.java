@@ -18,6 +18,8 @@
  */
 package org.apache.sqoop.framework;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
@@ -29,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 public class FrameworkMetadataUpgrader extends MetadataUpgrader{
+
+  private static final Logger LOG = Logger.getLogger(FrameworkMetadataUpgrader.class);
+
   @Override
   public void upgrade(MConnectionForms original,
     MConnectionForms upgradeTarget) {
@@ -54,9 +59,20 @@ public class FrameworkMetadataUpgrader extends MetadataUpgrader{
     for (MForm form : target) {
       List<MInput<?>> inputs = form.getInputs();
       MForm originalForm = formMap.get(form.getName());
+      if(originalForm == null) {
+        LOG.warn("Form: " + form.getName() + " not present in old " +
+          "framework metadata. So it will not be transferred by the upgrader.");
+        continue;
+      }
+
       for (MInput input : inputs) {
-        MInput originalInput = originalForm.getInput(input.getName());
-        input.setValue(originalInput.getValue());
+        try {
+          MInput originalInput = originalForm.getInput(input.getName());
+          input.setValue(originalInput.getValue());
+        } catch (SqoopException ex) {
+          LOG.warn("Input: " + input.getName() + " not present in old " +
+            "framework metadata. So it will not be transferred by the upgrader.");
+        }
       }
     }
   }
