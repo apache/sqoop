@@ -72,6 +72,10 @@ public class RepositoryManager implements Reconfigurable {
   private RepositoryProvider provider;
 
   public synchronized void initialize() {
+    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(RepoConfigurationConstants.SYSCFG_REPO_SCHEMA_IMMUTABLE, false));
+  }
+
+  public synchronized void initialize(boolean immutableRepository) {
     MapContext context = SqoopConfiguration.getInstance().getContext();
 
     Map<String, String> repoSysProps = context.getNestedProperties(
@@ -113,8 +117,7 @@ public class RepositoryManager implements Reconfigurable {
 
     provider.initialize(context);
 
-    if(!context.getBoolean(RepoConfigurationConstants
-      .SYSCFG_REPO_SCHEMA_IMMUTABLE, false)) {
+    if(!immutableRepository) {
       LOG.info("Creating or upgrading on disk structures if necessary");
       provider.getRepository().createOrUpdateInternals();
     }

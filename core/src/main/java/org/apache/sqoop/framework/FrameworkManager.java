@@ -147,11 +147,13 @@ public class FrameworkManager implements Reconfigurable {
   }
 
   public synchronized void initialize() {
+    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(ConfigurationConstants.FRAMEWORK_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE));
+  }
+
+  public synchronized void initialize(boolean autoUpgrade) {
     LOG.trace("Begin submission engine manager initialization");
 
     // Register framework metadata in repository
-    boolean autoUpgrade = SqoopConfiguration.getInstance().getContext().getBoolean(
-        ConfigurationConstants.FRAMEWORK_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE);
     mFramework = RepositoryManager.getInstance().getRepository().registerFramework(mFramework, autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));

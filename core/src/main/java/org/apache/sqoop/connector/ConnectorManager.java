@@ -142,6 +142,10 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public synchronized void initialize() {
+    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(ConfigurationConstants.CONNECTOR_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE));
+  }
+
+  public synchronized void initialize(boolean autoUpgrade) {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");
     }
@@ -190,8 +194,6 @@ public class ConnectorManager implements Reconfigurable {
       throw new SqoopException(ConnectorError.CONN_0001, ex);
     }
 
-    boolean autoUpgrade = SqoopConfiguration.getInstance().getContext().getBoolean(
-        ConfigurationConstants.CONNECTOR_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE);
     registerConnectors(autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));

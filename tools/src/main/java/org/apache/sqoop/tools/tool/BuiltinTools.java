@@ -34,6 +34,7 @@ public class BuiltinTools {
   private static Map<String, Class<? extends Tool>> tools;
   static {
     tools = new HashMap<String, Class<? extends Tool>>();
+    tools.put("upgrade", UpgradeTool.class);
     tools.put("verify", VerifyTool.class);
   }
 
