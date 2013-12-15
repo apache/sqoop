@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -77,7 +78,7 @@ public class CompilationManager {
    * If that doesn't work, check our classpath.
    * @return the filename of the hadoop-*-core.jar file.
    */
-  private String findHadoopCoreJar() {
+  private String findHadoopJars() {
     String hadoopMapRedHome = options.getHadoopMapRedHome();
 
     if (null == hadoopMapRedHome) {
@@ -91,22 +92,30 @@ public class CompilationManager {
 
     File hadoopMapRedHomeFile = new File(hadoopMapRedHome);
     LOG.info("HADOOP_MAPRED_HOME is " + hadoopMapRedHomeFile.getAbsolutePath());
-    File [] entries = hadoopMapRedHomeFile.listFiles();
+    
+    Iterator<File> filesIterator = FileUtils.iterateFiles(hadoopMapRedHomeFile,
+          new String[] { "jar" }, true);
+    StringBuilder sb = new StringBuilder();
 
-    if (null == entries) {
+    while (filesIterator.hasNext()) {
+      File file = filesIterator.next();
+      String name = file.getName();
+      if (name.startsWith("hadoop-common")
+        || name.startsWith("hadoop-mapreduce-client-core")
+        || name.startsWith("hadoop-core")) {
+          sb.append(file.getAbsolutePath());
+        sb.append(File.pathSeparator);
+        }
+    }
+
+    if (sb.length() < 1) {
       LOG.warn("HADOOP_MAPRED_HOME appears empty or missing");
       return Jars.getJarPathForClass(JobConf.class);
     }
 
-    for (File f : entries) {
-      if (f.getName().startsWith("hadoop-")
-          && f.getName().endsWith("-core.jar")) {
-        LOG.info("Found hadoop core jar at: " + f.getAbsolutePath());
-        return f.getAbsolutePath();
-      }
-    }
-
-    return Jars.getJarPathForClass(JobConf.class);
+    String s = sb.substring(0, sb.length() - 1);
+    LOG.debug("Returning jar file path " + s);
+    return s;
   }
 
   /**
@@ -134,7 +143,7 @@ public class CompilationManager {
     }
 
     // find hadoop-*-core.jar for classpath.
-    String coreJar = findHadoopCoreJar();
+    String coreJar = findHadoopJars();
     if (null == coreJar) {
       // Couldn't find a core jar to insert into the CP for compilation.  If,
       // however, we're running this from a unit test, then the path to the
@@ -159,6 +168,7 @@ public class CompilationManager {
     }
 
     String curClasspath = System.getProperty("java.class.path");
+    LOG.debug("Current sqoop classpath = " + curClasspath);
 
     args.add("-sourcepath");
     args.add(jarOutDir);
