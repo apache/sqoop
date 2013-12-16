@@ -105,7 +105,7 @@ public final class SqoopHCatUtilities {
     "sqoop.hcat.debug.import.mapper";
   public static final String DEBUG_HCAT_EXPORT_MAPPER_PROP =
     "sqoop.hcat.debug.export.mapper";
-  private static final String HCATCMD = Shell.WINDOWS ? "hcat.cmd" : "hcat";
+  private static final String HCATCMD = Shell.WINDOWS ? "hcat.py" : "hcat";
   private SqoopOptions options;
   private ConnManager connManager;
   private String hCatTableName;
@@ -970,6 +970,10 @@ public final class SqoopHCatUtilities {
     // run HCat command with the given args
     String hCatProgram = getHCatPath();
     ArrayList<String> args = new ArrayList<String>();
+    if (Shell.WINDOWS) {
+      // windows depends on python to be available
+      args.add("python");
+    }
     args.add(hCatProgram);
     if (cmdLine != null && cmdLine.length > 0) {
       for (String s : cmdLine) {

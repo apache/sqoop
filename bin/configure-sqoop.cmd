@@ -72,6 +72,20 @@ if not defined HBASE_HOME (
     echo Warning: HBASE_HOME and HBASE_VERSION not set.
   )
 )
+:: Check for HCatalog dependency
+if not defined HCAT_HOME (
+  if defined HCATALOG_HOME (
+     set HCAT_HOME=%HCATALOG_HOME%
+  ) else (
+     echo Warning: HCAT_HOME not set
+  )
+)
+
+if not exist "%HCATALOG_HOME%" (
+  echo Warning: HCATALOG_HOME does not exist! HCatalog imports will fail.
+  echo Please set HCATALOG_HOME to the root of your HCatalog installation.
+)
+ 
 ::
 :: Check for Accumulo dependency
 if not defined ACCUMULO_HOME (
@@ -125,11 +139,25 @@ if exist "%SQOOP_HOME%\lib" (
   call :add_dir_to_classpath %SQOOP_HOME%\lib
 )
 
+:: Add HCatalog Home to the dependency list so that newer thrift libraries are
+:: used instead of HBase version
+
+if exist "%HCATALOG_HOME%" (
+  if defined PYTHON_CMD (
+     for /F "usebackq eol==" %%G IN ( `%PYTHON_CMD% %HCAT_HOME%\bin\hcat.py -classpath`) DO SET SQOOP_CLASSPATH=%SQOOP_CLASSPATH%;%%G
+  ) else (
+     for /f "usebackq eol==" %%G IN ( `python %HCAT_HOME%\bin\hcat.py -classpath`) DO SET SQOOP_CLASSPATH=%SQOOP_CLASSPATH%;%%G
+  )
+)
+
+
 :: Add HBase to dependency list
 if exist "%HBASE_HOME%" (
   call :add_dir_to_classpath %HBASE_HOME%
   call :add_dir_to_classpath %HBASE_HOME%\lib
-)
+  set SQOOP_CLASSPATH=!SQOOP_CLASSPATH!;%HBASE_HOME%\conf
+ )
+ 
 ::
 :: Add Accumulo to dependency list
 if exist "%ACCUMULO_HOME%" (
@@ -147,7 +175,7 @@ if not defined ZOOCFGDIR (
 )
 
 if "%ZOOCFGDIR%" NEQ "" (
-  call :add_dir_to_classpath %ZOOCFGDIR%
+  set SQOOP_CLASSPATH=!SQOOP_CLASSPATH!;%ZOOCFGDIR%
 )
 
 call :add_dir_to_classpath %SQOOP_CONF_DIR%
@@ -173,3 +201,4 @@ if not "%1"=="" (
   set SQOOP_CLASSPATH=!SQOOP_CLASSPATH!;%1\*
 )
 goto :eof
+
