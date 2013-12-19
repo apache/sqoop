@@ -51,12 +51,12 @@ if [ -z "${HADOOP_COMMON_HOME}" ]; then
     fi
   fi
 fi
+
 if [ -z "${HADOOP_MAPRED_HOME}" ]; then
-  if [ -n "${HADOOP_HOME}" ]; then
-    HADOOP_MAPRED_HOME=${HADOOP_HOME}
-  else
-    if [ -d "/usr/lib/hadoop-mapreduce" ]; then
-      HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+  HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+  if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
+    if [ -n "${HADOOP_HOME}" ]; then
+      HADOOP_MAPRED_HOME=${HADOOP_HOME}
     else
       HADOOP_MAPRED_HOME=${SQOOP_HOME}/../hadoop-mapreduce
     fi
