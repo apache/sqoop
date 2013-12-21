@@ -53,7 +53,7 @@ public class TomcatToolRunner {
 
     // Various paths to war file and locations inside the war file
     String webappPath = System.getProperty(PROPERTY_APPBASE_PATH, DEFAULT_APPBASE_PATH);
-    String catalinaBase = Bootstrap.getCatalinaHome();
+    String catalinaBase = Bootstrap.getCatalinaBase();
     String fullWebappPath = catalinaBase + File.separator + webappPath;
     String fullSqoopWarPath = fullWebappPath + File.separator + "sqoop.war";
     String fullSqoopClassesPath = fullWebappPath + File.separator + "sqoop" + File.separator + "WEB-INF" + File.separator + "classes";
