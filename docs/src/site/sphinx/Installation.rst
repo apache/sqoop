@@ -14,9 +14,9 @@
    limitations under the License.
 
 
-=======================================
+============
 Installation
-=======================================
+============
 
 Sqoop ships as one binary package however it's compound from two separate parts - client and server. You need to install server on single node in your cluster. This node will then serve as an entry point for all connecting Sqoop clients. Server acts as a mapreduce client and therefore Hadoop must be installed and configured on machine hosting Sqoop server. Clients can be installed on any arbitrary number of machines. Client is not acting as a mapreduce client and thus you do not need to install Hadoop on nodes that will act only as a Sqoop client.
 
@@ -57,6 +57,17 @@ File ``sqoop_bootstrap.properties`` specifies which configuration provider shoul
 
 
 Second configuration file ``sqoop.properties`` contains remaining configuration properties that can affect Sqoop server. File is very well documented, so check if all configuration properties fits your environment. Default or very little tweaking should be sufficient most common cases.
+
+You can verify the Sqoop server configuration using `Verify Tool <Tools.html#verify>`__, for example::
+
+  ./bin/sqoop.sh tool verify
+
+Upon running the ``verify`` tool, you should see messages similar to the following::
+
+  Verification was successful.
+  Tool class org.apache.sqoop.tools.tool.VerifyTool has finished correctly
+
+Consult `Verify Tool <Tools.html#upgrade>`__ documentation page in case of any failure.
 
 Server Life Cycle
 -----------------

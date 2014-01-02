@@ -40,19 +40,16 @@ License
     See the License for the specific language governing permissions and
     limitations under the License.
 
-Overview
---------
+Administrator Documentation
+---------------------------
 
-- `Download Apache Sqoop <http://www.apache.org/dyn/closer.cgi/sqoop>`_
-- `Sqoop Wiki <https://cwiki.apache.org/confluence/display/SQOOP/Home>`_
-- `Sqoop Issue Tracking (JIRA) <https://issues.apache.org/jira/browse/SQOOP>`_
-- `Sqoop Source Code <https://git-wip-us.apache.org/repos/asf?p=sqoop.git;a=summary>`_
+- `Installation <Installation.html>`_
+- `Upgrade <Upgrade.html>`_
+- `Tools <Tools.html>`_
 
 User Documentation
 ------------------
 
-- `Installation <Installation.html>`_
-- `Upgrade <Upgrade.html>`_
 - `5 Minutes Demo <Sqoop5MinutesDemo.html>`_
 - `Command Line Client <CommandLineClient.html>`_
 
@@ -64,3 +61,13 @@ Developer Guide
 - `Java Client API Guide <ClientAPI.html>`_
 - `Developping Connector <ConnectorDevelopment.html>`_
 - `REST API Guide <RESTAPI.html>`_
+
+Overview
+--------
+
+- `Download Apache Sqoop <http://www.apache.org/dyn/closer.cgi/sqoop>`_
+- `Sqoop Wiki <https://cwiki.apache.org/confluence/display/SQOOP/Home>`_
+- `Sqoop Issue Tracking (JIRA) <https://issues.apache.org/jira/browse/SQOOP>`_
+- `Sqoop Source Code <https://git-wip-us.apache.org/repos/asf?p=sqoop.git;a=summary>`_
+
+

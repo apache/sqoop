@@ -25,11 +25,33 @@ This page describes procedure that you need to take in order to upgrade Sqoop fr
 Upgrading Server
 ================
 
-As Sqoop server is using external repository for persisting connection and job objects, this repository needs to be updated in addition to updating the server bits. The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the upgrade procedure by stopping the server: ::
+As Sqoop server is using external repository for persisting connection and job objects, this repository needs to be updated in addition to updating the server bits. There are two ways how to upgrade Sqoop server metadata and it's structures, you can either execute upgrade tool or configure Server to perform all necessary changes on start up.
+
+It's strongly advised to back up the repository before moving on to next steps. Backup instructions will vary depending on the repository implementation. For example, using MySQL as a repository will require a different back procedure than Apache Derby. Please follow the repositories' backup procedure
+
+Upgrading Server using upgrade tool
+-----------------------------------
+
+Preferred upgrade path is to explicitly run the `Upgrade Tool <Tools.html#upgrade>`_. First step is to however shutdown the server as having both the server and upgrade utility accessing the same repository might corrupt it::
 
   ./bin/sqoop.sh server stop
 
-It's strongly advised to back up the repository before moving on to next steps. Precise back-up instructions depends on the repository implementation that is in use, please follow the repository owns instructions to back it up.
+When the server has been successfully stopped, you can update the server bits and simply run the upgrade tool::
+
+  ./bin/sqoop.sh tool upgrade
+
+You should see that the upgrade process has been successful::
+
+  Tool class org.apache.sqoop.tools.tool.UpgradeTool has finished correctly.
+
+In case of any failure, please take a look into `Upgrade Tool <Tools.html#upgrade>`_ documentation page.
+
+Upgrading Server on start-up
+----------------------------
+
+The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the upgrade procedure by stopping the server: ::
+
+  ./bin/sqoop.sh server stop
 
 Now you can update server bits. Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary during Sqoop Server boot up procedure. You need to set following properties in configuration file ``sqoop.properties``::
 
