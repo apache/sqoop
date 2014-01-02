@@ -29,8 +29,6 @@ if [ $# = 0 ]; then
   exit
 fi
 
-OLD_DIR=`pwd`
-
 # resolve links - $0 may be a softlink
 PRG="${0}"
 
@@ -47,11 +45,10 @@ done
 BASEDIR=`dirname ${PRG}`
 BASEDIR=`cd ${BASEDIR}/..;pwd`
 
-cd ${BASEDIR}
 echo "Sqoop home directory: ${BASEDIR}"
 
-CATALINA_BIN=${CATALINA_BIN:-server/bin}
-CLIENT_LIB=${CLIENT_LIB:-shell/lib}
+CATALINA_BIN=${CATALINA_BIN:-${BASEDIR}/server/bin}
+CLIENT_LIB=${CLIENT_LIB:-${BASEDIR}/shell/lib}
 
 setup_catalina_opts() {
   # The Java System properties 'sqoop.http.port' and 'sqoop.admin.port' are
@@ -110,12 +107,8 @@ case $COMMAND in
   client)
     # Build class path with full path to each library
     for f in $CLIENT_LIB/*.jar; do
-      CLASSPATH="${CLASSPATH}:${BASEDIR}/$f"
+      CLASSPATH="${CLASSPATH}:$f"
     done
-
-    # We need to change current directory back to original as optional user side script
-    # might be specified with relative path.
-    cd ${OLD_DIR}
 
     EXEC_JAVA='java'
     if [ -n "${JAVA_HOME}" ] ; then
@@ -128,5 +121,3 @@ case $COMMAND in
     echo "Command is not recognized."
     ;;
 esac
-
-cd ${OLD_DIR}
