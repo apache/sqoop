@@ -79,11 +79,8 @@ public class FilePasswordLoader extends PasswordLoader {
     Path path = new Path(p);
     FileSystem fs = path.getFileSystem(configuration);
 
-    try {
-      verifyPath(fs, path);
-      return new String(readBytes(fs, path));
-    } finally {
-      fs.close();
-    }
+    // Not closing FileSystem object because of SQOOP-1226
+    verifyPath(fs, path);
+    return new String(readBytes(fs, path));
   }
 }
