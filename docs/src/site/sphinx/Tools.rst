@@ -30,9 +30,9 @@ List of available tools:
 * verify
 * upgrade
 
-To run the desired tool, execute binary ``sqoop.sh`` with the parameter ``tool`` followed by the desired tool name. For example to run ``verify`` tool::
+To run the desired tool, execute binary ``sqoop2-tool`` with desired tool name. For example to run ``verify`` tool::
 
-  bin/sqoop.sh tool verify
+  sqoop2-tool verify
 
 .. note:: Running tools while the Sqoop Server is also running is not recommended as it might lead to a data corruption and service disruption.
 
@@ -43,7 +43,7 @@ The verify tool will verify Sqoop server configuration by starting all subsystem
 
 To run the ``verify`` tool::
 
-  bin/sqoop.sh tool verify
+  sqoop2-tool verify
 
 If the verification process succeeds, you should see messages like::
 
@@ -61,6 +61,10 @@ Upgrade
 =======
 
 Upgrades all versionable components inside Sqoop2. This includes structural changes inside the repository and stored metadata. Running this tool is idempotent.
+
+To run the ``upgrade`` tool::
+
+  sqoop2-tool upgrade
 
 Upon successful upgrade you should see following message::
 

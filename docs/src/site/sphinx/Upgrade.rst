@@ -34,11 +34,11 @@ Upgrading Server using upgrade tool
 
 Preferred upgrade path is to explicitly run the `Upgrade Tool <Tools.html#upgrade>`_. First step is to however shutdown the server as having both the server and upgrade utility accessing the same repository might corrupt it::
 
-  ./bin/sqoop.sh server stop
+  sqoop2-server stop
 
 When the server has been successfully stopped, you can update the server bits and simply run the upgrade tool::
 
-  ./bin/sqoop.sh tool upgrade
+  sqoop2-tool upgrade
 
 You should see that the upgrade process has been successful::
 
@@ -51,7 +51,7 @@ Upgrading Server on start-up
 
 The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the upgrade procedure by stopping the server: ::
 
-  ./bin/sqoop.sh server stop
+  sqoop2-server stop
 
 Now you can update server bits. Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary during Sqoop Server boot up procedure. You need to set following properties in configuration file ``sqoop.properties``::
 
@@ -61,7 +61,7 @@ Now you can update server bits. Before starting the server again you will need t
 
 When all properties are set, start server using following command::
 
-  ./bin/sqoop.sh server start
+  sqoop2-server start
 
 All required actions will be performed automatically during the server bootstrap procedure. It's strongly advised to set all three properties to their original values once the server has been successfully started.
 

@@ -27,7 +27,7 @@ Starting Client
 
 Start client in interactive mode using following command: ::
 
-  ./bin/sqoop.sh client
+  sqoop2-shell
 
 Configure client to use your Sqoop server: ::
 

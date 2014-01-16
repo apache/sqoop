@@ -20,13 +20,13 @@ Command Line Client
 
 Sqoop 2 provides command line client that is capable of communicating with Sqoop 2 server using REST interface. Client is able to run in two modes - interactive and batch mode. Commands ``create``, ``update`` and ``clone`` are not currently supported in batch mode. Interactive mode supports all available commands.
 
-You can start Sqoop 2 client in interactive mode using provided ``sqoop.sh`` shell script by passing argument ``client``: ::
+You can start Sqoop 2 client in interactive mode using command ``sqoop2-shell``::
 
-  sqoop.sh client
+  sqoop2-shell
 
 Batch mode can be started by adding additional argument representing path to your Sqoop client script: ::
 
-  sqoop.sh client /path/to/your/script.sqoop
+  sqoop2-shell /path/to/your/script.sqoop
 
 Sqoop client script is expected to contain valid Sqoop client commands, empty lines and lines starting with ``#`` that are denoting comment lines. Comments and empty lines are ignored, all other lines are interpreted. Example script: ::
 
