@@ -18,9 +18,6 @@
 
 package org.apache.sqoop;
 
-import com.cloudera.sqoop.SqoopOptions.FileLayout;
-import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
-import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -33,18 +30,21 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.RandomHash;
-import com.cloudera.sqoop.util.StoredAsProperty;
 import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.validation.AbortOnFailureHandler;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
 import org.apache.sqoop.validation.RowCountValidator;
+
+import com.cloudera.sqoop.SqoopOptions.FileLayout;
+import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
+import com.cloudera.sqoop.SqoopOptions.UpdateMode;
+import com.cloudera.sqoop.lib.DelimiterSet;
+import com.cloudera.sqoop.lib.LargeObjectLoader;
+import com.cloudera.sqoop.tool.SqoopTool;
+import com.cloudera.sqoop.util.RandomHash;
+import com.cloudera.sqoop.util.StoredAsProperty;
 
 /**
  * Configurable state used by Sqoop tools.
@@ -62,7 +62,8 @@ public class SqoopOptions implements Cloneable {
 
   // Default hive and hcat locations.
   public static final String DEF_HIVE_HOME = "/usr/lib/hive";
-  public static final String DEF_HCAT_HOME = "/usr/lib/hcatalog";
+  public static final String DEF_HCAT_HOME = "/usr/lib/hive-hcatalog";
+  public static final String DEF_HCAT_HOME_OLD = "/usr/lib/hcatalog";
 
   public static final boolean METASTORE_PASSWORD_DEFAULT = false;
 
@@ -877,7 +878,12 @@ public class SqoopOptions implements Cloneable {
     String hcatHome = System.getenv("HCAT_HOME");
     hcatHome = System.getProperty("hcat.home", hcatHome);
     if (hcatHome == null) {
-      hcatHome = DEF_HCAT_HOME;
+      File file = new File(DEF_HCAT_HOME);
+      if (file.exists()) {
+        hcatHome = DEF_HCAT_HOME;
+      } else {
+        hcatHome = DEF_HCAT_HOME_OLD;
+      }
     }
     return hcatHome;
   }
