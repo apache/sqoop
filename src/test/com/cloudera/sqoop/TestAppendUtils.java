@@ -58,7 +58,7 @@ public class TestAppendUtils extends ImportJobTestCase {
    *
    * @return the argv as an array of strings.
    */
-  protected ArrayList getOutputlessArgv(boolean includeHadoopFlags,
+  protected ArrayList getOutputlessArgv(boolean includeHadoopFlags, boolean queryBased,
       String[] colNames, Configuration conf) {
     if (null == colNames) {
       colNames = getColNames();
@@ -76,8 +76,13 @@ public class TestAppendUtils extends ImportJobTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
-    args.add("--table");
-    args.add(getTableName());
+    if(queryBased) {
+      args.add("--query");
+      args.add("SELECT * FROM " + getTableName() + " WHERE $CONDITIONS");
+    } else {
+      args.add("--table");
+      args.add(getTableName());
+    }
     args.add("--columns");
     args.add(columnsString);
     args.add("--split-by");
@@ -241,8 +246,7 @@ public class TestAppendUtils extends ImportJobTestCase {
 
   /** independent to target-dir. */
   public void testAppend() throws IOException {
-    ArrayList args = getOutputlessArgv(false, HsqldbTestServer.getFieldNames(),
-        getConf());
+    ArrayList args = getOutputlessArgv(false, false, HsqldbTestServer.getFieldNames(), getConf());
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
 
@@ -252,14 +256,28 @@ public class TestAppendUtils extends ImportJobTestCase {
 
   /** working with target-dir. */
   public void testAppendToTargetDir() throws IOException {
-    ArrayList args = getOutputlessArgv(false, HsqldbTestServer.getFieldNames(),
-        getConf());
+    ArrayList args = getOutputlessArgv(false, false, HsqldbTestServer.getFieldNames(), getConf());
     String targetDir = getWarehouseDir() + "/tempTargetDir";
     args.add("--target-dir");
     args.add(targetDir);
 
     // there's no need for a new param
     // in diff. w/--warehouse-dir there will no be $tablename dir
+    Path output = new Path(targetDir);
+    runAppendTest(args, output);
+  }
+
+  /**
+   * Query based import should also work in append mode.
+   *
+   * @throws IOException
+   */
+  public void testAppendWithQuery() throws IOException {
+    ArrayList args = getOutputlessArgv(false, true, HsqldbTestServer.getFieldNames(), getConf());
+    String targetDir = getWarehouseDir() + "/tempTargetDir";
+    args.add("--target-dir");
+    args.add(targetDir);
+
     Path output = new Path(targetDir);
     runAppendTest(args, output);
   }

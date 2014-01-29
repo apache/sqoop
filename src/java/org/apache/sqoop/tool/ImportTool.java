@@ -458,7 +458,11 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     Path outputPath = null;
     if (options.isAppendMode()) {
       // Use temporary path, later removed when appending
-      outputPath = AppendUtils.getTempAppendDir(tableName);
+      String salt = tableName;
+      if(salt == null && options.getSqlQuery() != null) {
+        salt = Integer.toHexString(options.getSqlQuery().hashCode());
+      }
+      outputPath = AppendUtils.getTempAppendDir(salt);
       LOG.debug("Using temporary folder: " + outputPath.getName());
     } else {
       // Try in this order: target-dir or warehouse-dir
