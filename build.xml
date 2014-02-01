@@ -193,6 +193,7 @@
   <!-- root directory for output/intermediate data for testing -->
   <property name="build.test" location="${build.dir}/test"/>
   <property name="test.log.dir" location="${build.dir}/test/logs"/>
+  <property name="test.build.extraconf" value="${build.test}/extraconf" />
 
   <!-- compiled test classes -->
   <property name="build.test.classes" location="${build.test}/classes" />
@@ -255,6 +256,8 @@
   <property name="cobertura.format" value="html" /> <!-- may be 'xml' -->
   <property name="cobertura.class.dir" value="${cobertura.dir}/classes" />
 
+  <!-- aspectJ fault injection -->
+  <import file="${test.dir}/aop/build/aop.xml"/>
   <!-- Checking code style -->
   <property name="checkstyle.xml" value="${test.dir}/checkstyle.xml" />
   <property name="checkstyle.format.xsl"
@@ -414,6 +417,7 @@
     <!-- Classpath for unit tests (superset of compile.classpath) -->
     <path id="test.classpath">
       <pathelement location="${build.test.classes}" />
+      <pathelement location="${test.build.extraconf}"/>
       <path refid="${name}.hadooptest.classpath" />
       <path refid="compile.classpath" />
     </path>
@@ -480,6 +484,7 @@
       depends="compile, ivy-retrieve-hadoop-test"
       description="Compile test classes">
     <mkdir dir="${build.test.classes}" />
+    <mkdir dir="${test.build.extraconf}"/>
     <javac
         encoding="${build.encoding}"
         srcdir="${test.dir}"
@@ -805,6 +810,8 @@
     <delete dir="${build.test}/data"/>
     <mkdir dir="${build.test}/data/sqoop" />
     <mkdir dir="${cobertura.class.dir}" />
+    <copy file="${test.dir}/fi-site.xml"
+            todir="${test.build.extraconf}" />
     <junit
       printsummary="yes" showoutput="${test.output}"
       haltonfailure="no" fork="yes" maxmemory="512m"
@@ -1404,4 +1411,46 @@
       </classpath>
     </eclipse>
   </target>
+
+  <!-- Fault injection customization section -->
+  <target name="justjar" depends="ivy-resolve-test">
+    <echo message="Project: ${ant.project.name}" />
+    <jar jarfile="${build.dir}/${test.jar}" basedir="${build.test.classes}"/>
+  </target>
+
+  <target name="jar-fault-inject" depends="init, injectfaults"
+    description="Make sqoop-fi.jar">
+    <macro-jar-fault-inject
+      target.name="justjar"
+      build.dir="${build-fi.dir}"
+      jar.final.name="final.name"
+      jar.final.value="${final.name}-fi" />
+    <copy todir="${lib.dir}">
+      <fileset dir="${build-fi.dir}">
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="jar-test-fault-inject" depends="init, injectfaults"
+    description="Make sqoop-test-fi.jar">
+    <macro-jar-test-fault-inject
+      target.name="test-jar"
+      jar.final.name="test.final.name"
+      jar.final.value="${test.final.name}-fi" />
+  </target>
+
+  <target name="run-fault-inject-with-testcaseonly" depends="init, injectfaults">
+    <fail unless="testcase">Can't run this target without -Dtestcase setting!
+    </fail>
+    <macro-run-tests-fault-inject target.name="test"
+      testcasesonly="true"/>
+  </target>
+
+  <target name="run-test-core-fault-inject" depends="init, injectfaults"
+    description="Run full set of the unit tests with fault injection">
+    <macro-run-tests-fault-inject target.name="test"
+      testcasesonly="false"/>
+  </target>
+
 </project>

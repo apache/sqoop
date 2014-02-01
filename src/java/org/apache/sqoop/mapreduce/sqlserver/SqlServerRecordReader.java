@@ -34,7 +34,7 @@ import java.sql.SQLException;
  * Microsoft SQL Server specific Record Reader.
  */
 public class SqlServerRecordReader<T extends DBWritable>
-  extends DataDrivenDBRecordReader {
+  extends DataDrivenDBRecordReader<T> {
 
   private static final Log LOG =
     LogFactory.getLog(SqlServerRecordReader.class);

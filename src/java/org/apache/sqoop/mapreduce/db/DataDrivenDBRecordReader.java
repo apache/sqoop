@@ -70,9 +70,18 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
   /** Returns the query for selecting the records,
    * subclasses can override this for custom behaviour.*/
   protected String getSelectQuery() {
-    StringBuilder query = new StringBuilder();
     DataDrivenDBInputFormat.DataDrivenDBInputSplit dataSplit =
         (DataDrivenDBInputFormat.DataDrivenDBInputSplit) getSplit();
+    return getSelectQuery(dataSplit.getLowerClause(),
+        dataSplit.getUpperClause());
+  }
+
+  /** Returns the query for selecting the records, with lower and upper
+   * clause consitions provided as parameters
+   * This is needed for recovering from connection failures after some data
+   * in the split have been already processed */
+  protected String getSelectQuery(String lowerClause, String upperClause) {
+    StringBuilder query = new StringBuilder();
     DBConfiguration dbConf = getDBConf();
     String [] fieldNames = getFieldNames();
     String tableName = getTableName();
@@ -81,8 +90,8 @@ public class DataDrivenDBRecordReader<T extends DBWritable>
     // Build the WHERE clauses associated with the data split first.
     // We need them in both branches of this function.
     StringBuilder conditionClauses = new StringBuilder();
-    conditionClauses.append("( ").append(dataSplit.getLowerClause());
-    conditionClauses.append(" ) AND ( ").append(dataSplit.getUpperClause());
+    conditionClauses.append("( ").append(lowerClause);
+    conditionClauses.append(" ) AND ( ").append(upperClause);
     conditionClauses.append(" )");
 
     if (dbConf.getInputQuery() == null) {

@@ -160,10 +160,10 @@ public class DBRecordReader<T extends DBWritable> extends
       if (null != results) {
         results.close();
       }
-      if (null != statement) {
+      if (null != statement && !statement.isClosed()) {
         statement.close();
       }
-      if (null != connection) {
+      if (null != connection && !connection.isClosed()) {
         connection.commit();
         connection.close();
       }
@@ -253,6 +253,8 @@ public class DBRecordReader<T extends DBWritable> extends
           statement.close();
         } catch (SQLException ex) {
           LoggingUtils.logAll(LOG, "Failed to close statement", ex);
+        } finally {
+          this.statement = null;
         }
       }
       if (this.connection != null) {
@@ -260,6 +262,17 @@ public class DBRecordReader<T extends DBWritable> extends
           connection.close();
         } catch (SQLException ex) {
           LoggingUtils.logAll(LOG, "Failed to close connection", ex);
+        } finally {
+          this.connection = null;
+        }
+      }
+      if (this.results != null) {
+        try {
+          results.close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close ResultsSet", ex);
+        } finally {
+          this.results = null;
         }
       }
 
@@ -301,6 +314,10 @@ public class DBRecordReader<T extends DBWritable> extends
 
   protected Connection getConnection() {
     return connection;
+  }
+
+  protected void setConnection(Connection conn) {
+    connection = conn;
   }
 
   protected PreparedStatement getStatement() {

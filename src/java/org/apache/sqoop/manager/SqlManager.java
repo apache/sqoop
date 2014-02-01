@@ -43,7 +43,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
-import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.util.SqlTypeMap;
@@ -591,7 +590,7 @@ public abstract class SqlManager
         throw new ImportException("HBase jars are not present in "
             + "classpath, cannot import to HBase!");
       }
-      if(!opts.isBulkLoadEnabled()){
+      if (!opts.isBulkLoadEnabled()){
         importer = new HBaseImportJob(opts, context);
       } else {
         importer = new HBaseBulkImportJob(opts, context);
@@ -634,7 +633,7 @@ public abstract class SqlManager
         throw new ImportException("HBase jars are not present in classpath,"
             + " cannot import to HBase!");
       }
-      if(!opts.isBulkLoadEnabled()){
+      if (!opts.isBulkLoadEnabled()){
         importer = new HBaseImportJob(opts, context);
       } else {
         importer = new HBaseBulkImportJob(opts, context);
