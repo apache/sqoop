@@ -147,8 +147,15 @@ def jira_get_attachment(result, defect, username, password):
 # Get versions from JIRA JSON object
 def json_get_version(json):
   versions = []
+
+  # Load affectedVersion field
   for version in json.get("fields").get("versions"):
     versions = versions + [version.get("name")]
+
+  # Load fixVersion field
+  for version in json.get("fields").get("fixVersions"):
+    versions = versions + [version.get("name")]
+
   return versions
 
 def git_cleanup():
