@@ -53,49 +53,56 @@ public class MSubmission extends MAccountableEntity {
   /**
    * Any valid external id associated with this submission.
    *
-   * This property might be missing, but it's value will be recorded in metastore.
+   * This property is optional and might be NULL in case that the job has not
+   * yet been submitted to the external system (JobTracker, ResourceManager, ...).
    */
   String externalId;
 
   /**
    * Progress in the job.
    *
-   * This is optional property that is not serialized in metastore.
+   * This property is optional.
+   *
+   * This property holds the progress of the external process that is executing the
+   * Sqoop 2 job. As a result, this property will contain 0 during initialization
+   * and submission and will be updated only after the successful submission. Please
+   * note that some submission engines might not be able to report the progress at
+   * the required granularity and such this property might not be used at all.
    */
   double progress;
 
   /**
    * Counters associated with the job if it's already in finished state
    *
-   * This is optional property that is not serialized in metastore.
+   * This is property is optional.
    */
   Counters counters;
 
   /**
    * Link to external UI if available
    *
-   * This is optional property that is not serialized in metastore.
+   * This property is optional.
    */
   String externalLink;
 
   /**
    * Associated exception info with this job (if any).
    *
-   * This is optional property that is not serialized in metastore.
+   * This property is optional.
    */
   String exceptionInfo;
 
   /**
    * Associated exception stacktrace with this job (if any).
    *
-   * This is optional property that is not serialized in metastore.
+   * This property is optional.
    */
   String exceptionStackTrace;
 
   /**
    * Schema that was reported by the connector.
    *
-   * This is optional property that is currently not serialized into metastore.
+   * This property is required.
    */
   Schema connectorSchema;
 
@@ -104,7 +111,7 @@ public class MSubmission extends MAccountableEntity {
    * note that this property might be empty and in such case the connector
    * schema will use also on Hadoop I/O side.
    *
-   * This is optional property that is currently not serialized into metastore.
+   * This property is optional.
    */
   Schema hioSchema;
 
@@ -117,6 +124,7 @@ public class MSubmission extends MAccountableEntity {
     this();
     this.jobId = jobId;
     this.status = status;
+    setCreationDate(creationDate);
   }
 
   public MSubmission(long jobId) {
