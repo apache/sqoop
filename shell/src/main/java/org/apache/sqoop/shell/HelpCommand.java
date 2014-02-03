@@ -107,12 +107,8 @@ public class HelpCommand extends CommandSupport {
 
       String description = command.getDescription();
 
-      StringBuilder sb = new StringBuilder();
-      sb.append("  ")
-         .append(MessageFormat.format(resource.getString(Constants
-             .RES_HELP_CMD_DESCRIPTION), paddedName,
-             paddedShortcut, description));
-      println(sb.toString());
+      print("  ");
+      println(resource.getString(Constants.RES_HELP_CMD_DESCRIPTION), paddedName, paddedShortcut, description);
     }
 
     println();
