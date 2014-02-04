@@ -154,13 +154,15 @@ public class DBRecordReader<T extends DBWritable> extends
   }
 
   @Override
-  /** {@inheritDoc} */
   public void close() throws IOException {
     try {
       if (null != results) {
         results.close();
       }
-      if (null != statement && !statement.isClosed()) {
+      // Statement.isClosed() is only available from JDBC 4
+      // Some older drivers (like mysql 5.0.x and earlier fail with
+      // the check for statement.isClosed()
+      if (null != statement) {
         statement.close();
       }
       if (null != connection && !connection.isClosed()) {
@@ -178,13 +180,11 @@ public class DBRecordReader<T extends DBWritable> extends
   }
 
   @Override
-  /** {@inheritDoc} */
   public LongWritable getCurrentKey() {
     return key;
   }
 
   @Override
-  /** {@inheritDoc} */
   public T getCurrentValue() {
     return value;
   }
@@ -216,13 +216,11 @@ public class DBRecordReader<T extends DBWritable> extends
   }
 
   @Override
-  /** {@inheritDoc} */
   public float getProgress() throws IOException {
     return pos / (float)split.getLength();
   }
 
   @Override
-  /** {@inheritDoc} */
   public boolean nextKeyValue() throws IOException {
     try {
       if (key == null) {
