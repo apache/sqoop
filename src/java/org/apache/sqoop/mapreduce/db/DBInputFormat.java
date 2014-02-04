@@ -29,6 +29,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
@@ -58,7 +60,8 @@ import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
 public class DBInputFormat<T extends DBWritable>
 extends InputFormat<LongWritable, T> implements Configurable  {
 
-
+  public static final Log LOG = LogFactory.getLog(
+    DBInputFormat.class.getName());
   private String dbProductName = "DEFAULT";
 
   /**
@@ -160,9 +163,6 @@ extends InputFormat<LongWritable, T> implements Configurable  {
 
     try {
       getConnection();
-
-      DatabaseMetaData dbMeta = connection.getMetaData();
-      this.dbProductName = dbMeta.getDatabaseProductName().toUpperCase();
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
@@ -172,6 +172,31 @@ extends InputFormat<LongWritable, T> implements Configurable  {
     conditions = dbConf.getInputConditions();
   }
 
+  private void setTxIsolation(Connection conn) {
+    try {
+
+      if (getConf()
+        .getBoolean(DBConfiguration.PROP_RELAXED_ISOLATION, false)) {
+        if (dbProductName.startsWith("ORACLE")) {
+          LOG.info("Using read committed transaction isolation for Oracle"
+            + " as read uncommitted is not supported");
+          this.connection.setTransactionIsolation(
+            Connection.TRANSACTION_READ_COMMITTED);
+        } else {
+          LOG.info("Using read uncommited transaction isolation");
+          this.connection.setTransactionIsolation(
+            Connection.TRANSACTION_READ_UNCOMMITTED);
+        }
+      }
+      else {
+        LOG.info("Using read commited transaction isolation");
+        this.connection.setTransactionIsolation(
+          Connection.TRANSACTION_READ_COMMITTED);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
   public Configuration getConf() {
     return dbConf.getConf();
   }
@@ -182,12 +207,14 @@ extends InputFormat<LongWritable, T> implements Configurable  {
 
   public Connection getConnection() {
     try {
+
       if (null == this.connection) {
         // The connection was closed; reinstantiate it.
         this.connection = dbConf.getConnection();
         this.connection.setAutoCommit(false);
-        this.connection.setTransactionIsolation(
-            Connection.TRANSACTION_READ_COMMITTED);
+        DatabaseMetaData dbMeta = connection.getMetaData();
+        this.dbProductName = dbMeta.getDatabaseProductName().toUpperCase();
+        setTxIsolation(connection);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

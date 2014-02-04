@@ -468,4 +468,11 @@ public class TestSqoopOptions extends TestCase {
   private static String longArgument(String argument) {
     return String.format("--%s", argument);
   }
+
+  public void testRelaxedIsolation() throws Exception {
+    String extraArgs[] = {
+      "--relaxed-isolation",
+    };
+    validateImportOptions(extraArgs);
+  }
 }

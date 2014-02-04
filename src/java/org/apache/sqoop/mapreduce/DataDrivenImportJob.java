@@ -247,7 +247,13 @@ public class DataDrivenImportJob extends ImportJobBase {
         new DBConfiguration(job.getConfiguration()).setInputOrderBy(
             splitByCol);
       }
-
+      if (options.getRelaxedIsolation()) {
+        LOG
+          .info("Enabling relaxed (read uncommitted) transaction "
+             + "isolation for imports");
+        job.getConfiguration()
+          .setBoolean(DBConfiguration.PROP_RELAXED_ISOLATION, true);
+      }
       LOG.debug("Using table class: " + tableClassName);
       job.getConfiguration().set(ConfigurationHelper.getDbInputClassProperty(),
           tableClassName);

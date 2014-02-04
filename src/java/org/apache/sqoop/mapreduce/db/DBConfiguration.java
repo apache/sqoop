@@ -122,6 +122,13 @@ public class DBConfiguration {
     "mapreduce.jdbc.output.field.count";
 
   /**
+   * The name of the parameter to use for making Isolation level to be
+   * read uncommitted by default for connections.
+   */
+  public static final String PROP_RELAXED_ISOLATION =
+      "org.apache.sqoop.db.relaxedisolation";
+
+  /**
    * Sets the DB access related fields in the {@link Configuration}.
    * @param conf the configuration
    * @param driverClass JDBC Driver class name
@@ -150,6 +157,7 @@ public class DBConfiguration {
       conf.set(CONNECTION_PARAMS_PROPERTY,
                propertiesToString(connectionParams));
     }
+
   }
 
   // set the password in the secure credentials object
@@ -295,6 +303,7 @@ public class DBConfiguration {
                         connectString, username, password);
       }
     }
+
     return connection;
   }
 

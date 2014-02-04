@@ -285,6 +285,18 @@ are expected to be present in the shell path of the task process. For MySQL
 the utilities +mysqldump+ and +mysqlimport+ are required, whereas for
 PostgreSQL the utility +psql+ is required.
 
+Controlling transaction isolation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, Sqoop uses the read committed transaction isolation in the mappers
+to import data.  This may not be the ideal in all ETL workflows and it may
+desired to reduce the isolation guarantees.   The +\--relaxed-isolation+ option
+can be used to instruct Sqoop to use read uncommitted isolation level.
+
+The +read-uncommitted+ isolation level is not supported on all databases
+(for example, Oracle), so specifying the option +\--relaxed-isolation+
+may not be supported on all databases.
+
 Controlling type mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

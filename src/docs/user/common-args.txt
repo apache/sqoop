@@ -37,4 +37,6 @@ Argument                                  Description
 +\--verbose+                              Print more information while working
 +\--connection-param-file <filename>+     Optional properties file that\
                                           provides connection parameters
++\--relaxed-isolation+                    Set connection transaction isolation\
+                                          to read uncommitted for the mappers.
 -------------------------------------------------------------------------------

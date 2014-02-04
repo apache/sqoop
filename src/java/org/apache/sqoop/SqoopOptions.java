@@ -300,6 +300,9 @@ public class SqoopOptions implements Cloneable {
   // Accumulo zookeeper
   @StoredAsProperty("accumulo.zookeepers") private String accumuloZookeepers;
 
+  // Relaxed Isolation
+  @StoredAsProperty("relaxed.isolation") private boolean relaxedIsolation;
+
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
   // be populated by the JobStorage to facilitate updating the same
@@ -962,6 +965,10 @@ public class SqoopOptions implements Cloneable {
     this.validatorClass = RowCountValidator.class;
     this.validationThresholdClass = AbsoluteValidationThreshold.class;
     this.validationFailureHandlerClass = AbortOnFailureHandler.class;
+
+    // Relaxed isolation will not enabled by default which is the behavior
+    // of sqoop until now.
+    this.relaxedIsolation = false;
   }
 
   /**
@@ -2448,5 +2455,14 @@ public class SqoopOptions implements Cloneable {
 
   public boolean isSkipDistCache() {
     return this.skipDistCache;
+  }
+
+  public void setRelaxedIsolation(boolean b) {
+    this.relaxedIsolation = true;
+
+  }
+
+  public boolean getRelaxedIsolation() {
+    return this.relaxedIsolation;
   }
 }
