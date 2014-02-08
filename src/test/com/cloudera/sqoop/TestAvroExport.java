@@ -126,9 +126,8 @@ public class TestAvroExport extends ExportJobTestCase {
   protected void createAvroFile(int fileNum, int numRecords,
       ColumnGenerator... extraCols) throws IOException {
 
-    String ext = ".avro";
     Path tablePath = getTablePath();
-    Path filePath = new Path(tablePath, "part" + fileNum + ext);
+    Path filePath = new Path(tablePath, "part" + fileNum);
 
     Configuration conf = new Configuration();
     if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
