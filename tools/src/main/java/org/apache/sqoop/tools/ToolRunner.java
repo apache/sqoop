@@ -72,6 +72,7 @@ public final class ToolRunner {
       System.out.println("Tool " + toolClass + " has finished correctly.");
     } else {
       System.out.println("Tool " + toolClass + " has failed.");
+      System.exit(1);
     }
   }
 
