@@ -19,6 +19,7 @@
 package org.apache.sqoop.tools;
 
 import org.apache.sqoop.common.VersionInfo;
+import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.tools.tool.BuiltinTools;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -66,6 +67,9 @@ public final class ToolRunner {
     if(tool == null) {
       throw new RuntimeException("Can't get tool instance: " + args[0]);
     }
+
+    // We do want us to kill the Tomcat when running from tooling
+    System.setProperty(ConfigurationConstants.KILL_TOMCAT_ON_FAILURE, "false");
 
     System.out.println("Running tool: " + toolClass);
     if(tool.runTool(Arrays.copyOfRange(args, 1, args.length))) {

@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.server;
 
+import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.SqoopServer;
 
 import javax.servlet.ServletContextEvent;
@@ -33,6 +34,18 @@ public class ServerInitializer implements ServletContextListener {
   }
 
   public void contextInitialized(ServletContextEvent arg0) {
-    SqoopServer.initialize();
+    try {
+      SqoopServer.initialize();
+    } catch (Throwable ex) {
+      // We are assuming that by default we are running as the only app inside
+      // the tomcat and hence we want to try kill entire tomcat on our load failure.
+      if("true".equals(System.getProperty(ConfigurationConstants.KILL_TOMCAT_ON_FAILURE, "true"))) {
+        System.out.println("Sqoop failed to load:");
+        ex.printStackTrace(System.out);
+        System.exit(1);
+      }
+
+      throw new RuntimeException("Sqoop server failed to load.", ex);
+    }
   }
 }
