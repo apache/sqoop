@@ -25,6 +25,7 @@ import org.codehaus.groovy.tools.shell.IO;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -173,11 +174,11 @@ public final class ShellEnvironment {
   }
 
   public static void printlnResource(String resourceName, Object... values) {
-    io.out.printf(resourceString(resourceName), values);
+    io.out.println(MessageFormat.format(resourceString(resourceName), values));
   }
 
   public static void println(String str, Object ... values) {
-    io.out.printf(str, values);
+    io.out.println(MessageFormat.format(str, values));
   }
 
   public static void println(String str) {
