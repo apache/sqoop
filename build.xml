@@ -44,6 +44,21 @@
   </if>
 
   <!--
+    Set default Accumulo version
+
+    We use 1.5.0 by default if not specified.
+  -->
+  <if>
+    <isset property="accumulo.version" />
+    <then>
+      <echo message="Use Accumulo version ${accumulo.version}" />
+    </then>
+    <else>
+      <echo message="Using Accumulo profile 1.5.0 by default" />
+      <property name="accumulo.version" value="1.5.0" />
+    </else>
+  </if>
+  <!--
     Set default HBase profile if not set
 
     HBase 0.95 has broken one big monolithic archive into smaller pieces, so

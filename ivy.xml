@@ -207,10 +207,10 @@ under the License.
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
     <!-- Accumulo 1.5.0 -->
-    <dependency org="org.apache.accumulo" name="accumulo-core" rev="1.5.0"
+    <dependency org="org.apache.accumulo" name="accumulo-core" rev="${accumulo.version}"
                 conf="accumulo->default">
     </dependency>
-    <dependency org="org.apache.accumulo" name="accumulo-minicluster" rev="1.5.0"
+    <dependency org="org.apache.accumulo" name="accumulo-minicluster" rev="${accumulo.version}"
                 conf="accumulo->default">
     </dependency>
 
