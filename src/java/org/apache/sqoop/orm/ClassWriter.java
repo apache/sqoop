@@ -750,9 +750,9 @@ public class ClassWriter {
         sb.append("    o." + colName + " = (o." + colName + " != null) ? ("
                 + javaType + ") o." + colName + ".clone() : null;\n");
       } else if (javaType.equals(BytesWritable.class.getName())) {
-        sb.append("    o." + colName + " = new BytesWritable("
-            + "Arrays.copyOf(" + colName + ".getBytes(), "
-            + colName + ".getLength()));\n");
+        sb.append("    o." + colName + " = (o." + colName + " != null) ? "
+            + "new BytesWritable(Arrays.copyOf(" + colName + ".getBytes(), "
+            + colName + ".getLength())) : null;\n");
       }
     }
 

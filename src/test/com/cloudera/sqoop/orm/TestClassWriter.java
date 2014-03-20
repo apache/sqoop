@@ -46,6 +46,7 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+
 import java.lang.reflect.Field;
 
 /**
@@ -402,6 +403,53 @@ public class TestClassWriter extends TestCase {
 
     runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "."
         + HsqldbTestServer.getTableName());
+  }
+
+  @Test
+  public void testCloningTableWithVarbinaryDoesNotThrowNPE() throws SQLException,
+      IOException, ClassNotFoundException, NoSuchMethodException,
+      SecurityException, InstantiationException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException {
+    String tableName = HsqldbTestServer.getTableName();
+    Connection connection = testServer.getConnection();
+    Statement st = connection.createStatement();
+    try {
+      st.executeUpdate("DROP TABLE " + tableName + " IF EXISTS");
+      st.executeUpdate("CREATE TABLE " + tableName
+          + " (id INT, test VARBINARY(10))");
+      connection.commit();
+    } finally {
+      st.close();
+      connection.close();
+    }
+
+    String [] argv = {
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--package-name",
+      OVERRIDE_PACKAGE_NAME,
+    };
+
+    String className = OVERRIDE_PACKAGE_NAME + "."
+        + HsqldbTestServer.getTableName();
+    File ormJarFile = runGenerationTest(argv, className);
+
+    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+        ormJarFile.getCanonicalPath(), className);
+    Class tableClass = Class.forName(className, true,
+        Thread.currentThread().getContextClassLoader());
+    Method cloneImplementation = tableClass.getMethod("clone");
+
+    Object instance = tableClass.newInstance();
+
+    assertTrue(cloneImplementation.invoke(instance).getClass().
+        getCanonicalName().equals(className));
+
+    if (null != prevClassLoader) {
+      ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+    }
   }
 
   /**
