@@ -59,8 +59,8 @@ public class DirectNetezzaManager extends NetezzaManager {
       "max-errors";
 
   private static final String QUERY_CHECK_DICTIONARY_FOR_TABLE =
-      "SELECT 1 FROM _V_OBJECTS WHERE OWNER= ? "
-      + " AND OBJNAME = ? and OBJTYPE = 'TABLE'";
+      "SELECT 1 FROM _V_TABLE WHERE OWNER= ? "
+      + " AND TABLENAME = ?";
   public static final String NETEZZA_NULL_VALUE =
       "netezza.exttable.null.value";
   public DirectNetezzaManager(SqoopOptions opts) {
