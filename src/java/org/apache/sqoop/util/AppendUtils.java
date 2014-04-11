@@ -65,7 +65,6 @@ public class AppendUtils {
   public void append() throws IOException {
 
     SqoopOptions options = context.getOptions();
-    FileSystem fs = FileSystem.get(options.getConf());
     Path tempDir = context.getDestination();
 
     // Try in this order: target-dir or warehouse-dir
@@ -78,6 +77,7 @@ public class AppendUtils {
     } else {
       userDestDir = new Path(context.getTableName());
     }
+    FileSystem fs = userDestDir.getFileSystem(options.getConf());
 
     int nextPartition = 0;
 
