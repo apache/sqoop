@@ -57,7 +57,7 @@ For example:
 
 ----
 $ sqoop import --connect jdbc:mysql://database.example.com/employees \
-    --username venkatesh --passwordFile ${user.home}/.password
+    --username venkatesh --password-file ${user.home}/.password
 ----
 
 Another way of supplying passwords is using the +-P+ argument which will
