@@ -61,7 +61,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
         }
       }
 
-      if (numberOfRows != 0) {
+      if (numberOfRows != 0 || numberOfBatches != 0) {
         // execute and commit the remaining rows
         executor.executeBatch(true);
       }

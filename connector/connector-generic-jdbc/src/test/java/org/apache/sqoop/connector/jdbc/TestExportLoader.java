@@ -17,32 +17,49 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import java.sql.ResultSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import java.sql.ResultSet;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
+import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
-import org.apache.sqoop.etl.io.DataReader;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-public class TestExportLoader extends TestCase {
+@RunWith(Parameterized.class)
+public class TestExportLoader {
 
   private final String tableName;
 
   private GenericJdbcExecutor executor;
 
   private static final int START = -50;
-  private static final int NUMBER_OF_ROWS = 101;
+  
+  private int numberOfRows;
 
-  public TestExportLoader() {
+  @Parameters
+  public static Collection<Object[]> data() {
+    return Arrays.asList(new Object[][] {{50}, {100}, {101}, {150}, {200}});
+  }
+
+  public TestExportLoader(int numberOfRows) {
+    this.numberOfRows = numberOfRows;
     tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  @Override
+  @Before
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -51,14 +68,17 @@ public class TestExportLoader extends TestCase {
       executor.executeUpdate("CREATE TABLE "
           + executor.delimitIdentifier(tableName)
           + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
+    } else {
+      executor.deleteTableData(tableName);
     }
   }
 
-  @Override
+  @After
   public void tearDown() {
     executor.close();
   }
 
+  @Test
   public void testInsert() throws Exception {
     MutableContext context = new MutableMapContext();
 
@@ -86,7 +106,7 @@ public class TestExportLoader extends TestCase {
       assertEquals(String.valueOf(index), rs.getObject(3));
       index++;
     }
-    assertEquals(NUMBER_OF_ROWS, index-START);
+    assertEquals(numberOfRows, index-START);
   }
 
   public class DummyReader extends DataReader {
@@ -99,7 +119,7 @@ public class TestExportLoader extends TestCase {
 
     @Override
     public Object[] readArrayRecord() {
-      if (index < NUMBER_OF_ROWS) {
+      if (index < numberOfRows) {
         Object[] array = new Object[] {
             START + index,
             (double) (START + index),
