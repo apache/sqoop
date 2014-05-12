@@ -48,8 +48,8 @@ public class GenericJdbcExecutor {
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0000, driver, e);
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0001, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0001, e);
     }
   }
 
@@ -60,8 +60,8 @@ public class GenericJdbcExecutor {
       return statement.executeQuery(sql);
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -69,6 +69,7 @@ public class GenericJdbcExecutor {
     try {
       connection.setAutoCommit(autoCommit);
     } catch (SQLException e) {
+      logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
@@ -104,23 +105,21 @@ public class GenericJdbcExecutor {
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0018);
       }
     } catch(SQLException e) {
-      LOG.error("Got SQLException while migrating data from: " + fromTable +
-        " to: " + toTable, e);
-      throw new SqoopException(
-        GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0018, e);
+      logSQLException(e, "Got SQLException while migrating data from: " + fromTable + " to: " + toTable);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0018, e);
     } finally {
       if(stmt != null) {
         try {
           stmt.close();
         } catch(SQLException e) {
-          LOG.warn("Got SQLException at the time of closing statement.", e);
+          logSQLException(e, "Got SQLException at the time of closing statement.");
         }
       }
       if(oldAutoCommit != null) {
         try {
           connection.setAutoCommit(oldAutoCommit);
         } catch(SQLException e) {
-          LOG.warn("Got SQLException while setting autoCommit mode.", e);
+          logSQLException(e, "Got SQLException while setting autoCommit mode.");
         }
       }
     }
@@ -139,7 +138,7 @@ public class GenericJdbcExecutor {
         if(resultSet != null)
           resultSet.close();
       } catch(SQLException e) {
-        LOG.warn("Got SQLException while closing resultset.", e);
+        logSQLException(e, "Got SQLException while closing resultset.");
       }
     }
   }
@@ -151,8 +150,8 @@ public class GenericJdbcExecutor {
       statement.executeUpdate(sql);
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -162,8 +161,8 @@ public class GenericJdbcExecutor {
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -174,8 +173,8 @@ public class GenericJdbcExecutor {
       }
       preparedStatement.addBatch();
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -186,8 +185,8 @@ public class GenericJdbcExecutor {
         connection.commit();
       }
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -197,8 +196,8 @@ public class GenericJdbcExecutor {
         preparedStatement.close();
       }
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
     }
   }
 
@@ -216,8 +215,8 @@ public class GenericJdbcExecutor {
       }
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
     }
   }
 
@@ -237,8 +236,8 @@ public class GenericJdbcExecutor {
       return columns;
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
     }
   }
 
@@ -256,8 +255,8 @@ public class GenericJdbcExecutor {
       }
 
     } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
     }
   }
 
@@ -296,8 +295,18 @@ public class GenericJdbcExecutor {
       connection.close();
 
     } catch (SQLException e) {
-      // TODO: Log the exception
+      logSQLException(e);
     }
   }
 
+  private void logSQLException(SQLException e) {
+    logSQLException(e, "Caught SQLException:");
+  }
+
+  private void logSQLException(SQLException e, String message) {
+    LOG.error(message, e);
+    if(e.getNextException() != null) {
+      logSQLException(e.getNextException(), "Caused by:");
+    }
+  }
 }
