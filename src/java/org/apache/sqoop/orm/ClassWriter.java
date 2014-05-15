@@ -1118,6 +1118,13 @@ public class ClassWriter {
 
     String[] colNames = getColumnNames(columnTypes);
 
+    // Column number should be more than 0
+    if (colNames == null || colNames.length == 0) {
+      throw new IllegalArgumentException("There is no column found in the "
+              + "target table " + tableName
+              + ". Please ensure that your table name is correct.");
+    }
+
     // Translate all the column names into names that are safe to
     // use as identifiers.
     String [] cleanedColNames = cleanColNames(colNames);
