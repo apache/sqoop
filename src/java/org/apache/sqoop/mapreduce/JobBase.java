@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,9 @@ import com.cloudera.sqoop.util.Jars;
 public class JobBase {
 
   public static final Log LOG = LogFactory.getLog(JobBase.class.getName());
+
+  public static final String SERIALIZE_SQOOPOPTIONS = "sqoop.jobbase.serialize.sqoopoptions";
+  public static final boolean SERIALIZE_SQOOPOPTIONS_DEFAULT = false;
 
   protected SqoopOptions options;
   protected Class<? extends Mapper> mapperClass;
@@ -306,6 +310,39 @@ public class JobBase {
    */
   public Job getJob() {
     return mrJob;
+  }
+
+  /**
+   * Create new Job object in unified way for all types of jobs.
+   *
+   * @param configuration Hadoop configuration that should be used
+   * @return New job object, created object won't be persisted in the instance
+   */
+  public Job createJob(Configuration configuration) throws IOException {
+    // Put the SqoopOptions into job if requested
+    if(configuration.getBoolean(SERIALIZE_SQOOPOPTIONS, SERIALIZE_SQOOPOPTIONS_DEFAULT)) {
+      putSqoopOptionsToConfiguration(options, configuration);
+    }
+
+    return new Job(configuration);
+  }
+
+  /**
+   * Iterates over serialized form of SqoopOptions and put them into Configuration
+   * object.
+   *
+   * @param opts SqoopOptions that should be serialized
+   * @param configuration Target configuration object
+   */
+  public void putSqoopOptionsToConfiguration(SqoopOptions opts, Configuration configuration) {
+    for(Map.Entry<Object, Object> e : opts.writeProperties().entrySet()) {
+      String key = (String)e.getKey();
+      String value = (String)e.getValue();
+
+      // We don't need to do if(value is empty) because that is already done
+      // for us by the SqoopOptions.writeProperties() method.
+      configuration.set("sqoop.opt." + key, value);
+    }
   }
 
   /**

@@ -379,7 +379,7 @@ public class ExportJobBase extends JobBase {
       }
     }
 
-    Job job = new Job(conf);
+    Job job = createJob(conf);
     try {
       // Set the external jar to use for the job.
       job.getConfiguration().set("mapred.jar", ormJarFile);

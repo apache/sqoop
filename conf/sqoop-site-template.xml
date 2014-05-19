@@ -127,6 +127,20 @@ under the License.
   </property>
   -->
 
+  <!--
+    Enabling this option will instruct Sqoop to put all options that
+    were used in the invocation into created mapreduce job(s). This
+    become handy when one needs to investigate what exact options were
+    used in the Sqoop invocation.
+  -->
+  <!--
+  <property>
+    <name>sqoop.jobbase.serialize.sqoopoptions</name>
+    <value>true</value>
+    <description>If true, then all options will be serialized into job.xml
+    </description>
+  </property>
+  -->
 
   <!--
     SERVER CONFIGURATION: If you plan to run a Sqoop metastore on this machine,

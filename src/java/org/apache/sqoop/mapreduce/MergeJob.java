@@ -59,7 +59,7 @@ public class MergeJob extends JobBase {
 
   public boolean runMergeJob() throws IOException {
     Configuration conf = options.getConf();
-    Job job = new Job(conf);
+    Job job = createJob(conf);
 
     String userClassName = options.getClassName();
     if (null == userClassName) {
