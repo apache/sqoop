@@ -291,8 +291,13 @@ public class OracleManager
     String password = options.getPassword();
     String connectStr = options.getConnectString();
 
+    try {
+      connection = CACHE.getConnection(connectStr, username);
+    } catch (SQLException e) {
+      connection = null;
+      LOG.debug("Cached connecion has expired.");
+    }
 
-    connection = CACHE.getConnection(connectStr, username);
     if (null == connection) {
       // Couldn't pull one from the cache. Get a new one.
       LOG.debug("Creating a new connection for "
