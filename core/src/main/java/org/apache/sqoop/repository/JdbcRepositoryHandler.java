@@ -52,6 +52,13 @@ public abstract class JdbcRepositoryHandler {
   public abstract MConnector findConnector(String shortName, Connection conn);
 
   /**
+   * Get all connectors in repository
+   *
+   * @return List will all connectors in repository
+   */
+  public abstract List<MConnector> findConnectors(Connection conn);
+
+  /**
    * Register given connector in repository.
    *
    * Save given connector data to the repository. Given connector should not be

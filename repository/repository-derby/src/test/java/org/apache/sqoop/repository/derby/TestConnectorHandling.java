@@ -19,6 +19,8 @@ package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.model.MConnector;
 
+import java.util.List;
+
 /**
  * Test connector methods on Derby repository.
  */
@@ -53,6 +55,23 @@ public class TestConnectorHandling extends DerbyTestCase {
 
     // And compare them
     assertEquals(original, connector);
+  }
+
+  public void testFindAllConnectors() throws Exception {
+    // No connectors in an empty repository, we expect an empty list
+    assertEquals(handler.findConnectors(getDerbyConnection()).size(),0);
+
+    loadConnectorAndFramework();
+    addConnector();
+
+    // Retrieve connectors
+    List<MConnector> connectors = handler.findConnectors(getDerbyConnection());
+    assertNotNull(connectors);
+    assertEquals(connectors.size(),2);
+    assertEquals(connectors.get(0).getUniqueName(),"A");
+    assertEquals(connectors.get(1).getUniqueName(),"B");
+
+
   }
 
   public void testRegisterConnector() throws Exception {

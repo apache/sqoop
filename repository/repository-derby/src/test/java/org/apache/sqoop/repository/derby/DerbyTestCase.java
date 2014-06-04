@@ -265,6 +265,15 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   /**
+   * Add a second connector for testing with multiple connectors
+   */
+  public void addConnector() throws Exception {
+    // Connector entry
+    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+            + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test')");
+  }
+
+  /**
    * Load testing submissions into the metadata repository.
    *
    * @throws Exception

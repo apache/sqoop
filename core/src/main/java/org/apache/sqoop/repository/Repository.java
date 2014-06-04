@@ -96,6 +96,13 @@ public abstract class Repository {
    */
   public abstract MConnector findConnector(String shortName);
 
+  /**
+   * Get all connectors in repository
+   *
+   * @return List will all connectors in repository
+   */
+  public abstract List<MConnector> findConnectors();
+
 
   /**
    * Registers given framework in the repository and return registered

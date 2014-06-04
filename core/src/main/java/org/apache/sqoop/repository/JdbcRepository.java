@@ -205,6 +205,19 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+    @Override
+    public List<MConnector> findConnectors() {
+        return (List<MConnector>) doWithConnection(new DoWithConnection() {
+            @Override
+            public Object doIt(Connection conn) {
+                return handler.findConnectors(conn);
+            }
+        });
+    }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public MFramework registerFramework(final MFramework mFramework, final boolean autoUpgrade) {
     return (MFramework) doWithConnection(new DoWithConnection() {

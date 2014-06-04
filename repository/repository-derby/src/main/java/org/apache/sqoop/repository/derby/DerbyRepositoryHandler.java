@@ -446,54 +446,51 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
     MConnector mc = null;
     PreparedStatement baseConnectorFetchStmt = null;
-    PreparedStatement formFetchStmt = null;
-    PreparedStatement inputFetchStmt = null;
     try {
       baseConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_BASE_CONNECTOR);
       baseConnectorFetchStmt.setString(1, shortName);
-      ResultSet rsetBaseConnector = baseConnectorFetchStmt.executeQuery();
 
-      if (!rsetBaseConnector.next()) {
+      List<MConnector> connectors = loadConnectors(baseConnectorFetchStmt,conn);
+
+      if (connectors.size()==0) {
         LOG.debug("No connector found by name: " + shortName);
         return null;
+      }  else if (connectors.size()==1) {
+        LOG.debug("Looking up connector: " + shortName + ", found: " + mc);
+        return connectors.get(0);
       }
-
-      long connectorId = rsetBaseConnector.getLong(1);
-      String connectorName = rsetBaseConnector.getString(2);
-      String connectorClassName = rsetBaseConnector.getString(3);
-      String connectorVersion = rsetBaseConnector.getString(4);
-
-      formFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
-      formFetchStmt.setLong(1, connectorId);
-      inputFetchStmt = conn.prepareStatement(STMT_FETCH_INPUT);
-
-      List<MForm> connectionForms = new ArrayList<MForm>();
-      Map<MJob.Type, List<MForm>> jobForms =
-        new HashMap<MJob.Type, List<MForm>>();
-
-      loadForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
-
-      mc = new MConnector(connectorName, connectorClassName, connectorVersion,
-        new MConnectionForms(connectionForms),
-        convertToJobList(jobForms));
-      mc.setPersistenceId(connectorId);
-
-      if (rsetBaseConnector.next()) {
+      else {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0005, shortName);
       }
+
     } catch (SQLException ex) {
       logException(ex, shortName);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0004, shortName, ex);
     } finally {
-      closeStatements(baseConnectorFetchStmt,
-        formFetchStmt, inputFetchStmt);
+      closeStatements(baseConnectorFetchStmt);
     }
-
-    LOG.debug("Looking up connector: " + shortName + ", found: " + mc);
-    return mc;
   }
 
+
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MConnector> findConnectors(Connection conn) {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_CONNECTOR_ALL);
+      return loadConnectors(stmt,conn);
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0045, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+
+   /**
    * {@inheritDoc}
    */
   @Override
@@ -1601,6 +1598,46 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeStatements(stmt);
       closeResultSets(rs);
     }
+  }
+
+  private List<MConnector> loadConnectors(PreparedStatement stmt,Connection conn) throws SQLException {
+    List<MConnector> connectors = new ArrayList<MConnector>();
+    ResultSet rsConnectors = null;
+    PreparedStatement formFetchStmt = null;
+    PreparedStatement inputFetchStmt = null;
+
+    try {
+      rsConnectors = stmt.executeQuery();
+      formFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
+      inputFetchStmt = conn.prepareStatement(STMT_FETCH_INPUT);
+
+      while(rsConnectors.next()) {
+        long connectorId = rsConnectors.getLong(1);
+        String connectorName = rsConnectors.getString(2);
+        String connectorClassName = rsConnectors.getString(3);
+        String connectorVersion = rsConnectors.getString(4);
+
+        formFetchStmt.setLong(1, connectorId);
+
+        List<MForm> connectionForms = new ArrayList<MForm>();
+        Map<MJob.Type, List<MForm>> jobForms =
+                new HashMap<MJob.Type, List<MForm>>();
+
+        loadForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
+
+        MConnector mc = new MConnector(connectorName, connectorClassName, connectorVersion,
+                new MConnectionForms(connectionForms),
+                convertToJobList(jobForms));
+        mc.setPersistenceId(connectorId);
+
+        connectors.add(mc);
+      }
+    } finally {
+      closeResultSets(rsConnectors);
+      closeStatements(formFetchStmt,inputFetchStmt);
+    }
+
+    return connectors;
   }
 
   private List<MConnection> loadConnections(PreparedStatement stmt,

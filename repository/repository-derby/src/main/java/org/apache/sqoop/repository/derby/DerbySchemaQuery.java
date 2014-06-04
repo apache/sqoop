@@ -445,6 +445,14 @@ public final class DerbySchemaQuery {
       + " FROM " + TABLE_SQ_CONNECTOR
       + " WHERE " + COLUMN_SQC_NAME + " = ?";
 
+  // DML: Select all connectors
+  public static final String STMT_SELECT_CONNECTOR_ALL =
+    "SELECT "
+    + COLUMN_SQC_ID + ", "
+    + COLUMN_SQC_NAME + ", "
+    + COLUMN_SQC_CLASS + ", "
+    + COLUMN_SQC_VERSION
+    + " FROM " + TABLE_SQ_CONNECTOR;
 
   // DML: Fetch all forms for a given connector
   public static final String STMT_FETCH_FORM_CONNECTOR =

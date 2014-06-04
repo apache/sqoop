@@ -179,7 +179,9 @@ public enum DerbyRepoError implements ErrorCode {
   DERBYREPO_0043("Can't enable/disable job"),
 
   DERBYREPO_0044("Update of framework failed"),
-  ;
+
+  DERBYREPO_0045("Can't retrieve all connector metadata"),
+            ;
 
   private final String message;
 
