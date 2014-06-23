@@ -6,5 +6,7 @@ target
 *.eml
 *.log
 .idea
+*.ipr
+*.iws
 nb-configuration.xml
 patch-process
