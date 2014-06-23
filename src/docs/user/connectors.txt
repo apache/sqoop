@@ -1,4 +1,3 @@
-
 ////
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -17,7 +16,7 @@
   limitations under the License.
 ////
 
-
+[[connectors]]
 Notes for specific connectors
 -----------------------------
 
@@ -38,6 +37,80 @@ will try to insert new row and if the insertion fails with duplicate unique key 
 it will update appropriate row instead. As a result, Sqoop is ignoring values specified
 in parameter +\--update-key+, however user needs to specify at least one valid column
 to turn on update mode itself.
+
+
+MySQL Direct Connector
+~~~~~~~~~~~~~~~~~~~~~~
+
+MySQL Direct Connector allows faster import and export to/from MySQL using +mysqldump+ and +mysqlimport+ tools functionality
+instead of SQL selects and inserts.
+
+To use the MySQL Direct Connector, specify the +\--direct+ argument for your import or export job.
+
+Example:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
+    --direct
+----
+
+Passing additional parameters to mysqldump:
+
+----
+$ sqoop import --connect jdbc:mysql://server.foo.com/db --table bar \
+    --direct -- --default-character-set=latin1
+----
+
+Requirements
+^^^^^^^^^^^^
+
+Utilities +mysqldump+ and +mysqlimport+ should be present in the shell path of the user running the Sqoop command on
+all nodes. To validate SSH as this user to all nodes and execute these commands. If you get an error, so will Sqoop.
+
+Limitations
+^^^^^^^^^^^^
+
+* Currently the direct connector does not support import of large object columns (BLOB and CLOB).
+* Importing to HBase and Accumulo is not supported
+* Use of a staging table when exporting data is not supported
+* Import of views is not supported
+
+Direct-mode Transactions
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+For performance, each writer will commit the current transaction
+approximately every 32 MB of exported data. You can control this
+by specifying the following argument _before_ any tool-specific arguments: +-D
+sqoop.mysql.export.checkpoint.bytes=size+, where _size_ is a value in
+bytes. Set _size_ to 0 to disable intermediate checkpoints,
+but individual files being exported will continue to be committed
+independently of one another.
+
+Sometimes you need to export large data with Sqoop to a live MySQL cluster that
+is under a high load serving random queries from the users of your application.
+While data consistency issues during the export can be easily solved with a
+staging table, there is still a problem with the performance impact caused by
+the heavy export.
+
+First off, the resources of MySQL dedicated to the import process can affect
+the performance of the live product, both on the master and on the slaves.
+Second, even if the servers can handle the import with no significant
+performance impact (mysqlimport should be relatively "cheap"), importing big
+tables can cause serious replication lag in the cluster risking data
+inconsistency.
+
+With +-D sqoop.mysql.export.sleep.ms=time+, where _time_ is a value in
+milliseconds, you can let the server relax between checkpoints and the replicas
+catch up by pausing the export process after transferring the number of bytes
+specified in +sqoop.mysql.export.checkpoint.bytes+. Experiment with different
+settings of these two parameters to archieve an export pace that doesn't
+endanger the stability of your MySQL cluster.
+
+IMPORTANT: Note that any arguments to Sqoop that are of the form +-D
+parameter=value+ are Hadoop _generic arguments_ and must appear before
+any tool-specific arguments (for example, +\--connect+, +\--table+, etc).
+Don't forget that these parameters are only supported with the +\--direct+
+flag set.
 
 Microsoft SQL Connector
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,6 +133,7 @@ Argument                                 Description
 
 Schema support
 ^^^^^^^^^^^^^^
+
 If you need to work with tables that are located in non-default schemas, you can
 specify schema names via the +\--schema+ argument. Custom schemas are supported for
 both import and export jobs. For example:
@@ -98,8 +172,31 @@ Argument                                 Description
                                          Default is "public".
 ---------------------------------------------------------------------------------
 
-The direct connector (used when specified +\--direct+ parameter), offers also
-additional extra arguments:
+Schema support
+^^^^^^^^^^^^^^
+
+If you need to work with table that is located in schema other than default one,
+you need to specify extra argument +\--schema+. Custom schemas are supported for
+both import and export job (optional staging table however must be present in the
+same schema as target table). Example invocation:
+
+----
+$ sqoop import ... --table custom_table -- --schema custom_schema
+----
+
+PostgreSQL Direct Connector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PostgreSQL Direct Connector allows faster import and export to/from PostgresSQL "COPY" command.
+
+To use the PostgreSQL Direct Connector, specify the +\--direct+ argument for your import or export job.
+
+When importing from PostgreSQL in conjunction with direct mode, you
+can split the import into separate files after
+individual files reach a certain size. This size limit is controlled
+with the +\--direct-split-size+ argument.
+
+The direct connector offers also additional extra arguments:
 
 .Additional supported PostgreSQL extra arguments in direct mode:
 [grid="all"]
@@ -114,19 +211,19 @@ Argument                                 Description
                                          Default is "FALSE".
 ---------------------------------------------------------------------------------
 
-Schema support
-^^^^^^^^^^^^^^
+Requirements
+^^^^^^^^^^^^
 
-If you need to work with table that is located in schema other than default one,
-you need to specify extra argument +\--schema+. Custom schemas are supported for
-both import and export job (optional staging table however must be present in the
-same schema as target table). Example invocation:
-
-----
-$ sqoop import ... --table custom_table -- --schema custom_schema
-----
+Utility +psql+ should be present in the shell path of the user running the Sqoop command on
+all nodes. To validate SSH as this user to all nodes and execute these commands. If you get an error, so will Sqoop.
 
 
+Limitations
+^^^^^^^^^^^^
+
+* Currently the direct connector does not support import of large object columns (BLOB and CLOB).
+* Importing to HBase and Accumulo is not supported
+* Import of views is not supported
 
 pg_bulkload connector
 ~~~~~~~~~~~~~~~~~~~~~

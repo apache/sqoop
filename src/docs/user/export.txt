@@ -1,4 +1,3 @@
-
 ////
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -93,13 +92,10 @@ additional load may decrease performance. The +\--num-mappers+ or +-m+
 arguments control the number of map tasks, which is the degree of
 parallelism used.
 
-MySQL provides a direct mode for exports as well, using the
-+mysqlimport+ tool. When exporting to MySQL, use the +\--direct+ argument
-to specify this codepath. This may be
-higher-performance than the standard JDBC codepath.
-
-NOTE: When using export in direct mode with MySQL, the MySQL bulk utility
-+mysqlimport+ must be available in the shell path of the task process.
+Some databases provides a direct mode for exports as well. Use the +\--direct+ argument
+to specify this codepath. This may be higher-performance than the standard JDBC codepath.
+Details about use of direct mode with each specific RDBMS, installation requirements, available
+options and limitations can be found in <<connectors>>.
 
 The +\--input-null-string+ and +\--input-null-non-string+ arguments are
 optional. If +\--input-null-string+ is not specified, then the string
@@ -127,9 +123,9 @@ If the staging table contains data and the +\--clear-staging-table+ option is
 specified, Sqoop will delete all of the data before starting the export job.
 
 NOTE: Support for staging data prior to pushing it into the destination
-table is not available for +--direct+ exports. It is also not available when
+table is not always available for +--direct+ exports. It is also not available when
 export is invoked using the +--update-key+ option for updating existing data,
-and when stored procedures are used to insert the data.
+and when stored procedures are used to insert the data. It is best to check the <<connectors>> section to validate.
 
 
 Inserts vs. Updates

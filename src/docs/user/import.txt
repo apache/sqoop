@@ -1,4 +1,3 @@
-
 ////
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -64,9 +63,7 @@ Argument                          Description
 +\--columns <col,col,col...>+     Columns to import from table
 +\--delete-target-dir+            Delete the import target directory\
                                   if it exists
-+\--direct+                       Use direct import fast path
-+\--direct-split-size <n>+        Split the input stream every 'n' bytes\
-                                  when importing in direct mode
++\--direct+                       Use direct connector if exists for the database
 +\--fetch-size <n>+               Number of entries to read from database\
                                   at once.
 +\--inline-lob-limit <n>+         Set the maximum size for an inline LOB
@@ -231,13 +228,10 @@ data movement tools. For example, MySQL provides the +mysqldump+ tool
 which can export data from MySQL to other systems very quickly. By
 supplying the +\--direct+ argument, you are specifying that Sqoop
 should attempt the direct import channel. This channel may be
-higher performance than using JDBC. Currently, direct mode does not
-support imports of large object columns.
+higher performance than using JDBC.
 
-When importing from PostgreSQL in conjunction with direct mode, you
-can split the import into separate files after
-individual files reach a certain size. This size limit is controlled
-with the +\--direct-split-size+ argument.
+Details about use of direct mode with each specific RDBMS, installation requirements, available
+options and limitations can be found in <<connectors>>.
 
 By default, Sqoop will import a table named +foo+ to a directory named
 +foo+ inside your home directory in HDFS. For example, if your
@@ -280,10 +274,6 @@ data to a temporary directory and then rename the files into the normal
 target directory in a manner that does not conflict with existing filenames
 in that directory.
 
-NOTE: When using the direct mode of import, certain database client utilities
-are expected to be present in the shell path of the task process. For MySQL
-the utilities +mysqldump+ and +mysqlimport+ are required, whereas for
-PostgreSQL the utility +psql+ is required.
 
 Controlling transaction isolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -681,13 +671,6 @@ Controlling the import parallelism (using 8 parallel tasks):
 ----
 $ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
     -m 8
-----
-
-Enabling the MySQL "direct mode" fast path:
-
-----
-$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES \
-    --direct
 ----
 
 Storing data in SequenceFiles, and setting the generated class name to
