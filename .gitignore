@@ -14,18 +14,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-/build
+*.eml
+*.iml
+*.ipr
+*.iws
+*.log
 *~
 .classpath
+.idea
 .project
-.launches
 .settings
+nb-configuration.xml
+patch-process
+target
+
+# Sqoop1 specific
 .ant-targets-build.xml
-/tags
+.launches
+/build
 /build.properties
 /conf/managers.d
 /conf/tools.d
-.idea
-*.iml
-*.eml
-target
+/tags
