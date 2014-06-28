@@ -25,7 +25,10 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Output format for MySQL Update/insert functionality. We will use MySQL
@@ -63,7 +66,33 @@ public class MySQLUpsertOutputFormat<K extends SqoopRecord, V>
      * {@inheritDoc}
      */
     @Override
-    protected String getUpdateStatement() {
+    protected PreparedStatement getPreparedStatement(
+        List<SqoopRecord> userRecords) throws SQLException {
+
+      PreparedStatement stmt = null;
+
+      // Synchronize on connection to ensure this does not conflict
+      // with the operations in the update thread.
+      Connection conn = getConnection();
+      synchronized (conn) {
+	  stmt = conn.prepareStatement(getUpdateStatement(userRecords.size()));
+      }
+
+      // Inject the record parameters into the UPDATE and WHERE clauses.  This
+      // assumes that the update key column is the last column serialized in
+      // by the underlying record. Our code auto-gen process for exports was
+      // responsible for taking care of this constraint.
+      int i = 0;
+      for (SqoopRecord record : userRecords) {
+        record.write(stmt, i);
+        i += columnNames.length;
+      }
+      stmt.addBatch();
+
+      return stmt;
+    }
+
+    protected String getUpdateStatement(int numRows) {
       boolean first;
       StringBuilder sb = new StringBuilder();
       sb.append("INSERT INTO ");
@@ -80,14 +109,16 @@ public class MySQLUpsertOutputFormat<K extends SqoopRecord, V>
       }
 
       sb.append(") VALUES(");
-      first = true;
-      for (int i = 0; i < columnNames.length; i++) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
+      for (int i = 0; i < numRows; i++) {
+        if (i > 0) {
+          sb.append("),(");
         }
-        sb.append("?");
+	for (int j = 0; j < columnNames.length; j++) {
+          if (j > 0) {
+            sb.append(", ");
+          }
+          sb.append("?");
+        }
       }
 
       sb.append(") ON DUPLICATE KEY UPDATE ");
