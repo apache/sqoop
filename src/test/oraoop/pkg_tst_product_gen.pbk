@@ -1,0 +1,126 @@
+CREATE OR REPLACE
+PACKAGE BODY         "PKG_ODG_$TABLE_NAME"
+AS
+
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+   FUNCTION fnc_gen_data (i_parameters typ_rc_parameters)
+      RETURN typ_oraoop_datagen_tab
+      PIPELINED
+      PARALLEL_ENABLE(PARTITION i_parameters BY ANY)
+   IS
+      l_parameters   typ_parameters;
+      l_ret_rec      typ_oraoop_datagen;
+   BEGIN
+      LOOP
+         FETCH i_parameters INTO l_parameters;
+
+         EXIT WHEN i_parameters%NOTFOUND;
+
+         FOR id IN l_parameters.start_range .. l_parameters.end_range
+         LOOP
+            $DATA_EXPRESSION_LIST
+            PIPE ROW (l_ret_rec);
+         END LOOP;
+      END LOOP;
+
+      RETURN;
+   END fnc_gen_data;
+
+   PROCEDURE prc_create_table
+   IS
+   BEGIN
+      EXECUTE IMMEDIATE '
+         CREATE TABLE "$TABLE_NAME"
+         (
+            $COLUMN_LIST
+         )
+         NOLOGGING
+         PARALLEL
+         $PARTITION_CLAUSE';
+   END;
+
+   PROCEDURE prc_insert_data (i_degree NUMBER)
+   IS
+   BEGIN
+      EXECUTE IMMEDIATE 'ALTER SESSION ENABLE PARALLEL DML';
+
+      EXECUTE IMMEDIATE
+         'INSERT /*+append parallel(' || i_degree || ') */
+               INTO  "$TABLE_NAME"
+            SELECT /*+parallel(' || i_degree || ') */
+                  *
+              FROM TABLE (
+                      "PKG_ODG_$TABLE_NAME".
+                       fnc_gen_data (
+                         CURSOR (SELECT /*+parallel(' || i_degree || ') */
+                                       start_range, end_range FROM "ODGP_$TABLE_NAME")))';
+      COMMIT;
+   END;
+
+   PROCEDURE prc_create_parameters_table (i_degree            NUMBER,
+                                          i_rows_per_slave    NUMBER)
+   IS
+      l_sql           VARCHAR2 (32767) := 'CREATE TABLE "ODGP_$TABLE_NAME"
+                                           (
+                                             START_RANGE NUMBER
+                                           , END_RANGE NUMBER
+                                           )
+                                           PARTITION BY RANGE (START_RANGE)  ';
+      l_start_range   NUMBER;
+      l_end_range     NUMBER;
+   BEGIN
+      FOR i IN 1 .. i_degree
+      LOOP
+         l_sql :=
+               l_sql
+            || CASE WHEN i = 1 THEN '(' ELSE ',' END
+            || ' PARTITION "ODGP_$TABLE_NAME_P'
+            || i
+            || '" VALUES LESS THAN ('
+            || i_rows_per_slave * i
+            || ') NOLOGGING ';
+      END LOOP;
+
+      l_sql := l_sql || ')';
+
+      EXECUTE IMMEDIATE l_sql;
+
+      FOR i IN 1 .. i_degree
+      LOOP
+         l_start_range := (i_rows_per_slave * (i - 1)) + 1;
+         l_end_range := (i_rows_per_slave * i);
+
+         EXECUTE IMMEDIATE 'INSERT INTO "ODGP_$TABLE_NAME" VALUES (:start_range, :end_range)'
+            USING l_start_range, l_end_range;
+      END LOOP;
+
+      COMMIT;
+   END;
+
+   PROCEDURE prc_load_table (i_degree NUMBER, i_rows_per_slave NUMBER)
+   IS
+   BEGIN
+      prc_create_table;
+      prc_create_parameters_table (i_degree, i_rows_per_slave);
+      prc_insert_data (i_degree);
+
+      EXECUTE IMMEDIATE 'DROP TABLE "ODGP_$TABLE_NAME"';
+   END;
+END;

@@ -85,8 +85,11 @@ jdbc:mysql://localhost/
 
 === Oracle
 
-Install Oracle XE (Express edition) 10.2.0. Instructions for configuring the
+Install Oracle Enterprise Edition 10.2.0+. Instructions for configuring the
 database are in OracleManagerTest. Download the ojdbc6_g jar.
+
+If running the tests against Oracle XE (Express Edition) - a lot of them will
+fail as it does not include the partitioning feature.
 
 Use the system property sqoop.test.oracle.connectstring to specify the
 connection string for Oracle host used for testing. Specify this property on the
@@ -96,6 +99,9 @@ sqoop.test.oracle.connectstring=jdbc:oracle:thin:@//host.example.com/xe
 
 If not specified, the default value used for this property is:
 jdbc:oracle:thin:@//localhost/xe
+
+Users sqooptest and sqooptest2 should be created prior to running the tests.
+SQL script is available in src/test/oraoop/create_users.sql
 
 === PostgreSQL
 

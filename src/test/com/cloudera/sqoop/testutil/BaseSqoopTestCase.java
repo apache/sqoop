@@ -220,6 +220,8 @@ public abstract class BaseSqoopTestCase extends TestCase {
       manager = testServer.getManager();
     } else {
       Configuration conf = getConf();
+      //Need to disable OraOop for existing tests
+      conf.set("oraoop.disabled", "true");
       SqoopOptions opts = getSqoopOptions(conf);
       opts.setConnectString(getConnectString());
       opts.setTableName(getTableName());

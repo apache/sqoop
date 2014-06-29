@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<table>
+  <name>TST_PRODUCT_SUBPART</name>
+  <columns>
+    <column>
+      <name>product_id</name>
+      <dataType>INTEGER</dataType>
+      <dataExpression>id</dataExpression>
+    </column>
+    <column>
+      <name>supplier_code</name>
+      <dataType>VARCHAR2 (30)</dataType>
+      <dataExpression>TO_CHAR (id - MOD (id, 5000),'FMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')</dataExpression>
+    </column>
+    <column>
+      <name>product_code</name>
+      <dataType>VARCHAR2 (30)</dataType>
+      <dataExpression>TO_CHAR (MOD (id, 100000), 'FMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')</dataExpression>
+    </column>
+    <column>
+      <name>product_descr</name>
+      <dataType>VARCHAR2 (255)</dataType>
+      <dataExpression>DBMS_RANDOM.string ('x', ROUND (DBMS_RANDOM.VALUE (1, 100)))</dataExpression>
+    </column>
+    <column>
+      <name>product_long_descr</name>
+      <dataType>VARCHAR2 (4000)</dataType>
+      <dataExpression>DBMS_RANDOM.string ('x', ROUND (DBMS_RANDOM.VALUE (1, 200)))</dataExpression>
+    </column>
+    <column>
+      <name>product_cost_price</name>
+      <dataType>NUMBER</dataType>
+      <dataExpression>ROUND (DBMS_RANDOM.VALUE (0, 100000), 2)</dataExpression>
+    </column>
+    <column>
+      <name>sell_from_date</name>
+      <dataType>DATE</dataType>
+      <dataExpression>TRUNC (SYSDATE + DBMS_RANDOM.VALUE (-365, 365))</dataExpression>
+    </column>
+    <column>
+      <name>sell_price</name>
+      <dataType>NUMBER</dataType>
+      <dataExpression>ROUND (DBMS_RANDOM.VALUE (0, 200000), 2)</dataExpression>
+    </column>
+    <column>
+      <name>create_user</name>
+      <dataType>VARCHAR2 (30)</dataType>
+      <dataExpression>DBMS_RANDOM.string ('U', 30)</dataExpression>
+    </column>
+    <column>
+      <name>create_time</name>
+      <dataType>TIMESTAMP</dataType>
+      <dataExpression>TO_TIMESTAMP (TO_CHAR (SYSDATE + DBMS_RANDOM.VALUE (-730, 0),'YYYYMMDDHH24MISS') || '.' || TRUNC (TO_CHAR (DBMS_RANDOM.VALUE * 999999999)), 'YYYYMMDDHH24MISSXFF')</dataExpression>
+    </column>
+    <column>
+      <name>last_update_user</name>
+      <dataType>VARCHAR2 (30)</dataType>
+      <dataExpression>DBMS_RANDOM.string ('U', 30)</dataExpression>
+    </column>
+    <column>
+      <name>last_update_time</name>
+      <dataType>TIMESTAMP</dataType>
+      <dataExpression>TO_TIMESTAMP (TO_CHAR (SYSDATE + DBMS_RANDOM.VALUE (-730, 0),'YYYYMMDDHH24MISS') || '.' || TRUNC (TO_CHAR (DBMS_RANDOM.VALUE * 999999999)), 'YYYYMMDDHH24MISSXFF')</dataExpression>
+    </column>
+  </columns>
+  <primaryKeyColumns>
+    <primaryKeyColumn>product_id</primaryKeyColumn>
+  </primaryKeyColumns>
+  <uniqueKeyColumns>
+    <uniqueKeyColumn>supplier_code</uniqueKeyColumn>
+    <uniqueKeyColumn>product_code</uniqueKeyColumn>
+  </uniqueKeyColumns>
+  <partitionClause>
+    PARTITION BY RANGE(sell_from_date)
+    SUBPARTITION BY HASH(supplier_code)
+    SUBPARTITIONS 2
+    (
+      PARTITION tst_product_part_1 values less than (to_date(''' || to_char(add_months(sysdate,-9),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_2 values less than (to_date(''' || to_char(add_months(sysdate,-6),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_3 values less than (to_date(''' || to_char(add_months(sysdate,-3),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_4 values less than (to_date(''' || to_char(sysdate,'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_5 values less than (to_date(''' || to_char(add_months(sysdate,3),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_6 values less than (to_date(''' || to_char(add_months(sysdate,6),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_7 values less than (to_date(''' || to_char(add_months(sysdate,9),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
+      PARTITION tst_product_part_max values less than (MAXVALUE)
+    )
+  </partitionClause>
+</table>

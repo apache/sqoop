@@ -317,6 +317,8 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
     try {
       ExportTool exporter = new ExportTool();
       Configuration conf = getConf();
+      //Need to disable OraOop for existing tests
+      conf.set("oraoop.disabled", "true");
       SqoopOptions opts = getSqoopOptions(conf);
       Sqoop sqoop = new Sqoop(exporter, conf, opts);
       ret = Sqoop.runSqoop(sqoop, argv);

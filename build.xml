@@ -827,6 +827,11 @@
     <mkdir dir="${cobertura.class.dir}" />
     <copy file="${test.dir}/fi-site.xml"
             todir="${test.build.extraconf}" />
+    <copy file="${basedir}/conf/oraoop-site-template.xml"
+            todir="${test.build.extraconf}" />
+    <copy todir="${test.build.extraconf}/oraoop">
+      <fileset dir="${test.dir}/oraoop"/>
+    </copy>
     <junit
       printsummary="yes" showoutput="${test.output}"
       haltonfailure="no" fork="yes" maxmemory="512m"

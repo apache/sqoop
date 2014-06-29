@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+
+<!-- Put OraOop-specific properties in this file. -->
+
+<configuration>
+
+  <property>
+    <name>oraoop.oracle.session.initialization.statements</name>
+    <value>alter session disable parallel query;
+           alter session set "_serial_direct_read"=true;
+           alter session set tracefile_identifier=oraoop;
+           --alter session set events '10046 trace name context forever, level 8';
+    </value>
+    <description>A semicolon-delimited list of Oracle statements that are executed, in order, to initialize each Oracle session.
+                 Use {[property_name]|[default_value]} characters to refer to a Sqoop/Hadoop configuration property.
+                 If the property does not exist, the specified default value will be used.
+                 E.g. {oracle.sessionTimeZone|GMT} will equate to the value of the property named "oracle.sessionTimeZone" or
+                 to "GMT" if this property has not been set.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.map.tasks.speculative.execution</name>
+    <value>false</value>
+    <description>Speculative execution is disabled to prevent redundant load on the Oracle database.
+    </description>
+  </property>
+
+  <property>
+    <name>oraoop.import.hint</name>
+    <value>NO_INDEX(t)</value>
+    <description>Hint to add to the SELECT statement for an IMPORT job.
+                 The table will have an alias of t which can be used in the hint.
+                 By default the NO_INDEX hint is applied to stop the use of an index.
+                 To override this in oraoop-site.xml set the value to a blank string.
+    </description>
+  </property>
+
+<!--
+  <property>
+    <name>oraoop.block.allocation</name>
+    <value>ROUNDROBIN</value>
+    <description>Supported values are: ROUNDROBIN or SEQUENTIAL or RANDOM.
+                 Refer to the OraOop documentation for more details.
+    </description>
+  </property>
+-->
+
+<!--
+  <property>
+    <name>oraoop.import.omit.lobs.and.long</name>
+    <value>false</value>
+    <description>If true, OraOop will omit BLOB, CLOB, NCLOB and LONG columns during an Import.
+    </description>
+  </property>
+-->
+
+<!--
+  <property>
+    <name>oraoop.table.import.where.clause.location</name>
+    <value>SUBSPLIT</value>
+    <description>Supported values are: SUBSPLIT or SPLIT.
+                 Refer to the OraOop documentation for more details.
+    </description>
+  </property>
+-->
+
+<!--
+  <property>
+    <name>oraoop.oracle.append.values.hint.usage</name>
+    <value>AUTO</value>
+    <description>Supported values are: AUTO or ON or OFF.
+                 ON:
+                     OraOop will use the APPEND_VALUES Oracle hint during a Sqoop export, when inserting
+                     data into an Oracle table.
+                 OFF:
+                     OraOop will not use the APPEND_VALUES Oracle hint during a Sqoop export.
+                 AUTO:
+                     For OraOop 1.1, the AUTO setting will not use the APPEND_VALUES hint.
+    </description>
+  </property>
+-->
+
+</configuration>

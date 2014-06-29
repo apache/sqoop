@@ -1,0 +1,45 @@
+CREATE OR REPLACE
+PACKAGE         "PKG_ODG_$TABLE_NAME"
+AS
+
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+   TYPE typ_oraoop_datagen IS RECORD
+   (
+      $COLUMN_LIST
+   );
+
+   TYPE typ_oraoop_datagen_tab IS TABLE OF typ_oraoop_datagen;
+
+   TYPE typ_parameters IS RECORD
+   (
+      start_range   NUMBER,
+      end_range     NUMBER
+   );
+
+   TYPE typ_rc_parameters IS REF CURSOR
+      RETURN typ_parameters;
+
+   FUNCTION fnc_gen_data (i_parameters typ_rc_parameters)
+      RETURN typ_oraoop_datagen_tab
+      PIPELINED
+      PARALLEL_ENABLE(PARTITION i_parameters BY ANY);
+
+   PROCEDURE prc_load_table (i_degree NUMBER, i_rows_per_slave NUMBER);
+END;

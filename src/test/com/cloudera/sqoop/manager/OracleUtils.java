@@ -46,6 +46,16 @@ public final class OracleUtils {
   public static final String ORACLE_SECONDARY_USER_NAME = "SQOOPTEST2";
   public static final String ORACLE_SECONDARY_USER_PASS = "ABCDEF";
 
+  public static final String ORACLE_INVALID_USER_NAME = "invalidusr";
+  public static final String SYSTEMTEST_TABLE_NAME = "oraoop_test";
+  public static final int SYSTEMTEST_NUM_ROWS = 100;
+  public static final int INTEGRATIONTEST_NUM_ROWS = 10000;
+  // Number of mappers if wanting to override default setting
+  public static final int NUM_MAPPERS = 0;
+  // Oracle degree of parallelism to use when creating table.
+  // If 0 we will calculate a recommended value
+  public static final int ORACLE_PARALLEL_DEGREE = 0;
+
   private OracleUtils() { }
 
   public static void setOracleAuth(SqoopOptions options) {

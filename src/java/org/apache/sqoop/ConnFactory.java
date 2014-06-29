@@ -43,6 +43,7 @@ import com.cloudera.sqoop.metastore.JobData;
 
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.manager.GenericJdbcManager;
+import org.apache.sqoop.manager.oracle.OraOopManagerFactory;
 
 /**
  * Factory class to create the ConnManager type required
@@ -70,8 +71,12 @@ public class ConnFactory {
 
   // The default value for sqoop.connection.factories is the
   // name of the DefaultManagerFactory.
+  public static final String[] DEFAULT_FACTORY_CLASS_NAMES_ARR =
+      {OraOopManagerFactory.class.getName(),
+      DefaultManagerFactory.class.getName(), };
+
   public static final String DEFAULT_FACTORY_CLASS_NAMES =
-      DefaultManagerFactory.class.getName();
+      StringUtils.arrayToString(DEFAULT_FACTORY_CLASS_NAMES_ARR);
 
   /** The list of ManagerFactory instances consulted by getManager().
    */
@@ -84,7 +89,8 @@ public class ConnFactory {
   private void instantiateFactories(Configuration conf) {
     loadManagersFromConfDir(conf);
     String [] classNameArray =
-        conf.getStrings(FACTORY_CLASS_NAMES_KEY, DEFAULT_FACTORY_CLASS_NAMES);
+        conf.getStrings(FACTORY_CLASS_NAMES_KEY,
+            DEFAULT_FACTORY_CLASS_NAMES_ARR);
 
     for (String className : classNameArray) {
       try {
