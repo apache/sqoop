@@ -45,6 +45,8 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.InjectableManagerFactory;
 import com.cloudera.sqoop.testutil.InjectableConnManager;
 import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.ClassLoaderStack;
 
 /**
  * Test aspects of the DataDrivenImportJob class' failure reporting.
@@ -55,7 +57,6 @@ import com.cloudera.sqoop.tool.ImportTool;
  * SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError".
  */
 public class TestImportJob extends ImportJobTestCase {
-
   public void testFailedImportDueToIOException() throws IOException {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -246,21 +247,26 @@ public class TestImportJob extends ImportJobTestCase {
 
   // helper method to get contents of a given dir containing sequence files
   private String[] getContent(Configuration conf, Path path) throws Exception {
+    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+        new Path(new Path(new SqoopOptions().getJarOutputDir()), getTableName() + ".jar").toString(),
+        getTableName());
+
     FileSystem fs = FileSystem.getLocal(conf);
     FileStatus[] stats = fs.listStatus(path);
-    String [] fileNames = new String[stats.length];
+    Path[] paths = new Path[stats.length];
     for (int i = 0; i < stats.length; i++) {
-      fileNames[i] = stats[i].getPath().toString();
+      paths[i] = stats[i].getPath();
     }
 
     // Read all the files adding the value lines to the list.
     List<String> strings = new ArrayList<String>();
-    for (String fileName : fileNames) {
-      if (fileName.startsWith("_") || fileName.startsWith(".")) {
+    for (Path filePath : paths) {
+      if (filePath.getName().startsWith("_") || filePath.getName().startsWith(".")) {
         continue;
       }
 
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+      // Need to use new configuration object so that it has the proper classloaders.
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, filePath, new Configuration());
       WritableComparable key = (WritableComparable)
           reader.getKeyClass().newInstance();
       Writable value = (Writable) reader.getValueClass().newInstance();
@@ -268,6 +274,8 @@ public class TestImportJob extends ImportJobTestCase {
         strings.add(value.toString());
       }
     }
+
+    ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
     return strings.toArray(new String[0]);
   }
 
@@ -300,7 +308,7 @@ public class TestImportJob extends ImportJobTestCase {
       assertTrue("Expecting two files in the directory.",
           fs.listStatus(outputPath).length == 2);
       String[] output = getContent(conf, outputPath);
-      assertEquals("Expected output and actual output should be same.", "meep",
+      assertEquals("Expected output and actual output should be same.", "meep\n",
           output[0]);
 
       ret = Sqoop.runSqoop(importer, argv);
@@ -311,12 +319,11 @@ public class TestImportJob extends ImportJobTestCase {
       assertTrue("Expecting two files in the directory.",
           fs.listStatus(outputPath).length == 2);
       output = getContent(conf, outputPath);
-      assertEquals("Expected output and actual output should be same.", "meep",
+      assertEquals("Expected output and actual output should be same.", "meep\n",
           output[0]);
     } catch (Exception e) {
       // In debug mode, ImportException is wrapped in RuntimeException.
       LOG.info("Got exceptional return (expected: ok). msg is: " + e);
     }
   }
-
 }
