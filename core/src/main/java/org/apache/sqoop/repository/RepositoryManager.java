@@ -72,7 +72,7 @@ public class RepositoryManager implements Reconfigurable {
   private RepositoryProvider provider;
 
   public synchronized void initialize() {
-    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(RepoConfigurationConstants.SYSCFG_REPO_SCHEMA_IMMUTABLE, false));
+    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(RepoConfigurationConstants.SYSCFG_REPO_SCHEMA_IMMUTABLE, true));
   }
 
   public synchronized void initialize(boolean immutableRepository) {
