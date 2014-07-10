@@ -137,10 +137,6 @@ public class Sqoop extends Configured implements Tool {
       LOG.debug(e.getMessage(), e);
       // Print exception message.
       System.err.println(e.getMessage());
-      // Print the tool usage message and exit.
-      ToolOptions toolOpts = new ToolOptions();
-      tool.configureOptions(toolOpts);
-      tool.printHelp(toolOpts);
       return 1; // Exit on exception here.
     }
 
