@@ -27,6 +27,9 @@ include::common-args.txt[]
 Export control options
 ~~~~~~~~~~~~~~~~~~~~~~
 
+--columns (col-names)::
+  Columns to export to table
+
 --direct::
   Use direct import fast path (MySQL)
 

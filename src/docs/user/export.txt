@@ -48,6 +48,7 @@ include::validation-args.txt[]
 `----------------------------------------`------------------------------
 Argument                                 Description
 ------------------------------------------------------------------------
++\--columns <col,col,col...>+            Columns to export to table
 +\--direct+                              Use direct export fast path
 +\--export-dir <dir>+                    HDFS source path for the export
 +-m,\--num-mappers <n>+                  Use 'n' map tasks to export in\
@@ -77,9 +78,18 @@ Argument                                 Description
 ------------------------------------------------------------------------
 
 The +\--export-dir+ argument and one of +\--table+ or +\--call+ are
- required. These specify the table to populate in the database (or the
- stored procedure to call), and the directory in HDFS that contains
- the source data.
+required. These specify the table to populate in the database (or the
+stored procedure to call), and the directory in HDFS that contains
+the source data.
+
+By default, all columns within a table are selected for export. You
+can select a subset of columns and control their ordering by using the
++\--columns+ argument. This should include a comma-delimited list
+of columns to export. For example: +\--columns "col1,col2,col3"+. Note
+that columns that are not included in the +--columns+ parameter need
+to have either defined default value or allow +NULL+ values. Otherwise
+your database will reject the imported data which in turn will make 
+Sqoop job fail.
 
 You can control the number of mappers independently from the number of
 files present in the directory. Export performance depends on the
@@ -266,6 +276,11 @@ Sqoop attempts to insert rows which violate constraints in the database
 (for example, a particular primary key value already exists), then the export
 fails.
 
+Alternatively, you can specify the columns to be exported by providing
++--columns "col1,col2,col3"+. Please note that columns that are not included
+in the +--columns+ parameter need to have either defined default value or 
+allow +NULL+ values. Otherwise your database will reject the imported data 
+which in turn will make Sqoop job fail.
 
 Another basic export to populate a table named +bar+ with validation enabled:
 <<validation,More Details>>
@@ -282,4 +297,3 @@ An export that calls a stored procedure named +barproc+ for every record in
 $ sqoop export --connect jdbc:mysql://db.example.com/foo --call barproc \
     --export-dir /results/bar_data
 ----
-
