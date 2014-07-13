@@ -45,6 +45,7 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.InjectableManagerFactory;
 import com.cloudera.sqoop.testutil.InjectableConnManager;
 import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ClassLoaderStack;
 
@@ -320,6 +321,51 @@ public class TestImportJob extends ImportJobTestCase {
           fs.listStatus(outputPath).length == 2);
       output = getContent(conf, outputPath);
       assertEquals("Expected output and actual output should be same.", "meep\n",
+          output[0]);
+    } catch (Exception e) {
+      // In debug mode, ImportException is wrapped in RuntimeException.
+      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+    }
+  }
+
+  public void testManyColumns() throws Exception {
+    int numberOfColumns = 7500;
+
+    // Create a bunch of columns
+    String[] colNames = new String[numberOfColumns];
+    String[] colTypes = new String[numberOfColumns];
+    String[] colVals = new String[numberOfColumns];
+    List<String> testColVals = new ArrayList<String>(numberOfColumns);
+    for (int i = 0; i < numberOfColumns; ++i) {
+      colNames[i] = BASE_COL_NAME + Integer.toString(i);
+      colTypes[i] = "VARCHAR(32)";
+      colVals[i] = "'meep'";
+      testColVals.add("meep");
+    }
+    createTableWithColTypesAndNames(colNames, colTypes, colVals);
+
+    Configuration conf = new Configuration();
+
+    // Make sure the output dir does not exist
+    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.delete(outputPath, true);
+    assertTrue(!fs.exists(outputPath));
+
+    String[] argv = getArgv(true, colNames, conf);
+
+    Sqoop importer = new Sqoop(new ImportTool());
+    try {
+      int ret = Sqoop.runSqoop(importer, argv);
+      assertTrue("Expected job to go through if target directory"
+          + " does not exist.", 0 == ret);
+      assertTrue(fs.exists(outputPath));
+      // expecting one _SUCCESS file and one file containing data
+      assertTrue("Expecting two files in the directory.",
+          fs.listStatus(outputPath).length == 2);
+      String[] output = getContent(conf, outputPath);
+      assertEquals("Expected output and actual output should be same.",
+          StringUtils.join(",", testColVals) + "\n",
           output[0]);
     } catch (Exception e) {
       // In debug mode, ImportException is wrapped in RuntimeException.
