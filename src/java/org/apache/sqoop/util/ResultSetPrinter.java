@@ -73,11 +73,11 @@ public class ResultSetPrinter {
       ResultSetMetaData metadata = results.getMetaData();
       sbNames.append(LEFT_BORDER);
       for (int i = 1; i < cols + 1; i++) {
-        String colName = metadata.getColumnName(i);
+        String colName = metadata.getColumnLabel(i);
         colWidths[i - 1] = Math.min(metadata.getColumnDisplaySize(i),
             MAX_COL_WIDTH);
         if (colName == null || colName.equals("")) {
-          colName = metadata.getColumnLabel(i) + "*";
+          colName = metadata.getColumnName(i) + "*";
         }
         printPadded(sbNames, colName, colWidths[i - 1]);
         sbNames.append(COL_SEPARATOR);

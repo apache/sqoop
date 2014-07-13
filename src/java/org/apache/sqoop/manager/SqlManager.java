@@ -142,9 +142,9 @@ public abstract class SqlManager
       ArrayList<String> columns = new ArrayList<String>();
       ResultSetMetaData metadata = results.getMetaData();
       for (int i = 1; i < cols + 1; i++) {
-        String colName = metadata.getColumnName(i);
+        String colName = metadata.getColumnLabel(i);
         if (colName == null || colName.equals("")) {
-          colName = metadata.getColumnLabel(i);
+          colName = metadata.getColumnName(i);
           if (null == colName) {
             colName = "_RESULT_" + i;
           }
@@ -261,9 +261,9 @@ public abstract class SqlManager
             typeId = Types.BIGINT;
         }
 
-        String colName = metadata.getColumnName(i);
+        String colName = metadata.getColumnLabel(i);
         if (colName == null || colName.equals("")) {
-          colName = metadata.getColumnLabel(i);
+          colName = metadata.getColumnName(i);
         }
 
         colTypes.put(colName, Integer.valueOf(typeId));
@@ -319,9 +319,9 @@ public abstract class SqlManager
       for (int i = 1; i < cols + 1; i++) {
         String colTypeName = metadata.getColumnTypeName(i);
 
-        String colName = metadata.getColumnName(i);
+        String colName = metadata.getColumnLabel(i);
         if (colName == null || colName.equals("")) {
-          colName = metadata.getColumnLabel(i);
+          colName = metadata.getColumnName(i);
         }
 
         colTypeNames.put(colName, colTypeName);
