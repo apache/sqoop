@@ -238,7 +238,11 @@ public class CompilationManager {
       try {
           FileUtils.moveFile(fOrig, fDest);
       } catch (IOException e) {
-          LOG.debug("Could not rename " + orig + " to " + dest, e);
+    	  /*Removed the exception being thrown
+    	   *even if the .java file can not be renamed
+    	   *or can not be moved a "dest" directory for
+    	   *any reason.*/
+          LOG.debug("Could not rename " + orig + " to " + dest); 
       }
     }
   }
