@@ -292,7 +292,7 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       applyInputFormatOptions(in, out);
       applyOutputFormatOptions(in, out);
       applyCodeGenOptions(in, out, false);
-      applyHCatOptions(in, out);
+      applyHCatalogOptions(in, out);
     } catch (NumberFormatException nfe) {
       throw new InvalidOptionsException("Error: expected numeric argument.\n"
           + "Try --help for usage.");

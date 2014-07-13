@@ -189,7 +189,7 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     applyInputFormatOptions(in, out);
     applyCodeGenOptions(in, out, false);
     applyHiveOptions(in, out);
-    applyHCatOptions(in, out);
+    applyHCatalogOptions(in, out);
   }
 
   @Override

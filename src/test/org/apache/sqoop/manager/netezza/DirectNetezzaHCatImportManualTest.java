@@ -25,7 +25,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hcatalog.data.schema.HCatFieldSchema;
+import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
 import org.apache.sqoop.hcat.HCatalogImportTest;
 import org.apache.sqoop.hcat.HCatalogTestUtils;
 import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
@@ -93,17 +93,17 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-        "boolean", Types.BOOLEAN, HCatFieldSchema.Type.BOOLEAN,
+        "boolean", Types.BOOLEAN, HCatFieldSchema.Type.BOOLEAN, 0, 0,
         Boolean.TRUE, Boolean.TRUE, KeyType.NOT_A_KEY),
       // Netezza does not have tinyint
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
-        "smallint", Types.INTEGER, HCatFieldSchema.Type.INT, 100,
+        "smallint", Types.INTEGER, HCatFieldSchema.Type.INT, 0, 0, 100,
         100, KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(2),
-        "int", Types.INTEGER, HCatFieldSchema.Type.INT, 1000,
+        "int", Types.INTEGER, HCatFieldSchema.Type.INT, 0, 0, 1000,
         1000, KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(3),
-        "bigint", Types.BIGINT, HCatFieldSchema.Type.BIGINT, 10000L,
+        "bigint", Types.BIGINT, HCatFieldSchema.Type.BIGINT, 0, 0, 10000L,
         10000L, KeyType.NOT_A_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
@@ -116,10 +116,10 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-        "char(14)", Types.CHAR, HCatFieldSchema.Type.STRING, "string to test",
-        "string to test", KeyType.NOT_A_KEY),
+        "char(14)", Types.CHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        "string to test", "string to test", KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
-        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING,
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
         "string to test", "string to test", KeyType.NOT_A_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
@@ -132,11 +132,11 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-        "numeric(18,2)", Types.NUMERIC, HCatFieldSchema.Type.STRING, "1000.00",
-        new BigDecimal("1000"), KeyType.NOT_A_KEY),
+        "numeric(18,2)", Types.NUMERIC, HCatFieldSchema.Type.STRING, 0, 0,
+        "1000.00", new BigDecimal("1000"), KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
-        "decimal(18,2)", Types.DECIMAL, HCatFieldSchema.Type.STRING, "2000.00",
-        new BigDecimal("2000"), KeyType.NOT_A_KEY),
+        "decimal(18,2)", Types.DECIMAL, HCatFieldSchema.Type.STRING, 0, 0,
+        "2000.00", new BigDecimal("2000"), KeyType.NOT_A_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
     setExtraArgs(addlArgsArray);

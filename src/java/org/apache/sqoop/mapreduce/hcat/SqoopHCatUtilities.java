@@ -40,6 +40,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.shims.HadoopShims;
+import org.apache.hadoop.hive.shims.HadoopShims.HCatHadoopShims;
+import org.apache.hadoop.hive.shims.ShimLoader;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.IntWritable;
@@ -52,13 +55,13 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.hcatalog.common.HCatConstants;
-import org.apache.hcatalog.data.DefaultHCatRecord;
-import org.apache.hcatalog.data.schema.HCatFieldSchema;
-import org.apache.hcatalog.data.schema.HCatSchema;
-import org.apache.hcatalog.mapreduce.HCatInputFormat;
-import org.apache.hcatalog.mapreduce.HCatOutputFormat;
-import org.apache.hcatalog.mapreduce.OutputJobInfo;
+import org.apache.hive.hcatalog.common.HCatConstants;
+import org.apache.hive.hcatalog.data.DefaultHCatRecord;
+import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
+import org.apache.hive.hcatalog.data.schema.HCatSchema;
+import org.apache.hive.hcatalog.mapreduce.HCatInputFormat;
+import org.apache.hive.hcatalog.mapreduce.HCatOutputFormat;
+import org.apache.hive.hcatalog.mapreduce.OutputJobInfo;
 import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.ConnManager;
@@ -89,7 +92,7 @@ public final class SqoopHCatUtilities {
   public static final String HCAT_DB_OUTPUT_COLTYPES_SQL =
     "sqoop.hcat.db.output.coltypes.sql";
   public static final String HCAT_CLI_MAIN_CLASS =
-    "org.apache.hcatalog.cli.HCatCli";
+    "org.apache.hive.hcatalog.cli.HCatCli";
   public static final String HCAT_DEF_STORAGE_STANZA = "stored as rcfile";
   public static final String HIVE_DELIMITERS_TO_REPLACE_PROP =
     "sqoop.hive.delims.to.replace";
@@ -106,6 +109,9 @@ public final class SqoopHCatUtilities {
   public static final String DEBUG_HCAT_EXPORT_MAPPER_PROP =
     "sqoop.hcat.debug.export.mapper";
   private static final String HCATCMD = Shell.WINDOWS ? "hcat.py" : "hcat";
+  private static final int MAX_HIVE_CHAR_PREC = 65535;
+  private static final int MAX_HIVE_DECIMAL_PREC = 65;
+  private static final int MAX_HIVE_DECIMAL_SCALE = 30;
   private SqoopOptions options;
   private ConnManager connManager;
   private String hCatTableName;
@@ -118,14 +124,13 @@ public final class SqoopHCatUtilities {
   private boolean configured;
 
   private String hCatQualifiedTableName;
-  private String hCatStaticPartitionKey;
+  private List<String> hCatStaticPartitionKeys;
+  private List<String> hCatStaticPartitionValues;
   private List<String> hCatDynamicPartitionKeys;
   // DB stuff
   private String[] dbColumnNames;
   private String dbTableName;
-  private LCKeyMap<Integer> dbColumnTypes;
-
-  private Map<String, Integer> externalColTypes;
+  private LCKeyMap<List<Integer>> dbColumnInfo;
 
   private int[] hCatFieldPositions; // For each DB column, HCat position
 
@@ -222,14 +227,7 @@ public final class SqoopHCatUtilities {
     return configured;
   }
 
-  public void configureHCat(final SqoopOptions opts, final Job job,
-    final ConnManager connMgr, final String dbTable,
-    final Configuration config) throws IOException {
-    if (configured) {
-      LOG.info("Ignoring configuration request for HCatalog info");
-      return;
-    }
-    options = opts;
+  private void checkHomeDirs(SqoopOptions opts) {
 
     LOG.info("Configuring HCatalog specific details for job");
 
@@ -238,7 +236,7 @@ public final class SqoopHCatUtilities {
     if (home == null || home.length() == 0) {
       LOG.warn("Hive home is not set. job may fail if needed jar files "
         + "are not found correctly.  Please set HIVE_HOME in"
-        + " sqoop-env.sh or provide --hive-home option.  Setting HIVE_HOME "
+        + " sqoop-env.sh or provide --hive-home option.  HIVE_HOME defaulted "
         + " to " + SqoopOptions.getHiveHomeDefault());
     }
 
@@ -247,8 +245,19 @@ public final class SqoopHCatUtilities {
       LOG.warn("HCatalog home is not set. job may fail if needed jar "
         + "files are not found correctly.  Please set HCAT_HOME in"
         + " sqoop-env.sh or provide --hcatalog-home option.  "
-        + " Setting HCAT_HOME to " + SqoopOptions.getHCatHomeDefault());
+        + "HCAT_HOME defaulted to " + SqoopOptions.getHCatHomeDefault());
     }
+  }
+
+  public void configureHCat(final SqoopOptions opts, final Job job,
+    final ConnManager connMgr, final String dbTable,
+    final Configuration config) throws IOException {
+    if (configured) {
+      LOG.info("Ignoring configuration request for HCatalog info");
+      return;
+    }
+    options = opts;
+    checkHomeDirs(opts);
     connManager = connMgr;
     dbTableName = dbTable;
     configuration = config;
@@ -275,8 +284,24 @@ public final class SqoopHCatUtilities {
     if (principalID != null) {
       configuration.set(HCatConstants.HCAT_METASTORE_PRINCIPAL, principalID);
     }
-    hCatStaticPartitionKey = options.getHivePartitionKey();
+    hCatStaticPartitionKeys = new ArrayList<String>();
+    hCatStaticPartitionValues = new ArrayList<String>();
+    String partKeysString = options.getHCatalogPartitionKeys();
+    String partKeysVals = options.getHCatalogPartitionValues();
+    if (partKeysString != null) {
+      String[] keys = partKeysString.split(",");
+      hCatStaticPartitionKeys.addAll(Arrays.asList(keys));
+      String[] vals = partKeysVals.split(",");
+      hCatStaticPartitionValues.addAll(Arrays.asList(vals));
+    } else {
+      partKeysString = options.getHivePartitionKey();
+      if (partKeysString != null) {
+        hCatStaticPartitionKeys.add(partKeysString);
+      }
+      partKeysVals = options.getHivePartitionValue();
+      hCatStaticPartitionValues.add(partKeysVals);
 
+    }
     Properties userMapping = options.getMapColumnHive();
     userHiveMapping = new LCKeyMap<String>();
     for (Object o : userMapping.keySet()) {
@@ -286,7 +311,7 @@ public final class SqoopHCatUtilities {
     // Get the partition key filter if needed
     Map<String, String> filterMap = getHCatSPFilterMap();
     String filterStr = getHCatSPFilterStr();
-    initDBColumnNamesAndTypes();
+    initDBColumnInfo();
     if (options.doCreateHCatalogTable()) {
       LOG.info("Creating HCatalog table " + hCatQualifiedTableName
         + " for import");
@@ -345,8 +370,8 @@ public final class SqoopHCatUtilities {
         throw new IOException("Database column " + col + " not found in "
           + " hcatalog table.");
       }
-      if (hCatStaticPartitionKey != null
-        && hCatStaticPartitionKey.equals(col)) {
+      if (hCatStaticPartitionKeys != null
+        && hCatStaticPartitionKeys.equals(col)) {
         continue;
       }
       outputFieldList.add(hCatFullTableSchema.get(col));
@@ -415,17 +440,10 @@ public final class SqoopHCatUtilities {
   /**
    * Get the column names to import.
    */
-  private void initDBColumnNamesAndTypes() throws IOException {
+  private void initDBColumnInfo() throws IOException {
     String[] colNames = options.getColumns();
     if (null == colNames) {
-      if (null != externalColTypes) {
-        // Test-injection column mapping. Extract the col names from
-        ArrayList<String> keyList = new ArrayList<String>();
-        for (String key : externalColTypes.keySet()) {
-          keyList.add(key);
-        }
-        colNames = keyList.toArray(new String[keyList.size()]);
-      } else if (null != dbTableName) {
+      if (null != dbTableName) {
         colNames = connManager.getColumnNames(dbTableName);
       } else if (options.getCall() != null) {
         // Read procedure arguments from metadata
@@ -442,56 +460,97 @@ public final class SqoopHCatUtilities {
       dbColumnNames[i] = colNames[i].toLowerCase();
     }
 
-    LCKeyMap<Integer> colTypes = new LCKeyMap<Integer>();
-    if (externalColTypes != null) { // Use pre-defined column types.
-      colTypes.putAll(externalColTypes);
-    } else { // Get these from the database.
-      if (dbTableName != null) {
-        colTypes.putAll(connManager.getColumnTypes(dbTableName));
-      } else if (options.getCall() != null) {
+    LCKeyMap<List<Integer>> colInfo = new LCKeyMap<List<Integer>>();
+    if (dbTableName != null) {
+        colInfo.putAll(connManager.getColumnInfo(dbTableName));
+    } else if (options.getCall() != null) {
         // Read procedure arguments from metadata
-        colTypes.putAll(connManager.getColumnTypesForProcedure(this.options
+        colInfo.putAll(connManager.getColumnInfoForProcedure(this.options
           .getCall()));
-      } else {
-        colTypes.putAll(connManager.getColumnTypesForQuery(options
+    } else {
+        colInfo.putAll(connManager.getColumnInfoForQuery(options
           .getSqlQuery()));
-      }
     }
 
     if (options.getColumns() == null) {
-      dbColumnTypes = colTypes;
+      dbColumnInfo = colInfo;
     } else {
-      dbColumnTypes = new LCKeyMap<Integer>();
+      dbColumnInfo = new LCKeyMap<List<Integer>>();
       // prune column types based on projection
       for (String col : dbColumnNames) {
-        Integer type = colTypes.get(col);
-        if (type == null) {
+        List<Integer> info = colInfo.get(col);
+        if (info == null) {
           throw new IOException("Projected column " + col
             + " not in list of columns from database");
         }
-        dbColumnTypes.put(col, type);
+        dbColumnInfo.put(col, info);
       }
     }
     LOG.info("Database column names projected : "
       + Arrays.toString(dbColumnNames));
-    LOG.info("Database column name - type map :\n\tNames: "
-      + Arrays.toString(dbColumnTypes.keySet().toArray()) + "\n\tTypes : "
-      + Arrays.toString(dbColumnTypes.values().toArray()));
+    StringBuilder sb = new StringBuilder(1024);
+    for (String col : dbColumnInfo.keySet()) {
+      sb.append('\t').append(col).append(" : [");
+      List<Integer> info = dbColumnInfo.get(col);
+      sb.append("Type : ").append(info.get(0)).append(',');
+      sb.append("Precision : ").append(info.get(1)).append(',');
+      sb.append("Scale : ").append(info.get(2)).append(']');
+      sb.append('\n');
+    }
+    LOG.info("Database column name - info map :\n" + sb.toString());
+  }
+
+  public static StringBuilder escHCatObj(String objectName) {
+    StringBuilder sb = new StringBuilder(64);
+    sb.append('`').append(objectName).append('`');
+    return sb;
   }
 
   private void createHCatTable() throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append("create table ").
-      append(hCatDatabaseName).append('.');
-    sb.append(hCatTableName).append(" (\n\t");
+      append(escHCatObj(hCatDatabaseName)).append('.');
+    sb.append(escHCatObj(hCatTableName)).append(" (\n\t");
     boolean first = true;
     for (String col : dbColumnNames) {
       String type = userHiveMapping.get(col);
+      int prec = -1;
+      int scale = -1;
       if (type == null) {
-        type = connManager.toHCatType(dbColumnTypes.get(col));
+        type = connManager.toHCatType(dbColumnInfo.get(col).get(0));
       }
-      if (hCatStaticPartitionKey != null
-        && col.equals(hCatStaticPartitionKey)) {
+      if (type.equals("char") || type.equals("varchar")) {
+        prec = dbColumnInfo.get(col).get(1);
+        if (prec > MAX_HIVE_CHAR_PREC) {
+          LOG.warn("Truncating precison of column " + col + "  from " + prec
+            + " to " + MAX_HIVE_CHAR_PREC);
+          prec = MAX_HIVE_CHAR_PREC;
+        }
+      } else if (type.equals("decimal")) {
+          prec = dbColumnInfo.get(col).get(1);
+          if (prec > MAX_HIVE_DECIMAL_PREC) {
+            LOG.warn("Truncating precison of column " + col + "  from " + prec
+              + " to " + MAX_HIVE_DECIMAL_PREC);
+            prec = MAX_HIVE_DECIMAL_PREC;
+          }
+
+          scale = dbColumnInfo.get(col).get(2);
+          if (scale > MAX_HIVE_DECIMAL_SCALE) {
+            LOG.warn("Truncating precison of column " + col + "  from " + scale
+              + " to " + MAX_HIVE_DECIMAL_SCALE);
+            scale = MAX_HIVE_DECIMAL_SCALE;
+          }
+      }
+      boolean skip=false;
+      if (hCatStaticPartitionKeys != null) {
+        for (String key : hCatStaticPartitionKeys) {
+          if (col.equals(key)) {
+            skip=true;
+            break;
+          }
+        }
+      }
+      if (skip) {
         continue;
       }
       if (first) {
@@ -499,12 +558,28 @@ public final class SqoopHCatUtilities {
       } else {
         sb.append(",\n\t");
       }
-      sb.append(col).append(' ').append(type);
+      sb.append(escHCatObj(col)).append(' ').append(type);
+      if (prec > 0) {
+        sb.append('(').append(prec);
+        if (scale > 0) {
+          sb.append(',').append(scale);
+        }
+        sb.append(')');
+      }
     }
     sb.append(")\n");
-    if (hCatStaticPartitionKey != null) {
+    first = true;
+    if (hCatStaticPartitionKeys != null && hCatStaticPartitionKeys.size() > 0) {
       sb.append("partitioned by (\n\t");
-      sb.append(hCatStaticPartitionKey).append(" string)\n");
+      for (String key : hCatStaticPartitionKeys) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(", ");
+        }
+        sb.append(escHCatObj(key)).append(" string");
+      }
+      sb.append(")\n");
     }
     String storageStanza = options.getHCatStorageStanza();
     if (storageStanza == null) {
@@ -545,11 +620,11 @@ public final class SqoopHCatUtilities {
     for (int indx = 0; indx < dbColumnNames.length; ++indx) {
       boolean userMapped = false;
       String col = dbColumnNames[indx];
-      Integer colType = dbColumnTypes.get(col);
+      List<Integer> colInfo = dbColumnInfo.get(col);
       String hCatColType = userHiveMapping.get(col);
       if (hCatColType == null) {
         LOG.debug("No user defined type mapping for HCatalog field " + col);
-        hCatColType = connManager.toHCatType(colType);
+        hCatColType = connManager.toHCatType(colInfo.get(0));
       } else {
         LOG.debug("Found type mapping for HCatalog filed " + col);
         userMapped = true;
@@ -576,13 +651,14 @@ public final class SqoopHCatUtilities {
         if (!hCatFS.getTypeString().equals(hCatColType)) {
           LOG.warn("The HCatalog field " + col + " has type "
             + hCatFS.getTypeString() + ".  Expected = " + hCatColType
-            + " based on database column type : " + sqlTypeString(colType));
+            + " based on database column type : "
+            + sqlTypeString(colInfo.get(0)));
           LOG.warn("The Sqoop job can fail if types are not "
             + " assignment compatible");
         }
       }
 
-      if (HiveTypes.isHiveTypeImprovised(colType)) {
+      if (HiveTypes.isHiveTypeImprovised(colInfo.get(0))) {
         LOG.warn("Column " + col + " had to be cast to a less precise type "
           + hCatColType + " in hcatalog");
       }
@@ -603,20 +679,33 @@ public final class SqoopHCatUtilities {
   }
 
   private String getHCatSPFilterStr() {
-    if (hCatStaticPartitionKey != null) {
+    if (hCatStaticPartitionKeys != null && hCatStaticPartitionKeys.size() > 0) {
       StringBuilder filter = new StringBuilder();
-      filter.append(options.getHivePartitionKey()).append('=').append('\'')
-        .append(options.getHivePartitionValue()).append('\'');
+      boolean first = true;
+      for (int i = 0; i < hCatStaticPartitionKeys.size(); ++i) {
+        String key = hCatStaticPartitionKeys.get(i);
+        String val = hCatStaticPartitionValues.get(i);
+        if (first) {
+          first = false;
+        } else {
+          filter.append(" AND ");
+        }
+        filter.append(key).append('=').append('\'')
+          .append(val).append('\'');
+      }
       return filter.toString();
     }
     return null;
   }
 
   private Map<String, String> getHCatSPFilterMap() {
-    if (hCatStaticPartitionKey != null) {
+    if (hCatStaticPartitionKeys != null && hCatStaticPartitionKeys.size() > 0) {
       Map<String, String> filter = new HashMap<String, String>();
-      filter
-        .put(options.getHivePartitionKey(), options.getHivePartitionValue());
+      for (int i = 0; i < hCatStaticPartitionKeys.size(); ++i) {
+        String key = hCatStaticPartitionKeys.get(i);
+        String val = hCatStaticPartitionValues.get(i);
+        filter.put(key, val);
+      }
       return filter;
     }
     return null;
@@ -626,27 +715,34 @@ public final class SqoopHCatUtilities {
     // check the static partition key from command line
     List<HCatFieldSchema> partFields = hCatPartitionSchema.getFields();
 
-    if (hCatStaticPartitionKey != null) {
-      boolean found = false;
-      for (HCatFieldSchema hfs : partFields) {
-        if (hfs.getName().equals(hCatStaticPartitionKey)) {
-          found = true;
-          break;
+    if (hCatStaticPartitionKeys != null
+        && hCatStaticPartitionKeys.size() > 0) {
+      for (String key : hCatStaticPartitionKeys) {
+        boolean found = false;
+        for (HCatFieldSchema hfs : partFields) {
+          if (hfs.getName().equals(key)) {
+            found = true;
+            break;
+          }
         }
-      }
-      if (!found) {
-        throw new IOException("The provided hive partition key "
-          + hCatStaticPartitionKey + " is not part of the partition "
+        if (!found) {
+          throw new IOException("The provided hive partition key "
+          + key + " is not part of the partition "
           + " keys for table " + getQualifiedHCatTableName());
+        }
       }
     }
     hCatDynamicPartitionKeys = new ArrayList<String>();
     hCatDynamicPartitionKeys.addAll(hCatPartitionSchema.getFieldNames());
-    if (hCatStaticPartitionKey != null) {
-      hCatDynamicPartitionKeys.remove(hCatStaticPartitionKey);
+    if (hCatStaticPartitionKeys != null
+        && hCatStaticPartitionKeys.size() > 0) {
+      for (String key : hCatStaticPartitionKeys) {
+        hCatDynamicPartitionKeys.remove(key);
+      }
     }
-    configuration.set(HCAT_STATIC_PARTITION_KEY_PROP,
-      hCatStaticPartitionKey == null ? "" : hCatStaticPartitionKey);
+    configuration.setStrings(HCAT_STATIC_PARTITION_KEY_PROP,
+       hCatStaticPartitionKeys.toArray(
+         new String[hCatStaticPartitionKeys.size()]));
   }
 
   public static void configureImportOutputFormat(SqoopOptions opts, Job job,
@@ -700,18 +796,18 @@ public final class SqoopHCatUtilities {
     hCatUtils
       .configureHCat(opts, job, connMgr, dbTable, job.getConfiguration());
     job.setInputFormatClass(getInputFormatClass());
-    Map<String, Integer> dbColTypes = hCatUtils.getDbColumnTypes();
+    Map<String, List<Integer>> dbColInfo = hCatUtils.getDbColumnInfo();
     MapWritable columnTypesJava = new MapWritable();
-    for (Map.Entry<String, Integer> e : dbColTypes.entrySet()) {
+    for (Map.Entry<String, List<Integer>> e : dbColInfo.entrySet()) {
       Text columnName = new Text(e.getKey());
       Text columnText = new Text(connMgr.toJavaType(dbTable, e.getKey(),
-        e.getValue()));
+        e.getValue().get(0)));
       columnTypesJava.put(columnName, columnText);
     }
     MapWritable columnTypesSql = new MapWritable();
-    for (Map.Entry<String, Integer> e : dbColTypes.entrySet()) {
+    for (Map.Entry<String, List<Integer>> e : dbColInfo.entrySet()) {
       Text columnName = new Text(e.getKey());
-      IntWritable sqlType = new IntWritable(e.getValue());
+      IntWritable sqlType = new IntWritable(e.getValue().get(0));
       columnTypesSql.put(columnName, sqlType);
     }
     DefaultStringifier.store(config, columnTypesJava,
@@ -836,6 +932,71 @@ public final class SqoopHCatUtilities {
     }
     return false;
   }
+  /**
+  * Resolve a database-specific type to HCat data type. Largely follows Sqoop's
+  * hive translation.
+  * @param sqlType
+  *          sql type
+  * @return hcat type
+  */
+ public static String toHCatType(int sqlType) {
+   switch (sqlType) {
+
+   // Ideally TINYINT and SMALLINT should be mapped to their
+   // HCat equivalents tinyint and smallint respectively
+   // But the Sqoop Java type conversion has them mapped to Integer
+   // Even though the referenced Java doc clearly recommends otherwise.
+   // Changing this now can cause many of the sequence file usages to
+   // break as value class implementations will change. So, we
+   // just use the same behavior here.
+     case Types.SMALLINT:
+     case Types.TINYINT:
+     case Types.INTEGER:
+       return "int";
+
+     case Types.VARCHAR:
+       return "varchar";
+     case Types.CHAR:
+       return "char";
+     case Types.LONGVARCHAR:
+     case Types.NVARCHAR:
+     case Types.NCHAR:
+     case Types.LONGNVARCHAR:
+     case Types.DATE:
+     case Types.TIME:
+     case Types.TIMESTAMP:
+     case Types.CLOB:
+       return "string";
+
+     case Types.FLOAT:
+     case Types.REAL:
+       return "float";
+
+     case Types.NUMERIC:
+     case Types.DECIMAL:
+       return "decimal";
+
+     case Types.DOUBLE:
+       return "double";
+
+     case Types.BIT:
+     case Types.BOOLEAN:
+       return "boolean";
+
+     case Types.BIGINT:
+       return "bigint";
+
+     case Types.BINARY:
+     case Types.VARBINARY:
+     case Types.BLOB:
+     case Types.LONGVARBINARY:
+       return "binary";
+
+     default:
+       throw new IllegalArgumentException(
+         "Cannot convert SQL type to HCatalog type " + sqlType);
+   }
+ }
 
   public static boolean isLocalJobTracker(Job job) {
     Configuration conf = job.getConfiguration();
@@ -857,51 +1018,10 @@ public final class SqoopHCatUtilities {
       // HCatalog 0.11- do have special class HCatHadoopShims, however this
       // class got merged into Hive Shim layer in 0.12+. Following method will
       // try to find correct implementation via reflection.
-
-      // Final Shim layer
-      Object shimLayer = null;
-      Class shimClass = null;
-
-      // Let's try Hive 0.11-
+      HadoopShims shims = ShimLoader.getHadoopShims();
+      HCatHadoopShims hcatShims = shims.getHCatShim();
       try {
-        shimClass = Class.forName("org.apache.hcatalog.shims.HCatHadoopShims");
-
-        Class shimInstanceClass = Class.forName("org.apache.hcatalog.shims.HCatHadoopShims$Instance");
-        Method getMethod = shimInstanceClass.getMethod("get");
-
-        shimLayer = getMethod.invoke(null);
-      } catch (Exception e) {
-        LOG.debug("Not found HCatalog 0.11- implementation of the Shim layer", e);
-      }
-
-      // For Hive 0.12+
-      if (shimClass == null || shimLayer == null) {
-        try {
-          shimClass = Class.forName("org.apache.hadoop.hive.shims.HadoopShims$HCatHadoopShims");
-
-          Class shimLoader = Class.forName("org.apache.hadoop.hive.shims.ShimLoader");
-          Method getHadoopShims = shimLoader.getMethod("getHadoopShims");
-
-          Object hadoopShims = getHadoopShims.invoke(null);
-
-          Class hadoopShimClass = Class.forName("org.apache.hadoop.hive.shims.HadoopShims");
-          Method getHCatShim = hadoopShimClass.getMethod("getHCatShim");
-
-          shimLayer = getHCatShim.invoke(hadoopShims);
-        } catch (Exception e) {
-          LOG.debug("Not found HCatalog 0.12+ implementation of the Shim layer", e);
-        }
-      }
-
-      if (shimClass == null || shimLayer == null) {
-        throw new IOException("Did not found HCatalog shim layer to commit the job");
-      }
-
-      // Part that is the same for both shim layer implementations
-      try {
-        Method commitJobMethod = shimClass.getMethod("commitJob", OutputFormat.class, Job.class);
-        LOG.info("Explicitly committing job in local mode");
-        commitJobMethod.invoke(shimLayer, new HCatOutputFormat(), job);
+        hcatShims.commitJob(new HCatOutputFormat(), job);
       } catch (Exception e) {
         throw new RuntimeException("Can't explicitly commit job", e);
       }
@@ -1097,14 +1217,6 @@ public final class SqoopHCatUtilities {
     importValueClass = clz;
   }
 
-  /**
-   * Set the column type map to be used. (dependency injection for testing; not
-   * used in production.)
-   */
-  public void setColumnTypes(Map<String, Integer> colTypes) {
-    externalColTypes = colTypes;
-    LOG.debug("Using test-controlled type map");
-  }
 
   public String getDatabaseTable() {
     return dbTableName;
@@ -1126,8 +1238,8 @@ public final class SqoopHCatUtilities {
     return hCatDynamicPartitionKeys;
   }
 
-  public String getHCatStaticPartitionKey() {
-    return hCatStaticPartitionKey;
+  public List<String> getHCatStaticPartitionKey() {
+    return hCatStaticPartitionKeys;
   }
 
   public String[] getDBColumnNames() {
@@ -1150,8 +1262,8 @@ public final class SqoopHCatUtilities {
     hCatPartitionSchema = schema;
   }
 
-  public void setHCatStaticPartitionKey(String key) {
-    hCatStaticPartitionKey = key;
+  public void setHCatStaticPartitionKey(List<String> keys) {
+    hCatStaticPartitionKeys = keys;
   }
 
   public void setHCatDynamicPartitionKeys(List<String> keys) {
@@ -1166,12 +1278,8 @@ public final class SqoopHCatUtilities {
     dbColumnNames = names;
   }
 
-  public Map<String, Integer> getDbColumnTypes() {
-    return dbColumnTypes;
-  }
-
-  public void setDbColumnTypes(Map<String, Integer> types) {
-    dbColumnTypes.putAll(types);
+  public Map<String, List<Integer>> getDbColumnInfo() {
+    return dbColumnInfo;
   }
 
   public String gethCatTableName() {

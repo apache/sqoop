@@ -43,8 +43,8 @@ Exposing HCatalog Tables to Sqoop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 HCatalog integration with Sqoop is patterned on an existing feature set that
-supports Avro and Hive tables. Five new command line options are introduced,
-and some command line options defined for Hive are reused.
+supports Avro and Hive tables. Seven new command line options are introduced,
+and some command line options defined for Hive have been reused.
 
 New Command Line Options
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,6 +84,32 @@ below.
 This option specifies the storage stanza to be appended to the table.
 Further described in +Automatic Table Creation+ below.
 
++--hcatalog-partition-keys+ and +--hcatalog-partition-values+::
+
+These two options are used to specify multiple static partition key/value
+pairs.  In the prior releases, +--hive-partition-key+ and
++--hive-partition-value+ options were used to specify the static partition
+key/value pair, but only one level of static partition keys could be provided.
+The options +--hcatalog-partition-keys+ and +--hcatalog-partition-values+
+allow multiple keys and values to be provided as static partitioning keys.
+Multiple option values are to be separated by ',' (comma).
+
+For example, if the hive partition keys for the table to export/import from are
+defined with partition key names year, month and date and a specific partition
+with year=1999, month=12, day=31 is the desired partition, then the values
+for the two options will be as follows:
+
+    * +--hcatalog-partition-keys+ year,month,day
+    * +--hcatalog-partition-values+ 1999,12,31
+
+To provide backward compatibility, if +--hcatalog-partition-keys+ or
++--hcatalog-partition-values+ options are not provided, then
++--hive-partitition-key+ and +--hive-partition-value+ will be used if provided.
+
+It is an error to specify only one of +--hcatalog-partition-keys+ or
++--hcatalog-partition-values+ options. Either both of the options should be
+provided or neither of the options should be provided.
+
 Supported Sqoop Hive Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -102,9 +128,13 @@ The Hive home location.
 +--hive-partition-key+::
 Used for static partitioning filter. The partitioning key should be of
 type STRING. There can be only one static partitioning key.
+Please see the discussion about +--hcatalog-partition-keys+ and
++--hcatalog-partition-values+ options.
 
 +--hive-partition-value+::
 The value associated with the partition.
+Please see the discussion about +--hcatalog-partition-keys+ and
++--hcatalog-partition-values+ options.
 
 Direct Mode support
 ^^^^^^^^^^^^^^^^^^^
@@ -167,7 +197,7 @@ HCatalog import jobs provide an option that lets a user specifiy the
 storage format for the created table.
 
 The option +--create-hcatalog-table+ is used as an indicator that a table
-has to be created as part of the HCatalog import job.  If the option 
+has to be created as part of the HCatalog import job.  If the option
 +--create-hcatalog-table+ is specified and the table exists, then the
 table creation will fail and the job will be aborted.
 
@@ -253,9 +283,10 @@ float and double) is assignable to another field of any number type during
 exports and imports. Depending on the precision and scale of the target type
 of assignment, truncations can occur.
 
-Furthermore, date/time/timestamps are mapped to string (the full
-date/time/timestamp representation) or bigint (the number of milliseconds
-since epoch) during imports and exports.
+Furthermore, date/time/timestamps are mapped to date/timestamp hive types.
+(the full date/time/timestamp representation).   Date/time/timstamp columns
+can also be mapped to bigint Hive type in which case the value will be
+the number of milliseconds since epoch.
 
 BLOBs and CLOBs are only supported for imports. The BLOB/CLOB objects when
 imported are stored in a Sqoop-specific format and knowledge of this format
@@ -272,15 +303,15 @@ partitioning columns, if any, must be part of the projection when importing
 data into HCatalog tables.
 
 Dynamic partitioning fields should be mapped to database columns that are
-defined with the NOT NULL attribute (although this is not validated). A null
-value during import for a dynamic partitioning column will abort the Sqoop
-job.
+defined with the NOT NULL attribute (although this is not enforced during
+schema mapping). A null value during import for a dynamic partitioning
+column will abort the Sqoop job.
 
 Support for HCatalog Data Types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All the primitive HCatalog types are supported. Currently all the complex
-HCatalog types are unsupported.
+All the primitive Hive types that are part of Hive 0.13 version are supported.
+Currently all the complex HCatalog types are not supported.
 
 BLOB/CLOB database types are only supported for imports.
 

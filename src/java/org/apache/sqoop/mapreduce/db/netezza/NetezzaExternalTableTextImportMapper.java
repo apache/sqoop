@@ -21,8 +21,6 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.sqoop.lib.SqoopRecord;
-import org.apache.sqoop.mapreduce.hcat.SqoopHCatImportHelper;
 
 /**
  * Netezza import mapper using external tables for text formats.

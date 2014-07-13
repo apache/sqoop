@@ -168,7 +168,10 @@ public class SqoopOptions implements Cloneable {
   private String hCatStorageStanza;
   private String hCatHome; // not serialized to metastore.
   private boolean skipDistCache;
-
+  @StoredAsProperty("hcatalog.partition.keys")
+    private String hCatalogPartitionKeys;
+  @StoredAsProperty("hcatalog.partition.values")
+    private String hCatalogPartitionValues;
   // User explicit mapping of types
   private Properties mapColumnJava; // stored as map.colum.java
   private Properties mapColumnHive; // stored as map.column.hive
@@ -2464,5 +2467,21 @@ public class SqoopOptions implements Cloneable {
 
   public boolean getRelaxedIsolation() {
     return this.relaxedIsolation;
+  }
+
+  public String getHCatalogPartitionKeys() {
+    return hCatalogPartitionKeys;
+  }
+
+  public void setHCatalogPartitionKeys(String hpks) {
+    this.hCatalogPartitionKeys = hpks;
+  }
+
+  public String getHCatalogPartitionValues() {
+    return hCatalogPartitionValues;
+  }
+
+  public void setHCatalogPartitionValues(String hpvs) {
+    this.hCatalogPartitionValues = hpvs;
   }
 }

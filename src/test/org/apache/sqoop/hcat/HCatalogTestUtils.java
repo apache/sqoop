@@ -35,7 +35,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.common.type.HiveChar;
+import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hadoop.hive.metastore.api.MetaException;
+import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.DecimalTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -46,13 +52,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hcatalog.data.DefaultHCatRecord;
-import org.apache.hcatalog.data.HCatRecord;
-import org.apache.hcatalog.data.schema.HCatFieldSchema;
-import org.apache.hcatalog.data.schema.HCatSchema;
-import org.apache.hcatalog.mapreduce.HCatInputFormat;
-import org.apache.hcatalog.mapreduce.HCatOutputFormat;
-import org.apache.hcatalog.mapreduce.OutputJobInfo;
+import org.apache.hive.hcatalog.data.DefaultHCatRecord;
+import org.apache.hive.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
+import org.apache.hive.hcatalog.data.schema.HCatSchema;
+import org.apache.hive.hcatalog.mapreduce.HCatInputFormat;
+import org.apache.hive.hcatalog.mapreduce.HCatOutputFormat;
+import org.apache.hive.hcatalog.mapreduce.OutputJobInfo;
 import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.junit.Assert;
@@ -97,6 +103,10 @@ public final class HCatalogTestUtils {
     return Holder.INSTANCE;
   }
 
+  public static StringBuilder escHCatObj(String objectName) {
+    return SqoopHCatUtilities.escHCatObj(objectName);
+  }
+
   public void initUtils() throws IOException, MetaException {
     if (initialized) {
       return;
@@ -123,24 +133,25 @@ public final class HCatalogTestUtils {
     storageInfo = info;
   }
 
-  private static String getDropTableCmd(final String dbName,
+  private static String getHCatDropTableCmd(final String dbName,
     final String tableName) {
-    return "DROP TABLE IF EXISTS " + dbName.toLowerCase() + "."
-      + tableName.toLowerCase();
+    return "DROP TABLE IF EXISTS " + escHCatObj(dbName.toLowerCase()) + "."
+      + escHCatObj(tableName.toLowerCase());
   }
 
   private static String getHCatCreateTableCmd(String dbName,
     String tableName, List<HCatFieldSchema> tableCols,
     List<HCatFieldSchema> partKeys) {
     StringBuilder sb = new StringBuilder();
-    sb.append("create table ").append(dbName.toLowerCase()).append('.');
-    sb.append(tableName.toLowerCase()).append(" (\n\t");
+    sb.append("create table ")
+      .append(escHCatObj(dbName.toLowerCase()).append('.'));
+    sb.append(escHCatObj(tableName.toLowerCase()).append(" (\n\t"));
     for (int i = 0; i < tableCols.size(); ++i) {
       HCatFieldSchema hfs = tableCols.get(i);
       if (i > 0) {
         sb.append(",\n\t");
       }
-      sb.append(hfs.getName().toLowerCase());
+      sb.append(escHCatObj(hfs.getName().toLowerCase()));
       sb.append(' ').append(hfs.getTypeString());
     }
     sb.append(")\n");
@@ -151,7 +162,7 @@ public final class HCatalogTestUtils {
         if (i > 0) {
           sb.append("\n\t,");
         }
-        sb.append(hfs.getName().toLowerCase());
+        sb.append(escHCatObj(hfs.getName().toLowerCase()));
         sb.append(' ').append(hfs.getTypeString());
       }
       sb.append(")\n");
@@ -174,7 +185,7 @@ public final class HCatalogTestUtils {
       ? SqoopHCatUtilities.DEFHCATDB : dbName;
     LOG.info("Dropping HCatalog table if it exists " + databaseName
       + '.' + tableName);
-    String dropCmd = getDropTableCmd(databaseName, tableName);
+    String dropCmd = getHCatDropTableCmd(databaseName, tableName);
 
     try {
       utils.launchHCatCli(dropCmd);
@@ -411,6 +422,11 @@ public final class HCatalogTestUtils {
     /** Return the HCat type for this column. */
     HCatFieldSchema.Type getHCatType();
 
+    /** Return the precision/length of the field if any. */
+    int getHCatPrecision();
+
+    /** Return the scale of the field if any. */
+    int getHCatScale();
 
     /**
      * If the field is a partition key, then whether is part of the static
@@ -437,7 +453,8 @@ public final class HCatalogTestUtils {
 
   public static ColumnGenerator colGenerator(final String name,
     final String dbType, final int sqlType,
-    final HCatFieldSchema.Type hCatType, final Object hCatValue,
+    final HCatFieldSchema.Type hCatType, final int hCatPrecision,
+    final int hCatScale, final Object hCatValue,
     final Object dbValue, final KeyType keyType) {
     return new ColumnGenerator() {
 
@@ -471,6 +488,16 @@ public final class HCatalogTestUtils {
         return hCatType;
       }
 
+      @Override
+      public int getHCatPrecision() {
+        return hCatPrecision;
+      }
+
+      @Override
+      public int getHCatScale() {
+        return hCatScale;
+      }
+
       public KeyType getKeyType() {
         return keyType;
       }
@@ -502,6 +529,28 @@ public final class HCatalogTestUtils {
           Assert
             .assertEquals("Got unexpected column value", expectedVal,
               actualVal);
+        }
+      } else if (expectedVal instanceof HiveVarchar) {
+        HiveVarchar vc1 = (HiveVarchar) expectedVal;
+        if (actualVal instanceof HiveVarchar) {
+          HiveVarchar vc2 = (HiveVarchar)actualVal;
+          assertEquals(vc1.getCharacterLength(), vc2.getCharacterLength());
+          assertEquals(vc1.getValue(), vc2.getValue());
+        } else {
+          String vc2 = (String)actualVal;
+          assertEquals(vc1.getCharacterLength(), vc2.length());
+          assertEquals(vc1.getValue(), vc2);
+        }
+      } else if (expectedVal instanceof HiveChar) {
+        HiveChar c1 = (HiveChar) expectedVal;
+        if (actualVal instanceof HiveChar) {
+          HiveChar c2 = (HiveChar)actualVal;
+          assertEquals(c1.getCharacterLength(), c2.getCharacterLength());
+          assertEquals(c1.getValue(), c2.getValue());
+        } else {
+          String c2 = (String) actualVal;
+          assertEquals(c1.getCharacterLength(), c2.length());
+          assertEquals(c1.getValue(), c2);
         }
       } else {
         Assert
@@ -626,7 +675,7 @@ public final class HCatalogTestUtils {
     sb.append(tableName);
     sb.append(" (id, msg");
     int colNum = 0;
-    for (ColumnGenerator gen : extraCols) {
+    for (int i = 0; i < extraCols.length; ++i) {
       sb.append(", " + forIdx(colNum++));
     }
     sb.append(") VALUES ( ?, ?");
@@ -733,13 +782,34 @@ public final class HCatalogTestUtils {
     throws Exception {
     List<HCatFieldSchema> hCatTblCols = new ArrayList<HCatFieldSchema>();
     hCatTblCols.clear();
-    hCatTblCols.add(new HCatFieldSchema("id", HCatFieldSchema.Type.INT, ""));
+    PrimitiveTypeInfo tInfo;
+    tInfo = new PrimitiveTypeInfo();
+    tInfo.setTypeName(HCatFieldSchema.Type.INT.name().toLowerCase());
+    hCatTblCols.add(new HCatFieldSchema("id", tInfo, ""));
+    tInfo = new PrimitiveTypeInfo();
+    tInfo.setTypeName(HCatFieldSchema.Type.STRING.name().toLowerCase());
     hCatTblCols
-      .add(new HCatFieldSchema("msg", HCatFieldSchema.Type.STRING, ""));
+      .add(new HCatFieldSchema("msg", tInfo, ""));
     for (ColumnGenerator gen : extraCols) {
       if (gen.getKeyType() == KeyType.NOT_A_KEY) {
+        switch(gen.getHCatType()) {
+          case CHAR:
+            tInfo = new CharTypeInfo(gen.getHCatPrecision());
+            break;
+          case VARCHAR:
+            tInfo = new VarcharTypeInfo(gen.getHCatPrecision());
+            break;
+          case DECIMAL:
+            tInfo = new DecimalTypeInfo(gen.getHCatPrecision(),
+              gen.getHCatScale());
+            break;
+          default:
+            tInfo = new PrimitiveTypeInfo();
+            tInfo.setTypeName(gen.getHCatType().name().toLowerCase());
+            break;
+        }
         hCatTblCols
-          .add(new HCatFieldSchema(gen.getName(), gen.getHCatType(), ""));
+          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
       }
     }
     HCatSchema hCatTblSchema = new HCatSchema(hCatTblCols);
@@ -749,11 +819,28 @@ public final class HCatalogTestUtils {
   private HCatSchema generateHCatPartitionSchema(ColumnGenerator... extraCols)
     throws Exception {
     List<HCatFieldSchema> hCatPartCols = new ArrayList<HCatFieldSchema>();
+    PrimitiveTypeInfo tInfo;
 
     for (ColumnGenerator gen : extraCols) {
       if (gen.getKeyType() != KeyType.NOT_A_KEY) {
+        switch(gen.getHCatType()) {
+          case CHAR:
+            tInfo = new CharTypeInfo(gen.getHCatPrecision());
+            break;
+          case VARCHAR:
+            tInfo = new VarcharTypeInfo(gen.getHCatPrecision());
+            break;
+          case DECIMAL:
+            tInfo = new DecimalTypeInfo(gen.getHCatPrecision(),
+            gen.getHCatScale());
+            break;
+          default:
+            tInfo = new PrimitiveTypeInfo();
+            tInfo.setTypeName(gen.getHCatType().name().toLowerCase());
+            break;
+        }
         hCatPartCols
-          .add(new HCatFieldSchema(gen.getName(), gen.getHCatType(), ""));
+          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
       }
     }
     HCatSchema hCatPartSchema = new HCatSchema(hCatPartCols);
@@ -763,16 +850,32 @@ public final class HCatalogTestUtils {
   private HCatSchema generateHCatDynamicPartitionSchema(
     ColumnGenerator... extraCols) throws Exception {
     List<HCatFieldSchema> hCatPartCols = new ArrayList<HCatFieldSchema>();
+    PrimitiveTypeInfo tInfo;
+
     hCatPartCols.clear();
-    boolean staticFound = false;
     for (ColumnGenerator gen : extraCols) {
       if (gen.getKeyType() != KeyType.NOT_A_KEY) {
-        if (gen.getKeyType() == KeyType.STATIC_KEY && !staticFound) {
-          staticFound = true;
+        if (gen.getKeyType() == KeyType.STATIC_KEY) {
           continue;
         }
+        switch(gen.getHCatType()) {
+          case CHAR:
+            tInfo = new CharTypeInfo(gen.getHCatPrecision());
+            break;
+          case VARCHAR:
+            tInfo = new VarcharTypeInfo(gen.getHCatPrecision());
+            break;
+          case DECIMAL:
+            tInfo = new DecimalTypeInfo(gen.getHCatPrecision(),
+            gen.getHCatScale());
+            break;
+          default:
+            tInfo = new PrimitiveTypeInfo();
+            tInfo.setTypeName(gen.getHCatType().name().toLowerCase());
+            break;
+        }
         hCatPartCols
-          .add(new HCatFieldSchema(gen.getName(), gen.getHCatType(), ""));
+          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
       }
     }
     HCatSchema hCatPartSchema = new HCatSchema(hCatPartCols);
@@ -783,11 +886,29 @@ public final class HCatalogTestUtils {
   private HCatSchema generateHCatStaticPartitionSchema(
     ColumnGenerator... extraCols) throws Exception {
     List<HCatFieldSchema> hCatPartCols = new ArrayList<HCatFieldSchema>();
+    PrimitiveTypeInfo tInfo;
+
     hCatPartCols.clear();
     for (ColumnGenerator gen : extraCols) {
       if (gen.getKeyType() == KeyType.STATIC_KEY) {
+        switch(gen.getHCatType()) {
+          case CHAR:
+            tInfo = new CharTypeInfo(gen.getHCatPrecision());
+            break;
+          case VARCHAR:
+            tInfo = new VarcharTypeInfo(gen.getHCatPrecision());
+            break;
+          case DECIMAL:
+            tInfo = new DecimalTypeInfo(gen.getHCatPrecision(),
+            gen.getHCatScale());
+            break;
+          default:
+            tInfo = new PrimitiveTypeInfo();
+            tInfo.setTypeName(gen.getHCatType().name().toLowerCase());
+            break;
+        }
         hCatPartCols
-          .add(new HCatFieldSchema(gen.getName(), gen.getHCatType(), ""));
+          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
         break;
       }
     }
@@ -804,12 +925,9 @@ public final class HCatalogTestUtils {
       DefaultHCatRecord record = new DefaultHCatRecord(size);
       record.set(hCatTblCols.get(0).getName(), hCatTblSchema, i);
       record.set(hCatTblCols.get(1).getName(), hCatTblSchema, "textfield" + i);
-      boolean staticFound = false;
       int idx = 0;
       for (int j = 0; j < extraCols.length; ++j) {
-        if (extraCols[j].getKeyType() == KeyType.STATIC_KEY
-          && !staticFound) {
-          staticFound = true;
+        if (extraCols[j].getKeyType() == KeyType.STATIC_KEY) {
           continue;
         }
         record.set(hCatTblCols.get(idx + 2).getName(), hCatTblSchema,

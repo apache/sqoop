@@ -18,19 +18,21 @@
 
 package com.cloudera.sqoop;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.TestCase;
+
 import org.apache.hadoop.conf.Configuration;
+
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
-
-import junit.framework.TestCase;
-
-import java.io.IOException;
-import java.util.Map;
-import java.sql.Connection;
-import java.sql.ResultSet;
 
 /**
  * Test the ConnFactory implementation and its ability to delegate to multiple
@@ -127,6 +129,10 @@ public class TestConnFactory extends TestCase {
     }
 
     public String getPrimaryKey(String tableName) {
+      return null;
+    }
+
+    public Map<String,List<Integer>> getColumnInfo(String tableName) {
       return null;
     }
 

@@ -44,6 +44,39 @@
   </if>
 
   <!--
+    Set default HCatalog profile if not set
+
+    In Hive 0.12, the HCatalog artifcacts moved from org.apache.hcatalog
+    to org.apache.hive.hcatalog.   With the advent of hive 0.14, the older
+    hcatalog interfaces used by Sqoop are being removed.  So, we are upgrading
+    the hcatalog version to 0.13.   This will allow as to support the hcatalog
+    features in terms of datatype parity.
+
+    hcatalog 0.13 will be the default for now.
+
+  -->
+  <if>
+    <isset property="hcatprofile" />
+    <then>
+      <if>
+        <or>
+          <equals arg1="${hcatprofile}" arg2="13" />
+        </or>
+        <then>
+          <echo message="Using HCatalog profile ${hcatprofile}" />
+        </then>
+        <else>
+          <fail message="Invalid value for hcatprofile" />
+        </else>
+      </if>
+    </then>
+    <else>
+      <echo message="Using HCatalog profile 0.13" />
+      <property name="hcatprofile" value="13" />
+    </else>
+  </if>
+
+  <!--
     Set default Accumulo version
 
     We use 1.5.0 by default if not specified.
@@ -96,7 +129,7 @@
       <property name="hbase94.version" value="0.90.3-cdh3u1" />
       <property name="zookeeper.version" value="3.3.3-cdh3u1" />
       <property name="hadoop.version.full" value="0.20" />
-      <property name="hcatalog.version" value="0.11.0" />
+      <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
     </then>
 
@@ -107,7 +140,7 @@
         <property name="hbase94.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="0.23" />
-        <property name="hcatalog.version" value="0.11.0" />
+        <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
       </then>
     </elseif>
@@ -119,7 +152,7 @@
         <property name="hbase94.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="1.0.0" />
-        <property name="hcatalog.version" value="0.11.0" />
+        <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="1" />
       </then>
     </elseif>
@@ -131,7 +164,7 @@
         <property name="hbase94.version" value="0.94.2" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="2.0.4-alpha" />
-        <property name="hcatalog.version" value="0.11.0" />
+        <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
       </then>
     </elseif>
@@ -143,11 +176,10 @@
         <property name="hbase94.version" value="0.94.2" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="2.1.0-beta" />
-        <property name="hcatalog.version" value="0.11.0" />
+        <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
       </then>
     </elseif>
-
     <else>
       <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100, 200 or 210." />
     </else>

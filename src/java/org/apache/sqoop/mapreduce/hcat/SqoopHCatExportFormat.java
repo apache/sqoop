@@ -31,8 +31,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hcatalog.data.HCatRecord;
-import org.apache.hcatalog.mapreduce.HCatInputFormat;
+import org.apache.hive.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.mapreduce.HCatInputFormat;
 import org.apache.sqoop.mapreduce.ExportInputFormat;
 
 /**

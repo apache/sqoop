@@ -26,7 +26,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.data.HCatRecord;
 
 /**
  * A Record Reader that can combine underlying splits.

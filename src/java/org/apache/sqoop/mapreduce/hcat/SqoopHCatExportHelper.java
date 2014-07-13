@@ -27,20 +27,22 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.hcatalog.common.HCatConstants;
-import org.apache.hcatalog.common.HCatUtil;
-import org.apache.hcatalog.data.HCatRecord;
-import org.apache.hcatalog.data.schema.HCatFieldSchema;
-import org.apache.hcatalog.data.schema.HCatSchema;
-import org.apache.hcatalog.mapreduce.InputJobInfo;
+import org.apache.hive.hcatalog.common.HCatConstants;
+import org.apache.hive.hcatalog.common.HCatUtil;
+import org.apache.hive.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
+import org.apache.hive.hcatalog.data.schema.HCatSchema;
+import org.apache.hive.hcatalog.mapreduce.InputJobInfo;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.ExportJobBase;
+import org.apache.sqoop.mapreduce.ImportJobBase;
 
 /**
  * Helper class for Sqoop HCat Integration export jobs.
@@ -51,6 +53,7 @@ public class SqoopHCatExportHelper {
   public static final Log LOG = LogFactory
     .getLog(SqoopHCatExportHelper.class.getName());
   private SqoopRecord sqoopRecord;
+  private boolean bigDecimalFormatString;
   private static final String TIMESTAMP_TYPE = "java.sql.Timestamp";
   private static final String TIME_TYPE = "java.sql.Time";
   private static final String DATE_TYPE = "java.sql.Date";
@@ -85,6 +88,11 @@ public class SqoopHCatExportHelper {
         + ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY
         + ") is not set!");
     }
+
+    bigDecimalFormatString = conf.getBoolean(
+      ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+      ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+
     debugHCatExportMapper = conf.getBoolean(
       SqoopHCatUtilities.DEBUG_HCAT_EXPORT_MAPPER_PROP, false);
     try {
@@ -181,7 +189,29 @@ public class SqoopHCatExportHelper {
           }
         }
         break;
+      case DATE:
+        Date date = (Date) val;
+        if (javaColType.equals(DATE_TYPE)) {
+          return date;
+        } else if (javaColType.equals(TIME_TYPE)) {
+          return new Time(date.getTime());
+        } else if (javaColType.equals(TIMESTAMP_TYPE)) {
+          return new Timestamp(date.getTime());
+        }
+        break;
+      case TIMESTAMP:
+        Timestamp ts = (Timestamp) val;
+        if (javaColType.equals(DATE_TYPE)) {
+          return new Date(ts.getTime());
+        } else if (javaColType.equals(TIME_TYPE)) {
+          return new Time(ts.getTime());
+        } else if (javaColType.equals(TIMESTAMP_TYPE)) {
+          return ts;
+        }
+        break;
       case STRING:
+      case VARCHAR:
+      case CHAR:
         val = convertStringTypes(val, javaColType);
         if (val != null) {
           return val;
@@ -189,6 +219,12 @@ public class SqoopHCatExportHelper {
         break;
       case BINARY:
         val = convertBinaryTypes(val, javaColType);
+        if (val != null) {
+          return val;
+        }
+        break;
+      case DECIMAL:
+        val = convertDecimalTypes(val, javaColType);
         if (val != null) {
           return val;
         }
@@ -206,6 +242,23 @@ public class SqoopHCatExportHelper {
     return null;
   }
 
+  private Object convertDecimalTypes(Object val, String javaColType) {
+    HiveDecimal hd = (HiveDecimal) val;
+    BigDecimal bd = hd.bigDecimalValue();
+
+    if (javaColType.equals(BIG_DECIMAL_TYPE)) {
+      return bd;
+    } else if (javaColType.equals(STRING_TYPE)) {
+      String bdStr = null;
+      if (bigDecimalFormatString) {
+        bdStr = bd.toPlainString();
+      } else {
+        bdStr = bd.toString();
+      }
+      return bdStr;
+    }
+    return null;
+  }
   private Object convertBinaryTypes(Object val, String javaColType) {
     byte[] bb = (byte[]) val;
     if (javaColType.equals(BYTESWRITABLE)) {
@@ -225,7 +278,9 @@ public class SqoopHCatExportHelper {
       || javaColType.equals(TIMESTAMP_TYPE)) {
       // Oracle expects timestamps for Date also by default based on version
       // Just allow all date types to be assignment compatible
-      if (valStr.length() == 10) { // Date in yyyy-mm-dd format
+      if (valStr.length() == 10
+          && valStr.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+        // Date in yyyy-mm-dd format
         Date d = Date.valueOf(valStr);
         if (javaColType.equals(DATE_TYPE)) {
           return d;
@@ -234,7 +289,9 @@ public class SqoopHCatExportHelper {
         } else if (javaColType.equals(TIMESTAMP_TYPE)) {
           return new Timestamp(d.getTime());
         }
-      } else if (valStr.length() == 8) { // time in hh:mm:ss
+      } else if (valStr.length() == 8
+          && valStr.matches("^\\d{2}:\\d{2}:\\d{2}$")) {
+        // time in hh:mm:ss
         Time t = Time.valueOf(valStr);
         if (javaColType.equals(DATE_TYPE)) {
           return new Date(t.getTime());
@@ -243,7 +300,11 @@ public class SqoopHCatExportHelper {
         } else if (javaColType.equals(TIMESTAMP_TYPE)) {
           return new Timestamp(t.getTime());
         }
-      } else if (valStr.length() == 19) { // timestamp in yyyy-mm-dd hh:ss:mm
+      } else if (valStr.length() >= 19
+          && valStr.length() <= 26
+          && valStr.
+          matches("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}(.\\d+)?$")) {
+        // timestamp in yyyy-mm-dd hh:mm:ss
         Timestamp ts = Timestamp.valueOf(valStr);
         if (javaColType.equals(DATE_TYPE)) {
           return new Date(ts.getTime());

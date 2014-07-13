@@ -42,9 +42,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
+import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
 import org.apache.sqoop.util.LoggingUtils;
-import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.util.SqlTypeMap;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -237,8 +237,34 @@ public abstract class SqlManager
    * Get column types for a query statement that we do not modify further.
    */
   protected Map<String, Integer> getColumnTypesForRawQuery(String stmt) {
+    Map<String, List<Integer>> colInfo = getColumnInfoForRawQuery(stmt);
+    if (colInfo == null) {
+      return null;
+    }
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+    for (String s : colInfo.keySet()) {
+      List<Integer> info = colInfo.get(s);
+      colTypes.put(s, info.get(0));
+    }
+    return colTypes;
+  }
+
+  @Override
+  public Map<String, List<Integer>> getColumnInfo(String tableName) {
+    String stmt = getColNamesQuery(tableName);
+    return getColumnInfoForRawQuery(stmt);
+  }
+
+  @Override
+  public Map<String, List<Integer>> getColumnInfoForQuery(String query) {
+    // Manipulate the query to return immediately, with zero rows.
+    String rawQuery = query.replace(SUBSTITUTE_TOKEN, " (1 = 0) ");
+    return getColumnInfoForRawQuery(rawQuery);
+  }
+
+  protected Map<String, List<Integer>> getColumnInfoForRawQuery(String stmt) {
     ResultSet results;
-    LOG.debug("Execute getColumnTypesRawQuery : " + stmt);
+    LOG.debug("Execute getColumnInfoRawQuery : " + stmt);
     try {
       results = execute(stmt);
     } catch (SQLException sqlE) {
@@ -249,12 +275,16 @@ public abstract class SqlManager
     }
 
     try {
-      Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+      Map<String, List<Integer>> colInfo = 
+          new SqlTypeMap<String, List<Integer>>();
 
       int cols = results.getMetaData().getColumnCount();
       ResultSetMetaData metadata = results.getMetaData();
       for (int i = 1; i < cols + 1; i++) {
         int typeId = metadata.getColumnType(i);
+        int precision = metadata.getPrecision(i);
+        int scale = metadata.getScale(i);
+
         // If we have an unsigned int we need to make extra room by
         // plopping it into a bigint
         if (typeId == Types.INTEGER &&  !metadata.isSigned(i)){
@@ -265,11 +295,14 @@ public abstract class SqlManager
         if (colName == null || colName.equals("")) {
           colName = metadata.getColumnName(i);
         }
-
-        colTypes.put(colName, Integer.valueOf(typeId));
+        List<Integer> info = new ArrayList<Integer>(3);
+        info.add(Integer.valueOf(typeId));
+        info.add(precision);
+        info.add(scale);
+        colInfo.put(colName, info);
       }
 
-      return colTypes;
+      return colInfo;
     } catch (SQLException sqlException) {
       LoggingUtils.logAll(LOG, "Error reading from database: "
         + sqlException.toString(), sqlException);
@@ -381,7 +414,23 @@ public abstract class SqlManager
 
   @Override
   public Map<String, Integer> getColumnTypesForProcedure(String procedureName) {
-    Map<String, Integer> ret = new TreeMap<String, Integer>();
+    Map<String, List<Integer>> colInfo =
+        getColumnInfoForProcedure(procedureName);
+    if (colInfo == null) {
+      return null;
+    }
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+    for (String s : colInfo.keySet()) {
+      List<Integer> info = colInfo.get(s);
+      colTypes.put(s, info.get(0));
+    }
+    return colTypes;
+  }
+
+  @Override
+  public Map<String, List<Integer>>
+    getColumnInfoForProcedure(String procedureName) {
+    Map<String, List<Integer>> ret = new TreeMap<String, List<Integer>>();
     try {
       DatabaseMetaData metaData = this.getConnection().getMetaData();
       ResultSet results = metaData.getProcedureColumns(null, null,
@@ -398,9 +447,11 @@ public abstract class SqlManager
             // we don't care if we get several rows for the
             // same ORDINAL_POSITION (e.g. like H2 gives us)
             // as we'll just overwrite the entry in the map:
-            ret.put(
-              results.getString("COLUMN_NAME"),
-              results.getInt("DATA_TYPE"));
+            List<Integer> info = new ArrayList<Integer>(3);
+            info.add(results.getInt("DATA_TYPE"));
+            info.add(results.getInt("PRECISION"));
+            info.add(results.getInt("SCALE"));
+            ret.put(results.getString("COLUMN_NAME"), info);
           }
         }
         LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));

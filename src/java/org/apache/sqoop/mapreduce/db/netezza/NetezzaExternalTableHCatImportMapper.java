@@ -23,7 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.data.HCatRecord;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;

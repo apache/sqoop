@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hcatalog.data.HCatRecord;
+import org.apache.hive.hcatalog.data.HCatRecord;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatExportHelper;

@@ -29,7 +29,7 @@ import java.util.Set;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hcatalog.mapreduce.HCatSplit;
+import org.apache.hive.hcatalog.mapreduce.HCatSplit;
 
 /**
  * An abstraction of a combined HCatSplits.

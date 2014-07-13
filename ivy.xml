@@ -41,17 +41,17 @@ under the License.
     <conf name="hbase95" visibility="private" extends="hbasecompat${hbasecompatprofile}" />
     <conf name="hbasecompat1" visibility="private" />
     <conf name="hbasecompat2" visibility="private" />
-    <conf name="hcatalog" visibility="private" />
+    <conf name="hcatalog13" visibility="private" />
     <conf name="hadoop23" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop20" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop100" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop200" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop210" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog,accumulo" />
+      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -293,9 +293,9 @@ under the License.
     </dependency>
 
 
-    <dependency org="org.apache.hcatalog" name="hcatalog-core"
-      rev="${hcatalog.version}" conf="hcatalog->default">
-      <artifact name="hcatalog-core" type="jar"/>
+    <dependency org="org.apache.hive.hcatalog" name="hive-hcatalog-core"
+      rev="${hcatalog.version}" conf="hcatalog13->default">
+      <artifact name="hive-hcatalog-core" type="jar"/>
     </dependency>
 
     <dependency org="org.postgresql" name="postgresql"

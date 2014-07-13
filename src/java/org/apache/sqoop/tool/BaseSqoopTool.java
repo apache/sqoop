@@ -33,6 +33,8 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.util.CredentialsUtil;
+import org.apache.sqoop.util.LoggingUtils;
 
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
@@ -43,8 +45,6 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
-import org.apache.sqoop.util.CredentialsUtil;
-import org.apache.sqoop.util.LoggingUtils;
 
 /**
  * Layer on top of SqoopTool that provides some basic common code
@@ -107,6 +107,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           "hive-delims-replacement";
   public static final String HIVE_PARTITION_KEY_ARG = "hive-partition-key";
   public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
+  public static final String HCATCALOG_PARTITION_KEYS_ARG =
+      "hcatalog-partition-keys";
+  public static final String HCATALOG_PARTITION_VALUES_ARG =
+      "hcatalog-partition-values";
   public static final String CREATE_HIVE_TABLE_ARG =
       "create-hive-table";
   public static final String HCATALOG_TABLE_ARG = "hcatalog-table";
@@ -564,7 +568,17 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + " types.")
       .withLongOpt(MAP_COLUMN_HIVE)
       .create());
-
+    hCatOptions.addOption(OptionBuilder.withArgName("partition-key")
+      .hasArg()
+      .withDescription("Sets the partition keys to use when importing to hive")
+      .withLongOpt(HCATCALOG_PARTITION_KEYS_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder.withArgName("partition-value")
+      .hasArg()
+      .withDescription("Sets the partition values to use when importing "
+        + "to hive")
+      .withLongOpt(HCATALOG_PARTITION_VALUES_ARG)
+      .create());
     return hCatOptions;
   }
 
@@ -1071,7 +1085,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
   }
 
-  protected void applyHCatOptions(CommandLine in, SqoopOptions out) {
+  protected void applyHCatalogOptions(CommandLine in, SqoopOptions out) {
     if (in.hasOption(HCATALOG_TABLE_ARG)) {
       out.setHCatTableName(in.getOptionValue(HCATALOG_TABLE_ARG));
     }
@@ -1098,6 +1112,16 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setHiveHome(in.getOptionValue(HIVE_HOME_ARG));
     }
 
+    if (in.hasOption(HCATCALOG_PARTITION_KEYS_ARG)) {
+      out.setHCatalogPartitionKeys(
+        in.getOptionValue(HCATCALOG_PARTITION_KEYS_ARG));
+    }
+
+    if (in.hasOption(HCATALOG_PARTITION_VALUES_ARG)) {
+      out.setHCatalogPartitionValues(
+        in.getOptionValue(HCATALOG_PARTITION_VALUES_ARG));
+    }
+
     if (in.hasOption(HIVE_PARTITION_KEY_ARG)) {
       out.setHivePartitionKey(in.getOptionValue(HIVE_PARTITION_KEY_ARG));
     }
@@ -1109,6 +1133,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     if (in.hasOption(MAP_COLUMN_HIVE)) {
       out.setMapColumnHive(in.getOptionValue(MAP_COLUMN_HIVE));
     }
+
   }
 
 
@@ -1325,13 +1350,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + " option." + HELP_STR);
     }
 
-    if(options.doHiveImport()
+    if (options.doHiveImport()
         && options.getFileLayout() == SqoopOptions.FileLayout.AvroDataFile) {
       throw new InvalidOptionsException("Hive import is not compatible with "
         + "importing into AVRO format.");
     }
 
-    if(options.doHiveImport()
+    if (options.doHiveImport()
         && options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
       throw new InvalidOptionsException("Hive import is not compatible with "
         + "importing into SequenceFile format.");
@@ -1508,7 +1533,36 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException("HCatalog job  is not compatible with "
         + "SequenceFile format option " + FMT_SEQUENCEFILE_ARG
         + " option." + HELP_STR);
+    }
 
+    if (options.getHCatalogPartitionKeys() != null
+        && options.getHCatalogPartitionValues() == null) {
+      throw new InvalidOptionsException("Either both --hcatalog-partition-keys"
+        + " and --hcatalog-partition-values should be provided or both of these"
+        + " options should be omitted.");
+    }
+
+    if (options.getHCatalogPartitionKeys() != null) {
+      if (options.getHivePartitionKey() != null) {
+        LOG.warn("Both --hcatalog-partition-keys and --hive-partition-key"
+            + "options are provided.  --hive-partition-key option will be"
+            + "ignored");
+      }
+
+      String[] keys = options.getHCatalogPartitionKeys().split(",");
+      String[] vals = options.getHCatalogPartitionValues().split(",");
+
+      if (keys.length != vals.length) {
+        throw new InvalidOptionsException("Number of static partition keys "
+          + "provided dpes match the number of partition values");
+      }
+    } else {
+      if (options.getHivePartitionKey() != null
+          && options.getHivePartitionValue() == null) {
+        throw new InvalidOptionsException("Either both --hive-partition-key and"
+            + " --hive-partition-value options should be provided or both of "
+            + "these options should be omitted");
+      }
     }
   }
 
@@ -1527,8 +1581,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     if (options.isBulkLoadEnabled() && options.getHBaseTable() == null) {
-      String validationMessage = String.format("Can't run import with %s " +
-          "without %s",
+      String validationMessage = String.format("Can't run import with %s "
+          + "without %s",
           BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG,
           BaseSqoopTool.HBASE_TABLE_ARG);
       throw new InvalidOptionsException(validationMessage);

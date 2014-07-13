@@ -19,7 +19,6 @@
 package org.apache.sqoop.tool;
 
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -33,7 +32,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.Sqoop;
@@ -43,14 +43,11 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
-
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
 
 /**
  * Tool that performs database imports to HDFS.
@@ -860,7 +857,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       applyInputFormatOptions(in, out);
       applyCodeGenOptions(in, out, allTables);
       applyHBaseOptions(in, out);
-      applyHCatOptions(in, out);
+      applyHCatalogOptions(in, out);
       applyAccumuloOptions(in, out);
 
     } catch (NumberFormatException nfe) {

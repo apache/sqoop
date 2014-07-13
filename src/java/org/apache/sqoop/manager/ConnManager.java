@@ -36,6 +36,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hive.HiveTypes;
@@ -172,60 +173,7 @@ public abstract class ConnManager {
    * @return hcat type
    */
   public String toHCatType(int sqlType) {
-    switch (sqlType) {
-
-    // Ideally TINYINT and SMALLINT should be mapped to their
-    // HCat equivalents tinyint and smallint respectively
-    // But the Sqoop Java type conversion has them mapped to Integer
-    // Even though the referenced Java doc clearly recommends otherwise.
-    // Chaning this now can cause many of the sequence file usages to
-    // break as value class implementations will change. So, we
-    // just use the same behavior here.
-      case Types.SMALLINT:
-      case Types.TINYINT:
-      case Types.INTEGER:
-        return "int";
-
-      case Types.VARCHAR:
-      case Types.CHAR:
-      case Types.LONGVARCHAR:
-      case Types.NVARCHAR:
-      case Types.NCHAR:
-      case Types.LONGNVARCHAR:
-      case Types.DATE:
-      case Types.TIME:
-      case Types.TIMESTAMP:
-      case Types.CLOB:
-        return "string";
-
-      case Types.FLOAT:
-      case Types.REAL:
-        return "float";
-
-      case Types.NUMERIC:
-      case Types.DECIMAL:
-        return "string";
-
-      case Types.DOUBLE:
-        return "double";
-
-      case Types.BIT:
-      case Types.BOOLEAN:
-        return "boolean";
-
-      case Types.BIGINT:
-        return "bigint";
-
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.BLOB:
-      case Types.LONGVARBINARY:
-        return "binary";
-
-      default:
-        throw new IllegalArgumentException(
-          "Cannot convert SQL type to HCatalog type " + sqlType);
-    }
+    return SqoopHCatUtilities.toHCatType(sqlType);
   }
 
   /**
@@ -356,6 +304,71 @@ public abstract class ConnManager {
       columnTypes = getColumnTypesForQuery(query);
     }
     return columnTypes;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sqltype, precision and scale
+   * for all columns in a table.
+   *
+   * Precision and scale are as defined in the resultset metadata,
+   *
+   * The Integer type id is a constant from java.sql.Types
+   */
+  public  Map<String, List<Integer>> getColumnInfo(String tableName) {
+    throw new UnsupportedOperationException(
+      "Get column information is not supported by this manager");
+  }
+  /**
+   * Return an unordered mapping from colname to sqltype, precision and scale
+   * all the input arguments for a stored procedure.
+   *
+   * Precision and scale are as defined in the resultset metadata,
+   *
+   * The Integer type id is a constant from java.sql.Types
+   */
+  public Map<String, List<Integer>> getColumnInfoForProcedure(
+      String procedureName) {
+    throw new UnsupportedOperationException(
+        "No stored procedure support for this database");
+  }
+  /**
+   * Return an unordered mapping from colname to sqltype, precision and scale
+   * for all columns in a query.
+   *
+   * Precision and scale are as defined in the resultset metadata,
+   *
+   * The Integer type id is a constant from java.sql.Types
+   */
+  public Map<String, List<Integer>> getColumnInfoForQuery(String query) {
+    LOG.error("This database does not support free-form query column info.");
+    return null;
+  }
+
+  /**
+   * Return an unordered mapping from colname to sqltype, precision and scale
+   * for all columns in a table or query.
+   *
+   * The Integer type id is a constant from java.sql.Types
+   * Precision and scale are as defined in the resultset metadata,
+   * @param tableName the name of the table
+   * @param sqlQuery the SQL query to use if tableName is null
+   */
+  public Map<String, List<Integer>> getColumnInfo(String tableName,
+    String sqlQuery) throws IOException {
+    Map<String, List<Integer>> colInfo;
+    if (null != tableName) {
+      // We're generating a class based on a table import.
+      colInfo = getColumnInfo(tableName);
+    } else {
+      // This is based on an arbitrary query.
+      String query = sqlQuery;
+      if (query.indexOf(SqlManager.SUBSTITUTE_TOKEN) == -1) {
+        throw new IOException("Query [" + query + "] must contain '"
+            + SqlManager.SUBSTITUTE_TOKEN + "' in WHERE clause.");
+      }
+      colInfo = getColumnInfoForQuery(query);
+    }
+    return colInfo;
   }
 
   /**
