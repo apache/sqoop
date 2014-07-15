@@ -28,12 +28,17 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
+import com.cloudera.sqoop.mapreduce.MergeJob;
+import com.cloudera.sqoop.orm.TableClassName;
+import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.Sqoop;
@@ -66,6 +71,9 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   // store check column type for incremental option
   private int checkColumnType;
 
+  // Set classloader for local job runner
+  private ClassLoader prevClassLoader = null;
+
   public ImportTool() {
     this("import", false);
   }
@@ -88,6 +96,34 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    */
   public List<String> getGeneratedJarFiles() {
     return this.codeGenerator.getGeneratedJarFiles();
+  }
+
+  /**
+   * If jars must be loaded into the local environment, do so here.
+   */
+  private void loadJars(Configuration conf, String ormJarFile,
+                        String tableClassName) throws IOException {
+
+    boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
+        || "local".equals(conf.get("mapred.job.tracker"));
+    if (isLocal) {
+      // If we're using the LocalJobRunner, then instead of using the compiled
+      // jar file as the job source, we're running in the current thread. Push
+      // on another classloader that loads from that jar in addition to
+      // everything currently on the classpath.
+      this.prevClassLoader = ClassLoaderStack.addJarFile(ormJarFile,
+          tableClassName);
+    }
+  }
+
+  /**
+   * If any classloader was invoked by loadJars, free it here.
+   */
+  private void unloadJars() {
+    if (null != this.prevClassLoader) {
+      // unload the special classloader for this jar.
+      ClassLoaderStack.setCurrentClassLoader(this.prevClassLoader);
+    }
   }
 
   /**
@@ -256,6 +292,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       return true;
     }
 
+    FileSystem fs = FileSystem.get(options.getConf());
     SqoopOptions.IncrementalMode incrementalMode = options.getIncrementalMode();
     String nextIncrementalValue = null;
 
@@ -280,6 +317,12 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       }
       break;
     case DateLastModified:
+      if (options.getMergeKeyCol() == null && !options.isAppendMode()
+          && fs.exists(getOutputPath(options, context.getTableName(), false))) {
+        throw new ImportException("--" + MERGE_KEY_ARG + " or " + "--" + APPEND_ARG
+          + " is required when using --" + this.INCREMENT_TYPE_ARG
+          + " lastmodified and the output directory exists.");
+      }
       checkColumnType = manager.getColumnTypes(options.getTableName(),
         options.getSqlQuery()).get(options.getIncrementalTestColumn());
       nextVal = manager.getCurrentDbTimestamp();
@@ -382,6 +425,48 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   }
 
   /**
+   * Merge HDFS output directories
+   */
+  protected void lastModifiedMerge(SqoopOptions options, ImportJobContext context) throws IOException {
+    FileSystem fs = FileSystem.get(options.getConf());
+    if (context.getDestination() != null && fs.exists(context.getDestination())) {
+      Path userDestDir = getOutputPath(options, context.getTableName(), false);
+      if (fs.exists(userDestDir)) {
+        String tableClassName = null;
+        if (!context.getConnManager().isORMFacilitySelfManaged()) {
+          tableClassName =
+              new TableClassName(options).getClassForTable(context.getTableName());
+        }
+        Path destDir = getOutputPath(options, context.getTableName());
+        options.setExistingJarName(context.getJarFile());
+        options.setClassName(tableClassName);
+        options.setMergeOldPath(userDestDir.toString());
+        options.setMergeNewPath(context.getDestination().toString());
+        // Merge to temporary directory so that original directory remains intact.
+        options.setTargetDir(destDir.toString());
+
+        // Local job tracker needs jars in the classpath.
+        loadJars(options.getConf(), context.getJarFile(), context.getTableName());
+
+        MergeJob mergeJob = new MergeJob(options);
+        if (mergeJob.runMergeJob()) {
+          // Rename destination directory to proper location.
+          Path tmpDir = getOutputPath(options, context.getTableName());
+          fs.rename(userDestDir, tmpDir);
+          fs.rename(destDir, userDestDir);
+          fs.delete(tmpDir, true);
+        } else {
+          LOG.error("Merge MapReduce job failed!");
+        }
+
+        unloadJars();
+      } else {
+        fs.rename(context.getDestination(), userDestDir);
+      }
+    }
+  }
+
+  /**
    * Import a table or query.
    * @return true if an import was performed, false otherwise.
    */
@@ -392,9 +477,11 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     // Generate the ORM code for the tables.
     jarFile = codeGenerator.generateORM(options, tableName);
 
+    Path outputPath = getOutputPath(options, tableName);
+
     // Do the actual import.
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
-        options, getOutputPath(options, tableName));
+        options, outputPath);
 
     // If we're doing an incremental import, set up the
     // filtering conditions used to get the latest records.
@@ -415,6 +502,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     if (options.isAppendMode()) {
       AppendUtils app = new AppendUtils(context);
       app.append();
+    } else if (options.getIncrementalMode() == SqoopOptions.IncrementalMode.DateLastModified) {
+      lastModifiedMerge(options, context);
     }
 
     // If the user wants this table to be in Hive, perform that post-load.
@@ -449,11 +538,20 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    * if importing to hbase, this may return null.
    */
   private Path getOutputPath(SqoopOptions options, String tableName) {
+    return getOutputPath(options, tableName, options.isAppendMode()
+        || options.getIncrementalMode().equals(SqoopOptions.IncrementalMode.DateLastModified));
+  }
+
+  /**
+   * @return the output path for the imported files;
+   * if importing to hbase, this may return null.
+   */
+  private Path getOutputPath(SqoopOptions options, String tableName, boolean temp) {
     // Get output directory
     String hdfsWarehouseDir = options.getWarehouseDir();
     String hdfsTargetDir = options.getTargetDir();
     Path outputPath = null;
-    if (options.isAppendMode()) {
+    if (temp) {
       // Use temporary path, later removed when appending
       String salt = tableName;
       if(salt == null && options.getSqlQuery() != null) {
@@ -585,6 +683,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           .withDescription("Set boundary query for retrieving max and min"
               + " value of the primary key")
           .withLongOpt(SQL_QUERY_BOUNDARY)
+          .create());
+      importOpts.addOption(OptionBuilder.withArgName("column")
+          .hasArg().withDescription("Key column to use to join results")
+          .withLongOpt(MERGE_KEY_ARG)
           .create());
 
       addValidationOpts(importOpts);
@@ -798,6 +900,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           out.setBoundaryQuery(in.getOptionValue(SQL_QUERY_BOUNDARY));
         }
 
+        if (in.hasOption(MERGE_KEY_ARG)) {
+          out.setMergeKeyCol(in.getOptionValue(MERGE_KEY_ARG));
+        }
+
         applyValidationOptions(in, out);
       }
 
@@ -941,14 +1047,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       && options.getHCatTableName() != null) {
       throw new InvalidOptionsException("--hcatalog-table cannot be used "
         + " --warehouse-dir or --target-dir options");
-     } else if (options.isDeleteMode() && options.isAppendMode()) {
+    } else if (options.isDeleteMode() && options.isAppendMode()) {
        throw new InvalidOptionsException("--append and --delete-target-dir can"
          + " not be used together.");
-     } else if (options.isDeleteMode() && options.getIncrementalMode()
+    } else if (options.isDeleteMode() && options.getIncrementalMode()
          != SqoopOptions.IncrementalMode.None) {
        throw new InvalidOptionsException("--delete-target-dir can not be used"
          + " with incremental imports.");
-     }
+    }
   }
 
   /**
@@ -968,6 +1074,13 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       throw new InvalidOptionsException(
           "You must specify an incremental import mode with --"
           + INCREMENT_TYPE_ARG + ". " + HELP_STR);
+    }
+
+    if (options.getIncrementalMode() == SqoopOptions.IncrementalMode.DateLastModified
+        && options.getFileLayout() == SqoopOptions.FileLayout.AvroDataFile) {
+      throw new InvalidOptionsException("--"
+          + INCREMENT_TYPE_ARG + " lastmodified cannot be used in conjunction with --"
+          + FMT_AVRODATAFILE_ARG + "." + HELP_STR);
     }
   }
 

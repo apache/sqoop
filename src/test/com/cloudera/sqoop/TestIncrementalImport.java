@@ -323,10 +323,62 @@ public class TestIncrementalImport extends TestCase {
   }
 
   /**
+   * Look at a directory that should contain files full of an imported 'id'
+   * column and 'last_modified' column. Assert that all numbers in [0, expectedNums) are present
+   * in order.
+   */
+  public void assertDirOfNumbersAndTimestamps(String tableName, int expectedNums) {
+    try {
+      FileSystem fs = FileSystem.getLocal(new Configuration());
+      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path tableDir = new Path(warehouse, tableName);
+      FileStatus [] stats = fs.listStatus(tableDir);
+      String [] fileNames = new String[stats.length];
+      for (int i = 0; i < stats.length; i++) {
+        fileNames[i] = stats[i].getPath().toString();
+      }
+
+      Arrays.sort(fileNames);
+
+      // Read all the files in sorted order, adding the value lines to the list.
+      List<String> receivedNums = new ArrayList<String>();
+      for (String fileName : fileNames) {
+        if (fileName.startsWith("_") || fileName.startsWith(".")) {
+          continue;
+        }
+
+        BufferedReader r = new BufferedReader(
+            new InputStreamReader(fs.open(new Path(fileName))));
+        try {
+          while (true) {
+            String s = r.readLine();
+            if (null == s) {
+              break;
+            }
+
+            receivedNums.add(s.trim());
+          }
+        } finally {
+          r.close();
+        }
+      }
+
+      assertEquals(expectedNums, receivedNums.size());
+
+      // Compare the received values with the expected set.
+      for (int i = 0; i < expectedNums; i++) {
+        assertEquals((int) i, (int) Integer.valueOf(receivedNums.get(i).split(",")[0]));
+      }
+    } catch (Exception e) {
+      fail("Got unexpected exception: " + StringUtils.stringifyException(e));
+    }
+  }
+
+  /**
    * Assert that a directory contains a file with exactly one line
    * in it, containing the prescribed number 'val'.
    */
-  public void assertSpecificNumber(String tableName, int val) {
+  public void assertFirstSpecificNumber(String tableName, int val) {
     try {
       FileSystem fs = FileSystem.getLocal(new Configuration());
       Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
@@ -366,6 +418,53 @@ public class TestIncrementalImport extends TestCase {
 
           // Successfully got the value we were looking for.
           foundVal = true;
+        } finally {
+          r.close();
+        }
+      }
+    } catch (IOException e) {
+      fail("Got unexpected exception: " + StringUtils.stringifyException(e));
+    }
+  }
+
+  /**
+   * Assert that a directory contains a file with exactly one line
+   * in it, containing the prescribed number 'val'.
+   */
+  public void assertSpecificNumber(String tableName, int val) {
+    try {
+      FileSystem fs = FileSystem.getLocal(new Configuration());
+      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path tableDir = new Path(warehouse, tableName);
+      FileStatus [] stats = fs.listStatus(tableDir);
+      String [] filePaths = new String[stats.length];
+      for (int i = 0; i < stats.length; i++) {
+        filePaths[i] = stats[i].getPath().toString();
+      }
+
+      // Read the first file that is not a hidden file.
+      boolean foundVal = false;
+      for (String filePath : filePaths) {
+        String fileName = new Path(filePath).getName();
+        if (fileName.startsWith("_") || fileName.startsWith(".")) {
+          continue;
+        }
+
+        if (foundVal) {
+          // Make sure we don't have two or more "real" files in the dir.
+          fail("Got an extra data-containing file in this directory.");
+        }
+
+        BufferedReader r = new BufferedReader(
+            new InputStreamReader(fs.open(new Path(filePath))));
+        try {
+          String s = r.readLine();
+          if (val == (int) Integer.valueOf(s.trim().split(",")[0])) {
+            if (foundVal) {
+              fail("Expected only one result, but got another line: " + s);
+            }
+            foundVal = true;
+          }
         } finally {
           r.close();
         }
@@ -465,7 +564,7 @@ public class TestIncrementalImport extends TestCase {
       args.add("--incremental");
       args.add("lastmodified");
       args.add("--check-column");
-      args.add("last_modified");
+      args.add("LAST_MODIFIED");
     }
     args.add("-m");
     args.add("1");
@@ -857,6 +956,156 @@ public class TestIncrementalImport extends TestCase {
 
     // Import only the new row.
     clearDir(TABLE_NAME);
+    runJob(TABLE_NAME);
+    assertFirstSpecificNumber(TABLE_NAME, 4000);
+  }
+
+  public void testUpdateModifyWithTimestamp() throws Exception {
+    // Create a table with data in it; import it.
+    // Then modify some existing rows, and verify that we only grab
+    // those rows.
+
+    final String TABLE_NAME = "updateModifyTimestamp";
+    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
+    createTimestampTable(TABLE_NAME, 10, thePast);
+
+    List<String> args = getArgListForTable(TABLE_NAME, false, false);
+
+    Configuration conf = newConf();
+    SqoopOptions options = new SqoopOptions();
+    options.setConf(conf);
+    runImport(options, args);
+    assertDirOfNumbers(TABLE_NAME, 10);
+
+    // Modify a row.
+    long importWasBefore = System.currentTimeMillis();
+    Thread.sleep(50);
+    long rowsAddedTime = System.currentTimeMillis() - 5;
+    assertTrue(rowsAddedTime > importWasBefore);
+    assertTrue(rowsAddedTime < System.currentTimeMillis());
+    SqoopOptions options2 = new SqoopOptions();
+    options2.setConnectString(SOURCE_DB_URL);
+    HsqldbManager manager = new HsqldbManager(options2);
+    Connection c = manager.getConnection();
+    PreparedStatement s = null;
+    try {
+      s = c.prepareStatement("UPDATE " + TABLE_NAME
+          + " SET id=?, last_modified=? WHERE id=?");
+      s.setInt(1, 4000); // the first row should have '4000' in it now.
+      s.setTimestamp(2, new Timestamp(rowsAddedTime));
+      s.setInt(3, 0);
+      s.executeUpdate();
+      c.commit();
+    } finally {
+      s.close();
+    }
+
+    // Update the new row.
+    args.add("--last-value");
+    args.add(new Timestamp(importWasBefore).toString());
+    args.add("--merge-key");
+    args.add("id");
+    conf = newConf();
+    options = new SqoopOptions();
+    options.setConf(conf);
+    runImport(options, args);
+    assertSpecificNumber(TABLE_NAME, 4000);
+  }
+
+  public void testUpdateModifyWithTimestampWithQuery() throws Exception {
+    // Create an empty table. Import it; nothing happens.
+    // Add some rows. Verify they are appended.
+
+    final String TABLE_NAME = "UpdateModifyWithTimestampWithQuery";
+    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
+    createTimestampTable(TABLE_NAME, 10, thePast);
+
+    final String QUERY = "SELECT id, last_modified FROM UpdateModifyWithTimestampWithQuery WHERE $CONDITIONS";
+
+    List<String> args = getArgListForQuery(QUERY, TABLE_NAME,
+        true, false, false);
+
+    Configuration conf = newConf();
+    SqoopOptions options = new SqoopOptions();
+    options.setConf(conf);
+    runImport(options, args);
+    assertDirOfNumbersAndTimestamps(TABLE_NAME, 10);
+
+    // Modify a row.
+    long importWasBefore = System.currentTimeMillis();
+    Thread.sleep(50);
+    long rowsAddedTime = System.currentTimeMillis() - 5;
+    assertTrue(rowsAddedTime > importWasBefore);
+    assertTrue(rowsAddedTime < System.currentTimeMillis());
+    SqoopOptions options2 = new SqoopOptions();
+    options2.setConnectString(SOURCE_DB_URL);
+    HsqldbManager manager = new HsqldbManager(options2);
+    Connection c = manager.getConnection();
+    PreparedStatement s = null;
+    try {
+      s = c.prepareStatement("UPDATE " + TABLE_NAME
+          + " SET id=?, last_modified=? WHERE id=?");
+      s.setInt(1, 4000); // the first row should have '4000' in it now.
+      s.setTimestamp(2, new Timestamp(rowsAddedTime));
+      s.setInt(3, 0);
+      s.executeUpdate();
+      c.commit();
+    } finally {
+      s.close();
+    }
+
+    // Update the new row.
+    args.add("--last-value");
+    args.add(new Timestamp(importWasBefore).toString());
+    args.add("--merge-key");
+    args.add("id");
+    conf = newConf();
+    options = new SqoopOptions();
+    options.setConf(conf);
+    runImport(options, args);
+    assertSpecificNumber(TABLE_NAME, 4000);
+  }
+
+  public void testUpdateModifyWithTimestampJob() throws Exception {
+    // Create a table with data in it; import it.
+    // Then modify some existing rows, and verify that we only grab
+    // those rows.
+
+    final String TABLE_NAME = "updateModifyTimestampJob";
+    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
+    createTimestampTable(TABLE_NAME, 10, thePast);
+
+    List<String> args = getArgListForTable(TABLE_NAME, false, false);
+    args.add("--merge-key");
+    args.add("id");
+    createJob(TABLE_NAME, args);
+    runJob(TABLE_NAME);
+    assertDirOfNumbers(TABLE_NAME, 10);
+
+    // Modify a row.
+    long importWasBefore = System.currentTimeMillis();
+    Thread.sleep(50);
+    long rowsAddedTime = System.currentTimeMillis() - 5;
+    assertTrue(rowsAddedTime > importWasBefore);
+    assertTrue(rowsAddedTime < System.currentTimeMillis());
+    SqoopOptions options2 = new SqoopOptions();
+    options2.setConnectString(SOURCE_DB_URL);
+    HsqldbManager manager = new HsqldbManager(options2);
+    Connection c = manager.getConnection();
+    PreparedStatement s = null;
+    try {
+      s = c.prepareStatement("UPDATE " + TABLE_NAME
+          + " SET id=?, last_modified=? WHERE id=?");
+      s.setInt(1, 4000); // the first row should have '4000' in it now.
+      s.setTimestamp(2, new Timestamp(rowsAddedTime));
+      s.setInt(3, 0);
+      s.executeUpdate();
+      c.commit();
+    } finally {
+      s.close();
+    }
+
+    // Update the new row.
     runJob(TABLE_NAME);
     assertSpecificNumber(TABLE_NAME, 4000);
   }
