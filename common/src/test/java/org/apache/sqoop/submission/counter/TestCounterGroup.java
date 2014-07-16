@@ -26,56 +26,56 @@ import org.junit.Test;
  */
 public class TestCounterGroup {
 
-  /**
-   * CounterGroup initialization
-   */
-  @Test
-  public void testInitialization() {
-    CounterGroup cg = new CounterGroup("sqoop");
-    Assert.assertEquals("sqoop", cg.getName());
-    Assert.assertFalse(cg.iterator().hasNext());
-
-    Counter c1 = new Counter("counter");
-    cg.addCounter(c1);
-  }
-
-  /**
-   * Test for add and get counter
-   */
-  @Test
-  public void testAddGetCounter() {
-    CounterGroup cg = new CounterGroup("sqoop");
-    Counter c1 = new Counter("counter");
-    cg.addCounter(c1);
-    Assert.assertNotNull(cg.getCounter("counter"));
-    Assert.assertNull(cg.getCounter("NA"));
-  }
-
-  /**
-   * Test for iterator
-   */
-  @Test
-  public void testIterator() {
-    CounterGroup cg = new CounterGroup("sqoop");
-    Counter c1 = new Counter("counter1");
-    Counter c2 = new Counter("counter2");
-    // Adding 2 Counter into CounterGroup
-    cg.addCounter(c1);
-    cg.addCounter(c2);
-    int count = 0;
-
-    for (Counter c : cg) {
-      count++;
-    }
-    Assert.assertEquals(2, count);
-
-    Counter c3 = new Counter("counter3");
-    cg.addCounter(c3);
-    count = 0;
-
-    for (Counter c : cg) {
-      count++;
-    }
-    Assert.assertEquals(3, count);
-  }
+//  /**
+//   * CounterGroup initialization
+//   */
+//  @Test
+//  public void testInitialization() {
+//    CounterGroup cg = new CounterGroup("sqoop");
+//    Assert.assertEquals("sqoop", cg.getName());
+//    Assert.assertFalse(cg.iterator().hasNext());
+//
+//    Counter c1 = new Counter("counter");
+//    cg.addCounter(c1);
+//  }
+//
+//  /**
+//   * Test for add and get counter
+//   */
+//  @Test
+//  public void testAddGetCounter() {
+//    CounterGroup cg = new CounterGroup("sqoop");
+//    Counter c1 = new Counter("counter");
+//    cg.addCounter(c1);
+//    Assert.assertNotNull(cg.getCounter("counter"));
+//    Assert.assertNull(cg.getCounter("NA"));
+//  }
+//
+//  /**
+//   * Test for iterator
+//   */
+//  @Test
+//  public void testIterator() {
+//    CounterGroup cg = new CounterGroup("sqoop");
+//    Counter c1 = new Counter("counter1");
+//    Counter c2 = new Counter("counter2");
+//    // Adding 2 Counter into CounterGroup
+//    cg.addCounter(c1);
+//    cg.addCounter(c2);
+//    int count = 0;
+//
+//    for (Counter c : cg) {
+//      count++;
+//    }
+//    Assert.assertEquals(2, count);
+//
+//    Counter c3 = new Counter("counter3");
+//    cg.addCounter(c3);
+//    count = 0;
+//
+//    for (Counter c : cg) {
+//      count++;
+//    }
+//    Assert.assertEquals(3, count);
+//  }
 }

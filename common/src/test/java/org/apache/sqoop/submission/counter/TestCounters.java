@@ -26,42 +26,42 @@ import junit.framework.Assert;
  */
 public class TestCounters {
 
-  /**
-   * Test initialization
-   */
-  @Test
-  public void testInitialization() {
-    Counters counters = new Counters();
-    Assert.assertTrue(counters.isEmpty());
-  }
-
-  /**
-   * Test add and get CountersGroup
-   */
-  @Test
-  public void testAddGetCounters() {
-    Counters counters = new Counters();
-    CounterGroup cg = new CounterGroup("sqoop");
-    counters.addCounterGroup(cg);
-    Assert.assertFalse(counters.isEmpty());
-    Assert.assertNotNull(counters.getCounterGroup("sqoop"));
-    Assert.assertEquals("sqoop", counters.getCounterGroup("sqoop").getName());
-  }
-
-  /**
-   * Test for iterator
-   */
-  @Test
-  public void testIterator() {
-    Counters counters = new Counters();
-    CounterGroup cg1 = new CounterGroup("sqoop1");
-    CounterGroup cg2 = new CounterGroup("sqoop2");
-    counters.addCounterGroup(cg1);
-    counters.addCounterGroup(cg2);
-    int count = 0;
-    for (CounterGroup cg : counters) {
-      count++;
-    }
-    Assert.assertEquals(2, count);
-  }
+//  /**
+//   * Test initialization
+//   */
+//  @Test
+//  public void testInitialization() {
+//    Counters counters = new Counters();
+//    Assert.assertTrue(counters.isEmpty());
+//  }
+//
+//  /**
+//   * Test add and get CountersGroup
+//   */
+//  @Test
+//  public void testAddGetCounters() {
+//    Counters counters = new Counters();
+//    CounterGroup cg = new CounterGroup("sqoop");
+//    counters.addCounterGroup(cg);
+//    Assert.assertFalse(counters.isEmpty());
+//    Assert.assertNotNull(counters.getCounterGroup("sqoop"));
+//    Assert.assertEquals("sqoop", counters.getCounterGroup("sqoop").getName());
+//  }
+//
+//  /**
+//   * Test for iterator
+//   */
+//  @Test
+//  public void testIterator() {
+//    Counters counters = new Counters();
+//    CounterGroup cg1 = new CounterGroup("sqoop1");
+//    CounterGroup cg2 = new CounterGroup("sqoop2");
+//    counters.addCounterGroup(cg1);
+//    counters.addCounterGroup(cg2);
+//    int count = 0;
+//    for (CounterGroup cg : counters) {
+//      count++;
+//    }
+//    Assert.assertEquals(2, count);
+//  }
 }

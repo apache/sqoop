@@ -27,38 +27,38 @@ import junit.framework.TestCase;
  */
 public class TestSubmissionStatus extends TestCase {
 
-  /**
-   * unfinished() test
-   */
-  public void testUnfinished() {
-    SubmissionStatus subStatus[] = SubmissionStatus.unfinished();
-    SubmissionStatus subStatusTest[] = new SubmissionStatus[] {
-        SubmissionStatus.RUNNING, SubmissionStatus.BOOTING };
-    List<SubmissionStatus> tempSubmissionStatusList = Arrays.asList(subStatus);
-    for (SubmissionStatus stat : subStatusTest) {
-      assertTrue(tempSubmissionStatusList.contains(stat));
-    }
-  }
-
-  /**
-   * isRunning() test
-   */
-  public void testIsRunning() {
-    assertTrue(SubmissionStatus.RUNNING.isRunning());
-    assertTrue(SubmissionStatus.BOOTING.isRunning());
-    assertFalse(SubmissionStatus.FAILED.isRunning());
-    assertFalse(SubmissionStatus.UNKNOWN.isRunning());
-    assertFalse(SubmissionStatus.FAILURE_ON_SUBMIT.isRunning());
-  }
-
-  /**
-   * isFailure() test
-   */
-  public void testIsFailure() {
-    assertTrue(SubmissionStatus.FAILED.isFailure());
-    assertTrue(SubmissionStatus.UNKNOWN.isFailure());
-    assertTrue(SubmissionStatus.FAILURE_ON_SUBMIT.isFailure());
-    assertFalse(SubmissionStatus.RUNNING.isFailure());
-    assertFalse(SubmissionStatus.BOOTING.isFailure());
-  }
+//  /**
+//   * unfinished() test
+//   */
+//  public void testUnfinished() {
+//    SubmissionStatus subStatus[] = SubmissionStatus.unfinished();
+//    SubmissionStatus subStatusTest[] = new SubmissionStatus[] {
+//        SubmissionStatus.RUNNING, SubmissionStatus.BOOTING };
+//    List<SubmissionStatus> tempSubmissionStatusList = Arrays.asList(subStatus);
+//    for (SubmissionStatus stat : subStatusTest) {
+//      assertTrue(tempSubmissionStatusList.contains(stat));
+//    }
+//  }
+//
+//  /**
+//   * isRunning() test
+//   */
+//  public void testIsRunning() {
+//    assertTrue(SubmissionStatus.RUNNING.isRunning());
+//    assertTrue(SubmissionStatus.BOOTING.isRunning());
+//    assertFalse(SubmissionStatus.FAILED.isRunning());
+//    assertFalse(SubmissionStatus.UNKNOWN.isRunning());
+//    assertFalse(SubmissionStatus.FAILURE_ON_SUBMIT.isRunning());
+//  }
+//
+//  /**
+//   * isFailure() test
+//   */
+//  public void testIsFailure() {
+//    assertTrue(SubmissionStatus.FAILED.isFailure());
+//    assertTrue(SubmissionStatus.UNKNOWN.isFailure());
+//    assertTrue(SubmissionStatus.FAILURE_ON_SUBMIT.isFailure());
+//    assertFalse(SubmissionStatus.RUNNING.isFailure());
+//    assertFalse(SubmissionStatus.BOOTING.isFailure());
+//  }
 }

@@ -34,31 +34,31 @@ import static org.junit.Assert.*;
  */
 public class TestFrameworkBean {
 
-  /**
-   * Test that by JSON serialization followed by deserialization we will get
-   * equal framework object.
-   */
-  @Test
-  public void testSerialization() {
-    MFramework framework = getFramework();
-
-    // Serialize it to JSON object
-    FrameworkBean bean = new FrameworkBean(framework, getResourceBundle());
-    JSONObject json = bean.extract(false);
-
-    // "Move" it across network in text form
-    String string = json.toJSONString();
-
-    // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    FrameworkBean retrievedBean = new FrameworkBean();
-    retrievedBean.restore(retrievedJson);
-
-    assertEquals(framework, retrievedBean.getFramework());
-
-    ResourceBundle retrievedBundle = retrievedBean.getResourceBundle();
-    assertEquals("a", retrievedBundle.getString("a"));
-    assertEquals("b", retrievedBundle.getString("b"));
-  }
+//  /**
+//   * Test that by JSON serialization followed by deserialization we will get
+//   * equal framework object.
+//   */
+//  @Test
+//  public void testSerialization() {
+//    MFramework framework = getFramework();
+//
+//    // Serialize it to JSON object
+//    FrameworkBean bean = new FrameworkBean(framework, getResourceBundle());
+//    JSONObject json = bean.extract(false);
+//
+//    // "Move" it across network in text form
+//    String string = json.toJSONString();
+//
+//    // Retrieved transferred object
+//    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+//    FrameworkBean retrievedBean = new FrameworkBean();
+//    retrievedBean.restore(retrievedJson);
+//
+//    assertEquals(framework, retrievedBean.getFramework());
+//
+//    ResourceBundle retrievedBundle = retrievedBean.getResourceBundle();
+//    assertEquals("a", retrievedBundle.getString("a"));
+//    assertEquals("b", retrievedBundle.getString("b"));
+//  }
 
 }

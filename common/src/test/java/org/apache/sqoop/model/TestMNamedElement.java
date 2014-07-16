@@ -26,14 +26,14 @@ import org.junit.Test;
  */
 public class TestMNamedElement {
 
-  /**
-   * Test initialization and values
-   */
-  @Test
-  public void testInitialization() {
-    MNamedElement named = new MIntegerInput("SQOOP", false);
-    assertEquals("SQOOP", named.getName());
-    assertEquals("SQOOP.label", named.getLabelKey());
-    assertEquals("SQOOP.help", named.getHelpKey());
-  }
+//  /**
+//   * Test initialization and values
+//   */
+//  @Test
+//  public void testInitialization() {
+//    MNamedElement named = new MIntegerInput("SQOOP", false);
+//    assertEquals("SQOOP", named.getName());
+//    assertEquals("SQOOP.label", named.getLabelKey());
+//    assertEquals("SQOOP.help", named.getHelpKey());
+//  }
 }

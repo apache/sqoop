@@ -30,32 +30,32 @@ import org.junit.Test;
  */
 public class TestMAccountableEntity {
 
-  /**
-   * Test for class initialization
-   */
-  @Test
-  public void testInitialization() {
-    List<MForm> forms = new ArrayList<MForm>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
-    List<MInput<?>> list = new ArrayList<MInput<?>>();
-    list.add(input);
-    MForm form = new MForm("FORMNAME", list);
-    forms.add(form);
-    MAccountableEntity connection = new MConnection(123l, new MConnectionForms(
-        forms), new MConnectionForms(forms));
-    // Initially creation date and last update date is same
-    assertEquals(connection.getCreationDate(), connection.getLastUpdateDate());
-    Date testCreationDate = new Date();
-    Date testLastUpdateDate = new Date();
-    connection.setCreationUser("admin");
-    connection.setCreationDate(testCreationDate);
-    connection.setLastUpdateUser("user");
-    connection.setLastUpdateDate(testLastUpdateDate);
-    connection.setEnabled(false);
-    assertEquals(testCreationDate, connection.getCreationDate());
-    assertEquals("admin", connection.getCreationUser());
-    assertEquals(testLastUpdateDate, connection.getLastUpdateDate());
-    assertEquals(false, connection.getEnabled());
-    assertEquals("user", connection.getLastUpdateUser());
-  }
+//  /**
+//   * Test for class initialization
+//   */
+//  @Test
+//  public void testInitialization() {
+//    List<MForm> forms = new ArrayList<MForm>();
+//    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+//    List<MInput<?>> list = new ArrayList<MInput<?>>();
+//    list.add(input);
+//    MForm form = new MForm("FORMNAME", list);
+//    forms.add(form);
+//    MAccountableEntity connection = new MConnection(123l, new MConnectionForms(
+//        forms), new MConnectionForms(forms));
+//    // Initially creation date and last update date is same
+//    assertEquals(connection.getCreationDate(), connection.getLastUpdateDate());
+//    Date testCreationDate = new Date();
+//    Date testLastUpdateDate = new Date();
+//    connection.setCreationUser("admin");
+//    connection.setCreationDate(testCreationDate);
+//    connection.setLastUpdateUser("user");
+//    connection.setLastUpdateDate(testLastUpdateDate);
+//    connection.setEnabled(false);
+//    assertEquals(testCreationDate, connection.getCreationDate());
+//    assertEquals("admin", connection.getCreationUser());
+//    assertEquals(testLastUpdateDate, connection.getLastUpdateDate());
+//    assertEquals(false, connection.getEnabled());
+//    assertEquals("user", connection.getLastUpdateUser());
+//  }
 }

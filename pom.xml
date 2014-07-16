@@ -110,6 +110,9 @@ limitations under the License.
     <jdbc.sqlserver.version>4.0</jdbc.sqlserver.version>
     <jdbc.teradata.version>14.00.00.21</jdbc.teradata.version>
     <jdbc.netezza.version>6.0</jdbc.netezza.version>
+
+    <!-- To remove -->
+    <skipTests>true</skipTests>
   </properties>
 
   <dependencies>

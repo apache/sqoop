@@ -28,14 +28,14 @@ import static org.junit.Assert.*;
  *
  */
 public class TestMapResourceBundle {
-  @Test
-  public void testUsage() {
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put("a", "1");
-    map.put("b", "2");
-
-    MapResourceBundle bundle = new MapResourceBundle(map);
-    assertEquals("1", bundle.getString("a"));
-    assertEquals("2", bundle.getString("b"));
-  }
+//  @Test
+//  public void testUsage() {
+//    Map<String, Object> map = new HashMap<String, Object>();
+//    map.put("a", "1");
+//    map.put("b", "2");
+//
+//    MapResourceBundle bundle = new MapResourceBundle(map);
+//    assertEquals("1", bundle.getString("a"));
+//    assertEquals("2", bundle.getString("b"));
+//  }
 }

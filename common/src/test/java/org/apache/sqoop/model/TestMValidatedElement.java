@@ -27,44 +27,44 @@ import org.junit.Test;
  */
 public class TestMValidatedElement {
 
-  /**
-   * Test for initalization
-   */
-  @Test
-  public void testInitialization() {
-    MValidatedElement input = new MIntegerInput("input", false);
-    assertEquals("input", input.getName());
-    assertEquals(Status.FINE, input.getValidationStatus());
-  }
-
-  /**
-   * Test for validation message and status
-   */
-  @Test
-  public void testValidationMessageStatus() {
-    MValidatedElement input = new MIntegerInput("input", false);
-    // Default status
-    assertEquals(Status.FINE, input.getValidationStatus());
-    // Set status and user message
-    input.setValidationMessage(Status.ACCEPTABLE, "MY_MESSAGE");
-    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
-    assertEquals("MY_MESSAGE", input.getValidationMessage());
-    // Check for null if status does not equal
-    assertNull(input.getValidationMessage(Status.FINE));
-    assertNull(input.getErrorMessage());
-    assertNotNull(input.getWarningMessage());
-    // Set unacceptable status
-    input.setValidationMessage(Status.UNACCEPTABLE, "MY_MESSAGE");
-    assertNotNull(input.getErrorMessage());
-    assertEquals("MY_MESSAGE", input.getErrorMessage());
-    assertNull(input.getWarningMessage());
-    // Set warning
-    input.setWarningMessage("WARN");
-    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
-    assertEquals("WARN", input.getValidationMessage());
-    // Unacceptable method
-    input.setErrorMessage("ERROR");
-    assertEquals(Status.UNACCEPTABLE, input.getValidationStatus());
-    assertEquals("ERROR", input.getValidationMessage());
-  }
+//  /**
+//   * Test for initalization
+//   */
+//  @Test
+//  public void testInitialization() {
+//    MValidatedElement input = new MIntegerInput("input", false);
+//    assertEquals("input", input.getName());
+//    assertEquals(Status.FINE, input.getValidationStatus());
+//  }
+//
+//  /**
+//   * Test for validation message and status
+//   */
+//  @Test
+//  public void testValidationMessageStatus() {
+//    MValidatedElement input = new MIntegerInput("input", false);
+//    // Default status
+//    assertEquals(Status.FINE, input.getValidationStatus());
+//    // Set status and user message
+//    input.setValidationMessage(Status.ACCEPTABLE, "MY_MESSAGE");
+//    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
+//    assertEquals("MY_MESSAGE", input.getValidationMessage());
+//    // Check for null if status does not equal
+//    assertNull(input.getValidationMessage(Status.FINE));
+//    assertNull(input.getErrorMessage());
+//    assertNotNull(input.getWarningMessage());
+//    // Set unacceptable status
+//    input.setValidationMessage(Status.UNACCEPTABLE, "MY_MESSAGE");
+//    assertNotNull(input.getErrorMessage());
+//    assertEquals("MY_MESSAGE", input.getErrorMessage());
+//    assertNull(input.getWarningMessage());
+//    // Set warning
+//    input.setWarningMessage("WARN");
+//    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
+//    assertEquals("WARN", input.getValidationMessage());
+//    // Unacceptable method
+//    input.setErrorMessage("ERROR");
+//    assertEquals(Status.UNACCEPTABLE, input.getValidationStatus());
+//    assertEquals("ERROR", input.getValidationMessage());
+//  }
 }

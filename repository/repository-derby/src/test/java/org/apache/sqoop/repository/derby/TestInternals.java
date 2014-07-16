@@ -22,26 +22,26 @@ package org.apache.sqoop.repository.derby;
  */
 public class TestInternals extends DerbyTestCase {
 
-  DerbyRepositoryHandler handler;
-
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-
-    handler = new DerbyRepositoryHandler();
-  }
-
-  public void testSuitableInternals() throws Exception {
-    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-    createSchema(); // Test code is building the structures
-    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
-  }
-
-  public void testCreateorUpdateInternals() throws Exception {
-    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-    handler.createOrUpdateInternals(getDerbyConnection());
-    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
-  }
+//  DerbyRepositoryHandler handler;
+//
+//  @Override
+//  public void setUp() throws Exception {
+//    super.setUp();
+//
+//    handler = new DerbyRepositoryHandler();
+//  }
+//
+//  public void testSuitableInternals() throws Exception {
+//    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+//    createSchema(); // Test code is building the structures
+//    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+//  }
+//
+//  public void testCreateorUpdateInternals() throws Exception {
+//    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+//    handler.createOrUpdateInternals(getDerbyConnection());
+//    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+//  }
 
 
 }

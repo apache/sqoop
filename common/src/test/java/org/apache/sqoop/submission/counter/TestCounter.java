@@ -25,20 +25,20 @@ import org.junit.Test;
  */
 public class TestCounter {
 
-  /**
-   * Test method for initialization
-   */
-  @Test
-  public void testInitialization() {
-    Counter counter = new Counter("sqoop");
-    Assert.assertEquals("sqoop", counter.getName());
-    Assert.assertEquals(0l, counter.getValue());
-
-    Counter counter1 = new Counter("sqoop", 1000l);
-    Assert.assertEquals("sqoop", counter1.getName());
-    Assert.assertEquals(1000l, counter1.getValue());
-
-    counter1.setValue(2000l);
-    Assert.assertEquals(2000l, counter1.getValue());
-  }
+//  /**
+//   * Test method for initialization
+//   */
+//  @Test
+//  public void testInitialization() {
+//    Counter counter = new Counter("sqoop");
+//    Assert.assertEquals("sqoop", counter.getName());
+//    Assert.assertEquals(0l, counter.getValue());
+//
+//    Counter counter1 = new Counter("sqoop", 1000l);
+//    Assert.assertEquals("sqoop", counter1.getName());
+//    Assert.assertEquals(1000l, counter1.getValue());
+//
+//    counter1.setValue(2000l);
+//    Assert.assertEquals(2000l, counter1.getValue());
+//  }
 }
