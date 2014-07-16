@@ -29,132 +29,132 @@ import org.apache.sqoop.etl.io.DataWriter;
 
 public class TestImportExtractor extends TestCase {
 
-  private final String tableName;
-
-  private GenericJdbcExecutor executor;
-
-  private static final int START = -50;
-  private static final int NUMBER_OF_ROWS = 101;
-
-  public TestImportExtractor() {
-    tableName = getClass().getSimpleName().toUpperCase();
-  }
-
-  @Override
-  public void setUp() {
-    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
-        GenericJdbcTestConstants.URL, null, null);
-
-    if (!executor.existTable(tableName)) {
-      executor.executeUpdate("CREATE TABLE "
-          + executor.delimitIdentifier(tableName)
-          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
-
-      for (int i = 0; i < NUMBER_OF_ROWS; i++) {
-        int value = START + i;
-        String sql = "INSERT INTO " + executor.delimitIdentifier(tableName)
-            + " VALUES(" + value + ", " + value + ", '" + value + "')";
-        executor.executeUpdate(sql);
-      }
-    }
-  }
-
-  @Override
-  public void tearDown() {
-    executor.close();
-  }
-
-  public void testQuery() throws Exception {
-    MutableContext context = new MutableMapContext();
-
-    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
-
-    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
-
-    ImportJobConfiguration jobConfig = new ImportJobConfiguration();
-
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
-        "SELECT * FROM " + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}");
-
-    GenericJdbcImportPartition partition;
-
-    Extractor extractor = new GenericJdbcImportExtractor();
-    DummyWriter writer = new DummyWriter();
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("-16.6666666666666665 <= DCOL AND DCOL < 16.666666666666667");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("16.666666666666667 <= DCOL AND DCOL <= 50.0");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-  }
-
-  public void testSubquery() throws Exception {
-    MutableContext context = new MutableMapContext();
-
-    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
-
-    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
-
-    ImportJobConfiguration jobConfig = new ImportJobConfiguration();
-
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
-        "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "
-            + "(SELECT * FROM " + executor.delimitIdentifier(tableName)
-            + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
-
-    GenericJdbcImportPartition partition;
-
-    Extractor extractor = new GenericJdbcImportExtractor();
-    DummyWriter writer = new DummyWriter();
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("-50 <= ICOL AND ICOL < -16");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("-16 <= ICOL AND ICOL < 17");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-
-    partition = new GenericJdbcImportPartition();
-    partition.setConditions("17 <= ICOL AND ICOL < 50");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
-  }
-
-  public class DummyWriter extends DataWriter {
-    int indx = START;
-
-    @Override
-    public void writeArrayRecord(Object[] array) {
-      for (int i = 0; i < array.length; i++) {
-        if (array[i] instanceof Integer) {
-          assertEquals(indx, ((Integer)array[i]).intValue());
-        } else if (array[i] instanceof Double) {
-          assertEquals((double)indx, ((Double)array[i]).doubleValue());
-        } else {
-          assertEquals(String.valueOf(indx), array[i].toString());
-        }
-      }
-      indx++;
-    }
-
-    @Override
-    public void writeStringRecord(String text) {
-      fail("This method should not be invoked.");
-    }
-
-    @Override
-    public void writeRecord(Object content) {
-      fail("This method should not be invoked.");
-    }
-  }
+//  private final String tableName;
+//
+//  private GenericJdbcExecutor executor;
+//
+//  private static final int START = -50;
+//  private static final int NUMBER_OF_ROWS = 101;
+//
+//  public TestImportExtractor() {
+//    tableName = getClass().getSimpleName().toUpperCase();
+//  }
+//
+//  @Override
+//  public void setUp() {
+//    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
+//        GenericJdbcTestConstants.URL, null, null);
+//
+//    if (!executor.existTable(tableName)) {
+//      executor.executeUpdate("CREATE TABLE "
+//          + executor.delimitIdentifier(tableName)
+//          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
+//
+//      for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+//        int value = START + i;
+//        String sql = "INSERT INTO " + executor.delimitIdentifier(tableName)
+//            + " VALUES(" + value + ", " + value + ", '" + value + "')";
+//        executor.executeUpdate(sql);
+//      }
+//    }
+//  }
+//
+//  @Override
+//  public void tearDown() {
+//    executor.close();
+//  }
+//
+//  public void testQuery() throws Exception {
+//    MutableContext context = new MutableMapContext();
+//
+//    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+//
+//    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+//    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+//
+//    ImportJobConfiguration jobConfig = new ImportJobConfiguration();
+//
+//    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
+//        "SELECT * FROM " + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}");
+//
+//    GenericJdbcImportPartition partition;
+//
+//    Extractor extractor = new GenericJdbcImportExtractor();
+//    DummyWriter writer = new DummyWriter();
+//    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("-16.6666666666666665 <= DCOL AND DCOL < 16.666666666666667");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("16.666666666666667 <= DCOL AND DCOL <= 50.0");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//  }
+//
+//  public void testSubquery() throws Exception {
+//    MutableContext context = new MutableMapContext();
+//
+//    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+//
+//    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+//    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+//
+//    ImportJobConfiguration jobConfig = new ImportJobConfiguration();
+//
+//    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
+//        "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "
+//            + "(SELECT * FROM " + executor.delimitIdentifier(tableName)
+//            + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
+//
+//    GenericJdbcImportPartition partition;
+//
+//    Extractor extractor = new GenericJdbcImportExtractor();
+//    DummyWriter writer = new DummyWriter();
+//    ExtractorContext extractorContext = new ExtractorContext(context, writer, null);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("-50 <= ICOL AND ICOL < -16");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("-16 <= ICOL AND ICOL < 17");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//
+//    partition = new GenericJdbcImportPartition();
+//    partition.setConditions("17 <= ICOL AND ICOL < 50");
+//    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+//  }
+//
+//  public class DummyWriter extends DataWriter {
+//    int indx = START;
+//
+//    @Override
+//    public void writeArrayRecord(Object[] array) {
+//      for (int i = 0; i < array.length; i++) {
+//        if (array[i] instanceof Integer) {
+//          assertEquals(indx, ((Integer)array[i]).intValue());
+//        } else if (array[i] instanceof Double) {
+//          assertEquals((double)indx, ((Double)array[i]).doubleValue());
+//        } else {
+//          assertEquals(String.valueOf(indx), array[i].toString());
+//        }
+//      }
+//      indx++;
+//    }
+//
+//    @Override
+//    public void writeStringRecord(String text) {
+//      fail("This method should not be invoked.");
+//    }
+//
+//    @Override
+//    public void writeRecord(Object content) {
+//      fail("This method should not be invoked.");
+//    }
+//  }
 }

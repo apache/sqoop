@@ -29,23 +29,24 @@ import org.json.simple.JSONValue;
  * as a means of transfer.
  */
 public class TestSchemaBean extends TestSchemaSerialization {
-
-  /**
-   * Override the transfer method to use the SchemaBean.
-   *
-   * @param schema
-   * @return
-   */
-  @Override
-  protected Schema transfer(Schema schema) {
-    SchemaBean extractBean = new SchemaBean(schema);
-    JSONObject extractJson = extractBean.extract(true);
-
-    String transferredString = extractJson.toJSONString();
-
-    JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
-    SchemaBean restoreBean = new SchemaBean();
-    restoreBean.restore(restoreJson);
-
-    return restoreBean.getSchema();
-  }}
+//
+//  /**
+//   * Override the transfer method to use the SchemaBean.
+//   *
+//   * @param schema
+//   * @return
+//   */
+//  @Override
+//  protected Schema transfer(Schema schema) {
+//    SchemaBean extractBean = new SchemaBean(schema);
+//    JSONObject extractJson = extractBean.extract(true);
+//
+//    String transferredString = extractJson.toJSONString();
+//
+//    JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
+//    SchemaBean restoreBean = new SchemaBean();
+//    restoreBean.restore(restoreJson);
+//
+//    return restoreBean.getSchema();
+//  }
+}

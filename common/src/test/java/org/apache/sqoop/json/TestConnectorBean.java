@@ -37,40 +37,40 @@ import static org.apache.sqoop.json.TestUtil.*;
  */
 public class TestConnectorBean {
 
-  /**
-   * Test that by JSON serialization followed by deserialization we will get
-   * equal connector object.
-   */
-  @Test
-  public void testSerialization() {
-    // Create testing connector
-    List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector("jdbc"));
-    connectors.add(getConnector("mysql"));
-
-    // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, getResourceBundle());
-    bundles.put(2L, getResourceBundle());
-
-    // Serialize it to JSON object
-    ConnectorBean bean = new ConnectorBean(connectors, bundles);
-    JSONObject json = bean.extract(false);
-
-    // "Move" it across network in text form
-    String string = json.toJSONString();
-
-    // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectorBean retrievedBean = new ConnectorBean();
-    retrievedBean.restore(retrievedJson);
-
-    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
-    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
-
-    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(1L);
-    assertNotNull(retrievedBundle);
-    assertEquals("a", retrievedBundle.getString("a"));
-    assertEquals("b", retrievedBundle.getString("b"));
-  }
+//  /**
+//   * Test that by JSON serialization followed by deserialization we will get
+//   * equal connector object.
+//   */
+//  @Test
+//  public void testSerialization() {
+//    // Create testing connector
+//    List<MConnector> connectors = new LinkedList<MConnector>();
+//    connectors.add(getConnector("jdbc"));
+//    connectors.add(getConnector("mysql"));
+//
+//    // Create testing bundles
+//    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+//    bundles.put(1L, getResourceBundle());
+//    bundles.put(2L, getResourceBundle());
+//
+//    // Serialize it to JSON object
+//    ConnectorBean bean = new ConnectorBean(connectors, bundles);
+//    JSONObject json = bean.extract(false);
+//
+//    // "Move" it across network in text form
+//    String string = json.toJSONString();
+//
+//    // Retrieved transferred object
+//    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+//    ConnectorBean retrievedBean = new ConnectorBean();
+//    retrievedBean.restore(retrievedJson);
+//
+//    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+//    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+//
+//    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(1L);
+//    assertNotNull(retrievedBundle);
+//    assertEquals("a", retrievedBundle.getString("a"));
+//    assertEquals("b", retrievedBundle.getString("b"));
+//  }
 }

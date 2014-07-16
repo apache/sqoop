@@ -29,20 +29,20 @@ import org.junit.Test;
  */
 public class TestMConnectionForms {
 
-  /**
-   * Test for class initialization and values
-   */
-  @Test
-  public void testInitialization() {
-    List<MForm> forms = new ArrayList<MForm>();
-    MConnectionForms connectionForms1 = new MConnectionForms(forms);
-    List<MForm> testForms = new ArrayList<MForm>();
-    assertEquals(testForms, connectionForms1.getForms());
-    MConnectionForms connectionForms2 = new MConnectionForms(testForms);
-    assertEquals(connectionForms2, connectionForms1);
-    // Add a form to list for checking not equals
-    MForm m = new MForm("test", null);
-    testForms.add(m);
-    assertFalse(connectionForms1.equals(connectionForms2));
-  }
+//  /**
+//   * Test for class initialization and values
+//   */
+//  @Test
+//  public void testInitialization() {
+//    List<MForm> forms = new ArrayList<MForm>();
+//    MConnectionForms connectionForms1 = new MConnectionForms(forms);
+//    List<MForm> testForms = new ArrayList<MForm>();
+//    assertEquals(testForms, connectionForms1.getForms());
+//    MConnectionForms connectionForms2 = new MConnectionForms(testForms);
+//    assertEquals(connectionForms2, connectionForms1);
+//    // Add a form to list for checking not equals
+//    MForm m = new MForm("test", null);
+//    testForms.add(m);
+//    assertFalse(connectionForms1.equals(connectionForms2));
+//  }
 }

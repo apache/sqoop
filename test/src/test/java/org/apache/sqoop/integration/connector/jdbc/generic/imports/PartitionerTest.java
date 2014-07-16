@@ -35,91 +35,91 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class PartitionerTest extends ConnectorTestCase {
 
-  private static final Logger LOG = Logger.getLogger(PartitionerTest.class);
-
-  /**
-   * Columns that we will use as partition column with maximal number of
-   * partitions that can be created for such column.
-   */
-  public static Object[] COLUMNS = new Object [][] {
-    {"id",           13},
-    {"code_name",    13},
-    {"version",      13},
-    {"release_date", 13},
-    {"lts",           2},
-  };
-
-  /**
-   * Number of extractors that we will use to transfer the table.
-   */
-  public static Object [] EXTRACTORS = new Object[] {
-    3, 5, 10, 13,
-  };
-
-  @Parameterized.Parameters(name = "{0}-{1}-{2}")
-  public static Iterable<Object[]> data() {
-    return ParametrizedUtils.crossProduct(COLUMNS, EXTRACTORS);
-  }
-
-  private String partitionColumn;
-  private int extractors;
-  private int maxOutputFiles;
-
-  public PartitionerTest(String partitionColumn, int expectedOutputFiles, int extractors) {
-    this.partitionColumn = partitionColumn;
-    this.maxOutputFiles = expectedOutputFiles;
-    this.extractors = extractors;
-  }
-
-  @Test
-  public void testSplitter() throws Exception {
-    createAndLoadTableUbuntuReleases();
-
-    // Connection creation
-    MConnection connection = getClient().newConnection("generic-jdbc-connector");
-    fillConnectionForm(connection);
-    createConnection(connection);
-
-    // Job creation
-    MJob job = getClient().newJob(connection.getPersistenceId(), MJob.Type.IMPORT);
-
-    // Connector values
-    MFormList forms = job.getConnectorPart();
-    forms.getStringInput("table.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("table.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
-    // Framework values
-    fillOutputForm(job, StorageType.HDFS, OutputFormat.TEXT_FILE);
-    forms = job.getFrameworkPart();
-    forms.getIntegerInput("throttling.extractors").setValue(extractors);
-    createJob(job);
-
-    runJob(job);
-
-    // Assert correct output
-    assertMapreduceOutputFiles((extractors > maxOutputFiles) ? maxOutputFiles : extractors);
-    assertMapreduceOutput(
-      "1,'Warty Warthog',4.10,2004-10-20,false",
-      "2,'Hoary Hedgehog',5.04,2005-04-08,false",
-      "3,'Breezy Badger',5.10,2005-10-13,false",
-      "4,'Dapper Drake',6.06,2006-06-01,true",
-      "5,'Edgy Eft',6.10,2006-10-26,false",
-      "6,'Feisty Fawn',7.04,2007-04-19,false",
-      "7,'Gutsy Gibbon',7.10,2007-10-18,false",
-      "8,'Hardy Heron',8.04,2008-04-24,true",
-      "9,'Intrepid Ibex',8.10,2008-10-18,false",
-      "10,'Jaunty Jackalope',9.04,2009-04-23,false",
-      "11,'Karmic Koala',9.10,2009-10-29,false",
-      "12,'Lucid Lynx',10.04,2010-04-29,true",
-      "13,'Maverick Meerkat',10.10,2010-10-10,false",
-      "14,'Natty Narwhal',11.04,2011-04-28,false",
-      "15,'Oneiric Ocelot',11.10,2011-10-10,false",
-      "16,'Precise Pangolin',12.04,2012-04-26,true",
-      "17,'Quantal Quetzal',12.10,2012-10-18,false",
-      "18,'Raring Ringtail',13.04,2013-04-25,false",
-      "19,'Saucy Salamander',13.10,2013-10-17,false"
-    );
-
-    // Clean up testing table
-    dropTable();
-  }
+//  private static final Logger LOG = Logger.getLogger(PartitionerTest.class);
+//
+//  /**
+//   * Columns that we will use as partition column with maximal number of
+//   * partitions that can be created for such column.
+//   */
+//  public static Object[] COLUMNS = new Object [][] {
+//    {"id",           13},
+//    {"code_name",    13},
+//    {"version",      13},
+//    {"release_date", 13},
+//    {"lts",           2},
+//  };
+//
+//  /**
+//   * Number of extractors that we will use to transfer the table.
+//   */
+//  public static Object [] EXTRACTORS = new Object[] {
+//    3, 5, 10, 13,
+//  };
+//
+//  @Parameterized.Parameters(name = "{0}-{1}-{2}")
+//  public static Iterable<Object[]> data() {
+//    return ParametrizedUtils.crossProduct(COLUMNS, EXTRACTORS);
+//  }
+//
+//  private String partitionColumn;
+//  private int extractors;
+//  private int maxOutputFiles;
+//
+//  public PartitionerTest(String partitionColumn, int expectedOutputFiles, int extractors) {
+//    this.partitionColumn = partitionColumn;
+//    this.maxOutputFiles = expectedOutputFiles;
+//    this.extractors = extractors;
+//  }
+//
+//  @Test
+//  public void testSplitter() throws Exception {
+//    createAndLoadTableUbuntuReleases();
+//
+//    // Connection creation
+//    MConnection connection = getClient().newConnection("generic-jdbc-connector");
+//    fillConnectionForm(connection);
+//    createConnection(connection);
+//
+//    // Job creation
+//    MJob job = getClient().newJob(connection.getPersistenceId(), MJob.Type.IMPORT);
+//
+//    // Connector values
+//    MFormList forms = job.getFromPart();
+//    forms.getStringInput("table.tableName").setValue(provider.escapeTableName(getTableName()));
+//    forms.getStringInput("table.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+//    // Framework values
+//    fillOutputForm(job, StorageType.HDFS, OutputFormat.TEXT_FILE);
+//    forms = job.getFrameworkPart();
+//    forms.getIntegerInput("throttling.extractors").setValue(extractors);
+//    createJob(job);
+//
+//    runJob(job);
+//
+//    // Assert correct output
+//    assertMapreduceOutputFiles((extractors > maxOutputFiles) ? maxOutputFiles : extractors);
+//    assertMapreduceOutput(
+//      "1,'Warty Warthog',4.10,2004-10-20,false",
+//      "2,'Hoary Hedgehog',5.04,2005-04-08,false",
+//      "3,'Breezy Badger',5.10,2005-10-13,false",
+//      "4,'Dapper Drake',6.06,2006-06-01,true",
+//      "5,'Edgy Eft',6.10,2006-10-26,false",
+//      "6,'Feisty Fawn',7.04,2007-04-19,false",
+//      "7,'Gutsy Gibbon',7.10,2007-10-18,false",
+//      "8,'Hardy Heron',8.04,2008-04-24,true",
+//      "9,'Intrepid Ibex',8.10,2008-10-18,false",
+//      "10,'Jaunty Jackalope',9.04,2009-04-23,false",
+//      "11,'Karmic Koala',9.10,2009-10-29,false",
+//      "12,'Lucid Lynx',10.04,2010-04-29,true",
+//      "13,'Maverick Meerkat',10.10,2010-10-10,false",
+//      "14,'Natty Narwhal',11.04,2011-04-28,false",
+//      "15,'Oneiric Ocelot',11.10,2011-10-10,false",
+//      "16,'Precise Pangolin',12.04,2012-04-26,true",
+//      "17,'Quantal Quetzal',12.10,2012-10-18,false",
+//      "18,'Raring Ringtail',13.04,2013-04-25,false",
+//      "19,'Saucy Salamander',13.10,2013-10-17,false"
+//    );
+//
+//    // Clean up testing table
+//    dropTable();
+//  }
 }

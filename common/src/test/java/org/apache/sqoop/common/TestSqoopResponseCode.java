@@ -25,17 +25,17 @@ import org.junit.Test;
  */
 public class TestSqoopResponseCode {
 
-  /**
-   * Test for the method getFromCode()
-   */
-  @Test
-  public void testGetFromCode() {
-    SqoopResponseCode src = SqoopResponseCode.getFromCode("1000");
-    Assert.assertEquals("OK", src.getMessage());
-    Assert.assertEquals("1000", src.getCode());
-
-    SqoopResponseCode src1 = SqoopResponseCode.getFromCode("2000");
-    Assert.assertEquals("ERROR", src1.getMessage());
-    Assert.assertEquals("2000", src1.getCode());
-  }
+//  /**
+//   * Test for the method getFromCode()
+//   */
+//  @Test
+//  public void testGetFromCode() {
+//    SqoopResponseCode src = SqoopResponseCode.getFromCode("1000");
+//    Assert.assertEquals("OK", src.getMessage());
+//    Assert.assertEquals("1000", src.getCode());
+//
+//    SqoopResponseCode src1 = SqoopResponseCode.getFromCode("2000");
+//    Assert.assertEquals("ERROR", src1.getMessage());
+//    Assert.assertEquals("2000", src1.getCode());
+//  }
 }
