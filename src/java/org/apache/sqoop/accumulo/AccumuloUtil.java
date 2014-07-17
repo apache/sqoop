@@ -105,13 +105,22 @@ public final class AccumuloUtil {
         .addAll(conf.getStringCollection(
           ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM));
 
-      String dir = accumuloHome + File.separator + "lib";
-      LOG.info("Adding jar files under " + dir + " to distributed cache");
-      addDirToCache(new File(dir), fs, localUrls, false);
+      if (null == accumuloHome) {
+        throw new IllegalArgumentException("ACCUMULO_HOME is not set.");
+      } else {
+        File dir = new File(accumuloHome, "lib");
+        String path = dir.getPath();
+        LOG.info("Adding jar files under " + path + " to distributed cache");
+        addDirToCache(dir, fs, localUrls, false);
+      }
 
-      dir = zookeeperHome;
-      LOG.info("Adding jar files under " + dir + " to distributed cache");
-      addDirToCache(new File(dir), fs, localUrls, false);
+      if (null == zookeeperHome) {
+        throw new IllegalArgumentException("ZOOKEEPER_HOME is not set.");
+      } else {
+        String dir = zookeeperHome;
+        LOG.info("Adding jar files under " + dir + " to distributed cache");
+        addDirToCache(new File(dir), fs, localUrls, false);
+      }
 
       String tmpjars = conf
         .get(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM);
