@@ -221,3 +221,4 @@ export HBASE_HOME
 export HCAT_HOME
 export HIVE_CONF_DIR
 export ACCUMULO_HOME
+export ZOOKEEPER_HOME
