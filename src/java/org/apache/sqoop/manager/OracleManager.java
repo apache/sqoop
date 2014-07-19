@@ -345,7 +345,7 @@ public class OracleManager
     return connection;
   }
 
-  public String getSessionUser(Connection conn) {
+  public static String getSessionUser(Connection conn) {
     Statement stmt = null;
     ResultSet rset = null;
     String user = null;
@@ -379,6 +379,9 @@ public class OracleManager
           LoggingUtils.logAll(LOG, "Failed to close statement", ex);
         }
       }
+    }
+    if (user == null) {
+      throw new RuntimeException("Unable to get current session user");
     }
     return user;
   }

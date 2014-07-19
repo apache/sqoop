@@ -31,6 +31,7 @@ import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.manager.OracleManager;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
@@ -96,7 +97,10 @@ public class OraOopConnManager extends GenericJdbcManager {
     Connection connection =
         OracleConnectionFactory.createOracleJdbcConnection(this
             .getDriverClass(), connectStr, username, password, additionalProps);
-
+    if (username == null) {
+      username = OracleManager.getSessionUser(connection);
+    }
+    OraOopUtilities.setCurrentSessionUser(username);
     return connection;
   }
 
@@ -627,4 +631,5 @@ public class OraOopConnManager extends GenericJdbcManager {
             .getJavaClassPath());
     LOG.fatal(msg, ex);
   }
+
 }

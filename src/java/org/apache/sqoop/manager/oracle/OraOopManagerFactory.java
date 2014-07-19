@@ -34,6 +34,8 @@ import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
+
+import org.apache.sqoop.manager.OracleManager;
 import org.apache.sqoop.manager.oracle.OraOopOutputFormatUpdate.UpdateMode;
 import org.apache.sqoop.manager.oracle.OraOopUtilities.
            JdbcOracleThinConnectionParsingError;
@@ -319,6 +321,7 @@ public class OraOopManagerFactory extends ManagerFactory {
     int jdbcPort = 0;
     String jdbcSid = "";
     String jdbcService = "";
+    String jdbcTnsName = "";
     try {
 
       OraOopJdbcUrl oraOopJdbcUrl = new OraOopJdbcUrl(jdbcConnectStr);
@@ -328,6 +331,7 @@ public class OraOopManagerFactory extends ManagerFactory {
       jdbcPort = jdbcConnection.getPort();
       jdbcSid = jdbcConnection.getSid();
       jdbcService = jdbcConnection.getService();
+      jdbcTnsName = jdbcConnection.getTnsName();
     } catch (JdbcOracleThinConnectionParsingError ex) {
       LOG.info(String.format(
           "Unable to parse the JDBC connection URL \"%s\" as a connection "
@@ -362,18 +366,19 @@ public class OraOopManagerFactory extends ManagerFactory {
             jobData);
       }
     } else {
-      generateJdbcConnectionUrlsBySidOrService(jdbcHost, jdbcPort, jdbcSid,
-          jdbcService, jobData);
+      generateJdbcConnectionUrlsByTnsnameSidOrService(jdbcHost, jdbcPort,
+        jdbcSid, jdbcService, jdbcTnsName, jobData);
     }
 
   }
 
-  private void generateJdbcConnectionUrlsBySidOrService(String hostName,
-      int port, String sid, String serviceName, JobData jobData) {
+  private void generateJdbcConnectionUrlsByTnsnameSidOrService(String hostName,
+    int port, String sid, String serviceName, String tnsName, JobData jobData) {
 
     String jdbcUrl = null;
-
-    if (sid != null && !sid.isEmpty()) {
+    if (tnsName != null && !tnsName.isEmpty()) {
+      jdbcUrl = OraOopUtilities.generateOracleTnsNameJdbcUrl(tnsName);
+    } else if (sid != null && !sid.isEmpty()) {
       jdbcUrl = OraOopUtilities.generateOracleSidJdbcUrl(hostName, port, sid);
     } else {
       jdbcUrl =
@@ -437,7 +442,7 @@ public class OraOopManagerFactory extends ManagerFactory {
           jdbcActiveInstanceThinConnection =
               new OraOopUtilities.JdbcOracleThinConnection(
                   activeInstance.getHostName(),
-                  jdbcPort, activeInstance.getInstanceName(), "");
+                  jdbcPort, activeInstance.getInstanceName(), "", "");
 
       if (testDynamicallyGeneratedOracleRacInstanceConnection(
           jdbcActiveInstanceThinConnection.toString(), jobData
@@ -533,6 +538,8 @@ public class OraOopManagerFactory extends ManagerFactory {
     Configuration conf = jobData.getSqoopOptions().getConf();
     String mapperJdbcUrlPropertyName =
         OraOopUtilities.getMapperJdbcUrlPropertyName(mapperIdx, conf);
+    LOG.debug("Setting mapper url " + mapperJdbcUrlPropertyName + " = "
+      + jdbcUrl);
     conf.set(mapperJdbcUrlPropertyName, jdbcUrl);
   }
 
@@ -821,9 +828,14 @@ public class OraOopManagerFactory extends ManagerFactory {
 
     String exportTableTemplate =
         conf.get(OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_TEMPLATE, "");
+
+    String user = sqoopOptions.getUsername();
+    if (user == null) {
+      user = OracleManager.getSessionUser(connection);
+    }
+
     OracleTable templateTableContext =
-        OraOopUtilities.decodeOracleTableName(sqoopOptions.getUsername(),
-            exportTableTemplate);
+        OraOopUtilities.decodeOracleTableName(user, exportTableTemplate);
 
     boolean noLoggingOnNewTable =
         conf.getBoolean(OraOopConstants.ORAOOP_EXPORT_CREATE_TABLE_NO_LOGGING,

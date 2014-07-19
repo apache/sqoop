@@ -38,13 +38,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Category;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.manager.oracle.OraOopOutputFormatInsert.InsertMode;
+import org.apache.sqoop.manager.oracle.OraOopOutputFormatUpdate.UpdateMode;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
-
-import org.apache.sqoop.manager.oracle.OraOopOutputFormatInsert.InsertMode;
-import org.apache.sqoop.manager.oracle.OraOopOutputFormatUpdate.UpdateMode;
 
 /**
  * Utilities used by OraOop.
@@ -53,6 +52,8 @@ public final class OraOopUtilities {
 
   private OraOopUtilities() {
   }
+
+  private static String currentSessionUser = null;
 
   /**
    * Used for testing purposes - can get OraOop to call a class to run a report
@@ -103,6 +104,10 @@ public final class OraOopUtilities {
     // "schema".table
     // "schema"."table"
     String[] tableStrings = tableStr.split("\"");
+
+    if (oracleConnectionUserName == null) {
+      oracleConnectionUserName = currentSessionUser;
+    }
 
     switch (tableStrings.length) {
 
@@ -748,17 +753,23 @@ public final class OraOopUtilities {
     private int port;
     private String sid;
     private String service;
+    private String tnsName;
 
     public JdbcOracleThinConnection(String host, int port, String sid,
-        String service) {
+      String service, String tnsName) {
       this.host = host;
       this.port = port;
       this.sid = sid;
       this.service = service;
+      this.tnsName = tnsName;
     }
 
     @Override
     public String toString() {
+       // Use tnsName if it is available
+      if (this.tnsName != null && !this.tnsName.isEmpty()) {
+        return String.format("jdbc:oracle:thin:@%s", tnsName);
+      }
 
       // Use the SID if it's available...
       if (this.sid != null && !this.sid.isEmpty()) {
@@ -774,8 +785,8 @@ public final class OraOopUtilities {
       }
 
       throw new RuntimeException(
-          "Unable to generate a JDBC URL, as no SID or SERVICE has been "
-            + "provided.");
+          "Unable to generate a JDBC URL, as no TNS name, SID or SERVICE "
+            + "has been provided.");
 
     }
 
@@ -793,6 +804,10 @@ public final class OraOopUtilities {
 
     public String getService() {
       return service;
+    }
+
+    public String getTnsName() {
+      return tnsName;
     }
   }
 
@@ -842,6 +857,10 @@ public final class OraOopUtilities {
         + "(ADDRESS=(PROTOCOL=TCP)(HOST=%s)(PORT=%d))" + ")"
         + "(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=%s))" + ")", hostName,
         port, serviceName);
+  }
+
+  public static String generateOracleTnsNameJdbcUrl(String tnsName) {
+    return String.format("jdbc:oracle:thin:@%s", tnsName);
   }
 
   public static String getMapperJdbcUrlPropertyName(int mapperId,
@@ -1457,5 +1476,7 @@ public final class OraOopUtilities {
              + "file:///dev/urandom - Oracle connections may time out.");
     }
   }
-
+  public static void setCurrentSessionUser(String user) {
+    currentSessionUser = user;
+  }
 }

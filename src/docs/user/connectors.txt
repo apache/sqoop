@@ -692,12 +692,15 @@ The Sqoop +--connect+ parameter defines the Oracle instance or Oracle RAC to
 connect to. It is required with all Sqoop import and export commands.
 
 Data Connector for Oracle and Hadoop expects the associated connection string
-to be of a specific format dependent on whether the Oracle SID or Service
-is defined.
+to be of a specific format dependent on whether the Oracle SID, Service
+or TNS name is defined.  The TNS name based URL scheme can be used to enable
+authentication using Oracle wallets.
 
 +--connect jdbc:oracle:thin:@OracleServer:OraclePort:OracleSID+
 
 +--connect jdbc:oracle:thin:@//OracleServer:OraclePort/OracleService+
+
++--connect jdbc:oracle:thin:@TNSName+
 
 Connect to An Oracle Database Instance
 ++++++++++++++++++++++++++++++++++++++
@@ -720,6 +723,8 @@ with other drivers such as OCI.
 |The Oracle instance.
 |+OracleService+
 |The Oracle Service.
+|+TNSName+
+|The TNS name for the entry describing the connection to the Oracle server.
 |===============================================================================
 
 [NOTE]

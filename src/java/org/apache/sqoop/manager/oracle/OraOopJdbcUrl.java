@@ -89,6 +89,7 @@ public class OraOopJdbcUrl {
 
     /*
      * The format of an Oracle jdbc URL is one of:
+     * jdbc:oracle:<driver-type>:@tnsname - for tnsname based login
      * jdbc:oracle:<driver-type>:@<host>:<port>:<sid>
      * jdbc:oracle:<driver-type>:@<host>:<port>/<service>
      * jdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>
@@ -105,11 +106,12 @@ public class OraOopJdbcUrl {
     }
 
     // Check we can proceed...
-    if (jdbcFragments.length < 5 || jdbcFragments.length > 6) {
+    if (jdbcFragments.length < 4 || jdbcFragments.length > 6) {
       throw new JdbcOracleThinConnectionParsingError(
         String.format(
-          "There should be 5 or 6 colon-separated pieces of data in the JDBC "
-        + "URL, such as:\n\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"
+          "There should be 4, 5 or 6 colon-separated pieces of data in the "
+        + "JDBC URL, such as:\n\tjdbc:oracle:<driver-type>:@tnsname\n"
+        + "\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"
         + "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>\n"
         + "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>\n"
         + "The JDBC URL specified was:\n"
@@ -156,6 +158,8 @@ public class OraOopJdbcUrl {
     }
 
     String portStr = "";
+    String tnsName = "";
+
     switch (jdbcFragments.length) {
       case 6:
         // jdbc:oracle:<driver-type>:@<host>:<port>:<sid>
@@ -176,41 +180,49 @@ public class OraOopJdbcUrl {
         service = portAndService[1].trim();
         break;
 
+      case 4:
+        // jdbc:oracle:<driver-type>:@tnsname
+        tnsName = jdbcFragments[3].trim();
+        break;
+
       default:
         throw new JdbcOracleThinConnectionParsingError("Internal error parsing "
             + "JDBC connection string.");
     }
 
-    if (portStr.isEmpty()) {
-      throw new JdbcOracleThinConnectionParsingError(
-          "The fifth item in the colon-separated JDBC URL (the port) must not "
-          + "be empty.");
+    if (jdbcFragments.length > 4) {
+      if (portStr.isEmpty()) {
+        throw new JdbcOracleThinConnectionParsingError(
+            "The fifth item in the colon-separated JDBC URL (the port) must not"
+            + " be empty.");
+      }
+
+      try {
+        port = Integer.parseInt(portStr);
+      } catch (NumberFormatException ex) {
+        throw new JdbcOracleThinConnectionParsingError(
+            String
+                .format(
+                    "The fifth item in the colon-separated JDBC URL (the port) "
+                    + "must be a valid number.\n"
+                    + "\"%s\" could not be parsed as an integer.", portStr));
+      }
+
+      if (port <= 0) {
+        throw new JdbcOracleThinConnectionParsingError(
+            String
+                .format(
+                    "The fifth item in the colon-separated JDBC URL (the port) "
+                    + "must be greater than zero.\n"
+                        + "\"%s\" was specified.", portStr));
+      }
     }
 
-    try {
-      port = Integer.parseInt(portStr);
-    } catch (NumberFormatException ex) {
-      throw new JdbcOracleThinConnectionParsingError(
-          String
-              .format(
-                  "The fifth item in the colon-separated JDBC URL (the port) "
-                  + "must be a valid number.\n"
-                      + "\"%s\" could not be parsed as an integer.", portStr));
-    }
-
-    if (port <= 0) {
-      throw new JdbcOracleThinConnectionParsingError(
-          String
-              .format(
-                  "The fifth item in the colon-separated JDBC URL (the port) "
-                  + "must be greater than zero.\n"
-                      + "\"%s\" was specified.", portStr));
-    }
-
-    if (sid == null && service == null) {
+    if (sid == null && service == null && tnsName == null) {
       throw new JdbcOracleThinConnectionParsingError(
         "The JDBC URL does not contain a SID or SERVICE. The URL should look "
-      + "like one of these:\n\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"
+      + "like one of these:\n\tjdbc:oracle:<driver-type>:@tnsname\n"
+      + "\tjdbc:oracle:<driver-type>:@<host>:<port>:<sid>\n"
       + "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>\n"
       + "\tjdbc:oracle:<driver-type>:@<host>:<port>/<service>?<parameters>\n"
       + "\tjdbc:oracle:<driver-type>:@//<host>:<port>/<service>\n"
@@ -220,7 +232,7 @@ public class OraOopJdbcUrl {
     // Remove the "@" prefix of the hostname
     JdbcOracleThinConnection result =
         new JdbcOracleThinConnection(hostName.replaceFirst("^[@][/]{0,2}", "")
-            , port, sid, service);
+            , port, sid, service, tnsName.replaceFirst("^[@][/]{0,2}", ""));
 
     return result;
   }
