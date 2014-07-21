@@ -158,15 +158,19 @@ public class SubmissionRequest {
   }
 
   public void addJar(String jar) {
-    jars.add(jar);
+    if(!jars.contains(jar)) {
+      jars.add(jar);
+    }
   }
 
   public void addJarForClass(Class klass) {
-    jars.add(ClassUtils.jarForClass(klass));
+    addJar(ClassUtils.jarForClass(klass));
   }
 
   public void addJars(List<String> jars) {
-    this.jars.addAll(jars);
+    for(String j : jars) {
+      addJar(j);
+    }
   }
 
   public CallbackBase getConnectorCallbacks() {

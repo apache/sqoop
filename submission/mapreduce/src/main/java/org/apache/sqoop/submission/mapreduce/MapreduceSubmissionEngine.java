@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.submission.mapreduce;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
@@ -187,18 +188,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     configuration.setBoolean("mapred.reduce.tasks.speculative.execution", false);
 
     // Promote all required jars to the job
-    StringBuilder sb = new StringBuilder();
-    boolean first = true;
-    for(String jar : request.getJars()) {
-      if(first) {
-        first = false;
-      } else {
-        sb.append(",");
-      }
-      LOG.debug("Adding jar to the job: " + jar);
-      sb.append(jar);
-    }
-    configuration.set("tmpjars", sb.toString());
+    configuration.set("tmpjars", StringUtils.join(request.getJars(), ","));
 
     try {
       Job job = new Job(configuration);
