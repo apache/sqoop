@@ -269,6 +269,7 @@
 
   <!-- compilation -->
   <property name="targetJavaVersion" value="1.6" />
+  <property name="sourceJavaVersion" value="1.6" />
   <property name="javac.deprecation" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="build.encoding" value="ISO-8859-1"/>
@@ -509,6 +510,7 @@
         includes="**/*.java"
         destdir="${build.classes}"
         debug="${javac.debug}"
+        source="${sourceJavaVersion}"
         target="${targetJavaVersion}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
@@ -521,6 +523,7 @@
         includes="**/*.java"
         destdir="${build.classes}"
         debug="${javac.debug}"
+        source="${sourceJavaVersion}"
         target="${targetJavaVersion}"
         deprecation="${javac.deprecation}">
       <classpath refid="compile.classpath"/>
@@ -537,6 +540,7 @@
         srcdir="${test.dir}"
         includes="**/*.java"
         destdir="${build.test.classes}"
+        source="${sourceJavaVersion}"
         target="${targetJavaVersion}"
         debug="${javac.debug}">
       <classpath>
@@ -554,6 +558,7 @@
         srcdir="${perftest.src.dir}"
         includes="**/*.java"
         destdir="${build.perftest.classes}"
+        source="${sourceJavaVersion}"
         target="${targetJavaVersion}"
         debug="${javac.debug}">
       <classpath>
