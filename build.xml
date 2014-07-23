@@ -202,13 +202,13 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="1.4.5-SNAPSHOT" />
+  <property name="version" value="1.4.6-SNAPSHOT" />
 
   <!-- The last version released. -->
-  <property name="oldversion" value="1.4.4" />
+  <property name="oldversion" value="1.4.5" />
   <!-- The point when we branched for the previous release. -->
   <property name="prev.git.hash"
-      value="166417fdb0afd3141c6fd0fdc50043b5e13c2a97" />
+      value="81624ddf3c8ca5834ab015ebafc8b8649ac36ab7" />
 
   <property name="artifact.name" value="${name}-${version}" />
   <property name="dest.jar" value="${artifact.name}.jar" />
