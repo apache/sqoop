@@ -41,17 +41,20 @@ under the License.
     <conf name="hbase95" visibility="private" extends="hbasecompat${hbasecompatprofile}" />
     <conf name="hbasecompat1" visibility="private" />
     <conf name="hbasecompat2" visibility="private" />
+    <conf name="avro" visibility="private" extends="avrohadoop${avrohadoopprofile}" />
+    <conf name="avrohadoop1" visibility="private" />
+    <conf name="avrohadoop2" visibility="private" />
     <conf name="hcatalog13" visibility="private" />
     <conf name="hadoop23" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop20" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop100" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop200" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop210" visibility="private"
-      extends="common,runtime,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -180,20 +183,6 @@ under the License.
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
-    <dependency org="org.apache.avro" name="avro" rev="${avro.version}"
-      conf="common->default;redist->default">
-      <exclude org="org.slf4j" module="slf4j-api"/>
-      <exclude org="org.mortbay.jetty" module="jetty"/>
-      <exclude org="org.jboss.netty" module="netty"/>
-      <exclude org="org.apache.velocity" module="velocity"/>
-    </dependency>
-    <dependency org="org.apache.avro" name="avro-mapred" rev="${avro.version}"
-      conf="common->default;redist->default">
-      <exclude org="org.slf4j" module="slf4j-api"/>
-      <exclude org="org.mortbay.jetty" module="jetty"/>
-      <exclude org="org.jboss.netty" module="netty"/>
-      <exclude org="org.apache.velocity" module="velocity"/>
-    </dependency>
 
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
@@ -300,6 +289,28 @@ under the License.
 
     <dependency org="org.postgresql" name="postgresql"
       rev="${postgresql.version}" conf="common->default" />
+
+    <dependency org="org.apache.avro" name="avro" rev="${avro.version}"
+      conf="avro->default;redist->default">
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.mortbay.jetty" module="jetty"/>
+      <exclude org="org.jboss.netty" module="netty"/>
+      <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
+    <dependency org="org.apache.avro" name="avro-mapred" rev="${avro.version}"
+      m:classifier="hadoop1" conf="avrohadoop1->default;redist->default">
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.mortbay.jetty" module="jetty"/>
+      <exclude org="org.jboss.netty" module="netty"/>
+      <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
+    <dependency org="org.apache.avro" name="avro-mapred" rev="${avro.version}"
+      m:classifier="hadoop2" conf="avrohadoop2->default;redist->default">
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.mortbay.jetty" module="jetty"/>
+      <exclude org="org.jboss.netty" module="netty"/>
+      <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
 
     <exclude org="org.apache.hadoop" module="avro"/>
     <exclude org="commons-daemon" module="commons-daemon" />

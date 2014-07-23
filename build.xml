@@ -131,6 +131,7 @@
       <property name="hadoop.version.full" value="0.20" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
+      <property name="avrohadoopprofile" value="1" />
     </then>
 
     <elseif>
@@ -142,6 +143,7 @@
         <property name="hadoop.version.full" value="0.23" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
+        <property name="avrohadoopprofile" value="2" />
       </then>
     </elseif>
 
@@ -154,6 +156,7 @@
         <property name="hadoop.version.full" value="1.0.0" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="1" />
+        <property name="avrohadoopprofile" value="1" />
       </then>
     </elseif>
 
@@ -166,6 +169,7 @@
         <property name="hadoop.version.full" value="2.0.4-alpha" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
+        <property name="avrohadoopprofile" value="2" />
       </then>
     </elseif>
 
@@ -178,6 +182,7 @@
         <property name="hadoop.version.full" value="2.1.0-beta" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
+        <property name="avrohadoopprofile" value="2" />
       </then>
     </elseif>
     <else>
