@@ -93,9 +93,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           + "number of fragments in the JDBC URL.",
           ex.getMessage()
               .toLowerCase()
-              .contains(
-                  "there should be 5 or 6 colon-separated pieces of data in "
-                  + "the jdbc url"));
+              .contains("the oracle \"thin\" jdbc driver is not being used."));
     }
 
     // Incorrect driver-type (i.e. not using the "thin" driver)...
