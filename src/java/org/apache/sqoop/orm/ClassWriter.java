@@ -512,7 +512,8 @@ public class ClassWriter {
   }
 
   /**
-   * Get the number of methods that should be generated for a particular column set.
+   * Get the number of methods that should be generated for a particular column
+   * set.
    * @param colNames
    * @param size
    * @return
@@ -534,7 +535,8 @@ public class ClassWriter {
    * @return
    */
   private int topBoundary(String[] colNames, int methodNumber, int size) {
-    return (colNames.length > (methodNumber + 1) * size) ? (methodNumber + 1) * size : colNames.length;
+    return (colNames.length > (methodNumber + 1) * size)
+            ? (methodNumber + 1) * size : colNames.length;
   }
 
   /**
@@ -581,7 +583,8 @@ public class ClassWriter {
   private void generateEquals(Map<String, Integer> columnTypes,
       String [] colNames, String className, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public boolean equals(Object o) {\n");
     if (numberOfMethods > 1) {
@@ -591,12 +594,14 @@ public class ClassWriter {
       }
       sb.append("    return equal;\n");
     } else {
-      _generateEquals(columnTypes, colNames, className, sb, 0, maxColumnsPerMethod, false);
+      myGenerateEquals(columnTypes, colNames, className, sb, 0,
+              maxColumnsPerMethod, false);
     }
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateEquals(columnTypes, colNames, className, sb, i, maxColumnsPerMethod, true);
+      myGenerateEquals(columnTypes, colNames, className, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -610,9 +615,10 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateEquals(Map<String, Integer> columnTypes,
-                              String [] colNames, String className, StringBuilder sb,
-                              int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateEquals(Map<String, Integer> columnTypes,
+                                String[] colNames, String className,
+                                StringBuilder sb, int methodNumber, int size,
+                                boolean wrapInMethod) {
 
     if (wrapInMethod) {
       sb.append("  public boolean equals" + methodNumber + "(Object o) {\n");
@@ -626,7 +632,8 @@ public class ClassWriter {
     sb.append("    }\n");
     sb.append("    " + className + " that = (" + className + ") o;\n");
     sb.append("    boolean equal = true;\n");
-    for (int i = size * methodNumber; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = size * methodNumber;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
       int sqlType = columnTypes.get(col);
       String javaType = toJavaType(col, sqlType);
@@ -653,7 +660,8 @@ public class ClassWriter {
   private void generateDbRead(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public void readFields(ResultSet __dbResults) ");
     sb.append("throws SQLException {\n");
@@ -665,12 +673,14 @@ public class ClassWriter {
         sb.append("    this.readFields" + i + "(__dbResults);\n");
       }
     } else {
-      _generateDbRead(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateDbRead(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateDbRead(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateDbRead(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -683,16 +693,19 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateDbRead(Map<String, Integer> columnTypes,
-                               String [] colNames, StringBuilder sb,
-                               int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateDbRead(Map<String, Integer> columnTypes,
+                                String[] colNames, StringBuilder sb,
+                                int methodNumber, int size,
+                                boolean wrapInMethod) {
 
     if (wrapInMethod) {
-      sb.append("  public void readFields" + methodNumber + "(ResultSet __dbResults) ");
+      sb.append("  public void readFields" + methodNumber
+              + "(ResultSet __dbResults) ");
       sb.append("throws SQLException {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
 
       int sqlType = columnTypes.get(col);
@@ -725,7 +738,8 @@ public class ClassWriter {
   private void generateLoadLargeObjects(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     // This method relies on the __cur_result_set field being set by
     // readFields() method generated by generateDbRead().
@@ -739,13 +753,15 @@ public class ClassWriter {
         sb.append("    this.loadLargeObjects" + i + "(__loader);\n");
       }
     } else {
-      _generateLoadLargeObjects(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateLoadLargeObjects(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
 
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateLoadLargeObjects(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateLoadLargeObjects(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -753,20 +769,23 @@ public class ClassWriter {
    * Generate the loadLargeObjects() method called by the mapper to load
    * delayed objects (that require the Context from the mapper).
    */
-  private void _generateLoadLargeObjects(Map<String, Integer> columnTypes,
-                                         String [] colNames, StringBuilder sb,
-                                         int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateLoadLargeObjects(Map<String, Integer> columnTypes,
+                                          String[] colNames, StringBuilder sb,
+                                          int methodNumber, int size,
+                                          boolean wrapInMethod) {
 
     // This method relies on the __cur_result_set field being set by
     // readFields() method generated by generateDbRead().
 
     if (wrapInMethod) {
-      sb.append("  public void loadLargeObjects" + methodNumber + "(LargeObjectLoader __loader)\n");
+      sb.append("  public void loadLargeObjects" + methodNumber
+              + "(LargeObjectLoader __loader)\n");
       sb.append("      throws SQLException, IOException, ");
       sb.append("InterruptedException {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
 
       int sqlType = columnTypes.get(col);
@@ -802,7 +821,8 @@ public class ClassWriter {
   private void generateDbWrite(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public void write(PreparedStatement __dbStmt) "
         + "throws SQLException {\n");
@@ -817,14 +837,16 @@ public class ClassWriter {
         sb.append("    write" + i + "(__dbStmt, __off);\n");
       }
     } else {
-      _generateDbWrite(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateDbWrite(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
 
     sb.append("    return " + colNames.length + ";\n");
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateDbWrite(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateDbWrite(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -837,16 +859,19 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateDbWrite(Map<String, Integer> columnTypes,
-                               String [] colNames, StringBuilder sb,
-                               int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateDbWrite(Map<String, Integer> columnTypes,
+                                 String[] colNames, StringBuilder sb,
+                                 int methodNumber, int size,
+                                 boolean wrapInMethod) {
 
     if (wrapInMethod) {
-      sb.append("  public void write" + methodNumber + "(PreparedStatement __dbStmt, int __off) "
-          + "throws SQLException {\n");
+      sb.append("  public void write" + methodNumber
+              + "(PreparedStatement __dbStmt, int __off) "
+              + "throws SQLException {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
 
       int sqlType = columnTypes.get(col);
@@ -881,7 +906,8 @@ public class ClassWriter {
   private void generateHadoopRead(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public void readFields(DataInput __dataIn) "
         + "throws IOException {\n");
@@ -893,7 +919,8 @@ public class ClassWriter {
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateHadoopRead(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateHadoopRead(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -906,15 +933,17 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateHadoopRead(Map<String, Integer> columnTypes,
-                                  String [] colNames, StringBuilder sb,
-                                  int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateHadoopRead(Map<String, Integer> columnTypes,
+                                    String[] colNames, StringBuilder sb,
+                                    int methodNumber, int size,
+                                    boolean wrapInMethod) {
     if (wrapInMethod) {
-      sb.append("  public void readFields" + methodNumber + "(DataInput __dataIn) "
-          + "throws IOException {\n");
+      sb.append("  public void readFields" + methodNumber
+              + "(DataInput __dataIn) " + "throws IOException {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
       int sqlType = columnTypes.get(col);
       String javaType = toJavaType(col, sqlType);
@@ -947,7 +976,8 @@ public class ClassWriter {
   private void generateCloneMethod(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     TableClassName tableNameInfo = new TableClassName(options);
     String className = tableNameInfo.getShortClassForTable(tableName);
@@ -960,14 +990,16 @@ public class ClassWriter {
         sb.append("    this.clone" + i + "(o);");
       }
     } else {
-      _generateCloneMethod(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateCloneMethod(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
 
     sb.append("    return o;\n");
     sb.append("  }\n\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateCloneMethod(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateCloneMethod(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -980,18 +1012,21 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateCloneMethod(Map<String, Integer> columnTypes,
-                                   String [] colNames, StringBuilder sb,
-                                   int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateCloneMethod(Map<String, Integer> columnTypes,
+                                     String[] colNames, StringBuilder sb,
+                                     int methodNumber, int size,
+                                     boolean wrapInMethod) {
     TableClassName tableNameInfo = new TableClassName(options);
     String className = tableNameInfo.getShortClassForTable(tableName);
 
     if (wrapInMethod) {
-      sb.append("  public void clone" + methodNumber + "(" + className + " o) throws CloneNotSupportedException {\n");
+      sb.append("  public void clone" + methodNumber
+              + "(" + className + " o) throws CloneNotSupportedException {\n");
     }
 
     // For each field that is mutable, we need to perform the deep copy.
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String colName = colNames[i];
       int sqlType = columnTypes.get(colName);
       String javaType = toJavaType(colName, sqlType);
@@ -1025,7 +1060,8 @@ public class ClassWriter {
   private void generateSetField(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public void setField(String __fieldName, Object __fieldVal) "
         + "{\n");
@@ -1035,7 +1071,8 @@ public class ClassWriter {
         if (!first) {
           sb.append("    else");
         }
-        sb.append("    if (this.setField" + i + "(__fieldName, __fieldVal)) {\n");
+        sb.append("    if (this.setField" + i
+                + "(__fieldName, __fieldVal)) {\n");
         sb.append("      return;\n");
         sb.append("    }\n");
         first = false;
@@ -1067,7 +1104,7 @@ public class ClassWriter {
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateSetField(columnTypes, colNames, sb, i, maxColumnsPerMethod);
+      myGenerateSetField(columnTypes, colNames, sb, i, maxColumnsPerMethod);
     }
   }
 
@@ -1079,13 +1116,15 @@ public class ClassWriter {
    * @param methodNumber - method number
    * @param size - number of columns per method
    */
-  private void _generateSetField(Map<String, Integer> columnTypes,
-                                 String [] colNames, StringBuilder sb,
-                                 int methodNumber, int size) {
-    sb.append("  public boolean setField" + methodNumber + "(String __fieldName, Object __fieldVal) {\n");
+  private void myGenerateSetField(Map<String, Integer> columnTypes,
+                                  String[] colNames, StringBuilder sb,
+                                  int methodNumber, int size) {
+    sb.append("  public boolean setField" + methodNumber
+            + "(String __fieldName, Object __fieldVal) {\n");
 
     boolean first = true;
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String colName = colNames[i];
       int sqlType = columnTypes.get(colName);
       String javaType = toJavaType(colName, sqlType);
@@ -1118,7 +1157,8 @@ public class ClassWriter {
    */
   private void generateGetFieldMap(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public Map<String, Object> getFieldMap() {\n");
     sb.append("    Map<String, Object> __sqoop$field_map = "
@@ -1128,13 +1168,15 @@ public class ClassWriter {
         sb.append("    this.getFieldMap" + i + "(__sqoop$field_map);\n");
       }
     } else {
-      _generateGetFieldMap(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateGetFieldMap(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
     sb.append("    return __sqoop$field_map;\n");
     sb.append("  }\n\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateGetFieldMap(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateGetFieldMap(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -1147,14 +1189,17 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateGetFieldMap(Map<String, Integer> columnTypes,
-                                    String [] colNames, StringBuilder sb,
-                                    int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateGetFieldMap(Map<String, Integer> columnTypes,
+                                     String[] colNames, StringBuilder sb,
+                                     int methodNumber, int size,
+                                     boolean wrapInMethod) {
     if (wrapInMethod) {
-      sb.append("  public void getFieldMap" + methodNumber + "(Map<String, Object> __sqoop$field_map) {\n");
+      sb.append("  public void getFieldMap" + methodNumber
+              + "(Map<String, Object> __sqoop$field_map) {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String colName = colNames[i];
       sb.append("    __sqoop$field_map.put(\"" + colName + "\", this."
           + colName + ");\n");
@@ -1174,7 +1219,8 @@ public class ClassWriter {
   private void generateToString(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     // Save the delimiters to the class.
     sb.append("  private static final DelimiterSet __outputDelimiters = ");
@@ -1210,10 +1256,12 @@ public class ClassWriter {
 
     if (numberOfMethods > 1) {
       for (int i = 0; i < numberOfMethods; ++i) {
-        sb.append("    this.toString" + i + "(delimiters, __sb, fieldDelim);\n");
+        sb.append("    this.toString" + i
+                + "(delimiters, __sb, fieldDelim);\n");
       }
     } else {
-      _generateToString(columnTypes, colNames, sb, true, 0, maxColumnsPerMethod, false);
+      myGenerateToString(columnTypes, colNames, sb, true, 0,
+              maxColumnsPerMethod, false);
     }
 
     sb.append("    if (useRecordDelim) {\n");
@@ -1224,7 +1272,8 @@ public class ClassWriter {
 
     boolean first = true;
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateToString(columnTypes, colNames, sb, first, i, maxColumnsPerMethod, true);
+      myGenerateToString(columnTypes, colNames, sb, first, i,
+              maxColumnsPerMethod, true);
       first = false;
     }
   }
@@ -1238,20 +1287,22 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateToString(Map<String, Integer> columnTypes,
-                                 String [] colNames, StringBuilder sb,
-                                 boolean first, int methodNumber, int size,
-                                 boolean wrapInMethod) {
+  private void myGenerateToString(Map<String, Integer> columnTypes,
+                                  String[] colNames, StringBuilder sb,
+                                  boolean first, int methodNumber, int size,
+                                  boolean wrapInMethod) {
     // This toString() variant allows the user to specify delimiters, as well
     // as whether or not the end-of-record delimiter should be added to the
     // string.  Use 'false' to do reasonable things with TextOutputFormat,
     // which appends its own newline.
     if (wrapInMethod) {
-      sb.append("  public void toString" + methodNumber + "(DelimiterSet delimiters, ");
+      sb.append("  public void toString" + methodNumber
+              + "(DelimiterSet delimiters, ");
       sb.append("StringBuilder __sb, char fieldDelim) {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
       int sqlType = columnTypes.get(col);
       String javaType = toJavaType(col, sqlType);
@@ -1382,7 +1433,8 @@ public class ClassWriter {
       sb.append("      String[] strByteVal = __cur_str.trim().split(\" \");\n");
       sb.append("      byte [] byteVal = new byte[strByteVal.length];\n");
       sb.append("      for (int i = 0; i < byteVal.length; ++i) {\n");
-      sb.append("          byteVal[i] = (byte)Integer.parseInt(strByteVal[i], 16);\n");
+      sb.append("          byteVal[i] = "
+              + "(byte)Integer.parseInt(strByteVal[i], 16);\n");
       sb.append("      }\n");
       sb.append("      this." + colName + " = new BytesWritable(byteVal);\n");
     } else {
@@ -1401,7 +1453,8 @@ public class ClassWriter {
   private void generateParser(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     // Embed into the class the delimiter characters to use when parsing input
     // records.  Note that these can differ from the delims to use as output
@@ -1431,12 +1484,14 @@ public class ClassWriter {
         sb.append("    this.__loadFromFields" + i + "(__it);\n");
       }
     } else {
-      _generateParser(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateParser(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
     sb.append("  }\n\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateParser(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateParser(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -1449,18 +1504,21 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateParser(Map<String, Integer> columnTypes,
-                               String [] colNames, StringBuilder sb,
-                               int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateParser(Map<String, Integer> columnTypes,
+                                String[] colNames, StringBuilder sb,
+                                int methodNumber, int size,
+                                boolean wrapInMethod) {
     // The wrapper methods call __loadFromFields() to actually interpret the
     // raw field data as string, int, boolean, etc. The generation of this
     // method is type-dependent for the fields.
     if (wrapInMethod) {
-      sb.append("  private void __loadFromFields" + methodNumber + "(Iterator<String> __it) {\n");
+      sb.append("  private void __loadFromFields" + methodNumber
+              + "(Iterator<String> __it) {\n");
     }
     sb.append("    String __cur_str = null;\n");
     sb.append("    try {\n");
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String colName = colNames[i];
       int colType = columnTypes.get(colName);
       parseColumn(colName, colType, sb);
@@ -1483,7 +1541,8 @@ public class ClassWriter {
   private void generateHadoopWrite(Map<String, Integer> columnTypes,
       String [] colNames, StringBuilder sb) {
 
-    int numberOfMethods = this.getNumberOfMethods(colNames, maxColumnsPerMethod);
+    int numberOfMethods =
+            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
     sb.append("  public void write(DataOutput __dataOut) "
         + "throws IOException {\n");
@@ -1493,13 +1552,15 @@ public class ClassWriter {
         sb.append("    this.write" + i + "(__dataOut);\n");
       }
     } else {
-      _generateHadoopWrite(columnTypes, colNames, sb, 0, maxColumnsPerMethod, false);
+      myGenerateHadoopWrite(columnTypes, colNames, sb, 0,
+              maxColumnsPerMethod, false);
     }
 
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      _generateHadoopWrite(columnTypes, colNames, sb, i, maxColumnsPerMethod, true);
+      myGenerateHadoopWrite(columnTypes, colNames, sb, i,
+              maxColumnsPerMethod, true);
     }
   }
 
@@ -1512,15 +1573,17 @@ public class ClassWriter {
    * @param size - number of columns per method
    * @param wrapInMethod - wrap body in a method.
    */
-  private void _generateHadoopWrite(Map<String, Integer> columnTypes,
-                                    String [] colNames, StringBuilder sb,
-                                    int methodNumber, int size, boolean wrapInMethod) {
+  private void myGenerateHadoopWrite(Map<String, Integer> columnTypes,
+                                     String[] colNames, StringBuilder sb,
+                                     int methodNumber, int size,
+                                     boolean wrapInMethod) {
     if (wrapInMethod) {
       sb.append("  public void write" + methodNumber + "(DataOutput __dataOut) "
           + "throws IOException {\n");
     }
 
-    for (int i = methodNumber * size; i < topBoundary(colNames, methodNumber, size); ++i) {
+    for (int i = methodNumber * size;
+         i < topBoundary(colNames, methodNumber, size); ++i) {
       String col = colNames[i];
       int sqlType = columnTypes.get(col);
       String javaType = toJavaType(col, sqlType);
@@ -1600,23 +1663,19 @@ public class ClassWriter {
     for (int i = 0; i < colNames.length; i++) {
       String identifier = cleanedColNames[i];
 
-      // Name can't be blank
-      if (identifier.isEmpty()) {
+      if (identifier.isEmpty()) { // Name can't be blank
         throw new IllegalArgumentException("We found column without column "
                 + "name. Please verify that you've entered all column names "
                 + "in your query if using free form query import (consider "
                 + "adding clause AS if you're using column transformation)");
       }
-
       // Guarantee uniq col identifier
       if (uniqColNames.contains(identifier)) {
           throw new IllegalArgumentException("Duplicate Column identifier "
               + "specified: '" + identifier + "'");
       }
       uniqColNames.add(identifier);
-
-      // Make sure the col->type mapping holds for the
-      // new identifier name, too.
+      // Make sure the col->type mapping holds for the new identifier name, too
       String col = colNames[i];
       Integer type = columnTypes.get(col);
       if (type == null) {
@@ -1626,6 +1685,7 @@ public class ClassWriter {
       }
       columnTypes.put(identifier, type);
     }
+
     // Check that all explicitly mapped columns are present in result set
     Properties mapping = options.getMapColumnJava();
     if (mapping != null && !mapping.isEmpty()) {
@@ -1671,11 +1731,9 @@ public class ClassWriter {
     // Generate the Java code.
     StringBuilder sb = generateClassForColumns(columnTypes,
         cleanedColNames, cleanedDbWriteColNames);
-
     // Write this out to a file in the jar output directory.
     // We'll move it to the user-visible CodeOutputDir after compiling.
     String codeOutDir = options.getJarOutputDir();
-
     // Get the class name to generate, which includes package components.
     String className = new TableClassName(options).getClassForTable(tableName);
     // Convert the '.' characters to '/' characters.
@@ -1718,15 +1776,13 @@ public class ClassWriter {
       if (null != writer) {
         try {
           writer.close();
-        } catch (IOException ioe) {
-          // ignored because we're closing.
+        } catch (IOException ioe) { // ignored because we're closing.
         }
       }
       if (null != ostream) {
         try {
           ostream.close();
-        } catch (IOException ioe) {
-          // ignored because we're closing.
+        } catch (IOException ioe) { // ignored because we're closing.
         }
       }
     }
