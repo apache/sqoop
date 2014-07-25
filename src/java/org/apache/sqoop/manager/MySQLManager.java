@@ -64,22 +64,6 @@ public class MySQLManager
   }
 
   @Override
-  protected void initOptionDefaults() {
-    if (options.getFetchSize() == null) {
-      LOG.info("Preparing to use a MySQL streaming resultset.");
-      options.setFetchSize(Integer.MIN_VALUE);
-    } else if (
-        !options.getFetchSize().equals(Integer.MIN_VALUE)
-        && !options.getFetchSize().equals(0)) {
-      LOG.info("Argument '--fetch-size " + options.getFetchSize()
-          + "' will probably get ignored by MySQL JDBC driver.");
-      // see also
-      // http://dev.mysql.com/doc/refman/5.5/en
-      //                       /connector-j-reference-implementation-notes.html
-    }
-  }
-
-  @Override
   protected String getPrimaryKeyQuery(String tableName) {
     return "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS "
          + "WHERE TABLE_SCHEMA = (" + getSchemaQuery() + ") "
