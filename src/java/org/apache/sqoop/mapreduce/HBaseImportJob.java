@@ -138,7 +138,8 @@ public class HBaseImportJob extends DataDrivenImportJob {
     }
 
     // Add HBase configuration files to this conf object.
-    HBaseConfiguration.addHbaseResources(conf);
+    Configuration newConf = HBaseConfiguration.create(conf);
+    HBaseConfiguration.merge(conf, newConf);
 
     HBaseAdmin admin = new HBaseAdmin(conf);
 
