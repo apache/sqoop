@@ -28,14 +28,14 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.io.SqoopWritable;
 
 import java.io.IOException;
 
 /**
  * An output format for MapReduce job.
  */
-public class SqoopNullOutputFormat extends OutputFormat<Data, NullWritable> {
+public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWritable> {
 
   public static final Logger LOG =
     Logger.getLogger(SqoopNullOutputFormat.class);
@@ -46,7 +46,7 @@ public class SqoopNullOutputFormat extends OutputFormat<Data, NullWritable> {
   }
 
   @Override
-  public RecordWriter<Data, NullWritable> getRecordWriter(
+  public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(
       TaskAttemptContext context) {
     SqoopOutputFormatLoadExecutor executor =
         new SqoopOutputFormatLoadExecutor(context);

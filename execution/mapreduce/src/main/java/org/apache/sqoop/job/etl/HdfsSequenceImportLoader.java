@@ -30,7 +30,6 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -38,16 +37,9 @@ public class HdfsSequenceImportLoader extends Loader {
 
   public static final String EXTENSION = ".seq";
 
-  private final char fieldDelimiter;
-
-  public HdfsSequenceImportLoader() {
-    fieldDelimiter = Data.DEFAULT_FIELD_DELIMITER;
-  }
-
   @Override
   public void load(LoaderContext context, Object oc, Object oj) throws Exception {
     DataReader reader = context.getDataReader();
-    reader.setFieldDelimiter(fieldDelimiter);
 
     Configuration conf = new Configuration();
 //    Configuration conf = ((EtlContext)context).getConfiguration();
@@ -87,7 +79,7 @@ public class HdfsSequenceImportLoader extends Loader {
 
       String csv;
       Text text = new Text();
-      while ((csv = reader.readCsvRecord()) != null) {
+      while ((csv = reader.readTextRecord()) != null) {
         text.set(csv);
         filewriter.append(text, NullWritable.get());
       }

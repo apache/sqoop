@@ -34,13 +34,13 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.io.SqoopWritable;
 
 /**
  * An output format for MapReduce job.
  */
 public class SqoopFileOutputFormat
-    extends FileOutputFormat<Data, NullWritable> {
+    extends FileOutputFormat<SqoopWritable, NullWritable> {
 
   public static final Logger LOG =
     Logger.getLogger(SqoopFileOutputFormat.class);
@@ -49,7 +49,7 @@ public class SqoopFileOutputFormat
       DefaultCodec.class;
 
   @Override
-  public RecordWriter<Data, NullWritable> getRecordWriter(
+  public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(
       TaskAttemptContext context) throws IOException {
     Configuration conf = context.getConfiguration();
 
@@ -69,6 +69,7 @@ public class SqoopFileOutputFormat
     return executor.getRecordWriter();
   }
 
+  @Override
   public synchronized OutputCommitter getOutputCommitter(TaskAttemptContext context) throws IOException {
     Path output = getOutputPath(context);
     return new DestroyerFileOutputCommitter(output, context);

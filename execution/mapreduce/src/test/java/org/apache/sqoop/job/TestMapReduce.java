@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Loader;
@@ -42,12 +43,17 @@ import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
+import org.apache.sqoop.schema.type.Text;
 
 public class TestMapReduce extends TestCase {
 
@@ -59,6 +65,8 @@ public class TestMapReduce extends TestCase {
     Configuration conf = new Configuration();
     ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     Job job = new Job(conf);
 
     SqoopInputFormat inputformat = new SqoopInputFormat();
@@ -77,8 +85,15 @@ public class TestMapReduce extends TestCase {
     ConfigurationUtils.setJobType(conf, MJob.Type.IMPORT);
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
 
-    JobUtils.runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
         DummyOutputFormat.class);
   }
 
@@ -88,8 +103,15 @@ public class TestMapReduce extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new Text("3"));
 
-    JobUtils.runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
         SqoopNullOutputFormat.class);
   }
 
@@ -152,14 +174,14 @@ public class TestMapReduce extends TestCase {
   }
 
   public static class DummyOutputFormat
-      extends OutputFormat<Data, NullWritable> {
+      extends OutputFormat<SqoopWritable, NullWritable> {
     @Override
     public void checkOutputSpecs(JobContext context) {
       // do nothing
     }
 
     @Override
-    public RecordWriter<Data, NullWritable> getRecordWriter(
+    public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(
         TaskAttemptContext context) {
       return new DummyRecordWriter();
     }
@@ -170,12 +192,13 @@ public class TestMapReduce extends TestCase {
     }
 
     public static class DummyRecordWriter
-        extends RecordWriter<Data, NullWritable> {
+        extends RecordWriter<SqoopWritable, NullWritable> {
       private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
       private Data data = new Data();
 
       @Override
-      public void write(Data key, NullWritable value) {
+      public void write(SqoopWritable key, NullWritable value) {
+
         data.setContent(new Object[] {
           index,
           (double) index,
@@ -215,22 +238,22 @@ public class TestMapReduce extends TestCase {
   public static class DummyLoader extends Loader {
     private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
     private Data expected = new Data();
-    private Data actual = new Data();
+    private CSVIntermediateDataFormat actual = new CSVIntermediateDataFormat();
 
     @Override
     public void load(LoaderContext context, Object oc, Object oj) throws Exception{
-      Object[] array;
-      while ((array = context.getDataReader().readArrayRecord()) != null) {
-        actual.setContent(array, Data.ARRAY_RECORD);
+      String data;
+      while ((data = context.getDataReader().readTextRecord()) != null) {
 
+//        actual.setSchema(context.getSchema());
+//        actual.setObjectData(array, false);
         expected.setContent(new Object[] {
           index,
           (double) index,
           String.valueOf(index)},
           Data.ARRAY_RECORD);
         index++;
-
-        assertEquals(expected.toString(), actual.toString());
+        assertEquals(expected.toString(), data);
       }
     }
   }

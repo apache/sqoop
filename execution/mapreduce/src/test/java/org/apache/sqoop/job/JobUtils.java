@@ -27,7 +27,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
@@ -44,17 +44,17 @@ public class JobUtils {
   }
 
   public static void runJob(Configuration conf,
-      Class<? extends InputFormat<SqoopSplit, NullWritable>> input,
-      Class<? extends Mapper<SqoopSplit, NullWritable, Data, NullWritable>> mapper,
-      Class<? extends OutputFormat<Data, NullWritable>> output)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    Class<? extends InputFormat<SqoopSplit, NullWritable>> input,
+    Class<? extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable>> mapper,
+    Class<? extends OutputFormat<SqoopWritable, NullWritable>> output)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Job job = new Job(conf);
     job.setInputFormatClass(input);
     job.setMapperClass(mapper);
-    job.setMapOutputKeyClass(Data.class);
+    job.setMapOutputKeyClass(SqoopWritable.class);
     job.setMapOutputValueClass(NullWritable.class);
     job.setOutputFormatClass(output);
-    job.setOutputKeyClass(Data.class);
+    job.setOutputKeyClass(SqoopWritable.class);
     job.setOutputValueClass(NullWritable.class);
 
     boolean success = job.waitForCompletion(true);

@@ -98,4 +98,9 @@ public abstract class Column {
     result = 31 * result + (nullable != null ? nullable.hashCode() : 0);
     return result;
   }
+
+  public boolean validate(Object o) {
+    // TODO: Implement this in all subclasses!
+    return true;
+  }
 }

@@ -23,12 +23,24 @@ package org.apache.sqoop.etl.io;
  */
 public abstract class DataWriter {
 
+  /**
+   * Write an array of objects into the execution framework
+   * @param array - data to be written
+   */
   public abstract void writeArrayRecord(Object[] array);
 
-  public abstract void writeCsvRecord(String csv);
+  /**
+   * Write data into execution framework as text. The Intermediate Data Format
+   * may choose to convert the data to another format based on how the data
+   * format is implemented
+   * @param text - data represented as CSV text.
+   */
+  public abstract void writeStringRecord(String text);
 
-  public abstract void writeContent(Object content, int type);
-
-  public abstract void setFieldDelimiter(char fieldDelimiter);
+  /**
+   * Write data in the intermediate data format's native format.
+   * @param obj - data to be written
+   */
+  public abstract void writeRecord(Object obj);
 
 }

@@ -78,6 +78,8 @@ public enum GenericJdbcConnectorError implements ErrorCode {
 
   GENERIC_JDBC_CONNECTOR_0018("Error occurred while transferring data from " +
     "stage table to destination table."),
+
+  GENERIC_JDBC_CONNECTOR_0019("Table name extraction not supported.")
   ;
 
   private final String message;

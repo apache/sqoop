@@ -327,7 +327,7 @@ public class TestImportInitializer extends TestCase {
     Initializer initializer = new GenericJdbcImportInitializer();
     initializer.initialize(initializerContext, connConf, jobConf);
     Schema schema = initializer.getSchema(initializerContext, connConf, jobConf);
-    assertEquals(getSchema(tableName), schema);
+    assertEquals(getSchema(jobConf.table.schemaName + "." + tableName), schema);
   }
 
   @SuppressWarnings("unchecked")

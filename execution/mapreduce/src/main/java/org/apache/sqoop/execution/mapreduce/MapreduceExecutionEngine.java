@@ -34,7 +34,7 @@ import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
 import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.job.io.Data;
+import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
@@ -53,14 +53,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     return new MRSubmissionRequest();
   }
 
-  /**
-   *  {@inheritDoc}
-   */
-  @Override
-  public void prepareImportSubmission(SubmissionRequest gRequest) {
-    MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
-    ImportJobConfiguration jobConf = (ImportJobConfiguration) request.getConfigFrameworkJob();
-
+  public void prepareSubmission(MRSubmissionRequest request) {
     // Add jar dependencies
     addDependencies(request);
 
@@ -68,12 +61,34 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     request.setInputFormatClass(SqoopInputFormat.class);
 
     request.setMapperClass(SqoopMapper.class);
-    request.setMapOutputKeyClass(Data.class);
+    request.setMapOutputKeyClass(SqoopWritable.class);
     request.setMapOutputValueClass(NullWritable.class);
 
-    request.setOutputFormatClass(SqoopFileOutputFormat.class);
-    request.setOutputKeyClass(Data.class);
+    request.setOutputFormatClass(SqoopNullOutputFormat.class);
+    request.setOutputKeyClass(SqoopWritable.class);
     request.setOutputValueClass(NullWritable.class);
+
+    // Set up framework context
+    MutableMapContext context = request.getFrameworkContext();
+    context.setString(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      request.getIntermediateDataFormat().getName());
+
+    if(request.getExtractors() != null) {
+      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
+    }
+  }
+
+  /**
+   *  {@inheritDoc}
+   */
+  @Override
+  public void prepareImportSubmission(SubmissionRequest gRequest) {
+    MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
+
+    prepareSubmission(request);
+    request.setOutputFormatClass(SqoopFileOutputFormat.class);
+
+    ImportJobConfiguration jobConf = (ImportJobConfiguration) request.getConfigFrameworkJob();
 
     Importer importer = (Importer)request.getConnectorCallbacks();
 
@@ -82,10 +97,6 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(JobConstants.JOB_ETL_PARTITIONER, importer.getPartitioner().getName());
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
-
-    if(request.getExtractors() != null) {
-      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
-    }
 
     // TODO: This settings should be abstracted to core module at some point
     if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
@@ -137,19 +148,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
     ExportJobConfiguration jobConf = (ExportJobConfiguration) request.getConfigFrameworkJob();
 
-    // Add jar dependencies
-    addDependencies(request);
-
-    // Configure map-reduce classes for import
-    request.setInputFormatClass(SqoopInputFormat.class);
-
-    request.setMapperClass(SqoopMapper.class);
-    request.setMapOutputKeyClass(Data.class);
-    request.setMapOutputValueClass(NullWritable.class);
-
-    request.setOutputFormatClass(SqoopNullOutputFormat.class);
-    request.setOutputKeyClass(Data.class);
-    request.setOutputValueClass(NullWritable.class);
+    prepareSubmission(request);
 
     Exporter exporter = (Exporter)request.getConnectorCallbacks();
 
@@ -162,10 +161,6 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     // Extractor that will be able to read all supported file types
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsExportExtractor.class.getName());
     context.setString(JobConstants.HADOOP_INPUTDIR, jobConf.input.inputDirectory);
-
-    if(request.getExtractors() != null) {
-      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
-    }
   }
 
   /**

@@ -113,11 +113,6 @@ public class TestExportLoader {
     int index = 0;
 
     @Override
-    public void setFieldDelimiter(char fieldDelimiter) {
-      // do nothing and use default delimiter
-    }
-
-    @Override
     public Object[] readArrayRecord() {
       if (index < numberOfRows) {
         Object[] array = new Object[] {
@@ -132,16 +127,17 @@ public class TestExportLoader {
     }
 
     @Override
-    public String readCsvRecord() {
+    public String readTextRecord() {
       fail("This method should not be invoked.");
       return null;
     }
 
     @Override
-    public Object readContent(int type) {
+    public Object readContent() throws Exception {
       fail("This method should not be invoked.");
       return null;
     }
+
   }
 
 }

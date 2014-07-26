@@ -134,11 +134,6 @@ public class TestImportExtractor extends TestCase {
     int indx = START;
 
     @Override
-    public void setFieldDelimiter(char fieldDelimiter) {
-      // do nothing and use default delimiter
-    }
-
-    @Override
     public void writeArrayRecord(Object[] array) {
       for (int i = 0; i < array.length; i++) {
         if (array[i] instanceof Integer) {
@@ -153,12 +148,12 @@ public class TestImportExtractor extends TestCase {
     }
 
     @Override
-    public void writeCsvRecord(String csv) {
+    public void writeStringRecord(String text) {
       fail("This method should not be invoked.");
     }
 
     @Override
-    public void writeContent(Object content, int type) {
+    public void writeRecord(Object content) {
       fail("This method should not be invoked.");
     }
   }

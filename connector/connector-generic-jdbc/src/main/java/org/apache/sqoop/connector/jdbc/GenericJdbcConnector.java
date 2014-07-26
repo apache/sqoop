@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.common.VersionInfo;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
@@ -61,7 +63,7 @@ public class GenericJdbcConnector extends SqoopConnector {
   @Override
   public ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(
-        GenericJdbcConnectorConstants.RESOURCE_BUNDLE_NAME, locale);
+      GenericJdbcConnectorConstants.RESOURCE_BUNDLE_NAME, locale);
   }
 
   @Override

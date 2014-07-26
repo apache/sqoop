@@ -22,6 +22,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.request.HttpEventContext;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
@@ -327,6 +328,10 @@ public class JobManager implements Reconfigurable {
     request.setJobName(job.getName());
     request.setJobId(job.getPersistenceId());
     request.setNotificationUrl(notificationBaseUrl + jobId);
+    Class<? extends IntermediateDataFormat<?>> dataFormatClass =
+      connector.getIntermediateDataFormat();
+    request.setIntermediateDataFormat(connector.getIntermediateDataFormat());
+    // Create request object
 
     // Let's register all important jars
     // sqoop-common
@@ -342,6 +347,9 @@ public class JobManager implements Reconfigurable {
 
     // Extra libraries that Sqoop code requires
     request.addJarForClass(JSONValue.class);
+
+    // The IDF is used in the ETL process.
+    request.addJarForClass(dataFormatClass);
 
     // Get connector callbacks
     switch (job.getType()) {

@@ -18,17 +18,32 @@
 package org.apache.sqoop.etl.io;
 
 /**
- * An intermediate layer for passing data from the MR framework
+ * An intermediate layer for passing data from the execution framework
  * to the ETL framework.
  */
 public abstract class DataReader {
 
+  /**
+   * Read data from the execution framework as an object array.
+   * @return - array of objects with each column represented as an object
+   * @throws Exception
+   */
   public abstract Object[] readArrayRecord() throws Exception;
 
-  public abstract String readCsvRecord() throws Exception;
+  /**
+   * Read data from execution framework as text - as a CSV record.
+   * public abstract Object readContent(int type) throws Exception;
+   * @return - CSV formatted data.
+   * @throws Exception
+   */
+  public abstract String readTextRecord() throws Exception;
 
-  public abstract Object readContent(int type) throws Exception;
-
-  public abstract void setFieldDelimiter(char fieldDelimiter);
+  /**
+   * Read data from execution framework as a native format.
+   * @return - the content in the native format of the intermediate data
+   * format being used.
+   * @throws Exception
+   */
+  public abstract Object readContent() throws Exception;
 
 }

@@ -71,16 +71,17 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     String schemaName = importJobConfiguration.table.tableName;
     if(schemaName == null) {
       schemaName = "Query";
+    } else if(importJobConfiguration.table.schemaName != null) {
+      schemaName = importJobConfiguration.table.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
-
     ResultSet rs = null;
     ResultSetMetaData rsmt = null;
     try {
       rs = executor.executeQuery(
-        context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL)
-          .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
+          context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL)
+              .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
       );
 
       rsmt = rs.getMetaData();

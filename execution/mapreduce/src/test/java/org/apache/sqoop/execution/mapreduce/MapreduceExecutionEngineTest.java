@@ -18,6 +18,7 @@
 package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.framework.SubmissionRequest;
 import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.framework.configuration.OutputCompression;
@@ -71,6 +72,7 @@ public class MapreduceExecutionEngineTest {
     request.setConnectorCallbacks(new Importer(Initializer.class,
       Partitioner.class, Extractor.class, Destroyer.class) {
     });
+    request.setIntermediateDataFormat(CSVIntermediateDataFormat.class);
     executionEngine.prepareImportSubmission(request);
 
     MutableMapContext context = request.getFrameworkContext();
@@ -97,6 +99,7 @@ public class MapreduceExecutionEngineTest {
     request.setConnectorCallbacks(new Importer(Initializer.class,
       Partitioner.class, Extractor.class, Destroyer.class) {
     });
+    request.setIntermediateDataFormat(CSVIntermediateDataFormat.class);
     executionEngine.prepareImportSubmission(request);
 
     MutableMapContext context = request.getFrameworkContext();

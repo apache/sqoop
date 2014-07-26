@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
@@ -33,7 +34,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
@@ -45,6 +48,9 @@ import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
 
 public class TestHdfsLoad extends TestCase {
 
@@ -68,13 +74,21 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     conf.set(JobConstants.HADOOP_OUTDIR, outdir);
-    JobUtils.runJob(conf);
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration());
 
     String fileName = outdir + "/" +  OUTPUT_FILE;
     InputStream filestream = FileUtils.open(fileName);
     BufferedReader filereader = new BufferedReader(new InputStreamReader(
-        filestream, Data.CHARSET_NAME));
+        filestream, Charsets.UTF_8));
     verifyOutputText(filereader);
   }
 
@@ -86,9 +100,18 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     conf.set(JobConstants.HADOOP_OUTDIR, outdir);
     conf.setBoolean(JobConstants.HADOOP_COMPRESS, true);
-    JobUtils.runJob(conf);
+
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration());
 
     Class<? extends CompressionCodec> codecClass = conf.getClass(
         JobConstants.HADOOP_COMPRESS_CODEC, SqoopFileOutputFormat.DEFAULT_CODEC)
@@ -97,7 +120,7 @@ public class TestHdfsLoad extends TestCase {
     String fileName = outdir + "/" +  OUTPUT_FILE + codec.getDefaultExtension();
     InputStream filestream = codec.createInputStream(FileUtils.open(fileName));
     BufferedReader filereader = new BufferedReader(new InputStreamReader(
-        filestream, Data.CHARSET_NAME));
+        filestream, Charsets.UTF_8));
     verifyOutputText(filereader);
   }
 
@@ -108,7 +131,7 @@ public class TestHdfsLoad extends TestCase {
     int index = START_ID*NUMBER_OF_ROWS_PER_ID;
     while ((actual = reader.readLine()) != null){
       data.setContent(new Object[] {
-        index, (double) index, String.valueOf(index) },
+        index, (double) index, new String(new byte[] {(byte)(index + 127)}, Charsets.ISO_8859_1) },
           Data.ARRAY_RECORD);
       expected = data.toString();
       index++;
@@ -129,8 +152,17 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     conf.set(JobConstants.HADOOP_OUTDIR, outdir);
-    JobUtils.runJob(conf);
+
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration());
 
     Path filepath = new Path(outdir,
         OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
@@ -147,10 +179,18 @@ public class TestHdfsLoad extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     conf.set(JobConstants.HADOOP_OUTDIR, outdir);
     conf.setBoolean(JobConstants.HADOOP_COMPRESS, true);
-    JobUtils.runJob(conf);
 
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    JobUtils.runJob(job.getConfiguration());
     Path filepath = new Path(outdir,
         OUTPUT_FILE + HdfsSequenceImportLoader.EXTENSION);
     SequenceFile.Reader filereader = new SequenceFile.Reader(filepath.getFileSystem(conf), filepath, conf);
@@ -164,7 +204,7 @@ public class TestHdfsLoad extends TestCase {
     Data data = new Data();
     while (reader.next(actual)){
       data.setContent(new Object[] {
-          index, (double) index, String.valueOf(index) },
+          index, (double) index, new String(new byte[] {(byte)(index + 127)}, Charsets.ISO_8859_1) },
           Data.ARRAY_RECORD);
       expected.set(data.toString());
       index++;
@@ -225,7 +265,7 @@ public class TestHdfsLoad extends TestCase {
         Object[] array = new Object[] {
           id * NUMBER_OF_ROWS_PER_ID + row,
           (double) (id * NUMBER_OF_ROWS_PER_ID + row),
-          String.valueOf(id*NUMBER_OF_ROWS_PER_ID+row)
+          new String(new byte[]{(byte)(id * NUMBER_OF_ROWS_PER_ID + row + 127)}, Charsets.ISO_8859_1)
         };
         context.getDataWriter().writeArrayRecord(array);
       }

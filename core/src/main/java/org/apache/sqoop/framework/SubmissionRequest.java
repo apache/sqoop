@@ -18,6 +18,7 @@
 package org.apache.sqoop.framework;
 
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.CallbackBase;
 import org.apache.sqoop.model.MJob;
@@ -106,6 +107,11 @@ public class SubmissionRequest {
    * Number of loaders
    */
   Integer loaders;
+
+  /**
+   * The intermediate data format this submission should use.
+   */
+  Class<? extends IntermediateDataFormat> intermediateDataFormat;
 
   public SubmissionRequest() {
     this.jars = new LinkedList<String>();
@@ -252,4 +258,13 @@ public class SubmissionRequest {
   public void setLoaders(Integer loaders) {
     this.loaders = loaders;
   }
+
+  public Class<? extends IntermediateDataFormat> getIntermediateDataFormat() {
+    return intermediateDataFormat;
+  }
+
+  public void setIntermediateDataFormat(Class<? extends IntermediateDataFormat> intermediateDataFormat) {
+    this.intermediateDataFormat = intermediateDataFormat;
+  }
+
 }

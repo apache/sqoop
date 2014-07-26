@@ -20,6 +20,8 @@ package org.apache.sqoop.connector.spi;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.etl.Exporter;
 import org.apache.sqoop.job.etl.Importer;
 import org.apache.sqoop.model.MJob;
@@ -79,4 +81,14 @@ public abstract class SqoopConnector {
    */
   public abstract MetadataUpgrader getMetadataUpgrader();
 
+  /**
+   * Returns the {@linkplain IntermediateDataFormat} this connector
+   * can return natively in. This will support retrieving the data as text
+   * and an array of objects. This should never return null.
+   *
+   * @return {@linkplain IntermediateDataFormat} object
+   */
+  public Class<? extends IntermediateDataFormat<?>> getIntermediateDataFormat() {
+    return CSVIntermediateDataFormat.class;
+  }
 }

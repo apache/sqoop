@@ -30,10 +30,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.etl.HdfsExportExtractor;
 import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
@@ -45,6 +47,9 @@ import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.mr.ConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
 import org.junit.Test;
 
 public class TestHdfsExtract extends TestCase {
@@ -53,10 +58,20 @@ public class TestHdfsExtract extends TestCase {
   private static final int NUMBER_OF_FILES = 5;
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
 
-  private String indir;
+  private final String indir;
 
   public TestHdfsExtract() {
     indir = INPUT_ROOT + getClass().getSimpleName();
+  }
+
+  @Override
+  public void setUp() throws IOException {
+    FileUtils.mkdirs(indir);
+  }
+
+  @Override
+  public void tearDown() throws IOException {
+    FileUtils.delete(indir);
   }
 
   /**
@@ -68,12 +83,12 @@ public class TestHdfsExtract extends TestCase {
    */
   @Test
   public void testHdfsExportPartitioner() throws Exception {
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
     createTextInput(null);
     Configuration conf = new Configuration();
     conf.set(JobConstants.HADOOP_INPUTDIR, indir);
 
+    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+      CSVIntermediateDataFormat.class.getName());
     HdfsExportPartitioner partitioner = new HdfsExportPartitioner();
     PrefixContext prefixContext = new PrefixContext(conf, "");
     int[] partitionValues = {2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 17};
@@ -87,87 +102,67 @@ public class TestHdfsExtract extends TestCase {
 
   @Test
   public void testUncompressedText() throws Exception {
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
     createTextInput(null);
 
-    Configuration conf = new Configuration();
-    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
-    conf.set(JobConstants.JOB_ETL_PARTITIONER,
-        HdfsExportPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsExportExtractor.class.getName());
-    conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
-    conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
-    JobUtils.runJob(conf);
+    JobUtils.runJob(createJob(createConf(), createSchema()).getConfiguration());
   }
 
   @Test
-  public void testCompressedText() throws Exception {
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
+  public void testDefaultCompressedText() throws Exception {
     createTextInput(SqoopFileOutputFormat.DEFAULT_CODEC);
 
-    Configuration conf = new Configuration();
-    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
-    conf.set(JobConstants.JOB_ETL_PARTITIONER,
-        HdfsExportPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsExportExtractor.class.getName());
-    conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
-    conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
-    JobUtils.runJob(conf);
-
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
-    createTextInput(BZip2Codec.class);
-
-    conf.set(JobConstants.JOB_ETL_PARTITIONER,
-        HdfsExportPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsExportExtractor.class.getName());
-    conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
-    conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
-    JobUtils.runJob(conf);
+    JobUtils.runJob(createJob(createConf(), createSchema()).getConfiguration());
   }
 
   @Test
-  public void testCompressedSequence() throws Exception {
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
+  public void testBZip2CompressedText() throws Exception {
+    createTextInput(BZip2Codec.class);
+
+    JobUtils.runJob(createJob(createConf(), createSchema()).getConfiguration());
+  }
+
+  @Test
+  public void testDefaultCompressedSequence() throws Exception {
     createSequenceInput(SqoopFileOutputFormat.DEFAULT_CODEC);
 
-    Configuration conf = new Configuration();
-    ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
-    conf.set(JobConstants.JOB_ETL_PARTITIONER,
-        HdfsExportPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR,
-        HdfsExportExtractor.class.getName());
-    conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
-    conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
-    JobUtils.runJob(conf);
+    JobUtils.runJob(createJob(createConf(), createSchema()).getConfiguration());
   }
 
   @Test
   public void testUncompressedSequence() throws Exception {
-    FileUtils.delete(indir);
-    FileUtils.mkdirs(indir);
     createSequenceInput(null);
 
+    JobUtils.runJob(createJob(createConf(), createSchema()).getConfiguration());
+  }
+
+  private Schema createSchema() {
+    Schema schema = new Schema("Test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+    .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+    return schema;
+  }
+
+  private Configuration createConf() {
     Configuration conf = new Configuration();
     ConfigurationUtils.setJobType(conf, MJob.Type.EXPORT);
-    conf.set(JobConstants.JOB_ETL_PARTITIONER,
+    conf.setIfUnset(JobConstants.JOB_ETL_PARTITIONER,
         HdfsExportPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR,
+    conf.setIfUnset(JobConstants.JOB_ETL_EXTRACTOR,
         HdfsExportExtractor.class.getName());
-    conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
-    conf.set(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
-    conf.set(JobConstants.HADOOP_INPUTDIR, indir);
-    JobUtils.runJob(conf);
+    conf.setIfUnset(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
+    conf.setIfUnset(Constants.JOB_ETL_NUMBER_PARTITIONS, "4");
+    conf.setIfUnset(JobConstants.INTERMEDIATE_DATA_FORMAT,
+        CSVIntermediateDataFormat.class.getName());
+    conf.setIfUnset(JobConstants.HADOOP_INPUTDIR, indir);
+    return conf;
+  }
+
+  private Job createJob(Configuration conf, Schema schema) throws Exception {
+    Job job = new Job(conf);
+    ConfigurationUtils.setConnectorSchema(job, schema);
+    job.getConfiguration().set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+        CSVIntermediateDataFormat.class.getName());
+    return job;
   }
 
   private void createTextInput(Class<? extends CompressionCodec> clz)
@@ -227,11 +222,11 @@ public class TestHdfsExtract extends TestCase {
       SequenceFile.Writer filewriter;
       if (codec != null) {
         filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
-          conf, filepath, Text.class, NullWritable.class,
-          CompressionType.BLOCK, codec);
+            conf, filepath, Text.class, NullWritable.class,
+            CompressionType.BLOCK, codec);
       } else {
         filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
-          conf, filepath, Text.class, NullWritable.class, CompressionType.NONE);
+            conf, filepath, Text.class, NullWritable.class, CompressionType.NONE);
       }
 
       Text text = new Text();

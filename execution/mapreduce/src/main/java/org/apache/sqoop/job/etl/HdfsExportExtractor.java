@@ -36,7 +36,6 @@ import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
 import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
-import org.apache.sqoop.job.io.Data;
 
 /**
  * Extract from HDFS.
@@ -50,12 +49,6 @@ public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, Expo
   private DataWriter dataWriter;
   private long rowRead = 0;
 
-  private final char fieldDelimiter;
-
-  public HdfsExportExtractor() {
-    fieldDelimiter = Data.DEFAULT_FIELD_DELIMITER;
-  }
-
   @Override
   public void extract(ExtractorContext context,
       ConnectionConfiguration connectionConfiguration,
@@ -63,7 +56,6 @@ public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, Expo
 
     conf = ((PrefixContext) context.getContext()).getConfiguration();
     dataWriter = context.getDataWriter();
-    dataWriter.setFieldDelimiter(fieldDelimiter);
 
     try {
       HdfsExportPartition p = partition;
@@ -113,7 +105,7 @@ public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, Expo
     boolean hasNext = filereader.next(line);
     while (hasNext) {
       rowRead++;
-      dataWriter.writeCsvRecord(line.toString());
+      dataWriter.writeStringRecord(line.toString());
       line = new Text();
       hasNext = filereader.next(line);
       if (filereader.getPosition() >= end && filereader.syncSeen()) {
@@ -173,7 +165,7 @@ public class HdfsExportExtractor extends Extractor<ConnectionConfiguration, Expo
         next = fileseeker.getPos();
       }
       rowRead++;
-      dataWriter.writeCsvRecord(line.toString());
+      dataWriter.writeStringRecord(line.toString());
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
     filestream.close();

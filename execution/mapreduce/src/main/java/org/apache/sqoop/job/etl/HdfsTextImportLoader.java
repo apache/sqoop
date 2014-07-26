@@ -22,6 +22,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,18 +37,15 @@ import org.apache.sqoop.utils.ClassUtils;
 
 public class HdfsTextImportLoader extends Loader {
 
-  private final char fieldDelimiter;
   private final char recordDelimiter;
 
   public HdfsTextImportLoader() {
-    fieldDelimiter = Data.DEFAULT_FIELD_DELIMITER;
     recordDelimiter = Data.DEFAULT_RECORD_DELIMITER;
   }
 
   @Override
   public void load(LoaderContext context, Object oc, Object oj) throws Exception{
     DataReader reader = context.getDataReader();
-    reader.setFieldDelimiter(fieldDelimiter);
 
     Configuration conf = new Configuration();
 //    Configuration conf = ((EtlContext)context).getConfiguration();
@@ -81,15 +79,15 @@ public class HdfsTextImportLoader extends Loader {
       DataOutputStream filestream = fs.create(filepath, false);
       if (codec != null) {
         filewriter = new BufferedWriter(new OutputStreamWriter(
-            codec.createOutputStream(filestream, codec.createCompressor()),
-            Data.CHARSET_NAME));
+          codec.createOutputStream(filestream, codec.createCompressor()),
+          Charsets.UTF_8));
       } else {
         filewriter = new BufferedWriter(new OutputStreamWriter(
-            filestream, Data.CHARSET_NAME));
+            filestream, Charsets.UTF_8));
       }
 
       String csv;
-      while ((csv = reader.readCsvRecord()) != null) {
+      while ((csv = reader.readTextRecord()) != null) {
         filewriter.write(csv + recordDelimiter);
       }
       filewriter.close();

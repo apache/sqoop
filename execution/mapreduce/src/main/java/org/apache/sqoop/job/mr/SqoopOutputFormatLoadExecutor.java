@@ -31,14 +31,16 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class SqoopOutputFormatLoadExecutor {
@@ -48,7 +50,7 @@ public class SqoopOutputFormatLoadExecutor {
 
   private volatile boolean readerFinished = false;
   private volatile boolean writerFinished = false;
-  private volatile Data data;
+  private volatile IntermediateDataFormat data;
   private JobContext context;
   private SqoopRecordWriter producer;
   private Future<?> consumerFuture;
@@ -60,17 +62,19 @@ public class SqoopOutputFormatLoadExecutor {
   SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName){
     this.isTest = isTest;
     this.loaderName = loaderName;
-    data = new Data();
+    data = new CSVIntermediateDataFormat();
     producer = new SqoopRecordWriter();
   }
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
-    data = new Data();
     context = jobctx;
     producer = new SqoopRecordWriter();
+    data = (IntermediateDataFormat) ClassUtils.instantiate(context
+      .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
+    data.setSchema(ConfigurationUtils.getConnectorSchema(context.getConfiguration()));
   }
 
-  public RecordWriter<Data, NullWritable> getRecordWriter() {
+  public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
     consumerFuture = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat
         ("OutputFormatLoader-consumer").build()).submit(
             new ConsumerThread());
@@ -81,14 +85,13 @@ public class SqoopOutputFormatLoadExecutor {
    * This is a producer-consumer problem and can be solved
    * with two semaphores.
    */
-  private class SqoopRecordWriter extends RecordWriter<Data, NullWritable> {
+  private class SqoopRecordWriter extends RecordWriter<SqoopWritable, NullWritable> {
 
     @Override
-    public void write(Data key, NullWritable value) throws InterruptedException {
+    public void write(SqoopWritable key, NullWritable value) throws InterruptedException {
       free.acquire();
       checkIfConsumerThrew();
-      int type = key.getType();
-      data.setContent(key.getContent(type), type);
+      data.setTextData(key.getString());
       filled.release();
     }
 
@@ -135,23 +138,53 @@ public class SqoopOutputFormatLoadExecutor {
   }
 
   private class OutputFormatDataReader extends DataReader {
-    @Override
-    public void setFieldDelimiter(char fieldDelimiter) {
-      data.setFieldDelimiter(fieldDelimiter);
-    }
 
     @Override
     public Object[] readArrayRecord() throws InterruptedException {
-      return (Object[])readContent(Data.ARRAY_RECORD);
+      acquireSema();
+      // If the writer has finished, there is definitely no data remaining
+      if (writerFinished) {
+        return null;
+      }
+      try {
+        return data.getObjectData();
+      } finally {
+        releaseSema();
+      }
     }
 
     @Override
-    public String readCsvRecord() throws InterruptedException {
-      return (String)readContent(Data.CSV_RECORD);
+    public String readTextRecord() throws InterruptedException {
+      acquireSema();
+      // If the writer has finished, there is definitely no data remaining
+      if (writerFinished) {
+        return null;
+      }
+      try {
+        return data.getTextData();
+      } finally {
+        releaseSema();
+      }
     }
 
     @Override
-    public Object readContent(int type) throws InterruptedException {
+    public Object readContent() throws InterruptedException {
+      acquireSema();
+      if (writerFinished) {
+        return null;
+      }
+      try {
+        return data.getData();
+      } catch (Throwable t) {
+        readerFinished = true;
+        LOG.error("Caught exception e while getting content ", t);
+        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+      } finally {
+        releaseSema();
+      }
+    }
+
+    private void acquireSema() throws InterruptedException {
       // Has any more data been produced after I last consumed.
       // If no, wait for the producer to produce.
       try {
@@ -159,23 +192,13 @@ public class SqoopOutputFormatLoadExecutor {
       } catch (InterruptedException ex) {
         //Really at this point, there is nothing to do. Just throw and get out
         LOG.error("Interrupted while waiting for data to be available from " +
-            "mapper", ex);
+          "mapper", ex);
         throw ex;
       }
-      // If the writer has finished, there is definitely no data remaining
-      if (writerFinished) {
-        return null;
-      }
-      try {
-        Object content = data.getContent(type);
-        return content;
-      } catch (Throwable t) {
-        readerFinished = true;
-        LOG.error("Caught exception e while getting content ", t);
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
-      } finally {
-        free.release();
-      }
+    }
+
+    private void releaseSema(){
+      free.release();
     }
   }
 

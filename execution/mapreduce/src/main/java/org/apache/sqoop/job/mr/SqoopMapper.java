@@ -27,21 +27,22 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * A mapper to perform map function.
  */
-public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWritable> {
+public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable> {
 
   static {
     ConfigurationUtils.configureLogging();
@@ -52,6 +53,8 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWrit
    * Service for reporting progress to mapreduce.
    */
   private final ScheduledExecutorService progressService = Executors.newSingleThreadScheduledExecutor();
+  private IntermediateDataFormat data = null;
+  private SqoopWritable dataOut = null;
 
   @Override
   public void run(Context context) throws IOException, InterruptedException {
@@ -59,6 +62,12 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWrit
 
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
+
+    String intermediateDataFormatName = conf.get(JobConstants
+      .INTERMEDIATE_DATA_FORMAT);
+    data = (IntermediateDataFormat) ClassUtils.instantiate(intermediateDataFormatName);
+    data.setSchema(ConfigurationUtils.getConnectorSchema(conf));
+    dataOut = new SqoopWritable();
 
     // Objects that should be pass to the Executor execution
     PrefixContext subContext = null;
@@ -109,46 +118,38 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, Data, NullWrit
     }
   }
 
-  public class MapDataWriter extends DataWriter {
+  private class MapDataWriter extends DataWriter {
     private Context context;
-    private Data data;
 
     public MapDataWriter(Context context) {
       this.context = context;
     }
 
     @Override
-    public void setFieldDelimiter(char fieldDelimiter) {
-      if (data == null) {
-        data = new Data();
-      }
-
-      data.setFieldDelimiter(fieldDelimiter);
-    }
-
-    @Override
     public void writeArrayRecord(Object[] array) {
-      writeContent(array, Data.ARRAY_RECORD);
+      data.setObjectData(array);
+      writeContent();
     }
 
     @Override
-    public void writeCsvRecord(String csv) {
-      writeContent(csv, Data.CSV_RECORD);
+    public void writeStringRecord(String text) {
+      data.setTextData(text);
+      writeContent();
     }
 
     @Override
-    public void writeContent(Object content, int type) {
-      if (data == null) {
-        data = new Data();
-      }
+    public void writeRecord(Object obj) {
+      data.setData(obj.toString());
+      writeContent();
+    }
 
-      data.setContent(content, type);
+    private void writeContent() {
       try {
-        context.write(data, NullWritable.get());
+        dataOut.setString(data.getTextData());
+        context.write(dataOut, NullWritable.get());
       } catch (Exception e) {
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0013, e);
       }
     }
   }
-
 }

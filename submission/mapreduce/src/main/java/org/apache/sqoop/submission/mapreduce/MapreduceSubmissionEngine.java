@@ -198,6 +198,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       ConfigurationUtils.setConfigConnectorJob(job, request.getConfigConnectorJob());
       ConfigurationUtils.setConfigFrameworkConnection(job, request.getConfigFrameworkConnection());
       ConfigurationUtils.setConfigFrameworkJob(job, request.getConfigFrameworkJob());
+      ConfigurationUtils.setConnectorSchema(job, request.getSummary().getConnectorSchema());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());
