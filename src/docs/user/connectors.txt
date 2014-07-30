@@ -125,11 +125,23 @@ List of all extra arguments supported by Microsoft SQL Connector is shown below:
 `----------------------------------------`---------------------------------------
 Argument                                 Description
 ---------------------------------------------------------------------------------
++\--non-resilient+                       Don't attempt to recover failed \
+                                         export operations.
 +\--schema <name>+                       Scheme name that sqoop should use. \
                                          Default is "dbo".
 +\--table-hints <hints>+                 Table hints that Sqoop should use for \
                                          data movement.
 ---------------------------------------------------------------------------------
+
+Non-resilient operations
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can override the default and not use resilient operations during export.
+This will avoid retrying failed operations. For example:
+
+----
+$ sqoop export ... --export-dir custom_dir --table custom_table -- --non-resilient
+----
 
 Schema support
 ^^^^^^^^^^^^^^
