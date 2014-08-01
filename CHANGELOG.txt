@@ -1,4 +1,97 @@
 
+Release Notes - Sqoop - Version 1.4.5
+
+** Sub-task
+    * [SQOOP-1194] - Make changes to Sqoop build file to enable Netezza third party tests
+    * [SQOOP-1323] - Update HCatalog version to 0.13 in Sqoop builds
+    * [SQOOP-1324] - Support new hive datatypes in Sqoop hcatalog integration
+    * [SQOOP-1325] - Make hcatalog object names escaped during creation so that reserved words are properly processed
+    * [SQOOP-1326] - Support multiple static partition keys for better integration support
+    * [SQOOP-1363] - Document Hcatalog integration enhancements introduced in SQOOP-1322
+
+** Bug
+    * [SQOOP-585] - Bug when sqoop a join of two tables with the same column name with mysql backend
+    * [SQOOP-832] - Document --columns argument usage in export tool
+    * [SQOOP-1032] - Add the --bulk-load-dir option to support the HBase doBulkLoad function
+    * [SQOOP-1107] - Further improve error reporting when exporting malformed data
+    * [SQOOP-1117] - when failed to import a non-existing table, the failure information includes NullPointerException
+    * [SQOOP-1138] - incremental lastmodified should re-use output directory
+    * [SQOOP-1167] - Enhance HCatalog support to allow direct mode connection manager implementations
+    * [SQOOP-1170] - Can't import columns with name "public"
+    * [SQOOP-1179] - Incorrect warning saying --hive-import was not specified when it was specified
+    * [SQOOP-1185] - LobAvroImportTestCase is sensitive to test method order execution
+    * [SQOOP-1190] - Class HCatHadoopShims will be removed in HCatalog 0.12
+    * [SQOOP-1192] - Add option "--skip-dist-cache" to allow Sqoop not copying jars in %SQOOP_HOME%\lib folder when launched by Oozie and use Oozie share lib
+    * [SQOOP-1209] - DirectNetezzaManager fails to find tables from older Netezza system catalogs
+    * [SQOOP-1216] - Improve error message on corrupted input while doing export
+    * [SQOOP-1224] - Enable use of Oracle Wallets with Oracle Manager
+    * [SQOOP-1226] - --password-file option triggers FileSystemClosed exception at end of Oozie action
+    * [SQOOP-1227] - Sqoop fails to compile against commons-io higher then 1.4
+    * [SQOOP-1228] - Method Configuration#unset is not available on Hadoop < 1.2.0
+    * [SQOOP-1239] - Sqoop import code too large error
+    * [SQOOP-1246] - HBaseImportJob should add job authtoken only if HBase is secured
+    * [SQOOP-1249] - Sqoop HCatalog Import fails with -queries because of validation issues
+    * [SQOOP-1250] - Oracle connector is not disabling autoCommit on created connections
+    * [SQOOP-1259] - Sqoop on Windows can't run HCatalog/HBase multinode jobs
+    * [SQOOP-1260] - HADOOP_MAPRED_HOME should be defaulted correctly
+    * [SQOOP-1261] - CompilationManager should add Hadoop 2.x libraries to the classpath under Hadoop 2.x
+    * [SQOOP-1268] - Sqoop tarballs do not contain .gitignore and .gitattribute files
+    * [SQOOP-1271] - Sqoop hcatalog location should support older bigtop default location also
+    * [SQOOP-1273] - Multiple append jobs can easily end up sharing directories
+    * [SQOOP-1278] - Allow use of uncommitted isolation for databases that support it as an import option
+    * [SQOOP-1279] - Sqoop connection resiliency option breaks older Mysql versions that don't have JDBC 4 methods
+    * [SQOOP-1297] - Parameterize the Accumulo version in the build files
+    * [SQOOP-1298] - Cannot export to VARBINARY with null value
+    * [SQOOP-1302] - Doesn't run the mapper for remaining splits, when split-by ROWNUM
+    * [SQOOP-1303] - Can only write to default file system on incremental import
+    * [SQOOP-1316] - Example for use of password file in docs is incorrect
+    * [SQOOP-1322] - Enhance Sqoop HCatalog Integration to cover features introduced in newer Hive versions
+    * [SQOOP-1329] - JDBC connection to Oracle timeout after data import but before hive metadata import
+    * [SQOOP-1339] - Synchronize .gitignore files
+    * [SQOOP-1353] - Sqoop 1.4.5 release preparation
+    * [SQOOP-1358] - Add wallet support for Oracle High performance connector
+    * [SQOOP-1359] - Fix avro versions in Sqoop to stop shipping hadoop1  jars with hadoop2
+    * [SQOOP-1362] - TestImportJob getContent method doesn't work
+    * [SQOOP-1365] - Do not print stack trace when we can't move generated .java file to CWD
+    * [SQOOP-1370] - AccumuloUtils can throw NPE when zookeeper or accumulo home is null
+    * [SQOOP-1372] - configure-sqoop does not export ZOOKEEPER_HOME
+    * [SQOOP-1398] - Upgrade ivy version used to the latest release version
+    * [SQOOP-1399] - Fix TestOraOopJdbcUrl test case
+    * [SQOOP-1406] - Add license headers
+    * [SQOOP-1410] - Update change log for 1.4.5
+
+** Improvement
+    * [SQOOP-435] - Avro import should write the Schema to a file
+    * [SQOOP-1056] - Implement connection resiliency in Sqoop using pluggable failure handlers
+    * [SQOOP-1132] - Print out Sqoop version into log during execution
+    * [SQOOP-1137] - Put a stress in the user guide that eval tool is meant for evaluation purpose only
+    * [SQOOP-1161] - Generated Delimiter Set Field Should be Static
+    * [SQOOP-1172] - Make Sqoop compatible with HBase 0.95+
+    * [SQOOP-1203] - Add another default case for finding *_HOME when not explicitly defined
+    * [SQOOP-1212] - Do not print usage on wrong command line
+    * [SQOOP-1213] - Support reading password files from Amazon S3
+    * [SQOOP-1223] - Enhance the password file capability to enable plugging-in custom loaders
+    * [SQOOP-1282] - Consider avro files even if they carry no extension
+    * [SQOOP-1321] - Add ability to serialize SqoopOption into JobConf
+    * [SQOOP-1337] - Doc refactoring - Consolidate documentation of --direct
+    * [SQOOP-1341] - Sqoop Export Upsert for MySQL lacks batch support
+    * [SQOOP-1373] - Sqoop import schema is locked shows NullPointerException
+
+** New Feature
+    * [SQOOP-767] - Add support for Accumulo
+    * [SQOOP-1051] - Support direct mode connection managers in a generalized fashion
+    * [SQOOP-1197] - Enable Sqoop to build against Hadoop-2.1.0-beta jar files
+    * [SQOOP-1287] - Add high performance Oracle connector into Sqoop
+
+** Task
+    * [SQOOP-1207] - Allow user to override java source version
+    * [SQOOP-1344] - Add documentation for Oracle connector
+    * [SQOOP-1408] - Document SQL Server's --non-resilient arg
+
+
+** Test
+    * [SQOOP-1057] - Introduce fault injection framework to test connection resiliency
+
 Changelog - Sqoop - Version 1.4.4 - 07-18-2013
 
 ** New Feature
