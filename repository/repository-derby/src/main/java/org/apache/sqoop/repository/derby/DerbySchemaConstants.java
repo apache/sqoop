@@ -144,9 +144,9 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQB_NAME = "SQB_NAME";
 
-  public static final String COLUMN_SQB_TYPE = "SQB_TYPE";
+  public static final String COLUMN_SQB_FROM_CONNECTION = "SQB_FROM_CONNECTION";
 
-  public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
+  public static final String COLUMN_SQB_TO_CONNECTION = "SQB_TO_CONNECTION";
 
   public static final String COLUMN_SQB_CREATION_USER = "SQB_CREATION_USER";
 

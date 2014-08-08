@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
@@ -73,14 +73,13 @@ public class ConnectorBean implements JsonBean {
       object.put(NAME, connector.getUniqueName());
       object.put(CLASS, connector.getClassName());
       object.put(VERSION, connector.getVersion());
+
       object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms(), skipSensitive));
-
-      JSONObject jobForms = new JSONObject();
-      for (MJobForms job : connector.getAllJobsForms().values()) {
-        jobForms.put(job.getType().name(), extractForms(job.getForms(), skipSensitive));
-      }
-      object.put(JOB_FORMS, jobForms);
-
+      object.put(JOB_FORMS, new JSONObject());
+      ((JSONObject)object.get(JOB_FORMS)).put(
+          ConnectorType.FROM, extractForms(connector.getJobForms(ConnectorType.FROM).getForms(), skipSensitive));
+      ((JSONObject)object.get(JOB_FORMS)).put(
+          ConnectorType.TO, extractForms(connector.getJobForms(ConnectorType.TO).getForms(), skipSensitive));
       array.add(object);
     }
 
@@ -119,17 +118,17 @@ public class ConnectorBean implements JsonBean {
       List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
 
       JSONObject jobJson = (JSONObject) object.get(JOB_FORMS);
-      List<MJobForms> jobs = new ArrayList<MJobForms>();
-      for( Map.Entry entry : (Set<Map.Entry>) jobJson.entrySet()) {
-        MJob.Type type = MJob.Type.valueOf((String) entry.getKey());
+      JSONArray fromJobJson = (JSONArray)jobJson.get(ConnectorType.FROM.name());
+      JSONArray toJobJson = (JSONArray)jobJson.get(ConnectorType.TO.name());
+      List<MForm> fromJobForms =
+          restoreForms(fromJobJson);
+      List<MForm> toJobForms =
+          restoreForms(toJobJson);
+      MJobForms fromJob = new MJobForms(fromJobForms);
+      MJobForms toJob = new MJobForms(toJobForms);
+      MConnectionForms connection = new MConnectionForms(connForms);
 
-        List<MForm> jobForms =
-          restoreForms((JSONArray) jobJson.get(entry.getKey()));
-
-        jobs.add(new MJobForms(type, jobForms));
-      }
-
-      MConnector connector = new MConnector(uniqueName, className, version, new MConnectionForms(connForms), jobs);
+      MConnector connector = new MConnector(uniqueName, className, version, connection, fromJob, toJob);
       connector.setPersistenceId(connectorId);
 
       connectors.add(connector);

@@ -24,24 +24,24 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Extractor;
 
-public class GenericJdbcImportExtractor extends Extractor<ConnectionConfiguration, ImportJobConfiguration, GenericJdbcImportPartition> {
+public class GenericJdbcExtractor extends Extractor<ConnectionConfiguration, FromJobConfiguration, GenericJdbcPartition> {
 
- public static final Logger LOG = Logger.getLogger(GenericJdbcImportExtractor.class);
+ public static final Logger LOG = Logger.getLogger(GenericJdbcExtractor.class);
 
  private long rowsRead = 0;
   @Override
-  public void extract(ExtractorContext context, ConnectionConfiguration connection, ImportJobConfiguration job, GenericJdbcImportPartition partition) {
+  public void extract(ExtractorContext context, ConnectionConfiguration connection, FromJobConfiguration job, GenericJdbcPartition partition) {
     String driver = connection.connection.jdbcDriver;
     String url = connection.connection.connectionString;
     String username = connection.connection.username;
     String password = connection.connection.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
-    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
+    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL);
     String conditions = partition.getConditions();
     query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
     LOG.info("Using query: " + query);

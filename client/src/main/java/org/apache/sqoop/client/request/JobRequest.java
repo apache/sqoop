@@ -18,7 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.json.JobValidationBean;
 import org.apache.sqoop.model.MJob;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -49,7 +49,7 @@ public class JobRequest extends Request {
     return jobBean;
   }
 
-  public ValidationBean create(String serverUrl, MJob job) {
+  public JobValidationBean create(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
 
@@ -59,13 +59,13 @@ public class JobRequest extends Request {
     String response = super.post(serverUrl + RESOURCE,
       jobJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean();
+    JobValidationBean validationBean = new JobValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
     return validationBean;
   }
 
-  public ValidationBean update(String serverUrl, MJob job) {
+  public JobValidationBean update(String serverUrl, MJob job) {
 
     JobBean jobBean = new JobBean(job);
 
@@ -75,7 +75,7 @@ public class JobRequest extends Request {
     String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
                                 jobJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean();
+    JobValidationBean validationBean = new JobValidationBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
     return validationBean;

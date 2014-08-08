@@ -18,7 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.model.MConnection;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -49,7 +49,7 @@ public class ConnectionRequest extends Request {
     return connectionBean;
   }
 
-  public ValidationBean create(String serverUrl, MConnection connection) {
+  public ConnectionValidationBean create(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
 
@@ -59,13 +59,13 @@ public class ConnectionRequest extends Request {
     String response = super.post(serverUrl + RESOURCE,
                                  connectionJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
+    ConnectionValidationBean connectionValidationBean = new ConnectionValidationBean();
+    connectionValidationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean;
+    return connectionValidationBean;
   }
 
-  public ValidationBean update(String serverUrl, MConnection connection) {
+  public ConnectionValidationBean update(String serverUrl, MConnection connection) {
 
     ConnectionBean connectionBean = new ConnectionBean(connection);
 
@@ -76,10 +76,10 @@ public class ConnectionRequest extends Request {
                                   + connection.getPersistenceId(),
                                 connectionJson.toJSONString());
 
-    ValidationBean validationBean = new ValidationBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
+    ConnectionValidationBean connectionValidationBean = new ConnectionValidationBean();
+    connectionValidationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return validationBean;
+    return connectionValidationBean;
   }
 
   public void delete(String serverUrl, Long id) {

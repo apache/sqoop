@@ -15,41 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
+package org.apache.sqoop.connector.jdbc.configuration;
 
-import java.util.List;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
 /**
- * Metadata describing all required information to build a job
- * object with two connectors and a framework.
+ *
  */
-public class MJobForms extends MFormList {
-  public MJobForms(List<MForm> forms) {
-    super(forms);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    if (!(other instanceof MJobForms)) {
-      return false;
-    }
-
-    MJobForms mj = (MJobForms) other;
-    return super.equals(mj);
-  }
-
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
-
-  @Override
-  public MJobForms clone(boolean cloneWithValue) {
-    MJobForms copy = new MJobForms(super.clone(cloneWithValue).getForms());
-    return copy;
-  }
+@FormClass
+public class ToTableForm {
+  @Input(size = 50)   public String schemaName;
+  @Input(size = 2000) public String tableName;
+  @Input(size = 50)   public String sql;
+  @Input(size = 50)   public String columns;
+  @Input(size = 2000) public String stageTableName;
+  @Input              public Boolean clearStageTable;
 }

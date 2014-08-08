@@ -20,11 +20,11 @@ package org.apache.sqoop.connector.spi;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
-import org.apache.sqoop.job.etl.Exporter;
-import org.apache.sqoop.job.etl.Importer;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.job.etl.From;
+import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.validation.Validator;
 
 /**
@@ -53,17 +53,17 @@ public abstract class SqoopConnector {
   /**
    * @return Get job configuration class for given type or null if not supported
    */
-  public abstract Class getJobConfigurationClass(MJob.Type jobType);
+  public abstract Class getJobConfigurationClass(ConnectorType jobType);
 
   /**
-   * @return an <tt>Importer</tt> that provides classes for performing import.
+   * @return an <tt>From</tt> that provides classes for performing import.
    */
-  public abstract Importer getImporter();
+  public abstract From getFrom();
 
   /**
-   * @return an <tt>Exporter</tt> that provides classes for performing export.
+   * @return an <tt>To</tt> that provides classes for performing export.
    */
-  public abstract Exporter getExporter();
+  public abstract To getTo();
 
   /**
    * Returns validation object that Sqoop framework can use to validate user

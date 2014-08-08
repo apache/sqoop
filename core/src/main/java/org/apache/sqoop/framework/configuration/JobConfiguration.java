@@ -15,22 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.framework.configuration;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
-import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.DestroyerContext;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Form;
 
-public class GenericJdbcImportDestroyer extends Destroyer<ConnectionConfiguration, ImportJobConfiguration> {
+@ConfigurationClass
+public class JobConfiguration {
 
-  private static final Logger LOG =
-    Logger.getLogger(GenericJdbcImportDestroyer.class);
+  @Form public ThrottlingForm throttling;
 
-  @Override
-  public void destroy(DestroyerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
-    LOG.info("Running generic JDBC connector destroyer");
+  public JobConfiguration() {
+    throttling = new ThrottlingForm();
   }
-
 }

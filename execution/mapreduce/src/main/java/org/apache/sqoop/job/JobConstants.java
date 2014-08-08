@@ -51,8 +51,11 @@ public final class JobConstants extends Constants {
   public static final String JOB_ETL_EXTRACTOR_NUM = PREFIX_JOB_CONFIG
     + "etl.extractor.count";
 
-  public static final String PREFIX_CONNECTOR_CONTEXT =
-    PREFIX_JOB_CONFIG + "connector.context.";
+  public static final String PREFIX_CONNECTOR_FROM_CONTEXT =
+    PREFIX_JOB_CONFIG + "connector.from.context.";
+
+  public static final String PREFIX_CONNECTOR_TO_CONTEXT =
+      PREFIX_JOB_CONFIG + "connector.to.context.";
 
   // Hadoop specific constants
   // We're using constants from Hadoop 1. Hadoop 2 has different names, but

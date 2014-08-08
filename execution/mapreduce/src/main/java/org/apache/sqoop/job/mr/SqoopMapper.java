@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
@@ -34,6 +35,7 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.submission.counter.SqoopCounters;
@@ -75,24 +77,13 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Object configJob = null;
 
     // Propagate connector schema in every case for now
-    // TODO: Change to coditional choosing between HIO and Connector schema
-    Schema schema = ConfigurationUtils.getConnectorSchema(conf);
+    // TODO: Change to coditional choosing between Connector schemas.
+    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
 
-    // Executor is in connector space for IMPORT and in framework space for EXPORT
-    switch (ConfigurationUtils.getJobType(conf)) {
-      case IMPORT:
-        subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-        configConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
-        configJob = ConfigurationUtils.getConfigConnectorJob(conf);
-        break;
-      case EXPORT:
-        subContext = new PrefixContext(conf, "");
-        configConnection = ConfigurationUtils.getConfigFrameworkConnection(conf);
-        configJob = ConfigurationUtils.getConfigFrameworkJob(conf);
-        break;
-      default:
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
-    }
+    // Get configs for extractor
+    subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
+    configConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.FROM, conf);
+    configJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
     ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context), schema);

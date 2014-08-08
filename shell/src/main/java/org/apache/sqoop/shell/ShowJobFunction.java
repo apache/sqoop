@@ -19,6 +19,7 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
@@ -67,25 +68,27 @@ public class ShowJobFunction extends SqoopFunction {
     List<String> header = new LinkedList<String>();
     header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
-    header.add(resourceString(Constants.RES_TABLE_HEADER_TYPE));
-    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_FROM_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_TO_CONNECTOR));
     header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
-    List<String> types = new LinkedList<String>();
-    List<String> connectors = new LinkedList<String>();
+    List<String> fromConnectors = new LinkedList<String>();
+    List<String> toConnectors = new LinkedList<String>();
     List<String> availabilities = new LinkedList<String>();
 
     for(MJob job : jobs) {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
-      types.add(job.getType().toString());
-      connectors.add(String.valueOf(job.getConnectorId()));
+      fromConnectors.add(String.valueOf(
+          job.getConnectorId(ConnectorType.FROM)));
+      toConnectors.add(String.valueOf(
+          job.getConnectorId(ConnectorType.TO)));
       availabilities.add(String.valueOf(job.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, types, connectors, availabilities);
+    TableDisplayer.display(header, ids, names, fromConnectors, toConnectors, availabilities);
   }
 
   private void showJobs() {
@@ -118,13 +121,15 @@ public class ShowJobFunction extends SqoopFunction {
       formatter.format(job.getLastUpdateDate())
     );
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_XID_CID_INFO,
-        job.getConnectionId(),
-        job.getConnectorId());
+        job.getConnectionId(ConnectorType.FROM),
+        job.getConnectorId(ConnectorType.FROM));
 
     // Display connector part
-    displayForms(job.getConnectorPart().getForms(),
-                 client.getResourceBundle(job.getConnectorId()));
+    displayForms(job.getConnectorPart(ConnectorType.FROM).getForms(),
+                 client.getResourceBundle(job.getConnectorId(ConnectorType.FROM)));
     displayForms(job.getFrameworkPart().getForms(),
                  client.getFrameworkResourceBundle());
+    displayForms(job.getConnectorPart(ConnectorType.TO).getForms(),
+                 client.getResourceBundle(job.getConnectorId(ConnectorType.TO)));
   }
 }

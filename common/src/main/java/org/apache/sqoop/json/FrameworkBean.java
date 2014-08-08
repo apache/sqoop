@@ -18,6 +18,7 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
@@ -65,13 +66,10 @@ public class FrameworkBean implements JsonBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
+    // @TODO(Abe): Add From/To connection forms.
     JSONArray conForms =
       extractForms(framework.getConnectionForms().getForms(), skipSensitive);
-    JSONObject jobForms = new JSONObject();
-
-    for (MJobForms job : framework.getAllJobsForms().values()) {
-      jobForms.put(job.getType().name(), extractForms(job.getForms(), skipSensitive));
-    }
+    JSONArray jobForms = extractForms(framework.getJobForms().getForms(), skipSensitive);
 
     JSONObject result = new JSONObject();
     result.put(ID, framework.getPersistenceId());
@@ -89,22 +87,13 @@ public class FrameworkBean implements JsonBean {
     String frameworkVersion = (String) jsonObject.get(FRAMEWORK_VERSION);
 
     List<MForm> connForms = restoreForms((JSONArray) jsonObject.get(CON_FORMS));
+    List<MForm> jobForms = restoreForms((JSONArray) jsonObject.get(JOB_FORMS));
 
-    JSONObject jobForms =  (JSONObject) jsonObject.get(JOB_FORMS);
-
-    List<MJobForms> jobs = new ArrayList<MJobForms>();
-    for( Map.Entry entry : (Set<Map.Entry>) jobForms.entrySet()) {
-      //TODO(jarcec): Handle situation when server is supporting operation
-      // that client do not know (server do have newer version than client)
-      MJob.Type type = MJob.Type.valueOf((String) entry.getKey());
-
-      List<MForm> job = restoreForms((JSONArray) entry.getValue());
-
-      jobs.add(new MJobForms(type, job));
-    }
-
-    framework = new MFramework(new MConnectionForms(connForms), jobs,
-      frameworkVersion);
+    // @TODO(Abe): Get From/To connection forms.
+    framework = new MFramework(
+        new MConnectionForms(connForms),
+        new MJobForms(jobForms),
+        frameworkVersion);
     framework.setPersistenceId(id);
 
     bundle = restoreResourceBundle((JSONObject) jsonObject.get(RESOURCES));

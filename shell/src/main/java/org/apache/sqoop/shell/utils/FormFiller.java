@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
@@ -55,7 +56,7 @@ public final class FormFiller {
   /**
    * Fill job object based on CLI options.
    *
-   * @param reader Associated console reader object
+   * @param line Associated console reader object
    * @param job Job that user is suppose to fill in
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
@@ -68,7 +69,7 @@ public final class FormFiller {
 
     // Fill in data from user
     return fillForms(line,
-                     job.getConnectorPart().getForms(),
+                     job.getConnectorPart(ConnectorType.FROM).getForms(),
                      job.getFrameworkPart().getForms());
   }
 
@@ -77,25 +78,28 @@ public final class FormFiller {
    *
    * @param reader Associated console reader object
    * @param job Job that user is suppose to fill in
-   * @param connectorBundle Connector resource bundle
+   * @param fromConnectorBundle Connector resource bundle
    * @param frameworkBundle Framework resource bundle
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
   public static boolean fillJob(ConsoleReader reader,
                                 MJob job,
-                                ResourceBundle connectorBundle,
-                                ResourceBundle frameworkBundle)
+                                ResourceBundle fromConnectorBundle,
+                                ResourceBundle frameworkBundle,
+                                ResourceBundle toConnectorBundle)
                                 throws IOException {
 
     job.setName(getName(reader, job.getName()));
 
     // Fill in data from user
     return fillForms(reader,
-                     job.getConnectorPart().getForms(),
-                     connectorBundle,
+                     job.getConnectorPart(ConnectorType.FROM).getForms(),
+                     fromConnectorBundle,
                      job.getFrameworkPart().getForms(),
-                     frameworkBundle);
+                     frameworkBundle,
+                     job.getConnectorPart(ConnectorType.TO).getForms(),
+                     toConnectorBundle);
   }
 
   /**
@@ -387,8 +391,7 @@ public final class FormFiller {
                                   List<MForm> connectorForms,
                                   ResourceBundle connectorBundle,
                                   List<MForm> frameworkForms,
-                                  ResourceBundle frameworkBundle
-                                  ) throws IOException {
+                                  ResourceBundle frameworkBundle) throws IOException {
 
 
     // Query connector forms
@@ -398,6 +401,32 @@ public final class FormFiller {
 
     // Query framework forms
     if(!fillForms(frameworkForms, reader, frameworkBundle)) {
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean fillForms(ConsoleReader reader,
+                                  List<MForm> fromConnectorForms,
+                                  ResourceBundle fromConnectorBundle,
+                                  List<MForm> frameworkForms,
+                                  ResourceBundle frameworkBundle,
+                                  List<MForm> toConnectorForms,
+                                  ResourceBundle toConnectorBundle) throws IOException {
+
+
+    // From connector forms
+    if(!fillForms(fromConnectorForms, reader, fromConnectorBundle)) {
+      return false;
+    }
+
+    // Query framework forms
+    if(!fillForms(frameworkForms, reader, frameworkBundle)) {
+      return false;
+    }
+
+    // To connector forms
+    if(!fillForms(toConnectorForms, reader, toConnectorBundle)) {
       return false;
     }
 
@@ -880,12 +909,17 @@ public final class FormFiller {
   }
 
   public static void printJobValidationMessages(MJob job) {
-    for (MForm form : job.getConnectorPart().getForms()) {
+    for (MForm form : job.getConnectorPart(ConnectorType.FROM).getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }
     }
     for (MForm form : job.getFrameworkPart().getForms()) {
+      for (MInput<?> input : form.getInputs()) {
+        printValidationMessage(input, true);
+      }
+    }
+    for (MForm form : job.getConnectorPart(ConnectorType.TO).getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }

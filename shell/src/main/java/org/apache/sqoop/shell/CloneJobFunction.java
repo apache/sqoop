@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.shell.core.Constants;
@@ -70,8 +71,11 @@ public class CloneJobFunction extends SqoopFunction {
     MJob job = client.getJob(jobId);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    ResourceBundle connectorBundle = client.getResourceBundle(job.getConnectorId());
+    ResourceBundle fromConnectorBundle = client.getResourceBundle(
+        job.getConnectorId(ConnectorType.FROM));
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
+    ResourceBundle toConnectorBundle = client.getResourceBundle(
+        job.getConnectorId(ConnectorType.TO));
 
     Status status = Status.FINE;
 
@@ -88,7 +92,7 @@ public class CloneJobFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
+        if(!fillJob(reader, job, fromConnectorBundle, frameworkBundle, toConnectorBundle)) {
           return null;
         }
 

@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
@@ -37,7 +38,6 @@ import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -446,16 +446,18 @@ public abstract class Repository {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = newConnector.getJobForms(job.getType()).clone(false).getForms();
-        MJobForms newJobForms = new MJobForms(job.getType(), forms);
-        upgrader.upgrade(job.getConnectorPart(), newJobForms);
-        MJob newJob = new MJob(job, newJobForms, job.getFrameworkPart());
+        List<MForm> forms = newConnector.getJobForms(ConnectorType.FROM).clone(false).getForms();
+        MJobForms newJobForms = new MJobForms(forms);
+        upgrader.upgrade(job.getConnectorPart(ConnectorType.FROM), newJobForms);
+        // @TODO(Abe): Check From and To
+        MJob newJob = new MJob(job, newJobForms, job.getFrameworkPart(), newJobForms);
 
         // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(job.getType()));
-        FormUtils.fromForms(newJob.getConnectorPart().getForms(), newConfigurationObject);
+        // @TODO(Abe): Check From and To
+        Object newConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(ConnectorType.FROM));
+        FormUtils.fromForms(newJob.getConnectorPart(ConnectorType.FROM).getForms(), newConfigurationObject);
 
-        Validation validation = validator.validateJob(newJob.getType(), newConfigurationObject);
+        Validation validation = validator.validateJob(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {
@@ -509,6 +511,7 @@ public abstract class Repository {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
         // each connection.
+        // @TODO(Abe): From/To connection forms.
         List<MForm> forms = framework.getConnectionForms().clone(false).getForms();
         MConnectionForms newConnectionForms = new MConnectionForms(forms);
         upgrader.upgrade(connection.getFrameworkPart(), newConnectionForms);
@@ -530,16 +533,16 @@ public abstract class Repository {
         // Make a new copy of the forms from the framework,
         // else the values will get set in the forms in the connector for
         // each connection.
-        List<MForm> forms = framework.getJobForms(job.getType()).clone(false).getForms();
-        MJobForms newJobForms = new MJobForms(job.getType(), forms);
+        List<MForm> forms = framework.getJobForms().clone(false).getForms();
+        MJobForms newJobForms = new MJobForms(forms);
         upgrader.upgrade(job.getFrameworkPart(), newJobForms);
-        MJob newJob = new MJob(job, job.getConnectorPart(), newJobForms);
+        MJob newJob = new MJob(job, job.getConnectorPart(ConnectorType.FROM), newJobForms, job.getConnectorPart(ConnectorType.TO));
 
         // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass(job.getType()));
+        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass());
         FormUtils.fromForms(newJob.getFrameworkPart().getForms(), newConfigurationObject);
 
-        Validation validation = validator.validateJob(newJob.getType(), newConfigurationObject);
+        Validation validation = validator.validateJob(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {

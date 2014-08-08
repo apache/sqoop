@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.json.simple.JSONObject;
@@ -30,34 +31,39 @@ import java.util.Map;
  * part of validated entity. Optionally validation bean can also transfer
  * created persistent id in case that new entity was created.
  */
-public class ValidationBean implements JsonBean {
+public class JobValidationBean implements JsonBean {
 
   private static final String ID = "id";
   private static final String FRAMEWORK = "framework";
   private static final String CONNECTOR = "connector";
+  private static final String FROM = "from";
+  private static final String TO = "to";
   private static final String STATUS = "status";
   private static final String MESSAGE = "message";
   private static final String MESSAGES = "messages";
 
   private Long id;
-  private Validation connectorValidation;
+  private Map<ConnectorType, Validation> connectorValidation;
   private Validation frameworkValidation;
 
   // For "extract"
-  public ValidationBean(Validation connector, Validation framework) {
+  public JobValidationBean(Validation fromConnector, Validation framework, Validation toConnector) {
     this();
 
-    this.connectorValidation = connector;
+    this.connectorValidation = new HashMap<ConnectorType, Validation>();
+    this.connectorValidation.put(ConnectorType.FROM, fromConnector);
+    this.connectorValidation.put(ConnectorType.TO, toConnector);
     this.frameworkValidation = framework;
   }
 
   // For "restore"
-  public ValidationBean() {
+  public JobValidationBean() {
     id = null;
+    connectorValidation = new HashMap<ConnectorType, Validation>();
   }
 
-  public Validation getConnectorValidation() {
-    return connectorValidation;
+  public Validation getConnectorValidation(ConnectorType type) {
+    return connectorValidation.get(type);
   }
 
   public Validation getFrameworkValidation() {
@@ -75,14 +81,18 @@ public class ValidationBean implements JsonBean {
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
     JSONObject object = new JSONObject();
+    JSONObject connectorObject = new JSONObject();
 
     // Optionally transfer id
     if(id != null) {
       object.put(ID, id);
     }
 
-    object.put(CONNECTOR, extractValidation(connectorValidation));
+    connectorObject.put(FROM, extractValidation(getConnectorValidation(ConnectorType.FROM)));
+    connectorObject.put(TO, extractValidation(getConnectorValidation(ConnectorType.TO)));
+
     object.put(FRAMEWORK, extractValidation(frameworkValidation));
+    object.put(CONNECTOR, connectorObject);
 
     return object;
   }
@@ -113,16 +123,20 @@ public class ValidationBean implements JsonBean {
     // Optional and accepting NULLs
     id = (Long) jsonObject.get(ID);
 
-    connectorValidation = restoreValidation(
-      (JSONObject)jsonObject.get(CONNECTOR));
+    JSONObject jsonConnectorObject = (JSONObject)jsonObject.get(CONNECTOR);
+
+    connectorValidation.put(ConnectorType.FROM, restoreValidation(
+        (JSONObject)jsonConnectorObject.get(FROM)));
+    connectorValidation.put(ConnectorType.TO, restoreValidation(
+        (JSONObject)jsonConnectorObject.get(TO)));
     frameworkValidation = restoreValidation(
-      (JSONObject)jsonObject.get(FRAMEWORK));
+        (JSONObject)jsonObject.get(FRAMEWORK));
   }
 
   public Validation restoreValidation(JSONObject jsonObject) {
     JSONObject jsonMessages = (JSONObject) jsonObject.get(MESSAGES);
     Map<Validation.FormInput, Validation.Message> messages
-      = new HashMap<Validation.FormInput, Validation.Message>();
+        = new HashMap<Validation.FormInput, Validation.Message>();
 
     for(Object key : jsonMessages.keySet()) {
       JSONObject jsonMessage = (JSONObject) jsonMessages.get(key);
@@ -131,7 +145,7 @@ public class ValidationBean implements JsonBean {
       String stringMessage = (String) jsonMessage.get(MESSAGE);
 
       Validation.Message message
-        = new Validation.Message(status, stringMessage);
+          = new Validation.Message(status, stringMessage);
 
       messages.put(new Validation.FormInput((String)key), message);
     }

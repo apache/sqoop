@@ -19,13 +19,14 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.JobValidationBean;
 import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -163,47 +164,59 @@ public class JobRequestHandler implements RequestHandler {
     MJob job = jobs.get(0);
 
     // Verify that user is not trying to spoof us
-    MJobForms connectorForms
-      = ConnectorManager.getInstance().getConnectorMetadata(job.getConnectorId())
-      .getJobForms(job.getType());
+    MJobForms fromConnectorForms = ConnectorManager.getInstance()
+        .getConnectorMetadata(job.getConnectorId(ConnectorType.FROM))
+        .getJobForms(ConnectorType.FROM);
+    MJobForms toConnectorForms = ConnectorManager.getInstance()
+        .getConnectorMetadata(job.getConnectorId(ConnectorType.TO))
+        .getJobForms(ConnectorType.TO);
     MJobForms frameworkForms = FrameworkManager.getInstance().getFramework()
-      .getJobForms(job.getType());
+      .getJobForms();
 
-    if(!connectorForms.equals(job.getConnectorPart())
-      || !frameworkForms.equals(job.getFrameworkPart())) {
+    if(!fromConnectorForms.equals(job.getConnectorPart(ConnectorType.FROM))
+      || !frameworkForms.equals(job.getFrameworkPart())
+      || !toConnectorForms.equals(job.getConnectorPart(ConnectorType.TO))) {
       throw new SqoopException(ServerError.SERVER_0003,
         "Detected incorrect form structure");
     }
 
     // Responsible connector for this session
-    SqoopConnector connector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId());
+    SqoopConnector fromConnector =
+      ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.FROM));
+    SqoopConnector toConnector =
+      ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.TO));
 
     // Get validator objects
-    Validator connectorValidator = connector.getValidator();
+    Validator fromConnectorValidator = fromConnector.getValidator();
     Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
+    Validator toConnectorValidator = toConnector.getValidator();
 
     // We need translate forms to configuration objects
-    Object connectorConfig = ClassUtils.instantiate(
-      connector.getJobConfigurationClass(job.getType()));
+    Object fromConnectorConfig = ClassUtils.instantiate(
+        fromConnector.getJobConfigurationClass(ConnectorType.FROM));
     Object frameworkConfig = ClassUtils.instantiate(
-      FrameworkManager.getInstance().getJobConfigurationClass(job.getType()));
+      FrameworkManager.getInstance().getJobConfigurationClass());
+    Object toConnectorConfig = ClassUtils.instantiate(
+      toConnector.getJobConfigurationClass(ConnectorType.TO));
 
-    FormUtils.fromForms(job.getConnectorPart().getForms(), connectorConfig);
+    FormUtils.fromForms(job.getConnectorPart(ConnectorType.FROM).getForms(), fromConnectorConfig);
     FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
+    FormUtils.fromForms(job.getConnectorPart(ConnectorType.TO).getForms(), toConnectorConfig);
 
-    // Validate both parts
-    Validation connectorValidation =
-      connectorValidator.validateJob(job.getType(), connectorConfig);
+    // Validate all parts
+    Validation fromConnectorValidation =
+      fromConnectorValidator.validateJob(fromConnectorConfig);
     Validation frameworkValidation =
-      frameworkValidator.validateJob(job.getType(), frameworkConfig);
+      frameworkValidator.validateJob(frameworkConfig);
+    Validation toConnectorValidation =
+        toConnectorValidator.validateJob(toConnectorConfig);
 
-    Status finalStatus = Status.getWorstStatus(connectorValidation.getStatus(),
-      frameworkValidation.getStatus());
+    Status finalStatus = Status.getWorstStatus(fromConnectorValidation.getStatus(),
+        frameworkValidation.getStatus(), toConnectorValidation.getStatus());
 
     // Return back validations in all cases
-    ValidationBean outputBean =
-      new ValidationBean(connectorValidation, frameworkValidation);
+    JobValidationBean outputBean =
+      new JobValidationBean(fromConnectorValidation, frameworkValidation, toConnectorValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
@@ -247,8 +260,9 @@ public class JobRequestHandler implements RequestHandler {
       bean = new JobBean(jobs);
 
       // Add associated resources into the bean
+      // @TODO(Abe): From/To.
       for( MJob job : jobs) {
-        long connectorId = job.getConnectorId();
+        long connectorId = job.getConnectorId(ConnectorType.FROM);
         if(!bean.hasConnectorBundle(connectorId)) {
           bean.addConnectorBundle(connectorId,
             ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
@@ -258,7 +272,8 @@ public class JobRequestHandler implements RequestHandler {
       long jid = Long.valueOf(sjid);
 
       MJob job = repository.findJob(jid);
-      long connectorId = job.getConnectorId();
+      // @TODO(Abe): From/To
+      long connectorId = job.getConnectorId(ConnectorType.FROM);
 
       bean = new JobBean(job);
 

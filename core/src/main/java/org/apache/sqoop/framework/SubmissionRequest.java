@@ -17,16 +17,18 @@
  */
 package org.apache.sqoop.framework;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.CallbackBase;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Submission details class is used when creating new submission and contains
@@ -51,14 +53,9 @@ public class SubmissionRequest {
   long jobId;
 
   /**
-   * Job type
-   */
-  MJob.Type jobType;
-
-  /**
    * Connector instance associated with this submission request
    */
-  SqoopConnector connector;
+  Map<ConnectorType, SqoopConnector > connectors;
 
   /**
    * List of required local jars for the job
@@ -66,22 +63,27 @@ public class SubmissionRequest {
   List<String> jars;
 
   /**
-   * Base callbacks that are independent on job type
+   * From connector callback
    */
-  CallbackBase connectorCallbacks;
+  CallbackBase fromCallback;
 
   /**
-   * All 4 configuration objects
+   * To connector callback
    */
-  Object configConnectorConnection;
-  Object configConnectorJob;
-  Object configFrameworkConnection;
+  CallbackBase toCallback;
+
+  /**
+   * All configuration objects
+   */
+  Map<ConnectorType, Object> connectorConnectionConfigs;
+  Map<ConnectorType, Object> connectorJobConfigs;
+  Map<ConnectorType, Object> frameworkConnectionConfigs;
   Object configFrameworkJob;
 
   /**
    * Connector context (submission specific configuration)
    */
-  MutableMapContext connectorContext;
+  Map<ConnectorType, MutableMapContext> connectorContexts;
 
   /**
    * Framework context (submission specific configuration)
@@ -115,8 +117,17 @@ public class SubmissionRequest {
 
   public SubmissionRequest() {
     this.jars = new LinkedList<String>();
-    this.connectorContext = new MutableMapContext();
+    this.connectorContexts = new HashMap<ConnectorType, MutableMapContext>();
+
+    this.connectorContexts.put(ConnectorType.FROM, new MutableMapContext());
+    this.connectorContexts.put(ConnectorType.TO, new MutableMapContext());
     this.frameworkContext = new MutableMapContext();
+
+    this.connectorConnectionConfigs = new HashMap<ConnectorType, Object>();
+    this.connectorJobConfigs = new HashMap<ConnectorType, Object>();
+    this.frameworkConnectionConfigs = new HashMap<ConnectorType, Object>();
+
+    this.connectors = new HashMap<ConnectorType, SqoopConnector>();
   }
 
   public MSubmission getSummary() {
@@ -143,20 +154,12 @@ public class SubmissionRequest {
     this.jobId = jobId;
   }
 
-  public MJob.Type getJobType() {
-    return jobType;
+  public SqoopConnector getConnector(ConnectorType type) {
+    return connectors.get(type);
   }
 
-  public void setJobType(MJob.Type jobType) {
-    this.jobType = jobType;
-  }
-
-  public SqoopConnector getConnector() {
-    return connector;
-  }
-
-  public void setConnector(SqoopConnector connector) {
-    this.connector = connector;
+  public void setConnector(ConnectorType type, SqoopConnector connector) {
+    this.connectors.put(type, connector);
   }
 
   public List<String> getJars() {
@@ -179,36 +182,44 @@ public class SubmissionRequest {
     }
   }
 
-  public CallbackBase getConnectorCallbacks() {
-    return connectorCallbacks;
+  public CallbackBase getFromCallback() {
+    return fromCallback;
   }
 
-  public void setConnectorCallbacks(CallbackBase connectorCallbacks) {
-    this.connectorCallbacks = connectorCallbacks;
+  public void setFromCallback(CallbackBase fromCallback) {
+    this.fromCallback = fromCallback;
   }
 
-  public Object getConfigConnectorConnection() {
-    return configConnectorConnection;
+  public CallbackBase getToCallback() {
+    return toCallback;
   }
 
-  public void setConfigConnectorConnection(Object config) {
-    configConnectorConnection = config;
+  public void setToCallback(CallbackBase toCallback) {
+    this.toCallback = toCallback;
   }
 
-  public Object getConfigConnectorJob() {
-    return configConnectorJob;
+  public Object getConnectorConnectionConfig(ConnectorType type) {
+    return connectorConnectionConfigs.get(type);
   }
 
-  public void setConfigConnectorJob(Object config) {
-    configConnectorJob = config;
+  public void setConnectorConnectionConfig(ConnectorType type, Object config) {
+    connectorConnectionConfigs.put(type, config);
   }
 
-  public Object getConfigFrameworkConnection() {
-    return configFrameworkConnection;
+  public Object getConnectorJobConfig(ConnectorType type) {
+    return connectorJobConfigs.get(type);
   }
 
-  public void setConfigFrameworkConnection(Object config) {
-    configFrameworkConnection = config;
+  public void setConnectorJobConfig(ConnectorType type, Object config) {
+    connectorJobConfigs.put(type, config);
+  }
+
+  public Object getFrameworkConnectionConfig(ConnectorType type) {
+    return frameworkConnectionConfigs.get(type);
+  }
+
+  public void setFrameworkConnectionConfig(ConnectorType type, Object config) {
+    frameworkConnectionConfigs.put(type, config);
   }
 
   public Object getConfigFrameworkJob() {
@@ -219,20 +230,12 @@ public class SubmissionRequest {
     configFrameworkJob = config;
   }
 
-  public MutableMapContext getConnectorContext() {
-    return connectorContext;
+  public MutableMapContext getConnectorContext(ConnectorType type) {
+    return connectorContexts.get(type);
   }
 
   public MutableMapContext getFrameworkContext() {
     return frameworkContext;
-  }
-
-  public String getOutputDirectory() {
-    return outputDirectory;
-  }
-
-  public void setOutputDirectory(String outputDirectory) {
-    this.outputDirectory = outputDirectory;
   }
 
   public String getNotificationUrl() {

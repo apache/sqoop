@@ -18,9 +18,8 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
-import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
@@ -67,20 +66,13 @@ public class GenericJdbcValidator extends Validator {
   }
 
   @Override
-  public Validation validateJob(MJob.Type type, Object jobConfiguration) {
-    switch(type) {
-      case IMPORT:
-        return validateImportJob(jobConfiguration);
-      case EXPORT:
-        return validateExportJob(jobConfiguration);
-      default:
-        return super.validateJob(type, jobConfiguration);
-    }
+  public Validation validateJob(Object jobConfiguration) {
+    return super.validateJob(jobConfiguration);
   }
 
   private Validation validateExportJob(Object jobConfiguration) {
-    Validation validation = new Validation(ExportJobConfiguration.class);
-    ExportJobConfiguration configuration = (ExportJobConfiguration)jobConfiguration;
+    Validation validation = new Validation(ToJobConfiguration.class);
+    ToJobConfiguration configuration = (ToJobConfiguration)jobConfiguration;
 
     if(configuration.table.tableName == null && configuration.table.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");
@@ -104,8 +96,8 @@ public class GenericJdbcValidator extends Validator {
   }
 
   private Validation validateImportJob(Object jobConfiguration) {
-    Validation validation = new Validation(ImportJobConfiguration.class);
-    ImportJobConfiguration configuration = (ImportJobConfiguration)jobConfiguration;
+    Validation validation = new Validation(FromJobConfiguration.class);
+    FromJobConfiguration configuration = (FromJobConfiguration)jobConfiguration;
 
     if(configuration.table.tableName == null && configuration.table.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");

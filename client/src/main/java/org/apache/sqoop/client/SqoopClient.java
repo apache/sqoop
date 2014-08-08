@@ -18,10 +18,12 @@
 package org.apache.sqoop.client;
 
 import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
-import org.apache.sqoop.json.ValidationBean;
+import org.apache.sqoop.json.JobValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
@@ -351,21 +353,24 @@ public class SqoopClient {
   }
 
   /**
-   * Create new job of given type and for given connection.
+   * Create new job the for given connections.
    *
-   * @param xid Connection id
-   * @param type Job type
+   * @param fromXid From Connection id
+   * @param toXid To Connection id
    * @return
    */
-  public MJob newJob(long xid, MJob.Type type) {
-    MConnection connection = getConnection(xid);
+  public MJob newJob(long fromXid, long toXid) {
+    MConnection fromConnection = getConnection(fromXid);
+    MConnection toConnection = getConnection(toXid);
 
     return new MJob(
-      connection.getConnectorId(),
-      connection.getPersistenceId(),
-      type,
-      getConnector(connection.getConnectorId()).getJobForms(type),
-      getFramework().getJobForms(type)
+      fromConnection.getConnectorId(),
+      toConnection.getConnectorId(),
+      fromConnection.getPersistenceId(),
+      toConnection.getPersistenceId(),
+      getConnector(fromConnection.getConnectorId()).getJobForms(ConnectorType.FROM),
+      getConnector(fromConnection.getConnectorId()).getJobForms(ConnectorType.TO),
+      getFramework().getJobForms()
     );
   }
 
@@ -529,7 +534,7 @@ public class SqoopClient {
     return requests.readHistory(jid).getSubmissions();
   }
 
-  private Status applyValidations(ValidationBean bean, MConnection connection) {
+  private Status applyValidations(ConnectionValidationBean bean, MConnection connection) {
     Validation connector = bean.getConnectorValidation();
     Validation framework = bean.getFrameworkValidation();
 
@@ -544,18 +549,25 @@ public class SqoopClient {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  private Status applyValidations(ValidationBean bean, MJob job) {
-    Validation connector = bean.getConnectorValidation();
+  private Status applyValidations(JobValidationBean bean, MJob job) {
+    Validation fromConnector = bean.getConnectorValidation(ConnectorType.FROM);
+    Validation toConnector = bean.getConnectorValidation(ConnectorType.TO);
     Validation framework = bean.getFrameworkValidation();
 
-    FormUtils.applyValidation(job.getConnectorPart().getForms(), connector);
+    // @TODO(Abe): From/To validation.
+    FormUtils.applyValidation(
+        job.getConnectorPart(ConnectorType.FROM).getForms(),
+        fromConnector);
     FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
+    FormUtils.applyValidation(
+        job.getConnectorPart(ConnectorType.TO).getForms(),
+        toConnector);
 
     Long id = bean.getId();
     if(id != null) {
       job.setPersistenceId(id);
     }
 
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
+    return Status.getWorstStatus(fromConnector.getStatus(), framework.getStatus(), toConnector.getStatus());
   }
 }

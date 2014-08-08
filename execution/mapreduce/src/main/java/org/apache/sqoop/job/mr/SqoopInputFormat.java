@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
@@ -36,6 +37,7 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -61,10 +63,10 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     String partitionerName = conf.get(JobConstants.JOB_ETL_PARTITIONER);
     Partitioner partitioner = (Partitioner) ClassUtils.instantiate(partitionerName);
 
-    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-    Object connectorConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
-    Object connectorJob = ConfigurationUtils.getConfigConnectorJob(conf);
-    Schema schema = ConfigurationUtils.getConnectorSchema(conf);
+    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
+    Object connectorConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.FROM, conf);
+    Object connectorJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.FROM, conf);
+    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
 
     long maxPartitions = conf.getLong(JobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
     PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, schema);

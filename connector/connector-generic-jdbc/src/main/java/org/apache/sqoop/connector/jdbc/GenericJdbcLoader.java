@@ -18,11 +18,11 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 
-public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, ExportJobConfiguration> {
+public class GenericJdbcLoader extends Loader<ConnectionConfiguration, ToJobConfiguration> {
 
   public static final int DEFAULT_ROWS_PER_BATCH = 100;
   public static final int DEFAULT_BATCHES_PER_TRANSACTION = 100;
@@ -30,7 +30,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void load(LoaderContext context, ConnectionConfiguration connection, ExportJobConfiguration job) throws Exception{
+  public void load(LoaderContext context, ConnectionConfiguration connection, ToJobConfiguration job) throws Exception{
     String driver = connection.connection.jdbcDriver;
     String url = connection.connection.connectionString;
     String username = connection.connection.username;
@@ -38,7 +38,7 @@ public class GenericJdbcExportLoader extends Loader<ConnectionConfiguration, Exp
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
     executor.setAutoCommit(false);
 
-    String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL);
+    String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_TO_JDBC_DATA_SQL);
     executor.beginBatch(sql);
     try {
       int numberOfRows = 0;

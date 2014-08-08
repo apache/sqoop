@@ -20,33 +20,33 @@ package org.apache.sqoop.connector.jdbc;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
-import org.apache.sqoop.job.etl.Exporter;
-import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.job.etl.From;
+import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.validation.Validator;
 
 public class GenericJdbcConnector extends SqoopConnector {
 
   private static GenericJdbcValidator genericJdbcValidator = new GenericJdbcValidator();
 
-  private static final Importer IMPORTER = new Importer(
-      GenericJdbcImportInitializer.class,
-      GenericJdbcImportPartitioner.class,
-      GenericJdbcImportExtractor.class,
-      GenericJdbcImportDestroyer.class);
+  private static final From FROM = new From(
+      GenericJdbcFromInitializer.class,
+      GenericJdbcPartitioner.class,
+      GenericJdbcExtractor.class,
+      GenericJdbcFromDestroyer.class);
 
-  private static final Exporter EXPORTER = new Exporter(
-      GenericJdbcExportInitializer.class,
-      GenericJdbcExportLoader.class,
-      GenericJdbcExportDestroyer.class);
+  private static final To TO = new To(
+      GenericJdbcToInitializer.class,
+      GenericJdbcLoader.class,
+      GenericJdbcToDestroyer.class);
 
 
   /**
@@ -72,25 +72,25 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public Class getJobConfigurationClass(MJob.Type jobType) {
+  public Class getJobConfigurationClass(ConnectorType jobType) {
     switch (jobType) {
-      case IMPORT:
-        return ImportJobConfiguration.class;
-      case EXPORT:
-        return ExportJobConfiguration.class;
+      case FROM:
+        return FromJobConfiguration.class;
+      case TO:
+        return ToJobConfiguration.class;
       default:
         return null;
     }
   }
 
   @Override
-  public Importer getImporter() {
-    return IMPORTER;
+  public From getFrom() {
+    return FROM;
   }
 
   @Override
-  public Exporter getExporter() {
-    return EXPORTER;
+  public To getTo() {
+    return TO;
   }
 
   @Override

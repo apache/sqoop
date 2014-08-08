@@ -19,40 +19,33 @@ package org.apache.sqoop.job.etl;
 
 /**
  * This specifies classes that perform connector-defined steps
- * within import execution:
+ * within export execution:
  * Initializer
- * -> Partitioner
- * -> Extractor
  * -> (framework-defined steps)
+ * -> Loader
  * -> Destroyer
  */
-public class Importer extends CallbackBase {
+public class To extends CallbackBase {
 
-  private Class<? extends Partitioner> partitioner;
-  private Class<? extends Extractor> extractor;
+  private Class<? extends Loader> loader;
 
-  public Importer(Class<? extends Initializer> initializer,
-      Class<? extends Partitioner> partitioner,
-      Class<? extends Extractor> extractor,
-      Class<? extends Destroyer> destroyer) {
+  public To(
+      Class<? extends Initializer> initializer,
+      Class<? extends Loader> loader,
+      Class<? extends Destroyer> destroyer
+  ) {
     super(initializer, destroyer);
-    this.partitioner = partitioner;
-    this.extractor = extractor;
+    this.loader = loader;
   }
 
-  public Class<? extends Partitioner> getPartitioner() {
-    return partitioner;
-  }
-
-  public Class<? extends Extractor> getExtractor() {
-    return extractor;
+  public Class<? extends Loader> getLoader() {
+    return loader;
   }
 
   @Override
   public String toString() {
-    return "Importer{" + super.toString() +
-      ", partitioner=" + partitioner.getName() +
-      ", extractor=" + extractor.getName() +
+    return "Exporter{" + super.toString() +
+      ", loader=" + loader +
       '}';
   }
 }

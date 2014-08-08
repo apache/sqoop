@@ -42,9 +42,9 @@ public class ShowConnectionFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_CONNS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_XID)
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_FXID)
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONN_XID))
-        .withLongOpt(Constants.OPT_XID)
+        .withLongOpt(Constants.OPT_FXID)
         .create(Constants.OPT_XID_CHAR));
   }
 
@@ -52,8 +52,8 @@ public class ShowConnectionFunction extends SqoopFunction {
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showConnections();
-    } else if (line.hasOption(Constants.OPT_XID)) {
-      showConnection(getLong(line, Constants.OPT_XID));
+    } else if (line.hasOption(Constants.OPT_FXID)) {
+      showConnection(getLong(line, Constants.OPT_FXID));
     } else {
       showSummary();
     }

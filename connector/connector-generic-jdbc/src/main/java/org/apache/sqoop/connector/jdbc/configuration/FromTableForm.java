@@ -15,39 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.connector.jdbc.configuration;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
-import org.apache.sqoop.job.etl.Partition;
-
-public class GenericJdbcImportPartition extends Partition {
-
-  private String conditions;
-
-  public void setConditions(String conditions) {
-    this.conditions = conditions;
-  }
-
-  public String getConditions() {
-    return conditions;
-  }
-
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    conditions = in.readUTF();
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeUTF(conditions);
-  }
-
-  @Override
-  public String toString() {
-    return conditions;
-  }
-
+/**
+ *
+ */
+@FormClass
+public class FromTableForm {
+  @Input(size = 50)   public String schemaName;
+  @Input(size = 50)   public String tableName;
+  @Input(size = 2000) public String sql;
+  @Input(size = 50)   public String columns;
+  @Input(size = 50)   public String partitionColumn;
+  @Input              public Boolean partitionColumnNull;
+  @Input(size = 50)   public String boundaryQuery;
 }
