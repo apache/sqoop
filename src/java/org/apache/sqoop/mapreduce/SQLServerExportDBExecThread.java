@@ -123,6 +123,11 @@ public class SQLServerExportDBExecThread extends
   protected String getInsertStatement(int numRows) {
     StringBuilder sb = new StringBuilder();
 
+    if (getConf().getBoolean(SQLServerManager.IDENTITY_INSERT_PROP, false)) {
+      LOG.info("Enabling identity inserts");
+      sb.append("SET IDENTITY_INSERT ").append(tableName).append(" ON ");
+    }
+
     sb.append("INSERT INTO " + tableName + " ");
 
     String tableHints = getConf().get(SQLServerManager.TABLE_HINTS_PROP);

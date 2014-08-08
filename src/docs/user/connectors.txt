@@ -125,6 +125,8 @@ List of all extra arguments supported by Microsoft SQL Connector is shown below:
 `----------------------------------------`---------------------------------------
 Argument                                 Description
 ---------------------------------------------------------------------------------
++\--identity-insert                      Set IDENTITY_INSERT to ON before \
+                                         export insert.
 +\--non-resilient+                       Don't attempt to recover failed \
                                          export operations.
 +\--schema <name>+                       Scheme name that sqoop should use. \
@@ -132,6 +134,15 @@ Argument                                 Description
 +\--table-hints <hints>+                 Table hints that Sqoop should use for \
                                          data movement.
 ---------------------------------------------------------------------------------
+
+Allow identity inserts
+^^^^^^^^^^^^^^^^^^^^^^
+
+You can allow inserts on columns that have identity. For example:
+
+----
+$ sqoop export ... --export-dir custom_dir --table custom_table -- --identity-insert
+----
 
 Non-resilient operations
 ^^^^^^^^^^^^^^^^^^^^^^^^

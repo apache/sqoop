@@ -60,6 +60,11 @@ public class SQLServerManager
   // Option set in extra-arguments to disable resiliency and use default mode
   public static final String NON_RESILIENT_OPTION = "non-resilient";
 
+  // Option to allow inserts on identity columns
+  public static final String IDENTITY_INSERT = "identity-insert";
+  public static final String IDENTITY_INSERT_PROP =
+      "org.apache.sqoop.manager.sqlserver.table.identity";
+
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS =
       "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -76,6 +81,11 @@ public class SQLServerManager
    * Optional table hints to use.
    */
   private String tableHints;
+
+  /**
+   * Whether to allow identity inserts.
+   */
+  private boolean identityInserts;
 
   public SQLServerManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
@@ -159,6 +169,10 @@ public class SQLServerManager
     if (tableHints != null) {
       configuration.set(TABLE_HINTS_PROP, tableHints);
     }
+
+    // Propagate whether to allow identity inserts to job
+    configuration.setBoolean(IDENTITY_INSERT_PROP, identityInserts);
+
     JdbcExportJob exportJob;
     if (isNonResilientOperation()) {
       exportJob = new JdbcExportJob(context, null, null,
@@ -286,6 +300,8 @@ public class SQLServerManager
 
       this.tableHints = hints;
     }
+
+    identityInserts = cmdLine.hasOption(IDENTITY_INSERT);
   }
 
   /**
@@ -306,6 +322,10 @@ public class SQLServerManager
     extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
       .withDescription("Optional table hints to use")
       .withLongOpt(TABLE_HINTS).create());
+
+    extraOptions.addOption(OptionBuilder
+      .withDescription("Allow identity inserts")
+      .withLongOpt(IDENTITY_INSERT).create());
 
     return extraOptions;
   }
