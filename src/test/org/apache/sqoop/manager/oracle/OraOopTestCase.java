@@ -195,6 +195,8 @@ public abstract class OraOopTestCase {
 
     sqoopArgs.add("import");
 
+    sqoopArgs.add("--direct");
+
     if (sequenceFile) {
       sqoopArgs.add("--as-sequencefile");
     }
@@ -259,6 +261,8 @@ public abstract class OraOopTestCase {
     List<String> sqoopArgs = new ArrayList<String>();
 
     sqoopArgs.add("export");
+
+    sqoopArgs.add("--direct");
 
     sqoopArgs.add("--connect");
     sqoopArgs.add(OracleUtils.CONNECT_STRING);
