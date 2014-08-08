@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.util.SqlTypesUtils;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
@@ -37,15 +37,15 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class GenericJdbcImportInitializer extends Initializer<ConnectionConfiguration, ImportJobConfiguration> {
+public class GenericJdbcFromInitializer extends Initializer<ConnectionConfiguration, FromJobConfiguration> {
 
   private static final Logger LOG =
-    Logger.getLogger(GenericJdbcImportInitializer.class);
+    Logger.getLogger(GenericJdbcFromInitializer.class);
 
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(InitializerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
+  public void initialize(InitializerContext context, ConnectionConfiguration connection, FromJobConfiguration job) {
     configureJdbcProperties(context.getContext(), connection, job);
     try {
       configurePartitionProperties(context.getContext(), connection, job);
@@ -56,7 +56,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, ImportJobConfiguration job) {
+  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, FromJobConfiguration job) {
     List<String> jars = new LinkedList<String>();
 
     jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
@@ -65,14 +65,14 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, ImportJobConfiguration importJobConfiguration) {
-    configureJdbcProperties(context.getContext(), connectionConfiguration, importJobConfiguration);
+  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, FromJobConfiguration fromJobConfiguration) {
+    configureJdbcProperties(context.getContext(), connectionConfiguration, fromJobConfiguration);
 
-    String schemaName = importJobConfiguration.table.tableName;
+    String schemaName = fromJobConfiguration.table.tableName;
     if(schemaName == null) {
       schemaName = "Query";
-    } else if(importJobConfiguration.table.schemaName != null) {
-      schemaName = importJobConfiguration.table.schemaName + "." + schemaName;
+    } else if(fromJobConfiguration.table.schemaName != null) {
+      schemaName = fromJobConfiguration.table.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -80,8 +80,8 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     ResultSetMetaData rsmt = null;
     try {
       rs = executor.executeQuery(
-          context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL)
-              .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
+        context.getString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL)
+          .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
       );
 
       rsmt = rs.getMetaData();
@@ -114,7 +114,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
     String driver = connectionConfig.connection.jdbcDriver;
     String url = connectionConfig.connection.connectionString;
     String username = connectionConfig.connection.username;
@@ -126,7 +126,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
     // ----- configure column name -----
 
     String partitionColumnName = jobConfig.table.partitionColumn;
@@ -231,7 +231,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     }
   }
 
-  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ImportJobConfiguration jobConfig) {
+  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
     String dataSql;
     String fieldNames;
 
@@ -316,7 +316,7 @@ public class GenericJdbcImportInitializer extends Initializer<ConnectionConfigur
     LOG.info("Using dataSql: " + dataSql);
     LOG.info("Field names: " + fieldNames);
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL, dataSql);
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL, dataSql);
     context.setString(Constants.JOB_ETL_FIELD_NAMES, fieldNames);
   }
 }

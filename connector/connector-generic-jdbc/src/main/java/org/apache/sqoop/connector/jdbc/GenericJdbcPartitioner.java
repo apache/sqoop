@@ -22,7 +22,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +29,12 @@ import java.util.TimeZone;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ImportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 
-public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfiguration, ImportJobConfiguration> {
+public class GenericJdbcPartitioner extends Partitioner<ConnectionConfiguration, FromJobConfiguration> {
 
   private static final BigDecimal NUMERIC_MIN_INCREMENT = new BigDecimal(10000 * Double.MIN_VALUE);
 
@@ -48,7 +47,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
   private Boolean partitionColumnNull;
 
   @Override
-  public List<Partition> getPartitions(PartitionerContext context,ConnectionConfiguration connection, ImportJobConfiguration job) {
+  public List<Partition> getPartitions(PartitionerContext context,ConnectionConfiguration connection, FromJobConfiguration job) {
     List<Partition> partitions = new LinkedList<Partition>();
 
     numberPartitions = context.getMaxPartitions();
@@ -63,14 +62,14 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     }
 
     if (partitionMinValue == null && partitionMaxValue == null) {
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(partitionColumnName + " IS NULL");
       partitions.add(partition);
       return partitions;
     }
 
     if (partitionColumnNull) {
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(partitionColumnName + " IS NULL");
       partitions.add(partition);
       numberPartitions -= 1;
@@ -190,7 +189,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
           break;
       }
 
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(
           constructDateConditions(sdf, objLB, objUB, false));
       partitions.add(partition);
@@ -212,7 +211,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     }
 
 
-    GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+    GenericJdbcPartition partition = new GenericJdbcPartition();
     partition.setConditions(
         constructDateConditions(sdf, objLB, objUB, true));
     partitions.add(partition);
@@ -249,7 +248,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     // Having one single value means that we can create only one single split
     if(minStringBD.equals(maxStringBD)) {
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(constructTextConditions(prefix, 0, 0,
         partitionMinValue, partitionMaxValue, true, true));
       partitions.add(partition);
@@ -294,7 +293,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     for (int i = 1; i < splitPoints.size(); i++) {
       BigDecimal end = splitPoints.get(i);
 
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(constructTextConditions(prefix, start, end,
         partitionMinValue, partitionMaxValue, i == 1, i == splitPoints.size() - 1));
       partitions.add(partition);
@@ -327,13 +326,13 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
       upperBound = lowerBound + interval;
       upperBound += (i <= remainder) ? 1 : 0;
 
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(
           constructConditions(lowerBound, upperBound, false));
       partitions.add(partition);
     }
 
-    GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+    GenericJdbcPartition partition = new GenericJdbcPartition();
     partition.setConditions(
         constructConditions(upperBound, maxValue, true));
     partitions.add(partition);
@@ -357,13 +356,13 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
       lowerBound = upperBound;
       upperBound = lowerBound + interval;
 
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(
           constructConditions(lowerBound, upperBound, false));
       partitions.add(partition);
     }
 
-    GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+    GenericJdbcPartition partition = new GenericJdbcPartition();
     partition.setConditions(
         constructConditions(upperBound, maxValue, true));
     partitions.add(partition);
@@ -383,7 +382,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     // Having one single value means that we can create only one single split
     if(minValue.equals(maxValue)) {
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(constructConditions(minValue));
       partitions.add(partition);
       return partitions;
@@ -415,7 +414,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
     for (int i = 1; i < splitPoints.size(); i++) {
       BigDecimal end = splitPoints.get(i);
 
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(constructConditions(start, end, i == splitPoints.size() - 1));
       partitions.add(partition);
 
@@ -436,7 +435,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
 
     // Having one single value means that we can create only one single split
     if(minValue.equals(maxValue)) {
-      GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+      GenericJdbcPartition partition = new GenericJdbcPartition();
 
       conditions.append(partitionColumnName).append(" = ")
           .append(maxValue);
@@ -445,7 +444,7 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
       return partitions;
     }
 
-    GenericJdbcImportPartition partition = new GenericJdbcImportPartition();
+    GenericJdbcPartition partition = new GenericJdbcPartition();
 
     if (partitionMinValue == null) {
       conditions = new StringBuilder();
@@ -453,12 +452,12 @@ public class GenericJdbcImportPartitioner extends Partitioner<ConnectionConfigur
       partition.setConditions(conditions.toString());
       partitions.add(partition);
     }
-    partition = new GenericJdbcImportPartition();
+    partition = new GenericJdbcPartition();
     conditions = new StringBuilder();
     conditions.append(partitionColumnName).append(" = TRUE");
     partition.setConditions(conditions.toString());
     partitions.add(partition);
-    partition = new GenericJdbcImportPartition();
+    partition = new GenericJdbcPartition();
     conditions = new StringBuilder();
     conditions.append(partitionColumnName).append(" = FALSE");
     partition.setConditions(conditions.toString());

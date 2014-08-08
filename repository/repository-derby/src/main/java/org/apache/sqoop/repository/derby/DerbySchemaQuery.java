@@ -286,13 +286,13 @@ public final class DerbySchemaQuery {
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
       "CREATE TABLE " + TABLE_SQ_JOB + " ("
       + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQB_CONNECTION + " BIGINT, "
+      + COLUMN_SQB_FROM_CONNECTION + " BIGINT, "
+      + COLUMN_SQB_TO_CONNECTION + " BIGINT, "
       + COLUMN_SQB_NAME + " VARCHAR(64), "
-      + COLUMN_SQB_TYPE + " VARCHAR(64),"
       + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
       + "CONSTRAINT " + CONSTRAINT_SQB_SQN + " "
-        + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
+        + "FOREIGN KEY(" + COLUMN_SQB_FROM_CONNECTION + ") "
           + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
 
@@ -702,8 +702,8 @@ public final class DerbySchemaQuery {
   public static final String STMT_INSERT_JOB =
     "INSERT INTO " + TABLE_SQ_JOB + " ("
     + COLUMN_SQB_NAME + ", "
-    + COLUMN_SQB_CONNECTION + ", "
-    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_FROM_CONNECTION + ", "
+    + COLUMN_SQB_TO_CONNECTION + ", "
     + COLUMN_SQB_ENABLED + ", "
     + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
@@ -753,43 +753,49 @@ public final class DerbySchemaQuery {
     + " count(*)"
     + " FROM " + TABLE_SQ_JOB
     + " JOIN " + TABLE_SQ_CONNECTION
-      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+      + " ON " + COLUMN_SQB_FROM_CONNECTION + " = " + COLUMN_SQN_ID
     + " WHERE " + COLUMN_SQN_ID + " = ? ";
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE =
     "SELECT "
-    + COLUMN_SQN_CONNECTOR + ", "
-    + COLUMN_SQB_ID + ", "
-    + COLUMN_SQB_NAME + ", "
-    + COLUMN_SQB_CONNECTION + ", "
-    + COLUMN_SQB_TYPE + ", "
-    + COLUMN_SQB_ENABLED + ", "
-    + COLUMN_SQB_CREATION_USER + ", "
-    + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_USER + ", "
-    + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB
+    + "FROM_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
+    + "TO_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
+    + "job." + COLUMN_SQB_ID + ", "
+    + "job." + COLUMN_SQB_NAME + ", "
+    + "job." + COLUMN_SQB_FROM_CONNECTION + ", "
+    + "job." + COLUMN_SQB_TO_CONNECTION + ", "
+    + "job." + COLUMN_SQB_ENABLED + ", "
+    + "job." + COLUMN_SQB_CREATION_USER + ", "
+    + "job." + COLUMN_SQB_CREATION_DATE + ", "
+    + "job." + COLUMN_SQB_UPDATE_USER + ", "
+    + "job." + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB + " AS job"
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-    + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+    + " as FROM_CONNECTOR ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTOR." + COLUMN_SQN_ID
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION
+    + " as TO_CONNECTOR ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTOR." + COLUMN_SQN_ID
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs
   public static final String STMT_SELECT_JOB_ALL =
     "SELECT "
-    + COLUMN_SQN_CONNECTOR + ", "
-    + COLUMN_SQB_ID + ", "
-    + COLUMN_SQB_NAME + ", "
-    + COLUMN_SQB_CONNECTION + ", "
-    + COLUMN_SQB_TYPE + ", "
-    + COLUMN_SQB_ENABLED + ", "
-    + COLUMN_SQB_CREATION_USER + ", "
-    + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_USER + ", "
-    + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB
+    + "FROM_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
+    + "TO_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
+    + "job." + COLUMN_SQB_ID + ", "
+    + "job." + COLUMN_SQB_NAME + ", "
+    + "job." + COLUMN_SQB_FROM_CONNECTION + ", "
+    + "job." + COLUMN_SQB_TO_CONNECTION + ", "
+    + "job." + COLUMN_SQB_ENABLED + ", "
+    + "job." + COLUMN_SQB_CREATION_USER + ", "
+    + "job." + COLUMN_SQB_CREATION_DATE + ", "
+    + "job." + COLUMN_SQB_UPDATE_USER + ", "
+    + "job." + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB + " AS job"
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID;
+    + " as FROM_CONNECTOR ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTOR." + COLUMN_SQN_ID
+    + " LEFT JOIN " + TABLE_SQ_CONNECTION
+    + " as TO_CONNECTOR ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTOR." + COLUMN_SQN_ID;
 
   // DML: Select all jobs for a Connector
   public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR =
@@ -797,8 +803,8 @@ public final class DerbySchemaQuery {
     + COLUMN_SQN_CONNECTOR + ", "
     + COLUMN_SQB_ID + ", "
     + COLUMN_SQB_NAME + ", "
-    + COLUMN_SQB_CONNECTION + ", "
-    + COLUMN_SQB_TYPE + ", "
+    + COLUMN_SQB_FROM_CONNECTION + ", "
+    + COLUMN_SQB_TO_CONNECTION + ", "
     + COLUMN_SQB_ENABLED + ", "
     + COLUMN_SQB_CREATION_USER + ", "
     + COLUMN_SQB_CREATION_DATE + ", "
@@ -806,7 +812,7 @@ public final class DerbySchemaQuery {
     + COLUMN_SQB_UPDATE_DATE
     + " FROM " + TABLE_SQ_JOB
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-      + " ON " + COLUMN_SQB_CONNECTION + " = " + COLUMN_SQN_ID
+      + " ON " + COLUMN_SQB_FROM_CONNECTION + " = " + COLUMN_SQN_ID
       + " AND " + COLUMN_SQN_CONNECTOR + " = ? ";
 
   // DML: Insert new submission

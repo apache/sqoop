@@ -24,14 +24,11 @@ import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
-import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
-import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+import org.apache.sqoop.framework.configuration.JobConfiguration;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.validation.Validator;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -113,31 +110,20 @@ public class FrameworkManager implements Reconfigurable {
 
   public static final String CURRENT_FRAMEWORK_VERSION = "1";
 
-  public Class getJobConfigurationClass(MJob.Type jobType) {
-      switch (jobType) {
-          case IMPORT:
-              return ImportJobConfiguration.class;
-          case EXPORT:
-              return ExportJobConfiguration.class;
-          default:
-              return null;
-      }
+  public Class getJobConfigurationClass() {
+      return JobConfiguration.class;
   }
-    public Class getConnectionConfigurationClass() {
-        return ConnectionConfiguration.class;
-    }
+
+  public Class getConnectionConfigurationClass() {
+      return ConnectionConfiguration.class;
+  }
 
   public FrameworkManager() {
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(getConnectionConfigurationClass())
     );
-    List<MJobForms> jobForms = new LinkedList<MJobForms>();
-    jobForms.add(new MJobForms(MJob.Type.IMPORT,
-      FormUtils.toForms(getJobConfigurationClass(MJob.Type.IMPORT))));
-    jobForms.add(new MJobForms(MJob.Type.EXPORT,
-      FormUtils.toForms(getJobConfigurationClass(MJob.Type.EXPORT))));
-    mFramework = new MFramework(connectionForms, jobForms,
-      CURRENT_FRAMEWORK_VERSION);
+    mFramework = new MFramework(connectionForms, new MJobForms(FormUtils.toForms(getJobConfigurationClass())),
+        CURRENT_FRAMEWORK_VERSION);
 
     // Build validator
     validator = new FrameworkValidator();

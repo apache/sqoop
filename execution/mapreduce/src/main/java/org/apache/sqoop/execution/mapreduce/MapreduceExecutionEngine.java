@@ -20,22 +20,14 @@ package org.apache.sqoop.execution.mapreduce;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.framework.ExecutionEngine;
 import org.apache.sqoop.framework.SubmissionRequest;
-import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
-import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
-import org.apache.sqoop.framework.configuration.OutputFormat;
+import org.apache.sqoop.framework.configuration.JobConfiguration;
 import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.MapreduceExecutionError;
-import org.apache.sqoop.job.etl.Exporter;
-import org.apache.sqoop.job.etl.HdfsExportExtractor;
-import org.apache.sqoop.job.etl.HdfsExportPartitioner;
-import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
-import org.apache.sqoop.job.etl.HdfsTextImportLoader;
-import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.job.etl.From;
+import org.apache.sqoop.job.etl.To;
+import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.SqoopWritable;
-import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
@@ -69,99 +61,66 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     request.setOutputValueClass(NullWritable.class);
 
     // Set up framework context
+    From from = (From)request.getFromCallback();
+    To to = (To)request.getToCallback();
     MutableMapContext context = request.getFrameworkContext();
+    context.setString(JobConstants.JOB_ETL_PARTITIONER, from.getPartitioner().getName());
+    context.setString(JobConstants.JOB_ETL_EXTRACTOR, from.getExtractor().getName());
+    context.setString(JobConstants.JOB_ETL_LOADER, to.getLoader().getName());
+    context.setString(JobConstants.JOB_ETL_DESTROYER, from.getDestroyer().getName());
     context.setString(JobConstants.INTERMEDIATE_DATA_FORMAT,
-      request.getIntermediateDataFormat().getName());
+        request.getIntermediateDataFormat().getName());
 
     if(request.getExtractors() != null) {
       context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
     }
-  }
 
-  /**
-   *  {@inheritDoc}
-   */
-  @Override
-  public void prepareImportSubmission(SubmissionRequest gRequest) {
-    MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
-
-    prepareSubmission(request);
-    request.setOutputFormatClass(SqoopFileOutputFormat.class);
-
-    ImportJobConfiguration jobConf = (ImportJobConfiguration) request.getConfigFrameworkJob();
-
-    Importer importer = (Importer)request.getConnectorCallbacks();
-
-    // Set up framework context
-    MutableMapContext context = request.getFrameworkContext();
-    context.setString(JobConstants.JOB_ETL_PARTITIONER, importer.getPartitioner().getName());
-    context.setString(JobConstants.JOB_ETL_EXTRACTOR, importer.getExtractor().getName());
-    context.setString(JobConstants.JOB_ETL_DESTROYER, importer.getDestroyer().getName());
-
-    // TODO: This settings should be abstracted to core module at some point
-    if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
-      context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
-    } else if(jobConf.output.outputFormat == OutputFormat.SEQUENCE_FILE) {
-      context.setString(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
-    } else {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
-        "Format: " + jobConf.output.outputFormat);
+    if(request.getExtractors() != null) {
+      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
     }
-    if(getCompressionCodecName(jobConf) != null) {
-      context.setString(JobConstants.HADOOP_COMPRESS_CODEC,
-        getCompressionCodecName(jobConf));
-      context.setBoolean(JobConstants.HADOOP_COMPRESS, true);
-    }
+
+    // @TODO(Abe): Move to HDFS connector.
+//    if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
+//      context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
+//    } else if(jobConf.output.outputFormat == OutputFormat.SEQUENCE_FILE) {
+//      context.setString(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
+//    } else {
+//      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
+//        "Format: " + jobConf.output.outputFormat);
+//    }
+//    if(getCompressionCodecName(jobConf) != null) {
+//      context.setString(JobConstants.HADOOP_COMPRESS_CODEC,
+//        getCompressionCodecName(jobConf));
+//      context.setBoolean(JobConstants.HADOOP_COMPRESS, true);
+//    }
   }
 
-  private String getCompressionCodecName(ImportJobConfiguration jobConf) {
-    if(jobConf.output.compression == null)
-      return null;
-    switch(jobConf.output.compression) {
-      case NONE:
-        return null;
-      case DEFAULT:
-        return "org.apache.hadoop.io.compress.DefaultCodec";
-      case DEFLATE:
-        return "org.apache.hadoop.io.compress.DeflateCodec";
-      case GZIP:
-        return "org.apache.hadoop.io.compress.GzipCodec";
-      case BZIP2:
-        return "org.apache.hadoop.io.compress.BZip2Codec";
-      case LZO:
-        return "com.hadoop.compression.lzo.LzoCodec";
-      case LZ4:
-        return "org.apache.hadoop.io.compress.Lz4Codec";
-      case SNAPPY:
-        return "org.apache.hadoop.io.compress.SnappyCodec";
-      case CUSTOM:
-        return jobConf.output.customCompression.trim();
-    }
-    return null;
-  }
-
-  /**
-   *  {@inheritDoc}
-   */
-  @Override
-  public void prepareExportSubmission(SubmissionRequest gRequest) {
-    MRSubmissionRequest request = (MRSubmissionRequest) gRequest;
-    ExportJobConfiguration jobConf = (ExportJobConfiguration) request.getConfigFrameworkJob();
-
-    prepareSubmission(request);
-
-    Exporter exporter = (Exporter)request.getConnectorCallbacks();
-
-    // Set up framework context
-    MutableMapContext context = request.getFrameworkContext();
-    context.setString(JobConstants.JOB_ETL_PARTITIONER, HdfsExportPartitioner.class.getName());
-    context.setString(JobConstants.JOB_ETL_LOADER, exporter.getLoader().getName());
-    context.setString(JobConstants.JOB_ETL_DESTROYER, exporter.getDestroyer().getName());
-
-    // Extractor that will be able to read all supported file types
-    context.setString(JobConstants.JOB_ETL_EXTRACTOR, HdfsExportExtractor.class.getName());
-    context.setString(JobConstants.HADOOP_INPUTDIR, jobConf.input.inputDirectory);
-  }
+  // @TODO(Abe): Move to HDFS connector.
+//  private String getCompressionCodecName(ImportJobConfiguration jobConf) {
+//    if(jobConf.output.compression == null)
+//      return null;
+//    switch(jobConf.output.compression) {
+//      case NONE:
+//        return null;
+//      case DEFAULT:
+//        return "org.apache.hadoop.io.compress.DefaultCodec";
+//      case DEFLATE:
+//        return "org.apache.hadoop.io.compress.DeflateCodec";
+//      case GZIP:
+//        return "org.apache.hadoop.io.compress.GzipCodec";
+//      case BZIP2:
+//        return "org.apache.hadoop.io.compress.BZip2Codec";
+//      case LZO:
+//        return "com.hadoop.compression.lzo.LzoCodec";
+//      case LZ4:
+//        return "org.apache.hadoop.io.compress.Lz4Codec";
+//      case SNAPPY:
+//        return "org.apache.hadoop.io.compress.SnappyCodec";
+//      case CUSTOM:
+//        return jobConf.output.customCompression.trim();
+//    }
+//    return null;
+//  }
 
   /**
    * Our execution engine have additional dependencies that needs to be available

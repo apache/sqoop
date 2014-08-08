@@ -24,10 +24,10 @@ import org.apache.sqoop.model.Form;
  *
  */
 @ConfigurationClass
-public class ImportJobConfiguration {
-  @Form public ImportTableForm table;
+public class FromJobConfiguration {
+  @Form public FromTableForm table;
 
-  public ImportJobConfiguration() {
-    table = new ImportTableForm();
+  public FromJobConfiguration() {
+    table = new FromTableForm();
   }
 }

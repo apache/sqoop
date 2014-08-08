@@ -18,9 +18,11 @@
 package org.apache.sqoop.shell.utils;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MAccountableEntity;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFramework;
@@ -28,7 +30,6 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.shell.core.Constants;
@@ -49,21 +50,34 @@ public final class FormDisplayer {
 
   public static void displayFormMetadataDetails(MFramework framework,
                                                 ResourceBundle bundle) {
-    print("  %s: ", resourceString(Constants.RES_FORMDISPLAYER_SUPPORTED_JOBTYPE));
-    println(framework.getAllJobsForms().keySet().toString());
-
     displayFormsMetadata(
       framework.getConnectionForms().getForms(),
       resourceString(Constants.RES_FORMDISPLAYER_CONNECTION),
       bundle);
 
-    for (MJobForms jobForms : framework.getAllJobsForms().values()) {
-      print("  %s ", resourceString(Constants.RES_FORMDISPLAYER_FORM_JOBTYPE));
-      print(jobForms.getType().name());
-      println(":");
+    displayFormsMetadata(
+      framework.getJobForms().getForms(),
+      resourceString(Constants.RES_FORMDISPLAYER_JOB),
+      bundle);
+  }
 
-      displayFormsMetadata(jobForms.getForms(), resourceString(Constants.RES_FORMDISPLAYER_JOB), bundle);
-    }
+  public static void displayFormMetadataDetails(MConnector connector,
+                                                ResourceBundle bundle) {
+    displayFormsMetadata(
+        connector.getConnectionForms().getForms(),
+        resourceString(Constants.RES_FORMDISPLAYER_CONNECTION),
+        bundle);
+
+    // @TODO(Abe): Validate From/To output is correct.
+    displayFormsMetadata(
+        connector.getJobForms(ConnectorType.FROM).getForms(),
+        resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        bundle);
+
+    displayFormsMetadata(
+        connector.getJobForms(ConnectorType.TO).getForms(),
+        resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        bundle);
   }
 
   public static void displayFormsMetadata(List<MForm> forms,
@@ -139,8 +153,9 @@ public final class FormDisplayer {
       formList.addAll(connection.getFrameworkPart().getForms());
     } else if(entity instanceof MJob) {
       MJob job = (MJob) entity;
-      formList.addAll(job.getConnectorPart().getForms());
+      formList.addAll(job.getConnectorPart(ConnectorType.FROM).getForms());
       formList.addAll(job.getFrameworkPart().getForms());
+      formList.addAll(job.getConnectorPart(ConnectorType.TO).getForms());
     }
     for(MForm form : formList) {
       if(form.getValidationStatus() == Status.ACCEPTABLE) {

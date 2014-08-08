@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.jdbc.configuration.ExportJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.jdbc.util.SqlTypesUtils;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
@@ -36,14 +36,14 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class GenericJdbcExportInitializer extends Initializer<ConnectionConfiguration, ExportJobConfiguration> {
+public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguration, ToJobConfiguration> {
 
   private GenericJdbcExecutor executor;
   private static final Logger LOG =
-    Logger.getLogger(GenericJdbcExportInitializer.class);
+    Logger.getLogger(GenericJdbcToInitializer.class);
 
   @Override
-  public void initialize(InitializerContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
+  public void initialize(InitializerContext context, ConnectionConfiguration connection, ToJobConfiguration job) {
     configureJdbcProperties(context.getContext(), connection, job);
     try {
       configureTableProperties(context.getContext(), connection, job);
@@ -53,7 +53,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, ExportJobConfiguration job) {
+  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, ToJobConfiguration job) {
     List<String> jars = new LinkedList<String>();
 
     jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
@@ -62,18 +62,18 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, ExportJobConfiguration exportJobConfiguration) {
-    configureJdbcProperties(context.getContext(), connectionConfiguration, exportJobConfiguration);
+  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, ToJobConfiguration toJobConfiguration) {
+    configureJdbcProperties(context.getContext(), connectionConfiguration, toJobConfiguration);
 
-    String schemaName = exportJobConfiguration.table.tableName;
+    String schemaName = toJobConfiguration.table.tableName;
 
     if (schemaName == null) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
           "Table name extraction not supported yet.");
     }
 
-    if(exportJobConfiguration.table.schemaName != null) {
-      schemaName = exportJobConfiguration.table.schemaName + "." + schemaName;
+    if(toJobConfiguration.table.schemaName != null) {
+      schemaName = toJobConfiguration.table.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -112,7 +112,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ExportJobConfiguration jobConfig) {
+  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ToJobConfiguration jobConfig) {
     String driver = connectionConfig.connection.jdbcDriver;
     String url = connectionConfig.connection.connectionString;
     String username = connectionConfig.connection.username;
@@ -124,7 +124,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ExportJobConfiguration jobConfig) {
+  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ToJobConfiguration jobConfig) {
     String dataSql;
 
     String schemaName = jobConfig.table.schemaName;
@@ -216,7 +216,7 @@ public class GenericJdbcExportInitializer extends Initializer<ConnectionConfigur
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
     }
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_DATA_SQL,
-        dataSql.toString());
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_TO_JDBC_DATA_SQL,
+        dataSql);
   }
 }

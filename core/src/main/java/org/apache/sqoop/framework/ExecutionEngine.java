@@ -52,15 +52,9 @@ public abstract class ExecutionEngine {
   }
 
   /**
-   * Prepare given submission request for import job type.
+   * Prepare given submission request.
    *
    * @param request Submission request
    */
-  public abstract void prepareImportSubmission(SubmissionRequest request);
-
-  /**
-   * Prepare given submission request for export job type..
-   * @param request
-   */
-  public abstract void prepareExportSubmission(SubmissionRequest request);
+  public abstract void prepareSubmission(SubmissionRequest request);
 }

@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.FormDisplayer;
@@ -43,26 +44,26 @@ public class CreateJobFunction extends  SqoopFunction {
   public CreateJobFunction() {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
-      .withLongOpt(Constants.OPT_XID)
+      .withLongOpt(Constants.OPT_FXID)
       .hasArg()
-      .create(Constants.OPT_XID_CHAR)
+      .create(Constants.OPT_FXID_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_TYPE))
-      .withLongOpt(Constants.OPT_TYPE)
+      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
+      .withLongOpt(Constants.OPT_TXID)
       .hasArg()
-      .create(Constants.OPT_TYPE_CHAR)
+      .create(Constants.OPT_TXID_CHAR)
     );
   }
 
   @Override
   public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_XID)) {
-      printlnResource(Constants.RES_ARGS_XID_MISSING);
+    if (!line.hasOption(Constants.OPT_FXID)) {
+      printlnResource(Constants.RES_ARGS_FXID_MISSING);
       return false;
     }
-    if (!line.hasOption(Constants.OPT_TYPE)) {
-      printlnResource(Constants.RES_ARGS_TYPE_MISSING);
+    if (!line.hasOption(Constants.OPT_TXID)) {
+      printlnResource(Constants.RES_ARGS_TXID_MISSING);
       return false;
     }
     return true;
@@ -71,19 +72,23 @@ public class CreateJobFunction extends  SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return createJob(getLong(line, Constants.OPT_XID),
-                     line.getOptionValue(Constants.OPT_TYPE),
+    return createJob(getLong(line, Constants.OPT_FXID),
+                     getLong(line, Constants.OPT_TXID),
                      line.getArgList(),
                      isInteractive);
   }
 
-  private Status createJob(Long connectionId, String type, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CREATE_CREATING_JOB, connectionId);
+  private Status createJob(Long fromConnectionId, Long toConnectionId, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_CREATE_CREATING_JOB, fromConnectionId, toConnectionId);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.newJob(connectionId, MJob.Type.valueOf(type.toUpperCase()));
+    MJob job = client.newJob(fromConnectionId, toConnectionId);
 
-    ResourceBundle connectorBundle = client.getResourceBundle(job.getConnectorId());
+    // @TODO(Abe): From/To.
+    ResourceBundle fromConnectorBundle = client.getResourceBundle(
+        job.getConnectorId(ConnectorType.FROM));
+    ResourceBundle toConnectorBundle = client.getResourceBundle(
+        job.getConnectorId(ConnectorType.TO));
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
 
     Status status = Status.FINE;
@@ -98,7 +103,7 @@ public class CreateJobFunction extends  SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, connectorBundle, frameworkBundle)) {
+        if(!fillJob(reader, job, fromConnectorBundle, frameworkBundle, toConnectorBundle)) {
           return null;
         }
 

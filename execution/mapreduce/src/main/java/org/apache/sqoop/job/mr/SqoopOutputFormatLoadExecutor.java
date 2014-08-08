@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
@@ -39,6 +40,7 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.etl.io.DataReader;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.utils.ClassUtils;
@@ -225,23 +227,13 @@ public class SqoopOutputFormatLoadExecutor {
 
         if (!isTest) {
           // Propagate connector schema in every case for now
-          // TODO: Change to coditional choosing between HIO and Connector schema
-          schema = ConfigurationUtils.getConnectorSchema(conf);
+          // TODO: Change to coditional choosing between Connector schemas.
+          // @TODO(Abe): Maybe use TO schema?
+          schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
 
-          switch (ConfigurationUtils.getJobType(conf)) {
-            case EXPORT:
-              subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_CONTEXT);
-              configConnection = ConfigurationUtils.getConfigConnectorConnection(conf);
-              configJob = ConfigurationUtils.getConfigConnectorJob(conf);
-              break;
-            case IMPORT:
-              subContext = new PrefixContext(conf, "");
-              configConnection = ConfigurationUtils.getConfigFrameworkConnection(conf);
-              configJob = ConfigurationUtils.getConfigFrameworkJob(conf);
-              break;
-            default:
-              throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0023);
-          }
+          subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
+          configConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.TO, conf);
+          configJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.TO, conf);
         }
 
         // Create loader context

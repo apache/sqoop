@@ -15,41 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
-
-import java.util.List;
+package org.apache.sqoop.common;
 
 /**
- * Metadata describing all required information to build a job
- * object with two connectors and a framework.
+ * Connectors will have configurations for FROM and TO.
+ * If the connector is being used to extract data FROM,
+ * then the connector type will be FROM. If the connector
+ * is being used to load data TO, then the connector type
+ * will be TO.
  */
-public class MJobForms extends MFormList {
-  public MJobForms(List<MForm> forms) {
-    super(forms);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    if (!(other instanceof MJobForms)) {
-      return false;
-    }
-
-    MJobForms mj = (MJobForms) other;
-    return super.equals(mj);
-  }
-
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
-
-  @Override
-  public MJobForms clone(boolean cloneWithValue) {
-    MJobForms copy = new MJobForms(super.clone(cloneWithValue).getForms());
-    return copy;
-  }
+public enum ConnectorType {
+  FROM,
+  TO
 }

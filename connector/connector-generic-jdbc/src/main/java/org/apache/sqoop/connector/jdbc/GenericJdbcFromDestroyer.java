@@ -15,21 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.jdbc.configuration;
+package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.model.FormClass;
-import org.apache.sqoop.model.Input;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 
-/**
- *
- */
-@FormClass
-public class ImportTableForm {
-  @Input(size = 50)   public String schemaName;
-  @Input(size = 50)   public String tableName;
-  @Input(size = 2000) public String sql;
-  @Input(size = 50)   public String columns;
-  @Input(size = 50)   public String partitionColumn;
-  @Input              public Boolean partitionColumnNull;
-  @Input(size = 50)   public String boundaryQuery;
+public class GenericJdbcFromDestroyer extends Destroyer<ConnectionConfiguration, FromJobConfiguration> {
+
+  private static final Logger LOG =
+    Logger.getLogger(GenericJdbcFromDestroyer.class);
+
+  @Override
+  public void destroy(DestroyerContext context, ConnectionConfiguration connection, FromJobConfiguration job) {
+    LOG.info("Running generic JDBC connector destroyer");
+  }
+
 }

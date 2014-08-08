@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.apache.sqoop.job.etl.Exporter;
-import org.apache.sqoop.job.etl.Importer;
+import org.apache.sqoop.job.etl.From;
+import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -53,13 +53,13 @@ public class MySqlJdbcConnector implements SqoopConnector {
   }
 
   @Override
-  public Importer getImporter() {
+  public From getImporter() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public Exporter getExporter() {
+  public To getExporter() {
     // TODO Auto-generated method stub
     return null;
   }

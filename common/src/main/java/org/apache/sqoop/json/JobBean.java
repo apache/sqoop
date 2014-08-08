@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -42,10 +43,12 @@ public class JobBean implements JsonBean {
   private static final String ALL = "all";
   private static final String ID = "id";
   private static final String NAME = "name";
-  private static final String TYPE = "type";
-  private static final String CONNECTION_ID = "connection-id";
-  private static final String CONNECTOR_ID = "connector-id";
-  private static final String CONNECTOR_PART = "connector";
+  private static final String FROM_CONNECTION_ID = "from-connection-id";
+  private static final String TO_CONNECTION_ID = "to-connection-id";
+  private static final String FROM_CONNECTOR_ID = "from-connector-id";
+  private static final String TO_CONNECTOR_ID = "to-connector-id";
+  private static final String FROM_CONNECTOR_PART = "from-connector";
+  private static final String TO_CONNECTOR_PART = "to-connector";
   private static final String FRAMEWORK_PART = "framework";
 
   // Compulsory
@@ -106,16 +109,19 @@ public class JobBean implements JsonBean {
 
       object.put(ID, job.getPersistenceId());
       object.put(NAME, job.getName());
-      object.put(TYPE, job.getType().name());
       object.put(ENABLED, job.getEnabled());
       object.put(CREATION_USER, job.getCreationUser());
       object.put(CREATION_DATE, job.getCreationDate().getTime());
       object.put(UPDATE_USER, job.getLastUpdateUser());
       object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
-      object.put(CONNECTION_ID, job.getConnectionId());
-      object.put(CONNECTOR_ID, job.getConnectorId());
-      object.put(CONNECTOR_PART,
-        extractForms(job.getConnectorPart().getForms(), skipSensitive));
+      object.put(FROM_CONNECTION_ID, job.getConnectionId(ConnectorType.FROM));
+      object.put(TO_CONNECTION_ID, job.getConnectionId(ConnectorType.TO));
+      object.put(FROM_CONNECTOR_ID, job.getConnectorId(ConnectorType.FROM));
+      object.put(TO_CONNECTOR_ID, job.getConnectorId(ConnectorType.TO));
+      object.put(FROM_CONNECTOR_PART,
+        extractForms(job.getConnectorPart(ConnectorType.FROM).getForms(),skipSensitive));
+      object.put(TO_CONNECTOR_PART,
+          extractForms(job.getConnectorPart(ConnectorType.TO).getForms(), skipSensitive));
       object.put(FRAMEWORK_PART,
         extractForms(job.getFrameworkPart().getForms(), skipSensitive));
 
@@ -151,23 +157,26 @@ public class JobBean implements JsonBean {
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;
 
-      long connectorId = (Long) object.get(CONNECTOR_ID);
-      long connectionId = (Long) object.get(CONNECTION_ID);
-      JSONArray connectorPart = (JSONArray) object.get(CONNECTOR_PART);
+      long fromConnectorId = (Long) object.get(FROM_CONNECTOR_ID);
+      long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
+      long fromConnectionId = (Long) object.get(FROM_CONNECTION_ID);
+      long toConnectionId = (Long) object.get(TO_CONNECTION_ID);
+      JSONArray fromConnectorPart = (JSONArray) object.get(FROM_CONNECTOR_PART);
+      JSONArray toConnectorPart = (JSONArray) object.get(TO_CONNECTOR_PART);
       JSONArray frameworkPart = (JSONArray) object.get(FRAMEWORK_PART);
 
-      String stringType = (String) object.get(TYPE);
-      MJob.Type type = MJob.Type.valueOf(stringType);
-
-      List<MForm> connectorForms = restoreForms(connectorPart);
+      List<MForm> fromConnectorParts = restoreForms(fromConnectorPart);
+      List<MForm> toConnectorParts = restoreForms(toConnectorPart);
       List<MForm> frameworkForms = restoreForms(frameworkPart);
 
       MJob job = new MJob(
-        connectorId,
-        connectionId,
-        type,
-        new MJobForms(type, connectorForms),
-        new MJobForms(type, frameworkForms)
+        fromConnectorId,
+        toConnectorId,
+        fromConnectionId,
+        toConnectionId,
+        new MJobForms(fromConnectorParts),
+        new MJobForms(toConnectorParts),
+        new MJobForms(frameworkForms)
       );
 
       job.setPersistenceId((Long) object.get(ID));

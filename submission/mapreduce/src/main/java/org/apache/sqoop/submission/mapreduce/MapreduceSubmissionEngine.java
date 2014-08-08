@@ -19,15 +19,14 @@ package org.apache.sqoop.submission.mapreduce;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.execution.mapreduce.MRSubmissionRequest;
@@ -155,9 +154,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     // Clone global configuration
     Configuration configuration = new Configuration(globalConfiguration);
 
-    // Serialize job type as it will be needed by underlying execution engine
-    ConfigurationUtils.setJobType(configuration, request.getJobType());
-
     // Serialize framework context into job configuration
     for(Map.Entry<String, String> entry: request.getFrameworkContext()) {
       if (entry.getValue() == null) {
@@ -168,14 +164,24 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     }
 
     // Serialize connector context as a sub namespace
-    for(Map.Entry<String, String> entry :request.getConnectorContext()) {
+    for(Map.Entry<String, String> entry : request.getConnectorContext(ConnectorType.FROM)) {
       if (entry.getValue() == null) {
         LOG.warn("Ignoring null connector context value for key " + entry.getKey());
         continue;
       }
       configuration.set(
-        JobConstants.PREFIX_CONNECTOR_CONTEXT + entry.getKey(),
+        JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT + entry.getKey(),
         entry.getValue());
+    }
+
+    for(Map.Entry<String, String> entry : request.getConnectorContext(ConnectorType.TO)) {
+      if (entry.getValue() == null) {
+        LOG.warn("Ignoring null connector context value for key " + entry.getKey());
+        continue;
+      }
+      configuration.set(
+          JobConstants.PREFIX_CONNECTOR_TO_CONTEXT + entry.getKey(),
+          entry.getValue());
     }
 
     // Set up notification URL if it's available
@@ -194,9 +200,12 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       Job job = new Job(configuration);
 
       // And finally put all configuration objects to credentials cache
-      ConfigurationUtils.setConfigConnectorConnection(job, request.getConfigConnectorConnection());
-      ConfigurationUtils.setConfigConnectorJob(job, request.getConfigConnectorJob());
-      ConfigurationUtils.setConfigFrameworkConnection(job, request.getConfigFrameworkConnection());
+      ConfigurationUtils.setConnectorConnectionConfig(ConnectorType.FROM, job, request.getConnectorConnectionConfig(ConnectorType.FROM));
+      ConfigurationUtils.setConnectorJobConfig(ConnectorType.FROM, job, request.getConnectorJobConfig(ConnectorType.FROM));
+      ConfigurationUtils.setConnectorConnectionConfig(ConnectorType.TO, job, request.getConnectorConnectionConfig(ConnectorType.TO));
+      ConfigurationUtils.setConnectorJobConfig(ConnectorType.TO, job, request.getConnectorJobConfig(ConnectorType.TO));
+      ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.FROM, job, request.getFrameworkConnectionConfig(ConnectorType.FROM));
+      ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.TO, job, request.getFrameworkConnectionConfig(ConnectorType.TO));
       ConfigurationUtils.setConfigFrameworkJob(job, request.getConfigFrameworkJob());
       ConfigurationUtils.setConnectorSchema(job, request.getSummary().getConnectorSchema());
 
@@ -211,11 +220,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       job.setMapperClass(request.getMapperClass());
       job.setMapOutputKeyClass(request.getMapOutputKeyClass());
       job.setMapOutputValueClass(request.getMapOutputValueClass());
-
-      String outputDirectory = request.getOutputDirectory();
-      if(outputDirectory != null) {
-        FileOutputFormat.setOutputPath(job, new Path(outputDirectory));
-      }
 
       // Set number of reducers as number of configured loaders  or suppress
       // reduce phase entirely if loaders are not set at all.

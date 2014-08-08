@@ -22,10 +22,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.sqoop.common.ConnectorType;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.json.util.SchemaSerialization;
 import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONObject;
@@ -40,59 +40,59 @@ import java.util.Properties;
  */
 public final class ConfigurationUtils {
 
-  private static final String JOB_TYPE = JobConstants.PREFIX_JOB_CONFIG + "type";
+  private static final String JOB_CONFIG_CLASS_FROM_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.from.connection";
 
-  private static final String JOB_CONFIG_CLASS_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.connection";
+  private static final String JOB_CONFIG_CLASS_TO_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.to.connection";
 
-  private static final String JOB_CONFIG_CLASS_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.job";
+  private static final String JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.from.job";
 
-  private static final String JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION =  JobConstants.PREFIX_JOB_CONFIG + "config.class.framework.connection";
+  private static final String JOB_CONFIG_CLASS_TO_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.class.connector.to.job";
+
+  private static final String JOB_CONFIG_CLASS_FROM_FRAMEWORK_CONNECTION =  JobConstants.PREFIX_JOB_CONFIG + "config.class.framework.from.connection";
+
+  private static final String JOB_CONFIG_CLASS_TO_FRAMEWORK_CONNECTION =  JobConstants.PREFIX_JOB_CONFIG + "config.class.framework.to.connection";
 
   private static final String JOB_CONFIG_CLASS_FRAMEWORK_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.class.framework.job";
 
-  private static final String JOB_CONFIG_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.connector.connection";
+  private static final String JOB_CONFIG_FROM_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.connector.from.connection";
 
-  private static final Text JOB_CONFIG_CONNECTOR_CONNECTION_KEY = new Text(JOB_CONFIG_CONNECTOR_CONNECTION);
+  private static final Text JOB_CONFIG_FROM_CONNECTOR_CONNECTION_KEY = new Text(JOB_CONFIG_FROM_CONNECTOR_CONNECTION);
 
-  private static final String JOB_CONFIG_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.connector.job";
+  private static final String JOB_CONFIG_TO_CONNECTOR_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.connector.to.connection";
 
-  private static final Text JOB_CONFIG_CONNECTOR_JOB_KEY = new Text(JOB_CONFIG_CONNECTOR_JOB);
+  private static final Text JOB_CONFIG_TO_CONNECTOR_CONNECTION_KEY = new Text(JOB_CONFIG_TO_CONNECTOR_CONNECTION);
 
-  private static final String JOB_CONFIG_FRAMEWORK_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.framework.connection";
+  private static final String JOB_CONFIG_FROM_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.connector.from.job";
 
-  private static final Text JOB_CONFIG_FRAMEWORK_CONNECTION_KEY = new Text(JOB_CONFIG_FRAMEWORK_CONNECTION);
+  private static final Text JOB_CONFIG_FROM_CONNECTOR_JOB_KEY = new Text(JOB_CONFIG_FROM_CONNECTOR_JOB);
+
+  private static final String JOB_CONFIG_TO_CONNECTOR_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.connector.to.job";
+
+  private static final Text JOB_CONFIG_TO_CONNECTOR_JOB_KEY = new Text(JOB_CONFIG_TO_CONNECTOR_JOB);
+
+  private static final String JOB_CONFIG_FROM_FRAMEWORK_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.framework.from.connection";
+
+  private static final Text JOB_CONFIG_FROM_FRAMEWORK_CONNECTION_KEY = new Text(JOB_CONFIG_FROM_FRAMEWORK_CONNECTION);
+
+  private static final String JOB_CONFIG_TO_FRAMEWORK_CONNECTION = JobConstants.PREFIX_JOB_CONFIG + "config.framework.from.connection";
+
+  private static final Text JOB_CONFIG_TO_FRAMEWORK_CONNECTION_KEY = new Text(JOB_CONFIG_TO_FRAMEWORK_CONNECTION);
 
   private static final String JOB_CONFIG_FRAMEWORK_JOB = JobConstants.PREFIX_JOB_CONFIG + "config.framework.job";
 
   private static final Text JOB_CONFIG_FRAMEWORK_JOB_KEY = new Text(JOB_CONFIG_FRAMEWORK_JOB);
 
-  private static final String SCHEMA_CONNECTOR = JobConstants.PREFIX_JOB_CONFIG + "schema.connector";
+  private static final String SCHEMA_FROM_CONNECTOR = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.from";
 
-  private static final Text SCHEMA_CONNECTOR_KEY = new Text(SCHEMA_CONNECTOR);
+  private static final Text SCHEMA_FROM_CONNECTOR_KEY = new Text(SCHEMA_FROM_CONNECTOR);
+
+  private static final String SCHEMA_TO_CONNECTOR = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.to";
+
+  private static final Text SCHEMA_TO_CONNECTOR_KEY = new Text(SCHEMA_TO_CONNECTOR);
 
   private static final String SCHEMA_HIO = JobConstants.PREFIX_JOB_CONFIG + "schema.hio";
 
   private static final Text SCHEMA_HIO_KEY = new Text(SCHEMA_HIO);
-
-  /**
-   * Persist job type in the configuration object.
-   *
-   * @param configuration MapReduce configuration object
-   * @param type Job type
-   */
-  public static void setJobType(Configuration configuration, MJob.Type type) {
-    configuration.set(JOB_TYPE, type.name());
-  }
-
-  /**
-   * Retrieve job type.
-   *
-   * @param configuration MapReduce configuration object
-   * @return Job type
-   */
-  public static MJob.Type getJobType(Configuration configuration) {
-    return MJob.Type.valueOf(configuration.get(JOB_TYPE));
-  }
 
   /**
    * Persist Connector configuration object for connection.
@@ -100,20 +100,38 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConfigConnectorConnection(Job job, Object obj) {
-    job.getConfiguration().set(JOB_CONFIG_CLASS_CONNECTOR_CONNECTION, obj.getClass().getName());
-    job.getCredentials().addSecretKey(JOB_CONFIG_CONNECTOR_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+  public static void setConnectorConnectionConfig(ConnectorType type, Job job, Object obj) {
+    switch (type) {
+      case FROM:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_CONNECTOR_CONNECTION, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_FROM_CONNECTOR_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+
+      case TO:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_TO_CONNECTOR_CONNECTION, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_TO_CONNECTOR_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+    }
   }
 
   /**
-   * Persist Connector configuration object for job.
+   * Persist Connector configuration objects for job.
    *
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConfigConnectorJob(Job job, Object obj) {
-    job.getConfiguration().set(JOB_CONFIG_CLASS_CONNECTOR_JOB, obj.getClass().getName());
-    job.getCredentials().addSecretKey(JOB_CONFIG_CONNECTOR_JOB_KEY, FormUtils.toJson(obj).getBytes());
+  public static void setConnectorJobConfig(ConnectorType type, Job job, Object obj) {
+    switch (type) {
+      case FROM:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_FROM_CONNECTOR_JOB_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+
+      case TO:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_TO_CONNECTOR_JOB, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_TO_CONNECTOR_JOB_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+    }
   }
 
   /**
@@ -122,9 +140,18 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConfigFrameworkConnection(Job job, Object obj) {
-    job.getConfiguration().set(JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION, obj.getClass().getName());
-    job.getCredentials().addSecretKey(JOB_CONFIG_FRAMEWORK_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+  public static void setFrameworkConnectionConfig(ConnectorType type, Job job, Object obj) {
+    switch (type) {
+      case FROM:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_FRAMEWORK_CONNECTION, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_FROM_FRAMEWORK_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+
+      case TO:
+        job.getConfiguration().set(JOB_CONFIG_CLASS_TO_FRAMEWORK_CONNECTION, obj.getClass().getName());
+        job.getCredentials().addSecretKey(JOB_CONFIG_TO_FRAMEWORK_CONNECTION_KEY, FormUtils.toJson(obj).getBytes());
+        break;
+    }
   }
 
   /**
@@ -144,8 +171,16 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConfigConnectorConnection(Configuration configuration) {
-    return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_CONNECTOR_CONNECTION, JOB_CONFIG_CONNECTOR_CONNECTION_KEY);
+  public static Object getConnectorConnectionConfig(ConnectorType type, Configuration configuration) {
+    switch (type) {
+      case FROM:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_CONNECTOR_CONNECTION, JOB_CONFIG_FROM_CONNECTOR_CONNECTION_KEY);
+
+      case TO:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_TO_CONNECTOR_CONNECTION, JOB_CONFIG_TO_CONNECTOR_CONNECTION_KEY);
+    }
+
+    return null;
   }
 
   /**
@@ -154,8 +189,16 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConfigConnectorJob(Configuration configuration) {
-    return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_CONNECTOR_JOB, JOB_CONFIG_CONNECTOR_JOB_KEY);
+  public static Object getConnectorJobConfig(ConnectorType type, Configuration configuration) {
+    switch (type) {
+      case FROM:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, JOB_CONFIG_FROM_CONNECTOR_JOB_KEY);
+
+      case TO:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_TO_CONNECTOR_JOB, JOB_CONFIG_TO_CONNECTOR_JOB_KEY);
+    }
+
+    return null;
   }
 
   /**
@@ -164,8 +207,16 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConfigFrameworkConnection(Configuration configuration) {
-    return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FRAMEWORK_CONNECTION, JOB_CONFIG_FRAMEWORK_CONNECTION_KEY);
+  public static Object getFrameworkConnectionConfig(ConnectorType type, Configuration configuration) {
+    switch (type) {
+      case FROM:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_FRAMEWORK_CONNECTION, JOB_CONFIG_FROM_FRAMEWORK_CONNECTION_KEY);
+
+      case TO:
+        return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_TO_FRAMEWORK_CONNECTION, JOB_CONFIG_TO_FRAMEWORK_CONNECTION_KEY);
+    }
+
+    return null;
   }
 
   /**
@@ -179,14 +230,26 @@ public final class ConfigurationUtils {
   }
 
   /**
-   * Persist Connector generated schema.
+   * Persist From Connector generated schema.
    *
    * @param job MapReduce Job object
    * @param schema Schema
    */
-  public static void setConnectorSchema(Job job, Schema schema) {
+  public static void setFromConnectorSchema(Job job, Schema schema) {
     if(schema != null) {
-      job.getCredentials().addSecretKey(SCHEMA_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
+      job.getCredentials().addSecretKey(SCHEMA_FROM_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
+    }
+  }
+
+  /**
+   * Persist To Connector generated schema.
+   *
+   * @param job MapReduce Job object
+   * @param schema Schema
+   */
+  public static void setToConnectorSchema(Job job, Schema schema) {
+    if(schema != null) {
+      job.getCredentials().addSecretKey(SCHEMA_TO_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
     }
   }
 
@@ -203,23 +266,21 @@ public final class ConfigurationUtils {
   }
 
   /**
-   * Retrieve Connector generated schema.
+   * Retrieve From Connector generated schema.
    *
    * @param configuration MapReduce configuration object
    * @return Schema
    */
-  public static Schema getConnectorSchema(Configuration configuration) {
-    return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_CONNECTOR_KEY));
-  }
+  public static Schema getConnectorSchema(ConnectorType type, Configuration configuration) {
+    switch (type) {
+      case FROM:
+        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_FROM_CONNECTOR_KEY));
 
-  /**
-   * Retrieve Framework generated schema.
-   *
-   * @param configuration MapReduce configuration object
-   * @return Schema
-   */
-  public static Schema getHioSchema(Configuration configuration) {
-    return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_HIO_KEY));
+      case TO:
+        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_TO_CONNECTOR_KEY));
+    }
+
+    return null;
   }
 
   /**

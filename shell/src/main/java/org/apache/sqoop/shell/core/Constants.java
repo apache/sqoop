@@ -35,6 +35,8 @@ public class Constants {
   // Options
 
   public static final String OPT_XID = "xid";
+  public static final String OPT_FXID = "fxid";
+  public static final String OPT_TXID = "txid";
   public static final String OPT_ALL = "all";
   public static final String OPT_JID = "jid";
   public static final String OPT_CID = "cid";
@@ -54,6 +56,8 @@ public class Constants {
   public static final String OPT_DETAIL = "detail";
 
   public static final char OPT_XID_CHAR = 'x';
+  public static final char OPT_FXID_CHAR = 'f';
+  public static final char OPT_TXID_CHAR = 't';
   public static final char OPT_ALL_CHAR = 'a';
   public static final char OPT_JID_CHAR = 'j';
   public static final char OPT_CID_CHAR = 'c';
@@ -143,12 +147,14 @@ public class Constants {
       "args.function.unknown";
   public static final String RES_ARGS_XID_MISSING =
       "args.xid_missing";
+  public static final String RES_ARGS_FXID_MISSING =
+      "args.fxid_missing";
+  public static final String RES_ARGS_TXID_MISSING =
+      "args.txid_missing";
   public static final String RES_ARGS_JID_MISSING =
       "args.jid_missing";
   public static final String RES_ARGS_CID_MISSING =
       "args.cid_missing";
-  public static final String RES_ARGS_TYPE_MISSING =
-      "args.type_missing";
   public static final String RES_ARGS_NAME_MISSING =
       "args.name_missing";
   public static final String RES_ARGS_VALUE_MISSING =
@@ -160,8 +166,6 @@ public class Constants {
       "prompt.job_id";
   public static final String RES_CONNECTOR_ID =
       "prompt.connector_id";
-  public static final String RES_PROMPT_JOB_TYPE =
-      "prompt.job_type";
   public static final String RES_PROMPT_UPDATE_CONN_METADATA =
       "prompt.update_conn_metadata";
   public static final String RES_PROMPT_UPDATE_JOB_METADATA =
@@ -375,10 +379,12 @@ public class Constants {
       "table.header.version";
   public static final String RES_TABLE_HEADER_CLASS =
       "table.header.class";
-  public static final String RES_TABLE_HEADER_TYPE =
-      "table.header.type";
   public static final String RES_TABLE_HEADER_CONNECTOR =
       "table.header.connector";
+  public static final String RES_TABLE_HEADER_FROM_CONNECTOR =
+      "table.header.connector.from";
+  public static final String RES_TABLE_HEADER_TO_CONNECTOR =
+      "table.header.connector.to";
   public static final String RES_TABLE_HEADER_JOB_ID =
       "table.header.jid";
   public static final String RES_TABLE_HEADER_EXTERNAL_ID =
@@ -390,14 +396,10 @@ public class Constants {
   public static final String RES_TABLE_HEADER_ENABLED =
       "table.header.enabled";
 
-  public static final String RES_FORMDISPLAYER_SUPPORTED_JOBTYPE =
-      "formdisplayer.supported_job_types";
   public static final String RES_FORMDISPLAYER_CONNECTION =
       "formdisplayer.connection";
   public static final String RES_FORMDISPLAYER_JOB =
       "formdisplayer.job";
-  public static final String RES_FORMDISPLAYER_FORM_JOBTYPE =
-      "formdisplayer.forms_jobtype";
   public static final String RES_FORMDISPLAYER_FORM =
       "formdisplayer.form";
   public static final String RES_FORMDISPLAYER_NAME =

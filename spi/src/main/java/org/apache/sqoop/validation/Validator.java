@@ -40,11 +40,10 @@ public class Validator {
   /**
    * Validate configuration object for job .
    *
-   * @param type Type of jobs that being validated
    * @param jobConfiguration Job to be validated
    * @return Validation status
    */
-  public Validation validateJob(MJob.Type type, Object jobConfiguration) {
+  public Validation validateJob(Object jobConfiguration) {
     return new Validation(EmptyClass.class);
   }
 

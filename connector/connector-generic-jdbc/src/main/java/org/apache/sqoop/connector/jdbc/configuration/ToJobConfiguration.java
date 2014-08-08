@@ -24,10 +24,10 @@ import org.apache.sqoop.model.Form;
  *
  */
 @ConfigurationClass
-public class ExportJobConfiguration {
-  @Form public ExportTableForm table;
+public class ToJobConfiguration {
+  @Form public ToTableForm table;
 
-  public ExportJobConfiguration() {
-    table = new ExportTableForm();
+  public ToJobConfiguration() {
+    table = new ToTableForm();
   }
 }

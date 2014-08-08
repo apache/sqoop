@@ -24,8 +24,8 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.ConnectionBean;
+import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.ValidationBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -204,8 +204,8 @@ public class ConnectionRequestHandler implements RequestHandler {
       frameworkValidation.getStatus());
 
     // Return back validations in all cases
-    ValidationBean outputBean =
-      new ValidationBean(connectorValidation, frameworkValidation);
+    ConnectionValidationBean outputBean =
+      new ConnectionValidationBean(connectorValidation, frameworkValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {

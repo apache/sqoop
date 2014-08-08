@@ -17,38 +17,21 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.sqoop.common.SqoopException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Metadata describing framework options for connection and job for each
- * supported job type.
+ * Metadata describing framework options for connection and jobForms for each
+ * supported jobForms type.
  */
 public class MFramework extends MPersistableEntity implements MClonable {
 
   private final MConnectionForms connectionForms;
-  private final Map<MJob.Type, MJobForms> jobs;
+  private final MJobForms jobForms;
   String version;
 
-  public MFramework(MConnectionForms connectionForms, List<MJobForms> jobForms,
+  public MFramework(MConnectionForms connectionForms, MJobForms jobForms,
     String version) {
     this.version = version;
     this.connectionForms = connectionForms;
-    this.jobs = new HashMap<MJob.Type, MJobForms>();
-
-    for (MJobForms job : jobForms) {
-      MJob.Type type = job.getType();
-
-      if(this.jobs.containsKey(type)) {
-        throw new SqoopException(ModelError.MODEL_001, "Duplicate entry for"
-          + " jobForms type " + job.getType().name());
-      }
-      this.jobs.put(type, job);
-    }
+    this.jobForms = jobForms;
   }
 
   @Override
@@ -57,9 +40,7 @@ public class MFramework extends MPersistableEntity implements MClonable {
     sb.append(getPersistenceId()).append(":");
     sb.append("version = " + version);
     sb.append(", ").append(connectionForms.toString());
-    for(MJobForms entry: jobs.values()) {
-      sb.append(entry.toString());
-    }
+    sb.append(jobForms.toString());
 
     return sb.toString();
   }
@@ -77,16 +58,13 @@ public class MFramework extends MPersistableEntity implements MClonable {
     MFramework mo = (MFramework) other;
     return version.equals(mo.getVersion()) &&
       connectionForms.equals(mo.connectionForms) &&
-      jobs.equals(mo.jobs);
+      jobForms.equals(mo.jobForms);
   }
 
   @Override
   public int hashCode() {
     int result = connectionForms.hashCode();
-
-    for(MJobForms entry: jobs.values()) {
-      result = 31 * result + entry.hashCode();
-    }
+    result = 31 * result + jobForms.hashCode();
     result = 31 * result + version.hashCode();
     return result;
   }
@@ -95,27 +73,16 @@ public class MFramework extends MPersistableEntity implements MClonable {
     return connectionForms;
   }
 
-  public Map<MJob.Type, MJobForms> getAllJobsForms() {
-    return jobs;
-  }
-
-  public MJobForms getJobForms(MJob.Type type) {
-    return jobs.get(type);
+  public MJobForms getJobForms() {
+    return jobForms;
   }
 
   @Override
   public MFramework clone(boolean cloneWithValue) {
     //Framework never have any values filled
     cloneWithValue = false;
-    List<MJobForms> copyJobForms = null;
-    if(this.getAllJobsForms()!=null) {
-      copyJobForms = new ArrayList<MJobForms>();
-      for(MJobForms entry: this.getAllJobsForms().values()) {
-        copyJobForms.add(entry.clone(cloneWithValue));
-      }
-    }
     MFramework copy = new MFramework(this.getConnectionForms().clone(cloneWithValue),
-      copyJobForms, this.version);
+        this.getJobForms().clone(cloneWithValue), this.version);
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }

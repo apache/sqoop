@@ -17,8 +17,10 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.sqoop.common.ConnectorType;
 
 /**
  * Connector metadata.
@@ -26,14 +28,23 @@ import java.util.List;
  * Includes unique id that identifies connector in metadata store, unique human
  * readable name, corresponding name and all forms for all supported job types.
  */
-public final class MConnector extends MFramework {
+public final class MConnector extends MPersistableEntity implements MClonable {
 
   private final String uniqueName;
   private final String className;
+  private final MConnectionForms connectionForms;
+  private final Map<ConnectorType, MJobForms> jobForms;
+  String version;
 
-  public MConnector(String uniqueName, String className, String version,
-      MConnectionForms connectionForms, List<MJobForms> jobForms) {
-    super(connectionForms, jobForms, version);
+  public MConnector(String uniqueName, String className,
+                    String version, MConnectionForms connectionForms,
+                    MJobForms fromJobForms, MJobForms toJobForms) {
+    this.jobForms = new HashMap<ConnectorType, MJobForms>();
+
+    this.version = version;
+    this.connectionForms = connectionForms;
+    this.jobForms.put(ConnectorType.FROM, fromJobForms);
+    this.jobForms.put(ConnectorType.TO, toJobForms);
 
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
@@ -57,10 +68,8 @@ public final class MConnector extends MFramework {
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
     sb.append(className);
     sb.append(", ").append(getConnectionForms().toString());
-    for(MJobForms entry: getAllJobsForms().values()) {
-      sb.append(entry.toString());
-    }
-
+    sb.append(", ").append(getJobForms(ConnectorType.FROM).toString());
+    sb.append(", ").append(getJobForms(ConnectorType.TO).toString());
     return sb.toString();
   }
 
@@ -78,32 +87,49 @@ public final class MConnector extends MFramework {
     return uniqueName.equals(mc.uniqueName)
         && className.equals(mc.className)
         && version.equals(mc.version)
-        && super.equals(other);
+        && connectionForms.equals(mc.getConnectionForms())
+        && jobForms.get(ConnectorType.FROM).equals(mc.getJobForms(ConnectorType.FROM))
+        && jobForms.get(ConnectorType.TO).equals(mc.getJobForms(ConnectorType.TO));
   }
 
   @Override
   public int hashCode() {
-    int result = super.hashCode();
+    int result = getConnectionForms().hashCode();
+    result = 31 * result + getJobForms(ConnectorType.FROM).hashCode();
+    result = 31 * result + getJobForms(ConnectorType.TO).hashCode();
+    result = 31 * result + version.hashCode();
     result = 31 * result + uniqueName.hashCode();
     result = 31 * result + className.hashCode();
-
     return result;
   }
 
-  @Override
   public MConnector clone(boolean cloneWithValue) {
     //Connector never have any values filled
     cloneWithValue = false;
-    List<MJobForms> copyJobForms = null;
-    if(this.getAllJobsForms()!=null) {
-      copyJobForms = new ArrayList<MJobForms>();
-      for(MJobForms entry: this.getAllJobsForms().values()) {
-        copyJobForms.add(entry.clone(cloneWithValue));
-      }
-    }
-    MConnector copy = new MConnector(this.getUniqueName(), this.getClassName(), this.getVersion(),
-        this.getConnectionForms().clone(cloneWithValue), copyJobForms);
+    MConnector copy = new MConnector(
+        this.getUniqueName(),
+        this.getClassName(),
+        this.getVersion(),
+        this.getConnectionForms().clone(cloneWithValue),
+        this.getJobForms(ConnectorType.FROM).clone(cloneWithValue),
+        this.getJobForms(ConnectorType.TO).clone(cloneWithValue));
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
+  }
+
+  public MConnectionForms getConnectionForms() {
+    return connectionForms;
+  }
+
+  public MJobForms getJobForms(ConnectorType type) {
+    return jobForms.get(type);
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 }

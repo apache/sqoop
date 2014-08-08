@@ -40,7 +40,7 @@ public class DeleteConnectionFunction extends SqoopFunction {
 
   @Override
   public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_XID)) {
+    if (!line.hasOption(Constants.OPT_FXID)) {
       printlnResource(Constants.RES_ARGS_XID_MISSING);
       return false;
     }
