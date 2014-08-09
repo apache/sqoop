@@ -798,10 +798,16 @@ public final class SqoopHCatUtilities {
     job.setInputFormatClass(getInputFormatClass());
     Map<String, List<Integer>> dbColInfo = hCatUtils.getDbColumnInfo();
     MapWritable columnTypesJava = new MapWritable();
+    Properties mapColumnJava = opts.getMapColumnJava();
     for (Map.Entry<String, List<Integer>> e : dbColInfo.entrySet()) {
       Text columnName = new Text(e.getKey());
-      Text columnText = new Text(connMgr.toJavaType(dbTable, e.getKey(),
-        e.getValue().get(0)));
+      Text columnText = null;
+      if (mapColumnJava.containsKey(e.getKey())) {
+        columnText = new Text(mapColumnJava.getProperty(e.getKey()));
+      } else {
+        columnText = new Text(connMgr.toJavaType(dbTable, e.getKey(),
+          e.getValue().get(0)));
+      }
       columnTypesJava.put(columnName, columnText);
     }
     MapWritable columnTypesSql = new MapWritable();
