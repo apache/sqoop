@@ -35,7 +35,7 @@ public class ShowVersionFunction extends SqoopFunction {
 
 
   @SuppressWarnings("static-access")
-  protected ShowVersionFunction() {
+  public ShowVersionFunction() {
     this.addOption(OptionBuilder
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_VERSIONS))
         .withLongOpt(Constants.OPT_ALL)

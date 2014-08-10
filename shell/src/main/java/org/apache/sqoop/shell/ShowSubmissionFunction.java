@@ -33,7 +33,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 @SuppressWarnings("serial")
 public class ShowSubmissionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected ShowSubmissionFunction() {
+  public ShowSubmissionFunction() {
     this.addOption(OptionBuilder
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS))
         .withLongOpt(Constants.OPT_DETAIL)

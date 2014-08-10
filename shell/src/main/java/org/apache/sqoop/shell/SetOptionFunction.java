@@ -30,7 +30,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 @SuppressWarnings("serial")
 public class SetOptionFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected SetOptionFunction() {
+  public SetOptionFunction() {
     this.addOption(OptionBuilder.hasArg()
       .withDescription(resourceString(Constants.RES_SET_PROMPT_OPT_NAME))
       .withLongOpt(Constants.OPT_NAME)

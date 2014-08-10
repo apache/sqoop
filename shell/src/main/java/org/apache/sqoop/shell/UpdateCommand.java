@@ -17,47 +17,23 @@
  */
 package org.apache.sqoop.shell;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Shell;
-
-import java.util.List;
-
-import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  *
  */
 public class UpdateCommand extends SqoopCommand {
 
-  private UpdateConnectionFunction connectionFunction;
-  private UpdateJobFunction jobFunction;
-
   public UpdateCommand(Shell shell) {
-    super(shell, Constants.CMD_UPDATE, Constants.CMD_UPDATE_SC,
-      new String[] {Constants.FN_CONNECTION, Constants.FN_JOB},
-      Constants.PRE_UPDATE, Constants.SUF_INFO);
-  }
-
-  public Object executeCommand(List args) {
-    if (args.size() == 0) {
-      printlnResource(Constants.RES_UPDATE_USAGE, getUsage());
-      return null;
-    }
-
-    String func = (String)args.get(0);
-    if (func.equals(Constants.FN_CONNECTION)) {
-      if (connectionFunction == null) {
-        connectionFunction = new UpdateConnectionFunction();
-      }
-      return connectionFunction.execute(args);
-    } else if (func.equals(Constants.FN_JOB)) {
-      if (jobFunction == null) {
-        jobFunction = new UpdateJobFunction();
-      }
-      return jobFunction.execute(args);
-    } else {
-      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
-      return null;
-    }
+    super(shell,
+      Constants.CMD_UPDATE,
+      Constants.CMD_UPDATE_SC,
+      ImmutableMap.of(
+        Constants.FN_CONNECTION, UpdateConnectionFunction.class,
+        Constants.FN_JOB, UpdateJobFunction.class
+      )
+    );
   }
 }

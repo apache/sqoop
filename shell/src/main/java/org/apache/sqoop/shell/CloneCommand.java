@@ -17,47 +17,23 @@
  */
 package org.apache.sqoop.shell;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Shell;
-
-import java.util.List;
-
-import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 /**
  * Client side cloning of connection and job objects.
  */
 public class CloneCommand extends SqoopCommand {
 
-  private CloneConnectionFunction connectionFunction;
-  private CloneJobFunction jobFunction;
-
   public CloneCommand(Shell shell) {
-    super(shell, Constants.CMD_CLONE, Constants.CMD_CLONE_SC,
-      new String[] {Constants.FN_CONNECTION, Constants.FN_JOB},
-      Constants.PRE_CLONE, Constants.SUF_INFO);
-  }
-
-  public Object executeCommand(List args) {
-    if (args.size() == 0) {
-      printlnResource(Constants.RES_CLONE_USAGE, getUsage());
-      return null;
-    }
-
-    String func = (String)args.get(0);
-    if (func.equals(Constants.FN_CONNECTION)) {
-      if (connectionFunction == null) {
-        connectionFunction = new CloneConnectionFunction();
-      }
-      return connectionFunction.execute(args);
-    } else if (func.equals(Constants.FN_JOB)) {
-      if (jobFunction == null) {
-        jobFunction = new CloneJobFunction();
-      }
-      return jobFunction.execute(args);
-    } else {
-      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
-      return null;
-    }
+    super(shell,
+      Constants.CMD_CLONE,
+      Constants.CMD_CLONE_SC,
+      ImmutableMap.of(
+        Constants.FN_CONNECTION, CloneConnectionFunction.class,
+        Constants.FN_JOB, CloneJobFunction.class
+      )
+    );
   }
 }

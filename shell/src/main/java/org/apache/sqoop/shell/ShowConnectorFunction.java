@@ -34,7 +34,7 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected ShowConnectorFunction() {
+  public ShowConnectorFunction() {
     this.addOption(OptionBuilder
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS))
         .withLongOpt(Constants.OPT_ALL)
