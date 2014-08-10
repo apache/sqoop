@@ -192,6 +192,12 @@ public class PGBulkloadManagerManualTest extends TestExport {
   }
 
 
+  public void testMultiReduceExportWithNewProp() throws IOException, SQLException {
+    String[] genericargs = newStrArray(null, "-Dmapreduce.job.reduces=2");
+    multiFileTestWithGenericArgs(2, 10, 2, genericargs);
+  }
+
+
   public void testExportWithTablespace() throws IOException, SQLException {
     String[] genericargs =
       newStrArray(null, "-Dpgbulkload.staging.tablespace=" + TABLESPACE);

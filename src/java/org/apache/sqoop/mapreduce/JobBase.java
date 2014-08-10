@@ -285,18 +285,34 @@ public class JobBase {
   }
 
   /**
-   * Configure the number of map/reduce tasks to use in the job.
+   * Configure the number of map/reduce tasks to use in the job,
+   * returning the number of map tasks for backward compatibility.
    */
   protected int configureNumTasks(Job job) throws IOException {
+    int numMapTasks = configureNumMapTasks(job);
+    configureNumReduceTasks(job);
+    return numMapTasks;
+  }
+
+  /**
+   * Configure the number of map tasks to use in the job.
+   */
+  protected int configureNumMapTasks(Job job) throws IOException {
     int numMapTasks = options.getNumMappers();
     if (numMapTasks < 1) {
       numMapTasks = SqoopOptions.DEFAULT_NUM_MAPPERS;
       LOG.warn("Invalid mapper count; using " + numMapTasks + " mappers.");
     }
-
     ConfigurationHelper.setJobNumMaps(job, numMapTasks);
-    job.setNumReduceTasks(0);
     return numMapTasks;
+  }
+
+  /**
+   * Configure the number of reduce tasks to use in the job.
+   */
+  protected int configureNumReduceTasks(Job job) throws IOException {
+    job.setNumReduceTasks(0);
+    return 0;
   }
 
   /** Set the main job that will be run. */
