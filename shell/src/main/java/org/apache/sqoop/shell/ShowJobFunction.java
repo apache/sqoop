@@ -38,7 +38,7 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
 @SuppressWarnings("serial")
 public class ShowJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected ShowJobFunction() {
+  public ShowJobFunction() {
     this.addOption(OptionBuilder
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_JOBS))
         .withLongOpt(Constants.OPT_ALL)

@@ -32,7 +32,7 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
  */
 @SuppressWarnings("serial")
 public class ShowFrameworkFunction extends SqoopFunction {
-  protected ShowFrameworkFunction() {
+  public ShowFrameworkFunction() {
   }
 
   @Override

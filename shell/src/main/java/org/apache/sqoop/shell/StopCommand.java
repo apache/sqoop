@@ -17,37 +17,19 @@
  */
 package org.apache.sqoop.shell;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Shell;
 
-import static org.apache.sqoop.shell.ShellEnvironment.printlnResource;
-
 public class StopCommand extends SqoopCommand {
 
-  private StopJobFunction stopJobFunction;
-
   protected StopCommand(Shell shell) {
-    super(shell, Constants.CMD_STOP, Constants.CMD_STOP_SC,
-        new String[] { Constants.FN_JOB }, Constants.PRE_STOP, null);
-  }
-  @Override
-  public Object executeCommand(List args) {
-    if (args.size() == 0) {
-      printlnResource(Constants.RES_STOP_USAGE, getUsage());
-      return null;
-    }
-
-    String func = (String) args.get(0);
-    if (func.equals(Constants.FN_JOB)) {
-      if (stopJobFunction == null) {
-        stopJobFunction = new StopJobFunction();
-      }
-      return stopJobFunction.execute(args);
-    } else {
-      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
-    }
-    return null;
+    super(shell,
+      Constants.CMD_STOP,
+      Constants.CMD_STOP_SC,
+      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
+        .put(Constants.FN_JOB, StopJobFunction.class)
+        .build()
+    );
   }
 }

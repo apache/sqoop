@@ -26,8 +26,9 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 @SuppressWarnings("serial")
 public class SetServerFunction extends SqoopFunction {
+
   @SuppressWarnings("static-access")
-  protected SetServerFunction() {
+  public SetServerFunction() {
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_HOST)
         .withDescription(resourceString(Constants.RES_SET_HOST_DESCRIPTION))
         .withLongOpt(Constants.OPT_HOST)

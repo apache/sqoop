@@ -33,7 +33,7 @@ public class ShowOptionFunction extends SqoopFunction {
    * Construct new object.
    */
   @SuppressWarnings("static-access")
-  protected ShowOptionFunction() {
+  public ShowOptionFunction() {
     this.addOption(OptionBuilder
         .hasArg().withArgName(Constants.OPT_NAME)
         .withDescription(resource.getString(Constants.RES_SET_PROMPT_OPT_NAME))

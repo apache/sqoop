@@ -23,99 +23,75 @@ import groovy.lang.Script;
 
 import java.util.*;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.ShellError;
+import org.apache.sqoop.utils.ClassUtils;
 import org.codehaus.groovy.tools.shell.ComplexCommandSupport;
 import org.codehaus.groovy.tools.shell.Shell;
 
-public abstract class SqoopCommand extends ComplexCommandSupport
-{
-  private String descriptionPrefix;
-  private String descriptionPostfix;
+import static org.apache.sqoop.shell.ShellEnvironment.*;
 
-  private String description;
-  private String usage;
-  private String help;
+/**
+ * Sqoop shell command.
+ *
+ * Every command should define following resource properties:
+ *
+ * $command.description
+ *    One sentence describing purpose of the command, displayed on "help" command.
+ */
+public abstract class SqoopCommand extends ComplexCommandSupport {
 
-  @SuppressWarnings("unchecked")
-  protected SqoopCommand(Shell shell, String name, String shortcut,
-      String[] funcs, String descriptionPrefix, String descriptionPostfix) {
+  /**
+   * Command name
+   */
+  private String name;
+
+  /**
+   * Function map given by concrete implementation.
+   *
+   * Key: Name of the function as is present in the shell
+   * Value: Class name implementing the function
+   */
+  private final Map<String, Class<? extends SqoopFunction>> functionNames;
+
+  /**
+   * Instantiated functions for reuse. Built lazily.
+   */
+  private final Map<String, SqoopFunction> functionInstances;
+
+  protected SqoopCommand(Shell shell,
+                         String name,
+                         String shortcut,
+                         Map<String, Class<? extends SqoopFunction>> funcs) {
     super(shell, name, shortcut);
 
-    this.functions = new LinkedList<String>();
-    for (String func : funcs) {
-      this.functions.add(func);
-    }
+    this.name = name;
+    this.functionNames = funcs;
+    this.functionInstances = new HashMap<String, SqoopFunction>();
 
-    this.descriptionPrefix = descriptionPrefix;
-    this.descriptionPostfix = descriptionPostfix;
+    this.functions = new LinkedList<String>();
+    this.functions.addAll(funcs.keySet());
   }
 
   @Override
   public String getDescription() {
-    if (description == null) {
-      StringBuilder sb = new StringBuilder();
-
-      if (descriptionPrefix != null) {
-        sb.append(descriptionPrefix);
-        sb.append(" ");
-      }
-
-      @SuppressWarnings("unchecked")
-      Iterator<String> iterator = functions.iterator();
-      int size = functions.size();
-      sb.append(iterator.next());
-      if (size > 1) {
-        for (int i = 1; i < (size - 1); i++) {
-          sb.append(", ");
-          sb.append(iterator.next());
-        }
-        sb.append(" or ");
-        sb.append(iterator.next());
-      }
-
-      if (descriptionPostfix != null) {
-        sb.append(" ");
-        sb.append(descriptionPostfix);
-      }
-
-      description = sb.toString();
-    }
-
-    return description;
+    return resourceString(name + ".description");
   }
 
   @Override
   public String getUsage() {
-    if (usage == null) {
-      StringBuilder sb = new StringBuilder();
-
-      sb.append("[");
-
-      @SuppressWarnings("unchecked")
-      Iterator<String> iterator = functions.iterator();
-      int size = functions.size();
-      sb.append(iterator.next());
-      for (int i = 1; i < size; i++) {
-        sb.append("|");
-        sb.append(iterator.next());
-      }
-
-      sb.append("]");
-
-      usage = sb.toString();
-    }
-
-    return usage;
+    return new StringBuilder()
+      .append("[")
+      .append(StringUtils.join(functionNames.keySet(), "|"))
+      .append("]")
+      .toString();
   }
 
   @Override
   public String getHelp() {
-    if (help == null) {
-      help = getDescription() + ".";
-    }
-
-    return help;
+    return getDescription() + ".";
   }
 
   /**
@@ -132,7 +108,38 @@ public abstract class SqoopCommand extends ComplexCommandSupport
    * @param args list
    * @return Object
    */
-  public abstract Object executeCommand(List args);
+  public Object executeCommand(List args) {
+    if (args.size() == 0) {
+      printlnResource(Constants.RES_SHARED_USAGE, name, getUsage());
+      return null;
+    }
+
+    String func = (String)args.get(0);
+
+    // Unknown function
+    if(!functionNames.containsKey(func)) {
+      printlnResource(Constants.RES_SHARED_UNKNOWN_FUNCTION, func);
+      return null;
+    }
+
+    // If we already do have the instance, execute it
+    if(functionInstances.containsKey(func)) {
+      return functionInstances.get(func).execute(args);
+    }
+
+    // Otherwise create new instance
+    Class klass = functionNames.get(func);
+    SqoopFunction instance = (SqoopFunction) ClassUtils.instantiate(klass);
+    if(instance == null) {
+      // This is pretty much a developer error as it shouldn't happen without changing and testing code
+      throw new SqoopException(ShellError.SHELL_0000, "Can't instantiate class " + klass);
+    }
+
+    functionInstances.put(func, instance);
+
+    // And return the function execution
+    return instance.execute(args);
+  }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void resolveVariables(List arg) {

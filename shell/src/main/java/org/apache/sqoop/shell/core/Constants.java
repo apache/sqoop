@@ -122,29 +122,16 @@ public class Constants {
   public static final String FN_VERSION = "version";
   public static final String FN_FRAMEWORK = "framework";
 
-  public static final String PRE_CLONE = "Clone";
-  public static final String PRE_CREATE = "Create";
-  public static final String PRE_DELETE = "Delete";
-  public static final String PRE_SET = "Set";
-  public static final String PRE_SHOW = "Show";
-  public static final String PRE_UPDATE = "Update";
-  public static final String PRE_START = "Start";
-  public static final String PRE_STATUS = "Status";
-  public static final String PRE_STOP = "Stop";
-  public static final String PRE_ENABLE = "Enable";
-  public static final String PRE_DISABLE = "Disable";
-  public static final String SUF_INFO = "Info";
-
-
   public static final String PROP_HOMEDIR = "user.home";
   public static final String PROP_CURDIR = "user.dir";
   public static final String SQOOP_PROMPT = "sqoop";
 
+  // Shared resources
+  public static final String RES_SHARED_USAGE = "shared.usage";
+  public static final String RES_SHARED_UNKNOWN_FUNCTION =  "shared.unknown.function";
 
   // Resource Keys for various messages
 
-  public static final String RES_FUNCTION_UNKNOWN =
-      "args.function.unknown";
   public static final String RES_ARGS_XID_MISSING =
       "args.xid_missing";
   public static final String RES_ARGS_FXID_MISSING =
@@ -175,8 +162,6 @@ public class Constants {
   public static final String RES_PROMPT_FILL_JOB_METADATA =
       "prompt.fill_job_metadata";
 
-  public static final String RES_CLONE_USAGE =
-      "clone.usage";
   public static final String RES_CLONE_CONN_SUCCESSFUL =
       "clone.conn.successful";
   public static final String RES_CLONE_JOB_SUCCESSFUL =
@@ -186,8 +171,6 @@ public class Constants {
   public static final String RES_CLONE_CLONING_JOB =
       "clone.cloning_job";
 
-  public static final String RES_CREATE_USAGE =
-      "create.usage";
   public static final String RES_CREATE_CONN_SUCCESSFUL =
       "create.conn_successful";
   public static final String RES_CREATE_JOB_SUCCESSFUL =
@@ -197,18 +180,11 @@ public class Constants {
   public static final String RES_CREATE_CREATING_JOB =
       "create.creating_job";
 
-  public static final String RES_DELETE_USAGE =
-      "delete.usage";
-
-  public static final String RES_DISABLE_USAGE =
-      "disable.usage";
   public static final String RES_DISABLE_CONNECTION_SUCCESSFUL =
       "disable.conn_successful";
   public static final String RES_DISABLE_JOB_SUCCESSFUL =
       "disable.job_successful";
 
-  public static final String RES_ENABLE_USAGE =
-      "enable.usage";
   public static final String RES_ENABLE_CONNECTION_SUCCESSFUL =
       "enable.conn_successful";
   public static final String RES_ENABLE_JOB_SUCCESSFUL =
@@ -234,8 +210,6 @@ public class Constants {
   public static final String RES_UNRECOGNIZED_CMD =
       "unrecognized.cmd";
 
-  public static final String RES_SET_USAGE =
-      "set.usage";
   public static final String RES_SET_PROMPT_OPT_NAME =
       "set.prompt_opt_name";
   public static final String RES_SET_PROMPT_OPT_VALUE =
@@ -261,14 +235,10 @@ public class Constants {
   public static final String RES_SET_SERVER_IGNORED =
       "set.server_ignored";
 
-  public static final String RES_SHOW_USAGE =
-      "show.usage";
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNS =
       "show.prompt_display_all_conns";
   public static final String RES_SHOW_PROMPT_DISPLAY_CONN_XID =
       "show.prompt_display_conn_xid";
-  public static final String RES_SHOW_CONN_USAGE =
-      "show.conn_usage";
   public static final String RES_SHOW_PROMPT_CONNS_TO_SHOW =
       "show.prompt_conns_to_show";
   public static final String RES_SHOW_PROMPT_CONN_INFO =
@@ -280,8 +250,6 @@ public class Constants {
       "show.prompt_display_all_connectors";
   public static final String RES_SHOW_PROMPT_DISPLAY_CONNECTOR_CID =
       "show.prompt_display_connector_cid";
-  public static final String RES_SHOW_CONNECTOR_USAGE =
-      "show.connector_usage";
   public static final String RES_SHOW_PROMPT_CONNECTORS_TO_SHOW =
       "show.prompt_connectors_to_show";
   public static final String RES_SHOW_PROMPT_CONNECTOR_INFO =
@@ -296,8 +264,6 @@ public class Constants {
       "show.prompt_display_all_jobs";
   public static final String RES_SHOW_PROMPT_DISPLAY_JOB_JID =
       "show.prompt_display_job_jid";
-  public static final String RES_SHOW_JOB_USAGE =
-      "show.job_usage";
   public static final String RES_SHOW_PROMPT_JOBS_TO_SHOW =
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
@@ -342,16 +308,8 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_VERSION_PROTOCOL =
       "show.prompt_version_protocol";
 
-  public static final String RES_START_USAGE =
-      "start.usage";
-
-  public static final String RES_STATUS_USAGE =
-      "status.usage";
   public static final String RES_PROMPT_SYNCHRONOUS =
       "start.prompt_synchronous";
-
-  public static final String RES_STOP_USAGE =
-      "stop.usage";
 
   public static final String RES_SQOOP_SHELL_BANNER =
       "sqoop.shell_banner";
@@ -360,8 +318,6 @@ public class Constants {
   public static final String RES_SQOOP_PROMPT_SHELL_LOADEDRC =
       "sqoop.prompt_shell_loadedrc";
 
-  public static final String RES_UPDATE_USAGE =
-      "update.usage";
   public static final String RES_UPDATE_UPDATING_CONN =
       "update.conn";
   public static final String RES_UPDATE_CONN_SUCCESSFUL =

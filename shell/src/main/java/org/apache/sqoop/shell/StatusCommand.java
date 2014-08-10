@@ -17,39 +17,19 @@
  */
 package org.apache.sqoop.shell;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Shell;
 
-import static org.apache.sqoop.shell.ShellEnvironment.printlnResource;
-
 public class StatusCommand extends SqoopCommand {
 
-  private StatusJobFunction statusJobFunction;
-
   protected StatusCommand(Shell shell) {
-    super(shell, Constants.CMD_STATUS, Constants.CMD_STATUS_SC,
-        new String[] { Constants.FN_JOB }, Constants.PRE_STATUS, null);
-  }
-
-  @Override
-  public Object executeCommand(List args) {
-    if (args.size() == 0) {
-      printlnResource(Constants.RES_STATUS_USAGE, getUsage());
-      return null;
-    }
-
-    String func = (String) args.get(0);
-    if (func.equals(Constants.FN_JOB)) {
-      if (statusJobFunction == null) {
-        statusJobFunction = new StatusJobFunction();
-      }
-      return statusJobFunction.execute(args);
-    } else {
-      printlnResource(Constants.RES_FUNCTION_UNKNOWN, func);
-    }
-
-    return null;
+    super(shell,
+      Constants.CMD_STATUS,
+      Constants.CMD_STATUS_SC,
+      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
+        .put(Constants.FN_JOB, StatusJobFunction.class)
+        .build()
+      );
   }
 }

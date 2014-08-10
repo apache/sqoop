@@ -27,7 +27,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 @SuppressWarnings("serial")
 public class ShowServerFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
-  protected ShowServerFunction() {
+  public ShowServerFunction() {
     this.addOption(OptionBuilder
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS))
         .withLongOpt(Constants.OPT_ALL)
