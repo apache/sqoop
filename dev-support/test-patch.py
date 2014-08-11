@@ -44,7 +44,9 @@ def sqoop_guess_branch(versions):
   for v in versions:
     tmp_branch = None
 
-    if v.startswith("1.99") or v.startswith("2.0"):
+    if v.startswith("from/to"):
+      tmp_branch = "SQOOP-1367"
+    elif v.startswith("1.99") or v.startswith("2.0"):
       tmp_branch = "sqoop2"
     else:
       tmp_branch = "trunk"
@@ -59,7 +61,7 @@ def sqoop_guess_branch(versions):
 
 # Verify supported branch
 def sqoop_verify_branch(branch):
-  return branch in {"sqoop2", "SQOOP-1082"}
+  return branch in {"sqoop2", "SQOOP-1082", "SQOOP-1367"}
 
 def execute(cmd, log=True):
   if log:
@@ -179,7 +181,7 @@ def git_checkout(result, branch):
     result.fatal("git reset failed")
   if execute("git fetch origin") != 0:
     result.fatal("git fetch failed")
-  if execute("git merge --ff-only origin/sqoop2"):
+  if execute("git merge --ff-only origin/%s" % (branch)):
     result.fatal("git merge failed")
 
 def git_apply(result, cmd, patch_file, strip, output_dir):
