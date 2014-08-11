@@ -351,8 +351,8 @@ public class JobManager implements Reconfigurable {
     request.setJobId(job.getPersistenceId());
     request.setNotificationUrl(notificationBaseUrl + jobId);
     Class<? extends IntermediateDataFormat<?>> dataFormatClass =
-      connector.getIntermediateDataFormat();
-    request.setIntermediateDataFormat(connector.getIntermediateDataFormat());
+      fromConnector.getIntermediateDataFormat();
+    request.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat());
     // Create request object
 
     // Let's register all important jars

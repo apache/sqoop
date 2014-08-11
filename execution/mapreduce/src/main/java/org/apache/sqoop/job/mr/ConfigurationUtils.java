@@ -235,21 +235,15 @@ public final class ConfigurationUtils {
    * @param job MapReduce Job object
    * @param schema Schema
    */
-  public static void setFromConnectorSchema(Job job, Schema schema) {
+  public static void setConnectorSchema(ConnectorType type, Job job, Schema schema) {
     if(schema != null) {
-      job.getCredentials().addSecretKey(SCHEMA_FROM_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
-    }
-  }
+      switch (type) {
+        case FROM:
+          job.getCredentials().addSecretKey(SCHEMA_FROM_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
 
-  /**
-   * Persist To Connector generated schema.
-   *
-   * @param job MapReduce Job object
-   * @param schema Schema
-   */
-  public static void setToConnectorSchema(Job job, Schema schema) {
-    if(schema != null) {
-      job.getCredentials().addSecretKey(SCHEMA_TO_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
+        case TO:
+          job.getCredentials().addSecretKey(SCHEMA_TO_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
+      }
     }
   }
 
