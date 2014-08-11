@@ -73,7 +73,7 @@ public class SqoopOutputFormatLoadExecutor {
     producer = new SqoopRecordWriter();
     data = (IntermediateDataFormat) ClassUtils.instantiate(context
       .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
-    data.setSchema(ConfigurationUtils.getConnectorSchema(context.getConfiguration()));
+    data.setSchema(ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, context.getConfiguration()));
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {

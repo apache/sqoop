@@ -65,20 +65,20 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
+    // Propagate connector schema in every case for now
+    // TODO: Change to coditional choosing between Connector schemas.
+    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
+
     String intermediateDataFormatName = conf.get(JobConstants
       .INTERMEDIATE_DATA_FORMAT);
     data = (IntermediateDataFormat) ClassUtils.instantiate(intermediateDataFormatName);
-    data.setSchema(ConfigurationUtils.getConnectorSchema(conf));
+    data.setSchema(schema);
     dataOut = new SqoopWritable();
 
     // Objects that should be pass to the Executor execution
     PrefixContext subContext = null;
     Object configConnection = null;
     Object configJob = null;
-
-    // Propagate connector schema in every case for now
-    // TODO: Change to coditional choosing between Connector schemas.
-    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
 
     // Get configs for extractor
     subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);

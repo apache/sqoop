@@ -96,13 +96,13 @@ public class TestConfigurationUtils {
 //
 //  @Test
 //  public void testConnectorSchema() throws Exception {
-//    ConfigurationUtils.setFromConnectorSchema(job, getSchema("a"));
+//    ConfigurationUtils.setConnectorSchema(job, getSchema("a"));
 //    assertEquals(getSchema("a"), ConfigurationUtils.getFromConnectorSchema(jobConf));
 //  }
 //
 //  @Test
 //  public void testConnectorSchemaNull() throws Exception {
-//    ConfigurationUtils.setFromConnectorSchema(job, null);
+//    ConfigurationUtils.setConnectorSchema(job, null);
 //    assertNull(ConfigurationUtils.getFromConnectorSchema(jobConf));
 //  }
 //

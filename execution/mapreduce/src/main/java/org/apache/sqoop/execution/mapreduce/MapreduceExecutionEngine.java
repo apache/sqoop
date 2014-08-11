@@ -45,7 +45,9 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     return new MRSubmissionRequest();
   }
 
-  public void prepareSubmission(MRSubmissionRequest request) {
+  public void prepareSubmission(SubmissionRequest gRequest) {
+    MRSubmissionRequest request = (MRSubmissionRequest)gRequest;
+
     // Add jar dependencies
     addDependencies(request);
 
