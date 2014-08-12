@@ -17,83 +17,122 @@
  */
 package org.apache.sqoop.utils;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 
 /**
  *
  */
-public class TestClassUtils extends TestCase {
+public class TestClassUtils {
 
-//  public void testLoadClass() {
-//    assertNull(ClassUtils.loadClass("A"));
-//    assertEquals(A.class, ClassUtils.loadClass(A.class.getName()));
-//  }
-//
-//  public void testInstantiateNull() {
-//    assertNull(ClassUtils.instantiate((Class) null));
-//  }
-//
-//  public void testInstantiate() {
-//    A a = (A) ClassUtils.instantiate(A.class, "a");
-//    assertNotNull(a);
-//    assertEquals(1, a.num);
-//    assertEquals("a", a.a);
-//
-//    A b = (A) ClassUtils.instantiate(A.class, "b", 3, 5);
-//    assertNotNull(b);
-//    assertEquals(3, b.num);
-//    assertEquals("b", b.a);
-//    assertEquals(3, b.b);
-//    assertEquals(5, b.c);
-//  }
-//
-//  public static class A {
-//    String a;
-//    int b;
-//    int c;
-//    int num;
-//
-//    public A(String a) {
-//      num = 1;
-//      this.a = a;
-//    }
-//    public A(String a, Integer b, Integer c) {
-//      this(a);
-//
-//      num = 3;
-//      this.b = b;
-//      this.c = c;
-//    }
-//  }
-//
-//  public void testGetEnumStrings() {
-//    assertNull(ClassUtils.getEnumStrings(A.class));
-//
-//    assertEquals(
-//      new String[] {"A", "B", "C"},
-//      ClassUtils.getEnumStrings(EnumA.class)
-//    );
-//    assertEquals(
-//      new String[] {"X", "Y"},
-//      ClassUtils.getEnumStrings(EnumX.class)
-//    );
-//  }
-//
-//  enum EnumX {
-//    X, Y
-//  }
-//
-//  enum EnumA {
-//    A, B, C
-//  }
-//
-//  public void assertEquals(String[] expected, String[] actual) {
-//    assertEquals("Arrays do not have same length", expected.length, actual.length);
-//
-//    for(int i = 0; i < expected.length; i++) {
-//      assertEquals("Items on position " + i + " differs, expected "
-//        + expected[i] + ", actual " + actual[i],
-//        expected[i], actual[i]);
-//    }
-//  }
+  @Test
+  public void testLoadClass() {
+    assertNull(ClassUtils.loadClass("A"));
+    assertEquals(A.class, ClassUtils.loadClass(A.class.getName()));
+  }
+
+  @Test
+  public void testInstantiateNull() {
+    assertNull(ClassUtils.instantiate((Class) null));
+  }
+
+  @Test
+  public void testInstantiate() {
+    // Just object calls
+    A a = (A) ClassUtils.instantiate(A.class, "a");
+    assertNotNull(a);
+    assertEquals(1, a.num);
+    assertEquals("a", a.a);
+
+    // Automatic wrapping primitive -> objects
+    A b = (A) ClassUtils.instantiate(A.class, "b", 3, 5);
+    assertNotNull(b);
+    assertEquals(3, b.num);
+    assertEquals("b", b.a);
+    assertEquals(3, b.b);
+    assertEquals(5, b.c);
+
+    // Primitive types in the constructor definition
+    Primitive p = (Primitive) ClassUtils.instantiate(Primitive.class, 1, 1.0f, true);
+    assertNotNull(p);
+    assertEquals(1, p.i);
+    assertEquals(1.0f, p.f, 0.0f);
+    assertEquals(true, p.b);
+
+    // Subclasses can be used in the constructor call
+    A c = (A) ClassUtils.instantiate(A.class, new Child());
+    assertNotNull(c);
+    assertNotNull(c.p);
+    assertEquals(Child.class, c.p.getClass());
+  }
+
+  public static class Parent {
+  }
+
+  public static class Child extends Parent {
+  }
+
+
+  public static class A {
+    String a;
+    int b;
+    int c;
+    int num;
+    Parent p;
+
+    public A(String a) {
+      num = 1;
+      this.a = a;
+    }
+    public A(String a, Integer b, Integer c) {
+      this(a);
+
+      num = 3;
+      this.b = b;
+      this.c = c;
+    }
+
+    public A(Parent p) {
+      this.p = p;
+    }
+  }
+
+  public static class Primitive {
+    int i;
+    float f;
+    boolean b;
+
+    public Primitive(int i, float f, boolean b) {
+      this.i = i;
+      this.f = f;
+      this.b = b;
+    }
+  }
+
+  @Test
+  public void testGetEnumStrings() {
+    assertNull(ClassUtils.getEnumStrings(A.class));
+
+    assertArrayEquals(
+      new String[]{"A", "B", "C"},
+      ClassUtils.getEnumStrings(EnumA.class)
+    );
+    assertArrayEquals(
+      new String[]{"X", "Y"},
+      ClassUtils.getEnumStrings(EnumX.class)
+    );
+  }
+
+  enum EnumX {
+    X, Y
+  }
+
+  enum EnumA {
+    A, B, C
+  }
 }
