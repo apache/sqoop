@@ -95,23 +95,20 @@ public final class ClassUtils {
       return null;
     }
 
-    Class []argumentTypes = new Class[args.length];
-    for(int i = 0; i < args.length; i++) {
-      Class type = args[i].getClass();
-       argumentTypes[i] = type;
-    }
+    Constructor []constructors = klass.getConstructors();
 
-    try {
-      Constructor constructor = klass.getConstructor(argumentTypes);
-      return constructor.newInstance(args);
-    } catch (NoSuchMethodException e) {
-      LOG.debug("Can't find such constructor.", e);
-    } catch (InvocationTargetException e) {
-      LOG.debug("Can't instantiate object.", e);
-    } catch (InstantiationException e) {
-      LOG.debug("Can't instantiate object.", e);
-    } catch (IllegalAccessException e) {
-      LOG.debug("Can't instantiate object.", e);
+    for (Constructor constructor : constructors) {
+      try {
+        return constructor.newInstance(args);
+      } catch (InvocationTargetException e) {
+        LOG.debug("Can't instantiate object.", e);
+      } catch (InstantiationException e) {
+        LOG.trace("Can't instantiate object.", e);
+      } catch (IllegalAccessException e) {
+        LOG.trace("Can't instantiate object.", e);
+      } catch (IllegalArgumentException e) {
+        LOG.trace("Can't instantiate object.", e);
+      }
     }
 
     return null;
