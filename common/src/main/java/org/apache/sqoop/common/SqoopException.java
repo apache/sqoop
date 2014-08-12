@@ -28,28 +28,37 @@ package org.apache.sqoop.common;
 public class SqoopException extends RuntimeException {
 
   private final ErrorCode code;
+  private final String originalMessage;
 
   public SqoopException(ErrorCode code) {
     super(code.getCode() + ":" + code.getMessage());
     this.code = code;
+    originalMessage = null;
   }
 
   public SqoopException(ErrorCode code, String extraInfo) {
     super(code.getCode() + ":" + code.getMessage() + " - " + extraInfo);
     this.code = code;
+    originalMessage = extraInfo;
   }
 
   public SqoopException(ErrorCode code, Throwable cause) {
     super(code.getCode() + ":" + code.getMessage(), cause);
     this.code = code;
+    originalMessage = null;
   }
 
   public SqoopException(ErrorCode code, String extraInfo, Throwable cause) {
     super(code.getCode() + ":" + code.getMessage() + " - " + extraInfo, cause);
     this.code = code;
+    originalMessage = extraInfo;
   }
 
   public ErrorCode getErrorCode() {
     return code;
+  }
+
+  public String getOriginalMessage() {
+    return originalMessage;
   }
 }
