@@ -83,7 +83,7 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
+//    jobConf.fromTable.tableName = schemalessTableName;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -104,8 +104,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.columns = tableColumns;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.columns = tableColumns;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -124,7 +124,7 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.sql = schemalessTableSql;
+//    jobConf.fromTable.sql = schemalessTableSql;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -145,8 +145,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.tableName = tableName;
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.tableName = tableName;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -167,9 +167,9 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.tableName = tableName;
-//    jobConf.table.columns = tableColumns;
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.tableName = tableName;
+//    jobConf.fromTable.columns = tableColumns;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -188,8 +188,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.sql = tableSql;
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.sql = tableSql;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -222,8 +222,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.stageTableName = stageTableName;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.stageTableName = stageTableName;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -247,8 +247,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.stageTableName = stageTableName;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.stageTableName = stageTableName;
 //    createTable(fullStageTableName);
 //    executor.executeUpdate("INSERT INTO " + fullStageTableName +
 //      " VALUES(1, 1.1, 'one')");
@@ -274,8 +274,8 @@ public class TestExportInitializer extends TestCase {
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
 //    //specifying clear stage table flag without specifying name of
 //    // the stage table
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.clearStageTable = false;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.clearStageTable = false;
 //    GenericJdbcValidator validator = new GenericJdbcValidator();
 //    Validation validation = validator.validateJob(MJob.Type.EXPORT, jobConf);
 //    assertEquals("User should not specify clear stage table flag without " +
@@ -283,16 +283,16 @@ public class TestExportInitializer extends TestCase {
 //      Status.UNACCEPTABLE,
 //      validation.getStatus());
 //    assertTrue(validation.getMessages().containsKey(
-//      new Validation.FormInput("table")));
+//      new Validation.FormInput("fromTable")));
 //
-//    jobConf.table.clearStageTable = true;
+//    jobConf.fromTable.clearStageTable = true;
 //    validation = validator.validateJob(MJob.Type.EXPORT, jobConf);
 //    assertEquals("User should not specify clear stage table flag without " +
 //      "specifying name of the stage table",
 //      Status.UNACCEPTABLE,
 //      validation.getStatus());
 //    assertTrue(validation.getMessages().containsKey(
-//      new Validation.FormInput("table")));
+//      new Validation.FormInput("fromTable")));
 //  }
 //
 //  @SuppressWarnings("unchecked")
@@ -303,15 +303,15 @@ public class TestExportInitializer extends TestCase {
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
 //    //specifying stage table without specifying table name
-//    jobConf.table.stageTableName = stageTableName;
-//    jobConf.table.sql = "";
+//    jobConf.fromTable.stageTableName = stageTableName;
+//    jobConf.fromTable.sql = "";
 //
 //    GenericJdbcValidator validator = new GenericJdbcValidator();
 //    Validation validation = validator.validateJob(MJob.Type.EXPORT, jobConf);
 //    assertEquals("Stage table name cannot be specified without specifying " +
 //      "table name", Status.UNACCEPTABLE, validation.getStatus());
 //    assertTrue(validation.getMessages().containsKey(
-//      new Validation.FormInput("table")));
+//      new Validation.FormInput("fromTable")));
 //  }
 //
 //  @SuppressWarnings("unchecked")
@@ -323,9 +323,9 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.stageTableName = stageTableName;
-//    jobConf.table.clearStageTable = true;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.stageTableName = stageTableName;
+//    jobConf.fromTable.clearStageTable = true;
 //    createTable(fullStageTableName);
 //    executor.executeUpdate("INSERT INTO " + fullStageTableName +
 //      " VALUES(1, 1.1, 'one')");
@@ -348,8 +348,8 @@ public class TestExportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.stageTableName = stageTableName;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.stageTableName = stageTableName;
 //    createTable(fullStageTableName);
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);

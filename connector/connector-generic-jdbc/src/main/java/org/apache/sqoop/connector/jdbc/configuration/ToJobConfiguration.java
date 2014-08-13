@@ -25,9 +25,9 @@ import org.apache.sqoop.model.Form;
  */
 @ConfigurationClass
 public class ToJobConfiguration {
-  @Form public ToTableForm table;
+  @Form public ToTableForm toTable;
 
   public ToJobConfiguration() {
-    table = new ToTableForm();
+    toTable = new ToTableForm();
   }
 }

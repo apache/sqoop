@@ -56,7 +56,7 @@ public class GenericJdbcPartitioner extends Partitioner<ConnectionConfiguration,
     partitionMinValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE);
     partitionMaxValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE);
 
-    partitionColumnNull = job.table.partitionColumnNull;
+    partitionColumnNull = job.fromTable.partitionColumnNull;
     if (partitionColumnNull == null) {
       partitionColumnNull = false;
     }

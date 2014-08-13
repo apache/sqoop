@@ -206,7 +206,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       ConfigurationUtils.setConnectorJobConfig(ConnectorType.TO, job, request.getConnectorJobConfig(ConnectorType.TO));
       ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.FROM, job, request.getFrameworkConnectionConfig(ConnectorType.FROM));
       ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.TO, job, request.getFrameworkConnectionConfig(ConnectorType.TO));
-      ConfigurationUtils.setConfigFrameworkJob(job, request.getConfigFrameworkJob());
+      ConfigurationUtils.setFrameworkJobConfig(job, request.getConfigFrameworkJob());
       // @TODO(Abe): Persist TO schema.
       ConfigurationUtils.setConnectorSchema(ConnectorType.FROM, job, request.getSummary().getConnectorSchema());
 

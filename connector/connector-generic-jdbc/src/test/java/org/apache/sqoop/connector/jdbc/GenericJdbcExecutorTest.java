@@ -20,7 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import junit.framework.TestCase;
 
 public class GenericJdbcExecutorTest extends TestCase {
-//  private final String table;
+//  private final String fromTable;
 //  private final String emptyTable;
 //  private final GenericJdbcExecutor executor;
 //
@@ -28,8 +28,8 @@ public class GenericJdbcExecutorTest extends TestCase {
 //  private static final int NUMBER_OF_ROWS = 974;
 //
 //  public GenericJdbcExecutorTest() {
-//    table = getClass().getSimpleName().toUpperCase();
-//    emptyTable = table + "_EMPTY";
+//    fromTable = getClass().getSimpleName().toUpperCase();
+//    emptyTable = fromTable + "_EMPTY";
 //    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
 //      GenericJdbcTestConstants.URL, null, null);
 //  }
@@ -42,15 +42,15 @@ public class GenericJdbcExecutorTest extends TestCase {
 //    executor.executeUpdate("CREATE TABLE "
 //      + emptyTable + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
 //
-//    if(executor.existTable(table)) {
-//      executor.executeUpdate("DROP TABLE " + table);
+//    if(executor.existTable(fromTable)) {
+//      executor.executeUpdate("DROP TABLE " + fromTable);
 //    }
 //    executor.executeUpdate("CREATE TABLE "
-//      + table + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
+//      + fromTable + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
 //
 //    for (int i = 0; i < NUMBER_OF_ROWS; i++) {
 //      int value = START + i;
-//      String sql = "INSERT INTO " + table
+//      String sql = "INSERT INTO " + fromTable
 //        + " VALUES(" + value + ", '" + value + "')";
 //      executor.executeUpdate(sql);
 //    }
@@ -58,23 +58,23 @@ public class GenericJdbcExecutorTest extends TestCase {
 //
 //  @SuppressWarnings("unchecked")
 //  public void testDeleteTableData() throws Exception {
-//    executor.deleteTableData(table);
-//    assertEquals("Table " + table + " is expected to be empty.",
-//      0, executor.getTableRowCount(table));
+//    executor.deleteTableData(fromTable);
+//    assertEquals("Table " + fromTable + " is expected to be empty.",
+//      0, executor.getTableRowCount(fromTable));
 //  }
 //
 //  @SuppressWarnings("unchecked")
 //  public void testMigrateData() throws Exception {
 //    assertEquals("Table " + emptyTable + " is expected to be empty.",
 //      0, executor.getTableRowCount(emptyTable));
-//    assertEquals("Table " + table + " is expected to have " +
+//    assertEquals("Table " + fromTable + " is expected to have " +
 //      NUMBER_OF_ROWS + " rows.", NUMBER_OF_ROWS,
-//      executor.getTableRowCount(table));
+//      executor.getTableRowCount(fromTable));
 //
-//    executor.migrateData(table, emptyTable);
+//    executor.migrateData(fromTable, emptyTable);
 //
-//    assertEquals("Table " + table + " is expected to be empty.", 0,
-//      executor.getTableRowCount(table));
+//    assertEquals("Table " + fromTable + " is expected to be empty.", 0,
+//      executor.getTableRowCount(fromTable));
 //    assertEquals("Table " + emptyTable + " is expected to have " +
 //      NUMBER_OF_ROWS + " rows.", NUMBER_OF_ROWS,
 //      executor.getTableRowCount(emptyTable));
@@ -82,7 +82,7 @@ public class GenericJdbcExecutorTest extends TestCase {
 //
 //  @SuppressWarnings("unchecked")
 //  public void testGetTableRowCount() throws Exception {
-//    assertEquals("Table " + table + " is expected to be empty.",
-//      NUMBER_OF_ROWS, executor.getTableRowCount(table));
+//    assertEquals("Table " + fromTable + " is expected to be empty.",
+//      NUMBER_OF_ROWS, executor.getTableRowCount(fromTable));
 //  }
 }

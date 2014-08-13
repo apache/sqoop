@@ -89,9 +89,9 @@ public class TestConfigurationUtils {
 //
 //  @Test
 //  public void testConfigFrameworkJob() throws Exception {
-//    ConfigurationUtils.setConfigFrameworkJob(job, getConfig());
+//    ConfigurationUtils.setFrameworkJobConfig(job, getConfig());
 //    setUpJobConf();
-//    assertEquals(getConfig(), ConfigurationUtils.getConfigFrameworkJob(jobConf));
+//    assertEquals(getConfig(), ConfigurationUtils.getFrameworkJobConfig(jobConf));
 //  }
 //
 //  @Test
