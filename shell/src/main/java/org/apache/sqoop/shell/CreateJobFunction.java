@@ -44,13 +44,13 @@ public class CreateJobFunction extends  SqoopFunction {
   public CreateJobFunction() {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
-      .withLongOpt(Constants.OPT_FXID)
+      .withLongOpt(Constants.OPT_FROM)
       .hasArg()
       .create(Constants.OPT_FXID_CHAR)
     );
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
-      .withLongOpt(Constants.OPT_TXID)
+      .withLongOpt(Constants.OPT_TO)
       .hasArg()
       .create(Constants.OPT_TXID_CHAR)
     );
@@ -58,12 +58,12 @@ public class CreateJobFunction extends  SqoopFunction {
 
   @Override
   public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_FXID)) {
-      printlnResource(Constants.RES_ARGS_FXID_MISSING);
+    if (!line.hasOption(Constants.OPT_FROM)) {
+      printlnResource(Constants.RES_ARGS_FROM_MISSING);
       return false;
     }
-    if (!line.hasOption(Constants.OPT_TXID)) {
-      printlnResource(Constants.RES_ARGS_TXID_MISSING);
+    if (!line.hasOption(Constants.OPT_TO)) {
+      printlnResource(Constants.RES_ARGS_TO_MISSING);
       return false;
     }
     return true;
@@ -72,8 +72,8 @@ public class CreateJobFunction extends  SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return createJob(getLong(line, Constants.OPT_FXID),
-                     getLong(line, Constants.OPT_TXID),
+    return createJob(getLong(line, Constants.OPT_FROM),
+                     getLong(line, Constants.OPT_TO),
                      line.getArgList(),
                      isInteractive);
   }

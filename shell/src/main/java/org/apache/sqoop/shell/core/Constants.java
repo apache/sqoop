@@ -35,12 +35,11 @@ public class Constants {
   // Options
 
   public static final String OPT_XID = "xid";
-  public static final String OPT_FXID = "fxid";
-  public static final String OPT_TXID = "txid";
+  public static final String OPT_FROM = "from";
+  public static final String OPT_TO = "to";
   public static final String OPT_ALL = "all";
   public static final String OPT_JID = "jid";
   public static final String OPT_CID = "cid";
-  public static final String OPT_TYPE = "type";
   public static final String OPT_NAME = "name";
   public static final String OPT_VALUE = "value";
   public static final String OPT_VERBOSE = "verbose";
@@ -61,7 +60,6 @@ public class Constants {
   public static final char OPT_ALL_CHAR = 'a';
   public static final char OPT_JID_CHAR = 'j';
   public static final char OPT_CID_CHAR = 'c';
-  public static final char OPT_TYPE_CHAR = 't';
   public static final char OPT_NAME_CHAR = 'n';
   public static final char OPT_VALUE_CHAR = 'v';
   public static final char OPT_HOST_CHAR = 'h';
@@ -134,10 +132,10 @@ public class Constants {
 
   public static final String RES_ARGS_XID_MISSING =
       "args.xid_missing";
-  public static final String RES_ARGS_FXID_MISSING =
-      "args.fxid_missing";
-  public static final String RES_ARGS_TXID_MISSING =
-      "args.txid_missing";
+  public static final String RES_ARGS_FROM_MISSING =
+      "args.from_missing";
+  public static final String RES_ARGS_TO_MISSING =
+      "args.to_missing";
   public static final String RES_ARGS_JID_MISSING =
       "args.jid_missing";
   public static final String RES_ARGS_CID_MISSING =
