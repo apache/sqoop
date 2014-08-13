@@ -71,12 +71,12 @@ public final class FormDisplayer {
     // @TODO(Abe): Validate From/To output is correct.
     displayFormsMetadata(
         connector.getJobForms(ConnectorType.FROM).getForms(),
-        resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        ConnectorType.FROM.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
         bundle);
 
     displayFormsMetadata(
         connector.getJobForms(ConnectorType.TO).getForms(),
-        resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        ConnectorType.TO.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
         bundle);
   }
 
