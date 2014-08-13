@@ -288,6 +288,11 @@ public class JobManager implements Reconfigurable {
         "Connection id: " + fromConnection.getPersistenceId());
     }
 
+    if (!toConnection.getEnabled()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0010,
+          "Connection id: " + toConnection.getPersistenceId());
+    }
+
     SqoopConnector fromConnector =
       ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.FROM));
     SqoopConnector toConnector =
