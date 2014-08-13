@@ -68,7 +68,7 @@ public class MapreduceExecutionEngineTest {
 //    ImportJobConfiguration jobConf = new ImportJobConfiguration();
 //    jobConf.output.outputFormat = OutputFormat.TEXT_FILE;
 //    jobConf.output.compression = comprssionFormat;
-//    request.setConfigFrameworkJob(jobConf);
+//    request.setFrameworkJobConfig(jobConf);
 //    request.setConnectorCallbacks(new Importer(Initializer.class,
 //      Partitioner.class, Extractor.class, Destroyer.class) {
 //    });
@@ -95,7 +95,7 @@ public class MapreduceExecutionEngineTest {
 //    jobConf.output.outputFormat = OutputFormat.TEXT_FILE;
 //    jobConf.output.compression = OutputCompression.CUSTOM;
 //    jobConf.output.customCompression = customCodecName;
-//    request.setConfigFrameworkJob(jobConf);
+//    request.setFrameworkJobConfig(jobConf);
 //    request.setConnectorCallbacks(new Importer(Initializer.class,
 //      Partitioner.class, Extractor.class, Destroyer.class) {
 //    });

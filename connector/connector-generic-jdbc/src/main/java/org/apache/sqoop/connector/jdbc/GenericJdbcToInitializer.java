@@ -65,15 +65,15 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
   public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, ToJobConfiguration toJobConfiguration) {
     configureJdbcProperties(context.getContext(), connectionConfiguration, toJobConfiguration);
 
-    String schemaName = toJobConfiguration.table.tableName;
+    String schemaName = toJobConfiguration.toTable.tableName;
 
     if (schemaName == null) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
           "Table name extraction not supported yet.");
     }
 
-    if(toJobConfiguration.table.schemaName != null) {
-      schemaName = toJobConfiguration.table.schemaName + "." + schemaName;
+    if(toJobConfiguration.toTable.schemaName != null) {
+      schemaName = toJobConfiguration.toTable.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -127,23 +127,23 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
   private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ToJobConfiguration jobConfig) {
     String dataSql;
 
-    String schemaName = jobConfig.table.schemaName;
-    String tableName = jobConfig.table.tableName;
-    String stageTableName = jobConfig.table.stageTableName;
-    boolean clearStageTable = jobConfig.table.clearStageTable == null ?
-      false : jobConfig.table.clearStageTable;
+    String schemaName = jobConfig.toTable.schemaName;
+    String tableName = jobConfig.toTable.tableName;
+    String stageTableName = jobConfig.toTable.stageTableName;
+    boolean clearStageTable = jobConfig.toTable.clearStageTable == null ?
+      false : jobConfig.toTable.clearStageTable;
     final boolean stageEnabled =
       stageTableName != null && stageTableName.length() > 0;
-    String tableSql = jobConfig.table.sql;
-    String tableColumns = jobConfig.table.columns;
+    String tableSql = jobConfig.toTable.sql;
+    String tableColumns = jobConfig.toTable.columns;
 
     if (tableName != null && tableSql != null) {
-      // when both table name and table sql are specified:
+      // when both fromTable name and fromTable sql are specified:
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
 
     } else if (tableName != null) {
-      // when table name is specified:
+      // when fromTable name is specified:
       if(stageEnabled) {
         LOG.info("Stage has been enabled.");
         LOG.info("Use stageTable: " + stageTableName +
@@ -195,7 +195,7 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
         dataSql = builder.toString();
       }
     } else if (tableSql != null) {
-      // when table sql is specified:
+      // when fromTable sql is specified:
 
       if (tableSql.indexOf(
           GenericJdbcConnectorConstants.SQL_PARAMETER_MARKER) == -1) {

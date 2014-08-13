@@ -475,7 +475,7 @@ public class TestImportPartitioner extends TestCase {
 //
 //    ConnectionConfiguration connConf = new ConnectionConfiguration();
 //    ImportJobConfiguration jobConf = new ImportJobConfiguration();
-//    jobConf.table.partitionColumnNull = true;
+//    jobConf.fromTable.partitionColumnNull = true;
 //
 //    Partitioner partitioner = new GenericJdbcImportPartitioner();
 //    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);

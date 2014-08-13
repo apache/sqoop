@@ -160,7 +160,7 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConfigFrameworkJob(Job job, Object obj) {
+  public static void setFrameworkJobConfig(Job job, Object obj) {
     job.getConfiguration().set(JOB_CONFIG_CLASS_FRAMEWORK_JOB, obj.getClass().getName());
     job.getCredentials().addSecretKey(JOB_CONFIG_FRAMEWORK_JOB_KEY, FormUtils.toJson(obj).getBytes());
   }
@@ -225,7 +225,7 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConfigFrameworkJob(Configuration configuration) {
+  public static Object getFrameworkJobConfig(Configuration configuration) {
     return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FRAMEWORK_JOB, JOB_CONFIG_FRAMEWORK_JOB_KEY);
   }
 
@@ -248,22 +248,10 @@ public final class ConfigurationUtils {
   }
 
   /**
-   * Persist Framework generated schema.
+   * Retrieve Connector generated schema.
    *
-   * @param job MapReduce Job object
-   * @param schema Schema
-   */
-  public static void setHioSchema(Job job, Schema schema) {
-    if(schema != null) {
-      job.getCredentials().addSecretKey(SCHEMA_HIO_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
-    }
-  }
-
-  /**
-   * Retrieve From Connector generated schema.
-   *
+   * @param type The FROM or TO connector
    * @param configuration MapReduce configuration object
-   * @return Schema
    */
   public static Schema getConnectorSchema(ConnectorType type, Configuration configuration) {
     switch (type) {

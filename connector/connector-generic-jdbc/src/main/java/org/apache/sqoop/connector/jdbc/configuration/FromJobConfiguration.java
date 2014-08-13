@@ -25,9 +25,9 @@ import org.apache.sqoop.model.Form;
  */
 @ConfigurationClass
 public class FromJobConfiguration {
-  @Form public FromTableForm table;
+  @Form public FromTableForm fromTable;
 
   public FromJobConfiguration() {
-    table = new FromTableForm();
+    fromTable = new FromTableForm();
   }
 }

@@ -68,11 +68,11 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
   public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, FromJobConfiguration fromJobConfiguration) {
     configureJdbcProperties(context.getContext(), connectionConfiguration, fromJobConfiguration);
 
-    String schemaName = fromJobConfiguration.table.tableName;
+    String schemaName = fromJobConfiguration.fromTable.tableName;
     if(schemaName == null) {
       schemaName = "Query";
-    } else if(fromJobConfiguration.table.schemaName != null) {
-      schemaName = fromJobConfiguration.table.schemaName + "." + schemaName;
+    } else if(fromJobConfiguration.fromTable.schemaName != null) {
+      schemaName = fromJobConfiguration.fromTable.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -129,12 +129,12 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
   private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
     // ----- configure column name -----
 
-    String partitionColumnName = jobConfig.table.partitionColumn;
+    String partitionColumnName = jobConfig.fromTable.partitionColumn;
 
     if (partitionColumnName == null) {
       // if column is not specified by the user,
-      // find the primary key of the table (when there is a table).
-      String tableName = jobConfig.table.tableName;
+      // find the primary key of the fromTable (when there is a fromTable).
+      String tableName = jobConfig.fromTable.tableName;
       if (tableName != null) {
         partitionColumnName = executor.getPrimaryKey(tableName);
       }
@@ -152,22 +152,22 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
 
     // ----- configure column type, min value, and max value -----
 
-    String minMaxQuery = jobConfig.table.boundaryQuery;
+    String minMaxQuery = jobConfig.fromTable.boundaryQuery;
 
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
-      String schemaName = jobConfig.table.schemaName;
-      String tableName = jobConfig.table.tableName;
-      String tableSql = jobConfig.table.sql;
+      String schemaName = jobConfig.fromTable.schemaName;
+      String tableName = jobConfig.fromTable.tableName;
+      String tableSql = jobConfig.fromTable.sql;
 
       if (tableName != null && tableSql != null) {
-        // when both table name and table sql are specified:
+        // when both fromTable name and fromTable sql are specified:
         throw new SqoopException(
             GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
 
       } else if (tableName != null) {
-        // when table name is specified:
+        // when fromTable name is specified:
 
         // For databases that support schemas (IE: postgresql).
         String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
@@ -235,18 +235,18 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     String dataSql;
     String fieldNames;
 
-    String schemaName = jobConfig.table.schemaName;
-    String tableName = jobConfig.table.tableName;
-    String tableSql = jobConfig.table.sql;
-    String tableColumns = jobConfig.table.columns;
+    String schemaName = jobConfig.fromTable.schemaName;
+    String tableName = jobConfig.fromTable.tableName;
+    String tableSql = jobConfig.fromTable.sql;
+    String tableColumns = jobConfig.fromTable.columns;
 
     if (tableName != null && tableSql != null) {
-      // when both table name and table sql are specified:
+      // when both fromTable name and fromTable sql are specified:
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
 
     } else if (tableName != null) {
-      // when table name is specified:
+      // when fromTable name is specified:
 
       // For databases that support schemas (IE: postgresql).
       String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
@@ -276,7 +276,7 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
         fieldNames = tableColumns;
       }
     } else if (tableSql != null) {
-      // when table sql is specified:
+      // when fromTable sql is specified:
 
       assert tableSql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
 

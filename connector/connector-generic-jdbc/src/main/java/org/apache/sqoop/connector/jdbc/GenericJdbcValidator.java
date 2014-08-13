@@ -74,22 +74,22 @@ public class GenericJdbcValidator extends Validator {
     Validation validation = new Validation(ToJobConfiguration.class);
     ToJobConfiguration configuration = (ToJobConfiguration)jobConfiguration;
 
-    if(configuration.table.tableName == null && configuration.table.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");
+    if(configuration.toTable.tableName == null && configuration.toTable.sql == null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either fromTable name or SQL must be specified");
     }
-    if(configuration.table.tableName != null && configuration.table.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
+    if(configuration.toTable.tableName != null && configuration.toTable.sql != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both fromTable name and SQL cannot be specified");
     }
-    if(configuration.table.tableName == null &&
-        configuration.table.stageTableName != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table",
-        "Stage table name cannot be specified without specifying table name");
+    if(configuration.toTable.tableName == null &&
+        configuration.toTable.stageTableName != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable",
+        "Stage fromTable name cannot be specified without specifying fromTable name");
     }
-    if(configuration.table.stageTableName == null &&
-        configuration.table.clearStageTable != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table",
-        "Clear stage table cannot be specified without specifying name of " +
-        "the stage table.");
+    if(configuration.toTable.stageTableName == null &&
+        configuration.toTable.clearStageTable != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable",
+        "Clear stage fromTable cannot be specified without specifying name of " +
+        "the stage fromTable.");
     }
 
     return validation;
@@ -99,18 +99,18 @@ public class GenericJdbcValidator extends Validator {
     Validation validation = new Validation(FromJobConfiguration.class);
     FromJobConfiguration configuration = (FromJobConfiguration)jobConfiguration;
 
-    if(configuration.table.tableName == null && configuration.table.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "Either table name or SQL must be specified");
+    if(configuration.fromTable.tableName == null && configuration.fromTable.sql == null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either fromTable name or SQL must be specified");
     }
-    if(configuration.table.tableName != null && configuration.table.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "Both table name and SQL cannot be specified");
+    if(configuration.fromTable.tableName != null && configuration.fromTable.sql != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both fromTable name and SQL cannot be specified");
     }
-    if(configuration.table.schemaName != null && configuration.table.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "Both schema name and SQL cannot be specified");
+    if(configuration.fromTable.schemaName != null && configuration.fromTable.sql != null) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both schema name and SQL cannot be specified");
     }
 
-    if(configuration.table.sql != null && !configuration.table.sql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)) {
-      validation.addMessage(Status.UNACCEPTABLE, "table", "sql", "SQL statement must contain placeholder for auto generated "
+    if(configuration.fromTable.sql != null && !configuration.fromTable.sql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)) {
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "sql", "SQL statement must contain placeholder for auto generated "
         + "conditions - " + GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
     }
 

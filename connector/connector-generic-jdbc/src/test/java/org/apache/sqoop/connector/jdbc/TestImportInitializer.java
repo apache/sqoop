@@ -92,7 +92,7 @@ public class TestImportInitializer extends TestCase {
 //  }
 //
 //  /**
-//   * Return Schema representation for the testing table.
+//   * Return Schema representation for the testing fromTable.
 //   *
 //   * @param name Name that should be used for the generated schema.
 //   * @return
@@ -117,7 +117,7 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
+//    jobConf.fromTable.tableName = schemalessTableName;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -143,8 +143,8 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.tableName = schemalessTableName;
-//    jobConf.table.columns = tableColumns;
+//    jobConf.fromTable.tableName = schemalessTableName;
+//    jobConf.fromTable.columns = tableColumns;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -170,8 +170,8 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.sql = schemalessTableSql;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.sql = schemalessTableSql;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -197,9 +197,9 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.sql = schemalessTableSql;
-//    jobConf.table.columns = tableColumns;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.sql = schemalessTableSql;
+//    jobConf.fromTable.columns = tableColumns;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -228,8 +228,8 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.tableName = tableName;
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.tableName = tableName;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -257,9 +257,9 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.tableName = tableName;
-//    jobConf.table.columns = tableColumns;
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.tableName = tableName;
+//    jobConf.fromTable.columns = tableColumns;
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -287,9 +287,9 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.sql = tableSql;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.sql = tableSql;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -316,9 +316,9 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.tableName = tableName;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.tableName = tableName;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -337,9 +337,9 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.sql = tableSql;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.sql = tableSql;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);
@@ -360,10 +360,10 @@ public class TestImportInitializer extends TestCase {
 //
 //    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
 //    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-//    jobConf.table.schemaName = schemaName;
-//    jobConf.table.sql = tableSql;
-//    jobConf.table.columns = tableColumns;
-//    jobConf.table.partitionColumn = "DCOL";
+//    jobConf.fromTable.schemaName = schemaName;
+//    jobConf.fromTable.sql = tableSql;
+//    jobConf.fromTable.columns = tableColumns;
+//    jobConf.fromTable.partitionColumn = "DCOL";
 //
 //    MutableContext context = new MutableMapContext();
 //    InitializerContext initializerContext = new InitializerContext(context);

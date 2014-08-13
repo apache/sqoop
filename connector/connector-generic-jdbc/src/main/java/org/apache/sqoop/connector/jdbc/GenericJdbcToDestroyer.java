@@ -31,8 +31,8 @@ public class GenericJdbcToDestroyer extends Destroyer<ConnectionConfiguration, T
   public void destroy(DestroyerContext context, ConnectionConfiguration connection, ToJobConfiguration job) {
     LOG.info("Running generic JDBC connector destroyer");
 
-    final String tableName = job.table.tableName;
-    final String stageTableName = job.table.stageTableName;
+    final String tableName = job.toTable.tableName;
+    final String stageTableName = job.toTable.stageTableName;
     final boolean stageEnabled = stageTableName != null &&
       stageTableName.length() > 0;
     if(stageEnabled) {
@@ -50,11 +50,11 @@ public class GenericJdbcToDestroyer extends Destroyer<ConnectionConfiguration, T
         connectorConf.connection.password);
 
     if(success) {
-      LOG.info("Job completed, transferring data from stage table to " +
-        "destination table.");
+      LOG.info("Job completed, transferring data from stage fromTable to " +
+        "destination fromTable.");
       executor.migrateData(stageTableName, tableName);
     } else {
-      LOG.warn("Job failed, clearing stage table.");
+      LOG.warn("Job failed, clearing stage fromTable.");
       executor.deleteTableData(stageTableName);
     }
   }
