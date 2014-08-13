@@ -7,4 +7,7 @@ The Apache Software Foundation (http://www.apache.org/).
 Portions of this software were developed at
 Cloudera, Inc. (http://www.cloudera.com/).
 
-
+Patch review tool is based on the Kafka patch review tool.
+Which is part of the Apache Kafka project, an open source software
+project with copyright by The Apache Software Foundation.
+The original source code is available at: http://kafka.apache.org
