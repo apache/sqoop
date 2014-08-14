@@ -18,6 +18,8 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.json.simple.JSONObject;
@@ -43,27 +45,35 @@ public class JobValidationBean implements JsonBean {
   private static final String MESSAGES = "messages";
 
   private Long id;
-  private Map<ConnectorType, Validation> connectorValidation;
+  private Validation fromConnectorValidation;
+  private Validation toConnectorValidation;
   private Validation frameworkValidation;
 
   // For "extract"
   public JobValidationBean(Validation fromConnector, Validation framework, Validation toConnector) {
     this();
 
-    this.connectorValidation = new HashMap<ConnectorType, Validation>();
-    this.connectorValidation.put(ConnectorType.FROM, fromConnector);
-    this.connectorValidation.put(ConnectorType.TO, toConnector);
+    this.fromConnectorValidation = fromConnector;
+    this.toConnectorValidation = toConnector;
     this.frameworkValidation = framework;
   }
 
   // For "restore"
   public JobValidationBean() {
     id = null;
-    connectorValidation = new HashMap<ConnectorType, Validation>();
   }
 
   public Validation getConnectorValidation(ConnectorType type) {
-    return connectorValidation.get(type);
+    switch(type) {
+      case FROM:
+        return fromConnectorValidation;
+
+      case TO:
+        return toConnectorValidation;
+
+      default:
+        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+    }
   }
 
   public Validation getFrameworkValidation() {
@@ -125,10 +135,10 @@ public class JobValidationBean implements JsonBean {
 
     JSONObject jsonConnectorObject = (JSONObject)jsonObject.get(CONNECTOR);
 
-    connectorValidation.put(ConnectorType.FROM, restoreValidation(
-        (JSONObject)jsonConnectorObject.get(FROM)));
-    connectorValidation.put(ConnectorType.TO, restoreValidation(
-        (JSONObject)jsonConnectorObject.get(TO)));
+    fromConnectorValidation = restoreValidation(
+        (JSONObject)jsonConnectorObject.get(FROM));
+    toConnectorValidation = restoreValidation(
+        (JSONObject)jsonConnectorObject.get(TO));
     frameworkValidation = restoreValidation(
         (JSONObject)jsonObject.get(FRAMEWORK));
   }
