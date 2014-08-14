@@ -134,4 +134,13 @@ public class TestTextSplitter extends TestCase {
     assertEquals("Hardy", splits.get(splits.size() -1));
     assertEquals(6, splits.size());
   }
+
+  public void testNChar() throws SQLException {
+    // Splits between 'Hand' and 'Hardy'
+    NTextSplitter splitter = new NTextSplitter();
+    assertEquals(true, splitter.isUseNCharStrings());
+    TextSplitter splitter2 = new TextSplitter();
+    assertEquals(false, splitter2.isUseNCharStrings());
+  }
+
 }

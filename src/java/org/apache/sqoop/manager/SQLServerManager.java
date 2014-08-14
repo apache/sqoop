@@ -38,6 +38,7 @@ import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
+
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerInputFormat;
@@ -226,13 +227,29 @@ public class SQLServerManager
 
     return "'" + schema + "'";
   }
-
   @Override
   protected String getListColumnsQuery(String tableName) {
     return
-      super.getListColumnsQuery(tableName)
-        + "  ORDER BY ORDINAL_POSITION";
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+    + "WHERE TABLE_SCHEMA = (" + getSchemaQuery() + ") "
+    + "  AND TABLE_NAME = N'" + tableName + "' "
+    + "  ORDER BY ORDINAL_POSITION";
   }
+
+  @Override
+  protected String getPrimaryKeyQuery(String tableName) {
+    return
+      "SELECT kcu.COLUMN_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc, "
+    + "  INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu "
+    + "WHERE tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA "
+    + "  AND tc.TABLE_NAME = kcu.TABLE_NAME "
+    + "  AND tc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA "
+    + "  AND tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME "
+    + "  AND tc.TABLE_SCHEMA = (" + getSchemaQuery() + ") "
+    + "  AND tc.TABLE_NAME = N'" + tableName + "' "
+    + "  AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY'";
+  }
+
 
   @Override
   public String escapeColName(String colName) {

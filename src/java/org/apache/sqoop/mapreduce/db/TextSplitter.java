@@ -39,6 +39,8 @@ public class TextSplitter extends BigDecimalSplitter {
 
   private static final Log LOG = LogFactory.getLog(TextSplitter.class);
 
+  private boolean useNCharStrings = false;
+
   /**
    * This method needs to determine the splits between two user-provided
    * strings.  In the case where the user's strings are 'A' and 'Z', this is
@@ -90,8 +92,8 @@ public class TextSplitter extends BigDecimalSplitter {
     // divide cleanly.
     int numSplits = ConfigurationHelper.getConfNumMaps(conf);
 
-    String lowClausePrefix = colName + " >= '";
-    String highClausePrefix = colName + " < '";
+    String lowClausePrefix = colName + " >= " + (useNCharStrings ? "N'" : "'");
+    String highClausePrefix = colName + " < " + (useNCharStrings ? "N'" : "'");
 
     // If there is a common prefix between minString and maxString, establish
     // it and pull it out of minString and maxString.
@@ -123,7 +125,8 @@ public class TextSplitter extends BigDecimalSplitter {
       if (i == splitStrings.size() - 1) {
         // This is the last one; use a closed interval.
         splits.add(new DataDrivenDBInputFormat.DataDrivenDBInputSplit(
-            lowClausePrefix + start + "'", colName + " <= '" + end + "'"));
+            lowClausePrefix + start + "'", colName
+            + " <= " + (useNCharStrings ? "N'" : "'") + end + "'"));
       } else {
         // Normal open-interval case.
         splits.add(new DataDrivenDBInputFormat.DataDrivenDBInputSplit(
@@ -224,5 +227,13 @@ public class TextSplitter extends BigDecimalSplitter {
     }
 
     return sb.toString();
+  }
+
+  public void setUseNCharStrings(boolean use) {
+    useNCharStrings = use;
+  }
+
+  public boolean isUseNCharStrings() {
+    return useNCharStrings;
   }
 }
