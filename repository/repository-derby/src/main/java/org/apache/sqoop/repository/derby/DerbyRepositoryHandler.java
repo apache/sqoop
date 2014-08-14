@@ -29,11 +29,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -41,6 +39,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.ConnectorTypeError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
@@ -1619,14 +1618,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         formFetchStmt.setLong(1, connectorId);
 
         List<MForm> connectionForms = new ArrayList<MForm>();
-        Map<ConnectorType, List<MForm>> jobForms = new HashMap<ConnectorType, List<MForm>>();
+        List<MForm> fromJobForms = new ArrayList<MForm>();
+        List<MForm> toJobForms = new ArrayList<MForm>();
 
-        loadConnectorForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
+        loadConnectorForms(connectionForms, fromJobForms, toJobForms,
+            formFetchStmt, inputFetchStmt, 1);
 
         MConnector mc = new MConnector(connectorName, connectorClassName, connectorVersion,
                                        new MConnectionForms(connectionForms),
-                                       new MJobForms(jobForms.get(ConnectorType.FROM)),
-                                       new MJobForms(jobForms.get(ConnectorType.TO)));
+                                       new MJobForms(fromJobForms),
+                                       new MJobForms(toJobForms));
         mc.setPersistenceId(connectorId);
 
         connectors.add(mc);
@@ -1674,9 +1675,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MForm> connectorConnForms = new ArrayList<MForm>();
         List<MForm> frameworkConnForms = new ArrayList<MForm>();
         List<MForm> frameworkJobForms = new ArrayList<MForm>();
-        Map<ConnectorType, List<MForm>> connectorJobForms = new HashMap<ConnectorType, List<MForm>>();
+        List<MForm> fromJobForms = new ArrayList<MForm>();
+        List<MForm> toJobForms = new ArrayList<MForm>();
 
-        loadConnectorForms(connectorConnForms, connectorJobForms,
+        loadConnectorForms(connectorConnForms, fromJobForms, toJobForms,
           formConnectorFetchStmt, inputFetchStmt, 2);
         loadForms(frameworkConnForms, frameworkJobForms,
           formFrameworkFetchStmt, inputFetchStmt, 2);
@@ -1742,9 +1744,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MForm> connectorConnForms = new ArrayList<MForm>();
         List<MForm> frameworkConnForms = new ArrayList<MForm>();
         List<MForm> frameworkJobForms = new ArrayList<MForm>();
-        Map<ConnectorType, List<MForm>> connectorJobForms = new HashMap<ConnectorType, List<MForm>>();
+        List<MForm> fromJobForms = new ArrayList<MForm>();
+        List<MForm> toJobForms = new ArrayList<MForm>();
 
-        loadConnectorForms(connectorConnForms, connectorJobForms,
+        loadConnectorForms(connectorConnForms, fromJobForms, toJobForms,
             formConnectorFetchStmt, inputFetchStmt, 2);
         loadForms(frameworkConnForms, frameworkJobForms,
           formFrameworkFetchStmt, inputFetchStmt, 2);
@@ -1752,8 +1755,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         MJob job = new MJob(
           fromConnectorId, toConnectorId,
           fromConnectionId, toConnectionId,
-          new MJobForms(connectorJobForms.get(ConnectorType.FROM)),
-          new MJobForms(connectorJobForms.get(ConnectorType.TO)),
+          new MJobForms(fromJobForms),
+          new MJobForms(toJobForms),
           new MJobForms(frameworkJobForms));
 
         job.setPersistenceId(id);
@@ -2043,13 +2046,15 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * from Derby.
    *
    * @param connectionForms List of connection forms that will be filled up
-   * @param jobForms Map with job forms that will be filled up
+   * @param fromJobForms FROM job forms that will be filled up
+   * @param toJobForms TO job forms that will be filled up
    * @param formFetchStmt Prepared statement for fetching forms
    * @param inputFetchStmt Prepare statement for fetching inputs
    * @throws SQLException In case of any failure on Derby side
    */
   public void loadConnectorForms(List<MForm> connectionForms,
-                                 Map<ConnectorType, List<MForm>> jobForms,
+                                 List<MForm> fromJobForms,
+                                 List<MForm> toJobForms,
                                  PreparedStatement formFetchStmt,
                                  PreparedStatement inputFetchStmt,
                                  int formPosition) throws SQLException {
@@ -2151,20 +2156,30 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           break;
         case JOB:
           ConnectorType type = ConnectorType.valueOf(operation);
-          if (!jobForms.containsKey(type)) {
-            jobForms.put(type, new ArrayList<MForm>());
+          List<MForm> jobForms;
+          switch(type) {
+            case FROM:
+              jobForms = fromJobForms;
+              break;
+
+            case TO:
+              jobForms = toJobForms;
+              break;
+
+            default:
+              throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
           }
 
-          if (jobForms.get(type).size() != formIndex) {
+          if (jobForms.size() != formIndex) {
             throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
                 "connector-" + formConnectorId
                     + "; form: " + mf
                     + "; index: " + formIndex
-                    + "; expected: " + jobForms.get(type).size()
+                    + "; expected: " + jobForms.size()
             );
           }
 
-          jobForms.get(type).add(mf);
+          jobForms.add(mf);
           break;
         default:
           throw new SqoopException(DerbyRepoError.DERBYREPO_0007,

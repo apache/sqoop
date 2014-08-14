@@ -450,7 +450,7 @@ public abstract class Repository {
         MJobForms newJobForms = new MJobForms(forms);
         upgrader.upgrade(job.getConnectorPart(ConnectorType.FROM), newJobForms);
         // @TODO(Abe): Check From and To
-        MJob newJob = new MJob(job, newJobForms, job.getFrameworkPart(), newJobForms);
+        MJob newJob = new MJob(job, newJobForms, newJobForms, job.getFrameworkPart());
 
         // Transform form structures to objects for validations
         // @TODO(Abe): Check From and To
@@ -536,7 +536,7 @@ public abstract class Repository {
         List<MForm> forms = framework.getJobForms().clone(false).getForms();
         MJobForms newJobForms = new MJobForms(forms);
         upgrader.upgrade(job.getFrameworkPart(), newJobForms);
-        MJob newJob = new MJob(job, job.getConnectorPart(ConnectorType.FROM), newJobForms, job.getConnectorPart(ConnectorType.TO));
+        MJob newJob = new MJob(job, job.getConnectorPart(ConnectorType.FROM), job.getConnectorPart(ConnectorType.TO), newJobForms);
 
         // Transform form structures to objects for validations
         Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass());

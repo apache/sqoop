@@ -18,9 +18,8 @@
 package org.apache.sqoop.model;
 
 import org.apache.sqoop.common.ConnectorType;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.SqoopException;
 
 /**
  * Model describing entire job object including both connector and
@@ -34,28 +33,33 @@ public class MJob extends MAccountableEntity implements MClonable {
    * dependency through connection object, but having this dependency explicitly
    * carried along helps a lot.
    */
-  private final Map<ConnectorType, Long> connectorIds;
+  private final long fromConnectorId;
+  private final long toConnectorId;
 
   /**
    * Corresponding connection objects for connector.
    */
-  private final Map<ConnectorType, Long> connectionIds;
+  private final long fromConnectionId;
+  private final long toConnectionId;
 
   /**
    * User name for this object
    */
   private String name;
 
-  private final Map<ConnectorType, MJobForms> connectorParts;
+  private final MJobForms fromConnectorPart;
+  private final MJobForms toConnectorPart;
   private final MJobForms frameworkPart;
 
   /**
    * Default constructor to build  new MJob model.
    *
-   * @param fromConnectorId Connector id
-   * @param fromConnectionId Connection id
-   * @param fromPart From Connector forms
-   * @param toPart To Connector forms
+   * @param fromConnectorId FROM Connector id
+   * @param toConnectorId TO Connector id
+   * @param fromConnectionId FROM Connection id
+   * @param toConnectionId TO Connection id
+   * @param fromPart FROM Connector forms
+   * @param toPart TO Connector forms
    * @param frameworkPart Framework forms
    */
   public MJob(long fromConnectorId,
@@ -65,15 +69,12 @@ public class MJob extends MAccountableEntity implements MClonable {
               MJobForms fromPart,
               MJobForms toPart,
               MJobForms frameworkPart) {
-    connectorIds = new HashMap<ConnectorType, Long>();
-    connectorIds.put(ConnectorType.FROM, fromConnectorId);
-    connectorIds.put(ConnectorType.TO, toConnectorId);
-    connectionIds = new HashMap<ConnectorType, Long>();
-    connectionIds.put(ConnectorType.FROM, fromConnectionId);
-    connectionIds.put(ConnectorType.TO, toConnectionId);
-    connectorParts = new HashMap<ConnectorType, MJobForms>();
-    connectorParts.put(ConnectorType.FROM, fromPart);
-    connectorParts.put(ConnectorType.TO, toPart);
+    this.fromConnectorId = fromConnectorId;
+    this.toConnectorId = toConnectorId;
+    this.fromConnectionId = fromConnectionId;
+    this.toConnectionId = toConnectionId;
+    this.fromConnectorPart = fromPart;
+    this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
   }
 
@@ -96,22 +97,21 @@ public class MJob extends MAccountableEntity implements MClonable {
    * used otherwise.
    *
    * @param other MJob model to copy
-   * @param fromPart From Connector forms
+   * @param fromPart FROM Connector forms
+   * @param toPart TO Connector forms
    * @param frameworkPart Framework forms
-   * @param toPart To Connector forms
    */
-  public MJob(MJob other, MJobForms fromPart, MJobForms frameworkPart, MJobForms toPart) {
+  public MJob(MJob other, MJobForms fromPart, MJobForms toPart, MJobForms frameworkPart) {
     super(other);
-    connectorIds = new HashMap<ConnectorType, Long>();
-    connectorIds.put(ConnectorType.FROM, other.getConnectorId(ConnectorType.FROM));
-    connectorIds.put(ConnectorType.TO, other.getConnectorId(ConnectorType.TO));
-    connectionIds = new HashMap<ConnectorType, Long>();
-    connectorIds.put(ConnectorType.FROM, other.getConnectionId(ConnectorType.FROM));
-    connectorIds.put(ConnectorType.TO, other.getConnectionId(ConnectorType.TO));
-    connectorParts = new HashMap<ConnectorType, MJobForms>();
-    connectorParts.put(ConnectorType.FROM, fromPart);
-    connectorParts.put(ConnectorType.TO, toPart);
+
     this.name = other.name;
+
+    this.fromConnectorId = other.getConnectorId(ConnectorType.FROM);
+    this.toConnectorId = other.getConnectorId(ConnectorType.TO);
+    this.fromConnectionId = other.getConnectionId(ConnectorType.FROM);
+    this.toConnectionId = other.getConnectionId(ConnectorType.TO);
+    this.fromConnectorPart = fromPart;
+    this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
   }
 
@@ -134,15 +134,42 @@ public class MJob extends MAccountableEntity implements MClonable {
   }
 
   public long getConnectionId(ConnectorType type) {
-    return connectionIds.get(type);
+    switch(type) {
+      case FROM:
+        return fromConnectionId;
+
+      case TO:
+        return toConnectionId;
+
+      default:
+        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+    }
   }
 
   public long getConnectorId(ConnectorType type) {
-    return connectorIds.get(type);
+    switch(type) {
+      case FROM:
+        return fromConnectorId;
+
+      case TO:
+        return toConnectorId;
+
+      default:
+        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+    }
   }
 
   public MJobForms getConnectorPart(ConnectorType type) {
-    return connectorParts.get(type);
+    switch(type) {
+      case FROM:
+        return fromConnectorPart;
+
+      case TO:
+        return toConnectorPart;
+
+      default:
+        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+    }
   }
 
   public MJobForms getFrameworkPart() {

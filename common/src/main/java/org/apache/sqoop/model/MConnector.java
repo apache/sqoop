@@ -17,10 +17,9 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.SqoopException;
 
 /**
  * Connector metadata.
@@ -33,18 +32,17 @@ public final class MConnector extends MPersistableEntity implements MClonable {
   private final String uniqueName;
   private final String className;
   private final MConnectionForms connectionForms;
-  private final Map<ConnectorType, MJobForms> jobForms;
+  private final MJobForms fromJobForms;
+  private final MJobForms toJobForms;
   String version;
 
   public MConnector(String uniqueName, String className,
                     String version, MConnectionForms connectionForms,
                     MJobForms fromJobForms, MJobForms toJobForms) {
-    this.jobForms = new HashMap<ConnectorType, MJobForms>();
-
     this.version = version;
     this.connectionForms = connectionForms;
-    this.jobForms.put(ConnectorType.FROM, fromJobForms);
-    this.jobForms.put(ConnectorType.TO, toJobForms);
+    this.fromJobForms = fromJobForms;
+    this.toJobForms = toJobForms;
 
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
@@ -88,8 +86,8 @@ public final class MConnector extends MPersistableEntity implements MClonable {
         && className.equals(mc.className)
         && version.equals(mc.version)
         && connectionForms.equals(mc.getConnectionForms())
-        && jobForms.get(ConnectorType.FROM).equals(mc.getJobForms(ConnectorType.FROM))
-        && jobForms.get(ConnectorType.TO).equals(mc.getJobForms(ConnectorType.TO));
+        && fromJobForms.equals(mc.getJobForms(ConnectorType.FROM))
+        && toJobForms.equals(mc.getJobForms(ConnectorType.TO));
   }
 
   @Override
@@ -122,7 +120,16 @@ public final class MConnector extends MPersistableEntity implements MClonable {
   }
 
   public MJobForms getJobForms(ConnectorType type) {
-    return jobForms.get(type);
+    switch(type) {
+      case FROM:
+        return fromJobForms;
+
+      case TO:
+        return toJobForms;
+
+      default:
+        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+    }
   }
 
   public String getVersion() {
