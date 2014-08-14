@@ -657,6 +657,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>mengwei</id>
+      <name>Mengwei Ding</name>
+      <organization>Google</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>olamy</id>
       <name>Olivier Lamy</name>
       <organization>Talend</organization>
