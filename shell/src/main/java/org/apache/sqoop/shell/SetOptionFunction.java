@@ -34,24 +34,13 @@ public class SetOptionFunction extends SqoopFunction {
     this.addOption(OptionBuilder.hasArg()
       .withDescription(resourceString(Constants.RES_SET_PROMPT_OPT_NAME))
       .withLongOpt(Constants.OPT_NAME)
+      .isRequired()
       .create(Constants.OPT_NAME_CHAR));
     this.addOption(OptionBuilder.hasArg()
       .withDescription(resourceString(Constants.RES_SET_PROMPT_OPT_VALUE))
       .withLongOpt(Constants.OPT_VALUE)
+      .isRequired()
       .create(Constants.OPT_VALUE_CHAR));
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_NAME)) {
-      printlnResource(Constants.RES_ARGS_NAME_MISSING);
-      return false;
-    }
-    if (!line.hasOption(Constants.OPT_VALUE)) {
-      printlnResource(Constants.RES_ARGS_VALUE_MISSING);
-      return false;
-    }
-    return true;
   }
 
   @Override
