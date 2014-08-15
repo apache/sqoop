@@ -44,17 +44,9 @@ public class UpdateConnectionFunction extends SqoopFunction {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_XID)
+      .isRequired()
       .hasArg()
       .create(Constants.OPT_XID_CHAR));
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_XID)) {
-      printlnResource(Constants.RES_ARGS_XID_MISSING);
-      return false;
-    }
-    return true;
   }
 
   @Override

@@ -35,17 +35,9 @@ public class DeleteJobFunction extends SqoopFunction {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
       .withLongOpt(Constants.OPT_JID)
+      .isRequired()
       .hasArg()
       .create('j'));
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_JID)) {
-      printlnResource(Constants.RES_ARGS_JID_MISSING);
-      return false;
-    }
-    return true;
   }
 
   @Override

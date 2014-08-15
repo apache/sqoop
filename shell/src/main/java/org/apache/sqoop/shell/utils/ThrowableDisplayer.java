@@ -40,17 +40,23 @@ public class ThrowableDisplayer {
    * @param t Throwable to be displayed
    */
   public static void errorHook(Throwable t) {
-    println("@|red Exception has occurred during processing command |@");
-
-    // If this is server exception from server
-    if(t instanceof SqoopException
-      && ((SqoopException)t).getErrorCode() == ShellError.SHELL_0006) {
-      print("@|red Server has returned exception: |@");
+    // Based on the kind of exception we are dealing with, let's provide different user experince
+    if(t instanceof SqoopException && ((SqoopException)t).getErrorCode() == ShellError.SHELL_0006) {
+      println("@|red Server has returned exception: |@");
       printThrowable(t.getCause(), isVerbose());
+    } else if(t instanceof SqoopException && ((SqoopException)t).getErrorCode() == ShellError.SHELL_0003) {
+      print("@|red Invalid command invocation: |@");
+      // In most cases the cause will be actual parsing error, so let's print that alone
+      if (t.getCause() != null) {
+        println(t.getCause().getMessage());
+      } else {
+        println(t.getMessage());
+      }
     } else if(t.getClass() == MissingPropertyException.class) {
       print("@|red Unknown command: |@");
       println(t.getMessage());
     } else {
+      println("@|red Exception has occurred during processing command |@");
       printThrowable(t, isVerbose());
     }
   }

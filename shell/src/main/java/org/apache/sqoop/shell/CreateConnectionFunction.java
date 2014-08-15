@@ -44,17 +44,9 @@ public class CreateConnectionFunction extends SqoopFunction {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_CONNECTOR_ID))
       .withLongOpt(Constants.OPT_CID)
+      .isRequired()
       .hasArg()
       .create(Constants.OPT_CID_CHAR));
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_CID)) {
-      printlnResource(Constants.RES_ARGS_CID_MISSING);
-      return false;
-    }
-    return true;
   }
 
   @Override

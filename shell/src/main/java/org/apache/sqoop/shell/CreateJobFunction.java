@@ -45,28 +45,17 @@ public class CreateJobFunction extends  SqoopFunction {
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_FROM)
+      .isRequired()
       .hasArg()
       .create(Constants.OPT_FXID_CHAR)
     );
     this.addOption(OptionBuilder
       .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
       .withLongOpt(Constants.OPT_TO)
+      .isRequired()
       .hasArg()
       .create(Constants.OPT_TXID_CHAR)
     );
-  }
-
-  @Override
-  public boolean validateArgs(CommandLine line) {
-    if (!line.hasOption(Constants.OPT_FROM)) {
-      printlnResource(Constants.RES_ARGS_FROM_MISSING);
-      return false;
-    }
-    if (!line.hasOption(Constants.OPT_TO)) {
-      printlnResource(Constants.RES_ARGS_TO_MISSING);
-      return false;
-    }
-    return true;
   }
 
   @Override
