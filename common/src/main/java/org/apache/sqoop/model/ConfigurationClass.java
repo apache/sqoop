@@ -17,14 +17,25 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.validation.validators.Validator;
+
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Class annotation. Each class that is used a configuration object where user
  * is expected to provide input need to have this annotation.
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface ConfigurationClass {
 
+  /**
+   * List of validators associated with this Configuration class.
+   *
+   * @return
+   */
+  Class<? extends Validator>[] validators() default {};
 }

@@ -19,24 +19,26 @@ package org.apache.sqoop.validation;
 
 /**
  * Status modes of a validation process.
+ *
+ * TODO: This should really be renamed to "severity"
  */
 public enum Status {
   /**
    * There are no issues, no warnings. Everything is correct.
    */
-  FINE,
+  FINE, // TODO: Rename to "OK"
 
   /**
    * Validated entity is correct enough to be processed. There might be some
    * warnings, but no errors.
    */
-  ACCEPTABLE,
+  ACCEPTABLE, // TODO: Rename to "WARNING"
 
   /**
    * There are serious issues with validated entity. We can't proceed until
    * reported issues will be resolved.
    */
-  UNACCEPTABLE,
+  UNACCEPTABLE, // TODO: Rename to "ERROR"
 
   ;
 

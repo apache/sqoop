@@ -19,11 +19,13 @@ package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.Validator;
 
 /**
  *
  */
-@FormClass
+@FormClass(validators = {ToTableForm.FormValidator.class})
 public class ToTableForm {
   @Input(size = 50)   public String schemaName;
   @Input(size = 2000) public String tableName;
@@ -31,4 +33,22 @@ public class ToTableForm {
   @Input(size = 50)   public String columns;
   @Input(size = 2000) public String stageTableName;
   @Input              public Boolean clearStageTable;
+
+  public static class FormValidator extends Validator<ToTableForm> {
+    @Override
+    public void validate(ToTableForm form) {
+      if(form.tableName == null && form.sql == null) {
+        addMessage(Status.UNACCEPTABLE, "Either fromTable name or SQL must be specified");
+      }
+      if(form.tableName != null && form.sql != null) {
+        addMessage(Status.UNACCEPTABLE, "Both fromTable name and SQL cannot be specified");
+      }
+      if(form.tableName == null && form.stageTableName != null) {
+        addMessage(Status.UNACCEPTABLE, "Stage fromTable name cannot be specified without specifying fromTable name");
+      }
+      if(form.stageTableName == null && form.clearStageTable != null) {
+        addMessage(Status.UNACCEPTABLE, "Clear stage fromTable cannot be specified without specifying name of the stage fromTable.");
+      }
+    }
+  }
 }

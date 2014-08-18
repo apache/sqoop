@@ -15,33 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
+package org.apache.sqoop.validation.validators;
 
-import org.apache.sqoop.validation.validators.Validator;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.apache.sqoop.validation.Status;
 
 /**
- * Denote configuration class
+ * Ensure that given String is not empty.
+ *
+ * Will also ensure that the string is not null.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FormClass {
-
-  /**
-   * Default size for Inputs in this form.
-   *
-   * @return
-   */
-  short defaultSize() default -1;
-
-  /**
-   * List of validators associated with this form.
-   *
-   * @return
-   */
-  Class<? extends Validator>[] validators() default {};
+public class NotEmpty extends Validator<String> {
+  @Override
+  public void validate(String instance) {
+    if (instance == null || instance.isEmpty()) {
+      addMessage(Status.UNACCEPTABLE, "Can't be null nor empty");
+    }
+  }
 }

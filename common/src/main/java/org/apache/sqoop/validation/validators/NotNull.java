@@ -15,33 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
+package org.apache.sqoop.validation.validators;
 
-import org.apache.sqoop.validation.validators.Validator;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.apache.sqoop.validation.Status;
 
 /**
- * Denote configuration class
+ * Ensure that given object is never null.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FormClass {
-
-  /**
-   * Default size for Inputs in this form.
-   *
-   * @return
-   */
-  short defaultSize() default -1;
-
-  /**
-   * List of validators associated with this form.
-   *
-   * @return
-   */
-  Class<? extends Validator>[] validators() default {};
+public class NotNull<T> extends Validator<T> {
+  @Override
+  public void validate(T instance) {
+    if (instance == null) {
+      addMessage(Status.UNACCEPTABLE, "Can't be null");
+    }
+  }
 }
