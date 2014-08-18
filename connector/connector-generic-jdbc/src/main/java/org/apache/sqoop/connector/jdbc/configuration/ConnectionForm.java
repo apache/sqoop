@@ -19,17 +19,44 @@ package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.NotEmpty;
+import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.ClassAvailable;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
  *
  */
-@FormClass
+@FormClass(validators = {ConnectionForm.FormValidator.class})
 public class ConnectionForm {
-  @Input(size = 128) public String jdbcDriver;
-  @Input(size = 128) public String connectionString;
-  @Input(size = 40)  public String username;
-  @Input(size = 40, sensitive = true) public String password;
-  @Input public Map<String, String> jdbcProperties;
+  @Input(size = 128, validators = {NotEmpty.class, ClassAvailable.class} )
+  public String jdbcDriver;
+
+  @Input(size = 128, validators = {NotEmpty.class} )
+  public String connectionString;
+
+  @Input(size = 40)
+  public String username;
+
+  @Input(size = 40, sensitive = true)
+  public String password;
+
+  @Input
+  public Map<String, String> jdbcProperties;
+
+  public static class FormValidator extends Validator<ConnectionForm> {
+    @Override
+    public void validate(ConnectionForm form) {
+      // See if we can connect to the database
+      try {
+        DriverManager.getConnection(form.connectionString, form.username, form.password);
+      } catch (SQLException e) {
+        addMessage(Status.ACCEPTABLE, "Can't connect to the database with given credentials: " + e.getMessage());
+      }
+    }
+  }
 }

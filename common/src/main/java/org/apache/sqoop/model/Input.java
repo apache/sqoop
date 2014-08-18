@@ -17,14 +17,19 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.validation.validators.Validator;
+
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Field annotation. Each field that user might change in configuration object
  * need to have this annotation.
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface Input {
   /**
    * Sqoop framework will ensure that sensitive information will not be easily
@@ -40,4 +45,11 @@ public @interface Input {
    * @return Maximal length
    */
   short size() default -1;
+
+  /**
+   * List of validators associated with this input.
+   *
+   * @return
+   */
+  Class<? extends Validator>[] validators() default {};
 }

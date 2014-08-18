@@ -17,19 +17,59 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants;
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.Validator;
 
 /**
  *
  */
-@FormClass
+@FormClass( validators = {FromTableForm.FormValidator.class})
 public class FromTableForm {
-  @Input(size = 50)   public String schemaName;
-  @Input(size = 50)   public String tableName;
-  @Input(size = 2000) public String sql;
-  @Input(size = 50)   public String columns;
-  @Input(size = 50)   public String partitionColumn;
-  @Input              public Boolean partitionColumnNull;
-  @Input(size = 50)   public String boundaryQuery;
+  @Input(size = 50)
+  public String schemaName;
+
+  @Input(size = 50)
+  public String tableName;
+
+  @Input(size = 2000, validators = {SqlConditionTokenValidator.class})
+  public String sql;
+
+  @Input(size = 50)
+  public String columns;
+
+  @Input(size = 50)
+  public String partitionColumn;
+
+  @Input
+  public Boolean partitionColumnNull;
+
+  @Input(size = 50)
+  public String boundaryQuery;
+
+  public static class FormValidator extends Validator<FromTableForm> {
+    @Override
+    public void validate(FromTableForm form) {
+      if(form.tableName == null && form.sql == null) {
+        addMessage(Status.UNACCEPTABLE, "Either fromTable name or SQL must be specified");
+      }
+      if(form.tableName != null && form.sql != null) {
+        addMessage(Status.UNACCEPTABLE, "Both fromTable name and SQL cannot be specified");
+      }
+      if(form.schemaName != null && form.sql != null) {
+        addMessage(Status.UNACCEPTABLE, "Both schema name and SQL cannot be specified");
+      }
+    }
+  }
+
+  public static class SqlConditionTokenValidator extends Validator<String> {
+    @Override
+    public void validate(String sql) {
+      if(sql != null && !sql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)) {
+        addMessage(Status.UNACCEPTABLE, "SQL statement must contain placeholder for auto generated conditions - " + GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
+      }
+    }
+  }
 }
