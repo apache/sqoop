@@ -50,8 +50,11 @@ public enum ModelError implements ErrorCode {
 
   MODEL_013("Form name attribute should not contain unsupported characters"),
 
-  MODEL_014("Form name attribute cannot be more than 30 characters long")
-;
+  MODEL_014("Form name attribute cannot be more than 30 characters long"),
+
+  MODEL_015("Can't get value from object")
+
+  ;
 
   private final String message;
 

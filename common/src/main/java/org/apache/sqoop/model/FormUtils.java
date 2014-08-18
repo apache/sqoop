@@ -37,6 +37,8 @@ import java.util.Set;
 /**
  * Util class for transforming data from correctly annotated configuration
  * objects to different structures and vice-versa.
+ *
+ * TODO: This class should see some overhaul into more reusable code, especially expose and re-use the methods at the end.
  */
 public class FormUtils {
 
@@ -532,6 +534,63 @@ public class FormUtils {
       throw new SqoopException(ModelError.MODEL_014,
           "Issue with field form name " + customFormName);
 
+    }
+  }
+
+  public static String getName(Field input, Input annotation) {
+    return input.getName();
+  }
+
+  public static String getName(Field form, Form annotation) {
+    return form.getName();
+  }
+
+  public static ConfigurationClass getConfigurationClassAnnotation(Object object, boolean strict) {
+    ConfigurationClass annotation = object.getClass().getAnnotation(ConfigurationClass.class);
+
+    if(strict && annotation == null) {
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationClass on class " + object.getClass().getName());
+    }
+
+    return annotation;
+  }
+
+  public static FormClass getFormClassAnnotation(Object object, boolean strict) {
+    FormClass annotation = object.getClass().getAnnotation(FormClass.class);
+
+    if(strict && annotation == null) {
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationClass on class " + object.getClass().getName());
+    }
+
+    return annotation;
+  }
+
+  public static Form getFormAnnotation(Field field, boolean strict) {
+    Form annotation = field.getAnnotation(Form.class);
+
+    if(strict && annotation == null) {
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation Form on Field " + field.getName() + " on class " + field.getDeclaringClass().getName());
+    }
+
+    return annotation;
+  }
+
+  public static Input getInputAnnotation(Field field, boolean strict) {
+    Input annotation = field.getAnnotation(Input.class);
+
+    if(strict && annotation == null) {
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation Input on Field " + field.getName() + " on class " + field.getDeclaringClass().getName());
+    }
+
+    return annotation;
+  }
+
+  public static Object getFieldValue(Field field, Object object) {
+    try {
+      field.setAccessible(true);
+      return field.get(object);
+    } catch (IllegalAccessException e) {
+      throw new SqoopException(ModelError.MODEL_015, e);
     }
   }
 
