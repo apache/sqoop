@@ -20,7 +20,7 @@ package org.apache.sqoop.connector.spi;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.etl.From;
@@ -53,7 +53,7 @@ public abstract class SqoopConnector {
   /**
    * @return Get job configuration class for given type or null if not supported
    */
-  public abstract Class getJobConfigurationClass(ConnectorType jobType);
+  public abstract Class getJobConfigurationClass(Direction jobType);
 
   /**
    * @return an <tt>From</tt> that provides classes for performing import.

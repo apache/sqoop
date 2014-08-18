@@ -18,7 +18,7 @@
 package org.apache.sqoop.client;
 
 import org.apache.sqoop.client.request.SqoopRequests;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.ConnectorBean;
@@ -368,8 +368,8 @@ public class SqoopClient {
       toConnection.getConnectorId(),
       fromConnection.getPersistenceId(),
       toConnection.getPersistenceId(),
-      getConnector(fromConnection.getConnectorId()).getJobForms(ConnectorType.FROM),
-      getConnector(fromConnection.getConnectorId()).getJobForms(ConnectorType.TO),
+      getConnector(fromConnection.getConnectorId()).getJobForms(Direction.FROM),
+      getConnector(fromConnection.getConnectorId()).getJobForms(Direction.TO),
       getFramework().getJobForms()
     );
   }
@@ -550,17 +550,17 @@ public class SqoopClient {
   }
 
   private Status applyValidations(JobValidationBean bean, MJob job) {
-    Validation fromConnector = bean.getConnectorValidation(ConnectorType.FROM);
-    Validation toConnector = bean.getConnectorValidation(ConnectorType.TO);
+    Validation fromConnector = bean.getConnectorValidation(Direction.FROM);
+    Validation toConnector = bean.getConnectorValidation(Direction.TO);
     Validation framework = bean.getFrameworkValidation();
 
     // @TODO(Abe): From/To validation.
     FormUtils.applyValidation(
-        job.getConnectorPart(ConnectorType.FROM).getForms(),
+        job.getConnectorPart(Direction.FROM).getForms(),
         fromConnector);
     FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
     FormUtils.applyValidation(
-        job.getConnectorPart(ConnectorType.TO).getForms(),
+        job.getConnectorPart(Direction.TO).getForms(),
         toConnector);
 
     Long id = bean.getId();

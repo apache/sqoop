@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.framework;
 
-import org.apache.sqoop.common.ConnectorType;
-import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
@@ -159,7 +159,7 @@ public class SubmissionRequest {
     this.jobId = jobId;
   }
 
-  public SqoopConnector getConnector(ConnectorType type) {
+  public SqoopConnector getConnector(Direction type) {
     switch(type) {
       case FROM:
         return fromConnector;
@@ -168,11 +168,11 @@ public class SubmissionRequest {
         return toConnector;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public void setConnector(ConnectorType type, SqoopConnector connector) {
+  public void setConnector(Direction type, SqoopConnector connector) {
     switch(type) {
       case FROM:
         fromConnector = connector;
@@ -181,7 +181,7 @@ public class SubmissionRequest {
         toConnector = connector;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
@@ -221,7 +221,7 @@ public class SubmissionRequest {
     this.toCallback = toCallback;
   }
 
-  public Object getConnectorConnectionConfig(ConnectorType type) {
+  public Object getConnectorConnectionConfig(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorConnectionConfig;
@@ -230,11 +230,11 @@ public class SubmissionRequest {
         return toConnectorConnectionConfig;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public void setConnectorConnectionConfig(ConnectorType type, Object config) {
+  public void setConnectorConnectionConfig(Direction type, Object config) {
     switch(type) {
       case FROM:
         fromConnectorConnectionConfig = config;
@@ -243,11 +243,11 @@ public class SubmissionRequest {
         toConnectorConnectionConfig = config;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public Object getConnectorJobConfig(ConnectorType type) {
+  public Object getConnectorJobConfig(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorJobConfig;
@@ -256,11 +256,11 @@ public class SubmissionRequest {
         return toConnectorJobConfig;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public void setConnectorJobConfig(ConnectorType type, Object config) {
+  public void setConnectorJobConfig(Direction type, Object config) {
     switch(type) {
       case FROM:
         fromConnectorJobConfig = config;
@@ -269,11 +269,11 @@ public class SubmissionRequest {
         toConnectorJobConfig = config;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public Object getFrameworkConnectionConfig(ConnectorType type) {
+  public Object getFrameworkConnectionConfig(Direction type) {
     switch(type) {
       case FROM:
         return fromFrameworkConnectionConfig;
@@ -282,11 +282,11 @@ public class SubmissionRequest {
         return toFrameworkConnectionConfig;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public void setFrameworkConnectionConfig(ConnectorType type, Object config) {
+  public void setFrameworkConnectionConfig(Direction type, Object config) {
     switch(type) {
       case FROM:
         fromFrameworkConnectionConfig = config;
@@ -295,7 +295,7 @@ public class SubmissionRequest {
         toFrameworkConnectionConfig = config;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
@@ -307,7 +307,7 @@ public class SubmissionRequest {
     configFrameworkJob = config;
   }
 
-  public MutableMapContext getConnectorContext(ConnectorType type) {
+  public MutableMapContext getConnectorContext(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorContext;
@@ -316,7 +316,7 @@ public class SubmissionRequest {
         return toConnectorContext;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 

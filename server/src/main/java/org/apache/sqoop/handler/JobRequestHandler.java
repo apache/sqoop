@@ -19,7 +19,7 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -165,26 +165,26 @@ public class JobRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MJobForms fromConnectorForms = ConnectorManager.getInstance()
-        .getConnectorMetadata(job.getConnectorId(ConnectorType.FROM))
-        .getJobForms(ConnectorType.FROM);
+        .getConnectorMetadata(job.getConnectorId(Direction.FROM))
+        .getJobForms(Direction.FROM);
     MJobForms toConnectorForms = ConnectorManager.getInstance()
-        .getConnectorMetadata(job.getConnectorId(ConnectorType.TO))
-        .getJobForms(ConnectorType.TO);
+        .getConnectorMetadata(job.getConnectorId(Direction.TO))
+        .getJobForms(Direction.TO);
     MJobForms frameworkForms = FrameworkManager.getInstance().getFramework()
       .getJobForms();
 
-    if(!fromConnectorForms.equals(job.getConnectorPart(ConnectorType.FROM))
+    if(!fromConnectorForms.equals(job.getConnectorPart(Direction.FROM))
       || !frameworkForms.equals(job.getFrameworkPart())
-      || !toConnectorForms.equals(job.getConnectorPart(ConnectorType.TO))) {
+      || !toConnectorForms.equals(job.getConnectorPart(Direction.TO))) {
       throw new SqoopException(ServerError.SERVER_0003,
         "Detected incorrect form structure");
     }
 
     // Responsible connector for this session
     SqoopConnector fromConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.FROM));
+      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
     SqoopConnector toConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.TO));
+      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
     // Get validator objects
     Validator fromConnectorValidator = fromConnector.getValidator();
@@ -193,15 +193,15 @@ public class JobRequestHandler implements RequestHandler {
 
     // We need translate forms to configuration objects
     Object fromConnectorConfig = ClassUtils.instantiate(
-        fromConnector.getJobConfigurationClass(ConnectorType.FROM));
+        fromConnector.getJobConfigurationClass(Direction.FROM));
     Object frameworkConfig = ClassUtils.instantiate(
       FrameworkManager.getInstance().getJobConfigurationClass());
     Object toConnectorConfig = ClassUtils.instantiate(
-      toConnector.getJobConfigurationClass(ConnectorType.TO));
+      toConnector.getJobConfigurationClass(Direction.TO));
 
-    FormUtils.fromForms(job.getConnectorPart(ConnectorType.FROM).getForms(), fromConnectorConfig);
+    FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromConnectorConfig);
     FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
-    FormUtils.fromForms(job.getConnectorPart(ConnectorType.TO).getForms(), toConnectorConfig);
+    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toConnectorConfig);
 
     // Validate all parts
     Validation fromConnectorValidation =
@@ -262,7 +262,7 @@ public class JobRequestHandler implements RequestHandler {
       // Add associated resources into the bean
       // @TODO(Abe): From/To.
       for( MJob job : jobs) {
-        long connectorId = job.getConnectorId(ConnectorType.FROM);
+        long connectorId = job.getConnectorId(Direction.FROM);
         if(!bean.hasConnectorBundle(connectorId)) {
           bean.addConnectorBundle(connectorId,
             ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
@@ -273,7 +273,7 @@ public class JobRequestHandler implements RequestHandler {
 
       MJob job = repository.findJob(jid);
       // @TODO(Abe): From/To
-      long connectorId = job.getConnectorId(ConnectorType.FROM);
+      long connectorId = job.getConnectorId(Direction.FROM);
 
       bean = new JobBean(job);
 

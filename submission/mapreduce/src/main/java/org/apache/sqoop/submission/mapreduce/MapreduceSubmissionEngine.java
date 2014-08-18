@@ -26,7 +26,7 @@ import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.execution.mapreduce.MRSubmissionRequest;
@@ -164,7 +164,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     }
 
     // Serialize connector context as a sub namespace
-    for(Map.Entry<String, String> entry : request.getConnectorContext(ConnectorType.FROM)) {
+    for(Map.Entry<String, String> entry : request.getConnectorContext(Direction.FROM)) {
       if (entry.getValue() == null) {
         LOG.warn("Ignoring null connector context value for key " + entry.getKey());
         continue;
@@ -174,7 +174,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         entry.getValue());
     }
 
-    for(Map.Entry<String, String> entry : request.getConnectorContext(ConnectorType.TO)) {
+    for(Map.Entry<String, String> entry : request.getConnectorContext(Direction.TO)) {
       if (entry.getValue() == null) {
         LOG.warn("Ignoring null connector context value for key " + entry.getKey());
         continue;
@@ -200,15 +200,15 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       Job job = new Job(configuration);
 
       // And finally put all configuration objects to credentials cache
-      ConfigurationUtils.setConnectorConnectionConfig(ConnectorType.FROM, job, request.getConnectorConnectionConfig(ConnectorType.FROM));
-      ConfigurationUtils.setConnectorJobConfig(ConnectorType.FROM, job, request.getConnectorJobConfig(ConnectorType.FROM));
-      ConfigurationUtils.setConnectorConnectionConfig(ConnectorType.TO, job, request.getConnectorConnectionConfig(ConnectorType.TO));
-      ConfigurationUtils.setConnectorJobConfig(ConnectorType.TO, job, request.getConnectorJobConfig(ConnectorType.TO));
-      ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.FROM, job, request.getFrameworkConnectionConfig(ConnectorType.FROM));
-      ConfigurationUtils.setFrameworkConnectionConfig(ConnectorType.TO, job, request.getFrameworkConnectionConfig(ConnectorType.TO));
+      ConfigurationUtils.setConnectorConnectionConfig(Direction.FROM, job, request.getConnectorConnectionConfig(Direction.FROM));
+      ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getConnectorJobConfig(Direction.FROM));
+      ConfigurationUtils.setConnectorConnectionConfig(Direction.TO, job, request.getConnectorConnectionConfig(Direction.TO));
+      ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getConnectorJobConfig(Direction.TO));
+      ConfigurationUtils.setFrameworkConnectionConfig(Direction.FROM, job, request.getFrameworkConnectionConfig(Direction.FROM));
+      ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkConnectionConfig(Direction.TO));
       ConfigurationUtils.setFrameworkJobConfig(job, request.getConfigFrameworkJob());
       // @TODO(Abe): Persist TO schema.
-      ConfigurationUtils.setConnectorSchema(ConnectorType.FROM, job, request.getSummary().getConnectorSchema());
+      ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getConnectorSchema());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

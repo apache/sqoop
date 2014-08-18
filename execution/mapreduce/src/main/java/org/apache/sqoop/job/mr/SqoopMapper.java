@@ -26,7 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
@@ -35,7 +35,6 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.submission.counter.SqoopCounters;
@@ -67,7 +66,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     // Propagate connector schema in every case for now
     // TODO: Change to coditional choosing between Connector schemas.
-    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
+    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 
     String intermediateDataFormatName = conf.get(JobConstants
       .INTERMEDIATE_DATA_FORMAT);
@@ -82,8 +81,8 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     // Get configs for extractor
     subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    configConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.FROM, conf);
-    configJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.FROM, conf);
+    configConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
+    configJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
     ExtractorContext extractorContext = new ExtractorContext(subContext, new MapDataWriter(context), schema);

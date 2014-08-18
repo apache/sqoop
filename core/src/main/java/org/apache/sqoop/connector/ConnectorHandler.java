@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnectionForms;
@@ -92,11 +92,11 @@ public final class ConnectorHandler {
 
     // Initialize Metadata
     MJobForms fromJobForms = new MJobForms(FormUtils.toForms(
-      connector.getJobConfigurationClass(ConnectorType.FROM)));
+      connector.getJobConfigurationClass(Direction.FROM)));
     MConnectionForms connectionForms = new MConnectionForms(
       FormUtils.toForms(connector.getConnectionConfigurationClass()));
     MJobForms toJobForms = new MJobForms(FormUtils.toForms(
-        connector.getJobConfigurationClass(ConnectorType.TO)));
+        connector.getJobConfigurationClass(Direction.TO)));
     MConnectionForms toConnectionForms = new MConnectionForms(
         FormUtils.toForms(connector.getConnectionConfigurationClass()));
 

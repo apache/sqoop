@@ -20,7 +20,7 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.shell.core.Constants;
@@ -64,10 +64,10 @@ public class CloneJobFunction extends SqoopFunction {
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     ResourceBundle fromConnectorBundle = client.getResourceBundle(
-        job.getConnectorId(ConnectorType.FROM));
+        job.getConnectorId(Direction.FROM));
     ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
     ResourceBundle toConnectorBundle = client.getResourceBundle(
-        job.getConnectorId(ConnectorType.TO));
+        job.getConnectorId(Direction.TO));
 
     Status status = Status.FINE;
 

@@ -20,10 +20,8 @@ package org.apache.sqoop.connector.jdbc;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
@@ -72,7 +70,7 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public Class getJobConfigurationClass(ConnectorType jobType) {
+  public Class getJobConfigurationClass(Direction jobType) {
     switch (jobType) {
       case FROM:
         return FromJobConfiguration.class;

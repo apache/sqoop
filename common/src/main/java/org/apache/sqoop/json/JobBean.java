@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -114,14 +114,14 @@ public class JobBean implements JsonBean {
       object.put(CREATION_DATE, job.getCreationDate().getTime());
       object.put(UPDATE_USER, job.getLastUpdateUser());
       object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
-      object.put(FROM_CONNECTION_ID, job.getConnectionId(ConnectorType.FROM));
-      object.put(TO_CONNECTION_ID, job.getConnectionId(ConnectorType.TO));
-      object.put(FROM_CONNECTOR_ID, job.getConnectorId(ConnectorType.FROM));
-      object.put(TO_CONNECTOR_ID, job.getConnectorId(ConnectorType.TO));
+      object.put(FROM_CONNECTION_ID, job.getConnectionId(Direction.FROM));
+      object.put(TO_CONNECTION_ID, job.getConnectionId(Direction.TO));
+      object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
+      object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
       object.put(FROM_CONNECTOR_PART,
-        extractForms(job.getConnectorPart(ConnectorType.FROM).getForms(),skipSensitive));
+        extractForms(job.getConnectorPart(Direction.FROM).getForms(),skipSensitive));
       object.put(TO_CONNECTOR_PART,
-          extractForms(job.getConnectorPart(ConnectorType.TO).getForms(), skipSensitive));
+          extractForms(job.getConnectorPart(Direction.TO).getForms(), skipSensitive));
       object.put(FRAMEWORK_PART,
         extractForms(job.getFrameworkPart().getForms(), skipSensitive));
 

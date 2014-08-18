@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.sqoop.common.ConnectorType;
-import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 
 /**
@@ -66,8 +66,8 @@ public final class MConnector extends MPersistableEntity implements MClonable {
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
     sb.append(className);
     sb.append(", ").append(getConnectionForms().toString());
-    sb.append(", ").append(getJobForms(ConnectorType.FROM).toString());
-    sb.append(", ").append(getJobForms(ConnectorType.TO).toString());
+    sb.append(", ").append(getJobForms(Direction.FROM).toString());
+    sb.append(", ").append(getJobForms(Direction.TO).toString());
     return sb.toString();
   }
 
@@ -86,15 +86,15 @@ public final class MConnector extends MPersistableEntity implements MClonable {
         && className.equals(mc.className)
         && version.equals(mc.version)
         && connectionForms.equals(mc.getConnectionForms())
-        && fromJobForms.equals(mc.getJobForms(ConnectorType.FROM))
-        && toJobForms.equals(mc.getJobForms(ConnectorType.TO));
+        && fromJobForms.equals(mc.getJobForms(Direction.FROM))
+        && toJobForms.equals(mc.getJobForms(Direction.TO));
   }
 
   @Override
   public int hashCode() {
     int result = getConnectionForms().hashCode();
-    result = 31 * result + getJobForms(ConnectorType.FROM).hashCode();
-    result = 31 * result + getJobForms(ConnectorType.TO).hashCode();
+    result = 31 * result + getJobForms(Direction.FROM).hashCode();
+    result = 31 * result + getJobForms(Direction.TO).hashCode();
     result = 31 * result + version.hashCode();
     result = 31 * result + uniqueName.hashCode();
     result = 31 * result + className.hashCode();
@@ -109,8 +109,8 @@ public final class MConnector extends MPersistableEntity implements MClonable {
         this.getClassName(),
         this.getVersion(),
         this.getConnectionForms().clone(cloneWithValue),
-        this.getJobForms(ConnectorType.FROM).clone(cloneWithValue),
-        this.getJobForms(ConnectorType.TO).clone(cloneWithValue));
+        this.getJobForms(Direction.FROM).clone(cloneWithValue),
+        this.getJobForms(Direction.TO).clone(cloneWithValue));
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }
@@ -119,7 +119,7 @@ public final class MConnector extends MPersistableEntity implements MClonable {
     return connectionForms;
   }
 
-  public MJobForms getJobForms(ConnectorType type) {
+  public MJobForms getJobForms(Direction type) {
     switch(type) {
       case FROM:
         return fromJobForms;
@@ -128,7 +128,7 @@ public final class MConnector extends MPersistableEntity implements MClonable {
         return toJobForms;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 

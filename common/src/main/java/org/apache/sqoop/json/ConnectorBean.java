@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
@@ -77,9 +77,9 @@ public class ConnectorBean implements JsonBean {
       object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms(), skipSensitive));
       object.put(JOB_FORMS, new JSONObject());
       ((JSONObject)object.get(JOB_FORMS)).put(
-          ConnectorType.FROM, extractForms(connector.getJobForms(ConnectorType.FROM).getForms(), skipSensitive));
+          Direction.FROM, extractForms(connector.getJobForms(Direction.FROM).getForms(), skipSensitive));
       ((JSONObject)object.get(JOB_FORMS)).put(
-          ConnectorType.TO, extractForms(connector.getJobForms(ConnectorType.TO).getForms(), skipSensitive));
+          Direction.TO, extractForms(connector.getJobForms(Direction.TO).getForms(), skipSensitive));
       array.add(object);
     }
 
@@ -118,8 +118,8 @@ public class ConnectorBean implements JsonBean {
       List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
 
       JSONObject jobJson = (JSONObject) object.get(JOB_FORMS);
-      JSONArray fromJobJson = (JSONArray)jobJson.get(ConnectorType.FROM.name());
-      JSONArray toJobJson = (JSONArray)jobJson.get(ConnectorType.TO.name());
+      JSONArray fromJobJson = (JSONArray)jobJson.get(Direction.FROM.name());
+      JSONArray toJobJson = (JSONArray)jobJson.get(Direction.TO.name());
       List<MForm> fromJobForms =
           restoreForms(fromJobJson);
       List<MForm> toJobForms =

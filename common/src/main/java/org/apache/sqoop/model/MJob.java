@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.sqoop.common.ConnectorType;
-import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 
 /**
@@ -85,8 +85,8 @@ public class MJob extends MAccountableEntity implements MClonable {
    */
   public MJob(MJob other) {
     this(other,
-        other.getConnectorPart(ConnectorType.FROM).clone(true),
-        other.getConnectorPart(ConnectorType.TO).clone(true),
+        other.getConnectorPart(Direction.FROM).clone(true),
+        other.getConnectorPart(Direction.TO).clone(true),
         other.frameworkPart.clone(true));
   }
 
@@ -106,10 +106,10 @@ public class MJob extends MAccountableEntity implements MClonable {
 
     this.name = other.name;
 
-    this.fromConnectorId = other.getConnectorId(ConnectorType.FROM);
-    this.toConnectorId = other.getConnectorId(ConnectorType.TO);
-    this.fromConnectionId = other.getConnectionId(ConnectorType.FROM);
-    this.toConnectionId = other.getConnectionId(ConnectorType.TO);
+    this.fromConnectorId = other.getConnectorId(Direction.FROM);
+    this.toConnectorId = other.getConnectorId(Direction.TO);
+    this.fromConnectionId = other.getConnectionId(Direction.FROM);
+    this.toConnectionId = other.getConnectionId(Direction.TO);
     this.fromConnectorPart = fromPart;
     this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
@@ -118,8 +118,8 @@ public class MJob extends MAccountableEntity implements MClonable {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("job");
-    sb.append(" connector-from-part: ").append(getConnectorPart(ConnectorType.FROM));
-    sb.append(", connector-to-part: ").append(getConnectorPart(ConnectorType.TO));
+    sb.append(" connector-from-part: ").append(getConnectorPart(Direction.FROM));
+    sb.append(", connector-to-part: ").append(getConnectorPart(Direction.TO));
     sb.append(", framework-part: ").append(frameworkPart);
 
     return sb.toString();
@@ -133,7 +133,7 @@ public class MJob extends MAccountableEntity implements MClonable {
     this.name = name;
   }
 
-  public long getConnectionId(ConnectorType type) {
+  public long getConnectionId(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectionId;
@@ -142,11 +142,11 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectionId;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public long getConnectorId(ConnectorType type) {
+  public long getConnectorId(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorId;
@@ -155,11 +155,11 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectorId;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
-  public MJobForms getConnectorPart(ConnectorType type) {
+  public MJobForms getConnectorPart(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorPart;
@@ -168,7 +168,7 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectorPart;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
@@ -182,12 +182,12 @@ public class MJob extends MAccountableEntity implements MClonable {
       return new MJob(this);
     } else {
       return new MJob(
-          getConnectorId(ConnectorType.FROM),
-          getConnectorId(ConnectorType.TO),
-          getConnectionId(ConnectorType.FROM),
-          getConnectionId(ConnectorType.TO),
-          getConnectorPart(ConnectorType.FROM).clone(false),
-          getConnectorPart(ConnectorType.TO).clone(false),
+          getConnectorId(Direction.FROM),
+          getConnectorId(Direction.TO),
+          getConnectionId(Direction.FROM),
+          getConnectionId(Direction.TO),
+          getConnectorPart(Direction.FROM).clone(false),
+          getConnectorPart(Direction.TO).clone(false),
           frameworkPart.clone(false));
     }
   }
@@ -203,13 +203,13 @@ public class MJob extends MAccountableEntity implements MClonable {
     }
 
     MJob job = (MJob)object;
-    return (job.getConnectorId(ConnectorType.FROM) == this.getConnectorId(ConnectorType.FROM))
-        && (job.getConnectorId(ConnectorType.TO) == this.getConnectorId(ConnectorType.TO))
-        && (job.getConnectionId(ConnectorType.FROM) == this.getConnectionId(ConnectorType.FROM))
-        && (job.getConnectionId(ConnectorType.TO) == this.getConnectionId(ConnectorType.TO))
+    return (job.getConnectorId(Direction.FROM) == this.getConnectorId(Direction.FROM))
+        && (job.getConnectorId(Direction.TO) == this.getConnectorId(Direction.TO))
+        && (job.getConnectionId(Direction.FROM) == this.getConnectionId(Direction.FROM))
+        && (job.getConnectionId(Direction.TO) == this.getConnectionId(Direction.TO))
         && (job.getPersistenceId() == this.getPersistenceId())
-        && (job.getConnectorPart(ConnectorType.FROM).equals(this.getConnectorPart(ConnectorType.FROM)))
-        && (job.getConnectorPart(ConnectorType.TO).equals(this.getConnectorPart(ConnectorType.TO)))
+        && (job.getConnectorPart(Direction.FROM).equals(this.getConnectorPart(Direction.FROM)))
+        && (job.getConnectorPart(Direction.TO).equals(this.getConnectorPart(Direction.TO)))
         && (job.frameworkPart.equals(this.frameworkPart));
   }
 }

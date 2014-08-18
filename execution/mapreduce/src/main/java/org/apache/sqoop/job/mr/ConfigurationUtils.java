@@ -22,7 +22,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.json.util.SchemaSerialization;
 import org.apache.sqoop.model.FormUtils;
@@ -100,7 +100,7 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConnectorConnectionConfig(ConnectorType type, Job job, Object obj) {
+  public static void setConnectorConnectionConfig(Direction type, Job job, Object obj) {
     switch (type) {
       case FROM:
         job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_CONNECTOR_CONNECTION, obj.getClass().getName());
@@ -120,7 +120,7 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setConnectorJobConfig(ConnectorType type, Job job, Object obj) {
+  public static void setConnectorJobConfig(Direction type, Job job, Object obj) {
     switch (type) {
       case FROM:
         job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, obj.getClass().getName());
@@ -140,7 +140,7 @@ public final class ConfigurationUtils {
    * @param job MapReduce job object
    * @param obj Configuration object
    */
-  public static void setFrameworkConnectionConfig(ConnectorType type, Job job, Object obj) {
+  public static void setFrameworkConnectionConfig(Direction type, Job job, Object obj) {
     switch (type) {
       case FROM:
         job.getConfiguration().set(JOB_CONFIG_CLASS_FROM_FRAMEWORK_CONNECTION, obj.getClass().getName());
@@ -171,7 +171,7 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConnectorConnectionConfig(ConnectorType type, Configuration configuration) {
+  public static Object getConnectorConnectionConfig(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_CONNECTOR_CONNECTION, JOB_CONFIG_FROM_CONNECTOR_CONNECTION_KEY);
@@ -189,7 +189,7 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConnectorJobConfig(ConnectorType type, Configuration configuration) {
+  public static Object getConnectorJobConfig(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, JOB_CONFIG_FROM_CONNECTOR_JOB_KEY);
@@ -207,7 +207,7 @@ public final class ConfigurationUtils {
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getFrameworkConnectionConfig(ConnectorType type, Configuration configuration) {
+  public static Object getFrameworkConnectionConfig(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FROM_FRAMEWORK_CONNECTION, JOB_CONFIG_FROM_FRAMEWORK_CONNECTION_KEY);
@@ -235,7 +235,7 @@ public final class ConfigurationUtils {
    * @param job MapReduce Job object
    * @param schema Schema
    */
-  public static void setConnectorSchema(ConnectorType type, Job job, Schema schema) {
+  public static void setConnectorSchema(Direction type, Job job, Schema schema) {
     if(schema != null) {
       switch (type) {
         case FROM:
@@ -253,7 +253,7 @@ public final class ConfigurationUtils {
    * @param type The FROM or TO connector
    * @param configuration MapReduce configuration object
    */
-  public static Schema getConnectorSchema(ConnectorType type, Configuration configuration) {
+  public static Schema getConnectorSchema(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
         return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_FROM_CONNECTOR_KEY));

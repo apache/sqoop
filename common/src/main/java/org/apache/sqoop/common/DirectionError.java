@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.common;
 
-public enum ConnectorTypeError implements ErrorCode {
+public enum DirectionError implements ErrorCode {
 
   /** An unknown error has occurred. */
   CONNECTOR_TYPE_0000("Unknown connector type")
@@ -26,7 +26,7 @@ public enum ConnectorTypeError implements ErrorCode {
 
   private final String message;
 
-  private ConnectorTypeError(String message) {
+  private DirectionError(String message) {
     this.message = message;
   }
 
