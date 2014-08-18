@@ -44,20 +44,30 @@ abstract public class Validator<T> {
    */
   private List<Message> messages;
 
+  /**
+   * Overall status of the validation.
+   */
+  private Status status;
+
   public Validator() {
     reset();
   }
 
   protected void addMessage(Message msg) {
+    status = Status.getWorstStatus(status, msg.getStatus());
     messages.add(msg);
   }
 
   protected void addMessage(Status status, String msg) {
-    messages.add(new Message(status, msg));
+    addMessage(new Message(status, msg));
   }
 
   public List<Message> getMessages() {
     return messages;
+  }
+
+  public Status getStatus() {
+    return status;
   }
 
   /**
@@ -65,5 +75,6 @@ abstract public class Validator<T> {
    */
   public void reset() {
     messages = new LinkedList<Message>();
+    status = Status.getDefault();
   }
 }

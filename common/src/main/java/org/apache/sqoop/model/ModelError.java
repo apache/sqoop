@@ -46,6 +46,8 @@ public enum ModelError implements ErrorCode {
 
   MODEL_011("Input do not exist"),
 
+  MODEL_012("Can't get value from object"),
+
   ;
 
   private final String message;
