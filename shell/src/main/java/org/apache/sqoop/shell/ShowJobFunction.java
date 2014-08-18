@@ -19,7 +19,7 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
@@ -82,9 +82,9 @@ public class ShowJobFunction extends SqoopFunction {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
       fromConnectors.add(String.valueOf(
-          job.getConnectorId(ConnectorType.FROM)));
+          job.getConnectorId(Direction.FROM)));
       toConnectors.add(String.valueOf(
-          job.getConnectorId(ConnectorType.TO)));
+          job.getConnectorId(Direction.TO)));
       availabilities.add(String.valueOf(job.getEnabled()));
     }
 
@@ -121,15 +121,15 @@ public class ShowJobFunction extends SqoopFunction {
       formatter.format(job.getLastUpdateDate())
     );
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_XID_CID_INFO,
-        job.getConnectionId(ConnectorType.FROM),
-        job.getConnectorId(ConnectorType.FROM));
+        job.getConnectionId(Direction.FROM),
+        job.getConnectorId(Direction.FROM));
 
     // Display connector part
-    displayForms(job.getConnectorPart(ConnectorType.FROM).getForms(),
-                 client.getResourceBundle(job.getConnectorId(ConnectorType.FROM)));
+    displayForms(job.getConnectorPart(Direction.FROM).getForms(),
+                 client.getResourceBundle(job.getConnectorId(Direction.FROM)));
     displayForms(job.getFrameworkPart().getForms(),
                  client.getFrameworkResourceBundle());
-    displayForms(job.getConnectorPart(ConnectorType.TO).getForms(),
-                 client.getResourceBundle(job.getConnectorId(ConnectorType.TO)));
+    displayForms(job.getConnectorPart(Direction.TO).getForms(),
+                 client.getResourceBundle(job.getConnectorId(Direction.TO)));
   }
 }

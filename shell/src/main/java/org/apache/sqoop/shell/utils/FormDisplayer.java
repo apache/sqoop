@@ -18,7 +18,7 @@
 package org.apache.sqoop.shell.utils;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MAccountableEntity;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
@@ -70,13 +70,13 @@ public final class FormDisplayer {
 
     // @TODO(Abe): Validate From/To output is correct.
     displayFormsMetadata(
-        connector.getJobForms(ConnectorType.FROM).getForms(),
-        ConnectorType.FROM.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        connector.getJobForms(Direction.FROM).getForms(),
+        Direction.FROM.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
         bundle);
 
     displayFormsMetadata(
-        connector.getJobForms(ConnectorType.TO).getForms(),
-        ConnectorType.TO.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
+        connector.getJobForms(Direction.TO).getForms(),
+        Direction.TO.toString() + " " + resourceString(Constants.RES_FORMDISPLAYER_JOB),
         bundle);
   }
 
@@ -153,9 +153,9 @@ public final class FormDisplayer {
       formList.addAll(connection.getFrameworkPart().getForms());
     } else if(entity instanceof MJob) {
       MJob job = (MJob) entity;
-      formList.addAll(job.getConnectorPart(ConnectorType.FROM).getForms());
+      formList.addAll(job.getConnectorPart(Direction.FROM).getForms());
       formList.addAll(job.getFrameworkPart().getForms());
-      formList.addAll(job.getConnectorPart(ConnectorType.TO).getForms());
+      formList.addAll(job.getConnectorPart(Direction.TO).getForms());
     }
     for(MForm form : formList) {
       if(form.getValidationStatus() == Status.ACCEPTABLE) {

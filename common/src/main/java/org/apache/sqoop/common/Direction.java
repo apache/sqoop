@@ -24,7 +24,7 @@ package org.apache.sqoop.common;
  * is being used to load data TO, then the connector type
  * will be TO.
  */
-public enum ConnectorType {
+public enum Direction {
   FROM,
   TO
 }

@@ -38,8 +38,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sqoop.common.ConnectorType;
-import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
@@ -150,9 +150,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
 
       // Register all jobs
-      registerForms(connectorId, ConnectorType.FROM, mc.getJobForms(ConnectorType.FROM).getForms(),
+      registerForms(connectorId, Direction.FROM, mc.getJobForms(Direction.FROM).getForms(),
         MFormType.JOB.name(), baseFormStmt, baseInputStmt);
-      registerForms(connectorId, ConnectorType.TO, mc.getJobForms(ConnectorType.TO).getForms(),
+      registerForms(connectorId, Direction.TO, mc.getJobForms(Direction.TO).getForms(),
         MFormType.JOB.name(), baseFormStmt, baseInputStmt);
 
     } catch (SQLException ex) {
@@ -925,8 +925,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt = conn.prepareStatement(STMT_INSERT_JOB,
         Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, job.getName());
-      stmt.setLong(2, job.getConnectionId(ConnectorType.FROM));
-      stmt.setLong(3, job.getConnectionId(ConnectorType.TO));
+      stmt.setLong(2, job.getConnectionId(Direction.FROM));
+      stmt.setLong(3, job.getConnectionId(Direction.TO));
       stmt.setBoolean(4, job.getEnabled());
       stmt.setString(5, job.getCreationUser());
       stmt.setTimestamp(6, new Timestamp(job.getCreationDate().getTime()));
@@ -949,7 +949,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       createInputValues(STMT_INSERT_JOB_INPUT,
                         jobId,
-                        job.getConnectorPart(ConnectorType.FROM).getForms(),
+                        job.getConnectorPart(Direction.FROM).getForms(),
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
                         jobId,
@@ -957,7 +957,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
                         jobId,
-                        job.getConnectorPart(ConnectorType.TO).getForms(),
+                        job.getConnectorPart(Direction.TO).getForms(),
                         conn);
 
       job.setPersistenceId(jobId);
@@ -995,7 +995,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       // And reinsert new values
       createInputValues(STMT_INSERT_JOB_INPUT,
                         job.getPersistenceId(),
-                        job.getConnectorPart(ConnectorType.FROM).getForms(),
+                        job.getConnectorPart(Direction.FROM).getForms(),
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
           job.getPersistenceId(),
@@ -1791,7 +1791,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @return short number of forms registered.
    * @throws SQLException
    */
-  private short registerForms(Long connectorId, ConnectorType connectorType,
+  private short registerForms(Long connectorId, Direction direction,
       List<MForm> forms, String type, PreparedStatement baseFormStmt,
       PreparedStatement baseInputStmt)
           throws SQLException {
@@ -1803,10 +1803,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       } else {
         baseFormStmt.setLong(1, connectorId);
       }
-      if(connectorType == null) {
+      if(direction == null) {
         baseFormStmt.setNull(2, Types.VARCHAR);
       } else {
-        baseFormStmt.setString(2, connectorType.name());
+        baseFormStmt.setString(2, direction.name());
       }
       baseFormStmt.setString(3, form.getName());
       baseFormStmt.setString(4, type);
@@ -2155,7 +2155,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           connectionForms.add(mf);
           break;
         case JOB:
-          ConnectorType type = ConnectorType.valueOf(operation);
+          Direction type = Direction.valueOf(operation);
           List<MForm> jobForms;
           switch(type) {
             case FROM:
@@ -2167,7 +2167,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
               break;
 
             default:
-              throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+              throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
           }
 
           if (jobForms.size() != formIndex) {

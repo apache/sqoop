@@ -19,7 +19,7 @@ package org.apache.sqoop.shell.utils;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MJob;
 
 /**
@@ -35,13 +35,13 @@ public class JobDynamicFormOptions extends DynamicFormOptions<MJob> {
                   .withLongOpt("name")
                   .hasArg()
                   .create());
-    for (Option option : FormOptions.getFormsOptions("connector", job.getConnectorPart(ConnectorType.FROM).getForms())) {
+    for (Option option : FormOptions.getFormsOptions("connector", job.getConnectorPart(Direction.FROM).getForms())) {
       this.addOption(option);
     }
     for (Option option : FormOptions.getFormsOptions("framework", job.getFrameworkPart().getForms())) {
       this.addOption(option);
     }
-    for (Option option : FormOptions.getFormsOptions("connector", job.getConnectorPart(ConnectorType.TO).getForms())) {
+    for (Option option : FormOptions.getFormsOptions("connector", job.getConnectorPart(Direction.TO).getForms())) {
       this.addOption(option);
     }
   }

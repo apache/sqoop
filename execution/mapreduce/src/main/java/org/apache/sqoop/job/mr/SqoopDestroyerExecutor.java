@@ -19,12 +19,11 @@ package org.apache.sqoop.job.mr;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -54,12 +53,12 @@ public class SqoopDestroyerExecutor {
 
     // Objects that should be pass to the Destroyer execution
     PrefixContext subContext = new PrefixContext(configuration, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object fromConfigConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.FROM, configuration);
-    Object fromConfigJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.FROM, configuration);
+    Object fromConfigConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, configuration);
+    Object fromConfigJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, configuration);
 
     // Propagate connector schema in every case for now
     // TODO: Change to coditional choosing between Connector schemas.
-    Schema schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, configuration);
+    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, configuration);
 
     DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 

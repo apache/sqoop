@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.common.ConnectorType;
-import org.apache.sqoop.common.ConnectorTypeError;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
@@ -63,7 +63,7 @@ public class JobValidationBean implements JsonBean {
     id = null;
   }
 
-  public Validation getConnectorValidation(ConnectorType type) {
+  public Validation getConnectorValidation(Direction type) {
     switch(type) {
       case FROM:
         return fromConnectorValidation;
@@ -72,7 +72,7 @@ public class JobValidationBean implements JsonBean {
         return toConnectorValidation;
 
       default:
-        throw new SqoopException(ConnectorTypeError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
     }
   }
 
@@ -98,8 +98,8 @@ public class JobValidationBean implements JsonBean {
       object.put(ID, id);
     }
 
-    connectorObject.put(FROM, extractValidation(getConnectorValidation(ConnectorType.FROM)));
-    connectorObject.put(TO, extractValidation(getConnectorValidation(ConnectorType.TO)));
+    connectorObject.put(FROM, extractValidation(getConnectorValidation(Direction.FROM)));
+    connectorObject.put(TO, extractValidation(getConnectorValidation(Direction.TO)));
 
     object.put(FRAMEWORK, extractValidation(frameworkValidation));
     object.put(CONNECTOR, connectorObject);

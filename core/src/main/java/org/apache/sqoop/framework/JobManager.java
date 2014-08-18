@@ -18,7 +18,7 @@
 package org.apache.sqoop.framework;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
@@ -280,8 +280,8 @@ public class JobManager implements Reconfigurable {
         "Job id: " + job.getPersistenceId());
     }
 
-    MConnection fromConnection = repository.findConnection(job.getConnectionId(ConnectorType.FROM));
-    MConnection toConnection = repository.findConnection(job.getConnectionId(ConnectorType.TO));
+    MConnection fromConnection = repository.findConnection(job.getConnectionId(Direction.FROM));
+    MConnection toConnection = repository.findConnection(job.getConnectionId(Direction.TO));
 
     if (!fromConnection.getEnabled()) {
       throw new SqoopException(FrameworkError.FRAMEWORK_0010,
@@ -294,9 +294,9 @@ public class JobManager implements Reconfigurable {
     }
 
     SqoopConnector fromConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.FROM));
+      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
     SqoopConnector toConnector =
-        ConnectorManager.getInstance().getConnector(job.getConnectorId(ConnectorType.TO));
+        ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
     // Transform forms to fromConnector specific classes
     Object fromConnectorConnection = ClassUtils.instantiate(
@@ -305,9 +305,9 @@ public class JobManager implements Reconfigurable {
       fromConnectorConnection);
 
     Object fromJob = ClassUtils.instantiate(
-      fromConnector.getJobConfigurationClass(ConnectorType.FROM));
+      fromConnector.getJobConfigurationClass(Direction.FROM));
     FormUtils.fromForms(
-        job.getConnectorPart(ConnectorType.FROM).getForms(), fromJob);
+        job.getConnectorPart(Direction.FROM).getForms(), fromJob);
 
     // Transform forms to toConnector specific classes
     Object toConnectorConnection = ClassUtils.instantiate(
@@ -316,8 +316,8 @@ public class JobManager implements Reconfigurable {
         toConnectorConnection);
 
     Object toJob = ClassUtils.instantiate(
-        toConnector.getJobConfigurationClass(ConnectorType.TO));
-    FormUtils.fromForms(job.getConnectorPart(ConnectorType.TO).getForms(), toJob);
+        toConnector.getJobConfigurationClass(Direction.TO));
+    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toJob);
 
     // Transform framework specific forms
     Object fromFrameworkConnection = ClassUtils.instantiate(
@@ -342,15 +342,15 @@ public class JobManager implements Reconfigurable {
 
     // Save important variables to the submission request
     request.setSummary(summary);
-    request.setConnector(ConnectorType.FROM, fromConnector);
-    request.setConnector(ConnectorType.TO, toConnector);
-    request.setConnectorConnectionConfig(ConnectorType.FROM, fromConnectorConnection);
-    request.setConnectorConnectionConfig(ConnectorType.TO, toConnectorConnection);
-    request.setConnectorJobConfig(ConnectorType.FROM, fromJob);
-    request.setConnectorJobConfig(ConnectorType.TO, toJob);
+    request.setConnector(Direction.FROM, fromConnector);
+    request.setConnector(Direction.TO, toConnector);
+    request.setConnectorConnectionConfig(Direction.FROM, fromConnectorConnection);
+    request.setConnectorConnectionConfig(Direction.TO, toConnectorConnection);
+    request.setConnectorJobConfig(Direction.FROM, fromJob);
+    request.setConnectorJobConfig(Direction.TO, toJob);
     // @TODO(Abe): Should we actually have 2 different Framework Connection config objects?
-    request.setFrameworkConnectionConfig(ConnectorType.FROM, fromFrameworkConnection);
-    request.setFrameworkConnectionConfig(ConnectorType.TO, toFrameworkConnection);
+    request.setFrameworkConnectionConfig(Direction.FROM, fromFrameworkConnection);
+    request.setFrameworkConnectionConfig(Direction.TO, toFrameworkConnection);
     request.setConfigFrameworkJob(frameworkJob);
     request.setJobName(job.getName());
     request.setJobId(job.getPersistenceId());
@@ -410,24 +410,24 @@ public class JobManager implements Reconfigurable {
     }
 
     // Initializer context
-    initializerContext = new InitializerContext(request.getConnectorContext(ConnectorType.FROM));
+    initializerContext = new InitializerContext(request.getConnectorContext(Direction.FROM));
 
     // Initialize submission from fromConnector perspective
     initializer.initialize(initializerContext,
-        request.getConnectorConnectionConfig(ConnectorType.FROM),
-        request.getConnectorJobConfig(ConnectorType.FROM));
+        request.getConnectorConnectionConfig(Direction.FROM),
+        request.getConnectorJobConfig(Direction.FROM));
 
     // Add job specific jars to
     request.addJars(initializer.getJars(initializerContext,
-        request.getConnectorConnectionConfig(ConnectorType.FROM),
-        request.getConnectorJobConfig(ConnectorType.FROM)));
+        request.getConnectorConnectionConfig(Direction.FROM),
+        request.getConnectorJobConfig(Direction.FROM)));
 
     // @TODO(Abe): Alter behavior of Schema here. Need from Schema.
     // Retrieve and persist the schema
     request.getSummary().setConnectorSchema(initializer.getSchema(
         initializerContext,
-        request.getConnectorConnectionConfig(ConnectorType.FROM),
-        request.getConnectorJobConfig(ConnectorType.FROM)
+        request.getConnectorConnectionConfig(Direction.FROM),
+        request.getConnectorJobConfig(Direction.FROM)
     ));
 
     // Initialize To Connector callback.
@@ -444,17 +444,17 @@ public class JobManager implements Reconfigurable {
     }
 
     // Initializer context
-    initializerContext = new InitializerContext(request.getConnectorContext(ConnectorType.TO));
+    initializerContext = new InitializerContext(request.getConnectorContext(Direction.TO));
 
     // Initialize submission from fromConnector perspective
     initializer.initialize(initializerContext,
-        request.getConnectorConnectionConfig(ConnectorType.TO),
-        request.getConnectorJobConfig(ConnectorType.TO));
+        request.getConnectorConnectionConfig(Direction.TO),
+        request.getConnectorJobConfig(Direction.TO));
 
     // Add job specific jars to
     request.addJars(initializer.getJars(initializerContext,
-        request.getConnectorConnectionConfig(ConnectorType.TO),
-        request.getConnectorJobConfig(ConnectorType.TO)));
+        request.getConnectorConnectionConfig(Direction.TO),
+        request.getConnectorJobConfig(Direction.TO)));
 
     // @TODO(Abe): Alter behavior of Schema here. Need To Schema.
     // Retrieve and persist the schema
@@ -531,17 +531,17 @@ public class JobManager implements Reconfigurable {
 
     // @TODO(Abe): Update context to manage multiple connectors. As well as summary.
     DestroyerContext fromDestroyerContext = new DestroyerContext(
-      request.getConnectorContext(ConnectorType.FROM), false, request.getSummary()
+      request.getConnectorContext(Direction.FROM), false, request.getSummary()
         .getConnectorSchema());
     DestroyerContext toDestroyerContext = new DestroyerContext(
-        request.getConnectorContext(ConnectorType.TO), false, request.getSummary()
+        request.getConnectorContext(Direction.TO), false, request.getSummary()
         .getConnectorSchema());
 
     // Initialize submission from connector perspective
-    fromDestroyer.destroy(fromDestroyerContext, request.getConnectorConnectionConfig(ConnectorType.FROM),
-        request.getConnectorJobConfig(ConnectorType.FROM));
-    toDestroyer.destroy(toDestroyerContext, request.getConnectorConnectionConfig(ConnectorType.TO),
-        request.getConnectorJobConfig(ConnectorType.TO));
+    fromDestroyer.destroy(fromDestroyerContext, request.getConnectorConnectionConfig(Direction.FROM),
+        request.getConnectorJobConfig(Direction.FROM));
+    toDestroyer.destroy(toDestroyerContext, request.getConnectorConnectionConfig(Direction.TO),
+        request.getConnectorJobConfig(Direction.TO));
   }
 
   public MSubmission stop(long jobId, HttpEventContext ctx) {

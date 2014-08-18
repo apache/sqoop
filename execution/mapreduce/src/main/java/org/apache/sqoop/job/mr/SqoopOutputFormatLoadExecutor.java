@@ -30,7 +30,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
@@ -40,7 +40,6 @@ import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.etl.io.DataReader;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.utils.ClassUtils;
@@ -73,7 +72,7 @@ public class SqoopOutputFormatLoadExecutor {
     producer = new SqoopRecordWriter();
     data = (IntermediateDataFormat) ClassUtils.instantiate(context
       .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
-    data.setSchema(ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, context.getConfiguration()));
+    data.setSchema(ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()));
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
@@ -229,11 +228,11 @@ public class SqoopOutputFormatLoadExecutor {
           // Propagate connector schema in every case for now
           // TODO: Change to coditional choosing between Connector schemas.
           // @TODO(Abe): Maybe use TO schema?
-          schema = ConfigurationUtils.getConnectorSchema(ConnectorType.FROM, conf);
+          schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 
           subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
-          configConnection = ConfigurationUtils.getConnectorConnectionConfig(ConnectorType.TO, conf);
-          configJob = ConfigurationUtils.getConnectorJobConfig(ConnectorType.TO, conf);
+          configConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);
+          configJob = ConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
         }
 
         // Create loader context

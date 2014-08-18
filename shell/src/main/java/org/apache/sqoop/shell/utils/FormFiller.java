@@ -21,7 +21,7 @@ import jline.ConsoleReader;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sqoop.common.ConnectorType;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MEnumInput;
@@ -69,7 +69,7 @@ public final class FormFiller {
 
     // Fill in data from user
     return fillForms(line,
-                     job.getConnectorPart(ConnectorType.FROM).getForms(),
+                     job.getConnectorPart(Direction.FROM).getForms(),
                      job.getFrameworkPart().getForms());
   }
 
@@ -94,11 +94,11 @@ public final class FormFiller {
 
     // Fill in data from user
     return fillForms(reader,
-                     job.getConnectorPart(ConnectorType.FROM).getForms(),
+                     job.getConnectorPart(Direction.FROM).getForms(),
                      fromConnectorBundle,
                      job.getFrameworkPart().getForms(),
                      frameworkBundle,
-                     job.getConnectorPart(ConnectorType.TO).getForms(),
+                     job.getConnectorPart(Direction.TO).getForms(),
                      toConnectorBundle);
   }
 
@@ -909,7 +909,7 @@ public final class FormFiller {
   }
 
   public static void printJobValidationMessages(MJob job) {
-    for (MForm form : job.getConnectorPart(ConnectorType.FROM).getForms()) {
+    for (MForm form : job.getConnectorPart(Direction.FROM).getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }
@@ -919,7 +919,7 @@ public final class FormFiller {
         printValidationMessage(input, true);
       }
     }
-    for (MForm form : job.getConnectorPart(ConnectorType.TO).getForms()) {
+    for (MForm form : job.getConnectorPart(Direction.TO).getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }
