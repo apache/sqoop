@@ -20,7 +20,7 @@ package org.apache.sqoop.common;
 public enum DirectionError implements ErrorCode {
 
   /** An unknown error has occurred. */
-  CONNECTOR_TYPE_0000("Unknown connector type")
+  DIRECTION_0000("Unknown direction")
 
   ;
 

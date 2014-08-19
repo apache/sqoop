@@ -128,7 +128,7 @@ public final class MConnector extends MPersistableEntity implements MClonable {
         return toJobForms;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 

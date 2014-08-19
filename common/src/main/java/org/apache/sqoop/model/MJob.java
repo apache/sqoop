@@ -142,7 +142,7 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectionId;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -155,7 +155,7 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectorId;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -168,7 +168,7 @@ public class MJob extends MAccountableEntity implements MClonable {
         return toConnectorPart;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 

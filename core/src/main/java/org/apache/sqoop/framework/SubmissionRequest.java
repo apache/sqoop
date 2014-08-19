@@ -168,7 +168,7 @@ public class SubmissionRequest {
         return toConnector;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -181,7 +181,7 @@ public class SubmissionRequest {
         toConnector = connector;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -230,7 +230,7 @@ public class SubmissionRequest {
         return toConnectorConnectionConfig;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -243,7 +243,7 @@ public class SubmissionRequest {
         toConnectorConnectionConfig = config;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -256,7 +256,7 @@ public class SubmissionRequest {
         return toConnectorJobConfig;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -269,7 +269,7 @@ public class SubmissionRequest {
         toConnectorJobConfig = config;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -282,7 +282,7 @@ public class SubmissionRequest {
         return toFrameworkConnectionConfig;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -295,7 +295,7 @@ public class SubmissionRequest {
         toFrameworkConnectionConfig = config;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
@@ -316,7 +316,7 @@ public class SubmissionRequest {
         return toConnectorContext;
 
       default:
-        throw new SqoopException(DirectionError.CONNECTOR_TYPE_0000, "Connector type: " + type);
+        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
