@@ -29,42 +29,42 @@ import org.junit.Test;
  */
 public class TestMConnector {
 
-//  /**
-//   * Test for initialization
-//   */
-//  @Test
-//  public void testInitialization() {
-//    List<MForm> forms = new ArrayList<MForm>();
-//    MConnectionForms connectionForms1 = new MConnectionForms(forms);
-//    MJobForms jobform1 = new MJobForms(MJob.Type.EXPORT, forms);
-//    List<MJobForms> jobFormList = new ArrayList<MJobForms>();
-//    jobFormList.add(jobform1);
-//    MConnector connector1 = new MConnector("NAME", "CLASSNAME", "1.0",
-//        connectionForms1, jobFormList);
-//    assertEquals("NAME", connector1.getUniqueName());
-//    assertEquals("CLASSNAME", connector1.getClassName());
-//    assertEquals("1.0", connector1.getVersion());
-//    MConnector connector2 = new MConnector("NAME", "CLASSNAME", "1.0",
-//        connectionForms1, jobFormList);
-//    assertEquals(connector2, connector1);
-//    MConnector connector3 = new MConnector("NAME1", "CLASSNAME", "2.0",
-//        connectionForms1, jobFormList);
-//    assertFalse(connector1.equals(connector3));
-//
-//    try {
-//      connector1 = new MConnector(null, "CLASSNAME", "1.0", connectionForms1,
-//          jobFormList); // Expecting null pointer exception
-//    } catch (NullPointerException e) {
-//      assertTrue(true);
-//    }
-//    try {
-//      connector1 = new MConnector("NAME", null, "1.0", connectionForms1,
-//          jobFormList); // Expecting null pointer exception
-//    } catch (NullPointerException e) {
-//      assertTrue(true);
-//    }
-//  }
-//
+  /**
+   * Test for initialization
+   */
+  @Test
+  public void testInitialization() {
+    List<MForm> fromJobForms = new ArrayList<MForm>();
+    List<MForm> toJobForms = new ArrayList<MForm>();
+    MConnectionForms connectionForms1 = new MConnectionForms(fromJobForms);
+    MJobForms fromJobForm1 = new MJobForms(fromJobForms);
+    MJobForms toJobForm1 = new MJobForms(toJobForms);
+    MConnector connector1 = new MConnector("NAME", "CLASSNAME", "1.0",
+        connectionForms1, fromJobForm1, toJobForm1);
+    assertEquals("NAME", connector1.getUniqueName());
+    assertEquals("CLASSNAME", connector1.getClassName());
+    assertEquals("1.0", connector1.getVersion());
+    MConnector connector2 = new MConnector("NAME", "CLASSNAME", "1.0",
+        connectionForms1, fromJobForm1, toJobForm1);
+    assertEquals(connector2, connector1);
+    MConnector connector3 = new MConnector("NAME1", "CLASSNAME", "2.0",
+        connectionForms1, fromJobForm1, toJobForm1);
+    assertFalse(connector1.equals(connector3));
+
+    try {
+      connector1 = new MConnector(null, "CLASSNAME", "1.0", connectionForms1,
+          fromJobForm1, toJobForm1); // Expecting null pointer exception
+    } catch (NullPointerException e) {
+      assertTrue(true);
+    }
+    try {
+      connector1 = new MConnector("NAME", null, "1.0", connectionForms1,
+          fromJobForm1, toJobForm1); // Expecting null pointer exception
+    } catch (NullPointerException e) {
+      assertTrue(true);
+    }
+  }
+
 //  @Test
 //  public void testClone() {
 //    List<MForm> forms = new ArrayList<MForm>();
