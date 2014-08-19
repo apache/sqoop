@@ -29,18 +29,19 @@ import static org.junit.Assert.*;
  */
 public class TestMFramework {
 
-//  @Test
-//  public void testFailureOnDuplicateJobTypes() {
-//    MConnectionForms connectionForms = new MConnectionForms(new ArrayList<MForm>());
-//    List<MJobForms> jobForms = new ArrayList<MJobForms>();
-//    jobForms.add(new MJobForms(MJob.Type.IMPORT, new ArrayList<MForm>()));
-//    jobForms.add(new MJobForms(MJob.Type.IMPORT, new ArrayList<MForm>()));
-//
-//    try {
-//      new MFramework(connectionForms, jobForms, "1");
-//      fail("We we're expecting exception for invalid usage");
-//    } catch(Exception ex) {
-//      // Expected case
-//    }
-//  }
+  @Test
+  public void testForms() {
+    List<MForm> connectionFormList = new ArrayList<MForm>();
+    List<MForm> jobFormList = new ArrayList<MForm>();
+    connectionFormList.add(new MForm("connection-test", new ArrayList<MInput<?>>()));
+    jobFormList.add(new MForm("job-test", new ArrayList<MInput<?>>()));
+    MConnectionForms connectionForms = new MConnectionForms(connectionFormList);
+    MJobForms jobForms = new MJobForms(jobFormList);
+
+    MFramework framework = new MFramework(connectionForms, jobForms, "1");
+    assertEquals(1, framework.getJobForms().getForms().size());
+    assertEquals("job-test", framework.getJobForms().getForms().get(0).getName());
+    assertEquals(1, framework.getConnectionForms().getForms().size());
+    assertEquals("connection-test", framework.getConnectionForms().getForms().get(0).getName());
+  }
 }

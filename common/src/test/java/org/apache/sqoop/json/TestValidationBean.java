@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.json.simple.JSONObject;
@@ -32,76 +33,143 @@ import static org.junit.Assert.*;
  *
  */
 public class TestValidationBean {
-//
-//  @Test
-//  public void testSerialization() {
-//    // Serialize it to JSON object
-//    ValidationBean bean = new ValidationBean(
-//      getValidation(Status.FINE),
-//      getValidation(Status.UNACCEPTABLE)
-//    );
-//    JSONObject json = bean.extract(false);
-//
-//    // "Move" it across network in text form
-//    String string = json.toJSONString();
-//
-//    // Retrieved transferred object
-//    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-//    ValidationBean retrievedBean = new ValidationBean();
-//    retrievedBean.restore(retrievedJson);
-//
-//    assertNull(retrievedBean.getId());
-//
-//    Validation.FormInput fa = new Validation.FormInput("f", "i");
-//    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
-//
-//    Validation connector = retrievedBean.getConnectorValidation();
-//    assertEquals(Status.FINE, connector.getStatus());
-//    assertEquals(2, connector.getMessages().size());
-//    assertTrue(connector.getMessages().containsKey(fa));
-//    assertEquals(new Validation.Message(Status.FINE, "d"),
-//      connector.getMessages().get(fa));
-//
-//    Validation framework = retrievedBean.getFrameworkValidation();
-//    assertEquals(Status.UNACCEPTABLE, framework.getStatus());
-//    assertEquals(2, framework.getMessages().size());
-//    assertTrue(framework.getMessages().containsKey(fb));
-//    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
-//      framework.getMessages().get(fb));
-//  }
-//
-//  @Test
-//  public void testId() {
-//    // Serialize it to JSON object
-//    ValidationBean bean = new ValidationBean(
-//      getValidation(Status.FINE),
-//      getValidation(Status.FINE)
-//    );
-//    bean.setId((long) 10);
-//    JSONObject json = bean.extract(false);
-//
-//    // "Move" it across network in text form
-//    String string = json.toJSONString();
-//
-//    // Retrieved transferred object
-//    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-//    ValidationBean retrievedBean = new ValidationBean();
-//    retrievedBean.restore(retrievedJson);
-//
-//    assertEquals((Long)(long) 10, retrievedBean.getId());
-//  }
-//
-//  public Validation getValidation(Status status) {
-//    Map<Validation.FormInput, Validation.Message> messages =
-//      new HashMap<Validation.FormInput, Validation.Message>();
-//
-//    messages.put(
-//      new Validation.FormInput("f", "i"),
-//      new Validation.Message(status, "d"));
-//    messages.put(
-//      new Validation.FormInput("f2", "i2"),
-//      new Validation.Message(status, "c"));
-//
-//    return new Validation(status, messages);
-//  }
+
+  @Test
+  public void testJobValidationBeanSerialization() {
+    // Serialize it to JSON object
+    JobValidationBean bean = new JobValidationBean(
+      getValidation(Status.FINE),
+      getValidation(Status.UNACCEPTABLE),
+      getValidation(Status.FINE)
+    );
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JobValidationBean retrievedBean = new JobValidationBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertNull(retrievedBean.getId());
+
+    Validation.FormInput fa = new Validation.FormInput("f", "i");
+    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
+
+    Validation fromConnector = retrievedBean.getConnectorValidation(Direction.FROM);
+    assertEquals(Status.FINE, fromConnector.getStatus());
+    assertEquals(2, fromConnector.getMessages().size());
+    assertTrue(fromConnector.getMessages().containsKey(fa));
+    assertEquals(new Validation.Message(Status.FINE, "d"),
+        fromConnector.getMessages().get(fa));
+
+    Validation toConnector = retrievedBean.getConnectorValidation(Direction.TO);
+    assertEquals(Status.FINE, toConnector.getStatus());
+    assertEquals(2, toConnector.getMessages().size());
+    assertTrue(toConnector.getMessages().containsKey(fa));
+    assertEquals(new Validation.Message(Status.FINE, "d"),
+        toConnector.getMessages().get(fa));
+
+    Validation framework = retrievedBean.getFrameworkValidation();
+    assertEquals(Status.UNACCEPTABLE, framework.getStatus());
+    assertEquals(2, framework.getMessages().size());
+    assertTrue(framework.getMessages().containsKey(fb));
+    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
+      framework.getMessages().get(fb));
+  }
+
+  @Test
+  public void testJobValidationBeanId() {
+    // Serialize it to JSON object
+    JobValidationBean bean = new JobValidationBean(
+        getValidation(Status.FINE),
+        getValidation(Status.FINE),
+        getValidation(Status.FINE)
+    );
+    bean.setId((long) 10);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JobValidationBean retrievedBean = new JobValidationBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals((Long)(long) 10, retrievedBean.getId());
+  }
+
+  @Test
+  public void testConnectionValidationBeanSerialization() {
+    // Serialize it to JSON object
+    ConnectionValidationBean bean = new ConnectionValidationBean(
+        getValidation(Status.FINE),
+        getValidation(Status.UNACCEPTABLE)
+    );
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    ConnectionValidationBean retrievedBean = new ConnectionValidationBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertNull(retrievedBean.getId());
+
+    Validation.FormInput fa = new Validation.FormInput("f", "i");
+    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
+
+    Validation connector = retrievedBean.getConnectorValidation();
+    assertEquals(Status.FINE, connector.getStatus());
+    assertEquals(2, connector.getMessages().size());
+    assertTrue(connector.getMessages().containsKey(fa));
+    assertEquals(new Validation.Message(Status.FINE, "d"),
+        connector.getMessages().get(fa));
+
+    Validation framework = retrievedBean.getFrameworkValidation();
+    assertEquals(Status.UNACCEPTABLE, framework.getStatus());
+    assertEquals(2, framework.getMessages().size());
+    assertTrue(framework.getMessages().containsKey(fb));
+    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
+        framework.getMessages().get(fb));
+  }
+
+  @Test
+  public void testConnectionValidationBeanId() {
+    // Serialize it to JSON object
+    ConnectionValidationBean bean = new ConnectionValidationBean(
+        getValidation(Status.FINE),
+        getValidation(Status.FINE)
+    );
+    bean.setId((long) 10);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    ConnectionValidationBean retrievedBean = new ConnectionValidationBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals((Long)(long) 10, retrievedBean.getId());
+  }
+
+  public Validation getValidation(Status status) {
+    Map<Validation.FormInput, Validation.Message> messages =
+      new HashMap<Validation.FormInput, Validation.Message>();
+
+    messages.put(
+      new Validation.FormInput("f", "i"),
+      new Validation.Message(status, "d"));
+    messages.put(
+      new Validation.FormInput("f2", "i2"),
+      new Validation.Message(status, "c"));
+
+    return new Validation(status, messages);
+  }
 }
