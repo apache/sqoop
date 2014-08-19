@@ -372,6 +372,18 @@ For lib/avro-<version>.jar:
 
   The Apache License, Version 2.0
 
+For lib/kite-data-core-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-data-mapreduce-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-hadoop-compatibility-<version>.jar:
+
+  The Apache License, Version 2.0
+
 For lib/avro-ipc-<version>.jar:
 
   The Apache License, Version 2.0

@@ -228,8 +228,17 @@ public class AppendUtils {
         } while (!fs.rename(fileStatus.getPath(), new Path(targetDir, destFilename.toString())));
 
         LOG.debug("Filename: " + sourceFilename + " repartitioned to: " + destFilename.toString());
-      } else {    // ignore everything else
-        LOG.debug("Filename: " + sourceFilename + " ignored");
+      } else {
+        // Generated Parquet files do not follow the pattern "part-m-([0-9]{5}).ext", so that these
+        // files cannot be moved to target directory expectedly. We simply check file extension.
+        boolean fileMoved = false;
+        if (sourceFilename.endsWith(".parquet")) {
+          Path targetFilename = new Path(targetDir, sourceFilename.toString());
+          fileMoved = fs.rename(fileStatus.getPath(), targetFilename);
+        }
+        if (!fileMoved) {    // ignore everything else
+          LOG.debug("Filename: " + sourceFilename + " ignored");
+        }
       }
     }
   }

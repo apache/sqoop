@@ -708,6 +708,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         .withDescription("Imports data to Avro data files")
         .withLongOpt(FMT_AVRODATAFILE_ARG)
         .create());
+    importOpts.addOption(OptionBuilder
+        .withDescription("Imports data to Parquet files")
+        .withLongOpt(BaseSqoopTool.FMT_PARQUETFILE_ARG)
+        .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -923,6 +927,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         out.setFileLayout(SqoopOptions.FileLayout.AvroDataFile);
       }
 
+      if (in.hasOption(FMT_PARQUETFILE_ARG)) {
+        out.setFileLayout(SqoopOptions.FileLayout.ParquetFile);
+      }
+
       if (in.hasOption(NUM_MAPPERS_ARG)) {
         out.setNumMappers(Integer.parseInt(in.getOptionValue(NUM_MAPPERS_ARG)));
       }
@@ -1020,8 +1028,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
             && options.getFileLayout() != SqoopOptions.FileLayout.TextFile
             && options.getConnectString().contains("jdbc:mysql://")) {
       throw new InvalidOptionsException(
-            "MySQL direct import currently supports only text output format."
-             + "Parameters --as-sequencefile and --as-avrodatafile are not "
+            "MySQL direct import currently supports only text output format. "
+             + "Parameters --as-sequencefile --as-avrodatafile and --as-parquetfile are not "
              + "supported with --direct params in MySQL case.");
     } else if (options.isDirect()
             && options.doHiveDropDelims()) {

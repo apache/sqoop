@@ -33,6 +33,9 @@ Import control options
 --as-textfile::
   Imports data as plain text (default)
 
+--as-parquetfile::
+  Imports data to Parquet Files
+
 --boundary-query (query)::
   Using following query to select minimal and maximal value of '--split-by' column for creating splits
 

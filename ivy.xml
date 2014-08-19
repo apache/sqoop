@@ -183,6 +183,8 @@ under the License.
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
+    <dependency org="org.kitesdk" name="kite-data-mapreduce" rev="${kite-data-mapreduce.version}"
+      conf="avro->default;redist->default"/>
 
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"

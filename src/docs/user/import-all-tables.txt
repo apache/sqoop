@@ -47,6 +47,7 @@ Argument                     Description
 +\--as-avrodatafile+         Imports data to Avro Data Files
 +\--as-sequencefile+         Imports data to SequenceFiles
 +\--as-textfile+             Imports data as plain text (default)
++\--as-parquetfile+          Imports data to Parquet Files
 +\--direct+                  Use direct import fast path
 +\--inline-lob-limit <n>+    Set the maximum size for an inline LOB
 +-m,\--num-mappers <n>+      Use 'n' map tasks to import in parallel

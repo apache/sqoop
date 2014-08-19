@@ -81,6 +81,7 @@ Import control arguments:
    --as-avrodatafile             Imports data to Avro Data Files
    --as-sequencefile             Imports data to SequenceFiles
    --as-textfile                 Imports data as plain text (default)
+   --as-parquetfile              Imports data to Parquet Data Files
 ...
 ----
 

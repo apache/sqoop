@@ -39,7 +39,8 @@ public class SqoopOptions
   public enum FileLayout {
     TextFile,
     SequenceFile,
-    AvroDataFile
+    AvroDataFile,
+    ParquetFile
   }
 
   /**

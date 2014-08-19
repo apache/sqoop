@@ -98,6 +98,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String FMT_SEQUENCEFILE_ARG = "as-sequencefile";
   public static final String FMT_TEXTFILE_ARG = "as-textfile";
   public static final String FMT_AVRODATAFILE_ARG = "as-avrodatafile";
+  public static final String FMT_PARQUETFILE_ARG = "as-parquetfile";
   public static final String HIVE_IMPORT_ARG = "hive-import";
   public static final String HIVE_TABLE_ARG = "hive-table";
   public static final String HIVE_DATABASE_ARG = "hive-database";

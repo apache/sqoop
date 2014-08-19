@@ -36,6 +36,9 @@ Import control options
 --as-textfile::
   Imports data as plain text (default)
 
+--as-parquetfile::
+  Imports data to Parquet Files
+
 --direct::
   Use direct import fast path (mysql only)
 

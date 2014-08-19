@@ -169,6 +169,7 @@ The following Sqoop export and import options are not supported with HCatalog jo
 * +--append+
 * +--as-sequencefile+
 * +--as-avrofile+
+* +--as-parquetfile+
 
 Ignored Sqoop Options
 ^^^^^^^^^^^^^^^^^^^^^

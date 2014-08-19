@@ -59,6 +59,7 @@ Argument                          Description
 +\--as-avrodatafile+              Imports data to Avro Data Files
 +\--as-sequencefile+              Imports data to SequenceFiles
 +\--as-textfile+                  Imports data as plain text (default)
++\--as-parquetfile+               Imports data to Parquet Files
 +\--boundary-query <statement>+   Boundary query to use for creating splits
 +\--columns <col,col,col...>+     Columns to import from table
 +\--delete-target-dir+            Delete the import target directory\
