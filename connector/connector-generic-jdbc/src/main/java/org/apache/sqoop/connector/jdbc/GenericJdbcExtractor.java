@@ -41,7 +41,7 @@ public class GenericJdbcExtractor extends Extractor<ConnectionConfiguration, Fro
     String password = connection.connection.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
-    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL);
+    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);
     String conditions = partition.getConditions();
     query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
     LOG.info("Using query: " + query);

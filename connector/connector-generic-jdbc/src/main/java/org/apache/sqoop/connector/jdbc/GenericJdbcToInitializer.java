@@ -216,7 +216,7 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
     }
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_TO_JDBC_DATA_SQL,
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL,
         dataSql);
   }
 }

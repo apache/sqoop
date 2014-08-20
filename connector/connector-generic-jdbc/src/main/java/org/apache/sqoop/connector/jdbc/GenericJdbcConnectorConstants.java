@@ -42,9 +42,9 @@ public final class GenericJdbcConnectorConstants {
   public static final String CONNECTOR_JDBC_PARTITION_MAXVALUE =
       PREFIX_CONNECTOR_JDBC_CONFIG + "partition.maxvalue";
 
-  public static final String CONNECTOR_FROM_JDBC_DATA_SQL =
+  public static final String CONNECTOR_JDBC_FROM_DATA_SQL =
       PREFIX_CONNECTOR_JDBC_CONFIG + "from.data.sql";
-  public static final String CONNECTOR_TO_JDBC_DATA_SQL =
+  public static final String CONNECTOR_JDBC_TO_DATA_SQL =
       PREFIX_CONNECTOR_JDBC_CONFIG + "to.data.sql";
 
   public static final String SQL_CONDITIONS_TOKEN = "${CONDITIONS}";
