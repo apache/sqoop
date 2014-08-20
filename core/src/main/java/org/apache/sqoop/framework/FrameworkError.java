@@ -46,6 +46,8 @@ public enum FrameworkError implements ErrorCode {
 
   FRAMEWORK_0010("Connection for this job has been disabled. Cannot submit this job."),
 
+  FRAMEWORK_0011("Connector does not support direction. Cannot submit this job."),
+
   ;
 
   private final String message;

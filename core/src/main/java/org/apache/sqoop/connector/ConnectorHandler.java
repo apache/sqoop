@@ -19,6 +19,7 @@ package org.apache.sqoop.connector;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -29,6 +30,7 @@ import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MJobForms;
 
 public final class ConnectorHandler {
@@ -91,13 +93,23 @@ public final class ConnectorHandler {
     }
 
     // Initialize Metadata
-    MJobForms fromJobForms = new MJobForms(FormUtils.toForms(
-      connector.getJobConfigurationClass(Direction.FROM)));
+    MJobForms fromJobForms = null;
+    MJobForms toJobForms = null;
+    if (connector.getSupportedDirections().contains(Direction.FROM)) {
+      fromJobForms = new MJobForms(FormUtils.toForms(
+          connector.getJobConfigurationClass(Direction.FROM)));
+    } else {
+      fromJobForms = new MJobForms(new ArrayList<MForm>());
+    }
+
+    if (connector.getSupportedDirections().contains(Direction.TO)) {
+      toJobForms = new MJobForms(FormUtils.toForms(
+          connector.getJobConfigurationClass(Direction.TO)));
+    } else {
+      toJobForms = new MJobForms(new ArrayList<MForm>());
+    }
+
     MConnectionForms connectionForms = new MConnectionForms(
-      FormUtils.toForms(connector.getConnectionConfigurationClass()));
-    MJobForms toJobForms = new MJobForms(FormUtils.toForms(
-        connector.getJobConfigurationClass(Direction.TO)));
-    MConnectionForms toConnectionForms = new MConnectionForms(
         FormUtils.toForms(connector.getConnectionConfigurationClass()));
 
     String connectorVersion = connector.getVersion();

@@ -298,6 +298,17 @@ public class JobManager implements Reconfigurable {
     SqoopConnector toConnector =
         ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
+    // Make sure that connectors support the directions they will be used from.
+    if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0011,
+          "Connector: " + fromConnector.getClass().getCanonicalName());
+    }
+
+    if (!toConnector.getSupportedDirections().contains(Direction.TO)) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0011,
+          "Connector: " + toConnector.getClass().getCanonicalName());
+    }
+
     // Transform forms to fromConnector specific classes
     Object fromConnectorConnection = ClassUtils.instantiate(
         fromConnector.getConnectionConfigurationClass());
