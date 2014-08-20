@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
@@ -67,43 +68,48 @@ public class GenericJdbcValidator extends Validator {
 
   @Override
   public Validation validateJob(Object jobConfiguration) {
-    return super.validateJob(jobConfiguration);
+    if (jobConfiguration instanceof FromJobConfiguration) {
+      return validateFromJobConfiguration((FromJobConfiguration)jobConfiguration);
+    } else if (jobConfiguration instanceof ToJobConfiguration) {
+      return validateToJobConfiguration((ToJobConfiguration)jobConfiguration);
+    } else {
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0020,
+          "Configuration object for unknown direction.");
+    }
   }
 
-  private Validation validateExportJob(Object jobConfiguration) {
+  private Validation validateToJobConfiguration(ToJobConfiguration configuration) {
     Validation validation = new Validation(ToJobConfiguration.class);
-    ToJobConfiguration configuration = (ToJobConfiguration)jobConfiguration;
 
     if(configuration.toTable.tableName == null && configuration.toTable.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either fromTable name or SQL must be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "toTable", "Either table name or SQL must be specified");
     }
     if(configuration.toTable.tableName != null && configuration.toTable.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both fromTable name and SQL cannot be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "toTable", "Both table name and SQL cannot be specified");
     }
     if(configuration.toTable.tableName == null &&
         configuration.toTable.stageTableName != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable",
-        "Stage fromTable name cannot be specified without specifying fromTable name");
+      validation.addMessage(Status.UNACCEPTABLE, "toTable",
+        "Stage table name cannot be specified without specifying table name");
     }
     if(configuration.toTable.stageTableName == null &&
         configuration.toTable.clearStageTable != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable",
-        "Clear stage fromTable cannot be specified without specifying name of " +
-        "the stage fromTable.");
+      validation.addMessage(Status.UNACCEPTABLE, "toTable",
+        "Clear stage table cannot be specified without specifying name of " +
+        "the stage table.");
     }
 
     return validation;
   }
 
-  private Validation validateImportJob(Object jobConfiguration) {
-    Validation validation = new Validation(FromJobConfiguration.class);
-    FromJobConfiguration configuration = (FromJobConfiguration)jobConfiguration;
+  private Validation validateFromJobConfiguration(FromJobConfiguration configuration) {
+    Validation validation = new Validation(ToJobConfiguration.class);
 
     if(configuration.fromTable.tableName == null && configuration.fromTable.sql == null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either fromTable name or SQL must be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either table name or SQL must be specified");
     }
     if(configuration.fromTable.tableName != null && configuration.fromTable.sql != null) {
-      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both fromTable name and SQL cannot be specified");
+      validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both table name and SQL cannot be specified");
     }
     if(configuration.fromTable.schemaName != null && configuration.fromTable.sql != null) {
       validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Both schema name and SQL cannot be specified");

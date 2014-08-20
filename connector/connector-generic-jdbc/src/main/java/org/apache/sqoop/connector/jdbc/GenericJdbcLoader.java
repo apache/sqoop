@@ -38,7 +38,7 @@ public class GenericJdbcLoader extends Loader<ConnectionConfiguration, ToJobConf
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
     executor.setAutoCommit(false);
 
-    String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_TO_JDBC_DATA_SQL);
+    String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL);
     executor.beginBatch(sql);
     try {
       int numberOfRows = 0;

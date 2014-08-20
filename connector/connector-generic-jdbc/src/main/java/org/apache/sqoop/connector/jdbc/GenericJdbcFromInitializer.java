@@ -80,7 +80,7 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     ResultSetMetaData rsmt = null;
     try {
       rs = executor.executeQuery(
-        context.getString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL)
+        context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL)
           .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
       );
 
@@ -316,7 +316,7 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     LOG.info("Using dataSql: " + dataSql);
     LOG.info("Field names: " + fieldNames);
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_FROM_JDBC_DATA_SQL, dataSql);
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL, dataSql);
     context.setString(Constants.JOB_ETL_FIELD_NAMES, fieldNames);
   }
 }
