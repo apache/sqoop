@@ -17,40 +17,11 @@
  */
 package org.apache.sqoop.job;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.List;
-
 import junit.framework.TestCase;
 
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.BZip2Codec;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapreduce.Job;
 //import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 //import org.apache.sqoop.job.etl.HdfsExportExtractor;
-import org.apache.sqoop.job.etl.HdfsExportPartitioner;
-import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.etl.LoaderContext;
-import org.apache.sqoop.job.etl.Partition;
-import org.apache.sqoop.job.etl.PartitionerContext;
-import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.mr.ConfigurationUtils;
-import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.FixedPoint;
-import org.apache.sqoop.schema.type.FloatingPoint;
-import org.junit.Test;
+//import org.apache.sqoop.job.etl.HdfsExportPartitioner;
 
 public class TestHdfsExtract extends TestCase {
 

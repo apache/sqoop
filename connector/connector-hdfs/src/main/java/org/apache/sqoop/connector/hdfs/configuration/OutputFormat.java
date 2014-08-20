@@ -15,24 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
-
-import org.apache.sqoop.model.FormClass;
-import org.apache.sqoop.model.Input;
+package org.apache.sqoop.connector.hdfs.configuration;
 
 /**
- *
+ * Various supported formats on disk
  */
-@FormClass
-public class OutputForm {
+public enum OutputFormat {
+  /**
+   * Comma separated text file
+   */
+  TEXT_FILE,
 
-  @Input public StorageType storageType;
-
-  @Input public OutputFormat outputFormat;
-
-  @Input public OutputCompression compression;
-
-  @Input(size = 255) public String customCompression;
-
-  @Input(size = 255) public String outputDirectory;
+  /**
+   * Sequence file
+   */
+  SEQUENCE_FILE,
 }

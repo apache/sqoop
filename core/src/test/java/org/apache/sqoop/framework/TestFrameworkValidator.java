@@ -17,15 +17,7 @@
  */
 package org.apache.sqoop.framework;
 
-import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
-import org.apache.sqoop.framework.configuration.ExportJobConfiguration;
-import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
-import org.apache.sqoop.framework.configuration.OutputCompression;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.junit.Before;
-import org.junit.Test;
+//import org.apache.sqoop.framework.configuration.OutputCompression;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

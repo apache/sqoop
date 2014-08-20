@@ -15,17 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs.configuration;
 
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Form;
 
 @ConfigurationClass
-public class JobConfiguration {
-  @Form
-  public ThrottlingForm throttling;
+public class FromJobConfiguration {
+  @Form public InputForm input;
 
-  public JobConfiguration() {
-    throttling = new ThrottlingForm();
+
+  public FromJobConfiguration() {
+    input = new InputForm();
+
   }
 }

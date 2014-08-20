@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job;
+package org.apache.sqoop.common;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.common.ImmutableContext;

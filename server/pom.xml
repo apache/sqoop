@@ -64,6 +64,11 @@ limitations under the License.
       <artifactId>sqoop-connector-generic-jdbc</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.sqoop.connector</groupId>
+      <artifactId>sqoop-connector-hdfs</artifactId>
+    </dependency>
+
 <!--
     <dependency>
       <groupId>org.apache.sqoop.connector</groupId>

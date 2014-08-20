@@ -15,17 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
-
-@ConfigurationClass
-public class JobConfiguration {
-  @Form
-  public ThrottlingForm throttling;
-
-  public JobConfiguration() {
-    throttling = new ThrottlingForm();
-  }
+/**
+ * Various storage types that Sqoop is supporting
+ */
+public enum StorageType {
+  /**
+   * Direct HDFS import
+   */
+  HDFS,
 }

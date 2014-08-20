@@ -17,40 +17,11 @@
  */
 package org.apache.sqoop.job;
 
-import java.io.BufferedReader;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
-
-import com.google.common.base.Charsets;
 import junit.framework.TestCase;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.util.ReflectionUtils;
 //import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.apache.sqoop.job.etl.Extractor;
-import org.apache.sqoop.job.etl.ExtractorContext;
-import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
-import org.apache.sqoop.job.etl.HdfsTextImportLoader;
-import org.apache.sqoop.job.etl.Partition;
-import org.apache.sqoop.job.etl.Partitioner;
-import org.apache.sqoop.job.etl.PartitionerContext;
-import org.apache.sqoop.job.io.Data;
-import org.apache.sqoop.job.mr.ConfigurationUtils;
-import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.FixedPoint;
-import org.apache.sqoop.schema.type.FloatingPoint;
+//import org.apache.sqoop.job.etl.HdfsSequenceImportLoader;
+//import org.apache.sqoop.job.etl.HdfsTextImportLoader;
 
 public class TestHdfsLoad extends TestCase {
 

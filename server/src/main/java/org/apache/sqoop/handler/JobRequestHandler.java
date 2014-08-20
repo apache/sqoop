@@ -283,6 +283,7 @@ public class JobRequestHandler implements RequestHandler {
 
       MJob job = repository.findJob(jid);
       // @TODO(Abe): From/To
+
       long connectorId = job.getConnectorId(Direction.FROM);
 
       bean = new JobBean(job);

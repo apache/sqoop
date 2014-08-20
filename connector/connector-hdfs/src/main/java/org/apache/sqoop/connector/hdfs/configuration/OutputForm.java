@@ -15,17 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
-@ConfigurationClass
-public class JobConfiguration {
-  @Form
-  public ThrottlingForm throttling;
+/**
+ *
+ */
+@FormClass
+public class OutputForm {
 
-  public JobConfiguration() {
-    throttling = new ThrottlingForm();
-  }
+  @Input public OutputFormat outputFormat;
+
+  @Input public OutputCompression compression;
+
+  @Input(size = 255) public String customCompression;
+
+  @Input(size = 255) public String outputDirectory;
 }
