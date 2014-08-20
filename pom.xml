@@ -301,6 +301,17 @@ limitations under the License.
       </dependency>
       <dependency>
         <groupId>org.apache.sqoop.connector</groupId>
+        <artifactId>sqoop-connector-hdfs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.connector</groupId>
+        <artifactId>sqoop-connector-hdfs</artifactId>
+        <type>test-jar</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop.connector</groupId>
         <artifactId>sqoop-connector-mysql-jdbc</artifactId>
         <version>${project.version}</version>
       </dependency>

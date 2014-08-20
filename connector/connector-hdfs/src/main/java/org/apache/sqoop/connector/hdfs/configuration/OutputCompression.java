@@ -15,23 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
-
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+package org.apache.sqoop.connector.hdfs.configuration;
 
 /**
- *
+ * Supported compressions
  */
-@ConfigurationClass
-public class ExportJobConfiguration {
-
-  @Form public InputForm input;
-
-  @Form public ThrottlingForm throttling;
-
-  public ExportJobConfiguration() {
-    input = new InputForm();
-    throttling = new ThrottlingForm();
-  }
+public enum OutputCompression {
+  NONE,
+  DEFAULT,
+  DEFLATE,
+  GZIP,
+  BZIP2,
+  LZO,
+  LZ4,
+  SNAPPY,
+  CUSTOM,
 }

@@ -27,12 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -1711,14 +1706,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                               throws SQLException {
     List<MJob> jobs = new ArrayList<MJob>();
     ResultSet rsJob = null;
-    PreparedStatement formConnectorFetchStmt = null;
+    PreparedStatement toFormConnectorFetchStmt = null;
+    PreparedStatement fromFormConnectorFetchStmt = null;
     PreparedStatement formFrameworkFetchStmt = null;
     PreparedStatement inputFetchStmt = null;
 
     try {
       rsJob = stmt.executeQuery();
 
-      formConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
+      toFormConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
+      fromFormConnectorFetchStmt  = conn.prepareStatement(STMT_FETCH_FORM_CONNECTOR);
       formFrameworkFetchStmt = conn.prepareStatement(STMT_FETCH_FORM_FRAMEWORK);
       inputFetchStmt = conn.prepareStatement(STMT_FETCH_JOB_INPUT);
 
@@ -1735,28 +1732,47 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         String updateBy = rsJob.getString(10);
         Date lastUpdateDate = rsJob.getTimestamp(11);
 
-        formConnectorFetchStmt.setLong(1, fromConnectorId);
+        fromFormConnectorFetchStmt.setLong(1, fromConnectorId);
+        toFormConnectorFetchStmt.setLong(1,toConnectorId);
 
         inputFetchStmt.setLong(1, id);
         //inputFetchStmt.setLong(1, XXX); // Will be filled by loadForms
         inputFetchStmt.setLong(3, id);
 
-        List<MForm> connectorConnForms = new ArrayList<MForm>();
+        List<MForm> toConnectorConnForms = new ArrayList<MForm>();
+        List<MForm> fromConnectorConnForms = new ArrayList<MForm>();
+
         List<MForm> frameworkConnForms = new ArrayList<MForm>();
         List<MForm> frameworkJobForms = new ArrayList<MForm>();
-        List<MForm> fromJobForms = new ArrayList<MForm>();
-        List<MForm> toJobForms = new ArrayList<MForm>();
 
-        loadConnectorForms(connectorConnForms, fromJobForms, toJobForms,
-            formConnectorFetchStmt, inputFetchStmt, 2);
+        // This looks confusing but our job has 2 connectors, each connector has two job forms
+        // To define the job, we need to TO job form of the TO connector
+        // and the FROM job form of the FROM connector
+        List<MForm> fromConnectorFromJobForms = new ArrayList<MForm>();
+        List<MForm> fromConnectorToJobForms = new ArrayList<MForm>();
+        List<MForm> toConnectorFromJobForms = new ArrayList<MForm>();
+        List<MForm> toConnectorToJobForms = new ArrayList<MForm>();
+
+
+        loadConnectorForms(fromConnectorConnForms,
+                fromConnectorFromJobForms,
+                fromConnectorToJobForms,
+                fromFormConnectorFetchStmt,
+                inputFetchStmt,
+                2);
+        loadConnectorForms(toConnectorConnForms,
+                toConnectorFromJobForms,
+                toConnectorToJobForms,
+                toFormConnectorFetchStmt, inputFetchStmt, 2);
+
         loadForms(frameworkConnForms, frameworkJobForms,
           formFrameworkFetchStmt, inputFetchStmt, 2);
 
         MJob job = new MJob(
           fromConnectorId, toConnectorId,
           fromConnectionId, toConnectionId,
-          new MJobForms(fromJobForms),
-          new MJobForms(toJobForms),
+          new MJobForms(fromConnectorFromJobForms),
+          new MJobForms(toConnectorToJobForms),
           new MJobForms(frameworkJobForms));
 
         job.setPersistenceId(id);
@@ -1771,7 +1787,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
     } finally {
       closeResultSets(rsJob);
-      closeStatements(formConnectorFetchStmt, formFrameworkFetchStmt, inputFetchStmt);
+      closeStatements(fromFormConnectorFetchStmt, toFormConnectorFetchStmt, formFrameworkFetchStmt, inputFetchStmt);
     }
 
     return jobs;

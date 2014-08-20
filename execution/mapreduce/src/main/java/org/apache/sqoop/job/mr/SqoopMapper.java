@@ -31,7 +31,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
-import org.apache.sqoop.job.PrefixContext;
+import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
@@ -66,7 +66,16 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     // Propagate connector schema in every case for now
     // TODO: Change to coditional choosing between Connector schemas.
+
     Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+    if (schema==null) {
+      schema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
+    }
+
+    if (schema==null) {
+      LOG.info("setting an empty schema");
+    }
+
 
     String intermediateDataFormatName = conf.get(JobConstants
       .INTERMEDIATE_DATA_FORMAT);

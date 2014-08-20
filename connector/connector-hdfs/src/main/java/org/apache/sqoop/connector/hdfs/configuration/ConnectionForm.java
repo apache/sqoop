@@ -15,17 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Input;
 
-@ConfigurationClass
-public class JobConfiguration {
-  @Form
-  public ThrottlingForm throttling;
+@FormClass
+public class ConnectionForm {
+ //Todo: Didn't find anything that belongs here...
+ // Since empty forms don't work (DERBYREPO_0008:The form contains no input metadata), I'm putting a dummy form here
 
-  public JobConfiguration() {
-    throttling = new ThrottlingForm();
-  }
+  @Input(size = 255) public String dummy;
 }

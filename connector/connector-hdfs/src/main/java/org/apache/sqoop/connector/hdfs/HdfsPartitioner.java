@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,15 +39,18 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.MapreduceExecutionError;
-import org.apache.sqoop.job.PrefixContext;
+import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.job.etl.Partition;
+import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
+import org.apache.sqoop.common.PrefixContext;
 
 /**
  * This class derives mostly from CombineFileInputFormat of Hadoop, i.e.
  * org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat.
  */
-public class HdfsExportPartitioner extends Partitioner {
+public class HdfsPartitioner extends Partitioner<ConnectionConfiguration, FromJobConfiguration> {
 
   public static final String SPLIT_MINSIZE_PERNODE =
       "mapreduce.input.fileinputformat.split.minsize.per.node";
@@ -65,12 +68,12 @@ public class HdfsExportPartitioner extends Partitioner {
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,
-      Object connectionConfiguration, Object jobConfiguration) {
+      ConnectionConfiguration connectionConfiguration, FromJobConfiguration jobConfiguration) {
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
     try {
-      long numInputBytes = getInputSize(conf);
+      long numInputBytes = getInputSize(conf, jobConfiguration.input.inputDirectory);
       maxSplitSize = numInputBytes / context.getMaxPartitions();
 
       if(numInputBytes % context.getMaxPartitions() != 0 ) {
@@ -115,7 +118,7 @@ public class HdfsExportPartitioner extends Partitioner {
       }
 
       // all the files in input set
-      String indir = conf.get(JobConstants.HADOOP_INPUTDIR);
+      String indir = jobConfiguration.input.inputDirectory;
       FileSystem fs = FileSystem.get(conf);
 
       List<Path> paths = new LinkedList<Path>();
@@ -140,12 +143,12 @@ public class HdfsExportPartitioner extends Partitioner {
       return partitions;
 
     } catch (IOException e) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0021, e);
+      throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0000, e);
     }
   }
 
-  private long getInputSize(Configuration conf) throws IOException {
-    String indir = conf.get(JobConstants.HADOOP_INPUTDIR);
+  //TODO: Perhaps get the FS from connection configuration so we can support remote HDFS
+  private long getInputSize(Configuration conf, String indir) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] files = fs.listStatus(new Path(indir));
     long count = 0;
@@ -372,7 +375,7 @@ public class HdfsExportPartitioner extends Partitioner {
     }
 
      // add this split to the list that is returned
-    HdfsExportPartition partition = new HdfsExportPartition(
+    HdfsPartition partition = new HdfsPartition(
         files, offsets, lengths, locations.toArray(new String[0]));
     partitions.add(partition);
   }

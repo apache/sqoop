@@ -16,19 +16,20 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.job.etl;
+package org.apache.sqoop.connector.hdfs;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.job.etl.Partition;
 
 /**
  * This class derives mostly from CombineFileSplit of Hadoop, i.e.
  * org.apache.hadoop.mapreduce.lib.input.CombineFileSplit.
  */
-public class HdfsExportPartition extends Partition {
+public class HdfsPartition extends Partition {
 
   private long lenFiles;
   private int numFiles;
@@ -37,10 +38,10 @@ public class HdfsExportPartition extends Partition {
   private long[] lengths;
   private String[] locations;
 
-  public HdfsExportPartition() {}
+  public HdfsPartition() {}
 
-  public HdfsExportPartition(Path[] files, long[] offsets,
-      long[] lengths, String[] locations) {
+  public HdfsPartition(Path[] files, long[] offsets,
+                       long[] lengths, String[] locations) {
     for(long length : lengths) {
       this.lenFiles += length;
     }

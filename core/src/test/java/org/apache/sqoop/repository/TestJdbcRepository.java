@@ -28,7 +28,7 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.MetadataUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
-import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
+//import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;

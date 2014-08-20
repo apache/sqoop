@@ -176,9 +176,11 @@ public class SubmissionRequest {
     switch(type) {
       case FROM:
         fromConnector = connector;
+        break;
 
       case TO:
         toConnector = connector;
+        break;
 
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
@@ -238,10 +240,10 @@ public class SubmissionRequest {
     switch(type) {
       case FROM:
         fromConnectorConnectionConfig = config;
-
+        break;
       case TO:
         toConnectorConnectionConfig = config;
-
+        break;
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
@@ -264,10 +266,10 @@ public class SubmissionRequest {
     switch(type) {
       case FROM:
         fromConnectorJobConfig = config;
-
+        break;
       case TO:
         toConnectorJobConfig = config;
-
+        break;
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
@@ -290,10 +292,10 @@ public class SubmissionRequest {
     switch(type) {
       case FROM:
         fromFrameworkConnectionConfig = config;
-
+        break;
       case TO:
         toFrameworkConnectionConfig = config;
-
+        break;
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }

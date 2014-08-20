@@ -36,6 +36,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.utils.ClassUtils;
@@ -434,12 +435,17 @@ public class JobManager implements Reconfigurable {
         request.getConnectorJobConfig(Direction.FROM)));
 
     // @TODO(Abe): Alter behavior of Schema here. Need from Schema.
-    // Retrieve and persist the schema
-    request.getSummary().setConnectorSchema(initializer.getSchema(
-        initializerContext,
-        request.getConnectorConnectionConfig(Direction.FROM),
-        request.getConnectorJobConfig(Direction.FROM)
-    ));
+
+
+    Schema fromSchema = initializer.getSchema(initializerContext,
+            request.getConnectorConnectionConfig(Direction.FROM),
+            request.getConnectorJobConfig(Direction.FROM));
+
+    // request.getSummary().setConnectorSchema(initializer.getSchema(
+    //    initializerContext,
+    //    request.getConnectorConnectionConfig(ConnectorType.FROM),
+    //    request.getConnectorJobConfig(ConnectorType.FROM)
+    // ));
 
     // Initialize To Connector callback.
     baseCallback = request.getToCallback();
@@ -468,12 +474,23 @@ public class JobManager implements Reconfigurable {
         request.getConnectorJobConfig(Direction.TO)));
 
     // @TODO(Abe): Alter behavior of Schema here. Need To Schema.
+
+    Schema toSchema = initializer.getSchema(initializerContext,
+            request.getConnectorConnectionConfig(Direction.TO),
+            request.getConnectorJobConfig(Direction.TO));
+
     // Retrieve and persist the schema
 //    request.getSummary().setConnectorSchema(initializer.getSchema(
 //        initializerContext,
 //        request.getConnectorConnectionConfig(ConnectorType.TO),
 //        request.getConnectorJobConfig(ConnectorType.TO)
 //    ));
+
+    //TODO: Need better logic here
+    if (fromSchema != null)
+      request.getSummary().setConnectorSchema(fromSchema);
+    else
+      request.getSummary().setConnectorSchema(toSchema);
 
     // Bootstrap job from framework perspective
     prepareSubmission(request);

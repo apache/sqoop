@@ -17,18 +17,9 @@
  */
 package org.apache.sqoop.execution.mapreduce;
 
-import org.apache.sqoop.common.MutableMapContext;
 //import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.apache.sqoop.framework.SubmissionRequest;
-import org.apache.sqoop.framework.configuration.ImportJobConfiguration;
-import org.apache.sqoop.framework.configuration.OutputCompression;
-import org.apache.sqoop.framework.configuration.OutputFormat;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.Extractor;
-import org.apache.sqoop.job.etl.Initializer;
-import org.apache.sqoop.job.etl.Partitioner;
-import org.junit.Test;
+//import org.apache.sqoop.framework.configuration.OutputCompression;
+//import org.apache.sqoop.framework.configuration.OutputFormat;
 
 import static junit.framework.TestCase.assertEquals;
 

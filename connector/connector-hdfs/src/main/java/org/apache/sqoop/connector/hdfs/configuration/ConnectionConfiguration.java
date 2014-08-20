@@ -15,16 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.FormClass;
-import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Form;
 
-/**
- *
- */
-@FormClass
-public class InputForm {
+@ConfigurationClass
+public class ConnectionConfiguration {
+  @Form
+  public ConnectionForm connection;
 
-  @Input(size = 255) public String inputDirectory;
+  public ConnectionConfiguration() {
+    connection = new ConnectionForm();
+  }
 }

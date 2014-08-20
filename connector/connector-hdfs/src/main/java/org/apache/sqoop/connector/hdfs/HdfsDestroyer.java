@@ -15,14 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.framework.configuration;
+package org.apache.sqoop.connector.hdfs;
 
-/**
- * Various storage types that Sqoop is supporting
- */
-public enum StorageType {
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
+
+public class HdfsDestroyer extends Destroyer {
   /**
-   * Direct HDFS import
+   * Callback to clean up after job execution.
+   *
+   * @param context Destroyer context
+   * @param o       Connection configuration object
+   * @param o2      Job configuration object
    */
-  HDFS,
+  @Override
+  public void destroy(DestroyerContext context, Object o, Object o2) {
+    //TODO: Add a "success" flag?
+
+  }
 }

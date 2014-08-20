@@ -36,7 +36,7 @@ import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
-import org.apache.sqoop.job.PrefixContext;
+import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.etl.io.DataReader;
@@ -72,7 +72,13 @@ public class SqoopOutputFormatLoadExecutor {
     producer = new SqoopRecordWriter();
     data = (IntermediateDataFormat) ClassUtils.instantiate(context
       .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
-    data.setSchema(ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()));
+
+    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration());
+    if (schema==null) {
+      schema = ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration());
+    }
+
+    data.setSchema(schema);
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {

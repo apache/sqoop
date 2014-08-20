@@ -17,20 +17,9 @@
  */
 package org.apache.sqoop.integration.server;
 
-import org.apache.sqoop.client.ClientError;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.framework.FrameworkError;
-import org.apache.sqoop.framework.configuration.OutputFormat;
-import org.apache.sqoop.framework.configuration.StorageType;
-import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MFormList;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

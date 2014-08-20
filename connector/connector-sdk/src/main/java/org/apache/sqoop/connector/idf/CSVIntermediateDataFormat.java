@@ -180,6 +180,10 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       return null;
     }
 
+    if (schema == null) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0006);
+    }
+
     if (fields.length != schema.getColumns().size()) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
         "The data " + getTextData() + " has the wrong number of fields.");
@@ -189,7 +193,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     Column[] cols = schema.getColumns().toArray(new Column[fields.length]);
     for (int i = 0; i < fields.length; i++) {
       Type colType = cols[i].getType();
-      if (fields[i].equals("NULL")) {
+      //TODO: Replace with proper isNull method. Actually the entire content of the loop should be a parse method
+      if (fields[i].equals("NULL") || fields[i].equals("null") || fields[i].equals("'null'") || fields[i].isEmpty()) {
         out[i] = null;
         continue;
       }

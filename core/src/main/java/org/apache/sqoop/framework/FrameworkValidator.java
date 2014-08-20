@@ -18,20 +18,13 @@
 package org.apache.sqoop.framework;
 
 import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
-import org.apache.sqoop.framework.configuration.InputForm;
 import org.apache.sqoop.framework.configuration.JobConfiguration;
-import org.apache.sqoop.framework.configuration.OutputCompression;
-import org.apache.sqoop.framework.configuration.OutputForm;
 import org.apache.sqoop.framework.configuration.ThrottlingForm;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
-/**
- * Validate framework configuration objects
- */
 public class FrameworkValidator extends Validator {
-
   @Override
   public Validation validateConnection(Object connectionConfiguration) {
     Validation validation = new Validation(ConnectionConfiguration.class);
@@ -39,61 +32,16 @@ public class FrameworkValidator extends Validator {
     return validation;
   }
 
-
   @Override
   public Validation validateJob(Object jobConfiguration) {
-    JobConfiguration configuration = (JobConfiguration)jobConfiguration;
     Validation validation = new Validation(JobConfiguration.class);
-    validateThrottingForm(validation, configuration.throttling);
-    return super.validateJob(jobConfiguration);
-  }
+    JobConfiguration conf = (JobConfiguration)jobConfiguration;
+    validateThrottlingForm(validation,conf.throttling);
 
-//  private Validation validateExportJob(Object jobConfiguration) {
-//    Validation validation = new Validation(ExportJobConfiguration.class);
-//    ExportJobConfiguration configuration = (ExportJobConfiguration)jobConfiguration;
-//
-//    validateInputForm(validation, configuration.input);
-//    validateThrottingForm(validation, configuration.throttling);
-//
-//    return validation;
-//  }
-//
-//  private Validation validateImportJob(Object jobConfiguration) {
-//    Validation validation = new Validation(ImportJobConfiguration.class);
-//    ImportJobConfiguration configuration = (ImportJobConfiguration)jobConfiguration;
-//
-//    validateOutputForm(validation, configuration.output);
-//    validateThrottingForm(validation, configuration.throttling);
-//
-//    return validation;
-//  }
+    return validation;
+  };
 
-//  private void validateInputForm(Validation validation, InputForm input) {
-//    if(input.inputDirectory == null || input.inputDirectory.isEmpty()) {
-//      validation.addMessage(Status.UNACCEPTABLE, "input", "inputDirectory", "Input directory is empty");
-//    }
-//  }
-//
-//  private void validateOutputForm(Validation validation, OutputForm output) {
-//    if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
-//      validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Output directory is empty");
-//    }
-//    if(output.customCompression != null &&
-//      output.customCompression.trim().length() > 0  &&
-//      output.compression != OutputCompression.CUSTOM) {
-//      validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
-//        "custom compression should be blank as " + output.compression + " is being used.");
-//    }
-//    if(output.compression == OutputCompression.CUSTOM &&
-//      (output.customCompression == null ||
-//        output.customCompression.trim().length() == 0)
-//      ) {
-//      validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
-//        "custom compression is blank.");
-//    }
-//  }
-
-  private void validateThrottingForm(Validation validation, ThrottlingForm throttling) {
+  private void validateThrottlingForm(Validation validation, ThrottlingForm throttling) {
     if(throttling.extractors != null && throttling.extractors < 1) {
       validation.addMessage(Status.UNACCEPTABLE, "throttling", "extractors", "You need to specify more than one extractor");
     }
@@ -102,4 +50,5 @@ public class FrameworkValidator extends Validator {
       validation.addMessage(Status.UNACCEPTABLE, "throttling", "loaders", "You need to specify more than one loader");
     }
   }
+
 }

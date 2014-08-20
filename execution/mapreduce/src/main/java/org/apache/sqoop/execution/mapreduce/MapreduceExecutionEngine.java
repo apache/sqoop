@@ -80,49 +80,9 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     if(request.getExtractors() != null) {
       context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
     }
-
-    // @TODO(Abe): Move to HDFS connector.
-//    if(jobConf.output.outputFormat == OutputFormat.TEXT_FILE) {
-//      context.setString(JobConstants.JOB_ETL_LOADER, HdfsTextImportLoader.class.getName());
-//    } else if(jobConf.output.outputFormat == OutputFormat.SEQUENCE_FILE) {
-//      context.setString(JobConstants.JOB_ETL_LOADER, HdfsSequenceImportLoader.class.getName());
-//    } else {
-//      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0024,
-//        "Format: " + jobConf.output.outputFormat);
-//    }
-//    if(getCompressionCodecName(jobConf) != null) {
-//      context.setString(JobConstants.HADOOP_COMPRESS_CODEC,
-//        getCompressionCodecName(jobConf));
-//      context.setBoolean(JobConstants.HADOOP_COMPRESS, true);
-//    }
   }
 
-  // @TODO(Abe): Move to HDFS connector.
-//  private String getCompressionCodecName(ImportJobConfiguration jobConf) {
-//    if(jobConf.output.compression == null)
-//      return null;
-//    switch(jobConf.output.compression) {
-//      case NONE:
-//        return null;
-//      case DEFAULT:
-//        return "org.apache.hadoop.io.compress.DefaultCodec";
-//      case DEFLATE:
-//        return "org.apache.hadoop.io.compress.DeflateCodec";
-//      case GZIP:
-//        return "org.apache.hadoop.io.compress.GzipCodec";
-//      case BZIP2:
-//        return "org.apache.hadoop.io.compress.BZip2Codec";
-//      case LZO:
-//        return "com.hadoop.compression.lzo.LzoCodec";
-//      case LZ4:
-//        return "org.apache.hadoop.io.compress.Lz4Codec";
-//      case SNAPPY:
-//        return "org.apache.hadoop.io.compress.SnappyCodec";
-//      case CUSTOM:
-//        return jobConf.output.customCompression.trim();
-//    }
-//    return null;
-//  }
+
 
   /**
    * Our execution engine have additional dependencies that needs to be available

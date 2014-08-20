@@ -37,7 +37,9 @@ public enum IntermediateDataFormatError implements ErrorCode {
   INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
 
   /** Number of fields. */
-  INTERMEDIATE_DATA_FORMAT_0005("Wrong number of fields.")
+  INTERMEDIATE_DATA_FORMAT_0005("Wrong number of fields."),
+
+  INTERMEDIATE_DATA_FORMAT_0006("Schema missing.")
 
   ;
 

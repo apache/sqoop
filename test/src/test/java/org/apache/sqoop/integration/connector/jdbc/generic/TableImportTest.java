@@ -17,15 +17,7 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.framework.configuration.OutputFormat;
-import org.apache.sqoop.framework.configuration.StorageType;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
-import org.apache.sqoop.model.MConnection;
-import org.apache.sqoop.model.MFormList;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MSubmission;
-import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 

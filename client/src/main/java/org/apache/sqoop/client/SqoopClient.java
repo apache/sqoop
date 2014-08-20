@@ -369,7 +369,7 @@ public class SqoopClient {
       fromConnection.getPersistenceId(),
       toConnection.getPersistenceId(),
       getConnector(fromConnection.getConnectorId()).getJobForms(Direction.FROM),
-      getConnector(fromConnection.getConnectorId()).getJobForms(Direction.TO),
+      getConnector(toConnection.getConnectorId()).getJobForms(Direction.TO),
       getFramework().getJobForms()
     );
   }
