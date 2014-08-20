@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.spi;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -44,6 +46,16 @@ public abstract class SqoopConnector {
    * @return the resource bundle associated with the given locale.
    */
   public abstract ResourceBundle getBundle(Locale locale);
+
+  /**
+   * @return The supported directions
+   */
+  public List<Direction> getSupportedDirections() {
+    return Arrays.asList(new Direction[]{
+        Direction.FROM,
+        Direction.TO
+    });
+  }
 
   /**
    * @return Get connection configuration class

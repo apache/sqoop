@@ -186,6 +186,16 @@ public class JobRequestHandler implements RequestHandler {
     SqoopConnector toConnector =
       ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
+    if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
+      throw new SqoopException(ServerError.SERVER_0004, "Connector " + fromConnector.getClass().getCanonicalName()
+          + " does not support FROM direction.");
+    }
+
+    if (!toConnector.getSupportedDirections().contains(Direction.TO)) {
+      throw new SqoopException(ServerError.SERVER_0004, "Connector " + toConnector.getClass().getCanonicalName()
+          + " does not support TO direction.");
+    }
+
     // Get validator objects
     Validator fromConnectorValidator = fromConnector.getValidator();
     Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
