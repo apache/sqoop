@@ -183,7 +183,9 @@ under the License.
       conf="common->default;redist->default"/>
     <dependency org="commons-io" name="commons-io" rev="${commons-io.version}"
       conf="common->default;redist->default"/>
-    <dependency org="org.kitesdk" name="kite-data-mapreduce" rev="${kite-data-mapreduce.version}"
+    <dependency org="org.kitesdk" name="kite-data-mapreduce" rev="${kite-data.version}"
+      conf="avro->default;redist->default"/>
+    <dependency org="org.kitesdk" name="kite-data-hcatalog" rev="${kite-data.version}"
       conf="avro->default;redist->default"/>
 
     <!-- dependencies for static analysis -->

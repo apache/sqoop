@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -260,6 +261,22 @@ public class TestHiveImport extends ImportJobTestCase {
     String [] vals = { "'test'", "42", "'somestring'" };
     runImportTest(TABLE_NAME, types, vals, "normalImport.q",
         getArgv(false, null), new ImportTool());
+  }
+
+  /** Test that strings and ints are handled in the normal fashion as parquet
+   * file. */
+  @Test
+  public void testNormalHiveImportAsParquet() throws IOException {
+    final String TABLE_NAME = "NORMAL_HIVE_IMPORT_AS_PARQUET";
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] vals = { "'test'", "42", "'somestring'" };
+    String [] args_array = getArgv(false, null);
+    ArrayList<String> args = new ArrayList<String>(Arrays.asList(args_array));
+    args.add("--as-parquetfile");
+    runImportTest(TABLE_NAME, types, vals, "normalImportAsParquet.q", args.toArray(new String[0]),
+            new ImportTool());
   }
 
   /** Test that table is created in hive with no data import. */

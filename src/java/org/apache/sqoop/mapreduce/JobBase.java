@@ -180,6 +180,21 @@ public class JobBase {
           + "all job dependencies.");
     }
 
+    // If the user run import into hive as Parquet file,
+    // Add anything in $HIVE_HOME/lib.
+    if (options.doHiveImport() && (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile)) {
+      String hiveHome = options.getHiveHome();
+      if (null != hiveHome) {
+        File hiveHomeFile = new File(hiveHome);
+        File hiveLibFile = new File(hiveHomeFile, "lib");
+        if (hiveLibFile.exists()) {
+          addDirToCache(hiveLibFile, fs, localUrls);
+        }
+      } else {
+        LOG.warn("HIVE_HOME is unset. Cannot add hive libs as dependencies.");
+      }
+    }
+
     // If we didn't put anything in our set, then there's nothing to cache.
     if (localUrls.isEmpty()) {
       return;

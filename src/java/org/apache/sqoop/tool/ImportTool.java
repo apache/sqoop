@@ -508,7 +508,11 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     // If the user wants this table to be in Hive, perform that post-load.
     if (options.doHiveImport()) {
-      hiveImport.importTable(tableName, options.getHiveTableName(), false);
+      // For Parquet file, the import action will create hive table directly via
+      // kite. So there is no need to do hive import as a post step again.
+      if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
+        hiveImport.importTable(tableName, options.getHiveTableName(), false);
+      }
     }
 
     saveIncrementalState(options);

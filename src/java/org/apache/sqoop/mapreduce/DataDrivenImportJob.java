@@ -106,7 +106,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       Schema schema = new Schema.Parser().parse(conf.get("avro.schema"));
       String uri = "";
       if (options.doHiveImport()) {
-        // TODO: SQOOP-1393
+        uri = "dataset:hive?dataset=" + options.getTableName();
       } else {
         FileSystem fs = FileSystem.get(conf);
         uri = "dataset:" + fs.makeQualified(getContext().getDestination());
