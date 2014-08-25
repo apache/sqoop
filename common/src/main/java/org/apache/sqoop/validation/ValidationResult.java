@@ -72,6 +72,22 @@ public class ValidationResult {
     status = Status.getWorstStatus(status, result.status);
   }
 
+  /**
+   * Method to directly add messages for given name.
+   *
+   * This method will replace previous messages for given name.
+   *
+   * @param name Name of the entity
+   * @param messages List of messages associated with the name
+   */
+  public void addMessages(String name, List<Message> messages) {
+    this.messages.put(name, messages);
+
+    for(Message message : messages) {
+      this.status = Status.getWorstStatus(status, message.getStatus());
+    }
+  }
+
   public Status getStatus() {
     return status;
   }

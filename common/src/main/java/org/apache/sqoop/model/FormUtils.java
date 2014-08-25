@@ -19,8 +19,10 @@ package org.apache.sqoop.model;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.utils.ClassUtils;
+import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ValidationResult;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -279,6 +281,43 @@ public class FormUtils {
 
     if(messages.containsKey(name)) {
       Validation.Message message = messages.get(name);
+      element.setValidationMessage(message.getStatus(), message.getMessage());
+    } else {
+      element.setValidationMessage(Status.getDefault(), null);
+    }
+  }
+
+
+  /**
+   * Apply given validations on list of forms.
+   *
+   * @param forms
+   * @param result
+   */
+  public static void applyValidation(List<MForm> forms, ValidationResult result) {
+    for(MForm form : forms) {
+      applyValidation(form, result);
+
+      for(MInput input : form.getInputs()) {
+        applyValidation(input, result);
+      }
+    }
+  }
+
+  /**
+   * Apply validation messages on given element.
+   *
+   * Element's state will be set to default if there are no associated messages.
+   *
+   * @param element
+   * @param result
+   */
+  public static void applyValidation(MValidatedElement element, ValidationResult result) {
+    List<Message> messages = result.getMessages().get(element.getName());
+
+    if(messages != null) {
+      // TODO(SQOOP-1465) Add support for multiple messages (showing only the first one for now)
+      Message message = messages.get(0);
       element.setValidationMessage(message.getStatus(), message.getMessage());
     } else {
       element.setValidationMessage(Status.getDefault(), null);
