@@ -24,15 +24,16 @@ public abstract class MNamedElement extends MPersistableEntity {
   private static final String LABEL_KEY_SUFFIX = ".label";
   private static final String HELP_KEY_SUFFIX = ".help";
 
-  private final String name;
-  private final String labelKey;
-  private final String helpKey;
+  private String name;
+  private String labelKey;
+  private String helpKey;
 
   protected MNamedElement(String name) {
-    this.name = name;
+    setName(name);
+  }
 
-    labelKey = name + LABEL_KEY_SUFFIX;
-    helpKey = name + HELP_KEY_SUFFIX;
+  protected MNamedElement(MNamedElement other) {
+    this(other.name);
   }
 
   /**
@@ -40,6 +41,18 @@ public abstract class MNamedElement extends MPersistableEntity {
    */
   public String getName() {
     return name;
+  }
+
+  /**
+   * Set new name for this entity.
+   *
+   * @param name
+   */
+  public void setName(String name) {
+    this.name = name;
+
+    labelKey = name + LABEL_KEY_SUFFIX;
+    helpKey = name + HELP_KEY_SUFFIX;
   }
 
   /**

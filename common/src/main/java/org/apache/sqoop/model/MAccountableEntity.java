@@ -23,7 +23,7 @@ import java.util.Date;
  * Accountable entity provides additional fields that might help with identifying
  * what and when has happened.
  */
-abstract public class MAccountableEntity extends MPersistableEntity {
+abstract public class MAccountableEntity extends MValidatedElement {
 
   private final boolean DEFAULT_ENABLED = true;
 
@@ -59,6 +59,7 @@ abstract public class MAccountableEntity extends MPersistableEntity {
    * the accountable entity is enabled.
    */
   public MAccountableEntity() {
+    super((String)null);
     this.creationUser = null;
     this.creationDate = new Date();
     this.lastUpdateUser = this.creationUser;
