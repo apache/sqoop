@@ -55,6 +55,12 @@ public abstract class MValidatedElement extends MNamedElement {
     this.validationStatus = Status.getDefault();
   }
 
+  public MValidatedElement(MValidatedElement other) {
+    super(other);
+    this.validationMessage = other.validationMessage;
+    this.validationStatus = other.validationStatus;
+  }
+
   /**
    * Set validation message and given severity.
    *

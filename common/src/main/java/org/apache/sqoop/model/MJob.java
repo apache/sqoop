@@ -42,11 +42,6 @@ public class MJob extends MAccountableEntity implements MClonable {
   private final long fromConnectionId;
   private final long toConnectionId;
 
-  /**
-   * User name for this object
-   */
-  private String name;
-
   private final MJobForms fromConnectorPart;
   private final MJobForms toConnectorPart;
   private final MJobForms frameworkPart;
@@ -104,8 +99,6 @@ public class MJob extends MAccountableEntity implements MClonable {
   public MJob(MJob other, MJobForms fromPart, MJobForms toPart, MJobForms frameworkPart) {
     super(other);
 
-    this.name = other.name;
-
     this.fromConnectorId = other.getConnectorId(Direction.FROM);
     this.toConnectorId = other.getConnectorId(Direction.TO);
     this.fromConnectionId = other.getConnectionId(Direction.FROM);
@@ -123,14 +116,6 @@ public class MJob extends MAccountableEntity implements MClonable {
     sb.append(", framework-part: ").append(frameworkPart);
 
     return sb.toString();
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public long getConnectionId(Direction type) {

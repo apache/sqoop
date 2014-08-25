@@ -23,7 +23,6 @@ package org.apache.sqoop.model;
  */
 public class MConnection extends MAccountableEntity implements MClonable {
   private long connectorId;
-  private String name;
 
   private final MConnectionForms connectorPart;
   private final MConnectionForms frameworkPart;
@@ -65,26 +64,17 @@ public class MConnection extends MAccountableEntity implements MClonable {
   public MConnection(MConnection other, MConnectionForms connectorPart, MConnectionForms frameworkPart) {
     super(other);
     this.connectorId = other.connectorId;
-    this.name = other.name;
     this.connectorPart = connectorPart;
     this.frameworkPart = frameworkPart;
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("connection: ").append(name);
+    StringBuilder sb = new StringBuilder("connection: ").append(getName());
     sb.append(" connector-part: ").append(connectorPart);
     sb.append(", framework-part: ").append(frameworkPart);
 
     return sb.toString();
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public long getConnectorId() {
