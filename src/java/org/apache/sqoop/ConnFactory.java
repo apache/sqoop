@@ -220,6 +220,9 @@ public class ConnFactory {
       Properties props = new Properties();
       String line;
       while ((line = r.readLine()) != null) {
+        if ("".equals(line.trim())) {
+          continue;
+        }
         int separator = line.indexOf('=');
         if (separator == -1) {
           throw new IOException("the content of connector file must be "
