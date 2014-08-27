@@ -18,7 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JobValidationBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MJob;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -49,33 +49,29 @@ public class JobRequest extends Request {
     return jobBean;
   }
 
-  public JobValidationBean create(String serverUrl, MJob job) {
-
+  public ValidationResultBean create(String serverUrl, MJob job) {
     JobBean jobBean = new JobBean(job);
 
     // Extract all form inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
 
-    String response = super.post(serverUrl + RESOURCE,
-      jobJson.toJSONString());
+    String response = super.post(serverUrl + RESOURCE, jobJson.toJSONString());
 
-    JobValidationBean validationBean = new JobValidationBean();
+    ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
     return validationBean;
   }
 
-  public JobValidationBean update(String serverUrl, MJob job) {
-
+  public ValidationResultBean update(String serverUrl, MJob job) {
     JobBean jobBean = new JobBean(job);
 
     // Extract all form inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
 
-    String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
-                                jobJson.toJSONString());
+    String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(), jobJson.toJSONString());
 
-    JobValidationBean validationBean = new JobValidationBean();
+    ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
 
     return validationBean;

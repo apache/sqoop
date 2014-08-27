@@ -25,8 +25,8 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JobValidationBean;
 import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -37,8 +37,8 @@ import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
+import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ValidationRunner;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -181,10 +181,8 @@ public class JobRequestHandler implements RequestHandler {
     }
 
     // Responsible connector for this session
-    SqoopConnector fromConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
-    SqoopConnector toConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
+    SqoopConnector fromConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
+    SqoopConnector toConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
     if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
       throw new SqoopException(ServerError.SERVER_0004, "Connector " + fromConnector.getClass().getCanonicalName()
@@ -196,37 +194,25 @@ public class JobRequestHandler implements RequestHandler {
           + " does not support TO direction.");
     }
 
-    // Get validator objects
-    Validator fromConnectorValidator = fromConnector.getValidator();
-    Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
-    Validator toConnectorValidator = toConnector.getValidator();
-
     // We need translate forms to configuration objects
-    Object fromConnectorConfig = ClassUtils.instantiate(
-        fromConnector.getJobConfigurationClass(Direction.FROM));
-    Object frameworkConfig = ClassUtils.instantiate(
-      FrameworkManager.getInstance().getJobConfigurationClass());
-    Object toConnectorConfig = ClassUtils.instantiate(
-      toConnector.getJobConfigurationClass(Direction.TO));
+    Object fromConnectorConfig = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
+    Object frameworkConfig = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass());
+    Object toConnectorConfig = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
 
     FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromConnectorConfig);
     FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
     FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toConnectorConfig);
 
     // Validate all parts
-    Validation fromConnectorValidation =
-      fromConnectorValidator.validateJob(fromConnectorConfig);
-    Validation frameworkValidation =
-      frameworkValidator.validateJob(frameworkConfig);
-    Validation toConnectorValidation =
-        toConnectorValidator.validateJob(toConnectorConfig);
+    ValidationRunner validationRunner = new ValidationRunner();
+    ValidationResult fromConnectorValidation = validationRunner.validate(fromConnectorConfig);
+    ValidationResult frameworkValidation = validationRunner.validate(frameworkConfig);
+    ValidationResult toConnectorValidation = validationRunner.validate(toConnectorConfig);
 
-    Status finalStatus = Status.getWorstStatus(fromConnectorValidation.getStatus(),
-        frameworkValidation.getStatus(), toConnectorValidation.getStatus());
+    Status finalStatus = Status.getWorstStatus(fromConnectorValidation.getStatus(), frameworkValidation.getStatus(), toConnectorValidation.getStatus());
 
     // Return back validations in all cases
-    JobValidationBean outputBean =
-      new JobValidationBean(fromConnectorValidation, frameworkValidation, toConnectorValidation);
+    ValidationResultBean outputBean = new ValidationResultBean(fromConnectorValidation, frameworkValidation, toConnectorValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {

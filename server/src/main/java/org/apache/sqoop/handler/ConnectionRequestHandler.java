@@ -24,8 +24,8 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.framework.FrameworkManager;
 import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -36,8 +36,8 @@ import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
+import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ValidationRunner;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -176,36 +176,24 @@ public class ConnectionRequestHandler implements RequestHandler {
     }
 
     // Responsible connector for this session
-    SqoopConnector connector =
-      ConnectorManager.getInstance().getConnector(connection.getConnectorId());
-
-    // Get validator objects
-    Validator connectorValidator = connector.getValidator();
-    Validator frameworkValidator = FrameworkManager.getInstance().getValidator();
+    SqoopConnector connector = ConnectorManager.getInstance().getConnector(connection.getConnectorId());
 
     // We need translate forms to configuration objects
-    Object connectorConfig = ClassUtils.instantiate(
-      connector.getConnectionConfigurationClass());
-    Object frameworkConfig = ClassUtils.instantiate(
-      FrameworkManager.getInstance().getConnectionConfigurationClass());
+    Object connectorConfig = ClassUtils.instantiate(connector.getConnectionConfigurationClass());
+    Object frameworkConfig = ClassUtils.instantiate(FrameworkManager.getInstance().getConnectionConfigurationClass());
 
-    FormUtils.fromForms(
-      connection.getConnectorPart().getForms(), connectorConfig);
-    FormUtils.fromForms(
-      connection.getFrameworkPart().getForms(), frameworkConfig);
+    FormUtils.fromForms(connection.getConnectorPart().getForms(), connectorConfig);
+    FormUtils.fromForms(connection.getFrameworkPart().getForms(), frameworkConfig);
 
     // Validate both parts
-    Validation connectorValidation =
-      connectorValidator.validateConnection(connectorConfig);
-    Validation frameworkValidation =
-      frameworkValidator.validateConnection(frameworkConfig);
+    ValidationRunner validationRunner = new ValidationRunner();
+    ValidationResult connectorValidation = validationRunner.validate(connectorConfig);
+    ValidationResult frameworkValidation = validationRunner.validate(frameworkConfig);
 
-    Status finalStatus = Status.getWorstStatus(connectorValidation.getStatus(),
-      frameworkValidation.getStatus());
+    Status finalStatus = Status.getWorstStatus(connectorValidation.getStatus(), frameworkValidation.getStatus());
 
     // Return back validations in all cases
-    ConnectionValidationBean outputBean =
-      new ConnectionValidationBean(connectorValidation, frameworkValidation);
+    ValidationResultBean outputBean = new ValidationResultBean(connectorValidation, frameworkValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {

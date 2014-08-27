@@ -18,7 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.json.ConnectionValidationBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MConnection;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -49,37 +49,32 @@ public class ConnectionRequest extends Request {
     return connectionBean;
   }
 
-  public ConnectionValidationBean create(String serverUrl, MConnection connection) {
-
+  public ValidationResultBean create(String serverUrl, MConnection connection) {
     ConnectionBean connectionBean = new ConnectionBean(connection);
 
     // Extract all form inputs including sensitive inputs
     JSONObject connectionJson = connectionBean.extract(false);
 
-    String response = super.post(serverUrl + RESOURCE,
-                                 connectionJson.toJSONString());
+    String response = super.post(serverUrl + RESOURCE, connectionJson.toJSONString());
 
-    ConnectionValidationBean connectionValidationBean = new ConnectionValidationBean();
-    connectionValidationBean.restore((JSONObject) JSONValue.parse(response));
+    ValidationResultBean validationBean = new ValidationResultBean();
+    validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return connectionValidationBean;
+    return validationBean;
   }
 
-  public ConnectionValidationBean update(String serverUrl, MConnection connection) {
-
+  public ValidationResultBean update(String serverUrl, MConnection connection) {
     ConnectionBean connectionBean = new ConnectionBean(connection);
 
     // Extract all form inputs including sensitive inputs
     JSONObject connectionJson = connectionBean.extract(false);
 
-    String response = super.put(serverUrl + RESOURCE
-                                  + connection.getPersistenceId(),
-                                connectionJson.toJSONString());
+    String response = super.put(serverUrl + RESOURCE + connection.getPersistenceId(), connectionJson.toJSONString());
 
-    ConnectionValidationBean connectionValidationBean = new ConnectionValidationBean();
-    connectionValidationBean.restore((JSONObject) JSONValue.parse(response));
+    ValidationResultBean validationBean = new ValidationResultBean();
+    validationBean.restore((JSONObject) JSONValue.parse(response));
 
-    return connectionValidationBean;
+    return validationBean;
   }
 
   public void delete(String serverUrl, Long id) {

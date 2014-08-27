@@ -18,12 +18,11 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.ConnectionBean;
-import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JobValidationBean;
 import org.apache.sqoop.json.SubmissionBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MJob;
 
@@ -92,7 +91,7 @@ public class SqoopRequests {
     return getConnectorRequest().read(serverUrl, cid);
   }
 
-  public ConnectionValidationBean createConnection(MConnection connection) {
+  public ValidationResultBean createConnection(MConnection connection) {
     return getConnectionRequest().create(serverUrl, connection);
   }
 
@@ -100,7 +99,7 @@ public class SqoopRequests {
     return getConnectionRequest().read(serverUrl, connectionId);
   }
 
-  public ConnectionValidationBean updateConnection(MConnection connection) {
+  public ValidationResultBean updateConnection(MConnection connection) {
     return getConnectionRequest().update(serverUrl, connection);
   }
 
@@ -112,7 +111,7 @@ public class SqoopRequests {
     getConnectionRequest().delete(serverUrl, xid);
   }
 
-  public JobValidationBean createJob(MJob job) {
+  public ValidationResultBean createJob(MJob job) {
     return getJobRequest().create(serverUrl, job);
   }
 
@@ -120,7 +119,7 @@ public class SqoopRequests {
     return getJobRequest().read(serverUrl, jobId);
   }
 
-  public JobValidationBean updateJob(MJob job) {
+  public ValidationResultBean updateJob(MJob job) {
     return getJobRequest().update(serverUrl, job);
   }
 

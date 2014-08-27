@@ -20,10 +20,9 @@ package org.apache.sqoop.client;
 import org.apache.sqoop.client.request.SqoopRequests;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectionValidationBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.FrameworkBean;
-import org.apache.sqoop.json.JobValidationBean;
+import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnector;
@@ -31,7 +30,7 @@ import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ValidationResult;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -534,10 +533,11 @@ public class SqoopClient {
     return requests.readHistory(jid).getSubmissions();
   }
 
-  private Status applyValidations(ConnectionValidationBean bean, MConnection connection) {
-    Validation connector = bean.getConnectorValidation();
-    Validation framework = bean.getFrameworkValidation();
+  private Status applyValidations(ValidationResultBean bean, MConnection connection) {
+    ValidationResult connector = bean.getValidationResults()[0];
+    ValidationResult framework = bean.getValidationResults()[1];
 
+    // Apply validation results
     FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
     FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
 
@@ -549,11 +549,12 @@ public class SqoopClient {
     return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
   }
 
-  private Status applyValidations(JobValidationBean bean, MJob job) {
-    Validation fromConnector = bean.getConnectorValidation(Direction.FROM);
-    Validation toConnector = bean.getConnectorValidation(Direction.TO);
-    Validation framework = bean.getFrameworkValidation();
+  private Status applyValidations(ValidationResultBean bean, MJob job) {
+    ValidationResult fromConnector = bean.getValidationResults()[0];
+    ValidationResult toConnector = bean.getValidationResults()[1];
+    ValidationResult framework = bean.getValidationResults()[2];
 
+    // Apply validation results
     // @TODO(Abe): From/To validation.
     FormUtils.applyValidation(
         job.getConnectorPart(Direction.FROM).getForms(),
