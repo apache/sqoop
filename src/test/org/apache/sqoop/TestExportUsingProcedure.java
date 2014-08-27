@@ -241,8 +241,11 @@ public class TestExportUsingProcedure extends TestExport {
       sql.append(instanceForProcedure.names[i]);
     }
     sql.append(") values (");
-    sql.append(StringUtils.repeat("?", ",  ",
-        instanceForProcedure.names.length + 2));
+    for (int i = 0; i < instanceForProcedure.names.length + 2; ++i) {
+      sql.append("?,");
+    }
+    // Remove last ,
+    sql = sql.delete(sql.length() - 1, sql.length());
     sql.append(")");
 
     PreparedStatement statement = con.prepareStatement(sql.toString());
