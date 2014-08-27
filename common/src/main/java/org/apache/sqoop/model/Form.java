@@ -25,4 +25,11 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Form {
+
+  /**
+   * Optional name for the form object
+   *
+   * @return
+   */
+  String name() default "";
 }

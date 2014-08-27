@@ -33,24 +33,24 @@ import java.util.Map;
 public class TestFormUtils extends TestCase {
 
   public void testToForms() {
-    Config config = new Config();
-    config.aForm.a1 = "value";
+    Configuration Configuration = new Configuration();
+    Configuration.aForm.a1 = "value";
 
-    List<MForm> formsByInstance = FormUtils.toForms(config);
+    List<MForm> formsByInstance = FormUtils.toForms(Configuration);
     assertEquals(getForms(), formsByInstance);
     assertEquals("value", formsByInstance.get(0).getInputs().get(0).getValue());
 
-    List<MForm> formsByClass = FormUtils.toForms(Config.class);
+    List<MForm> formsByClass = FormUtils.toForms(Configuration.class);
     assertEquals(getForms(), formsByClass);
 
-    List<MForm> formsByBoth = FormUtils.toForms(Config.class, config);
+    List<MForm> formsByBoth = FormUtils.toForms(Configuration.class, Configuration);
     assertEquals(getForms(), formsByBoth);
     assertEquals("value", formsByBoth.get(0).getInputs().get(0).getValue());
   }
 
   public void testToFormsMissingAnnotation() {
     try {
-      FormUtils.toForms(ConfigWithout.class);
+      FormUtils.toForms(ConfigurationWithoutAnnotation.class);
     } catch(SqoopException ex) {
       assertEquals(ModelError.MODEL_003, ex.getErrorCode());
       return;
@@ -59,11 +59,43 @@ public class TestFormUtils extends TestCase {
     fail("Correct exception wasn't thrown");
   }
 
+  public void testNonUniqueFormNameAttributes() {
+    try {
+      FormUtils.toForms(ConfigurationWithNonUniqueFormNameAttribute.class);
+    } catch (SqoopException ex) {
+      assertEquals(ModelError.MODEL_012, ex.getErrorCode());
+      return;
+    }
+
+    fail("Correct exception wasn't thrown");
+  }
+
+  public void testInvalidFormNameAttribute() {
+    try {
+      FormUtils.toForms(ConfigurationWithInvalidFormNameAttribute.class);
+    } catch (SqoopException ex) {
+      assertEquals(ModelError.MODEL_013, ex.getErrorCode());
+      return;
+    }
+
+    fail("Correct exception wasn't thrown");
+  }
+
+  public void testInvalidFormNameAttributeLength() {
+    try {
+      FormUtils.toForms(ConfigurationWithInvalidFormNameAttributeLength.class);
+    } catch (SqoopException ex) {
+      assertEquals(ModelError.MODEL_014, ex.getErrorCode());
+      return;
+    }
+    fail("Correct exception wasn't thrown");
+  }
+
   public void testFailureOnPrimitiveType() {
-    PrimitiveConfig config = new PrimitiveConfig();
+    PrimitiveConfiguration Configuration = new PrimitiveConfiguration();
 
     try {
-      FormUtils.toForms(config);
+      FormUtils.toForms(Configuration);
       fail("We were expecting exception for unsupported type.");
     } catch(SqoopException ex) {
       assertEquals(ModelError.MODEL_007, ex.getErrorCode());
@@ -72,13 +104,16 @@ public class TestFormUtils extends TestCase {
 
   public void testFillValues() {
     List<MForm> forms = getForms();
+    assertEquals("test_AForm", forms.get(0).getName());
+    assertEquals("test_BForm", forms.get(1).getName());
+    assertEquals("cForm", forms.get(2).getName());
 
     ((MStringInput)forms.get(0).getInputs().get(0)).setValue("value");
 
-    Config config = new Config();
+    Configuration Configuration = new Configuration();
 
-    FormUtils.fromForms(forms, config);
-    assertEquals("value", config.aForm.a1);
+    FormUtils.fromForms(forms, Configuration);
+    assertEquals("value", Configuration.aForm.a1);
   }
 
   public void testFillValuesObjectReuse() {
@@ -86,15 +121,15 @@ public class TestFormUtils extends TestCase {
 
     ((MStringInput)forms.get(0).getInputs().get(0)).setValue("value");
 
-    Config config = new Config();
-    config.aForm.a2 = "x";
-    config.bForm.b1 = "y";
+    Configuration Configuration = new Configuration();
+    Configuration.aForm.a2 = "x";
+    Configuration.bForm.b1 = "y";
 
-    FormUtils.fromForms(forms, config);
-    assertEquals("value", config.aForm.a1);
-    assertNull(config.aForm.a2);
-    assertNull(config.bForm.b2);
-    assertNull(config.bForm.b2);
+    FormUtils.fromForms(forms, Configuration);
+    assertEquals("value", Configuration.aForm.a1);
+    assertNull(Configuration.aForm.a2);
+    assertNull(Configuration.bForm.b2);
+    assertNull(Configuration.bForm.b2);
   }
 
   public void testApplyValidation() {
@@ -115,16 +150,16 @@ public class TestFormUtils extends TestCase {
   }
 
   public void testJson() {
-    Config config = new Config();
-    config.aForm.a1 = "A";
-    config.bForm.b2 = "B";
-    config.cForm.intValue = 4;
-    config.cForm.map.put("C", "D");
-    config.cForm.enumeration = Enumeration.X;
+    Configuration Configuration = new Configuration();
+    Configuration.aForm.a1 = "A";
+    Configuration.bForm.b2 = "B";
+    Configuration.cForm.intValue = 4;
+    Configuration.cForm.map.put("C", "D");
+    Configuration.cForm.enumeration = Enumeration.X;
 
-    String json = FormUtils.toJson(config);
+    String json = FormUtils.toJson(Configuration);
 
-    Config targetConfig = new Config();
+    Configuration targetConfig = new Configuration();
 
     // Old values from should be always removed
     targetConfig.aForm.a2 = "X";
@@ -152,17 +187,17 @@ public class TestFormUtils extends TestCase {
       = new HashMap<Validation.FormInput, Validation.Message>();
 
     messages.put(
-      new Validation.FormInput("aForm", "a1"),
+      new Validation.FormInput("test_AForm", "a1"),
       new Validation.Message(Status.ACCEPTABLE, "e1"));
     messages.put(
-      new Validation.FormInput("aForm", "a2"),
+      new Validation.FormInput("test_AForm", "a2"),
       new Validation.Message(Status.UNACCEPTABLE, "e2"));
 
     return new Validation(Status.UNACCEPTABLE, messages);
   }
 
   /**
-   * Form structure that corresponds to Config class declared below
+   * Form structure that corresponds to Configuration class declared below
    * @return Form structure
    */
   protected List<MForm> getForms() {
@@ -172,15 +207,15 @@ public class TestFormUtils extends TestCase {
 
     // Form A
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("aForm.a1", false, (short)30));
-    inputs.add(new MStringInput("aForm.a2", true, (short)-1));
-    ret.add(new MForm("aForm", inputs));
+    inputs.add(new MStringInput("test_AForm.a1", false, (short)30));
+    inputs.add(new MStringInput("test_AForm.a2", true, (short)-1));
+    ret.add(new MForm("test_AForm", inputs));
 
     // Form B
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("bForm.b1", false, (short)2));
-    inputs.add(new MStringInput("bForm.b2", false, (short)3));
-    ret.add(new MForm("bForm", inputs));
+    inputs.add(new MStringInput("test_BForm.b1", false, (short)2));
+    inputs.add(new MStringInput("test_BForm.b2", false, (short)3));
+    ret.add(new MForm("test_BForm", inputs));
 
     // Form C
     inputs = new LinkedList<MInput<?>>();
@@ -193,21 +228,57 @@ public class TestFormUtils extends TestCase {
   }
 
   @ConfigurationClass
-  public static class Config {
+  public static class ConfigurationWithNonUniqueFormNameAttribute {
+    public ConfigurationWithNonUniqueFormNameAttribute() {
+      aForm = new InvalidForm();
+      bForm = new InvalidForm();
+    }
 
-    public Config() {
+    @Form(name = "sameName")
+    InvalidForm aForm;
+    @Form(name = "sameName")
+    InvalidForm bForm;
+  }
+
+  @ConfigurationClass
+  public static class ConfigurationWithInvalidFormNameAttribute {
+    public ConfigurationWithInvalidFormNameAttribute() {
+      invalidForm = new InvalidForm();
+    }
+
+    @Form(name = "#_form")
+    InvalidForm invalidForm;
+  }
+
+  @ConfigurationClass
+  public static class ConfigurationWithInvalidFormNameAttributeLength {
+    public ConfigurationWithInvalidFormNameAttributeLength() {
+      invalidLengthForm = new InvalidForm();
+    }
+
+    @Form(name = "longest_form_more_than_30_characers")
+    InvalidForm invalidLengthForm;
+  }
+
+  @ConfigurationClass
+  public static class Configuration {
+
+    public Configuration() {
       aForm = new AForm();
       bForm = new BForm();
       cForm = new CForm();
     }
 
-    @Form AForm aForm;
-    @Form BForm bForm;
-    @Form CForm cForm;
+    @Form(name = "test_AForm")
+    AForm aForm;
+    @Form(name = "test_BForm")
+    BForm bForm;
+    @Form(name = "")
+    CForm cForm;
   }
 
   @ConfigurationClass
-  public static class PrimitiveConfig {
+  public static class PrimitiveConfiguration {
     @Form DForm dForm;
   }
 
@@ -235,11 +306,15 @@ public class TestFormUtils extends TestCase {
   }
 
   @FormClass
+  public static class InvalidForm {
+
+  }
+  @FormClass
   public static class DForm {
     @Input int value;
   }
 
-  public static class ConfigWithout {
+  public static class ConfigurationWithoutAnnotation {
   }
 
   enum Enumeration {

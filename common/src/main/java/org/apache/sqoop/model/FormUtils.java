@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
@@ -26,9 +27,12 @@ import org.json.simple.JSONValue;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Util class for transforming data from correctly annotated configuration
@@ -56,6 +60,9 @@ public class FormUtils {
 
   @SuppressWarnings("unchecked")
   public static List<MForm> toForms(Class klass, Object configuration) {
+
+    Set<String> formNames = new HashSet<String>();
+
     ConfigurationClass global =
       (ConfigurationClass)klass.getAnnotation(ConfigurationClass.class);
 
@@ -68,25 +75,25 @@ public class FormUtils {
     List<MForm> forms = new LinkedList<MForm>();
 
     // Iterate over all declared fields
-    for (Field field : klass.getDeclaredFields()) {
-      field.setAccessible(true);
-
-      String formName = field.getName();
+    for (Field formField : klass.getDeclaredFields()) {
+      formField.setAccessible(true);
 
       // Each field that should be part of user input should have Input
       // annotation.
-      Form formAnnotation = field.getAnnotation(Form.class);
+      Form formAnnotation = formField.getAnnotation(Form.class);
 
-      if(formAnnotation != null) {
-        Class type = field.getType();
+      if (formAnnotation != null) {
+        String formName = getFormName(formField, formAnnotation, formNames);
+
+        Class type = formField.getType();
 
         Object value = null;
         if(configuration != null) {
           try {
-            value = field.get(configuration);
+            value = formField.get(configuration);
           } catch (IllegalAccessException e) {
             throw new SqoopException(ModelError.MODEL_005,
-              "Can't retrieve value from " + field.getName(), e);
+              "Can't retrieve value from " + formField.getName(), e);
           }
         }
 
@@ -98,7 +105,7 @@ public class FormUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static MForm toForm(String formName, Class klass, Object object) {
+  private static MForm toForm(String formName, Class<?> klass, Object object) {
      FormClass global =
       (FormClass)klass.getAnnotation(FormClass.class);
 
@@ -125,7 +132,7 @@ public class FormUtils {
       if(inputAnnotation != null) {
         boolean sensitive = inputAnnotation.sensitive();
         short maxLen = inputAnnotation.size();
-        Class type = field.getType();
+        Class<?> type = field.getType();
 
         MInput input;
 
@@ -136,19 +143,20 @@ public class FormUtils {
         }
 
         // Instantiate corresponding MInput<?> structure
-        if(type == String.class) {
+        if (type == String.class) {
           input = new MStringInput(inputName, sensitive, maxLen);
         } else if (type.isAssignableFrom(Map.class)) {
           input = new MMapInput(inputName, sensitive);
-        } else if(type == Integer.class) {
+        } else if (type == Integer.class) {
           input = new MIntegerInput(inputName, sensitive);
-        } else if(type == Boolean.class) {
+        } else if (type == Boolean.class) {
           input = new MBooleanInput(inputName, sensitive);
-        } else if(type.isEnum()) {
-          input = new MEnumInput(inputName, sensitive, ClassUtils.getEnumStrings(type));
+        } else if (type.isEnum()) {
+          input = new MEnumInput(inputName, sensitive,
+              ClassUtils.getEnumStrings(type));
         } else {
-          throw new SqoopException(ModelError.MODEL_004,
-            "Unsupported type " + type.getName() + " for input " + fieldName);
+          throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
+              + type.getName() + " for input " + fieldName);
         }
 
         // Move value if it's present in original configuration object
@@ -174,40 +182,57 @@ public class FormUtils {
     return new MForm(formName, inputs);
   }
 
+  private static Field getFieldFromName(Class<?> klass, String name) {
+    Field formField;
+    try {
+      formField = klass.getDeclaredField(name);
+    } catch (NoSuchFieldException e) {
+      // reverse lookup form field from custom form name
+      if (name != null) {
+        for (Field field : klass.getDeclaredFields()) {
+          Form formAnnotation = field.getAnnotation(Form.class);
+          if (formAnnotation == null) {
+            continue;
+          }
+          if (!StringUtils.isEmpty(formAnnotation.name()) && name.equals(formAnnotation.name())) {
+            return field;
+          }
+        }
+      }
+      throw new SqoopException(ModelError.MODEL_006, "Missing field " + name + " on form class "
+          + klass.getCanonicalName(), e);
+    }
+    return formField;
+  }
+
   /**
    * Move form values from form list into corresponding configuration object.
    *
-   * @param forms Input form list
-   * @param configuration Output configuration object
+   * @param forms
+   *          Input form list
+   * @param configuration
+   *          Output configuration object
    */
   public static void fromForms(List<MForm> forms, Object configuration) {
-    Class klass = configuration.getClass();
+    Class<?> klass = configuration.getClass();
 
-    for(MForm form : forms) {
-      Field formField;
-      try {
-        formField = klass.getDeclaredField(form.getName());
-      } catch (NoSuchFieldException e) {
-        throw new SqoopException(ModelError.MODEL_006,
-          "Missing field " + form.getName() + " on form class " + klass.getCanonicalName(), e);
-      }
-
+    for (MForm form : forms) {
+      Field formField = getFieldFromName(klass, form.getName());
       // We need to access this field even if it would be declared as private
       formField.setAccessible(true);
-
-      Class formClass = formField.getType();
+      Class<?> formClass = formField.getType();
       Object newValue = ClassUtils.instantiate(formClass);
 
-      if(newValue == null) {
+      if (newValue == null) {
         throw new SqoopException(ModelError.MODEL_006,
-          "Can't instantiate new form " + formClass);
+            "Can't instantiate new form " + formClass);
       }
 
-      for(MInput input : form.getInputs()) {
+      for (MInput input : form.getInputs()) {
         String[] splitNames = input.getName().split("\\.");
-        if(splitNames.length != 2) {
-          throw new SqoopException(ModelError.MODEL_009,
-            "Invalid name: " + input.getName());
+        if (splitNames.length != 2) {
+          throw new SqoopException(ModelError.MODEL_009, "Invalid name: "
+              + input.getName());
         }
 
         String inputName = splitNames[1];
@@ -216,34 +241,36 @@ public class FormUtils {
         try {
           inputField = formClass.getDeclaredField(inputName);
         } catch (NoSuchFieldException e) {
-          throw new SqoopException(ModelError.MODEL_006,
-            "Missing field " + input.getName(), e);
+          throw new SqoopException(ModelError.MODEL_006, "Missing field "
+              + input.getName(), e);
         }
 
         // We need to access this field even if it would be declared as private
         inputField.setAccessible(true);
 
         try {
-          if(input.isEmpty()) {
+          if (input.isEmpty()) {
             inputField.set(newValue, null);
           } else {
             if (input.getType() == MInputType.ENUM) {
-              inputField.set(newValue, Enum.valueOf((Class<? extends Enum>)inputField.getType(), (String) input.getValue()));
+              inputField.set(newValue, Enum.valueOf(
+                  (Class<? extends Enum>) inputField.getType(),
+                  (String) input.getValue()));
             } else {
               inputField.set(newValue, input.getValue());
             }
           }
         } catch (IllegalAccessException e) {
-          throw new SqoopException(ModelError.MODEL_005,
-            "Issue with field " + inputField.getName(), e);
+          throw new SqoopException(ModelError.MODEL_005, "Issue with field "
+              + inputField.getName(), e);
         }
       }
 
       try {
         formField.set(configuration, newValue);
       } catch (IllegalAccessException e) {
-        throw new SqoopException(ModelError.MODEL_005,
-          "Issue with field " + formField.getName(), e);
+        throw new SqoopException(ModelError.MODEL_005, "Issue with field "
+            + formField.getName(), e);
       }
     }
   }
@@ -251,16 +278,19 @@ public class FormUtils {
   /**
    * Apply validations on the forms.
    *
-   * @param forms Forms that should be updated
-   * @param validation Validation that we should apply
+   * @param forms
+   *          Forms that should be updated
+   * @param validation
+   *          Validation that we should apply
    */
   public static void applyValidation(List<MForm> forms, Validation validation) {
-    Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
+    Map<Validation.FormInput, Validation.Message> messages = validation
+        .getMessages();
 
-    for(MForm form : forms) {
+    for (MForm form : forms) {
       applyValidation(form, messages);
 
-      for(MInput input : form.getInputs()) {
+      for (MInput input : form.getInputs()) {
         applyValidation(input, messages);
       }
     }
@@ -269,13 +299,16 @@ public class FormUtils {
   /**
    * Apply validation on given validated element.
    *
-   * @param element Element on what we're applying the validations
-   * @param messages Map of all validation messages
+   * @param element
+   *          Element on what we're applying the validations
+   * @param messages
+   *          Map of all validation messages
    */
-  public static void applyValidation(MValidatedElement element, Map<Validation.FormInput, Validation.Message> messages) {
+  public static void applyValidation(MValidatedElement element,
+      Map<Validation.FormInput, Validation.Message> messages) {
     Validation.FormInput name = new Validation.FormInput(element.getName());
 
-    if(messages.containsKey(name)) {
+    if (messages.containsKey(name)) {
       Validation.Message message = messages.get(name);
       element.setValidationMessage(message.getStatus(), message.getMessage());
     } else {
@@ -293,14 +326,14 @@ public class FormUtils {
   @SuppressWarnings("unchecked")
   public static String toJson(Object configuration) {
     Class klass = configuration.getClass();
-
-    ConfigurationClass global =
-      (ConfigurationClass)klass.getAnnotation(ConfigurationClass.class);
+    Set<String> formNames = new HashSet<String>();
+    ConfigurationClass global = (ConfigurationClass) klass
+        .getAnnotation(ConfigurationClass.class);
 
     // Each configuration object must have this class annotation
-    if(global == null) {
+    if (global == null) {
       throw new SqoopException(ModelError.MODEL_003,
-        "Missing annotation Configuration on class " + klass.getName());
+          "Missing annotation Configuration on class " + klass.getName());
     }
 
     JSONObject jsonOutput = new JSONObject();
@@ -308,26 +341,26 @@ public class FormUtils {
     // Iterate over all declared fields
     for (Field formField : klass.getDeclaredFields()) {
       formField.setAccessible(true);
-      String formName = formField.getName();
 
       // We're processing only form validations
       Form formAnnotation = formField.getAnnotation(Form.class);
-      if(formAnnotation == null) {
+      if (formAnnotation == null) {
         continue;
       }
+      String formName = getFormName(formField, formAnnotation, formNames);
 
       Object formValue;
       try {
         formValue = formField.get(configuration);
       } catch (IllegalAccessException e) {
-        throw new SqoopException(ModelError.MODEL_005,
-          "Issue with field " + formName, e);
+        throw new SqoopException(ModelError.MODEL_005, "Issue with field "
+            + formName, e);
       }
 
       JSONObject jsonForm = new JSONObject();
 
       // Now process each input on the form
-      for(Field inputField : formField.getType().getDeclaredFields()) {
+      for (Field inputField : formField.getType().getDeclaredFields()) {
         inputField.setAccessible(true);
         String inputName = inputField.getName();
 
@@ -335,46 +368,45 @@ public class FormUtils {
         try {
           value = inputField.get(formValue);
         } catch (IllegalAccessException e) {
-          throw new SqoopException(ModelError.MODEL_005,
-            "Issue with field " + formName + "." + inputName, e);
+          throw new SqoopException(ModelError.MODEL_005, "Issue with field "
+              + formName + "." + inputName, e);
         }
 
         Input inputAnnotation = inputField.getAnnotation(Input.class);
 
         // Do not serialize all values
-        if(inputAnnotation != null && value != null) {
-          Class type = inputField.getType();
+        if (inputAnnotation != null && value != null) {
+          Class<?> type = inputField.getType();
 
           // We need to support NULL, so we do not support primitive types
-          if(type.isPrimitive()) {
+          if (type.isPrimitive()) {
             throw new SqoopException(ModelError.MODEL_007,
-              "Detected primitive type " + type + " for field " + formName + "." + inputName);
+                "Detected primitive type " + type + " for field " + formName
+                    + "." + inputName);
           }
 
-          if(type == String.class) {
+          if (type == String.class) {
             jsonForm.put(inputName, value);
           } else if (type.isAssignableFrom(Map.class)) {
             JSONObject map = new JSONObject();
-            for(Object key : ((Map)value).keySet()) {
-              map.put(key, ((Map)value).get(key));
+            for (Object key : ((Map) value).keySet()) {
+              map.put(key, ((Map) value).get(key));
             }
             jsonForm.put(inputName, map);
-          } else if(type == Integer.class) {
+          } else if (type == Integer.class) {
             jsonForm.put(inputName, value);
-          } else if(type.isEnum()) {
+          } else if (type.isEnum()) {
             jsonForm.put(inputName, value.toString());
-          } else if(type == Boolean.class) {
+          } else if (type == Boolean.class) {
             jsonForm.put(inputName, value);
-          }else {
-            throw new SqoopException(ModelError.MODEL_004,
-              "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
+          } else {
+            throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
+                + type.getName() + " for input " + formName + "." + inputName);
           }
         }
       }
-
       jsonOutput.put(formName, jsonForm);
     }
-
     return jsonOutput.toJSONString();
   }
 
@@ -389,16 +421,17 @@ public class FormUtils {
     Class klass = configuration.getClass();
 
     JSONObject jsonForms = (JSONObject) JSONValue.parse(json);
+    Set<String> formNames = new HashSet<String>();
 
     for(Field formField : klass.getDeclaredFields()) {
       formField.setAccessible(true);
-      String formName = formField.getName();
 
       // We're processing only form validations
       Form formAnnotation = formField.getAnnotation(Form.class);
       if(formAnnotation == null) {
         continue;
       }
+      String formName = getFormName(formField, formAnnotation, formNames);
 
       try {
         formField.set(configuration, formField.getType().newInstance());
@@ -407,7 +440,7 @@ public class FormUtils {
           "Issue with field " + formName, e);
       }
 
-      JSONObject jsonInputs = (JSONObject) jsonForms.get(formField.getName());
+      JSONObject jsonInputs = (JSONObject) jsonForms.get(formName);
       if(jsonInputs == null) {
         continue;
       }
@@ -463,6 +496,42 @@ public class FormUtils {
             "Issue with field " + formName + "." + inputName, e);
         }
       }
+    }
+  }
+
+  private static String getFormName(Field member, Form annotation, Set<String> existingFormNames) {
+    if (StringUtils.isEmpty(annotation.name())) {
+      return member.getName();
+    } else {
+      checkForValidFormName(existingFormNames, annotation.name());
+      existingFormNames.add(annotation.name());
+      return annotation.name();
+    }
+  }
+
+  private static void checkForValidFormName(Set<String> existingFormNames,
+      String customFormName) {
+    // uniqueness across fields check
+    if (existingFormNames.contains(customFormName)) {
+      throw new SqoopException(ModelError.MODEL_012,
+          "Issue with field form name " + customFormName);
+    }
+
+    if (!Character.isJavaIdentifierStart(customFormName.toCharArray()[0])) {
+      throw new SqoopException(ModelError.MODEL_013,
+          "Issue with field form name " + customFormName);
+    }
+    for (Character c : customFormName.toCharArray()) {
+      if (Character.isJavaIdentifierPart(c))
+        continue;
+      throw new SqoopException(ModelError.MODEL_013,
+          "Issue with field form name " + customFormName);
+    }
+
+    if (customFormName.length() > 30) {
+      throw new SqoopException(ModelError.MODEL_014,
+          "Issue with field form name " + customFormName);
+
     }
   }
 

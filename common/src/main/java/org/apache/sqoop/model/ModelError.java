@@ -46,7 +46,12 @@ public enum ModelError implements ErrorCode {
 
   MODEL_011("Input do not exist"),
 
-  ;
+  MODEL_012("Form name attribute should be unique across a configuration object"),
+
+  MODEL_013("Form name attribute should not contain unsupported characters"),
+
+  MODEL_014("Form name attribute cannot be more than 30 characters long")
+;
 
   private final String message;
 
