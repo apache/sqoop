@@ -52,8 +52,7 @@ public class AvroImportMapper
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     schema = AvroJob.getMapOutputSchema(conf);
-    lobLoader = new LargeObjectLoader(conf,
-        FileOutputFormat.getWorkOutputPath(context));
+    lobLoader = new LargeObjectLoader(conf);
     bigDecimalFormatString = conf.getBoolean(
         ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
         ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);

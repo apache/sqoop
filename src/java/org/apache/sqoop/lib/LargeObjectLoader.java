@@ -69,12 +69,11 @@ public class LargeObjectLoader implements Closeable  {
   /**
    * Create a new LargeObjectLoader.
    * @param conf the Configuration to use
-   * @param workPath the HDFS working directory for this task.
    */
-  public LargeObjectLoader(Configuration conf, Path workPath)
+  public LargeObjectLoader(Configuration conf)
       throws IOException {
     this.conf = conf;
-    this.workPath = workPath;
+    this.workPath = new Path(System.getProperty("java.io.tmpdir"), "SQOOP");
     this.fs = FileSystem.get(conf);
     this.curBlobWriter = null;
     this.curClobWriter = null;

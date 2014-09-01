@@ -42,9 +42,7 @@ public class ParquetImportMapper
   @Override
   protected void setup(Context context)
       throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    Path workPath = new Path("/tmp/sqoop-parquet-" + context.getTaskAttemptID());
-    lobLoader = new LargeObjectLoader(conf, workPath);
+    lobLoader = new LargeObjectLoader(context.getConfiguration());
   }
 
   @Override

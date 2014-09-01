@@ -112,8 +112,7 @@ public class SqoopHCatImportHelper {
       hCatFullTableSchema.append(hfs);
     }
     fieldCount = hCatFullTableSchema.size();
-    lobLoader = new LargeObjectLoader(conf, new Path(jobInfo.getTableInfo()
-      .getTableLocation()));
+    lobLoader = new LargeObjectLoader(conf);
     bigDecimalFormatString = conf.getBoolean(
       ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
       ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);

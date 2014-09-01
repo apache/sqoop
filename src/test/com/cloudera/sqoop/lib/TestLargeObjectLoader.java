@@ -49,14 +49,14 @@ public class TestLargeObjectLoader extends TestCase {
       conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
     }
     String tmpDir = System.getProperty("test.build.data", "/tmp/");
-    this.outDir = new Path(new Path(tmpDir), "testLobLoader");
+    this.outDir = new Path(System.getProperty("java.io.tmpdir"));
     FileSystem fs = FileSystem.get(conf);
     if (fs.exists(outDir)) {
       fs.delete(outDir, true);
     }
     fs.mkdirs(outDir);
 
-    loader = new LargeObjectLoader(conf, outDir);
+    loader = new LargeObjectLoader(conf);
   }
 
   public void testReadClobRef()

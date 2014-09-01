@@ -47,10 +47,9 @@ public class LargeObjectLoader extends org.apache.sqoop.lib.LargeObjectLoader {
   /**
    * Create a new LargeObjectLoader.
    * @param conf the Configuration to use
-   * @param workPath the HDFS working directory for this task.
    */
-  public LargeObjectLoader(Configuration conf, Path workPath)
+  public LargeObjectLoader(Configuration conf)
       throws IOException {
-    super(conf, workPath);
+    super(conf);
   }
 }
