@@ -48,14 +48,17 @@ public class GenericJdbcToDestroyer extends Destroyer<ConnectionConfiguration, T
         connectorConf.connection.connectionString,
         connectorConf.connection.username,
         connectorConf.connection.password);
-
-    if(success) {
-      LOG.info("Job completed, transferring data from stage fromTable to " +
-        "destination fromTable.");
-      executor.migrateData(stageTableName, tableName);
-    } else {
-      LOG.warn("Job failed, clearing stage fromTable.");
-      executor.deleteTableData(stageTableName);
+    try {
+      if(success) {
+        LOG.info("Job completed, transferring data from stage fromTable to " +
+          "destination fromTable.");
+        executor.migrateData(stageTableName, tableName);
+      } else {
+        LOG.warn("Job failed, clearing stage fromTable.");
+        executor.deleteTableData(stageTableName);
+      }
+    } finally {
+	  executor.close();
     }
   }
 

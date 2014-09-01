@@ -111,6 +111,9 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
           LOG.info("Ignoring exception while closing ResultSet", e);
         }
       }
+      if (executor != null) {
+        executor.close();
+      }
     }
   }
 
