@@ -356,6 +356,12 @@
   <property name="sqoop.test.mysql.connectstring.host_url"
             value="jdbc:mysql://localhost/"/>
 
+  <property name="sqoop.test.cubrid.connectstring.host_url"
+            value="jdbc:cubrid:localhost:30000"/>
+  <property name="sqoop.test.cubrid.connectstring.database" value="SQOOPCUBRIDTEST" />
+  <property name="sqoop.test.cubrid.connectstring.username" value="SQOOPUSER" />
+  <property name="sqoop.test.cubrid.connectstring.password" value="PASSWORD" />
+
   <property name="sqoop.test.postgresql.connectstring.host_url"
             value="jdbc:postgresql://localhost/"/>
 
@@ -956,6 +962,9 @@
 
       <sysproperty key="sqoop.test.mysql.connectstring.host_url"
                    value="${sqoop.test.mysql.connectstring.host_url}"/>
+
+      <sysproperty key="sqoop.test.cubrid.connectstring.host_url"
+                   value="${sqoop.test.cubrid.connectstring.host_url}"/>
 
       <sysproperty key="sqoop.test.postgresql.connectstring.host_url"
                    value="${sqoop.test.postgresql.connectstring.host_url}"/>

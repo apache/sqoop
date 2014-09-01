@@ -60,6 +60,7 @@ HSQLDB      1.8.0+   No                   +jdbc:hsqldb:*//+
 MySQL       5.0+     Yes                  +jdbc:mysql://+
 Oracle      10.2.0+  No                   +jdbc:oracle:*//+
 PostgreSQL  8.3+     Yes (import only)    +jdbc:postgresql://+
+CUBRID      9.2+     NO                   +jdbc:cubrid:*+
 ----------------------------------------------------------------
 
 Sqoop may work with older versions of the databases listed, but we have
@@ -190,3 +191,9 @@ http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14225/applocaledat
 
 include::hive-notes.txt[]
 
+CUBRID
+~~~~~~
+
+Sqoop supports JDBC-based connector for Cubrid: http://www.cubrid.org/?mid=downloads&item=jdbc_driver
+
+The connector has been tested using JDBC driver version "JDBC-9.2.0.0155-cubrid.jar" with Cubrid 9.2.

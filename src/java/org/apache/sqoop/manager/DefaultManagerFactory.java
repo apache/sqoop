@@ -74,6 +74,8 @@ public class DefaultManagerFactory
       } else {
         return new NetezzaManager(options);
       }
+    } else if (scheme.startsWith("jdbc:cubrid:")) {
+      return new CubridManager(options);
     } else {
       return null;
     }

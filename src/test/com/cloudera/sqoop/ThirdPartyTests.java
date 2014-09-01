@@ -34,6 +34,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import com.cloudera.sqoop.manager.CubridManagerExportTest;
+import com.cloudera.sqoop.manager.CubridManagerImportTest;
 import com.cloudera.sqoop.manager.DirectMySQLTest;
 import com.cloudera.sqoop.manager.DirectMySQLExportTest;
 import com.cloudera.sqoop.manager.JdbcMySQLExportTest;
@@ -45,6 +47,8 @@ import com.cloudera.sqoop.manager.OracleCompatTest;
 import com.cloudera.sqoop.manager.PostgresqlExportTest;
 import com.cloudera.sqoop.manager.PostgresqlImportTest;
 
+import org.apache.sqoop.manager.cubrid.CubridAuthTest;
+import org.apache.sqoop.manager.cubrid.CubridCompatTest;
 import org.apache.sqoop.manager.mysql.MySqlCallExportTest;
 import org.apache.sqoop.manager.netezza.DirectNetezzaExportManualTest;
 import org.apache.sqoop.manager.netezza.DirectNetezzaHCatExportManualTest;
@@ -110,6 +114,12 @@ public final class ThirdPartyTests extends TestCase {
     // PostgreSQL
     suite.addTestSuite(PostgresqlImportTest.class);
     suite.addTestSuite(PostgresqlExportTest.class);
+
+    // Cubrid
+    suite.addTestSuite(CubridManagerImportTest.class);
+    suite.addTestSuite(CubridManagerExportTest.class);
+    suite.addTestSuite(CubridAuthTest.class);
+    suite.addTestSuite(CubridCompatTest.class);
 
     // DB2
     suite.addTestSuite(DB2ManagerImportManualTest.class);

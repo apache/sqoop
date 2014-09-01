@@ -135,6 +135,22 @@ jdbc:sqlserver://sqlserverhost:1433
 This can be useful if you have the hostname sqlserverhost mapped to the IP
 address of the SQL Server instance.
 
+=== Cubrid
+
+Install Cubrid 9.2.2.0003 and create a database instance and download the
+appropriate JDBC driver. Instructions for configuring the database are in
+CubridAuthTest, CubridCompatTest, CubridManagerImportTest
+and CubridManagerExportTest.
+
+Use the system property sqoop.test.cubrid.connectstring.host_url to specify the
+URL for the Cubrid host used for testing. Specify this property on the command
+line or via the build.properties file. For example:
+
+sqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost
+
+If not specified, the default value used for this property is:
+jdbc:cubrid:localhost
+
 === DB2
 
 Install DB2 9.74 Express C and download the appropriate JDBC driver.
