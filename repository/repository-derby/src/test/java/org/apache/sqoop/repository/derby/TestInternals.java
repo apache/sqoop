@@ -17,31 +17,53 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import java.sql.Connection;
+
 /**
  *
  */
 public class TestInternals extends DerbyTestCase {
 
-//  DerbyRepositoryHandler handler;
-//
-//  @Override
-//  public void setUp() throws Exception {
-//    super.setUp();
-//
-//    handler = new DerbyRepositoryHandler();
-//  }
-//
-//  public void testSuitableInternals() throws Exception {
-//    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-//    createSchema(); // Test code is building the structures
-//    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
-//  }
-//
-//  public void testCreateorUpdateInternals() throws Exception {
-//    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-//    handler.createOrUpdateInternals(getDerbyConnection());
-//    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
-//  }
+  DerbyRepositoryHandler handler;
 
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
 
+    handler = new TestDerbyRepositoryHandler();
+  }
+
+  public void testSuitableInternals() throws Exception {
+    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+    createSchema(); // Test code is building the structures
+    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+  }
+
+  public void testCreateorUpdateInternals() throws Exception {
+    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+    handler.createOrUpdateInternals(getDerbyConnection());
+    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+  }
+
+  public void testUpgradeVersion2ToVersion4() throws Exception {
+    createSchema(2);
+    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+    loadConnectorAndFramework(2);
+    loadConnections(2);
+    loadJobs(2);
+    handler.createOrUpdateInternals(getDerbyConnection());
+    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+  }
+
+  private class TestDerbyRepositoryHandler extends DerbyRepositoryHandler {
+    protected long registerHdfsConnector(Connection conn) {
+      try {
+        runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+            + "VALUES('hdfs-connector', 'org.apache.sqoop.test.B', '1.0-test')");
+        return 2L;
+      } catch(Exception e) {
+        return -1L;
+      }
+    }
+  }
 }

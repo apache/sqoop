@@ -66,6 +66,7 @@ public class MConnection extends MAccountableEntity implements MClonable {
     this.connectorId = other.connectorId;
     this.connectorPart = connectorPart;
     this.frameworkPart = frameworkPart;
+    this.setPersistenceId(other.getPersistenceId());
   }
 
   @Override

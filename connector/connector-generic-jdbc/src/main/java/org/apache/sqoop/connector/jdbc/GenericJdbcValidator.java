@@ -79,7 +79,7 @@ public class GenericJdbcValidator extends Validator {
   }
 
   private Validation validateToJobConfiguration(ToJobConfiguration configuration) {
-    Validation validation = new Validation(ToJobConfiguration.class);
+    Validation validation = new Validation(FromJobConfiguration.class);
 
     if(configuration.toTable.tableName == null && configuration.toTable.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "toTable", "Either table name or SQL must be specified");
@@ -103,7 +103,7 @@ public class GenericJdbcValidator extends Validator {
   }
 
   private Validation validateFromJobConfiguration(FromJobConfiguration configuration) {
-    Validation validation = new Validation(ToJobConfiguration.class);
+    Validation validation = new Validation(FromJobConfiguration.class);
 
     if(configuration.fromTable.tableName == null && configuration.fromTable.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "fromTable", "Either table name or SQL must be specified");

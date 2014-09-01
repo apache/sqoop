@@ -445,24 +445,48 @@ public abstract class Repository {
       for (MJob job : jobs) {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
-        // each connection.
-        List<MForm> forms = newConnector.getJobForms(Direction.FROM).clone(false).getForms();
-        MJobForms newJobForms = new MJobForms(forms);
-        upgrader.upgrade(job.getConnectorPart(Direction.FROM), newJobForms);
-        // @TODO(Abe): Check From and To
-        MJob newJob = new MJob(job, newJobForms, newJobForms, job.getFrameworkPart());
+        // each job.
+        List<MForm> fromForms = newConnector.getJobForms(Direction.FROM).clone(false).getForms();
+        List<MForm> toForms = newConnector.getJobForms(Direction.TO).clone(false).getForms();
 
-        // Transform form structures to objects for validations
-        // @TODO(Abe): Check From and To
-        Object newConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(Direction.FROM));
-        FormUtils.fromForms(newJob.getConnectorPart(Direction.FROM).getForms(), newConfigurationObject);
-
-        Validation validation = validator.validateJob(newConfigurationObject);
-        if (validation.getStatus().canProceed()) {
+        // New FROM direction forms, old TO direction forms.
+        if (job.getConnectorId(Direction.FROM) == newConnector.getPersistenceId()) {
+          MJobForms newFromJobForms = new MJobForms(fromForms);
+          MJobForms oldToJobForms = job.getConnectorPart(Direction.TO);
+          upgrader.upgrade(job.getConnectorPart(Direction.FROM), newFromJobForms);
+          MJob newJob = new MJob(job, newFromJobForms, oldToJobForms, job.getFrameworkPart());
           updateJob(newJob, tx);
-        } else {
-          logInvalidModelObject("job", newJob, validation);
-          upgradeSuccessful = false;
+
+          // Transform form structures to objects for validations
+//          Object newFromConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(Direction.FROM));
+//          FormUtils.fromForms(newJob.getConnectorPart(Direction.FROM).getForms(), newFromConfigurationObject);
+//          Validation fromValidation = validator.validateJob(newFromConfigurationObject);
+//          if (fromValidation.getStatus().canProceed()) {
+//            updateJob(newJob, tx);
+//          } else {
+//            logInvalidModelObject("job", newJob, fromValidation);
+//            upgradeSuccessful = false;
+//          }
+        }
+
+        // Old FROM direction forms, new TO direction forms.
+        if (job.getConnectorId(Direction.TO) == newConnector.getPersistenceId()) {
+          MJobForms oldFromJobForms = job.getConnectorPart(Direction.FROM);
+          MJobForms newToJobForms = new MJobForms(toForms);
+          upgrader.upgrade(job.getConnectorPart(Direction.TO), newToJobForms);
+          MJob newJob = new MJob(job, oldFromJobForms, newToJobForms, job.getFrameworkPart());
+          updateJob(newJob, tx);
+
+          // Transform form structures to objects for validations
+//          Object newToConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(Direction.TO));
+//          FormUtils.fromForms(newJob.getConnectorPart(Direction.TO).getForms(), newToConfigurationObject);
+//          Validation toValidation = validator.validateJob(newToConfigurationObject);
+//          if (toValidation.getStatus().canProceed()) {
+//            updateJob(newJob, tx);
+//          } else {
+//            logInvalidModelObject("job", newJob, toValidation);
+//            upgradeSuccessful = false;
+//          }
         }
       }
 

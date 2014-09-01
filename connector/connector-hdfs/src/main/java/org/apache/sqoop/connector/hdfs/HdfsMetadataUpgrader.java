@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.connector.hdfs;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -30,9 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GenericJdbcConnectorMetadataUpgrader extends MetadataUpgrader {
+public class HdfsMetadataUpgrader extends MetadataUpgrader {
   private static final Logger LOG =
-    Logger.getLogger(GenericJdbcConnectorMetadataUpgrader.class);
+      Logger.getLogger(HdfsMetadataUpgrader.class);
 
   /*
    * For now, there is no real upgrade. So copy all data over,
@@ -42,7 +42,7 @@ public class GenericJdbcConnectorMetadataUpgrader extends MetadataUpgrader {
 
   @Override
   public void upgrade(MConnectionForms original,
-    MConnectionForms upgradeTarget) {
+                      MConnectionForms upgradeTarget) {
     doUpgrade(original.getForms(), upgradeTarget.getForms());
   }
 
@@ -75,7 +75,7 @@ public class GenericJdbcConnectorMetadataUpgrader extends MetadataUpgrader {
           input.setValue(originalInput.getValue());
         } catch (SqoopException ex) {
           LOG.warn("Input: '" + input.getName() + "' not present in old " +
-            "connector. So it will not be transferred by the upgrader.");
+              "connector. So it will not be transferred by the upgrader.");
         }
       }
     }

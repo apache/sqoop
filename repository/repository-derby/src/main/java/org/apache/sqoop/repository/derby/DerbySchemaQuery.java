@@ -50,16 +50,16 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <p>
  * <strong>SQ_FORM</strong>: Form details.
  * <pre>
- *    +-----------------------------+
- *    | SQ_FORM                     |
- *    +-----------------------------+
- *    | SQF_ID: BIGINT PK AUTO-GEN  |
- *    | SQF_CONNECTOR: BIGINT       | FK SQ_CONNECTOR(SQC_ID),NULL for framework
- *    | SQF_OPERATION: VARCHAR(32)  | "IMPORT"|"EXPORT"|NULL
- *    | SQF_NAME: VARCHAR(64)       |
- *    | SQF_TYPE: VARCHAR(32)       | "CONNECTION"|"JOB"
- *    | SQF_INDEX: SMALLINT         |
- *    +-----------------------------+
+ *    +----------------------------------+
+ *    | SQ_FORM                          |
+ *    +----------------------------------+
+ *    | SQF_ID: BIGINT PK AUTO-GEN       |
+ *    | SQF_CONNECTOR: BIGINT            | FK SQ_CONNECTOR(SQC_ID),NULL for framework
+ *    | SQF_DIRECTION: VARCHAR(32)       | "FROM"|"TO"|NULL
+ *    | SQF_NAME: VARCHAR(64)            |
+ *    | SQF_TYPE: VARCHAR(32)            | "CONNECTION"|"JOB"
+ *    | SQF_INDEX: SMALLINT              |
+ *    +----------------------------------+
  * </pre>
  * </p>
  * <p>
@@ -104,8 +104,8 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    +--------------------------------+
  *    | SQB_ID: BIGINT PK AUTO-GEN     |
  *    | SQB_NAME: VARCHAR(64)          |
- *    | SQB_TYPE: VARCHAR(64)          |
- *    | SQB_CONNECTION: BIGINT         | FK SQ_CONNECTION(SQN_ID)
+ *    | SQB_FROM_CONNECTION: BIGINT    | FK SQ_CONNECTION(SQN_ID)
+ *    | SQB_TO_CONNECTION: BIGINT      | FK SQ_CONNECTION(SQN_ID)
  *    | SQB_CREATION_USER: VARCHAR(32) |
  *    | SQB_CREATION_DATE: TIMESTAMP   |
  *    | SQB_UPDATE_USER: VARCHAR(32)   |
@@ -286,13 +286,13 @@ public final class DerbySchemaQuery {
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
       "CREATE TABLE " + TABLE_SQ_JOB + " ("
       + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQB_FROM_CONNECTION + " BIGINT, "
-      + COLUMN_SQB_TO_CONNECTION + " BIGINT, "
+      + COLUMN_SQB_CONNECTION + " BIGINT, "
       + COLUMN_SQB_NAME + " VARCHAR(64), "
+      + COLUMN_SQB_TYPE + " VARCHAR(64),"
       + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
       + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
       + "CONSTRAINT " + CONSTRAINT_SQB_SQN + " "
-        + "FOREIGN KEY(" + COLUMN_SQB_FROM_CONNECTION + ") "
+        + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
           + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
       + ")";
 
@@ -459,7 +459,7 @@ public final class DerbySchemaQuery {
       "SELECT "
       + COLUMN_SQF_ID + ", "
       + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_DIRECTION + ", "
       + COLUMN_SQF_NAME + ", "
       + COLUMN_SQF_TYPE + ", "
       + COLUMN_SQF_INDEX
@@ -472,13 +472,13 @@ public final class DerbySchemaQuery {
       "SELECT "
       + COLUMN_SQF_ID + ", "
       + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_DIRECTION + ", "
       + COLUMN_SQF_NAME + ", "
       + COLUMN_SQF_TYPE + ", "
       + COLUMN_SQF_INDEX
       + " FROM " + TABLE_SQ_FORM
       + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL "
-      + " ORDER BY " + COLUMN_SQF_INDEX;
+      + " ORDER BY " + COLUMN_SQF_TYPE + ", " + COLUMN_SQF_DIRECTION  + ", " + COLUMN_SQF_INDEX;
 
   // DML: Fetch inputs for a given form
   public static final String STMT_FETCH_INPUT =
@@ -530,10 +530,10 @@ public final class DerbySchemaQuery {
       + COLUMN_SQBI_VALUE
       + " FROM " + TABLE_SQ_INPUT
       + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT
-        + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
-        + " AND  " + COLUMN_SQBI_JOB + " = ?"
-      + " WHERE " + COLUMN_SQI_FORM + " = ?" +
-        " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
+      + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
+      + " AND  " + COLUMN_SQBI_JOB + " = ?"
+      + " WHERE " + COLUMN_SQI_FORM + " = ?"
+      + " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
       + " ORDER BY " + COLUMN_SQI_INDEX;
 
   // DML: Insert connector base
@@ -548,7 +548,7 @@ public final class DerbySchemaQuery {
   public static final String STMT_INSERT_FORM_BASE =
       "INSERT INTO " + TABLE_SQ_FORM + " ("
       + COLUMN_SQF_CONNECTOR + ", "
-      + COLUMN_SQF_OPERATION + ", "
+      + COLUMN_SQF_DIRECTION + ", "
       + COLUMN_SQF_NAME + ", "
       + COLUMN_SQF_TYPE + ", "
       + COLUMN_SQF_INDEX
@@ -770,50 +770,36 @@ public final class DerbySchemaQuery {
     + "job." + COLUMN_SQB_CREATION_DATE + ", "
     + "job." + COLUMN_SQB_UPDATE_USER + ", "
     + "job." + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " AS job"
+    + " FROM " + TABLE_SQ_JOB + " job"
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-    + " as FROM_CONNECTOR ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTOR." + COLUMN_SQN_ID
+    + " FROM_CONNECTOR ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTOR." + COLUMN_SQN_ID
     + " LEFT JOIN " + TABLE_SQ_CONNECTION
-    + " as TO_CONNECTOR ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTOR." + COLUMN_SQN_ID
+    + " TO_CONNECTOR ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTOR." + COLUMN_SQN_ID
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs
   public static final String STMT_SELECT_JOB_ALL =
     "SELECT "
-    + "FROM_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
-    + "TO_CONNECTOR." + COLUMN_SQN_CONNECTOR + ", "
-    + "job." + COLUMN_SQB_ID + ", "
-    + "job." + COLUMN_SQB_NAME + ", "
-    + "job." + COLUMN_SQB_FROM_CONNECTION + ", "
-    + "job." + COLUMN_SQB_TO_CONNECTION + ", "
-    + "job." + COLUMN_SQB_ENABLED + ", "
-    + "job." + COLUMN_SQB_CREATION_USER + ", "
-    + "job." + COLUMN_SQB_CREATION_DATE + ", "
-    + "job." + COLUMN_SQB_UPDATE_USER + ", "
-    + "job." + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " AS job"
-    + " LEFT JOIN " + TABLE_SQ_CONNECTION
-    + " as FROM_CONNECTOR ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTOR." + COLUMN_SQN_ID
-    + " LEFT JOIN " + TABLE_SQ_CONNECTION
-    + " as TO_CONNECTOR ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTOR." + COLUMN_SQN_ID;
+    + "FROM_CONNECTION." + COLUMN_SQN_CONNECTOR + ", "
+    + "TO_CONNECTION." + COLUMN_SQN_CONNECTOR + ", "
+    + "JOB." + COLUMN_SQB_ID + ", "
+    + "JOB." + COLUMN_SQB_NAME + ", "
+    + "JOB." + COLUMN_SQB_FROM_CONNECTION + ", "
+    + "JOB." + COLUMN_SQB_TO_CONNECTION + ", "
+    + "JOB." + COLUMN_SQB_ENABLED + ", "
+    + "JOB." + COLUMN_SQB_CREATION_USER + ", "
+    + "JOB." + COLUMN_SQB_CREATION_DATE + ", "
+    + "JOB." + COLUMN_SQB_UPDATE_USER + ", "
+    + "JOB." + COLUMN_SQB_UPDATE_DATE
+    + " FROM " + TABLE_SQ_JOB + " JOB"
+      + " LEFT JOIN " + TABLE_SQ_CONNECTION + " FROM_CONNECTION"
+        + " ON " + COLUMN_SQB_FROM_CONNECTION + " = FROM_CONNECTION." + COLUMN_SQN_ID
+      + " LEFT JOIN " + TABLE_SQ_CONNECTION + " TO_CONNECTION"
+        + " ON " + COLUMN_SQB_TO_CONNECTION + " = TO_CONNECTION." + COLUMN_SQN_ID;
 
   // DML: Select all jobs for a Connector
-  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR =
-    "SELECT "
-    + COLUMN_SQN_CONNECTOR + ", "
-    + COLUMN_SQB_ID + ", "
-    + COLUMN_SQB_NAME + ", "
-    + COLUMN_SQB_FROM_CONNECTION + ", "
-    + COLUMN_SQB_TO_CONNECTION + ", "
-    + COLUMN_SQB_ENABLED + ", "
-    + COLUMN_SQB_CREATION_USER + ", "
-    + COLUMN_SQB_CREATION_DATE + ", "
-    + COLUMN_SQB_UPDATE_USER + ", "
-    + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB
-    + " LEFT JOIN " + TABLE_SQ_CONNECTION
-      + " ON " + COLUMN_SQB_FROM_CONNECTION + " = " + COLUMN_SQN_ID
-      + " AND " + COLUMN_SQN_CONNECTOR + " = ? ";
+  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR = STMT_SELECT_JOB_ALL
+    + " WHERE FROM_CONNECTION." + COLUMN_SQN_CONNECTOR + " = ? OR TO_CONNECTION." + COLUMN_SQN_CONNECTOR + " = ?";
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =
@@ -963,6 +949,122 @@ public final class DerbySchemaQuery {
   public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64 =
     "ALTER TABLE " + TABLE_SQ_CONNECTOR + " ALTER COLUMN "
       + COLUMN_SQC_VERSION + " SET DATA TYPE VARCHAR(64)";
+
+  // Version 4 Upgrade
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_CONNECTION_TO_SQB_FROM_CONNECTION =
+      "RENAME COLUMN " + TABLE_SQ_JOB + "." + COLUMN_SQB_CONNECTION
+        + " TO " + COLUMN_SQB_FROM_CONNECTION;
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_CONNECTION =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD COLUMN " + COLUMN_SQB_TO_CONNECTION
+        + " BIGINT";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQN =
+      "ALTER TABLE " + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQN;
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQN_FROM
+          + " FOREIGN KEY (" + COLUMN_SQB_FROM_CONNECTION + ") REFERENCES "
+          + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQN_TO
+        + " FOREIGN KEY (" + COLUMN_SQB_TO_CONNECTION + ") REFERENCES "
+        + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_RENAME_COLUMN_SQF_OPERATION_TO_SQF_DIRECTION =
+    "RENAME COLUMN " + TABLE_SQ_FORM + "." + COLUMN_SQF_OPERATION
+      + " TO " + COLUMN_SQF_DIRECTION;
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION
+        + "=? WHERE " + COLUMN_SQF_DIRECTION + "=?"
+          + " AND " + COLUMN_SQF_CONNECTOR + " IS NOT NULL";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_CONNECTOR + "= ?"
+          + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL AND "
+          + COLUMN_SQF_NAME + " IN (?, ?)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION + "= ?"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION =
+      "UPDATE " + TABLE_SQ_JOB + " SET "
+        + COLUMN_SQB_TO_CONNECTION + "=" + COLUMN_SQB_FROM_CONNECTION
+        + " WHERE " + COLUMN_SQB_TYPE + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION =
+      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_FROM_CONNECTION + "=?"
+        + " WHERE " + COLUMN_SQB_TYPE + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION =
+      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_TO_CONNECTION + "=?"
+        + " WHERE " + COLUMN_SQB_TYPE + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+          + COLUMN_SQF_NAME + "= ?"
+          + " WHERE " + COLUMN_SQF_NAME + "= ?"
+          + " AND " + COLUMN_SQF_DIRECTION + "= ?";
+
+  /**
+   * Intended to rename forms based on direction.
+   * e.g. If SQ_FORM.SQF_NAME = 'table' and parameter 1 = 'from'
+   * then SQ_FORM.SQF_NAME = 'fromTable'.
+   */
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES =
+      "UPDATE " + TABLE_SQ_INPUT + " SET "
+          + COLUMN_SQI_NAME + "=("
+          + "? || UPPER(SUBSTR(" + COLUMN_SQI_NAME + ",1,1))"
+          + " || SUBSTR(" + COLUMN_SQI_NAME + ",2) )"
+          + " WHERE " + COLUMN_SQI_FORM + " IN ("
+          + " SELECT " + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_NAME + "= ?"
+          + " AND " + COLUMN_SQF_DIRECTION + "= ?)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DIRECTION_TO_NULL =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+        + COLUMN_SQF_DIRECTION + "= NULL"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
+
+  public static final String QUERY_SELECT_THROTTLING_FORM_INPUT_IDS =
+      "SELECT SQI." + COLUMN_SQI_ID + " FROM " + TABLE_SQ_INPUT + " SQI"
+          + " INNER JOIN " + TABLE_SQ_FORM + " SQF ON SQI." + COLUMN_SQI_FORM + "=SQF." + COLUMN_SQF_ID
+          + " WHERE SQF." + COLUMN_SQF_NAME + "='throttling' AND SQF." + COLUMN_SQF_DIRECTION + "=?";
+
+  /**
+   * Intended to change SQ_JOB_INPUT.SQBI_INPUT from EXPORT
+   * throttling form, to IMPORT throttling form.
+   */
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_FORM_INPUTS =
+      "UPDATE " + TABLE_SQ_JOB_INPUT + " SQBI SET"
+        + " SQBI." + COLUMN_SQBI_INPUT + "=(" + QUERY_SELECT_THROTTLING_FORM_INPUT_IDS
+          + " AND SQI." + COLUMN_SQI_NAME + "=("
+            + "SELECT SQI2." + COLUMN_SQI_NAME + " FROM " + TABLE_SQ_INPUT + " SQI2"
+            + " WHERE SQI2." + COLUMN_SQI_ID + "=SQBI." + COLUMN_SQBI_INPUT + " FETCH FIRST 1 ROWS ONLY"
+          +   "))"
+        + "WHERE SQBI." + COLUMN_SQBI_INPUT + " IN (" + QUERY_SELECT_THROTTLING_FORM_INPUT_IDS + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FORM_INPUTS =
+      "DELETE FROM " + TABLE_SQ_INPUT + " SQI"
+        + " WHERE SQI." + COLUMN_SQI_FORM + " IN ("
+          + "SELECT SQF." + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " SQF "
+          + " WHERE SQF." + COLUMN_SQF_NAME + "= ?"
+          + " AND SQF." + COLUMN_SQF_DIRECTION + "= ?)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FRAMEWORK_FORM =
+      "DELETE FROM " + TABLE_SQ_FORM
+        + " WHERE " + COLUMN_SQF_NAME + "= ?"
+        + " AND " + COLUMN_SQF_DIRECTION + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_FRAMEWORK_INDEX =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+        + COLUMN_SQF_INDEX + "= ?"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE =
+      "ALTER TABLE " + TABLE_SQ_JOB + " DROP COLUMN " + COLUMN_SQB_TYPE;
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

@@ -207,12 +207,12 @@ public class JdbcRepository extends Repository {
    */
     @Override
     public List<MConnector> findConnectors() {
-        return (List<MConnector>) doWithConnection(new DoWithConnection() {
-            @Override
-            public Object doIt(Connection conn) {
-                return handler.findConnectors(conn);
-            }
-        });
+      return (List<MConnector>) doWithConnection(new DoWithConnection() {
+          @Override
+          public Object doIt(Connection conn) {
+              return handler.findConnectors(conn);
+          }
+      });
     }
 
   /**

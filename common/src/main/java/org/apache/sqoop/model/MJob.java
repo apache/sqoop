@@ -106,6 +106,7 @@ public class MJob extends MAccountableEntity implements MClonable {
     this.fromConnectorPart = fromPart;
     this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
+    this.setPersistenceId(other.getPersistenceId());
   }
 
   @Override

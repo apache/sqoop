@@ -127,6 +127,6 @@ public class HdfsConnector extends SqoopConnector {
    */
   @Override
   public MetadataUpgrader getMetadataUpgrader() {
-    return null;
+    return new HdfsMetadataUpgrader();
   }
 }

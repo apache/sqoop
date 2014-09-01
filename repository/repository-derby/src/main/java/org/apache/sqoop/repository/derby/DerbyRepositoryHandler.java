@@ -19,6 +19,7 @@ package org.apache.sqoop.repository.derby;
 
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.*;
 
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,6 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorHandler;
+import org.apache.sqoop.connector.ConnectorManagerUtils;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
@@ -72,6 +75,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   private static final String EMBEDDED_DERBY_DRIVER_CLASSNAME =
           "org.apache.derby.jdbc.EmbeddedDriver";
+
+  /**
+   * Unique name of HDFS Connector.
+   * HDFS Connector was originally part of the Sqoop framework, but now is its
+   * own connector. This constant is used to pre-register the HDFS Connector
+   * so that jobs that are being upgraded can reference the HDFS Connector.
+   */
+  private static final String CONNECTOR_HDFS = "hdfs-connector";
 
   private JdbcRepositoryContext repoContext;
   private DataSource dataSource;
@@ -391,6 +402,25 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64, conn);
     }
+    if(version <= 3) {
+      // Schema modifications
+      runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_RENAME_COLUMN_SQF_OPERATION_TO_SQF_DIRECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_CONNECTION_TO_SQB_FROM_CONNECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_CONNECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQN, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO, conn);
+
+      // Data modifications only for non-fresh install.
+      if (version > 0) {
+        // Register HDFS connector
+        updateJobData(conn, registerHdfsConnector(conn));
+      }
+
+      // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update data.
+      // Data updates depend on knowledge of the type of job.
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE, conn);
+    }
 
     ResultSet rs = null;
     PreparedStatement stmt = null;
@@ -411,6 +441,172 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeResultSets(rs);
       closeStatements(stmt);
     }
+  }
+
+  /**
+   * Upgrade job data from IMPORT/EXPORT to FROM/TO.
+   * Since the framework is no longer responsible for HDFS,
+   * the HDFS connector/connection must be added.
+   * Also, the framework forms are moved around such that
+   * they belong to the added HDFS connector. Any extra forms
+   * are removed.
+   * NOTE: Connector forms should have a direction (FROM/TO),
+   * but framework forms should not.
+   *
+   * Here's a brief list describing the data migration process.
+   * 1. Change SQ_FORM.SQF_DIRECTION from IMPORT to FROM.
+   * 2. Change SQ_FORM.SQF_DIRECTION from EXPORT to TO.
+   * 3. Change EXPORT to TO in newly existing SQF_DIRECTION.
+   *    This should affect connectors only since Connector forms
+   *    should have had a value for SQF_OPERATION.
+   * 4. Change IMPORT to FROM in newly existing SQF_DIRECTION.
+   *    This should affect connectors only since Connector forms
+   *    should have had a value for SQF_OPERATION.
+   * 5. Add HDFS connector for jobs to reference.
+   * 6. Set 'input' and 'output' forms connector.
+   *    to HDFS connector.
+   * 7. Throttling form was originally the second form in
+   *    the framework. It should now be the first form.
+   * 8. Remove the EXPORT throttling form and ensure all of
+   *    its dependencies point to the IMPORT throttling form.
+   *    Then make sure the throttling form does not have a direction.
+   *    Framework forms should not have a direction.
+   * 9. Create an HDFS connection to reference and update
+   *    jobs to reference that connection. IMPORT jobs
+   *    should have TO HDFS connector, EXPORT jobs should have
+   *    FROM HDFS connector.
+   * 10. Update 'table' form names to 'fromTable' and 'toTable'.
+   *     Also update the relevant inputs as well.
+   * @param conn
+   */
+  private void updateJobData(Connection conn, long connectorId) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Updating existing data for generic connectors.");
+    }
+
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION, conn,
+        Direction.FROM.toString(), "IMPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION, conn,
+        Direction.TO.toString(), "EXPORT");
+
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION, conn,
+        Direction.FROM.toString(),
+        "input");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION, conn,
+        Direction.TO.toString(),
+        "output");
+
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR, conn,
+        new Long(connectorId), "input", "output");
+
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_FORM_INPUTS, conn,
+        "IMPORT", "EXPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FORM_INPUTS, conn,
+        "throttling", "EXPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FRAMEWORK_FORM, conn,
+        "throttling", "EXPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DIRECTION_TO_NULL, conn,
+        "throttling");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_FRAMEWORK_INDEX, conn,
+        new Long(0), "throttling");
+
+    MConnection hdfsConnection = createHdfsConnection(conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
+        "EXPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
+        new Long(hdfsConnection.getPersistenceId()), "EXPORT");
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION, conn,
+        new Long(hdfsConnection.getPersistenceId()), "IMPORT");
+
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
+        "fromTable", "table", Direction.FROM.toString());
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
+        Direction.FROM.toString().toLowerCase(), "fromTable", Direction.FROM.toString());
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
+        "toTable", "table", Direction.TO.toString());
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
+        Direction.TO.toString().toLowerCase(), "toTable", Direction.TO.toString());
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Updated existing data for generic connectors.");
+    }
+  }
+
+  /**
+   * Pre-register HDFS Connector so that metadata upgrade will work.
+   */
+  protected long registerHdfsConnector(Connection conn) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Begin HDFS Connector pre-loading.");
+    }
+
+    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs();
+
+    if (LOG.isInfoEnabled()) {
+      LOG.info("Connector config urls: " + connectorConfigs);
+    }
+
+    ConnectorHandler handler = null;
+    for (URL url : connectorConfigs) {
+      handler = new ConnectorHandler(url);
+
+      if (handler.getMetadata().getPersistenceId() != -1) {
+        return handler.getMetadata().getPersistenceId();
+      }
+
+      if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
+        try {
+          PreparedStatement baseConnectorStmt = conn.prepareStatement(
+              STMT_INSERT_CONNECTOR_BASE,
+              Statement.RETURN_GENERATED_KEYS);
+          baseConnectorStmt.setString(1, handler.getMetadata().getUniqueName());
+          baseConnectorStmt.setString(2, handler.getMetadata().getClassName());
+          baseConnectorStmt.setString(3, "0");
+          if (baseConnectorStmt.executeUpdate() == 1) {
+            ResultSet rsetConnectorId = baseConnectorStmt.getGeneratedKeys();
+            if (rsetConnectorId.next()) {
+              if (LOG.isInfoEnabled()) {
+                LOG.info("HDFS Connector pre-loaded: " + rsetConnectorId.getLong(1));
+              }
+              return rsetConnectorId.getLong(1);
+            }
+          }
+        } catch (SQLException e) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+        }
+
+        break;
+      }
+    }
+
+    return -1L;
+  }
+
+  /**
+   * Create an HDFS connection.
+   * Intended to be used when moving HDFS connector out of framework
+   * to its own connector.
+   *
+   * NOTE: Upgrade path only!
+   */
+  private MConnection createHdfsConnection(Connection conn) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Creating HDFS connection.");
+    }
+
+    MConnector hdfsConnector = this.findConnector(CONNECTOR_HDFS, conn);
+    MFramework framework = findFramework(conn);
+    MConnection hdfsConnection = new MConnection(
+        hdfsConnector.getPersistenceId(),
+        hdfsConnector.getConnectionForms(),
+        framework.getConnectionForms());
+    this.createConnection(hdfsConnection, conn);
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Created HDFS connection.");
+    }
+
+    return hdfsConnection;
   }
 
   /**
@@ -536,7 +732,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       List<MForm> connectionForms = new ArrayList<MForm>();
       List<MForm> jobForms = new ArrayList<MForm>();
 
-      loadForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
+      loadFrameworkForms(connectionForms, jobForms, formFetchStmt, inputFetchStmt, 1);
 
       // Return nothing If there aren't any framework metadata
       if(connectionForms.isEmpty() && jobForms.isEmpty()) {
@@ -948,11 +1144,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
                         jobId,
-                        job.getFrameworkPart().getForms(),
+                        job.getConnectorPart(Direction.TO).getForms(),
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
                         jobId,
-                        job.getConnectorPart(Direction.TO).getForms(),
+                        job.getFrameworkPart().getForms(),
                         conn);
 
       job.setPersistenceId(jobId);
@@ -993,9 +1189,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                         job.getConnectorPart(Direction.FROM).getForms(),
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
-          job.getPersistenceId(),
-          job.getFrameworkPart().getForms(),
-          conn);
+                        job.getPersistenceId(),
+                        job.getConnectorPart(Direction.TO).getForms(),
+                        conn);
+      createInputValues(STMT_INSERT_JOB_INPUT,
+                        job.getPersistenceId(),
+                        job.getFrameworkPart().getForms(),
+                        conn);
 
     } catch (SQLException ex) {
       logException(ex, job);
@@ -1157,6 +1357,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     try {
       stmt = conn.prepareStatement(STMT_SELECT_ALL_JOBS_FOR_CONNECTOR);
       stmt.setLong(1, connectorId);
+      stmt.setLong(2, connectorId);
       return loadJobs(stmt, conn);
 
     } catch (SQLException ex) {
@@ -1664,7 +1865,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         formConnectorFetchStmt.setLong(1, connectorId);
 
         inputFetchStmt.setLong(1, id);
-        //inputFetchStmt.setLong(2, XXX); // Will be filled by loadForms
+        //inputFetchStmt.setLong(2, XXX); // Will be filled by loadFrameworkForms
         inputFetchStmt.setLong(3, id);
 
         List<MForm> connectorConnForms = new ArrayList<MForm>();
@@ -1674,9 +1875,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MForm> toJobForms = new ArrayList<MForm>();
 
         loadConnectorForms(connectorConnForms, fromJobForms, toJobForms,
-          formConnectorFetchStmt, inputFetchStmt, 2);
-        loadForms(frameworkConnForms, frameworkJobForms,
-          formFrameworkFetchStmt, inputFetchStmt, 2);
+            formConnectorFetchStmt, inputFetchStmt, 2);
+        loadFrameworkForms(frameworkConnForms, frameworkJobForms,
+            formFrameworkFetchStmt, inputFetchStmt, 2);
 
         MConnection connection = new MConnection(connectorId,
           new MConnectionForms(connectorConnForms),
@@ -1736,7 +1937,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         toFormConnectorFetchStmt.setLong(1,toConnectorId);
 
         inputFetchStmt.setLong(1, id);
-        //inputFetchStmt.setLong(1, XXX); // Will be filled by loadForms
+        //inputFetchStmt.setLong(1, XXX); // Will be filled by loadFrameworkForms
         inputFetchStmt.setLong(3, id);
 
         List<MForm> toConnectorConnForms = new ArrayList<MForm>();
@@ -1765,8 +1966,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                 toConnectorToJobForms,
                 toFormConnectorFetchStmt, inputFetchStmt, 2);
 
-        loadForms(frameworkConnForms, frameworkJobForms,
-          formFrameworkFetchStmt, inputFetchStmt, 2);
+        loadFrameworkForms(frameworkConnForms, frameworkJobForms,
+            formFrameworkFetchStmt, inputFetchStmt, 2);
 
         MJob job = new MJob(
           fromConnectorId, toConnectorId,
@@ -1902,11 +2103,22 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    * @param query Query that should be executed
    */
-  private void runQuery(String query, Connection conn) {
-    Statement stmt = null;
+  private void runQuery(String query, Connection conn, Object... args) {
+    PreparedStatement stmt = null;
     try {
-      stmt = conn.createStatement();
-      if (stmt.execute(query)) {
+      stmt = conn.prepareStatement(query);
+
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i] instanceof String) {
+          stmt.setString(i + 1, (String)args[i]);
+        } else if (args[i] instanceof Long) {
+          stmt.setLong(i + 1, (Long) args[i]);
+        } else {
+          stmt.setObject(i, args[i]);
+        }
+      }
+
+      if (stmt.execute()) {
         ResultSet rset = stmt.getResultSet();
         int count = 0;
         while (rset.next()) {
@@ -1936,18 +2148,18 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param inputFetchStmt Prepare statement for fetching inputs
    * @throws SQLException In case of any failure on Derby side
    */
-  public void loadForms(List<MForm> connectionForms,
-                        List<MForm> jobForms,
-                        PreparedStatement formFetchStmt,
-                        PreparedStatement inputFetchStmt,
-                        int formPosition) throws SQLException {
+  public void loadFrameworkForms(List<MForm> connectionForms,
+                                 List<MForm> jobForms,
+                                 PreparedStatement formFetchStmt,
+                                 PreparedStatement inputFetchStmt,
+                                 int formPosition) throws SQLException {
 
     // Get list of structures from database
     ResultSet rsetForm = formFetchStmt.executeQuery();
     while (rsetForm.next()) {
       long formId = rsetForm.getLong(1);
       Long formConnectorId = rsetForm.getLong(2);
-      String operation = rsetForm.getString(3);
+      String direction = rsetForm.getString(3);
       String formName = rsetForm.getString(4);
       String formType = rsetForm.getString(5);
       int formIndex = rsetForm.getInt(6);

@@ -18,9 +18,7 @@
  */
 package org.apache.sqoop.connector.spi;
 
-import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 
 public abstract class MetadataUpgrader {
@@ -45,3 +43,4 @@ public abstract class MetadataUpgrader {
    */
   public abstract void upgrade(MJobForms original, MJobForms upgradeTarget);
 }
+

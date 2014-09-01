@@ -40,8 +40,10 @@ public final class DerbyRepoConstants {
    * 3 - Version 1.99.4
    *     SQ_SUBMISSION modified SQS_EXTERNAL_ID varchar(50)
    *     Increased size of SQ_CONNECTOR.SQC_VERSION to 64
+   * 4 - Version 1.99.4
+   *     Changed to FROM/TO design.
    */
-  public static final int VERSION = 3;
+  public static final int VERSION = 4;
 
   private DerbyRepoConstants() {
     // Disable explicit object creation

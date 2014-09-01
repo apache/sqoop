@@ -17,10 +17,7 @@
  */
 package org.apache.sqoop.connector;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -150,48 +147,22 @@ public class ConnectorManager implements Reconfigurable {
       LOG.trace("Begin connector manager initialization");
     }
 
-    List<URL> connectorConfigs = new ArrayList<URL>();
+    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs();
 
-    try {
-      Enumeration<URL> appPathConfigs =
-          ConnectorManager.class.getClassLoader().getResources(
-              ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
+    LOG.info("Connector config urls: " + connectorConfigs);
 
-      while (appPathConfigs.hasMoreElements()) {
-        connectorConfigs.add(appPathConfigs.nextElement());
+    if (connectorConfigs.size() == 0) {
+      throw new SqoopException(ConnectorError.CONN_0002);
+    }
+
+    for (URL url : connectorConfigs) {
+      ConnectorHandler handler = new ConnectorHandler(url);
+      ConnectorHandler handlerOld =
+          handlerMap.put(handler.getUniqueName(), handler);
+      if (handlerOld != null) {
+        throw new SqoopException(ConnectorError.CONN_0006,
+            handler + ", " + handlerOld);
       }
-
-      ClassLoader ctxLoader = Thread.currentThread().getContextClassLoader();
-
-      if (ctxLoader != null) {
-        Enumeration<URL> ctxPathConfigs = ctxLoader.getResources(
-            ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
-
-        while (ctxPathConfigs.hasMoreElements()) {
-          URL configUrl = ctxPathConfigs.nextElement();
-          if (!connectorConfigs.contains(configUrl)) {
-            connectorConfigs.add(configUrl);
-          }
-        }
-      }
-
-      LOG.info("Connector config urls: " + connectorConfigs);
-
-      if (connectorConfigs.size() == 0) {
-        throw new SqoopException(ConnectorError.CONN_0002);
-      }
-
-      for (URL url : connectorConfigs) {
-        ConnectorHandler handler = new ConnectorHandler(url);
-        ConnectorHandler handlerOld =
-            handlerMap.put(handler.getUniqueName(), handler);
-        if (handlerOld != null) {
-          throw new SqoopException(ConnectorError.CONN_0006,
-              handler + ", " + handlerOld);
-        }
-      }
-    } catch (IOException ex) {
-      throw new SqoopException(ConnectorError.CONN_0001, ex);
     }
 
     registerConnectors(autoUpgrade);
