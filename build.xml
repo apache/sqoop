@@ -966,6 +966,15 @@
       <sysproperty key="sqoop.test.cubrid.connectstring.host_url"
                    value="${sqoop.test.cubrid.connectstring.host_url}"/>
 
+      <sysproperty key="sqoop.test.cubrid.connectstring.database"
+                   value="${sqoop.test.cubrid.connectstring.database}"/>
+
+      <sysproperty key="sqoop.test.cubrid.connectstring.username"
+                   value="${sqoop.test.cubrid.connectstring.username}"/>
+
+      <sysproperty key="sqoop.test.cubrid.connectstring.password"
+                   value="${sqoop.test.cubrid.connectstring.password}"/>
+
       <sysproperty key="sqoop.test.postgresql.connectstring.host_url"
                    value="${sqoop.test.postgresql.connectstring.host_url}"/>
 
