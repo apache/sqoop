@@ -93,7 +93,9 @@ public class OracleConnectionFactory {
     }
 
     try {
-      return DriverManager.getConnection(jdbcUrl, props);
+      Connection result = DriverManager.getConnection(jdbcUrl, props);
+      result.setAutoCommit(false);
+      return result;
     } catch (SQLException ex) {
       String errorMsg = String.format(
         "Unable to obtain a JDBC connection to the URL \"%s\" as user \"%s\": ",
@@ -107,6 +109,8 @@ public class OracleConnectionFactory {
       org.apache.hadoop.conf.Configuration conf) throws SQLException {
 
     connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+    connection.setAutoCommit(false);
 
     OraOopOracleQueries.setConnectionTimeZone(connection, conf);
 

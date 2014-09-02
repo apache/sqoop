@@ -153,6 +153,7 @@ public class SystemImportTest extends OraOopTestCase {
           }
         } finally {
           ps.close();
+          conn.commit();
         }
 
         // Can't bind > 4000 bytes of data to LONG and LOB columns in the same
@@ -168,6 +169,7 @@ public class SystemImportTest extends OraOopTestCase {
           }
         } finally {
           ps.close();
+          conn.commit();
         }
 
         try {

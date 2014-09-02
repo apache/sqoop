@@ -100,6 +100,7 @@ public abstract class OraOopTestCase {
       this.conn =
           DriverManager.getConnection(OracleUtils.CONNECT_STRING,
               OracleUtils.ORACLE_USER_NAME, OracleUtils.ORACLE_USER_PASS);
+      this.conn.setAutoCommit(false);
     }
     return this.conn;
   }
