@@ -19,13 +19,14 @@ package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 
 /**
  *
  */
-@FormClass(validators = {ToTableForm.FormValidator.class})
+@FormClass(validators = {@Validator(ToTableForm.FormValidator.class)})
 public class ToTableForm {
   @Input(size = 50)   public String schemaName;
   @Input(size = 2000) public String tableName;
@@ -34,7 +35,7 @@ public class ToTableForm {
   @Input(size = 2000) public String stageTableName;
   @Input              public Boolean clearStageTable;
 
-  public static class FormValidator extends Validator<ToTableForm> {
+  public static class FormValidator extends AbstractValidator<ToTableForm> {
     @Override
     public void validate(ToTableForm form) {
       if(form.tableName == null && form.sql == null) {

@@ -28,7 +28,12 @@ import java.util.List;
  *
  * Can be used to validate inputs, forms and configuration classes.
  */
-abstract public class Validator<T> {
+abstract public class AbstractValidator<T> {
+
+  /**
+   * Default value of String argument.
+   */
+  public static final String DEFAULT_STRING_ARGUMENT = "";
 
   /**
    * Validation check.
@@ -49,7 +54,12 @@ abstract public class Validator<T> {
    */
   private Status status;
 
-  public Validator() {
+  /**
+   * Optional String argument that can be defined for the Validator
+   */
+  private String stringArgument;
+
+  public AbstractValidator() {
     reset();
   }
 
@@ -70,11 +80,24 @@ abstract public class Validator<T> {
     return status;
   }
 
+  public void setStringArgument(String arg) {
+    this.stringArgument = arg;
+  }
+
+  public String getStringArgument() {
+    return stringArgument;
+  }
+
   /**
-   * Reset validator state (all previous messages).
+   * Reset validator state.
+   *
+   * * Previous messages
+   * * Status
+   * * Any stored arguments
    */
   public void reset() {
     messages = new LinkedList<Message>();
     status = Status.getDefault();
+    stringArgument = DEFAULT_STRING_ARGUMENT;
   }
 }

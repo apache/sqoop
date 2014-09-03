@@ -21,9 +21,11 @@ import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Form;
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.validators.Contains;
 import org.apache.sqoop.validation.validators.NotEmpty;
 import org.apache.sqoop.validation.validators.NotNull;
-import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,12 +35,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestValidationRunner {
 
-  @FormClass(validators = {FormA.FormValidator.class})
+  @FormClass(validators = {@Validator(FormA.FormValidator.class)})
   public static class FormA {
-    @Input(validators = {NotNull.class})
+    @Input(validators = {@Validator(NotNull.class)})
     String notNull;
 
-    public static class FormValidator extends Validator<FormA> {
+    public static class FormValidator extends AbstractValidator<FormA> {
       @Override
       public void validate(FormA form) {
         if(form.notNull == null) {
@@ -80,7 +82,13 @@ public class TestValidationRunner {
 
   @FormClass
   public static class FormB {
-    @Input(validators = {NotNull.class, NotEmpty.class})
+    @Input(validators = {@Validator(NotNull.class), @Validator(NotEmpty.class)})
+    String str;
+  }
+
+  @FormClass
+  public static class FormC {
+    @Input(validators = {@Validator(value = Contains.class, strArg = "findme")})
     String str;
   }
 
@@ -98,14 +106,34 @@ public class TestValidationRunner {
     assertEquals(2, result.getMessages().get("formName.str").size());
   }
 
-  @ConfigurationClass(validators = {ConfigurationA.ClassValidator.class})
+  @Test
+  public void testValidatorWithParameters() {
+    FormC form = new FormC();
+    ValidationRunner runner = new ValidationRunner();
+    ValidationResult result;
+
+    // Sub string not found
+    form.str = "Mordor";
+    result = runner.validateForm("formName", form);
+    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(1, result.getMessages().size());
+    assertTrue(result.getMessages().containsKey("formName.str"));
+
+    // Sub string found
+    form.str = "Morfindmedor";
+    result = runner.validateForm("formName", form);
+    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(0, result.getMessages().size());
+  }
+
+  @ConfigurationClass(validators = {@Validator(ConfigurationA.ClassValidator.class)})
   public static class ConfigurationA {
     @Form FormA formA;
     public ConfigurationA() {
       formA = new FormA();
     }
 
-    public static class ClassValidator extends Validator<ConfigurationA> {
+    public static class ClassValidator extends AbstractValidator<ConfigurationA> {
       @Override
       public void validate(ConfigurationA conf) {
         if("error".equals(conf.formA.notNull)) {

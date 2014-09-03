@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
  *
  */
 public class TestValidator {
-  public static class ValidatorImpl extends Validator<String> {
+  public static class ValidatorImpl extends AbstractValidator<String> {
     @Override
     public void validate(String msg) {
       addMessage(Status.FINE, msg);

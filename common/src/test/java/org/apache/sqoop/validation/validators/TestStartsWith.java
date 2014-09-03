@@ -17,39 +17,58 @@
  */
 package org.apache.sqoop.validation.validators;
 
-import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 
 /**
  */
-public class TestNotEmpty {
+public class TestStartsWith {
 
-  AbstractValidator validator = new NotEmpty();
+  AbstractValidator validator = new StartsWith();
 
   @Test
   public void test() {
-    List<Message> messages;
     assertEquals(0, validator.getMessages().size());
 
-    validator.validate("Non empty");
+    // Default, no string argument set
+    validator.validate("str");
+    assertEquals(Status.FINE, validator.getStatus());
     assertEquals(0, validator.getMessages().size());
 
-    validator.validate("");
-    assertEquals(1, validator.getMessages().size());
-    messages = validator.getMessages();
-    assertEquals(Status.UNACCEPTABLE, messages.get(0).getStatus());
+    // Searched substring is entire string
+    validator.validate("str");
+    assertEquals(Status.FINE, validator.getStatus());
+    assertEquals(0, validator.getMessages().size());
 
+    // Just starts with
     validator.reset();
+    validator.setStringArgument("str");
+    validator.validate("strstr");
+    assertEquals(Status.FINE, validator.getStatus());
     assertEquals(0, validator.getMessages().size());
 
+    // Null string
+    validator.reset();
+    validator.setStringArgument("str");
     validator.validate(null);
+    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
     assertEquals(1, validator.getMessages().size());
-    messages = validator.getMessages();
-    assertEquals(Status.UNACCEPTABLE, messages.get(0).getStatus());
+
+    // Empty string
+    validator.reset();
+    validator.setStringArgument("str");
+    validator.validate("");
+    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
+    assertEquals(1, validator.getMessages().size());
+
+    // "Random" string
+    validator.reset();
+    validator.setStringArgument("str");
+    validator.validate("Ahoj tady je meduza");
+    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
+    assertEquals(1, validator.getMessages().size());
   }
+
 }

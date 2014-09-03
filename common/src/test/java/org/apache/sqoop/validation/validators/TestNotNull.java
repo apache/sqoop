@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestNotNull {
 
-  Validator validator = new NotNull();
+  AbstractValidator validator = new NotNull();
 
   @Test
   public void test() {

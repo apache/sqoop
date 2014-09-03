@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.sqoop.validation.validators.Validator;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,5 +41,5 @@ public @interface FormClass {
    *
    * @return
    */
-  Class<? extends Validator>[] validators() default {};
+  Validator[] validators() default {};
 }

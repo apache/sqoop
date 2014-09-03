@@ -19,10 +19,12 @@ package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.apache.sqoop.validation.validators.NotEmpty;
-import org.apache.sqoop.validation.validators.Validator;
 import org.apache.sqoop.validation.validators.ClassAvailable;
+import org.apache.sqoop.validation.validators.StartsWith;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,12 +33,12 @@ import java.util.Map;
 /**
  *
  */
-@FormClass(validators = {ConnectionForm.FormValidator.class})
+@FormClass(validators = {@Validator(ConnectionForm.FormValidator.class)})
 public class ConnectionForm {
-  @Input(size = 128, validators = {NotEmpty.class, ClassAvailable.class} )
+  @Input(size = 128, validators = {@Validator(NotEmpty.class), @Validator(ClassAvailable.class)} )
   public String jdbcDriver;
 
-  @Input(size = 128, validators = {NotEmpty.class} )
+  @Input(size = 128, validators = {@Validator(value = StartsWith.class, strArg = "jdbc:")} )
   public String connectionString;
 
   @Input(size = 40)
@@ -48,7 +50,7 @@ public class ConnectionForm {
   @Input
   public Map<String, String> jdbcProperties;
 
-  public static class FormValidator extends Validator<ConnectionForm> {
+  public static class FormValidator extends AbstractValidator<ConnectionForm> {
     @Override
     public void validate(ConnectionForm form) {
       // See if we can connect to the database

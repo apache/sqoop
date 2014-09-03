@@ -20,15 +20,13 @@ package org.apache.sqoop.validation.validators;
 import org.apache.sqoop.validation.Status;
 
 /**
- * Ensure that given String is not empty.
- *
- * Will also ensure that the string is not null.
+ * String validator to verify if Input starts with given string (String argument).
  */
-public class NotEmpty extends AbstractValidator<String> {
+public class StartsWith extends AbstractValidator<String> {
   @Override
-  public void validate(String instance) {
-    if (instance == null || instance.isEmpty()) {
-      addMessage(Status.UNACCEPTABLE, "Can't be null nor empty");
+  public void validate(String str) {
+    if(str == null || !str.startsWith(getStringArgument())) {
+      addMessage(Status.UNACCEPTABLE, "String must start with: " + getStringArgument());
     }
   }
 }

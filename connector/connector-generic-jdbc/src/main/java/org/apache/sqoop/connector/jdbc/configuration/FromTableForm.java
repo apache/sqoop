@@ -20,13 +20,15 @@ package org.apache.sqoop.connector.jdbc.configuration;
 import org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants;
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.Contains;
 
 /**
  *
  */
-@FormClass( validators = {FromTableForm.FormValidator.class})
+@FormClass( validators = {@Validator(FromTableForm.FormValidator.class)})
 public class FromTableForm {
   @Input(size = 50)
   public String schemaName;
@@ -34,7 +36,7 @@ public class FromTableForm {
   @Input(size = 50)
   public String tableName;
 
-  @Input(size = 2000, validators = {SqlConditionTokenValidator.class})
+  @Input(size = 2000, validators = {@Validator(value = Contains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)})
   public String sql;
 
   @Input(size = 50)
@@ -49,7 +51,7 @@ public class FromTableForm {
   @Input(size = 50)
   public String boundaryQuery;
 
-  public static class FormValidator extends Validator<FromTableForm> {
+  public static class FormValidator extends AbstractValidator<FromTableForm> {
     @Override
     public void validate(FromTableForm form) {
       if(form.tableName == null && form.sql == null) {
@@ -60,15 +62,6 @@ public class FromTableForm {
       }
       if(form.schemaName != null && form.sql != null) {
         addMessage(Status.UNACCEPTABLE, "Both schema name and SQL cannot be specified");
-      }
-    }
-  }
-
-  public static class SqlConditionTokenValidator extends Validator<String> {
-    @Override
-    public void validate(String sql) {
-      if(sql != null && !sql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)) {
-        addMessage(Status.UNACCEPTABLE, "SQL statement must contain placeholder for auto generated conditions - " + GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
       }
     }
   }

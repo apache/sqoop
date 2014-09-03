@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestClassAvailable {
 
-  Validator validator = new ClassAvailable();
+  AbstractValidator validator = new ClassAvailable();
 
   @Test
   public void test() {

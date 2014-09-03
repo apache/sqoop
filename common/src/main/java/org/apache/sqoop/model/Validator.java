@@ -15,20 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.validation.validators;
+package org.apache.sqoop.model;
 
-import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Ensure that given String is not empty.
+ * Annotation for specifying validators
  *
- * Will also ensure that the string is not null.
+ * Usage without any parameters:
+ * @Validator(ClassName.class)
+ *
+ * To specify string parameter call:
+ * @Validator(value = ClassName.class, strArg = "Hello World!")
  */
-public class NotEmpty extends AbstractValidator<String> {
-  @Override
-  public void validate(String instance) {
-    if (instance == null || instance.isEmpty()) {
-      addMessage(Status.UNACCEPTABLE, "Can't be null nor empty");
-    }
-  }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Validator {
+  /**
+   * Validator implementation that should be executed.
+   */
+  Class<? extends AbstractValidator> value();
+
+  /**
+   * Optional argument that should be given to the validator before execution.
+   */
+  String strArg() default AbstractValidator.DEFAULT_STRING_ARGUMENT;
 }

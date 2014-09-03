@@ -23,7 +23,7 @@ import org.apache.sqoop.validation.Status;
 /**
  * Ensure that given String Input is a class that is available to this JVM.
  */
-public class ClassAvailable extends Validator<String> {
+public class ClassAvailable extends AbstractValidator<String> {
   @Override
   public void validate(String klass) {
     try {

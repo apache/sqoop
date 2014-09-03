@@ -22,7 +22,7 @@ import org.apache.sqoop.validation.Status;
 /**
  * Ensure that given object is never null.
  */
-public class NotNull<T> extends Validator<T> {
+public class NotNull<T> extends AbstractValidator<T> {
   @Override
   public void validate(T instance) {
     if (instance == null) {

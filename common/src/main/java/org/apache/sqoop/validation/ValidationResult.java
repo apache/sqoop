@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.validation;
 
-import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ public class ValidationResult {
    * @param name Full name of the validated object
    * @param validator Executed validator
    */
-  public void addValidator(String name, Validator validator) {
+  public void addValidator(String name, AbstractValidator validator) {
     if(validator.getStatus() == Status.getDefault()) {
       return;
     }

@@ -22,8 +22,9 @@ import org.apache.sqoop.model.Form;
 import org.apache.sqoop.model.FormClass;
 import org.apache.sqoop.model.FormUtils;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.utils.ClassUtils;
-import org.apache.sqoop.validation.validators.Validator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.lang.reflect.Field;
 
@@ -114,14 +115,14 @@ public class ValidationRunner {
    *
    * @param name Full name of the object
    * @param object Input, Form or Class instance
-   * @param classes Validators array
+   * @param validators Validators array
    * @return
    */
-  private ValidationResult validateArray(String name, Object object, Class<? extends Validator> []classes) {
+  private ValidationResult validateArray(String name, Object object, Validator[] validators) {
     ValidationResult result = new ValidationResult();
 
-    for (Class<? extends Validator> klass : classes) {
-      Validator v = executeValidator(object, klass);
+    for (Validator validator : validators) {
+      AbstractValidator v = executeValidator(object, validator);
       result.addValidator(name, v);
     }
 
@@ -132,11 +133,12 @@ public class ValidationRunner {
    * Execute single validator.
    *
    * @param object Input, Form or Class instance
-   * @param klass Validator's clas
+   * @param validator Validator annotation
    * @return
    */
-  private Validator executeValidator(Object object, Class<? extends Validator> klass) {
-    Validator instance = (Validator) ClassUtils.instantiate(klass);
+  private AbstractValidator executeValidator(Object object, Validator validator) {
+    AbstractValidator instance = (AbstractValidator) ClassUtils.instantiate(validator.value());
+    instance.setStringArgument(validator.strArg());
     instance.validate(object);
     return instance;
   }
