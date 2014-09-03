@@ -15,15 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.job;
+package org.apache.sqoop.connector.hdfs;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FileUtils {
 
@@ -60,6 +63,16 @@ public class FileUtils {
     Path filepath = new Path(fileName);
     FileSystem fs = filepath.getFileSystem(new Configuration());
     return fs.create(filepath, false);
+  }
+
+  public static Path[] listDir(String directory) throws IOException {
+    Path dirpath = new Path(directory);
+    FileSystem fs = dirpath.getFileSystem(new Configuration());
+    List<Path> paths = new LinkedList<Path>();
+    for (FileStatus fileStatus : fs.listStatus(dirpath)) {
+      paths.add(fileStatus.getPath());
+    }
+    return paths.toArray(new Path[paths.size()]);
   }
 
   private FileUtils() {

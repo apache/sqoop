@@ -42,8 +42,6 @@ import java.io.IOException;
  * Extract from HDFS.
  * Default field delimiter of a record is comma.
  */
-
-
 public class HdfsExtractor extends Extractor<ConnectionConfiguration, FromJobConfiguration, HdfsPartition> {
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
