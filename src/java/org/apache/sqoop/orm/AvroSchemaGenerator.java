@@ -71,8 +71,8 @@ public class AvroSchemaGenerator {
 
     TableClassName tableClassName = new TableClassName(options);
     String shortClassName = tableClassName.getShortClassForTable(tableName);
-    String avroTableName = (tableName == null ? "QueryResult" : tableName);
-    String avroName = (shortClassName == null ? avroTableName : shortClassName);
+    String avroTableName = (tableName == null ? TableClassName.QUERY_RESULT : tableName);
+    String avroName = "sqoop_import_" + (shortClassName == null ? avroTableName : shortClassName);
     String avroNamespace = tableClassName.getPackageForTable();
 
     String doc = "Sqoop import of " + avroTableName;

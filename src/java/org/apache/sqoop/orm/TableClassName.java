@@ -33,6 +33,8 @@ public class TableClassName {
   public static final Log LOG = LogFactory.getLog(
       TableClassName.class.getName());
 
+  public static final String QUERY_RESULT = "QueryResult";
+
   private final SqoopOptions options;
 
   public TableClassName(final SqoopOptions opts) {
@@ -84,7 +86,7 @@ public class TableClassName {
 
     String queryName = tableName;
     if (null == queryName) {
-      queryName = "QueryResult";
+      queryName = QUERY_RESULT;
     }
 
     String packageName = options.getPackageName();
