@@ -88,7 +88,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       job.setOutputValueClass(NullWritable.class);
     } else if (options.getFileLayout()
         == SqoopOptions.FileLayout.AvroDataFile) {
-      Schema schema = generateArvoSchema(tableName);
+      Schema schema = generateAvroSchema(tableName);
       try {
         writeAvroSchema(schema);
       } catch (final IOException e) {
@@ -101,7 +101,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       Configuration conf = job.getConfiguration();
       // An Avro schema is required for creating a dataset that manages
       // Parquet data records. The import will fail, if schema is invalid.
-      Schema schema = generateArvoSchema(tableName);
+      Schema schema = generateAvroSchema(tableName);
       String uri;
       if (options.doHiveImport()) {
         uri = "dataset:hive?dataset=" + options.getTableName();
@@ -115,7 +115,7 @@ public class DataDrivenImportJob extends ImportJobBase {
     job.setMapperClass(getMapperClass());
   }
 
-  private Schema generateArvoSchema(String tableName) throws IOException {
+  private Schema generateAvroSchema(String tableName) throws IOException {
     ConnManager connManager = getContext().getConnManager();
     AvroSchemaGenerator generator = new AvroSchemaGenerator(options,
         connManager, tableName);
