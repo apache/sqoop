@@ -19,6 +19,7 @@ package org.apache.sqoop.avro;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.BlobRef;
@@ -29,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -80,6 +82,85 @@ public final class AvroUtil {
       record.put(entry.getKey(), avroObject);
     }
     return record;
+  }
+
+  private static final String TIMESTAMP_TYPE = "java.sql.Timestamp";
+  private static final String TIME_TYPE = "java.sql.Time";
+  private static final String DATE_TYPE = "java.sql.Date";
+  private static final String BIG_DECIMAL_TYPE = "java.math.BigDecimal";
+  private static final String BLOB_REF_TYPE = "com.cloudera.sqoop.lib.BlobRef";
+
+  /**
+   * Convert from Avro type to Sqoop's java representation of the SQL type
+   * see SqlManager#toJavaType
+   */
+  public static Object fromAvro(Object avroObject, Schema schema, String type) {
+    if (avroObject == null) {
+      return null;
+    }
+
+    switch (schema.getType()) {
+      case NULL:
+        return null;
+      case BOOLEAN:
+      case INT:
+      case FLOAT:
+      case DOUBLE:
+        return avroObject;
+      case LONG:
+        if (type.equals(DATE_TYPE)) {
+          return new Date((Long) avroObject);
+        } else if (type.equals(TIME_TYPE)) {
+          return new Time((Long) avroObject);
+        } else if (type.equals(TIMESTAMP_TYPE)) {
+          return new Timestamp((Long) avroObject);
+        }
+        return avroObject;
+      case BYTES:
+        ByteBuffer bb = (ByteBuffer) avroObject;
+        BytesWritable bw = new BytesWritable();
+        bw.set(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
+        if (type.equals(BLOB_REF_TYPE)) {
+          // TODO: Should convert BytesWritable to BlobRef properly. (SQOOP-991)
+          throw new UnsupportedOperationException("BlobRef not supported");
+        }
+        return bw;
+      case STRING:
+        if (type.equals(BIG_DECIMAL_TYPE)) {
+          return new BigDecimal(avroObject.toString());
+        } else if (type.equals(DATE_TYPE)) {
+          return Date.valueOf(avroObject.toString());
+        } else if (type.equals(TIME_TYPE)) {
+          return Time.valueOf(avroObject.toString());
+        } else if (type.equals(TIMESTAMP_TYPE)) {
+          return Timestamp.valueOf(avroObject.toString());
+        }
+        return avroObject.toString();
+      case ENUM:
+        return avroObject.toString();
+      case UNION:
+        List<Schema> types = schema.getTypes();
+        if (types.size() != 2) {
+          throw new IllegalArgumentException("Only support union with null");
+        }
+        Schema s1 = types.get(0);
+        Schema s2 = types.get(1);
+        if (s1.getType() == Schema.Type.NULL) {
+          return fromAvro(avroObject, s2, type);
+        } else if (s2.getType() == Schema.Type.NULL) {
+          return fromAvro(avroObject, s1, type);
+        } else {
+          throw new IllegalArgumentException("Only support union with null");
+        }
+      case FIXED:
+        return new BytesWritable(((GenericFixed) avroObject).bytes());
+      case RECORD:
+      case ARRAY:
+      case MAP:
+      default:
+        throw new IllegalArgumentException("Cannot convert Avro type "
+            + schema.getType());
+    }
   }
 
 }
