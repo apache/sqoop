@@ -267,3 +267,8 @@ div.footer-text {
 img {
 	border: 0;
 }
+
+.informaltable tr {
+	height: 10px;
+	vertical-align: top;
+}

@@ -635,38 +635,26 @@ alter user username quota unlimited on tablespace
 
 - The following privileges:
 +
-[frame="topbot",options="header",cols="2*v"]
-|===============================================================================
-|Type of Export                         |Privileges required
-|All Export
-|+create table+
-+select on dba_tab_partitions+
-+select on dba_tab_subpartitions+
-+select on dba_indexes+
-+select on dba_ind_columns+
-|Insert-Export with a template
-table into another schema
-|+select any table+
-+create any table+
-+insert any table+
-+alter any table+ (partitioning)
-|Insert-Export without a
-template table into another
-schema
-|+select,insert on table+ (no partitioning)
-+select,alter on table+ (partitioning)
-|Update-Export into another
-schema
-|+select,update on table+ (no partitioning)
-+select,delete,alter,insert on table+
-(partitioning)
-|Merge-Export into another
-schema
-|+select,insert,update on table+ (no
-partitioning)
-+select,insert,delete,alter on table+
-(partitioning)
-|===============================================================================
+[grid="all"]
+`-----------------------------------------------------------------------------------------------`--------------------------------------------------------------------------
+Type of Export                                                                                  Privileges Required
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+All Export                                                                                      +create table+
+                                                                                                +select on dba_tab_partitions+
+                                                                                                +select on dba_tab_subpartitions+
+                                                                                                +select on dba_indexes+
+                                                                                                +select on dba_ind_columns+
+Insert-Export with a template table into another schema                                         +select any table+
+                                                                                                +create any table+
+                                                                                                +insert any table+
+                                                                                                +alter any table+ (partitioning)
+Insert-Export without a template table into another schema                                      +select,insert on table+ (no partitioning)
+                                                                                                +select,alter on table+ (partitioning)
+Update-Export into another schema                                                               +select,update on table+ (no partitioning)
+                                                                                                +select,delete,alter,insert on table+ (partitioning)
+Merge-Export into another schema                                                                +select,insert,update on table+ (no partitioning)
+                                                                                                +select,insert,delete,alter on table+ (partitioning)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Supported Data Types
 ++++++++++++++++++++
@@ -674,32 +662,32 @@ Supported Data Types
 The following Oracle data types are supported by the Data Connector for
 Oracle and Hadoop:
 
-[frame="none",grid="none",cols="2,1l,2"]
-|===============================================================================
-|BINARY_DOUBLE                      |      |NCLOB
-|BINARY_FLOAT                       |      |NUMBER
-|BLOB                               |      |NVARCHAR2
-|CHAR                               |      |RAW
-|CLOB                               |      |ROWID
-|DATE                               |      |TIMESTAMP
-|FLOAT                              |      |TIMESTAMP WITH TIME ZONE
-|INTERVAL DAY TO SECOND             |      |TIMESTAMP WITH LOCAL TIME ZONE
-|INTERVAL YEAR TO MONTH             |      |URITYPE
-|LONG                               |      |VARCHAR2
-|NCHAR                              |      |
-|===============================================================================
+[grid="all"]
+`----------------------------------------`-----------------------------------------------------------------
+BINARY_DOUBLE                            NCLOB
+BINARY_FLOAT                             NUMBER
+BLOB                                     NVARCHAR2
+CHAR                                     RAW
+CLOB                                     ROWID
+DATE                                     TIMESTAMP
+FLOAT                                    TIMESTAMP WITH TIME ZONE
+INTERVAL DAY TO SECOND                   TIMESTAMP WITH LOCAL TIME ZONE
+INTERVAL YEAR TO MONTH                   URITYPE
+LONG                                     VARCHAR2
+NCHAR
+-----------------------------------------------------------------------------------------------------------
 
 All other Oracle column types are NOT supported. Example Oracle column types NOT
 supported by Data Connector for Oracle and Hadoop include:
 
-[frame="none",grid="none",cols="2,1l,2"]
-|===============================================================================
-|All of the ANY types               |      |BFILE
-|All of the MEDIA types             |      |LONG RAW
-|All of the SPATIAL types           |      |MLSLABEL
-|Any type referred to as UNDEFINED  |      |UROWID
-|All custom (user-defined) URI types|      |XMLTYPE
-|===============================================================================
+[grid="all"]
+`-----------------------------------------------------`-------------------------------
+All of the ANY types                                  BFILE
+All of the MEDIA types                                LONG RAW
+All of the SPATIAL types                              MLSLABEL
+Any type referred to as UNDEFINED                     UROWID
+All custom (user-defined) URI types                   XMLTYPE
+--------------------------------------------------------------------------------------
 
 NOTE: Data types RAW, LONG and LOB (BLOB, CLOB and NCLOB) are supported for
 Data Connector for Oracle and Hadoop imports. They are not supported for Data
@@ -728,27 +716,25 @@ authentication using Oracle wallets.
 Connect to An Oracle Database Instance
 ++++++++++++++++++++++++++++++++++++++
 
-[frame="topbot",options="header",cols="2*v"]
-|===============================================================================
-|Parameter / Component                         |Description
-|+jdbc:oracle:thin+
-|The Data Connector for Oracle and Hadoop requires the
-connection string starts with jdbc:oracle.
+[grid="all"]
+`---------------------------------------------`----------------------------------------
+Parameter / Component                         Description
+---------------------------------------------------------------------------------------
++jdbc:oracle:thin+                            The Data Connector for Oracle and\
+                                              Hadoop requires the connection string\
+                                              starts with jdbc:oracle.
 
-The Data Connector for Oracle and Hadoop has been tested
-with the thin driver however it should work equally well
-with other drivers such as OCI.
-|+OracleServer+
-|The host name of the Oracle server.
-|+OraclePort+
-|The port to connect to the Oracle server.
-|+OracleSID+
-|The Oracle instance.
-|+OracleService+
-|The Oracle Service.
-|+TNSName+
-|The TNS name for the entry describing the connection to the Oracle server.
-|===============================================================================
+                                              The Data Connector for Oracle and\
+                                              Hadoop has been tested with the thin\
+                                              driver however it should work equally\
+                                              well with other drivers such as OCI.
++OracleServer+                                The host name of the Oracle server.
++OraclePort+                                  The port to connect to the Oracle server.
++OracleSID+                                   The Oracle instance.
++OracleService+                               The Oracle Service.
++TNSName+                                     The TNS name for the entry describing\
+                                              the connection to the Oracle server.
+----------------------------------------------------------------------------------------
 
 [NOTE]
 ================================================================================
@@ -775,41 +761,39 @@ to specify the service name:
 
 +-D oraoop.oracle.rac.service.name=ServiceName+
 
-[frame="topbot",options="header",cols="2*v"]
-|===============================================================================
-|Parameter / Component                         |Description
-|+OracleServer:OraclePort:OracleInstance+
-|Name one instance of the Oracle RAC.
+[grid="all"]
+`--------------------------------------------------------------------`------------------------------------------------
+Parameter / Component                                                 Description
+----------------------------------------------------------------------------------------------------------------------
++OracleServer:OraclePort:OracleInstance+                              Name one instance of the Oracle RAC.\
+                                                                      The Data Connector for Oracle and\
+                                                                      Hadoop assumes the same port number for\
+                                                                      all instances of the Oracle RAC.
 
-The Data Connector for Oracle and
-Hadoop assumes the same port number for
-all instances of the Oracle RAC.
+                                                                      The listener of the host of this Oracle\
+                                                                      instance is used to locate other\
+                                                                      instances of the Oracle RAC. For more\
+                                                                      information enter this command on the\
+                                                                      host command line:
 
-The listener of the host of this Oracle
-instance is used to locate other instances of
-the Oracle RAC. For more information
-enter this command on the host command
-line:
+                                                                      +lsnrctl status+
++-D oraoop.oracle.rac.service.name=ServiceName+                       The service to connect to in the Oracle RAC.
 
-+lsnrctl status+
-|+-D oraoop.oracle.rac.service.name=ServiceName+
-|The service to connect to in the Oracle RAC.
+                                                                      A connection is made to all instances\
+                                                                      of the Oracle RAC associated with the\
+                                                                      service given by +ServiceName+.
 
-A connection is made to all instances of
-the Oracle RAC associated with the service
-given by +ServiceName+.
+                                                                      If omitted, a connection is made to all\
+                                                                      instances of the Oracle RAC.
 
-If omitted, a connection is made to all
-instances of the Oracle RAC.
+                                                                      The listener of the host of this Oracle\
+                                                                      instance needs to know the +ServiceName+\
+                                                                      and all instances of the Oracle RAC. For\
+                                                                      more information enter this command on\
+                                                                      the host command line:
 
-The listener of the host of this Oracle
-instance needs to know the +ServiceName+
-and all instances of the Oracle RAC. For
-more information enter this command on
-the host command line:
-
-+lsnrctl status+
-|===============================================================================
+                                                                      +lsnrctl status+
+----------------------------------------------------------------------------------------------------------------------
 
 Login to The Oracle Instance
 ++++++++++++++++++++++++++++
@@ -819,15 +803,15 @@ Login to the Oracle instance on the Sqoop command line:
 +--connect jdbc:oracle:thin:@OracleServer:OraclePort:OracleInstance --username
 UserName -P+
 
-[frame="topbot",options="header",cols="2*v"]
-|===============================================================================
-|Parameter / Component                         |Description
-|+--username UserName+
-|The username to login to the Oracle instance (SID).
-|+-P+
-|You will be prompted for the password to login to the Oracle
-instance.
-|===============================================================================
+[grid="all"]
+`-------------------------------------`----------------------------------------
+Parameter / Component                    Description
+-------------------------------------------------------------------------------
++--username UserName+                    The username to login to the Oracle\
+                                         instance (SID).
++-P+                                     You will be prompted for the password\
+                                         to login to the Oracle instance.
+--------------------------------------------------------------------------------
 
 Kill Data Connector for Oracle and Hadoop Jobs
 ++++++++++++++++++++++++++++++++++++++++++++++
@@ -1339,14 +1323,15 @@ Sqoop to export the data into Oracle.
 - TZR = Time Zone Region
 ================================================================================
 
-[frame="topbot",options="header"]
-|===============================================================================
-|Oracle Data Type                  |Required Format of The Data in the HDFS File
-|DATE                              |+yyyy-mm-dd hh24:mi:ss+
-|TIMESTAMP                         |+yyyy-mm-dd hh24:mi:ss.ff+
-|TIMESTAMPTZ                       |+yyyy-mm-dd hh24:mi:ss.ff TZR+
-|TIMESTAMPLTZ                      |+yyyy-mm-dd hh24:mi:ss.ff TZR+
-|===============================================================================
+[grid="all"]
+`-------------------------------------`-------------------------------------------------------
+Oracle Data Type                      Required Format of The Data in the HDFS File
+----------------------------------------------------------------------------------------------
+DATE                                  +yyyy-mm-dd hh24:mi:ss+
+TIMESTAMP                             +yyyy-mm-dd hh24:mi:ss.ff+
+TIMESTAMPTZ                           +yyyy-mm-dd hh24:mi:ss.ff TZR+
+TIMESTAMPLTZ                          +yyyy-mm-dd hh24:mi:ss.ff TZR+
+----------------------------------------------------------------------------------------------
 
 Configure The Data Connector for Oracle and Hadoop
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
