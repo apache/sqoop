@@ -39,6 +39,12 @@ public final class ParquetJob {
   private ParquetJob() {
   }
 
+  private static final String CONF_AVRO_SCHEMA = "avro.schema";
+
+  public static Schema getAvroSchema(Configuration conf) {
+    return new Schema.Parser().parse(conf.get(CONF_AVRO_SCHEMA));
+  }
+
   /**
    * Configure the import job. The import process will use a Kite dataset to
    * write data records into Parquet format internally. The input key class is
@@ -63,6 +69,7 @@ public final class ParquetJob {
     } else {
       dataset = createDataset(schema, uri);
     }
+    conf.set(CONF_AVRO_SCHEMA, schema.toString());
     DatasetKeyOutputFormat.configure(conf).writeTo(dataset);
   }
 

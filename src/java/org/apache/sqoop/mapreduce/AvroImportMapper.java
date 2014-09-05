@@ -18,21 +18,20 @@
 
 package org.apache.sqoop.mapreduce;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Map;
+import com.cloudera.sqoop.lib.LargeObjectLoader;
+import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroWrapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.sqoop.avro.AvroUtil;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Imports records by transforming them to Avro records in an Avro data file.
@@ -69,7 +68,9 @@ public class AvroImportMapper
       throw new IOException(sqlE);
     }
 
-    wrapper.datum(toGenericRecord(val));
+    GenericRecord outKey = AvroUtil.toGenericRecord(val.getFieldMap(),
+        schema, bigDecimalFormatString);
+    wrapper.datum(outKey);
     context.write(wrapper, NullWritable.get());
   }
 
@@ -78,16 +79,6 @@ public class AvroImportMapper
     if (null != lobLoader) {
       lobLoader.close();
     }
-  }
-
-  private GenericRecord toGenericRecord(SqoopRecord val) {
-    Map<String, Object> fieldMap = val.getFieldMap();
-    GenericRecord record = new GenericData.Record(schema);
-    for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
-      Object avro = AvroUtil.toAvro(entry.getValue(), bigDecimalFormatString);
-      record.put(entry.getKey(), avro);
-    }
-    return record;
   }
 
 }

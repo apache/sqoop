@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.avro;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
@@ -26,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Map;
 
 /**
  * The service class provides methods for creating and converting Avro objects.
@@ -33,14 +37,13 @@ import java.sql.Timestamp;
 public final class AvroUtil {
 
   /**
-   * Convert the Avro representation of a Java type (that has already been
-   * converted from the SQL equivalent). Note that the method is taken from
-   * {@link org.apache.sqoop.mapreduce.AvroImportMapper}
+   * Convert a Sqoop's Java representation to Avro representation.
    */
   public static Object toAvro(Object o, boolean bigDecimalFormatString) {
     if (o instanceof BigDecimal) {
       if (bigDecimalFormatString) {
-        return ((BigDecimal)o).toPlainString();
+        // Returns a string representation of this without an exponent field.
+        return ((BigDecimal) o).toPlainString();
       } else {
         return o.toString();
       }
@@ -64,6 +67,19 @@ public final class AvroUtil {
     }
     // primitive types (Integer, etc) are left unchanged
     return o;
+  }
+
+  /**
+   * Manipulate a GenericRecord instance.
+   */
+  public static GenericRecord toGenericRecord(Map<String, Object> fieldMap,
+      Schema schema, boolean bigDecimalFormatString) {
+    GenericRecord record = new GenericData.Record(schema);
+    for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
+      Object avroObject = toAvro(entry.getValue(), bigDecimalFormatString);
+      record.put(entry.getKey(), avroObject);
+    }
+    return record;
   }
 
 }

@@ -30,11 +30,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.sqoop.lib.SqoopAvroRecord;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -1110,26 +1108,6 @@ public class ClassWriter {
     }
   }
 
-  private void generateSqoopAvroRecordMethods(String className, Schema schema, StringBuilder sb) {
-    // Define shared immutable attributes as static
-    sb.append("  private final static boolean bigDecimalFormatString;\n");
-    sb.append("  private final static Schema schema;\n");
-    sb.append("  static {\n");
-    sb.append("    bigDecimalFormatString = " + bigDecimalFormatString + ";\n");
-    sb.append("    schema = new Schema.Parser().parse(\"");
-    sb.append(schema.toString().replaceAll("\"", "\\\\\""));
-    sb.append("\");\n");
-    sb.append("  }\n");
-    sb.append("  @Override\n");
-    sb.append("  public boolean getBigDecimalFormatString() {\n");
-    sb.append("    return bigDecimalFormatString;\n");
-    sb.append("  }\n");
-    sb.append("  @Override\n");
-    sb.append("  public Schema getSchema() {\n");
-    sb.append("    return schema;\n");
-    sb.append("  }\n");
-  }
-
   /**
    * Generate the setField() method.
    * @param columnTypes - mapping from column names to sql types
@@ -1750,15 +1728,9 @@ public class ClassWriter {
       }
     }
 
-    Schema schema = null;
-    if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-      schema = generateAvroSchemaForTable(tableName);
-      options.getConf().set("avro.schema", schema.toString());
-    }
-
     // Generate the Java code.
     StringBuilder sb = generateClassForColumns(columnTypes,
-        cleanedColNames, cleanedDbWriteColNames, schema);
+        cleanedColNames, cleanedDbWriteColNames);
     // Write this out to a file in the jar output directory.
     // We'll move it to the user-visible CodeOutputDir after compiling.
     String codeOutDir = options.getJarOutputDir();
@@ -1816,12 +1788,6 @@ public class ClassWriter {
     }
   }
 
-  private Schema generateAvroSchemaForTable(String tableName) throws IOException {
-    AvroSchemaGenerator generator = new AvroSchemaGenerator(options,
-        connManager, tableName);
-    return generator.generate();
-  }
-
   protected String[] getColumnNames(Map<String, Integer> columnTypes) {
     String [] colNames = options.getColumns();
     if (null == colNames) {
@@ -1872,18 +1838,15 @@ public class ClassWriter {
    * @param colNames - ordered list of column names for table.
    * @param dbWriteColNames - ordered list of column names for the db
    * write() method of the class.
-   * @param schema - If a valid Avro schema is specified, the base class will
-   * be SqoopAvroRecord
    * @return - A StringBuilder that contains the text of the class code.
    */
   private StringBuilder generateClassForColumns(
       Map<String, Integer> columnTypes,
-      String [] colNames, String [] dbWriteColNames, Schema schema) {
+      String [] colNames, String [] dbWriteColNames) {
     if (colNames.length ==0) {
       throw new IllegalArgumentException("Attempted to generate class with "
           + "no columns!");
     }
-
     StringBuilder sb = new StringBuilder();
     sb.append("// ORM class for table '" + tableName + "'\n");
     sb.append("// WARNING: This class is AUTO-GENERATED. "
@@ -1915,13 +1878,7 @@ public class ClassWriter {
     sb.append("import " + BlobRef.class.getCanonicalName() + ";\n");
     sb.append("import " + ClobRef.class.getCanonicalName() + ";\n");
     sb.append("import " + LargeObjectLoader.class.getCanonicalName() + ";\n");
-
-    Class baseClass = SqoopRecord.class;
-    if (null != schema) {
-      sb.append("import org.apache.avro.Schema;\n");
-      baseClass = SqoopAvroRecord.class;
-    }
-    sb.append("import " + baseClass.getCanonicalName() + ";\n");
+    sb.append("import " + SqoopRecord.class.getCanonicalName() + ";\n");
     sb.append("import java.sql.PreparedStatement;\n");
     sb.append("import java.sql.ResultSet;\n");
     sb.append("import java.sql.SQLException;\n");
@@ -1941,8 +1898,8 @@ public class ClassWriter {
     sb.append("\n");
 
     String className = tableNameInfo.getShortClassForTable(tableName);
-    sb.append("public class " + className + " extends " + baseClass.getSimpleName()
-          + " implements DBWritable, Writable {\n");
+    sb.append("public class " + className + " extends SqoopRecord "
+        + " implements DBWritable, Writable {\n");
     sb.append("  private final int PROTOCOL_VERSION = "
         + CLASS_WRITER_VERSION + ";\n");
     sb.append(
@@ -1960,10 +1917,6 @@ public class ClassWriter {
     generateCloneMethod(columnTypes, colNames, sb);
     generateGetFieldMap(columnTypes, colNames, sb);
     generateSetField(columnTypes, colNames, sb);
-
-    if (baseClass == SqoopAvroRecord.class) {
-      generateSqoopAvroRecordMethods(className, schema, sb);
-    }
 
     // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a
     // WritableComparable

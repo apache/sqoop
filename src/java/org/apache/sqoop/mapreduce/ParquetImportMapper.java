@@ -19,13 +19,14 @@
 package org.apache.sqoop.mapreduce;
 
 import com.cloudera.sqoop.lib.LargeObjectLoader;
+import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.sqoop.lib.SqoopAvroRecord;
+import org.apache.sqoop.avro.AvroUtil;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -34,19 +35,26 @@ import java.sql.SQLException;
  * Imports records by writing them to a Parquet File.
  */
 public class ParquetImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopAvroRecord,
+    extends AutoProgressMapper<LongWritable, SqoopRecord,
         GenericRecord, NullWritable> {
 
+  private Schema schema = null;
+  private boolean bigDecimalFormatString = true;
   private LargeObjectLoader lobLoader = null;
 
   @Override
   protected void setup(Context context)
       throws IOException, InterruptedException {
-    lobLoader = new LargeObjectLoader(context.getConfiguration());
+    Configuration conf = context.getConfiguration();
+    schema = ParquetJob.getAvroSchema(conf);
+    bigDecimalFormatString = conf.getBoolean(
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+    lobLoader = new LargeObjectLoader(conf);
   }
 
   @Override
-  protected void map(LongWritable key, SqoopAvroRecord val, Context context)
+  protected void map(LongWritable key, SqoopRecord val, Context context)
       throws IOException, InterruptedException {
     try {
       // Loading of LOBs was delayed until we have a Context.
@@ -55,7 +63,9 @@ public class ParquetImportMapper
       throw new IOException(sqlE);
     }
 
-    context.write(val, null);
+    GenericRecord outKey = AvroUtil.toGenericRecord(val.getFieldMap(), schema,
+        bigDecimalFormatString);
+    context.write(outKey, null);
   }
 
   @Override
