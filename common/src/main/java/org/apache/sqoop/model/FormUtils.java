@@ -314,9 +314,9 @@ public class FormUtils {
 
     if (messages.containsKey(name)) {
       Validation.Message message = messages.get(name);
-      element.setValidationMessage(message.getStatus(), message.getMessage());
+      element.addValidationMessage(new Message(message.getStatus(), message.getMessage()));
     } else {
-      element.setValidationMessage(Status.getDefault(), null);
+      element.addValidationMessage(new Message(Status.getDefault(), null));
     }
   }
 
@@ -349,11 +349,9 @@ public class FormUtils {
     List<Message> messages = result.getMessages().get(element.getName());
 
     if(messages != null) {
-      // TODO(SQOOP-1465) Add support for multiple messages (showing only the first one for now)
-      Message message = messages.get(0);
-      element.setValidationMessage(message.getStatus(), message.getMessage());
+      element.setValidationMessages(messages);
     } else {
-      element.setValidationMessage(Status.getDefault(), null);
+      element.resetValidationMessages();
     }
   }
 

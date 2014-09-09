@@ -129,23 +129,6 @@ public class TestFormUtils extends TestCase {
     assertNull(config.bForm.b2);
   }
 
-  public void testApplyValidation() {
-    Validation validation = getValidation();
-    List<MForm> forms = getForms();
-
-    FormUtils.applyValidation(forms, validation);
-
-    assertEquals(Status.ACCEPTABLE,
-      forms.get(0).getInputs().get(0).getValidationStatus());
-    assertEquals("e1",
-      forms.get(0).getInputs().get(0).getValidationMessage());
-
-    assertEquals(Status.UNACCEPTABLE,
-      forms.get(0).getInputs().get(1).getValidationStatus());
-    assertEquals("e2",
-      forms.get(0).getInputs().get(1).getValidationMessage());
-  }
-
   public void testJson() {
     Config config = new Config();
     config.aForm.a1 = "A";
@@ -177,20 +160,6 @@ public class TestFormUtils extends TestCase {
     assertTrue(targetConfig.cForm.map.containsKey("C"));
     assertEquals("D", targetConfig.cForm.map.get("C"));
     assertEquals(Enumeration.X, targetConfig.cForm.enumeration);
-  }
-
-  protected Validation getValidation() {
-    Map<Validation.FormInput, Validation.Message> messages
-      = new HashMap<Validation.FormInput, Validation.Message>();
-
-    messages.put(
-      new Validation.FormInput("aForm", "a1"),
-      new Validation.Message(Status.ACCEPTABLE, "e1"));
-    messages.put(
-      new Validation.FormInput("aForm", "a2"),
-      new Validation.Message(Status.UNACCEPTABLE, "e2"));
-
-    return new Validation(Status.UNACCEPTABLE, messages);
   }
 
   /**

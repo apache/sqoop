@@ -18,7 +18,21 @@
 package org.apache.sqoop.validation;
 
 /**
- * Status modes of a validation process.
+ * Severity of validation message.
+ *
+ * Fine:
+ * Everything is correct (default state).
+ *
+ * Warning:
+ * Warning is something suspicious, potentially wrong but something that
+ * can be ignored. For example in case of JDBC URL element, warning would
+ * be if specified host is not responding - it's warning because specified
+ * URL might be wrong. However at the same time URL might be right as only
+ * target host might be down.
+ *
+ * Error:
+ * Error represents unacceptable element content. For example in case of JDBC
+ * URL path, error would be empty element or element containing invalid URL.
  *
  * TODO: This should really be renamed to "severity"
  */

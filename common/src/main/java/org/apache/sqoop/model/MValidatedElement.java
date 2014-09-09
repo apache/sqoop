@@ -17,59 +17,70 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * Element that can be validated for correctness.
- *
- * Two severity levels are supported at the moment - warning and error.
- *
- * Warning:
- * Warning is something suspicious, potentially wrong but something that
- * can be ignored. For example in case of JDBC URL element, warning would
- * be if specified host is not responding - it's warning because specified
- * URL might be wrong. However at the same time URL might be right as only
- * target host might be down.
- *
- * Error:
- * Error represents unacceptable element content. For example in case of JDBC
- * URL path, error would be empty element or element containing invalid URL.
+ * Element that can have associated validation messages (0..N).
  */
 public abstract class MValidatedElement extends MNamedElement {
 
   /**
-   * Validation message.
-   *
-   * One element can have only one message regardless of the type.
+   * Validation messages.
    */
-  private String validationMessage;
+  private List<Message> validationMessages;
 
   /**
-   * Severity of the message.
+   * The worst status of all validation messages.
    */
   private Status validationStatus;
 
   public MValidatedElement(String name) {
     super(name);
-    // Everything is fine by default
-    this.validationStatus = Status.getDefault();
+    resetValidationMessages();
   }
 
   public MValidatedElement(MValidatedElement other) {
     super(other);
-    this.validationMessage = other.validationMessage;
     this.validationStatus = other.validationStatus;
+    this.validationMessages.addAll(other.validationMessages);
   }
 
   /**
-   * Set validation message and given severity.
+   * Reset this validated element back to default state.
    *
-   * @param status Message validation status
+   * Will remove all associated messages and validation status.
+   */
+  public void resetValidationMessages() {
+    this.validationStatus = Status.getDefault();
+    this.validationMessages = new LinkedList<Message>();
+  }
+
+  /**
+   * Set validation messages (override anything that has been set before).
+   *
    * @param msg Message itself
    */
-  public void setValidationMessage(Status status, String msg) {
-    this.validationMessage = msg;
-    this.validationStatus = status;
+  public void addValidationMessage(Message msg) {
+    this.validationMessages.add(msg);
+    this.validationStatus = Status.getWorstStatus(this.validationStatus, msg.getStatus());
+  }
+
+  /**
+   * Override all previously existing validation messages.
+   *
+   * @param messages
+   */
+  public void setValidationMessages(List<Message> messages) {
+    this.validationMessages = messages;
+    this.validationStatus = Status.getDefault();
+
+    for(Message message : messages ) {
+      this.validationStatus = Status.getWorstStatus(this.validationStatus, message.getStatus());
+    }
   }
 
   /**
@@ -77,20 +88,9 @@ public abstract class MValidatedElement extends MNamedElement {
    *
    * Return either associated message for given severity or null in case
    * that there is no message with given severity.
-   *
-   * @param status Message validation status
    */
-  public String getValidationMessage(Status status) {
-    return (validationStatus.equals(status)) ? validationMessage : null;
-  }
-
-  /**
-   * Return validation message.
-   *
-   * Return current validation message.
-   */
-  public String getValidationMessage() {
-    return validationMessage;
+  public List<Message> getValidationMessages() {
+    return this.validationMessages;
   }
 
   /**
@@ -98,41 +98,6 @@ public abstract class MValidatedElement extends MNamedElement {
    */
   public Status getValidationStatus() {
     return validationStatus;
-  }
-
-  /**
-   * Set error message for this element.
-   *
-   * @param errMsg Error message
-   */
-  public void setErrorMessage(String errMsg) {
-    setValidationMessage(Status.UNACCEPTABLE, errMsg);
-  }
-
-  /**
-   * Return error message associated with this element.
-   *
-   * @return Error message
-   */
-  public String getErrorMessage() {
-    return getValidationMessage(Status.UNACCEPTABLE);
-  }
-
-  /**
-   * Set warning message for this element.
-   *
-   * @param warnMsg Warning message
-   */
-  public void setWarningMessage(String warnMsg) {
-    setValidationMessage(Status.ACCEPTABLE, warnMsg);
-  }
-
-  /**
-   * Retrieve warning message associated with this element.
-   * @return
-   */
-  public String getWarningMessage() {
-    return getValidationMessage(Status.ACCEPTABLE);
   }
 
 }

@@ -33,6 +33,8 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MNamedElement;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MValidatedElement;
+import org.apache.sqoop.validation.Message;
+import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
 import java.util.List;
@@ -849,19 +851,24 @@ public final class FormFiller {
    * @param element Validated element
    */
   public static void printValidationMessage(MValidatedElement element, boolean includeInputPrefix) {
-    switch (element.getValidationStatus()) {
+    if(element.getValidationStatus() == Status.getDefault()) {
+      return;
+    }
+
+    for(Message message : element.getValidationMessages())
+    switch (message.getStatus()) {
       case UNACCEPTABLE:
         if (includeInputPrefix) {
-          errorMessage(element, element.getValidationMessage());
+          errorMessage(element, message.getMessage());
         } else {
-          errorMessage(element.getValidationMessage());
+          errorMessage(message.getMessage());
         }
         break;
       case ACCEPTABLE:
         if (includeInputPrefix) {
-          warningMessage(element, element.getValidationMessage());
+          warningMessage(element, message.getMessage());
         } else {
-          warningMessage(element.getValidationMessage());
+          warningMessage(message.getMessage());
         }
         break;
       default:

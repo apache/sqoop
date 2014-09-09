@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import static org.junit.Assert.*;
 
+import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
 
@@ -41,30 +42,27 @@ public class TestMValidatedElement {
    * Test for validation message and status
    */
   @Test
-  public void testValidationMessageStatus() {
+  public void testVarious() {
     MValidatedElement input = new MIntegerInput("input", false);
+
     // Default status
     assertEquals(Status.FINE, input.getValidationStatus());
-    // Set status and user message
-    input.setValidationMessage(Status.ACCEPTABLE, "MY_MESSAGE");
+
+    // Add a message
+    input.addValidationMessage(new Message(Status.ACCEPTABLE, "MY_MESSAGE"));
     assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
-    assertEquals("MY_MESSAGE", input.getValidationMessage());
-    // Check for null if status does not equal
-    assertNull(input.getValidationMessage(Status.FINE));
-    assertNull(input.getErrorMessage());
-    assertNotNull(input.getWarningMessage());
+    assertEquals(1, input.getValidationMessages().size());
+    assertEquals("MY_MESSAGE", input.getValidationMessages().get(0).getMessage());
+
+    // Reset
+    input.resetValidationMessages();
+    assertEquals(Status.FINE, input.getValidationStatus());
+    assertEquals(0, input.getValidationMessages().size());
+
     // Set unacceptable status
-    input.setValidationMessage(Status.UNACCEPTABLE, "MY_MESSAGE");
-    assertNotNull(input.getErrorMessage());
-    assertEquals("MY_MESSAGE", input.getErrorMessage());
-    assertNull(input.getWarningMessage());
-    // Set warning
-    input.setWarningMessage("WARN");
-    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
-    assertEquals("WARN", input.getValidationMessage());
-    // Unacceptable method
-    input.setErrorMessage("ERROR");
+    input.addValidationMessage(new Message(Status.UNACCEPTABLE, "MY_MESSAGE"));
     assertEquals(Status.UNACCEPTABLE, input.getValidationStatus());
-    assertEquals("ERROR", input.getValidationMessage());
+    assertEquals(1, input.getValidationMessages().size());
+    assertEquals("MY_MESSAGE", input.getValidationMessages().get(0).getMessage());
   }
 }

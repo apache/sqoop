@@ -33,6 +33,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
 import java.util.ArrayList;
@@ -163,7 +164,9 @@ public final class FormDisplayer {
           print("\n@|yellow %s|@\n", resourceString(Constants.RES_FORMDISPLAYER_FORM_WARNING));
           showMessage = false;
         }
-        FormFiller.warningMessage(form.getValidationMessage());
+        for(Message message : form.getValidationMessages()) {
+          FormFiller.warningMessage(message.getMessage());
+        }
       }
     }
   }
