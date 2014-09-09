@@ -18,10 +18,14 @@
 
 package org.apache.sqoop.mapreduce;
 
-import java.io.IOException;
-import java.util.Map;
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.ExportJobContext;
+import com.cloudera.sqoop.mapreduce.ExportJobBase;
+import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
@@ -30,11 +34,10 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.mapreduce.ExportJobBase;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
+import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Run an export using JDBC (JDBC-based ExportOutputFormat).
@@ -72,27 +75,37 @@ public class JdbcExportJob extends ExportJobBase {
       return;
     } else if (fileType == FileType.AVRO_DATA_FILE) {
       LOG.debug("Configuring for Avro export");
-      ConnManager connManager = context.getConnManager();
-      Map<String, Integer> columnTypeInts;
-      if (options.getCall() == null) {
-        columnTypeInts = connManager.getColumnTypes(
+      configureGenericRecordExportInputFormat(job, tableName);
+    } else if (fileType == FileType.PARQUET_FILE) {
+      LOG.debug("Configuring for Parquet export");
+      configureGenericRecordExportInputFormat(job, tableName);
+      FileSystem fs = FileSystem.get(job.getConfiguration());
+      String uri = "dataset:" + fs.makeQualified(getInputPath());
+      DatasetKeyInputFormat.configure(job).readFrom(uri);
+    }
+  }
+
+  private void configureGenericRecordExportInputFormat(Job job, String tableName)
+      throws IOException {
+    ConnManager connManager = context.getConnManager();
+    Map<String, Integer> columnTypeInts;
+    if (options.getCall() == null) {
+      columnTypeInts = connManager.getColumnTypes(
           tableName,
           options.getSqlQuery());
-      } else {
-        columnTypeInts = connManager.getColumnTypesForProcedure(
+    } else {
+      columnTypeInts = connManager.getColumnTypesForProcedure(
           options.getCall());
-      }
-      MapWritable columnTypes = new MapWritable();
-      for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
-        Text columnName = new Text(e.getKey());
-        Text columnText = new Text(
-            connManager.toJavaType(tableName, e.getKey(), e.getValue()));
-        columnTypes.put(columnName, columnText);
-      }
-      DefaultStringifier.store(job.getConfiguration(), columnTypes,
-          AvroExportMapper.AVRO_COLUMN_TYPES_MAP);
     }
-
+    MapWritable columnTypes = new MapWritable();
+    for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
+      Text columnName = new Text(e.getKey());
+      Text columnText = new Text(
+          connManager.toJavaType(tableName, e.getKey(), e.getValue()));
+      columnTypes.put(columnName, columnText);
+    }
+    DefaultStringifier.store(job.getConfiguration(), columnTypes,
+        AvroExportMapper.AVRO_COLUMN_TYPES_MAP);
   }
 
   @Override
@@ -101,10 +114,14 @@ public class JdbcExportJob extends ExportJobBase {
     if (isHCatJob) {
       return SqoopHCatUtilities.getInputFormatClass();
     }
-    if (fileType == FileType.AVRO_DATA_FILE) {
-      return AvroInputFormat.class;
+    switch (fileType) {
+      case AVRO_DATA_FILE:
+        return AvroInputFormat.class;
+      case PARQUET_FILE:
+        return DatasetKeyInputFormat.class;
+      default:
+        return super.getInputFormatClass();
     }
-    return super.getInputFormatClass();
   }
 
   @Override
@@ -117,6 +134,8 @@ public class JdbcExportJob extends ExportJobBase {
         return SequenceFileExportMapper.class;
       case AVRO_DATA_FILE:
         return AvroExportMapper.class;
+      case PARQUET_FILE:
+        return ParquetExportMapper.class;
       case UNKNOWN:
       default:
         return TextExportMapper.class;

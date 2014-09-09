@@ -58,7 +58,7 @@ public class ExportJobBase extends JobBase {
    * The (inferred) type of a file or group of files.
    */
   public enum FileType {
-    SEQUENCE_FILE, AVRO_DATA_FILE, HCATALOG_MANAGED_FILE, UNKNOWN
+    SEQUENCE_FILE, AVRO_DATA_FILE, HCATALOG_MANAGED_FILE, PARQUET_FILE, UNKNOWN
   }
 
   public static final Log LOG = LogFactory.getLog(
@@ -189,6 +189,9 @@ public class ExportJobBase extends JobBase {
     }
     if (header[0] == 'O' && header[1] == 'b' && header[2] == 'j') {
       return FileType.AVRO_DATA_FILE;
+    }
+    if (header[0] == 'P' && header[1] == 'A' && header[2] == 'R') {
+      return FileType.PARQUET_FILE;
     }
     return FileType.UNKNOWN;
   }
