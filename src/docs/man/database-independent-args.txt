@@ -16,16 +16,32 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--connection-manager (class-name)::
+  Specify connection manager class name (optional)
 
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
+--hadoop-mapred-home (dir)::
+  Override $HADOOP_MAPRED_HOME
 
---driver (class-name)::
-  Manually specify JDBC driver class to use
+--help::
+  Print usage instructions
 
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
+--password-file (file containing the password)::
+  Set authentication password in a file on the users home
+  directory with 400 permissions
+  (Note: This is very secure and a preferred way of entering credentials)
 
-include::database-independent-args.txt[]
+--password (password)::
+  Set authentication password
+  (Note: This is very insecure. You should use -P instead.)
+
+-P::
+  Prompt for user password
+
+--username (username)::
+  Set authentication username
+
+--verbose::
+  Print more information while working
+
+--hadoop-home (dir)::
+  Deprecated. Override $HADOOP_HOME

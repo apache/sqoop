@@ -1,4 +1,6 @@
 ////
+  Copyright 2011 The Apache Software Foundation
+
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -16,16 +18,49 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sqoop-import-mainframe(1)
+=========================
 
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
+NAME
+----
+sqoop-import-mainframe - Import mainframe sequential datasets to HDFS
 
---driver (class-name)::
-  Manually specify JDBC driver class to use
+SYNOPSIS
+--------
+'sqoop-import-mainframe' <generic-options> <tool-options>
 
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
+'sqoop import-mainframe' <generic-options> <tool-options>
+
+DESCRIPTION
+-----------
+
+include::../user/import-mainframe-purpose.txt[]
+
+OPTIONS
+-------
+
+The +--connect+ and +--dataset+ options are required.
+
+Mainframe connection and common options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+include::mainframe-connection-args.txt[]
 
 include::database-independent-args.txt[]
+
+include::import-common-args.txt[]
+
+include::hive-args.txt[]
+
+include::hbase-args.txt[]
+
+include::input-args.txt[]
+
+include::output-args.txt[]
+
+include::codegen-args.txt[]
+
+ENVIRONMENT
+-----------
+
+See 'sqoop(1)'

@@ -1,0 +1,243 @@
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
++sqoop-import-mainframe+
+------------------------
+
+Purpose
+~~~~~~~
+
+include::import-mainframe-purpose.txt[]
+
+Syntax
+~~~~~~
+
+----
+$ sqoop import-mainframe (generic-args) (import-args)
+$ sqoop-import-mainframe (generic-args) (import-args)
+----
+
+While the Hadoop generic arguments must precede any import arguments,
+you can type the import arguments in any order with respect to one
+another.
+
+include::mainframe-common-args.txt[]
+
+include::connecting-to-mainframe.txt[]
+
+.Import control arguments:
+[grid="all"]
+`---------------------------------`--------------------------------------
+Argument                          Description
+-------------------------------------------------------------------------
++\--as-avrodatafile+              Imports data to Avro Data Files
++\--as-sequencefile+              Imports data to SequenceFiles
++\--as-textfile+                  Imports data as plain text (default)
++\--as-parquetfile+               Imports data to Parquet Files
++\--delete-target-dir+            Delete the import target directory\
+                                  if it exists
++-m,\--num-mappers <n>+           Use 'n' map tasks to import in parallel
++\--target-dir <dir>+             HDFS destination dir
++\--warehouse-dir <dir>+          HDFS parent for table destination
++-z,\--compress+                  Enable compression
++\--compression-codec <c>+        Use Hadoop codec (default gzip)
+-------------------------------------------------------------------------
+
+Selecting the Files to Import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can use the +\--dataset+ argument to specify a partitioned dataset name.
+All sequential datasets in the partitioned dataset will be imported.
+
+Controlling Parallelism
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop imports data in parallel by making multiple ftp connections to the
+mainframe to transfer multiple files simultaneously.  You can specify the
+number of map tasks (parallel processes) to use to perform the import by
+using the +-m+ or +\--num-mappers+ argument. Each of these arguments
+takes an integer value which corresponds to the degree of parallelism
+to employ. By default, four tasks are used. You can adjust this value to
+maximize the data transfer rate from the mainframe.
+
+include::distributed-cache.txt[]
+
+Controlling the Import Process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, Sqoop will import all sequential files in a partitioned dataset
++pds+ to a directory named +pds+ inside your home directory in HDFS. For
+example, if your username is +someuser+, then the import tool will write to
++/user/someuser/pds/(files)+. You can adjust the parent directory of
+the import with the +\--warehouse-dir+ argument. For example:
+
+----
+$ sqoop import-mainframe --connnect <host> --dataset foo --warehouse-dir /shared \
+    ...
+----
+
+This command would write to a set of files in the +/shared/pds/+ directory.
+
+You can also explicitly choose the target directory, like so:
+
+----
+$ sqoop import-mainframe --connnect <host> --dataset foo --target-dir /dest \
+    ...
+----
+
+This will import the files into the +/dest+ directory. +\--target-dir+ is
+incompatible with +\--warehouse-dir+.
+
+By default, imports go to a new target location. If the destination directory
+already exists in HDFS, Sqoop will refuse to import and overwrite that
+directory's contents.
+
+File Formats
+^^^^^^^^^^^^
+
+By default, each record in a dataset is stored
+as a text record with a newline at the end.  Each record is assumed to contain
+a single text field with the name DEFAULT_COLUMN.
+When Sqoop imports data to HDFS, it generates a Java class which can
+reinterpret the text files that it creates.
+
+You can also import mainframe records to Sequence, Avro, or Parquet files.
+
+By default, data is not compressed. You can compress your data by
+using the deflate (gzip) algorithm with the +-z+ or +\--compress+
+argument, or specify any Hadoop compression codec using the
++\--compression-codec+ argument.
+
+include::output-args.txt[]
+
+Since mainframe record contains only one field, importing to delimited files
+will not contain any field delimiter.  However, the field may be enclosed with
+enclosing character or escaped by an escaping character.
+
+include::input-args.txt[]
+
+When Sqoop imports data to HDFS, it generates a Java class which can
+reinterpret the text files that it creates when doing a
+delimited-format import. The delimiters are chosen with arguments such
+as +\--fields-terminated-by+; this controls both how the data is
+written to disk, and how the generated +parse()+ method reinterprets
+this data. The delimiters used by the +parse()+ method can be chosen
+independently of the output arguments, by using
++\--input-fields-terminated-by+, and so on. This is useful, for example, to
+generate classes which can parse records created with one set of
+delimiters, and emit the records to a different set of files using a
+separate set of delimiters.
+
+include::hive-args.txt[]
+
+include::hive.txt[]
+
+include::hbase-args.txt[]
+include::hbase.txt[]
+
+include::accumulo-args.txt[]
+include::accumulo.txt[]
+
+include::codegen-args.txt[]
+
+As mentioned earlier, a byproduct of importing a table to HDFS is a
+class which can manipulate the imported data.
+You should use this class in your subsequent
+MapReduce processing of the data.
+
+The class is typically named after the partitioned dataset name; a
+partitioned dataset named +foo+ will
+generate a class named +foo+. You may want to override this class
+name. For example, if your partitioned dataset
+is named +EMPLOYEES+, you may want to
+specify +\--class-name Employee+ instead. Similarly, you can specify
+just the package name with +\--package-name+. The following import
+generates a class named +com.foocorp.SomePDS+:
+
+----
+$ sqoop import-mainframe --connect <host> --dataset SomePDS --package-name com.foocorp
+----
+
+The +.java+ source file for your class will be written to the current
+working directory when you run +sqoop+. You can control the output
+directory with +\--outdir+. For example, +\--outdir src/generated/+.
+
+The import process compiles the source into +.class+ and +.jar+ files;
+these are ordinarily stored under +/tmp+. You can select an alternate
+target directory with +\--bindir+. For example, +\--bindir /scratch+.
+
+If you already have a compiled class that can be used to perform the
+import and want to suppress the code-generation aspect of the import
+process, you can use an existing jar and class by
+providing the +\--jar-file+ and +\--class-name+ options. For example:
+
+----
+$ sqoop import-mainframe --dataset SomePDS --jar-file mydatatypes.jar \
+    --class-name SomePDSType
+----
+
+This command will load the +SomePDSType+ class out of +mydatatypes.jar+.
+
+Additional Import Configuration Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are some additional properties which can be configured by modifying
++conf/sqoop-site.xml+. Properties can be specified the same as in Hadoop
+configuration files, for example:
+
+----
+  <property>
+    <name>property.name</name>
+    <value>property.value</value>
+  </property>
+----
+
+They can also be specified on the command line in the generic arguments, for
+example:
+
+----
+sqoop import -D property.name=property.value ...
+----
+
+Example Invocations
+~~~~~~~~~~~~~~~~~~~
+
+The following examples illustrate how to use the import tool in a variety
+of situations.
+
+A basic import of all sequential files in a partitioned dataset named
++EMPLOYEES+ in the mainframe host z390:
+
+----
+$ sqoop import-mainframe --connect z390 --dataset EMPLOYEES \
+    --username SomeUser -P
+Enter password: (hidden)
+----
+
+Controlling the import parallelism (using 8 parallel tasks):
+
+----
+$ sqoop import-mainframe --connect z390 --dataset EMPLOYEES \
+    --username SomeUser --password-file mypassword -m 8
+----
+
+Importing the data to Hive:
+
+----
+$ sqoop import-mainframe --connect z390 --dataset EMPLOYEES \
+    --hive-import
+----

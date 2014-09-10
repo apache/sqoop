@@ -1,4 +1,3 @@
-
 ////
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -19,14 +18,14 @@
 
 .Validation arguments <<validation,More Details>>
 [grid="all"]
-`----------------------------------------`-------------------------------------
-Argument                                  Description
--------------------------------------------------------------------------------
-+\--validate+                             Enable validation of data copied, \
-                                          supports single table copy only.  \
-+\--validator <class-name>+               Specify validator class to use.
-+\--validation-threshold <class-name>+    Specify validation threshold class \
-                                          to use.
+`-------------------------------------------`-------------------------------------
+Argument                                    Description
+----------------------------------------------------------------------------------
++\--validate+                               Enable validation of data copied, \
+                                            supports single table copy only.
++\--validator <class-name>+                 Specify validator class to use.
++\--validation-threshold <class-name>+      Specify validation threshold class \
+                                            to use.
 +\--validation-failurehandler <class-name>+ Specify validation failure \
-                                          handler class to use.
--------------------------------------------------------------------------------
+                                            handler class to use.
+----------------------------------------------------------------------------------

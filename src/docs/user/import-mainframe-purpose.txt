@@ -16,16 +16,8 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
-
---driver (class-name)::
-  Manually specify JDBC driver class to use
-
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
-
-include::database-independent-args.txt[]
+The +import-mainframe+ tool imports all sequential datasets
+in a partitioned dataset(PDS) on a mainframe to HDFS.  A PDS is
+akin to a directory on the open systems.
+The records in a dataset can contain only character data.
+Records will be stored with the entire record as a single text field.

@@ -16,16 +16,10 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Connection arguments
 
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
+--connect (hostname)::
+  Specify mainframe host name (required)
 
---driver (class-name)::
-  Manually specify JDBC driver class to use
-
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
-
-include::database-independent-args.txt[]
+--dataset (partitioned dataset name)::
+  Specify a partitioned dataset name

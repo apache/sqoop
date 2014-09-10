@@ -16,16 +16,15 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Controlling Distributed Cache
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
-
---driver (class-name)::
-  Manually specify JDBC driver class to use
-
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
-
-include::database-independent-args.txt[]
+Sqoop will copy the jars in $SQOOP_HOME/lib folder to job cache every
+time when start a Sqoop job. When launched by Oozie this is unnecessary
+since Oozie use its own Sqoop share lib which keeps Sqoop dependencies
+in the distributed cache. Oozie will do the localization on each
+worker node for the Sqoop dependencies only once during the first Sqoop
+job and reuse the jars on worker node for subsquencial jobs. Using
+option +--skip-dist-cache+ in Sqoop command when launched by Oozie will
+skip the step which Sqoop copies its dependencies to job cache and save
+massive I/O.

@@ -262,6 +262,10 @@ public class SqoopOptions implements Cloneable {
   // "key" column for the merge operation.
   @StoredAsProperty("merge.key.col") private String mergeKeyCol;
 
+  // Dataset name for mainframe import tool
+  @StoredAsProperty("mainframe.input.dataset.name")
+  private String mainframeInputDatasetName;
+
   // Accumulo home directory
   private String accumuloHome; // not serialized to metastore.
   // Zookeeper home directory
@@ -2162,6 +2166,21 @@ public class SqoopOptions implements Cloneable {
   /** Return the name of the column used to merge an old and new dataset. */
   public String getMergeKeyCol() {
     return this.mergeKeyCol;
+  }
+
+  /**
+   * Set the mainframe dataset name.
+   */
+  public void setMainframeInputDatasetName(String name) {
+    mainframeInputDatasetName = name;
+    tableName = name;
+  }
+
+  /**
+   * Return the mainframe dataset name.
+   */
+  public String getMainframeInputDatasetName() {
+    return mainframeInputDatasetName;
   }
 
   public static String getAccumuloHomeDefault() {

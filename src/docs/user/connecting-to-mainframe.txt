@@ -1,0 +1,66 @@
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+Connecting to a Mainframe
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sqoop is designed to import mainframe datasets into HDFS. To do
+so, you must specify a mainframe host name in the Sqoop +\--connect+ argument.
+
+----
+$ sqoop import-mainframe --connect z390
+----
+
+This will connect to the mainframe host z390 via ftp.
+
+You might need to authenticate against the mainframe host to
+access it. You can use the +\--username+ to supply a username to the mainframe.
+Sqoop provides couple of different ways to supply a password,
+secure and non-secure, to the mainframe which is detailed below.
+
+.Secure way of supplying password to the mainframe
+You should save the password in a file on the users home directory with 400
+permissions and specify the path to that file using the *+--password-file+*
+argument, and is the preferred method of entering credentials. Sqoop will
+then read the password from the file and pass it to the MapReduce cluster
+using secure means with out exposing the password in the job configuration.
+The file containing the password can either be on the Local FS or HDFS.
+
+Example:
+
+----
+$ sqoop import-mainframe --connect z390 \
+    --username david --password-file ${user.home}/.password
+----
+
+Another way of supplying passwords is using the +-P+ argument which will
+read a password from a console prompt.
+
+.Non-secure way of passing password
+
+WARNING: The +\--password+ parameter is insecure, as other users may
+be able to read your password from the command-line arguments via
+the output of programs such as `ps`. The *+-P+* argument is the preferred
+method over using the +\--password+ argument. Credentials may still be
+transferred between nodes of the MapReduce cluster using insecure means.
+
+Example:
+
+----
+$ sqoop import-mainframe --connect z390 --username david --password 12345
+----

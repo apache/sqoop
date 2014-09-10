@@ -1,4 +1,3 @@
-
 ////
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -7,9 +6,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,24 +16,10 @@
   limitations under the License.
 ////
 
-
-Import control options
-~~~~~~~~~~~~~~~~~~~~~~
+include::import-common-args.txt[]
 
 --append::
   Append data to an existing HDFS dataset
-
---as-avrodatafile::
-  Imports data to Avro Data Files
-
---as-sequencefile::
-  Imports data to SequenceFiles
-
---as-textfile::
-  Imports data as plain text (default)
-
---as-parquetfile::
-  Imports data to Parquet Files
 
 --boundary-query (query)::
   Using following query to select minimal and maximal value of '--split-by' column for creating splits
@@ -51,10 +36,6 @@ Import control options
 --inline-lob-limit (n)::
   Set the maximum size for an inline LOB
 
---num-mappers (n)::
--m::
-  Use 'n' map tasks to import in parallel
-
 --query (statement)::
   Imports the results of +statement+ instead of a table
 
@@ -64,23 +45,9 @@ Import control options
 --table (table-name)::
   The table to import
 
---target-dir (dir)::
-  Explicit HDFS target directory for the import.
-
---warehouse-dir (dir)::
-  Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+
-
 --where (clause)::
   Import only the rows for which _clause_ is true.
   e.g.: `--where "user_id > 400 AND hidden == 0"`
-
---compress::
--z::
-  Uses gzip (or, alternatively, the codec specified by +\--compression-codec+,
-  if set) to compress data as it is written to HDFS
-
---compression-codec (codec)::
-  Uses the Hadoop +codec+ class to compress data as it is written to HDFS.
 
 --null-string::
   The string to be written for a null value for string columns

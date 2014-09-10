@@ -6,9 +6,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -206,18 +206,7 @@ multi-column indices. If your table has no index column, or has a
 multi-column key, then you must also manually choose a splitting
 column.
 
-Controlling Distributed Cache
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Sqoop will copy the jars in $SQOOP_HOME/lib folder to job cache every
-time when start a Sqoop job. When launched by Oozie this is unnecessary
-since Oozie use its own Sqoop share lib which keeps Sqoop dependencies
-in the distributed cache. Oozie will do the localization on each
-worker node for the Sqoop dependencies only once during the first Sqoop
-job and reuse the jars on worker node for subsquencial jobs. Using
-option +--skip-dist-cache+ in Sqoop command when launched by Oozie will
-skip the step which Sqoop copies its dependencies to job cache and save
-massive I/O.
+include::distributed-cache.txt[]
 
 Controlling the Import Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

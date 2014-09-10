@@ -16,16 +16,36 @@
   limitations under the License.
 ////
 
-Database connection and common options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
---connect (jdbc-uri)::
-  Specify JDBC connect string (required)
+Import control options
+~~~~~~~~~~~~~~~~~~~~~~
 
---driver (class-name)::
-  Manually specify JDBC driver class to use
+--as-textfile::
+  Imports data as plain text (default)
 
---connection-param-file (filename)::
-  Optional properties file that provides connection parameters
+--as-avrodatafile::
+  Imports data to Avro Data Files
 
-include::database-independent-args.txt[]
+--as-sequencefile::
+  Imports data to SequenceFiles
+
+--as-parquetfile::
+  Imports data to Parquet Files
+
+--num-mappers (n)::
+-m::
+  Use 'n' map tasks to import in parallel
+
+--target-dir (dir)::
+  Explicit HDFS target directory for the import.
+
+--warehouse-dir (dir)::
+  Tables are uploaded to the HDFS path +/warehouse/dir/(tablename)/+
+
+--compress::
+-z::
+  Uses gzip (or, alternatively, the codec specified by +\--compression-codec+,
+  if set) to compress data as it is written to HDFS
+
+--compression-codec (codec)::
+  Uses the Hadoop +codec+ class to compress data as it is written to HDFS.

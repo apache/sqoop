@@ -84,6 +84,8 @@ public abstract class SqoopTool {
         "Import a table from a database to HDFS");
     registerTool("import-all-tables", ImportAllTablesTool.class,
         "Import tables from a database to HDFS");
+    registerTool("import-mainframe", MainframeImportTool.class,
+            "Import datasets from a mainframe server to HDFS");
     registerTool("help", HelpTool.class, "List available commands");
     registerTool("list-databases", ListDatabasesTool.class,
         "List available databases on a server");

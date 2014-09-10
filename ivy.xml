@@ -170,10 +170,14 @@ under the License.
       rev="${commons-cli.version}" conf="common->default"/>
     <dependency org="commons-logging" name="commons-logging"
       rev="${commons-logging.version}" conf="common->default"/>
+    <dependency org="commons-net" name="commons-net"
+      rev="${commons-net.version}" conf="common->default"/>
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
+    <dependency org="org.mockito" name="mockito-all"
+      rev="${mockito-all.version}" conf="test->default"/>
     <!-- We're only using H2 for tests as it supports stored
          procedures; once we move to HSQLDB 2.x we can drop
          this -->
