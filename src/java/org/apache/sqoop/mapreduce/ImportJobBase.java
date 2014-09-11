@@ -140,6 +140,18 @@ public class ImportJobBase extends JobBase {
             .set(AvroJob.OUTPUT_CODEC, DataFileConstants.DEFLATE_CODEC);
         }
       }
+
+      if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+        if (codecName != null) {
+          Configuration conf = job.getConfiguration();
+          String shortName = CodecMap.getCodecShortNameByName(codecName, conf);
+          if (!shortName.equalsIgnoreCase("default") &&
+              !shortName.equalsIgnoreCase("snappy")) {
+            // TODO: SQOOP-1391 More compression codec support
+            LOG.warn("Will use snappy as compression codec instead");
+          }
+        }
+      }
     }
 
     Path outputPath = context.getDestination();
