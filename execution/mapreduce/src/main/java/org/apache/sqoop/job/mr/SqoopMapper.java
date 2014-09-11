@@ -144,6 +144,9 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     private void writeContent() {
       try {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Extracted data: " + data.getTextData());
+        }
         dataOut.setString(data.getTextData());
         context.write(dataOut, NullWritable.get());
       } catch (Exception e) {

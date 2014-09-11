@@ -49,9 +49,7 @@ public class HdfsUtils {
   public static Path [] getOutputMapreduceFiles(FileSystem fs, String directory) throws FileNotFoundException, IOException {
     LinkedList<Path> files = new LinkedList<Path>();
     for (FileStatus fileStatus : fs.listStatus(new Path(directory))) {
-      if (fileStatus.getPath().getName().startsWith("part-")) {
-        files.add(fileStatus.getPath());
-      }
+      files.add(fileStatus.getPath());
     }
     return files.toArray(new Path[files.size()]);
   }

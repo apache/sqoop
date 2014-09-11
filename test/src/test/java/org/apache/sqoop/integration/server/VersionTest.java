@@ -32,14 +32,14 @@ public class VersionTest extends TomcatTestCase {
 
   @Test
   public void testVersion() {
-//    VersionRequest versionRequest = new VersionRequest();
-//    VersionBean versionBean = versionRequest.doGet(getServerUrl());
-//
-//    assertEquals(versionBean.getVersion(), VersionInfo.getVersion());
-//    assertEquals(versionBean.getDate(), VersionInfo.getDate());
-//    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
-//    assertEquals(versionBean.getUser(), VersionInfo.getUser());
-//    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
+    VersionRequest versionRequest = new VersionRequest();
+    VersionBean versionBean = versionRequest.doGet(getServerUrl());
+
+    assertEquals(versionBean.getVersion(), VersionInfo.getVersion());
+    assertEquals(versionBean.getDate(), VersionInfo.getDate());
+    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
+    assertEquals(versionBean.getUser(), VersionInfo.getUser());
+    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
   }
 
 }

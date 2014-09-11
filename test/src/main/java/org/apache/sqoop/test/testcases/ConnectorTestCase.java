@@ -21,8 +21,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
-import org.apache.sqoop.connector.hdfs.configuration.StorageType;
 import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
@@ -125,7 +125,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    *
    * @param connection MConnection object to fill
    */
-  protected void fillConnectionForm(MConnection connection) {
+  protected void fillRdbmsConnectionForm(MConnection connection) {
     MFormList forms = connection.getConnectorPart();
     forms.getStringInput("connection.jdbcDriver").setValue(provider.getJdbcDriver());
     forms.getStringInput("connection.connectionString").setValue(provider.getConnectionUrl());
@@ -138,12 +138,10 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * will be set to default test value.
    *
    * @param job MJOb object to fill
-   * @param storage Storage type that should be set
    * @param output Output type that should be set
    */
-  protected void fillOutputForm(MJob job, StorageType storage, OutputFormat output) {
-    MFormList forms = job.getFrameworkPart();
-    forms.getEnumInput("output.storageType").setValue(storage);
+  protected void fillOutputForm(MJob job, OutputFormat output) {
+    MFormList forms = job.getConnectorPart(Direction.TO);
     forms.getEnumInput("output.outputFormat").setValue(output);
     forms.getStringInput("output.outputDirectory").setValue(getMapreduceDirectory());
   }
@@ -154,7 +152,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job MJOb object to fill
    */
   protected void fillInputForm(MJob job) {
-    MFormList forms = job.getFrameworkPart();
+    MFormList forms = job.getConnectorPart(Direction.FROM);
     forms.getStringInput("input.inputDirectory").setValue(getMapreduceDirectory());
   }
 

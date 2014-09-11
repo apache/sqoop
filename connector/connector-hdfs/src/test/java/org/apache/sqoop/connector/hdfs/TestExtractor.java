@@ -97,9 +97,8 @@ public class TestExtractor extends TestHdfsBase {
   public void testExtractor() throws Exception {
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
+    final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
     ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
-      private long index = 1L;
-
       @Override
       public void writeArrayRecord(Object[] array) {
         throw new AssertionError("Should not be writing array.");
@@ -107,7 +106,23 @@ public class TestExtractor extends TestHdfsBase {
 
       @Override
       public void writeStringRecord(String text) {
-        Assert.assertEquals(index + "," + index + ".0,'" + index++ + "'", text);
+        int index;
+        String[] components = text.split(",");
+        Assert.assertEquals(3, components.length);
+
+        // Value should take on the form <integer>,<float>,'<integer>'
+        // for a single index. IE: 1,1.0,'1'.
+        try {
+          index = Integer.parseInt(components[0]);
+        } catch (NumberFormatException e) {
+          throw new AssertionError("Could not parse int for " + components[0]);
+        }
+
+        Assert.assertFalse(visited[index - 1]);
+        Assert.assertEquals(String.valueOf((double)index), components[1]);
+        Assert.assertEquals("'" + index + "'", components[2]);
+
+        visited[index - 1] = true;
       }
 
       @Override
@@ -121,5 +136,9 @@ public class TestExtractor extends TestHdfsBase {
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));
 
     extractor.extract(context, connConf, jobConf, partition);
+
+    for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
+      Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+    }
   }
 }

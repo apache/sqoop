@@ -15,14 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.hdfs.configuration;
+package org.apache.sqoop.validation.validators;
+
+import org.apache.sqoop.validation.Status;
 
 /**
- * Various storage types that Sqoop is supporting
+ * String validator to verify presence of a sub string (provided as a String argument)
  */
-public enum StorageType {
-  /**
-   * Direct HDFS import
-   */
-  HDFS,
+public class NullOrContains extends AbstractValidator<String> {
+  @Override
+  public void validate(String str) {
+    if(str != null && !str.contains(getStringArgument())) {
+      addMessage(Status.UNACCEPTABLE, "String must contain substring: " + getStringArgument());
+    }
+  }
 }

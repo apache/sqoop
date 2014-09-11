@@ -23,7 +23,7 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
-import org.apache.sqoop.validation.validators.Contains;
+import org.apache.sqoop.validation.validators.NullOrContains;
 
 /**
  *
@@ -36,7 +36,7 @@ public class FromTableForm {
   @Input(size = 50)
   public String tableName;
 
-  @Input(size = 2000, validators = {@Validator(value = Contains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)})
+  @Input(size = 2000, validators = {@Validator(value = NullOrContains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)})
   public String sql;
 
   @Input(size = 50)

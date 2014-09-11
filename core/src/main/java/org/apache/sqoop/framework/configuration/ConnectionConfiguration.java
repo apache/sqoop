@@ -26,5 +26,5 @@ import org.apache.sqoop.model.Form;
 @ConfigurationClass
 public class ConnectionConfiguration {
 
-  @Form SecurityForm security;
+  @Form SecurityForm security = new SecurityForm();
 }

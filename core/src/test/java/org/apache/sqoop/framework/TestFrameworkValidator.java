@@ -17,7 +17,13 @@
  */
 package org.apache.sqoop.framework;
 
-//import org.apache.sqoop.framework.configuration.OutputCompression;
+import org.apache.sqoop.framework.configuration.ConnectionConfiguration;
+import org.apache.sqoop.framework.configuration.JobConfiguration;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ValidationRunner;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,134 +33,48 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestFrameworkValidator {
 
-//  FrameworkValidator validator;
-//
-//  @Before
-//  public void setUp() {
-//    validator = new FrameworkValidator();
-//  }
-//
-//  @Test
-//  public void testConnectionValidation() {
-//    ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();
-//
-//    Validation validation = validator.validateConnection(connectionConfiguration);
-//    assertEquals(Status.FINE, validation.getStatus());
-//    assertEquals(0, validation.getMessages().size());
-//  }
-//
-//  @Test
-//  public void testExportJobValidation() {
-//    ExportJobConfiguration configuration;
-//    Validation validation;
-//
-//    // Empty form is not allowed
-//    configuration = new ExportJobConfiguration();
-//    validation = validator.validateJob(MJob.Type.EXPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("input.inputDirectory")));
-//
-//    // Explicitly setting extractors and loaders
-//    configuration = new ExportJobConfiguration();
-//    configuration.input.inputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 3;
-//    configuration.throttling.loaders = 3;
-//
-//    validation = validator.validateJob(MJob.Type.EXPORT, configuration);
-//    assertEquals(Status.FINE, validation.getStatus());
-//    assertEquals(0, validation.getMessages().size());
-//
-//    // Negative and zero values for extractors and loaders
-//    configuration = new ExportJobConfiguration();
-//    configuration.input.inputDirectory = "/czech/republic";
+  FrameworkValidator validator;
+
+  @Before
+  public void setUp() {
+    validator = new FrameworkValidator();
+  }
+
+  @Test
+  public void testConnectionValidation() {
+    ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();
+    ValidationRunner runner = new ValidationRunner();
+    ValidationResult result = runner.validate(connectionConfiguration);
+    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(0, result.getMessages().size());
+  }
+
+  @Test
+  public void testJobValidation() {
+    ValidationRunner runner = new ValidationRunner();
+    ValidationResult result;
+    JobConfiguration configuration;
+
+    // Empty form is allowed
+    configuration = new JobConfiguration();
+    result = runner.validate(configuration);
+    assertEquals(Status.FINE, result.getStatus());
+
+    // Explicitly setting extractors and loaders
+    configuration = new JobConfiguration();
+    configuration.throttling.extractors = 3;
+    configuration.throttling.loaders = 3;
+    result = runner.validate(configuration);
+    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(0, result.getMessages().size());
+
+    // Negative and zero values for extractors and loaders
+//    configuration = new JobConfiguration();
 //    configuration.throttling.extractors = 0;
 //    configuration.throttling.loaders = -1;
-//
-//    validation = validator.validateJob(MJob.Type.EXPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.extractors")));
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.loaders")));
-//  }
-//
-//
-//  @Test
-//  public void testImportJobValidation() {
-//    ImportJobConfiguration configuration;
-//    Validation validation;
-//
-//    // Empty form is not allowed
-//    configuration = new ImportJobConfiguration();
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.outputDirectory")));
-//
-//    // Explicitly setting extractors and loaders
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 3;
-//    configuration.throttling.loaders = 3;
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.FINE, validation.getStatus());
-//    assertEquals(0, validation.getMessages().size());
-//
-//    // Negative and zero values for extractors and loaders
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 0;
-//    configuration.throttling.loaders = -1;
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.extractors")));
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("throttling.loaders")));
-//
-//    // specifying both compression as well as customCompression is
-//    // unacceptable
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 2;
-//    configuration.throttling.loaders = 2;
-//    configuration.output.compression = OutputCompression.BZIP2;
-//    configuration.output.customCompression = "some.compression.codec";
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
-//
-//    // specifying a customCompression is fine
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 2;
-//    configuration.throttling.loaders = 2;
-//    configuration.output.compression = OutputCompression.CUSTOM;
-//    configuration.output.customCompression = "some.compression.codec";
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.FINE, validation.getStatus());
-//
-//    // specifying a customCompression without codec name is unacceptable
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 2;
-//    configuration.throttling.loaders = 2;
-//    configuration.output.compression = OutputCompression.CUSTOM;
-//    configuration.output.customCompression = "";
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
-//
-//    configuration = new ImportJobConfiguration();
-//    configuration.output.outputDirectory = "/czech/republic";
-//    configuration.throttling.extractors = 2;
-//    configuration.throttling.loaders = 2;
-//    configuration.output.compression = OutputCompression.CUSTOM;
-//    configuration.output.customCompression = null;
-//
-//    validation = validator.validateJob(MJob.Type.IMPORT, configuration);
-//    assertEquals(Status.UNACCEPTABLE, validation.getStatus());
-//    assertTrue(validation.getMessages().containsKey(new Validation.FormInput("output.compression")));
-//
-//  }
+//    result = runner.validate(configuration);
+//    assertEquals(Status.FINE, result.getStatus());
+//    assertTrue(result.getMessages().containsKey("throttling.extractors"));
+//    assertTrue(result.getMessages().containsKey("throttling.loaders"));
+  }
 }

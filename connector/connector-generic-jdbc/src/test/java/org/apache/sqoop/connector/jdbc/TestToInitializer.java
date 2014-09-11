@@ -27,6 +27,8 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ValidationRunner;
 
 public class TestToInitializer extends TestCase {
   private final String schemaName;
@@ -274,23 +276,23 @@ public class TestToInitializer extends TestCase {
     // the stage table
     jobConf.toTable.tableName = schemalessTableName;
     jobConf.toTable.clearStageTable = false;
-    GenericJdbcValidator validator = new GenericJdbcValidator();
-    Validation validation = validator.validateJob(jobConf);
+    ValidationRunner validationRunner = new ValidationRunner();
+    ValidationResult result = validationRunner.validate(jobConf);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
       Status.UNACCEPTABLE,
-      validation.getStatus());
-    assertTrue(validation.getMessages().containsKey(
-      new Validation.FormInput("toTable")));
+        result.getStatus());
+    assertTrue(result.getMessages().containsKey(
+      "toTable"));
 
     jobConf.toTable.clearStageTable = true;
-    validation = validator.validateJob(jobConf);
+    result = validationRunner.validate(jobConf);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
       Status.UNACCEPTABLE,
-      validation.getStatus());
-    assertTrue(validation.getMessages().containsKey(
-      new Validation.FormInput("toTable")));
+        result.getStatus());
+    assertTrue(result.getMessages().containsKey(
+      "toTable"));
   }
 
   @SuppressWarnings("unchecked")
@@ -304,12 +306,12 @@ public class TestToInitializer extends TestCase {
     jobConf.toTable.stageTableName = stageTableName;
     jobConf.toTable.sql = "";
 
-    GenericJdbcValidator validator = new GenericJdbcValidator();
-    Validation validation = validator.validateJob(jobConf);
+    ValidationRunner validationRunner = new ValidationRunner();
+    ValidationResult result = validationRunner.validate(jobConf);
     assertEquals("Stage table name cannot be specified without specifying " +
-      "table name", Status.UNACCEPTABLE, validation.getStatus());
-    assertTrue(validation.getMessages().containsKey(
-      new Validation.FormInput("toTable")));
+      "table name", Status.UNACCEPTABLE, result.getStatus());
+    assertTrue(result.getMessages().containsKey(
+      "toTable"));
   }
 
   @SuppressWarnings("unchecked")

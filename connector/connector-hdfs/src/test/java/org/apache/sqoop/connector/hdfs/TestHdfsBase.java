@@ -30,6 +30,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.UUID;
 
 public class TestHdfsBase {
 
@@ -66,7 +67,7 @@ public class TestHdfsBase {
 
     int index = 1;
     for (int fi = 0; fi < numberOfFiles; fi++) {
-      String fileName = indir + "/" + "part-r-" + padZeros(fi, 5) + extension;
+      String fileName = indir + "/" + UUID.randomUUID() + extension;
       OutputStream filestream = FileUtils.create(fileName);
       BufferedWriter filewriter;
       if (codec != null) {
@@ -105,8 +106,7 @@ public class TestHdfsBase {
 
     int index = 1;
     for (int fi = 0; fi < numberOfFiles; fi++) {
-      Path filepath = new Path(indir,
-          "part-r-" + padZeros(fi, 5) + ".seq");
+      Path filepath = new Path(indir,UUID.randomUUID() + ".seq");
       SequenceFile.Writer filewriter;
       if (codec != null) {
         filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
@@ -127,13 +127,5 @@ public class TestHdfsBase {
 
       filewriter.close();
     }
-  }
-
-  private String padZeros(int number, int digits) {
-    String string = String.valueOf(number);
-    for (int i = (digits - string.length()); i > 0; i--) {
-      string = "0" + string;
-    }
-    return string;
   }
 }

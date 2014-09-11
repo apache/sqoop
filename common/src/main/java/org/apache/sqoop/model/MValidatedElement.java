@@ -45,6 +45,7 @@ public abstract class MValidatedElement extends MNamedElement {
 
   public MValidatedElement(MValidatedElement other) {
     super(other);
+    resetValidationMessages();
     this.validationStatus = other.validationStatus;
     this.validationMessages.addAll(other.validationMessages);
   }
