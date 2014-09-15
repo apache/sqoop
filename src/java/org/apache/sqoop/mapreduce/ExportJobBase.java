@@ -39,7 +39,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.PerfCounters;
+
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
@@ -47,6 +49,7 @@ import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.util.ExportException;
+
 import org.apache.sqoop.validation.*;
 
 /**
@@ -327,7 +330,16 @@ public class ExportJobBase extends JobBase {
         + context.getConnManager().getClass().getName()
         + ". Please remove the parameter --direct");
     }
-
+    if (options.getAccumuloTable() != null && options.isDirect()
+        && !cmgr.isDirectModeAccumuloSupported()) {
+      throw new IOException("Direct mode is incompatible with "
+            + "Accumulo. Please remove the parameter --direct");
+    }
+    if (options.getHBaseTable() != null && options.isDirect()
+        && !cmgr.isDirectModeHBaseSupported()) {
+      throw new IOException("Direct mode is incompatible with "
+            + "HBase. Please remove the parameter --direct");
+    }
     if (stagingTableName != null) { // user has specified the staging table
       if (cmgr.supportsStagingForExport()) {
         LOG.info("Data will be staged in the table: " + stagingTableName);

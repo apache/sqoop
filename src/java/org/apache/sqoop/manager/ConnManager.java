@@ -794,5 +794,25 @@ public abstract class ConnManager {
   public boolean isDirectModeHCatSupported() {
     return false;
   }
+
+
+  /**
+   * Determine if HBase operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HBase
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeHBaseSupported() {
+    return false;
+  }
+
+  /**
+   * Determine if Accumulo operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HBase
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeAccumuloSupported() {
+    return false;
+  }
+
 }
 

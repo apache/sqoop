@@ -631,5 +631,31 @@ public class OraOopConnManager extends GenericJdbcManager {
             .getJavaClassPath());
     LOG.fatal(msg, ex);
   }
+  /**
+   * Determine if HCat integration from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HCat
+   * @return Whether direct mode is allowed.
+   */
+  @Override
+  public boolean isDirectModeHCatSupported() {
+    return true;
+  }
 
+  /**
+   * Determine if HBase operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HBase
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeHBaseSupported() {
+    return true;
+  }
+
+  /**
+   * Determine if Accumulo operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with HBase
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeAccumuloSupported() {
+    return true;
+  }
 }

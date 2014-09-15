@@ -1425,10 +1425,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           "Both --accumulo-table and --accumulo-column-family must be set."
           + HELP_STR);
     }
-    if (options.getAccumuloTable() != null && options.isDirect()) {
-      throw new InvalidOptionsException("Direct import is incompatible with "
-            + "Accumulo. Please remove parameter --direct");
-    }
+
     if (options.getAccumuloTable() != null
         && options.getHBaseTable() != null) {
       throw new InvalidOptionsException("HBase import is incompatible with "
@@ -1575,10 +1572,6 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException(
           "Both --hbase-table and --column-family must be set together."
           + HELP_STR);
-    }
-    if (options.getHBaseTable() != null && options.isDirect()) {
-      throw new InvalidOptionsException("Direct import is incompatible with "
-        + "HBase. Please remove parameter --direct");
     }
 
     if (options.isBulkLoadEnabled() && options.getHBaseTable() == null) {

@@ -223,7 +223,16 @@ public class ImportJobBase extends JobBase {
         + context.getConnManager().getClass().getName()
         + ". Please remove the parameter --direct");
     }
-
+    if (options.getAccumuloTable() != null && options.isDirect()
+        && !getContext().getConnManager().isDirectModeAccumuloSupported()) {
+      throw new IOException("Direct mode is incompatible with "
+            + "Accumulo. Please remove the parameter --direct");
+    }
+    if (options.getHBaseTable() != null && options.isDirect()
+        && !getContext().getConnManager().isDirectModeHBaseSupported()) {
+      throw new IOException("Direct mode is incompatible with "
+            + "HBase. Please remove the parameter --direct");
+    }
     if (null != tableName) {
       LOG.info("Beginning import of " + tableName);
     } else {
