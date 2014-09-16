@@ -294,7 +294,20 @@ public class ConnFactory {
     if (mgrDir.exists() && mgrDir.isDirectory()) {
       // We have a managers.d subdirectory. Get the file list, sort it,
       // and process them in order.
-      String [] fileNames = mgrDir.list();
+      String[] fileNames;
+
+      try {
+        fileNames = mgrDir.list();
+      } catch (SecurityException e) {
+        fileNames = null;
+      }
+
+      if (null == fileNames) {
+        LOG.warn("Sqoop cannot read $SQOOP_CONF_DIR/managers.d. "
+            + "Please check the permissions on managers.d.");
+        return conf;
+      }
+
       Arrays.sort(fileNames);
 
       for (String fileName : fileNames) {
