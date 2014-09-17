@@ -190,7 +190,9 @@ under the License.
     <dependency org="org.kitesdk" name="kite-data-mapreduce" rev="${kite-data.version}"
       conf="avro->default;redist->default"/>
     <dependency org="org.kitesdk" name="kite-data-hcatalog" rev="${kite-data.version}"
-      conf="avro->default;redist->default"/>
+      conf="avro->default;redist->default">
+      <exclude org="com.twitter" module="parquet-hive-bundle"/>
+    </dependency>
 
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
