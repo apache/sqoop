@@ -104,7 +104,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       Schema schema = generateAvroSchema(tableName);
       String uri;
       if (options.doHiveImport()) {
-        uri = "dataset:hive?dataset=" + options.getTableName();
+        uri = "dataset:hive?dataset=" + options.getHiveTableName();
       } else {
         FileSystem fs = FileSystem.get(conf);
         uri = "dataset:" + fs.makeQualified(getContext().getDestination());
