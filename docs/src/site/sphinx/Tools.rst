@@ -34,7 +34,7 @@ To run the desired tool, execute binary ``sqoop2-tool`` with desired tool name. 
 
   sqoop2-tool verify
 
-.. note:: Running tools while the Sqoop Server is also running is not recommended as it might lead to a data corruption and service disruption.
+.. note:: Stop the Sqoop Server before running Sqoop tools. Running tools while Sqoop Server is running can lead to a data corruption and service disruption.
 
 Verify
 ======
@@ -60,7 +60,8 @@ Further details why the verification has failed will be available in the Sqoop s
 Upgrade
 =======
 
-Upgrades all versionable components inside Sqoop2. This includes structural changes inside the repository and stored metadata. Running this tool is idempotent.
+Upgrades all versionable components inside Sqoop2. This includes structural changes inside the repository and stored metadata.
+Running this tool on Sqoop deployment that was already upgraded will have no effect.
 
 To run the ``upgrade`` tool::
 
@@ -75,3 +76,54 @@ Execution failure will show the following message instead::
   Tool class org.apache.sqoop.tools.tool.UpgradeTool has failed.
 
 Further details why the upgrade process has failed will be available in the Sqoop server log - same file as the Sqoop Server logs into.
+
+RepositoryDump
+==============
+
+Writes the user-created contents of the Sqoop repository to a file in JSON format. This includes connections, jobs and submissions.
+
+To run the ``repositorydump`` tool::
+
+  sqoop2-tool repositorydump -o repository.json
+
+As an option, the administrator can choose to include sensitive information such as database connection passwords in the file::
+
+  sqoop2-tool repositorydump -o repository.json --include-sensitive
+
+Upon successful execution, you should see the following message::
+
+  Tool class org.apache.sqoop.tools.tool.RepositoryDumpTool has finished correctly.
+
+If repository dump has failed, you will see the following message instead::
+
+  Tool class org.apache.sqoop.tools.tool.RepositoryDumpTool has failed.
+
+Further details why the upgrade process has failed will be available in the Sqoop server log - same file as the Sqoop Server logs into.
+
+RepositoryLoad
+==============
+
+Reads a json formatted file created by RepositoryDump and loads to current Sqoop repository.
+
+To run the ``repositoryLoad`` tool::
+
+  sqoop2-tool repositoryload -i repository.json
+
+Upon successful execution, you should see the following message::
+
+  Tool class org.apache.sqoop.tools.tool.RepositoryLoadTool has finished correctly.
+
+If repository load failed you will see the following message instead::
+
+ Tool class org.apache.sqoop.tools.tool.RepositoryLoadTool has failed.
+
+Or an exception. Further details why the upgrade process has failed will be available in the Sqoop server log - same file as the Sqoop Server logs into.
+
+.. note:: If the repository dump was created without passwords (default), the connections will not contain a password and the jobs will fail to execute. In that case you'll need to manually update the connections and set the password.
+.. note:: RepositoryLoad tool will always generate new connections, jobs and submissions from the file. Even when an identical objects already exists in repository.
+
+
+
+
+
+

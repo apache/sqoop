@@ -88,6 +88,7 @@ limitations under the License.
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compile.source>1.6</maven.compile.source>
     <maven.compile.target>1.6</maven.compile.target>
+    <commons-cli.version>1.2</commons-cli.version>
     <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-lang.version>2.5</commons-lang.version>
     <commons-io.version>2.4</commons-io.version>
@@ -343,6 +344,16 @@ limitations under the License.
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
+      <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>${commons-cli.version}</version>
+      </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>

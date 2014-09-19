@@ -36,6 +36,8 @@ public class BuiltinTools {
     tools = new HashMap<String, Class<? extends Tool>>();
     tools.put("upgrade", UpgradeTool.class);
     tools.put("verify", VerifyTool.class);
+    tools.put("repositorydump", RepositoryDumpTool.class);
+    tools.put("repositoryload", RepositoryLoadTool.class);
   }
 
   /**
