@@ -17,20 +17,19 @@
  */
 package org.apache.sqoop.execution.mapreduce;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.framework.ExecutionEngine;
-import org.apache.sqoop.framework.SubmissionRequest;
-import org.apache.sqoop.framework.configuration.JobConfiguration;
+import org.apache.sqoop.framework.JobRequest;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  *
@@ -41,44 +40,40 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
    *  {@inheritDoc}
    */
   @Override
-  public SubmissionRequest createSubmissionRequest() {
-    return new MRSubmissionRequest();
+  public JobRequest createJobRequest() {
+    return new MRJobRequest();
   }
 
-  public void prepareSubmission(SubmissionRequest gRequest) {
-    MRSubmissionRequest request = (MRSubmissionRequest)gRequest;
+  public void prepareJob(JobRequest jobRequest) {
+    MRJobRequest mrJobRequest = (MRJobRequest)jobRequest;
 
     // Add jar dependencies
-    addDependencies(request);
+    addDependencies(mrJobRequest);
 
     // Configure map-reduce classes for import
-    request.setInputFormatClass(SqoopInputFormat.class);
+    mrJobRequest.setInputFormatClass(SqoopInputFormat.class);
 
-    request.setMapperClass(SqoopMapper.class);
-    request.setMapOutputKeyClass(SqoopWritable.class);
-    request.setMapOutputValueClass(NullWritable.class);
+    mrJobRequest.setMapperClass(SqoopMapper.class);
+    mrJobRequest.setMapOutputKeyClass(SqoopWritable.class);
+    mrJobRequest.setMapOutputValueClass(NullWritable.class);
 
-    request.setOutputFormatClass(SqoopNullOutputFormat.class);
-    request.setOutputKeyClass(SqoopWritable.class);
-    request.setOutputValueClass(NullWritable.class);
+    mrJobRequest.setOutputFormatClass(SqoopNullOutputFormat.class);
+    mrJobRequest.setOutputKeyClass(SqoopWritable.class);
+    mrJobRequest.setOutputValueClass(NullWritable.class);
 
-    // Set up framework context
-    From from = (From)request.getFromCallback();
-    To to = (To)request.getToCallback();
-    MutableMapContext context = request.getFrameworkContext();
+    From from = (From) mrJobRequest.getFrom();
+    To to = (To) mrJobRequest.getTo();
+
+    MutableMapContext context = mrJobRequest.getFrameworkContext();
     context.setString(JobConstants.JOB_ETL_PARTITIONER, from.getPartitioner().getName());
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, from.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_LOADER, to.getLoader().getName());
     context.setString(JobConstants.JOB_ETL_DESTROYER, from.getDestroyer().getName());
     context.setString(JobConstants.INTERMEDIATE_DATA_FORMAT,
-        request.getIntermediateDataFormat().getName());
+        mrJobRequest.getIntermediateDataFormat().getName());
 
-    if(request.getExtractors() != null) {
-      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
-    }
-
-    if(request.getExtractors() != null) {
-      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, request.getExtractors());
+    if(mrJobRequest.getExtractors() != null) {
+      context.setInteger(JobConstants.JOB_ETL_EXTRACTOR_NUM, mrJobRequest.getExtractors());
     }
   }
 
@@ -91,7 +86,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
    *
    * @param request Active request object.
    */
-  protected void addDependencies(MRSubmissionRequest request) {
+  protected void addDependencies(MRJobRequest request) {
     // Guava
     request.addJarForClass(ThreadFactoryBuilder.class);
   }

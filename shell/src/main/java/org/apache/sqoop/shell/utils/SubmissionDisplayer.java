@@ -68,14 +68,14 @@ public final class SubmissionDisplayer {
       }
     }
 
-    if(isVerbose() && submission.getConnectorSchema() != null) {
+    if(isVerbose() && submission.getFromSchema() != null) {
       print(resourceString(Constants.RES_CONNECTOR_SCHEMA)+": ");
-      println(submission.getConnectorSchema());
+      println(submission.getFromSchema());
     }
 
-    if(isVerbose() && submission.getHioSchema() != null) {
+    if(isVerbose() && submission.getToSchema() != null) {
       print(resourceString(Constants.RES_HIO_SCHEMA)+": ");
-      println(submission.getHioSchema());
+      println(submission.getToSchema());
     }
   }
 

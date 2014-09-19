@@ -25,7 +25,7 @@ package org.apache.sqoop.job.etl;
  * -> Loader
  * -> Destroyer
  */
-public class To extends CallbackBase {
+public class To extends Transferable {
 
   private Class<? extends Loader> loader;
 

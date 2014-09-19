@@ -32,8 +32,7 @@ import org.apache.sqoop.utils.ClassUtils;
  */
 public class SqoopDestroyerExecutor {
 
-  public static final Logger LOG =
-    Logger.getLogger(SqoopDestroyerExecutor.class);
+  public static final Logger LOG = Logger.getLogger(SqoopDestroyerExecutor.class);
 
   /**
    * Execute destroyer.
@@ -56,10 +55,8 @@ public class SqoopDestroyerExecutor {
     Object fromConfigConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, configuration);
     Object fromConfigJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, configuration);
 
-    // Propagate connector schema in every case for now
-    // TODO: Change to coditional choosing between Connector schemas.
+    // TODO(Abe/Gwen): Change to conditional choosing between schemas.
     Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, configuration);
-
     DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 
     LOG.info("Executing destroyer class " + destroyer.getClass());

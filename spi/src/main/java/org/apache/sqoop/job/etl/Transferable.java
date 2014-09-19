@@ -18,14 +18,16 @@
 package org.apache.sqoop.job.etl;
 
 /**
- * Set of default callbacks that must be implement by each job type.
+ * This entity encapsulates the workflow for data transfer via the
+ * {@link SqoopConnector}.It basically acts as an adapter between the data-source
+ * imported from or exported to.
  */
-public abstract class CallbackBase {
+public abstract class Transferable {
 
   private Class<? extends Initializer> initializer;
   private Class<? extends Destroyer> destroyer;
 
-  public CallbackBase(
+  public Transferable(
     Class<? extends Initializer> initializer,
     Class<? extends Destroyer> destroyer
   ) {

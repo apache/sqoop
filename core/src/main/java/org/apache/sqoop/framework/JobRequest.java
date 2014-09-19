@@ -23,7 +23,7 @@ import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.job.etl.CallbackBase;
+import org.apache.sqoop.job.etl.Transferable;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -35,7 +35,7 @@ import java.util.List;
  * all information that we need to create a new submission (including mappers,
  * reducers, ...).
  */
-public class SubmissionRequest {
+public class JobRequest {
 
   /**
    * Submission summary
@@ -64,14 +64,14 @@ public class SubmissionRequest {
   List<String> jars;
 
   /**
-   * From connector callback
+   * From entity
    */
-  CallbackBase fromCallback;
+  Transferable from;
 
   /**
-   * To connector callback
+   * To entity
    */
-  CallbackBase toCallback;
+  Transferable to;
 
   /**
    * All configuration objects
@@ -96,11 +96,6 @@ public class SubmissionRequest {
   MutableMapContext frameworkContext;
 
   /**
-   * HDFS output directory
-   */
-  String outputDirectory;
-
-  /**
    * Optional notification URL for job progress
    */
   String notificationUrl;
@@ -120,7 +115,7 @@ public class SubmissionRequest {
    */
   Class<? extends IntermediateDataFormat> intermediateDataFormat;
 
-  public SubmissionRequest() {
+  public JobRequest() {
     this.jars = new LinkedList<String>();
     this.fromConnectorContext = new MutableMapContext();
     this.toConnectorContext = new MutableMapContext();
@@ -207,20 +202,20 @@ public class SubmissionRequest {
     }
   }
 
-  public CallbackBase getFromCallback() {
-    return fromCallback;
+  public Transferable getFrom() {
+    return from;
   }
 
-  public void setFromCallback(CallbackBase fromCallback) {
-    this.fromCallback = fromCallback;
+  public void setFrom(Transferable from) {
+    this.from = from;
   }
 
-  public CallbackBase getToCallback() {
-    return toCallback;
+  public Transferable getTo() {
+    return to;
   }
 
-  public void setToCallback(CallbackBase toCallback) {
-    this.toCallback = toCallback;
+  public void setTo(Transferable to) {
+    this.to = to;
   }
 
   public Object getConnectorConnectionConfig(Direction type) {

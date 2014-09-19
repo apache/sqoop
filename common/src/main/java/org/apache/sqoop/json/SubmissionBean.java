@@ -52,8 +52,8 @@ public class SubmissionBean implements JsonBean {
   private static final String EXCEPTION_TRACE = "exception-trace";
   private static final String PROGRESS = "progress";
   private static final String COUNTERS = "counters";
-  private static final String CONNECTOR_SCHEMA = "schema-connector";
-  private static final String HIO_SCHEMA = "schema-hio";
+  private static final String FROM_SCHEMA = "schema-from";
+  private static final String TO_SCHEMA = "schema-to";
 
   private List<MSubmission> submissions;
 
@@ -116,11 +116,11 @@ public class SubmissionBean implements JsonBean {
       if(submission.getCounters() != null) {
         object.put(COUNTERS, extractCounters(submission.getCounters()));
       }
-      if(submission.getConnectorSchema() != null)  {
-        object.put(CONNECTOR_SCHEMA, extractSchema(submission.getConnectorSchema()));
+      if(submission.getFromSchema() != null)  {
+        object.put(FROM_SCHEMA, extractSchema(submission.getFromSchema()));
       }
-      if(submission.getHioSchema() != null) {
-        object.put(HIO_SCHEMA, extractSchema(submission.getHioSchema()));
+      if(submission.getToSchema() != null) {
+        object.put(TO_SCHEMA, extractSchema(submission.getToSchema()));
       }
 
       array.add(object);
@@ -188,11 +188,11 @@ public class SubmissionBean implements JsonBean {
       if(object.containsKey(COUNTERS)) {
         submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
       }
-      if(object.containsKey(CONNECTOR_SCHEMA)) {
-        submission.setConnectorSchema(restoreSchemna((JSONObject) object.get(CONNECTOR_SCHEMA)));
+      if(object.containsKey(FROM_SCHEMA)) {
+        submission.setFromSchema(restoreSchemna((JSONObject) object.get(FROM_SCHEMA)));
       }
-      if(object.containsKey(HIO_SCHEMA)) {
-        submission.setHioSchema(restoreSchemna((JSONObject) object.get(HIO_SCHEMA)));
+      if(object.containsKey(TO_SCHEMA)) {
+        submission.setToSchema(restoreSchemna((JSONObject) object.get(TO_SCHEMA)));
       }
 
       this.submissions.add(submission);

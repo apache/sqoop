@@ -18,12 +18,11 @@
 package org.apache.sqoop.framework;
 
 import org.apache.sqoop.common.ImmutableContext;
-import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.model.MSubmission;
 
 /**
- * Execution engine drive execution of sqoop submission (job). It's responsible
+ * Execution engine drives execution of sqoop job. It's responsible
  * for executing all defined steps in the import/export workflow.
+ * A successful job execution will be recorded in the job submission entity
  */
 public abstract class ExecutionEngine {
 
@@ -31,6 +30,7 @@ public abstract class ExecutionEngine {
    * Initialize execution engine
    *
    * @param context Configuration context
+   * @parma prefix Execution engine prefix
    */
   public void initialize(ImmutableContext context, String prefix) {
   }
@@ -42,19 +42,19 @@ public abstract class ExecutionEngine {
   }
 
   /**
-   * Return new SubmissionRequest class or any subclass if it's needed by
+   * Return new JobRequest class or any subclass if it's needed by
    * execution and submission engine combination.
    *
-   * @return New Submission request object
+   * @return new JobRequestobject
    */
-  public SubmissionRequest createSubmissionRequest() {
-    return new SubmissionRequest();
+  public JobRequest createJobRequest() {
+    return new JobRequest();
   }
 
   /**
-   * Prepare given submission request.
+   * Prepare given job request.
    *
-   * @param request Submission request
+   * @param request JobRequest
    */
-  public abstract void prepareSubmission(SubmissionRequest request);
+  public abstract void prepareJob(JobRequest request);
 }

@@ -22,8 +22,8 @@ import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.submission.SubmissionStatus;
 
 /**
- * Submission engine is capable of executing and getting information about
- * submissions to remote (hadoop) cluster.
+ * Submission engine is responsible in conveying the information about the
+ * job instances (submissions) to remote (hadoop) cluster.
  */
 public abstract class SubmissionEngine {
 
@@ -31,6 +31,7 @@ public abstract class SubmissionEngine {
    * Initialize submission engine
    *
    * @param context Configuration context
+   * @param prefix Submission engine prefix
    */
   public void initialize(MapContext context, String prefix) {
   }
@@ -57,7 +58,7 @@ public abstract class SubmissionEngine {
    *
    * @return Return true if we were able to submit job to remote cluster.
    */
-  public abstract boolean submit(SubmissionRequest submission);
+  public abstract boolean submit(JobRequest submission);
 
   /**
    * Hard stop for given submission.

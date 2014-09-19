@@ -64,9 +64,7 @@ public class SqoopFileOutputFormat
       conf.set(JobConstants.JOB_MR_OUTPUT_CODEC, codecname);
     }
 
-    SqoopOutputFormatLoadExecutor executor =
-        new SqoopOutputFormatLoadExecutor(context);
-    return executor.getRecordWriter();
+    return  new SqoopOutputFormatLoadExecutor(context).getRecordWriter();
   }
 
   @Override

@@ -29,9 +29,9 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.execution.mapreduce.MRSubmissionRequest;
+import org.apache.sqoop.execution.mapreduce.MRJobRequest;
 import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
-import org.apache.sqoop.framework.SubmissionRequest;
+import org.apache.sqoop.framework.JobRequest;
 import org.apache.sqoop.framework.SubmissionEngine;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.mr.ConfigurationUtils;
@@ -72,6 +72,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    */
   @Override
   public void initialize(MapContext context, String prefix) {
+    super.initialize(context, prefix);
     LOG.info("Initializing Map-reduce Submission Engine");
 
     // Build global configuration, start with empty configuration object
@@ -125,6 +126,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    */
   @Override
   public void destroy() {
+    super.destroy();
     LOG.info("Destroying Mapreduce Submission Engine");
 
     // Closing job client
@@ -147,9 +149,9 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * {@inheritDoc}
    */
   @Override
-  public boolean submit(SubmissionRequest generalRequest) {
+  public boolean submit(JobRequest mrJobRequest) {
     // We're supporting only map reduce jobs
-    MRSubmissionRequest request = (MRSubmissionRequest) generalRequest;
+    MRJobRequest request = (MRJobRequest) mrJobRequest;
 
     // Clone global configuration
     Configuration configuration = new Configuration(globalConfiguration);
@@ -208,7 +210,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkConnectionConfig(Direction.TO));
       ConfigurationUtils.setFrameworkJobConfig(job, request.getConfigFrameworkJob());
       // @TODO(Abe): Persist TO schema.
-      ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getConnectorSchema());
+      ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

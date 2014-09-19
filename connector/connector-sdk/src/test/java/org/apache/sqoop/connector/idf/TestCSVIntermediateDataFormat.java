@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class CSVIntermediateDataFormatTest {
+public class TestCSVIntermediateDataFormat {
 
   private final String BYTE_FIELD_ENCODING = "ISO-8859-1";
 

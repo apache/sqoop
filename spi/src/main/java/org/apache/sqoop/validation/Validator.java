@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.validation;
 
-import org.apache.sqoop.model.MJob;
 
 /**
  * Connection and job metadata validator.

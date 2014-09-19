@@ -21,7 +21,6 @@ package org.apache.sqoop.connector.idf;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
@@ -38,7 +37,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
@@ -46,8 +44,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   public static final char ESCAPE_CHARACTER = '\\';
   public static final char QUOTE_CHARACTER = '\'';
 
-  private static final Logger LOG = Logger.getLogger
-    (CSVIntermediateDataFormat.class);
 
   private static final char[] originals = {
     0x5C,0x00,0x0A,0x0D,0x1A,0x22,0x27

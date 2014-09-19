@@ -1,3 +1,5 @@
+
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -266,264 +268,228 @@ public class JobManager implements Reconfigurable {
   }
 
   public MSubmission submit(long jobId, HttpEventContext ctx) {
-    String username = ctx.getUsername();
 
-    Repository repository = RepositoryManager.getInstance().getRepository();
-
-    MJob job = repository.findJob(jobId);
-    if (job == null) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0004,
-        "Unknown job id " + jobId);
-    }
-
-    if (!job.getEnabled()) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0009,
-        "Job id: " + job.getPersistenceId());
-    }
-
-    MConnection fromConnection = repository.findConnection(job.getConnectionId(Direction.FROM));
-    MConnection toConnection = repository.findConnection(job.getConnectionId(Direction.TO));
-
-    if (!fromConnection.getEnabled()) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0010,
-        "Connection id: " + fromConnection.getPersistenceId());
-    }
-
-    if (!toConnection.getEnabled()) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0010,
-          "Connection id: " + toConnection.getPersistenceId());
-    }
-
-    SqoopConnector fromConnector =
-      ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
-    SqoopConnector toConnector =
-        ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
-
-    // Make sure that connectors support the directions they will be used from.
-    if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0011,
-          "Connector: " + fromConnector.getClass().getCanonicalName());
-    }
-
-    if (!toConnector.getSupportedDirections().contains(Direction.TO)) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0011,
-          "Connector: " + toConnector.getClass().getCanonicalName());
-    }
-
-    // Transform forms to fromConnector specific classes
-    Object fromConnectorConnection = ClassUtils.instantiate(
-        fromConnector.getConnectionConfigurationClass());
-    FormUtils.fromForms(fromConnection.getConnectorPart().getForms(),
-      fromConnectorConnection);
-
-    Object fromJob = ClassUtils.instantiate(
-      fromConnector.getJobConfigurationClass(Direction.FROM));
-    FormUtils.fromForms(
-        job.getConnectorPart(Direction.FROM).getForms(), fromJob);
-
-    // Transform forms to toConnector specific classes
-    Object toConnectorConnection = ClassUtils.instantiate(
-        toConnector.getConnectionConfigurationClass());
-    FormUtils.fromForms(toConnection.getConnectorPart().getForms(),
-        toConnectorConnection);
-
-    Object toJob = ClassUtils.instantiate(
-        toConnector.getJobConfigurationClass(Direction.TO));
-    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toJob);
-
-    // Transform framework specific forms
-    Object fromFrameworkConnection = ClassUtils.instantiate(
-      FrameworkManager.getInstance().getConnectionConfigurationClass());
-    Object toFrameworkConnection = ClassUtils.instantiate(
-        FrameworkManager.getInstance().getConnectionConfigurationClass());
-    FormUtils.fromForms(fromConnection.getFrameworkPart().getForms(),
-      fromFrameworkConnection);
-    FormUtils.fromForms(toConnection.getFrameworkPart().getForms(),
-        toFrameworkConnection);
-
-    Object frameworkJob = ClassUtils.instantiate(
-      FrameworkManager.getInstance().getJobConfigurationClass());
-    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkJob);
-
-    // Create request object
-    MSubmission summary = new MSubmission(jobId);
-    SubmissionRequest request = executionEngine.createSubmissionRequest();
-
-    summary.setCreationUser(username);
-    summary.setLastUpdateUser(username);
-
-    // Save important variables to the submission request
-    request.setSummary(summary);
-    request.setConnector(Direction.FROM, fromConnector);
-    request.setConnector(Direction.TO, toConnector);
-    request.setConnectorConnectionConfig(Direction.FROM, fromConnectorConnection);
-    request.setConnectorConnectionConfig(Direction.TO, toConnectorConnection);
-    request.setConnectorJobConfig(Direction.FROM, fromJob);
-    request.setConnectorJobConfig(Direction.TO, toJob);
-    // @TODO(Abe): Should we actually have 2 different Framework Connection config objects?
-    request.setFrameworkConnectionConfig(Direction.FROM, fromFrameworkConnection);
-    request.setFrameworkConnectionConfig(Direction.TO, toFrameworkConnection);
-    request.setConfigFrameworkJob(frameworkJob);
-    request.setJobName(job.getName());
-    request.setJobId(job.getPersistenceId());
-    request.setNotificationUrl(notificationBaseUrl + jobId);
-    Class<? extends IntermediateDataFormat<?>> dataFormatClass =
-      fromConnector.getIntermediateDataFormat();
-    request.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat());
-    // Create request object
-
-    // Let's register all important jars
-    // sqoop-common
-    request.addJarForClass(MapContext.class);
-    // sqoop-core
-    request.addJarForClass(FrameworkManager.class);
-    // sqoop-spi
-    request.addJarForClass(SqoopConnector.class);
-    // Execution engine jar
-    request.addJarForClass(executionEngine.getClass());
-    // Connectors in use
-    request.addJarForClass(fromConnector.getClass());
-    request.addJarForClass(toConnector.getClass());
-
-    // Extra libraries that Sqoop code requires
-    request.addJarForClass(JSONValue.class);
-
-    // The IDF is used in the ETL process.
-    request.addJarForClass(dataFormatClass);
-
-
-    // Get callbacks
-    request.setFromCallback(fromConnector.getFrom());
-    request.setToCallback(toConnector.getTo());
-    LOG.debug("Using callbacks: " + request.getFromCallback() + ", " + request.getToCallback());
-
-    // Initialize submission from fromConnector perspective
-    CallbackBase[] baseCallbacks = {
-        request.getFromCallback(),
-        request.getToCallback()
-    };
-
-    CallbackBase baseCallback;
-    Class<? extends Initializer> initializerClass;
-    Initializer initializer;
-    InitializerContext initializerContext;
-
-    // Initialize From Connector callback.
-    baseCallback = request.getFromCallback();
-
-    initializerClass = baseCallback
-        .getInitializer();
-    initializer = (Initializer) ClassUtils
-        .instantiate(initializerClass);
-
-    if (initializer == null) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0006,
-          "Can't create initializer instance: " + initializerClass.getName());
-    }
-
-    // Initializer context
-    initializerContext = new InitializerContext(request.getConnectorContext(Direction.FROM));
-
-    // Initialize submission from fromConnector perspective
-    initializer.initialize(initializerContext,
-        request.getConnectorConnectionConfig(Direction.FROM),
-        request.getConnectorJobConfig(Direction.FROM));
-
-    // Add job specific jars to
-    request.addJars(initializer.getJars(initializerContext,
-        request.getConnectorConnectionConfig(Direction.FROM),
-        request.getConnectorJobConfig(Direction.FROM)));
-
-    // @TODO(Abe): Alter behavior of Schema here. Need from Schema.
-
-
-    Schema fromSchema = initializer.getSchema(initializerContext,
-            request.getConnectorConnectionConfig(Direction.FROM),
-            request.getConnectorJobConfig(Direction.FROM));
-
-    // request.getSummary().setConnectorSchema(initializer.getSchema(
-    //    initializerContext,
-    //    request.getConnectorConnectionConfig(ConnectorType.FROM),
-    //    request.getConnectorJobConfig(ConnectorType.FROM)
-    // ));
-
-    // Initialize To Connector callback.
-    baseCallback = request.getToCallback();
-
-    initializerClass = baseCallback
-        .getInitializer();
-    initializer = (Initializer) ClassUtils
-        .instantiate(initializerClass);
-
-    if (initializer == null) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0006,
-          "Can't create initializer instance: " + initializerClass.getName());
-    }
-
-    // Initializer context
-    initializerContext = new InitializerContext(request.getConnectorContext(Direction.TO));
-
-    // Initialize submission from fromConnector perspective
-    initializer.initialize(initializerContext,
-        request.getConnectorConnectionConfig(Direction.TO),
-        request.getConnectorJobConfig(Direction.TO));
-
-    // Add job specific jars to
-    request.addJars(initializer.getJars(initializerContext,
-        request.getConnectorConnectionConfig(Direction.TO),
-        request.getConnectorJobConfig(Direction.TO)));
-
-    // @TODO(Abe): Alter behavior of Schema here. Need To Schema.
-
-    Schema toSchema = initializer.getSchema(initializerContext,
-            request.getConnectorConnectionConfig(Direction.TO),
-            request.getConnectorJobConfig(Direction.TO));
-
-    // Retrieve and persist the schema
-//    request.getSummary().setConnectorSchema(initializer.getSchema(
-//        initializerContext,
-//        request.getConnectorConnectionConfig(ConnectorType.TO),
-//        request.getConnectorJobConfig(ConnectorType.TO)
-//    ));
-
-    //TODO: Need better logic here
-    if (fromSchema != null)
-      request.getSummary().setConnectorSchema(fromSchema);
-    else
-      request.getSummary().setConnectorSchema(toSchema);
-
-    // Bootstrap job from framework perspective
-    prepareSubmission(request);
-
+    MSubmission mSubmission = createJobSubmission(ctx, jobId);
+    JobRequest jobRequest = createJobRequest(jobId, mSubmission);
+    // Bootstrap job to execute
+    prepareJob(jobRequest);
     // Make sure that this job id is not currently running and submit the job
     // only if it's not.
     synchronized (getClass()) {
-      MSubmission lastSubmission = repository.findSubmissionLastForJob(jobId);
+      MSubmission lastSubmission = RepositoryManager.getInstance().getRepository()
+          .findSubmissionLastForJob(jobId);
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
-        throw new SqoopException(FrameworkError.FRAMEWORK_0002,
-          "Job with id " + jobId);
+        throw new SqoopException(FrameworkError.FRAMEWORK_0002, "Job with id " + jobId);
       }
-
-      // @TODO(Abe): Call multiple destroyers.
+      // TODO(Abe): Call multiple destroyers.
       // TODO(jarcec): We might need to catch all exceptions here to ensure
       // that Destroyer will be executed in all cases.
-      boolean submitted = submissionEngine.submit(request);
-      if (!submitted) {
-        destroySubmission(request);
-        summary.setStatus(SubmissionStatus.FAILURE_ON_SUBMIT);
+      // NOTE: the following is a blocking call
+      boolean success = submissionEngine.submit(jobRequest);
+      if (!success) {
+        destroySubmission(jobRequest);
+        mSubmission.setStatus(SubmissionStatus.FAILURE_ON_SUBMIT);
       }
-
-      repository.createSubmission(summary);
+      RepositoryManager.getInstance().getRepository().createSubmission(mSubmission);
     }
+    return mSubmission;
+  }
 
-    // Return job status most recent
+  private JobRequest createJobRequest(long jobId, MSubmission submission) {
+    // get job
+    MJob job = getJob(jobId);
+
+    // get from/to connections for the job
+    MConnection fromConnection = getConnection(job.getConnectionId(Direction.FROM));
+    MConnection toConnection = getConnection(job.getConnectionId(Direction.TO));
+
+    // get from/to connectors for the connection
+    SqoopConnector fromConnector = getConnector(fromConnection.getConnectorId());
+    validateSupportedDirection(fromConnector, Direction.FROM);
+    SqoopConnector toConnector = getConnector(toConnection.getConnectorId());
+    validateSupportedDirection(toConnector, Direction.TO);
+
+    // Transform config to fromConnector specific classes
+    Object fromConnectionConfig = ClassUtils.instantiate(fromConnector
+        .getConnectionConfigurationClass());
+    FormUtils.fromForms(fromConnection.getConnectorPart().getForms(), fromConnectionConfig);
+
+    // Transform config to toConnector specific classes
+    Object toConnectorConfig = ClassUtils
+        .instantiate(toConnector.getConnectionConfigurationClass());
+    FormUtils.fromForms(toConnection.getConnectorPart().getForms(), toConnectorConfig);
+
+    Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
+    FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromJob);
+
+    Object toJob = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
+    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toJob);
+
+    // Transform framework specific configs
+    // Q(VB) : Aren't the following 2 exactly the same?
+    Object fromFrameworkConnection = ClassUtils.instantiate(FrameworkManager.getInstance()
+        .getConnectionConfigurationClass());
+    FormUtils.fromForms(fromConnection.getFrameworkPart().getForms(), fromFrameworkConnection);
+
+    Object toFrameworkConnection = ClassUtils.instantiate(FrameworkManager.getInstance()
+        .getConnectionConfigurationClass());
+    FormUtils.fromForms(toConnection.getFrameworkPart().getForms(), toFrameworkConnection);
+
+    Object frameworkJob = ClassUtils.instantiate(FrameworkManager.getInstance()
+        .getJobConfigurationClass());
+    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkJob);
+
+    // Create a job request for submit/execution
+    JobRequest jobRequest = executionEngine.createJobRequest();
+    // Save important variables to the job request
+    jobRequest.setSummary(submission);
+    jobRequest.setConnector(Direction.FROM, fromConnector);
+    jobRequest.setConnector(Direction.TO, toConnector);
+    jobRequest.setConnectorConnectionConfig(Direction.FROM, fromConnectionConfig);
+    jobRequest.setConnectorConnectionConfig(Direction.TO, toConnectorConfig);
+    jobRequest.setConnectorJobConfig(Direction.FROM, fromJob);
+    jobRequest.setConnectorJobConfig(Direction.TO, toJob);
+    // TODO(Abe): Should we actually have 2 different Framework Connection config objects?
+    jobRequest.setFrameworkConnectionConfig(Direction.FROM, fromFrameworkConnection);
+    jobRequest.setFrameworkConnectionConfig(Direction.TO, toFrameworkConnection);
+    jobRequest.setConfigFrameworkJob(frameworkJob);
+    jobRequest.setJobName(job.getName());
+    jobRequest.setJobId(job.getPersistenceId());
+    jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
+    Class<? extends IntermediateDataFormat<?>> dataFormatClass =
+      fromConnector.getIntermediateDataFormat();
+    jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat());
+
+
+    jobRequest.setFrom(fromConnector.getFrom());
+    jobRequest.setTo(toConnector.getTo());
+
+    addStandardJars(jobRequest);
+    addConnectorJars(jobRequest, fromConnector, toConnector, dataFormatClass);
+    addConnectorInitializerJars(jobRequest, Direction.FROM);
+    addConnectorInitializerJars(jobRequest, Direction.TO);
+
+    Schema fromSchema = getSchemaFromConnector(jobRequest, Direction.FROM);
+    Schema toSchema = getSchemaFromConnector(jobRequest, Direction.TO);
+
+    // TODO(Gwen): Need better logic here once the Schema refactor: SQOOP-1378
+    if (fromSchema != null) {
+      jobRequest.getSummary().setFromSchema(fromSchema);
+    }
+    else {
+      jobRequest.getSummary().setFromSchema(toSchema);
+    }
+    LOG.debug("Using entities: " + jobRequest.getFrom() + ", " + jobRequest.getTo());
+    return jobRequest;
+  }
+
+  private void addConnectorJars(JobRequest jobRequest, SqoopConnector fromConnector,
+      SqoopConnector toConnector, Class<? extends IntermediateDataFormat<?>> dataFormatClass) {
+    jobRequest.addJarForClass(fromConnector.getClass());
+    jobRequest.addJarForClass(toConnector.getClass());
+    jobRequest.addJarForClass(dataFormatClass);
+  }
+
+  private void addStandardJars(JobRequest jobRequest) {
+    // Let's register all important jars
+    // sqoop-common
+    jobRequest.addJarForClass(MapContext.class);
+    // sqoop-core
+    jobRequest.addJarForClass(FrameworkManager.class);
+    // sqoop-spi
+    jobRequest.addJarForClass(SqoopConnector.class);
+    // Execution engine jar
+    jobRequest.addJarForClass(executionEngine.getClass());
+    // Extra libraries that Sqoop code requires
+    jobRequest.addJarForClass(JSONValue.class);
+  }
+
+  MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
+    MSubmission summary = new MSubmission(jobId);
+    summary.setCreationUser(ctx.getUsername());
+    summary.setLastUpdateUser(ctx.getUsername());
     return summary;
   }
 
-  private void prepareSubmission(SubmissionRequest request) {
-    JobConfiguration jobConfiguration = (JobConfiguration) request
-        .getConfigFrameworkJob();
+  SqoopConnector getConnector(long connnectorId) {
+    return ConnectorManager.getInstance().getConnector(connnectorId);
+  }
 
+  void validateSupportedDirection(SqoopConnector connector, Direction direction) {
+    // Make sure that connector supports the given direction
+    if (!connector.getSupportedDirections().contains(direction)) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0011, "Connector: "
+          + connector.getClass().getCanonicalName());
+    }
+  }
+
+  MConnection getConnection(long connectionId) {
+    MConnection connection = RepositoryManager.getInstance().getRepository()
+        .findConnection(connectionId);
+    if (!connection.getEnabled()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0010, "Connection id: "
+          + connection.getPersistenceId());
+    }
+    return connection;
+  }
+
+  MJob getJob(long jobId) {
+    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
+    if (job == null) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0004, "Unknown job id: " + jobId);
+    }
+
+    if (!job.getEnabled()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0009, "Job id: " + job.getPersistenceId());
+    }
+    return job;
+  }
+  
+  private Schema getSchemaFromConnector(JobRequest jobRequest, Direction direction) {
+
+    Initializer initializer = getConnectorInitializer(jobRequest, direction);
+
+    // Initializer context
+    InitializerContext initializerContext = getInitializerContext(jobRequest, direction);
+
+    // Initialize submission from the connector perspective
+    initializer.initialize(initializerContext, jobRequest.getConnectorConnectionConfig(direction),
+        jobRequest.getConnectorJobConfig(direction));
+
+    // TODO(Abe): Alter behavior of Schema here.
+    return initializer.getSchema(initializerContext,
+        jobRequest.getConnectorConnectionConfig(direction),
+        jobRequest.getConnectorJobConfig(direction));
+  }
+
+  private void addConnectorInitializerJars(JobRequest jobRequest, Direction direction) {
+
+    Initializer initializer = getConnectorInitializer(jobRequest, direction);
+    InitializerContext initializerContext = getInitializerContext(jobRequest, direction);
+    // Add job specific jars to
+    jobRequest.addJars(initializer.getJars(initializerContext,
+        jobRequest.getConnectorConnectionConfig(direction),
+        jobRequest.getConnectorJobConfig(direction)));
+  }
+
+  private Initializer getConnectorInitializer(JobRequest jobRequest, Direction direction) {
+    Transferable transferable = direction.equals(Direction.FROM) ? jobRequest.getFrom() : jobRequest.getTo();
+    Class<? extends Initializer> initializerClass = transferable.getInitializer();
+    Initializer initializer = (Initializer) ClassUtils.instantiate(initializerClass);
+
+    if (initializer == null) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0006,
+          "Can't create connector initializer instance: " + initializerClass.getName());
+    }
+    return initializer;
+  }
+
+  private InitializerContext getInitializerContext(JobRequest jobRequest, Direction direction) {
+    return new InitializerContext(jobRequest.getConnectorContext(direction));
+  }
+
+  void prepareJob(JobRequest request) {
+    JobConfiguration jobConfiguration = (JobConfiguration) request.getConfigFrameworkJob();
     // We're directly moving configured number of extractors and loaders to
     // underlying request object. In the future we might need to throttle this
     // count based on other running jobs to meet our SLAs.
@@ -531,19 +497,19 @@ public class JobManager implements Reconfigurable {
     request.setLoaders(jobConfiguration.throttling.loaders);
 
     // Delegate rest of the job to execution engine
-    executionEngine.prepareSubmission(request);
+    executionEngine.prepareJob(request);
   }
 
   /**
    * Callback that will be called only if we failed to submit the job to the
    * remote cluster.
    */
-  private void destroySubmission(SubmissionRequest request) {
-    CallbackBase fromCallback = request.getFromCallback();
-    CallbackBase toCallback = request.getToCallback();
+  void destroySubmission(JobRequest request) {
+    Transferable from = request.getFrom();
+    Transferable to = request.getTo();
 
-    Class<? extends Destroyer> fromDestroyerClass = fromCallback.getDestroyer();
-    Class<? extends Destroyer> toDestroyerClass = toCallback.getDestroyer();
+    Class<? extends Destroyer> fromDestroyerClass = from.getDestroyer();
+    Class<? extends Destroyer> toDestroyerClass = to.getDestroyer();
     Destroyer fromDestroyer = (Destroyer) ClassUtils.instantiate(fromDestroyerClass);
     Destroyer toDestroyer = (Destroyer) ClassUtils.instantiate(toDestroyerClass);
 
@@ -557,15 +523,15 @@ public class JobManager implements Reconfigurable {
           "Can't create toDestroyer instance: " + toDestroyerClass.getName());
     }
 
-    // @TODO(Abe): Update context to manage multiple connectors. As well as summary.
+    // TODO(Abe): Update context to manage multiple connectors. As well as summary.
     DestroyerContext fromDestroyerContext = new DestroyerContext(
       request.getConnectorContext(Direction.FROM), false, request.getSummary()
-        .getConnectorSchema());
+        .getFromSchema());
     DestroyerContext toDestroyerContext = new DestroyerContext(
         request.getConnectorContext(Direction.TO), false, request.getSummary()
-        .getConnectorSchema());
+        .getToSchema());
 
-    // Initialize submission from connector perspective
+    // destroy submission from connector perspective
     fromDestroyer.destroy(fromDestroyerContext, request.getConnectorConnectionConfig(Direction.FROM),
         request.getConnectorJobConfig(Direction.FROM));
     toDestroyer.destroy(toDestroyerContext, request.getConnectorConnectionConfig(Direction.TO),
@@ -573,42 +539,39 @@ public class JobManager implements Reconfigurable {
   }
 
   public MSubmission stop(long jobId, HttpEventContext ctx) {
-    String username = ctx.getUsername();
 
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission submission = repository.findSubmissionLastForJob(jobId);
+    MSubmission mSubmission = repository.findSubmissionLastForJob(jobId);
 
-    if (submission == null || !submission.getStatus().isRunning()) {
-      throw new SqoopException(FrameworkError.FRAMEWORK_0003,
-        "Job with id " + jobId + " is not running");
+    if (mSubmission == null || !mSubmission.getStatus().isRunning()) {
+      throw new SqoopException(FrameworkError.FRAMEWORK_0003, "Job with id " + jobId
+          + " is not running");
     }
+    submissionEngine.stop(mSubmission.getExternalId());
 
-    String externalId = submission.getExternalId();
-    submissionEngine.stop(externalId);
-
-    submission.setLastUpdateUser(username);
+    mSubmission.setLastUpdateUser(ctx.getUsername());
 
     // Fetch new information to verify that the stop command has actually worked
-    update(submission);
+    update(mSubmission);
 
     // Return updated structure
-    return submission;
+    return mSubmission;
   }
 
   public MSubmission status(long jobId) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission submission = repository.findSubmissionLastForJob(jobId);
+    MSubmission mSubmission = repository.findSubmissionLastForJob(jobId);
 
-    if (submission == null) {
+    if (mSubmission == null) {
       return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
     }
 
     // If the submission is in running state, let's update it
-    if (submission.getStatus().isRunning()) {
-      update(submission);
+    if (mSubmission.getStatus().isRunning()) {
+      update(mSubmission);
     }
 
-    return submission;
+    return mSubmission;
   }
 
   private void update(MSubmission submission) {

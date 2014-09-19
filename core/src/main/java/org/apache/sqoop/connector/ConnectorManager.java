@@ -114,10 +114,9 @@ public class ConnectorManager implements Reconfigurable {
     return bundles;
   }
 
-  public ResourceBundle getResourceBundle(long connectorId,
-                                                 Locale locale) {
+  public ResourceBundle getResourceBundle(long connectorId, Locale locale) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
-    return  handler.getConnector().getBundle(locale);
+    return handler.getConnector().getBundle(locale);
   }
 
   public MConnector getConnectorMetadata(long connectorId) {

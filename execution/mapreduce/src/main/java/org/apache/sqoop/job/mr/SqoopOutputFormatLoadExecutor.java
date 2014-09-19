@@ -51,9 +51,9 @@ public class SqoopOutputFormatLoadExecutor {
 
   private volatile boolean readerFinished = false;
   private volatile boolean writerFinished = false;
-  private volatile IntermediateDataFormat data;
+  private volatile IntermediateDataFormat<String> dataFormat;
   private JobContext context;
-  private SqoopRecordWriter producer;
+  private SqoopRecordWriter writer;
   private Future<?> consumerFuture;
   private Semaphore filled = new Semaphore(0, true);
   private Semaphore free = new Semaphore(1, true);
@@ -63,14 +63,14 @@ public class SqoopOutputFormatLoadExecutor {
   SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName){
     this.isTest = isTest;
     this.loaderName = loaderName;
-    data = new CSVIntermediateDataFormat();
-    producer = new SqoopRecordWriter();
+    dataFormat = new CSVIntermediateDataFormat();
+    writer = new SqoopRecordWriter();
   }
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
     context = jobctx;
-    producer = new SqoopRecordWriter();
-    data = (IntermediateDataFormat) ClassUtils.instantiate(context
+    writer = new SqoopRecordWriter();
+    dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
       .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
 
     Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration());
@@ -78,14 +78,14 @@ public class SqoopOutputFormatLoadExecutor {
       schema = ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration());
     }
 
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
     consumerFuture = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat
         ("OutputFormatLoader-consumer").build()).submit(
             new ConsumerThread());
-    return producer;
+    return writer;
   }
 
   /*
@@ -98,7 +98,7 @@ public class SqoopOutputFormatLoadExecutor {
     public void write(SqoopWritable key, NullWritable value) throws InterruptedException {
       free.acquire();
       checkIfConsumerThrew();
-      data.setTextData(key.getString());
+      dataFormat.setTextData(key.getString());
       filled.release();
     }
 
@@ -144,7 +144,7 @@ public class SqoopOutputFormatLoadExecutor {
     }
   }
 
-  private class OutputFormatDataReader extends DataReader {
+  private class SqoopOutputFormatDataReader extends DataReader {
 
     @Override
     public Object[] readArrayRecord() throws InterruptedException {
@@ -154,7 +154,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return data.getObjectData();
+        return dataFormat.getObjectData();
       } finally {
         releaseSema();
       }
@@ -168,7 +168,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return data.getTextData();
+        return dataFormat.getTextData();
       } finally {
         releaseSema();
       }
@@ -181,7 +181,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return data.getData();
+        return dataFormat.getData();
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Caught exception e while getting content ", t);
@@ -215,7 +215,7 @@ public class SqoopOutputFormatLoadExecutor {
     public void run() {
       LOG.info("SqoopOutputFormatLoadExecutor consumer thread is starting");
       try {
-        DataReader reader = new OutputFormatDataReader();
+        DataReader reader = new SqoopOutputFormatDataReader();
 
         Configuration conf = null;
         if (!isTest) {

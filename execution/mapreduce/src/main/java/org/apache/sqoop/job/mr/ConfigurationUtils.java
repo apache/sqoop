@@ -90,9 +90,6 @@ public final class ConfigurationUtils {
 
   private static final Text SCHEMA_TO_CONNECTOR_KEY = new Text(SCHEMA_TO_CONNECTOR);
 
-  private static final String SCHEMA_HIO = JobConstants.PREFIX_JOB_CONFIG + "schema.hio";
-
-  private static final Text SCHEMA_HIO_KEY = new Text(SCHEMA_HIO);
 
   /**
    * Persist Connector configuration object for connection.

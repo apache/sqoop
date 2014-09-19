@@ -26,7 +26,7 @@ package org.apache.sqoop.job.etl;
  * -> (framework-defined steps)
  * -> Destroyer
  */
-public class From extends CallbackBase {
+public class From extends Transferable {
 
   private Class<? extends Partitioner> partitioner;
   private Class<? extends Extractor> extractor;

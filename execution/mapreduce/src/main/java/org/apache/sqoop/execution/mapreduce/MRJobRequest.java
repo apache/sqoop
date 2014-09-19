@@ -21,13 +21,13 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.framework.SubmissionRequest;
+import org.apache.sqoop.framework.JobRequest;
 
 /**
  * Map-reduce specific submission request containing all extra information
  * needed for bootstrapping map-reduce job.
  */
-public class MRSubmissionRequest extends SubmissionRequest {
+public class MRJobRequest extends JobRequest {
 
   /**
    * Map-reduce specific options.
@@ -40,7 +40,7 @@ public class MRSubmissionRequest extends SubmissionRequest {
   Class<? extends Writable> outputKeyClass;
   Class<? extends Writable> outputValueClass;
 
-  public MRSubmissionRequest() {
+  public MRJobRequest() {
     super();
   }
 

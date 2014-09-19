@@ -19,14 +19,10 @@
 package org.apache.sqoop.connector.idf;
 
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.Column;
-import org.apache.sqoop.schema.type.Type;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Abstract class representing a pluggable intermediate data format the Sqoop

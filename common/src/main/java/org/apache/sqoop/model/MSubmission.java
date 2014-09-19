@@ -100,20 +100,21 @@ public class MSubmission extends MAccountableEntity {
   String exceptionStackTrace;
 
   /**
-   * Schema that was reported by the connector.
+   * Schema for the FROM part of the job submission
    *
    * This property is required.
    */
-  Schema connectorSchema;
+  Schema fromSchema;
 
   /**
+   * Schema for the TO part of the job submission
    * Optional schema that reported by the underlying I/O implementation. Please
-   * note that this property might be empty and in such case the connector
-   * schema will use also on Hadoop I/O side.
+   * note that this property might be empty and in such case use the FROM schema
+   * on the TO side.
    *
    * This property is optional.
    */
-  Schema hioSchema;
+  Schema toSchema;
 
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
@@ -219,20 +220,20 @@ public class MSubmission extends MAccountableEntity {
     this.setExceptionStackTrace(writer.toString());
   }
 
-  public Schema getConnectorSchema() {
-    return connectorSchema;
+  public Schema getFromSchema() {
+    return fromSchema;
   }
 
-  public void setConnectorSchema(Schema connectorSchema) {
-    this.connectorSchema = connectorSchema;
+  public void setFromSchema(Schema connectorSchema) {
+    this.fromSchema = connectorSchema;
   }
 
-  public Schema getHioSchema() {
-    return hioSchema;
+  public Schema getToSchema() {
+    return toSchema;
   }
 
-  public void setHioSchema(Schema hioSchema) {
-    this.hioSchema = hioSchema;
+  public void setToSchema(Schema hioSchema) {
+    this.toSchema = hioSchema;
   }
 
   @Override
@@ -248,8 +249,8 @@ public class MSubmission extends MAccountableEntity {
       ", externalLink='" + externalLink + '\'' +
       ", exceptionInfo='" + exceptionInfo + '\'' +
       ", exceptionStackTrace='" + exceptionStackTrace + '\'' +
-      ", connectorSchema='" + connectorSchema + '\'' +
-      ", hioSchema='" + hioSchema + '\'' +
+      ", fromSchema='" + fromSchema + '\'' +
+      ", toSchema='" + toSchema + '\'' +
       '}';
   }
 

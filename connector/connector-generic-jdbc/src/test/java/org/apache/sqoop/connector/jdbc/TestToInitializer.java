@@ -26,7 +26,6 @@ import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.ValidationResult;
 import org.apache.sqoop.validation.ValidationRunner;
 

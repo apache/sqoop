@@ -31,9 +31,9 @@ public class ProgressRunnable implements Runnable {
   /**
    * Context class that we should use for reporting progress.
    */
-  private final TaskInputOutputContext context;
+  private final TaskInputOutputContext<?,?,?,?> context;
 
-  public ProgressRunnable(final TaskInputOutputContext ctxt) {
+  public ProgressRunnable(final TaskInputOutputContext<?,?,?,?> ctxt) {
     this.context = ctxt;
   }
 

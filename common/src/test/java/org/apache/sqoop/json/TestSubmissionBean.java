@@ -405,20 +405,20 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(222222, counter.getValue());
   }
 
-  public void testTransferConnectorSchema() {
+  public void testTransferFromSchema() {
     MSubmission source = new MSubmission();
-    source.setConnectorSchema(getSchema());
+    source.setFromSchema(getSchema());
 
-    Schema target = transfer(source).getConnectorSchema();
+    Schema target = transfer(source).getFromSchema();
     assertNotNull(target);
     assertEquals(getSchema(), target);
   }
 
-  public void testTransferHioSchema() {
+  public void testTransferToSchema() {
     MSubmission source = new MSubmission();
-    source.setHioSchema(getSchema());
+    source.setToSchema(getSchema());
 
-    Schema target = transfer(source).getHioSchema();
+    Schema target = transfer(source).getToSchema();
     assertNotNull(target);
     assertEquals(getSchema(), target);
   }

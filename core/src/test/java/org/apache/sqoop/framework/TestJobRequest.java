@@ -29,43 +29,43 @@ import static org.junit.Assert.assertTrue;
 /**
  *
  */
-public class TestSubmissionRequest {
+public class TestJobRequest {
 
-  private SubmissionRequest submissionRequest;
+  private JobRequest jobRequest;
 
   @Before
   public void initializeSubmissionRequest() {
-    submissionRequest = new SubmissionRequest();
+    jobRequest = new JobRequest();
   }
 
   @Test
   public void testAddJar() {
-    submissionRequest.addJar("A");
-    submissionRequest.addJar("B");
-    submissionRequest.addJar("A");
+    jobRequest.addJar("A");
+    jobRequest.addJar("B");
+    jobRequest.addJar("A");
 
-    assertEquals(2, submissionRequest.getJars().size());
-    assertEquals("A", submissionRequest.getJars().get(0));
-    assertEquals("B", submissionRequest.getJars().get(1));
+    assertEquals(2, jobRequest.getJars().size());
+    assertEquals("A", jobRequest.getJars().get(0));
+    assertEquals("B", jobRequest.getJars().get(1));
   }
 
   @Test
   public void testAddJarForClass() {
-    submissionRequest.addJarForClass(TestSubmissionRequest.class);
-    submissionRequest.addJarForClass(TestFrameworkValidator.class);
+    jobRequest.addJarForClass(TestJobRequest.class);
+    jobRequest.addJarForClass(TestFrameworkValidator.class);
 
-    assertEquals(1, submissionRequest.getJars().size());
-    assertTrue(submissionRequest.getJars().contains(ClassUtils.jarForClass(TestSubmissionRequest.class)));
+    assertEquals(1, jobRequest.getJars().size());
+    assertTrue(jobRequest.getJars().contains(ClassUtils.jarForClass(TestJobRequest.class)));
   }
 
   @Test
   public void testAddJars() {
-    submissionRequest.addJars(Arrays.asList("A", "B"));
-    submissionRequest.addJars(Arrays.asList("B", "C"));
+    jobRequest.addJars(Arrays.asList("A", "B"));
+    jobRequest.addJars(Arrays.asList("B", "C"));
 
-    assertEquals(3, submissionRequest.getJars().size());
-    assertEquals("A", submissionRequest.getJars().get(0));
-    assertEquals("B", submissionRequest.getJars().get(1));
-    assertEquals("C", submissionRequest.getJars().get(2));
+    assertEquals(3, jobRequest.getJars().size());
+    assertEquals("A", jobRequest.getJars().get(0));
+    assertEquals("B", jobRequest.getJars().get(1));
+    assertEquals("C", jobRequest.getJars().get(2));
   }
 }
