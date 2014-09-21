@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.io.SqoopWritable;
 
@@ -84,7 +85,8 @@ public class SqoopFileOutputFormat
       super.commitJob(context);
 
       Configuration config = context.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(true, config, JobConstants.JOB_ETL_DESTROYER);
+      SqoopDestroyerExecutor.executeDestroyer(true, config, Direction.FROM);
+      SqoopDestroyerExecutor.executeDestroyer(true, config, Direction.TO);
     }
 
     @Override
@@ -92,7 +94,8 @@ public class SqoopFileOutputFormat
       super.abortJob(context, state);
 
       Configuration config = context.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(false, config, JobConstants.JOB_ETL_DESTROYER);
+      SqoopDestroyerExecutor.executeDestroyer(false, config, Direction.FROM);
+      SqoopDestroyerExecutor.executeDestroyer(false, config, Direction.TO);
     }
   }
 }

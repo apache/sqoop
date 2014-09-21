@@ -68,15 +68,12 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
     runJob(job);
 
-    // @TODO(Abe): Change back after SQOOP-1488
-//    assertEquals(0L, provider.rowCount(stageTableName));
-//    assertEquals(4L, rowCount());
-//    assertRowInCities(1, "USA", "San Francisco");
-//    assertRowInCities(2, "USA", "Sunnyvale");
-//    assertRowInCities(3, "Czech Republic", "Brno");
-//    assertRowInCities(4, "USA", "Palo Alto");
-    assertEquals(4L, provider.rowCount(stageTableName));
-    assertEquals(0L, rowCount());
+    assertEquals(0L, provider.rowCount(stageTableName));
+    assertEquals(4L, rowCount());
+    assertRowInCities(1, "USA", "San Francisco");
+    assertRowInCities(2, "USA", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "Brno");
+    assertRowInCities(4, "USA", "Palo Alto");
 
     // Clean up testing table
     provider.dropTable(stageTableName);

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +37,8 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Loader;
@@ -100,6 +103,8 @@ public class TestMapReduce extends TestCase {
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(JobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
+    conf.set(JobConstants.JOB_ETL_FROM_DESTROYER, DummyFromDestroyer.class.getName());
+    conf.set(JobConstants.JOB_ETL_TO_DESTROYER, DummyToDestroyer.class.getName());
     conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
       CSVIntermediateDataFormat.class.getName());
     Schema schema = new Schema("Test");
@@ -110,6 +115,10 @@ public class TestMapReduce extends TestCase {
     ConfigurationUtils.setConnectorSchema(Direction.FROM, job, schema);
     JobUtils.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
         SqoopNullOutputFormat.class);
+
+    // Make sure both destroyers get called.
+    Assert.assertEquals(1, DummyFromDestroyer.count);
+    Assert.assertEquals(1, DummyToDestroyer.count);
   }
 
   public static class DummyPartition extends Partition {
@@ -249,6 +258,26 @@ public class TestMapReduce extends TestCase {
         index++;
         assertEquals(expected.toString(), data);
       }
+    }
+  }
+
+  public static class DummyFromDestroyer extends Destroyer {
+
+    public static int count = 0;
+
+    @Override
+    public void destroy(DestroyerContext context, Object o, Object o2) {
+      count++;
+    }
+  }
+
+  public static class DummyToDestroyer extends Destroyer {
+
+    public static int count = 0;
+
+    @Override
+    public void destroy(DestroyerContext context, Object o, Object o2) {
+      count++;
     }
   }
 }

@@ -40,10 +40,24 @@ public class SqoopDestroyerExecutor {
    * @param success True if the job execution was successfull
    * @param configuration Configuration object to get destroyer class with context
    *                      and configuration objects.
-   * @param propertyName Name of property that holds destroyer class.
+   * @param direction The direction of the Destroyer to execute.
    */
-  public static void executeDestroyer(boolean success, Configuration configuration, String propertyName) {
-    Destroyer destroyer = (Destroyer) ClassUtils.instantiate(configuration.get(propertyName));
+  public static void executeDestroyer(boolean success, Configuration configuration, Direction direction) {
+    String destroyerPropertyName, prefixPropertyName;
+    switch (direction) {
+      default:
+      case FROM:
+        destroyerPropertyName = JobConstants.JOB_ETL_FROM_DESTROYER;
+        prefixPropertyName = JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT;
+        break;
+
+      case TO:
+        destroyerPropertyName = JobConstants.JOB_ETL_TO_DESTROYER;
+        prefixPropertyName = JobConstants.PREFIX_CONNECTOR_TO_CONTEXT;
+        break;
+    }
+
+    Destroyer destroyer = (Destroyer) ClassUtils.instantiate(configuration.get(destroyerPropertyName));
 
     if(destroyer == null) {
       LOG.info("Skipping running destroyer as non was defined.");
@@ -51,16 +65,17 @@ public class SqoopDestroyerExecutor {
     }
 
     // Objects that should be pass to the Destroyer execution
-    PrefixContext subContext = new PrefixContext(configuration, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object fromConfigConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, configuration);
-    Object fromConfigJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, configuration);
+    PrefixContext subContext = new PrefixContext(configuration, prefixPropertyName);
+    Object configConnection = ConfigurationUtils.getConnectorConnectionConfig(direction, configuration);
+    Object configJob = ConfigurationUtils.getConnectorJobConfig(direction, configuration);
 
-    // TODO(Abe/Gwen): Change to conditional choosing between schemas.
-    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, configuration);
+    // Propagate connector schema in every case for now
+    Schema schema = ConfigurationUtils.getConnectorSchema(direction, configuration);
+
     DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 
     LOG.info("Executing destroyer class " + destroyer.getClass());
-    destroyer.destroy(destroyerContext, fromConfigConnection, fromConfigJob);
+    destroyer.destroy(destroyerContext, configConnection, configJob);
   }
 
   private SqoopDestroyerExecutor() {

@@ -68,7 +68,8 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(JobConstants.JOB_ETL_PARTITIONER, from.getPartitioner().getName());
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, from.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_LOADER, to.getLoader().getName());
-    context.setString(JobConstants.JOB_ETL_DESTROYER, from.getDestroyer().getName());
+    context.setString(JobConstants.JOB_ETL_FROM_DESTROYER, from.getDestroyer().getName());
+    context.setString(JobConstants.JOB_ETL_TO_DESTROYER, to.getDestroyer().getName());
     context.setString(JobConstants.INTERMEDIATE_DATA_FORMAT,
         mrJobRequest.getIntermediateDataFormat().getName());
 

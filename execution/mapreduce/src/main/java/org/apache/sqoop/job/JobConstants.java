@@ -37,9 +37,11 @@ public final class JobConstants extends Constants {
   public static final String JOB_ETL_LOADER = PREFIX_JOB_CONFIG
       + "etl.loader";
 
-  public static final String JOB_ETL_DESTROYER = PREFIX_JOB_CONFIG
-      + "etl.destroyer";
+  public static final String JOB_ETL_FROM_DESTROYER = PREFIX_JOB_CONFIG
+      + "etl.from.destroyer";
 
+  public static final String JOB_ETL_TO_DESTROYER = PREFIX_JOB_CONFIG
+      + "etl.to.destroyer";
 
   public static final String JOB_MR_OUTPUT_FILE = PREFIX_JOB_CONFIG
       + "mr.output.file";
