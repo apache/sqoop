@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
@@ -33,6 +35,8 @@ import static org.apache.sqoop.shell.utils.FormDisplayer.*;
 
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction {
+  private static final char SUPPORTED_DIRECTIONS_SEPARATOR = '/';
+
   @SuppressWarnings("static-access")
   public ShowConnectorFunction() {
     this.addOption(OptionBuilder
@@ -66,20 +70,23 @@ public class ShowConnectorFunction extends SqoopFunction {
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_VERSION));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CLASS));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_SUPPORTED_DIRECTIONS));
 
     List<String> ids = new LinkedList<String>();
     List<String> uniqueNames = new LinkedList<String>();
     List<String> versions = new LinkedList<String>();
     List<String> classes = new LinkedList<String>();
+    List<String> supportedDirections = new LinkedList<String>();
 
     for(MConnector connector : connectors) {
       ids.add(String.valueOf(connector.getPersistenceId()));
       uniqueNames.add(connector.getUniqueName());
       versions.add(connector.getVersion());
       classes.add(connector.getClassName());
+      supportedDirections.add(getSupportedDirections(connector));
     }
 
-    TableDisplayer.display(header, ids, uniqueNames, versions, classes);
+    TableDisplayer.display(header, ids, uniqueNames, versions, classes, supportedDirections);
   }
 
   private void showConnectors() {
@@ -105,8 +112,34 @@ public class ShowConnectorFunction extends SqoopFunction {
       connector.getPersistenceId(),
       connector.getUniqueName(),
       connector.getClassName(),
-      connector.getVersion()
+      connector.getVersion(),
+      getSupportedDirections(connector)
     );
     displayFormMetadataDetails(connector, client.getResourceBundle(connector.getPersistenceId()));
+  }
+
+  /**
+   * Creates a nicely formatted string for which directions are supported.
+   * Example: FROM/TO.
+   * @param connector
+   * @return String
+   */
+  private String getSupportedDirections(MConnector connector) {
+    StringBuffer supportedDirectionsBuffer = new StringBuffer();
+    SupportedDirections supportedDirections
+        = connector.getSupportedDirections();
+
+    if (supportedDirections.isDirectionSupported(Direction.FROM)) {
+      supportedDirectionsBuffer.append(Direction.FROM);
+
+      if (supportedDirections.isDirectionSupported(Direction.TO)) {
+        supportedDirectionsBuffer.append(SUPPORTED_DIRECTIONS_SEPARATOR);
+        supportedDirectionsBuffer.append(Direction.TO);
+      }
+    } else if (supportedDirections.isDirectionSupported(Direction.TO)) {
+      supportedDirectionsBuffer.append(Direction.TO);
+    }
+
+    return supportedDirectionsBuffer.toString();
   }
 }

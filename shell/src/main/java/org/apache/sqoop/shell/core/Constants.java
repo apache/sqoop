@@ -333,6 +333,8 @@ public class Constants {
       "table.header.version";
   public static final String RES_TABLE_HEADER_CLASS =
       "table.header.class";
+  public static final String RES_TABLE_HEADER_SUPPORTED_DIRECTIONS =
+      "table.header.supported_directions";
   public static final String RES_TABLE_HEADER_CONNECTOR =
       "table.header.connector";
   public static final String RES_TABLE_HEADER_FROM_CONNECTOR =

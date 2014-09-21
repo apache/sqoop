@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SupportedDirections;
 
 /**
  * Connector metadata.
@@ -138,5 +139,10 @@ public final class MConnector extends MPersistableEntity implements MClonable {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  public SupportedDirections getSupportedDirections() {
+    return new SupportedDirections(this.getJobForms(Direction.FROM) != null,
+        this.getJobForms(Direction.TO) != null);
   }
 }

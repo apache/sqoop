@@ -98,15 +98,11 @@ public final class ConnectorHandler {
     if (connector.getSupportedDirections().contains(Direction.FROM)) {
       fromJobForms = new MJobForms(FormUtils.toForms(
           connector.getJobConfigurationClass(Direction.FROM)));
-    } else {
-      fromJobForms = new MJobForms(new ArrayList<MForm>());
     }
 
     if (connector.getSupportedDirections().contains(Direction.TO)) {
       toJobForms = new MJobForms(FormUtils.toForms(
           connector.getJobConfigurationClass(Direction.TO)));
-    } else {
-      toJobForms = new MJobForms(new ArrayList<MForm>());
     }
 
     MConnectionForms connectionForms = new MConnectionForms(
