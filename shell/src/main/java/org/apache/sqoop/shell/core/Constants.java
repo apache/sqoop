@@ -34,7 +34,7 @@ public class Constants {
 
   // Options
 
-  public static final String OPT_XID = "xid";
+  public static final String OPT_LID = "lid";
   public static final String OPT_FROM = "from";
   public static final String OPT_TO = "to";
   public static final String OPT_ALL = "all";
@@ -54,9 +54,9 @@ public class Constants {
   public static final String OPT_POLL_TIMEOUT = "poll-timeout";
   public static final String OPT_DETAIL = "detail";
 
-  public static final char OPT_XID_CHAR = 'x';
-  public static final char OPT_FXID_CHAR = 'f';
-  public static final char OPT_TXID_CHAR = 't';
+  public static final char OPT_LID_CHAR = 'l';
+  public static final char OPT_FROM_CHAR = 'f';
+  public static final char OPT_TO_CHAR = 't';
   public static final char OPT_ALL_CHAR = 'a';
   public static final char OPT_JID_CHAR = 'j';
   public static final char OPT_CID_CHAR = 'c';
@@ -111,14 +111,14 @@ public class Constants {
   public static final String CMD_DISABLE = "disable";
   public static final String CMD_DISABLE_SC = "\\di";
 
-  public static final String FN_CONNECTION = "connection";
+  public static final String FN_LINK = "link";
   public static final String FN_JOB = "job";
   public static final String FN_SUBMISSION = "submission";
   public static final String FN_SERVER = "server";
   public static final String FN_OPTION = "option";
   public static final String FN_CONNECTOR = "connector";
   public static final String FN_VERSION = "version";
-  public static final String FN_FRAMEWORK = "framework";
+  public static final String FN_DRIVER_CONFIG = "driverConfig";
 
   public static final String PROP_HOMEDIR = "user.home";
   public static final String PROP_CURDIR = "user.dir";
@@ -130,8 +130,8 @@ public class Constants {
 
   // Resource Keys for various messages
 
-  public static final String RES_ARGS_XID_MISSING =
-      "args.xid_missing";
+  public static final String RES_ARGS_LID_MISSING =
+      "args.lid_missing";
   public static final String RES_ARGS_FROM_MISSING =
       "args.from_missing";
   public static final String RES_ARGS_TO_MISSING =
@@ -145,46 +145,46 @@ public class Constants {
   public static final String RES_ARGS_VALUE_MISSING =
       "args.value_missing";
 
-  public static final String RES_PROMPT_CONN_ID =
-      "prompt.conn_id";
+  public static final String RES_PROMPT_LINK_ID =
+      "prompt.link_id";
   public static final String RES_PROMPT_JOB_ID =
       "prompt.job_id";
   public static final String RES_CONNECTOR_ID =
       "prompt.connector_id";
-  public static final String RES_PROMPT_UPDATE_CONN_METADATA =
-      "prompt.update_conn_metadata";
-  public static final String RES_PROMPT_UPDATE_JOB_METADATA =
-      "prompt.update_job_metadata";
-  public static final String RES_PROMPT_FILL_CONN_METADATA =
-      "prompt.fill_conn_metadata";
-  public static final String RES_PROMPT_FILL_JOB_METADATA =
-      "prompt.fill_job_metadata";
+  public static final String RES_PROMPT_UPDATE_LINK_CONFIG =
+      "prompt.update_link_config";
+  public static final String RES_PROMPT_UPDATE_JOB_CONFIG =
+      "prompt.update_job_config";
+  public static final String RES_PROMPT_FILL_LINK_CONFIG =
+      "prompt.fill_link_config";
+  public static final String RES_PROMPT_FILL_JOB_CONFIG =
+      "prompt.fill_job_config";
 
-  public static final String RES_CLONE_CONN_SUCCESSFUL =
-      "clone.conn.successful";
+  public static final String RES_CLONE_LINK_SUCCESSFUL =
+      "clone.link.successful";
   public static final String RES_CLONE_JOB_SUCCESSFUL =
       "clone.job.successful";
-  public static final String RES_CLONE_CLONING_CONN =
-      "clone.cloning_conn";
+  public static final String RES_CLONE_CLONING_LINK =
+      "clone.cloning_link";
   public static final String RES_CLONE_CLONING_JOB =
       "clone.cloning_job";
 
-  public static final String RES_CREATE_CONN_SUCCESSFUL =
-      "create.conn_successful";
+  public static final String RES_CREATE_LINK_SUCCESSFUL =
+      "create.link_successful";
   public static final String RES_CREATE_JOB_SUCCESSFUL =
       "create.job_successful";
-  public static final String RES_CREATE_CREATING_CONN =
-      "create.creating_conn";
+  public static final String RES_CREATE_CREATING_LINK =
+      "create.creating_link";
   public static final String RES_CREATE_CREATING_JOB =
       "create.creating_job";
 
-  public static final String RES_DISABLE_CONNECTION_SUCCESSFUL =
-      "disable.conn_successful";
+  public static final String RES_DISABLE_LINK_SUCCESSFUL =
+      "disable.link_successful";
   public static final String RES_DISABLE_JOB_SUCCESSFUL =
       "disable.job_successful";
 
-  public static final String RES_ENABLE_CONNECTION_SUCCESSFUL =
-      "enable.conn_successful";
+  public static final String RES_ENABLE_LINK_SUCCESSFUL =
+      "enable.link_successful";
   public static final String RES_ENABLE_JOB_SUCCESSFUL =
       "enable.job_successful";
 
@@ -233,16 +233,16 @@ public class Constants {
   public static final String RES_SET_SERVER_IGNORED =
       "set.server_ignored";
 
-  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNS =
-      "show.prompt_display_all_conns";
-  public static final String RES_SHOW_PROMPT_DISPLAY_CONN_XID =
-      "show.prompt_display_conn_xid";
-  public static final String RES_SHOW_PROMPT_CONNS_TO_SHOW =
-      "show.prompt_conns_to_show";
-  public static final String RES_SHOW_PROMPT_CONN_INFO =
-      "show.prompt_conn_info";
-  public static final String RES_SHOW_PROMPT_CONN_CID_INFO =
-      "show.prompt_conn_cid_info";
+  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_LINKS =
+      "show.prompt_display_all_links";
+  public static final String RES_SHOW_PROMPT_DISPLAY_LINK_LID =
+      "show.prompt_display_link_lid";
+  public static final String RES_SHOW_PROMPT_LINKS_TO_SHOW =
+      "show.prompt_links_to_show";
+  public static final String RES_SHOW_PROMPT_LINK_INFO =
+      "show.prompt_link_info";
+  public static final String RES_SHOW_PROMPT_LINK_CID_INFO =
+      "show.prompt_link_cid_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS =
       "show.prompt_display_all_connectors";
@@ -253,10 +253,10 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_CONNECTOR_INFO =
       "show.prompt_connector_info";
 
-  public static final String RES_SHOW_FRAMEWORK_USAGE =
-      "show.framework_usage";
-  public static final String RES_SHOW_PROMPT_FRAMEWORK_OPTS =
-      "show.prompt_framework_opts";
+  public static final String RES_SHOW_DRIVER_CONFIG_USAGE =
+      "show.driver_config_usage";
+  public static final String RES_SHOW_PROMPT_DRIVER_CONFIG_OPTS =
+      "show.prompt_driver_config_opts";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_JOBS =
       "show.prompt_display_all_jobs";
@@ -266,8 +266,8 @@ public class Constants {
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
       "show.prompt_job_info";
-  public static final String RES_SHOW_PROMPT_JOB_XID_CID_INFO =
-      "show.prompt_job_xid_cid_info";
+  public static final String RES_SHOW_PROMPT_JOB_LID_CID_INFO =
+      "show.prompt_job_lid_cid_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS =
       "show.prompt_display_all_submissions";
@@ -316,10 +316,10 @@ public class Constants {
   public static final String RES_SQOOP_PROMPT_SHELL_LOADEDRC =
       "sqoop.prompt_shell_loadedrc";
 
-  public static final String RES_UPDATE_UPDATING_CONN =
-      "update.conn";
-  public static final String RES_UPDATE_CONN_SUCCESSFUL =
-      "update.conn_successful";
+  public static final String RES_UPDATE_UPDATING_LINK =
+      "update.link";
+  public static final String RES_UPDATE_LINK_SUCCESSFUL =
+      "update.link_successful";
   public static final String RES_UPDATE_UPDATING_JOB =
       "update.job";
   public static final String RES_UPDATE_JOB_SUCCESSFUL =
@@ -353,7 +353,7 @@ public class Constants {
       "table.header.enabled";
 
   public static final String RES_FORMDISPLAYER_CONNECTION =
-      "formdisplayer.connection";
+      "formdisplayer.link";
   public static final String RES_FORMDISPLAYER_JOB =
       "formdisplayer.job";
   public static final String RES_FORMDISPLAYER_FORM =
@@ -402,10 +402,10 @@ public class Constants {
       "submission.executed_success";
   public static final String RES_SUBMISSION_SERVER_URL =
       "submission.server_url";
-  public static final String RES_CONNECTOR_SCHEMA =
-      "submission.connector_schema";
-  public static final String RES_HIO_SCHEMA =
-    "submission.hio_schema";
+  public static final String RES_FROM_SCHEMA =
+      "submission.from_schema";
+  public static final String RES_TO_SCHEMA =
+    "submission.to_schema";
 
   private Constants() {
     // Instantiation is prohibited

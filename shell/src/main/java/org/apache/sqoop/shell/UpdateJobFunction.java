@@ -63,16 +63,16 @@ public class UpdateJobFunction extends SqoopFunction {
 
     MJob job = client.getJob(jobId);
 
-    ResourceBundle fromConnectorBundle = client.getResourceBundle(
+    ResourceBundle fromConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.FROM));
-    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
-    ResourceBundle toConnectorBundle = client.getResourceBundle(
+    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
+    ResourceBundle toConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.TO));
 
     Status status = Status.FINE;
 
     if (isInteractive) {
-      printlnResource(Constants.RES_PROMPT_UPDATE_JOB_METADATA);
+      printlnResource(Constants.RES_PROMPT_UPDATE_JOB_CONFIG);
 
       do {
         // Print error introduction if needed
@@ -81,7 +81,7 @@ public class UpdateJobFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, fromConnectorBundle, frameworkBundle, toConnectorBundle)) {
+        if(!fillJob(reader, job, fromConnectorBundle, driverConfigBundle, toConnectorBundle)) {
           return status;
         }
 

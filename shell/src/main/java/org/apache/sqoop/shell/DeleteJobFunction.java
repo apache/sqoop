@@ -37,7 +37,7 @@ public class DeleteJobFunction extends SqoopFunction {
       .withLongOpt(Constants.OPT_JID)
       .isRequired()
       .hasArg()
-      .create('j'));
+      .create(Constants.OPT_JID_CHAR));
   }
 
   @Override

@@ -24,7 +24,7 @@ public final class GenericJdbcConnectorConstants {
 
   // Resource bundle name
   public static final String RESOURCE_BUNDLE_NAME =
-      "generic-jdbc-connector-resources";
+      "generic-jdbc-connector-config";
 
   /*
    * All jdbc connector related configuration is prefixed with this:

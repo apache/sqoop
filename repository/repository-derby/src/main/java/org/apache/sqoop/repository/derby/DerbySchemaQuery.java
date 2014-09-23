@@ -1012,7 +1012,7 @@ public final class DerbySchemaQuery {
   /**
    * Intended to rename forms based on direction.
    * e.g. If SQ_FORM.SQF_NAME = 'table' and parameter 1 = 'from'
-   * then SQ_FORM.SQF_NAME = 'fromTable'.
+   * then SQ_FORM.SQF_NAME = 'fromJobConfig'.
    */
   public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES =
       "UPDATE " + TABLE_SQ_INPUT + " SET "

@@ -23,9 +23,9 @@ import org.apache.sqoop.model.Form;
 @ConfigurationClass
 public class ToJobConfiguration {
     @Form
-    public OutputForm output;
+    public ToJobConfig toJobConfig;
 
     public ToJobConfiguration() {
-      output = new OutputForm();
+      toJobConfig = new ToJobConfig();
     }
 }

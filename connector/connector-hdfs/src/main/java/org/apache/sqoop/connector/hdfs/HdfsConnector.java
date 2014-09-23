@@ -20,10 +20,10 @@ package org.apache.sqoop.connector.hdfs;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
-import org.apache.sqoop.connector.spi.MetadataUpgrader;
+import org.apache.sqoop.connector.spi.RepositoryUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
@@ -71,8 +71,8 @@ public class HdfsConnector extends SqoopConnector {
    * @return Get connection configuration class
    */
   @Override
-  public Class getConnectionConfigurationClass() {
-    return ConnectionConfiguration.class;
+  public Class getLinkConfigurationClass() {
+    return LinkConfiguration.class;
   }
 
   /**
@@ -108,7 +108,7 @@ public class HdfsConnector extends SqoopConnector {
   }
 
   /**
-   * Returns validation object that Sqoop framework can use to validate user
+   * Returns validation object that Sqoop can use to validate user
    * supplied forms before accepting them. This object will be used both for
    * connection and job forms.
    *
@@ -120,13 +120,13 @@ public class HdfsConnector extends SqoopConnector {
   }
 
   /**
-   * Returns an {@linkplain org.apache.sqoop.connector.spi.MetadataUpgrader} object that can upgrade the
+   * Returns an {@linkplain org.apache.sqoop.connector.spi.RepositoryUpgrader} object that can upgrade the
    * connection and job metadata.
    *
    * @return MetadataUpgrader object
    */
   @Override
-  public MetadataUpgrader getMetadataUpgrader() {
-    return new HdfsMetadataUpgrader();
+  public RepositoryUpgrader getRepositoryUpgrader() {
+    return new HdfsConfigUpgrader();
   }
 }

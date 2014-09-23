@@ -17,6 +17,19 @@
  */
 package org.apache.sqoop.json;
 
+import static org.apache.sqoop.json.util.FormSerialization.ALL;
+import static org.apache.sqoop.json.util.FormSerialization.CLASS;
+import static org.apache.sqoop.json.util.FormSerialization.CON_FORMS;
+import static org.apache.sqoop.json.util.FormSerialization.ID;
+import static org.apache.sqoop.json.util.FormSerialization.JOB_FORMS;
+import static org.apache.sqoop.json.util.FormSerialization.NAME;
+import static org.apache.sqoop.json.util.FormSerialization.VERSION;
+import static org.apache.sqoop.json.util.FormSerialization.extractForms;
+import static org.apache.sqoop.json.util.FormSerialization.restoreForms;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.CONNECTOR_CONFIGS;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.extractResourceBundle;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.restoreResourceBundle;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +39,11 @@ import java.util.Set;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MJobForms;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import static org.apache.sqoop.json.util.FormSerialization.*;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
 
 public class ConnectorBean implements JsonBean {
 
@@ -93,8 +103,7 @@ public class ConnectorBean implements JsonBean {
         jsonBundles.put(entry.getKey().toString(),
                          extractResourceBundle(entry.getValue()));
       }
-
-      all.put(CONNECTOR_RESOURCES, jsonBundles);
+      all.put(CONNECTOR_CONFIGS, jsonBundles);
     }
 
     return all;
@@ -116,28 +125,24 @@ public class ConnectorBean implements JsonBean {
       String version = (String) object.get(VERSION);
 
       List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
-
       JSONObject jobJson = (JSONObject) object.get(JOB_FORMS);
       JSONArray fromJobJson = (JSONArray)jobJson.get(Direction.FROM.name());
       JSONArray toJobJson = (JSONArray)jobJson.get(Direction.TO.name());
-      List<MForm> fromJobForms =
-          restoreForms(fromJobJson);
-      List<MForm> toJobForms =
-          restoreForms(toJobJson);
+      List<MForm> fromJobForms = restoreForms(fromJobJson);
+      List<MForm> toJobForms = restoreForms(toJobJson);
       MJobForms fromJob = new MJobForms(fromJobForms);
       MJobForms toJob = new MJobForms(toJobForms);
       MConnectionForms connection = new MConnectionForms(connForms);
-
-      MConnector connector = new MConnector(uniqueName, className, version, connection, fromJob, toJob);
+      MConnector connector = new MConnector(uniqueName, className, version, connection, fromJob,
+          toJob);
       connector.setPersistenceId(connectorId);
-
       connectors.add(connector);
     }
 
-    if(jsonObject.containsKey(CONNECTOR_RESOURCES)) {
+    if(jsonObject.containsKey(CONNECTOR_CONFIGS)) {
       bundles = new HashMap<Long, ResourceBundle>();
 
-      JSONObject jsonBundles = (JSONObject) jsonObject.get(CONNECTOR_RESOURCES);
+      JSONObject jsonBundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
       Set<Map.Entry<String, JSONObject>> entrySet = jsonBundles.entrySet();
       for (Map.Entry<String, JSONObject> entry : entrySet) {
         bundles.put(Long.parseLong(entry.getKey()),

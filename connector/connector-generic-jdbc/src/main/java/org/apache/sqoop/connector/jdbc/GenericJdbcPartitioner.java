@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 
-public class GenericJdbcPartitioner extends Partitioner<ConnectionConfiguration, FromJobConfiguration> {
+public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
 
   private static final BigDecimal NUMERIC_MIN_INCREMENT = new BigDecimal(10000 * Double.MIN_VALUE);
 
@@ -47,7 +47,7 @@ public class GenericJdbcPartitioner extends Partitioner<ConnectionConfiguration,
   private Boolean partitionColumnNull;
 
   @Override
-  public List<Partition> getPartitions(PartitionerContext context,ConnectionConfiguration connection, FromJobConfiguration job) {
+  public List<Partition> getPartitions(PartitionerContext context,LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
     List<Partition> partitions = new LinkedList<Partition>();
 
     numberPartitions = context.getMaxPartitions();
@@ -56,7 +56,7 @@ public class GenericJdbcPartitioner extends Partitioner<ConnectionConfiguration,
     partitionMinValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE);
     partitionMaxValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE);
 
-    partitionColumnNull = job.fromTable.partitionColumnNull;
+    partitionColumnNull = fromJobConf.fromJobConfig.partitionColumnNull;
     if (partitionColumnNull == null) {
       partitionColumnNull = false;
     }

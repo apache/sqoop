@@ -156,7 +156,7 @@ abstract public class TomcatTestCase {
   }
 
   /**
-   * Assert that mapreduce has generated following lines.
+   * Assert that execution has generated following lines.
    *
    * As the lines can be spread between multiple files the ordering do not make
    * a difference.
@@ -164,27 +164,29 @@ abstract public class TomcatTestCase {
    * @param lines
    * @throws IOException
    */
-  protected void assertMapreduceOutput(String... lines) throws IOException {
+  protected void assertTo(String... lines) throws IOException {
+    // TODO(VB): fix this to be not directly dependent on mapreduce
     HdfsAsserts.assertMapreduceOutput(hdfsClient, getMapreduceDirectory(), lines);
   }
 
   /**
-   * Verify number of output mapreduce files.
+   * Verify number of TO files.
    *
    * @param expectedFiles Expected number of files
    */
-  protected void assertMapreduceOutputFiles(int expectedFiles) throws IOException {
+  protected void assertToFiles(int expectedFiles) throws IOException {
+    // TODO(VB): fix this to be not directly dependent on mapreduce
     HdfsAsserts.assertMapreduceOutputFiles(hdfsClient, getMapreduceDirectory(), expectedFiles);
   }
 
   /**
-   * Create mapreduce input file with specified content.
+   * Create FROM file with specified content.
    *
    * @param filename Input file name
    * @param lines Individual lines that should be written into the file
    * @throws IOException
    */
-  protected void createInputMapreduceFile(String filename, String...lines) throws IOException {
+  protected void createFromFile(String filename, String...lines) throws IOException {
     HdfsUtils.createFile(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), filename), lines);
   }
 }

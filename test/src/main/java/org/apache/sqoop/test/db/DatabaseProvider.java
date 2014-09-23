@@ -43,7 +43,7 @@ abstract public class DatabaseProvider {
   /**
    * Internal connection to the database.
    */
-  private Connection connection;
+  private Connection databaseConnection;
 
   /**
    * JDBC Url to the remote database system.
@@ -140,9 +140,9 @@ abstract public class DatabaseProvider {
    */
   public void stop() {
    // Close connection to the database server
-   if(connection != null) {
+   if(databaseConnection != null) {
      try {
-       connection.close();
+       databaseConnection.close();
      } catch (SQLException e) {
        LOG.info("Ignored exception on closing connection", e);
      }
@@ -155,7 +155,7 @@ abstract public class DatabaseProvider {
    * @return
    */
   public Connection getConnection() {
-    return connection;
+    return databaseConnection;
   }
 
   /**
@@ -164,7 +164,7 @@ abstract public class DatabaseProvider {
    * @param connection New connection object
    */
   protected void setConnection(Connection connection) {
-    this.connection = connection;
+    databaseConnection = connection;
   }
 
   /**
@@ -179,7 +179,7 @@ abstract public class DatabaseProvider {
     Statement stmt = null;
 
     try {
-      stmt = connection.createStatement();
+      stmt = databaseConnection.createStatement();
       stmt.executeUpdate(query);
     } catch (SQLException e) {
       LOG.error("Error in executing query", e);
@@ -208,7 +208,7 @@ abstract public class DatabaseProvider {
     Statement stmt = null;
 
     try {
-      stmt = connection.createStatement();
+      stmt = databaseConnection.createStatement();
       return stmt.executeQuery(query);
     } catch (SQLException e) {
       LOG.error("Error in executing query", e);

@@ -31,7 +31,7 @@ public class UpdateCommand extends SqoopCommand {
       Constants.CMD_UPDATE,
       Constants.CMD_UPDATE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, UpdateConnectionFunction.class,
+        Constants.FN_LINK, UpdateLinkFunction.class,
         Constants.FN_JOB, UpdateJobFunction.class
       )
     );

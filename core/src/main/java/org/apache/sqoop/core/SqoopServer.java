@@ -20,8 +20,8 @@ package org.apache.sqoop.core;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.framework.FrameworkManager;
-import org.apache.sqoop.framework.JobManager;
+import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.driver.JobManager;
 import org.apache.sqoop.repository.RepositoryManager;
 
 /**
@@ -34,7 +34,7 @@ public class SqoopServer {
   public static void destroy() {
     LOG.info("Shutting down Sqoop server");
     JobManager.getInstance().destroy();
-    FrameworkManager.getInstance().destroy();
+    Driver.getInstance().destroy();
     ConnectorManager.getInstance().destroy();
     RepositoryManager.getInstance().destroy();
     AuditLoggerManager.getInstance().destroy();
@@ -49,7 +49,7 @@ public class SqoopServer {
       AuditLoggerManager.getInstance().initialize();
       RepositoryManager.getInstance().initialize();
       ConnectorManager.getInstance().initialize();
-      FrameworkManager.getInstance().initialize();
+      Driver.getInstance().initialize();
       JobManager.getInstance().initialize();
       LOG.info("Sqoop server has successfully boot up");
     } catch (Exception ex) {

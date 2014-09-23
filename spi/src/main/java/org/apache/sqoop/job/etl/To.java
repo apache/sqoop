@@ -21,7 +21,7 @@ package org.apache.sqoop.job.etl;
  * This specifies classes that perform connector-defined steps
  * within export execution:
  * Initializer
- * -> (framework-defined steps)
+ * -> (Sqoop-defined steps)
  * -> Loader
  * -> Destroyer
  */
@@ -44,7 +44,7 @@ public class To extends Transferable {
 
   @Override
   public String toString() {
-    return "Exporter{" + super.toString() +
+    return "To {" + super.toString() +
       ", loader=" + loader +
       '}';
   }

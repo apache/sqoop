@@ -44,10 +44,10 @@ public class TestSubmissionHandling extends DerbyTestCase {
     createSchema();
 
     // We always needs connector and framework structures in place
-    loadConnectorAndFramework();
+    loadConnectorAndDriverConfig();
 
     // We also always needs connection metadata in place
-    loadConnections();
+    loadLinks();
 
     // And finally we always needs job metadata in place
     loadJobs();
@@ -56,34 +56,34 @@ public class TestSubmissionHandling extends DerbyTestCase {
   public void testFindSubmissionsUnfinished() throws Exception {
     List<MSubmission> submissions;
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
 
     loadSubmissions();
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
   }
 
   public void testExistsSubmission() throws Exception {
     // There shouldn't be anything on empty repository
-    assertFalse(handler.existsSubmission(1, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(2, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(3, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(4, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(5, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(6, getDerbyConnection()));
+    assertFalse(handler.existsSubmission(1, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(2, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(3, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(4, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(5, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(6, getDerbyDatabaseConnection()));
 
     loadSubmissions();
 
-    assertTrue(handler.existsSubmission(1, getDerbyConnection()));
-    assertTrue(handler.existsSubmission(2, getDerbyConnection()));
-    assertTrue(handler.existsSubmission(3, getDerbyConnection()));
-    assertTrue(handler.existsSubmission(4, getDerbyConnection()));
-    assertTrue(handler.existsSubmission(5, getDerbyConnection()));
-    assertFalse(handler.existsSubmission(6, getDerbyConnection()));
+    assertTrue(handler.existsSubmission(1, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsSubmission(2, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsSubmission(3, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsSubmission(4, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsSubmission(5, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsSubmission(6, getDerbyDatabaseConnection()));
   }
 
   public void testCreateSubmission() throws Exception {
@@ -111,13 +111,13 @@ public class TestSubmissionHandling extends DerbyTestCase {
     submission.setExceptionStackTrace("Yeah it happens");
     submission.setCounters(counters);
 
-    handler.createSubmission(submission, getDerbyConnection());
+    handler.createSubmission(submission, getDerbyDatabaseConnection());
 
     assertEquals(1, submission.getPersistenceId());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
 
     List<MSubmission> submissions =
-      handler.findSubmissionsUnfinished(getDerbyConnection());
+      handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
 
@@ -162,7 +162,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     // Let's create second (simpler) connection
     submission =
       new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
-    handler.createSubmission(submission, getDerbyConnection());
+    handler.createSubmission(submission, getDerbyDatabaseConnection());
 
     assertEquals(2, submission.getPersistenceId());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
@@ -172,16 +172,16 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
 
     List<MSubmission> submissions =
-      handler.findSubmissionsUnfinished(getDerbyConnection());
+      handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
 
     MSubmission submission = submissions.get(0);
     submission.setStatus(SubmissionStatus.SUCCEEDED);
 
-    handler.updateSubmission(submission, getDerbyConnection());
+    handler.updateSubmission(submission, getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
   }
@@ -190,7 +190,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
     List<MSubmission> submissions;
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 5);
@@ -198,23 +198,23 @@ public class TestSubmissionHandling extends DerbyTestCase {
     Calendar calendar = Calendar.getInstance();
     // 2012-01-03 05:05:05
     calendar.set(2012, Calendar.JANUARY, 3, 5, 5, 5);
-    handler.purgeSubmissions(calendar.getTime(), getDerbyConnection());
+    handler.purgeSubmissions(calendar.getTime(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
 
-    handler.purgeSubmissions(new Date(), getDerbyConnection());
+    handler.purgeSubmissions(new Date(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
 
-    handler.purgeSubmissions(new Date(), getDerbyConnection());
+    handler.purgeSubmissions(new Date(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyConnection());
+    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
@@ -230,16 +230,16 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
     assertCountForTable("SQOOP.SQ_SUBMISSION", 5);
 
-    handler.deleteJob(1, getDerbyConnection());
+    handler.deleteJob(1, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 3);
 
-    handler.deleteJob(2, getDerbyConnection());
+    handler.deleteJob(2, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
 
-    handler.deleteJob(3, getDerbyConnection());
+    handler.deleteJob(3, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
 
-    handler.deleteJob(4, getDerbyConnection());
+    handler.deleteJob(4, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
   }
 }

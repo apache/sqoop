@@ -25,7 +25,7 @@ import org.apache.sqoop.schema.Schema;
  *
  * This class is wrapping information if the run was successful or not.
  */
-public class DestroyerContext extends ActorContext {
+public class DestroyerContext extends TransferableContext {
 
   private boolean success;
 

@@ -21,17 +21,17 @@ package org.apache.sqoop.job.etl;
  * This allows connector to define work to complete execution, for example,
  * resource cleaning.
  */
-public abstract class Destroyer<ConnectionConfiguration, JobConfiguration> {
+public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
 
   /**
    * Callback to clean up after job execution.
    *
    * @param context Destroyer context
-   * @param connectionConfiguration Connection configuration object
+   * @param linkConfiguration link configuration object
    * @param jobConfiguration Job configuration object
    */
   public abstract void destroy(DestroyerContext context,
-                               ConnectionConfiguration connectionConfiguration,
+                               LinkConfiguration linkConfiguration,
                                JobConfiguration jobConfiguration);
 
 }

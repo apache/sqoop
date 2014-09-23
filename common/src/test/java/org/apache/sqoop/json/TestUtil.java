@@ -18,11 +18,11 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -44,23 +44,18 @@ public class TestUtil {
       getConnectionForms(), getJobForms(), getJobForms());
   }
 
-  public static MFramework getFramework() {
-    return new MFramework(getConnectionForms(), getJobForms(), "1");
+  public static MDriverConfig getDriverConfig() {
+    return new MDriverConfig(getConnectionForms(), getJobForms(), "1");
   }
 
-  public static MConnection getConnection(String name) {
-    return new MConnection(1,
-                           getConnector(name).getConnectionForms(),
-                           getFramework().getConnectionForms()
-    );
+  public static MLink getLink(String name) {
+    return new MLink(1, getConnector(name).getConnectionForms(), getDriverConfig()
+        .getConnectionForms());
   }
 
   public static MJob getJob(String name) {
-    return new MJob(1, 2, 1, 2,
-                    getConnector(name).getJobForms(Direction.FROM),
-                    getConnector(name).getJobForms(Direction.TO),
-                    getFramework().getJobForms()
-    );
+    return new MJob(1, 2, 1, 2, getConnector(name).getJobForms(Direction.FROM), getConnector(name)
+        .getJobForms(Direction.TO), getDriverConfig().getJobForms());
   }
 
   public static MConnectionForms getConnectionForms() {

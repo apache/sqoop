@@ -33,9 +33,9 @@ import java.util.ResourceBundle;
  */
 public final class ResourceBundleSerialization {
 
-  public static final String RESOURCES = "resources";
-  public static final String CONNECTOR_RESOURCES = "resources-connector";
-  public static final String FRAMEWORK_RESOURCES = "resources-framework";
+  public static final String CONFIGS = "configs";
+  public static final String CONNECTOR_CONFIGS = "connector-configs";
+  public static final String DRIVER_CONFIGS = "driver-configs";
 
   @SuppressWarnings("unchecked")
   public static JSONArray extractResourceBundles(List<ResourceBundle> bundles) {
@@ -50,27 +50,20 @@ public final class ResourceBundleSerialization {
   @SuppressWarnings("unchecked")
   public static JSONObject extractResourceBundle(ResourceBundle bundle) {
     JSONObject json = new JSONObject();
-
     Enumeration<String> keys = bundle.getKeys();
-
     while(keys.hasMoreElements()) {
       String key = keys.nextElement();
-
       json.put(key, bundle.getString(key));
-
     }
-
     return json;
   }
 
   @SuppressWarnings("unchecked")
   public static List<ResourceBundle> restoreResourceBundles(JSONArray array) {
     List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
-
     for (Object item : array) {
       bundles.add(restoreResourceBundle((JSONObject) item));
     }
-
     return bundles;
   }
 

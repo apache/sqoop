@@ -26,31 +26,32 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class JobServlet extends SqoopProtocolServlet {
 
-  private RequestHandler requestHandler;
+  private RequestHandler jobRequestHandler;
 
   public JobServlet() {
-    requestHandler = new JobRequestHandler();
+    jobRequestHandler = new JobRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return jobRequestHandler.handleEvent(ctx);
   }
 
   @Override
   protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return jobRequestHandler.handleEvent(ctx);
   }
 
   @Override
   protected JsonBean handlePutRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return jobRequestHandler.handleEvent(ctx);
   }
 
   @Override
   protected JsonBean handleDeleteRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return jobRequestHandler.handleEvent(ctx);
   }
 }

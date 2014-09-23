@@ -45,16 +45,16 @@ public class TestJobHandling extends DerbyTestCase {
     createSchema();
 
     // We always needs connector and framework structures in place
-    loadConnectorAndFramework();
+    loadConnectorAndDriverConfig();
 
     // We always needs connection metadata in place
-    loadConnections();
+    loadLinks();
   }
 
   public void testFindJob() throws Exception {
     // Let's try to find non existing job
     try {
-      handler.findJob(1, getDerbyConnection());
+      handler.findJob(1, getDerbyDatabaseConnection());
       fail();
     } catch(SqoopException ex) {
       assertEquals(DerbyRepoError.DERBYREPO_0030, ex.getErrorCode());
@@ -63,7 +63,7 @@ public class TestJobHandling extends DerbyTestCase {
     // Load prepared connections into database
     loadJobs();
 
-    MJob jobImport = handler.findJob(1, getDerbyConnection());
+    MJob jobImport = handler.findJob(1, getDerbyDatabaseConnection());
     assertNotNull(jobImport);
     assertEquals(1, jobImport.getPersistenceId());
     assertEquals("JA", jobImport.getName());
@@ -98,13 +98,13 @@ public class TestJobHandling extends DerbyTestCase {
     List<MJob> list;
 
     // Load empty list on empty repository
-    list = handler.findJobs(getDerbyConnection());
+    list = handler.findJobs(getDerbyDatabaseConnection());
     assertEquals(0, list.size());
 
     loadJobs();
 
     // Load all two connections on loaded repository
-    list = handler.findJobs(getDerbyConnection());
+    list = handler.findJobs(getDerbyDatabaseConnection());
     assertEquals(4, list.size());
 
     assertEquals("JA", list.get(0).getName());
@@ -118,29 +118,29 @@ public class TestJobHandling extends DerbyTestCase {
 
   public void testExistsJob() throws Exception {
     // There shouldn't be anything on empty repository
-    assertFalse(handler.existsJob(1, getDerbyConnection()));
-    assertFalse(handler.existsJob(2, getDerbyConnection()));
-    assertFalse(handler.existsJob(3, getDerbyConnection()));
-    assertFalse(handler.existsJob(4, getDerbyConnection()));
-    assertFalse(handler.existsJob(5, getDerbyConnection()));
+    assertFalse(handler.existsJob(1, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(2, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(3, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(4, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(5, getDerbyDatabaseConnection()));
 
     loadJobs();
 
-    assertTrue(handler.existsJob(1, getDerbyConnection()));
-    assertTrue(handler.existsJob(2, getDerbyConnection()));
-    assertTrue(handler.existsJob(3, getDerbyConnection()));
-    assertTrue(handler.existsJob(4, getDerbyConnection()));
-    assertFalse(handler.existsJob(5, getDerbyConnection()));
+    assertTrue(handler.existsJob(1, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsJob(2, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsJob(3, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsJob(4, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(5, getDerbyDatabaseConnection()));
   }
 
   public void testInUseJob() throws Exception {
     loadJobs();
     loadSubmissions();
 
-    assertTrue(handler.inUseJob(1, getDerbyConnection()));
-    assertFalse(handler.inUseJob(2, getDerbyConnection()));
-    assertFalse(handler.inUseJob(3, getDerbyConnection()));
-    assertFalse(handler.inUseJob(4, getDerbyConnection()));
+    assertTrue(handler.inUseJob(1, getDerbyDatabaseConnection()));
+    assertFalse(handler.inUseJob(2, getDerbyDatabaseConnection()));
+    assertFalse(handler.inUseJob(3, getDerbyDatabaseConnection()));
+    assertFalse(handler.inUseJob(4, getDerbyDatabaseConnection()));
   }
 
   public void testCreateJob() throws Exception {
@@ -149,13 +149,13 @@ public class TestJobHandling extends DerbyTestCase {
     // Load some data
     fillJob(job);
 
-    handler.createJob(job, getDerbyConnection());
+    handler.createJob(job, getDerbyDatabaseConnection());
 
     assertEquals(1, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 1);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 6);
 
-    MJob retrieved = handler.findJob(1, getDerbyConnection());
+    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
     assertEquals(1, retrieved.getPersistenceId());
 
     List<MForm> forms;
@@ -176,7 +176,7 @@ public class TestJobHandling extends DerbyTestCase {
     job = getJob();
     fillJob(job);
 
-    handler.createJob(job, getDerbyConnection());
+    handler.createJob(job, getDerbyDatabaseConnection());
 
     assertEquals(2, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 2);
@@ -189,7 +189,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB", 4);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
 
-    MJob job = handler.findJob(1, getDerbyConnection());
+    MJob job = handler.findJob(1, getDerbyDatabaseConnection());
 
     List<MForm> forms;
 
@@ -208,13 +208,13 @@ public class TestJobHandling extends DerbyTestCase {
 
     job.setName("name");
 
-    handler.updateJob(job, getDerbyConnection());
+    handler.updateJob(job, getDerbyDatabaseConnection());
 
     assertEquals(1, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 4);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 26);
 
-    MJob retrieved = handler.findJob(1, getDerbyConnection());
+    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
     assertEquals("name", retrieved.getName());
 
     forms = job.getConnectorPart(Direction.FROM).getForms();
@@ -237,16 +237,16 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobs();
 
     // disable job 1
-    handler.enableJob(1, false, getDerbyConnection());
+    handler.enableJob(1, false, getDerbyDatabaseConnection());
 
-    MJob retrieved = handler.findJob(1, getDerbyConnection());
+    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
     assertNotNull(retrieved);
     assertEquals(false, retrieved.getEnabled());
 
     // enable job 1
-    handler.enableJob(1, true, getDerbyConnection());
+    handler.enableJob(1, true, getDerbyDatabaseConnection());
 
-    retrieved = handler.findJob(1, getDerbyConnection());
+    retrieved = handler.findJob(1, getDerbyDatabaseConnection());
     assertNotNull(retrieved);
     assertEquals(true, retrieved.getEnabled());
   }
@@ -254,28 +254,28 @@ public class TestJobHandling extends DerbyTestCase {
   public void testDeleteJob() throws Exception {
     loadJobs();
 
-    handler.deleteJob(1, getDerbyConnection());
+    handler.deleteJob(1, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_JOB", 3);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 18);
 
-    handler.deleteJob(2, getDerbyConnection());
+    handler.deleteJob(2, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_JOB", 2);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
 
-    handler.deleteJob(3, getDerbyConnection());
+    handler.deleteJob(3, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_JOB", 1);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 6);
 
-    handler.deleteJob(4, getDerbyConnection());
+    handler.deleteJob(4, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_JOB", 0);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 0);
   }
 
   public MJob getJob() {
     return new MJob(1, 1, 1, 1,
-      handler.findConnector("A", getDerbyConnection()).getJobForms(Direction.FROM),
-      handler.findConnector("A", getDerbyConnection()).getJobForms(Direction.TO),
-      handler.findFramework(getDerbyConnection()).getJobForms()
+      handler.findConnector("A", getDerbyDatabaseConnection()).getJobForms(Direction.FROM),
+      handler.findConnector("A", getDerbyDatabaseConnection()).getJobForms(Direction.TO),
+      handler.findDriverConfig(getDerbyDatabaseConnection()).getJobForms()
     );
   }
 }

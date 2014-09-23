@@ -21,18 +21,18 @@ package org.apache.sqoop.job.etl;
  * This allows connector to extract data from a source system
  * based on each partition.
  */
-public abstract class Extractor<ConnectionConfiguration, JobConfiguration, Partition> {
+public abstract class Extractor<LinkConfiguration, JobConfiguration, Partition> {
 
   /**
-   * Extract data from source and pass them into the framework.
+   * Extract data from source and pass them into the Sqoop.
    *
    * @param context Extractor context object
-   * @param connectionConfiguration Connection configuration
+   * @param linkConfiguration link configuration
    * @param jobConfiguration Job configuration
    * @param partition Partition that this extract should work on
    */
   public abstract void extract(ExtractorContext context,
-                               ConnectionConfiguration connectionConfiguration,
+                               LinkConfiguration linkConfiguration,
                                JobConfiguration jobConfiguration,
                                Partition partition);
 

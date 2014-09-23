@@ -22,8 +22,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
@@ -121,39 +121,38 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   }
 
   /**
-   * Fill connection form based on currently active provider.
+   * Fill link form based on currently active provider.
    *
-   * @param connection MConnection object to fill
+   * @param link MLink object to fill
    */
-  protected void fillRdbmsConnectionForm(MConnection connection) {
-    MFormList forms = connection.getConnectorPart();
-    forms.getStringInput("connection.jdbcDriver").setValue(provider.getJdbcDriver());
-    forms.getStringInput("connection.connectionString").setValue(provider.getConnectionUrl());
-    forms.getStringInput("connection.username").setValue(provider.getConnectionUsername());
-    forms.getStringInput("connection.password").setValue(provider.getConnectionPassword());
+  protected void fillRdbmsLinkForm(MLink link) {
+    MFormList forms = link.getConnectorPart();
+    forms.getStringInput("link.jdbcDriver").setValue(provider.getJdbcDriver());
+    forms.getStringInput("link.connectionString").setValue(provider.getConnectionUrl());
+    forms.getStringInput("link.username").setValue(provider.getConnectionUsername());
+    forms.getStringInput("link.password").setValue(provider.getConnectionPassword());
   }
 
   /**
-   * Fill output form with specific storage and output type. Mapreduce output directory
-   * will be set to default test value.
+   * Fill TO form with specific storage and output type.
    *
-   * @param job MJOb object to fill
+   * @param job MJob object to fill
    * @param output Output type that should be set
    */
-  protected void fillOutputForm(MJob job, OutputFormat output) {
-    MFormList forms = job.getConnectorPart(Direction.TO);
-    forms.getEnumInput("output.outputFormat").setValue(output);
-    forms.getStringInput("output.outputDirectory").setValue(getMapreduceDirectory());
+  protected void fillToJobForm(MJob job, ToFormat output) {
+    MFormList toForms = job.getConnectorPart(Direction.TO);
+    toForms.getEnumInput("toJobConfig.outputFormat").setValue(output);
+    toForms.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
   }
 
   /**
-   * Fill input form. Mapreduce input directory will be set to default test value.
+   * Fill FROM form
    *
-   * @param job MJOb object to fill
+   * @param job MJob object to fill
    */
-  protected void fillInputForm(MJob job) {
+  protected void fillFromJobForm(MJob job) {
     MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("input.inputDirectory").setValue(getMapreduceDirectory());
+    forms.getStringInput("fromJobConfig.inputDirectory").setValue(getMapreduceDirectory());
   }
 
   /**
@@ -204,15 +203,15 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   }
 
   /**
-   * Create connection.
+   * Create link.
    *
    * With asserts to make sure that it was created correctly.
    *
-   * @param connection
+   * @param link
    */
-  protected void createConnection(MConnection connection) {
-    assertEquals(Status.FINE, getClient().createConnection(connection));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, connection.getPersistenceId());
+  protected void saveLink(MLink link) {
+    assertEquals(Status.FINE, getClient().saveLink(link));
+    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, link.getPersistenceId());
   }
 
  /**
@@ -222,8 +221,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    *
    * @param job
    */
- protected void createJob(MJob job) {
-    assertEquals(Status.FINE, getClient().createJob(job));
+ protected void saveJob(MJob job) {
+    assertEquals(Status.FINE, getClient().saveJob(job));
     assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
   }
 
@@ -233,7 +232,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param jid Job id
    * @throws Exception
    */
-  protected void runJob(long jid) throws Exception {
+  protected void executeJob(long jid) throws Exception {
     getClient().startSubmission(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
   }
 
@@ -243,7 +242,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job Job object
    * @throws Exception
    */
-  protected void runJob(MJob job) throws Exception {
-    runJob(job.getPersistenceId());
+  protected void executeJob(MJob job) throws Exception {
+    executeJob(job.getPersistenceId());
   }
 }

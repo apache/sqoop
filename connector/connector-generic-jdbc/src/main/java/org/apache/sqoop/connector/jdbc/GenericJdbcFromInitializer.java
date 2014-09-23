@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.util.SqlTypesUtils;
 import org.apache.sqoop.job.Constants;
@@ -37,7 +37,7 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class GenericJdbcFromInitializer extends Initializer<ConnectionConfiguration, FromJobConfiguration> {
+public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, FromJobConfiguration> {
 
   private static final Logger LOG =
     Logger.getLogger(GenericJdbcFromInitializer.class);
@@ -45,34 +45,34 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(InitializerContext context, ConnectionConfiguration connection, FromJobConfiguration job) {
-    configureJdbcProperties(context.getContext(), connection, job);
+  public void initialize(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
+    configureJdbcProperties(context.getContext(), linkConf, fromJobConf);
     try {
-      configurePartitionProperties(context.getContext(), connection, job);
-      configureTableProperties(context.getContext(), connection, job);
+      configurePartitionProperties(context.getContext(), linkConf, fromJobConf);
+      configureTableProperties(context.getContext(), linkConf, fromJobConf);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, FromJobConfiguration job) {
+  public List<String> getJars(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
     List<String> jars = new LinkedList<String>();
 
-    jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
+    jars.add(ClassUtils.jarForClass(linkConf.link.jdbcDriver));
 
     return jars;
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, FromJobConfiguration fromJobConfiguration) {
-    configureJdbcProperties(context.getContext(), connectionConfiguration, fromJobConfiguration);
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
+    configureJdbcProperties(context.getContext(), linkConf, fromJobConf);
 
-    String schemaName = fromJobConfiguration.fromTable.tableName;
+    String schemaName = fromJobConf.fromJobConfig.tableName;
     if(schemaName == null) {
       schemaName = "Query";
-    } else if(fromJobConfiguration.fromTable.schemaName != null) {
-      schemaName = fromJobConfiguration.fromTable.schemaName + "." + schemaName;
+    } else if(fromJobConf.fromJobConfig.schemaName != null) {
+      schemaName = fromJobConf.fromJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -117,11 +117,11 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
-    String driver = connectionConfig.connection.jdbcDriver;
-    String url = connectionConfig.connection.connectionString;
-    String username = connectionConfig.connection.username;
-    String password = connectionConfig.connection.password;
+  private void configureJdbcProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
+    String driver = connectionConfig.link.jdbcDriver;
+    String url = connectionConfig.link.connectionString;
+    String username = connectionConfig.link.username;
+    String password = connectionConfig.link.password;
 
     assert driver != null;
     assert url != null;
@@ -129,15 +129,15 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
+  private void configurePartitionProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
     // ----- configure column name -----
 
-    String partitionColumnName = jobConfig.fromTable.partitionColumn;
+    String partitionColumnName = fromJobConfig.fromJobConfig.partitionColumn;
 
     if (partitionColumnName == null) {
       // if column is not specified by the user,
       // find the primary key of the fromTable (when there is a fromTable).
-      String tableName = jobConfig.fromTable.tableName;
+      String tableName = fromJobConfig.fromJobConfig.tableName;
       if (tableName != null) {
         partitionColumnName = executor.getPrimaryKey(tableName);
       }
@@ -155,14 +155,14 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
 
     // ----- configure column type, min value, and max value -----
 
-    String minMaxQuery = jobConfig.fromTable.boundaryQuery;
+    String minMaxQuery = fromJobConfig.fromJobConfig.boundaryQuery;
 
     if (minMaxQuery == null) {
       StringBuilder builder = new StringBuilder();
 
-      String schemaName = jobConfig.fromTable.schemaName;
-      String tableName = jobConfig.fromTable.tableName;
-      String tableSql = jobConfig.fromTable.sql;
+      String schemaName = fromJobConfig.fromJobConfig.schemaName;
+      String tableName = fromJobConfig.fromJobConfig.tableName;
+      String tableSql = fromJobConfig.fromJobConfig.sql;
 
       if (tableName != null && tableSql != null) {
         // when both fromTable name and fromTable sql are specified:
@@ -234,14 +234,14 @@ public class GenericJdbcFromInitializer extends Initializer<ConnectionConfigurat
     }
   }
 
-  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, FromJobConfiguration jobConfig) {
+  private void configureTableProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
     String dataSql;
     String fieldNames;
 
-    String schemaName = jobConfig.fromTable.schemaName;
-    String tableName = jobConfig.fromTable.tableName;
-    String tableSql = jobConfig.fromTable.sql;
-    String tableColumns = jobConfig.fromTable.columns;
+    String schemaName = fromJobConfig.fromJobConfig.schemaName;
+    String tableName = fromJobConfig.fromJobConfig.tableName;
+    String tableSql = fromJobConfig.fromJobConfig.sql;
+    String tableColumns = fromJobConfig.fromJobConfig.columns;
 
     if (tableName != null && tableSql != null) {
       // when both fromTable name and fromTable sql are specified:

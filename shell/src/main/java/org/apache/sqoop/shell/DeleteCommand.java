@@ -31,7 +31,7 @@ public class DeleteCommand extends SqoopCommand {
       Constants.CMD_DELETE,
       Constants.CMD_DELETE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, DeleteConnectionFunction.class,
+        Constants.FN_LINK, DeleteLinkFunction.class,
         Constants.FN_JOB, DeleteJobFunction.class
       )
     );

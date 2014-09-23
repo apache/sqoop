@@ -21,11 +21,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MAccountableEntity;
 import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
@@ -49,15 +49,15 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 public final class FormDisplayer {
 
-  public static void displayFormMetadataDetails(MFramework framework,
+  public static void displayFormMetadataDetails(MDriverConfig driverConfig,
                                                 ResourceBundle bundle) {
     displayFormsMetadata(
-      framework.getConnectionForms().getForms(),
+      driverConfig.getConnectionForms().getForms(),
       resourceString(Constants.RES_FORMDISPLAYER_CONNECTION),
       bundle);
 
     displayFormsMetadata(
-      framework.getJobForms().getForms(),
+      driverConfig.getJobForms().getForms(),
       resourceString(Constants.RES_FORMDISPLAYER_JOB),
       bundle);
   }
@@ -143,15 +143,15 @@ public final class FormDisplayer {
 
   /**
    * Method prints the warning message of ACCEPTABLE status
-   * @param entity - connection or job instance
+   * @param entity - link or job instance
    */
   public static void displayFormWarning(MAccountableEntity entity) {
     List<MForm> formList = new ArrayList<MForm>();
     boolean showMessage = true;
-    if (entity instanceof MConnection) {
-      MConnection connection = (MConnection) entity;
-      formList.addAll(connection.getConnectorPart().getForms());
-      formList.addAll(connection.getFrameworkPart().getForms());
+    if (entity instanceof MLink) {
+      MLink link = (MLink) entity;
+      formList.addAll(link.getConnectorPart().getForms());
+      formList.addAll(link.getFrameworkPart().getForms());
     } else if(entity instanceof MJob) {
       MJob job = (MJob) entity;
       formList.addAll(job.getConnectorPart(Direction.FROM).getForms());

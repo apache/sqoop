@@ -23,13 +23,13 @@ import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
 /**
- * Validate framework configuration objects
+ * Validate configuration objects
  */
 public class HdfsValidator extends Validator {
 
   @Override
-  public Validation validateConnection(Object connectionConfiguration) {
-    Validation validation = new Validation(ConnectionConfiguration.class);
+  public Validation validateLink(Object connectionConfiguration) {
+    Validation validation = new Validation(LinkConfiguration.class);
     // No validation on connection object
     return validation;
   }
@@ -41,42 +41,39 @@ public class HdfsValidator extends Validator {
     return super.validateJob(jobConfiguration);
   }
 
-  private Validation validateExportJob(Object jobConfiguration) {
+  @SuppressWarnings("unused")
+  private Validation validateFromJob(Object jobConfiguration) {
     Validation validation = new Validation(FromJobConfiguration.class);
     FromJobConfiguration configuration = (FromJobConfiguration)jobConfiguration;
-
-    validateInputForm(validation, configuration.input);
-
-
+    validateInputForm(validation, configuration.fromJobConfig);
     return validation;
   }
 
-  private Validation validateImportJob(Object jobConfiguration) {
+  @SuppressWarnings("unused")
+  private Validation validateToJob(Object jobConfiguration) {
     Validation validation = new Validation(ToJobConfiguration.class);
     ToJobConfiguration configuration = (ToJobConfiguration)jobConfiguration;
-
-    validateOutputForm(validation, configuration.output);
-
+    validateOutputForm(validation, configuration.toJobConfig);
     return validation;
   }
 
-  private void validateInputForm(Validation validation, InputForm input) {
+  private void validateInputForm(Validation validation, FromJobConfig input) {
     if(input.inputDirectory == null || input.inputDirectory.isEmpty()) {
       validation.addMessage(Status.UNACCEPTABLE, "input", "inputDirectory", "Input directory is empty");
     }
   }
 
-  private void validateOutputForm(Validation validation, OutputForm output) {
+  private void validateOutputForm(Validation validation, ToJobConfig output) {
     if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Output directory is empty");
     }
     if(output.customCompression != null &&
       output.customCompression.trim().length() > 0  &&
-      output.compression != OutputCompression.CUSTOM) {
+      output.compression != ToCompression.CUSTOM) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
         "custom compression should be blank as " + output.compression + " is being used.");
     }
-    if(output.compression == OutputCompression.CUSTOM &&
+    if(output.compression == ToCompression.CUSTOM &&
       (output.customCompression == null ||
         output.customCompression.trim().length() == 0)
       ) {
@@ -84,6 +81,4 @@ public class HdfsValidator extends Validator {
         "custom compression is blank.");
     }
   }
-
-
 }

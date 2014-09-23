@@ -27,7 +27,7 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
@@ -42,7 +42,7 @@ import java.io.IOException;
  * Extract from HDFS.
  * Default field delimiter of a record is comma.
  */
-public class HdfsExtractor extends Extractor<ConnectionConfiguration, FromJobConfiguration, HdfsPartition> {
+public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> {
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
 
@@ -52,7 +52,7 @@ public class HdfsExtractor extends Extractor<ConnectionConfiguration, FromJobCon
 
   @Override
   public void extract(ExtractorContext context,
-      ConnectionConfiguration connectionConfiguration,
+      LinkConfiguration connectionConfiguration,
       FromJobConfiguration jobConfiguration, HdfsPartition partition) {
 
     conf = ((PrefixContext) context.getContext()).getConfiguration();

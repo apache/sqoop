@@ -18,7 +18,7 @@
 package org.apache.sqoop.model;
 
 /**
- * Represents a parameter input used by the connector for creating a connection
+ * Represents a parameter input used by the connector for creating a link
  * or a job object.
  * @param <T> the value type associated with this parameter
  * @param boolean whether or not the field contains sensitive information

@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
@@ -75,14 +75,14 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableName() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemalessTableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -96,15 +96,15 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemalessTableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.columns = tableColumns;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -118,12 +118,12 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSql() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.sql = schemalessTableSql;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.sql = schemalessTableSql;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -137,15 +137,15 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.schemaName = schemaName;
-    jobConf.toTable.tableName = tableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.schemaName = schemaName;
+    jobConf.toJobConfig.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -159,16 +159,16 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumnsWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.schemaName = schemaName;
-    jobConf.toTable.tableName = tableName;
-    jobConf.toTable.columns = tableColumns;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.schemaName = schemaName;
+    jobConf.toJobConfig.tableName = tableName;
+    jobConf.toJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -182,13 +182,13 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSqlWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.schemaName = schemaName;
-    jobConf.toTable.sql = tableSql;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.schemaName = schemaName;
+    jobConf.toJobConfig.sql = tableSql;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -216,13 +216,13 @@ public class TestToInitializer extends TestCase {
   }
 
   public void testNonExistingStageTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.stageTableName = stageTableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.stageTableName = stageTableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -239,15 +239,15 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testNonEmptyStageTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullStageTableName = executor.delimitIdentifier(stageTableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.stageTableName = stageTableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.stageTableName = stageTableName;
     createTable(fullStageTableName);
     executor.executeUpdate("INSERT INTO " + fullStageTableName +
       " VALUES(1, 1.1, 'one')");
@@ -264,17 +264,16 @@ public class TestToInitializer extends TestCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void testClearStageTableValidation() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
     //specifying clear stage table flag without specifying name of
     // the stage table
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.clearStageTable = false;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.clearStageTable = false;
     ValidationRunner validationRunner = new ValidationRunner();
     ValidationResult result = validationRunner.validate(jobConf);
     assertEquals("User should not specify clear stage table flag without " +
@@ -282,49 +281,48 @@ public class TestToInitializer extends TestCase {
       Status.UNACCEPTABLE,
         result.getStatus());
     assertTrue(result.getMessages().containsKey(
-      "toTable"));
+      "toJobConfig"));
 
-    jobConf.toTable.clearStageTable = true;
+    jobConf.toJobConfig.clearStageTable = true;
     result = validationRunner.validate(jobConf);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
       Status.UNACCEPTABLE,
         result.getStatus());
     assertTrue(result.getMessages().containsKey(
-      "toTable"));
+      "toJobConfig"));
   }
 
-  @SuppressWarnings("unchecked")
   public void testStageTableWithoutTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
     //specifying stage table without specifying table name
-    jobConf.toTable.stageTableName = stageTableName;
-    jobConf.toTable.sql = "";
+    jobConf.toJobConfig.stageTableName = stageTableName;
+    jobConf.toJobConfig.sql = "";
 
     ValidationRunner validationRunner = new ValidationRunner();
     ValidationResult result = validationRunner.validate(jobConf);
     assertEquals("Stage table name cannot be specified without specifying " +
       "table name", Status.UNACCEPTABLE, result.getStatus());
     assertTrue(result.getMessages().containsKey(
-      "toTable"));
+      "toJobConfig"));
   }
 
   @SuppressWarnings("unchecked")
   public void testClearStageTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullStageTableName = executor.delimitIdentifier(stageTableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.stageTableName = stageTableName;
-    jobConf.toTable.clearStageTable = true;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.stageTableName = stageTableName;
+    jobConf.toJobConfig.clearStageTable = true;
     createTable(fullStageTableName);
     executor.executeUpdate("INSERT INTO " + fullStageTableName +
       " VALUES(1, 1.1, 'one')");
@@ -340,15 +338,15 @@ public class TestToInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testStageTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
 
     String fullStageTableName = executor.delimitIdentifier(stageTableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.toTable.tableName = schemalessTableName;
-    jobConf.toTable.stageTableName = stageTableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.toJobConfig.tableName = schemalessTableName;
+    jobConf.toJobConfig.stageTableName = stageTableName;
     createTable(fullStageTableName);
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);

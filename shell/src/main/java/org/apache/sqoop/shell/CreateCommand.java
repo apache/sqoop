@@ -31,7 +31,7 @@ public class CreateCommand extends SqoopCommand {
       Constants.CMD_CREATE,
       Constants.CMD_CREATE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, CreateConnectionFunction.class,
+        Constants.FN_LINK, CreateLinkFunction.class,
         Constants.FN_JOB, CreateJobFunction.class
       )
     );

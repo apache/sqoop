@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.integration.server;
 
-import org.apache.sqoop.client.request.VersionRequest;
+import org.apache.sqoop.client.request.VersionResourceRequest;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.json.VersionBean;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Basic test to check that server is working and returning correct version info.
@@ -32,8 +32,8 @@ public class VersionTest extends TomcatTestCase {
 
   @Test
   public void testVersion() {
-    VersionRequest versionRequest = new VersionRequest();
-    VersionBean versionBean = versionRequest.doGet(getServerUrl());
+    VersionResourceRequest versionRequest = new VersionResourceRequest();
+    VersionBean versionBean = versionRequest.read(getServerUrl());
 
     assertEquals(versionBean.getVersion(), VersionInfo.getVersion());
     assertEquals(versionBean.getDate(), VersionInfo.getDate());

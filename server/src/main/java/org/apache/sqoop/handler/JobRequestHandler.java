@@ -23,7 +23,7 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.framework.FrameworkManager;
+import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ValidationResultBean;
@@ -170,7 +170,7 @@ public class JobRequestHandler implements RequestHandler {
     MJobForms toConnectorForms = ConnectorManager.getInstance()
         .getConnectorMetadata(job.getConnectorId(Direction.TO))
         .getJobForms(Direction.TO);
-    MJobForms frameworkForms = FrameworkManager.getInstance().getFramework()
+    MJobForms frameworkForms = Driver.getInstance().getDriverConfig()
       .getJobForms();
 
     if(!fromConnectorForms.equals(job.getConnectorPart(Direction.FROM))
@@ -196,7 +196,7 @@ public class JobRequestHandler implements RequestHandler {
 
     // We need translate forms to configuration objects
     Object fromConnectorConfig = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
-    Object frameworkConfig = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass());
+    Object frameworkConfig = ClassUtils.instantiate(Driver.getInstance().getJobConfigurationClass());
     Object toConnectorConfig = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
 
     FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromConnectorConfig);
@@ -259,8 +259,8 @@ public class JobRequestHandler implements RequestHandler {
       // @TODO(Abe): From/To.
       for( MJob job : jobs) {
         long connectorId = job.getConnectorId(Direction.FROM);
-        if(!bean.hasConnectorBundle(connectorId)) {
-          bean.addConnectorBundle(connectorId,
+        if(!bean.hasConnectorConfigBundle(connectorId)) {
+          bean.addConnectorConfigBundle(connectorId,
             ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
         }
       }
@@ -274,12 +274,12 @@ public class JobRequestHandler implements RequestHandler {
 
       bean = new JobBean(job);
 
-      bean.addConnectorBundle(connectorId,
+      bean.addConnectorConfigBundle(connectorId,
         ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }
 
     // Sent framework resource bundle in all cases
-    bean.setFrameworkBundle(FrameworkManager.getInstance().getBundle(locale));
+    bean.setDriverConfigBundle(Driver.getInstance().getBundle(locale));
 
     return bean;
   }

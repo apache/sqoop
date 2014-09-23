@@ -19,20 +19,20 @@ package org.apache.sqoop.validation;
 
 
 /**
- * Connection and job metadata validator.
+ * Link and Job config validator.
  *
  * This class should be extended by connector to provide configuration
- * validation for connection and job configuration objects.
+ * validation for link and job configuration objects.
  */
 public class Validator {
 
   /**
-   * Validate connection configuration object.
+   * Validate link configuration object.
    *
-   * @param connectionConfiguration Connection object to be validated
+   * @param linkConfiguration Connection object to be validated
    * @return Validation status
    */
-  public Validation validateConnection(Object connectionConfiguration) {
+  public Validation validateLink(Object linkConfiguration) {
     return new Validation(EmptyClass.class);
   }
 

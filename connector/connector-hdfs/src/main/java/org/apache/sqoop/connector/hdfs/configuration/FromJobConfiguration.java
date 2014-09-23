@@ -22,11 +22,10 @@ import org.apache.sqoop.model.Form;
 
 @ConfigurationClass
 public class FromJobConfiguration {
-  @Form public InputForm input;
-
+  @Form public FromJobConfig fromJobConfig;
 
   public FromJobConfiguration() {
-    input = new InputForm();
+    fromJobConfig = new FromJobConfig();
 
   }
 }

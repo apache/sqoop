@@ -26,7 +26,7 @@ import java.io.IOException;
 
 /**
  * Abstract class representing a pluggable intermediate data format the Sqoop
- * framework will use to move data to/from the connector. All intermediate
+ * driver will use to move data to/from the connector. All intermediate
  * data formats are expected to have an internal/native implementation,
  * but also should minimally be able to return a text (CSV) version of the
  * data. The data format should also be able to return the data as an object

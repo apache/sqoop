@@ -23,22 +23,23 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Extractor;
 
-public class GenericJdbcExtractor extends Extractor<ConnectionConfiguration, FromJobConfiguration, GenericJdbcPartition> {
+public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, GenericJdbcPartition> {
 
  public static final Logger LOG = Logger.getLogger(GenericJdbcExtractor.class);
 
  private long rowsRead = 0;
   @Override
-  public void extract(ExtractorContext context, ConnectionConfiguration connection, FromJobConfiguration job, GenericJdbcPartition partition) {
-    String driver = connection.connection.jdbcDriver;
-    String url = connection.connection.connectionString;
-    String username = connection.connection.username;
-    String password = connection.connection.password;
+  public void extract(ExtractorContext context, LinkConfiguration linkConf,
+      FromJobConfiguration fromJobConf, GenericJdbcPartition partition) {
+    String driver = linkConf.link.jdbcDriver;
+    String url = linkConf.link.connectionString;
+    String username = linkConf.link.username;
+    String password = linkConf.link.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
 
     String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);

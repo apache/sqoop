@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
@@ -112,12 +112,12 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableName() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.tableName = schemalessTableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.tableName = schemalessTableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -138,13 +138,13 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.tableName = schemalessTableName;
-    jobConf.fromTable.columns = tableColumns;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.tableName = schemalessTableName;
+    jobConf.fromJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -165,13 +165,13 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSql() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.sql = schemalessTableSql;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.sql = schemalessTableSql;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -192,14 +192,14 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSqlWithTableColumns() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.sql = schemalessTableSql;
-    jobConf.fromTable.columns = tableColumns;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.sql = schemalessTableSql;
+    jobConf.fromJobConfig.columns = tableColumns;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -221,15 +221,15 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.tableName = tableName;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -250,16 +250,16 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumnsWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.tableName = tableName;
-    jobConf.fromTable.columns = tableColumns;
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.tableName = tableName;
+    jobConf.fromJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -280,16 +280,16 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSqlWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.sql = tableSql;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.sql = tableSql;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -311,14 +311,14 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testGetSchemaForTable() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.tableName = tableName;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.tableName = tableName;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -327,19 +327,19 @@ public class TestFromInitializer extends TestCase {
     Initializer initializer = new GenericJdbcFromInitializer();
     initializer.initialize(initializerContext, connConf, jobConf);
     Schema schema = initializer.getSchema(initializerContext, connConf, jobConf);
-    assertEquals(getSchema(jobConf.fromTable.schemaName + "." + tableName), schema);
+    assertEquals(getSchema(jobConf.fromJobConfig.schemaName + "." + tableName), schema);
   }
 
   @SuppressWarnings("unchecked")
   public void testGetSchemaForSql() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.sql = tableSql;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.sql = tableSql;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);
@@ -353,17 +353,17 @@ public class TestFromInitializer extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testTableSqlWithTableColumnsWithSchema() throws Exception {
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
-    connConf.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connConf.connection.connectionString = GenericJdbcTestConstants.URL;
-    jobConf.fromTable.schemaName = schemaName;
-    jobConf.fromTable.sql = tableSql;
-    jobConf.fromTable.columns = tableColumns;
-    jobConf.fromTable.partitionColumn = "DCOL";
+    connConf.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connConf.link.connectionString = GenericJdbcTestConstants.URL;
+    jobConf.fromJobConfig.schemaName = schemaName;
+    jobConf.fromJobConfig.sql = tableSql;
+    jobConf.fromJobConfig.columns = tableColumns;
+    jobConf.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context);

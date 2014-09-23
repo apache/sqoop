@@ -17,36 +17,36 @@
  */
 package org.apache.sqoop.repository;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.connector.spi.MetadataUpgrader;
+import org.apache.sqoop.connector.spi.RepositoryUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.framework.FrameworkManager;
+import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnection;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFramework;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Validation;
 import org.apache.sqoop.validation.Validator;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 
 /**
- * Defines the contract of a Repository used by Sqoop. A Repository allows
- * Sqoop to store metadata, statistics and other state relevant to Sqoop
- * Jobs in the system.
+ * Defines the contract for repository used by Sqoop. A Repository allows
+ * Sqoop to store entities such as connectors, links, jobs, submissions and its related configs,
+ * statistics and other state relevant the entities in the store
  */
 public abstract class Repository {
 
@@ -76,11 +76,11 @@ public abstract class Repository {
 
   /**
    * Registers given connector in the repository and return registered
-   * variant. This method might return an exception in case that metadata for
+   * variant. This method might return an exception in case that 
    * given connector are already registered with different structure.
    *
-   * @param mConnector the connector metadata to be registered
-   * autoupgrade whether to upgrade framework automatically
+   * @param mConnector the connector to be registered
+   * autoupgrade whether to upgrade driver config automatically
    * @return Registered connector structure
    */
   public abstract MConnector registerConnector(MConnector mConnector, boolean autoUpgrade);
@@ -88,7 +88,7 @@ public abstract class Repository {
   /**
    * Search for connector with given name in repository.
    *
-   * And return corresponding metadata structure.
+   * And return corresponding entity structure.
    *
    * @param shortName Connector unique name
    * @return null if connector is not yet registered in repository or
@@ -105,76 +105,75 @@ public abstract class Repository {
 
 
   /**
-   * Registers given framework in the repository and return registered
-   * variant. This method might return an exception in case that metadata for
-   * given framework are already registered with different structure.
+   * Registers given driverConfig in the repository and return registered
+   * variant. This method might return an exception in case that the
+   * given driverConfig are already registered with different structure.
    *
-   * @param mFramework framework metadata to be registered
-   * autoupgrade whether to upgrade framework automatically
+   * @param mDriverConfig driverConfig to be registered
+   * autoupgrade whether to upgrade driverConfig automatically
    * @return Registered connector structure
    */
-  public abstract MFramework registerFramework(MFramework mFramework, boolean autoUpgrade);
+  public abstract MDriverConfig registerDriverConfig(MDriverConfig mDriverConfig, boolean autoUpgrade);
 
   /**
-   * Save given connection to repository. This connection must not be already
+   * Save given link to repository. This link must not be already
    * present in the repository otherwise exception will be thrown.
    *
-   * @param connection Connection object to serialize into repository.
+   * @param link link object to serialize into repository.
    */
-  public abstract void createConnection(MConnection connection);
+  public abstract void createLink(MLink link);
 
   /**
-   * Update given connection representation in repository. This connection
+   * Update given link representation in repository. This link
    * object must already exists in the repository otherwise exception will be
    * thrown.
    *
-   * @param connection Connection object that should be updated in repository.
+   * @param link link object that should be updated in repository.
    */
-  public abstract void updateConnection(MConnection connection);
+  public abstract void updateLink(MLink link);
 
   /**
-   * Update given connection representation in repository. This connection
+   * Update given link representation in repository. This link
    * object must already exists in the repository otherwise exception will be
    * thrown.
    *
-   * @param connection Connection object that should be updated in repository.
+   * @param link Link object that should be updated in repository.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  public abstract void updateConnection(final MConnection connection,
-    RepositoryTransaction tx);
+  public abstract void updateLink(final MLink link, RepositoryTransaction tx);
 
   /**
-   * Enable or disable connection with given id from metadata repository
+   * Enable or disable Link with given id from the repository
    *
-   * @param id Connection object that is going to be enabled or disabled
+   * @param id Link object that is going to be enabled or disabled
    * @param enabled enable or disable
    */
-  public abstract void enableConnection(long id, boolean enabled);
+  public abstract void enableLink(long id, boolean enabled);
 
   /**
-   * Delete connection with given id from metadata repository.
+   * Delete Link with given id from the repository.
    *
-   * @param id Connection object that should be removed from repository
+   * @param id Link object that should be removed from repository
    */
-  public abstract void deleteConnection(long id);
+  public abstract void deleteLink(long id);
 
   /**
-   * Find connection with given id in repository.
+   * Find link with given id in repository.
    *
-   * @param id Connection id
-   * @return Deserialized form of the connection that is saved in repository
+   * @param id Link id
+   * @return Deserialized form of the link that is saved in repository
    */
-  public abstract MConnection findConnection(long id);
+  public abstract MLink findLink(long id);
 
   /**
-   * Get all connection objects.
+   * Get all Link objects.
    *
-   * @return List will all saved connection objects
+   * @return List will all saved link objects
    */
-  public abstract List<MConnection> findConnections();
+  public abstract List<MLink> findLinks();
 
   /**
    * Save given job to repository. This job object must not be already present
@@ -285,18 +284,18 @@ public abstract class Repository {
   public abstract MSubmission findSubmissionLastForJob(long jobId);
 
   /**
-   * Retrieve connections which use the given connector.
-   * @param connectorID Connector ID whose connections should be fetched
-   * @return List of MConnections that use <code>connectorID</code>.
+   * Retrieve links which use the given connector.
+   * @param connectorID Connector ID whose links should be fetched
+   * @return List of MLink that use <code>connectorID</code>.
    */
-  public abstract List<MConnection> findConnectionsForConnector(long
+  public abstract List<MLink> findLinksForConnector(long
     connectorID);
 
   /**
-   * Retrieve jobs which use the given connection.
+   * Retrieve jobs which use the given link.
    *
    * @param connectorID Connector ID whose jobs should be fetched
-   * @return List of MJobs that use <code>connectionID</code>.
+   * @return List of MJobs that use <code>linkID</code>.
    */
   public abstract List<MJob> findJobsForConnector(long
     connectorID);
@@ -317,29 +316,25 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void updateConnector(MConnector newConnector,
-    RepositoryTransaction tx);
-
+  protected abstract void updateConnector(MConnector newConnector, RepositoryTransaction tx);
 
   /**
-   * Update the framework with the new data supplied in the
-   * <tt>mFramework</tt>. Also Update all forms associated with the framework
+   * Update the driverConfig with the new data supplied in the
+   * <tt>mDriverConfig</tt>. Also Update all forms associated with the driverConfig
    * in the repository with the forms specified in
-   * <tt>mFramework</tt>. <tt>mFramework </tt> must
+   * <tt>mDriverConfig</tt>. <tt>mDriverConfig </tt> must
    * minimally have the connectorID and all required forms (including ones
    * which may not have changed). After this operation the repository is
    * guaranteed to only have the new forms specified in this object.
    *
-   * @param mFramework The new data to be inserted into the repository for
-   *                     the framework.
+   * @param mDriverConfig The new data to be inserted into the repository for
+   *                     the driverConfig.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void updateFramework(MFramework mFramework,
-    RepositoryTransaction tx);
-
+  protected abstract void updateDriverConfig(MDriverConfig mDriverConfig, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a job
@@ -351,24 +346,22 @@ public abstract class Repository {
   protected abstract void deleteJobInputs(long jobId, RepositoryTransaction tx);
 
   /**
-   * Delete all inputs for a connection
-   * @param connectionID The id of the connection whose inputs are to be
+   * Delete all inputs for a link
+   * @param linkId The id of the link whose inputs are to be
    *                     deleted.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void deleteConnectionInputs(long connectionID,
-    RepositoryTransaction tx);
+  protected abstract void deleteLinkInputs(long linkId, RepositoryTransaction tx);
 
-  private void deleteConnectionsAndJobs(List<MConnection> connections,
-    List<MJob> jobs, RepositoryTransaction tx) {
+  private void deletelinksAndJobs(List<MLink> links, List<MJob> jobs, RepositoryTransaction tx) {
     for (MJob job : jobs) {
       deleteJobInputs(job.getPersistenceId(), tx);
     }
-    for (MConnection connection : connections) {
-      deleteConnectionInputs(connection.getPersistenceId(), tx);
+    for (MLink link : links) {
+      deleteLinkInputs(link.getPersistenceId(), tx);
     }
   }
 
@@ -376,7 +369,7 @@ public abstract class Repository {
    * Upgrade the connector with the same {@linkplain MConnector#uniqueName}
    * in the repository with values from <code>newConnector</code>.
    * <p/>
-   * All connections and jobs associated with this connector will be upgraded
+   * All links and jobs associated with this connector will be upgraded
    * automatically.
    *
    * @param oldConnector The old connector that should be upgraded.
@@ -389,18 +382,18 @@ public abstract class Repository {
     newConnector.setPersistenceId(connectorID);
     /* Algorithms:
      * 1. Get an upgrader for the connector.
-     * 2. Get all connections associated with the connector.
+     * 2. Get all links associated with the connector.
      * 3. Get all jobs associated with the connector.
-     * 4. Delete the inputs for all of the jobs and connections (in that order)
+     * 4. Delete the inputs for all of the jobs and links (in that order)
      * 5. Remove all inputs and forms associated with the connector, and
      *    register the new forms and inputs.
-     * 6. Create new connections and jobs with connector part being the ones
+     * 6. Create new links and jobs with connector part being the ones
      *    returned by the upgrader.
-     * 7. Validate new connections and jobs with connector's validator
-     * 8. If any invalid connections or jobs detected, throw an exception
+     * 7. Validate new links and jobs with connector's validator
+     * 8. If any invalid links or jobs detected, throw an exception
      *    and stop the bootup of Sqoop server
-     * 9. Otherwise, Insert the connection inputs followed by job inputs (using
-     *    updateJob and updateConnection)
+     * 9. Otherwise, Insert the link inputs followed by job inputs (using
+     *    updateJob and updatelink)
      */
     RepositoryTransaction tx = null;
     try {
@@ -412,33 +405,33 @@ public abstract class Repository {
 
       boolean upgradeSuccessful = true;
 
-      MetadataUpgrader upgrader = connector.getMetadataUpgrader();
-      List<MConnection> connections = findConnectionsForConnector(
+      RepositoryUpgrader upgrader = connector.getRepositoryUpgrader();
+      List<MLink> links = findLinksForConnector(
         connectorID);
       List<MJob> jobs = findJobsForConnector(connectorID);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deleteConnectionsAndJobs(connections, jobs, tx);
+      deletelinksAndJobs(links, jobs, tx);
       updateConnector(newConnector, tx);
-      for (MConnection connection : connections) {
+      for (MLink link : links) {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
-        // each connection.
+        // each link.
         List<MForm> forms = newConnector.getConnectionForms().clone(false).getForms();
-        MConnectionForms newConnectionForms = new MConnectionForms(forms);
-        upgrader.upgrade(connection.getConnectorPart(), newConnectionForms);
-        MConnection newConnection = new MConnection(connection, newConnectionForms, connection.getFrameworkPart());
+        MConnectionForms newlinkForms = new MConnectionForms(forms);
+        upgrader.upgrade(link.getConnectorPart(), newlinkForms);
+        MLink newlink = new MLink(link, newlinkForms, link.getFrameworkPart());
 
         // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(connector.getConnectionConfigurationClass());
-        FormUtils.fromForms(newConnection.getConnectorPart().getForms(), newConfigurationObject);
+        Object newConfigurationObject = ClassUtils.instantiate(connector.getLinkConfigurationClass());
+        FormUtils.fromForms(newlink.getConnectorPart().getForms(), newConfigurationObject);
 
-        Validation validation = validator.validateConnection(newConfigurationObject);
+        Validation validation = validator.validateLink(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
-          updateConnection(newConnection, tx);
+          updateLink(newlink, tx);
         } else {
-          logInvalidModelObject("connection", newConnection, validation);
+          logInvalidModelObject("link", newlink, validation);
           upgradeSuccessful = false;
         }
       }
@@ -513,57 +506,57 @@ public abstract class Repository {
     }
   }
 
-  public final void upgradeFramework(MFramework framework) {
-    LOG.info("Upgrading framework metadata");
+  public final void upgradeDriverConfig(MDriverConfig driverConfig) {
+    LOG.info("Upgrading driver config");
     RepositoryTransaction tx = null;
     try {
-      MetadataUpgrader upgrader = FrameworkManager.getInstance()
-        .getMetadataUpgrader();
-      List<MConnection> connections = findConnections();
+      RepositoryUpgrader upgrader = Driver.getInstance()
+        .getDriverConfigRepositoryUpgrader();
+      List<MLink> links = findLinks();
       List<MJob> jobs = findJobs();
 
-      Validator validator = FrameworkManager.getInstance().getValidator();
+      Validator validator = Driver.getInstance().getValidator();
 
       boolean upgradeSuccessful = true;
 
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deleteConnectionsAndJobs(connections, jobs, tx);
-      updateFramework(framework, tx);
-      for (MConnection connection : connections) {
+      deletelinksAndJobs(links, jobs, tx);
+      updateDriverConfig(driverConfig, tx);
+      for (MLink link : links) {
         // Make a new copy of the forms from the connector,
         // else the values will get set in the forms in the connector for
-        // each connection.
-        // @TODO(Abe): From/To connection forms.
-        List<MForm> forms = framework.getConnectionForms().clone(false).getForms();
-        MConnectionForms newConnectionForms = new MConnectionForms(forms);
-        upgrader.upgrade(connection.getFrameworkPart(), newConnectionForms);
-        MConnection newConnection = new MConnection(connection, connection.getConnectorPart(), newConnectionForms);
+        // each link.
+        // @TODO(Abe): From/To link forms.
+        List<MForm> forms = driverConfig.getConnectionForms().clone(false).getForms();
+        MConnectionForms newlinkForms = new MConnectionForms(forms);
+        upgrader.upgrade(link.getFrameworkPart(), newlinkForms);
+        MLink newlink = new MLink(link, link.getConnectorPart(), newlinkForms);
 
         // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getConnectionConfigurationClass());
-        FormUtils.fromForms(newConnection.getFrameworkPart().getForms(), newConfigurationObject);
+        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getLinkConfigurationClass());
+        FormUtils.fromForms(newlink.getFrameworkPart().getForms(), newConfigurationObject);
 
-        Validation validation = validator.validateConnection(newConfigurationObject);
+        Validation validation = validator.validateLink(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
-          updateConnection(newConnection, tx);
+          updateLink(newlink, tx);
         } else {
-          logInvalidModelObject("connection", newConnection, validation);
+          logInvalidModelObject("link", newlink, validation);
           upgradeSuccessful = false;
         }
       }
       for (MJob job : jobs) {
         // Make a new copy of the forms from the framework,
         // else the values will get set in the forms in the connector for
-        // each connection.
-        List<MForm> forms = framework.getJobForms().clone(false).getForms();
+        // each link.
+        List<MForm> forms = driverConfig.getJobForms().clone(false).getForms();
         MJobForms newJobForms = new MJobForms(forms);
         upgrader.upgrade(job.getFrameworkPart(), newJobForms);
         MJob newJob = new MJob(job, job.getConnectorPart(Direction.FROM), job.getConnectorPart(Direction.TO), newJobForms);
 
         // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(FrameworkManager.getInstance().getJobConfigurationClass());
+        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getJobConfigurationClass());
         FormUtils.fromForms(newJob.getFrameworkPart().getForms(), newConfigurationObject);
 
         Validation validation = validator.validateJob(newConfigurationObject);
@@ -594,7 +587,7 @@ public abstract class Repository {
       if(tx != null) {
         tx.close();
       }
-      LOG.info("Framework metadata upgrade finished");
+      LOG.info("Driver config upgrade finished");
     }
   }
 

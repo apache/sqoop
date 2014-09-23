@@ -63,10 +63,10 @@ public class CloneJobFunction extends SqoopFunction {
     MJob job = client.getJob(jobId);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    ResourceBundle fromConnectorBundle = client.getResourceBundle(
+    ResourceBundle fromConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.FROM));
-    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
-    ResourceBundle toConnectorBundle = client.getResourceBundle(
+    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
+    ResourceBundle toConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.TO));
 
     Status status = Status.FINE;
@@ -75,7 +75,7 @@ public class CloneJobFunction extends SqoopFunction {
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     if (isInteractive) {
-      printlnResource(Constants.RES_PROMPT_UPDATE_JOB_METADATA);
+      printlnResource(Constants.RES_PROMPT_UPDATE_JOB_CONFIG);
 
       do {
         // Print error introduction if needed
@@ -84,19 +84,19 @@ public class CloneJobFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, fromConnectorBundle, frameworkBundle, toConnectorBundle)) {
+        if(!fillJob(reader, job, fromConnectorBundle, driverConfigBundle, toConnectorBundle)) {
           return null;
         }
 
         // Try to create
-        status = client.createJob(job);
+        status = client.saveJob(job);
       } while(!status.canProceed());
     } else {
       JobDynamicFormOptions options = new JobDynamicFormOptions();
       options.prepareOptions(job);
       CommandLine line = FormOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
-        status = client.createJob(job);
+        status = client.saveJob(job);
         if (!status.canProceed()) {
           printJobValidationMessages(job);
           return null;

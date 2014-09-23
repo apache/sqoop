@@ -40,8 +40,8 @@ public enum RepositoryError implements ErrorCode {
   /** The system was unable to find or load the JDBC repository handler. */
   JDBCREPO_0001("Invalid JDBC Repository Handler specified"),
 
-  /** An invalid JDBC connection URL was specified. */
-  JDBCREPO_0002("Invalid JDBC connection URL specified"),
+  /** An invalid JDBC link URL was specified. */
+  JDBCREPO_0002("Invalid JDBC link URL specified"),
 
   /** An invalid JDBC driver class name was specified. */
   JDBCREPO_0003("Invalid JDBC driver class specified"),
@@ -49,17 +49,17 @@ public enum RepositoryError implements ErrorCode {
   /** An invalid JDBC transaction isolation level was specified. */
   JDBCREPO_0004("Invalid JDBC transaction isolation level specified"),
 
-  /** The value specified for maximum connection pool connections is invalid.*/
-  JDBCREPO_0005("Invalid maximum connections specified for connection pool"),
+  /** The value specified for maximum link pool links is invalid.*/
+  JDBCREPO_0005("Invalid maximum links specified for link pool"),
 
   /** The system attempted to use an inactive transaction. */
   JDBCREPO_0006("Transaction is not active"),
 
   /**
-   * The system was unable to obtain a connection lease for the
+   * The system was unable to obtain a link lease for the
    * requested transaction.
    */
-  JDBCREPO_0007("Unable to lease connection"),
+  JDBCREPO_0007("Unable to lease link"),
 
   /** The system attempted to commit a transaction marked for rollback.*/
   JDBCREPO_0008("Attempt to commit a transaction marked for rollback"),
@@ -76,23 +76,23 @@ public enum RepositoryError implements ErrorCode {
    */
   JDBCREPO_0011("Attempt to reinitialize JDBC repository context"),
 
-  /** Failure in metadata repository operation. */
-  JDBCREPO_0012("Failure in metadata repository operation."),
+  /** Failure in config repository operation. */
+  JDBCREPO_0012("Failure in config repository operation."),
 
-  /** The system found a change in connector metadata that requires upgrade. */
-  JDBCREPO_0013("Connector metadata changed - upgrade may be required"),
+  /** The system found a change in connector config that requires upgrade. */
+  JDBCREPO_0013("Connector config changed - upgrade may be required"),
 
-  /** The system found a change in framework metadata that requires upgrade. */
-  JDBCREPO_0014("Framework metadata changed - upgrade may be required"),
+  /** The system found a change in driver config that requires upgrade. */
+  JDBCREPO_0014("Driver config changed - upgrade may be required"),
 
-  /** Connection that we're trying to create is already saved in repository **/
-  JDBCREPO_0015("Cannot create connection that was already created"),
+  /** link that we're trying to create is already saved in repository **/
+  JDBCREPO_0015("Cannot create link that was already created"),
 
-  /** Connection that we're trying to update is not yet saved **/
-  JDBCREPO_0016("Cannot update connection that was not yet created"),
+  /** link that we're trying to update is not yet saved **/
+  JDBCREPO_0016("Cannot update link that was not yet created"),
 
-  /** Invalid connection id **/
-  JDBCREPO_0017("Given connection id is invalid"),
+  /** Invalid link id **/
+  JDBCREPO_0017("Given link id is invalid"),
 
   /** Job that we're trying to create is already saved in repository **/
   JDBCREPO_0018("Cannot create job that was already created"),
@@ -103,8 +103,8 @@ public enum RepositoryError implements ErrorCode {
   /** Invalid job id **/
   JDBCREPO_0020("Given job id is invalid"),
 
-  /** Connection ID is in use **/
-  JDBCREPO_0021("Given connection id is in use"),
+  /** link ID is in use **/
+  JDBCREPO_0021("Given link id is in use"),
 
   /** Job ID is in use **/
   JDBCREPO_0022("Given job id is in use"),
@@ -121,8 +121,8 @@ public enum RepositoryError implements ErrorCode {
   /** Upgrade required but not allowed **/
   JDBCREPO_0026("Upgrade required but not allowed"),
 
-  /** Invalid connections or jobs when upgrading connector **/
-  JDBCREPO_0027("Invalid connections or jobs when upgrading connector");
+  /** Invalid links or jobs when upgrading connector **/
+  JDBCREPO_0027("Invalid links or jobs when upgrading connector");
 
   ;
 

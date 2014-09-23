@@ -26,7 +26,7 @@ import org.apache.sqoop.schema.Schema;
  *
  * This class is also wrapping reader object.
  */
-public class LoaderContext extends ActorContext {
+public class LoaderContext extends TransferableContext {
 
   private DataReader reader;
 

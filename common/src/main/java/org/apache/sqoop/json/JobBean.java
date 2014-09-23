@@ -43,20 +43,20 @@ public class JobBean implements JsonBean {
   private static final String ALL = "all";
   private static final String ID = "id";
   private static final String NAME = "name";
-  private static final String FROM_CONNECTION_ID = "from-connection-id";
-  private static final String TO_CONNECTION_ID = "to-connection-id";
+  private static final String FROM_LINK_ID = "from-link-id";
+  private static final String TO_LINK_ID = "to-link-id";
   private static final String FROM_CONNECTOR_ID = "from-connector-id";
   private static final String TO_CONNECTOR_ID = "to-connector-id";
   private static final String FROM_CONNECTOR_PART = "from-connector";
   private static final String TO_CONNECTOR_PART = "to-connector";
   private static final String FRAMEWORK_PART = "framework";
 
-  // Compulsory
+  // Required
   private List<MJob> jobs;
 
   // Optional
-  private Map<Long, ResourceBundle> connectorBundles;
-  private ResourceBundle frameworkBundle;
+  private Map<Long, ResourceBundle> connectorConfigBundles;
+  private ResourceBundle driverConfigBundle;
 
   // For "extract"
   public JobBean(MJob job) {
@@ -72,31 +72,31 @@ public class JobBean implements JsonBean {
 
   // For "restore"
   public JobBean() {
-    connectorBundles = new HashMap<Long, ResourceBundle>();
+    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
   }
 
-  public void setFrameworkBundle(ResourceBundle frameworkBundle) {
-    this.frameworkBundle = frameworkBundle;
+  public void setDriverConfigBundle(ResourceBundle driverConfigBundle) {
+    this.driverConfigBundle = driverConfigBundle;
   }
 
-  public void addConnectorBundle(Long id, ResourceBundle connectorBundle) {
-    connectorBundles.put(id, connectorBundle);
+  public void addConnectorConfigBundle(Long id, ResourceBundle connectorConfigBundle) {
+    connectorConfigBundles.put(id, connectorConfigBundle);
   }
 
-  public boolean hasConnectorBundle(Long id) {
-    return connectorBundles.containsKey(id);
+  public boolean hasConnectorConfigBundle(Long id) {
+    return connectorConfigBundles.containsKey(id);
   }
 
   public List<MJob> getJobs() {
     return jobs;
   }
 
-  public ResourceBundle getConnectorBundle(Long id) {
-    return connectorBundles.get(id);
+  public ResourceBundle getConnectorConfigBundle(Long id) {
+    return connectorConfigBundles.get(id);
   }
 
-  public ResourceBundle getFrameworkBundle() {
-    return frameworkBundle;
+  public ResourceBundle getDriverConfigBundle() {
+    return driverConfigBundle;
   }
 
   @Override
@@ -114,8 +114,8 @@ public class JobBean implements JsonBean {
       object.put(CREATION_DATE, job.getCreationDate().getTime());
       object.put(UPDATE_USER, job.getLastUpdateUser());
       object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
-      object.put(FROM_CONNECTION_ID, job.getConnectionId(Direction.FROM));
-      object.put(TO_CONNECTION_ID, job.getConnectionId(Direction.TO));
+      object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
+      object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
       object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
       object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
       object.put(FROM_CONNECTOR_PART,
@@ -131,18 +131,17 @@ public class JobBean implements JsonBean {
     JSONObject all = new JSONObject();
     all.put(ALL, array);
 
-    if(!connectorBundles.isEmpty()) {
+    if(!connectorConfigBundles.isEmpty()) {
       JSONObject bundles = new JSONObject();
 
-      for(Map.Entry<Long, ResourceBundle> entry : connectorBundles.entrySet()) {
+      for(Map.Entry<Long, ResourceBundle> entry : connectorConfigBundles.entrySet()) {
         bundles.put(entry.getKey().toString(),
                     extractResourceBundle(entry.getValue()));
       }
-
-      all.put(CONNECTOR_RESOURCES, bundles);
+      all.put(CONNECTOR_CONFIGS, bundles);
     }
-    if(frameworkBundle != null) {
-      all.put(FRAMEWORK_RESOURCES,extractResourceBundle(frameworkBundle));
+    if(driverConfigBundle != null) {
+      all.put(DRIVER_CONFIGS,extractResourceBundle(driverConfigBundle));
     }
     return all;
   }
@@ -159,8 +158,8 @@ public class JobBean implements JsonBean {
 
       long fromConnectorId = (Long) object.get(FROM_CONNECTOR_ID);
       long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
-      long fromConnectionId = (Long) object.get(FROM_CONNECTION_ID);
-      long toConnectionId = (Long) object.get(TO_CONNECTION_ID);
+      long fromConnectionId = (Long) object.get(FROM_LINK_ID);
+      long toConnectionId = (Long) object.get(TO_LINK_ID);
       JSONArray fromConnectorPart = (JSONArray) object.get(FROM_CONNECTOR_PART);
       JSONArray toConnectorPart = (JSONArray) object.get(TO_CONNECTOR_PART);
       JSONArray frameworkPart = (JSONArray) object.get(FRAMEWORK_PART);
@@ -190,17 +189,17 @@ public class JobBean implements JsonBean {
       jobs.add(job);
     }
 
-    if(jsonObject.containsKey(CONNECTOR_RESOURCES)) {
-      JSONObject bundles = (JSONObject) jsonObject.get(CONNECTOR_RESOURCES);
+    if(jsonObject.containsKey(CONNECTOR_CONFIGS)) {
+      JSONObject bundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
       Set<Map.Entry<String, JSONObject>> entrySet = bundles.entrySet();
       for (Map.Entry<String, JSONObject> entry : entrySet) {
-        connectorBundles.put(Long.parseLong(entry.getKey()),
+        connectorConfigBundles.put(Long.parseLong(entry.getKey()),
                              restoreResourceBundle(entry.getValue()));
       }
     }
-    if(jsonObject.containsKey(FRAMEWORK_RESOURCES)) {
-      frameworkBundle = restoreResourceBundle(
-        (JSONObject) jsonObject.get(FRAMEWORK_RESOURCES));
+    if(jsonObject.containsKey(DRIVER_CONFIGS)) {
+      driverConfigBundle = restoreResourceBundle(
+        (JSONObject) jsonObject.get(DRIVER_CONFIGS));
     }
   }
 }

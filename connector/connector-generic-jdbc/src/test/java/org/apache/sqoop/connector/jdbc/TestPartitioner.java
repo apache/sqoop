@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -55,7 +55,7 @@ public class TestPartitioner extends TestCase {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -86,7 +86,7 @@ public class TestPartitioner extends TestCase {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -115,7 +115,7 @@ public class TestPartitioner extends TestCase {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -151,7 +151,7 @@ public class TestPartitioner extends TestCase {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -182,7 +182,7 @@ public class TestPartitioner extends TestCase {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -203,7 +203,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(START));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -226,7 +226,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START + NUMBER_OF_ROWS - 1)));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -247,7 +247,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START)));
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -272,7 +272,7 @@ public class TestPartitioner extends TestCase {
         .toString());
 
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -300,7 +300,7 @@ public class TestPartitioner extends TestCase {
         Time.valueOf("10:40:50").toString());
 
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -325,7 +325,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         Timestamp.valueOf("2013-12-31 10:40:50.654").toString());
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -349,7 +349,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "1");
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -372,7 +372,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "Z");
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -419,7 +419,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
       .CONNECTOR_JDBC_PARTITION_MAXVALUE, "Warty Warthog");
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
@@ -442,7 +442,7 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "AAF");
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
@@ -471,9 +471,9 @@ public class TestPartitioner extends TestCase {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "AAE");
 
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
-    jobConf.fromTable.partitionColumnNull = true;
+    jobConf.fromJobConfig.partitionColumnNull = true;
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);

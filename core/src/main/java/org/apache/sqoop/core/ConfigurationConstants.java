@@ -73,8 +73,8 @@ public final class ConfigurationConstants {
   public static final String CONNECTOR_AUTO_UPGRADE =
       "org.apache.sqoop.connector.autoupgrade";
 
-  public static final String FRAMEWORK_AUTO_UPGRADE =
-      "org.apache.sqoop.framework.autoupgrade";
+  public static final String DRIVER_AUTO_UPGRADE =
+      "org.apache.sqoop.driver.autoupgrade";
 
   /**
    * Enable Sqoop App to kill Tomcat in case that it will fail to load.

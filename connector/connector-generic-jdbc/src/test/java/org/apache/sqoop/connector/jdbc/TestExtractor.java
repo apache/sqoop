@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -67,10 +67,10 @@ public class TestExtractor extends TestCase {
   public void testQuery() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+    LinkConfiguration connectionConfig = new LinkConfiguration();
 
-    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
 
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
@@ -99,10 +99,10 @@ public class TestExtractor extends TestCase {
   public void testSubquery() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+    LinkConfiguration connectionConfig = new LinkConfiguration();
 
-    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
 
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 

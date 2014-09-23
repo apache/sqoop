@@ -69,12 +69,12 @@ public final class SubmissionDisplayer {
     }
 
     if(isVerbose() && submission.getFromSchema() != null) {
-      print(resourceString(Constants.RES_CONNECTOR_SCHEMA)+": ");
+      print(resourceString(Constants.RES_FROM_SCHEMA)+": ");
       println(submission.getFromSchema());
     }
 
     if(isVerbose() && submission.getToSchema() != null) {
-      print(resourceString(Constants.RES_HIO_SCHEMA)+": ");
+      print(resourceString(Constants.RES_TO_SCHEMA)+": ");
       println(submission.getToSchema());
     }
   }

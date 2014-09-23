@@ -25,7 +25,7 @@ import org.apache.sqoop.common.MutableContext;
  *
  * This class is returning mutable context instead of immutable.
  */
-public class InitializerContext extends ActorContext {
+public class InitializerContext extends TransferableContext {
 
   public InitializerContext(MutableContext context) {
     super(context);

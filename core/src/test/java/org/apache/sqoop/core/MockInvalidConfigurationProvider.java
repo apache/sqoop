@@ -29,26 +29,19 @@ public class MockInvalidConfigurationProvider implements ConfigurationProvider {
 
   @Override
   public void initialize(File configDir, Properties bootstrapCongiruation) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
   public void registerListener(ConfigurationListener listener) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
   public Map<String, String> getConfiguration() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public void destroy() {
-    // TODO Auto-generated method stub
-
   }
 
 }

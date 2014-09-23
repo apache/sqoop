@@ -17,6 +17,12 @@
  */
 package org.apache.sqoop.submission.mapreduce;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobClient;
@@ -29,22 +35,16 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.driver.SubmissionEngine;
 import org.apache.sqoop.execution.mapreduce.MRJobRequest;
 import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
-import org.apache.sqoop.framework.JobRequest;
-import org.apache.sqoop.framework.SubmissionEngine;
+import org.apache.sqoop.driver.JobRequest;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.mr.ConfigurationUtils;
+import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
-import org.apache.sqoop.submission.SubmissionStatus;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Map;
 
 
 /**
@@ -156,10 +156,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     // Clone global configuration
     Configuration configuration = new Configuration(globalConfiguration);
 
-    // Serialize framework context into job configuration
-    for(Map.Entry<String, String> entry: request.getFrameworkContext()) {
+    // Serialize driver context into job configuration
+    for(Map.Entry<String, String> entry: request.getDriverContext()) {
       if (entry.getValue() == null) {
-        LOG.warn("Ignoring null framework context value for key " + entry.getKey());
+        LOG.warn("Ignoring null driver context value for key " + entry.getKey());
         continue;
       }
       configuration.set(entry.getKey(), entry.getValue());
@@ -202,13 +202,13 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       Job job = new Job(configuration);
 
       // And finally put all configuration objects to credentials cache
-      ConfigurationUtils.setConnectorConnectionConfig(Direction.FROM, job, request.getConnectorConnectionConfig(Direction.FROM));
+      ConfigurationUtils.setConnectorConnectionConfig(Direction.FROM, job, request.getConnectorLinkConfig(Direction.FROM));
       ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getConnectorJobConfig(Direction.FROM));
-      ConfigurationUtils.setConnectorConnectionConfig(Direction.TO, job, request.getConnectorConnectionConfig(Direction.TO));
+      ConfigurationUtils.setConnectorConnectionConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
       ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getConnectorJobConfig(Direction.TO));
-      ConfigurationUtils.setFrameworkConnectionConfig(Direction.FROM, job, request.getFrameworkConnectionConfig(Direction.FROM));
-      ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkConnectionConfig(Direction.TO));
-      ConfigurationUtils.setFrameworkJobConfig(job, request.getConfigFrameworkJob());
+      ConfigurationUtils.setFrameworkConnectionConfig(Direction.FROM, job, request.getFrameworkLinkConfig(Direction.FROM));
+      ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkLinkConfig(Direction.TO));
+      ConfigurationUtils.setFrameworkJobConfig(job, request.getFrameworkJobConfig());
       // @TODO(Abe): Persist TO schema.
       ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
 

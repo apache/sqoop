@@ -26,7 +26,7 @@ import java.util.Collection;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
@@ -82,10 +82,10 @@ public class TestLoader {
   public void testInsert() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    ConnectionConfiguration connectionConfig = new ConnectionConfiguration();
+    LinkConfiguration connectionConfig = new LinkConfiguration();
 
-    connectionConfig.connection.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.connection.connectionString = GenericJdbcTestConstants.URL;
+    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
 
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 

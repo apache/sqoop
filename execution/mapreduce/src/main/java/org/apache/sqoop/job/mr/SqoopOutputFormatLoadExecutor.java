@@ -250,7 +250,7 @@ public class SqoopOutputFormatLoadExecutor {
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Error while loading data out of MR job.", t);
-        // Release so that the writer can tell the framework something went
+        // Release so that the writer can tell Sqoop something went
         // wrong.
         free.release();
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
@@ -262,7 +262,7 @@ public class SqoopOutputFormatLoadExecutor {
         // throw exception if data are not all consumed
         readerFinished = true;
         LOG.error("Reader terminated, but writer is still running!");
-        // Release so that the writer can tell the framework something went
+        // Release so that the writer can tell Sqoop something went
         // wrong.
         free.release();
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);

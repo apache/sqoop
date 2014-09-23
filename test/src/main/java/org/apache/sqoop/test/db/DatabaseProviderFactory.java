@@ -32,7 +32,7 @@ public class DatabaseProviderFactory {
       return new DerbyProvider();
     }
 
-    Class klass = Class.forName(className);
+    Class<?> klass = Class.forName(className);
     return (DatabaseProvider)klass.newInstance();
   }
 

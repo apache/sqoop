@@ -17,16 +17,16 @@
  */
 package org.apache.sqoop.client;
 
-import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.client.request.SqoopResourceRequests;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.FrameworkBean;
+import org.apache.sqoop.json.DriverConfigBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.validation.Status;
@@ -45,7 +45,7 @@ import java.util.ResourceBundle;
  * implementation is not thread safe.
  *
  * SqoopClient is keeping cache of objects that are unlikely to be changed
- * (Resources, Connector structures). Volatile structures (Connections, Jobs)
+ * (Resources, Connector structures). Volatile structures (Links, Jobs)
  * are not cached.
  */
 public class SqoopClient {
@@ -53,32 +53,29 @@ public class SqoopClient {
   /**
    * Underlying request object to fetch data from Sqoop server.
    */
-  private SqoopRequests requests;
+  private SqoopResourceRequests resourceRequests;
 
   /**
    * True if user retrieved all connectors at once.
    */
-  private boolean allConnectors;
-
-  /**
-   * All cached bundles for all connectors.
-   */
-  private Map<Long, ResourceBundle> bundles;
-
-  /**
-   * Cached framework bundle.
-   */
-  private ResourceBundle frameworkBundle;
-
+  private boolean isAllConnectors;
   /**
    * All cached connectors.
    */
   private Map<Long, MConnector> connectors;
+  /**
+   * All cached bundles for all connectors.
+   */
+  private Map<Long, ResourceBundle> connectorConfigBundles;
 
   /**
-   * Cached framework.
+   * Cached driverConfig.
    */
-  private MFramework framework;
+  private MDriverConfig driverConfig;
+  /**
+   * Cached driverConfig bundle.
+   */
+  private ResourceBundle driverConfigBundle;
 
   /**
    * Status flags used when updating the submission callback status
@@ -90,7 +87,7 @@ public class SqoopClient {
   }
 
   public SqoopClient(String serverUrl) {
-    requests = new SqoopRequests();
+    resourceRequests = new SqoopResourceRequests();
     setServerUrl(serverUrl);
   }
 
@@ -102,7 +99,7 @@ public class SqoopClient {
    * @param serverUrl Server URL
    */
   public void setServerUrl(String serverUrl) {
-    requests.setServerUrl(serverUrl);
+    resourceRequests.setServerUrl(serverUrl);
     clearCache();
   }
 
@@ -111,8 +108,8 @@ public class SqoopClient {
    *
    * @param requests SqoopRequests object
    */
-  public void setSqoopRequests(SqoopRequests requests) {
-    this.requests = requests;
+  public void setSqoopRequests(SqoopResourceRequests requests) {
+    this.resourceRequests = requests;
     clearCache();
   }
 
@@ -120,11 +117,11 @@ public class SqoopClient {
    * Clear internal cache.
    */
   public void clearCache() {
-    bundles = new HashMap<Long, ResourceBundle>();
-    frameworkBundle = null;
+    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
+    driverConfigBundle = null;
     connectors = new HashMap<Long, MConnector>();
-    framework = null;
-    allConnectors = false;
+    driverConfig = null;
+    isAllConnectors = false;
   }
 
   /**
@@ -155,7 +152,7 @@ public class SqoopClient {
 
     // If the connector wasn't in cache and we have all connectors,
     // it simply do not exists.
-    if(allConnectors) return null;
+    if(isAllConnectors) return null;
 
     // Retrieve all connectors from server
     getConnectors();
@@ -186,9 +183,9 @@ public class SqoopClient {
    * @param cid Connector id
    */
   private void retrieveConnector(long cid) {
-    ConnectorBean request = requests.readConnector(cid);
+    ConnectorBean request = resourceRequests.readConnector(cid);
     connectors.put(cid, request.getConnectors().get(0));
-    bundles.put(cid, request.getResourceBundles().get(cid));
+    connectorConfigBundles.put(cid, request.getResourceBundles().get(cid));
   }
 
   /**
@@ -197,16 +194,16 @@ public class SqoopClient {
    * @return
    */
   public Collection<MConnector> getConnectors() {
-    if(allConnectors) {
+    if(isAllConnectors) {
       return connectors.values();
     }
 
-    ConnectorBean bean = requests.readConnector(null);
-    allConnectors = true;
+    ConnectorBean bean = resourceRequests.readConnector(null);
+    isAllConnectors = true;
     for(MConnector connector : bean.getConnectors()) {
       connectors.put(connector.getPersistenceId(), connector);
     }
-    bundles = bean.getResourceBundles();
+    connectorConfigBundles = bean.getResourceBundles();
 
     return connectors.values();
   }
@@ -214,173 +211,171 @@ public class SqoopClient {
   /**
    * Get resource bundle for given connector.
    *
-   * @param cid Connector id.
+   * @param connectorId Connector id.
    * @return
    */
-  public ResourceBundle getResourceBundle(long cid) {
-    if(bundles.containsKey(cid)) {
-      return bundles.get(cid);
+  public ResourceBundle getConnectorConfigResourceBundle(long connectorId) {
+    if(connectorConfigBundles.containsKey(connectorId)) {
+      return connectorConfigBundles.get(connectorId);
     }
 
-    retrieveConnector(cid);
-    return bundles.get(cid);
+    retrieveConnector(connectorId);
+    return connectorConfigBundles.get(connectorId);
   }
 
   /**
-   * Return framework metadata.
+   * Return driver config.
    *
    * @return
    */
-  public MFramework getFramework() {
-    if(framework != null) {
-      return framework.clone(false);
+  public MDriverConfig getDriverConfig() {
+    if(driverConfig != null) {
+      return driverConfig.clone(false);
     }
-
-    retrieveFramework();
-    return framework.clone(false);
+    retrieveAndCacheDriverConfig();
+    return driverConfig.clone(false);
 
   }
 
   /**
-   * Retrieve framework structure and cache it.
+   * Retrieve driverConfig and cache it.
    */
-  private void retrieveFramework() {
-    FrameworkBean request =  requests.readFramework();
-    framework = request.getFramework();
-    frameworkBundle = request.getResourceBundle();
+  private void retrieveAndCacheDriverConfig() {
+    DriverConfigBean driverConfigBean =  resourceRequests.readDriverConfig();
+    driverConfig = driverConfigBean.getDriverConfig();
+    driverConfigBundle = driverConfigBean.getResourceBundle();
   }
 
   /**
-   * Return framework bundle.
+   * Return driverConfig bundle.
    *
    * @return
    */
-  public ResourceBundle getFrameworkResourceBundle() {
-    if(frameworkBundle != null) {
-      return frameworkBundle;
+  public ResourceBundle getDriverConfigBundle() {
+    if(driverConfigBundle != null) {
+      return driverConfigBundle;
     }
-
-    retrieveFramework();
-    return frameworkBundle;
+    retrieveAndCacheDriverConfig();
+    return driverConfigBundle;
   }
 
   /**
-   * Create new connection object for given connector.
+   * Create new link object for given connector id
    *
-   * @param cid Connector id
+   * @param connectorId Connector id
    * @return
    */
-  public MConnection newConnection(long cid) {
-    return new MConnection(
-      cid,
-      getConnector(cid).getConnectionForms(),
-      getFramework().getConnectionForms()
+  public MLink createLink(long connectorId) {
+    return new MLink(
+      connectorId,
+      getConnector(connectorId).getConnectionForms(),
+      getDriverConfig().getConnectionForms()
     );
   }
 
   /**
-   * Create new connection object for given connector.
+   * Create new link object for given connector name
    *
    * @param connectorName Connector name
    * @return
    */
-  public MConnection newConnection(String connectorName) {
+  public MLink createLink(String connectorName) {
     MConnector connector = getConnector(connectorName);
     if(connector == null) {
       throw new SqoopException(ClientError.CLIENT_0003, connectorName);
     }
 
-    return newConnection(connector.getPersistenceId());
+    return createLink(connector.getPersistenceId());
   }
 
   /**
-   * Retrieve connection with given id.
+   * Retrieve link for given id.
    *
-   * @param xid Connnection id
+   * @param linkId Link id
    * @return
    */
-  public MConnection getConnection(long xid) {
-    return requests.readConnection(xid).getConnections().get(0);
+  public MLink getLink(long linkId) {
+    return resourceRequests.readLink(linkId).getLinks().get(0);
   }
 
   /**
-   * Retrieve list of all connections.
+   * Retrieve list of all links.
    *
    * @return
    */
-  public List<MConnection> getConnections() {
-    return requests.readConnection(null).getConnections();
+  public List<MLink> getLinks() {
+    return resourceRequests.readLink(null).getLinks();
   }
 
   /**
-   * Create the connection on server.
+   * Create the link and save to the repository
    *
-   * @param connection Connection that should be created
+   * @param link link that should be created
    * @return
    */
-  public Status createConnection(MConnection connection) {
-    return applyValidations(requests.createConnection(connection), connection);
+  public Status saveLink(MLink link) {
+    return applyLinkValidations(resourceRequests.saveLink(link), link);
   }
 
   /**
-   * Update connection on the server.
+   * Update link on the server.
    *
-   * @param connection Connection that should be updated
+   * @param link link that should be updated
    * @return
    */
-  public Status updateConnection(MConnection connection) {
-    return applyValidations(requests.updateConnection(connection), connection);
+  public Status updateLink(MLink link) {
+    return applyLinkValidations(resourceRequests.updateLink(link), link);
   }
 
   /**
-   * Enable/disable connection with given id
+   * Enable/disable link with given id
    *
-   * @param xid Connection id
+   * @param linkId link id
    * @param enabled Enable or disable
    */
-  public void enableConnection(long xid, boolean enabled) {
-    requests.enableConnection(xid, enabled);
+  public void enableLink(long linkId, boolean enabled) {
+    resourceRequests.enableLink(linkId, enabled);
   }
 
   /**
-   * Delete connection with given id.
+   * Delete link with given id.
    *
-   * @param xid Connection id
+   * @param linkId link id
    */
-  public void deleteConnection(long xid) {
-    requests.deleteConnection(xid);
+  public void deleteLink(long linkId) {
+    resourceRequests.deleteLink(linkId);
   }
 
   /**
-   * Create new job the for given connections.
+   * Create new job the for given links.
    *
-   * @param fromXid From Connection id
-   * @param toXid To Connection id
+   * @param fromLinkId From link id
+   * @param toLinkId To link id
    * @return
    */
-  public MJob newJob(long fromXid, long toXid) {
-    MConnection fromConnection = getConnection(fromXid);
-    MConnection toConnection = getConnection(toXid);
+  public MJob createJob(long fromLinkId, long toLinkId) {
+    MLink fromLink = getLink(fromLinkId);
+    MLink toLink = getLink(toLinkId);
 
     return new MJob(
-      fromConnection.getConnectorId(),
-      toConnection.getConnectorId(),
-      fromConnection.getPersistenceId(),
-      toConnection.getPersistenceId(),
-      getConnector(fromConnection.getConnectorId()).getJobForms(Direction.FROM),
-      getConnector(toConnection.getConnectorId()).getJobForms(Direction.TO),
-      getFramework().getJobForms()
+      fromLink.getConnectorId(),
+      toLink.getConnectorId(),
+      fromLink.getPersistenceId(),
+      toLink.getPersistenceId(),
+      getConnector(fromLink.getConnectorId()).getJobForms(Direction.FROM),
+      getConnector(toLink.getConnectorId()).getJobForms(Direction.TO),
+      getDriverConfig().getJobForms()
     );
   }
 
   /**
    * Retrieve job for given id.
    *
-   * @param jid Job id
+   * @param jobId Job id
    * @return
    */
-  public MJob getJob(long jid) {
-    return requests.readJob(jid).getJobs().get(0);
+  public MJob getJob(long jobId) {
+    return resourceRequests.readJob(jobId).getJobs().get(0);
   }
 
   /**
@@ -389,17 +384,17 @@ public class SqoopClient {
    * @return
    */
   public List<MJob> getJobs() {
-    return requests.readJob(null).getJobs();
+    return resourceRequests.readJob(null).getJobs();
   }
 
   /**
-   * Create job on server.
+   * Create job on server and save to the repository
    *
    * @param job Job that should be created
    * @return
    */
-  public Status createJob(MJob job) {
-    return applyValidations(requests.createJob(job), job);
+  public Status saveJob(MJob job) {
+    return applyJobValidations(resourceRequests.saveJob(job), job);
   }
 
   /**
@@ -408,7 +403,7 @@ public class SqoopClient {
    * @return
    */
   public Status updateJob(MJob job) {
-    return applyValidations(requests.updateJob(job), job);
+    return applyJobValidations(resourceRequests.updateJob(job), job);
   }
 
   /**
@@ -418,44 +413,45 @@ public class SqoopClient {
    * @param enabled Enable or disable
    */
   public void enableJob(long jid, boolean enabled) {
-    requests.enableJob(jid, enabled);
+    resourceRequests.enableJob(jid, enabled);
   }
 
   /**
    * Delete job with given id.
    *
-   * @param jid Job id
+   * @param jobId Job id
    */
-  public void deleteJob(long jid) {
-    requests.deleteJob(jid);
+  public void deleteJob(long jobId) {
+    resourceRequests.deleteJob(jobId);
   }
 
   /**
    * Start job with given id.
    *
-   * @param jid Job id
+   * @param jobId Job id
    * @return
    */
-  public MSubmission startSubmission(long jid) {
-    return requests.createSubmission(jid).getSubmissions().get(0);
+  public MSubmission startSubmission(long jobId) {
+    return resourceRequests.createSubmission(jobId).getSubmissions().get(0);
   }
 
   /**
    * Method used for synchronous job submission.
    * Pass null to callback parameter if submission status is not required and after completion
    * job execution returns MSubmission which contains final status of submission.
-   * @param jid - Job ID
+   * @param jobId - Job ID
    * @param callback - User may set null if submission status is not required, else callback methods invoked
    * @param pollTime - Server poll time
    * @return MSubmission - Final status of job submission
    * @throws InterruptedException
    */
-  public MSubmission startSubmission(long jid, SubmissionCallback callback, long pollTime) throws InterruptedException {
+  public MSubmission startSubmission(long jobId, SubmissionCallback callback, long pollTime)
+      throws InterruptedException {
     if(pollTime <= 0) {
       throw new SqoopException(ClientError.CLIENT_0002);
     }
     boolean first = true;
-    MSubmission submission = requests.createSubmission(jid).getSubmissions().get(0);
+    MSubmission submission = resourceRequests.createSubmission(jobId).getSubmissions().get(0);
     while(submission.getStatus().isRunning()) {
       if(first) {
         submissionCallback(callback, submission, SubmissionStatus.SUBMITTED);
@@ -464,7 +460,7 @@ public class SqoopClient {
         submissionCallback(callback, submission, SubmissionStatus.UPDATED);
       }
       Thread.sleep(pollTime);
-      submission = getSubmissionStatus(jid);
+      submission = getSubmissionStatus(jobId);
     }
     submissionCallback(callback, submission, SubmissionStatus.FINISHED);
     return submission;
@@ -477,9 +473,9 @@ public class SqoopClient {
    * @param submission
    * @param status
    */
-  private void submissionCallback(SubmissionCallback callback,
-      MSubmission submission, SubmissionStatus status) {
-    if(callback == null) {
+  private void submissionCallback(SubmissionCallback callback, MSubmission submission,
+      SubmissionStatus status) {
+    if (callback == null) {
       return;
     }
     switch (status) {
@@ -501,7 +497,7 @@ public class SqoopClient {
    * @return
    */
   public MSubmission stopSubmission(long jid) {
-    return requests.deleteSubmission(jid).getSubmissions().get(0);
+    return resourceRequests.deleteSubmission(jid).getSubmissions().get(0);
   }
 
   /**
@@ -511,7 +507,7 @@ public class SqoopClient {
    * @return
    */
   public MSubmission getSubmissionStatus(long jid) {
-    return requests.readSubmission(jid).getSubmissions().get(0);
+    return resourceRequests.readSubmission(jid).getSubmissions().get(0);
   }
 
   /**
@@ -520,46 +516,46 @@ public class SqoopClient {
    * @return
    */
   public List<MSubmission> getSubmissions() {
-    return requests.readHistory(null).getSubmissions();
+    return resourceRequests.readHistory(null).getSubmissions();
   }
 
   /**
    * Retrieve list of submissions for given jobId.
    *
-   * @param jid Job id
+   * @param jobId Job id
    * @return
    */
-  public List<MSubmission> getSubmissionsForJob(long jid) {
-    return requests.readHistory(jid).getSubmissions();
+  public List<MSubmission> getSubmissionsForJob(long jobId) {
+    return resourceRequests.readHistory(jobId).getSubmissions();
   }
 
-  private Status applyValidations(ValidationResultBean bean, MConnection connection) {
+  private Status applyLinkValidations(ValidationResultBean bean, MLink link) {
     ValidationResult connector = bean.getValidationResults()[0];
-    ValidationResult framework = bean.getValidationResults()[1];
+    ValidationResult driverConfig = bean.getValidationResults()[1];
 
     // Apply validation results
-    FormUtils.applyValidation(connection.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(connection.getFrameworkPart().getForms(), framework);
+    FormUtils.applyValidation(link.getConnectorPart().getForms(), connector);
+    FormUtils.applyValidation(link.getFrameworkPart().getForms(), driverConfig);
 
     Long id = bean.getId();
     if(id != null) {
-      connection.setPersistenceId(id);
+      link.setPersistenceId(id);
     }
 
-    return Status.getWorstStatus(connector.getStatus(), framework.getStatus());
+    return Status.getWorstStatus(connector.getStatus(), driverConfig.getStatus());
   }
 
-  private Status applyValidations(ValidationResultBean bean, MJob job) {
+  private Status applyJobValidations(ValidationResultBean bean, MJob job) {
     ValidationResult fromConnector = bean.getValidationResults()[0];
     ValidationResult toConnector = bean.getValidationResults()[1];
-    ValidationResult framework = bean.getValidationResults()[2];
+    ValidationResult driverConfig = bean.getValidationResults()[2];
 
     // Apply validation results
     // @TODO(Abe): From/To validation.
     FormUtils.applyValidation(
         job.getConnectorPart(Direction.FROM).getForms(),
         fromConnector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(), framework);
+    FormUtils.applyValidation(job.getFrameworkPart().getForms(), driverConfig);
     FormUtils.applyValidation(
         job.getConnectorPart(Direction.TO).getForms(),
         toConnector);
@@ -569,6 +565,6 @@ public class SqoopClient {
       job.setPersistenceId(id);
     }
 
-    return Status.getWorstStatus(fromConnector.getStatus(), framework.getStatus(), toConnector.getStatus());
+    return Status.getWorstStatus(fromConnector.getStatus(), driverConfig.getStatus(), toConnector.getStatus());
   }
 }

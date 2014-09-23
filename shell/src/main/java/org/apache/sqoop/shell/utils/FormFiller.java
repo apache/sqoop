@@ -23,7 +23,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MInput;
@@ -50,7 +50,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 public final class FormFiller {
 
   /**
-   * Internal input that will be reused for loading names for connection and
+   * Internal input that will be reused for loading names for link and
    * job objects.
    */
   private static MStringInput nameInput = new MStringInput("object-name", false, (short)25);
@@ -81,14 +81,14 @@ public final class FormFiller {
    * @param reader Associated console reader object
    * @param job Job that user is suppose to fill in
    * @param fromConnectorBundle Connector resource bundle
-   * @param frameworkBundle Framework resource bundle
+   * @param driverConfigBundle Driver config resource bundle
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
   public static boolean fillJob(ConsoleReader reader,
                                 MJob job,
                                 ResourceBundle fromConnectorBundle,
-                                ResourceBundle frameworkBundle,
+                                ResourceBundle driverConfigBundle,
                                 ResourceBundle toConnectorBundle)
                                 throws IOException {
 
@@ -99,55 +99,55 @@ public final class FormFiller {
                      job.getConnectorPart(Direction.FROM).getForms(),
                      fromConnectorBundle,
                      job.getFrameworkPart().getForms(),
-                     frameworkBundle,
+                     driverConfigBundle,
                      job.getConnectorPart(Direction.TO).getForms(),
                      toConnectorBundle);
   }
 
   /**
-   * Fill connection object based on CLI options.
+   * Fill link object based on CLI options.
    *
    * @param line Associated command line options
-   * @param connection Connection that user is suppose to fill in
+   * @param link Link that user is suppose to fill in
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
   public static boolean fillConnection(CommandLine line,
-                                       MConnection connection)
+                                       MLink link)
                                        throws IOException {
 
-    connection.setName(line.getOptionValue("name"));
+    link.setName(line.getOptionValue("name"));
 
     // Fill in data from user
     return fillForms(line,
-                     connection.getConnectorPart().getForms(),
-                     connection.getFrameworkPart().getForms());
+                     link.getConnectorPart().getForms(),
+                     link.getFrameworkPart().getForms());
   }
 
   /**
-   * Fill connection object based on user input.
+   * Fill link object based on user input.
    *
    * @param reader Associated console reader object
-   * @param connection Connection that user is suppose to fill in
-   * @param connectorBundle Connector resource bundle
-   * @param frameworkBundle Framework resouce bundle
+   * @param link Link that user is suppose to fill in
+   * @param connectorConfigBundle Connector resource bundle
+   * @param driverConfigBundle Driver config resource bundle
    * @return True if we filled all inputs, false if user has stopped processing
    * @throws IOException
    */
-  public static boolean fillConnection(ConsoleReader reader,
-                                       MConnection connection,
-                                       ResourceBundle connectorBundle,
-                                       ResourceBundle frameworkBundle)
+  public static boolean fillLink(ConsoleReader reader,
+                                       MLink link,
+                                       ResourceBundle connectorConfigBundle,
+                                       ResourceBundle driverConfigBundle)
                                        throws IOException {
 
-    connection.setName(getName(reader, connection.getName()));
+    link.setName(getName(reader, link.getName()));
 
     // Fill in data from user
     return fillForms(reader,
-                     connection.getConnectorPart().getForms(),
-                     connectorBundle,
-                     connection.getFrameworkPart().getForms(),
-                     frameworkBundle);
+                     link.getConnectorPart().getForms(),
+                     connectorConfigBundle,
+                     link.getFrameworkPart().getForms(),
+                     driverConfigBundle);
   }
 
   /**
@@ -391,18 +391,18 @@ public final class FormFiller {
 
   public static boolean fillForms(ConsoleReader reader,
                                   List<MForm> connectorForms,
-                                  ResourceBundle connectorBundle,
+                                  ResourceBundle connectorConfigBundle,
                                   List<MForm> frameworkForms,
-                                  ResourceBundle frameworkBundle) throws IOException {
+                                  ResourceBundle driverConfigBundle) throws IOException {
 
 
     // Query connector forms
-    if(!fillForms(connectorForms, reader, connectorBundle)) {
+    if(!fillForms(connectorForms, reader, connectorConfigBundle)) {
       return false;
     }
 
     // Query framework forms
-    if(!fillForms(frameworkForms, reader, frameworkBundle)) {
+    if(!fillForms(frameworkForms, reader, driverConfigBundle)) {
       return false;
     }
     return true;
@@ -412,7 +412,7 @@ public final class FormFiller {
                                   List<MForm> fromConnectorForms,
                                   ResourceBundle fromConnectorBundle,
                                   List<MForm> frameworkForms,
-                                  ResourceBundle frameworkBundle,
+                                  ResourceBundle driverConfigBundle,
                                   List<MForm> toConnectorForms,
                                   ResourceBundle toConnectorBundle) throws IOException {
 
@@ -423,7 +423,7 @@ public final class FormFiller {
     }
 
     // Query framework forms
-    if(!fillForms(frameworkForms, reader, frameworkBundle)) {
+    if(!fillForms(frameworkForms, reader, driverConfigBundle)) {
       return false;
     }
 
@@ -902,13 +902,13 @@ public final class FormFiller {
     println("@|red There are issues with entered data, please revise your input:|@");
   }
 
-  public static void printConnectionValidationMessages(MConnection connection) {
-    for (MForm form : connection.getConnectorPart().getForms()) {
+  public static void printLinkValidationMessages(MLink link) {
+    for (MForm form : link.getConnectorPart().getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }
     }
-    for (MForm form : connection.getFrameworkPart().getForms()) {
+    for (MForm form : link.getFrameworkPart().getForms()) {
       for (MInput<?> input : form.getInputs()) {
         printValidationMessage(input, true);
       }

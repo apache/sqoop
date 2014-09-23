@@ -22,9 +22,9 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -40,8 +40,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.sqoop.connector.hdfs.configuration.OutputFormat.SEQUENCE_FILE;
-import static org.apache.sqoop.connector.hdfs.configuration.OutputFormat.TEXT_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
 
 @RunWith(Parameterized.class)
 public class TestExtractor extends TestHdfsBase {
@@ -49,12 +49,12 @@ public class TestExtractor extends TestHdfsBase {
   private static final int NUMBER_OF_FILES = 5;
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
 
-  private OutputFormat outputFileType;
+  private ToFormat outputFileType;
   private Class<? extends CompressionCodec> compressionClass;
   private final String inputDirectory;
   private Extractor extractor;
 
-  public TestExtractor(OutputFormat outputFileType,
+  public TestExtractor(ToFormat outputFileType,
                        Class<? extends CompressionCodec> compressionClass)
       throws Exception {
     this.inputDirectory = INPUT_ROOT + getClass().getSimpleName();
@@ -130,7 +130,7 @@ public class TestExtractor extends TestHdfsBase {
         throw new AssertionError("Should not be writing object.");
       }
     }, null);
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));

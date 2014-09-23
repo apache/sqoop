@@ -31,7 +31,7 @@ public class EnableCommand extends SqoopCommand {
       Constants.CMD_ENABLE,
       Constants.CMD_ENABLE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, EnableConnectionFunction.class,
+        Constants.FN_LINK, EnableLinkFunction.class,
         Constants.FN_JOB, EnableJobFunction.class
       )
     );

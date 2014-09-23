@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Input {
   /**
-   * Sqoop framework will ensure that sensitive information will not be easily
+   * Sqoop will ensure that sensitive information will not be easily
    * accessible.
    *
    * @return True if field is sensitive

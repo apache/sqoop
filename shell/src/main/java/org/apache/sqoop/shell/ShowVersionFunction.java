@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.request.VersionRequest;
+import org.apache.sqoop.client.request.VersionResourceRequest;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.shell.core.Constants;
@@ -31,7 +31,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 @SuppressWarnings("serial")
 public class ShowVersionFunction extends SqoopFunction {
-  private VersionRequest versionRequest;
+  private VersionResourceRequest versionRequest;
 
 
   @SuppressWarnings("static-access")
@@ -106,9 +106,9 @@ public class ShowVersionFunction extends SqoopFunction {
     }
 
     if (versionRequest == null) {
-      versionRequest = new VersionRequest();
+      versionRequest = new VersionResourceRequest();
     }
-    VersionBean versionBean = versionRequest.doGet(getServerUrl());
+    VersionBean versionBean = versionRequest.read(getServerUrl());
 
     if (server) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,

@@ -22,10 +22,10 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
-import org.apache.sqoop.connector.spi.MetadataUpgrader;
+import org.apache.sqoop.connector.spi.RepositoryUpgrader;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -65,8 +65,8 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public Class getConnectionConfigurationClass() {
-    return ConnectionConfiguration.class;
+  public Class getLinkConfigurationClass() {
+    return LinkConfiguration.class;
   }
 
   @Override
@@ -97,8 +97,8 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public MetadataUpgrader getMetadataUpgrader() {
-    return new GenericJdbcConnectorMetadataUpgrader();
+  public RepositoryUpgrader getRepositoryUpgrader() {
+    return new GenericJdbcConnectorUpgrader();
   }
 
 }

@@ -18,7 +18,7 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.data.Cities;
@@ -36,7 +36,7 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
   public void testStagedTransfer() throws Exception {
     final String stageTableName = "STAGE_" + getTableName();
     createTableCities();
-    createInputMapreduceFile("input-0001",
+    createFromFile("input-0001",
       "1,'USA','San Francisco'",
       "2,'USA','Sunnyvale'",
       "3,'Czech Republic','Brno'",
@@ -44,29 +44,29 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     );
     new Cities(provider, stageTableName).createTables();
 
-    // RDBMS connection
-    MConnection rdbmsConnection = getClient().newConnection("generic-jdbc-connector");
-    fillRdbmsConnectionForm(rdbmsConnection);
-    createConnection(rdbmsConnection);
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkForm(rdbmsLink);
+    saveLink(rdbmsLink);
 
-    // HDFS connection
-    MConnection hdfsConnection = getClient().newConnection("hdfs-connector");
-    createConnection(hdfsConnection);
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().newJob(hdfsConnection.getPersistenceId(),
-        rdbmsConnection.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getPersistenceId(),
+        rdbmsLink.getPersistenceId());
 
     // Connector values
     MFormList forms = job.getConnectorPart(Direction.TO);
-    forms.getStringInput("toTable.tableName").setValue(
+    forms.getStringInput("toJobConfig.tableName").setValue(
       provider.escapeTableName(getTableName()));
-    forms.getStringInput("toTable.stageTableName").setValue(
+    forms.getStringInput("toJobConfig.stageTableName").setValue(
       provider.escapeTableName(stageTableName));
-    fillInputForm(job);
-    createJob(job);
+    fillFromJobForm(job);
+    saveJob(job);
 
-    runJob(job);
+    executeJob(job);
 
     assertEquals(0L, provider.rowCount(stageTableName));
     assertEquals(4L, rowCount());

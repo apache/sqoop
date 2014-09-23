@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 
-public class GenericJdbcLoader extends Loader<ConnectionConfiguration, ToJobConfiguration> {
+public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
   public static final int DEFAULT_ROWS_PER_BATCH = 100;
   public static final int DEFAULT_BATCHES_PER_TRANSACTION = 100;
@@ -30,11 +30,11 @@ public class GenericJdbcLoader extends Loader<ConnectionConfiguration, ToJobConf
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void load(LoaderContext context, ConnectionConfiguration connection, ToJobConfiguration job) throws Exception{
-    String driver = connection.connection.jdbcDriver;
-    String url = connection.connection.connectionString;
-    String username = connection.connection.username;
-    String password = connection.connection.password;
+  public void load(LoaderContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) throws Exception{
+    String driver = linkConf.link.jdbcDriver;
+    String url = linkConf.link.connectionString;
+    String username = linkConf.link.username;
+    String password = linkConf.link.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
     executor.setAutoCommit(false);
 

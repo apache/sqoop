@@ -21,7 +21,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.framework.JobRequest;
+import org.apache.sqoop.driver.JobRequest;
 
 /**
  * Map-reduce specific submission request containing all extra information

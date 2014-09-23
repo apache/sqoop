@@ -18,7 +18,7 @@
 package org.apache.sqoop.job;
 
 import org.apache.sqoop.core.ConfigurationConstants;
-import org.apache.sqoop.framework.FrameworkConstants;
+import org.apache.sqoop.driver.DriverConstants;
 
 public final class JobConstants extends Constants {
   /**
@@ -73,7 +73,7 @@ public final class JobConstants extends Constants {
     "mapred.output.compression.codec";
 
   public static final String INTERMEDIATE_DATA_FORMAT =
-    FrameworkConstants.PREFIX_EXECUTION_CONFIG + "intermediate.format";
+    DriverConstants.PREFIX_EXECUTION_CONFIG + "intermediate.format";
 
   private JobConstants() {
     // Disable explicit object creation

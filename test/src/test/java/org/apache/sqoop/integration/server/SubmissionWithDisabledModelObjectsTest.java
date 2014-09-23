@@ -20,9 +20,9 @@ package org.apache.sqoop.integration.server;
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
-import org.apache.sqoop.framework.FrameworkError;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.driver.DriverError;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
 
 /**
  * Ensure that server will reject starting job when either job itself
- * or corresponding connection is disabled.
+ * or corresponding link is disabled.
  */
 @RunWith(Parameterized.class)
 public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
@@ -53,11 +53,11 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
     });
   }
 
-  private boolean enabledConnection;
+  private boolean enabledLink;
   private boolean enabledJob;
 
-  public SubmissionWithDisabledModelObjectsTest(boolean enabledConnection, boolean enabledJob) {
-    this.enabledConnection = enabledConnection;
+  public SubmissionWithDisabledModelObjectsTest(boolean enabledLink, boolean enabledJob) {
+    this.enabledLink = enabledLink;
     this.enabledJob = enabledJob;
   }
 
@@ -65,33 +65,33 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
   public void testWithDisabledObjects() throws Exception {
     createAndLoadTableCities();
 
-    // RDBMS connection
-    MConnection rdbmsConnection = getClient().newConnection("generic-jdbc-connector");
-    fillRdbmsConnectionForm(rdbmsConnection);
-    createConnection(rdbmsConnection);
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkForm(rdbmsLink);
+    saveLink(rdbmsLink);
 
-    // HDFS connection
-    MConnection hdfsConnection = getClient().newConnection("hdfs-connector");
-    createConnection(hdfsConnection);
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().newJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
     MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromTable.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromTable.partitionColumn").setValue(provider.escapeColumnName("id"));
+    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     // Framework values
-    fillOutputForm(job, OutputFormat.TEXT_FILE);
-    createJob(job);
+    fillToJobForm(job, ToFormat.TEXT_FILE);
+    saveJob(job);
 
     // Disable model entities as per parametrized run
-    getClient().enableConnection(rdbmsConnection.getPersistenceId(), enabledConnection);
+    getClient().enableLink(rdbmsLink.getPersistenceId(), enabledLink);
     getClient().enableJob(job.getPersistenceId(), enabledJob);
 
-    // Try to run the job and verify that the it was not executed
+    // Try to execute the job and verify that the it was not executed
     try {
-      runJob(job);
+      executeJob(job);
       fail("Expected exception as the model classes are disabled.");
     } catch(SqoopException ex) {
       // Top level exception should be CLIENT_0001
@@ -104,9 +104,9 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
       assertNotNull(cause);
 
       if(!enabledJob) {
-        assertTrue(cause.getMessage().startsWith(FrameworkError.FRAMEWORK_0009.toString()));
-      } else if(!enabledConnection) {
-        assertTrue(cause.getMessage().startsWith(FrameworkError.FRAMEWORK_0010.toString()));
+        assertTrue(cause.getMessage().startsWith(DriverError.DRIVER_0009.toString()));
+      } else if(!enabledLink) {
+        assertTrue(cause.getMessage().startsWith(DriverError.DRIVER_0010.toString()));
       } else {
         fail("Unexpected expception retrieved from server " + cause);
       }

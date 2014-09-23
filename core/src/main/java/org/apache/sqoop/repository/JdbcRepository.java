@@ -23,9 +23,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 
@@ -43,13 +43,13 @@ public class JdbcRepository extends Repository {
   }
 
   /**
-   * Private interface to wrap specific code that requires fresh connection to
-   * repository with general code that will get the connection and handle
+   * Private interface to wrap specific code that requires fresh link to
+   * repository with general code that will get the link and handle
    * exceptions.
    */
   private interface DoWithConnection {
     /**
-     * Do what is needed to be done with given connection object.
+     * Do what is needed to be done with given link object.
      *
      * @param conn Connection to metadata repository.
      * @return Arbitrary value
@@ -62,7 +62,7 @@ public class JdbcRepository extends Repository {
   }
 
   /**
-   * Handle transaction and connection functionality and delegate action to
+   * Handle transaction and link functionality and delegate action to
    * given delegator.
    *
    * @param delegator Code for specific action
@@ -77,7 +77,7 @@ public class JdbcRepository extends Repository {
     boolean shouldCloseTxn = false;
 
     try {
-      // Get transaction and connection
+      // Get transaction and link
       Connection conn;
       if (tx == null) {
         tx = getTransaction();
@@ -205,6 +205,7 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+    @SuppressWarnings("unchecked")
     @Override
     public List<MConnector> findConnectors() {
       return (List<MConnector>) doWithConnection(new DoWithConnection() {
@@ -219,24 +220,24 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MFramework registerFramework(final MFramework mFramework, final boolean autoUpgrade) {
-    return (MFramework) doWithConnection(new DoWithConnection() {
+  public MDriverConfig registerDriverConfig(final MDriverConfig mDriverConfig, final boolean autoUpgrade) {
+    return (MDriverConfig) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        MFramework result = handler.findFramework(conn);
+        MDriverConfig result = handler.findDriverConfig(conn);
         if (result == null) {
-          handler.registerFramework(mFramework, conn);
-          return mFramework;
+          handler.registerDriverConfig(mDriverConfig, conn);
+          return mDriverConfig;
         } else {
-          // We're currently not serializing framework version into repository
+          // We're currently not serializing version into repository
           // so let's just compare the structure to see if we need upgrade.
-          if(!mFramework.equals(result)) {
+          if(!mDriverConfig.equals(result)) {
             if (autoUpgrade) {
-              upgradeFramework(mFramework);
-              return mFramework;
+              upgradeDriverConfig(mDriverConfig);
+              return mDriverConfig;
             } else {
               throw new SqoopException(RepositoryError.JDBCREPO_0026,
-                "Framework: " + mFramework.getPersistenceId());
+                "DriverConfig: " + mDriverConfig.getPersistenceId());
             }
           }
           return result;
@@ -249,15 +250,15 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void createConnection(final MConnection connection) {
+  public void createLink(final MLink link) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(connection.hasPersistenceId()) {
+        if(link.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0015);
         }
 
-        handler.createConnection(connection, conn);
+        handler.createLink(link, conn);
         return null;
       }
     });
@@ -267,28 +268,27 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void updateConnection(final MConnection connection) {
-    updateConnection(connection, null);
+  public void updateLink(final MLink link) {
+    updateLink(link, null);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void updateConnection(final MConnection connection,
-    RepositoryTransaction tx) {
+  public void updateLink(final MLink link, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-       if(!connection.hasPersistenceId()) {
+        if (!link.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
-        if(!handler.existsConnection(connection.getPersistenceId(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017,
-            "Invalid id: " + connection.getPersistenceId());
+        if (!handler.existsLink(link.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: "
+              + link.getPersistenceId());
         }
 
-        handler.updateConnection(connection, conn);
+        handler.updateLink(link, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
@@ -298,16 +298,16 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void enableConnection(final long connectionId, final boolean enabled) {
+  public void enableLink(final long linkId, final boolean enabled) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsConnection(connectionId, conn)) {
+        if(!handler.existsLink(linkId, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0017,
-            "Invalid id: " + connectionId);
+            "Invalid id: " + linkId);
         }
 
-        handler.enableConnection(connectionId, enabled, conn);
+        handler.enableLink(linkId, enabled, conn);
         return null;
       }
     });
@@ -317,20 +317,20 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void deleteConnection(final long connectionId) {
+  public void deleteLink(final long linkId) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsConnection(connectionId, conn)) {
+        if(!handler.existsLink(linkId, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0017,
-            "Invalid id: " + connectionId);
+            "Invalid id: " + linkId);
         }
-        if(handler.inUseConnection(connectionId, conn)) {
+        if(handler.inUseLink(linkId, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0021,
-            "Id in use: " + connectionId);
+            "Id in use: " + linkId);
         }
 
-        handler.deleteConnection(connectionId, conn);
+        handler.deleteLink(linkId, conn);
         return null;
       }
     });
@@ -340,11 +340,11 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MConnection findConnection(final long connectionId) {
-    return (MConnection) doWithConnection(new DoWithConnection() {
+  public MLink findLink(final long connectionId) {
+    return (MLink) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        return handler.findConnection(connectionId, conn);
+        return handler.findLink(connectionId, conn);
       }
     });
   }
@@ -354,11 +354,11 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MConnection> findConnections() {
-    return (List<MConnection>) doWithConnection(new DoWithConnection() {
+  public List<MLink> findLinks() {
+    return (List<MLink>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        return handler.findConnections(conn);
+        return handler.findLinks(conn);
       }
     });
   }
@@ -601,12 +601,12 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public List<MConnection> findConnectionsForConnector(final long
+  public List<MLink> findLinksForConnector(final long
     connectorID) {
-    return (List<MConnection>) doWithConnection(new DoWithConnection() {
+    return (List<MLink>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findConnectionsForConnector(connectorID, conn);
+        return handler.findLinksForConnector(connectorID, conn);
       }
     });
   }
@@ -637,12 +637,11 @@ public class JdbcRepository extends Repository {
   }
 
   @Override
-  protected void deleteConnectionInputs(final long connectionID,
-    RepositoryTransaction tx) {
+  protected void deleteLinkInputs(final long linkId, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.deleteConnectionInputs(connectionID, conn);
+        handler.deleteLinkInputs(linkId, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
@@ -665,12 +664,11 @@ public class JdbcRepository extends Repository {
   }
 
 
-  protected void updateFramework(final MFramework mFramework,
-    RepositoryTransaction tx) {
+  protected void updateDriverConfig(final MDriverConfig mDriverConfig, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.updateFramework(mFramework, conn);
+        handler.updateDriverConfig(mDriverConfig, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

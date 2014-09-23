@@ -18,12 +18,12 @@
 package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
@@ -56,17 +56,17 @@ public class TestInputTypes extends DerbyTestCase {
    * Ensure that metadata with all various data types can be successfully
    * serialized into repository and retrieved back.
    */
-  public void testMetadataSerialization() throws Exception {
+  public void testEntitySerialization() throws Exception {
     MConnector connector = getConnector();
 
     // Serialize the connector with all data types into repository
-    handler.registerConnector(connector, getDerbyConnection());
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
 
     // Successful serialization should update the ID
     assertNotSame(connector.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     // Retrieve registered connector
-    MConnector retrieved = handler.findConnector(connector.getUniqueName(), getDerbyConnection());
+    MConnector retrieved = handler.findConnector(connector.getUniqueName(), getDerbyDatabaseConnection());
     assertNotNull(retrieved);
 
     // Original and retrieved connectors should be the same
@@ -76,33 +76,33 @@ public class TestInputTypes extends DerbyTestCase {
   /**
    * Test that serializing actual data is not an issue.
    */
-  public void testDataSerialization() throws Exception {
+  public void testEntityDataSerialization() throws Exception {
     MConnector connector = getConnector();
-    MFramework framework = getFramework();
+    MDriverConfig driverConfig = getDriverConfig();
 
-    // Register metadata for everything and our new connector
-    handler.registerConnector(connector, getDerbyConnection());
-    handler.registerFramework(framework, getDerbyConnection());
+    // Register objects for everything and our new connector
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+    handler.registerDriverConfig(driverConfig, getDerbyDatabaseConnection());
 
     // Inserted values
     Map<String, String> map = new HashMap<String, String>();
     map.put("A", "B");
 
     // Connection object with all various values
-    MConnection connection = new MConnection(connector.getPersistenceId(), connector.getConnectionForms(), framework.getConnectionForms());
-    MConnectionForms forms = connection.getConnectorPart();
+    MLink link = new MLink(connector.getPersistenceId(), connector.getConnectionForms(), driverConfig.getConnectionForms());
+    MConnectionForms forms = link.getConnectorPart();
     forms.getStringInput("f.String").setValue("A");
     forms.getMapInput("f.Map").setValue(map);
     forms.getIntegerInput("f.Integer").setValue(1);
     forms.getBooleanInput("f.Boolean").setValue(true);
     forms.getEnumInput("f.Enum").setValue("YES");
 
-    // Create the connection in repository
-    handler.createConnection(connection, getDerbyConnection());
-    assertNotSame(connection.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
+    // Create the link in repository
+    handler.createLink(link, getDerbyDatabaseConnection());
+    assertNotSame(link.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    // Retrieve created connection
-    MConnection retrieved = handler.findConnection(connection.getPersistenceId(), getDerbyConnection());
+    // Retrieve created link
+    MLink retrieved = handler.findLink(link.getPersistenceId(), getDerbyDatabaseConnection());
     forms = retrieved.getConnectorPart();
     assertEquals("A", forms.getStringInput("f.String").getValue());
     assertEquals(map, forms.getMapInput("f.Map").getValue());

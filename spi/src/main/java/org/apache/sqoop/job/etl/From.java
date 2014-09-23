@@ -23,7 +23,7 @@ package org.apache.sqoop.job.etl;
  * Initializer
  * -> Partitioner
  * -> Extractor
- * -> (framework-defined steps)
+ * -> (Sqoop-defined steps)
  * -> Destroyer
  */
 public class From extends Transferable {
@@ -50,7 +50,7 @@ public class From extends Transferable {
 
   @Override
   public String toString() {
-    return "Importer{" + super.toString() +
+    return "From{" + super.toString() +
       ", partitioner=" + partitioner.getName() +
       ", extractor=" + extractor.getName() +
       '}';

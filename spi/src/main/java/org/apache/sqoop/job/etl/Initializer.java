@@ -17,16 +17,16 @@
  */
 package org.apache.sqoop.job.etl;
 
-import org.apache.sqoop.schema.Schema;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.sqoop.schema.Schema;
 
 /**
  * This allows connector to define initialization work for execution,
  * for example, context configuration.
  */
-public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
+public abstract class Initializer<LinkConfiguration, JobConfiguration> {
 
   /**
    * Initialize new submission based on given configuration properties. Any
@@ -34,11 +34,11 @@ public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
    * promoted to all other part of the workflow automatically.
    *
    * @param context Initializer context object
-   * @param connectionConfiguration Connector's connection configuration object
+   * @param linkConfiguration Connector's link configuration object
    * @param jobConfiguration Connector's job configuration object
    */
   public abstract void initialize(InitializerContext context,
-                                  ConnectionConfiguration connectionConfiguration,
+                                  LinkConfiguration linkConfiguration,
                                   JobConfiguration jobConfiguration);
 
   /**
@@ -49,13 +49,13 @@ public abstract class Initializer<ConnectionConfiguration, JobConfiguration> {
    * @return
    */
   public List<String> getJars(InitializerContext context,
-                              ConnectionConfiguration connectionConfiguration,
+                              LinkConfiguration linkConfiguration,
                               JobConfiguration jobConfiguration) {
     return new LinkedList<String>();
   }
 
   public abstract Schema getSchema(InitializerContext context,
-                                   ConnectionConfiguration connectionConfiguration,
+                                   LinkConfiguration linkConfiguration,
                                    JobConfiguration jobConfiguration);
 
 }

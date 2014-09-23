@@ -43,18 +43,18 @@ public class CreateJobFunction extends  SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
       .withLongOpt(Constants.OPT_FROM)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_FXID_CHAR)
+      .create(Constants.OPT_FROM_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_CONN_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
       .withLongOpt(Constants.OPT_TO)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_TXID_CHAR)
+      .create(Constants.OPT_TO_CHAR)
     );
   }
 
@@ -71,19 +71,19 @@ public class CreateJobFunction extends  SqoopFunction {
     printlnResource(Constants.RES_CREATE_CREATING_JOB, fromConnectionId, toConnectionId);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.newJob(fromConnectionId, toConnectionId);
+    MJob job = client.createJob(fromConnectionId, toConnectionId);
 
     // @TODO(Abe): From/To.
-    ResourceBundle fromConnectorBundle = client.getResourceBundle(
+    ResourceBundle fromConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.FROM));
-    ResourceBundle toConnectorBundle = client.getResourceBundle(
+    ResourceBundle toConnectorBundle = client.getConnectorConfigResourceBundle(
         job.getConnectorId(Direction.TO));
-    ResourceBundle frameworkBundle = client.getFrameworkResourceBundle();
+    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.FINE;
 
     if (isInteractive) {
-      printlnResource(Constants.RES_PROMPT_FILL_JOB_METADATA);
+      printlnResource(Constants.RES_PROMPT_FILL_JOB_CONFIG);
 
       do {
         // Print error introduction if needed
@@ -92,19 +92,19 @@ public class CreateJobFunction extends  SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, fromConnectorBundle, frameworkBundle, toConnectorBundle)) {
+        if(!fillJob(reader, job, fromConnectorBundle, driverConfigBundle, toConnectorBundle)) {
           return null;
         }
 
         // Try to create
-        status = client.createJob(job);
+        status = client.saveJob(job);
       } while(!status.canProceed());
     } else {
       JobDynamicFormOptions options = new JobDynamicFormOptions();
       options.prepareOptions(job);
       CommandLine line = FormOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
-        status = client.createJob(job);
+        status = client.saveJob(job);
         if (!status.canProceed()) {
           printJobValidationMessages(job);
           return null;

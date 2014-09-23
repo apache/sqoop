@@ -40,14 +40,14 @@ public class TestConnectorHandling extends DerbyTestCase {
 
   public void testFindConnector() throws Exception {
     // On empty repository, no connectors should be there
-    assertNull(handler.findConnector("A", getDerbyConnection()));
-    assertNull(handler.findConnector("B", getDerbyConnection()));
+    assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
+    assertNull(handler.findConnector("B", getDerbyDatabaseConnection()));
 
     // Load connector into repository
-    loadConnectorAndFramework();
+    loadConnectorAndDriverConfig();
 
     // Retrieve it
-    MConnector connector = handler.findConnector("A", getDerbyConnection());
+    MConnector connector = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(connector);
 
     // Get original structure
@@ -59,13 +59,13 @@ public class TestConnectorHandling extends DerbyTestCase {
 
   public void testFindAllConnectors() throws Exception {
     // No connectors in an empty repository, we expect an empty list
-    assertEquals(handler.findConnectors(getDerbyConnection()).size(),0);
+    assertEquals(handler.findConnectors(getDerbyDatabaseConnection()).size(),0);
 
-    loadConnectorAndFramework();
+    loadConnectorAndDriverConfig();
     addConnector();
 
     // Retrieve connectors
-    List<MConnector> connectors = handler.findConnectors(getDerbyConnection());
+    List<MConnector> connectors = handler.findConnectors(getDerbyDatabaseConnection());
     assertNotNull(connectors);
     assertEquals(connectors.size(),2);
     assertEquals(connectors.get(0).getUniqueName(),"A");
@@ -77,7 +77,7 @@ public class TestConnectorHandling extends DerbyTestCase {
   public void testRegisterConnector() throws Exception {
     MConnector connector = getConnector();
 
-    handler.registerConnector(connector, getDerbyConnection());
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
 
     // Connector should get persistence ID
     assertEquals(1, connector.getPersistenceId());
@@ -88,7 +88,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_INPUT", 12);
 
     // Registered connector should be easily recovered back
-    MConnector retrieved = handler.findConnector("A", getDerbyConnection());
+    MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(retrieved);
     assertEquals(connector, retrieved);
   }

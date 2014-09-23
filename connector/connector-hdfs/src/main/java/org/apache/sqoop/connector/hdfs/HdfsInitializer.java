@@ -29,17 +29,16 @@ public class HdfsInitializer extends Initializer {
    * promoted to all other part of the workflow automatically.
    *
    * @param context Initializer context object
-   * @param connection       Connector's connection configuration object
-   * @param job      Connector's job configuration object
+   * @param linkConf       Connector's link configuration object
+   * @param jobConf      Connector's job configuration object
    */
   @Override
-  public void initialize(InitializerContext context, Object connection, Object job) {
+  public void initialize(InitializerContext context, Object linkConf, Object jobConf) {
 
   }
 
-
   @Override
-  public Schema getSchema(InitializerContext context, Object connection, Object job) {
+  public Schema getSchema(InitializerContext context, Object linkConf, Object jobConf) {
     return null;
   }
 }

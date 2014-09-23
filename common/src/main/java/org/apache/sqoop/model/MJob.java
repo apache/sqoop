@@ -30,17 +30,17 @@ public class MJob extends MAccountableEntity implements MClonable {
    * Connector reference.
    *
    * Job object do not immediately depend on connector as there is indirect
-   * dependency through connection object, but having this dependency explicitly
+   * dependency through link object, but having this dependency explicitly
    * carried along helps a lot.
    */
   private final long fromConnectorId;
   private final long toConnectorId;
 
   /**
-   * Corresponding connection objects for connector.
+   * Corresponding link objects for connector.
    */
-  private final long fromConnectionId;
-  private final long toConnectionId;
+  private final long fromLinkId;
+  private final long toLinkId;
 
   private final MJobForms fromConnectorPart;
   private final MJobForms toConnectorPart;
@@ -51,8 +51,8 @@ public class MJob extends MAccountableEntity implements MClonable {
    *
    * @param fromConnectorId FROM Connector id
    * @param toConnectorId TO Connector id
-   * @param fromConnectionId FROM Connection id
-   * @param toConnectionId TO Connection id
+   * @param fromLinkId FROM Link id
+   * @param toLinkId TO Link id
    * @param fromPart FROM Connector forms
    * @param toPart TO Connector forms
    * @param frameworkPart Framework forms
@@ -66,8 +66,8 @@ public class MJob extends MAccountableEntity implements MClonable {
               MJobForms frameworkPart) {
     this.fromConnectorId = fromConnectorId;
     this.toConnectorId = toConnectorId;
-    this.fromConnectionId = fromConnectionId;
-    this.toConnectionId = toConnectionId;
+    this.fromLinkId = fromConnectionId;
+    this.toLinkId = toConnectionId;
     this.fromConnectorPart = fromPart;
     this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
@@ -101,8 +101,8 @@ public class MJob extends MAccountableEntity implements MClonable {
 
     this.fromConnectorId = other.getConnectorId(Direction.FROM);
     this.toConnectorId = other.getConnectorId(Direction.TO);
-    this.fromConnectionId = other.getConnectionId(Direction.FROM);
-    this.toConnectionId = other.getConnectionId(Direction.TO);
+    this.fromLinkId = other.getLinkId(Direction.FROM);
+    this.toLinkId = other.getLinkId(Direction.TO);
     this.fromConnectorPart = fromPart;
     this.toConnectorPart = toPart;
     this.frameworkPart = frameworkPart;
@@ -119,13 +119,13 @@ public class MJob extends MAccountableEntity implements MClonable {
     return sb.toString();
   }
 
-  public long getConnectionId(Direction type) {
+  public long getLinkId(Direction type) {
     switch(type) {
       case FROM:
-        return fromConnectionId;
+        return fromLinkId;
 
       case TO:
-        return toConnectionId;
+        return toLinkId;
 
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
@@ -170,8 +170,8 @@ public class MJob extends MAccountableEntity implements MClonable {
       return new MJob(
           getConnectorId(Direction.FROM),
           getConnectorId(Direction.TO),
-          getConnectionId(Direction.FROM),
-          getConnectionId(Direction.TO),
+          getLinkId(Direction.FROM),
+          getLinkId(Direction.TO),
           getConnectorPart(Direction.FROM).clone(false),
           getConnectorPart(Direction.TO).clone(false),
           frameworkPart.clone(false));
@@ -191,8 +191,8 @@ public class MJob extends MAccountableEntity implements MClonable {
     MJob job = (MJob)object;
     return (job.getConnectorId(Direction.FROM) == this.getConnectorId(Direction.FROM))
         && (job.getConnectorId(Direction.TO) == this.getConnectorId(Direction.TO))
-        && (job.getConnectionId(Direction.FROM) == this.getConnectionId(Direction.FROM))
-        && (job.getConnectionId(Direction.TO) == this.getConnectionId(Direction.TO))
+        && (job.getLinkId(Direction.FROM) == this.getLinkId(Direction.FROM))
+        && (job.getLinkId(Direction.TO) == this.getLinkId(Direction.TO))
         && (job.getPersistenceId() == this.getPersistenceId())
         && (job.getConnectorPart(Direction.FROM).equals(this.getConnectorPart(Direction.FROM)))
         && (job.getConnectorPart(Direction.TO).equals(this.getConnectorPart(Direction.TO)))

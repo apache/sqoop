@@ -18,13 +18,14 @@
 package org.apache.sqoop.repository.derby;
 
 import junit.framework.TestCase;
+
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.framework.FrameworkManager;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
@@ -48,7 +49,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaQuery.*;
  */
 abstract public class DerbyTestCase extends TestCase {
 
-  private static int SYSTEM_VERSION = 4;
+  private static int LATEST_SYSTEM_VERSION = 4;
 
   public static final String DERBY_DRIVER =
     "org.apache.derby.jdbc.EmbeddedDriver";
@@ -62,14 +63,14 @@ abstract public class DerbyTestCase extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    // Create connection to the database
+    // Create link to the database
     Class.forName(DERBY_DRIVER).newInstance();
     connection = DriverManager.getConnection(getStartJdbcUrl());
   }
 
   @Override
   public void tearDown() throws Exception {
-    // Close active connection
+    // Close active link
     if(connection != null) {
       connection.close();
     }
@@ -130,11 +131,11 @@ abstract public class DerbyTestCase extends TestCase {
 
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '"  + version + "')");
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) " +
-      "VALUES('framework.version', '1')");
+      "VALUES('" + DerbyRepoConstants.SYSKEY_DRIVER_VERSION + "', '1')");
   }
 
   protected void createSchema() throws Exception {
-    createSchema(SYSTEM_VERSION);
+    createSchema(LATEST_SYSTEM_VERSION);
   }
 
   /**
@@ -146,7 +147,7 @@ abstract public class DerbyTestCase extends TestCase {
   protected void runQuery(String query, String... args) throws Exception {
     PreparedStatement stmt = null;
     try {
-      stmt = getDerbyConnection().prepareStatement(query);
+      stmt = getDerbyDatabaseConnection().prepareStatement(query);
 
       for (int i = 0; i < args.length; ++i) {
         stmt.setString(i + 1, args[i]);
@@ -160,7 +161,7 @@ abstract public class DerbyTestCase extends TestCase {
     }
   }
 
-  protected Connection getDerbyConnection() {
+  protected Connection getDerbyDatabaseConnection() {
     return connection;
   }
 
@@ -176,7 +177,7 @@ abstract public class DerbyTestCase extends TestCase {
     return JDBC_URL + ";drop=true";
   }
 
-  protected void loadConnectorAndFrameworkVersion2() throws Exception {
+  protected void loadConnectorAndDriverConfigVersion2() throws Exception {
     // Connector entry
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
         + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
@@ -255,7 +256,7 @@ abstract public class DerbyTestCase extends TestCase {
         + "('throttling.loaders',10,1,'INTEGER','false',NULL,NULL)");
   }
 
-  protected void loadConnectorAndFrameworkVersion4() throws Exception {
+  protected void loadConnectorAndDriverConfigVersion4() throws Exception {
     // Connector entry
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
         + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
@@ -308,10 +309,10 @@ abstract public class DerbyTestCase extends TestCase {
     }
 
     // Input entries
-    // Connector connection parts: 0-3
+    // Connector link parts: 0-3
     // Connector job (FROM) parts: 4-7
     // Connector job (TO) parts: 8-11
-    // Framework connection parts: 12-15
+    // Framework link parts: 12-15
     // Framework job parts: 16-19
     for (int i = 0; i < 5; i++) {
       // First form
@@ -333,19 +334,19 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   /**
-   * Load testing connector and framework metadata into repository.
+   * Load testing connector and driver config into repository.
    *
    * @param version system version (2 or 4)
    * @throws Exception
    */
-  protected void loadConnectorAndFramework(int version) throws Exception {
+  protected void loadConnectorAndDriverConfig(int version) throws Exception {
     switch(version) {
       case 2:
-        loadConnectorAndFrameworkVersion2();
+        loadConnectorAndDriverConfigVersion2();
         break;
 
       case 4:
-        loadConnectorAndFrameworkVersion4();
+        loadConnectorAndDriverConfigVersion4();
         break;
 
       default:
@@ -353,20 +354,20 @@ abstract public class DerbyTestCase extends TestCase {
     }
   }
 
-  protected void loadConnectorAndFramework() throws Exception {
-    loadConnectorAndFramework(SYSTEM_VERSION);
+  protected void loadConnectorAndDriverConfig() throws Exception {
+    loadConnectorAndDriverConfig(LATEST_SYSTEM_VERSION);
   }
 
   /**
-   * Load testing connection objects into metadata repository.
+   * Load testing link objects into  repository.
    *
    * @param version system version (2 or 4)
    * @throws Exception
    */
-  public void loadConnections(int version) throws Exception {
+  public void loadLinks(int version) throws Exception {
     switch (version) {
       case 2:
-        // Insert two connections - CA and CB
+        // Insert two links - CA and CB
         runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
             + "VALUES('CA', 1)");
         runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
@@ -382,7 +383,7 @@ abstract public class DerbyTestCase extends TestCase {
         break;
 
       case 4:
-        // Insert two connections - CA and CB
+        // Insert two links - CA and CB
         runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
             + "VALUES('CA', 1)");
         runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
@@ -402,12 +403,12 @@ abstract public class DerbyTestCase extends TestCase {
     }
   }
 
-  public void loadConnections() throws Exception {
-    loadConnections(SYSTEM_VERSION);
+  public void loadLinks() throws Exception {
+    loadLinks(LATEST_SYSTEM_VERSION);
   }
 
   /**
-   * Load testing job objects into metadata repository.
+   * Load testing job objects into  repository.
    *
    * @param version system version (2 or 4)
    * @throws Exception
@@ -470,7 +471,7 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   public void loadJobs() throws Exception {
-    loadJobs(SYSTEM_VERSION);
+    loadJobs(LATEST_SYSTEM_VERSION);
   }
 
   /**
@@ -483,7 +484,7 @@ abstract public class DerbyTestCase extends TestCase {
   }
 
   /**
-   * Load testing submissions into the metadata repository.
+   * Load testing submissions into the repository.
    *
    * @throws Exception
    */
@@ -527,22 +528,22 @@ abstract public class DerbyTestCase extends TestCase {
 
   protected MConnector getConnector() {
     return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test",
-      getConnectionForms(), new MJobForms(getForms()), new MJobForms(getForms()));
+      getConnectionForms(), getJobForms(), getJobForms());
   }
 
-  protected MFramework getFramework() {
-    return new MFramework(getConnectionForms(), new MJobForms(getForms()),
-      FrameworkManager.CURRENT_FRAMEWORK_VERSION);
+  protected MDriverConfig getDriverConfig() {
+    return new MDriverConfig(getConnectionForms(), getJobForms(),
+        Driver.CURRENT_DRIVER_VERSION);
   }
 
-  protected void fillConnection(MConnection connection) {
+  protected void fillLink(MLink link) {
     List<MForm> forms;
 
-    forms = connection.getConnectorPart().getForms();
+    forms = link.getConnectorPart().getForms();
     ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value1");
     ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value2");
 
-    forms = connection.getFrameworkPart().getForms();
+    forms = link.getFrameworkPart().getForms();
     ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value13");
     ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value15");
   }
@@ -565,6 +566,10 @@ abstract public class DerbyTestCase extends TestCase {
 
   protected MConnectionForms getConnectionForms() {
     return new MConnectionForms(getForms());
+  }
+  
+  protected MJobForms getJobForms() {
+    return  new MJobForms(getForms());
   }
 
   protected List<MForm> getForms() {
@@ -602,7 +607,7 @@ abstract public class DerbyTestCase extends TestCase {
     ResultSet rs = null;
 
     try {
-      stmt = getDerbyConnection().createStatement();
+      stmt = getDerbyDatabaseConnection().createStatement();
 
       rs = stmt.executeQuery("SELECT COUNT(*) FROM "+ table);
       rs.next();
@@ -658,7 +663,7 @@ abstract public class DerbyTestCase extends TestCase {
     ResultSetMetaData rsmt = null;
 
     try {
-      ps = getDerbyConnection().prepareStatement("SELECT * FROM " + table);
+      ps = getDerbyDatabaseConnection().prepareStatement("SELECT * FROM " + table);
       rs = ps.executeQuery();
 
       rsmt = rs.getMetaData();

@@ -31,7 +31,7 @@ public class DisableCommand extends SqoopCommand {
       Constants.CMD_DISABLE,
       Constants.CMD_DISABLE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, DisableConnectionFunction.class,
+        Constants.FN_LINK, DisableLinkFunction.class,
         Constants.FN_JOB, DisableJobFunction.class
       )
     );

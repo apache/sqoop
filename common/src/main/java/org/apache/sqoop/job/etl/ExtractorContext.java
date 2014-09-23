@@ -26,7 +26,7 @@ import org.apache.sqoop.schema.Schema;
  *
  * This class is wrapping writer object.
  */
-public class ExtractorContext extends ActorContext {
+public class ExtractorContext extends TransferableContext {
 
   private DataWriter writer;
 

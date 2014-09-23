@@ -23,8 +23,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsSequenceWriter;
@@ -37,24 +37,24 @@ import org.apache.sqoop.utils.ClassUtils;
 import java.io.IOException;
 import java.util.UUID;
 
-public class HdfsLoader extends Loader<ConnectionConfiguration, ToJobConfiguration> {
+public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   /**
    * Load data to target.
    *
    * @param context Loader context object
-   * @param connection       Connection configuration
-   * @param job      Job configuration
+   * @param linkConf       Link configuration
+   * @param toJobConf      Job configuration
    * @throws Exception
    */
   @Override
-  public void load(LoaderContext context, ConnectionConfiguration connection, ToJobConfiguration job) throws Exception {
+  public void load(LoaderContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) throws Exception {
 
     DataReader reader = context.getDataReader();
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
-    String directoryName = job.output.outputDirectory;
-    String codecname = getCompressionCodecName(job);
+    String directoryName = toJobConf.toJobConfig.outputDirectory;
+    String codecname = getCompressionCodecName(toJobConf);
 
     CompressionCodec codec = null;
     if (codecname != null) {
@@ -73,12 +73,12 @@ public class HdfsLoader extends Loader<ConnectionConfiguration, ToJobConfigurati
       }
     }
 
-    String filename = directoryName + "/" + UUID.randomUUID() + getExtension(job,codec);
+    String filename = directoryName + "/" + UUID.randomUUID() + getExtension(toJobConf,codec);
 
     try {
       Path filepath = new Path(filename);
 
-      GenericHdfsWriter filewriter = getWriter(job);
+      GenericHdfsWriter filewriter = getWriter(toJobConf);
 
       filewriter.initialize(filepath,conf,codec);
 
@@ -95,18 +95,15 @@ public class HdfsLoader extends Loader<ConnectionConfiguration, ToJobConfigurati
 
   }
 
-  private GenericHdfsWriter getWriter(ToJobConfiguration job) {
-    if (job.output.outputFormat == OutputFormat.SEQUENCE_FILE)
-      return new HdfsSequenceWriter();
-    else
-      return new HdfsTextWriter();
+  private GenericHdfsWriter getWriter(ToJobConfiguration toJobConf) {
+    return (toJobConf.toJobConfig.outputFormat == ToFormat.SEQUENCE_FILE) ? new HdfsSequenceWriter()
+        : new HdfsTextWriter();
   }
 
-
-  private String getCompressionCodecName(ToJobConfiguration jobConf) {
-    if(jobConf.output.compression == null)
+  private String getCompressionCodecName(ToJobConfiguration toJobConf) {
+    if(toJobConf.toJobConfig.compression == null)
       return null;
-    switch(jobConf.output.compression) {
+    switch(toJobConf.toJobConfig.compression) {
       case NONE:
         return null;
       case DEFAULT:
@@ -124,14 +121,14 @@ public class HdfsLoader extends Loader<ConnectionConfiguration, ToJobConfigurati
       case SNAPPY:
         return "org.apache.hadoop.io.compress.SnappyCodec";
       case CUSTOM:
-        return jobConf.output.customCompression.trim();
+        return toJobConf.toJobConfig.customCompression.trim();
     }
     return null;
   }
 
   //TODO: We should probably support configurable extensions at some point
-  private static String getExtension(ToJobConfiguration job, CompressionCodec codec) {
-    if (job.output.outputFormat == OutputFormat.SEQUENCE_FILE)
+  private static String getExtension(ToJobConfiguration toJobConf, CompressionCodec codec) {
+    if (toJobConf.toJobConfig.outputFormat == ToFormat.SEQUENCE_FILE)
       return ".seq";
     if (codec == null)
       return ".txt";

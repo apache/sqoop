@@ -68,8 +68,8 @@ public class TestJobBean {
 
     // Check id and name
     assertEquals(666, target.getPersistenceId());
-    assertEquals(target.getConnectionId(Direction.FROM), 1);
-    assertEquals(target.getConnectionId(Direction.TO), 2);
+    assertEquals(target.getLinkId(Direction.FROM), 1);
+    assertEquals(target.getLinkId(Direction.TO), 2);
     assertEquals(target.getConnectorId(Direction.FROM), 1);
     assertEquals(target.getConnectorId(Direction.TO), 2);
     assertEquals("The big job", target.getName());

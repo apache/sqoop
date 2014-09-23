@@ -44,7 +44,7 @@ public final class FormSerialization {
   public static final String ID = "id";
   public static final String NAME = "name";
   public static final String VERSION = "version";
-  public static final String FRAMEWORK_VERSION = "framework-version";
+  public static final String DRIVER_VERSION = "driver-version";
   public static final String CLASS = "class";
   public static final String ENABLED = "enabled";
   public static final String CREATION_USER = "creation-user";

@@ -102,9 +102,9 @@ public class TestValidationBean {
   }
 
   @Test
-  public void testConnectionValidationBeanSerialization() {
+  public void testLinkValidationBeanSerialization() {
     // Serialize it to JSON object
-    ConnectionValidationBean bean = new ConnectionValidationBean(
+    LinkValidationBean bean = new LinkValidationBean(
         getValidation(Status.FINE),
         getValidation(Status.UNACCEPTABLE)
     );
@@ -115,7 +115,7 @@ public class TestValidationBean {
 
     // Retrieved transferred object
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectionValidationBean retrievedBean = new ConnectionValidationBean();
+    LinkValidationBean retrievedBean = new LinkValidationBean();
     retrievedBean.restore(retrievedJson);
 
     assertNull(retrievedBean.getId());
@@ -139,9 +139,9 @@ public class TestValidationBean {
   }
 
   @Test
-  public void testConnectionValidationBeanId() {
+  public void testLinkValidationBeanId() {
     // Serialize it to JSON object
-    ConnectionValidationBean bean = new ConnectionValidationBean(
+    LinkValidationBean bean = new LinkValidationBean(
         getValidation(Status.FINE),
         getValidation(Status.FINE)
     );
@@ -153,7 +153,7 @@ public class TestValidationBean {
 
     // Retrieved transferred object
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectionValidationBean retrievedBean = new ConnectionValidationBean();
+    LinkValidationBean retrievedBean = new LinkValidationBean();
     retrievedBean.restore(retrievedJson);
 
     assertEquals((Long)(long) 10, retrievedBean.getId());

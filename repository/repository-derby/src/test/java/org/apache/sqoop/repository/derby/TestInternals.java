@@ -34,25 +34,25 @@ public class TestInternals extends DerbyTestCase {
   }
 
   public void testSuitableInternals() throws Exception {
-    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
+    assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
     createSchema(); // Test code is building the structures
-    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+    assertTrue(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
   }
 
   public void testCreateorUpdateInternals() throws Exception {
-    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-    handler.createOrUpdateInternals(getDerbyConnection());
-    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+    assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
+    handler.createOrUpdateInternals(getDerbyDatabaseConnection());
+    assertTrue(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
   }
 
   public void testUpgradeVersion2ToVersion4() throws Exception {
     createSchema(2);
-    assertFalse(handler.haveSuitableInternals(getDerbyConnection()));
-    loadConnectorAndFramework(2);
-    loadConnections(2);
+    assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
+    loadConnectorAndDriverConfig(2);
+    loadLinks(2);
     loadJobs(2);
-    handler.createOrUpdateInternals(getDerbyConnection());
-    assertTrue(handler.haveSuitableInternals(getDerbyConnection()));
+    handler.createOrUpdateInternals(getDerbyDatabaseConnection());
+    assertTrue(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
   }
 
   private class TestDerbyRepositoryHandler extends DerbyRepositoryHandler {

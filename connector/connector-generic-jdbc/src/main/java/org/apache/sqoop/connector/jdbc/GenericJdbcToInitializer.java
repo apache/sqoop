@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.jdbc.util.SqlTypesUtils;
 import org.apache.sqoop.job.etl.Initializer;
@@ -36,44 +36,42 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguration, ToJobConfiguration> {
+public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
 
   private GenericJdbcExecutor executor;
   private static final Logger LOG =
     Logger.getLogger(GenericJdbcToInitializer.class);
 
   @Override
-  public void initialize(InitializerContext context, ConnectionConfiguration connection, ToJobConfiguration job) {
-    configureJdbcProperties(context.getContext(), connection, job);
+  public void initialize(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
+    configureJdbcProperties(context.getContext(), linkConf, toJobConf);
     try {
-      configureTableProperties(context.getContext(), connection, job);
+      configureTableProperties(context.getContext(), linkConf, toJobConf);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, ConnectionConfiguration connection, ToJobConfiguration job) {
+  public List<String> getJars(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
     List<String> jars = new LinkedList<String>();
-
-    jars.add(ClassUtils.jarForClass(connection.connection.jdbcDriver));
-
+    jars.add(ClassUtils.jarForClass(linkConf.link.jdbcDriver));
     return jars;
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, ConnectionConfiguration connectionConfiguration, ToJobConfiguration toJobConfiguration) {
-    configureJdbcProperties(context.getContext(), connectionConfiguration, toJobConfiguration);
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
+    configureJdbcProperties(context.getContext(), linkConf, toJobConf);
 
-    String schemaName = toJobConfiguration.toTable.tableName;
+    String schemaName = toJobConf.toJobConfig.tableName;
 
     if (schemaName == null) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
           "Table name extraction not supported yet.");
     }
 
-    if(toJobConfiguration.toTable.schemaName != null) {
-      schemaName = toJobConfiguration.toTable.schemaName + "." + schemaName;
+    if(toJobConf.toJobConfig.schemaName != null) {
+      schemaName = toJobConf.toJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -112,11 +110,11 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, ConnectionConfiguration connectionConfig, ToJobConfiguration jobConfig) {
-    String driver = connectionConfig.connection.jdbcDriver;
-    String url = connectionConfig.connection.connectionString;
-    String username = connectionConfig.connection.username;
-    String password = connectionConfig.connection.password;
+  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
+    String driver = linkConf.link.jdbcDriver;
+    String url = linkConf.link.connectionString;
+    String username = linkConf.link.username;
+    String password = linkConf.link.password;
 
     assert driver != null;
     assert url != null;
@@ -124,18 +122,18 @@ public class GenericJdbcToInitializer extends Initializer<ConnectionConfiguratio
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configureTableProperties(MutableContext context, ConnectionConfiguration connectionConfig, ToJobConfiguration jobConfig) {
+  private void configureTableProperties(MutableContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConfig) {
     String dataSql;
 
-    String schemaName = jobConfig.toTable.schemaName;
-    String tableName = jobConfig.toTable.tableName;
-    String stageTableName = jobConfig.toTable.stageTableName;
-    boolean clearStageTable = jobConfig.toTable.clearStageTable == null ?
-      false : jobConfig.toTable.clearStageTable;
+    String schemaName = toJobConfig.toJobConfig.schemaName;
+    String tableName = toJobConfig.toJobConfig.tableName;
+    String stageTableName = toJobConfig.toJobConfig.stageTableName;
+    boolean clearStageTable = toJobConfig.toJobConfig.clearStageTable == null ?
+      false : toJobConfig.toJobConfig.clearStageTable;
     final boolean stageEnabled =
       stageTableName != null && stageTableName.length() > 0;
-    String tableSql = jobConfig.toTable.sql;
-    String tableColumns = jobConfig.toTable.columns;
+    String tableSql = toJobConfig.toJobConfig.sql;
+    String tableColumns = toJobConfig.toJobConfig.columns;
 
     if (tableName != null && tableSql != null) {
       // when both fromTable name and fromTable sql are specified:

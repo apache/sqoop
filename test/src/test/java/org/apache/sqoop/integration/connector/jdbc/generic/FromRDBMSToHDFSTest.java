@@ -17,10 +17,9 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
@@ -34,35 +33,33 @@ import static org.junit.Assert.assertTrue;
  */
 public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
-  private static final Logger LOG = Logger.getLogger(FromRDBMSToHDFSTest.class);
-
   @Test
   public void testBasic() throws Exception {
     createAndLoadTableCities();
 
-    // RDBMS connection
-    MConnection rdbmsConnection = getClient().newConnection("generic-jdbc-connector");
-    fillRdbmsConnectionForm(rdbmsConnection);
-    createConnection(rdbmsConnection);
+    // RDBMS link
+    MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkForm(rdbmsConnection);
+    saveLink(rdbmsConnection);
 
-    // HDFS connection
-    MConnection hdfsConnection = getClient().newConnection("hdfs-connector");
-    createConnection(hdfsConnection);
+    // HDFS link
+    MLink hdfsConnection = getClient().createLink("hdfs-connector");
+    saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().newJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
     // Connector values
     MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromTable.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromTable.partitionColumn").setValue(provider.escapeColumnName("id"));
-    fillOutputForm(job, OutputFormat.TEXT_FILE);
-    createJob(job);
+    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillToJobForm(job, ToFormat.TEXT_FILE);
+    saveJob(job);
 
-    runJob(job);
+    executeJob(job);
 
     // Assert correct output
-    assertMapreduceOutput(
+    assertTo(
       "1,'USA','San Francisco'",
       "2,'USA','Sunnyvale'",
       "3,'Czech Republic','Brno'",
@@ -77,25 +74,25 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
   public void testColumns() throws Exception {
     createAndLoadTableCities();
 
-    // RDBMS connection
-    MConnection rdbmsConnection = getClient().newConnection("generic-jdbc-connector");
-    fillRdbmsConnectionForm(rdbmsConnection);
-    createConnection(rdbmsConnection);
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkForm(rdbmsLink);
+    saveLink(rdbmsLink);
 
-    // HDFS connection
-    MConnection hdfsConnection = getClient().newConnection("hdfs-connector");
-    createConnection(hdfsConnection);
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().newJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
     MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromTable.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromTable.partitionColumn").setValue(provider.escapeColumnName("id"));
-    forms.getStringInput("fromTable.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
-    fillOutputForm(job, OutputFormat.TEXT_FILE);
-    createJob(job);
+    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    forms.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
+    fillToJobForm(job, ToFormat.TEXT_FILE);
+    saveJob(job);
 
     MSubmission submission = getClient().startSubmission(job.getPersistenceId());
     assertTrue(submission.getStatus().isRunning());
@@ -108,7 +105,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     } while(submission.getStatus().isRunning());
 
     // Assert correct output
-    assertMapreduceOutput(
+    assertTo(
       "1,'USA'",
       "2,'USA'",
       "3,'Czech Republic'",

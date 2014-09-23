@@ -24,7 +24,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 
-
 import java.io.IOException;
 
 public class HdfsSequenceWriter  extends GenericHdfsWriter {
@@ -32,6 +31,7 @@ public class HdfsSequenceWriter  extends GenericHdfsWriter {
   private SequenceFile.Writer filewriter;
   private Text text;
 
+  @SuppressWarnings("deprecation")
   public void initialize(Path filepath, Configuration conf, CompressionCodec codec) throws IOException {
     if (codec != null) {
       filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),

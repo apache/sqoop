@@ -25,7 +25,7 @@ import org.apache.sqoop.schema.Schema;
  *
  * This class is also wrapping number of maximal allowed partitions.
  */
-public class PartitionerContext extends ActorContext {
+public class PartitionerContext extends TransferableContext {
 
   private long maxPartitions;
 

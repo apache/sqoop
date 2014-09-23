@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.client;
 
-import org.apache.sqoop.client.request.SqoopRequests;
+import org.apache.sqoop.client.request.SqoopResourceRequests;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.FrameworkBean;
+import org.apache.sqoop.json.DriverConfigBean;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.utils.MapResourceBundle;
 import org.junit.Before;
@@ -32,7 +32,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -43,14 +42,14 @@ import static org.mockito.Mockito.*;
 
 public class TestSqoopClient {
 
-  SqoopRequests requests;
+  SqoopResourceRequests resourceRequests;
   SqoopClient client;
 
   @Before
   public void setUp() {
-    requests = mock(SqoopRequests.class);
+    resourceRequests = mock(SqoopResourceRequests.class);
     client = new SqoopClient("my-cool-server");
-    client.setSqoopRequests(requests);
+    client.setSqoopRequests(resourceRequests);
   }
 
   /**
@@ -59,26 +58,26 @@ public class TestSqoopClient {
    */
   @Test
   public void testGetConnector() {
-    when(requests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
+    when(resourceRequests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
     MConnector connector = client.getConnector(1);
     assertEquals(1, connector.getPersistenceId());
 
-    client.getResourceBundle(1L);
+    client.getConnectorConfigResourceBundle(1L);
 
-    verify(requests, times(1)).readConnector(1L);
+    verify(resourceRequests, times(1)).readConnector(1L);
   }
 
   @Test
   public void testGetConnectorByString() {
-    when(requests.readConnector(null)).thenReturn(connectorBean(connector(1)));
+    when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connector(1)));
     MConnector connector = client.getConnector("A1");
     assertEquals(1, connector.getPersistenceId());
     assertEquals("A1", connector.getUniqueName());
 
-    client.getResourceBundle(1L);
+    client.getConnectorConfigResourceBundle(1L);
 
-    verify(requests, times(0)).readConnector(1L);
-    verify(requests, times(1)).readConnector(null);
+    verify(resourceRequests, times(0)).readConnector(1L);
+    verify(resourceRequests, times(1)).readConnector(null);
   }
 
   /**
@@ -87,41 +86,41 @@ public class TestSqoopClient {
    */
   @Test
   public void testGetConnectorBundle() {
-    when(requests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
-    client.getResourceBundle(1L);
+    when(resourceRequests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
+    client.getConnectorConfigResourceBundle(1L);
 
     MConnector connector = client.getConnector(1);
     assertEquals(1, connector.getPersistenceId());
 
-    verify(requests, times(1)).readConnector(1L);
+    verify(resourceRequests, times(1)).readConnector(1L);
   }
 
   /**
-   * Retrieve framework information, request to framework bundle should not
+   * Retrieve driverConfig information, request to driverConfig bundle should not
    * require additional HTTP request.
    */
   @Test
-  public void testGetFramework() {
-    when(requests.readFramework()).thenReturn(frameworkBean(framework()));
+  public void testGetDriverConfig() {
+    when(resourceRequests.readDriverConfig()).thenReturn(driverConfigBean(driverConfig()));
 
-    client.getFramework();
-    client.getFrameworkResourceBundle();
+    client.getDriverConfig();
+    client.getDriverConfigBundle();
 
-    verify(requests, times(1)).readFramework();
+    verify(resourceRequests, times(1)).readDriverConfig();
   }
 
   /**
-   * Retrieve framework bundle, request to framework metadata should not
+   * Retrieve driverConfig bundle, request to driverConfig metadata should not
    * require additional HTTP request.
    */
   @Test
-  public void testGetFrameworkBundle() {
-    when(requests.readFramework()).thenReturn(frameworkBean(framework()));
+  public void testGetDriverConfigBundle() {
+    when(resourceRequests.readDriverConfig()).thenReturn(driverConfigBean(driverConfig()));
 
-    client.getFrameworkResourceBundle();
-    client.getFramework();
+    client.getDriverConfigBundle();
+    client.getDriverConfig();
 
-    verify(requests, times(1)).readFramework();
+    verify(resourceRequests, times(1)).readDriverConfig();
   }
 
   /**
@@ -132,16 +131,16 @@ public class TestSqoopClient {
   public void testGetConnectors() {
     MConnector connector;
 
-    when(requests.readConnector(null)).thenReturn(connectorBean(connector(1), connector(2)));
+    when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connector(1), connector(2)));
     Collection<MConnector> connectors = client.getConnectors();
     assertEquals(2, connectors.size());
 
-    client.getResourceBundle(1);
+    client.getConnectorConfigResourceBundle(1);
     connector = client.getConnector(1);
     assertEquals(1, connector.getPersistenceId());
 
     connector = client.getConnector(2);
-    client.getResourceBundle(2);
+    client.getConnectorConfigResourceBundle(2);
     assertEquals(2, connector.getPersistenceId());
 
     connectors = client.getConnectors();
@@ -158,8 +157,8 @@ public class TestSqoopClient {
     connector = client.getConnector("A3");
     assertNull(connector);
 
-    verify(requests, times(1)).readConnector(null);
-    verifyNoMoreInteractions(requests);
+    verify(resourceRequests, times(1)).readConnector(null);
+    verifyNoMoreInteractions(resourceRequests);
   }
 
 
@@ -170,32 +169,32 @@ public class TestSqoopClient {
   @Test
   public void testGetConnectorOneByOne() {
     ConnectorBean bean = connectorBean(connector(1), connector(2));
-    when(requests.readConnector(null)).thenReturn(bean);
-    when(requests.readConnector(1L)).thenReturn(bean);
-    when(requests.readConnector(2L)).thenReturn(bean);
+    when(resourceRequests.readConnector(null)).thenReturn(bean);
+    when(resourceRequests.readConnector(1L)).thenReturn(bean);
+    when(resourceRequests.readConnector(2L)).thenReturn(bean);
 
-    client.getResourceBundle(1);
+    client.getConnectorConfigResourceBundle(1);
     client.getConnector(1);
 
     client.getConnector(2);
-    client.getResourceBundle(2);
+    client.getConnectorConfigResourceBundle(2);
 
     Collection<MConnector> connectors = client.getConnectors();
     assertEquals(2, connectors.size());
 
-    verify(requests, times(1)).readConnector(null);
-    verify(requests, times(1)).readConnector(1L);
-    verify(requests, times(1)).readConnector(2L);
-    verifyNoMoreInteractions(requests);
+    verify(resourceRequests, times(1)).readConnector(null);
+    verify(resourceRequests, times(1)).readConnector(1L);
+    verify(resourceRequests, times(1)).readConnector(2L);
+    verifyNoMoreInteractions(resourceRequests);
   }
 
   /**
-   * Connection for non-existing connector can't be created.
+   * Link for non-existing connector can't be created.
    */
   @Test(expected = SqoopException.class)
-  public void testNewConnection() {
-    when(requests.readConnector(null)).thenReturn(connectorBean(connector(1)));
-    client.newConnection("non existing connector");
+  public void testCreateLink() {
+    when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connector(1)));
+    client.createLink("non existing connector");
   }
 
   private ConnectorBean connectorBean(MConnector...connectors) {
@@ -208,8 +207,8 @@ public class TestSqoopClient {
     }
     return new ConnectorBean(connectorList, bundles);
   }
-  private FrameworkBean frameworkBean(MFramework framework) {
-    return new FrameworkBean(framework, new MapResourceBundle(null));
+  private DriverConfigBean driverConfigBean(MDriverConfig driverConfig) {
+    return new DriverConfigBean(driverConfig, new MapResourceBundle(null));
   }
 
   private MConnector connector(long id) {
@@ -219,10 +218,10 @@ public class TestSqoopClient {
     return connector;
   }
 
-  private MFramework framework() {
-    MFramework framework = new MFramework(new MConnectionForms(null),
+  private MDriverConfig driverConfig() {
+    MDriverConfig driverConfig = new MDriverConfig(new MConnectionForms(null),
         new MJobForms(null), "1");
-    framework.setPersistenceId(1);
-    return framework;
+    driverConfig.setPersistenceId(1);
+    return driverConfig;
   }
 }

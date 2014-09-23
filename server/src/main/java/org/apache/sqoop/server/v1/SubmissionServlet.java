@@ -26,26 +26,27 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 /**
  *
  */
+@SuppressWarnings("serial")
 public class SubmissionServlet extends SqoopProtocolServlet {
 
-  private RequestHandler requestHandler;
+  private RequestHandler submissionRequestHandler;
 
   public SubmissionServlet() {
-    requestHandler = new SubmissionRequestHandler();
+    submissionRequestHandler = new SubmissionRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return submissionRequestHandler.handleEvent(ctx);
   }
 
   @Override
   protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return submissionRequestHandler.handleEvent(ctx);
   }
 
   @Override
   protected JsonBean handleDeleteRequest(RequestContext ctx) throws Exception {
-    return requestHandler.handleEvent(ctx);
+    return submissionRequestHandler.handleEvent(ctx);
   }
 }

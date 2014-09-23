@@ -31,7 +31,7 @@ public class CloneCommand extends SqoopCommand {
       Constants.CMD_CLONE,
       Constants.CMD_CLONE_SC,
       ImmutableMap.of(
-        Constants.FN_CONNECTION, CloneConnectionFunction.class,
+        Constants.FN_LINK, CloneLinkFunction.class,
         Constants.FN_JOB, CloneJobFunction.class
       )
     );

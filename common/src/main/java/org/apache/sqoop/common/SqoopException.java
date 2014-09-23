@@ -19,7 +19,7 @@ package org.apache.sqoop.common;
 
 
 /**
- * Base exception for Sqoop framework. This exception requires the specification
+ * Base exception for Sqoop driver. This exception requires the specification
  * of an error code for reference purposes. Where necessary the appropriate
  * constructor can be used to pass in additional message beyond what is
  * specified by the error code and/or the causal exception.

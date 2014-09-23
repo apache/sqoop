@@ -27,9 +27,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.OutputCompression;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.ToCompression;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
@@ -48,21 +48,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.sqoop.connector.hdfs.configuration.OutputFormat.SEQUENCE_FILE;
-import static org.apache.sqoop.connector.hdfs.configuration.OutputFormat.TEXT_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
 
 @RunWith(Parameterized.class)
 public class TestLoader extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
 
-  private OutputFormat outputFormat;
-  private OutputCompression compression;
+  private ToFormat outputFormat;
+  private ToCompression compression;
   private final String outputDirectory;
   private Loader loader;
 
-  public TestLoader(OutputFormat outputFormat,
-                    OutputCompression compression)
+  public TestLoader(ToFormat outputFormat,
+                    ToCompression compression)
       throws Exception {
     this.outputDirectory = INPUT_ROOT + getClass().getSimpleName();
     this.outputFormat = outputFormat;
@@ -73,10 +73,10 @@ public class TestLoader extends TestHdfsBase {
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     List<Object[]> parameters = new ArrayList<Object[]>();
-    for (OutputCompression compression : new OutputCompression[]{
-        OutputCompression.DEFAULT,
-        OutputCompression.BZIP2,
-        OutputCompression.NONE
+    for (ToCompression compression : new ToCompression[]{
+        ToCompression.DEFAULT,
+        ToCompression.BZIP2,
+        ToCompression.NONE
     }) {
       for (Object outputFileType : new Object[]{TEXT_FILE, SEQUENCE_FILE}) {
         parameters.add(new Object[]{outputFileType, compression});
@@ -121,11 +121,11 @@ public class TestLoader extends TestHdfsBase {
         return null;
       }
     }, null);
-    ConnectionConfiguration connConf = new ConnectionConfiguration();
+    LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
-    jobConf.output.outputDirectory = outputDirectory;
-    jobConf.output.compression = compression;
-    jobConf.output.outputFormat = outputFormat;
+    jobConf.toJobConfig.outputDirectory = outputDirectory;
+    jobConf.toJobConfig.compression = compression;
+    jobConf.toJobConfig.outputFormat = outputFormat;
     Path outputPath = new Path(outputDirectory);
 
     loader.load(context, connConf, jobConf);

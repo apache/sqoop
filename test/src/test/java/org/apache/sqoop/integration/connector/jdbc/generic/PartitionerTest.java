@@ -17,10 +17,9 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.connector.hdfs.configuration.OutputFormat;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MFormList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
@@ -34,8 +33,6 @@ import org.junit.Test;
  */
 @RunWith(Parameterized.class)
 public class PartitionerTest extends ConnectorTestCase {
-
-  private static final Logger LOG = Logger.getLogger(PartitionerTest.class);
 
   /**
    * Columns that we will use as partition column with maximal number of
@@ -75,32 +72,32 @@ public class PartitionerTest extends ConnectorTestCase {
   public void testSplitter() throws Exception {
     createAndLoadTableUbuntuReleases();
 
-    // RDBMS connection
-    MConnection rdbmsConnection = getClient().newConnection("generic-jdbc-connector");
-    fillRdbmsConnectionForm(rdbmsConnection);
-    createConnection(rdbmsConnection);
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkForm(rdbmsLink);
+    saveLink(rdbmsLink);
 
-    // HDFS connection
-    MConnection hdfsConnection = getClient().newConnection("hdfs-connector");
-    createConnection(hdfsConnection);
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().newJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
     MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromTable.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromTable.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
-    fillOutputForm(job, OutputFormat.TEXT_FILE);
+    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+    fillToJobForm(job, ToFormat.TEXT_FILE);
     forms = job.getFrameworkPart();
     forms.getIntegerInput("throttling.extractors").setValue(extractors);
-    createJob(job);
+    saveJob(job);
 
-    runJob(job);
+    executeJob(job);
 
     // Assert correct output
-    assertMapreduceOutputFiles((extractors > maxOutputFiles) ? maxOutputFiles : extractors);
-    assertMapreduceOutput(
+    assertToFiles((extractors > maxOutputFiles) ? maxOutputFiles : extractors);
+    assertTo(
       "1,'Warty Warthog',4.10,2004-10-20,false",
       "2,'Hoary Hedgehog',5.04,2005-04-08,false",
       "3,'Breezy Badger',5.10,2005-10-13,false",

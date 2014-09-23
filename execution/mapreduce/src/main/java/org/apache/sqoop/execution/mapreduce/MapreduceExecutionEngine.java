@@ -19,8 +19,8 @@ package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.framework.ExecutionEngine;
-import org.apache.sqoop.framework.JobRequest;
+import org.apache.sqoop.driver.ExecutionEngine;
+import org.apache.sqoop.driver.JobRequest;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
@@ -63,8 +63,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
 
     From from = (From) mrJobRequest.getFrom();
     To to = (To) mrJobRequest.getTo();
-
-    MutableMapContext context = mrJobRequest.getFrameworkContext();
+    MutableMapContext context = mrJobRequest.getDriverContext();
     context.setString(JobConstants.JOB_ETL_PARTITIONER, from.getPartitioner().getName());
     context.setString(JobConstants.JOB_ETL_EXTRACTOR, from.getExtractor().getName());
     context.setString(JobConstants.JOB_ETL_LOADER, to.getLoader().getName());
@@ -85,10 +84,10 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
    * at mapreduce job time. This method will register all dependencies in the request
    * object.
    *
-   * @param request Active request object.
+   * @param jobrequest Active job request object.
    */
-  protected void addDependencies(MRJobRequest request) {
+  protected void addDependencies(MRJobRequest jobrequest) {
     // Guava
-    request.addJarForClass(ThreadFactoryBuilder.class);
+    jobrequest.addJarForClass(ThreadFactoryBuilder.class);
   }
 }

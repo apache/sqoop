@@ -39,7 +39,7 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.ConnectionConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -50,7 +50,7 @@ import org.apache.sqoop.common.PrefixContext;
  * This class derives mostly from CombineFileInputFormat of Hadoop, i.e.
  * org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat.
  */
-public class HdfsPartitioner extends Partitioner<ConnectionConfiguration, FromJobConfiguration> {
+public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
 
   public static final String SPLIT_MINSIZE_PERNODE =
       "mapreduce.input.fileinputformat.split.minsize.per.node";
@@ -68,12 +68,12 @@ public class HdfsPartitioner extends Partitioner<ConnectionConfiguration, FromJo
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,
-      ConnectionConfiguration connectionConfiguration, FromJobConfiguration jobConfiguration) {
+      LinkConfiguration linkConfiguration, FromJobConfiguration jobConfiguration) {
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
     try {
-      long numInputBytes = getInputSize(conf, jobConfiguration.input.inputDirectory);
+      long numInputBytes = getInputSize(conf, jobConfiguration.fromJobConfig.inputDirectory);
       maxSplitSize = numInputBytes / context.getMaxPartitions();
 
       if(numInputBytes % context.getMaxPartitions() != 0 ) {
@@ -118,7 +118,7 @@ public class HdfsPartitioner extends Partitioner<ConnectionConfiguration, FromJo
       }
 
       // all the files in input set
-      String indir = jobConfiguration.input.inputDirectory;
+      String indir = jobConfiguration.fromJobConfig.inputDirectory;
       FileSystem fs = FileSystem.get(conf);
 
       List<Path> paths = new LinkedList<Path>();
@@ -147,7 +147,7 @@ public class HdfsPartitioner extends Partitioner<ConnectionConfiguration, FromJo
     }
   }
 
-  //TODO: Perhaps get the FS from connection configuration so we can support remote HDFS
+  //TODO: Perhaps get the FS from link configuration so we can support remote HDFS
   private long getInputSize(Configuration conf, String indir) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] files = fs.listStatus(new Path(indir));

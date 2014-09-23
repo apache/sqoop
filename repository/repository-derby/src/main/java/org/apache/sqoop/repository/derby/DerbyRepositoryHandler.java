@@ -30,8 +30,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.*;
 
-import javax.sql.DataSource;
-
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
@@ -40,7 +38,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManagerUtils;
 import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConnection;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnectionForms;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MIntegerInput;
@@ -49,7 +47,7 @@ import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MFormType;
-import org.apache.sqoop.model.MFramework;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MMapInput;
@@ -57,7 +55,6 @@ import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
-import org.apache.sqoop.repository.JdbcRepositoryTransactionFactory;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -78,15 +75,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   /**
    * Unique name of HDFS Connector.
-   * HDFS Connector was originally part of the Sqoop framework, but now is its
+   * HDFS Connector was originally part of the Sqoop driver, but now is its
    * own connector. This constant is used to pre-register the HDFS Connector
    * so that jobs that are being upgraded can reference the HDFS Connector.
    */
   private static final String CONNECTOR_HDFS = "hdfs-connector";
 
   private JdbcRepositoryContext repoContext;
-  private DataSource dataSource;
-  private JdbcRepositoryTransactionFactory txFactory;
 
   /**
    * {@inheritDoc}
@@ -105,10 +100,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Helper method to insert the forms from the  into the
    * repository. The job and connector forms within <code>mc</code> will get
    * updated with the id of the forms when this function returns.
-   * @param mf The MFramework instance to use to upgrade.
-   * @param conn JDBC connection to use for updating the forms
+   * @param mDriverConfig The MFramework instance to use to upgrade.
+   * @param conn JDBC link to use for updating the forms
    */
-  private void insertFormsForFramework(MFramework mf, Connection conn) {
+  private void insertFormsForFramework(MDriverConfig mDriverConfig, Connection conn) {
     PreparedStatement baseFormStmt = null;
     PreparedStatement baseInputStmt = null;
     try{
@@ -119,15 +114,15 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         Statement.RETURN_GENERATED_KEYS);
 
       // Register connector forms
-      registerForms(null, null, mf.getConnectionForms().getForms(),
+      registerForms(null, null, mDriverConfig.getConnectionForms().getForms(),
         MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
 
       // Register job forms
-      registerForms(null, null, mf.getJobForms().getForms(),
+      registerForms(null, null, mDriverConfig.getJobForms().getForms(),
         MFormType.JOB.name(), baseFormStmt, baseInputStmt);
 
     } catch (SQLException ex) {
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0014, mf.toString(), ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0014, mDriverConfig.toString(), ex);
     } finally {
       closeStatements(baseFormStmt, baseInputStmt);
     }
@@ -138,7 +133,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * repository. The job and connector forms within <code>mc</code> will get
    * updated with the id of the forms when this function returns.
    * @param mc The connector to use for updating forms
-   * @param conn JDBC connection to use for updating the forms
+   * @param conn JDBC link to use for updating the forms
    */
   private void insertFormsForConnector (MConnector mc, Connection conn) {
     long connectorId = mc.getPersistenceId();
@@ -205,8 +200,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public synchronized void initialize(JdbcRepositoryContext ctx) {
     repoContext = ctx;
-    dataSource = repoContext.getDataSource();
-    txFactory = repoContext.getTransactionFactory();
+    repoContext.getDataSource();
     LOG.info("DerbyRepositoryHandler initialized.");
   }
 
@@ -313,24 +307,24 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Detect version of the framework
+   * Detect version of the driver
    *
-   * @param conn Connection to metadata repository
-   * @return Version of the MFramework
+   * @param conn Connection to the repository
+   * @return Version of the Driver
    */
-  private String detectFrameworkVersion (Connection conn) {
+  private String detectDriverVersion (Connection conn) {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(DerbySchemaQuery.STMT_SELECT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
       rs = stmt.executeQuery();
       if(!rs.next()) {
         return null;
       }
       return rs.getString(1);
     } catch (SQLException e) {
-      LOG.info("Can't fetch framework version.", e);
+      LOG.info("Can't fetch driver version.", e);
       return null;
     } finally {
       closeResultSets(rs);
@@ -339,23 +333,22 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Create or update framework version
-   * @param conn Connection to the metadata repository
-   * @param mFramework
+   * Create or update driver version
+   * @param conn Connection to the the repository
+   * @param mDriverConfig
    */
-  private void createOrUpdateFrameworkVersion(Connection conn,
-      MFramework mFramework) {
+  private void createOrUpdateDriverVersion(Connection conn, MDriverConfig mDriverConfig) {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
       stmt.executeUpdate();
       closeStatements(stmt);
 
       stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_FRAMEWORK_VERSION);
-      stmt.setString(2, mFramework.getVersion());
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
+      stmt.setString(2, mDriverConfig.getVersion());
       stmt.executeUpdate();
     } catch (SQLException e) {
       logException(e);
@@ -446,7 +439,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   /**
    * Upgrade job data from IMPORT/EXPORT to FROM/TO.
    * Since the framework is no longer responsible for HDFS,
-   * the HDFS connector/connection must be added.
+   * the HDFS connector/link must be added.
    * Also, the framework forms are moved around such that
    * they belong to the added HDFS connector. Any extra forms
    * are removed.
@@ -471,11 +464,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *    its dependencies point to the IMPORT throttling form.
    *    Then make sure the throttling form does not have a direction.
    *    Framework forms should not have a direction.
-   * 9. Create an HDFS connection to reference and update
-   *    jobs to reference that connection. IMPORT jobs
+   * 9. Create an HDFS link to reference and update
+   *    jobs to reference that link. IMPORT jobs
    *    should have TO HDFS connector, EXPORT jobs should have
    *    FROM HDFS connector.
-   * 10. Update 'table' form names to 'fromTable' and 'toTable'.
+   * 10. Update 'table' form names to 'fromJobConfig' and 'toTable'.
    *     Also update the relevant inputs as well.
    * @param conn
    */
@@ -510,7 +503,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_FRAMEWORK_INDEX, conn,
         new Long(0), "throttling");
 
-    MConnection hdfsConnection = createHdfsConnection(conn);
+    MLink hdfsConnection = createHdfsConnection(conn);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
         "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
@@ -519,13 +512,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         new Long(hdfsConnection.getPersistenceId()), "IMPORT");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
-        "fromTable", "table", Direction.FROM.toString());
+        "fromJobConfig", "table", Direction.FROM.toString());
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
-        Direction.FROM.toString().toLowerCase(), "fromTable", Direction.FROM.toString());
+        Direction.FROM.toString().toLowerCase(), "fromJobConfig", Direction.FROM.toString());
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
-        "toTable", "table", Direction.TO.toString());
+        "toJobConfig", "table", Direction.TO.toString());
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
-        Direction.TO.toString().toLowerCase(), "toTable", Direction.TO.toString());
+        Direction.TO.toString().toLowerCase(), "toJobConfig", Direction.TO.toString());
 
     if (LOG.isTraceEnabled()) {
       LOG.trace("Updated existing data for generic connectors.");
@@ -583,27 +576,27 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Create an HDFS connection.
-   * Intended to be used when moving HDFS connector out of framework
+   * Create an HDFS link.
+   * Intended to be used when moving HDFS connector out of driverConfig
    * to its own connector.
    *
    * NOTE: Upgrade path only!
    */
-  private MConnection createHdfsConnection(Connection conn) {
+  private MLink createHdfsConnection(Connection conn) {
     if (LOG.isTraceEnabled()) {
-      LOG.trace("Creating HDFS connection.");
+      LOG.trace("Creating HDFS link.");
     }
 
     MConnector hdfsConnector = this.findConnector(CONNECTOR_HDFS, conn);
-    MFramework framework = findFramework(conn);
-    MConnection hdfsConnection = new MConnection(
+    MDriverConfig driverConfig = findDriverConfig(conn);
+    MLink hdfsConnection = new MLink(
         hdfsConnector.getPersistenceId(),
         hdfsConnector.getConnectionForms(),
-        framework.getConnectionForms());
-    this.createConnection(hdfsConnection, conn);
+        driverConfig.getConnectionForms());
+    this.createLink(hdfsConnection, conn);
 
     if (LOG.isTraceEnabled()) {
-      LOG.trace("Created HDFS connection.");
+      LOG.trace("Created HDFS link.");
     }
 
     return hdfsConnection;
@@ -682,8 +675,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void registerFramework(MFramework mf, Connection conn) {
-    if (mf.hasPersistenceId()) {
+  public void registerDriverConfig(MDriverConfig mDriverConfig, Connection conn) {
+    if (mDriverConfig.hasPersistenceId()) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0011,
         "Framework metadata");
     }
@@ -697,32 +690,32 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
 
       // Register connector forms
-      registerForms(null, null, mf.getConnectionForms().getForms(),
+      registerForms(null, null, mDriverConfig.getConnectionForms().getForms(),
         MFormType.CONNECTION.name(), baseFormStmt, baseInputStmt);
 
       // Register all jobs
-      registerForms(null, null, mf.getJobForms().getForms(),
+      registerForms(null, null, mDriverConfig.getJobForms().getForms(),
         MFormType.JOB.name(), baseFormStmt, baseInputStmt);
 
       // We're using hardcoded value for framework metadata as they are
       // represented as NULL in the database.
-      mf.setPersistenceId(1);
+      mDriverConfig.setPersistenceId(1);
     } catch (SQLException ex) {
-      logException(ex, mf);
+      logException(ex, mDriverConfig);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014, ex);
     } finally {
       closeStatements(baseFormStmt, baseInputStmt);
     }
-    createOrUpdateFrameworkVersion(conn, mf);
+    createOrUpdateDriverVersion(conn, mDriverConfig);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public MFramework findFramework(Connection conn) {
-    LOG.debug("Looking up framework metadata");
-    MFramework mf = null;
+  public MDriverConfig findDriverConfig(Connection conn) {
+    LOG.debug("Looking up driver config");
+    MDriverConfig mDriverConfig = null;
     PreparedStatement formFetchStmt = null;
     PreparedStatement inputFetchStmt = null;
     try {
@@ -739,16 +732,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         return null;
       }
 
-      mf = new MFramework(new MConnectionForms(connectionForms),
-        new MJobForms(jobForms), detectFrameworkVersion(conn));
+      mDriverConfig = new MDriverConfig(new MConnectionForms(connectionForms),
+        new MJobForms(jobForms), detectDriverVersion(conn));
 
-      // We're using hardcoded value for framework metadata as they are
+      // We're using hardcoded value for driver config as they are
       // represented as NULL in the database.
-      mf.setPersistenceId(1);
+      mDriverConfig.setPersistenceId(1);
 
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0004,
-        "Framework metadata", ex);
+        "Driver config", ex);
     } finally {
       if (formFetchStmt != null) {
         try {
@@ -766,10 +759,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
     }
 
-    LOG.debug("Looking up framework metadta found: " + mf);
-
-    // Returned loaded framework metadata
-    return mf;
+    LOG.debug("Looking up driver config found:" + mDriverConfig);
+    return mDriverConfig;
   }
 
   /**
@@ -784,19 +775,19 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void createConnection(MConnection connection, Connection conn) {
+  public void createLink(MLink link, Connection conn) {
     PreparedStatement stmt = null;
     int result;
     try {
       stmt = conn.prepareStatement(STMT_INSERT_CONNECTION,
         Statement.RETURN_GENERATED_KEYS);
-      stmt.setString(1, connection.getName());
-      stmt.setLong(2, connection.getConnectorId());
-      stmt.setBoolean(3, connection.getEnabled());
-      stmt.setString(4, connection.getCreationUser());
-      stmt.setTimestamp(5, new Timestamp(connection.getCreationDate().getTime()));
-      stmt.setString(6, connection.getLastUpdateUser());
-      stmt.setTimestamp(7, new Timestamp(connection.getLastUpdateDate().getTime()));
+      stmt.setString(1, link.getName());
+      stmt.setLong(2, link.getConnectorId());
+      stmt.setBoolean(3, link.getEnabled());
+      stmt.setString(4, link.getCreationUser());
+      stmt.setTimestamp(5, new Timestamp(link.getCreationDate().getTime()));
+      stmt.setString(6, link.getLastUpdateUser());
+      stmt.setTimestamp(7, new Timestamp(link.getLastUpdateDate().getTime()));
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -814,17 +805,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       createInputValues(STMT_INSERT_CONNECTION_INPUT,
         connectionId,
-        connection.getConnectorPart().getForms(),
+        link.getConnectorPart().getForms(),
         conn);
       createInputValues(STMT_INSERT_CONNECTION_INPUT,
         connectionId,
-        connection.getFrameworkPart().getForms(),
+        link.getFrameworkPart().getForms(),
         conn);
 
-      connection.setPersistenceId(connectionId);
+      link.setPersistenceId(connectionId);
 
     } catch (SQLException ex) {
-      logException(ex, connection);
+      logException(ex, link);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0019, ex);
     } finally {
       closeStatements(stmt);
@@ -835,36 +826,36 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void updateConnection(MConnection connection, Connection conn) {
+  public void updateLink(MLink link, Connection conn) {
     PreparedStatement deleteStmt = null;
     PreparedStatement updateStmt = null;
     try {
       // Firstly remove old values
       deleteStmt = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
-      deleteStmt.setLong(1, connection.getPersistenceId());
+      deleteStmt.setLong(1, link.getPersistenceId());
       deleteStmt.executeUpdate();
 
       // Update CONNECTION table
       updateStmt = conn.prepareStatement(STMT_UPDATE_CONNECTION);
-      updateStmt.setString(1, connection.getName());
-      updateStmt.setString(2, connection.getLastUpdateUser());
+      updateStmt.setString(1, link.getName());
+      updateStmt.setString(2, link.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
 
-      updateStmt.setLong(4, connection.getPersistenceId());
+      updateStmt.setLong(4, link.getPersistenceId());
       updateStmt.executeUpdate();
 
       // And reinsert new values
       createInputValues(STMT_INSERT_CONNECTION_INPUT,
-        connection.getPersistenceId(),
-        connection.getConnectorPart().getForms(),
+        link.getPersistenceId(),
+        link.getConnectorPart().getForms(),
         conn);
       createInputValues(STMT_INSERT_CONNECTION_INPUT,
-        connection.getPersistenceId(),
-        connection.getFrameworkPart().getForms(),
+        link.getPersistenceId(),
+        link.getFrameworkPart().getForms(),
         conn);
 
     } catch (SQLException ex) {
-      logException(ex, connection);
+      logException(ex, link);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0021, ex);
     } finally {
       closeStatements(deleteStmt, updateStmt);
@@ -875,7 +866,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean existsConnection(long id, Connection conn) {
+  public boolean existsLink(long id, Connection conn) {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
@@ -897,7 +888,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   @Override
-  public boolean inUseConnection(long connectionId, Connection conn) {
+  public boolean inUseLink(long connectionId, Connection conn) {
     PreparedStatement stmt = null;
     ResultSet rs = null;
 
@@ -921,7 +912,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   @Override
-  public void enableConnection(long connectionId, boolean enabled, Connection conn) {
+  public void enableLink(long connectionId, boolean enabled, Connection conn) {
     PreparedStatement enableConn = null;
 
     try {
@@ -941,11 +932,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteConnection(long id, Connection conn) {
+  public void deleteLink(long id, Connection conn) {
     PreparedStatement dltConn = null;
 
     try {
-      deleteConnectionInputs(id, conn);
+      deleteLinkInputs(id, conn);
       dltConn = conn.prepareStatement(STMT_DELETE_CONNECTION);
       dltConn.setLong(1, id);
       dltConn.executeUpdate();
@@ -961,7 +952,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteConnectionInputs(long id, Connection conn) {
+  public void deleteLinkInputs(long id, Connection conn) {
     PreparedStatement dltConnInput = null;
     try {
       dltConnInput = conn.prepareStatement(STMT_DELETE_CONNECTION_INPUT);
@@ -979,20 +970,20 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public MConnection findConnection(long id, Connection conn) {
+  public MLink findLink(long id, Connection conn) {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_SELECT_CONNECTION_SINGLE);
       stmt.setLong(1, id);
 
-      List<MConnection> connections = loadConnections(stmt, conn);
+      List<MLink> connections = loadLinks(stmt, conn);
 
       if(connections.size() != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0024, "Couldn't find"
-          + " connection with id " + id);
+          + " link with id " + id);
       }
 
-      // Return the first and only one connection object
+      // Return the first and only one link object
       return connections.get(0);
 
     } catch (SQLException ex) {
@@ -1007,12 +998,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MConnection> findConnections(Connection conn) {
+  public List<MLink> findLinks(Connection conn) {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_SELECT_CONNECTION_ALL);
 
-      return loadConnections(stmt, conn);
+      return loadLinks(stmt, conn);
 
     } catch (SQLException ex) {
       logException(ex);
@@ -1029,13 +1020,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    */
   @Override
-  public List<MConnection> findConnectionsForConnector(long connectorID, Connection conn) {
+  public List<MLink> findLinksForConnector(long connectorID, Connection conn) {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_SELECT_CONNECTION_FOR_CONNECTOR);
       stmt.setLong(1, connectorID);
 
-      return loadConnections(stmt, conn);
+      return loadLinks(stmt, conn);
 
     } catch (SQLException ex) {
       logException(ex, connectorID);
@@ -1084,7 +1075,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void updateFramework(MFramework mFramework, Connection conn) {
+  public void updateDriverConfig(MDriverConfig mDriverConfig, Connection conn) {
     PreparedStatement deleteForm = null;
     PreparedStatement deleteInput = null;
     try {
@@ -1095,13 +1086,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       deleteForm.executeUpdate();
 
     } catch (SQLException e) {
-      logException(e, mFramework);
+      logException(e, mDriverConfig);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0044, e);
     } finally {
       closeStatements(deleteForm, deleteInput);
     }
-    createOrUpdateFrameworkVersion(conn, mFramework);
-    insertFormsForFramework(mFramework, conn);
+    createOrUpdateDriverVersion(conn, mDriverConfig);
+    insertFormsForFramework(mDriverConfig, conn);
 
   }
 
@@ -1116,8 +1107,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       stmt = conn.prepareStatement(STMT_INSERT_JOB,
         Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, job.getName());
-      stmt.setLong(2, job.getConnectionId(Direction.FROM));
-      stmt.setLong(3, job.getConnectionId(Direction.TO));
+      stmt.setLong(2, job.getLinkId(Direction.FROM));
+      stmt.setLong(3, job.getLinkId(Direction.TO));
       stmt.setBoolean(4, job.getEnabled());
       stmt.setString(5, job.getCreationUser());
       stmt.setTimestamp(6, new Timestamp(job.getCreationDate().getTime()));
@@ -1318,7 +1309,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           + " job with id " + id);
       }
 
-      // Return the first and only one connection object
+      // Return the first and only one link object
       return jobs.get(0);
 
     } catch (SQLException ex) {
@@ -1652,7 +1643,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Resolves counter group database id.
    *
    * @param group Given group
-   * @param conn Connection to metastore
+   * @param conn Connection to database
    * @return Id
    * @throws SQLException
    */
@@ -1693,7 +1684,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Resolves counter id.
    *
    * @param counter Given counter
-   * @param conn connection to metastore
+   * @param conn Connection to database
    * @return Id
    * @throws SQLException
    */
@@ -1734,7 +1725,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Create MSubmission structure from result set.
    *
    * @param rs Result set, only active row will be fetched
-   * @param conn Connection to metastore
+   * @param conn Connection to database
    * @return Created MSubmission structure
    * @throws SQLException
    */
@@ -1836,10 +1827,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     return connectors;
   }
 
-  private List<MConnection> loadConnections(PreparedStatement stmt,
+  private List<MLink> loadLinks(PreparedStatement stmt,
                                             Connection conn)
                                             throws SQLException {
-    List<MConnection> connections = new ArrayList<MConnection>();
+    List<MLink> links = new ArrayList<MLink>();
     ResultSet rsConnection = null;
     PreparedStatement formConnectorFetchStmt = null;
     PreparedStatement formFrameworkFetchStmt = null;
@@ -1879,19 +1870,19 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         loadFrameworkForms(frameworkConnForms, frameworkJobForms,
             formFrameworkFetchStmt, inputFetchStmt, 2);
 
-        MConnection connection = new MConnection(connectorId,
+        MLink link = new MLink(connectorId,
           new MConnectionForms(connectorConnForms),
           new MConnectionForms(frameworkConnForms));
 
-        connection.setPersistenceId(id);
-        connection.setName(name);
-        connection.setCreationUser(creationUser);
-        connection.setCreationDate(creationDate);
-        connection.setLastUpdateUser(updateUser);
-        connection.setLastUpdateDate(lastUpdateDate);
-        connection.setEnabled(enabled);
+        link.setPersistenceId(id);
+        link.setName(name);
+        link.setCreationUser(creationUser);
+        link.setCreationDate(creationDate);
+        link.setLastUpdateUser(updateUser);
+        link.setLastUpdateDate(lastUpdateDate);
+        link.setEnabled(enabled);
 
-        connections.add(connection);
+        links.add(link);
       }
     } finally {
       closeResultSets(rsConnection);
@@ -1899,7 +1890,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         formFrameworkFetchStmt, inputFetchStmt);
     }
 
-    return connections;
+    return links;
   }
 
   private List<MJob> loadJobs(PreparedStatement stmt,
@@ -1925,8 +1916,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         long toConnectorId = rsJob.getLong(2);
         long id = rsJob.getLong(3);
         String name = rsJob.getString(4);
-        long fromConnectionId = rsJob.getLong(5);
-        long toConnectionId = rsJob.getLong(6);
+        long fromLinkId = rsJob.getLong(5);
+        long toLinkId = rsJob.getLong(6);
         boolean enabled = rsJob.getBoolean(7);
         String createBy = rsJob.getString(8);
         Date creationDate = rsJob.getTimestamp(9);
@@ -1971,7 +1962,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
         MJob job = new MJob(
           fromConnectorId, toConnectorId,
-          fromConnectionId, toConnectionId,
+          fromLinkId, toLinkId,
           new MJobForms(fromConnectorFromJobForms),
           new MJobForms(toConnectorToJobForms),
           new MJobForms(frameworkJobForms));
@@ -2142,7 +2133,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Use given prepared statements to load all forms and corresponding inputs
    * from Derby.
    *
-   * @param connectionForms List of connection forms that will be filled up
+   * @param connectionForms List of link forms that will be filled up
    * @param jobForms Map with job forms that will be filled up
    * @param formFetchStmt Prepared statement for fetching forms
    * @param inputFetchStmt Prepare statement for fetching inputs
@@ -2159,14 +2150,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     while (rsetForm.next()) {
       long formId = rsetForm.getLong(1);
       Long formConnectorId = rsetForm.getLong(2);
-      String direction = rsetForm.getString(3);
       String formName = rsetForm.getString(4);
       String formType = rsetForm.getString(5);
       int formIndex = rsetForm.getInt(6);
       List<MInput<?>> formInputs = new ArrayList<MInput<?>>();
 
-      MForm mf = new MForm(formName, formInputs);
-      mf.setPersistenceId(formId);
+      MForm mDriverConfig = new MForm(formName, formInputs);
+      mDriverConfig.setPersistenceId(formId);
 
       inputFetchStmt.setLong(formPosition, formId);
 
@@ -2217,52 +2207,52 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           input.restoreFromUrlSafeValueString(value);
         }
 
-        if (mf.getInputs().size() != inputIndex) {
+        if (mDriverConfig.getInputs().size() != inputIndex) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0009,
-            "form: " + mf
+            "form: " + mDriverConfig
             + "; input: " + input
             + "; index: " + inputIndex
-            + "; expected: " + mf.getInputs().size()
+            + "; expected: " + mDriverConfig.getInputs().size()
           );
         }
 
-        mf.getInputs().add(input);
+        mDriverConfig.getInputs().add(input);
       }
 
-      if (mf.getInputs().size() == 0) {
+      if (mDriverConfig.getInputs().size() == 0) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0008,
           "connector-" + formConnectorId
-          + "; form: " + mf
+          + "; form: " + mDriverConfig
         );
       }
 
-      MFormType mft = MFormType.valueOf(formType);
-      switch (mft) {
+      MFormType mDriverConfigt = MFormType.valueOf(formType);
+      switch (mDriverConfigt) {
       case CONNECTION:
         if (connectionForms.size() != formIndex) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
             "connector-" + formConnectorId
-            + "; form: " + mf
+            + "; form: " + mDriverConfig
             + "; index: " + formIndex
             + "; expected: " + connectionForms.size()
           );
         }
-        connectionForms.add(mf);
+        connectionForms.add(mDriverConfig);
         break;
       case JOB:
         if (jobForms.size() != formIndex) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
             "connector-" + formConnectorId
-            + "; form: " + mf
+            + "; form: " + mDriverConfig
             + "; index: " + formIndex
             + "; expected: " + jobForms.size()
           );
         }
-        jobForms.add(mf);
+        jobForms.add(mDriverConfig);
         break;
       default:
         throw new SqoopException(DerbyRepoError.DERBYREPO_0007,
-            "connector-" + formConnectorId + ":" + mf);
+            "connector-" + formConnectorId + ":" + mDriverConfig);
       }
     }
   }
@@ -2273,7 +2263,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Use given prepared statements to load all forms and corresponding inputs
    * from Derby.
    *
-   * @param connectionForms List of connection forms that will be filled up
+   * @param connectionForms List of link forms that will be filled up
    * @param fromJobForms FROM job forms that will be filled up
    * @param toJobForms TO job forms that will be filled up
    * @param formFetchStmt Prepared statement for fetching forms
@@ -2298,8 +2288,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       int formIndex = rsetForm.getInt(6);
       List<MInput<?>> formInputs = new ArrayList<MInput<?>>();
 
-      MForm mf = new MForm(formName, formInputs);
-      mf.setPersistenceId(formId);
+      MForm mDriverConfig = new MForm(formName, formInputs);
+      mDriverConfig.setPersistenceId(formId);
 
       inputFetchStmt.setLong(formPosition, formId);
 
@@ -2317,7 +2307,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
         MInputType mit = MInputType.valueOf(inputType);
 
-        MInput input = null;
+        MInput<?> input = null;
         switch (mit) {
           case STRING:
             input = new MStringInput(inputName, inputSensitivity, inputStrLength);
@@ -2350,37 +2340,37 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           input.restoreFromUrlSafeValueString(value);
         }
 
-        if (mf.getInputs().size() != inputIndex) {
+        if (mDriverConfig.getInputs().size() != inputIndex) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0009,
-              "form: " + mf
+              "form: " + mDriverConfig
                   + "; input: " + input
                   + "; index: " + inputIndex
-                  + "; expected: " + mf.getInputs().size()
+                  + "; expected: " + mDriverConfig.getInputs().size()
           );
         }
 
-        mf.getInputs().add(input);
+        mDriverConfig.getInputs().add(input);
       }
 
-      if (mf.getInputs().size() == 0) {
+      if (mDriverConfig.getInputs().size() == 0) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0008,
             "connector-" + formConnectorId
-                + "; form: " + mf
+                + "; form: " + mDriverConfig
         );
       }
 
-      MFormType mft = MFormType.valueOf(formType);
-      switch (mft) {
+      MFormType mDriverConfigt = MFormType.valueOf(formType);
+      switch (mDriverConfigt) {
         case CONNECTION:
           if (connectionForms.size() != formIndex) {
             throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
                 "connector-" + formConnectorId
-                    + "; form: " + mf
+                    + "; form: " + mDriverConfig
                     + "; index: " + formIndex
                     + "; expected: " + connectionForms.size()
             );
           }
-          connectionForms.add(mf);
+          connectionForms.add(mDriverConfig);
           break;
         case JOB:
           Direction type = Direction.valueOf(operation);
@@ -2401,17 +2391,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           if (jobForms.size() != formIndex) {
             throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
                 "connector-" + formConnectorId
-                    + "; form: " + mf
+                    + "; form: " + mDriverConfig
                     + "; index: " + formIndex
                     + "; expected: " + jobForms.size()
             );
           }
 
-          jobForms.add(mf);
+          jobForms.add(mDriverConfig);
           break;
         default:
           throw new SqoopException(DerbyRepoError.DERBYREPO_0007,
-              "connector-" + formConnectorId + ":" + mf);
+              "connector-" + formConnectorId + ":" + mDriverConfig);
       }
     }
   }

@@ -115,7 +115,7 @@ public class ShowConnectorFunction extends SqoopFunction {
       connector.getVersion(),
       getSupportedDirections(connector)
     );
-    displayFormMetadataDetails(connector, client.getResourceBundle(connector.getPersistenceId()));
+    displayFormMetadataDetails(connector, client.getConnectorConfigResourceBundle(connector.getPersistenceId()));
   }
 
   /**
