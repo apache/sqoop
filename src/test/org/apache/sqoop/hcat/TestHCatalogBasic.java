@@ -284,7 +284,27 @@ public class TestHCatalogBasic extends TestCase {
       // expected.
     }
   }
-
+  public void testHCatImportWithEmptyKeysAndVals() throws Exception {
+    String[] args = {
+      "--connect",
+      "jdbc:db:url",
+      "--table",
+      "dbtable",
+      "--hcatalog-table",
+      "table",
+      "--hcatalog-partition-keys",
+      "k1,",
+      "--hcatalog-partition-values",
+      ",v1",
+    };
+    try {
+      SqoopOptions opts = parseImportArgs(args);
+      importTool.validateOptions(opts);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // expected.
+    }
+  }
   public void testHCatImportWithBothHCatAndHivePartOptions() throws Exception {
     String[] args = {
       "--connect",

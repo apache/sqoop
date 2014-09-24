@@ -1554,6 +1554,21 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         throw new InvalidOptionsException("Number of static partition keys "
           + "provided dpes match the number of partition values");
       }
+
+      for (int i = 0; i < keys.length; ++i) {
+        String k = keys[i].trim();
+        if (k.isEmpty()) {
+          throw new InvalidOptionsException(
+            "Invalid HCatalog static partition key at position " + i);
+        }
+      }
+      for (int i = 0; i < vals.length; ++i) {
+        String v = vals[i].trim();
+        if (v.isEmpty()) {
+          throw new InvalidOptionsException(
+            "Invalid HCatalog static partition key at position " + v);
+        }
+      }
     } else {
       if (options.getHivePartitionKey() != null
           && options.getHivePartitionValue() == null) {

@@ -288,11 +288,18 @@ public final class SqoopHCatUtilities {
     hCatStaticPartitionValues = new ArrayList<String>();
     String partKeysString = options.getHCatalogPartitionKeys();
     String partKeysVals = options.getHCatalogPartitionValues();
+    // Already validated
     if (partKeysString != null) {
       String[] keys = partKeysString.split(",");
-      hCatStaticPartitionKeys.addAll(Arrays.asList(keys));
+      for (int i = 0; i < keys.length; ++i) {
+        String k = keys[i].trim();
+        hCatStaticPartitionKeys.add(k);
+      }
       String[] vals = partKeysVals.split(",");
-      hCatStaticPartitionValues.addAll(Arrays.asList(vals));
+      for (int i = 0; i < vals.length; ++i) {
+        String v = vals[i].trim();
+        hCatStaticPartitionValues.add(v);
+      }
     } else {
       partKeysString = options.getHivePartitionKey();
       if (partKeysString != null) {
@@ -370,8 +377,16 @@ public final class SqoopHCatUtilities {
         throw new IOException("Database column " + col + " not found in "
           + " hcatalog table.");
       }
-      if (hCatStaticPartitionKeys != null
-        && hCatStaticPartitionKeys.equals(col)) {
+      boolean skip=false;
+      if (hCatStaticPartitionKeys != null) {
+        for (String key : hCatStaticPartitionKeys) {
+          if (col.equals(key)) {
+            skip=true;
+            break;
+          }
+        }
+      }
+      if (skip) {
         continue;
       }
       outputFieldList.add(hCatFullTableSchema.get(col));
@@ -670,7 +685,7 @@ public final class SqoopHCatUtilities {
     }
 
     IntWritable[] positions = new IntWritable[hCatFieldPositions.length];
-    for (int i : hCatFieldPositions) {
+    for (int i = 0; i < hCatFieldPositions.length; ++i) {
       positions[i] = new IntWritable(hCatFieldPositions[i]);
     }
 
