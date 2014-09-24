@@ -132,6 +132,58 @@ public class TestMConnector {
   }
 
   @Test
+  public void testFromDirection() {
+    MConnector connector = createConnector(Arrays.asList(Direction.FROM));
+
+    // Clone should clone only one job form.
+    MConnector clone = connector.clone(true);
+    assertNotNull(clone.getJobForms(Direction.FROM));
+    assertNull(clone.getJobForms(Direction.TO));
+    assertEquals(connector, clone);
+    assertEquals(connector.toString(), clone.toString());
+    assertNotEquals(connector.hashCode(), clone.hashCode());
+  }
+
+  @Test
+  public void testToDirection() {
+    MConnector connector = createConnector(Arrays.asList(Direction.TO));
+
+    // Clone should clone only one job form.
+    MConnector clone = connector.clone(true);
+    assertNull(clone.getJobForms(Direction.FROM));
+    assertNotNull(clone.getJobForms(Direction.TO));
+    assertEquals(connector, clone);
+    assertEquals(connector.toString(), clone.toString());
+    assertNotEquals(connector.hashCode(), clone.hashCode());
+  }
+
+  @Test
+  public void testNoDirection() {
+    MConnector connector = createConnector(Arrays.asList(new Direction[0]));
+
+    // Clone should clone only one job form.
+    MConnector clone = connector.clone(true);
+    assertNull(clone.getJobForms(Direction.FROM));
+    assertNull(clone.getJobForms(Direction.TO));
+    assertEquals(connector, clone);
+    assertEquals(connector.toString(), clone.toString());
+    assertNotEquals(connector.hashCode(), clone.hashCode());
+  }
+
+  @Test
+  public void testBothDirections() {
+    MConnector connector = createConnector(Arrays.asList(Direction.FROM, Direction.TO));
+
+    // Clone should clone only one job form.
+    MConnector clone = connector.clone(true);
+    assertNotNull(clone.getJobForms(Direction.FROM));
+    assertNotNull(clone.getJobForms(Direction.TO));
+    assertEquals(connector, clone);
+    assertEquals(connector.toString(), clone.toString());
+    assertNotEquals(connector.hashCode(), clone.hashCode());
+  }
+
+  @Test
   public void testGetSupportedDirections() {
     MConnector connector = createConnector(Arrays.asList(Direction.FROM, Direction.TO));
     assertTrue(connector.getSupportedDirections().isDirectionSupported(Direction.FROM));
