@@ -73,12 +73,11 @@ public class SqoopOutputFormatLoadExecutor {
     dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
       .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
 
-    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration());
-    if (schema==null) {
-      schema = ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration());
-    }
+    Schema fromSchema = ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration());
+    dataFormat.setFromSchema(fromSchema);
 
-    dataFormat.setSchema(schema);
+    Schema toSchema = ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration());
+    dataFormat.setToSchema(toSchema);
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
@@ -231,10 +230,8 @@ public class SqoopOutputFormatLoadExecutor {
         Schema schema = null;
 
         if (!isTest) {
-          // Propagate connector schema in every case for now
-          // TODO: Change to coditional choosing between Connector schemas.
-          // @TODO(Abe): Maybe use TO schema?
-          schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+          // Using the TO schema since the IDF returns data in TO schema
+          schema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
 
           subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
           configConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);

@@ -68,12 +68,12 @@ public final class SubmissionDisplayer {
       }
     }
 
-    if(isVerbose() && submission.getFromSchema() != null) {
+    if(isVerbose() && submission.getFromSchema() != null && !submission.getFromSchema().isEmpty() ) {
       print(resourceString(Constants.RES_FROM_SCHEMA)+": ");
       println(submission.getFromSchema());
     }
 
-    if(isVerbose() && submission.getToSchema() != null) {
+    if(isVerbose() && submission.getToSchema() != null && !submission.getToSchema().isEmpty() ) {
       print(resourceString(Constants.RES_TO_SCHEMA)+": ");
       println(submission.getToSchema());
     }

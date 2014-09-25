@@ -17,38 +17,24 @@
  */
 package org.apache.sqoop.schema;
 
-import org.apache.sqoop.common.ErrorCode;
-
 /**
+ * The order of the matching options here indicates an order of preference
+ * if it is possible to use both NAME and LOCATION matching options, we will prefer NAME
  *
+ * NAME - match columns in FROM and TO schemas by column name. Data from column "hello"
+ * will be written to a column named "hello". If TO schema doesn't have a column with
+ * identical name, the column will be skipped.
+ *
+ * LOCATION - match columns in FROM and TO schemas by the column location.
+ * Data from first column goes into first column in TO link.
+ * If FROM link has more columns than TO, the extra columns will be skipped.
+ *
+ * USER_DEFINED - not implemented yet.
  */
-public enum SchemaError implements ErrorCode {
-
-  SCHEMA_0000("Unknown error"),
-
-  SCHEMA_0001("Column without name"),
-
-  SCHEMA_0002("Duplicate column name"),
-
-  SCHEMA_0003("Source and Target schemas don't match"),
-
-  SCHEMA_0004("Non-null target column has no matching source column"),
-
-  SCHEMA_0005("No matching method available for source and target schemas")
-
-  ;
-
-  private final String message;
-
-  private SchemaError(String message) {
-    this.message = message;
+public enum SchemaMatchOption {
+    NAME,
+    LOCATION,
+  //TODO: SQOOP-1546 - SQOOP2: Allow users to define their own schema matching
+    USER_DEFINED
   }
 
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
-  }
-}

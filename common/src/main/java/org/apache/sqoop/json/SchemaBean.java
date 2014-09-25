@@ -48,7 +48,7 @@ public class SchemaBean implements JsonBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    schema = SchemaSerialization.restoreSchemna(jsonObject);
+    schema = SchemaSerialization.restoreSchema(jsonObject);
   }
 
 }

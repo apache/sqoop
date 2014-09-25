@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.idf;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.SchemaMatchOption;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
@@ -38,6 +39,8 @@ public class TestCSVIntermediateDataFormat {
   private final String BYTE_FIELD_ENCODING = "ISO-8859-1";
 
   private IntermediateDataFormat<?> data;
+
+  private Schema emptySchema = new Schema("empty");
 
   @Before
   public void setUp() {
@@ -70,7 +73,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    data.setFromSchema(schema);
     data.setTextData(null);
 
     Object[] out = data.getObjectData();
@@ -87,7 +90,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    data.setFromSchema(schema);
     data.setTextData("");
 
     data.getObjectData();
@@ -106,7 +109,9 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+
+    data.setFromSchema(schema);
+    data.setToSchema(emptySchema);
     data.setTextData(testData);
 
     Object[] out = data.getObjectData();
@@ -129,7 +134,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    data.setFromSchema(schema);
 
     byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
     Object[] in = new Object[6];
@@ -159,7 +164,8 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    data.setFromSchema(schema);
+    data.setToSchema(emptySchema);
 
     Object[] in = new Object[6];
     in[0] = new Long(10);
@@ -181,7 +187,9 @@ public class TestCSVIntermediateDataFormat {
   public void testStringFullRangeOfCharacters() {
     Schema schema = new Schema("test");
     schema.addColumn(new Text("1"));
-    data.setSchema(schema);
+
+    data.setFromSchema(schema);
+    data.setToSchema(emptySchema);
 
     char[] allCharArr = new char[256];
     for(int i = 0; i < allCharArr.length; ++i) {
@@ -204,7 +212,8 @@ public class TestCSVIntermediateDataFormat {
   public void testByteArrayFullRangeOfCharacters() {
     Schema schema = new Schema("test");
     schema.addColumn(new Binary("1"));
-    data.setSchema(schema);
+    data.setFromSchema(schema);
+    data.setToSchema(emptySchema);
 
     byte[] allCharByteArr = new byte[256];
     for(int i = 0; i < allCharByteArr.length; ++i) {
@@ -219,4 +228,132 @@ public class TestCSVIntermediateDataFormat {
     data.setObjectData(in);
     assertTrue(Arrays.deepEquals(inCopy, data.getObjectData()));
   }
+
+  /**
+   * Note that we don't have an EmptyTo matching test
+   * Because most tests above have empty "to" schema
+   */
+  @Test
+  public void testMatchingEmptyFrom() {
+
+    data.setFromSchema(emptySchema);
+
+    Schema toSchema = new Schema("To");
+    toSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"));
+    data.setToSchema(toSchema);
+
+    Object[] in = new Object[2];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+
+    Object[] out = new Object[2];
+    out[0] = new Long(10);
+    out[1] = new Long(34);
+
+    data.setObjectData(in);
+
+    assertTrue(Arrays.deepEquals(out, data.getObjectData()));
+  }
+
+  @Test(expected=SqoopException.class)
+  public void testMatchingTwoEmptySchema() {
+    data.setFromSchema(emptySchema);
+    data.setToSchema(emptySchema);
+
+    Object[] in = new Object[2];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+
+    data.setObjectData(in);
+
+    data.getObjectData();
+  }
+
+  @Test
+  public void testMatchingFewerFromColumns(){
+    Schema fromSchema = new Schema("From");
+    fromSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"));
+    data.setFromSchema(fromSchema);
+
+    Schema toSchema = new Schema("To");
+    toSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"))
+            .addColumn(new Text("3"));
+    data.setToSchema(toSchema);
+
+    Object[] in = new Object[2];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+
+    Object[] out = new Object[3];
+    out[0] = new Long(10);
+    out[1] = new Long(34);
+    out[2] = null;
+
+    data.setObjectData(in);
+
+    assertTrue(Arrays.deepEquals(out, data.getObjectData()));
+  }
+
+  @Test
+  public void testMatchingFewerToColumns(){
+    Schema fromSchema = new Schema("From");
+    fromSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"))
+            .addColumn(new FixedPoint("3"));
+    data.setFromSchema(fromSchema);
+
+    Schema toSchema = new Schema("To");
+    toSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"));
+    data.setToSchema(toSchema);
+
+    Object[] in = new Object[3];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+    in[2] = new Long(50);
+
+    Object[] out = new Object[2];
+    out[0] = new Long(10);
+    out[1] = new Long(34);
+
+
+    data.setObjectData(in);
+
+    assertTrue(Arrays.deepEquals(out, data.getObjectData()));
+  }
+
+
+  @Test
+  public void testWithSomeNonMatchingFields(){
+
+    Schema fromSchema = new Schema("From");
+    fromSchema.addColumn(new FixedPoint("1"))
+            .addColumn(new FixedPoint("2"))
+            .addColumn(new FixedPoint("3"));
+    data.setFromSchema(fromSchema);
+
+    Schema toSchema = new Schema("From");
+    toSchema.addColumn(new FixedPoint("2"))
+            .addColumn(new FixedPoint("3"))
+            .addColumn(new FixedPoint("4"));
+    data.setToSchema(toSchema);
+
+    Object[] in = new Object[3];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+    in[2] = new Long(50);
+
+    Object[] out = new Object[3];
+    out[0] = new Long(34);
+    out[1] = new Long(50);
+    out[2] = null;
+
+    data.setObjectData(in);
+
+    assertTrue(Arrays.deepEquals(out, data.getObjectData()));
+  }
+
 }

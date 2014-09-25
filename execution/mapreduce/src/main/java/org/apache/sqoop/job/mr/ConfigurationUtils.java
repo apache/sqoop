@@ -82,13 +82,13 @@ public final class ConfigurationUtils {
 
   private static final Text JOB_CONFIG_FRAMEWORK_JOB_KEY = new Text(JOB_CONFIG_FRAMEWORK_JOB);
 
-  private static final String SCHEMA_FROM_CONNECTOR = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.from";
+  private static final String SCHEMA_FROM = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.from";
 
-  private static final Text SCHEMA_FROM_CONNECTOR_KEY = new Text(SCHEMA_FROM_CONNECTOR);
+  private static final Text SCHEMA_FROM_KEY = new Text(SCHEMA_FROM);
 
-  private static final String SCHEMA_TO_CONNECTOR = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.to";
+  private static final String SCHEMA_TO = JobConstants.PREFIX_JOB_CONFIG + "schema.connector.to";
 
-  private static final Text SCHEMA_TO_CONNECTOR_KEY = new Text(SCHEMA_TO_CONNECTOR);
+  private static final Text SCHEMA_TO_KEY = new Text(SCHEMA_TO);
 
 
   /**
@@ -163,6 +163,27 @@ public final class ConfigurationUtils {
   }
 
   /**
+   * Persist Connector generated schema.
+   *
+   * @param type  Direction of schema we are persisting
+   * @param job MapReduce Job object
+   * @param schema Schema
+   */
+  public static void setConnectorSchema(Direction type, Job job, Schema schema) {
+    if(schema != null) {
+      String jsonSchema =  SchemaSerialization.extractSchema(schema).toJSONString();
+      switch (type) {
+        case FROM:
+          job.getCredentials().addSecretKey(SCHEMA_FROM_KEY,jsonSchema.getBytes());
+          return;
+        case TO:
+          job.getCredentials().addSecretKey(SCHEMA_TO_KEY, jsonSchema.getBytes());
+          return;
+      }
+    }
+  }
+
+  /**
    * Retrieve Connector configuration object for connection.
    *
    * @param configuration MapReduce configuration object
@@ -226,23 +247,7 @@ public final class ConfigurationUtils {
     return loadConfiguration((JobConf) configuration, JOB_CONFIG_CLASS_FRAMEWORK_JOB, JOB_CONFIG_FRAMEWORK_JOB_KEY);
   }
 
-  /**
-   * Persist From Connector generated schema.
-   *
-   * @param job MapReduce Job object
-   * @param schema Schema
-   */
-  public static void setConnectorSchema(Direction type, Job job, Schema schema) {
-    if(schema != null) {
-      switch (type) {
-        case FROM:
-          job.getCredentials().addSecretKey(SCHEMA_FROM_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
 
-        case TO:
-          job.getCredentials().addSecretKey(SCHEMA_TO_CONNECTOR_KEY, SchemaSerialization.extractSchema(schema).toJSONString().getBytes());
-      }
-    }
-  }
 
   /**
    * Retrieve Connector generated schema.
@@ -253,10 +258,10 @@ public final class ConfigurationUtils {
   public static Schema getConnectorSchema(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
-        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_FROM_CONNECTOR_KEY));
+        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_FROM_KEY));
 
       case TO:
-        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_TO_CONNECTOR_KEY));
+        return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_TO_KEY));
     }
 
     return null;
@@ -274,7 +279,9 @@ public final class ConfigurationUtils {
     if(bytes == null) {
       return null;
     }
-    return SchemaSerialization.restoreSchemna((JSONObject) JSONValue.parse(new String(bytes)));
+
+    JSONObject jsonSchema = (JSONObject) JSONValue.parse(new String(bytes));
+    return SchemaSerialization.restoreSchema(jsonSchema);
   }
 
   /**

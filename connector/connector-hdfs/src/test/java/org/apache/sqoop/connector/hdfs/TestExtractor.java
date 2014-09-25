@@ -129,8 +129,10 @@ public class TestExtractor extends TestHdfsBase {
       public void writeRecord(Object obj) {
         throw new AssertionError("Should not be writing object.");
       }
-    }, null);
+    });
+
     LinkConfiguration connConf = new LinkConfiguration();
+
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));

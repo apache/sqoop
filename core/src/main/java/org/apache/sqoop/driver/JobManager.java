@@ -374,13 +374,10 @@ public class JobManager implements Reconfigurable {
     Schema fromSchema = getSchemaFromConnector(jobRequest, Direction.FROM);
     Schema toSchema = getSchemaFromConnector(jobRequest, Direction.TO);
 
-    // TODO(Gwen): Need better logic here once the Schema refactor: SQOOP-1378
-    if (fromSchema != null) {
-      jobRequest.getSummary().setFromSchema(fromSchema);
-    }
-    else {
-      jobRequest.getSummary().setFromSchema(toSchema);
-    }
+
+    jobRequest.getSummary().setFromSchema(fromSchema);
+    jobRequest.getSummary().setToSchema(toSchema);
+
     LOG.debug("Using entities: " + jobRequest.getFrom() + ", " + jobRequest.getTo());
     return jobRequest;
   }
@@ -458,7 +455,7 @@ public class JobManager implements Reconfigurable {
     initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
         jobRequest.getConnectorJobConfig(direction));
 
-    // TODO(Abe): Alter behavior of Schema here.
+
     return initializer.getSchema(initializerContext,
         jobRequest.getConnectorLinkConfig(direction),
         jobRequest.getConnectorJobConfig(direction));

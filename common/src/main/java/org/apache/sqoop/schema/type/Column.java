@@ -32,11 +32,15 @@ public abstract class Column {
    */
   Boolean nullable;
 
+  /**
+   * By default columns are empty name and are nullable
+   */
   public Column() {
+    this("", true);
   }
 
   public Column(String name) {
-    setName(name);
+    this(name, true);
   }
 
   public Column(String name, Boolean nullable) {

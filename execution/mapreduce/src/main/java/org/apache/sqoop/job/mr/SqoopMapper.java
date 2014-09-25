@@ -64,20 +64,18 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
-    // TODO(Abe/Gwen): Change to conditional choosing between Connector schemas.
-    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
-    if (schema == null) {
-      schema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
-    }
 
-    if (schema == null) {
-      LOG.info("setting an empty schema");
-    }
+
+    Schema fromSchema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+    Schema toSchema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
 
     String intermediateDataFormatName = conf.get(JobConstants.INTERMEDIATE_DATA_FORMAT);
     dataFormat = (IntermediateDataFormat<String>) ClassUtils
         .instantiate(intermediateDataFormatName);
-    dataFormat.setSchema(schema);
+
+    dataFormat.setFromSchema(fromSchema);
+    dataFormat.setToSchema(toSchema);
+
     dataOut = new SqoopWritable();
 
     // Objects that should be passed to the Executor execution
@@ -86,7 +84,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Object fromJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
-    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), schema);
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context));
 
     try {
       LOG.info("Starting progress service");

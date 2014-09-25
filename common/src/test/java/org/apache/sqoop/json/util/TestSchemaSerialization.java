@@ -172,6 +172,6 @@ public class TestSchemaSerialization {
     String transferredString = extractJson.toJSONString();
 
     JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
-    return SchemaSerialization.restoreSchemna(restoreJson);
+    return SchemaSerialization.restoreSchema(restoreJson);
   }
 }

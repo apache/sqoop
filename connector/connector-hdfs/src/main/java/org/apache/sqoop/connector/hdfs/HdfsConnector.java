@@ -19,6 +19,7 @@
 package org.apache.sqoop.connector.hdfs;
 
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
@@ -87,7 +88,9 @@ public class HdfsConnector extends SqoopConnector {
       case TO:
         return ToJobConfiguration.class;
       default:
-        return null;
+        throw new SqoopException(
+                HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0006,
+                String.valueOf(jobType));
     }
   }
 

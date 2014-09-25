@@ -79,7 +79,7 @@ public class SchemaSerialization {
     return object;
   }
 
-  public static Schema restoreSchemna(JSONObject jsonObject) {
+  public static Schema restoreSchema(JSONObject jsonObject) {
     String name = (String)jsonObject.get(NAME);
     String note = (String)jsonObject.get(NOTE);
     java.util.Date date = new java.util.Date((Long)jsonObject.get(CREATION_DATE));

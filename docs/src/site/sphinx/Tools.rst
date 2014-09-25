@@ -23,8 +23,7 @@ Tools are server commands that administrators can execute on the Sqoop server ma
 In order to perform the maintenance task each tool is suppose to do, they need to be executed in exactly the same environment as the main Sqoop server. The tool binary will take care of setting up the ``CLASSPATH`` and other environmental variables that might be required. However it's up to the administrator himself to run the tool under the same user as is used for the server. This is usually configured automatically for various Hadoop distributions (such as Apache Bigtop).
 
 
-.. note:: Running tools under a different user such as ``root`` might prevent Sqoop Server from running correctly.
-
+.. note:: Running tools while the Sqoop Server is also running is not recommended as it might lead to a data corruption and service disruption.
 List of available tools:
 
 * verify

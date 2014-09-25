@@ -77,7 +77,7 @@ public class Schema {
    * same name will lead to an exception being thrown.
    *
    * @param column Column that should be added to the schema at the end.
-   * @return
+   * @return a reference to this object
    */
   public Schema addColumn(Column column) {
     if(column.getName() == null) {
@@ -119,6 +119,15 @@ public class Schema {
 
   public List<Column> getColumns() {
     return columns;
+  }
+
+  public boolean isEmpty() {
+    if (columns.size()==0) {
+      return true;
+    } else {
+      return false;
+    }
+
   }
 
   public String toString() {

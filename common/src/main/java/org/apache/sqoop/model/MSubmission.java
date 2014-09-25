@@ -102,17 +102,14 @@ public class MSubmission extends MAccountableEntity {
   /**
    * Schema for the FROM part of the job submission
    *
-   * This property is required.
+   * This property is required, but can be empty.
    */
   Schema fromSchema;
 
   /**
    * Schema for the TO part of the job submission
-   * Optional schema that reported by the underlying I/O implementation. Please
-   * note that this property might be empty and in such case use the FROM schema
-   * on the TO side.
    *
-   * This property is optional.
+   * This property is required, but can be empty.
    */
   Schema toSchema;
 
@@ -224,16 +221,16 @@ public class MSubmission extends MAccountableEntity {
     return fromSchema;
   }
 
-  public void setFromSchema(Schema connectorSchema) {
-    this.fromSchema = connectorSchema;
+  public void setFromSchema(Schema fromSchema) {
+    this.fromSchema = fromSchema;
   }
 
   public Schema getToSchema() {
     return toSchema;
   }
 
-  public void setToSchema(Schema hioSchema) {
-    this.toSchema = hioSchema;
+  public void setToSchema(Schema toSchema) {
+    this.toSchema = toSchema;
   }
 
   @Override

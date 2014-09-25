@@ -30,12 +30,10 @@ public class ExtractorContext extends TransferableContext {
 
   private DataWriter writer;
 
-  private Schema schema;
 
-  public ExtractorContext(ImmutableContext context, DataWriter writer, Schema schema) {
+  public ExtractorContext(ImmutableContext context, DataWriter writer) {
     super(context);
     this.writer = writer;
-    this.schema = schema;
   }
 
   /**
@@ -47,12 +45,5 @@ public class ExtractorContext extends TransferableContext {
     return writer;
   }
 
-  /**
-   * Return schema associated with this step.
-   *
-   * @return
-   */
-  public Schema getSchema() {
-    return schema;
-  }
+
 }

@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.sqoop.json.util.SchemaSerialization.extractSchema;
-import static org.apache.sqoop.json.util.SchemaSerialization.restoreSchemna;
+import static org.apache.sqoop.json.util.SchemaSerialization.restoreSchema;
 
 /**
  *
@@ -188,11 +188,12 @@ public class SubmissionBean implements JsonBean {
       if(object.containsKey(COUNTERS)) {
         submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
       }
+
       if(object.containsKey(FROM_SCHEMA)) {
-        submission.setFromSchema(restoreSchemna((JSONObject) object.get(FROM_SCHEMA)));
+        submission.setFromSchema(restoreSchema((JSONObject) object.get(FROM_SCHEMA)));
       }
       if(object.containsKey(TO_SCHEMA)) {
-        submission.setToSchema(restoreSchemna((JSONObject) object.get(TO_SCHEMA)));
+        submission.setToSchema(restoreSchema((JSONObject) object.get(TO_SCHEMA)));
       }
 
       this.submissions.add(submission);

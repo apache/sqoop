@@ -206,11 +206,13 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getConnectorJobConfig(Direction.FROM));
       ConfigurationUtils.setConnectorConnectionConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
       ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getConnectorJobConfig(Direction.TO));
+
       ConfigurationUtils.setFrameworkConnectionConfig(Direction.FROM, job, request.getFrameworkLinkConfig(Direction.FROM));
       ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkLinkConfig(Direction.TO));
       ConfigurationUtils.setFrameworkJobConfig(job, request.getFrameworkJobConfig());
-      // @TODO(Abe): Persist TO schema.
+
       ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
+      ConfigurationUtils.setConnectorSchema(Direction.TO, job, request.getSummary().getToSchema());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());
@@ -413,4 +415,5 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     return "local".equals(globalConfiguration.get("mapreduce.jobtracker.address"))
         || "local".equals(globalConfiguration.get("mapred.job.tracker"));
   }
+
 }

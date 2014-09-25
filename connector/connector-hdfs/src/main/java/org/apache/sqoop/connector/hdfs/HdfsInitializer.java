@@ -39,6 +39,6 @@ public class HdfsInitializer extends Initializer {
 
   @Override
   public Schema getSchema(InitializerContext context, Object linkConf, Object jobConf) {
-    return null;
+    return new Schema("HDFS file");
   }
 }

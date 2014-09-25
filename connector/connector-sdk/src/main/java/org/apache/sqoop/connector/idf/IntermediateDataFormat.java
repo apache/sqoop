@@ -81,7 +81,8 @@ public abstract class IntermediateDataFormat<T> {
   /**
    * Get one row of data as CSV.
    *
-   * @return - String representing the data in CSV
+   * @return - String representing the data in CSV, according to the "FROM" schema.
+   * No schema conversion is done on textData, to keep it as "high performance" option.
    */
   public abstract String getTextData();
 
@@ -95,6 +96,7 @@ public abstract class IntermediateDataFormat<T> {
    * Get one row of data as an Object array.
    *
    * @return - String representing the data as an Object array
+   * If FROM and TO schema exist, we will use SchemaMatcher to get the data according to "TO" schema
    */
   public abstract Object[] getObjectData();
 
@@ -105,18 +107,18 @@ public abstract class IntermediateDataFormat<T> {
   public abstract void setObjectData(Object[] data);
 
   /**
-   * Set the schema to be used.
+   * Set the schema for reading data.
    *
-   * @param schema - the schema to be used
+   * @param schema - the schema used for reading data
    */
-  public abstract void setSchema(Schema schema);
+  public abstract void setFromSchema(Schema schema);
 
   /**
-   * Get the schema of the data.
+   * Set the schema for writing data.
    *
-   * @return - The schema of the data.
+   * @param schema - the schema used for writing data
    */
-  public abstract Schema getSchema();
+  public abstract void setToSchema(Schema schema);
 
   /**
    * Serialize the fields of this object to <code>out</code>.
