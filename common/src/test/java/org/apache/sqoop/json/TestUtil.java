@@ -40,8 +40,20 @@ import java.util.ResourceBundle;
  */
 public class TestUtil {
   public static MConnector getConnector(String name) {
+    return getConnector(name, true, true);
+  }
+
+  public static MConnector getConnector(String name, boolean from, boolean to) {
+    MJobForms fromJobForms = null;
+    MJobForms toJobForms = null;
+    if (from) {
+      fromJobForms = getJobForms();
+    }
+    if (to) {
+      toJobForms = getJobForms();
+    }
     return new MConnector(name, name + ".class", "1.0-test",
-      getConnectionForms(), getJobForms(), getJobForms());
+      getConnectionForms(), fromJobForms, toJobForms);
   }
 
   public static MDriverConfig getDriverConfig() {

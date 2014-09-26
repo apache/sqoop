@@ -73,4 +73,62 @@ public class TestConnectorBean {
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));
   }
+
+  @Test
+  public void testSingleDirection() {
+    // Create testing connector
+    List<MConnector> connectors = new LinkedList<MConnector>();
+    connectors.add(getConnector("jdbc", true, false));
+    connectors.add(getConnector("mysql", false, true));
+
+    // Create testing bundles
+    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+    bundles.put(1L, getResourceBundle());
+    bundles.put(2L, getResourceBundle());
+
+    // Serialize it to JSON object
+    ConnectorBean bean = new ConnectorBean(connectors, bundles);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    ConnectorBean retrievedBean = new ConnectorBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
+  }
+
+  @Test
+  public void testNoDirection() {
+    // Create testing connector
+    List<MConnector> connectors = new LinkedList<MConnector>();
+    connectors.add(getConnector("jdbc", false, false));
+    connectors.add(getConnector("mysql", false, false));
+
+    // Create testing bundles
+    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+    bundles.put(1L, getResourceBundle());
+    bundles.put(2L, getResourceBundle());
+
+    // Serialize it to JSON object
+    ConnectorBean bean = new ConnectorBean(connectors, bundles);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    ConnectorBean retrievedBean = new ConnectorBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
+  }
 }

@@ -86,10 +86,15 @@ public class ConnectorBean implements JsonBean {
 
       object.put(CON_FORMS, extractForms(connector.getConnectionForms().getForms(), skipSensitive));
       object.put(JOB_FORMS, new JSONObject());
-      ((JSONObject)object.get(JOB_FORMS)).put(
-          Direction.FROM, extractForms(connector.getJobForms(Direction.FROM).getForms(), skipSensitive));
-      ((JSONObject)object.get(JOB_FORMS)).put(
-          Direction.TO, extractForms(connector.getJobForms(Direction.TO).getForms(), skipSensitive));
+      if (connector.getJobForms(Direction.FROM) != null) {
+        ((JSONObject)object.get(JOB_FORMS)).put(
+            Direction.FROM, extractForms(connector.getJobForms(Direction.FROM).getForms(), skipSensitive));
+      }
+
+      if (connector.getJobForms(Direction.TO) != null) {
+        ((JSONObject)object.get(JOB_FORMS)).put(
+            Direction.TO, extractForms(connector.getJobForms(Direction.TO).getForms(), skipSensitive));
+      }
       array.add(object);
     }
 
@@ -124,17 +129,23 @@ public class ConnectorBean implements JsonBean {
       String className = (String) object.get(CLASS);
       String version = (String) object.get(VERSION);
 
+      MJobForms fromJob = null;
+      MJobForms toJob = null;
       List<MForm> connForms = restoreForms((JSONArray) object.get(CON_FORMS));
       JSONObject jobJson = (JSONObject) object.get(JOB_FORMS);
       JSONArray fromJobJson = (JSONArray)jobJson.get(Direction.FROM.name());
       JSONArray toJobJson = (JSONArray)jobJson.get(Direction.TO.name());
-      List<MForm> fromJobForms = restoreForms(fromJobJson);
-      List<MForm> toJobForms = restoreForms(toJobJson);
-      MJobForms fromJob = new MJobForms(fromJobForms);
-      MJobForms toJob = new MJobForms(toJobForms);
+      if (fromJobJson != null) {
+        List<MForm> fromJobForms = restoreForms(fromJobJson);
+        fromJob = new MJobForms(fromJobForms);
+      }
+      if (toJobJson != null) {
+        List<MForm> toJobForms = restoreForms(toJobJson);
+        toJob = new MJobForms(toJobForms);
+      }
       MConnectionForms connection = new MConnectionForms(connForms);
-      MConnector connector = new MConnector(uniqueName, className, version, connection, fromJob,
-          toJob);
+      MConnector connector = new MConnector(uniqueName, className, version,
+          connection, fromJob, toJob);
       connector.setPersistenceId(connectorId);
       connectors.add(connector);
     }
