@@ -31,6 +31,20 @@ Connector reads data from databases for import,
 and write data to databases for export.
 Interaction with Hadoop is taken cared by common modules of Sqoop 2 framework.
 
+When do we add a new connector?
+===============================
+You add a new connector when you need to extract data from a new data source, or load
+data to a new target.
+In addition to the connector API, Sqoop 2 also has an engine interface.
+At the moment the only engine is MapReduce,but we may support additional engines in the future.
+Since many parallel execution engines are capable of reading/writing data
+there may be a question of whether support for specific data stores should be done
+through a new connector or new engine.
+
+**Our guideline is:** Connectors should manage all data extract/load. Engines manage job
+life cycles. If you need to support a new data store and don't care how jobs run -
+you are looking to add a connector.
+
 
 Connector Implementation
 ++++++++++++++++++++++++
