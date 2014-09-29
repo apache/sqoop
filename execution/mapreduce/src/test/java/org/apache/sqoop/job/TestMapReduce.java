@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -57,13 +54,17 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
+import org.junit.Test;
 
-public class TestMapReduce extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TestMapReduce {
 
   private static final int START_PARTITION = 1;
   private static final int NUMBER_OF_PARTITIONS = 9;
   private static final int NUMBER_OF_ROWS_PER_PARTITION = 10;
 
+  @Test
   public void testInputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -82,6 +83,7 @@ public class TestMapReduce extends TestCase {
     }
   }
 
+  @Test
   public void testMapper() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -98,6 +100,7 @@ public class TestMapReduce extends TestCase {
         DummyOutputFormat.class);
   }
 
+  @Test
   public void testOutputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
@@ -117,8 +120,8 @@ public class TestMapReduce extends TestCase {
         SqoopNullOutputFormat.class);
 
     // Make sure both destroyers get called.
-    Assert.assertEquals(1, DummyFromDestroyer.count);
-    Assert.assertEquals(1, DummyToDestroyer.count);
+    assertEquals(1, DummyFromDestroyer.count);
+    assertEquals(1, DummyToDestroyer.count);
   }
 
   public static class DummyPartition extends Partition {

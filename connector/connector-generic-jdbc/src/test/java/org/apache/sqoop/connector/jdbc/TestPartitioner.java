@@ -25,8 +25,6 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
@@ -34,12 +32,17 @@ import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
+import org.junit.Test;
 
-public class TestPartitioner extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class TestPartitioner {
 
   private static final int START = -5;
   private static final int NUMBER_OF_ROWS = 11;
 
+  @Test
   public void testIntegerEvenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(
@@ -71,6 +74,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testIntegerUnevenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(
@@ -100,6 +104,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testIntegerOverPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(
@@ -136,6 +141,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testFloatingPointEvenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(
@@ -167,6 +173,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testFloatingPointUnevenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(
@@ -196,6 +203,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testNumericEvenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "ICOL");
@@ -219,6 +227,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testNumericUnevenPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
@@ -240,6 +249,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testNumericSinglePartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
@@ -259,7 +269,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
-
+  @Test
   public void testDatePartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
@@ -288,6 +298,7 @@ public class TestPartitioner extends TestCase {
 
   }
 
+  @Test
   public void testTimePartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -314,6 +325,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testTimestampPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -338,6 +350,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testBooleanPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -361,6 +374,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testVarcharPartition() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -408,6 +422,7 @@ public class TestPartitioner extends TestCase {
     });
   }
 
+  @Test
   public void testVarcharPartition2() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -431,6 +446,7 @@ public class TestPartitioner extends TestCase {
     assertTrue(partitions.get(4).toString().contains("Warty Warthog"));
   }
 
+  @Test
   public void testVarcharPartitionWithCommonPrefix() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -460,6 +476,7 @@ public class TestPartitioner extends TestCase {
 
   }
 
+  @Test
   public void testPatitionWithNullValues() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants

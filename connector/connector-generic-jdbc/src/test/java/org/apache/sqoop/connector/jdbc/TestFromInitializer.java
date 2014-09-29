@@ -19,8 +19,6 @@ package org.apache.sqoop.connector.jdbc;
 
 import java.sql.Types;
 
-import junit.framework.TestCase;
-
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
@@ -32,8 +30,13 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestFromInitializer extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TestFromInitializer {
 
   private final String schemaName;
   private final String tableName;
@@ -56,7 +59,7 @@ public class TestFromInitializer extends TestCase {
     tableColumns = "ICOL,VCOL";
   }
 
-  @Override
+  @Before
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -105,11 +108,12 @@ public class TestFromInitializer extends TestCase {
     ;
   }
 
-  @Override
+  @After
   public void tearDown() {
     executor.close();
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableName() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -136,6 +140,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -163,6 +168,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSql() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -190,6 +196,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSqlWithTableColumns() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -219,6 +226,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -248,6 +256,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumnsWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -278,6 +287,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf(START+NUMBER_OF_ROWS-1));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSqlWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -308,7 +318,7 @@ public class TestFromInitializer extends TestCase {
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
-
+  @Test
   @SuppressWarnings("unchecked")
   public void testGetSchemaForTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -330,6 +340,7 @@ public class TestFromInitializer extends TestCase {
     assertEquals(getSchema(jobConf.fromJobConfig.schemaName + "." + tableName), schema);
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testGetSchemaForSql() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -351,6 +362,7 @@ public class TestFromInitializer extends TestCase {
     assertEquals(getSchema("Query"), schema);
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSqlWithTableColumnsWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();

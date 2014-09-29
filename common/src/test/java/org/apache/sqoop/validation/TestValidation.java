@@ -20,20 +20,22 @@ package org.apache.sqoop.validation;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.validation.Validation.FormInput;
 import org.apache.sqoop.validation.Validation.Message;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test class for org.apache.sqoop.validation.Validation
  */
-public class TestValidation extends TestCase {
+public class TestValidation {
 
   /**
    * Initialization test
    */
+  @Test
   public void testInitialization() {
     /* Check initialization with class */
     Validation validation = new Validation(Class.class);

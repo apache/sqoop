@@ -19,11 +19,10 @@ package org.apache.sqoop.job.io;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
-
+import org.junit.Assert;
 import org.junit.Test;
 
-public class TestData extends TestCase {
+public class TestData {
 
   private static final double TEST_NUMBER = Math.PI + 100;
   @Test
@@ -108,10 +107,10 @@ public class TestData extends TestCase {
 
   public static void assertEquals(Object expected, Object actual) {
     if (expected instanceof byte[]) {
-      assertEquals(Arrays.toString((byte[])expected),
+      Assert.assertEquals(Arrays.toString((byte[])expected),
           Arrays.toString((byte[])actual));
     } else {
-      TestCase.assertEquals(expected, actual);
+      Assert.assertEquals(expected, actual);
     }
   }
 

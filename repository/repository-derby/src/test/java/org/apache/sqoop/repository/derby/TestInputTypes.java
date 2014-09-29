@@ -29,11 +29,17 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MStringInput;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 /**
  * Test proper support of all available model types.
@@ -42,7 +48,7 @@ public class TestInputTypes extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
@@ -56,6 +62,7 @@ public class TestInputTypes extends DerbyTestCase {
    * Ensure that metadata with all various data types can be successfully
    * serialized into repository and retrieved back.
    */
+  @Test
   public void testEntitySerialization() throws Exception {
     MConnector connector = getConnector();
 
@@ -76,6 +83,7 @@ public class TestInputTypes extends DerbyTestCase {
   /**
    * Test that serializing actual data is not an issue.
    */
+  @Test
   public void testEntityDataSerialization() throws Exception {
     MConnector connector = getConnector();
     MDriverConfig driverConfig = getDriverConfig();

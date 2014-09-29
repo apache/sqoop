@@ -25,8 +25,6 @@ import org.junit.Test;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.json.TestUtil.*;
-
-
 import static org.junit.Assert.*;
 
 /**

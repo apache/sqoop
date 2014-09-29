@@ -17,19 +17,23 @@
  */
 package org.apache.sqoop.submission;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for org.apache.sqoop.submission.SubmissionStatus
  */
-public class TestSubmissionStatus extends TestCase {
+public class TestSubmissionStatus {
 
   /**
    * unfinished() test
    */
+  @Test
   public void testUnfinished() {
     SubmissionStatus subStatus[] = SubmissionStatus.unfinished();
     SubmissionStatus subStatusTest[] = new SubmissionStatus[] {
@@ -43,6 +47,7 @@ public class TestSubmissionStatus extends TestCase {
   /**
    * isRunning() test
    */
+  @Test
   public void testIsRunning() {
     assertTrue(SubmissionStatus.RUNNING.isRunning());
     assertTrue(SubmissionStatus.BOOTING.isRunning());
@@ -54,6 +59,7 @@ public class TestSubmissionStatus extends TestCase {
   /**
    * isFailure() test
    */
+  @Test
   public void testIsFailure() {
     assertTrue(SubmissionStatus.FAILED.isFailure());
     assertTrue(SubmissionStatus.UNKNOWN.isFailure());

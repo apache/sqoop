@@ -22,10 +22,14 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -34,7 +38,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
@@ -53,6 +57,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadJobs();
   }
 
+  @Test
   public void testFindSubmissionsUnfinished() throws Exception {
     List<MSubmission> submissions;
 
@@ -67,6 +72,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(2, submissions.size());
   }
 
+  @Test
   public void testExistsSubmission() throws Exception {
     // There shouldn't be anything on empty repository
     assertFalse(handler.existsSubmission(1, getDerbyDatabaseConnection()));
@@ -86,6 +92,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertFalse(handler.existsSubmission(6, getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testCreateSubmission() throws Exception {
     Date creationDate = new Date();
     Date updateDate = new Date();
@@ -168,6 +175,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
   }
 
+  @Test
   public void testUpdateConnection() throws Exception {
     loadSubmissions();
 
@@ -186,6 +194,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(1, submissions.size());
   }
 
+  @Test
   public void testPurgeSubmissions() throws Exception {
     loadSubmissions();
     List<MSubmission> submissions;
@@ -226,6 +235,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testDeleteJobs() throws Exception {
     loadSubmissions();
     assertCountForTable("SQOOP.SQ_SUBMISSION", 5);

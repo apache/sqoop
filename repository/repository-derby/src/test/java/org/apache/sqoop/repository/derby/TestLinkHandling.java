@@ -22,10 +22,14 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Test link methods on Derby repository.
@@ -34,7 +38,7 @@ public class TestLinkHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
@@ -47,6 +51,7 @@ public class TestLinkHandling extends DerbyTestCase {
     loadConnectorAndDriverConfig();
   }
 
+  @Test
   public void testFindLink() throws Exception {
     // Let's try to find non existing link
     try {
@@ -81,6 +86,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertNull(forms.get(1).getInputs().get(1).getValue());
   }
 
+  @Test
   public void testFindLinks() throws Exception {
     List<MLink> list;
 
@@ -98,6 +104,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertEquals("CB", list.get(1).getName());
   }
 
+  @Test
   public void testExistsLink() throws Exception {
     // There shouldn't be anything on empty repository
     assertFalse(handler.existsLink(1, getDerbyDatabaseConnection()));
@@ -111,6 +118,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertFalse(handler.existsLink(3, getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testCreateLink() throws Exception {
     MLink link = getLink();
 
@@ -150,6 +158,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 8);
   }
 
+  @Test
   public void testInUseLink() throws Exception {
     loadLinks();
 
@@ -160,6 +169,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertTrue(handler.inUseLink(1, getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testUpdateLink() throws Exception {
     loadLinks();
 
@@ -205,6 +215,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertEquals(((Map)forms.get(1).getInputs().get(1).getValue()).size(), 0);
   }
 
+  @Test
   public void testEnableAndDisableLink() throws Exception {
     loadLinks();
 
@@ -223,6 +234,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertEquals(true, retrieved.getEnabled());
   }
 
+  @Test
   public void testDeleteLink() throws Exception {
     loadLinks();
 

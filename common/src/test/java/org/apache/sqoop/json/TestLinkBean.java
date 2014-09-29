@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 import static org.apache.sqoop.json.TestUtil.*;
 
 /**

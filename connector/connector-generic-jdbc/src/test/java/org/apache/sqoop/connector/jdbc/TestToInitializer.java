@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import junit.framework.TestCase;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -28,8 +27,15 @@ import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ValidationResult;
 import org.apache.sqoop.validation.ValidationRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestToInitializer extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class TestToInitializer {
   private final String schemaName;
   private final String tableName;
   private final String schemalessTableName;
@@ -51,7 +57,7 @@ public class TestToInitializer extends TestCase {
     tableColumns = "ICOL,VCOL";
   }
 
-  @Override
+  @Before
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -68,11 +74,12 @@ public class TestToInitializer extends TestCase {
     }
   }
 
-  @Override
+  @After
   public void tearDown() {
     executor.close();
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableName() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -94,6 +101,7 @@ public class TestToInitializer extends TestCase {
     verifyResult(context, "INSERT INTO " + fullTableName + " VALUES (?,?,?)");
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -116,6 +124,7 @@ public class TestToInitializer extends TestCase {
     verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSql() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -135,6 +144,7 @@ public class TestToInitializer extends TestCase {
     verifyResult(context, "INSERT INTO " + executor.delimitIdentifier(schemalessTableName) + " VALUES (?,?,?)");
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -157,6 +167,7 @@ public class TestToInitializer extends TestCase {
     verifyResult(context, "INSERT INTO " + fullTableName + " VALUES (?,?,?)");
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumnsWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -180,6 +191,7 @@ public class TestToInitializer extends TestCase {
     verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testTableSqlWithSchema() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -215,6 +227,7 @@ public class TestToInitializer extends TestCase {
       "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
   }
 
+  @Test
   public void testNonExistingStageTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
@@ -237,6 +250,7 @@ public class TestToInitializer extends TestCase {
     }
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testNonEmptyStageTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -264,6 +278,7 @@ public class TestToInitializer extends TestCase {
     }
   }
 
+  @Test
   public void testClearStageTableValidation() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
@@ -293,6 +308,7 @@ public class TestToInitializer extends TestCase {
       "toJobConfig"));
   }
 
+  @Test
   public void testStageTableWithoutTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
@@ -311,6 +327,7 @@ public class TestToInitializer extends TestCase {
       "toJobConfig"));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testClearStageTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();
@@ -336,6 +353,7 @@ public class TestToInitializer extends TestCase {
       executor.getTableRowCount(stageTableName));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testStageTable() throws Exception {
     LinkConfiguration connConf = new LinkConfiguration();

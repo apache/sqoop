@@ -19,8 +19,6 @@
 package org.apache.sqoop.job.io;
 
 import com.google.common.base.Charsets;
-import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,17 +32,21 @@ import java.io.InputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.JobConstants;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class SqoopWritableTest extends TestCase {
+public class SqoopWritableTest {
 
   private final SqoopWritable writable = new SqoopWritable();
 
+  @Test
   public void testStringInStringOut() {
     String testData = "Live Long and prosper";
     writable.setString(testData);
     Assert.assertEquals(testData,writable.getString());
   }
 
+  @Test
   public void testDataWritten() throws IOException {
     String testData = "One ring to rule them all";
     byte[] testDataBytes = testData.getBytes(Charsets.UTF_8);
@@ -59,6 +61,7 @@ public class SqoopWritableTest extends TestCase {
     Assert.assertEquals(testData, readData);
   }
 
+  @Test
   public void testDataRead() throws IOException {
     String testData = "Brandywine Bridge - 20 miles!";
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
@@ -70,6 +73,7 @@ public class SqoopWritableTest extends TestCase {
     Assert.assertEquals(testData, writable.getString());
   }
 
+  @Test
   public void testWriteReadUsingStream() throws IOException {
     String testData = "You shall not pass";
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();

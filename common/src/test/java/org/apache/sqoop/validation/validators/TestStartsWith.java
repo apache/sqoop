@@ -20,7 +20,7 @@ package org.apache.sqoop.validation.validators;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  */

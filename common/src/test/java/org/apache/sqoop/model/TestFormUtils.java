@@ -17,21 +17,24 @@
  */
 package org.apache.sqoop.model;
 
-import junit.framework.TestCase;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.Validation;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
+
 /**
  * Test form utils
  */
-public class TestFormUtils extends TestCase {
+public class TestFormUtils {
 
+  @Test
   public void testToForms() {
     Config config = new Config();
     config.aForm.a1 = "value";
@@ -48,6 +51,7 @@ public class TestFormUtils extends TestCase {
     assertEquals("value", formsByBoth.get(0).getInputs().get(0).getValue());
   }
 
+  @Test
   public void testToFormsMissingAnnotation() {
     try {
       FormUtils.toForms(ConfigWithout.class);
@@ -91,6 +95,7 @@ public class TestFormUtils extends TestCase {
     fail("Correct exception wasn't thrown");
   }
 
+  @Test
   public void testFailureOnPrimitiveType() {
     PrimitiveConfig config = new PrimitiveConfig();
 
@@ -102,6 +107,7 @@ public class TestFormUtils extends TestCase {
     }
   }
 
+  @Test
   public void testFillValues() {
     List<MForm> forms = getForms();
 
@@ -113,6 +119,7 @@ public class TestFormUtils extends TestCase {
     assertEquals("value", config.aForm.a1);
   }
 
+  @Test
   public void testFillValuesObjectReuse() {
     List<MForm> forms = getForms();
 
@@ -129,6 +136,7 @@ public class TestFormUtils extends TestCase {
     assertNull(config.bForm.b2);
   }
 
+  @Test
   public void testJson() {
     Config config = new Config();
     config.aForm.a1 = "A";

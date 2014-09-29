@@ -18,7 +18,6 @@
  */
 package org.apache.sqoop.job.mr;
 
-import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -29,6 +28,7 @@ import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.SqoopWritable;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

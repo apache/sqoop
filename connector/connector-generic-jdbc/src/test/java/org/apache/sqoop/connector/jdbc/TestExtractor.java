@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import junit.framework.TestCase;
-
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
@@ -26,8 +24,14 @@ import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestExtractor extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class TestExtractor {
 
   private final String tableName;
 
@@ -36,11 +40,13 @@ public class TestExtractor extends TestCase {
   private static final int START = -50;
   private static final int NUMBER_OF_ROWS = 101;
 
+  private static final double EPSILON = 0.01;
+
   public TestExtractor() {
     tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  @Override
+  @Before
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -59,11 +65,12 @@ public class TestExtractor extends TestCase {
     }
   }
 
-  @Override
+  @After
   public void tearDown() {
     executor.close();
   }
 
+  @Test
   public void testQuery() throws Exception {
     MutableContext context = new MutableMapContext();
 
@@ -96,6 +103,7 @@ public class TestExtractor extends TestCase {
     extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
   }
 
+  @Test
   public void testSubquery() throws Exception {
     MutableContext context = new MutableMapContext();
 
@@ -139,7 +147,7 @@ public class TestExtractor extends TestCase {
         if (array[i] instanceof Integer) {
           assertEquals(indx, ((Integer)array[i]).intValue());
         } else if (array[i] instanceof Double) {
-          assertEquals((double)indx, ((Double)array[i]).doubleValue());
+          assertEquals((double)indx, ((Double)array[i]).doubleValue(), EPSILON);
         } else {
           assertEquals(String.valueOf(indx), array[i].toString());
         }

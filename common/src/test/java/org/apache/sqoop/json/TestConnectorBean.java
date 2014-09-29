@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.json;
 
-import static org.junit.Assert.*;
-
 import org.apache.sqoop.model.MConnector;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -31,6 +29,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.json.TestUtil.*;
+import static org.junit.Assert.*;
 
 /**
  *

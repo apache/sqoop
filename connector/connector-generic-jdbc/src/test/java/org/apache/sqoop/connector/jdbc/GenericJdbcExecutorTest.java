@@ -17,9 +17,12 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class GenericJdbcExecutorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class GenericJdbcExecutorTest {
   private final String table;
   private final String emptyTable;
   private final GenericJdbcExecutor executor;
@@ -34,7 +37,7 @@ public class GenericJdbcExecutorTest extends TestCase {
       GenericJdbcTestConstants.URL, null, null);
   }
 
-  @Override
+  @Before
   public void setUp() {
     if(executor.existTable(emptyTable)) {
       executor.executeUpdate("DROP TABLE " + emptyTable);
@@ -56,6 +59,7 @@ public class GenericJdbcExecutorTest extends TestCase {
     }
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testDeleteTableData() throws Exception {
     executor.deleteTableData(table);
@@ -63,6 +67,7 @@ public class GenericJdbcExecutorTest extends TestCase {
       0, executor.getTableRowCount(table));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testMigrateData() throws Exception {
     assertEquals("Table " + emptyTable + " is expected to be empty.",
@@ -80,6 +85,7 @@ public class GenericJdbcExecutorTest extends TestCase {
       executor.getTableRowCount(emptyTable));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   public void testGetTableRowCount() throws Exception {
     assertEquals("Table " + table + " is expected to be empty.",

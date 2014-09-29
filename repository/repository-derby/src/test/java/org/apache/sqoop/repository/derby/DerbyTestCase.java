@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import junit.framework.TestCase;
-
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.model.MLink;
@@ -31,6 +29,8 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.junit.After;
+import org.junit.Before;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -43,11 +43,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Abstract class with convenience methods for testing derby repository.
  */
-abstract public class DerbyTestCase extends TestCase {
+abstract public class DerbyTestCase {
 
   private static int LATEST_SYSTEM_VERSION = 4;
 
@@ -59,16 +60,14 @@ abstract public class DerbyTestCase extends TestCase {
 
   private Connection connection;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
-
     // Create link to the database
     Class.forName(DERBY_DRIVER).newInstance();
     connection = DriverManager.getConnection(getStartJdbcUrl());
   }
 
-  @Override
+  @After
   public void tearDown() throws Exception {
     // Close active link
     if(connection != null) {
@@ -81,9 +80,6 @@ abstract public class DerbyTestCase extends TestCase {
     } catch (SQLException ex) {
       // Dropping Derby database leads always to exception
     }
-
-    // Call parent tear down
-    super.tearDown();
   }
 
   /**

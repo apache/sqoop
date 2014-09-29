@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +34,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class TestLoader {

@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.model;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test class for org.apache.sqoop.model.MEnumInput

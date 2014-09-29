@@ -17,12 +17,10 @@
  */
 package org.apache.sqoop.json;
 
-
 import org.apache.sqoop.json.util.TestSchemaSerialization;
 import org.apache.sqoop.schema.Schema;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
 
 /**
  * Run the same tests as TestSchemaSerialization, but using the SchamaBean

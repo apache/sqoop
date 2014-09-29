@@ -23,10 +23,14 @@ import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Test job methods on Derby repository.
@@ -35,7 +39,7 @@ public class TestJobHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
@@ -51,6 +55,7 @@ public class TestJobHandling extends DerbyTestCase {
     loadLinks();
   }
 
+  @Test
   public void testFindJob() throws Exception {
     // Let's try to find non existing job
     try {
@@ -94,6 +99,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertNull(forms.get(1).getInputs().get(1).getValue());
   }
 
+  @Test
   public void testFindJobs() throws Exception {
     List<MJob> list;
 
@@ -116,6 +122,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals("JD", list.get(3).getName());
   }
 
+  @Test
   public void testExistsJob() throws Exception {
     // There shouldn't be anything on empty repository
     assertFalse(handler.existsJob(1, getDerbyDatabaseConnection()));
@@ -133,6 +140,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertFalse(handler.existsJob(5, getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testInUseJob() throws Exception {
     loadJobs();
     loadSubmissions();
@@ -143,6 +151,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertFalse(handler.inUseJob(4, getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testCreateJob() throws Exception {
     MJob job = getJob();
 
@@ -183,6 +192,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
   }
 
+  @Test
   public void testUpdateJob() throws Exception {
     loadJobs();
 
@@ -233,6 +243,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(((Map)forms.get(0).getInputs().get(1).getValue()).size(), 0);
   }
 
+  @Test
   public void testEnableAndDisableJob() throws Exception {
     loadJobs();
 
@@ -251,6 +262,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(true, retrieved.getEnabled());
   }
 
+  @Test
   public void testDeleteJob() throws Exception {
     loadJobs();
 

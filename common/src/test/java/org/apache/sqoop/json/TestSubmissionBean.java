@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.json;
 
-import junit.framework.TestCase;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Decimal;
@@ -28,16 +27,23 @@ import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  *
  */
-public class TestSubmissionBean extends TestCase {
+public class TestSubmissionBean {
 
+  private static final double EPSILON = 0.01;
+
+  @Test
   public void testTransferUnknown() {
     transfer(MSubmission.UNKNOWN);
 
@@ -47,6 +53,7 @@ public class TestSubmissionBean extends TestCase {
     transfer(submissions);
   }
 
+  @Test
   public void testTransferJobId() {
     MSubmission source = new MSubmission();
     source.setJobId(666);
@@ -69,6 +76,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(888, targets.get(1).getJobId());
   }
 
+  @Test
   public void testTransferCreationUser() {
     String username = "admin";
     MSubmission source = new MSubmission();
@@ -92,6 +100,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("userB", targets.get(1).getCreationUser());
   }
 
+  @Test
   public void testTransferCreationDate() {
     Date date = new Date();
     MSubmission source = new MSubmission();
@@ -117,6 +126,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(datey, targets.get(1).getCreationDate());
   }
 
+  @Test
   public void testTransferLastUpdateUser() {
     String username = "admin";
     MSubmission source = new MSubmission();
@@ -140,6 +150,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("userB", targets.get(1).getLastUpdateUser());
   }
 
+  @Test
   public void testTransferLastUpdateDate() {
     Date date = new Date();
     MSubmission source = new MSubmission();
@@ -165,6 +176,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(datey, targets.get(1).getLastUpdateDate());
   }
 
+  @Test
   public void testTransferStatus() {
     MSubmission source = new MSubmission();
     source.setStatus(SubmissionStatus.SUCCEEDED);
@@ -187,6 +199,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(SubmissionStatus.BOOTING, targets.get(1).getStatus());
   }
 
+  @Test
   public void testTransferExternalId() {
     MSubmission source = new MSubmission();
     source.setExternalId("Job-x");
@@ -209,6 +222,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("Job-z", targets.get(1).getExternalId());
   }
 
+  @Test
   public void testTransferExternalLink() {
     MSubmission source = new MSubmission();
     source.setExternalLink("http://");
@@ -231,6 +245,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("http://localhost:8080", targets.get(1).getExternalLink());
   }
 
+  @Test
   public void testTransferException() {
     MSubmission source = new MSubmission();
     source.setExceptionInfo("EndOfTheWorldException");
@@ -253,6 +268,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("EndOfTheWorldAgainException", targets.get(1).getExceptionInfo());
   }
 
+  @Test
   public void testTransferExceptionTrace() {
     MSubmission source = new MSubmission();
     source.setExceptionStackTrace("void.java(3): line infinity");
@@ -275,12 +291,13 @@ public class TestSubmissionBean extends TestCase {
     assertEquals("void.java(5): core dumps in Java", targets.get(1).getExceptionStackTrace());
   }
 
+  @Test
   public void testTransferProgress() {
     MSubmission source = new MSubmission();
     source.setProgress(25.0);
 
     MSubmission target = transfer(source);
-    assertEquals(25.0, target.getProgress());
+    assertEquals(25.0, target.getProgress(), EPSILON);
 
     List<MSubmission> sources = new ArrayList<MSubmission>();
     MSubmission sourcex = new MSubmission();
@@ -292,11 +309,12 @@ public class TestSubmissionBean extends TestCase {
 
     List<MSubmission> targets = transfer(sources);
     assertNotNull(targets.get(0));
-    assertEquals(50.0, targets.get(0).getProgress());
+    assertEquals(50.0, targets.get(0).getProgress(), EPSILON);
     assertNotNull(targets.get(1));
-    assertEquals(99.9, targets.get(1).getProgress());
+    assertEquals(99.9, targets.get(1).getProgress(), EPSILON);
   }
 
+  @Test
   public void testTransferCounters() {
     Counters counters = new Counters();
     counters.addCounterGroup(new CounterGroup("A")
@@ -405,6 +423,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(222222, counter.getValue());
   }
 
+  @Test
   public void testTransferFromSchema() {
     MSubmission source = new MSubmission();
     source.setFromSchema(getSchema());
@@ -414,6 +433,7 @@ public class TestSubmissionBean extends TestCase {
     assertEquals(getSchema(), target);
   }
 
+  @Test
   public void testTransferToSchema() {
     MSubmission source = new MSubmission();
     source.setToSchema(getSchema());

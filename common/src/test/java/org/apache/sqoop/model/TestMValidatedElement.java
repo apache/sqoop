@@ -17,11 +17,11 @@
  */
 package org.apache.sqoop.model;
 
-import static org.junit.Assert.*;
-
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test class for org.apache.sqoop.model.MValidatedElement

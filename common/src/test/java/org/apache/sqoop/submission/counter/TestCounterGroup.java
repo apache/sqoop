@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.submission.counter;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

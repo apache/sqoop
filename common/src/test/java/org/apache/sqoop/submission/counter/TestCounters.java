@@ -19,7 +19,7 @@ package org.apache.sqoop.submission.counter;
 
 import org.junit.Test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Test Class for org.apache.sqoop.submission.counter.TestCounters

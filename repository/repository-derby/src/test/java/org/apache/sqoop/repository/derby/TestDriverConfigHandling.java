@@ -19,10 +19,16 @@ package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.model.MDriverConfig;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test driver config methods on Derby repository.
@@ -31,7 +37,7 @@ public class TestDriverConfigHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
@@ -41,6 +47,7 @@ public class TestDriverConfigHandling extends DerbyTestCase {
     createSchema();
   }
 
+  @Test
   public void testFindDriverConfig() throws Exception {
     // On empty repository, no driverConfig should be there
     assertNull(handler.findDriverConfig(getDerbyDatabaseConnection()));
@@ -57,6 +64,7 @@ public class TestDriverConfigHandling extends DerbyTestCase {
     assertEquals(originalDriverConfig, driverConfig);
   }
 
+  @Test
   public void testRegisterConnector() throws Exception {
     MDriverConfig driverConfig = getDriverConfig();
     handler.registerDriverConfig(driverConfig, getDerbyDatabaseConnection());
@@ -106,6 +114,7 @@ public class TestDriverConfigHandling extends DerbyTestCase {
     }
   }
 
+  @Test
   public void testDriverVersion() throws Exception {
     handler.registerDriverConfig(getDriverConfig(), getDerbyDatabaseConnection());
 

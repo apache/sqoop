@@ -17,7 +17,13 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.sql.Connection;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -26,25 +32,28 @@ public class TestInternals extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
 
     handler = new TestDerbyRepositoryHandler();
   }
 
+  @Test
   public void testSuitableInternals() throws Exception {
     assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
     createSchema(); // Test code is building the structures
     assertTrue(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testCreateorUpdateInternals() throws Exception {
     assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
     handler.createOrUpdateInternals(getDerbyDatabaseConnection());
     assertTrue(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
   }
 
+  @Test
   public void testUpgradeVersion2ToVersion4() throws Exception {
     createSchema(2);
     assertFalse(handler.haveSuitableInternals(getDerbyDatabaseConnection()));
