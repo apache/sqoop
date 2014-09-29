@@ -19,8 +19,15 @@
 package org.apache.sqoop.accumulo;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -37,10 +44,8 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.After;
 import org.junit.Before;
 
@@ -126,8 +131,96 @@ public abstract class AccumuloTestCase extends ImportJobTestCase {
     tempDir.mkdir();
     tempDir.deleteOnExit();
     temp.delete();
-    accumuloCluster = new MiniAccumuloCluster(tempDir, ACCUMULO_PASSWORD);
+    accumuloCluster = createMiniAccumuloCluster(tempDir, ACCUMULO_PASSWORD);
     accumuloCluster.start();
+  }
+
+  protected static MiniAccumuloCluster createMiniAccumuloCluster(File tempDir, String rootPassword) throws Exception {
+    final String configImplClassName = "org.apache.accumulo.minicluster.impl.MiniAccumuloConfigImpl", clusterImplClassName = "org.apache.accumulo.minicluster.impl.MiniAccumuloClusterImpl";
+    try {
+      // Get the MiniAccumuloConfigImpl class
+      Class<?> configImplClz = Class.forName(configImplClassName);
+      // Get the (File,String) constructor
+      Constructor<?> cfgConstructor = configImplClz.getConstructor(new Class[] {File.class, String.class});
+      Object configImpl = cfgConstructor.newInstance(tempDir, rootPassword);
+      // Get setClasspathItems(String...)
+      Method setClasspathItemsMethod = configImplClz.getDeclaredMethod("setClasspathItems", String[].class);
+      // Get the classpath, removing problematic jars
+      String classpath = getClasspath(new File(tempDir, "conf"));
+      // Call the method
+      setClasspathItemsMethod.invoke(configImpl, (Object) new String[] {classpath});
+
+      // Get the private MiniAccumuloCluster(MiniAccumuloConfigImpl constructor)
+      Constructor<?> clusterConstructor = MiniAccumuloCluster.class.getDeclaredConstructor(configImplClz);
+      // Make it accessible (since its private)
+      clusterConstructor.setAccessible(true);
+      Object clusterImpl = clusterConstructor.newInstance(configImpl);
+      return MiniAccumuloCluster.class.cast(clusterImpl);
+    } catch (Exception e) {
+      // Couldn't load the 1.6 MiniAccumuloConfigImpl which has
+      // the classpath control
+      LOG.warn("Could not load 1.6 minicluster classes", e);
+
+      return new MiniAccumuloCluster(tempDir, ACCUMULO_PASSWORD);
+    }
+  }
+
+  protected static String getClasspath(File confDir) throws URISyntaxException {
+    // Mostly lifted from MiniAccumuloConfigImpl#getClasspath
+    ArrayList<ClassLoader> classloaders = new ArrayList<ClassLoader>();
+
+    ClassLoader cl = AccumuloTestCase.class.getClassLoader();
+
+    while (cl != null) {
+      classloaders.add(cl);
+      cl = cl.getParent();
+    }
+
+    Collections.reverse(classloaders);
+
+    StringBuilder classpathBuilder = new StringBuilder(64);
+    classpathBuilder.append(confDir.getAbsolutePath());
+
+    // assume 0 is the system classloader and skip it
+    for (int i = 1; i < classloaders.size(); i++) {
+      ClassLoader classLoader = classloaders.get(i);
+
+      if (classLoader instanceof URLClassLoader) {
+
+        for (URL u : ((URLClassLoader) classLoader).getURLs()) {
+          append(classpathBuilder, u);
+        }
+      } else {
+        throw new IllegalArgumentException("Unknown classloader type : " + classLoader.getClass().getName());
+      }
+    }
+
+    return classpathBuilder.toString();
+  }
+
+  private static void append(StringBuilder classpathBuilder, URL url) throws URISyntaxException {
+    File file = new File(url.toURI());
+    // do not include dirs containing hadoop or accumulo site files, nor the hive-exec jar (which has thrift inside)
+    if (!containsSiteFile(file) && !isHiveExec(file))
+      classpathBuilder.append(File.pathSeparator).append(file.getAbsolutePath());
+  }
+
+  private static boolean containsSiteFile(File f) {
+    return f.isDirectory() && f.listFiles(new FileFilter() {
+
+      @Override
+      public boolean accept(File pathname) {
+        return pathname.getName().endsWith("site.xml");
+      }
+    }).length > 0;
+  }
+
+  private static boolean isHiveExec(File f) {
+    if (f.isFile()) {
+      String name = f.getName();
+      return name.startsWith("hive-exec") && name.endsWith(".jar");
+    }
+    return false;
   }
 
   protected static void cleanUpCluster() throws Exception {
