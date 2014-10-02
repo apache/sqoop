@@ -111,14 +111,7 @@ public abstract class IntermediateDataFormat<T> {
    *
    * @param schema - the schema used for reading data
    */
-  public abstract void setFromSchema(Schema schema);
-
-  /**
-   * Set the schema for writing data.
-   *
-   * @param schema - the schema used for writing data
-   */
-  public abstract void setToSchema(Schema schema);
+  public abstract void setSchema(Schema schema);
 
   /**
    * Serialize the fields of this object to <code>out</code>.

@@ -15,44 +15,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.idf.matcher;
+package org.apache.sqoop.connector.matcher;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.Column;
 
-public abstract class AbstractMatcher {
+public abstract class Matcher {
 
-  //NOTE: This is currently tightly coupled to the CSV idf. We'll need refactoring after adding additional formats
-  //NOTE: There's is a very blatant special case of empty schemas that seem to apply only to HDFS.
+  private final Schema fromSchema;
+  private final Schema toSchema;
+
+  public Matcher(Schema fromSchema, Schema toSchema) {
+    if (fromSchema.isEmpty() && toSchema.isEmpty()) {
+      throw new SqoopException(MatcherError.MATCHER_0000, "Neither a FROM or TO schemas been provided.");
+    } else if (toSchema.isEmpty()) {
+      this.fromSchema = fromSchema;
+      this.toSchema = fromSchema;
+    } else if (fromSchema.isEmpty()) {
+      this.fromSchema = toSchema;
+      this.toSchema = toSchema;
+    } else {
+      this.fromSchema = fromSchema;
+      this.toSchema = toSchema;
+    }
+  }
 
   /**
    *
    * @param fields
-   * @param fromSchema
-   * @param toSchema
    * @return Return the data in "fields" converted from matching the fromSchema to matching the toSchema.
    * Right not "converted" means re-ordering if needed and handling nulls.
    */
-  abstract public String[] getMatchingData(String[] fields, Schema fromSchema, Schema toSchema);
+  abstract public Object[] getMatchingData(Object[] fields);
 
-  /***
-   *
-   * @param fromSchema
-   * @param toSchema
-   * @return return a schema with which to read the output data
-   * This always returns the toSchema (since this is used when getting output data), unless its empty
-   */
-  public Schema getMatchingSchema(Schema fromSchema, Schema toSchema) {
-    if (toSchema.isEmpty()) {
-      return fromSchema;
-    } else {
-      return toSchema;
-    }
-
+  public Schema getFromSchema() {
+    return fromSchema;
   }
 
-  protected boolean isNull(String value) {
-    if (value.equals("NULL") || value.equals("null") || value.equals("'null'") || value.isEmpty()) {
+  public Schema getToSchema() {
+    return toSchema;
+  }
+
+  protected boolean isNull(Object value) {
+    if (value == null || value.equals("NULL")
+        || value.equals("null") || value.equals("'null'")
+        || value.equals("")) {
       return true;
     }
     return false;

@@ -36,14 +36,7 @@ import org.apache.sqoop.job.mr.SqoopSplit;
 
 public class JobUtils {
 
-  public static void runJob(Configuration conf)
-      throws IOException, InterruptedException, ClassNotFoundException {
-    runJob(conf, SqoopInputFormat.class, SqoopMapper.class,
-        (conf.get(JobConstants.HADOOP_OUTDIR) != null) ?
-        SqoopFileOutputFormat.class : SqoopNullOutputFormat.class);
-  }
-
-  public static void runJob(Configuration conf,
+  public static boolean runJob(Configuration conf,
     Class<? extends InputFormat<SqoopSplit, NullWritable>> input,
     Class<? extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable>> mapper,
     Class<? extends OutputFormat<SqoopWritable, NullWritable>> output)
@@ -57,8 +50,7 @@ public class JobUtils {
     job.setOutputKeyClass(SqoopWritable.class);
     job.setOutputValueClass(NullWritable.class);
 
-    boolean success = job.waitForCompletion(true);
-    Assert.assertEquals("Job failed!", true, success);
+    return job.waitForCompletion(true);
   }
 
   private JobUtils() {

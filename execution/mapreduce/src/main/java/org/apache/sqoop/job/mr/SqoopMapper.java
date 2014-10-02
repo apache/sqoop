@@ -29,13 +29,14 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
+import org.apache.sqoop.connector.matcher.Matcher;
+import org.apache.sqoop.connector.matcher.MatcherFactory;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
-import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
@@ -54,8 +55,9 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
    * Service for reporting progress to mapreduce.
    */
   private final ScheduledExecutorService progressService = Executors.newSingleThreadScheduledExecutor();
-  private IntermediateDataFormat<String> dataFormat = null;
-  private SqoopWritable dataOut = null;
+  private IntermediateDataFormat<String> fromDataFormat = null;
+  private IntermediateDataFormat<String> toDataFormat = null;
+  private Matcher matcher;
 
   @Override
   public void run(Context context) throws IOException, InterruptedException {
@@ -64,19 +66,17 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
-
-
-    Schema fromSchema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
-    Schema toSchema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
+    matcher = MatcherFactory.getMatcher(
+        ConfigurationUtils.getConnectorSchema(Direction.FROM, conf),
+        ConfigurationUtils.getConnectorSchema(Direction.TO, conf));
 
     String intermediateDataFormatName = conf.get(JobConstants.INTERMEDIATE_DATA_FORMAT);
-    dataFormat = (IntermediateDataFormat<String>) ClassUtils
+    fromDataFormat = (IntermediateDataFormat<String>) ClassUtils
         .instantiate(intermediateDataFormatName);
-
-    dataFormat.setFromSchema(fromSchema);
-    dataFormat.setToSchema(toSchema);
-
-    dataOut = new SqoopWritable();
+    fromDataFormat.setSchema(matcher.getFromSchema());
+    toDataFormat = (IntermediateDataFormat<String>) ClassUtils
+        .instantiate(intermediateDataFormatName);
+    toDataFormat.setSchema(matcher.getToSchema());
 
     // Objects that should be passed to the Executor execution
     PrefixContext subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
@@ -109,36 +109,41 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
   private class SqoopMapDataWriter extends DataWriter {
     private Context context;
+    private SqoopWritable writable;
 
     public SqoopMapDataWriter(Context context) {
       this.context = context;
+      this.writable = new SqoopWritable();
     }
 
     @Override
     public void writeArrayRecord(Object[] array) {
-      dataFormat.setObjectData(array);
+      fromDataFormat.setObjectData(array);
       writeContent();
     }
 
     @Override
     public void writeStringRecord(String text) {
-      dataFormat.setTextData(text);
+      fromDataFormat.setTextData(text);
       writeContent();
     }
 
     @Override
     public void writeRecord(Object obj) {
-      dataFormat.setData(obj.toString());
+      fromDataFormat.setData(obj.toString());
       writeContent();
     }
 
     private void writeContent() {
       try {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Extracted data: " + dataFormat.getTextData());
+          LOG.debug("Extracted data: " + fromDataFormat.getTextData());
         }
-        dataOut.setString(dataFormat.getTextData());
-        context.write(dataOut, NullWritable.get());
+
+        toDataFormat.setObjectData( matcher.getMatchingData( fromDataFormat.getObjectData() ) );
+
+        writable.setString(toDataFormat.getTextData());
+        context.write(writable, NullWritable.get());
       } catch (Exception e) {
         throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0013, e);
       }

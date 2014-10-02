@@ -15,21 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.idf.matcher;
+package org.apache.sqoop.connector.matcher;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.idf.IntermediateDataFormatError;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.SchemaError;
-import org.apache.sqoop.schema.SchemaMatchOption;
 import org.apache.sqoop.schema.type.Column;
-import org.apache.sqoop.schema.type.FixedPoint;
-import org.apache.sqoop.schema.type.FloatingPoint;
-import org.apache.sqoop.schema.type.Type;
-
-import java.math.BigDecimal;
-import java.util.Iterator;
 
 
 /**
@@ -39,24 +31,28 @@ import java.util.Iterator;
  * If TO schema has more fields and they are "nullable", the value will be set to null
  * If TO schema has extra non-null fields, we'll throw an exception
  */
-public class LocationMatcher extends AbstractMatcher {
+public class LocationMatcher extends Matcher {
 
   public static final Logger LOG = Logger.getLogger(LocationMatcher.class);
-  @Override
-  public String[] getMatchingData(String[] fields, Schema fromSchema, Schema toSchema) {
 
-    String[] out = new String[toSchema.getColumns().size()];
+  public LocationMatcher(Schema from, Schema to) {
+    super(from, to);
+  }
+
+  @Override
+  public Object[] getMatchingData(Object[] fields) {
+
+    Object[] out = new Object[getToSchema().getColumns().size()];
 
     int i = 0;
 
-    if (toSchema.isEmpty()) {
+    if (getToSchema().isEmpty()) {
       // If there's no destination schema, no need to convert anything
       // Just use the original data
       return fields;
     }
 
-    for (Column col: toSchema.getColumns())
-    {
+    for (Column col: getToSchema().getColumns()) {
       if (i < fields.length) {
         if (isNull(fields[i])) {
           out[i] = null;

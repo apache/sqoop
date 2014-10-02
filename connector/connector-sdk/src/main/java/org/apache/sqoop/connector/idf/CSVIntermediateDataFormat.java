@@ -22,12 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.idf.matcher.AbstractMatcher;
-import org.apache.sqoop.connector.idf.matcher.LocationMatcher;
-import org.apache.sqoop.connector.idf.matcher.NameMatcher;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.SchemaError;
-import org.apache.sqoop.schema.SchemaMatchOption;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
@@ -41,7 +36,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 
 public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
@@ -71,8 +65,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   private final List<Integer> stringFieldIndices = new ArrayList<Integer>();
   private final List<Integer> byteFieldIndices = new ArrayList<Integer>();
 
-  private Schema fromSchema;
-  private Schema toSchema;
+  private Schema schema;
 
   /**
    * {@inheritDoc}
@@ -94,11 +87,11 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * {@inheritDoc}
    */
   @Override
-  public void setFromSchema(Schema schema) {
+  public void setSchema(Schema schema) {
     if(schema == null) {
       return;
     }
-    this.fromSchema = schema;
+    this.schema = schema;
     List<Column> columns = schema.getColumns();
     int i = 0;
     for(Column col : columns) {
@@ -110,19 +103,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       i++;
     }
   }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setToSchema(Schema schema) {
-    if(schema == null) {
-      return;
-    }
-    this.toSchema = schema;
-  }
-
-
 
   /**
    * Custom CSV parser that honors quoting and escaped quotes.
@@ -180,69 +160,68 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   /**
    * {@inheritDoc}
-   *
-   * The CSV data is ordered according to the fromSchema. We "translate" it to the TO schema.
-   * We currently have 3 methods of matching fields in one schema to another:
-   * - by location
-   * - by name
-   * - user-defined matching
-   *
-   * If one schema exists (either to or from) and the other is empty
-   * We'll match fields based on location.
-   * If both schemas exist, we'll match names of fields.
-   *
-   * In the future, we may want to let users choose the method
-   * Currently nothing is implemented for user-defined matching
    */
   @Override
   public Object[] getObjectData() {
+    if (schema.isEmpty()) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0006);
+    }
+
     String[] fields = getFields();
+
     if (fields == null) {
       return null;
     }
 
-    if (fromSchema == null || toSchema == null || (toSchema.isEmpty() && fromSchema.isEmpty())) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0006);
+    if (fields.length != schema.getColumns().size()) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+          "The data " + getTextData() + " has the wrong number of fields.");
     }
 
-    AbstractMatcher matcher = getMatcher(fromSchema,toSchema);
-    String[] outFields =  matcher.getMatchingData(fields, fromSchema, toSchema);
-    Object[] out =  new Object[outFields.length];
-
-    int i = 0;
-
-    // After getting back the data in order that matches the output schema
-    // We need to un-do the CSV escaping
-    for (Column col: matcher.getMatchingSchema(fromSchema,toSchema).getColumns()) {
-      Type colType = col.getType();
-      if (outFields[i] == null) {
+    Object[] out = new Object[fields.length];
+    Column[] cols = schema.getColumns().toArray(new Column[fields.length]);
+    for (int i = 0; i < fields.length; i++) {
+      Type colType = cols[i].getType();
+      if (fields[i].equals("NULL")) {
         out[i] = null;
         continue;
       }
-      if (colType == Type.TEXT) {
-        out[i] = unescapeStrings(outFields[i]);
-      } else if (colType == Type.BINARY) {
-        out[i] = unescapeByteArray(outFields[i]);
-      } else if (colType == Type.FIXED_POINT) {
-        Long byteSize = ((FixedPoint) col).getByteSize();
-        if (byteSize != null && byteSize <= Integer.SIZE) {
-          out[i] = Integer.valueOf(outFields[i]);
-        } else {
-          out[i] = Long.valueOf(outFields[i]);
-        }
-      } else if (colType == Type.FLOATING_POINT) {
-        Long byteSize = ((FloatingPoint) col).getByteSize();
-        if (byteSize != null && byteSize <= Float.SIZE) {
-          out[i] = Float.valueOf(outFields[i]);
-        } else {
-          out[i] = Double.valueOf(outFields[i]);
-        }
-      } else if (colType == Type.DECIMAL) {
-        out[i] = new BigDecimal(outFields[i]);
-      } else {
-        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004, "Column type from schema was not recognized for " + colType);
+
+      Long byteSize;
+      switch(colType) {
+        case TEXT:
+          out[i] = unescapeStrings(fields[i]);
+          break;
+        case BINARY:
+          out[i] = unescapeByteArray(fields[i]);
+          break;
+        case FIXED_POINT:
+          byteSize = ((FixedPoint) cols[i]).getByteSize();
+          if (byteSize != null && byteSize <= Integer.SIZE) {
+            out[i] = Integer.valueOf(fields[i]);
+          } else {
+            out[i] = Long.valueOf(fields[i]);
+          }
+          break;
+        case FLOATING_POINT:
+          byteSize = ((FloatingPoint) cols[i]).getByteSize();
+          if (byteSize != null && byteSize <= Float.SIZE) {
+            out[i] = Float.valueOf(fields[i]);
+          } else {
+            out[i] = Double.valueOf(fields[i]);
+          }
+          break;
+        case DECIMAL:
+          out[i] = new BigDecimal(fields[i]);
+          break;
+        case DATE:
+        case DATE_TIME:
+        case BIT:
+          out[i] = fields[i];
+          break;
+        default:
+          throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004, "Column type from schema was not recognized for " + colType);
       }
-      i++;
     }
     return out;
   }
@@ -380,15 +359,4 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   public String toString() {
     return data;
   }
-
-  private AbstractMatcher getMatcher(Schema fromSchema, Schema toSchema) {
-    if (toSchema.isEmpty() || fromSchema.isEmpty()) {
-      return new LocationMatcher();
-    } else {
-      return new NameMatcher();
-    }
-
-
-  }
-
 }

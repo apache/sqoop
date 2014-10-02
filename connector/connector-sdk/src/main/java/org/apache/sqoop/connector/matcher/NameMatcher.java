@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.idf.matcher;
+package org.apache.sqoop.connector.matcher;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -25,26 +25,31 @@ import org.apache.sqoop.schema.type.Column;
 
 import java.util.HashMap;
 
-public class NameMatcher extends AbstractMatcher {
+public class NameMatcher extends Matcher {
+
   public static final Logger LOG = Logger.getLogger(NameMatcher.class);
 
+  public NameMatcher(Schema from, Schema to) {
+    super(from, to);
+  }
+
   @Override
-  public String[] getMatchingData(String[] fields, Schema fromSchema, Schema toSchema) {
-    String[] out = new String[toSchema.getColumns().size()];
+  public Object[] getMatchingData(Object[] fields) {
+    Object[] out = new Object[getToSchema().getColumns().size()];
 
     HashMap<String,Column> colNames = new HashMap<String, Column>();
 
-    for (Column fromCol: fromSchema.getColumns()) {
+    for (Column fromCol: getFromSchema().getColumns()) {
       colNames.put(fromCol.getName(), fromCol);
     }
 
     int toIndex = 0;
 
-    for (Column toCol: toSchema.getColumns()) {
+    for (Column toCol: getToSchema().getColumns()) {
       Column fromCol = colNames.get(toCol.getName());
 
       if (fromCol != null) {
-        int fromIndex = fromSchema.getColumns().indexOf(fromCol);
+        int fromIndex = getFromSchema().getColumns().indexOf(fromCol);
         if (isNull(fields[fromIndex])) {
           out[toIndex] = null;
         } else {

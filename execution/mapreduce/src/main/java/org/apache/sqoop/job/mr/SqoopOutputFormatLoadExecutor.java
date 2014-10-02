@@ -34,6 +34,8 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
+import org.apache.sqoop.connector.matcher.Matcher;
+import org.apache.sqoop.connector.matcher.MatcherFactory;
 import org.apache.sqoop.job.JobConstants;
 import org.apache.sqoop.job.MapreduceExecutionError;
 import org.apache.sqoop.common.PrefixContext;
@@ -52,6 +54,7 @@ public class SqoopOutputFormatLoadExecutor {
   private volatile boolean readerFinished = false;
   private volatile boolean writerFinished = false;
   private volatile IntermediateDataFormat<String> dataFormat;
+  private Matcher matcher;
   private JobContext context;
   private SqoopRecordWriter writer;
   private Future<?> consumerFuture;
@@ -65,19 +68,18 @@ public class SqoopOutputFormatLoadExecutor {
     this.loaderName = loaderName;
     dataFormat = new CSVIntermediateDataFormat();
     writer = new SqoopRecordWriter();
+    matcher = null;
   }
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
     context = jobctx;
     writer = new SqoopRecordWriter();
+    matcher = MatcherFactory.getMatcher(
+        ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()),
+        ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration()));
     dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
-      .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
-
-    Schema fromSchema = ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration());
-    dataFormat.setFromSchema(fromSchema);
-
-    Schema toSchema = ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration());
-    dataFormat.setToSchema(toSchema);
+        .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
+    dataFormat.setSchema(matcher.getToSchema());
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
