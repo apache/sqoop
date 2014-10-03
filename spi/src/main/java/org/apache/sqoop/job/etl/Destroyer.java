@@ -28,7 +28,7 @@ public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
    *
    * @param context Destroyer context
    * @param linkConfiguration link configuration object
-   * @param jobConfiguration Job configuration object
+   * @param jobConfiguration job configuration object
    */
   public abstract void destroy(DestroyerContext context,
                                LinkConfiguration linkConfiguration,

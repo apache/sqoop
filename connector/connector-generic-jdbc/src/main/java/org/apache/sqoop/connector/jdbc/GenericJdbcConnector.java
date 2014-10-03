@@ -92,7 +92,7 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public Validator getValidator() {
+  public Validator getConfigValidator() {
     return genericJdbcValidator;
   }
 

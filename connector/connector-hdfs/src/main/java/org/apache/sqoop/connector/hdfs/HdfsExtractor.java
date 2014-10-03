@@ -52,8 +52,8 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   @Override
   public void extract(ExtractorContext context,
-      LinkConfiguration connectionConfiguration,
-      FromJobConfiguration jobConfiguration, HdfsPartition partition) {
+      LinkConfiguration linkConfig,
+      FromJobConfiguration fromJobConfig, HdfsPartition partition) {
 
     conf = ((PrefixContext) context.getContext()).getConfiguration();
     dataWriter = context.getDataWriter();

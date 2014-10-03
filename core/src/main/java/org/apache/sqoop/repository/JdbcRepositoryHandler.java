@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 
@@ -113,11 +113,11 @@ public abstract class JdbcRepositoryHandler {
    * which may not have changed). After this operation the repository is
    * guaranteed to only have the new forms specified in this object.
    *
-   * @param mDriverConfig The new data to be inserted into the repository for
+   * @param mDriver The new data to be inserted into the repository for
    *                     the driverConfig.
    * @param conn JDBC link for querying repository
    */
-  public abstract void updateDriverConfig(MDriverConfig mDriverConfig, Connection conn);
+  public abstract void updateDriver(MDriver mDriver, Connection conn);
 
 
   /**
@@ -127,7 +127,7 @@ public abstract class JdbcRepositoryHandler {
    * @return null if driverConfig are not yet present in repository or
    *  loaded representation.
    */
-  public abstract MDriverConfig findDriverConfig(Connection conn);
+  public abstract MDriver findDriver(Connection conn);
 
   /**
    * Register driver config in repository.
@@ -138,7 +138,7 @@ public abstract class JdbcRepositoryHandler {
    * @param driverConfig Driver config that should be registered.
    * @param conn JDBC link for querying repository.
    */
-  public abstract void registerDriverConfig(MDriverConfig driverConfig, Connection conn);
+  public abstract void registerDriver(MDriver driverConfig, Connection conn);
 
   /**
    * Return true if repository tables exists and are suitable for use.
@@ -243,7 +243,7 @@ public abstract class JdbcRepositoryHandler {
    *
    * @param linkId Link id
    * @param conn Connection to the repository
-   * @return Deserialized form of the link that is saved in repository
+   * @return Deserialized config of the link that is saved in repository
    */
   public abstract MLink findLink(long linkId, Connection conn);
 
@@ -323,7 +323,7 @@ public abstract class JdbcRepositoryHandler {
    *
    * @param jobId Job id
    * @param conn Connection to the repository
-   * @return Deserialized form of the job that is present in the repository
+   * @return Deserialized config of the job that is present in the repository
    */
   public abstract MJob findJob(long jobId, Connection conn);
 

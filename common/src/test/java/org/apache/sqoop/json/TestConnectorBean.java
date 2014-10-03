@@ -17,10 +17,9 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.model.MConnector;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.junit.Test;
+import static org.apache.sqoop.json.ConfigTestUtil.getConnector;
+import static org.apache.sqoop.json.ConfigTestUtil.getResourceBundle;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,8 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import static org.apache.sqoop.json.TestUtil.*;
-import static org.junit.Assert.*;
+import org.apache.sqoop.model.MConnector;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.junit.Test;
 
 /**
  *
@@ -48,26 +49,26 @@ public class TestConnectorBean {
     connectors.add(getConnector("mysql"));
 
     // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, getResourceBundle());
-    bundles.put(2L, getResourceBundle());
+    Map<Long, ResourceBundle> configBundles = new HashMap<Long, ResourceBundle>();
+    configBundles.put(1L, getResourceBundle());
+    configBundles.put(2L, getResourceBundle());
 
     // Serialize it to JSON object
-    ConnectorBean bean = new ConnectorBean(connectors, bundles);
-    JSONObject json = bean.extract(false);
+    ConnectorBean connectorBean = new ConnectorBean(connectors, configBundles);
+    JSONObject connectorJSON = connectorBean.extract(false);
 
     // "Move" it across network in text form
-    String string = json.toJSONString();
+    String connectorJSONString = connectorJSON.toJSONString();
 
     // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectorBean retrievedBean = new ConnectorBean();
-    retrievedBean.restore(retrievedJson);
+    JSONObject parsedConnector = (JSONObject) JSONValue.parse(connectorJSONString);
+    ConnectorBean parsedConnectorBean = new ConnectorBean();
+    parsedConnectorBean.restore(parsedConnector);
 
-    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
-    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+    assertEquals(connectors.size(), parsedConnectorBean.getConnectors().size());
+    assertEquals(connectors.get(0), parsedConnectorBean.getConnectors().get(0));
 
-    ResourceBundle retrievedBundle = retrievedBean.getResourceBundles().get(1L);
+    ResourceBundle retrievedBundle = parsedConnectorBean.getResourceBundles().get(1L);
     assertNotNull(retrievedBundle);
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));

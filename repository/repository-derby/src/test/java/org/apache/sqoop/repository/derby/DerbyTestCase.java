@@ -17,20 +17,35 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
-import org.junit.After;
-import org.junit.Before;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_SCHEMA_SQOOP;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONFIG;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONNECTOR;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER_GROUP;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_INPUT;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_JOB;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_JOB_INPUT;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_LINK;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_LINK_INPUT;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_SUBMISSION;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_SYSTEM;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQ_LNK;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_CREATION_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_ENABLED;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_UPDATE_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER;
+import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,8 +57,22 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.apache.sqoop.repository.derby.DerbySchemaQuery.*;
-import static org.junit.Assert.assertEquals;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MToConfig;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * Abstract class with convenience methods for testing derby repository.
@@ -91,11 +120,11 @@ abstract public class DerbyTestCase {
     if (version > 0) {
       runQuery(QUERY_CREATE_SCHEMA_SQOOP);
       runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR);
-      runQuery(QUERY_CREATE_TABLE_SQ_FORM);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONFIG);
       runQuery(QUERY_CREATE_TABLE_SQ_INPUT);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION);
+      runQuery(QUERY_CREATE_TABLE_SQ_LINK);
       runQuery(QUERY_CREATE_TABLE_SQ_JOB);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT);
+      runQuery(QUERY_CREATE_TABLE_SQ_LINK_INPUT);
       runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT);
       runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION);
       runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP);
@@ -105,10 +134,10 @@ abstract public class DerbyTestCase {
 
     if (version > 1) {
       runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_ENABLED);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_CREATION_USER);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_UPDATE_USER);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_CREATION_USER);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_UPDATE_USER);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER);
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER);
@@ -116,12 +145,12 @@ abstract public class DerbyTestCase {
     }
 
     if (version > 3) {
-      runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_RENAME_COLUMN_SQF_OPERATION_TO_SQF_DIRECTION);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_CONNECTION_TO_SQB_FROM_CONNECTION);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_CONNECTION);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQN);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQ_LNK);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE);
     }
 
@@ -180,65 +209,64 @@ abstract public class DerbyTestCase {
 
     String connector = "1";
 
-    // Connector form entries
+    // Connector config entries
     for(String operation : new String[] {"null", "'IMPORT'", "'EXPORT'"}) {
 
       String type;
       if(operation.equals("null")) {
-        type = "CONNECTION";
+        type = "LINK";
       } else {
         type = "JOB";
       }
 
-      runQuery("INSERT INTO SQOOP.SQ_FORM"
-          + "(SQF_CONNECTOR, SQF_OPERATION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+      runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+          + "(SQ_CFG_OWNER, SQ_CFG_OPERATION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
           + "VALUES("
           + connector  + ", "
           + operation
-          + ", 'F1', '"
+          + ", 'C1', '"
           + type
           + "', 0)");
-      runQuery("INSERT INTO SQOOP.SQ_FORM"
-          + "(SQF_CONNECTOR, SQF_OPERATION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+      runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+          + "(SQ_CFG_OWNER, SQ_CFG_OPERATION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
           + "VALUES("
           + connector + ", "
           + operation
-          +  ", 'F2', '"
+          +  ", 'C2', '"
           + type
           + "', 1)");
     }
 
-    // Framework form entries
-    runQuery("INSERT INTO SQOOP.SQ_FORM"
-        + "(SQF_CONNECTOR, SQF_OPERATION, SQF_NAME, SQF_TYPE, SQF_INDEX) VALUES"
+    // Driver config entries
+    runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_OWNER, SQ_CFG_OPERATION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) VALUES"
         + "(NULL, 'IMPORT', 'output', 'JOB', 0),"
         + "(NULL, 'IMPORT', 'throttling', 'JOB', 1),"
         + "(NULL, 'EXPORT', 'input', 'JOB', 0),"
         + "(NULL, 'EXPORT', 'throttling', 'JOB', 1),"
-        + "(NULL, NULL, 'security', 'CONNECTION', 0)");
+        + "(NULL, NULL, 'security', 'LINK', 0)");
 
     // Connector input entries
-    int x = 0;
     for(int i = 0; i < 3; i++) {
-      // First form
+      // First config
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          +"(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30)");
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          +"(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30)");
 
-      // Second form
+      // Second config
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          +"(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30)");
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          +"(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          +"(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30)");
     }
 
-    // Framework input entries.
-    runQuery("INSERT INTO SQOOP.SQ_INPUT (SQI_NAME, SQI_FORM, SQI_INDEX,"
+    // Driver input entries.
+    runQuery("INSERT INTO SQOOP.SQ_INPUT (SQI_NAME, SQI_CONFIG, SQI_INDEX,"
         + " SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_ENUMVALS)"
         +" VALUES ('security.maxConnections',11,0,'INTEGER','false',NULL,NULL),"
         + "('input.inputDirectory',9,0,'STRING','false',255,NULL),"
@@ -257,74 +285,72 @@ abstract public class DerbyTestCase {
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
         + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
 
-    // Connector part
     for (String connector : new String[]{"1"}) {
-      // Form entries
+      // connector configs
       for (String direction : new String[]{"null", "'FROM'", "'TO'"}) {
 
         String type;
         if (direction.equals("null")) {
-          type = "CONNECTION";
+          type = "LINK";
         } else {
           type = "JOB";
         }
 
-        runQuery("INSERT INTO SQOOP.SQ_FORM"
-            + "(SQF_CONNECTOR, SQF_DIRECTION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+        runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+            + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
             + "VALUES("
             + connector + ", "
             + direction
-            + ", 'F1', '"
+            + ", 'C1', '"
             + type
             + "', 0)");
-        runQuery("INSERT INTO SQOOP.SQ_FORM"
-            + "(SQF_CONNECTOR, SQF_DIRECTION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+        runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+            + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
             + "VALUES("
             + connector + ", "
             + direction
-            + ", 'F2', '"
+            + ", 'C2', '"
             + type
             + "', 1)");
       }
     }
 
-    // Framework part
-    for (String type : new String[]{"CONNECTION", "JOB"}) {
-      runQuery("INSERT INTO SQOOP.SQ_FORM"
-          + "(SQF_CONNECTOR, SQF_DIRECTION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+    // driver config
+    for (String type : new String[]{"JOB"}) {
+      runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+          + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
           + "VALUES(NULL, NULL"
-          + ", 'F1', '"
+          + ", 'C1', '"
           + type
           + "', 0)");
-      runQuery("INSERT INTO SQOOP.SQ_FORM"
-          + "(SQF_CONNECTOR, SQF_DIRECTION, SQF_NAME, SQF_TYPE, SQF_INDEX) "
+      runQuery("INSERT INTO SQOOP.SQ_CONFIG"
+          + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
           + "VALUES(NULL, NULL"
-          + ", 'F2', '"
+          + ", 'C2', '"
           + type
           + "', 1)");
     }
 
     // Input entries
-    // Connector link parts: 0-3
-    // Connector job (FROM) parts: 4-7
-    // Connector job (TO) parts: 8-11
-    // Framework link parts: 12-15
-    // Framework job parts: 16-19
-    for (int i = 0; i < 5; i++) {
-      // First form
+    // Connector LINK config: 0-3
+    // Connector job (FROM) config: 4-7
+    // Connector job (TO) config: 8-11
+    // Driver JOB config: 12-15
+    for (int i = 0; i < 4; i++) {
+      // First config
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30)");
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30)");
 
-      // Second form
+      // Second config
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30)");
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_FORM, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30)");
     }
   }
@@ -350,7 +376,7 @@ abstract public class DerbyTestCase {
     }
   }
 
-  protected void loadConnectorAndDriverConfig() throws Exception {
+  protected void loadConnectorLinkConfig() throws Exception {
     loadConnectorAndDriverConfig(LATEST_SYSTEM_VERSION);
   }
 
@@ -364,15 +390,15 @@ abstract public class DerbyTestCase {
     switch (version) {
       case 2:
         // Insert two links - CA and CB
-        runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
             + "VALUES('CA', 1)");
-        runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
             + "VALUES('CB', 1)");
 
         for(String ci : new String[] {"1", "2"}) {
           for(String i : new String[] {"1", "3", "13", "15"}) {
-            runQuery("INSERT INTO SQOOP.SQ_CONNECTION_INPUT"
-                + "(SQNI_CONNECTION, SQNI_INPUT, SQNI_VALUE) "
+            runQuery("INSERT INTO SQOOP.SQ_LINK_INPUT"
+                + "(SQ_LNKI_LINK, SQ_LNKI_INPUT, SQ_LNKI_VALUE) "
                 + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
           }
         }
@@ -380,15 +406,15 @@ abstract public class DerbyTestCase {
 
       case 4:
         // Insert two links - CA and CB
-        runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
             + "VALUES('CA', 1)");
-        runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
             + "VALUES('CB', 1)");
 
         for (String ci : new String[]{"1", "2"}) {
           for (String i : new String[]{"1", "3", "13", "15"}) {
-            runQuery("INSERT INTO SQOOP.SQ_CONNECTION_INPUT"
-                + "(SQNI_CONNECTION, SQNI_INPUT, SQNI_VALUE) "
+            runQuery("INSERT INTO SQOOP.SQ_LINK_INPUT"
+                + "(SQ_LNKI_LINK, SQ_LNKI_INPUT, SQ_LNKI_VALUE) "
                 + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
           }
         }
@@ -414,7 +440,7 @@ abstract public class DerbyTestCase {
       case 2:
         for(String type : new String[] {"IMPORT", "EXPORT"}) {
           for(String name : new String[] {"JA", "JB"} ) {
-            runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_CONNECTION, SQB_TYPE)"
+            runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_LINK, SQB_TYPE)"
                 + " VALUES('" + name + "', 1, '" + type + "')");
           }
         }
@@ -441,19 +467,19 @@ abstract public class DerbyTestCase {
 
       case 4:
         for (String name : new String[]{"JA", "JB", "JC", "JD"}) {
-          runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_CONNECTION, SQB_TO_CONNECTION)"
+          runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)"
               + " VALUES('" + name + "', 1, 1)");
         }
 
         // Odd IDs inputs have values
         for (String ci : new String[]{"1", "2", "3", "4"}) {
-          for (String i : new String[]{"5", "9", "17"}) {
+          for (String i : new String[]{"5", "9", "13"}) {
             runQuery("INSERT INTO SQOOP.SQ_JOB_INPUT"
                 + "(SQBI_JOB, SQBI_INPUT, SQBI_VALUE) "
                 + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
           }
 
-          for (String i : new String[]{"7", "11", "19"}) {
+          for (String i : new String[]{"7", "11", "15"}) {
             runQuery("INSERT INTO SQOOP.SQ_JOB_INPUT"
                 + "(SQBI_JOB, SQBI_INPUT, SQBI_VALUE) "
                 + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
@@ -524,71 +550,70 @@ abstract public class DerbyTestCase {
 
   protected MConnector getConnector() {
     return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test",
-      getConnectionForms(), getJobForms(), getJobForms());
+      getLinkConfig(), getFromConfig(), getToConfig());
   }
-
-  protected MDriverConfig getDriverConfig() {
-    return new MDriverConfig(getConnectionForms(), getJobForms(),
-        Driver.CURRENT_DRIVER_VERSION);
+  
+  protected MDriver getDriver() {
+    return new MDriver(getDriverConfig(), DriverBean.CURRENT_DRIVER_VERSION);
   }
 
   protected void fillLink(MLink link) {
-    List<MForm> forms;
-
-    forms = link.getConnectorPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value1");
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value2");
-
-    forms = link.getFrameworkPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value13");
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value15");
+    List<MConfig> configs = link.getConnectorLinkConfig().getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Value1");
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Value2");
   }
 
   protected void fillJob(MJob job) {
-    List<MForm> forms;
+    List<MConfig> configs = job.getJobConfig(Direction.FROM).getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Value1");
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Value2");
 
-    forms = job.getConnectorPart(Direction.FROM).getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value1");
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value2");
+    configs = job.getJobConfig(Direction.TO).getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Value1");
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Value2");
 
-    forms = job.getConnectorPart(Direction.TO).getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value1");
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value2");
-
-    forms = job.getFrameworkPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Value13");
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Value15");
+    configs = job.getDriverConfig().getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Value13");
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Value15");
   }
 
-  protected MConnectionForms getConnectionForms() {
-    return new MConnectionForms(getForms());
+  protected MLinkConfig getLinkConfig() {
+    return new MLinkConfig(getConfigs());
+  }
+
+  protected MFromConfig getFromConfig() {
+    return  new MFromConfig(getConfigs());
+  }
+
+  protected MToConfig getToConfig() {
+    return  new MToConfig(getConfigs());
   }
   
-  protected MJobForms getJobForms() {
-    return  new MJobForms(getForms());
+  protected MDriverConfig getDriverConfig() {
+    return  new MDriverConfig(getConfigs());
   }
 
-  protected List<MForm> getForms() {
-    List<MForm> forms = new LinkedList<MForm>();
+  protected List<MConfig> getConfigs() {
+    List<MConfig> jobConfigs = new LinkedList<MConfig>();
 
-    List<MInput<?>> inputs;
-    MInput input;
-
-    inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I1", false, (short)30);
+    List<MInput<?>> inputs = new LinkedList<MInput<?>>();
+    MInput input = new MStringInput("I1", false, (short)30);
     inputs.add(input);
     input = new MMapInput("I2", false);
     inputs.add(input);
-    forms.add(new MForm("F1", inputs));
+    // adding the from part of the job config
+    jobConfigs.add(new MConfig("C1", inputs));
 
+    // to
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput("I3", false, (short)30);
     inputs.add(input);
     input = new MMapInput("I4", false);
     inputs.add(input);
-    forms.add(new MForm("F2", inputs));
+    // adding the to part of the job config
+    jobConfigs.add(new MConfig("C2", inputs));
 
-    return forms;
+    return jobConfigs;
   }
 
   /**
@@ -641,8 +666,8 @@ abstract public class DerbyTestCase {
    * @throws Exception
    */
   protected void generateDatabaseState() throws Exception {
-    for(String tbl : new String[] {"SQ_CONNECTOR", "SQ_FORM", "SQ_INPUT",
-      "SQ_CONNECTION", "SQ_CONNECTION_INPUT", "SQ_JOB", "SQ_JOB_INPUT"}) {
+    for(String tbl : new String[] {"SQ_CONNECTOR", "SQ_CONFIG", "SQ_INPUT",
+      "SQ_LINK", "SQ_LINK_INPUT", "SQ_JOB", "SQ_JOB_INPUT"}) {
       generateTableState("SQOOP." + tbl);
     }
   }

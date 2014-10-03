@@ -58,12 +58,12 @@ public abstract class SqoopConnector {
   }
 
   /**
-   * @return Get connection configuration class
+   * @return Get link configuration group class
    */
   public abstract Class getLinkConfigurationClass();
 
   /**
-   * @return Get job configuration class for given type or null if not supported
+   * @return Get job configuration group class per direction type or null if not supported
    */
   public abstract Class getJobConfigurationClass(Direction jobType);
 
@@ -79,12 +79,10 @@ public abstract class SqoopConnector {
 
   /**
    * Returns validation object that Sqoop can use to validate user
-   * supplied forms before accepting them. This object will be used both for
-   * connection and job forms.
-   *
+   * supplied configs before accepting them. This object will be used both link and job configs
    * @return Validator object
    */
-  public abstract Validator getValidator();
+  public abstract Validator getConfigValidator();
 
   /**
    * Returns an {@linkplain RepositoryUpgrader} object that can upgrade the

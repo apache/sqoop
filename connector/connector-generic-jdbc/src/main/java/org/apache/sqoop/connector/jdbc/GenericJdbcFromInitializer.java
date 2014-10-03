@@ -45,34 +45,34 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
   private GenericJdbcExecutor executor;
 
   @Override
-  public void initialize(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
-    configureJdbcProperties(context.getContext(), linkConf, fromJobConf);
+  public void initialize(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    configureJdbcProperties(context.getContext(), linkConfig, fromJobConfig);
     try {
-      configurePartitionProperties(context.getContext(), linkConf, fromJobConf);
-      configureTableProperties(context.getContext(), linkConf, fromJobConf);
+      configurePartitionProperties(context.getContext(), linkConfig, fromJobConfig);
+      configureTableProperties(context.getContext(), linkConfig, fromJobConfig);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
+  public List<String> getJars(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     List<String> jars = new LinkedList<String>();
 
-    jars.add(ClassUtils.jarForClass(linkConf.link.jdbcDriver));
+    jars.add(ClassUtils.jarForClass(linkConfig.linkConfig.jdbcDriver));
 
     return jars;
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
-    configureJdbcProperties(context.getContext(), linkConf, fromJobConf);
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    configureJdbcProperties(context.getContext(), linkConfig, fromJobConfig);
 
-    String schemaName = fromJobConf.fromJobConfig.tableName;
+    String schemaName = fromJobConfig.fromJobConfig.tableName;
     if(schemaName == null) {
       schemaName = "Query";
-    } else if(fromJobConf.fromJobConfig.schemaName != null) {
-      schemaName = fromJobConf.fromJobConfig.schemaName + "." + schemaName;
+    } else if(fromJobConfig.fromJobConfig.schemaName != null) {
+      schemaName = fromJobConfig.fromJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -117,11 +117,11 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
-    String driver = connectionConfig.link.jdbcDriver;
-    String url = connectionConfig.link.connectionString;
-    String username = connectionConfig.link.username;
-    String password = connectionConfig.link.password;
+  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    String driver = linkConfig.linkConfig.jdbcDriver;
+    String url = linkConfig.linkConfig.connectionString;
+    String username = linkConfig.linkConfig.username;
+    String password = linkConfig.linkConfig.password;
 
     assert driver != null;
     assert url != null;
@@ -129,7 +129,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
+  private void configurePartitionProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     // ----- configure column name -----
 
     String partitionColumnName = fromJobConfig.fromJobConfig.partitionColumn;
@@ -234,7 +234,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     }
   }
 
-  private void configureTableProperties(MutableContext context, LinkConfiguration connectionConfig, FromJobConfiguration fromJobConfig) {
+  private void configureTableProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     String dataSql;
     String fieldNames;
 

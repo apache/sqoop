@@ -43,7 +43,6 @@ public final class ResourceBundleSerialization {
     for (ResourceBundle bundle : bundles) {
       array.add(extractResourceBundle(bundle));
     }
-
     return array;
   }
 
@@ -58,7 +57,6 @@ public final class ResourceBundleSerialization {
     return json;
   }
 
-  @SuppressWarnings("unchecked")
   public static List<ResourceBundle> restoreResourceBundles(JSONArray array) {
     List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
     for (Object item : array) {

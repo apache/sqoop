@@ -17,26 +17,23 @@
  */
 package org.apache.sqoop.client.request;
 
-import org.apache.sqoop.json.DriverConfigBean;
+import org.apache.sqoop.json.DriverBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- * Provide cRud semantics over RESTfull HTTP API for driverConfig. Only read
- * is supported as creation, update and delete is not allowed.
+ * Provide CRUD semantics over RESTfull HTTP API for driverConfig
  */
 public class DriverConfigResourceRequest extends ResourceRequest {
 
   public static final String RESOURCE = "v1/config/driver";
 
-  public DriverConfigBean read(String serverUrl) {
+  public DriverBean read(String serverUrl) {
     String response = null;
     response = super.get(serverUrl + RESOURCE);
     JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
-
-    DriverConfigBean driverConfigBean = new DriverConfigBean();
-    driverConfigBean.restore(jsonObject);
-
-    return driverConfigBean;
+    DriverBean driverBean = new DriverBean();
+    driverBean.restore(jsonObject);
+    return driverBean;
   }
 }

@@ -26,12 +26,12 @@ public abstract class Loader<LinkConfiguration, JobConfiguration> {
    * Load data to target.
    *
    * @param context Loader context object
-   * @param linkConfiguration link configuration
-   * @param jobConfiguration Job configuration
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object
    * @throws Exception
    */
-  public abstract void load(LoaderContext context,
-                            LinkConfiguration linkConfiguration,
-                            JobConfiguration jobConfiguration) throws Exception;
+	public abstract void load(LoaderContext context,
+			LinkConfiguration linkConfiguration,
+			JobConfiguration jobConfiguration) throws Exception;
 
 }

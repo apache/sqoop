@@ -20,6 +20,13 @@ package org.apache.sqoop.driver;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
@@ -33,13 +40,6 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class TestJobManager {
   private JobManager jobManager;
@@ -99,7 +99,7 @@ public class TestJobManager {
 
   @Test
   public void testGetLink() {
-    MLink testLink = new MLink(123l, null, null);
+    MLink testLink = new MLink(123l, null);
     testLink.setEnabled(true);
     MLink mConnectionSpy = org.mockito.Mockito.spy(testLink);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
@@ -111,7 +111,7 @@ public class TestJobManager {
 
   @Test
   public void testDisabledLink() {
-    MLink testConnection = new MLink(123l, null, null);
+    MLink testConnection = new MLink(123l, null);
     testConnection.setPersistenceId(1234);
     testConnection.setEnabled(false);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection id: "

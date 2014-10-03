@@ -17,29 +17,23 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.List;
+
 /**
- * Describes the configs associated with the {@link Driver} for executing sqoop jobs.
+ * Config describing all required information for the driver
+ * NOTE: It extends a config list since {@link MToConfig} could consist of a related config groups
+ *       In future this could be simplified to hold a single list of all configs for the driver
+
  */
-public class MDriverConfig extends MPersistableEntity implements MClonable {
-
-  private final MConnectionForms connectionForms;
-  private final MJobForms jobForms;
-  String version;
-
-  public MDriverConfig(MConnectionForms connectionForms, MJobForms jobForms, String version) {
-    this.connectionForms = connectionForms;
-    this.jobForms = jobForms;
-    this.version = version;
+public class MDriverConfig extends MConfigList {
+  public MDriverConfig(List<MConfig> configs) {
+    super(configs);
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("driver-");
-    sb.append(getPersistenceId()).append(":");
-    sb.append("version = " + version);
-    sb.append(", ").append(connectionForms.toString());
-    sb.append(jobForms.toString());
-
+    StringBuilder sb = new StringBuilder("Driver:");
+    sb.append(super.toString());
     return sb.toString();
   }
 
@@ -53,45 +47,18 @@ public class MDriverConfig extends MPersistableEntity implements MClonable {
       return false;
     }
 
-    MDriverConfig mo = (MDriverConfig) other;
-    return version.equals(mo.getVersion()) &&
-      connectionForms.equals(mo.connectionForms) &&
-      jobForms.equals(mo.jobForms);
+    MDriverConfig mDriver = (MDriverConfig) other;
+    return super.equals(mDriver);
   }
 
   @Override
   public int hashCode() {
-    int result = connectionForms.hashCode();
-    result = 31 * result + jobForms.hashCode();
-    result = 31 * result + version.hashCode();
-    return result;
-  }
-
-  public MConnectionForms getConnectionForms() {
-    return connectionForms;
-  }
-
-  public MJobForms getJobForms() {
-    return jobForms;
+    return super.hashCode();
   }
 
   @Override
   public MDriverConfig clone(boolean cloneWithValue) {
-    //Framework never have any values filled
-    cloneWithValue = false;
-    MDriverConfig copy = new MDriverConfig(this.getConnectionForms().clone(cloneWithValue),
-        this.getJobForms().clone(cloneWithValue), this.version);
-    copy.setPersistenceId(this.getPersistenceId());
+    MDriverConfig copy = new MDriverConfig(super.clone(cloneWithValue).getConfigs());
     return copy;
   }
-
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
 }
-

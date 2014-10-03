@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import static org.apache.sqoop.json.util.ConfigSerialization.CREATION_DATE;
+import static org.apache.sqoop.json.util.ConfigSerialization.CREATION_USER;
+import static org.apache.sqoop.json.util.ConfigSerialization.ENABLED;
+import static org.apache.sqoop.json.util.ConfigSerialization.UPDATE_DATE;
+import static org.apache.sqoop.json.util.ConfigSerialization.UPDATE_USER;
+import static org.apache.sqoop.json.util.ConfigSerialization.extractConfigList;
+import static org.apache.sqoop.json.util.ConfigSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.CONNECTOR_CONFIGS;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.DRIVER_CONFIGS;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.extractResourceBundle;
+import static org.apache.sqoop.json.util.ResourceBundleSerialization.restoreResourceBundle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,11 +37,18 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import static org.apache.sqoop.json.util.FormSerialization.*;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MToConfig;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
- *
+ * Json representation of the job config
  */
 public class JobBean implements JsonBean {
 
@@ -47,9 +59,9 @@ public class JobBean implements JsonBean {
   private static final String TO_LINK_ID = "to-link-id";
   private static final String FROM_CONNECTOR_ID = "from-connector-id";
   private static final String TO_CONNECTOR_ID = "to-connector-id";
-  private static final String FROM_CONNECTOR_PART = "from-connector";
-  private static final String TO_CONNECTOR_PART = "to-connector";
-  private static final String FRAMEWORK_PART = "framework";
+  private static final String FROM_CONFIG = "from-config";
+  private static final String TO_CONFIG = "to-config";
+  private static final String DRIVER_CONFIG = "driver-config";
 
   // Required
   private List<MJob> jobs;
@@ -114,18 +126,21 @@ public class JobBean implements JsonBean {
       object.put(CREATION_DATE, job.getCreationDate().getTime());
       object.put(UPDATE_USER, job.getLastUpdateUser());
       object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
-      object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
-      object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
+      // job link associated connectors
       object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
       object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
-      object.put(FROM_CONNECTOR_PART,
-        extractForms(job.getConnectorPart(Direction.FROM).getForms(),skipSensitive));
-      object.put(TO_CONNECTOR_PART,
-          extractForms(job.getConnectorPart(Direction.TO).getForms(), skipSensitive));
-      object.put(FRAMEWORK_PART,
-        extractForms(job.getFrameworkPart().getForms(), skipSensitive));
+      // job associated links
+      object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
+      object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
+      // job configs
+      object.put(FROM_CONFIG, extractConfigList(job
+          .getJobConfig(Direction.FROM).getConfigs(), skipSensitive));
+      object.put(TO_CONFIG,
+          extractConfigList(job.getJobConfig(Direction.TO).getConfigs(), skipSensitive));
+      object.put(DRIVER_CONFIG,
+          extractConfigList(job.getDriverConfig().getConfigs(), skipSensitive));
 
-      array.add(object);
+    array.add(object);
     }
 
     JSONObject all = new JSONObject();
@@ -160,22 +175,22 @@ public class JobBean implements JsonBean {
       long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
       long fromConnectionId = (Long) object.get(FROM_LINK_ID);
       long toConnectionId = (Long) object.get(TO_LINK_ID);
-      JSONArray fromConnectorPart = (JSONArray) object.get(FROM_CONNECTOR_PART);
-      JSONArray toConnectorPart = (JSONArray) object.get(TO_CONNECTOR_PART);
-      JSONArray frameworkPart = (JSONArray) object.get(FRAMEWORK_PART);
+      JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG);
+      JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG);
+      JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG);
 
-      List<MForm> fromConnectorParts = restoreForms(fromConnectorPart);
-      List<MForm> toConnectorParts = restoreForms(toConnectorPart);
-      List<MForm> frameworkForms = restoreForms(frameworkPart);
+      List<MConfig> fromConfig = restoreConfigList(fromConfigJson);
+      List<MConfig> toConfig = restoreConfigList(toConfigJson);
+      List<MConfig> driverConfig = restoreConfigList(driverConfigJson);
 
       MJob job = new MJob(
         fromConnectorId,
         toConnectorId,
         fromConnectionId,
         toConnectionId,
-        new MJobForms(fromConnectorParts),
-        new MJobForms(toConnectorParts),
-        new MJobForms(frameworkForms)
+        new MFromConfig(fromConfig),
+        new MToConfig(toConfig),
+        new MDriverConfig(driverConfig)
       );
 
       job.setPersistenceId((Long) object.get(ID));

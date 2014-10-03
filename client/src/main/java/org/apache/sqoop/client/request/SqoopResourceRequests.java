@@ -19,7 +19,7 @@ package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.DriverConfigBean;
+import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
@@ -83,7 +83,7 @@ public class SqoopResourceRequests {
     return submissionRequest;
   }
 
-  public DriverConfigBean readDriverConfig() {
+  public DriverBean readDriver() {
     return getDriverConfigResourceRequest().read(serverUrl);
   }
 

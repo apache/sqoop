@@ -18,14 +18,14 @@
 package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.Config;
 
 /**
  *
  */
 @ConfigurationClass
 public class FromJobConfiguration {
-  @Form public FromJobConfig fromJobConfig;
+  @Config public FromJobConfig fromJobConfig;
 
   public FromJobConfiguration() {
     fromJobConfig = new FromJobConfig();

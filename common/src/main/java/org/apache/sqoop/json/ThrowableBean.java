@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Transfer throwable instance.
+ * Transfer throwable instance as a throwable bean.
  */
 public class ThrowableBean implements JsonBean {
 

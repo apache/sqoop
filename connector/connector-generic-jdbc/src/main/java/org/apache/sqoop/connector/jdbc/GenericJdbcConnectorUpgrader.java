@@ -18,21 +18,20 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.spi.RepositoryUpgrader;
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJobForms;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.spi.RepositoryUpgrader;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MLinkConfig;
+
 public class GenericJdbcConnectorUpgrader extends RepositoryUpgrader {
-  private static final Logger LOG =
-    Logger.getLogger(GenericJdbcConnectorUpgrader.class);
+  private static final Logger LOG = Logger.getLogger(GenericJdbcConnectorUpgrader.class);
 
   /*
    * For now, there is no real upgrade. So copy all data over,
@@ -41,41 +40,40 @@ public class GenericJdbcConnectorUpgrader extends RepositoryUpgrader {
    */
 
   @Override
-  public void upgrade(MConnectionForms original,
-    MConnectionForms upgradeTarget) {
-    doUpgrade(original.getForms(), upgradeTarget.getForms());
+  public void upgrade(MLinkConfig original, MLinkConfig upgradeTarget) {
+    doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
   }
 
   @Override
-  public void upgrade(MJobForms original, MJobForms upgradeTarget) {
-    doUpgrade(original.getForms(), upgradeTarget.getForms());
+  public void upgrade(MConfigList original, MConfigList upgradeTarget) {
+    doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
   }
 
   @SuppressWarnings("unchecked")
-  private void doUpgrade(List<MForm> original, List<MForm> target) {
-    // Easier to find the form in the original forms list if we use a map.
-    // Since the constructor of MJobForms takes a list,
+  private void doUpgrade(List<MConfig> original, List<MConfig> target) {
+    // Easier to find the config in the original list if we use a map.
+    // Since the constructor takes a list,
     // index is not guaranteed to be the same, so we need to look for
     // equivalence
-    Map<String, MForm> formMap = new HashMap<String, MForm>();
-    for (MForm form : original) {
-      formMap.put(form.getName(), form);
+    Map<String, MConfig> configMap = new HashMap<String, MConfig>();
+    for (MConfig config : original) {
+      configMap.put(config.getName(), config);
     }
-    for (MForm form : target) {
-      List<MInput<?>> inputs = form.getInputs();
-      MForm originalForm = formMap.get(form.getName());
-      if (originalForm == null) {
-        LOG.warn("Form: '" + form.getName() + "' not present in old " +
-            "connector. So it and its inputs will not be transferred by the upgrader.");
+    for (MConfig config : target) {
+      List<MInput<?>> inputs = config.getInputs();
+      MConfig orginalConfig = configMap.get(config.getName());
+      if (orginalConfig == null) {
+        LOG.warn("Config: '" + config.getName() + "' not present in old " +
+            "generic JDBC connector. So it and its inputs will not be transferred by the upgrader.");
         continue;
       }
       for (MInput input : inputs) {
         try {
-          MInput originalInput = originalForm.getInput(input.getName());
+          MInput originalInput = orginalConfig.getInput(input.getName());
           input.setValue(originalInput.getValue());
         } catch (SqoopException ex) {
           LOG.warn("Input: '" + input.getName() + "' not present in old " +
-            "connector. So it will not be transferred by the upgrader.");
+            "generic JDBC connector. So it will not be transferred by the upgrader.");
         }
       }
     }

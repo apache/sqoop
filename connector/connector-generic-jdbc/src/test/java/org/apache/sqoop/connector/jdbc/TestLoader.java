@@ -82,10 +82,10 @@ public class TestLoader {
   public void testInsert() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    LinkConfiguration connectionConfig = new LinkConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
 
-    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
 
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
@@ -95,7 +95,7 @@ public class TestLoader {
     Loader loader = new GenericJdbcLoader();
     DummyReader reader = new DummyReader();
     LoaderContext loaderContext = new LoaderContext(context, reader, null);
-    loader.load(loaderContext, connectionConfig, jobConfig);
+    loader.load(loaderContext, linkConfig, jobConfig);
 
     int index = START;
     ResultSet rs = executor.executeQuery("SELECT * FROM "

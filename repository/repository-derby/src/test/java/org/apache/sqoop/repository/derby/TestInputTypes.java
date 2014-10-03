@@ -19,11 +19,11 @@ package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MEnumInput;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
@@ -86,19 +86,19 @@ public class TestInputTypes extends DerbyTestCase {
   @Test
   public void testEntityDataSerialization() throws Exception {
     MConnector connector = getConnector();
-    MDriverConfig driverConfig = getDriverConfig();
+    MDriver driver = getDriver();
 
     // Register objects for everything and our new connector
     handler.registerConnector(connector, getDerbyDatabaseConnection());
-    handler.registerDriverConfig(driverConfig, getDerbyDatabaseConnection());
+    handler.registerDriver(driver, getDerbyDatabaseConnection());
 
     // Inserted values
     Map<String, String> map = new HashMap<String, String>();
     map.put("A", "B");
 
     // Connection object with all various values
-    MLink link = new MLink(connector.getPersistenceId(), connector.getConnectionForms(), driverConfig.getConnectionForms());
-    MConnectionForms forms = link.getConnectorPart();
+    MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
+    MLinkConfig forms = link.getConnectorLinkConfig();
     forms.getStringInput("f.String").setValue("A");
     forms.getMapInput("f.Map").setValue(map);
     forms.getIntegerInput("f.Integer").setValue(1);
@@ -111,7 +111,7 @@ public class TestInputTypes extends DerbyTestCase {
 
     // Retrieve created link
     MLink retrieved = handler.findLink(link.getPersistenceId(), getDerbyDatabaseConnection());
-    forms = retrieved.getConnectorPart();
+    forms = retrieved.getConnectorLinkConfig();
     assertEquals("A", forms.getStringInput("f.String").getValue());
     assertEquals(map, forms.getMapInput("f.Map").getValue());
     assertEquals(1, (int)forms.getIntegerInput("f.Integer").getValue());
@@ -125,8 +125,8 @@ public class TestInputTypes extends DerbyTestCase {
    * @return Forms with all data types
    */
   @Override
-  protected List<MForm> getForms() {
-    List<MForm> forms = new LinkedList<MForm>();
+  protected List<MConfig> getConfigs() {
+    List<MConfig> forms = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs;
     MInput input;
@@ -148,7 +148,7 @@ public class TestInputTypes extends DerbyTestCase {
     input = new MEnumInput("f.Enum", false, new String[] {"YES", "NO"});
     inputs.add(input);
 
-    forms.add(new MForm("f", inputs));
+    forms.add(new MConfig("f", inputs));
     return forms;
   }
 }

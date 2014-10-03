@@ -18,16 +18,19 @@
  */
 package org.apache.sqoop.driver;
 
-import org.apache.sqoop.driver.DriverConfigUpgrader;
-import org.apache.sqoop.model.*;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MStringInput;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  */
@@ -39,35 +42,14 @@ public class TestDriverConfigUpgrader {
   public void initializeUpgrader() {
     upgrader = new DriverConfigUpgrader();
   }
-
   /**
-   * We take the same forms on input and output and we
+   * We take the same configs on input and output and we
    * expect that all values will be correctly transferred.
    */
   @Test
-  public void testConnectionUpgrade() {
-    MConnectionForms original = connection1();
-    MConnectionForms target = connection1();
-
-    original.getStringInput("f1.s1").setValue("A");
-    original.getStringInput("f1.s2").setValue("B");
-    original.getIntegerInput("f1.i").setValue(3);
-
-    upgrader.upgrade(original, target);
-
-    assertEquals("A", target.getStringInput("f1.s1").getValue());
-    assertEquals("B", target.getStringInput("f1.s2").getValue());
-    assertEquals(3, (long)target.getIntegerInput("f1.i").getValue());
-  }
-
-  /**
-   * We take the same forms on input and output and we
-   * expect that all values will be correctly transferred.
-   */
-  @Test
-  public void testJobUpgrade() {
-    MJobForms original = job1();
-    MJobForms target = job1();
+  public void testJobConfigTyeUpgrade() {
+    MConfigList original = job();
+    MConfigList target = job();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
@@ -85,8 +67,8 @@ public class TestDriverConfigUpgrader {
    */
   @Test
   public void testNonExistingInput() {
-    MConnectionForms original = connection1();
-    MConnectionForms target = connection2();
+    MConfigList original = job1();
+    MConfigList target = job2();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
@@ -104,9 +86,9 @@ public class TestDriverConfigUpgrader {
    * therefore is missing in the original.
    */
   @Test
-  public void testNonExistingForm() {
-    MConnectionForms original = connection1();
-    MConnectionForms target = connection3();
+  public void testNonExistingConfig() {
+    MConfigList original = job1();
+    MConfigList target = job3();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
@@ -119,25 +101,25 @@ public class TestDriverConfigUpgrader {
     assertNull(target.getIntegerInput("f2.i").getValue());
   }
 
-  MJobForms job1() {
-    return new MJobForms(forms1());
+  MConfigList job() {
+    return new MConfigList(configs1());
   }
 
-  MConnectionForms connection1() {
-    return new MConnectionForms(forms1());
+  MConfigList job1() {
+    return new MConfigList(configs1());
   }
 
-  MConnectionForms connection2() {
-    return new MConnectionForms(forms2());
+  MConfigList job2() {
+    return new MConfigList(configs2());
   }
 
-  MConnectionForms connection3() {
-    return new MConnectionForms(forms3());
+  MConfigList job3() {
+    return new MConfigList(configs3());
   }
 
-  List<MForm> forms1() {
-    List<MForm> list = new LinkedList<MForm>();
-    list.add(new MForm("f1", inputs1("f1")));
+  List<MConfig> configs1() {
+    List<MConfig> list = new LinkedList<MConfig>();
+    list.add(new MConfig("f1", inputs1("f1")));
     return list;
   }
 
@@ -149,9 +131,9 @@ public class TestDriverConfigUpgrader {
     return list;
   }
 
-  List<MForm> forms2() {
-    List<MForm> list = new LinkedList<MForm>();
-    list.add(new MForm("f1", inputs2("f1")));
+  List<MConfig> configs2() {
+    List<MConfig> list = new LinkedList<MConfig>();
+    list.add(new MConfig("f1", inputs2("f1")));
     return list;
   }
 
@@ -163,9 +145,9 @@ public class TestDriverConfigUpgrader {
     return list;
   }
 
-  List<MForm> forms3() {
-    List<MForm> list = new LinkedList<MForm>();
-    list.add(new MForm("f2", inputs1("f2")));
+  List<MConfig> configs3() {
+    List<MConfig> list = new LinkedList<MConfig>();
+    list.add(new MConfig("f2", inputs1("f2")));
     return list;
   }
 }

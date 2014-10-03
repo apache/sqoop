@@ -119,7 +119,7 @@ public class ConnectorManager implements Reconfigurable {
     return handler.getConnector().getBundle(locale);
   }
 
-  public MConnector getConnectorMetadata(long connectorId) {
+  public MConnector getConnectorConfig(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     if(handler == null) {
       return null;

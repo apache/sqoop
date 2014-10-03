@@ -22,29 +22,23 @@ import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 
 /**
- * Model describing entire job object including both connector and
- * framework part.
+ * Model describing entire job object including the from/to and driver config information
+ * to execute the job
  */
 public class MJob extends MAccountableEntity implements MClonable {
   /**
-   * Connector reference.
-   *
-   * Job object do not immediately depend on connector as there is indirect
+   * NOTE :  Job object do not immediately depend on connector as there is indirect
    * dependency through link object, but having this dependency explicitly
-   * carried along helps a lot.
+   * carried along helps with not having to make the DB call everytime
    */
   private final long fromConnectorId;
   private final long toConnectorId;
-
-  /**
-   * Corresponding link objects for connector.
-   */
   private final long fromLinkId;
   private final long toLinkId;
 
-  private final MJobForms fromConnectorPart;
-  private final MJobForms toConnectorPart;
-  private final MJobForms frameworkPart;
+  private final MFromConfig fromConfig;
+  private final MToConfig toConfig;
+  private final MDriverConfig driverConfig;
 
   /**
    * Default constructor to build  new MJob model.
@@ -53,24 +47,24 @@ public class MJob extends MAccountableEntity implements MClonable {
    * @param toConnectorId TO Connector id
    * @param fromLinkId FROM Link id
    * @param toLinkId TO Link id
-   * @param fromPart FROM Connector forms
-   * @param toPart TO Connector forms
-   * @param frameworkPart Framework forms
+   * @param fromConfig FROM job config
+   * @param toConfig TO job config
+   * @param driverConfig driver config
    */
   public MJob(long fromConnectorId,
               long toConnectorId,
-              long fromConnectionId,
-              long toConnectionId,
-              MJobForms fromPart,
-              MJobForms toPart,
-              MJobForms frameworkPart) {
+              long fromLinkId,
+              long toLinkId,
+              MFromConfig fromConfig,
+              MToConfig toConfig,
+              MDriverConfig driverConfig) {
     this.fromConnectorId = fromConnectorId;
     this.toConnectorId = toConnectorId;
-    this.fromLinkId = fromConnectionId;
-    this.toLinkId = toConnectionId;
-    this.fromConnectorPart = fromPart;
-    this.toConnectorPart = toPart;
-    this.frameworkPart = frameworkPart;
+    this.fromLinkId = fromLinkId;
+    this.toLinkId = toLinkId;
+    this.fromConfig = fromConfig;
+    this.toConfig = toConfig;
+    this.driverConfig = driverConfig;
   }
 
   /**
@@ -80,9 +74,9 @@ public class MJob extends MAccountableEntity implements MClonable {
    */
   public MJob(MJob other) {
     this(other,
-        other.getConnectorPart(Direction.FROM).clone(true),
-        other.getConnectorPart(Direction.TO).clone(true),
-        other.frameworkPart.clone(true));
+        other.getFromJobConfig().clone(true),
+        other.getToJobConfig().clone(true),
+        other.driverConfig.clone(true));
   }
 
   /**
@@ -92,29 +86,29 @@ public class MJob extends MAccountableEntity implements MClonable {
    * used otherwise.
    *
    * @param other MJob model to copy
-   * @param fromPart FROM Connector forms
-   * @param toPart TO Connector forms
-   * @param frameworkPart Framework forms
+   * @param fromConfig FROM Job config
+   * @param toConfig TO Job config
+   * @param driverConfig driverConfig
    */
-  public MJob(MJob other, MJobForms fromPart, MJobForms toPart, MJobForms frameworkPart) {
+  public MJob(MJob other, MFromConfig fromConfig, MToConfig toConfig, MDriverConfig driverConfig) {
     super(other);
 
     this.fromConnectorId = other.getConnectorId(Direction.FROM);
     this.toConnectorId = other.getConnectorId(Direction.TO);
     this.fromLinkId = other.getLinkId(Direction.FROM);
     this.toLinkId = other.getLinkId(Direction.TO);
-    this.fromConnectorPart = fromPart;
-    this.toConnectorPart = toPart;
-    this.frameworkPart = frameworkPart;
+    this.fromConfig = fromConfig;
+    this.toConfig = toConfig;
+    this.driverConfig = driverConfig;
     this.setPersistenceId(other.getPersistenceId());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("job");
-    sb.append(" connector-from-part: ").append(getConnectorPart(Direction.FROM));
-    sb.append(", connector-to-part: ").append(getConnectorPart(Direction.TO));
-    sb.append(", framework-part: ").append(frameworkPart);
+    sb.append("From job config: ").append(getJobConfig(Direction.FROM));
+    sb.append(", To job config: ").append(getJobConfig(Direction.TO));
+    sb.append(", Driver config: ").append(driverConfig);
 
     return sb.toString();
   }
@@ -145,21 +139,29 @@ public class MJob extends MAccountableEntity implements MClonable {
     }
   }
 
-  public MJobForms getConnectorPart(Direction type) {
+  public MConfigList getJobConfig(Direction type) {
     switch(type) {
       case FROM:
-        return fromConnectorPart;
+        return fromConfig;
 
       case TO:
-        return toConnectorPart;
+        return toConfig;
 
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
-  public MJobForms getFrameworkPart() {
-    return frameworkPart;
+  public MFromConfig getFromJobConfig() {
+    return fromConfig;
+  }
+
+  public MToConfig getToJobConfig() {
+    return toConfig;
+  }
+
+  public MDriverConfig getDriverConfig() {
+    return driverConfig;
   }
 
   @Override
@@ -172,9 +174,9 @@ public class MJob extends MAccountableEntity implements MClonable {
           getConnectorId(Direction.TO),
           getLinkId(Direction.FROM),
           getLinkId(Direction.TO),
-          getConnectorPart(Direction.FROM).clone(false),
-          getConnectorPart(Direction.TO).clone(false),
-          frameworkPart.clone(false));
+          getFromJobConfig().clone(false),
+          getToJobConfig().clone(false),
+          getDriverConfig().clone(false));
     }
   }
 
@@ -194,8 +196,8 @@ public class MJob extends MAccountableEntity implements MClonable {
         && (job.getLinkId(Direction.FROM) == this.getLinkId(Direction.FROM))
         && (job.getLinkId(Direction.TO) == this.getLinkId(Direction.TO))
         && (job.getPersistenceId() == this.getPersistenceId())
-        && (job.getConnectorPart(Direction.FROM).equals(this.getConnectorPart(Direction.FROM)))
-        && (job.getConnectorPart(Direction.TO).equals(this.getConnectorPart(Direction.TO)))
-        && (job.frameworkPart.equals(this.frameworkPart));
+        && (job.getFromJobConfig().equals(this.getJobConfig(Direction.FROM)))
+        && (job.getToJobConfig().equals(this.getJobConfig(Direction.TO)))
+        && (job.getDriverConfig().equals(this.driverConfig));
   }
 }

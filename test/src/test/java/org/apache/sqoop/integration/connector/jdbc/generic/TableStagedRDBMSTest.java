@@ -17,15 +17,15 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -46,7 +46,7 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsLink);
+    fillRdbmsLinkConfig(rdbmsLink);
     saveLink(rdbmsLink);
 
     // HDFS link
@@ -57,13 +57,19 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(hdfsLink.getPersistenceId(),
         rdbmsLink.getPersistenceId());
 
-    // Connector values
-    MFormList forms = job.getConnectorPart(Direction.TO);
-    forms.getStringInput("toJobConfig.tableName").setValue(
+    // fill HDFS "FROM" config
+    fillHdfsFromConfig(job);
+
+    // fill rdbms "TO" config here
+    MConfigList configs = job.getJobConfig(Direction.TO);
+    configs.getStringInput("toJobConfig.tableName").setValue(
       provider.escapeTableName(getTableName()));
-    forms.getStringInput("toJobConfig.stageTableName").setValue(
+    configs.getStringInput("toJobConfig.stageTableName").setValue(
       provider.escapeTableName(stageTableName));
-    fillFromJobForm(job);
+    // driver config
+    MConfigList driverConfig = job.getDriverConfig();
+    driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(3);
+
     saveJob(job);
 
     executeJob(job);

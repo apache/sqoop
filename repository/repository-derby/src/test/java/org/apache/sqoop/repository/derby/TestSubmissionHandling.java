@@ -48,7 +48,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     createSchema();
 
     // We always needs connector and framework structures in place
-    loadConnectorAndDriverConfig();
+    loadConnectorLinkConfig();
 
     // We also always needs connection metadata in place
     loadLinks();

@@ -17,26 +17,27 @@
  */
 package org.apache.sqoop.client;
 
-import org.apache.sqoop.client.request.SqoopResourceRequests;
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.DriverConfigBean;
-import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ValidationResult;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+
+import org.apache.sqoop.client.request.SqoopResourceRequests;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.json.ValidationResultBean;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.validation.ConfigValidationResult;
+import org.apache.sqoop.validation.Status;
 
 /**
  * Sqoop client API.
@@ -69,9 +70,9 @@ public class SqoopClient {
   private Map<Long, ResourceBundle> connectorConfigBundles;
 
   /**
-   * Cached driverConfig.
+   * Cached driver.
    */
-  private MDriverConfig driverConfig;
+  private MDriver mDriver;
   /**
    * Cached driverConfig bundle.
    */
@@ -120,7 +121,7 @@ public class SqoopClient {
     connectorConfigBundles = new HashMap<Long, ResourceBundle>();
     driverConfigBundle = null;
     connectors = new HashMap<Long, MConnector>();
-    driverConfig = null;
+    mDriver = null;
     isAllConnectors = false;
   }
 
@@ -214,11 +215,10 @@ public class SqoopClient {
    * @param connectorId Connector id.
    * @return
    */
-  public ResourceBundle getConnectorConfigResourceBundle(long connectorId) {
+  public ResourceBundle getConnectorConfigBundle(long connectorId) {
     if(connectorConfigBundles.containsKey(connectorId)) {
       return connectorConfigBundles.get(connectorId);
     }
-
     retrieveConnector(connectorId);
     return connectorConfigBundles.get(connectorId);
   }
@@ -229,33 +229,46 @@ public class SqoopClient {
    * @return
    */
   public MDriverConfig getDriverConfig() {
-    if(driverConfig != null) {
-      return driverConfig.clone(false);
+    if (mDriver != null) {
+      return mDriver.clone(false).getDriverConfig();
     }
-    retrieveAndCacheDriverConfig();
-    return driverConfig.clone(false);
-
+    retrieveAndCacheDriver();
+    return mDriver.clone(false).getDriverConfig();
+  }
+  
+  /**
+   * Return driver.
+   *
+   * @return
+   */
+  public MDriver getDriver() {
+    if (mDriver != null) {
+      return mDriver.clone(false);
+    }
+    retrieveAndCacheDriver();
+    return mDriver.clone(false);
+ 
   }
 
   /**
    * Retrieve driverConfig and cache it.
    */
-  private void retrieveAndCacheDriverConfig() {
-    DriverConfigBean driverConfigBean =  resourceRequests.readDriverConfig();
-    driverConfig = driverConfigBean.getDriverConfig();
-    driverConfigBundle = driverConfigBean.getResourceBundle();
+  private void retrieveAndCacheDriver() {
+    DriverBean driverBean =  resourceRequests.readDriver();
+    mDriver = driverBean.getDriver();
+    driverConfigBundle = driverBean.getDriverConfigResourceBundle();
   }
 
   /**
    * Return driverConfig bundle.
-   *
+   *xx
    * @return
    */
   public ResourceBundle getDriverConfigBundle() {
     if(driverConfigBundle != null) {
       return driverConfigBundle;
     }
-    retrieveAndCacheDriverConfig();
+    retrieveAndCacheDriver();
     return driverConfigBundle;
   }
 
@@ -266,11 +279,7 @@ public class SqoopClient {
    * @return
    */
   public MLink createLink(long connectorId) {
-    return new MLink(
-      connectorId,
-      getConnector(connectorId).getConnectionForms(),
-      getDriverConfig().getConnectionForms()
-    );
+    return new MLink(connectorId, getConnector(connectorId).getLinkConfig());
   }
 
   /**
@@ -281,10 +290,9 @@ public class SqoopClient {
    */
   public MLink createLink(String connectorName) {
     MConnector connector = getConnector(connectorName);
-    if(connector == null) {
+    if (connector == null) {
       throw new SqoopException(ClientError.CLIENT_0003, connectorName);
     }
-
     return createLink(connector.getPersistenceId());
   }
 
@@ -362,9 +370,9 @@ public class SqoopClient {
       toLink.getConnectorId(),
       fromLink.getPersistenceId(),
       toLink.getPersistenceId(),
-      getConnector(fromLink.getConnectorId()).getJobForms(Direction.FROM),
-      getConnector(toLink.getConnectorId()).getJobForms(Direction.TO),
-      getDriverConfig().getJobForms()
+      getConnector(fromLink.getConnectorId()).getFromConfig(),
+      getConnector(toLink.getConnectorId()).getToConfig(),
+      getDriverConfig()
     );
   }
 
@@ -530,41 +538,36 @@ public class SqoopClient {
   }
 
   private Status applyLinkValidations(ValidationResultBean bean, MLink link) {
-    ValidationResult connector = bean.getValidationResults()[0];
-    ValidationResult driverConfig = bean.getValidationResults()[1];
-
+    ConfigValidationResult linkConfig = bean.getValidationResults()[0];
     // Apply validation results
-    FormUtils.applyValidation(link.getConnectorPart().getForms(), connector);
-    FormUtils.applyValidation(link.getFrameworkPart().getForms(), driverConfig);
-
+    ConfigUtils.applyValidation(link.getConnectorLinkConfig().getConfigs(), linkConfig);
     Long id = bean.getId();
     if(id != null) {
       link.setPersistenceId(id);
     }
-
-    return Status.getWorstStatus(connector.getStatus(), driverConfig.getStatus());
+    return Status.getWorstStatus(linkConfig.getStatus());
   }
 
   private Status applyJobValidations(ValidationResultBean bean, MJob job) {
-    ValidationResult fromConnector = bean.getValidationResults()[0];
-    ValidationResult toConnector = bean.getValidationResults()[1];
-    ValidationResult driverConfig = bean.getValidationResults()[2];
+    ConfigValidationResult fromConfig = bean.getValidationResults()[0];
+    ConfigValidationResult toConfig = bean.getValidationResults()[1];
+    // TODO(VB): fix this as part of SQOOP 1509
+    //ConfigValidationResult driverConfig = bean.getValidationResults()[2];
 
-    // Apply validation results
-    // @TODO(Abe): From/To validation.
-    FormUtils.applyValidation(
-        job.getConnectorPart(Direction.FROM).getForms(),
-        fromConnector);
-    FormUtils.applyValidation(job.getFrameworkPart().getForms(), driverConfig);
-    FormUtils.applyValidation(
-        job.getConnectorPart(Direction.TO).getForms(),
-        toConnector);
+    ConfigUtils.applyValidation(
+        job.getJobConfig(Direction.FROM).getConfigs(),
+        fromConfig);
+    ConfigUtils.applyValidation(
+        job.getJobConfig(Direction.TO).getConfigs(),
+        toConfig);
+    //ConfigUtils.applyValidation(job.getDriverConfig().getSelf().getConfigs(), driverConfig);
 
     Long id = bean.getId();
     if(id != null) {
       job.setPersistenceId(id);
     }
 
-    return Status.getWorstStatus(fromConnector.getStatus(), driverConfig.getStatus(), toConnector.getStatus());
+    return Status.getWorstStatus(fromConfig.getStatus(), toConfig.getStatus());
+       // driverConfig.getStatus());
   }
 }

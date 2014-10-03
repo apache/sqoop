@@ -50,28 +50,22 @@ public class LinkResourceRequest extends ResourceRequest {
   public ValidationResultBean create(String serverUrl, MLink link) {
     LinkBean linkBean = new LinkBean(link);
 
-    // Extract all form inputs including sensitive inputs
+    // Extract all config inputs including sensitive inputs
     JSONObject linkJson = linkBean.extract(false);
-
     String response = super.post(serverUrl + RESOURCE, linkJson.toJSONString());
-
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
-
     return validationBean;
   }
 
   public ValidationResultBean update(String serverUrl, MLink link) {
     LinkBean linkBean = new LinkBean(link);
 
-    // Extract all form inputs including sensitive inputs
+    // Extract all config inputs including sensitive inputs
     JSONObject linkJson = linkBean.extract(false);
-
     String response = super.put(serverUrl + RESOURCE + link.getPersistenceId(), linkJson.toJSONString());
-
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
-
     return validationBean;
   }
 

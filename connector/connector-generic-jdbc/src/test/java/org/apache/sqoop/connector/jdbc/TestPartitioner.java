@@ -58,12 +58,12 @@ public class TestPartitioner {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -3",
@@ -90,12 +90,12 @@ public class TestPartitioner {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -1",
@@ -120,12 +120,12 @@ public class TestPartitioner {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 13, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -4",
@@ -157,12 +157,12 @@ public class TestPartitioner {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -3.0",
@@ -189,12 +189,12 @@ public class TestPartitioner {
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         String.valueOf((double)(START + NUMBER_OF_ROWS - 1)));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5.0 <= DCOL AND DCOL < -1.6666666666666665",
@@ -211,12 +211,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(START));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(START + NUMBER_OF_ROWS - 1));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "-5 <= ICOL AND ICOL < -3",
@@ -235,12 +235,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START + NUMBER_OF_ROWS - 1)));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
       "-5 <= DCOL AND DCOL < -2",
@@ -257,12 +257,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(START)));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(START)));
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
       "DCOL = -5",
@@ -282,12 +282,12 @@ public class TestPartitioner {
         .toString());
 
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
 
     verifyResult(partitions, new String[]{
@@ -311,12 +311,12 @@ public class TestPartitioner {
         Time.valueOf("10:40:50").toString());
 
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
         "'01:01:01' <= TCOL AND TCOL < '04:14:17'",
@@ -337,12 +337,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
         Timestamp.valueOf("2013-12-31 10:40:50.654").toString());
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     verifyResult(partitions, new String[]{
         "'2013-01-01 01:01:01.123' <= TSCOL AND TSCOL < '2013-05-02 12:14:17.634'",
         "'2013-05-02 12:14:17.634' <= TSCOL AND TSCOL < '2013-08-31 23:27:34.144'",
@@ -362,12 +362,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "1");
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     verifyResult(partitions, new String[]{
       "BCOL = TRUE",
       "BCOL = FALSE",
@@ -386,12 +386,12 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "Z");
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 25, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "'A' <= VCCOL AND VCCOL < 'B'",
@@ -434,11 +434,11 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
       .CONNECTOR_JDBC_PARTITION_MAXVALUE, "Warty Warthog");
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     assertEquals(partitions.size(), 5);
     // First partition needs to contain entire upper bound
     assertTrue(partitions.get(0).toString().contains("Breezy Badger"));
@@ -458,13 +458,13 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "AAF");
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
 
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "'AAA' <= VCCOL AND VCCOL < 'AAB'",
@@ -488,14 +488,14 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_MAXVALUE, "AAE");
 
-    LinkConfiguration connConf = new LinkConfiguration();
-    FromJobConfiguration jobConf = new FromJobConfiguration();
-    jobConf.fromJobConfig.partitionColumnNull = true;
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+    jobConfig.fromJobConfig.partitionColumnNull = true;
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
 
-    List<Partition> partitions = partitioner.getPartitions(partitionerContext, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
         "VCCOL IS NULL",

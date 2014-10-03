@@ -24,7 +24,7 @@ import org.apache.sqoop.common.ErrorCode;
  */
 public enum ModelError implements ErrorCode {
 
-  MODEL_001("Attempt to pass two different set of MForms for single job type."),
+  MODEL_001("Attempt to pass two different set of MConfigs for single job type."),
 
   MODEL_002("Creating MJob of different job types"),
 
@@ -34,7 +34,7 @@ public enum ModelError implements ErrorCode {
 
   MODEL_005("Can't get field value"),
 
-  MODEL_006("Incompatible form list and configuration object"),
+  MODEL_006("Incompatible config list and configuration object"),
 
   MODEL_007("Primitive types in configuration objects are not allowed"),
 
@@ -42,7 +42,7 @@ public enum ModelError implements ErrorCode {
 
   MODEL_009("Invalid input name"),
 
-  MODEL_010("Form do not exist"),
+  MODEL_010("Config do not exist"),
 
   MODEL_011("Input do not exist"),
 

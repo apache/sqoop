@@ -23,15 +23,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Class annotation. Each class that is used a configuration object where user
- * is expected to provide input need to have this annotation.
+ * Class annotation to represent configuration for the connectors
+ * Each class that is used a configuration group object, the connector developer
+ * is expected to provide the inputs needed for this annotation
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ConfigurationClass {
 
   /**
-   * List of validators associated with this Configuration class.
+   * List of validators associated with this Configuration group class.
    *
    * @return
    */

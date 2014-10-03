@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -38,18 +43,19 @@ import static org.junit.Assert.*;
 public class TestJobHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
+  Connection derbyConnection;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
 
+    derbyConnection = getDerbyDatabaseConnection();
     handler = new DerbyRepositoryHandler();
 
     // We always needs schema for this test case
     createSchema();
 
-    // We always needs connector and framework structures in place
-    loadConnectorAndDriverConfig();
+    loadConnectorLinkConfig();
 
     // We always needs connection metadata in place
     loadLinks();
@@ -59,58 +65,53 @@ public class TestJobHandling extends DerbyTestCase {
   public void testFindJob() throws Exception {
     // Let's try to find non existing job
     try {
-      handler.findJob(1, getDerbyDatabaseConnection());
+      handler.findJob(1, derbyConnection);
       fail();
     } catch(SqoopException ex) {
       assertEquals(DerbyRepoError.DERBYREPO_0030, ex.getErrorCode());
     }
 
-    // Load prepared connections into database
     loadJobs();
 
-    MJob jobImport = handler.findJob(1, getDerbyDatabaseConnection());
-    assertNotNull(jobImport);
-    assertEquals(1, jobImport.getPersistenceId());
-    assertEquals("JA", jobImport.getName());
+    MJob firstJob = handler.findJob(1, derbyConnection);
+    assertNotNull(firstJob);
+    assertEquals(1, firstJob.getPersistenceId());
+    assertEquals("JA", firstJob.getName());
 
-    List<MForm> forms;
+    List<MConfig> configs;
 
-    // Check connector parts
-    forms = jobImport.getConnectorPart(Direction.FROM).getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Value5", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value5", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    configs = firstJob.getJobConfig(Direction.FROM).getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
 
-    forms = jobImport.getConnectorPart(Direction.TO).getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Value9", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value9", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    configs = firstJob.getJobConfig(Direction.TO).getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Value9", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value9", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
 
-    // Check framework part
-    forms = jobImport.getFrameworkPart().getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Value17", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value19", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    configs = firstJob.getDriverConfig().getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Value13", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value15", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
   @Test
   public void testFindJobs() throws Exception {
     List<MJob> list;
-
     // Load empty list on empty repository
-    list = handler.findJobs(getDerbyDatabaseConnection());
+    list = handler.findJobs(derbyConnection);
     assertEquals(0, list.size());
-
     loadJobs();
 
     // Load all two connections on loaded repository
-    list = handler.findJobs(getDerbyDatabaseConnection());
+    list = handler.findJobs(derbyConnection);
     assertEquals(4, list.size());
 
     assertEquals("JA", list.get(0).getName());
@@ -125,19 +126,19 @@ public class TestJobHandling extends DerbyTestCase {
   @Test
   public void testExistsJob() throws Exception {
     // There shouldn't be anything on empty repository
-    assertFalse(handler.existsJob(1, getDerbyDatabaseConnection()));
-    assertFalse(handler.existsJob(2, getDerbyDatabaseConnection()));
-    assertFalse(handler.existsJob(3, getDerbyDatabaseConnection()));
-    assertFalse(handler.existsJob(4, getDerbyDatabaseConnection()));
-    assertFalse(handler.existsJob(5, getDerbyDatabaseConnection()));
+    assertFalse(handler.existsJob(1, derbyConnection));
+    assertFalse(handler.existsJob(2, derbyConnection));
+    assertFalse(handler.existsJob(3, derbyConnection));
+    assertFalse(handler.existsJob(4, derbyConnection));
+    assertFalse(handler.existsJob(5, derbyConnection));
 
     loadJobs();
 
-    assertTrue(handler.existsJob(1, getDerbyDatabaseConnection()));
-    assertTrue(handler.existsJob(2, getDerbyDatabaseConnection()));
-    assertTrue(handler.existsJob(3, getDerbyDatabaseConnection()));
-    assertTrue(handler.existsJob(4, getDerbyDatabaseConnection()));
-    assertFalse(handler.existsJob(5, getDerbyDatabaseConnection()));
+    assertTrue(handler.existsJob(1, derbyConnection));
+    assertTrue(handler.existsJob(2, derbyConnection));
+    assertTrue(handler.existsJob(3, derbyConnection));
+    assertTrue(handler.existsJob(4, derbyConnection));
+    assertFalse(handler.existsJob(5, derbyConnection));
   }
 
   @Test
@@ -145,10 +146,10 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobs();
     loadSubmissions();
 
-    assertTrue(handler.inUseJob(1, getDerbyDatabaseConnection()));
-    assertFalse(handler.inUseJob(2, getDerbyDatabaseConnection()));
-    assertFalse(handler.inUseJob(3, getDerbyDatabaseConnection()));
-    assertFalse(handler.inUseJob(4, getDerbyDatabaseConnection()));
+    assertTrue(handler.inUseJob(1, derbyConnection));
+    assertFalse(handler.inUseJob(2, derbyConnection));
+    assertFalse(handler.inUseJob(3, derbyConnection));
+    assertFalse(handler.inUseJob(4, derbyConnection));
   }
 
   @Test
@@ -158,34 +159,34 @@ public class TestJobHandling extends DerbyTestCase {
     // Load some data
     fillJob(job);
 
-    handler.createJob(job, getDerbyDatabaseConnection());
+    handler.createJob(job, derbyConnection);
 
     assertEquals(1, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 1);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 6);
 
-    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
+    MJob retrieved = handler.findJob(1, derbyConnection);
     assertEquals(1, retrieved.getPersistenceId());
 
-    List<MForm> forms;
-    forms = job.getConnectorPart(Direction.FROM).getForms();
-    assertEquals("Value1", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    forms = job.getConnectorPart(Direction.TO).getForms();
-    assertEquals("Value1", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
+    List<MConfig> configs;
+    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    configs = job.getJobConfig(Direction.TO).getConfigs();
+    assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
 
-    forms = job.getFrameworkPart().getForms();
-    assertEquals("Value13", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value15", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    configs = job.getDriverConfig().getConfigs();
+    assertEquals("Value13", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value15", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
 
     // Let's create second job
     job = getJob();
     fillJob(job);
 
-    handler.createJob(job, getDerbyDatabaseConnection());
+    handler.createJob(job, derbyConnection);
 
     assertEquals(2, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 2);
@@ -199,48 +200,49 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB", 4);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
 
-    MJob job = handler.findJob(1, getDerbyDatabaseConnection());
+    MJob job = handler.findJob(1, derbyConnection);
 
-    List<MForm> forms;
+    List<MConfig> configs;
 
-    forms = job.getConnectorPart(Direction.FROM).getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(null);
-    forms = job.getConnectorPart(Direction.TO).getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(null);
+    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
 
-    forms = job.getFrameworkPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(1).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
+    configs = job.getJobConfig(Direction.TO).getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
+
+    configs = job.getDriverConfig().getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(0).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(1).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
 
     job.setName("name");
 
-    handler.updateJob(job, getDerbyDatabaseConnection());
+    handler.updateJob(job, derbyConnection);
 
     assertEquals(1, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 4);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 26);
 
-    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
+    MJob retrieved = handler.findJob(1, derbyConnection);
     assertEquals("name", retrieved.getName());
 
-    forms = job.getConnectorPart(Direction.FROM).getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    forms = job.getConnectorPart(Direction.TO).getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
+    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    configs = job.getJobConfig(Direction.TO).getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
 
-    forms = retrieved.getFrameworkPart().getForms();
-    assertEquals(2, forms.size());
-    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
-    assertNotNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals(((Map)forms.get(0).getInputs().get(1).getValue()).size(), 0);
+    configs = retrieved.getDriverConfig().getConfigs();
+    assertEquals(2, configs.size());
+    assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
+    assertNotNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals(((Map)configs.get(0).getInputs().get(1).getValue()).size(), 0);
   }
 
   @Test
@@ -248,16 +250,16 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobs();
 
     // disable job 1
-    handler.enableJob(1, false, getDerbyDatabaseConnection());
+    handler.enableJob(1, false, derbyConnection);
 
-    MJob retrieved = handler.findJob(1, getDerbyDatabaseConnection());
+    MJob retrieved = handler.findJob(1, derbyConnection);
     assertNotNull(retrieved);
     assertEquals(false, retrieved.getEnabled());
 
     // enable job 1
-    handler.enableJob(1, true, getDerbyDatabaseConnection());
+    handler.enableJob(1, true, derbyConnection);
 
-    retrieved = handler.findJob(1, getDerbyDatabaseConnection());
+    retrieved = handler.findJob(1, derbyConnection);
     assertNotNull(retrieved);
     assertEquals(true, retrieved.getEnabled());
   }
@@ -266,28 +268,28 @@ public class TestJobHandling extends DerbyTestCase {
   public void testDeleteJob() throws Exception {
     loadJobs();
 
-    handler.deleteJob(1, getDerbyDatabaseConnection());
+    handler.deleteJob(1, derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 3);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 18);
 
-    handler.deleteJob(2, getDerbyDatabaseConnection());
+    handler.deleteJob(2, derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 2);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
 
-    handler.deleteJob(3, getDerbyDatabaseConnection());
+    handler.deleteJob(3, derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 1);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 6);
 
-    handler.deleteJob(4, getDerbyDatabaseConnection());
+    handler.deleteJob(4, derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 0);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 0);
   }
 
   public MJob getJob() {
     return new MJob(1, 1, 1, 1,
-      handler.findConnector("A", getDerbyDatabaseConnection()).getJobForms(Direction.FROM),
-      handler.findConnector("A", getDerbyDatabaseConnection()).getJobForms(Direction.TO),
-      handler.findDriverConfig(getDerbyDatabaseConnection()).getJobForms()
+      handler.findConnector("A", derbyConnection).getFromConfig(),
+      handler.findConnector("A", derbyConnection).getToConfig(),
+      handler.findDriver(derbyConnection).getDriverConfig()
     );
   }
 }

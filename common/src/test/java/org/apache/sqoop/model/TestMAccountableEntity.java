@@ -35,14 +35,13 @@ public class TestMAccountableEntity {
    */
   @Test
   public void testInitialization() {
-    List<MForm> forms = new ArrayList<MForm>();
+    List<MConfig> configs = new ArrayList<MConfig>();
     MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
-    MForm form = new MForm("FORMNAME", list);
-    forms.add(form);
-    MAccountableEntity link = new MLink(123l, new MConnectionForms(
-        forms), new MConnectionForms(forms));
+    MConfig config = new MConfig("CONFIGNAME", list);
+    configs.add(config);
+    MAccountableEntity link = new MLink(123l, new MLinkConfig(configs));
     // Initially creation date and last update date is same
     assertEquals(link.getCreationDate(), link.getLastUpdateDate());
     Date testCreationDate = new Date();

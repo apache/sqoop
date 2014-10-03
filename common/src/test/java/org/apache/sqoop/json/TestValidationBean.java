@@ -17,17 +17,19 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.validation.ConfigValidator;
+import org.apache.sqoop.validation.Status;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.junit.Test;
 
 /**
  *
@@ -44,7 +46,7 @@ public class TestValidationBean {
     );
     JSONObject json = bean.extract(false);
 
-    // "Move" it across network in text form
+    // "Move" it across network in text config
     String string = json.toJSONString();
 
     // Retrieved transferred object
@@ -54,43 +56,43 @@ public class TestValidationBean {
 
     assertNull(retrievedBean.getId());
 
-    Validation.FormInput fa = new Validation.FormInput("f", "i");
-    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
+    ConfigValidator.ConfigInput fa = new ConfigValidator.ConfigInput("c", "i");
+    ConfigValidator.ConfigInput fb = new ConfigValidator.ConfigInput("c2", "i2");
 
-    Validation fromConnector = retrievedBean.getConnectorValidation(Direction.FROM);
+    ConfigValidator fromConnector = retrievedBean.getConnectorValidation(Direction.FROM);
     assertEquals(Status.FINE, fromConnector.getStatus());
     assertEquals(2, fromConnector.getMessages().size());
     assertTrue(fromConnector.getMessages().containsKey(fa));
-    assertEquals(new Validation.Message(Status.FINE, "d"),
+    assertEquals(new ConfigValidator.Message(Status.FINE, "d"),
         fromConnector.getMessages().get(fa));
 
-    Validation toConnector = retrievedBean.getConnectorValidation(Direction.TO);
+    ConfigValidator toConnector = retrievedBean.getConnectorValidation(Direction.TO);
     assertEquals(Status.FINE, toConnector.getStatus());
     assertEquals(2, toConnector.getMessages().size());
     assertTrue(toConnector.getMessages().containsKey(fa));
-    assertEquals(new Validation.Message(Status.FINE, "d"),
+    assertEquals(new ConfigValidator.Message(Status.FINE, "d"),
         toConnector.getMessages().get(fa));
 
-    Validation framework = retrievedBean.getFrameworkValidation();
+    ConfigValidator framework = retrievedBean.getFrameworkValidation();
     assertEquals(Status.UNACCEPTABLE, framework.getStatus());
     assertEquals(2, framework.getMessages().size());
     assertTrue(framework.getMessages().containsKey(fb));
-    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
+    assertEquals(new ConfigValidator.Message(Status.UNACCEPTABLE, "c"),
       framework.getMessages().get(fb));
   }
 
   @Test
   public void testJobValidationBeanId() {
     // Serialize it to JSON object
-    JobValidationBean bean = new JobValidationBean(
+    JobValidationBean jobValidatioBean = new JobValidationBean(
         getValidation(Status.FINE),
         getValidation(Status.FINE),
         getValidation(Status.FINE)
     );
-    bean.setId((long) 10);
-    JSONObject json = bean.extract(false);
+    jobValidatioBean.setId((long) 10);
+    JSONObject json = jobValidatioBean.extract(false);
 
-    // "Move" it across network in text form
+    // "Move" it across network in text config
     String string = json.toJSONString();
 
     // Retrieved transferred object
@@ -105,12 +107,10 @@ public class TestValidationBean {
   public void testLinkValidationBeanSerialization() {
     // Serialize it to JSON object
     LinkValidationBean bean = new LinkValidationBean(
-        getValidation(Status.FINE),
-        getValidation(Status.UNACCEPTABLE)
-    );
+        getValidation(Status.FINE));
     JSONObject json = bean.extract(false);
 
-    // "Move" it across network in text form
+    // "Move" it across network in text config
     String string = json.toJSONString();
 
     // Retrieved transferred object
@@ -120,35 +120,25 @@ public class TestValidationBean {
 
     assertNull(retrievedBean.getId());
 
-    Validation.FormInput fa = new Validation.FormInput("f", "i");
-    Validation.FormInput fb = new Validation.FormInput("f2", "i2");
-
-    Validation connector = retrievedBean.getConnectorValidation();
+    ConfigValidator.ConfigInput ca = new ConfigValidator.ConfigInput("c", "i");
+    ConfigValidator connector = retrievedBean.getLinkConfigValidator();
     assertEquals(Status.FINE, connector.getStatus());
     assertEquals(2, connector.getMessages().size());
-    assertTrue(connector.getMessages().containsKey(fa));
-    assertEquals(new Validation.Message(Status.FINE, "d"),
-        connector.getMessages().get(fa));
-
-    Validation framework = retrievedBean.getFrameworkValidation();
-    assertEquals(Status.UNACCEPTABLE, framework.getStatus());
-    assertEquals(2, framework.getMessages().size());
-    assertTrue(framework.getMessages().containsKey(fb));
-    assertEquals(new Validation.Message(Status.UNACCEPTABLE, "c"),
-        framework.getMessages().get(fb));
+    assertTrue(connector.getMessages().containsKey(ca));
+    assertEquals(new ConfigValidator.Message(Status.FINE, "d"),
+        connector.getMessages().get(ca));
   }
 
   @Test
   public void testLinkValidationBeanId() {
     // Serialize it to JSON object
     LinkValidationBean bean = new LinkValidationBean(
-        getValidation(Status.FINE),
         getValidation(Status.FINE)
     );
     bean.setId((long) 10);
     JSONObject json = bean.extract(false);
 
-    // "Move" it across network in text form
+    // "Move" it across network in text config
     String string = json.toJSONString();
 
     // Retrieved transferred object
@@ -159,17 +149,12 @@ public class TestValidationBean {
     assertEquals((Long)(long) 10, retrievedBean.getId());
   }
 
-  public Validation getValidation(Status status) {
-    Map<Validation.FormInput, Validation.Message> messages =
-      new HashMap<Validation.FormInput, Validation.Message>();
+  public ConfigValidator getValidation(Status status) {
+    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages = new HashMap<ConfigValidator.ConfigInput, ConfigValidator.Message>();
 
-    messages.put(
-      new Validation.FormInput("f", "i"),
-      new Validation.Message(status, "d"));
-    messages.put(
-      new Validation.FormInput("f2", "i2"),
-      new Validation.Message(status, "c"));
+    messages.put(new ConfigValidator.ConfigInput("c", "i"), new ConfigValidator.Message(status, "d"));
+    messages.put(new ConfigValidator.ConfigInput("c2", "i2"), new ConfigValidator.Message(status, "c"));
 
-    return new Validation(status, messages);
+    return new ConfigValidator(status, messages);
   }
 }

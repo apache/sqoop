@@ -18,14 +18,14 @@
 package org.apache.sqoop.connector.hdfs.configuration;
 
 import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.Config;
 
 @ConfigurationClass
 public class LinkConfiguration {
-  @Form
-  public LinkConfig link;
+  @Config
+  public LinkConfig linkConfig;
 
   public LinkConfiguration() {
-    link = new LinkConfig();
+    linkConfig = new LinkConfig();
   }
 }

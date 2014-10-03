@@ -68,12 +68,12 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,
-      LinkConfiguration linkConfiguration, FromJobConfiguration jobConfiguration) {
+      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
     try {
-      long numInputBytes = getInputSize(conf, jobConfiguration.fromJobConfig.inputDirectory);
+      long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);
       maxSplitSize = numInputBytes / context.getMaxPartitions();
 
       if(numInputBytes % context.getMaxPartitions() != 0 ) {
@@ -118,7 +118,7 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
       }
 
       // all the files in input set
-      String indir = jobConfiguration.fromJobConfig.inputDirectory;
+      String indir = fromJobConfig.fromJobConfig.inputDirectory;
       FileSystem fs = FileSystem.get(conf);
 
       List<Path> paths = new LinkedList<Path>();

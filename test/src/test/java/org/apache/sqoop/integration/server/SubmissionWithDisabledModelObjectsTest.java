@@ -23,7 +23,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.driver.DriverError;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.junit.runner.RunWith;
@@ -67,7 +67,7 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsLink);
+    fillRdbmsLinkConfig(rdbmsLink);
     saveLink(rdbmsLink);
 
     // HDFS link
@@ -77,15 +77,21 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
-    // Connector values
-    MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
-    // Framework values
-    fillToJobForm(job, ToFormat.TEXT_FILE);
+    // rdms "FROM" config
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+
+    // hdfs "TO" config
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
+    // driver config
+    MConfigList driverConfig = job.getDriverConfig();
+    //driverConfig.getIntegerInput("throttlingConfig.extractors").setValue(3);
+
     saveJob(job);
 
-    // Disable model entities as per parametrized run
+    // Disable model entities as per parameterized run
     getClient().enableLink(rdbmsLink.getPersistenceId(), enabledLink);
     getClient().enableJob(job.getPersistenceId(), enabledJob);
 

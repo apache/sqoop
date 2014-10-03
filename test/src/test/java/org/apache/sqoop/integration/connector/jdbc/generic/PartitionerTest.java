@@ -19,8 +19,9 @@ package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
@@ -59,8 +60,8 @@ public class PartitionerTest extends ConnectorTestCase {
   }
 
   private String partitionColumn;
-  private int extractors;
   private int maxOutputFiles;
+  private int extractors;
 
   public PartitionerTest(String partitionColumn, int expectedOutputFiles, int extractors) {
     this.partitionColumn = partitionColumn;
@@ -74,7 +75,7 @@ public class PartitionerTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsLink);
+    fillRdbmsLinkConfig(rdbmsLink);
     saveLink(rdbmsLink);
 
     // HDFS link
@@ -84,13 +85,17 @@ public class PartitionerTest extends ConnectorTestCase {
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
-    // Connector values
-    MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
-    fillToJobForm(job, ToFormat.TEXT_FILE);
-    forms = job.getFrameworkPart();
-    forms.getIntegerInput("throttling.extractors").setValue(extractors);
+    // set the rdbms "FROM" config
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+    // fill hdfs "TO" config
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
+    // set driver config
+    MDriverConfig driverConfig = job.getDriverConfig();
+    driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(extractors);
+
     saveJob(job);
 
     executeJob(job);

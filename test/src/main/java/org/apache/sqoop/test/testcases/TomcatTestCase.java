@@ -165,7 +165,7 @@ abstract public class TomcatTestCase {
    * @throws IOException
    */
   protected void assertTo(String... lines) throws IOException {
-    // TODO(VB): fix this to be not directly dependent on mapreduce
+    // TODO(VB): fix this to be not directly dependent on hdfs/MR
     HdfsAsserts.assertMapreduceOutput(hdfsClient, getMapreduceDirectory(), lines);
   }
 
@@ -175,7 +175,7 @@ abstract public class TomcatTestCase {
    * @param expectedFiles Expected number of files
    */
   protected void assertToFiles(int expectedFiles) throws IOException {
-    // TODO(VB): fix this to be not directly dependent on mapreduce
+    // TODO(VB): fix this to be not directly dependent on hdfs/MR
     HdfsAsserts.assertMapreduceOutputFiles(hdfsClient, getMapreduceDirectory(), expectedFiles);
   }
 

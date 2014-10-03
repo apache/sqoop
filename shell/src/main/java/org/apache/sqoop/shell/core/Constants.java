@@ -1,7 +1,7 @@
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
+ * distributed with this work for additional inconfigation
  * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -316,11 +316,11 @@ public class Constants {
   public static final String RES_SQOOP_PROMPT_SHELL_LOADEDRC =
       "sqoop.prompt_shell_loadedrc";
 
-  public static final String RES_UPDATE_UPDATING_LINK =
+  public static final String RES_SQOOP_UPDATING_LINK =
       "update.link";
   public static final String RES_UPDATE_LINK_SUCCESSFUL =
       "update.link_successful";
-  public static final String RES_UPDATE_UPDATING_JOB =
+  public static final String RES_SQOOP_UPDATING_JOB =
       "update.job";
   public static final String RES_UPDATE_JOB_SUCCESSFUL =
       "update.job_successful";
@@ -352,35 +352,35 @@ public class Constants {
   public static final String RES_TABLE_HEADER_ENABLED =
       "table.header.enabled";
 
-  public static final String RES_FORMDISPLAYER_CONNECTION =
-      "formdisplayer.link";
-  public static final String RES_FORMDISPLAYER_JOB =
-      "formdisplayer.job";
-  public static final String RES_FORMDISPLAYER_FORM =
-      "formdisplayer.form";
-  public static final String RES_FORMDISPLAYER_NAME =
-      "formdisplayer.name";
-  public static final String RES_FORMDISPLAYER_LABEL =
-      "formdisplayer.label";
-  public static final String RES_FORMDISPLAYER_HELP =
-      "formdisplayer.help";
-  public static final String RES_FORMDISPLAYER_INPUT =
-      "formdisplayer.input";
-  public static final String RES_FORMDISPLAYER_TYPE =
-      "formdisplayer.type";
-  public static final String RES_FORMDISPLAYER_SENSITIVE =
-      "formdisplayer.sensitive";
-  public static final String RES_FORMDISPLAYER_SIZE =
-      "formdisplayer.size";
-  public static final String RES_FORMDISPLAYER_POSSIBLE_VALUES =
-      "formdisplayer.possible_values";
-  public static final String RES_FORMDISPLAYER_UNSUPPORTED_DATATYPE =
-      "formdisplayer.unsupported_datatype";
-  public static final String RES_FORMDISPLAYER_INPUT_SENSITIVE =
-      "formdisplayer.input_sensitive";
+  public static final String RES_CONFIG_DISPLAYER_LINK =
+      "config.displayer.link";
+  public static final String RES_CONFIG_DISPLAYER_JOB =
+      "config.displayer.job";
+  public static final String RES_CONFIG_DISPLAYER_CONFIG =
+      "config.displayer.config";
+  public static final String RES_CONFIG_DISPLAYER_NAME =
+      "config.displayer.name";
+  public static final String RES_CONFIG_DISPLAYER_LABEL =
+      "config.displayer.label";
+  public static final String RES_CONFIG_DISPLAYER_HELP =
+      "config.displayer.help";
+  public static final String RES_CONFIG_DISPLAYER_INPUT =
+      "config.displayer.input";
+  public static final String RES_CONFIG_DISPLAYER_TYPE =
+      "config.displayer.type";
+  public static final String RES_CONFIG_DISPLAYER_SENSITIVE =
+      "config.displayer.sensitive";
+  public static final String RES_CONFIG_DISPLAYER_SIZE =
+      "config.displayer.size";
+  public static final String RES_CONFIG_DISPLAYER_POSSIBLE_VALUES =
+      "config.displayer.possible_values";
+  public static final String RES_CONFIG_DISPLAYER_UNSUPPORTED_DATATYPE =
+      "config.displayer.unsupported_datatype";
+  public static final String RES_CONFIG_DISPLAYER_INPUT_SENSITIVE =
+      "config.displayer.input_sensitive";
 
-  public static final String RES_FORMDISPLAYER_FORM_WARNING =
-      "formdisplayer.warning_message";
+  public static final String RES_CONFIG_DISPLAYER_FORM_WARNING =
+      "config.displayer.warning_message";
 
   public static final String RES_SUBMISSION_SUBMISSION_DETAIL =
       "submission.submission_detail";

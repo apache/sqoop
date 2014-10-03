@@ -31,12 +31,12 @@ public abstract class Partitioner<LinkConfiguration, JobConfiguration> {
    * Each partition will be then processed in separate extractor.
    *
    * @param context Partitioner context object
-   * @param linkConfiguration link configuration
-   * @param jobConfiguration Job configuration
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object
    * @return
    */
-  public abstract List<Partition> getPartitions(PartitionerContext context,
-                                                LinkConfiguration linkConfiguration,
-                                                JobConfiguration jobConfiguration);
+	public abstract List<Partition> getPartitions(PartitionerContext context,
+			LinkConfiguration linkConfiguration,
+			JobConfiguration jobConfiguration);
 
 }

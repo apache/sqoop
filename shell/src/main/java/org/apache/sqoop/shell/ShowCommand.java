@@ -31,7 +31,7 @@ public class ShowCommand extends SqoopCommand {
         .put(Constants.FN_SERVER, ShowServerFunction.class)
         .put(Constants.FN_VERSION, ShowVersionFunction.class)
         .put(Constants.FN_CONNECTOR, ShowConnectorFunction.class)
-        .put(Constants.FN_DRIVER_CONFIG, ShowDriverConfigFunction.class)
+        .put(Constants.FN_DRIVER_CONFIG, ShowDriverFunction.class)
         .put(Constants.FN_LINK, ShowLinkFunction.class)
         .put(Constants.FN_JOB, ShowJobFunction.class)
         .put(Constants.FN_SUBMISSION, ShowSubmissionFunction.class)

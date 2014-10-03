@@ -22,57 +22,49 @@ package org.apache.sqoop.model;
  */
 public class MLink extends MAccountableEntity implements MClonable {
   private long connectorId;
-
-  private final MConnectionForms connectorPart;
-  private final MConnectionForms frameworkPart;
+  // NOTE: we hold this in the model for easy access to the link config object, it might as well be retrieved on the fly using the connectorId
+  private final MLinkConfig connectorLinkConfig;
 
   /**
-   * Default constructor to build new MConnection model.
+   * Default constructor to build new MLink model.
    *
    * @param connectorId Connector id
-   * @param connectorPart Connector forms
-   * @param frameworkPart Framework forms
+   * @param linkConfig Connector forms
    */
-  public MLink(long connectorId,
-                     MConnectionForms connectorPart,
-                     MConnectionForms frameworkPart) {
+  public MLink(long connectorId, MLinkConfig linkConfig) {
     this.connectorId = connectorId;
-    this.connectorPart = connectorPart;
-    this.frameworkPart = frameworkPart;
+    this.connectorLinkConfig = linkConfig;
   }
 
   /**
-   * Constructor to create deep copy of another MConnection model.
+   * Constructor to create deep copy of another MLink model.
    *
-   * @param other MConnection model to copy
+   * @param other MLink model to copy
    */
   public MLink(MLink other) {
-    this(other, other.connectorPart.clone(true), other.frameworkPart.clone(true));
+    this(other, other.connectorLinkConfig.clone(true));
   }
 
   /**
-   * Construct new MConnection model as a copy of another with replaced forms.
+   * Construct new MLink model as a copy of another with replaced forms.
    *
-   * This method is suitable only for metadata upgrade path and should not be
+   * This method is suitable only for link upgrade path and should not be
    * used otherwise.
    *
-   * @param other MConnection model to copy
-   * @param connectorPart Connector forms
-   * @param frameworkPart Framework forms
+   * @param other MLink model to copy
+   * @param linkConfig link config
    */
-  public MLink(MLink other, MConnectionForms connectorPart, MConnectionForms frameworkPart) {
+  public MLink(MLink other, MLinkConfig linkConfig) {
     super(other);
     this.connectorId = other.connectorId;
-    this.connectorPart = connectorPart;
-    this.frameworkPart = frameworkPart;
+    this.connectorLinkConfig = linkConfig;
     this.setPersistenceId(other.getPersistenceId());
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("connection: ").append(getName());
-    sb.append(" connector-part: ").append(connectorPart);
-    sb.append(", framework-part: ").append(frameworkPart);
+    StringBuilder sb = new StringBuilder("link: ").append(getName());
+    sb.append(" link-config: ").append(connectorLinkConfig);
 
     return sb.toString();
   }
@@ -85,20 +77,11 @@ public class MLink extends MAccountableEntity implements MClonable {
     this.connectorId = connectorId;
   }
 
-  public MConnectionForms getConnectorPart() {
-    return connectorPart;
+  public MLinkConfig getConnectorLinkConfig() {
+    return connectorLinkConfig;
   }
-
-  public MConnectionForms getFrameworkPart() {
-    return frameworkPart;
-  }
-
-  public MForm getConnectorForm(String formName) {
-    return connectorPart.getForm(formName);
-  }
-
-  public MForm getFrameworkForm(String formName) {
-    return frameworkPart.getForm(formName);
+  public MConfig getConnectorLinkConfig(String formName) {
+    return connectorLinkConfig.getConfig(formName);
   }
 
   @Override
@@ -106,7 +89,7 @@ public class MLink extends MAccountableEntity implements MClonable {
     if(cloneWithValue) {
       return new MLink(this);
     } else {
-      return new MLink(connectorId, connectorPart.clone(false), frameworkPart.clone(false));
+      return new MLink(connectorId, connectorLinkConfig.clone(false));
     }
   }
 
@@ -120,10 +103,9 @@ public class MLink extends MAccountableEntity implements MClonable {
       return false;
     }
 
-    MLink mc = (MLink)object;
-    return (mc.connectorId == this.connectorId)
-        && (mc.getPersistenceId() == this.getPersistenceId())
-        && (mc.connectorPart.equals(this.connectorPart))
-        && (mc.frameworkPart.equals(this.frameworkPart));
-  }
+    MLink mLink = (MLink)object;
+    return (mLink.connectorId == this.connectorId)
+        && (mLink.getPersistenceId() == this.getPersistenceId())
+        && (mLink.connectorLinkConfig.equals(this.connectorLinkConfig));
+    }
 }

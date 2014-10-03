@@ -74,10 +74,10 @@ public class TestExtractor {
   public void testQuery() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    LinkConfiguration connectionConfig = new LinkConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
 
-    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
 
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
@@ -92,25 +92,25 @@ public class TestExtractor {
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-16.6666666666666665 <= DCOL AND DCOL < 16.666666666666667");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
 
     partition = new GenericJdbcPartition();
     partition.setConditions("16.666666666666667 <= DCOL AND DCOL <= 50.0");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
   }
 
   @Test
   public void testSubquery() throws Exception {
     MutableContext context = new MutableMapContext();
 
-    LinkConfiguration connectionConfig = new LinkConfiguration();
+    LinkConfiguration linkConfig = new LinkConfiguration();
 
-    connectionConfig.link.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    connectionConfig.link.connectionString = GenericJdbcTestConstants.URL;
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
 
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
@@ -127,15 +127,15 @@ public class TestExtractor {
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-16 <= ICOL AND ICOL < 17");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
 
     partition = new GenericJdbcPartition();
     partition.setConditions("17 <= ICOL AND ICOL < 50");
-    extractor.extract(extractorContext, connectionConfig, jobConfig, partition);
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
   }
 
   public class DummyWriter extends DataWriter {

@@ -19,7 +19,7 @@ package org.apache.sqoop.json;
 
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
@@ -39,31 +39,31 @@ public class TestValidationResultBean {
 
   @Test
   public void testEmptyTransfer() {
-    ValidationResult []empty = new ValidationResult[0];
+    ConfigValidationResult []empty = new ConfigValidationResult[0];
 
-    ValidationResult []retrieved = transfer(empty);
+    ConfigValidationResult []retrieved = transfer(empty);
     assertEquals(0, retrieved.length);
   }
 
   @Test
   public void testOneMessage() {
-    ValidationResult []empty = new ValidationResult[] {
+    ConfigValidationResult []empty = new ConfigValidationResult[] {
       getResultA()
     };
 
-    ValidationResult []retrieved = transfer(empty);
+    ConfigValidationResult []retrieved = transfer(empty);
     assertEquals(1, retrieved.length);
     verifyResultA(retrieved[0]);
   }
 
   @Test
   public void testTwoMessages() {
-     ValidationResult []empty = new ValidationResult[] {
+     ConfigValidationResult []empty = new ConfigValidationResult[] {
       getResultA(),
       getResultA()
     };
 
-    ValidationResult []retrieved = transfer(empty);
+    ConfigValidationResult []retrieved = transfer(empty);
     assertEquals(2, retrieved.length);
 
     verifyResultA(retrieved[0]);
@@ -79,7 +79,7 @@ public class TestValidationResultBean {
     assertNull(idNull);
   }
 
-  public void verifyResultA(ValidationResult result) {
+  public void verifyResultA(ConfigValidationResult result) {
     assertNotNull(result);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
 
@@ -98,8 +98,8 @@ public class TestValidationResultBean {
     assertEquals("B", messagesA.get(1).getMessage());
   }
 
-  public ValidationResult getResultA() {
-    ValidationResult result = new ValidationResult();
+  public ConfigValidationResult getResultA() {
+    ConfigValidationResult result = new ConfigValidationResult();
     List<Message> messages = new LinkedList<Message>();
     messages.add(new Message(Status.ACCEPTABLE, "A"));
     messages.add(new Message(Status.UNACCEPTABLE, "B"));
@@ -109,7 +109,7 @@ public class TestValidationResultBean {
 
 
   private Long transfer(Long id) {
-    ValidationResultBean bean = new ValidationResultBean(new ValidationResult[0]);
+    ValidationResultBean bean = new ValidationResultBean(new ConfigValidationResult[0]);
     bean.setId(id);
     JSONObject json = bean.extract(false);
 
@@ -122,7 +122,7 @@ public class TestValidationResultBean {
     return retrievedBean.getId();
   }
 
-  private ValidationResult[] transfer(ValidationResult [] results) {
+  private ConfigValidationResult[] transfer(ConfigValidationResult [] results) {
     ValidationResultBean bean = new ValidationResultBean(results);
     JSONObject json = bean.extract(false);
 

@@ -17,9 +17,11 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import java.util.List;
+
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MForm;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.junit.Before;
@@ -48,7 +50,7 @@ public class TestLinkHandling extends DerbyTestCase {
     createSchema();
 
     // We always needs connector and framework structures in place
-    loadConnectorAndDriverConfig();
+    loadConnectorLinkConfig();
   }
 
   @Test
@@ -64,26 +66,19 @@ public class TestLinkHandling extends DerbyTestCase {
     // Load prepared connections into database
     loadLinks();
 
-    MLink connA = handler.findLink(1, getDerbyDatabaseConnection());
-    assertNotNull(connA);
-    assertEquals(1, connA.getPersistenceId());
-    assertEquals("CA", connA.getName());
+    MLink linkA = handler.findLink(1, getDerbyDatabaseConnection());
+    assertNotNull(linkA);
+    assertEquals(1, linkA.getPersistenceId());
+    assertEquals("CA", linkA.getName());
 
-    List<MForm> forms;
+    List<MConfig> configs;
 
-    // Check connector part
-    forms = connA.getConnectorPart().getForms();
-    assertEquals("Value1", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value3", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
-
-    // Check framework part
-    forms = connA.getFrameworkPart().getForms();
-    assertEquals("Value13", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value15", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    // Check connector link config
+    configs = linkA.getConnectorLinkConfig().getConfigs();
+    assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value3", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
   @Test
@@ -128,24 +123,18 @@ public class TestLinkHandling extends DerbyTestCase {
     handler.createLink(link, getDerbyDatabaseConnection());
 
     assertEquals(1, link.getPersistenceId());
-    assertCountForTable("SQOOP.SQ_CONNECTION", 1);
-    assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 4);
+    assertCountForTable("SQOOP.SQ_LINK", 1);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 2);
 
     MLink retrieved = handler.findLink(1, getDerbyDatabaseConnection());
     assertEquals(1, retrieved.getPersistenceId());
 
-    List<MForm> forms;
-    forms = link.getConnectorPart().getForms();
-    assertEquals("Value1", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value2", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
-
-    forms = link.getFrameworkPart().getForms();
-    assertEquals("Value13", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Value15", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
+    List<MConfig> configs;
+    configs = link.getConnectorLinkConfig().getConfigs();
+    assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value2", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
 
     // Let's create second link
     link = getLink();
@@ -154,8 +143,8 @@ public class TestLinkHandling extends DerbyTestCase {
     handler.createLink(link, getDerbyDatabaseConnection());
 
     assertEquals(2, link.getPersistenceId());
-    assertCountForTable("SQOOP.SQ_CONNECTION", 2);
-    assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 8);
+    assertCountForTable("SQOOP.SQ_LINK", 2);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 4);
   }
 
   @Test
@@ -175,44 +164,30 @@ public class TestLinkHandling extends DerbyTestCase {
 
     MLink link = handler.findLink(1, getDerbyDatabaseConnection());
 
-    List<MForm> forms;
+    List<MConfig> configs;
 
-    forms = link.getConnectorPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(null);
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(1).getInputs().get(1)).setValue(null);
-
-    forms = link.getFrameworkPart().getForms();
-    ((MStringInput)forms.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(0).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
-    ((MStringInput)forms.get(1).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)forms.get(1).getInputs().get(1)).setValue(new HashMap<String, String>()); // inject new map value
+    configs = link.getConnectorLinkConfig().getConfigs();
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
+    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Updated");
+    ((MMapInput)configs.get(1).getInputs().get(1)).setValue(null);
 
     link.setName("name");
 
     handler.updateLink(link, getDerbyDatabaseConnection());
 
     assertEquals(1, link.getPersistenceId());
-    assertCountForTable("SQOOP.SQ_CONNECTION", 2);
-    assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 10);
+    assertCountForTable("SQOOP.SQ_LINK", 2);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 6);
 
     MLink retrieved = handler.findLink(1, getDerbyDatabaseConnection());
     assertEquals("name", link.getName());
 
-    forms = retrieved.getConnectorPart().getForms();
-    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
-    assertNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals("Updated", forms.get(1).getInputs().get(0).getValue());
-    assertNull(forms.get(1).getInputs().get(1).getValue());
-
-    forms = retrieved.getFrameworkPart().getForms();
-    assertEquals("Updated", forms.get(0).getInputs().get(0).getValue());
-    assertNotNull(forms.get(0).getInputs().get(1).getValue());
-    assertEquals(((Map)forms.get(0).getInputs().get(1).getValue()).size(), 0);
-    assertEquals("Updated", forms.get(1).getInputs().get(0).getValue());
-    assertNotNull(forms.get(1).getInputs().get(1).getValue());
-    assertEquals(((Map)forms.get(1).getInputs().get(1).getValue()).size(), 0);
+    configs = retrieved.getConnectorLinkConfig().getConfigs();
+    assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Updated", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
   @Test
@@ -239,18 +214,15 @@ public class TestLinkHandling extends DerbyTestCase {
     loadLinks();
 
     handler.deleteLink(1, getDerbyDatabaseConnection());
-    assertCountForTable("SQOOP.SQ_CONNECTION", 1);
-    assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 4);
+    assertCountForTable("SQOOP.SQ_LINK", 1);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 4);
 
     handler.deleteLink(2, getDerbyDatabaseConnection());
-    assertCountForTable("SQOOP.SQ_CONNECTION", 0);
-    assertCountForTable("SQOOP.SQ_CONNECTION_INPUT", 0);
+    assertCountForTable("SQOOP.SQ_LINK", 0);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 0);
   }
 
   public MLink getLink() {
-    return new MLink(1,
-      handler.findConnector("A", getDerbyDatabaseConnection()).getConnectionForms(),
-      handler.findDriverConfig(getDerbyDatabaseConnection()).getConnectionForms()
-    );
+    return new MLink(1, handler.findConnector("A", getDerbyDatabaseConnection()).getLinkConfig());
   }
 }

@@ -56,30 +56,30 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQC_VERSION = "SQC_VERSION";
 
-  // SQ_FORM
+  // SQ_CONFIG
 
-  public static final String TABLE_SQ_FORM_NAME = "SQ_FORM";
+  public static final String TABLE_SQ_CONFIG_NAME = "SQ_CONFIG";
 
-  public static final String TABLE_SQ_FORM = SCHEMA_PREFIX
-    + TABLE_SQ_FORM_NAME;
+  public static final String TABLE_SQ_CONFIG = SCHEMA_PREFIX
+    + TABLE_SQ_CONFIG_NAME;
 
-  public static final String COLUMN_SQF_ID = "SQF_ID";
+  public static final String COLUMN_SQ_CFG_ID = "SQ_CFG_ID";
 
-  public static final String COLUMN_SQF_CONNECTOR = "SQF_CONNECTOR";
+  public static final String COLUMN_SQ_CFG_OWNER = "SQ_CFG_OWNER";
 
-  public static final String COLUMN_SQF_OPERATION = "SQF_OPERATION";
+  public static final String COLUMN_SQ_CFG_OPERATION = "SQ_CFG_OPERATION";
 
-  public static final String COLUMN_SQF_DIRECTION = "SQF_DIRECTION";
+  public static final String COLUMN_SQ_CFG_DIRECTION = "SQ_CFG_DIRECTION";
 
-  public static final String COLUMN_SQF_NAME = "SQF_NAME";
+  public static final String COLUMN_SQ_CFG_NAME = "SQ_CFG_NAME";
 
-  public static final String COLUMN_SQF_TYPE = "SQF_TYPE";
+  public static final String COLUMN_SQ_CFG_TYPE = "SQ_CFG_TYPE";
 
-  public static final String COLUMN_SQF_INDEX = "SQF_INDEX";
+  public static final String COLUMN_SQ_CFG_INDEX = "SQ_CFG_INDEX";
 
-  public static final String CONSTRAINT_SQF_SQC_NAME = CONSTRAINT_PREFIX + "SQF_SQC";
+  public static final String CONSTRAINT_SQ_CFG_SQC_NAME = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
 
-  public static final String CONSTRAINT_SQF_SQC = SCHEMA_PREFIX + CONSTRAINT_SQF_SQC_NAME;
+  public static final String CONSTRAINT_SQ_CFG_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_SQC_NAME;
 
   // SQ_INPUT
 
@@ -92,7 +92,7 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQI_NAME = "SQI_NAME";
 
-  public static final String COLUMN_SQI_FORM = "SQI_FORM";
+  public static final String COLUMN_SQI_CONFIG = "SQI_CONFIG";
 
   public static final String COLUMN_SQI_INDEX = "SQI_INDEX";
 
@@ -104,36 +104,34 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQI_ENUMVALS = "SQI_ENUMVALS";
 
-  public static final String CONSTRAINT_SQI_SQF_NAME = CONSTRAINT_PREFIX + "SQI_SQF";
+  public static final String CONSTRAINT_SQI_SQ_CFG_NAME = CONSTRAINT_PREFIX + "SQI_SQ_CFG";
 
-  public static final String CONSTRAINT_SQI_SQF = SCHEMA_PREFIX + CONSTRAINT_SQI_SQF_NAME;
+  public static final String CONSTRAINT_SQI_SQ_CFG = SCHEMA_PREFIX + CONSTRAINT_SQI_SQ_CFG_NAME;
 
-  // SQ_CONNECTION
+  public static final String TABLE_SQ_LINK_NAME = "SQ_LINK";
 
-  public static final String TABLE_SQ_CONNECTION_NAME = "SQ_CONNECTION";
+  public static final String TABLE_SQ_LINK = SCHEMA_PREFIX
+      + TABLE_SQ_LINK_NAME;
 
-  public static final String TABLE_SQ_CONNECTION = SCHEMA_PREFIX
-    + TABLE_SQ_CONNECTION_NAME;
+  public static final String COLUMN_SQ_LNK_ID = "SQ_LNK_ID";
 
-  public static final String COLUMN_SQN_ID = "SQN_ID";
+  public static final String COLUMN_SQ_LNK_NAME = "SQ_LNK_NAME";
 
-  public static final String COLUMN_SQN_NAME = "SQN_NAME";
+  public static final String COLUMN_SQ_LNK_CONNECTOR = "SQ_LNK_CONNECTOR";
 
-  public static final String COLUMN_SQN_CONNECTOR = "SQN_CONNECTOR";
+  public static final String COLUMN_SQ_LNK_CREATION_USER = "SQ_LNK_CREATION_USER";
 
-  public static final String COLUMN_SQN_CREATION_USER = "SQN_CREATION_USER";
+  public static final String COLUMN_SQ_LNK_CREATION_DATE = "SQ_LNK_CREATION_DATE";
 
-  public static final String COLUMN_SQN_CREATION_DATE = "SQN_CREATION_DATE";
+  public static final String COLUMN_SQ_LNK_UPDATE_USER = "SQ_LNK_UPDATE_USER";
 
-  public static final String COLUMN_SQN_UPDATE_USER = "SQN_UPDATE_USER";
+  public static final String COLUMN_SQ_LNK_UPDATE_DATE = "SQ_LNK_UPDATE_DATE";
 
-  public static final String COLUMN_SQN_UPDATE_DATE = "SQN_UPDATE_DATE";
+  public static final String COLUMN_SQ_LNK_ENABLED = "SQ_LNK_ENABLED";
 
-  public static final String COLUMN_SQN_ENABLED = "SQN_ENABLED";
+  public static final String CONSTRAINT_SQ_LNK_SQC_NAME = CONSTRAINT_PREFIX + "SQ_LNK_SQC";
 
-  public static final String CONSTRAINT_SQN_SQC_NAME = CONSTRAINT_PREFIX + "SQN_SQC";
-
-  public static final String CONSTRAINT_SQN_SQC = SCHEMA_PREFIX + CONSTRAINT_SQN_SQC_NAME;
+  public static final String CONSTRAINT_SQ_LNK_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_LNK_SQC_NAME;
 
   // SQ_JOB
 
@@ -146,13 +144,13 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQB_NAME = "SQB_NAME";
 
-  public static final String COLUMN_SQB_CONNECTION = "SQB_CONNECTION";
+  public static final String COLUMN_SQB_LINK = "SQB_LINK";
 
   public static final String COLUMN_SQB_TYPE = "SQB_TYPE";
 
-  public static final String COLUMN_SQB_FROM_CONNECTION = "SQB_FROM_CONNECTION";
+  public static final String COLUMN_SQB_FROM_LINK = "SQB_FROM_LINK";
 
-  public static final String COLUMN_SQB_TO_CONNECTION = "SQB_TO_CONNECTION";
+  public static final String COLUMN_SQB_TO_LINK = "SQB_TO_LINK";
 
   public static final String COLUMN_SQB_CREATION_USER = "SQB_CREATION_USER";
 
@@ -164,39 +162,37 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQB_ENABLED = "SQB_ENABLED";
 
-  public static final String CONSTRAINT_SQB_SQN_NAME = CONSTRAINT_PREFIX + "SQB_SQN";
+  public static final String CONSTRAINT_SQB_SQ_LNK_NAME = CONSTRAINT_PREFIX + "SQB_SQ_LNK";
 
-  public static final String CONSTRAINT_SQB_SQN = SCHEMA_PREFIX + CONSTRAINT_SQB_SQN_NAME;
+  public static final String CONSTRAINT_SQB_SQ_LNK = SCHEMA_PREFIX + CONSTRAINT_SQB_SQ_LNK_NAME;
 
-  public static final String CONSTRAINT_SQB_SQN_FROM_NAME = CONSTRAINT_PREFIX + "SQB_SQN_FROM";
+  public static final String CONSTRAINT_SQB_SQ_LNK_FROM_NAME = CONSTRAINT_PREFIX + "SQB_SQ_LNK_FROM";
 
-  public static final String CONSTRAINT_SQB_SQN_FROM = SCHEMA_PREFIX + CONSTRAINT_SQB_SQN_FROM_NAME;
+  public static final String CONSTRAINT_SQB_SQ_LNK_FROM = SCHEMA_PREFIX + CONSTRAINT_SQB_SQ_LNK_FROM_NAME;
 
-  public static final String CONSTRAINT_SQB_SQN_TO_NAME = CONSTRAINT_PREFIX + "SQB_SQN_TO";
+  public static final String CONSTRAINT_SQB_SQ_LNK_TO_NAME = CONSTRAINT_PREFIX + "SQB_SQ_LNK_TO";
 
-  public static final String CONSTRAINT_SQB_SQN_TO = SCHEMA_PREFIX + CONSTRAINT_SQB_SQN_TO_NAME;
+  public static final String CONSTRAINT_SQB_SQ_LNK_TO = SCHEMA_PREFIX + CONSTRAINT_SQB_SQ_LNK_TO_NAME;
 
-  // SQ_CONNECTION_INPUT
+  public static final String TABLE_SQ_LINK_INPUT_NAME =
+    "SQ_LINK_INPUT";
 
-  public static final String TABLE_SQ_CONNECTION_INPUT_NAME =
-    "SQ_CONNECTION_INPUT";
+  public static final String TABLE_SQ_LINK_INPUT = SCHEMA_PREFIX
+    + TABLE_SQ_LINK_INPUT_NAME;
 
-  public static final String TABLE_SQ_CONNECTION_INPUT = SCHEMA_PREFIX
-    + TABLE_SQ_CONNECTION_INPUT_NAME;
+  public static final String COLUMN_SQ_LNKI_LINK = "SQ_LNKI_LINK";
 
-  public static final String COLUMN_SQNI_CONNECTION = "SQNI_CONNECTION";
+  public static final String COLUMN_SQ_LNKI_INPUT = "SQ_LNKI_INPUT";
 
-  public static final String COLUMN_SQNI_INPUT = "SQNI_INPUT";
+  public static final String COLUMN_SQ_LNKI_VALUE = "SQ_LNKI_VALUE";
 
-  public static final String COLUMN_SQNI_VALUE = "SQNI_VALUE";
+  public static final String CONSTRAINT_SQ_LNKI_SQ_LNK_NAME = CONSTRAINT_PREFIX + "SQ_LNKI_SQ_LNK";
 
-  public static final String CONSTRAINT_SQNI_SQN_NAME = CONSTRAINT_PREFIX + "SQNI_SQN";
+  public static final String CONSTRAINT_SQ_LNKI_SQ_LNK = SCHEMA_PREFIX + CONSTRAINT_SQ_LNKI_SQ_LNK_NAME;
 
-  public static final String CONSTRAINT_SQNI_SQN = SCHEMA_PREFIX + CONSTRAINT_SQNI_SQN_NAME;
+  public static final String CONSTRAINT_SQ_LNKI_SQI_NAME = CONSTRAINT_PREFIX + "SQ_LNKI_SQI";
 
-  public static final String CONSTRAINT_SQNI_SQI_NAME = CONSTRAINT_PREFIX + "SQNI_SQI";
-
-  public static final String CONSTRAINT_SQNI_SQI = SCHEMA_PREFIX + CONSTRAINT_SQNI_SQI_NAME;
+  public static final String CONSTRAINT_SQ_LNKI_SQI = SCHEMA_PREFIX + CONSTRAINT_SQ_LNKI_SQI_NAME;
 
   // SQ_JOB_INPUT
 
@@ -314,12 +310,12 @@ public final class DerbySchemaConstants {
   static {
     tablesV1 = new HashSet<String>();
     tablesV1.add(TABLE_SQ_CONNECTOR_NAME);
-    tablesV1.add(TABLE_SQ_CONNECTION_NAME);
-    tablesV1.add(TABLE_SQ_CONNECTION_INPUT_NAME);
+    tablesV1.add(TABLE_SQ_LINK_NAME);
+    tablesV1.add(TABLE_SQ_LINK_INPUT_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_GROUP_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_SUBMISSION_NAME);
-    tablesV1.add(TABLE_SQ_FORM_NAME);
+    tablesV1.add(TABLE_SQ_CONFIG_NAME);
     tablesV1.add(TABLE_SQ_INPUT_NAME);
     tablesV1.add(TABLE_SQ_JOB_NAME);
     tablesV1.add(TABLE_SQ_JOB_INPUT_NAME);

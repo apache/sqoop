@@ -29,21 +29,21 @@ public class Validator {
   /**
    * Validate link configuration object.
    *
-   * @param linkConfiguration Connection object to be validated
+   * @param linkConfiguration link config object to be validated
    * @return Validation status
    */
-  public Validation validateLink(Object linkConfiguration) {
-    return new Validation(EmptyClass.class);
+  public ConfigValidator validateConfigForLink(Object linkConfiguration) {
+    return new ConfigValidator(EmptyClass.class);
   }
 
   /**
    * Validate configuration object for job .
    *
-   * @param jobConfiguration Job to be validated
+   * @param jobConfiguration Job config to be validated
    * @return Validation status
    */
-  public Validation validateJob(Object jobConfiguration) {
-    return new Validation(EmptyClass.class);
+  public ConfigValidator validateConfigForJob(Object jobConfiguration) {
+    return new ConfigValidator(EmptyClass.class);
   }
 
   /**

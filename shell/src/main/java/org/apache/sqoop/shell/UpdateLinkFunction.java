@@ -22,9 +22,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
-import org.apache.sqoop.shell.utils.LinkDynamicFormOptions;
-import org.apache.sqoop.shell.utils.FormDisplayer;
-import org.apache.sqoop.shell.utils.FormOptions;
+import org.apache.sqoop.shell.utils.LinkDynamicConfigOptions;
+import org.apache.sqoop.shell.utils.ConfigDisplayer;
+import org.apache.sqoop.shell.utils.ConfigOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormFiller.*;
+import static org.apache.sqoop.shell.utils.ConfigFiller.*;
 
 /**
  *
@@ -56,14 +56,13 @@ public class UpdateLinkFunction extends SqoopFunction {
   }
 
   private Status updateLink(Long linkId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_UPDATE_UPDATING_LINK, linkId);
+    printlnResource(Constants.RES_SQOOP_UPDATING_LINK, linkId);
 
     ConsoleReader reader = new ConsoleReader();
 
     MLink link = client.getLink(linkId);
 
-    ResourceBundle connectorConfigBundle = client.getConnectorConfigResourceBundle(link.getConnectorId());
-    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
+    ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
 
     Status status = Status.FINE;
 
@@ -77,7 +76,7 @@ public class UpdateLinkFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillLink(reader, link, connectorConfigBundle, driverConfigBundle)) {
+        if(!fillLinkWithBundle(reader, link, connectorLinkConfigBundle)) {
           return null;
         }
 
@@ -85,10 +84,10 @@ public class UpdateLinkFunction extends SqoopFunction {
         status = client.updateLink(link);
       } while(!status.canProceed());
     } else {
-      LinkDynamicFormOptions options = new LinkDynamicFormOptions();
+      LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
       options.prepareOptions(link);
-      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
-      if (fillConnection(line, link)) {
+      CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
+      if (fillLink(line, link)) {
         status = client.updateLink(link);
         if (!status.canProceed()) {
           printLinkValidationMessages(link);
@@ -99,7 +98,7 @@ public class UpdateLinkFunction extends SqoopFunction {
         return null;
       }
     }
-    FormDisplayer.displayFormWarning(link);
+    ConfigDisplayer.displayConfigWarning(link);
     printlnResource(Constants.RES_UPDATE_LINK_SUCCESSFUL, status.name());
 
     return status;

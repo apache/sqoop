@@ -17,6 +17,13 @@
  */
 package org.apache.sqoop.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,39 +31,34 @@ import java.util.List;
 import org.apache.sqoop.common.Direction;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
-/**
- * Test class for org.apache.sqoop.model.TestMConnector
- */
 public class TestMConnector {
 
   private MConnector createConnector(List<Direction> supportedDirections) {
-    List<MForm> forms = new ArrayList<MForm>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
-    input.setValue(100);
+    List<MConfig> configs = new ArrayList<MConfig>();
+    MIntegerInput inputs = new MIntegerInput("INTEGER-INPUT", false);
+    inputs.setValue(100);
     MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
-    list.add(input);
+    list.add(inputs);
     list.add(strInput);
-    MForm form = new MForm("FORMNAME", list);
-    forms.add(form);
+    MConfig config = new MConfig("CONFIGNAME", list);
+    configs.add(config);
 
-    MConnectionForms connectionForms1 = new MConnectionForms(forms);
-    MJobForms fromForm = null;
-    MJobForms toForm = null;
+    MLinkConfig linkConfig = new MLinkConfig(configs);
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
 
     if (supportedDirections.contains(Direction.FROM)) {
-      fromForm = new MJobForms(forms);
+      fromConfig = new MFromConfig(configs);
     }
 
     if (supportedDirections.contains(Direction.TO)) {
-      toForm = new MJobForms(forms);
+      toConfig = new MToConfig(configs);
     }
 
     return new MConnector("NAME", "CLASSNAME", "1.0",
-        connectionForms1, fromForm, toForm);
+        linkConfig, fromConfig, toConfig);
   }
 
   /**
@@ -64,32 +66,32 @@ public class TestMConnector {
    */
   @Test
   public void testInitialization() {
-    List<MForm> fromJobForms = new ArrayList<MForm>();
-    List<MForm> toJobForms = new ArrayList<MForm>();
-    MConnectionForms connectionForms1 = new MConnectionForms(fromJobForms);
-    MJobForms fromJobForm1 = new MJobForms(fromJobForms);
-    MJobForms toJobForm1 = new MJobForms(toJobForms);
+    List<MConfig> fromJobConfig = new ArrayList<MConfig>();
+    List<MConfig> toJobConfig = new ArrayList<MConfig>();
+    MLinkConfig linkConfig = new MLinkConfig(fromJobConfig);
+    MFromConfig fromConfig1 = new MFromConfig(fromJobConfig);
+    MToConfig toConfig1 = new MToConfig(toJobConfig);
     MConnector connector1 = new MConnector("NAME", "CLASSNAME", "1.0",
-        connectionForms1, fromJobForm1, toJobForm1);
+        linkConfig, fromConfig1, toConfig1);
     assertEquals("NAME", connector1.getUniqueName());
     assertEquals("CLASSNAME", connector1.getClassName());
     assertEquals("1.0", connector1.getVersion());
     MConnector connector2 = new MConnector("NAME", "CLASSNAME", "1.0",
-        connectionForms1, fromJobForm1, toJobForm1);
+        linkConfig, fromConfig1, toConfig1);
     assertEquals(connector2, connector1);
     MConnector connector3 = new MConnector("NAME1", "CLASSNAME", "2.0",
-        connectionForms1, fromJobForm1, toJobForm1);
+        linkConfig, fromConfig1, toConfig1);
     assertFalse(connector1.equals(connector3));
 
     try {
-      connector1 = new MConnector(null, "CLASSNAME", "1.0", connectionForms1,
-          fromJobForm1, toJobForm1); // Expecting null pointer exception
+      connector1 = new MConnector(null, "CLASSNAME", "1.0", linkConfig,
+          fromConfig1, toConfig1); // Expecting null pointer exception
     } catch (NullPointerException e) {
       assertTrue(true);
     }
     try {
-      connector1 = new MConnector("NAME", null, "1.0", connectionForms1,
-          fromJobForm1, toJobForm1); // Expecting null pointer exception
+      connector1 = new MConnector("NAME", null, "1.0", linkConfig,
+          fromConfig1, toConfig1); // Expecting null pointer exception
     } catch (NullPointerException e) {
       assertTrue(true);
     }
@@ -97,48 +99,48 @@ public class TestMConnector {
 
   @Test
   public void testClone() {
-    MConnector connector1 = createConnector(Arrays.asList(Direction.FROM, Direction.TO));
-    assertEquals("NAME", connector1.getUniqueName());
-    assertEquals("CLASSNAME", connector1.getClassName());
-    assertEquals("1.0", connector1.getVersion());
-    //Clone with values. Checking values copying after the cloning. But form values will be null
-    MConnector clone1 = connector1.clone(true);
-    assertEquals("NAME", clone1.getUniqueName());
-    assertEquals("CLASSNAME", clone1.getClassName());
-    assertEquals("1.0", clone1.getVersion());
-    MForm clonedForm1 = clone1.getConnectionForms().getForms().get(0);
-    assertNull(clonedForm1.getInputs().get(0).getValue());
-    assertNull(clonedForm1.getInputs().get(1).getValue());
+    MConnector connector = createConnector(Arrays.asList(Direction.FROM, Direction.TO));
+    assertEquals("NAME", connector.getUniqueName());
+    assertEquals("CLASSNAME", connector.getClassName());
+    assertEquals("1.0", connector.getVersion());
+    //Clone with values. Checking values copying after the cloning. But config values will be null
+    MConnector cloneConnector1 = connector.clone(true);
+    assertEquals("NAME", cloneConnector1.getUniqueName());
+    assertEquals("CLASSNAME", cloneConnector1.getClassName());
+    assertEquals("1.0", cloneConnector1.getVersion());
+    MConfig clonedLinkConfig = cloneConnector1.getLinkConfig().getConfigs().get(0);
+    assertNull(clonedLinkConfig.getInputs().get(0).getValue());
+    assertNull(clonedLinkConfig.getInputs().get(1).getValue());
 
-    MForm clonedForm2 = clone1.getJobForms(Direction.FROM).getForms().get(0);
-    assertNull(clonedForm2.getInputs().get(0).getValue());
-    assertNull(clonedForm2.getInputs().get(1).getValue());
+    MConfig clonedFromConfig = cloneConnector1.getConfig(Direction.FROM).getConfigs().get(0);
+    assertNull(clonedFromConfig.getInputs().get(0).getValue());
+    assertNull(clonedFromConfig.getInputs().get(1).getValue());
 
-    MForm clonedForm3 = clone1.getJobForms(Direction.TO).getForms().get(0);
-    assertNull(clonedForm3.getInputs().get(0).getValue());
-    assertNull(clonedForm3.getInputs().get(1).getValue());
+    MConfig clonedToConfig = cloneConnector1.getConfig(Direction.TO).getConfigs().get(0);
+    assertNull(clonedToConfig.getInputs().get(0).getValue());
+    assertNull(clonedToConfig.getInputs().get(1).getValue());
 
     //Clone without values. Inputs value will be null after cloning.
-    MConnector clone2 = connector1.clone(false);
-    clonedForm1 = clone2.getConnectionForms().getForms().get(0);
-    assertNull(clonedForm1.getInputs().get(0).getValue());
-    assertNull(clonedForm1.getInputs().get(1).getValue());
-    clonedForm2 = clone2.getJobForms(Direction.FROM).getForms().get(0);
-    assertNull(clonedForm2.getInputs().get(0).getValue());
-    assertNull(clonedForm2.getInputs().get(1).getValue());
-    clonedForm3 = clone2.getJobForms(Direction.TO).getForms().get(0);
-    assertNull(clonedForm3.getInputs().get(0).getValue());
-    assertNull(clonedForm3.getInputs().get(1).getValue());
+    MConnector clonedConnector2 = connector.clone(false);
+    clonedLinkConfig = clonedConnector2.getLinkConfig().getConfigs().get(0);
+    assertNull(clonedLinkConfig.getInputs().get(0).getValue());
+    assertNull(clonedLinkConfig.getInputs().get(1).getValue());
+    clonedFromConfig = clonedConnector2.getConfig(Direction.FROM).getConfigs().get(0);
+    assertNull(clonedFromConfig.getInputs().get(0).getValue());
+    assertNull(clonedFromConfig.getInputs().get(1).getValue());
+    clonedToConfig = clonedConnector2.getConfig(Direction.TO).getConfigs().get(0);
+    assertNull(clonedToConfig.getInputs().get(0).getValue());
+    assertNull(clonedToConfig.getInputs().get(1).getValue());
   }
 
   @Test
   public void testFromDirection() {
     MConnector connector = createConnector(Arrays.asList(Direction.FROM));
 
-    // Clone should clone only one job form.
+    // Clone should clone only one job config.
     MConnector clone = connector.clone(true);
-    assertNotNull(clone.getJobForms(Direction.FROM));
-    assertNull(clone.getJobForms(Direction.TO));
+    assertNotNull(clone.getFromConfig());
+    assertNull(clone.getToConfig());
     assertEquals(connector, clone);
     assertEquals(connector.toString(), clone.toString());
     assertNotEquals(connector.hashCode(), clone.hashCode());
@@ -148,10 +150,10 @@ public class TestMConnector {
   public void testToDirection() {
     MConnector connector = createConnector(Arrays.asList(Direction.TO));
 
-    // Clone should clone only one job form.
+    // Clone should clone only one job config.
     MConnector clone = connector.clone(true);
-    assertNull(clone.getJobForms(Direction.FROM));
-    assertNotNull(clone.getJobForms(Direction.TO));
+    assertNull(clone.getFromConfig());
+    assertNotNull(clone.getToConfig());
     assertEquals(connector, clone);
     assertEquals(connector.toString(), clone.toString());
     assertNotEquals(connector.hashCode(), clone.hashCode());
@@ -161,10 +163,10 @@ public class TestMConnector {
   public void testNoDirection() {
     MConnector connector = createConnector(Arrays.asList(new Direction[0]));
 
-    // Clone should clone only one job form.
+    // Clone should clone only one job config.
     MConnector clone = connector.clone(true);
-    assertNull(clone.getJobForms(Direction.FROM));
-    assertNull(clone.getJobForms(Direction.TO));
+    assertNull(clone.getFromConfig());
+    assertNull(clone.getToConfig());
     assertEquals(connector, clone);
     assertEquals(connector.toString(), clone.toString());
     assertNotEquals(connector.hashCode(), clone.hashCode());
@@ -174,10 +176,10 @@ public class TestMConnector {
   public void testBothDirections() {
     MConnector connector = createConnector(Arrays.asList(Direction.FROM, Direction.TO));
 
-    // Clone should clone only one job form.
+    // Clone should clone only one job config.
     MConnector clone = connector.clone(true);
-    assertNotNull(clone.getJobForms(Direction.FROM));
-    assertNotNull(clone.getJobForms(Direction.TO));
+    assertNotNull(clone.getFromConfig());
+    assertNotNull(clone.getToConfig());
     assertEquals(connector, clone);
     assertEquals(connector.toString(), clone.toString());
     assertNotEquals(connector.hashCode(), clone.hashCode());

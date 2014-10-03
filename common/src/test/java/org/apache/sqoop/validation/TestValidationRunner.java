@@ -18,8 +18,8 @@
 package org.apache.sqoop.validation;
 
 import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
-import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.validators.Contains;
@@ -35,18 +35,18 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestValidationRunner {
 
-  @FormClass(validators = {@Validator(FormA.FormValidator.class)})
-  public static class FormA {
+  @ConfigClass(validators = {@Validator(ConfigA.ConfigValidator.class)})
+  public static class ConfigA {
     @Input(validators = {@Validator(NotNull.class)})
     String notNull;
 
-    public static class FormValidator extends AbstractValidator<FormA> {
+    public static class ConfigValidator extends AbstractValidator<ConfigA> {
       @Override
-      public void validate(FormA form) {
-        if(form.notNull == null) {
+      public void validate(ConfigA config) {
+        if(config.notNull == null) {
           addMessage(Status.UNACCEPTABLE, "null");
         }
-        if("error".equals(form.notNull)) {
+        if("error".equals(config.notNull)) {
           addMessage(Status.UNACCEPTABLE, "error");
         }
       }
@@ -54,83 +54,83 @@ public class TestValidationRunner {
   }
 
   @Test
-  public void testValidateForm() {
-    FormA form = new FormA();
-    ValidationRunner runner = new ValidationRunner();
-    ValidationResult result;
+  public void testValidateConfig() {
+    ConfigA config = new ConfigA();
+    ConfigValidationRunner runner = new ConfigValidationRunner();
+    ConfigValidationResult result;
 
-    // Null string should fail on Input level and should not call form level validators
-    form.notNull = null;
-    result = runner.validateForm("formName", form);
+    // Null string should fail on Input level and should not call config level validators
+    config.notNull = null;
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
-    assertTrue(result.getMessages().containsKey("formName.notNull"));
+    assertTrue(result.getMessages().containsKey("configName.notNull"));
 
-    // String "error" should trigger form level error, but not Input level
-    form.notNull = "error";
-    result = runner.validateForm("formName", form);
+    // String "error" should trigger config level error, but not Input level
+    config.notNull = "error";
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
-    assertTrue(result.getMessages().containsKey("formName"));
+    assertTrue(result.getMessages().containsKey("configName"));
 
     // Acceptable state
-    form.notNull = "This is truly random string";
-    result = runner.validateForm("formName", form);
+    config.notNull = "This is truly random string";
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.FINE, result.getStatus());
     assertEquals(0, result.getMessages().size());
   }
 
-  @FormClass
-  public static class FormB {
+  @ConfigClass
+  public static class ConfigB {
     @Input(validators = {@Validator(NotNull.class), @Validator(NotEmpty.class)})
     String str;
   }
 
-  @FormClass
-  public static class FormC {
+  @ConfigClass
+  public static class ConfigC {
     @Input(validators = {@Validator(value = Contains.class, strArg = "findme")})
     String str;
   }
 
   @Test
   public void testMultipleValidatorsOnSingleInput() {
-    FormB form = new FormB();
-    ValidationRunner runner = new ValidationRunner();
-    ValidationResult result;
+    ConfigB config = new ConfigB();
+    ConfigValidationRunner runner = new ConfigValidationRunner();
+    ConfigValidationResult result;
 
-    form.str = null;
-    result = runner.validateForm("formName", form);
+    config.str = null;
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
-    assertTrue(result.getMessages().containsKey("formName.str"));
-    assertEquals(2, result.getMessages().get("formName.str").size());
+    assertTrue(result.getMessages().containsKey("configName.str"));
+    assertEquals(2, result.getMessages().get("configName.str").size());
   }
 
   @Test
   public void testValidatorWithParameters() {
-    FormC form = new FormC();
-    ValidationRunner runner = new ValidationRunner();
-    ValidationResult result;
+    ConfigC config = new ConfigC();
+    ConfigValidationRunner runner = new ConfigValidationRunner();
+    ConfigValidationResult result;
 
     // Sub string not found
-    form.str = "Mordor";
-    result = runner.validateForm("formName", form);
+    config.str = "Mordor";
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
-    assertTrue(result.getMessages().containsKey("formName.str"));
+    assertTrue(result.getMessages().containsKey("configName.str"));
 
     // Sub string found
-    form.str = "Morfindmedor";
-    result = runner.validateForm("formName", form);
+    config.str = "Morfindmedor";
+    result = runner.validateConfig("configName", config);
     assertEquals(Status.FINE, result.getStatus());
     assertEquals(0, result.getMessages().size());
   }
 
   @ConfigurationClass(validators = {@Validator(ConfigurationA.ClassValidator.class)})
   public static class ConfigurationA {
-    @Form FormA formA;
+    @Config ConfigA formA;
     public ConfigurationA() {
-      formA = new FormA();
+      formA = new ConfigA();
     }
 
     public static class ClassValidator extends AbstractValidator<ConfigurationA> {
@@ -149,24 +149,24 @@ public class TestValidationRunner {
   @Test
   public void testValidate() {
     ConfigurationA conf = new ConfigurationA();
-    ValidationRunner runner = new ValidationRunner();
-    ValidationResult result;
+    ConfigValidationRunner runner = new ConfigValidationRunner();
+    ConfigValidationResult result;
 
-    // Null string should fail on Input level and should not call form nor class level validators
+    // Null string should fail on Input level and should not call config nor class level validators
     conf.formA.notNull = null;
     result = runner.validate(conf);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("formA.notNull"));
 
-    // String "error" should trigger form level error, but not Input nor class level
+    // String "error" should trigger config level error, but not Input nor class level
     conf.formA.notNull = "error";
     result = runner.validate(conf);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("formA"));
 
-    // String "conf-error" should trigger class level error, but not Input nor Form level
+    // String "conf-error" should trigger class level error, but not Input nor Config level
     conf.formA.notNull = "conf-error";
     result = runner.validate(conf);
     assertEquals(Status.UNACCEPTABLE, result.getStatus());

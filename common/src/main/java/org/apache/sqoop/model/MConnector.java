@@ -23,28 +23,27 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 
 /**
- * Connector metadata.
- *
- * Includes unique id that identifies connector in metadata store, unique human
- * readable name, corresponding name and all forms for all supported job types.
+ * Connector entity supports the FROM/TO {@link Transferable} Includes unique id
+ * that identifies connector in the repository, unique human readable name,
+ * corresponding name and all configs to support the from and to data sources
  */
 public final class MConnector extends MPersistableEntity implements MClonable {
 
   private final String uniqueName;
   private final String className;
-  private final MConnectionForms connectionForms;
-  private final MJobForms fromJobForms;
-  private final MJobForms toJobForms;
-  String version;
+  private final String version;
+  private final MLinkConfig linkConfig;
+  private final MFromConfig fromConfig;
+  private final MToConfig toConfig;
 
-  public MConnector(String uniqueName, String className,
-                    String version, MConnectionForms connectionForms,
-                    MJobForms fromJobForms, MJobForms toJobForms) {
+  public MConnector(String uniqueName, String className, String version, MLinkConfig linkConfig,
+      MFromConfig fromConfig, MToConfig toConfig) {
     this.version = version;
-    this.connectionForms = connectionForms;
-    this.fromJobForms = fromJobForms;
-    this.toJobForms = toJobForms;
+    this.linkConfig = linkConfig;
+    this.fromConfig = fromConfig;
+    this.toConfig = toConfig;
 
+    // Why are we abusing NPE?
     if (uniqueName == null || className == null) {
       throw new NullPointerException();
     }
@@ -63,17 +62,15 @@ public final class MConnector extends MPersistableEntity implements MClonable {
 
   @Override
   public String toString() {
-    MJobForms fromJobForms = this.getJobForms(Direction.FROM);
-    MJobForms toJobForms = this.getJobForms(Direction.TO);
     StringBuilder sb = new StringBuilder("connector-");
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
     sb.append(className);
-    sb.append(", ").append(getConnectionForms().toString());
-    if (fromJobForms != null) {
-      sb.append(", ").append(fromJobForms.toString());
+    sb.append(", ").append(getLinkConfig().toString());
+    if (getConfig(Direction.FROM) != null) {
+      sb.append(", ").append(getConfig(Direction.FROM).toString());
     }
-    if (toJobForms != null) {
-      sb.append(", ").append(toJobForms.toString());
+    if (getConfig(Direction.TO) != null) {
+      sb.append(", ").append(getConfig(Direction.TO).toString());
     }
     return sb.toString();
   }
@@ -94,41 +91,39 @@ public final class MConnector extends MPersistableEntity implements MClonable {
 
     if (supportedDirections.isDirectionSupported(Direction.FROM)
         && mcSupportedDirections.isDirectionSupported(Direction.FROM)
-        && !getJobForms(Direction.FROM).equals(mc.getJobForms(Direction.FROM))) {
+        && !getFromConfig().equals(mc.getFromConfig())) {
       return false;
     }
 
-    if (supportedDirections.isDirectionSupported(Direction.FROM)
-        != mcSupportedDirections.isDirectionSupported(Direction.FROM)) {
+    if (supportedDirections.isDirectionSupported(Direction.FROM) != mcSupportedDirections
+        .isDirectionSupported(Direction.FROM)) {
       return false;
     }
 
     if (supportedDirections.isDirectionSupported(Direction.TO)
         && mcSupportedDirections.isDirectionSupported(Direction.TO)
-        && !getJobForms(Direction.TO).equals(mc.getJobForms(Direction.TO))) {
+        && !getToConfig().equals(mc.getToConfig())) {
       return false;
     }
 
-    if (supportedDirections.isDirectionSupported(Direction.TO)
-        != mcSupportedDirections.isDirectionSupported(Direction.TO)) {
+    if (supportedDirections.isDirectionSupported(Direction.TO) != mcSupportedDirections
+        .isDirectionSupported(Direction.TO)) {
       return false;
     }
 
-    return uniqueName.equals(mc.uniqueName)
-        && className.equals(mc.className)
-        && version.equals(mc.version)
-        && connectionForms.equals(mc.getConnectionForms());
+    return uniqueName.equals(mc.uniqueName) && className.equals(mc.className)
+        && version.equals(mc.version) && linkConfig.equals((mc.getLinkConfig()));
   }
 
   @Override
   public int hashCode() {
     SupportedDirections supportedDirections = getSupportedDirections();
-    int result = getConnectionForms().hashCode();
+    int result = getLinkConfig().hashCode();
     if (supportedDirections.isDirectionSupported(Direction.FROM)) {
-      result = 31 * result + getJobForms(Direction.FROM).hashCode();
+      result = 31 * result + getFromConfig().hashCode();
     }
     if (supportedDirections.isDirectionSupported(Direction.TO)) {
-      result = 31 * result + getJobForms(Direction.TO).hashCode();
+      result = 31 * result + getToConfig().hashCode();
     }
     result = 31 * result + version.hashCode();
     result = 31 * result + uniqueName.hashCode();
@@ -137,58 +132,57 @@ public final class MConnector extends MPersistableEntity implements MClonable {
   }
 
   public MConnector clone(boolean cloneWithValue) {
-    //Connector never have any values filled
+    // Connector never have any values filled
     cloneWithValue = false;
 
-    MJobForms fromJobForms = this.getJobForms(Direction.FROM);
-    MJobForms toJobForms = this.getJobForms(Direction.TO);
+    MFromConfig fromConfig = this.getFromConfig();
+    MToConfig toConfig = this.getToConfig();
 
-    if (fromJobForms != null) {
-      fromJobForms = fromJobForms.clone(cloneWithValue);
+    if (fromConfig != null) {
+      fromConfig = fromConfig.clone(cloneWithValue);
     }
 
-    if (toJobForms != null) {
-      toJobForms = toJobForms.clone(cloneWithValue);
+    if (toConfig != null) {
+      toConfig = toConfig.clone(cloneWithValue);
     }
 
-    MConnector copy = new MConnector(
-        this.getUniqueName(),
-        this.getClassName(),
-        this.getVersion(),
-        this.getConnectionForms().clone(cloneWithValue),
-        fromJobForms,
-        toJobForms);
+    MConnector copy = new MConnector(this.getUniqueName(), this.getClassName(), this.getVersion(),
+        this.getLinkConfig().clone(cloneWithValue), fromConfig, toConfig);
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }
 
-  public MConnectionForms getConnectionForms() {
-    return connectionForms;
+  public MLinkConfig getLinkConfig() {
+    return linkConfig;
   }
 
-  public MJobForms getJobForms(Direction type) {
-    switch(type) {
-      case FROM:
-        return fromJobForms;
+  public MConfigList getConfig(Direction type) {
+    switch (type) {
+    case FROM:
+      return fromConfig;
 
-      case TO:
-        return toJobForms;
+    case TO:
+      return toConfig;
 
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
+    default:
+      throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
+  }
+
+  public MFromConfig getFromConfig() {
+    return fromConfig;
+  }
+
+  public MToConfig getToConfig() {
+    return toConfig;
   }
 
   public String getVersion() {
     return version;
   }
 
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
   public SupportedDirections getSupportedDirections() {
-    return new SupportedDirections(this.getJobForms(Direction.FROM) != null,
-        this.getJobForms(Direction.TO) != null);
+    return new SupportedDirections(this.getConfig(Direction.FROM) != null,
+        this.getConfig(Direction.TO) != null);
   }
 }

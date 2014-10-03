@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 
-@FormClass
+@ConfigClass
 public class LinkConfig {
  //Todo: Didn't find anything that belongs here...
- // Since empty forms don't work (DERBYREPO_0008:The form contains no input metadata), I'm putting a dummy form here
+ // Since empty forms don't work (DERBYREPO_0008:The config contains no input metadata), I'm putting a dummy config here
 
   @Input(size = 255) public String dummy;
 }

@@ -30,13 +30,13 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
-import org.apache.sqoop.driver.configuration.JobConfiguration;
+import org.apache.sqoop.driver.configuration.DriverConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.job.etl.Transferable;
-import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
@@ -311,35 +311,27 @@ public class JobManager implements Reconfigurable {
     SqoopConnector toConnector = getConnector(toConnection.getConnectorId());
     validateSupportedDirection(toConnector, Direction.TO);
 
-    // Transform config to fromConnector specific classes
-    Object fromConnectionConfig = ClassUtils.instantiate(fromConnector
-        .getLinkConfigurationClass());
-    FormUtils.fromForms(fromConnection.getConnectorPart().getForms(), fromConnectionConfig);
+    // link config for the FROM part of the job
+    Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
+    ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
 
-    // Transform config to toConnector specific classes
-    Object toConnectorConfig = ClassUtils
-        .instantiate(toConnector.getLinkConfigurationClass());
-    FormUtils.fromForms(toConnection.getConnectorPart().getForms(), toConnectorConfig);
+    // link config for the TO part of the job
+    Object toLinkConfig = ClassUtils.instantiate(toConnector.getLinkConfigurationClass());
+    ConfigUtils.fromConfigs(toConnection.getConnectorLinkConfig().getConfigs(), toLinkConfig);
 
+    // from config for the job
     Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
-    FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromJob);
+    ConfigUtils.fromConfigs(job.getJobConfig(Direction.FROM).getConfigs(), fromJob);
 
+    // to config for the job
     Object toJob = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
-    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toJob);
+    ConfigUtils.fromConfigs(job.getJobConfig(Direction.TO).getConfigs(), toJob);
 
-    // Transform framework specific configs
-    // Q(VB) : Aren't the following 2 exactly the same?
-    Object fromDriverConnection = ClassUtils.instantiate(Driver.getInstance()
-        .getLinkConfigurationClass());
-    FormUtils.fromForms(fromConnection.getFrameworkPart().getForms(), fromDriverConnection);
+    // the only driver config for the job
+    Object driverConfig = ClassUtils
+        .instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
+    ConfigUtils.fromConfigs(job.getDriverConfig().getConfigs(), driverConfig);
 
-    Object toDriverConnection = ClassUtils.instantiate(Driver.getInstance()
-        .getLinkConfigurationClass());
-    FormUtils.fromForms(toConnection.getFrameworkPart().getForms(), toDriverConnection);
-
-    Object frameworkJob = ClassUtils.instantiate(Driver.getInstance()
-        .getJobConfigurationClass());
-    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkJob);
 
     // Create a job request for submit/execution
     JobRequest jobRequest = executionEngine.createJobRequest();
@@ -347,14 +339,14 @@ public class JobManager implements Reconfigurable {
     jobRequest.setSummary(submission);
     jobRequest.setConnector(Direction.FROM, fromConnector);
     jobRequest.setConnector(Direction.TO, toConnector);
-    jobRequest.setConnectorLinkConfig(Direction.FROM, fromConnectionConfig);
-    jobRequest.setConnectorLinkConfig(Direction.TO, toConnectorConfig);
-    jobRequest.setConnectorJobConfig(Direction.FROM, fromJob);
-    jobRequest.setConnectorJobConfig(Direction.TO, toJob);
-    // TODO(Abe): Should we actually have 2 different Driver Connection config objects?
-    jobRequest.setFrameworkLinkConfig(Direction.FROM, fromDriverConnection);
-    jobRequest.setFrameworkLinkConfig(Direction.TO, toDriverConnection);
-    jobRequest.setFrameworkJobConfig(frameworkJob);
+
+    jobRequest.setConnectorLinkConfig(Direction.FROM, fromLinkConfig);
+    jobRequest.setConnectorLinkConfig(Direction.TO, toLinkConfig);
+
+    jobRequest.setJobConfig(Direction.FROM, fromJob);
+    jobRequest.setJobConfig(Direction.TO, toJob);
+
+    jobRequest.setDriverConfig(driverConfig);
     jobRequest.setJobName(job.getName());
     jobRequest.setJobId(job.getPersistenceId());
     jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
@@ -453,12 +445,12 @@ public class JobManager implements Reconfigurable {
 
     // Initialize submission from the connector perspective
     initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getConnectorJobConfig(direction));
+        jobRequest.getJobConfig(direction));
 
 
     return initializer.getSchema(initializerContext,
         jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getConnectorJobConfig(direction));
+        jobRequest.getJobConfig(direction));
   }
 
   private void addConnectorInitializerJars(JobRequest jobRequest, Direction direction) {
@@ -468,7 +460,7 @@ public class JobManager implements Reconfigurable {
     // Add job specific jars to
     jobRequest.addJars(initializer.getJars(initializerContext,
         jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getConnectorJobConfig(direction)));
+        jobRequest.getJobConfig(direction)));
   }
 
   private Initializer getConnectorInitializer(JobRequest jobRequest, Direction direction) {
@@ -488,12 +480,12 @@ public class JobManager implements Reconfigurable {
   }
 
   void prepareJob(JobRequest request) {
-    JobConfiguration jobConfiguration = (JobConfiguration) request.getFrameworkJobConfig();
+    DriverConfiguration jobConfiguration = (DriverConfiguration) request.getDriverConfig();
     // We're directly moving configured number of extractors and loaders to
     // underlying request object. In the future we might need to throttle this
     // count based on other running jobs to meet our SLAs.
-    request.setExtractors(jobConfiguration.throttling.extractors);
-    request.setLoaders(jobConfiguration.throttling.loaders);
+    request.setExtractors(jobConfiguration.throttlingConfig.numExtractors);
+    request.setLoaders(jobConfiguration.throttlingConfig.numLoaders);
 
     // Delegate rest of the job to execution engine
     executionEngine.prepareJob(request);
@@ -532,9 +524,9 @@ public class JobManager implements Reconfigurable {
 
     // destroy submission from connector perspective
     fromDestroyer.destroy(fromDestroyerContext, request.getConnectorLinkConfig(Direction.FROM),
-        request.getConnectorJobConfig(Direction.FROM));
+        request.getJobConfig(Direction.FROM));
     toDestroyer.destroy(toDestroyerContext, request.getConnectorLinkConfig(Direction.TO),
-        request.getConnectorJobConfig(Direction.TO));
+        request.getJobConfig(Direction.TO));
   }
 
   public MSubmission stop(long jobId, HttpEventContext ctx) {

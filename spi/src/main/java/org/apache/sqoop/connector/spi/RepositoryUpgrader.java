@@ -18,8 +18,8 @@
  */
 package org.apache.sqoop.connector.spi;
 
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MLinkConfig;
 
 /**
  * Repository represents the sqoop entity store. Sqoop entities include
@@ -29,23 +29,23 @@ import org.apache.sqoop.model.MJobForms;
 public abstract class RepositoryUpgrader {
 
   /**
-   * Upgrade the original connection and fill into the upgradeTarget. Note
-   * that any metadata already in {@code upgradeTarget} maybe overwritten.
-   * @param original - original connection metadata as in the repository
+   * Upgrade the original link config and fill into the upgradeTarget. Note
+   * that any data already in {@code upgradeTarget} maybe overwritten.
+   * @param original - original link config as in the repository
    * @param upgradeTarget - the instance that will be filled in with the
-   *                      upgraded metadata.
+   *                      upgraded link config.
    */
-  public abstract void upgrade(MConnectionForms original,
-    MConnectionForms upgradeTarget);
+  public abstract void upgrade(MLinkConfig original, MLinkConfig upgradeTarget);
   /**
-   * Upgrade the original job and fill into the upgradeTarget. Note
-   * that any metadata already in {@code upgradeTarget} maybe overwritten.
-   * This method must be called only after the connection metadata has
+   * Upgrade the original job config and fill into the upgradeTarget. Note
+   * that any config data already in {@code upgradeTarget} maybe overwritten.
+   * This method must be called only after the link config has
    * already been upgraded.
-   * @param original - original connection metadata as in the repository
+   * @param original - original job config as in the repository
    * @param upgradeTarget - the instance that will be filled in with the
-   *                      upgraded metadata.
+   *                      upgraded job config.
+   *  NOTE(VB): This api will be revisited to accomodate from and to job config update
    */
-  public abstract void upgrade(MJobForms original, MJobForms upgradeTarget);
+  public abstract void upgrade(MConfigList original, MConfigList upgradeTarget);
 }
 

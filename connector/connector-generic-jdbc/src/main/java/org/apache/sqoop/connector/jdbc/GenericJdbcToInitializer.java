@@ -43,35 +43,35 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     Logger.getLogger(GenericJdbcToInitializer.class);
 
   @Override
-  public void initialize(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
-    configureJdbcProperties(context.getContext(), linkConf, toJobConf);
+  public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    configureJdbcProperties(context.getContext(), linkConfig, toJobConfig);
     try {
-      configureTableProperties(context.getContext(), linkConf, toJobConf);
+      configureTableProperties(context.getContext(), linkConfig, toJobConfig);
     } finally {
       executor.close();
     }
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
+  public List<String> getJars(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     List<String> jars = new LinkedList<String>();
-    jars.add(ClassUtils.jarForClass(linkConf.link.jdbcDriver));
+    jars.add(ClassUtils.jarForClass(linkConfig.linkConfig.jdbcDriver));
     return jars;
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
-    configureJdbcProperties(context.getContext(), linkConf, toJobConf);
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    configureJdbcProperties(context.getContext(), linkConfig, toJobConfig);
 
-    String schemaName = toJobConf.toJobConfig.tableName;
+    String schemaName = toJobConfig.toJobConfig.tableName;
 
     if (schemaName == null) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
           "Table name extraction not supported yet.");
     }
 
-    if(toJobConf.toJobConfig.schemaName != null) {
-      schemaName = toJobConf.toJobConfig.schemaName + "." + schemaName;
+    if(toJobConfig.toJobConfig.schemaName != null) {
+      schemaName = toJobConfig.toJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -110,11 +110,11 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     }
   }
 
-  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
-    String driver = linkConf.link.jdbcDriver;
-    String url = linkConf.link.connectionString;
-    String username = linkConf.link.username;
-    String password = linkConf.link.password;
+  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    String driver = linkConfig.linkConfig.jdbcDriver;
+    String url = linkConfig.linkConfig.connectionString;
+    String username = linkConfig.linkConfig.username;
+    String password = linkConfig.linkConfig.password;
 
     assert driver != null;
     assert url != null;
@@ -122,7 +122,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configureTableProperties(MutableContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConfig) {
+  private void configureTableProperties(MutableContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     String dataSql;
 
     String schemaName = toJobConfig.toJobConfig.schemaName;

@@ -19,8 +19,9 @@ package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.junit.Test;
 
@@ -43,7 +44,7 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsLink);
+    fillRdbmsLinkConfig(rdbmsLink);
     saveLink(rdbmsLink);
 
     // HDFS link
@@ -53,10 +54,16 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
     // Job creation
     MJob job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
 
-    // Connector values
-    MFormList toForms = job.getConnectorPart(Direction.TO);
-    toForms.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fillFromJobForm(job);
+    // set hdfs "FROM" config for the job, since the connector test case base class only has utilities for hdfs!
+    fillHdfsFromConfig(job);
+
+    // set the rdms "TO" config here
+    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+
+    // driver config
+    MDriverConfig driverConfig = job.getDriverConfig();
+    driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(3);
     saveJob(job);
 
     executeJob(job);

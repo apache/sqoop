@@ -17,18 +17,21 @@
  */
 package org.apache.sqoop.handler;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
@@ -36,41 +39,37 @@ import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ValidationResult;
-import org.apache.sqoop.validation.ValidationRunner;
+import org.apache.sqoop.validation.ConfigValidationResult;
+import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Connection request handler is supporting following resources:
  *
- * GET /v1/connection/:xid
- * Return details about one particular connection with id :xid or about all of
+ * GET /v1/link/:xid
+ * Return details about one particular link with id :xid or about all of
  * them if :xid equals to "all".
  *
- * POST /v1/connection
- * Create new connection
+ * POST /v1/link
+ * Create new link
  *
- * PUT /v1/connection/:xid
- * Update connection with id :xid.
+ * PUT /v1/link/:xid
+ * Update link with id :xid.
  *
- * PUT /v1/connection/:xid/enable
- * Enable connection with id :xid
+ * PUT /v1/link/:xid/enable
+ * Enable link with id :xid
  *
- * PUT /v1/connection/:xid/disable
- * Disable connection with id :xid
+ * PUT /v1/link/:xid/disable
+ * Disable link with id :xid
  *
- * DELETE /v1/connection/:xid
- * Remove connection with id :xid
+ * DELETE /v1/link/:xid
+ * Remove link with id :xid
  *
  * Planned resources:
  *
- * GET /v1/connection
- * Get brief list of all connections present in the system.
+ * GET /v1/link
+ * Get brief list of all links present in the system.
  *
  */
 public class LinkRequestHandler implements RequestHandler {
@@ -89,37 +88,37 @@ public class LinkRequestHandler implements RequestHandler {
   public JsonBean handleEvent(RequestContext ctx) {
     switch (ctx.getMethod()) {
       case GET:
-        return getConnections(ctx);
+        return getLink(ctx);
       case POST:
-          return createUpdateConnection(ctx, false);
+          return createUpdateLink(ctx, false);
       case PUT:
         if (ctx.getLastURLElement().equals(ENABLE)) {
-          return enableConnection(ctx, true);
+          return enableLink(ctx, true);
         } else if (ctx.getLastURLElement().equals(DISABLE)) {
-          return enableConnection(ctx, false);
+          return enableLink(ctx, false);
         } else {
-          return createUpdateConnection(ctx, true);
+          return createUpdateLink(ctx, true);
         }
       case DELETE:
-        return deleteConnection(ctx);
+        return deleteLink(ctx);
     }
 
     return null;
   }
 
   /**
-   * Delete connection from metadata repository.
+   * Delete link from thes repository.
    *
    * @param ctx Context object
    * @return Empty bean
    */
-  private JsonBean deleteConnection(RequestContext ctx) {
+  private JsonBean deleteLink(RequestContext ctx) {
     String sxid = ctx.getLastURLElement();
     long xid = Long.valueOf(sxid);
 
     AuditLoggerManager.getInstance()
         .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "delete", "connection", sxid);
+        "delete", "link", sxid);
 
     Repository repository = RepositoryManager.getInstance().getRepository();
     repository.deleteLink(xid);
@@ -128,20 +127,15 @@ public class LinkRequestHandler implements RequestHandler {
   }
 
   /**
-   * Update or create connection metadata in repository.
+   * Update or create link in repository.
    *
    * @param ctx Context object
    * @return Validation bean object
    */
-  private JsonBean createUpdateConnection(RequestContext ctx, boolean update) {
-//    Check that given ID equals with sent ID, otherwise report an error UPDATE
-//    String sxid = ctx.getLastURLElement();
-//    long xid = Long.valueOf(sxid);
+  private JsonBean createUpdateLink(RequestContext ctx, boolean update) {
 
     String username = ctx.getUserName();
-
     LinkBean bean = new LinkBean();
-
     try {
       JSONObject json =
         (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
@@ -152,93 +146,86 @@ public class LinkRequestHandler implements RequestHandler {
         "Can't read request content", e);
     }
 
-    // Get connection object
-    List<MLink> connections = bean.getLinks();
+    // Get link object
+    List<MLink> links = bean.getLinks();
 
-    if(connections.size() != 1) {
+    if(links.size() != 1) {
       throw new SqoopException(ServerError.SERVER_0003,
-        "Expected one connection metadata but got " + connections.size());
+        "Expected one link but got " + links.size());
     }
 
-    MLink connection = connections.get(0);
+    MLink link = links.get(0);
 
     // Verify that user is not trying to spoof us
-    MConnectionForms connectorForms =
-      ConnectorManager.getInstance().getConnectorMetadata(connection.getConnectorId())
-      .getConnectionForms();
-    MConnectionForms frameworkForms = Driver.getInstance().getDriverConfig()
-      .getConnectionForms();
-
-    if(!connectorForms.equals(connection.getConnectorPart())
-      || !frameworkForms.equals(connection.getFrameworkPart())) {
+    MLinkConfig linkConfig =
+      ConnectorManager.getInstance().getConnectorConfig(link.getConnectorId())
+      .getLinkConfig();
+    if(!linkConfig.equals(link.getConnectorLinkConfig())) {
       throw new SqoopException(ServerError.SERVER_0003,
-        "Detected incorrect form structure");
+        "Detected incorrect config structure");
     }
 
     // Responsible connector for this session
-    SqoopConnector connector = ConnectorManager.getInstance().getConnector(connection.getConnectorId());
+    SqoopConnector connector = ConnectorManager.getInstance().getConnector(link.getConnectorId());
 
-    // We need translate forms to configuration objects
-    Object connectorConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());
-    Object frameworkConfig = ClassUtils.instantiate(Driver.getInstance().getLinkConfigurationClass());
+    // We need translate configs
+    Object connectorLinkConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());
 
-    FormUtils.fromForms(connection.getConnectorPart().getForms(), connectorConfig);
-    FormUtils.fromForms(connection.getFrameworkPart().getForms(), frameworkConfig);
+    ConfigUtils.fromConfigs(link.getConnectorLinkConfig().getConfigs(), connectorLinkConfig);
 
     // Validate both parts
-    ValidationRunner validationRunner = new ValidationRunner();
-    ValidationResult connectorValidation = validationRunner.validate(connectorConfig);
-    ValidationResult frameworkValidation = validationRunner.validate(frameworkConfig);
+    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
+    ConfigValidationResult connectorLinkValidation = validationRunner.validate(connectorLinkConfig);
 
-    Status finalStatus = Status.getWorstStatus(connectorValidation.getStatus(), frameworkValidation.getStatus());
+    Status finalStatus = Status.getWorstStatus(connectorLinkValidation.getStatus());
 
     // Return back validations in all cases
-    ValidationResultBean outputBean = new ValidationResultBean(connectorValidation, frameworkValidation);
+    ValidationResultBean outputBean = new ValidationResultBean(connectorLinkValidation);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
       if(update) {
         AuditLoggerManager.getInstance()
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "update", "connection", String.valueOf(connection.getPersistenceId()));
+            "update", "link", String.valueOf(link.getPersistenceId()));
 
-        connection.setLastUpdateUser(username);
-        RepositoryManager.getInstance().getRepository().updateLink(connection);
+        link.setLastUpdateUser(username);
+        RepositoryManager.getInstance().getRepository().updateLink(link);
       } else {
-        connection.setCreationUser(username);
-        connection.setLastUpdateUser(username);
-        RepositoryManager.getInstance().getRepository().createLink(connection);
-        outputBean.setId(connection.getPersistenceId());
+        link.setCreationUser(username);
+        link.setLastUpdateUser(username);
+        RepositoryManager.getInstance().getRepository().createLink(link);
+        outputBean.setId(link.getPersistenceId());
 
         AuditLoggerManager.getInstance()
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "create", "connection", String.valueOf(connection.getPersistenceId()));
+            "create", "link", String.valueOf(link.getPersistenceId()));
       }
     }
 
     return outputBean;
   }
 
-  private JsonBean getConnections(RequestContext ctx) {
+  private JsonBean getLink(RequestContext ctx) {
     String sxid = ctx.getLastURLElement();
     LinkBean bean;
 
     AuditLoggerManager.getInstance()
         .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "get", "connection", sxid);
+        "get", "link", sxid);
 
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     if (sxid.equals("all")) {
 
-      List<MLink> connections = repository.findLinks();
-      bean = new LinkBean(connections);
+      List<MLink> links = repository.findLinks();
+      bean = new LinkBean(links);
 
       // Add associated resources into the bean
-      for( MLink connection : connections) {
-        long connectorId = connection.getConnectorId();
-        if(!bean.hasConnectorBundle(connectorId)) {
+      for( MLink link : links) {
+        long connectorId = link.getConnectorId();
+        if(!bean.hasConnectorConfigBundle(connectorId)) {
           bean.addConnectorConfigBundle(connectorId,
             ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
         }
@@ -246,21 +233,18 @@ public class LinkRequestHandler implements RequestHandler {
     } else {
       long xid = Long.valueOf(sxid);
 
-      MLink connection = repository.findLink(xid);
-      long connectorId = connection.getConnectorId();
+      MLink link = repository.findLink(xid);
+      long connectorId = link.getConnectorId();
 
-      bean = new LinkBean(connection);
+      bean = new LinkBean(link);
 
       bean.addConnectorConfigBundle(connectorId,
         ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }
-
-    // Sent framework resource bundle in all cases
-    bean.setDriverConfigBundle(Driver.getInstance().getBundle(locale));
     return bean;
   }
 
-  private JsonBean enableConnection(RequestContext ctx, boolean enabled) {
+  private JsonBean enableLink(RequestContext ctx, boolean enabled) {
     String[] elements = ctx.getUrlElements();
     String sLinkId = elements[elements.length - 2];
     long linkId = Long.valueOf(sLinkId);

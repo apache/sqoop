@@ -21,41 +21,41 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ConfigValidator;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Bean for sending validations across network. This bean will move two
- * validation objects at one time - one for connector and second for framework
- * part of validated entity. Optionally validation bean can also transfer
+ * Bean for sending validations across network. This bean will send job validation results
+ * Optionally validation bean can also transfer
  * created persistent id in case that new entity was created.
  */
 public class JobValidationBean implements JsonBean {
 
   private static final String ID = "id";
-  private static final String FRAMEWORK = "framework";
-  private static final String CONNECTOR = "connector";
+  private static final String JOB = "job";
   private static final String FROM = "from";
   private static final String TO = "to";
+  private static final String DRIVER = "driver";
+
   private static final String STATUS = "status";
   private static final String MESSAGE = "message";
   private static final String MESSAGES = "messages";
 
   private Long id;
-  private Validation fromConnectorValidation;
-  private Validation toConnectorValidation;
-  private Validation frameworkValidation;
+  private ConfigValidator fromConfigValidation;
+  private ConfigValidator toConfigValidation;
+  private ConfigValidator driverConfigValidation;
 
   // For "extract"
-  public JobValidationBean(Validation fromConnector, Validation framework, Validation toConnector) {
+  public JobValidationBean(ConfigValidator fromConnector, ConfigValidator framework, ConfigValidator toConnector) {
     this();
 
-    this.fromConnectorValidation = fromConnector;
-    this.toConnectorValidation = toConnector;
-    this.frameworkValidation = framework;
+    this.fromConfigValidation = fromConnector;
+    this.toConfigValidation = toConnector;
+    this.driverConfigValidation = framework;
   }
 
   // For "restore"
@@ -63,21 +63,21 @@ public class JobValidationBean implements JsonBean {
     id = null;
   }
 
-  public Validation getConnectorValidation(Direction type) {
+  public ConfigValidator getConnectorValidation(Direction type) {
     switch(type) {
       case FROM:
-        return fromConnectorValidation;
+        return fromConfigValidation;
 
       case TO:
-        return toConnectorValidation;
+        return toConfigValidation;
 
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
-  public Validation getFrameworkValidation() {
-    return frameworkValidation;
+  public ConfigValidator getFrameworkValidation() {
+    return driverConfigValidation;
   }
 
   public void setId(Long id) {
@@ -91,32 +91,30 @@ public class JobValidationBean implements JsonBean {
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
     JSONObject object = new JSONObject();
-    JSONObject connectorObject = new JSONObject();
+    JSONObject jobObject = new JSONObject();
 
     // Optionally transfer id
     if(id != null) {
       object.put(ID, id);
     }
 
-    connectorObject.put(FROM, extractValidation(getConnectorValidation(Direction.FROM)));
-    connectorObject.put(TO, extractValidation(getConnectorValidation(Direction.TO)));
-
-    object.put(FRAMEWORK, extractValidation(frameworkValidation));
-    object.put(CONNECTOR, connectorObject);
-
+    jobObject.put(FROM, extractValidation(getConnectorValidation(Direction.FROM)));
+    jobObject.put(TO, extractValidation(getConnectorValidation(Direction.TO)));
+    jobObject.put(DRIVER, extractValidation(driverConfigValidation));
+    object.put(JOB, jobObject);
     return object;
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject extractValidation(Validation validation) {
+  private JSONObject extractValidation(ConfigValidator validation) {
     JSONObject object = new JSONObject();
 
     object.put(STATUS, validation.getStatus().name());
 
     JSONObject jsonMessages = new JSONObject();
-    Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
+    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages = validation.getMessages();
 
-    for(Map.Entry<Validation.FormInput, Validation.Message> entry : messages.entrySet()) {
+    for(Map.Entry<ConfigValidator.ConfigInput, ConfigValidator.Message> entry : messages.entrySet()) {
       JSONObject jsonEntry = new JSONObject();
       jsonEntry.put(STATUS, entry.getValue().getStatus().name());
       jsonEntry.put(MESSAGE, entry.getValue().getMessage());
@@ -133,20 +131,21 @@ public class JobValidationBean implements JsonBean {
     // Optional and accepting NULLs
     id = (Long) jsonObject.get(ID);
 
-    JSONObject jsonConnectorObject = (JSONObject)jsonObject.get(CONNECTOR);
+    JSONObject jobJsonObject = (JSONObject)jsonObject.get(JOB);
 
-    fromConnectorValidation = restoreValidation(
-        (JSONObject)jsonConnectorObject.get(FROM));
-    toConnectorValidation = restoreValidation(
-        (JSONObject)jsonConnectorObject.get(TO));
-    frameworkValidation = restoreValidation(
-        (JSONObject)jsonObject.get(FRAMEWORK));
+    fromConfigValidation = restoreValidation(
+        (JSONObject)jobJsonObject.get(FROM));
+    toConfigValidation = restoreValidation(
+        (JSONObject)jobJsonObject.get(TO));
+    driverConfigValidation = restoreValidation(
+        (JSONObject)jobJsonObject.get(DRIVER));
   }
 
-  public Validation restoreValidation(JSONObject jsonObject) {
+  public ConfigValidator restoreValidation(JSONObject jsonObject) {
+
     JSONObject jsonMessages = (JSONObject) jsonObject.get(MESSAGES);
-    Map<Validation.FormInput, Validation.Message> messages
-        = new HashMap<Validation.FormInput, Validation.Message>();
+    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages
+        = new HashMap<ConfigValidator.ConfigInput, ConfigValidator.Message>();
 
     for(Object key : jsonMessages.keySet()) {
       JSONObject jsonMessage = (JSONObject) jsonMessages.get(key);
@@ -154,14 +153,14 @@ public class JobValidationBean implements JsonBean {
       Status status = Status.valueOf((String) jsonMessage.get(STATUS));
       String stringMessage = (String) jsonMessage.get(MESSAGE);
 
-      Validation.Message message
-          = new Validation.Message(status, stringMessage);
+      ConfigValidator.Message message
+          = new ConfigValidator.Message(status, stringMessage);
 
-      messages.put(new Validation.FormInput((String)key), message);
+      messages.put(new ConfigValidator.ConfigInput((String)key), message);
     }
 
     Status status = Status.valueOf((String) jsonObject.get(STATUS));
 
-    return new Validation(status, messages);
+    return new ConfigValidator(status, messages);
   }
 }

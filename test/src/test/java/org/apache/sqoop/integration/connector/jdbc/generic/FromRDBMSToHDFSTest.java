@@ -17,16 +17,17 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
+import static org.junit.Assert.assertTrue;
+
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Import simple table with various configurations.
@@ -39,7 +40,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsConnection);
+    fillRdbmsLinkConfig(rdbmsConnection);
     saveLink(rdbmsConnection);
 
     // HDFS link
@@ -49,11 +50,17 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Job creation
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
-    // Connector values
-    MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
-    fillToJobForm(job, ToFormat.TEXT_FILE);
+    // srt rdbms "FROM" config
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+
+    // fill the hdfs "TO" config
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    // driver config
+    MDriverConfig driverConfig = job.getDriverConfig();
+    driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(3);
+
     saveJob(job);
 
     executeJob(job);
@@ -76,7 +83,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkForm(rdbmsLink);
+    fillRdbmsLinkConfig(rdbmsLink);
     saveLink(rdbmsLink);
 
     // HDFS link
@@ -87,11 +94,11 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
-    MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    forms.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
-    forms.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
-    fillToJobForm(job, ToFormat.TEXT_FILE);
+    MConfigList configs = job.getJobConfig(Direction.FROM);
+    configs.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
 
     MSubmission submission = getClient().startSubmission(job.getPersistenceId());

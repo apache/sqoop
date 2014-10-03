@@ -30,7 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormDisplayer.*;
+import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
 
 /**
  *
@@ -124,12 +124,11 @@ public class ShowJobFunction extends SqoopFunction {
         job.getLinkId(Direction.FROM),
         job.getConnectorId(Direction.FROM));
 
-    // Display connector part
-    displayForms(job.getConnectorPart(Direction.FROM).getForms(),
-                 client.getConnectorConfigResourceBundle(job.getConnectorId(Direction.FROM)));
-    displayForms(job.getFrameworkPart().getForms(),
+    displayConfig(job.getJobConfig(Direction.FROM).getConfigs(),
+                 client.getConnectorConfigBundle(job.getConnectorId(Direction.FROM)));
+    displayConfig(job.getDriverConfig().getConfigs(),
                  client.getDriverConfigBundle());
-    displayForms(job.getConnectorPart(Direction.TO).getForms(),
-                 client.getConnectorConfigResourceBundle(job.getConnectorId(Direction.TO)));
+    displayConfig(job.getJobConfig(Direction.TO).getConfigs(),
+                 client.getConnectorConfigBundle(job.getConnectorId(Direction.TO)));
   }
 }

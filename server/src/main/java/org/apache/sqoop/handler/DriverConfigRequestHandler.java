@@ -20,7 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.json.DriverConfigBean;
+import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
@@ -40,11 +40,10 @@ public class DriverConfigRequestHandler  implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
-    AuditLoggerManager.getInstance()
-        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "get", "framework", "");
+    AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+        ctx.getRequest().getRemoteAddr(), "get", "driverConfig", "");
 
-    return new DriverConfigBean(Driver.getInstance().getDriverConfig(),
-      Driver.getInstance().getBundle(ctx.getAcceptLanguageHeader()));
+    return new DriverBean(Driver.getInstance().getDriver(), Driver.getInstance()
+        .getBundle(ctx.getAcceptLanguageHeader()));
   }
 }

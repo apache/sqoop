@@ -17,15 +17,18 @@
  */
 package org.apache.sqoop.test.testcases;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MFormList;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.asserts.ProviderAsserts;
@@ -38,9 +41,6 @@ import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 
 /**
  * Base test case suitable for connector testing.
@@ -121,39 +121,48 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   }
 
   /**
-   * Fill link form based on currently active provider.
+   * Fill link config based on currently active provider.
    *
    * @param link MLink object to fill
    */
-  protected void fillRdbmsLinkForm(MLink link) {
-    MFormList forms = link.getConnectorPart();
-    forms.getStringInput("link.jdbcDriver").setValue(provider.getJdbcDriver());
-    forms.getStringInput("link.connectionString").setValue(provider.getConnectionUrl());
-    forms.getStringInput("link.username").setValue(provider.getConnectionUsername());
-    forms.getStringInput("link.password").setValue(provider.getConnectionPassword());
+  protected void fillRdbmsLinkConfig(MLink link) {
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.jdbcDriver").setValue(provider.getJdbcDriver());
+    configs.getStringInput("linkConfig.connectionString").setValue(provider.getConnectionUrl());
+    configs.getStringInput("linkConfig.username").setValue(provider.getConnectionUsername());
+    configs.getStringInput("linkConfig.password").setValue(provider.getConnectionPassword());
   }
 
   /**
-   * Fill TO form with specific storage and output type.
+   * Fill TO config with specific storage and output type.
    *
    * @param job MJob object to fill
    * @param output Output type that should be set
    */
-  protected void fillToJobForm(MJob job, ToFormat output) {
-    MFormList toForms = job.getConnectorPart(Direction.TO);
-    toForms.getEnumInput("toJobConfig.outputFormat").setValue(output);
-    toForms.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
+  protected void fillHdfsToConfig(MJob job, ToFormat output) {
+    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    toConfig.getEnumInput("toJobConfig.outputFormat").setValue(output);
+    toConfig.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
   }
 
   /**
-   * Fill FROM form
+   * Fill FROM config
    *
    * @param job MJob object to fill
    */
-  protected void fillFromJobForm(MJob job) {
-    MFormList forms = job.getConnectorPart(Direction.FROM);
-    forms.getStringInput("fromJobConfig.inputDirectory").setValue(getMapreduceDirectory());
+  protected void fillHdfsFromConfig(MJob job) {
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    fromConfig.getStringInput("fromJobConfig.inputDirectory").setValue(getMapreduceDirectory());
   }
+
+  /**
+   * Fill Driver config
+   * @param job
+   */
+  protected void fillDriverConfig(MJob job) {
+    job.getDriverConfig().getStringInput("throttlingConfig.numExtractors").setValue("3");
+  }
+
 
   /**
    * Create table cities.
@@ -186,7 +195,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   /**
    * Assert row in testing table.
    *
-   * @param conditions Conditions in form that are expected by the database provider
+   * @param conditions Conditions in config that are expected by the database provider
    * @param values Values that are expected in the table (with corresponding types)
    */
   protected void assertRow(Object []conditions, Object ...values) {

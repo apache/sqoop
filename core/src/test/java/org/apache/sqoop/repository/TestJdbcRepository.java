@@ -17,35 +17,6 @@
  */
 package org.apache.sqoop.repository;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.connector.spi.RepositoryUpgrader;
-import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.driver.configuration.JobConfiguration;
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
-import org.apache.sqoop.validation.Validator;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InOrder;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -63,6 +34,39 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.spi.RepositoryUpgrader;
+import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.driver.configuration.DriverConfiguration;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.validation.ConfigValidator;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.Validator;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InOrder;
+
 public class TestJdbcRepository {
 
   private JdbcRepository repoSpy;
@@ -73,8 +77,8 @@ public class TestJdbcRepository {
   private Validator validatorMock;
   private RepositoryUpgrader upgraderMock;
 
-  private Validation validRepoMock;
-  private Validation invalidRepoMock;
+  private ConfigValidator validRepoMock;
+  private ConfigValidator invalidRepoMock;
 
   @Before
   public void setUp() throws Exception {
@@ -91,20 +95,20 @@ public class TestJdbcRepository {
     ConnectorManager.setInstance(connectorMgrMock);
     Driver.setInstance(driverMock);
 
-    validRepoMock = mock(Validation.class);
+    validRepoMock = mock(ConfigValidator.class);
     when(validRepoMock.getStatus()).thenReturn(Status.ACCEPTABLE);
-    invalidRepoMock = mock(Validation.class);
+    invalidRepoMock = mock(ConfigValidator.class);
     when(invalidRepoMock.getStatus()).thenReturn(Status.UNACCEPTABLE);
 
-    doNothing().when(upgraderMock).upgrade(any(MConnectionForms.class), any(MConnectionForms.class));
-    doNothing().when(upgraderMock).upgrade(any(MJobForms.class), any(MJobForms.class));
+    doNothing().when(upgraderMock).upgrade(any(MLinkConfig.class), any(MLinkConfig.class));
+    doNothing().when(upgraderMock).upgrade(any(MFromConfig.class), any(MFromConfig.class));
   }
 
   /**
    * Test the procedure when the connector auto upgrade option is enabled
    */
   @Test
-  public void testConnectorEnableAutoUpgrade() {
+  public void testConnectorConfigEnableAutoUpgrade() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1, "1.0");
 
@@ -155,22 +159,22 @@ public class TestJdbcRepository {
    */
   @Test
   public void testDriverConfigEnableAutoUpgrade() {
-    MDriverConfig newDriverConfig = driverConfig();
-    MDriverConfig oldDriverConfig = anotherDriverConfig();
+    MDriver newDriverConfig = driver();
+    MDriver oldDriverConfig = anotherDriver();
 
-    when(repoHandlerMock.findDriverConfig(any(Connection.class))).thenReturn(oldDriverConfig);
+    when(repoHandlerMock.findDriver(any(Connection.class))).thenReturn(oldDriverConfig);
 
     // make the upgradeDriverConfig to throw an exception to prove that it has been called
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "upgradeDriverConfig() has been called.");
-    doThrow(exception).when(repoHandlerMock).findLinks(any(Connection.class));
+    doThrow(exception).when(repoHandlerMock).findJobs(any(Connection.class));
 
     try {
-      repoSpy.registerDriverConfig(newDriverConfig, true);
+      repoSpy.registerDriver(newDriverConfig, true);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findDriverConfig(any(Connection.class));
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
+      verify(repoHandlerMock, times(1)).findDriver(any(Connection.class));
+      verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -183,16 +187,16 @@ public class TestJdbcRepository {
    */
   @Test
   public void testDriverConfigDisableAutoUpgrade() {
-    MDriverConfig newDriverConfig = driverConfig();
-    MDriverConfig oldDriverConfig = anotherDriverConfig();
+    MDriver newDriverConfig = driver();
+    MDriver oldDriverConfig = anotherDriver();
 
-    when(repoHandlerMock.findDriverConfig(any(Connection.class))).thenReturn(oldDriverConfig);
+    when(repoHandlerMock.findDriver(any(Connection.class))).thenReturn(oldDriverConfig);
 
     try {
-      repoSpy.registerDriverConfig(newDriverConfig, false);
+      repoSpy.registerDriver(newDriverConfig, false);
     } catch (SqoopException ex) {
       assertEquals(ex.getErrorCode(), RepositoryError.JDBCREPO_0026);
-      verify(repoHandlerMock, times(1)).findDriverConfig(any(Connection.class));
+      verify(repoHandlerMock, times(1)).findDriver(any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -205,18 +209,18 @@ public class TestJdbcRepository {
    * jobs using the old connector are still valid for the new connector
    */
   @Test
-  public void testConnectorUpgradeWithValidLinksAndJobs() {
+  public void testConnectorConfigUpgradeWithValidLinksAndJobs() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     // prepare the sqoop connector
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(validRepoMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(JobConfiguration.class);
+    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationGroup.class);
+    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(DriverConfiguration.class);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
     // prepare the links and jobs
@@ -252,160 +256,82 @@ public class TestJdbcRepository {
     txOrder.verify(repoTransactionMock, times(1)).commit();
     txOrder.verify(repoTransactionMock, times(1)).close();
     txOrder.verifyNoMoreInteractions();
-    upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MConnectionForms.class), any(MConnectionForms.class));
-    upgraderOrder.verify(upgraderMock, times(4)).upgrade(any(MJobForms.class), any(MJobForms.class));
+    upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MLinkConfig.class), any(MLinkConfig.class));
+    upgraderOrder.verify(upgraderMock, times(4)).upgrade(any(MFromConfig.class), any(MFromConfig.class));
     upgraderOrder.verifyNoMoreInteractions();
-    validatorOrder.verify(validatorMock, times(2)).validateLink(anyObject());
+    validatorOrder.verify(validatorMock, times(2)).validateConfigForLink(anyObject());
     // @TODO(Abe): Re-enable job validation?
-    validatorOrder.verify(validatorMock, times(0)).validateJob(anyObject());
+    validatorOrder.verify(validatorMock, times(0)).validateConfigForJob(anyObject());
     validatorOrder.verifyNoMoreInteractions();
   }
 
   /**
-   * @TODO(Abe): To re-enable with Validation in Repository upgrade.
-   * Test the connector upgrade procedure, when all the links and
-   * jobs using the old connector are invalid for the new connector
-   */
-//  @Test
-//  public void testConnectorUpgradeWithInvalidLinksAndJobs() {
-//    MConnector newConnector = connector(1, "1.1");
-//    MConnector oldConnector = connector(1);
-//
-//    // prepare the sqoop connector
-//    SqoopConnector sqconnector = mock(SqoopConnector.class);
-//    when(validator.validateLink(any(MLink.class))).thenReturn(invalid);
-//    when(validator.validateJob(any(MJob.class))).thenReturn(invalid);
-//    when(sqconnector.getValidator()).thenReturn(validator);
-//    when(sqconnector.getDriverConfigRepositoryUpgrader()).thenReturn(upgrader);
-//    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-//    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(JobConfiguration.class);
-//    when(connectorMgr.getConnector(anyString())).thenReturn(sqconnector);
-//
-//    // prepare the links and jobs
-//    List<MLink> linkList = links(link(1,1), link(2,1));
-//    List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-//
-//    doReturn(linkList).when(repo).findLinksForConnector(anyLong());
-//    doReturn(jobList).when(repo).findJobsForConnector(anyLong());
-//    doNothing().when(repo).updateLink(any(MLink.class), any(RepositoryTransaction.class));
-//    doNothing().when(repo).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-//    doNothing().when(repo).updateConnector(any(MConnector.class), any(RepositoryTransaction.class));
-//
-//    try {
-//      repo.upgradeConnector(oldConnector, newConnector);
-//    } catch (SqoopException ex) {
-//      assertEquals(ex.getErrorCode(), RepositoryError.JDBCREPO_0027);
-//
-//      InOrder repoOrder = inOrder(repo);
-//      InOrder txOrder = inOrder(tx);
-//      InOrder upgraderOrder = inOrder(upgrader);
-//      InOrder validatorOrder = inOrder(validator);
-//
-//      repoOrder.verify(repo, times(1)).findLinksForConnector(anyLong());
-//      repoOrder.verify(repo, times(1)).findJobsForConnector(anyLong());
-//      repoOrder.verify(repo, times(1)).getTransaction();
-//      repoOrder.verify(repo, times(1)).deleteJobInputs(1, tx);
-//      repoOrder.verify(repo, times(1)).deleteJobInputs(2, tx);
-//      repoOrder.verify(repo, times(1)).deleteLinkInputs(1, tx);
-//      repoOrder.verify(repo, times(1)).deleteLinkInputs(2, tx);
-//      repoOrder.verify(repo, times(1)).updateConnector(any(MConnector.class), any(RepositoryTransaction.class));
-//      repoOrder.verifyNoMoreInteractions();
-//      txOrder.verify(tx, times(1)).begin();
-//      txOrder.verify(tx, times(1)).rollback();
-//      txOrder.verify(tx, times(1)).close();
-//      txOrder.verifyNoMoreInteractions();
-//      upgraderOrder.verify(upgrader, times(2)).upgrade(any(MConnectionForms.class), any(MConnectionForms.class));
-//      upgraderOrder.verify(upgrader, times(2)).upgrade(any(MJobForms.class), any(MJobForms.class));
-//      upgraderOrder.verifyNoMoreInteractions();
-//      validatorOrder.verify(validator, times(2)).validateLink(anyObject());
-//      validatorOrder.verify(validator, times(2)).validateJob(anyObject());
-//      validatorOrder.verifyNoMoreInteractions();
-//      return ;
-//    }
-//
-//    fail("Should throw out an exception with code: " + RepositoryError.JDBCREPO_0027);
-//  }
-
-  /**
-   * Test the driverConfig upgrade procedure, when all the links and
-   * jobs using the old connector are still valid for the new connector
+   * Test the driverConfig upgrade procedure, when all jobs
+   * using the old connector are still valid for the new connector
    */
   @Test
-  public void testDriverConfigUpgradeWithValidLinksAndJobs() {
-    MDriverConfig newDriverConfig = driverConfig();
+  public void testDriverConfigUpgradeWithValidJobs() {
+    MDriver newDriverConfig = driver();
 
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(validRepoMock);
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(driverMock.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(driverMock.getJobConfigurationClass()).thenReturn(JobConfiguration.class);
+    when(driverMock.getDriverConfigurationGroupClass()).thenReturn(EmptyConfigurationGroup.class);
 
-    List<MLink> linkList = links(link(1,1), link(2,1));
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
 
-    doReturn(linkList).when(repoSpy).findLinks();
     doReturn(jobList).when(repoSpy).findJobs();
     doNothing().when(repoSpy).updateLink(any(MLink.class), any(RepositoryTransaction.class));
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-    doNothing().when(repoSpy).updateDriverConfig(any(MDriverConfig.class), any(RepositoryTransaction.class));
+    doNothing().when(repoSpy).updateDriver(any(MDriver.class), any(RepositoryTransaction.class));
 
-    repoSpy.upgradeDriverConfig(newDriverConfig);
+    repoSpy.upgradeDriver(newDriverConfig);
 
     InOrder repoOrder = inOrder(repoSpy);
     InOrder txOrder = inOrder(repoTransactionMock);
     InOrder upgraderOrder = inOrder(upgraderMock);
     InOrder validatorOrder = inOrder(validatorMock);
 
-    repoOrder.verify(repoSpy, times(1)).findLinks();
     repoOrder.verify(repoSpy, times(1)).findJobs();
     repoOrder.verify(repoSpy, times(1)).getTransaction();
     repoOrder.verify(repoSpy, times(1)).deleteJobInputs(1, repoTransactionMock);
     repoOrder.verify(repoSpy, times(1)).deleteJobInputs(2, repoTransactionMock);
-    repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(1, repoTransactionMock);
-    repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(2, repoTransactionMock);
-    repoOrder.verify(repoSpy, times(1)).updateDriverConfig(any(MDriverConfig.class), any(RepositoryTransaction.class));
-    repoOrder.verify(repoSpy, times(2)).updateLink(any(MLink.class), any(RepositoryTransaction.class));
+    repoOrder.verify(repoSpy, times(1)).updateDriver(any(MDriver.class), any(RepositoryTransaction.class));
     repoOrder.verify(repoSpy, times(2)).updateJob(any(MJob.class), any(RepositoryTransaction.class));
     repoOrder.verifyNoMoreInteractions();
     txOrder.verify(repoTransactionMock, times(1)).begin();
     txOrder.verify(repoTransactionMock, times(1)).commit();
     txOrder.verify(repoTransactionMock, times(1)).close();
     txOrder.verifyNoMoreInteractions();
-    upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MConnectionForms.class), any(MConnectionForms.class));
-    upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MJobForms.class), any(MJobForms.class));
+    upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MConfigList.class), any(MConfigList.class));
     upgraderOrder.verifyNoMoreInteractions();
-    validatorOrder.verify(validatorMock, times(2)).validateLink(anyObject());
-    validatorOrder.verify(validatorMock, times(2)).validateJob(anyObject());
+    validatorOrder.verify(validatorMock, times(2)).validateConfigForJob(anyObject());
     validatorOrder.verifyNoMoreInteractions();
   }
 
   /**
-   * Test the driverConfig upgrade procedure, when all the links and
-   * jobs using the old connector are invalid for the new connector
+   * Test the driverConfig upgrade procedure, when all the jobs
+   * using the old connector are invalid for the new connector
    */
   @Test
-  public void testDriverConfigUpgradeWithInvalidLinksAndJobs() {
-    MDriverConfig newDriverConfig = driverConfig();
+  public void testDriverConfigUpgradeWithInvalidJobs() {
+    MDriver newDriverConfig = driver();
 
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(invalidRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(invalidRepoMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(invalidRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(invalidRepoMock);
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(driverMock.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(driverMock.getJobConfigurationClass()).thenReturn(JobConfiguration.class);
+    when(driverMock.getDriverConfigurationGroupClass()).thenReturn(EmptyConfigurationGroup.class);
 
-    List<MLink> linkList = links(link(1,1), link(2,1));
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
 
-    doReturn(linkList).when(repoSpy).findLinks();
     doReturn(jobList).when(repoSpy).findJobs();
-    doNothing().when(repoSpy).updateLink(any(MLink.class), any(RepositoryTransaction.class));
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-    doNothing().when(repoSpy).updateDriverConfig(any(MDriverConfig.class), any(RepositoryTransaction.class));
+    doNothing().when(repoSpy).updateDriver(any(MDriver.class), any(RepositoryTransaction.class));
 
     try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
+      repoSpy.upgradeDriver(newDriverConfig);
     } catch (SqoopException ex) {
       assertEquals(ex.getErrorCode(), RepositoryError.JDBCREPO_0027);
 
@@ -414,24 +340,20 @@ public class TestJdbcRepository {
       InOrder upgraderOrder = inOrder(upgraderMock);
       InOrder validatorOrder = inOrder(validatorMock);
 
-      repoOrder.verify(repoSpy, times(1)).findLinks();
       repoOrder.verify(repoSpy, times(1)).findJobs();
       repoOrder.verify(repoSpy, times(1)).getTransaction();
       repoOrder.verify(repoSpy, times(1)).deleteJobInputs(1, repoTransactionMock);
       repoOrder.verify(repoSpy, times(1)).deleteJobInputs(2, repoTransactionMock);
-      repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(1, repoTransactionMock);
-      repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(2, repoTransactionMock);
-      repoOrder.verify(repoSpy, times(1)).updateDriverConfig(any(MDriverConfig.class), any(RepositoryTransaction.class));
+      repoOrder.verify(repoSpy, times(1)).updateDriver(any(MDriver.class), any(RepositoryTransaction.class));
       repoOrder.verifyNoMoreInteractions();
       txOrder.verify(repoTransactionMock, times(1)).begin();
       txOrder.verify(repoTransactionMock, times(1)).rollback();
       txOrder.verify(repoTransactionMock, times(1)).close();
       txOrder.verifyNoMoreInteractions();
-      upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MConnectionForms.class), any(MConnectionForms.class));
-      upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MJobForms.class), any(MJobForms.class));
+      upgraderOrder.verify(upgraderMock, times(2)).upgrade(any(MConfigList.class), any(MConfigList.class));
       upgraderOrder.verifyNoMoreInteractions();
-      validatorOrder.verify(validatorMock, times(2)).validateLink(anyObject());
-      validatorOrder.verify(validatorMock, times(2)).validateJob(anyObject());
+      // driver configs are per job.
+      validatorOrder.verify(validatorMock, times(2)).validateConfigForJob(anyObject());
       validatorOrder.verifyNoMoreInteractions();
       return ;
     }
@@ -444,12 +366,12 @@ public class TestJdbcRepository {
    * find links for a given connector
    */
   @Test
-  public void testConnectorUpgradeHandlerFindLinksForConnectorError() {
+  public void testConnectorConfigUpgradeHandlerWithFindLinksForConnectorError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
@@ -474,12 +396,12 @@ public class TestJdbcRepository {
    * find jobs for a given connector
    */
   @Test
-  public void testConnectorUpgradeHandlerFindJobsForConnectorError() {
+  public void testConnectorConfigUpgradeHandlerWithFindJobsForConnectorError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
@@ -508,12 +430,12 @@ public class TestJdbcRepository {
    * delete job inputs for a given connector
    */
   @Test
-  public void testConnectorUpgradeHandlerDeleteJobInputsError() {
+  public void testConnectorConfigUpgradeHandlerWithDeleteJobInputsError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
@@ -545,12 +467,12 @@ public class TestJdbcRepository {
    * delete link inputs for a given connector
    */
   @Test
-  public void testConnectorUpgradeHandlerDeleteLinkInputsError() {
+  public void testConnectorConfigUpgradeHandlerWithDeleteLinkInputsError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
@@ -584,12 +506,12 @@ public class TestJdbcRepository {
    * update the connector entity
    */
   @Test
-  public void testConnectorUpgradeHandlerUpdateConnectorError() {
+  public void testConnectorConfigUpgradeHandlerWithUpdateConnectorError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
@@ -625,17 +547,17 @@ public class TestJdbcRepository {
    * update the link entity
    */
   @Test
-  public void testConnectorUpgradeHandlerUpdateLinkError() {
+  public void testConnectorConfigUpgradeHandlerWithUpdateLinkError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(validRepoMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(JobConfiguration.class);
+    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationGroup.class);
+    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(DriverConfiguration.class);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
     List<MLink> linkList = links(link(1,1), link(2,1));
@@ -674,17 +596,17 @@ public class TestJdbcRepository {
    * update the job entity
    */
   @Test
-  public void testConnectorUpgradeHandlerUpdateJobError() {
+  public void testConnectorConfigUpgradeHandlerWithUpdateJobError() {
     MConnector newConnector = connector(1, "1.1");
     MConnector oldConnector = connector(1);
 
     SqoopConnector sqconnector = mock(SqoopConnector.class);
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
-    when(sqconnector.getValidator()).thenReturn(validatorMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(validRepoMock);
+    when(sqconnector.getConfigValidator()).thenReturn(validatorMock);
     when(sqconnector.getRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(JobConfiguration.class);
+    when(sqconnector.getLinkConfigurationClass()).thenReturn(EmptyConfigurationGroup.class);
+    when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(DriverConfiguration.class);
     when(connectorMgrMock.getConnector(anyString())).thenReturn(sqconnector);
 
     List<MLink> linkList = links(link(1,1), link(2,1));
@@ -724,54 +646,23 @@ public class TestJdbcRepository {
 
   /**
    * Test the exception handling procedure when the database handler fails to
-   * find links for driverConfig
-   */
-  @Test
-  public void testDriverConfigUpgradeHandlerFindLinksError() {
-    MDriverConfig newDriverConfig = driverConfig();
-
-    when(driverMock.getValidator()).thenReturn(validatorMock);
-    when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "find links error.");
-    doThrow(exception).when(repoHandlerMock).findLinks(any(Connection.class));
-
-    try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
-    } catch (SqoopException ex) {
-      assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
-      verifyNoMoreInteractions(repoHandlerMock);
-      return ;
-    }
-
-    fail("Should throw out an exception with message: " + exception.getMessage());
-  }
-
-  /**
-   * Test the exception handling procedure when the database handler fails to
    * find jobs for driverConfig
    */
   @Test
-  public void testDriverConfigUpgradeHandlerFindJobsError() {
-    MDriverConfig newDriverConfig = driverConfig();
+  public void testDriverConfigUpgradeHandlerWithFindJobsError() {
+    MDriver newDriverConfig = driver();
 
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-
-    List<MLink> linkList = links(link(1,1), link(2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "find jobs error.");
     doThrow(exception).when(repoHandlerMock).findJobs(any(Connection.class));
 
     try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
+      repoSpy.upgradeDriver(newDriverConfig);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
@@ -785,15 +676,13 @@ public class TestJdbcRepository {
    * delete job inputs for driverConfig upgrade
    */
   @Test
-  public void testDriverConfigUpgradeHandlerDeleteJobInputsError() {
-    MDriverConfig newDriverConfig = driverConfig();
+  public void testDriverConfigUpgradeHandlerWithDeleteJobInputsError() {
+    MDriver newDriverConfig = driver();
 
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
 
-    List<MLink> linkList = links(link(1,1), link(2,1));
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -801,48 +690,11 @@ public class TestJdbcRepository {
     doThrow(exception).when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
 
     try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
+      repoSpy.upgradeDriver(newDriverConfig);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(1)).deleteJobInputs(anyLong(), any(Connection.class));
-      verifyNoMoreInteractions(repoHandlerMock);
-      return ;
-    }
-
-    fail("Should throw out an exception with message: " + exception.getMessage());
-  }
-
-  /**
-   * Test the exception handling procedure when the database handler fails to
-   * delete link inputs for driverConfig upgrade
-   */
-  @Test
-  public void testDriverConfigUpgradeHandlerDeleteConnectionInputsError() {
-    MDriverConfig newDriverConfig = driverConfig();
-
-    when(driverMock.getValidator()).thenReturn(validatorMock);
-    when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-
-    List<MLink> linkList = links(link(1,1), link(2,1));
-    List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
-    doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
-    doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
-
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "delete link inputs error.");
-    doThrow(exception).when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
-
-    try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
-    } catch (SqoopException ex) {
-      assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
-      verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
-      verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).deleteLinkInputs(anyLong(), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -855,32 +707,28 @@ public class TestJdbcRepository {
    * update the driverConfig entity
    */
   @Test
-  public void testDriverConfigUpgradeHandlerUpdateDriverConfigError() {
-    MDriverConfig newDriverConfig = driverConfig();
+  public void testDriverConfigUpgradeHandlerWithUpdateDriverConfigError() {
+    MDriver newDriverConfig = driver();
 
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
 
-    List<MLink> linkList = links(link(1,1), link(2,1));
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "update driverConfig entity error.");
-    doThrow(exception).when(repoHandlerMock).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
+    doThrow(exception).when(repoHandlerMock).updateDriver(any(MDriver.class), any(Connection.class));
 
     try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
+      repoSpy.upgradeDriver(newDriverConfig);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).updateDriver(any(MDriver.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -888,93 +736,38 @@ public class TestJdbcRepository {
     fail("Should throw out an exception with message: " + exception.getMessage());
   }
 
-  /**
-   * Test the exception handling procedure when the database handler fails to
-   * update the link entity
-   */
-  @Test
-  public void testDriverConfigUpgradeHandlerUpdateConnectionError() {
-    MDriverConfig newDriverConfig = driverConfig();
-
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
-    when(driverMock.getValidator()).thenReturn(validatorMock);
-    when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(driverMock.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(driverMock.getJobConfigurationClass()).thenReturn(JobConfiguration.class);
-
-    List<MLink> linkList = links(link(1,1), link(2,1));
-    List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
-    doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
-    doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
-    doReturn(true).when(repoHandlerMock).existsLink(anyLong(), any(Connection.class));
-
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "update link error.");
-    doThrow(exception).when(repoHandlerMock).updateLink(any(MLink.class), any(Connection.class));
-
-    try {
-      repoSpy.upgradeDriverConfig(newDriverConfig);
-    } catch (SqoopException ex) {
-      assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
-      verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
-      verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsLink(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateLink(any(MLink.class), any(Connection.class));
-      verifyNoMoreInteractions(repoHandlerMock);
-      return ;
-    }
-
-    fail("Should throw out an exception with message: " + exception.getMessage());
-  }
 
   /**
    * Test the exception handling procedure when the database handler fails to
    * update the job entity
    */
   @Test
-  public void testDriverConfigUpgradeHandlerUpdateJobError() {
-    MDriverConfig driverConfig = driverConfig();
+  public void testDriverConfigUpgradeHandlerWithUpdateJobError() {
+    MDriver driverConfig = driver();
 
-    when(validatorMock.validateLink(any(MLink.class))).thenReturn(validRepoMock);
-    when(validatorMock.validateJob(any(MJob.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForLink(any(MLink.class))).thenReturn(validRepoMock);
+    when(validatorMock.validateConfigForJob(any(MJob.class))).thenReturn(validRepoMock);
     when(driverMock.getValidator()).thenReturn(validatorMock);
     when(driverMock.getDriverConfigRepositoryUpgrader()).thenReturn(upgraderMock);
-    when(driverMock.getLinkConfigurationClass()).thenReturn(EmptyConfigurationClass.class);
-    when(driverMock.getJobConfigurationClass()).thenReturn(JobConfiguration.class);
+    when(driverMock.getDriverConfigurationGroupClass()).thenReturn(EmptyConfigurationGroup.class);
 
-    List<MLink> linkList = links(link(1,1), link(2,1));
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
-    doReturn(linkList).when(repoHandlerMock).findLinks(any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
-    doReturn(true).when(repoHandlerMock).existsLink(anyLong(), any(Connection.class));
+    doNothing().when(repoHandlerMock).updateDriver(any(MDriver.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).updateLink(any(MLink.class), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "update job error.");
     doThrow(exception).when(repoHandlerMock).updateJob(any(MJob.class), any(Connection.class));
 
     try {
-      repoSpy.upgradeDriverConfig(driverConfig);
+      repoSpy.upgradeDriver(driverConfig);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findLinks(any(Connection.class));
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateDriverConfig(any(MDriverConfig.class), any(Connection.class));
-      verify(repoHandlerMock, times(2)).existsLink(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(2)).updateLink(any(MLink.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).updateDriver(any(MDriver.class), any(Connection.class));
       verify(repoHandlerMock, times(1)).existsJob(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
@@ -986,9 +779,9 @@ public class TestJdbcRepository {
 
   private MConnector connector(long connectorId, String version) {
     MConnector connector = new MConnector("A" + connectorId, "A" + connectorId, version + connectorId,
-        new MConnectionForms(new LinkedList<MForm>()),
-        new MJobForms(FormUtils.toForms(JobConfiguration.class)),
-        new MJobForms(FormUtils.toForms(JobConfiguration.class)));
+        new MLinkConfig(new LinkedList<MConfig>()),
+        new MFromConfig(ConfigUtils.toConfigs(FromJobConfigurationGroup.class)),
+        new MToConfig(ConfigUtils.toConfigs(ToJobConfigurationGroup.class)));
     connector.setPersistenceId(connectorId);
     return connector;
   }
@@ -997,34 +790,30 @@ public class TestJdbcRepository {
     return connector(connectoId, "1.0");
   }
 
-  private MDriverConfig driverConfig() {
-    MDriverConfig driverConfig = new MDriverConfig(
-        new MConnectionForms(new LinkedList<MForm>()),
-        new MJobForms(FormUtils.toForms(JobConfiguration.class)),
-        Driver.CURRENT_DRIVER_VERSION);
-    driverConfig.setPersistenceId(1);
-    return driverConfig;
+  private MDriver driver() {
+    MDriver driver = new MDriver(new MDriverConfig(new LinkedList<MConfig>()),
+        DriverBean.CURRENT_DRIVER_VERSION);
+    driver.setPersistenceId(1);
+    return driver;
   }
 
-  private MDriverConfig anotherDriverConfig() {
-    MDriverConfig driverConfig = new MDriverConfig(null, null,
-      Driver.CURRENT_DRIVER_VERSION);
-    driverConfig.setPersistenceId(1);
-    return driverConfig;
+  private MDriver anotherDriver() {
+    MDriver driver = new MDriver(null, DriverBean.CURRENT_DRIVER_VERSION);
+    driver.setPersistenceId(1);
+    return driver;
   }
 
   private MLink link(long linkId, long connectorId) {
-    MLink link = new MLink(connectorId, new MConnectionForms(new LinkedList<MForm>()),
-        new MConnectionForms(new LinkedList<MForm>()));
+    MLink link = new MLink(connectorId, new MLinkConfig(new LinkedList<MConfig>()));
     link.setPersistenceId(linkId);
     return link;
   }
 
   private MJob job(long id, long fromConnectorId, long toConnectorId, long fromLinkId, long toLinkId) {
     MJob job = new MJob(fromConnectorId, toConnectorId, fromLinkId, toLinkId,
-        new MJobForms(new LinkedList<MForm>()),
-        new MJobForms(new LinkedList<MForm>()),
-        new MJobForms(new LinkedList<MForm>()));
+        new MFromConfig(new LinkedList<MConfig>()),
+        new MToConfig(new LinkedList<MConfig>()),
+        new MDriverConfig(new LinkedList<MConfig>()));
     job.setPersistenceId(id);
     return job;
   }
@@ -1042,6 +831,12 @@ public class TestJdbcRepository {
   }
 
   @ConfigurationClass
-  public static class EmptyConfigurationClass {
+  public static class EmptyConfigurationGroup {
+  }
+  @ConfigurationClass
+  public static class FromJobConfigurationGroup {
+  }
+  @ConfigurationClass
+  public static class ToJobConfigurationGroup {
   }
 }

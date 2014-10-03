@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  *
  */
-@FormClass(validators = {@Validator(LinkConfig.FormValidator.class)})
+@ConfigClass(validators = {@Validator(LinkConfig.ConfigValidator.class)})
 public class LinkConfig {
   @Input(size = 128, validators = {@Validator(NotEmpty.class), @Validator(ClassAvailable.class)} )
   public String jdbcDriver;
@@ -50,7 +50,7 @@ public class LinkConfig {
   @Input
   public Map<String, String> jdbcProperties;
 
-  public static class FormValidator extends AbstractValidator<LinkConfig> {
+  public static class ConfigValidator extends AbstractValidator<LinkConfig> {
     @Override
     public void validate(LinkConfig linkConfig) {
       // See if we can connect to the database

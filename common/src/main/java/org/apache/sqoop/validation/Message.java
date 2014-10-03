@@ -21,7 +21,7 @@ package org.apache.sqoop.validation;
  * Validation message.
  *
  * Validation message have always two parts - severity and textual information about what
- * is wrong. It can be associated with Input, Form or Configuration class.
+ * is wrong. It can be associated with Input, Config or ConfigurationGroup class.
  */
 public class Message {
   private Status status;

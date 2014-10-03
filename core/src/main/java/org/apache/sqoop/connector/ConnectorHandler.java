@@ -19,19 +19,18 @@ package org.apache.sqoop.connector;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.core.ConfigurationConstants;
-import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.model.MForm;
-import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MToConfig;
 
 public final class ConnectorHandler {
 
@@ -92,26 +91,25 @@ public final class ConnectorHandler {
           connectorClassName, ex);
     }
 
-    // Initialize Metadata
-    MJobForms fromJobForms = null;
-    MJobForms toJobForms = null;
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
     if (connector.getSupportedDirections().contains(Direction.FROM)) {
-      fromJobForms = new MJobForms(FormUtils.toForms(
+      fromConfig = new MFromConfig(ConfigUtils.toConfigs(
           connector.getJobConfigurationClass(Direction.FROM)));
     }
 
     if (connector.getSupportedDirections().contains(Direction.TO)) {
-      toJobForms = new MJobForms(FormUtils.toForms(
+      toConfig = new MToConfig(ConfigUtils.toConfigs(
           connector.getJobConfigurationClass(Direction.TO)));
     }
 
-    MConnectionForms connectionForms = new MConnectionForms(
-        FormUtils.toForms(connector.getLinkConfigurationClass()));
+    MLinkConfig connectionForms = new MLinkConfig(
+        ConfigUtils.toConfigs(connector.getLinkConfigurationClass()));
 
     String connectorVersion = connector.getVersion();
 
     mConnector = new MConnector(connectorUniqueName, connectorClassName, connectorVersion,
-        connectionForms, fromJobForms, toJobForms);
+        connectionForms, fromConfig, toConfig);
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector [" + connectorClassName + "] initialized.");

@@ -17,6 +17,10 @@
  */
 package org.apache.sqoop.handler;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.Direction;
@@ -27,24 +31,23 @@ import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.FormUtils;
+import org.apache.sqoop.json.util.ConfigSerialization;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
+import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.utils.ClassUtils;
+import org.apache.sqoop.validation.ConfigValidationResult;
+import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ValidationResult;
-import org.apache.sqoop.validation.ValidationRunner;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Job request handler is supporting following resources:
@@ -109,7 +112,7 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   /**
-   * Delete job from metadata repository.
+   * Delete job from  repository.
    *
    * @param ctx Context object
    * @return Empty bean
@@ -129,18 +132,14 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   /**
-   * Update or create job metadata in repository.
+   * Update or create job in repository.
    *
    * @param ctx Context object
    * @return Validation bean object
    */
   private JsonBean createUpdateJob(RequestContext ctx, boolean update) {
-//    Check that given ID equals with sent ID, otherwise report an error UPDATE
-//    String sxid = ctx.getLastURLElement();
-//    long xid = Long.valueOf(sxid);
 
     String username = ctx.getUserName();
-
     JobBean bean = new JobBean();
 
     try {
@@ -157,30 +156,29 @@ public class JobRequestHandler implements RequestHandler {
 
     if(jobs.size() != 1) {
       throw new SqoopException(ServerError.SERVER_0003,
-        "Expected one job metadata but got " + jobs.size());
+        "Expected one job but got " + jobs.size());
     }
 
     // Job object
     MJob job = jobs.get(0);
 
     // Verify that user is not trying to spoof us
-    MJobForms fromConnectorForms = ConnectorManager.getInstance()
-        .getConnectorMetadata(job.getConnectorId(Direction.FROM))
-        .getJobForms(Direction.FROM);
-    MJobForms toConnectorForms = ConnectorManager.getInstance()
-        .getConnectorMetadata(job.getConnectorId(Direction.TO))
-        .getJobForms(Direction.TO);
-    MJobForms frameworkForms = Driver.getInstance().getDriverConfig()
-      .getJobForms();
+    MFromConfig fromConfig = ConnectorManager.getInstance()
+        .getConnectorConfig(job.getConnectorId(Direction.FROM))
+        .getFromConfig();
+    MToConfig toConfig = ConnectorManager.getInstance()
+        .getConnectorConfig(job.getConnectorId(Direction.TO))
+        .getToConfig();
+    MDriverConfig driverConfig = Driver.getInstance().getDriver().getDriverConfig();
 
-    if(!fromConnectorForms.equals(job.getConnectorPart(Direction.FROM))
-      || !frameworkForms.equals(job.getFrameworkPart())
-      || !toConnectorForms.equals(job.getConnectorPart(Direction.TO))) {
+    if(!fromConfig.equals(job.getJobConfig(Direction.FROM))
+      || !driverConfig.equals(job.getDriverConfig())
+      || !toConfig.equals(job.getJobConfig(Direction.TO))) {
       throw new SqoopException(ServerError.SERVER_0003,
-        "Detected incorrect form structure");
+        "Detected incorrect config structure");
     }
 
-    // Responsible connector for this session
+    // Corresponding connectors for this
     SqoopConnector fromConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
     SqoopConnector toConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
 
@@ -194,25 +192,27 @@ public class JobRequestHandler implements RequestHandler {
           + " does not support TO direction.");
     }
 
-    // We need translate forms to configuration objects
-    Object fromConnectorConfig = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
-    Object frameworkConfig = ClassUtils.instantiate(Driver.getInstance().getJobConfigurationClass());
-    Object toConnectorConfig = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
+    // We need translate configs
+    Object fromConfigObject = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
+    Object toConfigObject = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
 
-    FormUtils.fromForms(job.getConnectorPart(Direction.FROM).getForms(), fromConnectorConfig);
-    FormUtils.fromForms(job.getFrameworkPart().getForms(), frameworkConfig);
-    FormUtils.fromForms(job.getConnectorPart(Direction.TO).getForms(), toConnectorConfig);
+    Object driverConfigObject = ClassUtils.instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
 
-    // Validate all parts
-    ValidationRunner validationRunner = new ValidationRunner();
-    ValidationResult fromConnectorValidation = validationRunner.validate(fromConnectorConfig);
-    ValidationResult frameworkValidation = validationRunner.validate(frameworkConfig);
-    ValidationResult toConnectorValidation = validationRunner.validate(toConnectorConfig);
+    ConfigUtils.fromConfigs(job.getJobConfig(Direction.FROM).getConfigs(), fromConfigObject);
+    ConfigUtils.fromConfigs(job.getJobConfig(Direction.TO).getConfigs(), toConfigObject);
+    ConfigUtils.fromConfigs(job.getDriverConfig().getConfigs(), driverConfigObject);
 
-    Status finalStatus = Status.getWorstStatus(fromConnectorValidation.getStatus(), frameworkValidation.getStatus(), toConnectorValidation.getStatus());
+    // Validate all configs
+    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
+    ConfigValidationResult fromConfigvalidator = validationRunner.validate(fromConfigObject);
+    ConfigValidationResult toConfigValidator = validationRunner.validate(toConfigObject);
+    ConfigValidationResult driverConfigValidator = validationRunner.validate(driverConfigObject);
+
+
+    Status finalStatus = Status.getWorstStatus(fromConfigvalidator.getStatus(), toConfigValidator.getStatus(), driverConfigValidator.getStatus());
 
     // Return back validations in all cases
-    ValidationResultBean outputBean = new ValidationResultBean(fromConnectorValidation, frameworkValidation, toConnectorValidation);
+    ValidationResultBean validationResultBean = new ValidationResultBean(fromConfigvalidator, toConfigValidator);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {
@@ -227,7 +227,7 @@ public class JobRequestHandler implements RequestHandler {
         job.setCreationUser(username);
         job.setLastUpdateUser(username);
         RepositoryManager.getInstance().getRepository().createJob(job);
-        outputBean.setId(job.getPersistenceId());
+        validationResultBean.setId(job.getPersistenceId());
 
         AuditLoggerManager.getInstance()
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
@@ -236,7 +236,7 @@ public class JobRequestHandler implements RequestHandler {
 
     }
 
-    return outputBean;
+    return validationResultBean;
   }
 
   private JsonBean getJobs(RequestContext ctx) {
@@ -250,7 +250,7 @@ public class JobRequestHandler implements RequestHandler {
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    if (sjid.equals("all")) {
+    if (sjid.equals(ConfigSerialization.ALL)) {
 
       List<MJob> jobs = repository.findJobs();
       bean = new JobBean(jobs);
@@ -269,11 +269,8 @@ public class JobRequestHandler implements RequestHandler {
 
       MJob job = repository.findJob(jid);
       // @TODO(Abe): From/To
-
       long connectorId = job.getConnectorId(Direction.FROM);
-
       bean = new JobBean(job);
-
       bean.addConnectorConfigBundle(connectorId,
         ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }

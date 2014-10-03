@@ -87,7 +87,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       connectors = new LinkedList<MConnector>();
       bundles = new HashMap<Long, ResourceBundle>();
 
-      connectors.add(ConnectorManager.getInstance().getConnectorMetadata(id));
+      connectors.add(ConnectorManager.getInstance().getConnectorConfig(id));
       bundles.put(id, ConnectorManager.getInstance().getResourceBundle(id, locale));
 
       AuditLoggerManager.getInstance()

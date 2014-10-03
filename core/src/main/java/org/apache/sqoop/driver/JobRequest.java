@@ -78,11 +78,11 @@ public class JobRequest {
    */
   Object fromConnectorLinkConfig;
   Object toConnectorLinkConfig;
-  Object fromConnectorJobConfig;
-  Object toConnectorJobConfig;
-  Object fromFrameworkLinkConfig;
-  Object toFrameworkLinkConfig;
-  Object frameworkJobConfig;
+
+  Object fromConfig;
+  Object toConfig;
+
+  Object driverConfig;
 
   /**
    * Connector context (submission specific configuration)
@@ -124,10 +124,9 @@ public class JobRequest {
     this.toConnector = null;
     this.fromConnectorLinkConfig = null;
     this.toConnectorLinkConfig = null;
-    this.fromConnectorJobConfig = null;
-    this.toConnectorJobConfig = null;
-    this.fromFrameworkLinkConfig = null;
-    this.toFrameworkLinkConfig = null;
+    this.fromConfig = null;
+    this.toConfig = null;
+    this.driverConfig = null;
   }
 
   public MSubmission getSummary() {
@@ -244,64 +243,38 @@ public class JobRequest {
     }
   }
 
-  public Object getConnectorJobConfig(Direction type) {
+  public Object getJobConfig(Direction type) {
     switch(type) {
       case FROM:
-        return fromConnectorJobConfig;
+        return fromConfig;
 
       case TO:
-        return toConnectorJobConfig;
+        return toConfig;
 
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
-  public void setConnectorJobConfig(Direction type, Object config) {
+  public void setJobConfig(Direction type, Object config) {
     switch(type) {
       case FROM:
-        fromConnectorJobConfig = config;
+        fromConfig = config;
         break;
       case TO:
-        toConnectorJobConfig = config;
+        toConfig = config;
         break;
       default:
         throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
     }
   }
 
-  public Object getFrameworkLinkConfig(Direction type) {
-    switch(type) {
-      case FROM:
-        return fromFrameworkLinkConfig;
-
-      case TO:
-        return toFrameworkLinkConfig;
-
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
+  public Object getDriverConfig() {
+    return driverConfig;
   }
 
-  public void setFrameworkLinkConfig(Direction type, Object config) {
-    switch(type) {
-      case FROM:
-        fromFrameworkLinkConfig = config;
-        break;
-      case TO:
-        toFrameworkLinkConfig = config;
-        break;
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
-  }
-
-  public Object getFrameworkJobConfig() {
-    return frameworkJobConfig;
-  }
-
-  public void setFrameworkJobConfig(Object config) {
-    frameworkJobConfig = config;
+  public void setDriverConfig(Object config) {
+    driverConfig = config;
   }
 
   public MutableMapContext getConnectorContext(Direction type) {

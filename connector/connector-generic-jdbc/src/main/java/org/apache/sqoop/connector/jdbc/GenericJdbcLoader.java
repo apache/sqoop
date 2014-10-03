@@ -30,11 +30,11 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
 
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) throws Exception{
-    String driver = linkConf.link.jdbcDriver;
-    String url = linkConf.link.connectionString;
-    String username = linkConf.link.username;
-    String password = linkConf.link.password;
+  public void load(LoaderContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception{
+    String driver = linkConfig.linkConfig.jdbcDriver;
+    String url = linkConfig.linkConfig.connectionString;
+    String username = linkConfig.linkConfig.username;
+    String password = linkConfig.linkConfig.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
     executor.setAutoCommit(false);
 

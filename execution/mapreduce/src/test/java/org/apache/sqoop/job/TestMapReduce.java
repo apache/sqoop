@@ -253,7 +253,6 @@ public class TestMapReduce {
   public static class DummyLoader extends Loader {
     private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
     private Data expected = new Data();
-    private CSVIntermediateDataFormat actual = new CSVIntermediateDataFormat();
 
     @Override
     public void load(LoaderContext context, Object oc, Object oj) throws Exception{

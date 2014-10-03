@@ -18,7 +18,7 @@
 package org.apache.sqoop.connector.jdbc.configuration;
 
 import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Form;
+import org.apache.sqoop.model.Config;
 
 /**
  *
@@ -26,9 +26,9 @@ import org.apache.sqoop.model.Form;
 @ConfigurationClass
 public class LinkConfiguration {
 
-  @Form public LinkConfig link;
+  @Config public LinkConfig linkConfig;
 
   public LinkConfiguration() {
-    link = new LinkConfig();
+    linkConfig = new LinkConfig();
   }
 }

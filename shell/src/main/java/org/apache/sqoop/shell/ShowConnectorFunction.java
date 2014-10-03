@@ -31,7 +31,7 @@ import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormDisplayer.*;
+import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
 
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction {
@@ -115,7 +115,7 @@ public class ShowConnectorFunction extends SqoopFunction {
       connector.getVersion(),
       getSupportedDirections(connector)
     );
-    displayFormMetadataDetails(connector, client.getConnectorConfigResourceBundle(connector.getPersistenceId()));
+    displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getPersistenceId()));
   }
 
   /**

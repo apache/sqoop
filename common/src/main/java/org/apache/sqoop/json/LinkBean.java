@@ -18,8 +18,8 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConnectionForms;
-import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import static org.apache.sqoop.json.util.FormSerialization.*;
+import static org.apache.sqoop.json.util.ConfigSerialization.*;
 import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
 
 /**
@@ -42,16 +42,14 @@ import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
  */
 public class LinkBean implements JsonBean {
 
-  private static final String CONNECTOR_ID = "connector-id";
-  private static final String CONNECTOR_PART = "connector";
-  private static final String FRAMEWORK_PART = "framework";
+  static final String CONNECTOR_ID = "connector-id";
+  static final String LINK_CONFIG = "link-config";
 
   // Required
   private List<MLink> links;
 
   // Optional
-  private Map<Long, ResourceBundle> connectorConfigBundles;
-  private ResourceBundle driverConfigBundle;
+  private Map<Long, ResourceBundle> linkConfigBundles;
 
   // For "extract"
   public LinkBean(MLink link) {
@@ -67,71 +65,55 @@ public class LinkBean implements JsonBean {
 
   // For "restore"
   public LinkBean() {
-    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
-  }
-
-  public void setDriverConfigBundle(ResourceBundle driverConfigBundle) {
-    this.driverConfigBundle = driverConfigBundle;
+    linkConfigBundles = new HashMap<Long, ResourceBundle>();
   }
 
   public void addConnectorConfigBundle(Long id, ResourceBundle connectorConfigBundle) {
-    connectorConfigBundles.put(id, connectorConfigBundle);
+    linkConfigBundles.put(id, connectorConfigBundle);
   }
 
-  public boolean hasConnectorBundle(Long id) {
-    return connectorConfigBundles.containsKey(id);
+  public boolean hasConnectorConfigBundle(Long id) {
+    return linkConfigBundles.containsKey(id);
   }
 
   public List<MLink> getLinks() {
     return links;
   }
 
-  public ResourceBundle getConnectorBundle(Long id) {
-    return connectorConfigBundles.get(id);
-  }
-
-  public ResourceBundle getFrameworkBundle() {
-    return driverConfigBundle;
+  public ResourceBundle getConnectorConfigBundle(Long id) {
+    return linkConfigBundles.get(id);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray array = new JSONArray();
+    JSONArray linkArray = new JSONArray();
 
     for(MLink link : links) {
-      JSONObject object = new JSONObject();
+      JSONObject linkJsonObject = new JSONObject();
 
-      object.put(ID, link.getPersistenceId());
-      object.put(NAME, link.getName());
-      object.put(ENABLED, link.getEnabled());
-      object.put(CREATION_USER, link.getCreationUser());
-      object.put(CREATION_DATE, link.getCreationDate().getTime());
-      object.put(UPDATE_USER, link.getLastUpdateUser());
-      object.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
-      object.put(CONNECTOR_ID, link.getConnectorId());
-      object.put(CONNECTOR_PART,
-        extractForms(link.getConnectorPart().getForms(), skipSensitive));
-      object.put(FRAMEWORK_PART,
-        extractForms(link.getFrameworkPart().getForms(), skipSensitive));
+      linkJsonObject.put(ID, link.getPersistenceId());
+      linkJsonObject.put(NAME, link.getName());
+      linkJsonObject.put(ENABLED, link.getEnabled());
+      linkJsonObject.put(CREATION_USER, link.getCreationUser());
+      linkJsonObject.put(CREATION_DATE, link.getCreationDate().getTime());
+      linkJsonObject.put(UPDATE_USER, link.getLastUpdateUser());
+      linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
+      linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
+      linkJsonObject.put(LINK_CONFIG,
+        extractConfigList(link.getConnectorLinkConfig().getConfigs(), skipSensitive));
 
-      array.add(object);
+      linkArray.add(linkJsonObject);
     }
 
     JSONObject all = new JSONObject();
-    all.put(ALL, array);
-
-    if(!connectorConfigBundles.isEmpty()) {
+    all.put(ALL, linkArray);
+    if (!linkConfigBundles.isEmpty()) {
       JSONObject bundles = new JSONObject();
-
-      for(Map.Entry<Long, ResourceBundle> entry : connectorConfigBundles.entrySet()) {
-        bundles.put(entry.getKey().toString(),
-                    extractResourceBundle(entry.getValue()));
+      for (Map.Entry<Long, ResourceBundle> entry : linkConfigBundles.entrySet()) {
+        bundles.put(entry.getKey().toString(), extractResourceBundle(entry.getValue()));
       }
       all.put(CONNECTOR_CONFIGS, bundles);
-    }
-    if(driverConfigBundle != null) {
-      all.put(DRIVER_CONFIGS,extractResourceBundle(driverConfigBundle));
     }
     return all;
   }
@@ -147,15 +129,11 @@ public class LinkBean implements JsonBean {
       JSONObject object = (JSONObject) obj;
 
       long connectorId = (Long) object.get(CONNECTOR_ID);
-      JSONArray connectorPart = (JSONArray) object.get(CONNECTOR_PART);
-      JSONArray frameworkPart = (JSONArray) object.get(FRAMEWORK_PART);
+      JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG);
 
-      List<MForm> connectorForms = restoreForms(connectorPart);
-      List<MForm> frameworkForms = restoreForms(frameworkPart);
+      List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
 
-      MLink link = new MLink(connectorId,
-        new MConnectionForms(connectorForms),
-        new MConnectionForms(frameworkForms));
+      MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
 
       link.setPersistenceId((Long) object.get(ID));
       link.setName((String) object.get(NAME));
@@ -172,13 +150,9 @@ public class LinkBean implements JsonBean {
       JSONObject bundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
       Set<Map.Entry<String, JSONObject>> entrySet = bundles.entrySet();
       for (Map.Entry<String, JSONObject> entry : entrySet) {
-        connectorConfigBundles.put(Long.parseLong(entry.getKey()),
+        linkConfigBundles.put(Long.parseLong(entry.getKey()),
                              restoreResourceBundle(entry.getValue()));
       }
-    }
-    if(jsonObject.containsKey(DRIVER_CONFIGS)) {
-      driverConfigBundle = restoreResourceBundle(
-        (JSONObject) jsonObject.get(DRIVER_CONFIGS));
     }
   }
 }

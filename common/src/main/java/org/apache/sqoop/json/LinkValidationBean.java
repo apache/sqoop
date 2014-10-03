@@ -18,37 +18,32 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ConfigValidator;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Bean for sending validations across network. This bean will move two
- * validation objects at one time - one for connector and second for framework
- * part of validated entity. Optionally validation bean can also transfer
+ * Bean for sending validations across network.This bean will transfer link config
+ * validation results. Optionally validation bean can also transfer
  * created persistent id in case that new entity was created.
  */
 public class LinkValidationBean implements JsonBean {
 
   private static final String ID = "id";
-  private static final String FRAMEWORK = "framework";
-  private static final String CONNECTOR = "connector";
   private static final String STATUS = "status";
   private static final String MESSAGE = "message";
   private static final String MESSAGES = "messages";
 
   private Long id;
-  private Validation connectorValidation;
-  private Validation frameworkValidation;
+  private ConfigValidator linkConfigValidation;
 
   // For "extract"
-  public LinkValidationBean(Validation connector, Validation framework) {
+  public LinkValidationBean(ConfigValidator linkConfigValidator) {
     this();
 
-    this.connectorValidation = connector;
-    this.frameworkValidation = framework;
+    this.linkConfigValidation = linkConfigValidator;
   }
 
   // For "restore"
@@ -56,12 +51,8 @@ public class LinkValidationBean implements JsonBean {
     id = null;
   }
 
-  public Validation getConnectorValidation() {
-    return connectorValidation;
-  }
-
-  public Validation getFrameworkValidation() {
-    return frameworkValidation;
+  public ConfigValidator getLinkConfigValidator() {
+    return linkConfigValidation;
   }
 
   public void setId(Long id) {
@@ -80,23 +71,20 @@ public class LinkValidationBean implements JsonBean {
     if(id != null) {
       object.put(ID, id);
     }
-
-    object.put(CONNECTOR, extractValidation(connectorValidation));
-    object.put(FRAMEWORK, extractValidation(frameworkValidation));
-
+    object.put(LinkBean.LINK_CONFIG, extractValidation(linkConfigValidation));
     return object;
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject extractValidation(Validation validation) {
+  private JSONObject extractValidation(ConfigValidator validation) {
     JSONObject object = new JSONObject();
 
     object.put(STATUS, validation.getStatus().name());
 
     JSONObject jsonMessages = new JSONObject();
-    Map<Validation.FormInput, Validation.Message> messages = validation.getMessages();
+    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages = validation.getMessages();
 
-    for(Map.Entry<Validation.FormInput, Validation.Message> entry : messages.entrySet()) {
+    for(Map.Entry<ConfigValidator.ConfigInput, ConfigValidator.Message> entry : messages.entrySet()) {
       JSONObject jsonEntry = new JSONObject();
       jsonEntry.put(STATUS, entry.getValue().getStatus().name());
       jsonEntry.put(MESSAGE, entry.getValue().getMessage());
@@ -113,16 +101,14 @@ public class LinkValidationBean implements JsonBean {
     // Optional and accepting NULLs
     id = (Long) jsonObject.get(ID);
 
-    connectorValidation = restoreValidation(
-      (JSONObject)jsonObject.get(CONNECTOR));
-    frameworkValidation = restoreValidation(
-      (JSONObject)jsonObject.get(FRAMEWORK));
+    linkConfigValidation = restoreValidation(
+      (JSONObject)jsonObject.get(LinkBean.LINK_CONFIG));
   }
 
-  public Validation restoreValidation(JSONObject jsonObject) {
+  public ConfigValidator restoreValidation(JSONObject jsonObject) {
     JSONObject jsonMessages = (JSONObject) jsonObject.get(MESSAGES);
-    Map<Validation.FormInput, Validation.Message> messages
-      = new HashMap<Validation.FormInput, Validation.Message>();
+    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages
+      = new HashMap<ConfigValidator.ConfigInput, ConfigValidator.Message>();
 
     for(Object key : jsonMessages.keySet()) {
       JSONObject jsonMessage = (JSONObject) jsonMessages.get(key);
@@ -130,14 +116,14 @@ public class LinkValidationBean implements JsonBean {
       Status status = Status.valueOf((String) jsonMessage.get(STATUS));
       String stringMessage = (String) jsonMessage.get(MESSAGE);
 
-      Validation.Message message
-        = new Validation.Message(status, stringMessage);
+      ConfigValidator.Message message
+        = new ConfigValidator.Message(status, stringMessage);
 
-      messages.put(new Validation.FormInput((String)key), message);
+      messages.put(new ConfigValidator.ConfigInput((String)key), message);
     }
 
     Status status = Status.valueOf((String) jsonObject.get(STATUS));
 
-    return new Validation(status, messages);
+    return new ConfigValidator(status, messages);
   }
 }

@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 
 /**
  *
  */
-@FormClass
+@ConfigClass
 public class ToJobConfig {
 
   @Input public ToFormat outputFormat;

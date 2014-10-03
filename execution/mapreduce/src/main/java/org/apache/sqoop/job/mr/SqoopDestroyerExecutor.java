@@ -37,7 +37,7 @@ public class SqoopDestroyerExecutor {
   /**
    * Execute destroyer.
    *
-   * @param success True if the job execution was successfull
+   * @param success True if the job execution was successful
    * @param configuration Configuration object to get destroyer class with context
    *                      and configuration objects.
    * @param direction The direction of the Destroyer to execute.

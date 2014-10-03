@@ -23,8 +23,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.shell.core.Constants;
-import org.apache.sqoop.shell.utils.LinkDynamicFormOptions;
-import org.apache.sqoop.shell.utils.FormOptions;
+import org.apache.sqoop.shell.utils.LinkDynamicConfigOptions;
+import org.apache.sqoop.shell.utils.ConfigOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormFiller.*;
+import static org.apache.sqoop.shell.utils.ConfigFiller.*;
 
 /**
  *
@@ -67,8 +67,7 @@ public class CloneLinkFunction extends SqoopFunction {
 
     Status status = Status.FINE;
 
-    ResourceBundle connectorConfigBundle = client.getConnectorConfigResourceBundle(connection.getConnectorId());
-    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
+    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(connection.getConnectorId());
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_LINK_CONFIG);
@@ -80,17 +79,17 @@ public class CloneLinkFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillLink(reader, connection, connectorConfigBundle, driverConfigBundle)) {
+        if(!fillLinkWithBundle(reader, connection, linkConfigBundle)) {
           return null;
         }
 
         status = client.saveLink(connection);
       } while(!status.canProceed());
     } else {
-      LinkDynamicFormOptions options = new LinkDynamicFormOptions();
+      LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
       options.prepareOptions(connection);
-      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
-      if (fillConnection(line, connection)) {
+      CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
+      if (fillLink(line, connection)) {
         status = client.saveLink(connection);
         if (!status.canProceed()) {
           printLinkValidationMessages(connection);

@@ -28,18 +28,21 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.RepositoryUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MForm;
+import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.utils.ClassUtils;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ConfigValidator;
 import org.apache.sqoop.validation.Validator;
 
 
@@ -76,14 +79,25 @@ public abstract class Repository {
 
   /**
    * Registers given connector in the repository and return registered
-   * variant. This method might return an exception in case that 
-   * given connector are already registered with different structure.
+   * variant. This method might return an exception in case that
+   * given connector are already registered with different structure
    *
    * @param mConnector the connector to be registered
-   * autoupgrade whether to upgrade driver config automatically
+   * @param autoUpgrade whether to upgrade driver config automatically
    * @return Registered connector structure
    */
   public abstract MConnector registerConnector(MConnector mConnector, boolean autoUpgrade);
+
+   /**
+   * Registers given driver and its config in the repository and return registered
+   * variant. This method might return an exception in case that the
+   * given driverConfig are already registered with different structure
+   *
+   * @param mDriverConfig driverConfig to be registered
+   * @param autoUpgrade whether to upgrade driverConfig automatically
+   * @return Registered connector structure
+   */
+  public abstract MDriver registerDriver(MDriver mDriverConfig, boolean autoUpgrade);
 
   /**
    * Search for connector with given name in repository.
@@ -102,18 +116,6 @@ public abstract class Repository {
    * @return List will all connectors in repository
    */
   public abstract List<MConnector> findConnectors();
-
-
-  /**
-   * Registers given driverConfig in the repository and return registered
-   * variant. This method might return an exception in case that the
-   * given driverConfig are already registered with different structure.
-   *
-   * @param mDriverConfig driverConfig to be registered
-   * autoupgrade whether to upgrade driverConfig automatically
-   * @return Registered connector structure
-   */
-  public abstract MDriverConfig registerDriverConfig(MDriverConfig mDriverConfig, boolean autoUpgrade);
 
   /**
    * Save given link to repository. This link must not be already
@@ -164,7 +166,7 @@ public abstract class Repository {
    * Find link with given id in repository.
    *
    * @param id Link id
-   * @return Deserialized form of the link that is saved in repository
+   * @return Deserialized config of the link that is saved in repository
    */
   public abstract MLink findLink(long id);
 
@@ -184,7 +186,7 @@ public abstract class Repository {
   public abstract void createJob(MJob job);
 
   /**
-   * Update given job metadata in repository. This object must already be saved
+   * Update given job entity in repository. This object must already be saved
    * in repository otherwise exception will be thrown.
    *
    * @param job Job object that should be updated in the repository
@@ -192,7 +194,7 @@ public abstract class Repository {
   public abstract void updateJob(MJob job);
 
   /**
-   * Update given job metadata in repository. This object must already be saved
+   * Update given job entity in repository. This object must already be saved
    * in repository otherwise exception will be thrown.
    *
    * @param job Job object that should be updated in the repository
@@ -204,7 +206,7 @@ public abstract class Repository {
   public abstract void updateJob(MJob job, RepositoryTransaction tx);
 
   /**
-   * Enable or disable job with given id from metadata repository
+   * Enable or disable job with given id from entity repository
    *
    * @param id Job object that is going to be enabled or disabled
    * @param enabled Enable or disable
@@ -212,7 +214,7 @@ public abstract class Repository {
   public abstract void enableJob(long id, boolean enabled);
 
   /**
-   * Delete job with given id from metadata repository.
+   * Delete job with given id from entity repository.
    *
    * @param id Job id that should be removed
    */
@@ -222,7 +224,7 @@ public abstract class Repository {
    * Find job object with given id.
    *
    * @param id Job id
-   * @return Deserialized form of job loaded from repository
+   * @return Deserialized config of job loaded from repository
    */
   public abstract MJob findJob(long id);
 
@@ -288,8 +290,7 @@ public abstract class Repository {
    * @param connectorID Connector ID whose links should be fetched
    * @return List of MLink that use <code>connectorID</code>.
    */
-  public abstract List<MLink> findLinksForConnector(long
-    connectorID);
+  public abstract List<MLink> findLinksForConnector(long connectorID);
 
   /**
    * Retrieve jobs which use the given link.
@@ -297,17 +298,16 @@ public abstract class Repository {
    * @param connectorID Connector ID whose jobs should be fetched
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnector(long
-    connectorID);
+  public abstract List<MJob> findJobsForConnector(long connectorID);
 
   /**
    * Update the connector with the new data supplied in the
-   * <tt>newConnector</tt>. Also Update all forms associated with this
-   * connector in the repository with the forms specified in
+   * <tt>newConnector</tt>. Also Update all configs associated with this
+   * connector in the repository with the configs specified in
    * <tt>mConnector</tt>. <tt>mConnector </tt> must
-   * minimally have the connectorID and all required forms (including ones
+   * minimally have the connectorID and all required configs (including ones
    * which may not have changed). After this operation the repository is
-   * guaranteed to only have the new forms specified in this object.
+   * guaranteed to only have the new configs specified in this object.
    *
    * @param newConnector The new data to be inserted into the repository for
    *                     this connector.
@@ -319,22 +319,22 @@ public abstract class Repository {
   protected abstract void updateConnector(MConnector newConnector, RepositoryTransaction tx);
 
   /**
-   * Update the driverConfig with the new data supplied in the
-   * <tt>mDriverConfig</tt>. Also Update all forms associated with the driverConfig
-   * in the repository with the forms specified in
+   * Update the driver with the new data supplied in the
+   * <tt>mDriverConfig</tt>. Also Update all configs associated with the driverConfig
+   * in the repository with the configs specified in
    * <tt>mDriverConfig</tt>. <tt>mDriverConfig </tt> must
-   * minimally have the connectorID and all required forms (including ones
+   * minimally have the connectorID and all required configs (including ones
    * which may not have changed). After this operation the repository is
-   * guaranteed to only have the new forms specified in this object.
+   * guaranteed to only have the new configs specified in this object.
    *
-   * @param mDriverConfig The new data to be inserted into the repository for
+   * @param mDriver The new data to be inserted into the repository for
    *                     the driverConfig.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void updateDriverConfig(MDriverConfig mDriverConfig, RepositoryTransaction tx);
+  protected abstract void updateDriver(MDriver mDriver, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a job
@@ -365,6 +365,13 @@ public abstract class Repository {
     }
   }
 
+  private void deleteJobs(List<MJob> jobs, RepositoryTransaction tx) {
+    for (MJob job : jobs) {
+      deleteJobInputs(job.getPersistenceId(), tx);
+    }
+  }
+
+
   /**
    * Upgrade the connector with the same {@linkplain MConnector#uniqueName}
    * in the repository with values from <code>newConnector</code>.
@@ -377,7 +384,7 @@ public abstract class Repository {
    *                     upgraded.
    */
   public final void upgradeConnector(MConnector oldConnector, MConnector newConnector) {
-    LOG.info("Upgrading metadata for connector: " + oldConnector.getUniqueName());
+    LOG.info("Upgrading connector: " + oldConnector.getUniqueName());
     long connectorID = oldConnector.getPersistenceId();
     newConnector.setPersistenceId(connectorID);
     /* Algorithms:
@@ -385,8 +392,8 @@ public abstract class Repository {
      * 2. Get all links associated with the connector.
      * 3. Get all jobs associated with the connector.
      * 4. Delete the inputs for all of the jobs and links (in that order)
-     * 5. Remove all inputs and forms associated with the connector, and
-     *    register the new forms and inputs.
+     * 5. Remove all inputs and configs associated with the connector, and
+     *    register the new configs and inputs.
      * 6. Create new links and jobs with connector part being the ones
      *    returned by the upgrader.
      * 7. Validate new links and jobs with connector's validator
@@ -401,85 +408,63 @@ public abstract class Repository {
         ConnectorManager.getInstance().getConnector(newConnector
           .getUniqueName());
 
-      Validator validator = connector.getValidator();
-
+      Validator connectorConfigValidator = connector.getConfigValidator();
       boolean upgradeSuccessful = true;
-
       RepositoryUpgrader upgrader = connector.getRepositoryUpgrader();
-      List<MLink> links = findLinksForConnector(
-        connectorID);
-      List<MJob> jobs = findJobsForConnector(connectorID);
+      List<MLink> linksByConnector = findLinksForConnector(connectorID);
+      List<MJob> jobsByConnector = findJobsForConnector(connectorID);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deletelinksAndJobs(links, jobs, tx);
+      deletelinksAndJobs(linksByConnector, jobsByConnector, tx);
       updateConnector(newConnector, tx);
-      for (MLink link : links) {
-        // Make a new copy of the forms from the connector,
-        // else the values will get set in the forms in the connector for
-        // each link.
-        List<MForm> forms = newConnector.getConnectionForms().clone(false).getForms();
-        MConnectionForms newlinkForms = new MConnectionForms(forms);
-        upgrader.upgrade(link.getConnectorPart(), newlinkForms);
-        MLink newlink = new MLink(link, newlinkForms, link.getFrameworkPart());
+      for (MLink oldLink : linksByConnector) {
+        // Make a new copy of the configs
+        List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
+        MLinkConfig newLinkConfig = new MLinkConfig(linkConfig);
+        MLinkConfig oldLinkConfig = oldLink.getConnectorLinkConfig();
+        upgrader.upgrade(oldLinkConfig, newLinkConfig);
 
-        // Transform form structures to objects for validations
+        MLink newlink = new MLink(oldLink, newLinkConfig);
+
         Object newConfigurationObject = ClassUtils.instantiate(connector.getLinkConfigurationClass());
-        FormUtils.fromForms(newlink.getConnectorPart().getForms(), newConfigurationObject);
+        ConfigUtils.fromConfigs(newlink.getConnectorLinkConfig().getConfigs(), newConfigurationObject);
 
-        Validation validation = validator.validateLink(newConfigurationObject);
-        if (validation.getStatus().canProceed()) {
+        ConfigValidator configValidator = connectorConfigValidator.validateConfigForLink(newConfigurationObject);
+        if (configValidator.getStatus().canProceed()) {
           updateLink(newlink, tx);
         } else {
-          logInvalidModelObject("link", newlink, validation);
+          logInvalidModelObject("link", newlink, configValidator);
           upgradeSuccessful = false;
         }
       }
-      for (MJob job : jobs) {
-        // Make a new copy of the forms from the connector,
-        // else the values will get set in the forms in the connector for
+      for (MJob job : jobsByConnector) {
+        // Make a new copy of the configs
+        // else the values will get set in the configs in the connector for
         // each job.
-        List<MForm> fromForms = newConnector.getJobForms(Direction.FROM).clone(false).getForms();
-        List<MForm> toForms = newConnector.getJobForms(Direction.TO).clone(false).getForms();
+        List<MConfig> fromConfig = newConnector.getConfig(Direction.FROM).clone(false).getConfigs();
+        List<MConfig> toConfig = newConnector.getConfig(Direction.TO).clone(false).getConfigs();
 
-        // New FROM direction forms, old TO direction forms.
+        // New FROM direction configs, old TO direction configs.
         if (job.getConnectorId(Direction.FROM) == newConnector.getPersistenceId()) {
-          MJobForms newFromJobForms = new MJobForms(fromForms);
-          MJobForms oldToJobForms = job.getConnectorPart(Direction.TO);
-          upgrader.upgrade(job.getConnectorPart(Direction.FROM), newFromJobForms);
-          MJob newJob = new MJob(job, newFromJobForms, oldToJobForms, job.getFrameworkPart());
-          updateJob(newJob, tx);
+          MFromConfig newFromConfig = new MFromConfig(fromConfig);
+          MFromConfig oldFromCOnfig = job.getFromJobConfig();
+          upgrader.upgrade(oldFromCOnfig, newFromConfig);
 
-          // Transform form structures to objects for validations
-//          Object newFromConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(Direction.FROM));
-//          FormUtils.fromForms(newJob.getConnectorPart(Direction.FROM).getForms(), newFromConfigurationObject);
-//          Validation fromValidation = validator.validateJob(newFromConfigurationObject);
-//          if (fromValidation.getStatus().canProceed()) {
-//            updateJob(newJob, tx);
-//          } else {
-//            logInvalidModelObject("job", newJob, fromValidation);
-//            upgradeSuccessful = false;
-//          }
+          MToConfig oldToConfig = job.getToJobConfig();
+          MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
+          updateJob(newJob, tx);
         }
 
-        // Old FROM direction forms, new TO direction forms.
+        // Old FROM direction configs, new TO direction configs.
         if (job.getConnectorId(Direction.TO) == newConnector.getPersistenceId()) {
-          MJobForms oldFromJobForms = job.getConnectorPart(Direction.FROM);
-          MJobForms newToJobForms = new MJobForms(toForms);
-          upgrader.upgrade(job.getConnectorPart(Direction.TO), newToJobForms);
-          MJob newJob = new MJob(job, oldFromJobForms, newToJobForms, job.getFrameworkPart());
-          updateJob(newJob, tx);
 
-          // Transform form structures to objects for validations
-//          Object newToConfigurationObject = ClassUtils.instantiate(connector.getJobConfigurationClass(Direction.TO));
-//          FormUtils.fromForms(newJob.getConnectorPart(Direction.TO).getForms(), newToConfigurationObject);
-//          Validation toValidation = validator.validateJob(newToConfigurationObject);
-//          if (toValidation.getStatus().canProceed()) {
-//            updateJob(newJob, tx);
-//          } else {
-//            logInvalidModelObject("job", newJob, toValidation);
-//            upgradeSuccessful = false;
-//          }
+          MToConfig oldToConfig = job.getToJobConfig();
+          MToConfig newToConfig = new MToConfig(toConfig);
+          upgrader.upgrade(oldToConfig, newToConfig);
+          MFromConfig oldFromConfig = job.getFromJobConfig();
+          MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
+          updateJob(newJob, tx);
         }
       }
 
@@ -506,60 +491,35 @@ public abstract class Repository {
     }
   }
 
-  public final void upgradeDriverConfig(MDriverConfig driverConfig) {
-    LOG.info("Upgrading driver config");
+  public final void upgradeDriver(MDriver driver) {
+    LOG.info("Upgrading driver");
     RepositoryTransaction tx = null;
     try {
-      RepositoryUpgrader upgrader = Driver.getInstance()
+      RepositoryUpgrader driverConfigUpgrader = Driver.getInstance()
         .getDriverConfigRepositoryUpgrader();
-      List<MLink> links = findLinks();
       List<MJob> jobs = findJobs();
 
       Validator validator = Driver.getInstance().getValidator();
-
       boolean upgradeSuccessful = true;
 
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deletelinksAndJobs(links, jobs, tx);
-      updateDriverConfig(driverConfig, tx);
-      for (MLink link : links) {
-        // Make a new copy of the forms from the connector,
-        // else the values will get set in the forms in the connector for
-        // each link.
-        // @TODO(Abe): From/To link forms.
-        List<MForm> forms = driverConfig.getConnectionForms().clone(false).getForms();
-        MConnectionForms newlinkForms = new MConnectionForms(forms);
-        upgrader.upgrade(link.getFrameworkPart(), newlinkForms);
-        MLink newlink = new MLink(link, link.getConnectorPart(), newlinkForms);
+      deleteJobs(jobs, tx);
+      updateDriver(driver, tx);
 
-        // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getLinkConfigurationClass());
-        FormUtils.fromForms(newlink.getFrameworkPart().getForms(), newConfigurationObject);
-
-        Validation validation = validator.validateLink(newConfigurationObject);
-        if (validation.getStatus().canProceed()) {
-          updateLink(newlink, tx);
-        } else {
-          logInvalidModelObject("link", newlink, validation);
-          upgradeSuccessful = false;
-        }
-      }
       for (MJob job : jobs) {
-        // Make a new copy of the forms from the framework,
-        // else the values will get set in the forms in the connector for
-        // each link.
-        List<MForm> forms = driverConfig.getJobForms().clone(false).getForms();
-        MJobForms newJobForms = new MJobForms(forms);
-        upgrader.upgrade(job.getFrameworkPart(), newJobForms);
-        MJob newJob = new MJob(job, job.getConnectorPart(Direction.FROM), job.getConnectorPart(Direction.TO), newJobForms);
+        // Make a new copy of the configs
+        MDriverConfig driverConfig = driver.getDriverConfig().clone(false);
+        MDriver newDriver = new MDriver(driverConfig, DriverBean.CURRENT_DRIVER_VERSION);
+        driverConfigUpgrader.upgrade(job.getDriverConfig(), newDriver.getDriverConfig());
+        MJob newJob = new MJob(job, job.getFromJobConfig(), job.getToJobConfig(), newDriver.getDriverConfig());
 
-        // Transform form structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getJobConfigurationClass());
-        FormUtils.fromForms(newJob.getFrameworkPart().getForms(), newConfigurationObject);
+        // Transform config structures to objects for validations
+        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
+        ConfigUtils.fromConfigs(newJob.getDriverConfig().getConfigs(), newConfigurationObject);
 
-        Validation validation = validator.validateJob(newConfigurationObject);
+        ConfigValidator validation = validator.validateConfigForJob(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
           updateJob(newJob, tx);
         } else {
@@ -587,14 +547,14 @@ public abstract class Repository {
       if(tx != null) {
         tx.close();
       }
-      LOG.info("Driver config upgrade finished");
+      LOG.info("Driver upgrade finished");
     }
   }
 
-  private void logInvalidModelObject(String objectType, MPersistableEntity entity, Validation validation) {
+  private void logInvalidModelObject(String objectType, MPersistableEntity entity, ConfigValidator validation) {
     LOG.error("Upgrader created invalid " + objectType + " with id" + entity.getPersistenceId());
 
-    for(Map.Entry<Validation.FormInput, Validation.Message> entry : validation.getMessages().entrySet()) {
+    for(Map.Entry<ConfigValidator.ConfigInput, ConfigValidator.Message> entry : validation.getMessages().entrySet()) {
       LOG.error("\t" + entry.getKey() + ": " + entry.getValue());
     }
   }

@@ -27,8 +27,8 @@ public abstract class Extractor<LinkConfiguration, JobConfiguration, Partition> 
    * Extract data from source and pass them into the Sqoop.
    *
    * @param context Extractor context object
-   * @param linkConfiguration link configuration
-   * @param jobConfiguration Job configuration
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object
    * @param partition Partition that this extract should work on
    */
   public abstract void extract(ExtractorContext context,

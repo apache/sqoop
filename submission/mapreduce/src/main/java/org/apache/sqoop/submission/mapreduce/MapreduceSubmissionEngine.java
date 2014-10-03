@@ -141,7 +141,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * {@inheritDoc}
    */
   @Override
-  public boolean isExecutionEngineSupported(Class executionEngineClass) {
+  public boolean isExecutionEngineSupported(Class<?> executionEngineClass) {
     return executionEngineClass == MapreduceExecutionEngine.class;
   }
 
@@ -201,16 +201,16 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     try {
       Job job = new Job(configuration);
 
-      // And finally put all configuration objects to credentials cache
-      ConfigurationUtils.setConnectorConnectionConfig(Direction.FROM, job, request.getConnectorLinkConfig(Direction.FROM));
-      ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getConnectorJobConfig(Direction.FROM));
-      ConfigurationUtils.setConnectorConnectionConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
-      ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getConnectorJobConfig(Direction.TO));
+      // link configs
+      ConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, request.getConnectorLinkConfig(Direction.FROM));
+      ConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
 
-      ConfigurationUtils.setFrameworkConnectionConfig(Direction.FROM, job, request.getFrameworkLinkConfig(Direction.FROM));
-      ConfigurationUtils.setFrameworkConnectionConfig(Direction.TO, job, request.getFrameworkLinkConfig(Direction.TO));
-      ConfigurationUtils.setFrameworkJobConfig(job, request.getFrameworkJobConfig());
+      // from and to configs
+      ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getJobConfig(Direction.FROM));
+      ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getJobConfig(Direction.TO));
 
+      ConfigurationUtils.setDriverConfig(job, request.getDriverConfig());
+      // @TODO(Abe): Persist TO schema.
       ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
       ConfigurationUtils.setConnectorSchema(Direction.TO, job, request.getSummary().getToSchema());
 

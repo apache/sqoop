@@ -29,7 +29,7 @@ public class GenericJdbcFromDestroyer extends Destroyer<LinkConfiguration, FromJ
     Logger.getLogger(GenericJdbcFromDestroyer.class);
 
   @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConf, FromJobConfiguration fromJobConf) {
+  public void destroy(DestroyerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     LOG.info("Running generic JDBC connector destroyer");
   }
 

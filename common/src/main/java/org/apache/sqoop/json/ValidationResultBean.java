@@ -19,7 +19,7 @@ package org.apache.sqoop.json;
 
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ValidationResult;
+import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -38,18 +38,18 @@ public class ValidationResultBean implements JsonBean {
   private static final String STATUS = "STATUS";
   private static final String TEXT = "TEXT";
 
-  private ValidationResult[] results;
+  private ConfigValidationResult[] results;
   private Long id;
 
   public ValidationResultBean() {
     // Empty, for restore
   }
 
-  public ValidationResultBean(ValidationResult ... results) {
+  public ValidationResultBean(ConfigValidationResult ... results) {
     this.results = results;
   }
 
-  public ValidationResult[] getValidationResults() {
+  public ConfigValidationResult[] getValidationResults() {
     return results;
   }
 
@@ -65,7 +65,7 @@ public class ValidationResultBean implements JsonBean {
   public JSONObject extract(boolean skipSensitive) {
     JSONArray array = new JSONArray();
 
-    for(ValidationResult result : results) {
+    for(ConfigValidationResult result : results) {
       JSONObject output = extractValidationResult(result);
       array.add(output);
     }
@@ -78,7 +78,7 @@ public class ValidationResultBean implements JsonBean {
     return object;
   }
 
-  private JSONObject extractValidationResult(ValidationResult result) {
+  private JSONObject extractValidationResult(ConfigValidationResult result) {
     JSONObject ret = new JSONObject();
 
     for(Map.Entry<String, List<Message>> entry : result.getMessages().entrySet()) {
@@ -110,7 +110,7 @@ public class ValidationResultBean implements JsonBean {
   @Override
   public void restore(JSONObject jsonObject) {
     JSONArray array = (JSONArray) jsonObject.get(ROOT);
-    results = new ValidationResult[array.size()];
+    results = new ConfigValidationResult[array.size()];
 
     int i = 0;
     for(Object item : array) {
@@ -122,8 +122,8 @@ public class ValidationResultBean implements JsonBean {
     }
   }
 
-  private ValidationResult restoreValidationResult(JSONObject item) {
-    ValidationResult result  = new ValidationResult();
+  private ConfigValidationResult restoreValidationResult(JSONObject item) {
+    ConfigValidationResult result  = new ConfigValidationResult();
     Set<Map.Entry<String, JSONArray>> entrySet = item.entrySet();
 
     for(Map.Entry<String, JSONArray> entry : entrySet) {

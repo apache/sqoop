@@ -25,7 +25,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.ShellError;
-import org.apache.sqoop.shell.utils.FormOptions;
+import org.apache.sqoop.shell.utils.ConfigOptions;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -44,7 +44,7 @@ abstract public class SqoopFunction extends Options {
   }
 
   public Object execute(List<String> args) {
-    CommandLine line = FormOptions.parseOptions(this, 1, args, true);
+    CommandLine line = ConfigOptions.parseOptions(this, 1, args, true);
 
     try {
       if (validateArgs(line)) {

@@ -60,7 +60,6 @@ public class GenericJdbcExecutorTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testDeleteTableData() throws Exception {
     executor.deleteTableData(table);
     assertEquals("Table " + table + " is expected to be empty.",
@@ -68,7 +67,6 @@ public class GenericJdbcExecutorTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testMigrateData() throws Exception {
     assertEquals("Table " + emptyTable + " is expected to be empty.",
       0, executor.getTableRowCount(emptyTable));
@@ -86,7 +84,6 @@ public class GenericJdbcExecutorTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testGetTableRowCount() throws Exception {
     assertEquals("Table " + table + " is expected to be empty.",
       NUMBER_OF_ROWS, executor.getTableRowCount(table));

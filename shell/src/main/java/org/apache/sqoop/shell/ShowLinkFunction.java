@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormDisplayer.*;
+import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
 
 /**
  *
@@ -103,26 +103,24 @@ public class ShowLinkFunction extends SqoopFunction {
     displayLink(link);
   }
 
-  private void displayLink(MLink connection) {
+  private void displayLink(MLink link) {
     DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
     printlnResource(Constants.RES_SHOW_PROMPT_LINK_INFO,
-      connection.getPersistenceId(),
-      connection.getName(),
-      connection.getEnabled(),
-      connection.getCreationUser(),
-      formatter.format(connection.getCreationDate()),
-      connection.getLastUpdateUser(),
-      formatter.format(connection.getLastUpdateDate())
+      link.getPersistenceId(),
+      link.getName(),
+      link.getEnabled(),
+      link.getCreationUser(),
+      formatter.format(link.getCreationDate()),
+      link.getLastUpdateUser(),
+      formatter.format(link.getLastUpdateDate())
     );
 
-    long connectorId = connection.getConnectorId();
+    long connectorId = link.getConnectorId();
     printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, connectorId);
 
-    // Display connector part
-    displayForms(connection.getConnectorPart().getForms(),
-                 client.getConnectorConfigResourceBundle(connectorId));
-    displayForms(connection.getFrameworkPart().getForms(),
-                 client.getDriverConfigBundle());
+    // Display link config
+    displayConfig(link.getConnectorLinkConfig().getConfigs(),
+                 client.getConnectorConfigBundle(connectorId));
   }
 }

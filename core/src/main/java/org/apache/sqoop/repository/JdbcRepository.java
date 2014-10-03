@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 
@@ -51,7 +51,7 @@ public class JdbcRepository extends Repository {
     /**
      * Do what is needed to be done with given link object.
      *
-     * @param conn Connection to metadata repository.
+     * @param conn Connection to the repository.
      * @return Arbitrary value
      */
     Object doIt(Connection conn) throws Exception;
@@ -158,8 +158,8 @@ public class JdbcRepository extends Repository {
       public Object doIt(Connection conn) throws Exception {
         String connectorUniqueName = mConnector.getUniqueName();
 
-        MConnector result = handler.findConnector(connectorUniqueName, conn);
-        if (result == null) {
+        MConnector connectorResult = handler.findConnector(connectorUniqueName, conn);
+        if (connectorResult == null) {
           handler.registerConnector(mConnector, conn);
           return mConnector;
         } else {
@@ -167,23 +167,23 @@ public class JdbcRepository extends Repository {
           // For now, use the "string" versions itself - later we should
           // probably include a build number or something that is
           // monotonically increasing.
-          if (result.getUniqueName().equals(mConnector.getUniqueName()) &&
-            mConnector.getVersion().compareTo(result.getVersion()) > 0) {
+          if (connectorResult.getUniqueName().equals(mConnector.getUniqueName()) &&
+            mConnector.getVersion().compareTo(connectorResult.getVersion()) > 0) {
             if (autoUpgrade) {
-              upgradeConnector(result, mConnector);
+              upgradeConnector(connectorResult, mConnector);
               return mConnector;
             } else {
               throw new SqoopException(RepositoryError.JDBCREPO_0026,
                 "Connector: " + mConnector.getUniqueName());
             }
           }
-          if (!result.equals(mConnector)) {
+          if (!connectorResult.equals(mConnector)) {
             throw new SqoopException(RepositoryError.JDBCREPO_0013,
               "Connector: " + mConnector.getUniqueName()
                 + " given: " + mConnector
-                + " found: " + result);
+                + " found: " + connectorResult);
           }
-          return result;
+          return connectorResult;
         }
       }
     });
@@ -220,27 +220,27 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MDriverConfig registerDriverConfig(final MDriverConfig mDriverConfig, final boolean autoUpgrade) {
-    return (MDriverConfig) doWithConnection(new DoWithConnection() {
+  public MDriver registerDriver(final MDriver mDriver, final boolean autoUpgrade) {
+    return (MDriver) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        MDriverConfig result = handler.findDriverConfig(conn);
-        if (result == null) {
-          handler.registerDriverConfig(mDriverConfig, conn);
-          return mDriverConfig;
+        MDriver existingDriverConfig = handler.findDriver(conn);
+        if (existingDriverConfig == null) {
+          handler.registerDriver(mDriver, conn);
+          return mDriver;
         } else {
           // We're currently not serializing version into repository
           // so let's just compare the structure to see if we need upgrade.
-          if(!mDriverConfig.equals(result)) {
+          if(!mDriver.equals(existingDriverConfig)) {
             if (autoUpgrade) {
-              upgradeDriverConfig(mDriverConfig);
-              return mDriverConfig;
+              upgradeDriver(mDriver);
+              return mDriver;
             } else {
               throw new SqoopException(RepositoryError.JDBCREPO_0026,
-                "DriverConfig: " + mDriverConfig.getPersistenceId());
+                "DriverConfig: " + mDriver.getPersistenceId());
             }
           }
-          return result;
+          return existingDriverConfig;
         }
       }
     });
@@ -664,11 +664,11 @@ public class JdbcRepository extends Repository {
   }
 
 
-  protected void updateDriverConfig(final MDriverConfig mDriverConfig, RepositoryTransaction tx) {
+  protected void updateDriver(final MDriver mDriver, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.updateDriverConfig(mDriverConfig, conn);
+        handler.updateDriver(mDriver, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

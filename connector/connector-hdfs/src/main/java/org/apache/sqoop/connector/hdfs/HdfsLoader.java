@@ -42,19 +42,19 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
    * Load data to target.
    *
    * @param context Loader context object
-   * @param linkConf       Link configuration
-   * @param toJobConf      Job configuration
+   * @param linkConfig       Link configuration
+   * @param toJobConfig      Job configuration
    * @throws Exception
    */
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) throws Exception {
+  public void load(LoaderContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception {
 
     DataReader reader = context.getDataReader();
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 
-    String directoryName = toJobConf.toJobConfig.outputDirectory;
-    String codecname = getCompressionCodecName(toJobConf);
+    String directoryName = toJobConfig.toJobConfig.outputDirectory;
+    String codecname = getCompressionCodecName(toJobConfig);
 
     CompressionCodec codec = null;
     if (codecname != null) {
@@ -73,12 +73,12 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
       }
     }
 
-    String filename = directoryName + "/" + UUID.randomUUID() + getExtension(toJobConf,codec);
+    String filename = directoryName + "/" + UUID.randomUUID() + getExtension(toJobConfig,codec);
 
     try {
       Path filepath = new Path(filename);
 
-      GenericHdfsWriter filewriter = getWriter(toJobConf);
+      GenericHdfsWriter filewriter = getWriter(toJobConfig);
 
       filewriter.initialize(filepath,conf,codec);
 

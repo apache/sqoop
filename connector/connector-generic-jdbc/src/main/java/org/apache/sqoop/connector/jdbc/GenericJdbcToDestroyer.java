@@ -28,26 +28,26 @@ public class GenericJdbcToDestroyer extends Destroyer<LinkConfiguration, ToJobCo
   private static final Logger LOG = Logger.getLogger(GenericJdbcToDestroyer.class);
 
   @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConf, ToJobConfiguration toJobConf) {
+  public void destroy(DestroyerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     LOG.info("Running generic JDBC connector destroyer");
 
-    final String tableName = toJobConf.toJobConfig.tableName;
-    final String stageTableName = toJobConf.toJobConfig.stageTableName;
+    final String tableName = toJobConfig.toJobConfig.tableName;
+    final String stageTableName = toJobConfig.toJobConfig.stageTableName;
     final boolean stageEnabled = stageTableName != null &&
       stageTableName.length() > 0;
     if(stageEnabled) {
-      moveDataToDestinationTable(linkConf,
+      moveDataToDestinationTable(linkConfig,
         context.isSuccess(), stageTableName, tableName);
     }
   }
 
-  private void moveDataToDestinationTable(LinkConfiguration linkConf,
+  private void moveDataToDestinationTable(LinkConfiguration linkConfig,
     boolean success, String stageTableName, String tableName) {
     GenericJdbcExecutor executor =
-      new GenericJdbcExecutor(linkConf.link.jdbcDriver,
-        linkConf.link.connectionString,
-        linkConf.link.username,
-        linkConf.link.password);
+      new GenericJdbcExecutor(linkConfig.linkConfig.jdbcDriver,
+        linkConfig.linkConfig.connectionString,
+        linkConfig.linkConfig.username,
+        linkConfig.linkConfig.password);
     try {
       if(success) {
         LOG.info("Job completed, transferring data from stage fromTable to " +

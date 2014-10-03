@@ -34,28 +34,28 @@ public abstract class Initializer<LinkConfiguration, JobConfiguration> {
    * promoted to all other part of the workflow automatically.
    *
    * @param context Initializer context object
-   * @param linkConfiguration Connector's link configuration object
-   * @param jobConfiguration Connector's job configuration object
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object
    */
-  public abstract void initialize(InitializerContext context,
-                                  LinkConfiguration linkConfiguration,
-                                  JobConfiguration jobConfiguration);
+	public abstract void initialize(InitializerContext context,
+			LinkConfiguration linkConfiguration,
+			JobConfiguration jobConfiguration);
 
-  /**
-   * Return list of all jars that this particular connector needs to operate
-   * on following job. This method will be called after running initialize
-   * method.
-   *
-   * @return
-   */
-  public List<String> getJars(InitializerContext context,
-                              LinkConfiguration linkConfiguration,
-                              JobConfiguration jobConfiguration) {
-    return new LinkedList<String>();
-  }
+	/**
+	 * Return list of all jars that this particular connector needs to operate
+	 * on following job. This method will be called after running initialize
+	 * method.
+	 *
+	 * @return
+	 */
+	public List<String> getJars(InitializerContext context,
+			LinkConfiguration linkConfiguration,
+			JobConfiguration jobConfiguration) {
+		return new LinkedList<String>();
+	}
 
-  public abstract Schema getSchema(InitializerContext context,
-                                   LinkConfiguration linkConfiguration,
-                                   JobConfiguration jobConfiguration);
+	public abstract Schema getSchema(InitializerContext context,
+			LinkConfiguration linkConfiguration,
+			JobConfiguration jobConfiguration);
 
 }

@@ -22,7 +22,7 @@ import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ConfigValidator;
 import org.apache.sqoop.validation.Validator;
 
 import java.sql.DriverManager;
@@ -34,30 +34,30 @@ import java.sql.SQLException;
 public class GenericJdbcValidator extends Validator {
 
   @Override
-  public Validation validateLink(Object configuration) {
-    Validation validation = new Validation(LinkConfiguration.class);
-    LinkConfiguration linkConf = (LinkConfiguration)configuration;
+  public ConfigValidator validateConfigForLink(Object configuration) {
+    ConfigValidator validation = new ConfigValidator(LinkConfiguration.class);
+    LinkConfiguration linkConfig = (LinkConfiguration)configuration;
 
-    if(linkConf.link.jdbcDriver == null) {
+    if(linkConfig.linkConfig.jdbcDriver == null) {
       validation.addMessage(Status.UNACCEPTABLE, "link", "jdbcDriver", "Driver can't be empty");
     } else {
       try {
-        Class.forName(linkConf.link.jdbcDriver);
+        Class.forName(linkConfig.linkConfig.jdbcDriver);
       } catch (ClassNotFoundException e) {
         validation.addMessage(Status.UNACCEPTABLE, "link", "jdbcDriver", "Can't load specified driver");
       }
     }
 
-    if(linkConf.link.connectionString == null) {
+    if(linkConfig.linkConfig.connectionString == null) {
       validation.addMessage(Status.UNACCEPTABLE, "link", "connectionString", "JDBC URL can't be empty");
-    } else if(!linkConf.link.connectionString.startsWith("jdbc:")) {
+    } else if(!linkConfig.linkConfig.connectionString.startsWith("jdbc:")) {
       validation.addMessage(Status.UNACCEPTABLE, "link", "connectionString", "This do not seem as a valid JDBC URL");
     }
 
     // See if we can connect to the database
     try {
-      DriverManager.getConnection(linkConf.link.connectionString,
-        linkConf.link.username, linkConf.link.password);
+      DriverManager.getConnection(linkConfig.linkConfig.connectionString,
+        linkConfig.linkConfig.username, linkConfig.linkConfig.password);
     } catch (SQLException e) {
       validation.addMessage(Status.ACCEPTABLE, "link", "Can't connect to the database with given credentials: " + e.getMessage());
     }
@@ -67,7 +67,7 @@ public class GenericJdbcValidator extends Validator {
   }
 
   @Override
-  public Validation validateJob(Object jobConfiguration) {
+  public ConfigValidator validateConfigForJob(Object jobConfiguration) {
     if (jobConfiguration instanceof FromJobConfiguration) {
       return validateFromJobConfiguration((FromJobConfiguration)jobConfiguration);
     } else if (jobConfiguration instanceof ToJobConfiguration) {
@@ -78,8 +78,8 @@ public class GenericJdbcValidator extends Validator {
     }
   }
 
-  private Validation validateToJobConfiguration(ToJobConfiguration configuration) {
-    Validation validation = new Validation(FromJobConfiguration.class);
+  private ConfigValidator validateToJobConfiguration(ToJobConfiguration configuration) {
+    ConfigValidator validation = new ConfigValidator(FromJobConfiguration.class);
 
     if(configuration.toJobConfig.tableName == null && configuration.toJobConfig.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "toJobConfig", "Either table name or SQL must be specified");
@@ -102,8 +102,8 @@ public class GenericJdbcValidator extends Validator {
     return validation;
   }
 
-  private Validation validateFromJobConfiguration(FromJobConfiguration configuration) {
-    Validation validation = new Validation(FromJobConfiguration.class);
+  private ConfigValidator validateFromJobConfiguration(FromJobConfiguration configuration) {
+    ConfigValidator validation = new ConfigValidator(FromJobConfiguration.class);
 
     if(configuration.fromJobConfig.tableName == null && configuration.fromJobConfig.sql == null) {
       validation.addMessage(Status.UNACCEPTABLE, "fromJobConfig", "Either table name or SQL must be specified");

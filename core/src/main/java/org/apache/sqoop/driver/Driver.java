@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.driver;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -26,12 +27,12 @@ import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
-import org.apache.sqoop.driver.configuration.JobConfiguration;
-import org.apache.sqoop.driver.configuration.LinkConfiguration;
-import org.apache.sqoop.model.FormUtils;
-import org.apache.sqoop.model.MConnectionForms;
+import org.apache.sqoop.driver.configuration.DriverConfiguration;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MJobForms;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.validation.Validator;
 
@@ -92,14 +93,14 @@ public class Driver implements Reconfigurable {
   }
 
   /**
-   * Driver config structure
+   * Driver structure
    */
-  private MDriverConfig mDriverConfig;
+  private MDriver mDriver;
 
   /**
    * Validator instance
    */
-  private final Validator validator;
+  private final Validator driverValidator;
 
   /**
    * Driver config upgrader instance
@@ -111,38 +112,30 @@ public class Driver implements Reconfigurable {
    */
   private static final boolean DEFAULT_AUTO_UPGRADE = false;
 
-  public static final String CURRENT_DRIVER_VERSION = "1";
-
-  public Class getJobConfigurationClass() {
-      return JobConfiguration.class;
-  }
-
-  public Class getLinkConfigurationClass() {
-      return LinkConfiguration.class;
+  public Class getDriverConfigurationGroupClass() {
+      return DriverConfiguration.class;
   }
 
   public Driver() {
-    MConnectionForms connectionForms = new MConnectionForms(
-      FormUtils.toForms(getLinkConfigurationClass())
-    );
-    mDriverConfig = new MDriverConfig(connectionForms, new MJobForms(FormUtils.toForms(getJobConfigurationClass())),
-        CURRENT_DRIVER_VERSION);
+    List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverConfigurationGroupClass());
+    mDriver = new MDriver(new MDriverConfig(driverConfig), DriverBean.CURRENT_DRIVER_VERSION);
 
     // Build validator
-    validator = new DriverValidator();
+    driverValidator = new DriverConfigValidator();
     // Build upgrader
     driverConfigUpgrader = new DriverConfigUpgrader();
   }
 
   public synchronized void initialize() {
-    initialize(SqoopConfiguration.getInstance().getContext().getBoolean(ConfigurationConstants.DRIVER_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE));
+    initialize(SqoopConfiguration.getInstance().getContext()
+        .getBoolean(ConfigurationConstants.DRIVER_AUTO_UPGRADE, DEFAULT_AUTO_UPGRADE));
   }
 
   public synchronized void initialize(boolean autoUpgrade) {
     LOG.trace("Begin Driver Config initialization");
 
     // Register driver config in repository
-    mDriverConfig = RepositoryManager.getInstance().getRepository().registerDriverConfig(mDriverConfig, autoUpgrade);
+    mDriver = RepositoryManager.getInstance().getRepository().registerDriver(mDriver, autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
@@ -154,15 +147,15 @@ public class Driver implements Reconfigurable {
   }
 
   public Validator getValidator() {
-    return validator;
+    return driverValidator;
   }
 
   public RepositoryUpgrader getDriverConfigRepositoryUpgrader() {
     return driverConfigUpgrader;
   }
 
-  public MDriverConfig getDriverConfig() {
-    return mDriverConfig;
+  public MDriver getDriver() {
+    return mDriver;
   }
 
   public ResourceBundle getBundle(Locale locale) {

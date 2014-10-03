@@ -19,7 +19,7 @@ package org.apache.sqoop.connector.hdfs;
 
 import org.apache.sqoop.connector.hdfs.configuration.*;
 import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.Validation;
+import org.apache.sqoop.validation.ConfigValidator;
 import org.apache.sqoop.validation.Validator;
 
 /**
@@ -28,54 +28,45 @@ import org.apache.sqoop.validation.Validator;
 public class HdfsValidator extends Validator {
 
   @Override
-  public Validation validateLink(Object connectionConfiguration) {
-    Validation validation = new Validation(LinkConfiguration.class);
-    // No validation on connection object
-    return validation;
-  }
-
-
-  @Override
-  public Validation validateJob(Object jobConfiguration) {
-    //TODO: I'm pretty sure this needs to call either validateExportJob or validateImportJob, depending on context
-    return super.validateJob(jobConfiguration);
+  public ConfigValidator validateConfigForJob(Object jobConfiguration) {
+    return super.validateConfigForJob(jobConfiguration);
   }
 
   @SuppressWarnings("unused")
-  private Validation validateFromJob(Object jobConfiguration) {
-    Validation validation = new Validation(FromJobConfiguration.class);
+  private ConfigValidator validateFromJob(Object jobConfiguration) {
+    ConfigValidator validation = new ConfigValidator(FromJobConfiguration.class);
     FromJobConfiguration configuration = (FromJobConfiguration)jobConfiguration;
-    validateInputForm(validation, configuration.fromJobConfig);
+    validateInputConfig(validation, configuration.fromJobConfig);
     return validation;
   }
 
   @SuppressWarnings("unused")
-  private Validation validateToJob(Object jobConfiguration) {
-    Validation validation = new Validation(ToJobConfiguration.class);
+  private ConfigValidator validateToJob(Object jobConfiguration) {
+    ConfigValidator validation = new ConfigValidator(ToJobConfiguration.class);
     ToJobConfiguration configuration = (ToJobConfiguration)jobConfiguration;
-    validateOutputForm(validation, configuration.toJobConfig);
+    validateOutputConfig(validation, configuration.toJobConfig);
     return validation;
   }
 
-  private void validateInputForm(Validation validation, FromJobConfig input) {
-    if(input.inputDirectory == null || input.inputDirectory.isEmpty()) {
+  private void validateInputConfig(ConfigValidator validation, FromJobConfig inputConfig) {
+    if(inputConfig.inputDirectory == null || inputConfig.inputDirectory.isEmpty()) {
       validation.addMessage(Status.UNACCEPTABLE, "input", "inputDirectory", "Input directory is empty");
     }
   }
 
-  private void validateOutputForm(Validation validation, ToJobConfig output) {
-    if(output.outputDirectory == null || output.outputDirectory.isEmpty()) {
+  private void validateOutputConfig(ConfigValidator validation, ToJobConfig outputConfig) {
+    if(outputConfig.outputDirectory == null || outputConfig.outputDirectory.isEmpty()) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "outputDirectory", "Output directory is empty");
     }
-    if(output.customCompression != null &&
-      output.customCompression.trim().length() > 0  &&
-      output.compression != ToCompression.CUSTOM) {
+    if(outputConfig.customCompression != null &&
+      outputConfig.customCompression.trim().length() > 0  &&
+      outputConfig.compression != ToCompression.CUSTOM) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
-        "custom compression should be blank as " + output.compression + " is being used.");
+        "custom compression should be blank as " + outputConfig.compression + " is being used.");
     }
-    if(output.compression == ToCompression.CUSTOM &&
-      (output.customCompression == null ||
-        output.customCompression.trim().length() == 0)
+    if(outputConfig.compression == ToCompression.CUSTOM &&
+      (outputConfig.customCompression == null ||
+        outputConfig.customCompression.trim().length() == 0)
       ) {
       validation.addMessage(Status.UNACCEPTABLE, "output", "compression",
         "custom compression is blank.");

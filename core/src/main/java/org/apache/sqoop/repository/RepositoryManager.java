@@ -118,7 +118,7 @@ public class RepositoryManager implements Reconfigurable {
     provider.initialize(context);
 
     if(!immutableRepository) {
-      LOG.info("Creating or upgrading on disk structures if necessary");
+      LOG.info("Creating or update respository internals at bootup");
       provider.getRepository().createOrUpdateInternals();
     }
 

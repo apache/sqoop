@@ -22,7 +22,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- * Provide cRud semantics over RESTfull HTTP API for connectors. Only read
+ * Provide Read semantics over RESTfull HTTP API for connectors. Only read
  * is supported as creation, update and delete might be done only directly on
  * server side.
  */
@@ -38,10 +38,8 @@ public class ConnectorResourceRequest extends ResourceRequest
       response = super.get(serverUrl + RESOURCE + cid);
     }
     JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
-
     ConnectorBean connectorBean = new ConnectorBean();
     connectorBean.restore(jsonObject);
-
     return connectorBean;
   }
 }

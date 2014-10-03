@@ -34,46 +34,36 @@ public class JobResourceRequest extends ResourceRequest {
   private static final String ENABLE = "/enable";
   private static final String DISABLE = "/disable";
 
-  public JobBean read(String serverUrl, Long xid) {
+  public JobBean read(String serverUrl, Long linkId) {
     String response;
-    if (xid == null) {
+    if (linkId == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + RESOURCE + xid);
+      response = super.get(serverUrl + RESOURCE + linkId);
     }
     JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
-
     JobBean jobBean = new JobBean();
     jobBean.restore(jsonObject);
-
     return jobBean;
   }
 
   public ValidationResultBean create(String serverUrl, MJob job) {
     JobBean jobBean = new JobBean(job);
-
-    // Extract all form inputs including sensitive inputs
+    // Extract all config inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
-
     String response = super.post(serverUrl + RESOURCE, jobJson.toJSONString());
-
-    ValidationResultBean validationBean = new ValidationResultBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
-
-    return validationBean;
+    ValidationResultBean validationResultBean = new ValidationResultBean();
+    validationResultBean.restore((JSONObject) JSONValue.parse(response));
+    return validationResultBean;
   }
 
   public ValidationResultBean update(String serverUrl, MJob job) {
     JobBean jobBean = new JobBean(job);
-
-    // Extract all form inputs including sensitive inputs
+    // Extract all config inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
-
     String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(), jobJson.toJSONString());
-
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore((JSONObject) JSONValue.parse(response));
-
     return validationBean;
   }
 

@@ -17,19 +17,17 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-
-/**
- */
 public class TestClassAvailable {
 
-  AbstractValidator validator = new ClassAvailable();
+  AbstractValidator<String> validator = new ClassAvailable();
 
   @Test
   public void test() {

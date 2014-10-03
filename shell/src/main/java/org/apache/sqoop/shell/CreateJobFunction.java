@@ -23,9 +23,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
-import org.apache.sqoop.shell.utils.FormDisplayer;
-import org.apache.sqoop.shell.utils.FormOptions;
-import org.apache.sqoop.shell.utils.JobDynamicFormOptions;
+import org.apache.sqoop.shell.utils.ConfigDisplayer;
+import org.apache.sqoop.shell.utils.ConfigOptions;
+import org.apache.sqoop.shell.utils.JobDynamicConfigOptions;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
-import static org.apache.sqoop.shell.utils.FormFiller.*;
+import static org.apache.sqoop.shell.utils.ConfigFiller.*;
 
 /**
  * Handles creation of new job objects.
@@ -67,16 +67,16 @@ public class CreateJobFunction extends  SqoopFunction {
                      isInteractive);
   }
 
-  private Status createJob(Long fromConnectionId, Long toConnectionId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CREATE_CREATING_JOB, fromConnectionId, toConnectionId);
+  private Status createJob(Long fromLinkId, Long toLinkId, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_CREATE_CREATING_JOB, fromLinkId, toLinkId);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.createJob(fromConnectionId, toConnectionId);
+    MJob job = client.createJob(fromLinkId, toLinkId);
 
     // @TODO(Abe): From/To.
-    ResourceBundle fromConnectorBundle = client.getConnectorConfigResourceBundle(
+    ResourceBundle fromConfigBundle = client.getConnectorConfigBundle(
         job.getConnectorId(Direction.FROM));
-    ResourceBundle toConnectorBundle = client.getConnectorConfigResourceBundle(
+    ResourceBundle toConfigBundle = client.getConnectorConfigBundle(
         job.getConnectorId(Direction.TO));
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
@@ -92,7 +92,7 @@ public class CreateJobFunction extends  SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillJob(reader, job, fromConnectorBundle, driverConfigBundle, toConnectorBundle)) {
+        if(!fillJobWithBundle(reader, job, fromConfigBundle, toConfigBundle, driverConfigBundle)) {
           return null;
         }
 
@@ -100,9 +100,9 @@ public class CreateJobFunction extends  SqoopFunction {
         status = client.saveJob(job);
       } while(!status.canProceed());
     } else {
-      JobDynamicFormOptions options = new JobDynamicFormOptions();
+      JobDynamicConfigOptions options = new JobDynamicConfigOptions();
       options.prepareOptions(job);
-      CommandLine line = FormOptions.parseOptions(options, 0, args, false);
+      CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
         status = client.saveJob(job);
         if (!status.canProceed()) {
@@ -115,7 +115,7 @@ public class CreateJobFunction extends  SqoopFunction {
       }
     }
 
-    FormDisplayer.displayFormWarning(job);
+    ConfigDisplayer.displayConfigWarning(job);
     printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
 
     return status;

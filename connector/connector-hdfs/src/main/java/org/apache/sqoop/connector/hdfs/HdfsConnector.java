@@ -118,7 +118,7 @@ public class HdfsConnector extends SqoopConnector {
    * @return Validator object
    */
   @Override
-  public Validator getValidator() {
+  public Validator getConfigValidator() {
     return hdfsValidator;
   }
 

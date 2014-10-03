@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.FormClass;
+import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
@@ -26,7 +26,7 @@ import org.apache.sqoop.validation.validators.AbstractValidator;
 /**
  *
  */
-@FormClass(validators = {@Validator(ToJobConfig.FormValidator.class)})
+@ConfigClass(validators = {@Validator(ToJobConfig.ConfigValidator.class)})
 public class ToJobConfig {
   @Input(size = 50)   public String schemaName;
   @Input(size = 2000) public String tableName;
@@ -35,19 +35,19 @@ public class ToJobConfig {
   @Input(size = 2000) public String stageTableName;
   @Input              public Boolean clearStageTable;
 
-  public static class FormValidator extends AbstractValidator<ToJobConfig> {
+  public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
-    public void validate(ToJobConfig form) {
-      if(form.tableName == null && form.sql == null) {
+    public void validate(ToJobConfig config) {
+      if(config.tableName == null && config.sql == null) {
         addMessage(Status.UNACCEPTABLE, "Either table name or SQL must be specified");
       }
-      if(form.tableName != null && form.sql != null) {
+      if(config.tableName != null && config.sql != null) {
         addMessage(Status.UNACCEPTABLE, "Both table name and SQL cannot be specified");
       }
-      if(form.tableName == null && form.stageTableName != null) {
+      if(config.tableName == null && config.stageTableName != null) {
         addMessage(Status.UNACCEPTABLE, "Stage table name cannot be specified without specifying table name");
       }
-      if(form.stageTableName == null && form.clearStageTable != null) {
+      if(config.stageTableName == null && config.clearStageTable != null) {
         addMessage(Status.UNACCEPTABLE, "Clear stage table cannot be specified without specifying name of the stage table.");
       }
     }
