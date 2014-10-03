@@ -31,6 +31,9 @@ public enum ValidationError implements ErrorCode {
   VALIDATION_0002("Usage of missing field"),
 
   VALIDATION_0003("Invalid representation of form and input field"),
+
+  VALIDATION_0004("Can't find validator class"),
+
   ;
 
   private final String message;

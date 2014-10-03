@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Form;
 import org.apache.sqoop.model.FormClass;
@@ -27,6 +28,8 @@ import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Validation runner that will run validators associated with given configuration
@@ -39,10 +42,21 @@ import java.lang.reflect.Field;
  * Which means that form validator don't have to repeat it's input validators as it will
  * be never called if the input's are not valid. Similarly Class validators won't be called
  * unless all forms will pass validators.
- *
- * TODO: Cache the validators instances, so that we don't have create new instance every time
  */
 public class ValidationRunner {
+
+  /**
+   * Private cache of instantiated validators.
+   *
+   * We're expecting that this cache will be very small as the number of possible validators
+   * is driven to high extent by the number of connectors and hence we don't have a cache
+   * eviction at the moment.
+   */
+  private Map<Class<? extends AbstractValidator>, AbstractValidator> cache;
+
+  public ValidationRunner() {
+    cache = new HashMap<Class<? extends AbstractValidator>, AbstractValidator>();
+  }
 
   /**
    * Validate given configuration instance.
@@ -137,7 +151,22 @@ public class ValidationRunner {
    * @return
    */
   private AbstractValidator executeValidator(Object object, Validator validator) {
-    AbstractValidator instance = (AbstractValidator) ClassUtils.instantiate(validator.value());
+    // Try to get validator instance from the cache
+    AbstractValidator instance = cache.get(validator.value());
+
+    if(instance == null) {
+      instance = (AbstractValidator) ClassUtils.instantiate(validator.value());
+
+      // This could happen if we would be missing some connector's jars on our classpath
+      if(instance == null) {
+        throw new SqoopException(ValidationError.VALIDATION_0004, validator.value().getName());
+      }
+
+      cache.put(validator.value(), instance);
+    } else {
+      instance.reset();
+    }
+
     instance.setStringArgument(validator.strArg());
     instance.validate(object);
     return instance;
