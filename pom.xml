@@ -14,7 +14,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache</groupId>
@@ -111,6 +112,7 @@ limitations under the License.
     <jdbc.sqlserver.version>4.0</jdbc.sqlserver.version>
     <jdbc.teradata.version>14.00.00.21</jdbc.teradata.version>
     <jdbc.netezza.version>6.0</jdbc.netezza.version>
+    <joda.version>2.4</joda.version>
   </properties>
 
   <dependencies>
@@ -440,18 +442,23 @@ limitations under the License.
         <artifactId>nzjdbc3</artifactId>
         <version>${jdbc.netezza.version}</version>
       </dependency>
-     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>${mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat</groupId>
-      <artifactId>catalina</artifactId>
-      <version>${tomcat.version}</version>
-      <scope>provided</scope>
-    </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>${joda.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>catalina</artifactId>
+        <version>${tomcat.version}</version>
+        <scope>provided</scope>
+      </dependency>
    </dependencies>
   </dependencyManagement>
 

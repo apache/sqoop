@@ -28,6 +28,8 @@ import java.util.Arrays;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Binary;
+import org.apache.sqoop.schema.type.Date;
+import org.apache.sqoop.schema.type.DateTime;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.junit.Before;
@@ -220,6 +222,31 @@ public class TestCSVIntermediateDataFormat {
     // Modifies the input array, so we use the copy to confirm
     data.setObjectData(in);
     assertTrue(Arrays.deepEquals(inCopy, data.getObjectData()));
+  }
+
+  @Test
+  public void testDate() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Date("1"));
+    data.setSchema(schema);
+
+    data.setTextData("2014-10-01");
+    assertEquals("2014-10-01", data.getObjectData()[0].toString());
+  }
+
+  @Test
+  public void testDateTime() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    data.setSchema(schema);
+
+    for (String dateTime : new String[]{
+        "2014-10-01T12:00:00",
+        "2014-10-01T12:00:00.000"
+    }) {
+      data.setTextData(dateTime);
+      assertEquals("2014-10-01T12:00:00.000", data.getObjectData()[0].toString());
+    }
   }
 
   @Test(expected=SqoopException.class)

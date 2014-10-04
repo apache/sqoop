@@ -27,6 +27,8 @@ import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Type;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -215,7 +217,11 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
           out[i] = new BigDecimal(fields[i]);
           break;
         case DATE:
+          out[i] = LocalDate.parse(fields[i]);
+          break;
         case DATE_TIME:
+          out[i] = LocalDateTime.parse(fields[i]);
+          break;
         case BIT:
           out[i] = fields[i];
           break;
