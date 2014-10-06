@@ -19,6 +19,7 @@
 package org.apache.sqoop.connector.idf;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Binary;
+import org.apache.sqoop.schema.type.Bit;
 import org.apache.sqoop.schema.type.Date;
 import org.apache.sqoop.schema.type.DateTime;
 import org.apache.sqoop.schema.type.FixedPoint;
@@ -195,7 +197,7 @@ public class TestCSVIntermediateDataFormat {
 
     Object[] in = {strData};
     Object[] inCopy = new Object[1];
-    System.arraycopy(in,0,inCopy,0,in.length);
+    System.arraycopy(in, 0, inCopy, 0, in.length);
 
     // Modifies the input array, so we use the copy to confirm
     data.setObjectData(in);
@@ -246,6 +248,27 @@ public class TestCSVIntermediateDataFormat {
     }) {
       data.setTextData(dateTime);
       assertEquals("2014-10-01T12:00:00.000", data.getObjectData()[0].toString());
+    }
+  }
+
+  @Test
+  public void testBit() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1"));
+    data.setSchema(schema);
+
+    for (String trueBit : new String[]{
+        "true", "TRUE", "1"
+    }) {
+      data.setTextData(trueBit);
+      assertTrue((Boolean) data.getObjectData()[0]);
+    }
+
+    for (String falseBit : new String[]{
+        "false", "FALSE", "0"
+    }) {
+      data.setTextData(falseBit);
+      assertFalse((Boolean) data.getObjectData()[0]);
     }
   }
 

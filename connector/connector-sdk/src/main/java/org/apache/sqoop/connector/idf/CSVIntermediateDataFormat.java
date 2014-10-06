@@ -223,7 +223,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
           out[i] = LocalDateTime.parse(fields[i]);
           break;
         case BIT:
-          out[i] = fields[i];
+          out[i] = Boolean.valueOf(fields[i].equals("1")
+              || fields[i].toLowerCase().equals("true"));
           break;
         default:
           throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004, "Column type from schema was not recognized for " + colType);
