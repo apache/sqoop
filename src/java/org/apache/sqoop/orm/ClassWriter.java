@@ -116,6 +116,10 @@ public class ClassWriter {
     JAVA_RESERVED_WORDS.add("void");
     JAVA_RESERVED_WORDS.add("volatile");
     JAVA_RESERVED_WORDS.add("while");
+
+    // not strictly reserved words, but collides with
+    // our imports
+    JAVA_RESERVED_WORDS.add("Text");
   }
 
   public static final String PROPERTY_CODEGEN_METHODS_MAXCOLS =
