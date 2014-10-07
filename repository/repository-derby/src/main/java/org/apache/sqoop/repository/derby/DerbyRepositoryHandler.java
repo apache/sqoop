@@ -415,6 +415,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update data.
       // Data updates depend on knowledge of the type of job.
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE, conn);
+
+      // Add unique constraints on job and links.
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME, conn);
     }
 
     ResultSet rs = null;
@@ -849,7 +853,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_LINK_CHECK);
+      stmt = conn.prepareStatement(STMT_SELECT_LINK_CHECK_BY_ID);
       stmt.setLong(1, id);
       rs = stmt.executeQuery();
 
@@ -1164,9 +1168,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
                         job.getJobConfig(Direction.TO).getConfigs(),
                         conn);
       createInputValues(STMT_INSERT_JOB_INPUT,
-                        job.getPersistenceId(),
-                        job.getDriverConfig().getConfigs(),
-                        conn);
+          job.getPersistenceId(),
+          job.getDriverConfig().getConfigs(),
+          conn);
 
     } catch (SQLException ex) {
       logException(ex, job);
@@ -1184,7 +1188,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_JOB_CHECK);
+      stmt = conn.prepareStatement(STMT_SELECT_JOB_CHECK_BY_ID);
       stmt.setLong(1, id);
       rs = stmt.executeQuery();
 
@@ -1279,7 +1283,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   public MJob findJob(long id, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_JOB_SINGLE);
+      stmt = conn.prepareStatement(STMT_SELECT_JOB_SINGLE_BY_ID);
       stmt.setLong(1, id);
 
       List<MJob> jobs = loadJobs(stmt, conn);
@@ -1307,7 +1311,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   public List<MJob> findJobs(Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_JOB_ALL);
+      stmt = conn.prepareStatement(STMT_SELECT_JOB);
 
       return loadJobs(stmt, conn);
 

@@ -133,6 +133,10 @@ public final class DerbySchemaConstants {
 
   public static final String CONSTRAINT_SQ_LNK_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_LNK_SQC_NAME;
 
+  public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME = CONSTRAINT_PREFIX + "SQ_LNK_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE = SCHEMA_PREFIX + CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME;
+
   // SQ_JOB
 
   public static final String TABLE_SQ_JOB_NAME = "SQ_JOB";
@@ -173,6 +177,12 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQB_SQ_LNK_TO_NAME = CONSTRAINT_PREFIX + "SQB_SQ_LNK_TO";
 
   public static final String CONSTRAINT_SQB_SQ_LNK_TO = SCHEMA_PREFIX + CONSTRAINT_SQB_SQ_LNK_TO_NAME;
+
+  public static final String CONSTRAINT_SQB_NAME_UNIQUE_NAME = CONSTRAINT_PREFIX + "SQB_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQB_NAME_UNIQUE = SCHEMA_PREFIX + CONSTRAINT_SQB_NAME_UNIQUE_NAME;
+
+  // SQ_CONNECTION_INPUT
 
   public static final String TABLE_SQ_LINK_INPUT_NAME =
     "SQ_LINK_INPUT";

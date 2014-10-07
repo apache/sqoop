@@ -147,6 +147,18 @@ public class TestLinkHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_LINK_INPUT", 4);
   }
 
+  @Test(expected=SqoopException.class)
+  public void testCreateDuplicateLink() throws Exception {
+    MLink link = getLink();
+    fillLink(link);
+    link.setName("test");
+    handler.createLink(link, getDerbyDatabaseConnection());
+    assertEquals(1, link.getPersistenceId());
+
+    link.setPersistenceId(MLink.PERSISTANCE_ID_DEFAULT);
+    handler.createLink(link, getDerbyDatabaseConnection());
+  }
+
   @Test
   public void testInUseLink() throws Exception {
     loadLinks();

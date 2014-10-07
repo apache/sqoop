@@ -76,7 +76,7 @@ public class TestJobHandling extends DerbyTestCase {
     MJob firstJob = handler.findJob(1, derbyConnection);
     assertNotNull(firstJob);
     assertEquals(1, firstJob.getPersistenceId());
-    assertEquals("JA", firstJob.getName());
+    assertEquals("JA0", firstJob.getName());
 
     List<MConfig> configs;
 
@@ -114,13 +114,13 @@ public class TestJobHandling extends DerbyTestCase {
     list = handler.findJobs(derbyConnection);
     assertEquals(4, list.size());
 
-    assertEquals("JA", list.get(0).getName());
+    assertEquals("JA0", list.get(0).getName());
 
-    assertEquals("JB", list.get(1).getName());
+    assertEquals("JB0", list.get(1).getName());
 
-    assertEquals("JC", list.get(2).getName());
+    assertEquals("JC0", list.get(2).getName());
 
-    assertEquals("JD", list.get(3).getName());
+    assertEquals("JD0", list.get(3).getName());
   }
 
   @Test
@@ -191,6 +191,19 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(2, job.getPersistenceId());
     assertCountForTable("SQOOP.SQ_JOB", 2);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
+  }
+
+  @Test(expected=SqoopException.class)
+  public void testCreateDuplicateJob() throws Exception {
+    // Duplicate jobs
+    MJob job = getJob();
+    fillJob(job);
+    job.setName("test");
+    handler.createJob(job, getDerbyDatabaseConnection());
+    assertEquals(1, job.getPersistenceId());
+
+    job.setPersistenceId(MJob.PERSISTANCE_ID_DEFAULT);
+    handler.createJob(job, getDerbyDatabaseConnection());
   }
 
   @Test

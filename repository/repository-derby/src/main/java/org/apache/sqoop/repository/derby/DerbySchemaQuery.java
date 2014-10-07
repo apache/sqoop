@@ -694,7 +694,7 @@ public final class DerbySchemaQuery {
     + " WHERE " + COLUMN_SQ_LNK_CONNECTOR + " = ?";
 
   // DML: Check if given link exists
-  public static final String STMT_SELECT_LINK_CHECK =
+  public static final String STMT_SELECT_LINK_CHECK_BY_ID =
     "SELECT count(*) FROM " + TABLE_SQ_LINK
     + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
 
@@ -743,7 +743,7 @@ public final class DerbySchemaQuery {
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Check if given job exists
-  public static final String STMT_SELECT_JOB_CHECK =
+  public static final String STMT_SELECT_JOB_CHECK_BY_ID =
     "SELECT count(*) FROM " + TABLE_SQ_JOB
     + " WHERE " + COLUMN_SQB_ID + " = ?";
 
@@ -756,29 +756,8 @@ public final class DerbySchemaQuery {
       + " ON " + COLUMN_SQB_FROM_LINK + " = " + COLUMN_SQ_LNK_ID
     + " WHERE " + COLUMN_SQ_LNK_ID + " = ? ";
 
-  // DML: Select one specific job
-  public static final String STMT_SELECT_JOB_SINGLE =
-    "SELECT "
-    + "FROM_CONNECTOR." + COLUMN_SQ_LNK_CONNECTOR + ", "
-    + "TO_CONNECTOR." + COLUMN_SQ_LNK_CONNECTOR + ", "
-    + "job." + COLUMN_SQB_ID + ", "
-    + "job." + COLUMN_SQB_NAME + ", "
-    + "job." + COLUMN_SQB_FROM_LINK + ", "
-    + "job." + COLUMN_SQB_TO_LINK + ", "
-    + "job." + COLUMN_SQB_ENABLED + ", "
-    + "job." + COLUMN_SQB_CREATION_USER + ", "
-    + "job." + COLUMN_SQB_CREATION_DATE + ", "
-    + "job." + COLUMN_SQB_UPDATE_USER + ", "
-    + "job." + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " job"
-    + " LEFT JOIN " + TABLE_SQ_LINK
-    + " FROM_CONNECTOR ON " + COLUMN_SQB_FROM_LINK + " = FROM_CONNECTOR." + COLUMN_SQ_LNK_ID
-    + " LEFT JOIN " + TABLE_SQ_LINK
-    + " TO_CONNECTOR ON " + COLUMN_SQB_TO_LINK + " = TO_CONNECTOR." + COLUMN_SQ_LNK_ID
-    + " WHERE " + COLUMN_SQB_ID + " = ?";
-
   // DML: Select all jobs
-  public static final String STMT_SELECT_JOB_ALL =
+  public static final String STMT_SELECT_JOB =
     "SELECT "
     + "FROM_LINK." + COLUMN_SQ_LNK_CONNECTOR + ", "
     + "TO_LINK." + COLUMN_SQ_LNK_CONNECTOR + ", "
@@ -797,9 +776,14 @@ public final class DerbySchemaQuery {
       + " LEFT JOIN " + TABLE_SQ_LINK + " TO_LINK"
         + " ON " + COLUMN_SQB_TO_LINK + " = TO_LINK." + COLUMN_SQ_LNK_ID;
 
+  // DML: Select one specific job
+  public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
+      STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+
   // DML: Select all jobs for a Connector
-  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR = STMT_SELECT_JOB_ALL
-    + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONNECTOR + " = ? OR TO_LINK." + COLUMN_SQ_LNK_CONNECTOR + " = ?";
+  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR = STMT_SELECT_JOB
+      + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONNECTOR + " = ? OR TO_LINK."
+      + COLUMN_SQ_LNK_CONNECTOR + " = ?";
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =
@@ -1065,6 +1049,14 @@ public final class DerbySchemaQuery {
 
   public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE =
       "ALTER TABLE " + TABLE_SQ_JOB + " DROP COLUMN " + COLUMN_SQB_TYPE;
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT "
+          + CONSTRAINT_SQB_NAME_UNIQUE + " UNIQUE (" + COLUMN_SQB_NAME + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME =
+      "ALTER TABLE " + TABLE_SQ_LINK + " ADD CONSTRAINT "
+          + CONSTRAINT_SQ_LNK_NAME_UNIQUE + " UNIQUE (" + COLUMN_SQ_LNK_NAME + ")";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

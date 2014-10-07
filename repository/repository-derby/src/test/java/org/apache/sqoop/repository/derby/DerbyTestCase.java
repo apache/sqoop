@@ -37,12 +37,14 @@ import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_T
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQ_LNK;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_CREATION_USER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_ENABLED;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_UPDATE_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER;
 import static org.junit.Assert.assertEquals;
@@ -152,11 +154,13 @@ abstract public class DerbyTestCase {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME);
     }
 
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '"  + version + "')");
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) " +
-      "VALUES('" + DerbyRepoConstants.SYSKEY_DRIVER_VERSION + "', '1')");
+        "VALUES('" + DerbyRepoConstants.SYSKEY_DRIVER_VERSION + "', '1')");
   }
 
   protected void createSchema() throws Exception {
@@ -169,13 +173,19 @@ abstract public class DerbyTestCase {
    * @param query Query to execute
    * @throws Exception
    */
-  protected void runQuery(String query, String... args) throws Exception {
+  protected void runQuery(String query, Object... args) throws Exception {
     PreparedStatement stmt = null;
     try {
       stmt = getDerbyDatabaseConnection().prepareStatement(query);
 
       for (int i = 0; i < args.length; ++i) {
-        stmt.setString(i + 1, args[i]);
+        if (args[i] instanceof String) {
+          stmt.setString(i + 1, (String)args[i]);
+        } else if (args[i] instanceof Long) {
+          stmt.setLong(i + 1, (Long)args[i]);
+        } else {
+          stmt.setString(i + 1, args[i].toString());
+        }
       }
 
       stmt.execute();
@@ -436,6 +446,7 @@ abstract public class DerbyTestCase {
    * @throws Exception
    */
   public void loadJobs(int version) throws Exception {
+    int index = 0;
     switch (version) {
       case 2:
         for(String type : new String[] {"IMPORT", "EXPORT"}) {
@@ -468,7 +479,7 @@ abstract public class DerbyTestCase {
       case 4:
         for (String name : new String[]{"JA", "JB", "JC", "JD"}) {
           runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)"
-              + " VALUES('" + name + "', 1, 1)");
+              + " VALUES('" + name + index + "', 1, 1)");
         }
 
         // Odd IDs inputs have values

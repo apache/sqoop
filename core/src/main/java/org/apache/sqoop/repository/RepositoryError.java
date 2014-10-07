@@ -122,7 +122,7 @@ public enum RepositoryError implements ErrorCode {
   JDBCREPO_0026("Upgrade required but not allowed"),
 
   /** Invalid links or jobs when upgrading connector **/
-  JDBCREPO_0027("Invalid links or jobs when upgrading connector");
+  JDBCREPO_0027("Invalid links or jobs when upgrading connector")
 
   ;
 
