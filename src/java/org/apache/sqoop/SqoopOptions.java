@@ -119,6 +119,7 @@ public class SqoopOptions implements Cloneable {
   // This represents path to a file on ${user.home} containing the password
   // with 400 permissions so its only readable by user executing the tool
   @StoredAsProperty("db.password.file") private String passwordFilePath;
+  @StoredAsProperty("db.password.alias") private String passwordAlias;
 
   @StoredAsProperty("null.string") private String nullStringValue;
   @StoredAsProperty("input.null.string") private String inNullStringValue;
@@ -1183,6 +1184,13 @@ public class SqoopOptions implements Cloneable {
     this.passwordFilePath = passwdFilePath;
   }
 
+  public String getPasswordAlias() {
+    return passwordAlias;
+  }
+
+  public void setPasswordAlias(String alias) {
+    this.passwordAlias = alias;
+  }
   protected void parseColumnMapping(String mapping,
           Properties output) {
     output.clear();

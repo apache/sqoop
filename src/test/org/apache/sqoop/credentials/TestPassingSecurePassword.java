@@ -21,6 +21,7 @@ package org.apache.sqoop.credentials;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,13 +30,17 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.ImportTool;
+import org.apache.sqoop.util.password.CredentialProviderHelper;
+import org.apache.sqoop.util.password.CredentialProviderPasswordLoader;
 import org.apache.sqoop.util.password.CryptoFileLoader;
+import org.apache.sqoop.util.password.PasswordLoader;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -93,9 +98,10 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
       SqoopOptions opts = getSqoopOptions(conf);
       ImportTool importTool = new ImportTool();
       importTool.parseArguments(argv, conf, opts, true);
-      fail("The password file does not exist! ");
+      fail("The password file does not exist!");
     } catch (Exception e) {
-      assertTrue(e.getMessage().contains("The password file does not exist!"));
+      assertTrue(e.getMessage().matches(".*The provided password file "
+        + ".* does not exist!"));
     }
   }
 
@@ -110,10 +116,10 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
       SqoopOptions opts = getSqoopOptions(conf);
       ImportTool importTool = new ImportTool();
       importTool.parseArguments(argv, conf, opts, true);
-      fail("The password file cannot be a directory! ");
+      fail("The password file cannot be a directory!");
     } catch (Exception e) {
-      assertTrue(e.getMessage().contains("The password file cannot "
-        + "be a directory!"));
+      assertTrue(e.getMessage().matches(".*The provided password file .*"
+        + " is a directory!"));
     }
   }
 
@@ -137,10 +143,11 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
       SqoopOptions out = importTool.parseArguments(argv, conf, in, true);
       assertNotNull(out.getPassword());
       importTool.validateOptions(out);
-      fail("Either password or passwordPath must be specified but not both.");
+      fail("Only one of password, password "
+          + "alias or path to a password file must be specified.");
     } catch (Exception e) {
-      assertTrue(e.getMessage().contains("Either password or path to a "
-        + "password file must be specified but not both"));
+      assertTrue(e.getMessage().contains("Only one of password, password "
+          + "alias or path to a password file must be specified."));
     }
   }
 
@@ -348,6 +355,88 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
       for(String pass : passphrases) {
         executeCipherTest(pass, pass, (String)cipher[0], (Integer)cipher[1]);
       }
+    }
+  }
+
+  public void testCredentialProviderLoader() throws Exception {
+    CredentialProviderPasswordLoader pl =
+        new CredentialProviderPasswordLoader();
+
+    if (!CredentialProviderHelper.isProviderAvailable()) {
+      LOG.info("CredentialProvider facility not available "
+        + "in the hadoop environment used");
+    } else {
+      String alias = "super.secret.alias";
+      String pw = "super.secret.password";
+
+      String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+      String jksFile = "creds.jks";
+      createTempFile(passwordFilePath);
+      writeToFile(passwordFilePath, alias.getBytes());
+      File credDir = new File(".");
+
+      Configuration conf = getConf();
+      String ourUrl =  CredentialProviderHelper.SCHEME_NAME +
+        "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
+      File file = new File(credDir, jksFile);
+      file.delete();
+      conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PATH,
+        ourUrl);
+      CredentialProviderHelper.createCredentialEntry(conf, alias, pw);
+
+      conf.set("org.apache.sqoop.credentials.loader.class",
+        CredentialProviderPasswordLoader.class.getCanonicalName());
+
+      ArrayList<String> extraArgs = new ArrayList<String>();
+      extraArgs.add("--username");
+      extraArgs.add("username");
+      extraArgs.add("--password-file");
+      extraArgs.add(passwordFilePath);
+      String[] commonArgs = getCommonArgs(false, extraArgs);
+
+      SqoopOptions in = getSqoopOptions(conf);
+      ImportTool importTool = new ImportTool();
+
+      SqoopOptions out = importTool.parseArguments(commonArgs, conf, in, true);
+      assertEquals(pw, pl.loadPassword(passwordFilePath, conf));
+      assertEquals(pw, out.getPassword());
+    }
+  }
+
+  public void testPasswordAliasOption() throws Exception {
+    CredentialProviderPasswordLoader pl =
+        new CredentialProviderPasswordLoader();
+
+    if (!CredentialProviderHelper.isProviderAvailable()) {
+      LOG.info("CredentialProvider facility not available "
+        + "in the hadoop environment used");
+    } else {
+      String alias = "super.secret.alias";
+      String pw = "super.secret.password";
+      String jksFile = "creds.jks";
+      File credDir = new File(".");
+
+      Configuration conf = getConf();
+      String ourUrl =  CredentialProviderHelper.SCHEME_NAME +
+        "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
+      File file = new File(credDir, jksFile);
+      file.delete();
+      conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PATH,
+        ourUrl);
+      CredentialProviderHelper.createCredentialEntry(conf, alias, pw);
+
+      ArrayList<String> extraArgs = new ArrayList<String>();
+      extraArgs.add("--username");
+      extraArgs.add("username");
+      extraArgs.add("--password-alias");
+      extraArgs.add(alias);
+      String[] commonArgs = getCommonArgs(false, extraArgs);
+
+      SqoopOptions in = getSqoopOptions(conf);
+      ImportTool importTool = new ImportTool();
+
+      SqoopOptions out = importTool.parseArguments(commonArgs, conf, in, true);
+      assertEquals(pw, out.getPassword());
     }
   }
 

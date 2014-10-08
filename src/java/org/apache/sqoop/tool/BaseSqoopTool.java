@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.util.password.CredentialProviderHelper;
 
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
@@ -73,6 +74,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String PASSWORD_ARG = "password";
   public static final String PASSWORD_PROMPT_ARG = "P";
   public static final String PASSWORD_PATH_ARG = "password-file";
+  public static final String PASSWORD_ALIAS_ARG = "password-alias";
   public static final String DIRECT_ARG = "direct";
   public static final String BATCH_ARG = "batch";
   public static final String TABLE_ARG = "table";
@@ -426,7 +428,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     commonOpts.addOption(OptionBuilder
         .withDescription("Read password from console")
         .create(PASSWORD_PROMPT_ARG));
-
+    commonOpts.addOption(OptionBuilder.withArgName(PASSWORD_ALIAS_ARG)
+      .hasArg().withDescription("Credential provider password alias")
+      .withLongOpt(PASSWORD_ALIAS_ARG)
+      .create());
     commonOpts.addOption(OptionBuilder.withArgName("dir")
         .hasArg().withDescription("Override $HADOOP_MAPRED_HOME_ARG")
         .withLongOpt(HADOOP_MAPRED_HOME_ARG)
@@ -1017,9 +1022,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     if (in.hasOption(PASSWORD_PATH_ARG)) {
-      if (in.hasOption(PASSWORD_ARG) || in.hasOption(PASSWORD_PROMPT_ARG)) {
-        throw new InvalidOptionsException("Either password or path to a "
-          + "password file must be specified but not both.");
+      if (in.hasOption(PASSWORD_ARG) || in.hasOption(PASSWORD_PROMPT_ARG)
+          || in.hasOption(PASSWORD_ALIAS_ARG)) {
+        throw new InvalidOptionsException("Only one of password, password "
+          + "alias or path to a password file must be specified.");
       }
 
       try {
@@ -1029,10 +1035,31 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         // And allow the PasswordLoader to clean up any sensitive properties
         CredentialsUtil.cleanUpSensitiveProperties(out.getConf());
       } catch (IOException ex) {
-        LOG.warn("Failed to load connection parameter file", ex);
+        LOG.warn("Failed to load password file", ex);
+        throw (InvalidOptionsException)
+          new InvalidOptionsException("Error while loading password file: "
+            + ex.getMessage()).initCause(ex);
+      }
+    }
+    if (in.hasOption(PASSWORD_ALIAS_ARG)) {
+      if (in.hasOption(PASSWORD_ARG) || in.hasOption(PASSWORD_PROMPT_ARG)
+          || in.hasOption(PASSWORD_PATH_ARG)) {
+        throw new InvalidOptionsException("Only one of password, password "
+          + "alias or path to a password file must be specified.");
+      }
+      out.setPasswordAlias(in.getOptionValue(PASSWORD_ALIAS_ARG));
+      if (!CredentialProviderHelper.isProviderAvailable()) {
         throw new InvalidOptionsException(
-          "Error while loading connection parameter file: "
-            + ex.getMessage());
+          "CredentialProvider facility not available in the hadoop "
+          + " environment used");
+      }
+      try {
+        out.setPassword(CredentialProviderHelper
+          .resolveAlias(out.getConf(), in.getOptionValue(PASSWORD_ALIAS_ARG)));
+      } catch (IOException ioe) {
+        throw (InvalidOptionsException)
+          new InvalidOptionsException("Unable to process alias")
+            .initCause(ioe);
       }
     }
   }

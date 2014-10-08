@@ -48,11 +48,13 @@ public class FilePasswordLoader extends PasswordLoader {
    */
   protected void verifyPath(FileSystem fs, Path path) throws IOException {
     if (!fs.exists(path)) {
-      throw new IOException("The password file does not exist! " + path);
+      throw new IOException("The provided password file " + path
+        + " does not exist!");
     }
 
     if (!fs.isFile(path)) {
-      throw new IOException("The password file cannot be a directory! " + path);
+      throw new IOException("The provided password file " + path
+        + " is a directory!");
     }
   }
 

@@ -63,6 +63,53 @@ $ sqoop import --connect jdbc:mysql://database.example.com/employees \
 Another way of supplying passwords is using the +-P+ argument which will
 read a password from a console prompt.
 
+.Protecting password from preying eyes
+Hadoop 2.6.0 provides an API to separate password storage from applications.
+This API is called the credential provided API and there is a new
++credential+  command line tool to manage passwords and their aliases.
+The passwords are stored with their aliases in a keystore that is password
+protected.   The keystore password can be the provided to a password prompt
+on the command line, via an environment variable or defaulted to a software
+defined constant.   Please check the Hadoop documentation on the usage
+of this facility.
+
+Once the password is stored using the Credential Provider facility and
+the Hadoop configuration has been suitably updated, all applications can
+optionally use the alias in place of the actual password and at runtime
+resolve the alias for the password to use.
+
+Since the keystore or similar technology used for storing the credential
+provider is shared across components, passwords for various applications,
+various database and other passwords can be securely stored in them and only
+the alias needs to be exposed in configuration files, protecting the password
+from being visible.
+
+Sqoop has been enhanced to allow usage of this funcionality if it is
+available in the underlying Hadoop version being used.   One new option
+has been introduced to provide the alias on the command line instead of the
+actual password (--password-alias).  The argument value this option is
+the alias on the storage associated with the actual password.
+Example usage is as follows:
+
+----
+$ sqoop import --connect jdbc:mysql://database.example.com/employees \
+    --username dbuser --password-alias mydb.password.alias
+----
+
+Similarly, if the command line option is not preferred, the alias can be saved
+in the file provided with --password-file option.  Along with this, the
+Sqoop configuration parameter org.apache.sqoop.credentials.loader.class
+should be set to the classname that provides the alias resolution:
++org.apache.sqoop.util.password.CredentialProviderPasswordLoader+
+
+Example usage is as follows (assuming .password.alias has the alias for
+the real password) :
+
+----
+$ sqoop import --connect jdbc:mysql://database.example.com/employees \
+    --username dbuser --password-file ${user.home}/.password-alias
+----
+
 .Non-secure way of passing password
 
 WARNING: The +\--password+ parameter is insecure, as other users may
