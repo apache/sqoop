@@ -26,17 +26,15 @@ using the code of built-in connector ( ``GenericJdbcConnector`` ) as example.
 What is Connector?
 ++++++++++++++++++
 
-Connector provides interaction with external databases.
-Connector reads data from databases for import,
-and write data to databases for export.
-Interaction with Hadoop is taken cared by common modules of Sqoop 2 framework.
+The connector provides the facilities to interact with external data sources.
+The connector can read from, or write to, a data source.
 
 When do we add a new connector?
 ===============================
 You add a new connector when you need to extract data from a new data source, or load
 data to a new target.
 In addition to the connector API, Sqoop 2 also has an engine interface.
-At the moment the only engine is MapReduce,but we may support additional engines in the future.
+At the moment the only engine is MapReduce, but we may support additional engines in the future.
 Since many parallel execution engines are capable of reading/writing data
 there may be a question of whether support for specific data stores should be done
 through a new connector or new engine.
@@ -51,57 +49,73 @@ Connector Implementation
 
 The ``SqoopConnector`` class defines functionality
 which must be provided by Connectors.
-Each Connector must extends ``SqoopConnector`` and overrides methods shown below.
+Each Connector must extend ``SqoopConnector`` and override the methods shown below.
 ::
 
   public abstract String getVersion();
   public abstract ResourceBundle getBundle(Locale locale);
-  public abstract Class getConnectionConfigurationClass();
-  public abstract Class getJobConfigurationClass(MJob.Type jobType);
-  public abstract Importer getImporter();
-  public abstract Exporter getExporter();
+  public abstract Class getLinkConfigurationClass();
+  public abstract Class getJobConfigurationClass(Direction direction);
+  public abstract From getFrom();
+  public abstract To getTo();
   public abstract Validator getValidator();
   public abstract MetadataUpgrader getMetadataUpgrader();
 
-The ``getImporter`` method returns Importer_ instance
-which is a placeholder for the modules needed for import.
+Connectors can optionally override the following methods:
+::
 
-The ``getExporter`` method returns Exporter_ instance
-which is a placeholder for the modules needed for export.
+  public List<Direction> getSupportedDirections();
+
+
+The ``getFrom`` method returns From_ instance
+which is a placeholder for the modules needed to read from a data source.
+
+The ``getTo`` method returns Exporter_ instance
+which is a placeholder for the modules needed to write to a data source.
 
 Methods such as ``getBundle`` , ``getConnectionConfigurationClass`` ,
 ``getJobConfigurationClass`` and ``getValidator``
 are concerned to `Connector configurations`_ .
 
-
-Importer
-========
-
-Connector's ``getImporter`` method returns ``Importer`` instance
-which is a placeholder for the modules needed for import
-such as Partitioner_ and Extractor_ .
-Built-in ``GenericJdbcConnector`` defines ``Importer`` like this.
+The ``getSupportedDirections`` method returns a list of directions
+that a connector supports. This should be some subset of:
 ::
 
-  private static final Importer IMPORTER = new Importer(
-      GenericJdbcImportInitializer.class,
-      GenericJdbcImportPartitioner.class,
-      GenericJdbcImportExtractor.class,
-      GenericJdbcImportDestroyer.class);
+  public List<Direction> getSupportedDirections() {
+      return Arrays.asList(new Direction[]{
+          Direction.FROM,
+          Direction.TO
+      });
+  }
+
+
+From
+====
+
+The connector's ``getFrom`` method returns ``From`` instance
+which is a placeholder for the modules needed for reading
+from a data source. Modules such as Partitioner_ and Extractor_ .
+The built-in ``GenericJdbcConnector`` defines ``From`` like this.
+::
+
+  private static final From FROM = new From(
+        GenericJdbcFromInitializer.class,
+        GenericJdbcPartitioner.class,
+        GenericJdbcExtractor.class,
+        GenericJdbcFromDestroyer.class);
   
   ...
   
   @Override
-  public Importer getImporter() {
-    return IMPORTER;
+  public From getFrom() {
+    return FROM;
   }
 
 
 Extractor
 ---------
 
-Extractor (E for ETL) extracts data from external database and
-writes it to Sqoop framework for import.
+Extractor (E for ETL) extracts data from external database.
 
 Extractor must overrides ``extract`` method.
 ::
@@ -114,7 +128,13 @@ Extractor must overrides ``extract`` method.
 The ``extract`` method extracts data from database in some way and
 writes it to ``DataWriter`` (provided by context) as `Intermediate representation`_ .
 
-Extractor must iterates in the ``extract`` method until the data from database exhausts.
+Extractors use Writer's provided by the ExtractorContext to send a record through the
+framework.
+::
+
+  context.getDataWriter().writeArrayRecord(array);
+
+The extractor must iterate through the entire dataset in the ``extract`` method.
 ::
 
   while (resultSet.next()) {
@@ -127,9 +147,9 @@ Extractor must iterates in the ``extract`` method until the data from database e
 Partitioner
 -----------
 
-Partitioner creates ``Partition`` instances based on configurations.
+The Partitioner creates ``Partition`` instances based on configurations.
 The number of ``Partition`` instances is decided
-based on the value users specified as the numbers of ectractors
+based on the value users specified as the numbers of extractors
 in job configuration.
 
 ``Partition`` instances are passed to Extractor_ as the argument of ``extract`` method.
@@ -157,35 +177,35 @@ for doing preparation such as adding dependent jar files.
 Destroyer is instantiated after MapReduce job is finished for clean up.
 
 
-Exporter
-========
+To
+==
 
-Connector's ``getExporter`` method returns ``Exporter`` instance
-which is a placeholder for the modules needed for export
-such as Loader_ .
-Built-in ``GenericJdbcConnector`` defines ``Exporter`` like this.
+The Connector's ``getTo`` method returns a ``To`` instance
+which is a placeholder for the modules needed for writing
+to a data source such as Loader_ .
+The built-in ``GenericJdbcConnector`` defines ``To`` like this.
 ::
 
-  private static final Exporter EXPORTER = new Exporter(
-      GenericJdbcExportInitializer.class,
-      GenericJdbcExportLoader.class,
-      GenericJdbcExportDestroyer.class);
+  private static final To TO = new To(
+        GenericJdbcToInitializer.class,
+        GenericJdbcLoader.class,
+        GenericJdbcToDestroyer.class);
   
   ...
   
   @Override
-  public Exporter getExporter() {
-    return EXPORTER;
+  public To getTo() {
+    return TO;
   }
 
 
 Loader
 ------
 
-Loader (L for ETL) receives data from Sqoop framework and
-loads it to external database.
+A loader (L for ETL) receives data from the Sqoop framework and
+loads it to an external database.
 
-Loader must overrides ``load`` method.
+Loaders must overrides ``load`` method.
 ::
 
   public abstract void load(LoaderContext context,
@@ -195,7 +215,7 @@ Loader must overrides ``load`` method.
 The ``load`` method reads data from ``DataReader`` (provided by context)
 in `Intermediate representation`_ and loads it to database in some way.
 
-Loader must iterates in the ``load`` method until the data from ``DataReader`` exhausts.
+Loader must iterate in the ``load`` method until the data from ``DataReader`` is exhausted.
 ::
 
   while ((array = context.getDataReader().readArrayRecord()) != null) {
@@ -218,7 +238,7 @@ Connector Configurations
 Connector specifications
 ========================
 
-Framework of the Sqoop loads definitions of connectors
+Sqoop loads definitions of connectors
 from the file named ``sqoopconnector.properties``
 which each connector implementation provides.
 ::
@@ -231,7 +251,7 @@ which each connector implementation provides.
 Configurations
 ==============
 
-Implementation of ``SqoopConnector`` overrides methods such as
+Implementations of ``SqoopConnector`` overrides methods such as
 ``getConnectionConfigurationClass`` and ``getJobConfigurationClass``
 returning configuration class.
 ::
@@ -242,12 +262,12 @@ returning configuration class.
   }
 
   @Override
-  public Class getJobConfigurationClass(MJob.Type jobType) {
-    switch (jobType) {
-      case IMPORT:
-        return ImportJobConfiguration.class;
-      case EXPORT:
-        return ExportJobConfiguration.class;
+  public Class getJobConfigurationClass(Direction direction) {
+    switch (direction) {
+      case FROM:
+        return FromJobConfiguration.class;
+      case TO:
+        return ToJobConfiguration.class;
       default:
         return null;
     }
@@ -260,7 +280,7 @@ Annotations such as
 are provided for defining configurations of each connectors
 using these models.
 
-``ConfigurationClass`` is place holder for ``FormClasses`` .
+``ConfigurationClass`` is a place holder for ``FormClasses`` .
 ::
 
   @ConfigurationClass
@@ -323,16 +343,12 @@ Validator validates configurations set by users.
 Internal of Sqoop2 MapReduce Job
 ++++++++++++++++++++++++++++++++
 
-Sqoop 2 provides common MapReduce modules such as ``SqoopMapper`` and ``SqoopReducer``
-for the both of import and export.
+Sqoop 2 provides common MapReduce modules such as ``SqoopMapper`` and ``SqoopReducer``.
 
-- For import, ``Extractor`` provided by connector extracts data from databases,
-  and ``Loader`` provided by Sqoop2 loads data into Hadoop.
+When reading from a data source, the ``Extractor`` provided by the FROM connector extracts data from a database,
+and the ``Loader``, provided by the TO connector, loads data into another database.
 
-- For export, ``Extractor`` provided by Sqoop2 exracts data from Hadoop,
-  and ``Loader`` provided by connector loads data into databases.
-
-The diagram below describes the initialization phase of IMPORT job.
+The diagram below describes the initialization phase of a job.
 ``SqoopInputFormat`` create splits using ``Partitioner`` .
 ::
 
@@ -351,8 +367,8 @@ The diagram below describes the initialization phase of IMPORT job.
               |-------------------------------------------------->|SqoopSplit|
               |                         |              |          `----+-----'
 
-The diagram below describes the map phase of IMPORT job.
-``SqoopMapper`` invokes extractor's ``extract`` method.
+The diagram below describes the map phase of a job.
+``SqoopMapper`` invokes FROM connector's extractor's ``extract`` method.
 ::
 
       ,-----------.
@@ -378,8 +394,8 @@ The diagram below describes the map phase of IMPORT job.
             |                     |                    |      context.write
             |                     |                    |-------------------------->
 
-The diagram below decribes the reduce phase of EXPORT job.
-``OutputFormat`` invokes loader's ``load`` method (via ``SqoopOutputFormatLoadExecutor`` ).
+The diagram below decribes the reduce phase of a job.
+``OutputFormat`` invokes TO connector's loader's ``load`` method (via ``SqoopOutputFormatLoadExecutor`` ).
 ::
 
     ,-------.  ,---------------------.

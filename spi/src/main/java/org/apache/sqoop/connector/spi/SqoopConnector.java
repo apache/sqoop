@@ -65,7 +65,7 @@ public abstract class SqoopConnector {
   /**
    * @return Get job configuration group class per direction type or null if not supported
    */
-  public abstract Class getJobConfigurationClass(Direction jobType);
+  public abstract Class getJobConfigurationClass(Direction direction);
 
   /**
    * @return an <tt>From</tt> that provides classes for performing import.

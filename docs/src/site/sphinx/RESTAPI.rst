@@ -418,7 +418,7 @@ So far, the resource contains only explanations for fields of forms. For example
         "name":"generic-jdbc-connector",
         "class":"org.apache.sqoop.connector.jdbc.GenericJdbcConnector",
         "job-forms":{
-          "IMPORT":[
+          "FROM":[
             {
               "id":2,
               "inputs":[
@@ -475,7 +475,7 @@ So far, the resource contains only explanations for fields of forms. For example
               "type":"CONNECTION"
             }
           ],
-          "EXPORT":[
+          "TO":[
             {
               "id":3,
               "inputs":[
@@ -624,35 +624,7 @@ the id of the form to track these parameter inputs.
     },
     "framework-version":"1",
     "job-forms":{
-      "IMPORT":[
-        {
-          "id":5,
-          "inputs":[
-            {
-              "id":18,
-              "values":"HDFS",
-              "name":"output.storageType",
-              "type":"ENUM",
-              "sensitive":false
-            },
-            {
-              "id":19,
-              "values":"TEXT_FILE,SEQUENCE_FILE",
-              "name":"output.outputFormat",
-              "type":"ENUM",
-              "sensitive":false
-            },
-            {
-              "id":20,
-              "name":"output.outputDirectory",
-              "type":"STRING",
-              "size":255,
-              "sensitive":false
-            }
-          ],
-          "name":"output",
-          "type":"CONNECTION"
-        },
+      "FROM":[
         {
           "id":6,
           "inputs":[
@@ -673,23 +645,9 @@ the id of the form to track these parameter inputs.
           "type":"CONNECTION"
         }
       ],
-      "EXPORT":[
+      "TO":[
         {
-          "id":7,
-          "inputs":[
-            {
-              "id":23,
-              "name":"input.inputDirectory",
-              "type":"STRING",
-              "size":255,
-              "sensitive":false
-            }
-          ],
-          "name":"input",
-          "type":"CONNECTION"
-        },
-        {
-          "id":8,
+          "id":1,
           "inputs":[
             {
               "id":24,
@@ -1272,7 +1230,7 @@ Provide the id of the job in the url [jid] part. If you provide ``all`` in the [
           }
         ],
         "connector-id":1,
-        "type":"IMPORT",
+        "type":"FROM",
         "framework":[
           {
             "id":5,

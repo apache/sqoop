@@ -329,14 +329,14 @@ Create new job object.
 +------------------------+------------------------------------------------------------------+
 | Argument               |  Description                                                     |
 +========================+==================================================================+
-| ``-x``, ``--xid <x>``  | Create new job object for connection with id ``<x>``             |
+| ``-f``, ``--from <x>`` | Create new job object with a FROM connection with id ``<x>``     |
 +------------------------+------------------------------------------------------------------+
-| ``-t``, ``--type <t>`` | Create new job object with type ``<t>`` (``import``, ``export``) |
+| ``-t``, ``--to <t>``   | Create new job object with a TO connection with id ``<x>``       |
 +------------------------+------------------------------------------------------------------+
 
 Example: ::
 
-  create job --xid 1
+  create job --from 1 --to 2
 
 Update Command
 --------------
