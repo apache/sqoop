@@ -33,13 +33,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManagerUtils;
 import org.apache.sqoop.model.MBooleanInput;
@@ -88,6 +91,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    */
   private static final String CONNECTOR_HDFS = "hdfs-connector";
 
+  private static final String LINK_HDFS = "hdfs-link";
+
   private JdbcRepositoryContext repoContext;
 
   /**
@@ -121,7 +126,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       // Register the job config type, since driver config is per job
       registerConfigs(null, null, mDriver.getDriverConfig().getConfigs(),
-        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt);
+        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
 
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014, mDriver.toString(), ex);
@@ -150,14 +155,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       // Register link type config
       registerConfigs(connectorId, null, mc.getLinkConfig().getConfigs(),
-        MConfigType.LINK.name(), baseConfigStmt, baseInputStmt);
+        MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
 
       // Register both from/to job type config
-      registerConfigs(connectorId, Direction.FROM, mc.getConfig(Direction.FROM).getConfigs(),
-        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt);
-      registerConfigs(connectorId, Direction.TO, mc.getConfig(Direction.TO).getConfigs(),
-        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt);
-
+      if (mc.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
+        registerConfigs(connectorId, Direction.FROM, mc.getConfig(Direction.FROM).getConfigs(),
+            MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
+      }
+      if (mc.getSupportedDirections().isDirectionSupported(Direction.TO)) {
+        registerConfigs(connectorId, Direction.TO, mc.getConfig(Direction.TO).getConfigs(),
+            MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
+      }
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
         mc.toString(), ex);
@@ -165,6 +173,34 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeStatements(baseConfigStmt, baseInputStmt);
     }
 
+  }
+
+  private void insertConnectorDirection(Long connectorId, Direction direction, Connection conn)
+      throws SQLException {
+    PreparedStatement stmt = null;
+
+    try {
+      stmt = conn.prepareStatement(STMT_INSERT_SQ_CONNECTOR_DIRECTIONS);
+      stmt.setLong(1, connectorId);
+      stmt.setLong(2, getDirection(direction, conn));
+
+      if (stmt.executeUpdate() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0049);
+      }
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  private void insertConnectorDirections(Long connectorId, SupportedDirections directions, Connection conn)
+      throws SQLException {
+    if (directions.isDirectionSupported(Direction.FROM)) {
+      insertConnectorDirection(connectorId, Direction.FROM, conn);
+    }
+
+    if (directions.isDirectionSupported(Direction.TO)) {
+      insertConnectorDirection(connectorId, Direction.TO, conn);
+    }
   }
 
   private long getConnectorId(MConnector mc, Connection conn) {
@@ -187,6 +223,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       if (!rsetConnectorId.next()) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
       }
+
+      insertConnectorDirections(rsetConnectorId.getLong(1),
+          mc.getSupportedDirections(), conn);
+
       return rsetConnectorId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
@@ -399,6 +439,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
     if(version <= 3) {
       // Schema modifications
+      runQuery(QUERY_CREATE_TABLE_SQ_DIRECTION, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK, conn);
@@ -411,6 +452,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         // Register HDFS connector
         updteJobInternals(conn, registerHdfsConnector(conn));
       }
+
+      // Change direction from VARCHAR to BIGINT + foreign key.
+      updateDirections(conn, insertDirections(conn));
 
       // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update data.
       // Data updates depend on knowledge of the type of job.
@@ -439,6 +483,110 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     } finally {
       closeResultSets(rs);
       closeStatements(stmt);
+    }
+  }
+
+  /**
+   * Insert directions: FROM and TO.
+   * @param conn
+   * @return Map<Direction, Long> direction ID => Direction
+   */
+  protected Map<Direction, Long> insertDirections(Connection conn) {
+    // Add directions
+    Map<Direction, Long> directionMap = new TreeMap<Direction, Long>();
+    PreparedStatement insertDirectionStmt = null;
+    try {
+      // Insert directions and get IDs.
+      for (Direction direction : Direction.values()) {
+        insertDirectionStmt = conn.prepareStatement(STMT_INSERT_DIRECTION, Statement.RETURN_GENERATED_KEYS);
+        insertDirectionStmt.setString(1, direction.toString());
+        if (insertDirectionStmt.executeUpdate() != 1) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0046, "Could not add directions FROM and TO.");
+        }
+
+        ResultSet directionId = insertDirectionStmt.getGeneratedKeys();
+        if (directionId.next()) {
+          if (LOG.isInfoEnabled()) {
+            LOG.info("Loaded direction: " + directionId.getLong(1));
+          }
+
+          directionMap.put(direction, directionId.getLong(1));
+        } else {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0047, "Could not get ID of direction " + direction);
+        }
+      }
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
+    } finally {
+      closeStatements(insertDirectionStmt);
+    }
+
+    return directionMap;
+  }
+
+  /**
+   * Add normalized M2M for SQ_CONNECTOR and SQ_CONFIG for Direction.
+   * 1. Remember all ID => direction for configs.
+   * 2. Drop SQF_DIRECTION (varhchar).
+   * 3. Add new M2M tables for SQ_CONNECTOR and SQ_CONFIG.
+   * 4. Add directions via updating SQ_CONFIG with proper Direction IDs.
+   * 5. Make sure all connectors have all supported directions.
+   * @param conn
+   */
+  protected void updateDirections(Connection conn, Map<Direction, Long> directionMap) {
+    // Remember directions
+    Statement fetchFormsStmt = null,
+              fetchConnectorsStmt = null;
+    List<Long> connectorIds = new LinkedList<Long>();
+    List<Long> configIds = new LinkedList<Long>();
+    List<String> directions = new LinkedList<String>();
+    try {
+      fetchFormsStmt = conn.createStatement();
+      ResultSet rs = fetchFormsStmt.executeQuery(STMT_FETCH_CONFIG_DIRECTIONS);
+      while (rs.next()) {
+        configIds.add(rs.getLong(1));
+        directions.add(rs.getString(2));
+      }
+      rs.close();
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
+    } finally {
+      closeStatements(fetchFormsStmt);
+    }
+
+    // Change Schema
+    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR, conn);
+    runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS, conn);
+    runQuery(QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS, conn);
+
+    // Add directions back
+    while (!configIds.isEmpty() && !directions.isEmpty()) {
+      Long configId = configIds.remove(0);
+      String directionString = directions.remove(0);
+      if (directionString != null && !directionString.isEmpty()) {
+        Direction direction = Direction.valueOf(directionString);
+        runQuery(STMT_INSERT_SQ_CONFIG_DIRECTIONS, conn, configId, directionMap.get(direction));
+      }
+    }
+
+    // Add connector directions
+    try {
+      fetchConnectorsStmt = conn.createStatement();
+      ResultSet rs = fetchConnectorsStmt.executeQuery(STMT_SELECT_CONNECTOR_ALL);
+      while (rs.next()) {
+        connectorIds.add(rs.getLong(1));
+      }
+      rs.close();
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
+    } finally {
+      closeStatements(fetchConnectorsStmt);
+    }
+
+    for (Long connectorId : connectorIds) {
+      for (Long directionId : directionMap.values()) {
+        runQuery(STMT_INSERT_SQ_CONNECTOR_DIRECTIONS, conn, connectorId, directionId);
+      }
     }
   }
 
@@ -509,13 +657,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_DRIVER_INDEX, conn,
         new Long(0), "throttling");
 
-    MLink hdfsLink = createHdfsLink(conn);
+    Long linkId = createHdfsLink(conn, connectorId);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK_COPY_SQB_FROM_LINK, conn,
         "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_LINK, conn,
-        new Long(hdfsLink.getPersistenceId()), "EXPORT");
+        new Long(linkId), "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK, conn,
-        new Long(hdfsLink.getPersistenceId()), "IMPORT");
+        new Long(linkId), "IMPORT");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_NAME, conn,
         "fromJobConfig", "table", Direction.FROM.toString());
@@ -556,7 +704,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
         try {
           PreparedStatement baseConnectorStmt = conn.prepareStatement(
-              STMT_INSERT_CONNECTOR_BASE,
+              STMT_INSERT_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
               Statement.RETURN_GENERATED_KEYS);
           baseConnectorStmt.setString(1, handler.getMetadata().getUniqueName());
           baseConnectorStmt.setString(2, handler.getMetadata().getClassName());
@@ -588,22 +736,46 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    * NOTE: Upgrade path only!
    */
-  private MLink createHdfsLink(Connection conn) {
+  private Long createHdfsLink(Connection conn, Long connectorId) {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Creating HDFS link.");
     }
 
-    MConnector hdfsConnector = this.findConnector(CONNECTOR_HDFS, conn);
-    MLink hdfsLink = new MLink(
-        hdfsConnector.getPersistenceId(),
-        hdfsConnector.getLinkConfig());
-    this.createLink(hdfsLink, conn);
+    PreparedStatement stmt = null;
+    int result;
+    try {
+      stmt = conn.prepareStatement(STMT_INSERT_LINK,
+          Statement.RETURN_GENERATED_KEYS);
+      stmt.setString(1, LINK_HDFS);
+      stmt.setLong(2, connectorId);
+      stmt.setBoolean(3, true);
+      stmt.setNull(4, Types.VARCHAR);
+      stmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+      stmt.setNull(6, Types.VARCHAR);
+      stmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Created HDFS link.");
+      result = stmt.executeUpdate();
+      if (result != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0012,
+            Integer.toString(result));
+      }
+
+      ResultSet rsetConnectionId = stmt.getGeneratedKeys();
+
+      if (!rsetConnectionId.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Created HDFS link.");
+      }
+
+      return rsetConnectionId.getLong(1);
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0019, ex);
+    } finally {
+      closeStatements(stmt);
     }
-
-    return hdfsLink;
   }
 
   /**
@@ -695,7 +867,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       // Register a driver config as a job type with no owner/connector and direction
       registerConfigs(null/* owner*/, null /*direction*/, mDriver.getDriverConfig().getConfigs(),
-        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt);
+        MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
 
       // We're using hardcoded value for driver config as they are
       // represented as NULL in the database.
@@ -1744,13 +1916,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       Counters counters = new Counters();
 
-      while(rs.next()) {
+      while (rs.next()) {
         String groupName = rs.getString(1);
         String counterName = rs.getString(2);
         long value = rs.getLong(3);
 
         CounterGroup group = counters.getCounterGroup(groupName);
-        if(group == null) {
+        if (group == null) {
           group = new CounterGroup(groupName);
           counters.addCounterGroup(group);
         }
@@ -1758,7 +1930,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         group.addCounter(new Counter(counterName, value));
       }
 
-      if(counters.isEmpty()) {
+      if (counters.isEmpty()) {
         return null;
       } else {
         return counters;
@@ -1769,7 +1941,83 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
-  private List<MConnector> loadConnectors(PreparedStatement stmt,Connection conn) throws SQLException {
+  private Long getDirection(Direction direction, Connection conn) throws SQLException {
+    PreparedStatement directionStmt = null;
+    ResultSet rs = null;
+
+    try {
+      directionStmt = conn.prepareStatement(STMT_SELECT_SQD_ID_BY_SQD_NAME);
+      directionStmt.setString(1, direction.toString());
+      rs = directionStmt.executeQuery();
+
+      rs.next();
+      return rs.getLong(1);
+    } finally {
+      if (rs != null) {
+        closeResultSets(rs);
+      }
+      if (directionStmt != null) {
+        closeStatements(directionStmt);
+      }
+    }
+  }
+
+  private Direction getDirection(long directionId, Connection conn) throws SQLException {
+    PreparedStatement directionStmt = null;
+    ResultSet rs = null;
+
+    try {
+      directionStmt = conn.prepareStatement(STMT_SELECT_SQD_NAME_BY_SQD_ID);
+      directionStmt.setLong(1, directionId);
+      rs = directionStmt.executeQuery();
+
+      rs.next();
+      return Direction.valueOf(rs.getString(1));
+    } finally {
+      if (rs != null) {
+        closeResultSets(rs);
+      }
+      if (directionStmt != null) {
+        closeStatements(directionStmt);
+      }
+    }
+  }
+
+  private SupportedDirections findConnectorSupportedDirections(long connectorId, Connection conn) throws SQLException {
+    PreparedStatement connectorDirectionsStmt = null;
+    ResultSet rs = null;
+
+    boolean from = false, to = false;
+
+    try {
+      connectorDirectionsStmt = conn.prepareStatement(STMT_SELECT_SQ_CONNECTOR_DIRECTIONS);
+      connectorDirectionsStmt.setLong(1, connectorId);
+      rs = connectorDirectionsStmt.executeQuery();
+
+      while(rs.next()) {
+        switch(getDirection(rs.getLong(2), conn)) {
+          case FROM:
+            from = true;
+            break;
+
+          case TO:
+            to = true;
+            break;
+        }
+      }
+    } finally {
+      if (rs != null) {
+        closeResultSets(rs);
+      }
+      if (connectorDirectionsStmt != null) {
+        closeStatements(connectorDirectionsStmt);
+      }
+    }
+
+    return new SupportedDirections(from, to);
+  }
+
+  private List<MConnector> loadConnectors(PreparedStatement stmt, Connection conn) throws SQLException {
     List<MConnector> connectors = new ArrayList<MConnector>();
     ResultSet rsConnectors = null;
     PreparedStatement connectorConfigFetchStmt = null;
@@ -1792,13 +2040,21 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConfig = new ArrayList<MConfig>();
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
-        loadConfigTypes(linkConfig, fromConfig, toConfig,
-            connectorConfigFetchStmt, connectorConfigInputFetchStmt, 1);
+        loadConfigTypes(linkConfig, fromConfig, toConfig, connectorConfigFetchStmt,
+            connectorConfigInputFetchStmt, 1, conn);
 
+        SupportedDirections supportedDirections
+            = findConnectorSupportedDirections(connectorId, conn);
+        MFromConfig fromJobConfig = null;
+        MToConfig toJobConfig = null;
+        if (supportedDirections.isDirectionSupported(Direction.FROM)) {
+          fromJobConfig = new MFromConfig(fromConfig);
+        }
+        if (supportedDirections.isDirectionSupported(Direction.TO)) {
+          toJobConfig = new MToConfig(toConfig);
+        }
         MConnector mc = new MConnector(connectorName, connectorClassName, connectorVersion,
-                                       new MLinkConfig(linkConfig),
-                                       new MFromConfig(fromConfig),
-                                       new MToConfig(toConfig));
+                                       new MLinkConfig(linkConfig), fromJobConfig, toJobConfig);
         mc.setPersistenceId(connectorId);
 
         connectors.add(mc);
@@ -1845,7 +2101,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
         loadConfigTypes(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
-            connectorConfigInputStatement, 2);
+            connectorConfigInputStatement, 2, conn);
         MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig));
 
         link.setPersistenceId(id);
@@ -1911,7 +2167,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConnectorToJobConfig = new ArrayList<MConfig>();
 
         loadConfigTypes(fromConnectorLinkConfig, fromConnectorFromJobConfig, fromConnectorToJobConfig,
-            fromConfigFetchStmt, jobInputFetchStmt, 2);
+            fromConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
         // TO entity configs
         List<MConfig> toConnectorLinkConfig = new ArrayList<MConfig>();
@@ -1922,7 +2178,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> driverConfig = new ArrayList<MConfig>();
 
         loadConfigTypes(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
-            toConfigFetchStmt, jobInputFetchStmt, 2);
+            toConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2);
 
@@ -1951,6 +2207,21 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     return jobs;
   }
 
+  private void registerConfigDirection(Long configId, Direction direction, Connection conn)
+      throws SQLException {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_INSERT_SQ_CONFIG_DIRECTIONS);
+      stmt.setLong(1, configId);
+      stmt.setLong(2, getDirection(direction, conn));
+      if (stmt.executeUpdate() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0048);
+      }
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
   /**
    * Register configs in derby database. This method will insert the ids
    * generated by the repository into the configs passed in itself.
@@ -1962,12 +2233,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param type
    * @param baseConfigStmt
    * @param baseInputStmt
+   * @param conn
    * @return short number of configs registered.
    * @throws SQLException
    */
   private short registerConfigs(Long connectorId, Direction direction,
       List<MConfig> configs, String type, PreparedStatement baseConfigStmt,
-      PreparedStatement baseInputStmt)
+      PreparedStatement baseInputStmt, Connection conn)
           throws SQLException {
     short configIndex = 0;
 
@@ -1977,14 +2249,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       } else {
         baseConfigStmt.setLong(1, connectorId);
       }
-      if(direction == null) {
-        baseConfigStmt.setNull(2, Types.VARCHAR);
-      } else {
-        baseConfigStmt.setString(2, direction.name());
-      }
-      baseConfigStmt.setString(3, config.getName());
-      baseConfigStmt.setString(4, type);
-      baseConfigStmt.setShort(5, configIndex++);
+
+      baseConfigStmt.setString(2, config.getName());
+      baseConfigStmt.setString(3, type);
+      baseConfigStmt.setShort(4, configIndex++);
 
       int baseConfigCount = baseConfigStmt.executeUpdate();
       if (baseConfigCount != 1) {
@@ -1998,6 +2266,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       long configId = rsetConfigId.getLong(1);
       config.setPersistenceId(configId);
+
+      if (direction != null) {
+        registerConfigDirection(configId, direction, conn);
+      }
 
       // Insert all the inputs
       List<MInput<?>> inputs = config.getInputs();
@@ -2071,7 +2343,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         } else if (args[i] instanceof Long) {
           stmt.setLong(i + 1, (Long) args[i]);
         } else {
-          stmt.setObject(i, args[i]);
+          stmt.setObject(i + 1, args[i]);
         }
       }
 
@@ -2115,9 +2387,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     while (rsetConfig.next()) {
       long configId = rsetConfig.getLong(1);
       Long fromConnectorId = rsetConfig.getLong(2);
-      String configName = rsetConfig.getString(4);
-      String configTYpe = rsetConfig.getString(5);
-      int configIndex = rsetConfig.getInt(6);
+      String configName = rsetConfig.getString(3);
+      String configTYpe = rsetConfig.getString(4);
+      int configIndex = rsetConfig.getInt(5);
       List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
       MConfig mDriverConfig = new MConfig(configName, configInputs);
@@ -2211,6 +2483,26 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  private Direction findConfigDirection(long configId, Connection conn) throws SQLException {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_SQ_CONFIG_DIRECTIONS);
+      stmt.setLong(1, configId);
+      rs = stmt.executeQuery();
+      rs.next();
+      return getDirection(rs.getLong(2), conn);
+    } finally {
+      if (rs != null) {
+        closeResultSets(rs);
+      }
+      if (stmt != null) {
+        closeStatements(stmt);
+      }
+    }
+  }
+
   /**
    * Load configs and corresponding inputs from Derby database.
    *
@@ -2222,21 +2514,21 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param toConfig TO job configs that will be filled up
    * @param configFetchStmt Prepared statement for fetching configs
    * @param inputFetchStmt Prepare statement for fetching inputs
+   * @param conn Connection object that is used to find config direction.
    * @throws SQLException In case of any failure on Derby side
    */
   public void loadConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig,
       List<MConfig> toConfig, PreparedStatement configFetchStmt, PreparedStatement inputFetchStmt,
-      int configPosition) throws SQLException {
+      int configPosition, Connection conn) throws SQLException {
 
     // Get list of structures from database
     ResultSet rsetConfig = configFetchStmt.executeQuery();
     while (rsetConfig.next()) {
       long configId = rsetConfig.getLong(1);
       Long configConnectorId = rsetConfig.getLong(2);
-      String operation = rsetConfig.getString(3);
-      String configName = rsetConfig.getString(4);
-      String configType = rsetConfig.getString(5);
-      int configIndex = rsetConfig.getInt(6);
+      String configName = rsetConfig.getString(3);
+      String configType = rsetConfig.getString(4);
+      int configIndex = rsetConfig.getInt(5);
       List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
       MConfig config = new MConfig(configName, configInputs);
@@ -2324,7 +2616,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           linkConfig.add(config);
           break;
         case JOB:
-          Direction type = Direction.valueOf(operation);
+          Direction type = findConfigDirection(configId, conn);
           List<MConfig> jobConfigs;
           switch(type) {
             case FROM:

@@ -52,4 +52,23 @@ public class TestSupportedDirections {
     Assert.assertFalse(
         supportedDirections.isDirectionSupported(Direction.TO));
   }
+
+  @Test
+  public void testToString() {
+    // Both
+    SupportedDirections supportedDirections = new SupportedDirections(true, true);
+    Assert.assertEquals("FROM/TO", supportedDirections.toString());
+
+    // FROM
+    supportedDirections = new SupportedDirections(true, false);
+    Assert.assertEquals("FROM", supportedDirections.toString());
+
+    // TO
+    supportedDirections = new SupportedDirections(false, true);
+    Assert.assertEquals("TO", supportedDirections.toString());
+
+    // NONE
+    supportedDirections = new SupportedDirections(false, false);
+    Assert.assertEquals("", supportedDirections.toString());
+  }
 }

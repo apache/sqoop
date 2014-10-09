@@ -41,6 +41,17 @@ public final class DerbySchemaConstants {
 
   public static final String COLUMN_SQM_VALUE = "SQM_VALUE";
 
+  // SQ_DIRECTION
+
+  public static final String TABLE_SQ_DIRECTION_NAME = "SQ_DIRECTION";
+
+  public static final String TABLE_SQ_DIRECTION = SCHEMA_PREFIX
+      + TABLE_SQ_DIRECTION_NAME;
+
+  public static final String COLUMN_SQD_ID = "SQD_ID";
+
+  public static final String COLUMN_SQD_NAME = "SQD_NAME";
+
   // SQ_CONNECTOR
 
   public static final String TABLE_SQ_CONNECTOR_NAME = "SQ_CONNECTOR";
@@ -55,6 +66,27 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQC_CLASS = "SQC_CLASS";
 
   public static final String COLUMN_SQC_VERSION = "SQC_VERSION";
+
+  // SQ_CONNECTOR_DIRECTIONS
+
+  public static final String TABLE_SQ_CONNECTOR_DIRECTIONS_NAME = "SQ_CONNECTOR_DIRECTIONS";
+
+  public static final String TABLE_SQ_CONNECTOR_DIRECTIONS = SCHEMA_PREFIX
+      + TABLE_SQ_CONNECTOR_DIRECTIONS_NAME;
+
+  public static final String COLUMN_SQCD_ID = "SQCD_ID";
+
+  public static final String COLUMN_SQCD_CONNECTOR = "SQCD_CONNECTOR";
+
+  public static final String COLUMN_SQCD_DIRECTION = "SQCD_DIRECTION";
+
+  public static final String CONSTRAINT_SQCD_SQC_NAME = CONSTRAINT_PREFIX + "SQCD_SQC";
+
+  public static final String CONSTRAINT_SQCD_SQC = SCHEMA_PREFIX + CONSTRAINT_SQCD_SQC_NAME;
+
+  public static final String CONSTRAINT_SQCD_SQD_NAME = CONSTRAINT_PREFIX + "SQCD_SQD";
+
+  public static final String CONSTRAINT_SQCD_SQD = SCHEMA_PREFIX + CONSTRAINT_SQCD_SQD_NAME;
 
   // SQ_CONFIG
 
@@ -80,6 +112,27 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQ_CFG_SQC_NAME = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
 
   public static final String CONSTRAINT_SQ_CFG_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_SQC_NAME;
+
+  // SQ_CONFIG_DIRECTIONS
+
+  public static final String TABLE_SQ_CONFIG_DIRECTIONS_NAME = "SQ_CONFIG_DIRECTIONS";
+
+  public static final String TABLE_SQ_CONFIG_DIRECTIONS = SCHEMA_PREFIX
+      + TABLE_SQ_CONFIG_DIRECTIONS_NAME;
+
+  public static final String COLUMN_SQ_CFG_DIR_ID = "SQ_CFG_DIR_ID";
+
+  public static final String COLUMN_SQ_CFG_DIR_CONFIG = "SQ_CFG_DIR_CONFIG";
+
+  public static final String COLUMN_SQ_CFG_DIR_DIRECTION = "SQ_CFG_DIR_DIRECTION";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_CONFIG_NAME = CONSTRAINT_PREFIX + "SQ_CFG_DIR_CONFIG";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_CONFIG = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_DIR_CONFIG_NAME;
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_DIRECTION_NAME = CONSTRAINT_PREFIX + "SQ_CFG_DIR_DIRECTION";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_DIRECTION = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_DIR_DIRECTION_NAME;
 
   // SQ_INPUT
 

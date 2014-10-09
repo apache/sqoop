@@ -19,10 +19,13 @@ package org.apache.sqoop.repository.derby;
 
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_SCHEMA_SQOOP;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONFIG;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONNECTOR;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER_GROUP;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_DIRECTION;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_INPUT;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_JOB;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_JOB_INPUT;
@@ -31,6 +34,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TA
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_SUBMISSION;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_CREATE_TABLE_SQ_SYSTEM;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK;
@@ -47,6 +51,8 @@ import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_T
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER;
 import static org.apache.sqoop.repository.derby.DerbySchemaQuery.QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER;
+import static org.apache.sqoop.repository.derby.DerbySchemaQuery.STMT_INSERT_DIRECTION;
+
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
@@ -147,6 +153,7 @@ abstract public class DerbyTestCase {
     }
 
     if (version > 3) {
+      runQuery(QUERY_CREATE_TABLE_SQ_DIRECTION);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK);
@@ -156,6 +163,13 @@ abstract public class DerbyTestCase {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME);
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS);
+
+      for (Direction direction : Direction.values()) {
+        runQuery(STMT_INSERT_DIRECTION, direction.toString());
+      }
     }
 
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '"  + version + "')");
@@ -194,6 +208,42 @@ abstract public class DerbyTestCase {
         stmt.close();
       }
     }
+  }
+
+  /**
+   * Run single, arbitrary insert query on derby memory repository.
+   *
+   * @param query Query to execute
+   * @return Long id of newly inserted row (-1 if none).
+   * @throws Exception
+   */
+  protected Long runInsertQuery(String query, Object... args) throws Exception {
+    PreparedStatement stmt = null;
+    try {
+      stmt = getDerbyDatabaseConnection().prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i] instanceof String) {
+          stmt.setString(i + 1, (String)args[i]);
+        } else if (args[i] instanceof Long) {
+          stmt.setLong(i + 1, (Long)args[i]);
+        } else {
+          stmt.setString(i + 1, args[i].toString());
+        }
+      }
+
+      if (!stmt.execute()) {
+        ResultSet rs = stmt.getGeneratedKeys();
+        rs.next();
+        return rs.getLong(1);
+      }
+    } finally {
+      if (stmt != null) {
+        stmt.close();
+      }
+    }
+
+    return -1L;
   }
 
   protected Connection getDerbyDatabaseConnection() {
@@ -291,54 +341,59 @@ abstract public class DerbyTestCase {
   }
 
   protected void loadConnectorAndDriverConfigVersion4() throws Exception {
+    Long configId;
+
     // Connector entry
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
         + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
 
     for (String connector : new String[]{"1"}) {
+      // Directions
+      runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS(SQCD_CONNECTOR, SQCD_DIRECTION)"
+          + "VALUES(" + connector + ", 1)");
+      runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS(SQCD_CONNECTOR, SQCD_DIRECTION)"
+          + "VALUES(" + connector + ", 2)");
+
       // connector configs
-      for (String direction : new String[]{"null", "'FROM'", "'TO'"}) {
+      for (String direction : new String[]{null, "1", "2"}) {
 
         String type;
-        if (direction.equals("null")) {
+        if (direction == null) {
           type = "LINK";
         } else {
           type = "JOB";
         }
 
-        runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-            + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-            + "VALUES("
-            + connector + ", "
-            + direction
-            + ", 'C1', '"
-            + type
-            + "', 0)");
-        runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-            + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-            + "VALUES("
-            + connector + ", "
-            + direction
-            + ", 'C2', '"
-            + type
-            + "', 1)");
+        configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+            + "(SQ_CFG_OWNER, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+            + "VALUES(" + connector + ", 'C1', '" + type + "', 0)");
+
+        if (direction != null) {
+          runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG_DIRECTIONS"
+              + "(SQ_CFG_DIR_CONFIG, SQ_CFG_DIR_DIRECTION) "
+              + "VALUES(" + configId + ", " + direction + ")");
+        }
+
+        configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+            + "(SQ_CFG_OWNER, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+            + "VALUES(" + connector + ", 'C2', '" + type + "', 1)");
+
+        if (direction != null) {
+          runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG_DIRECTIONS"
+              + "(SQ_CFG_DIR_CONFIG, SQ_CFG_DIR_DIRECTION) "
+              + "VALUES(" + configId + ", " + direction + ")");
+        }
       }
     }
 
     // driver config
     for (String type : new String[]{"JOB"}) {
       runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-          + "VALUES(NULL, NULL"
-          + ", 'C1', '"
-          + type
-          + "', 0)");
+          + "(SQ_CFG_OWNER, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+          + "VALUES(NULL" + ", 'C1', '" + type + "', 0)");
       runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_OWNER, SQ_CFG_DIRECTION, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-          + "VALUES(NULL, NULL"
-          + ", 'C2', '"
-          + type
-          + "', 1)");
+          + "(SQ_CFG_OWNER, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+          + "VALUES(NULL" + ", 'C2', '" + type + "', 1)");
     }
 
     // Input entries
@@ -512,8 +567,10 @@ abstract public class DerbyTestCase {
    */
   public void addConnector() throws Exception {
     // Connector entry
-    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
-            + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test')");
+    Long connectorId = runInsertQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+        + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test')");
+    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES (" + connectorId + ", 1)");
+    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES (" + connectorId + ", 2)");
   }
 
   /**
@@ -560,8 +617,20 @@ abstract public class DerbyTestCase {
   }
 
   protected MConnector getConnector() {
+    return getConnector(true, true);
+  }
+
+  protected MConnector getConnector(boolean from, boolean to) {
+    MFromConfig fromJobForms = null;
+    MToConfig toJobForms = null;
+    if (from) {
+      fromJobForms = getFromConfig();
+    }
+    if (to) {
+      toJobForms = getToConfig();
+    }
     return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test",
-      getLinkConfig(), getFromConfig(), getToConfig());
+      getLinkConfig(), fromJobForms, toJobForms);
   }
   
   protected MDriver getDriver() {

@@ -35,7 +35,6 @@ import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
 
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction {
-  private static final char SUPPORTED_DIRECTIONS_SEPARATOR = '/';
 
   @SuppressWarnings("static-access")
   public ShowConnectorFunction() {
@@ -83,7 +82,7 @@ public class ShowConnectorFunction extends SqoopFunction {
       uniqueNames.add(connector.getUniqueName());
       versions.add(connector.getVersion());
       classes.add(connector.getClassName());
-      supportedDirections.add(getSupportedDirections(connector));
+      supportedDirections.add(connector.getSupportedDirections().toString());
     }
 
     TableDisplayer.display(header, ids, uniqueNames, versions, classes, supportedDirections);
@@ -113,33 +112,8 @@ public class ShowConnectorFunction extends SqoopFunction {
       connector.getUniqueName(),
       connector.getClassName(),
       connector.getVersion(),
-      getSupportedDirections(connector)
+      connector.getSupportedDirections().toString()
     );
     displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getPersistenceId()));
-  }
-
-  /**
-   * Creates a nicely formatted string for which directions are supported.
-   * Example: FROM/TO.
-   * @param connector
-   * @return String
-   */
-  private String getSupportedDirections(MConnector connector) {
-    StringBuffer supportedDirectionsBuffer = new StringBuffer();
-    SupportedDirections supportedDirections
-        = connector.getSupportedDirections();
-
-    if (supportedDirections.isDirectionSupported(Direction.FROM)) {
-      supportedDirectionsBuffer.append(Direction.FROM);
-
-      if (supportedDirections.isDirectionSupported(Direction.TO)) {
-        supportedDirectionsBuffer.append(SUPPORTED_DIRECTIONS_SEPARATOR);
-        supportedDirectionsBuffer.append(Direction.TO);
-      }
-    } else if (supportedDirections.isDirectionSupported(Direction.TO)) {
-      supportedDirectionsBuffer.append(Direction.TO);
-    }
-
-    return supportedDirectionsBuffer.toString();
   }
 }

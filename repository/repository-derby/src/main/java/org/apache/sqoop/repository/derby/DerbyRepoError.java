@@ -181,6 +181,14 @@ public enum DerbyRepoError implements ErrorCode {
   DERBYREPO_0044("Update of driver config failed"),
 
   DERBYREPO_0045("Can't retrieve all connectors"),
+
+  DERBYREPO_0046("Could not add directions"),
+
+  DERBYREPO_0047("Could not get ID of recently added direction"),
+
+  DERBYREPO_0048("Could not register config direction"),
+
+  DERBYREPO_0049("Could not set connector direction")
             ;
 
   private final String message;

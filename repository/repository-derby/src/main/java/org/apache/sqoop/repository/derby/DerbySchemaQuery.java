@@ -35,31 +35,65 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * </pre>
  * </p>
  * <p>
+ * <strong>SQ_DIRECTION</strong>: Directions.
+ * <pre>
+ *    +---------------------------------------+
+ *    | SQ_DIRECTION                          |
+ *    +---------------------------------------+
+ *    | SQD_ID: BIGINT PK AUTO-GEN            |
+ *    | SQD_NAME: VARCHAR(64)                 | "FROM"|"TO"
+ *    +---------------------------------------+
+ * </pre>
+ * </p>
+ * <p>
  * <strong>SQ_CONNECTOR</strong>: Connector registration.
  * <pre>
- *    +----------------------------+
- *    | SQ_CONNECTOR               |
- *    +----------------------------+
- *    | SQC_ID: BIGINT PK AUTO-GEN |
- *    | SQC_NAME: VARCHAR(64)      |
- *    | SQC_CLASS: VARCHAR(255)    |
- *    | SQC_VERSION: VARCHAR(64)   |
- *    +----------------------------+
+ *    +-----------------------------+
+ *    | SQ_CONNECTOR                |
+ *    +-----------------------------+
+ *    | SQC_ID: BIGINT PK AUTO-GEN  |
+ *    | SQC_NAME: VARCHAR(64)       |
+ *    | SQC_CLASS: VARCHAR(255)     |
+ *    | SQC_VERSION: VARCHAR(64)    |
+ *    +-----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_CONNECTOR_DIRECTIONS</strong>: Connector directions.
+ * <pre>
+ *    +------------------------------+
+ *    | SQ_CONNECTOR_DIRECTIONS      |
+ *    +------------------------------+
+ *    | SQCD_ID: BIGINT PK AUTO-GEN  |
+ *    | SQCD_CONNECTOR: BIGINT       | FK SQCD_CONNECTOR(SQC_ID)
+ *    | SQCD_DIRECTION: BIGINT       | FK SQCD_DIRECTION(SQD_ID)
+ *    +------------------------------+
  * </pre>
  * </p>
  * <p>
  * <strong>SQ_CONFIG</strong>: Config details.
  * <pre>
- *    +----------------------------------+
- *    | SQ_CONFIG                          |
- *    +----------------------------------+
+ *    +-------------------------------------+
+ *    | SQ_CONFIG                           |
+ *    +-------------------------------------+
  *    | SQ_CFG_ID: BIGINT PK AUTO-GEN       |
  *    | SQ_CFG_OWNER: BIGINT                | FK SQ_CFG_OWNER(SQC_ID),NULL for driver
- *    | SQ_CFG_DIRECTION: VARCHAR(32)       | "FROM"|"TO"|NULL
  *    | SQ_CFG_NAME: VARCHAR(64)            |
  *    | SQ_CFG_TYPE: VARCHAR(32)            | "LINK"|"JOB"
  *    | SQ_CFG_INDEX: SMALLINT              |
- *    +----------------------------------+
+ *    +-------------------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_CONFIG_DIRECTIONS</strong>: Connector directions.
+ * <pre>
+ *    +------------------------------+
+ *    | SQ_CONNECTOR_DIRECTIONS      |
+ *    +------------------------------+
+ *    | SQCD_ID: BIGINT PK AUTO-GEN  |
+ *    | SQCD_CONFIG: BIGINT          | FK SQCD_CONFIG(SQ_CFG_ID)
+ *    | SQCD_DIRECTION: BIGINT       | FK SQCD_DIRECTION(SQD_ID)
+ *    +------------------------------+
  * </pre>
  * </p>
  * <p>
@@ -118,11 +152,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <strong>SQ_LINK_INPUT</strong>: N:M relationship link and input
  * <pre>
  *    +----------------------------+
- *    | SQ_LINK_INPUT        |
+ *    | SQ_LINK_INPUT              |
  *    +----------------------------+
- *    | SQ_LNKI_LINK: BIGINT PK | FK SQ_LINK(SQ_LNK_ID)
- *    | SQ_LNKI_INPUT: BIGINT PK      | FK SQ_INPUT(SQI_ID)
- *    | SQ_LNKI_VALUE: LONG VARCHAR   |
+ *    | SQ_LNKI_LINK: BIGINT PK    | FK SQ_LINK(SQ_LNK_ID)
+ *    | SQ_LNKI_INPUT: BIGINT PK   | FK SQ_INPUT(SQI_ID)
+ *    | SQ_LNKI_VALUE: LONG VARCHAR|
  *    +----------------------------+
  * </pre>
  * </p>
@@ -212,6 +246,13 @@ public final class DerbySchemaQuery {
     + COLUMN_SQM_VALUE + " VARCHAR(64) "
     + ")";
 
+  // DDL: Create table SQ_DIRECTION
+  public static final String QUERY_CREATE_TABLE_SQ_DIRECTION =
+      "CREATE TABLE " + TABLE_SQ_DIRECTION + " ("
+      + COLUMN_SQD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQD_NAME + " VARCHAR(64)"
+      + ")";
+
   // DDL: Create table SQ_CONNECTOR
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
       "CREATE TABLE " + TABLE_SQ_CONNECTOR + " ("
@@ -219,6 +260,20 @@ public final class DerbySchemaQuery {
       + COLUMN_SQC_NAME + " VARCHAR(64), "
       + COLUMN_SQC_CLASS + " VARCHAR(255), "
       + COLUMN_SQC_VERSION + " VARCHAR(64) "
+      + ")";
+
+  // DDL: Create table SQ_CONNECTOR_DIRECTIONS
+  public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS =
+      "CREATE TABLE " + TABLE_SQ_CONNECTOR_DIRECTIONS + " ("
+      + COLUMN_SQCD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQCD_CONNECTOR + " BIGINT, "
+      + COLUMN_SQCD_DIRECTION + " BIGINT, "
+      + "CONSTRAINT " + CONSTRAINT_SQCD_SQC + " "
+        + "FOREIGN KEY (" + COLUMN_SQCD_CONNECTOR + ") "
+          + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + "), "
+      + "CONSTRAINT " + CONSTRAINT_SQCD_SQD + " "
+        + "FOREIGN KEY (" + COLUMN_SQCD_DIRECTION + ") "
+          + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
       + ")";
 
   // DDL: Create table SQ_CONFIG ( It stores the configs defined by every connector), if connector is null then it is driver config
@@ -233,6 +288,20 @@ public final class DerbySchemaQuery {
       + "CONSTRAINT " + CONSTRAINT_SQ_CFG_SQC + " "
         + "FOREIGN KEY (" + COLUMN_SQ_CFG_OWNER + ") "
           + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+      + ")";
+
+  // DDL: Create table SQ_CONFIG_DIRECTIONS
+  public static final String QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS =
+      "CREATE TABLE " + TABLE_SQ_CONFIG_DIRECTIONS + " ("
+      + COLUMN_SQ_CFG_DIR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQ_CFG_DIR_CONFIG + " BIGINT, "
+      + COLUMN_SQ_CFG_DIR_DIRECTION + " BIGINT, "
+      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_CONFIG + " "
+        + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_CONFIG + ") "
+          + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + "), "
+      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_DIRECTION + " "
+        + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_DIRECTION + ") "
+          + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
       + ")";
 
   // DDL: Create table SQ_INPUT
@@ -435,6 +504,14 @@ public final class DerbySchemaQuery {
     + COLUMN_SQM_VALUE + ") "
     + "VALUES(?, ?)";
 
+  public static final String STMT_SELECT_SQD_ID_BY_SQD_NAME =
+      "SELECT " + COLUMN_SQD_ID + " FROM " + TABLE_SQ_DIRECTION
+          + " WHERE " + COLUMN_SQD_NAME + "=?";
+
+  public static final String STMT_SELECT_SQD_NAME_BY_SQD_ID =
+      "SELECT " + COLUMN_SQD_NAME + " FROM " + TABLE_SQ_DIRECTION
+          + " WHERE " + COLUMN_SQD_ID + "=?";
+
   // DML: Fetch connector Given Name
   public static final String STMT_FETCH_BASE_CONNECTOR =
       "SELECT "
@@ -459,7 +536,6 @@ public final class DerbySchemaQuery {
       "SELECT "
       + COLUMN_SQ_CFG_ID + ", "
       + COLUMN_SQ_CFG_OWNER + ", "
-      + COLUMN_SQ_CFG_DIRECTION + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
@@ -472,13 +548,12 @@ public final class DerbySchemaQuery {
       "SELECT "
       + COLUMN_SQ_CFG_ID + ", "
       + COLUMN_SQ_CFG_OWNER + ", "
-      + COLUMN_SQ_CFG_DIRECTION + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
       + " FROM " + TABLE_SQ_CONFIG
       + " WHERE " + COLUMN_SQ_CFG_OWNER + " IS NULL "
-      + " ORDER BY " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_DIRECTION  + ", " + COLUMN_SQ_CFG_INDEX;
+      + " ORDER BY " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_INDEX;
 
   // DML: Fetch inputs for a given config
   public static final String STMT_FETCH_INPUT =
@@ -544,15 +619,21 @@ public final class DerbySchemaQuery {
       + COLUMN_SQC_VERSION
       + ") VALUES (?, ?, ?)";
 
+  public static final String STMT_INSERT_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS =
+      "INSERT INTO " + TABLE_SQ_CONNECTOR + " ("
+          + COLUMN_SQC_NAME + ", "
+          + COLUMN_SQC_CLASS + ", "
+          + COLUMN_SQC_VERSION
+          + ") VALUES (?, ?, ?)";
+
   // DML: Insert config base
   public static final String STMT_INSERT_CONFIG_BASE =
       "INSERT INTO " + TABLE_SQ_CONFIG + " ("
       + COLUMN_SQ_CFG_OWNER + ", "
-      + COLUMN_SQ_CFG_DIRECTION + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
-      + ") VALUES ( ?, ?, ?, ?, ?)";
+      + ") VALUES ( ?, ?, ?, ?)";
 
   // DML: Insert config input
   public static final String STMT_INSERT_INPUT_BASE =
@@ -1057,6 +1138,45 @@ public final class DerbySchemaQuery {
   public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME =
       "ALTER TABLE " + TABLE_SQ_LINK + " ADD CONSTRAINT "
           + CONSTRAINT_SQ_LNK_NAME_UNIQUE + " UNIQUE (" + COLUMN_SQ_LNK_NAME + ")";
+
+  public static final String STMT_INSERT_DIRECTION = "INSERT INTO " + TABLE_SQ_DIRECTION + " "
+      + "(" + COLUMN_SQD_NAME + ") VALUES (?)";
+
+  // DML: Fetch all configs
+  public static final String STMT_FETCH_CONFIG_DIRECTIONS =
+      "SELECT "
+          + COLUMN_SQ_CFG_ID + ", "
+          + COLUMN_SQ_CFG_DIRECTION
+          + " FROM " + TABLE_SQ_CONFIG;
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR =
+      "ALTER TABLE " + TABLE_SQ_CONFIG + " DROP COLUMN " + COLUMN_SQ_CFG_DIRECTION;
+
+  public static final String STMT_INSERT_SQ_CONNECTOR_DIRECTIONS =
+      "INSERT INTO " + TABLE_SQ_CONNECTOR_DIRECTIONS + " "
+          + "(" + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION + ")"
+          + " VALUES (?, ?)";
+
+  public static final String STMT_INSERT_SQ_CONFIG_DIRECTIONS =
+      "INSERT INTO " + TABLE_SQ_CONFIG_DIRECTIONS + " "
+          + "(" + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION + ")"
+          + " VALUES (?, ?)";
+
+  public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL =
+      "SELECT " + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION
+          + " FROM " + TABLE_SQ_CONNECTOR_DIRECTIONS;
+
+  public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS =
+      STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL + " WHERE "
+          + COLUMN_SQCD_CONNECTOR + " = ?";
+
+  public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL =
+      "SELECT " + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION
+          + " FROM " + TABLE_SQ_CONFIG_DIRECTIONS;
+
+  public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS =
+      STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
+          + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

@@ -73,7 +73,7 @@ public abstract class SqoopConnector {
   public abstract From getFrom();
 
   /**
-   * @return an <tt>To</tt> that provides classes for performing export.
+   * @return an <tt>To</tt> that provides classes for performing export.n
    */
   public abstract To getTo();
 

@@ -78,8 +78,6 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(connectors.size(),2);
     assertEquals(connectors.get(0).getUniqueName(),"A");
     assertEquals(connectors.get(1).getUniqueName(),"B");
-
-
   }
 
   @Test
@@ -95,6 +93,66 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 6);
     assertCountForTable("SQOOP.SQ_INPUT", 12);
+
+    // Registered connector should be easily recovered back
+    MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
+    assertNotNull(retrieved);
+    assertEquals(connector, retrieved);
+  }
+
+  @Test
+  public void testFromDirection() throws Exception {
+    MConnector connector = getConnector(true, false);
+
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+
+    // Connector should get persistence ID
+    assertEquals(1, connector.getPersistenceId());
+
+    // Now check content in corresponding tables
+    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIG", 4);
+    assertCountForTable("SQOOP.SQ_INPUT", 8);
+
+    // Registered connector should be easily recovered back
+    MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
+    assertNotNull(retrieved);
+    assertEquals(connector, retrieved);
+  }
+
+  @Test
+  public void testToDirection() throws Exception {
+    MConnector connector = getConnector(false, true);
+
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+
+    // Connector should get persistence ID
+    assertEquals(1, connector.getPersistenceId());
+
+    // Now check content in corresponding tables
+    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIG", 4);
+    assertCountForTable("SQOOP.SQ_INPUT", 8);
+
+    // Registered connector should be easily recovered back
+    MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
+    assertNotNull(retrieved);
+    assertEquals(connector, retrieved);
+  }
+
+  @Test
+  public void testNeitherDirection() throws Exception {
+    MConnector connector = getConnector(false, false);
+
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+
+    // Connector should get persistence ID
+    assertEquals(1, connector.getPersistenceId());
+
+    // Now check content in corresponding tables
+    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIG", 2);
+    assertCountForTable("SQOOP.SQ_INPUT", 4);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());

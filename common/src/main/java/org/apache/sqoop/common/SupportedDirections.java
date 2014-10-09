@@ -20,7 +20,9 @@ package org.apache.sqoop.common;
 /**
  * Represents which Directions are supported.
  */
-public class SupportedDirections {
+public class SupportedDirections implements Comparable<SupportedDirections> {
+  private static final char SUPPORTED_DIRECTIONS_SEPARATOR = '/';
+
   private boolean from;
   private boolean to;
 
@@ -37,5 +39,80 @@ public class SupportedDirections {
   public boolean isDirectionSupported(Direction direction) {
     return direction == Direction.FROM && from
         || direction == Direction.TO && to;
+  }
+
+  /**
+   * @return String "FROM", "TO", "FROM/TO", "".
+   */
+  public String toString() {
+    StringBuffer buffer = new StringBuffer();
+
+    if (isDirectionSupported(Direction.FROM)) {
+      buffer.append(Direction.FROM);
+
+      if (isDirectionSupported(Direction.TO)) {
+        buffer.append(SUPPORTED_DIRECTIONS_SEPARATOR);
+        buffer.append(Direction.TO);
+      }
+    } else if (isDirectionSupported(Direction.TO)) {
+      buffer.append(Direction.TO);
+    }
+
+    return buffer.toString();
+  }
+
+  public static SupportedDirections fromString(String supportedDirections) {
+    boolean from = false, to = false;
+
+    if (supportedDirections != null && !supportedDirections.equals("")) {
+      for (String direction : supportedDirections.split("/")) {
+        switch (Direction.valueOf(direction)) {
+          case FROM:
+            from = true;
+            break;
+
+          case TO:
+            to = true;
+            break;
+        }
+      }
+    }
+
+    return new SupportedDirections(from, to);
+  }
+
+  public static SupportedDirections fromDirection(Direction direction) {
+    boolean from = false, to = false;
+    switch (direction) {
+      case FROM:
+        from = true;
+        break;
+
+      case TO:
+        to = true;
+        break;
+    }
+    return new SupportedDirections(from, to);
+  }
+
+  @Override
+  public int compareTo(SupportedDirections o) {
+    int hash = 0;
+    if (this.isDirectionSupported(Direction.FROM)) {
+      hash |= 1;
+    }
+    if (this.isDirectionSupported(Direction.TO)) {
+      hash |= 2;
+    }
+
+    int oHash = 0;
+    if (this.isDirectionSupported(Direction.FROM)) {
+      oHash |= 1;
+    }
+    if (this.isDirectionSupported(Direction.TO)) {
+      oHash |= 2;
+    }
+
+    return hash - oHash;
   }
 }
