@@ -25,25 +25,21 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.json.ConnectionBean;
 import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionBean;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
 import org.apache.sqoop.common.VersionInfo;
-import static org.apache.sqoop.json.util.FormSerialization.ALL;
+import static org.apache.sqoop.json.util.ConfigSerialization.ALL;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Write user-created content of Sqoop repository to JSON formatted file
@@ -106,8 +102,8 @@ public class RepositoryDumpTool extends ConfiguredTool {
     JSONObject result = new JSONObject();
 
     LOG.info("Dumping Connections with skipSensitive=" + String.valueOf(skipSensitive));
-    ConnectionBean connections = new ConnectionBean(repository.findConnections());
-    result.put(JSONConstants.CONNECTIONS, addConnectorName(connections.extract(skipSensitive)));
+    LinkBean links = new LinkBean(repository.findLinks());
+    result.put(JSONConstants.LINKS, addConnectorName(links.extract(skipSensitive)));
 
     LOG.info("Dumping Jobs with skipSensitive=" + String.valueOf(skipSensitive));
     JobBean jobs = new JobBean(repository.findJobs());
@@ -134,7 +130,6 @@ public class RepositoryDumpTool extends ConfiguredTool {
   }
 
   private JSONObject addConnectorName(JSONObject json) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
     ConnectorManager connectorManager = ConnectorManager.getInstance();
 
     JSONArray results = (JSONArray) json.get(ALL);
@@ -144,7 +139,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
     while (iterator.hasNext()) {
       JSONObject result = iterator.next();
       Long connectorId = (Long) result.get(JSONConstants.CONNECTOR_ID);
-      result.put(JSONConstants.CONNECTOR_NAME,  connectorManager.getConnectorMetadata(connectorId).getUniqueName());
+      result.put(JSONConstants.CONNECTOR_NAME,  connectorManager.getConnectorConfig(connectorId).getUniqueName());
     }
 
     return json;
