@@ -19,11 +19,15 @@ package org.apache.sqoop.connector.hdfs.configuration;
 
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.NotEmpty;
 
 /**
  *
  */
-@ConfigClass
+@ConfigClass(validators = { @Validator(ToJobConfig.ToJobConfigValidator.class)})
 public class ToJobConfig {
 
   @Input public ToFormat outputFormat;
@@ -32,5 +36,21 @@ public class ToJobConfig {
 
   @Input(size = 255) public String customCompression;
 
-  @Input(size = 255) public String outputDirectory;
+  @Input(size = 255, validators = { @Validator(NotEmpty.class)}) public String outputDirectory;
+
+  public static class ToJobConfigValidator extends AbstractValidator<ToJobConfig> {
+    @Override
+    public void validate(ToJobConfig conf) {
+      if(conf.customCompression != null &&
+         conf.customCompression.trim().length() > 0 &&
+         conf.compression != ToCompression.CUSTOM) {
+        addMessage(Status.UNACCEPTABLE, "Custom compression codec should be blank as " + conf.compression + " is being used");
+      }
+
+      if(conf.compression == ToCompression.CUSTOM &&
+         (conf.customCompression == null || conf.customCompression.trim().length() == 0)) {
+        addMessage(Status.UNACCEPTABLE, "Custom compression field is blank.");
+      }
+    }
+  }
 }

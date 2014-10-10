@@ -19,6 +19,8 @@ package org.apache.sqoop.connector.hdfs.configuration;
 
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.validators.NotEmpty;
 
 /**
  *
@@ -26,5 +28,5 @@ import org.apache.sqoop.model.Input;
 @ConfigClass
 public class FromJobConfig {
 
-  @Input(size = 255) public String inputDirectory;
+  @Input(size = 255, validators = { @Validator(NotEmpty.class) }) public String inputDirectory;
 }
