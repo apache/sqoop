@@ -29,7 +29,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.MRExecutionError;
 
 public class Data implements WritableComparable<Data> {
 
@@ -76,7 +76,7 @@ public class Data implements WritableComparable<Data> {
       this.content = content;
       break;
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -87,7 +87,7 @@ public class Data implements WritableComparable<Data> {
     case ARRAY_RECORD:
       return parse();
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(targetType));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(targetType));
     }
   }
 
@@ -141,7 +141,7 @@ public class Data implements WritableComparable<Data> {
       }
       return result;
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -156,7 +156,7 @@ public class Data implements WritableComparable<Data> {
       readArray(in);
       break;
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -171,7 +171,7 @@ public class Data implements WritableComparable<Data> {
       writeArray(out);
       break;
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -249,7 +249,7 @@ public class Data implements WritableComparable<Data> {
 
       default:
         throw new IOException(
-          new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, Integer.toString(type))
+          new SqoopException(MRExecutionError.MAPRED_EXEC_0012, Integer.toString(type))
         );
       }
     }
@@ -307,7 +307,7 @@ public class Data implements WritableComparable<Data> {
 
       } else {
         throw new IOException(
-          new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012,
+          new SqoopException(MRExecutionError.MAPRED_EXEC_0012,
             array[i].getClass().getName()
           )
         );
@@ -351,7 +351,7 @@ public class Data implements WritableComparable<Data> {
       return sb.toString();
 
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -399,7 +399,7 @@ public class Data implements WritableComparable<Data> {
       return (Object[])content;
 
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(type));
     }
   }
 
@@ -418,7 +418,7 @@ public class Data implements WritableComparable<Data> {
     case FieldTypes.UTF:
       if (field.charAt(0) != stringDelimiter ||
           field.charAt(field.length()-1) != stringDelimiter) {
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0022);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0022);
       }
       list.add(index, unescape(field.substring(1, field.length()-1)));
       break;
@@ -426,7 +426,7 @@ public class Data implements WritableComparable<Data> {
     case FieldTypes.BIN:
       if (field.charAt(0) != '[' ||
           field.charAt(field.length()-1) != ']') {
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0022);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0022);
       }
       String[] splits =
           field.substring(1, field.length()-1).split(String.valueOf(','));
@@ -474,7 +474,7 @@ public class Data implements WritableComparable<Data> {
       break;
 
     default:
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0012, String.valueOf(fieldType));
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0012, String.valueOf(fieldType));
     }
 
     return ++index;

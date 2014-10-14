@@ -42,7 +42,7 @@ import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.SqoopWritable;
-import org.apache.sqoop.job.mr.ConfigurationUtils;
+import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.schema.Schema;
@@ -123,14 +123,14 @@ public class TestMatching {
   @Test
   public void testSchemaMatching() throws Exception {
     Configuration conf = new Configuration();
-    conf.set(JobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
-    conf.set(JobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
-    conf.set(JobConstants.INTERMEDIATE_DATA_FORMAT,
+    conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
+    conf.set(MRJobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
+    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
         CSVIntermediateDataFormat.class.getName());
 
     Job job = new Job(conf);
-    ConfigurationUtils.setConnectorSchema(Direction.FROM, job, from);
-    ConfigurationUtils.setConnectorSchema(Direction.TO, job, to);
+    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, from);
+    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, to);
     JobUtils.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
         DummyOutputFormat.class);
     boolean success = JobUtils.runJob(job.getConfiguration(),

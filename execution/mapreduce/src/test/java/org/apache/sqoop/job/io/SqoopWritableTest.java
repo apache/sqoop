@@ -31,7 +31,7 @@ import java.io.InputStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MRJobConstants;
 import org.junit.Assert;
 import org.junit.Test;
 

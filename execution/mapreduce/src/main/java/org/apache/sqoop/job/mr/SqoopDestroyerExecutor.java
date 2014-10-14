@@ -20,7 +20,7 @@ package org.apache.sqoop.job.mr;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
@@ -47,13 +47,13 @@ public class SqoopDestroyerExecutor {
     switch (direction) {
       default:
       case FROM:
-        destroyerPropertyName = JobConstants.JOB_ETL_FROM_DESTROYER;
-        prefixPropertyName = JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT;
+        destroyerPropertyName = MRJobConstants.JOB_ETL_FROM_DESTROYER;
+        prefixPropertyName = MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT;
         break;
 
       case TO:
-        destroyerPropertyName = JobConstants.JOB_ETL_TO_DESTROYER;
-        prefixPropertyName = JobConstants.PREFIX_CONNECTOR_TO_CONTEXT;
+        destroyerPropertyName = MRJobConstants.JOB_ETL_TO_DESTROYER;
+        prefixPropertyName = MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT;
         break;
     }
 
@@ -66,11 +66,11 @@ public class SqoopDestroyerExecutor {
 
     // Objects that should be pass to the Destroyer execution
     PrefixContext subContext = new PrefixContext(configuration, prefixPropertyName);
-    Object configConnection = ConfigurationUtils.getConnectorConnectionConfig(direction, configuration);
-    Object configJob = ConfigurationUtils.getConnectorJobConfig(direction, configuration);
+    Object configConnection = MRConfigurationUtils.getConnectorConnectionConfig(direction, configuration);
+    Object configJob = MRConfigurationUtils.getConnectorJobConfig(direction, configuration);
 
     // Propagate connector schema in every case for now
-    Schema schema = ConfigurationUtils.getConnectorSchema(direction, configuration);
+    Schema schema = MRConfigurationUtils.getConnectorSchema(direction, configuration);
 
     DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 

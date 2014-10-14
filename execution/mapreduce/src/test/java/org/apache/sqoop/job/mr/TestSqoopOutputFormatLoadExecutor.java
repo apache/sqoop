@@ -24,7 +24,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
-import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.SqoopWritable;
@@ -120,13 +120,13 @@ public class TestSqoopOutputFormatLoadExecutor {
   @Before
   public void setUp() {
     conf = new Configuration();
-    conf.setIfUnset(JobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
+    conf.setIfUnset(MRJobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
 
   }
 
   @Test(expected = BrokenBarrierException.class)
   public void testWhenLoaderThrows() throws Throwable {
-    conf.set(JobConstants.JOB_ETL_LOADER, ThrowingLoader.class.getName());
+    conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, ThrowingLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
@@ -145,7 +145,7 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   @Test
   public void testSuccessfulContinuousLoader() throws Throwable {
-    conf.set(JobConstants.JOB_ETL_LOADER, GoodContinuousLoader.class.getName());
+    conf.set(MRJobConstants.JOB_ETL_LOADER, GoodContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, GoodContinuousLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
@@ -192,7 +192,7 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   @Test(expected = ConcurrentModificationException.class)
   public void testThrowingContinuousLoader() throws Throwable {
-    conf.set(JobConstants.JOB_ETL_LOADER, ThrowingContinuousLoader.class.getName());
+    conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
         SqoopOutputFormatLoadExecutor(true, ThrowingContinuousLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();

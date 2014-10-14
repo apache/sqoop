@@ -24,17 +24,17 @@ import org.apache.log4j.Logger;
 /**
   * Runnable that will ping mapreduce context about progress.
   */
-public class ProgressRunnable implements Runnable {
+public class SqoopProgressRunnable implements Runnable {
 
-  public static final Logger LOG = Logger.getLogger(ProgressRunnable.class);
+  public static final Logger LOG = Logger.getLogger(SqoopProgressRunnable.class);
 
   /**
    * Context class that we should use for reporting progress.
    */
   private final TaskInputOutputContext<?,?,?,?> context;
 
-  public ProgressRunnable(final TaskInputOutputContext<?,?,?,?> ctxt) {
-    this.context = ctxt;
+  public SqoopProgressRunnable(final TaskInputOutputContext<?,?,?,?> ctx) {
+    this.context = ctx;
   }
 
   @Override

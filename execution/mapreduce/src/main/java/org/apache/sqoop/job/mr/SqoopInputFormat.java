@@ -31,8 +31,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.MRJobConstants;
+import org.apache.sqoop.job.MRExecutionError;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -59,15 +59,15 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
 
-    String partitionerName = conf.get(JobConstants.JOB_ETL_PARTITIONER);
+    String partitionerName = conf.get(MRJobConstants.JOB_ETL_PARTITIONER);
     Partitioner partitioner = (Partitioner) ClassUtils.instantiate(partitionerName);
 
-    PrefixContext connectorContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object connectorConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
-    Object connectorJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
-    Schema schema = ConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+    PrefixContext connectorContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
+    Object connectorConnection = MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
+    Object connectorJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
+    Schema schema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 
-    long maxPartitions = conf.getLong(JobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
+    long maxPartitions = conf.getLong(MRJobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
     PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, schema);
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connectorConnection, connectorJob);
@@ -80,7 +80,7 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     }
 
     if(splits.size() > maxPartitions) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0025,
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0025,
         String.format("Got %d, max was %d", splits.size(), maxPartitions));
     }
 

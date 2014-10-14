@@ -31,8 +31,8 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.matcher.Matcher;
 import org.apache.sqoop.connector.matcher.MatcherFactory;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.MRJobConstants;
+import org.apache.sqoop.job.MRExecutionError;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -47,7 +47,7 @@ import org.apache.sqoop.utils.ClassUtils;
 public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable> {
 
   static {
-    ConfigurationUtils.configureLogging();
+    MRConfigurationUtils.configureLogging();
   }
   public static final Logger LOG = Logger.getLogger(SqoopMapper.class);
 
@@ -63,14 +63,14 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
   public void run(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
 
-    String extractorName = conf.get(JobConstants.JOB_ETL_EXTRACTOR);
+    String extractorName = conf.get(MRJobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
     matcher = MatcherFactory.getMatcher(
-        ConfigurationUtils.getConnectorSchema(Direction.FROM, conf),
-        ConfigurationUtils.getConnectorSchema(Direction.TO, conf));
+        MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf),
+        MRConfigurationUtils.getConnectorSchema(Direction.TO, conf));
 
-    String intermediateDataFormatName = conf.get(JobConstants.INTERMEDIATE_DATA_FORMAT);
+    String intermediateDataFormatName = conf.get(MRJobConstants.INTERMEDIATE_DATA_FORMAT);
     fromDataFormat = (IntermediateDataFormat<String>) ClassUtils
         .instantiate(intermediateDataFormatName);
     fromDataFormat.setSchema(matcher.getFromSchema());
@@ -79,16 +79,16 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     toDataFormat.setSchema(matcher.getToSchema());
 
     // Objects that should be passed to the Executor execution
-    PrefixContext subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object fromConfig = ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
-    Object fromJob = ConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
+    PrefixContext subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
+    Object fromConfig = MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
+    Object fromJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
     ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context));
 
     try {
       LOG.info("Starting progress service");
-      progressService.scheduleAtFixedRate(new ProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
+      progressService.scheduleAtFixedRate(new SqoopProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
 
       LOG.info("Running extractor class " + extractorName);
       extractor.extract(extractorContext, fromConfig, fromJob, split.getPartition());
@@ -96,7 +96,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
       context.getCounter(SqoopCounters.ROWS_READ)
               .increment(extractor.getRowsRead());
     } catch (Exception e) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0017, e);
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0017, e);
     } finally {
       LOG.info("Stopping progress service");
       progressService.shutdown();
@@ -145,7 +145,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
         writable.setString(toDataFormat.getTextData());
         context.write(writable, NullWritable.get());
       } catch (Exception e) {
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0013, e);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0013, e);
       }
     }
   }

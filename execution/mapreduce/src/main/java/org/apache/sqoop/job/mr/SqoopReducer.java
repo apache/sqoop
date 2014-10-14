@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class SqoopReducer extends Reducer<SqoopWritable, NullWritable, SqoopWritable, NullWritable> {
 
   static {
-    ConfigurationUtils.configureLogging();
+    MRConfigurationUtils.configureLogging();
   }
   public static final Logger LOG = Logger.getLogger(SqoopReducer.class);
 
@@ -46,7 +46,7 @@ public class SqoopReducer extends Reducer<SqoopWritable, NullWritable, SqoopWrit
   public void run(Context context) throws IOException, InterruptedException {
     try {
       LOG.info("Starting progress service");
-      progressService.scheduleAtFixedRate(new ProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
+      progressService.scheduleAtFixedRate(new SqoopProgressRunnable(context), 0, 2, TimeUnit.MINUTES);
 
       // Delegating all functionality to our parent
       super.run(context);

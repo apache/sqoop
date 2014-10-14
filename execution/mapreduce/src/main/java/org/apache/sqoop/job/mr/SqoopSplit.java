@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.MRExecutionError;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -60,12 +60,12 @@ public class SqoopSplit extends InputSplit implements Writable {
     // instantiate Partition object
     Class<?> clz = ClassUtils.loadClass(className);
     if (clz == null) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0009, className);
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0009, className);
     }
     try {
       partition = (Partition) clz.newInstance();
     } catch (Exception e) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0010, className, e);
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0010, className, e);
     }
     // read Partition object content
     partition.readFields(in);

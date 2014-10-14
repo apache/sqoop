@@ -34,7 +34,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.job.JobConstants;
+import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.io.SqoopWritable;
 
 /**
@@ -56,13 +56,13 @@ public class SqoopFileOutputFormat
 
     Path filepath = getDefaultWorkFile(context, "");
     String filename = filepath.toString();
-    conf.set(JobConstants.JOB_MR_OUTPUT_FILE, filename);
+    conf.set(MRJobConstants.JOB_MR_OUTPUT_FILE, filename);
 
     boolean isCompressed = getCompressOutput(context);
     if (isCompressed) {
       String codecname =
-          conf.get(JobConstants.HADOOP_COMPRESS_CODEC, DEFAULT_CODEC.getName());
-      conf.set(JobConstants.JOB_MR_OUTPUT_CODEC, codecname);
+          conf.get(MRJobConstants.HADOOP_COMPRESS_CODEC, DEFAULT_CODEC.getName());
+      conf.set(MRJobConstants.JOB_MR_OUTPUT_CODEC, codecname);
     }
 
     return  new SqoopOutputFormatLoadExecutor(context).getRecordWriter();

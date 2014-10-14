@@ -39,8 +39,8 @@ import org.apache.sqoop.driver.SubmissionEngine;
 import org.apache.sqoop.execution.mapreduce.MRJobRequest;
 import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
 import org.apache.sqoop.driver.JobRequest;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.mr.ConfigurationUtils;
+import org.apache.sqoop.job.MRJobConstants;
+import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -172,7 +172,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         continue;
       }
       configuration.set(
-        JobConstants.PREFIX_CONNECTOR_FROM_CONTEXT + entry.getKey(),
+        MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT + entry.getKey(),
         entry.getValue());
     }
 
@@ -182,7 +182,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         continue;
       }
       configuration.set(
-          JobConstants.PREFIX_CONNECTOR_TO_CONTEXT + entry.getKey(),
+          MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT + entry.getKey(),
           entry.getValue());
     }
 
@@ -202,17 +202,17 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       Job job = new Job(configuration);
 
       // link configs
-      ConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, request.getConnectorLinkConfig(Direction.FROM));
-      ConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
+      MRConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, request.getConnectorLinkConfig(Direction.FROM));
+      MRConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, request.getConnectorLinkConfig(Direction.TO));
 
       // from and to configs
-      ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getJobConfig(Direction.FROM));
-      ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getJobConfig(Direction.TO));
+      MRConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, request.getJobConfig(Direction.FROM));
+      MRConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getJobConfig(Direction.TO));
 
-      ConfigurationUtils.setDriverConfig(job, request.getDriverConfig());
+      MRConfigurationUtils.setDriverConfig(job, request.getDriverConfig());
       // @TODO(Abe): Persist TO schema.
-      ConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
-      ConfigurationUtils.setConnectorSchema(Direction.TO, job, request.getSummary().getToSchema());
+      MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
+      MRConfigurationUtils.setConnectorSchema(Direction.TO, job, request.getSummary().getToSchema());
 
       if(request.getJobName() != null) {
         job.setJobName("Sqoop: " + request.getJobName());

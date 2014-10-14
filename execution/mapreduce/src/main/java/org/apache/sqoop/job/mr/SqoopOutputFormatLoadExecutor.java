@@ -36,8 +36,8 @@ import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.matcher.Matcher;
 import org.apache.sqoop.connector.matcher.MatcherFactory;
-import org.apache.sqoop.job.JobConstants;
-import org.apache.sqoop.job.MapreduceExecutionError;
+import org.apache.sqoop.job.MRJobConstants;
+import org.apache.sqoop.job.MRExecutionError;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
@@ -75,10 +75,10 @@ public class SqoopOutputFormatLoadExecutor {
     context = jobctx;
     writer = new SqoopRecordWriter();
     matcher = MatcherFactory.getMatcher(
-        ConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()),
-        ConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration()));
+        MRConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()),
+        MRConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration()));
     dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
-        .getConfiguration().get(JobConstants.INTERMEDIATE_DATA_FORMAT));
+        .getConfiguration().get(MRJobConstants.INTERMEDIATE_DATA_FORMAT));
     dataFormat.setSchema(matcher.getToSchema());
   }
 
@@ -141,7 +141,7 @@ public class SqoopOutputFormatLoadExecutor {
       //In the rare case, it was not a SqoopException
       Throwables.propagate(t);
     } catch (Exception ex) {
-      throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019, ex);
+      throw new SqoopException(MRExecutionError.MAPRED_EXEC_0019, ex);
     }
   }
 
@@ -186,7 +186,7 @@ public class SqoopOutputFormatLoadExecutor {
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Caught exception e while getting content ", t);
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0018, t);
       } finally {
         releaseSema();
       }
@@ -221,7 +221,7 @@ public class SqoopOutputFormatLoadExecutor {
         Configuration conf = null;
         if (!isTest) {
           conf = context.getConfiguration();
-          loaderName = conf.get(JobConstants.JOB_ETL_LOADER);
+          loaderName = conf.get(MRJobConstants.JOB_ETL_LOADER);
         }
         Loader loader = (Loader) ClassUtils.instantiate(loaderName);
 
@@ -233,11 +233,11 @@ public class SqoopOutputFormatLoadExecutor {
 
         if (!isTest) {
           // Using the TO schema since the IDF returns data in TO schema
-          schema = ConfigurationUtils.getConnectorSchema(Direction.TO, conf);
+          schema = MRConfigurationUtils.getConnectorSchema(Direction.TO, conf);
 
-          subContext = new PrefixContext(conf, JobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
-          configConnection = ConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);
-          configJob = ConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
+          subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
+          configConnection = MRConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);
+          configJob = MRConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
         }
 
         // Create loader context
@@ -252,7 +252,7 @@ public class SqoopOutputFormatLoadExecutor {
         // Release so that the writer can tell Sqoop something went
         // wrong.
         free.release();
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0018, t);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0018, t);
       }
 
       // if no exception happens yet and reader finished before writer,
@@ -264,7 +264,7 @@ public class SqoopOutputFormatLoadExecutor {
         // Release so that the writer can tell Sqoop something went
         // wrong.
         free.release();
-        throw new SqoopException(MapreduceExecutionError.MAPRED_EXEC_0019);
+        throw new SqoopException(MRExecutionError.MAPRED_EXEC_0019);
 
       }
       // inform writer that reader is finished

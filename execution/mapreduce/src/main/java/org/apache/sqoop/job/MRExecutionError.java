@@ -22,7 +22,7 @@ import org.apache.sqoop.common.ErrorCode;
 /**
  *
  */
-public enum MapreduceExecutionError implements ErrorCode {
+public enum MRExecutionError implements ErrorCode {
 
   MAPRED_EXEC_0000("Unknown error"),
 
@@ -83,7 +83,7 @@ public enum MapreduceExecutionError implements ErrorCode {
 
   private final String message;
 
-  private MapreduceExecutionError(String message) {
+  private MRExecutionError(String message) {
     this.message = message;
   }
 

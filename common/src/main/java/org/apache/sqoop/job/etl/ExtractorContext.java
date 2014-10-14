@@ -19,7 +19,6 @@ package org.apache.sqoop.job.etl;
 
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.etl.io.DataWriter;
-import org.apache.sqoop.schema.Schema;
 
 /**
  * Context implementation for Extractor.

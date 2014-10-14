@@ -39,7 +39,7 @@ import org.junit.Test;
  * to hadoop JobConf object. This implementation was chosen because it's not clear
  * how MapReduce is converting one object to another.
  */
-public class TestConfigurationUtils {
+public class TestMRConfigurationUtils {
 
   Job job;
   JobConf jobConfSpy;
@@ -61,49 +61,49 @@ public class TestConfigurationUtils {
 
   @Test
   public void testLinkConfiguration() throws Exception {
-    ConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, getConfig());
+    MRConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), ConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, jobConfSpy));
 
-    ConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, getConfig());
+    MRConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), ConfigurationUtils.getConnectorConnectionConfig(Direction.TO, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorConnectionConfig(Direction.TO, jobConfSpy));
   }
 
   @Test
   public void testJobConfiguration() throws Exception {
-    ConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, getConfig());
+    MRConfigurationUtils.setConnectorJobConfig(Direction.FROM, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), ConfigurationUtils.getConnectorJobConfig(Direction.FROM, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, jobConfSpy));
 
-    ConfigurationUtils.setConnectorJobConfig(Direction.TO, job, getConfig());
+    MRConfigurationUtils.setConnectorJobConfig(Direction.TO, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), ConfigurationUtils.getConnectorJobConfig(Direction.TO, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorJobConfig(Direction.TO, jobConfSpy));
   }
 
   @Test
   public void testDriverConfiguration() throws Exception {
-    ConfigurationUtils.setDriverConfig(job, getConfig());
+    MRConfigurationUtils.setDriverConfig(job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), ConfigurationUtils.getDriverConfig(jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getDriverConfig(jobConfSpy));
   }
 
   @Test
   public void testConnectorSchema() throws Exception {
-    ConfigurationUtils.setConnectorSchema(Direction.FROM, job, getSchema("a"));
-    assertEquals(getSchema("a"), ConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
+    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, getSchema("a"));
+    assertEquals(getSchema("a"), MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
 
-    ConfigurationUtils.setConnectorSchema(Direction.TO, job, getSchema("b"));
-    assertEquals(getSchema("b"), ConfigurationUtils.getConnectorSchema(Direction.TO, jobConfSpy));
+    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, getSchema("b"));
+    assertEquals(getSchema("b"), MRConfigurationUtils.getConnectorSchema(Direction.TO, jobConfSpy));
   }
 
   @Test
   public void testConnectorSchemaNull() throws Exception {
-    ConfigurationUtils.setConnectorSchema(Direction.FROM, job, null);
-    assertNull(ConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
+    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, null);
+    assertNull(MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
 
-    ConfigurationUtils.setConnectorSchema(Direction.TO, job, null);
-    assertNull(ConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
+    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, null);
+    assertNull(MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
   }
 
   private Schema getSchema(String name) {

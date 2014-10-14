@@ -20,7 +20,7 @@ package org.apache.sqoop.job;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.driver.DriverConstants;
 
-public final class JobConstants extends Constants {
+public final class MRJobConstants extends Constants {
   /**
    * All job related configuration is prefixed with this:
    * <tt>org.apache.sqoop.job.</tt>
@@ -75,7 +75,7 @@ public final class JobConstants extends Constants {
   public static final String INTERMEDIATE_DATA_FORMAT =
     DriverConstants.PREFIX_EXECUTION_CONFIG + "intermediate.format";
 
-  private JobConstants() {
+  private MRJobConstants() {
     // Disable explicit object creation
   }
 }
