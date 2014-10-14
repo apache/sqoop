@@ -123,12 +123,12 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void createOrUpdateInternals() {
+  public void createOrUpgradeRepository() {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
         LOG.info("Creating repository schema objects");
-        handler.createOrUpdateInternals(conn);
+        handler.createOrUpgradeRepository(conn);
         return null;
       }
     });
@@ -138,11 +138,11 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public boolean haveSuitableInternals() {
+  public boolean isRespositorySuitableForUse() {
     return (Boolean) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.haveSuitableInternals(conn);
+        return handler.isRespositorySuitableForUse(conn);
       }
     });
   }
@@ -652,23 +652,23 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  protected void updateConnector(final MConnector newConnector,
+  protected void upgradeConnector(final MConnector newConnector,
     RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.updateConnector(newConnector, conn);
+        handler.upgradeConnector(newConnector, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
   }
 
 
-  protected void updateDriver(final MDriver mDriver, RepositoryTransaction tx) {
+  protected void upgradeDriver(final MDriver mDriver, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.updateDriver(mDriver, conn);
+        handler.upgradeDriver(mDriver, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

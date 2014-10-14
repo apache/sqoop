@@ -58,10 +58,12 @@ public class RepositoryManager implements Reconfigurable {
   }
 
   /**
-   * Allows to set instance in case that it's need.
+   * Allows to set instance
    *
-   * This method should not be normally used as the default instance should be sufficient. One target
+   * This method should not be normally used since the default instance should be sufficient. One target
    * user use case for this method are unit tests.
+   * NOTE: Ideally this should not have been a public method, default package access should have been sufficient if tests were
+   * written keeping this in mind
    *
    * @param newInstance New instance
    */
@@ -100,8 +102,7 @@ public class RepositoryManager implements Reconfigurable {
       LOG.trace("Repository provider: " + repoProviderClassName);
     }
 
-    Class<?> repoProviderClass =
-        ClassUtils.loadClass(repoProviderClassName);
+    Class<?> repoProviderClass = ClassUtils.loadClass(repoProviderClassName);
 
     if (repoProviderClass == null) {
       throw new SqoopException(RepositoryError.REPO_0001,
@@ -118,17 +119,19 @@ public class RepositoryManager implements Reconfigurable {
     provider.initialize(context);
 
     if(!immutableRepository) {
-      LOG.info("Creating or update respository internals at bootup");
-      provider.getRepository().createOrUpdateInternals();
+      LOG.info("Creating or updating respository at bootup");
+      provider.getRepository().createOrUpgradeRepository();
     }
 
-    if(!provider.getRepository().haveSuitableInternals()) {
+    // NOTE: There are scenarios where a repository upgrade/ changes may happen outside of the
+    // server bootup lifecyle. Hence always check/ verify for the repository sanity before marking the repo manager ready
+    if(!provider.getRepository().isRespositorySuitableForUse()) {
       throw new SqoopException(RepositoryError.REPO_0002);
     }
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
-    LOG.info("Repository initialized: OK");
+    LOG.info("Repository Manager initialized: OK");
   }
 
   public synchronized void destroy() {

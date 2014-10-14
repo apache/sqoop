@@ -37,11 +37,9 @@ public class TestConnectorHandling extends DerbyTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-
     handler = new DerbyRepositoryHandler();
-
     // We always needs schema for this test case
-    createSchema();
+    createOrUpgradeSchemaForLatestVersion();
   }
 
   @Test
@@ -49,17 +47,14 @@ public class TestConnectorHandling extends DerbyTestCase {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
     assertNull(handler.findConnector("B", getDerbyDatabaseConnection()));
-
     // Load connector into repository
-    loadConnectorLinkConfig();
+    loadConnectorAndDriverConfig();
 
     // Retrieve it
     MConnector connector = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(connector);
-
     // Get original structure
     MConnector original = getConnector();
-
     // And compare them
     assertEquals(original, connector);
   }
@@ -69,7 +64,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     // No connectors in an empty repository, we expect an empty list
     assertEquals(handler.findConnectors(getDerbyDatabaseConnection()).size(),0);
 
-    loadConnectorLinkConfig();
+    loadConnectorAndDriverConfig();
     addConnector();
 
     // Retrieve connectors
@@ -83,9 +78,7 @@ public class TestConnectorHandling extends DerbyTestCase {
   @Test
   public void testRegisterConnector() throws Exception {
     MConnector connector = getConnector();
-
     handler.registerConnector(connector, getDerbyDatabaseConnection());
-
     // Connector should get persistence ID
     assertEquals(1, connector.getPersistenceId());
 
@@ -99,7 +92,6 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertNotNull(retrieved);
     assertEquals(connector, retrieved);
   }
-
   @Test
   public void testFromDirection() throws Exception {
     MConnector connector = getConnector(true, false);

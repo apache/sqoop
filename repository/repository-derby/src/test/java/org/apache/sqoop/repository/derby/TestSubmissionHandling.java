@@ -43,18 +43,17 @@ public class TestSubmissionHandling extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-
     // We always needs schema for this test case
-    createSchema();
+    super.createOrUpgradeSchemaForLatestVersion();
 
     // We always needs connector and framework structures in place
-    loadConnectorLinkConfig();
+    loadConnectorAndDriverConfig();
 
     // We also always needs connection metadata in place
-    loadLinks();
+    loadLinksForLatestVersion();
 
     // And finally we always needs job metadata in place
-    loadJobs();
+    loadJobsForLatestVersion();
   }
 
   @Test

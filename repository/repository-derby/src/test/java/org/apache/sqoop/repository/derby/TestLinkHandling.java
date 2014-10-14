@@ -17,6 +17,13 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.List;
 
 import org.apache.sqoop.common.SqoopException;
@@ -26,12 +33,6 @@ import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * Test link methods on Derby repository.
@@ -45,12 +46,10 @@ public class TestLinkHandling extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-
     // We always needs schema for this test case
-    createSchema();
-
+    createOrUpgradeSchemaForLatestVersion();
     // We always needs connector and framework structures in place
-    loadConnectorLinkConfig();
+    loadConnectorAndDriverConfig();
   }
 
   @Test
@@ -64,7 +63,7 @@ public class TestLinkHandling extends DerbyTestCase {
     }
 
     // Load prepared connections into database
-    loadLinks();
+    loadLinksForLatestVersion();
 
     MLink linkA = handler.findLink(1, getDerbyDatabaseConnection());
     assertNotNull(linkA);
@@ -89,7 +88,7 @@ public class TestLinkHandling extends DerbyTestCase {
     list = handler.findLinks(getDerbyDatabaseConnection());
     assertEquals(0, list.size());
 
-    loadLinks();
+    loadLinksForLatestVersion();
 
     // Load all two connections on loaded repository
     list = handler.findLinks(getDerbyDatabaseConnection());
@@ -106,7 +105,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertFalse(handler.existsLink(2, getDerbyDatabaseConnection()));
     assertFalse(handler.existsLink(3, getDerbyDatabaseConnection()));
 
-    loadLinks();
+    loadLinksForLatestVersion();
 
     assertTrue(handler.existsLink(1, getDerbyDatabaseConnection()));
     assertTrue(handler.existsLink(2, getDerbyDatabaseConnection()));
@@ -161,18 +160,18 @@ public class TestLinkHandling extends DerbyTestCase {
 
   @Test
   public void testInUseLink() throws Exception {
-    loadLinks();
+    loadLinksForLatestVersion();
 
     assertFalse(handler.inUseLink(1, getDerbyDatabaseConnection()));
 
-    loadJobs();
+    loadJobsForLatestVersion();
 
     assertTrue(handler.inUseLink(1, getDerbyDatabaseConnection()));
   }
 
   @Test
   public void testUpdateLink() throws Exception {
-    loadLinks();
+    loadLinksForLatestVersion();
 
     MLink link = handler.findLink(1, getDerbyDatabaseConnection());
 
@@ -204,7 +203,7 @@ public class TestLinkHandling extends DerbyTestCase {
 
   @Test
   public void testEnableAndDisableLink() throws Exception {
-    loadLinks();
+    loadLinksForLatestVersion();
 
     // disable link 1
     handler.enableLink(1, false, getDerbyDatabaseConnection());
@@ -223,7 +222,7 @@ public class TestLinkHandling extends DerbyTestCase {
 
   @Test
   public void testDeleteLink() throws Exception {
-    loadLinks();
+    loadLinksForLatestVersion();
 
     handler.deleteLink(1, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_LINK", 1);

@@ -17,29 +17,29 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MEnumInput;
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MDriver;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MIntegerInput;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.model.MStringInput;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MEnumInput;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.model.MStringInput;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test proper support of all available model types.
@@ -53,9 +53,8 @@ public class TestInputTypes extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-
     // We always needs schema for this test case
-    createSchema();
+    createOrUpgradeSchemaForLatestVersion();
   }
 
   /**

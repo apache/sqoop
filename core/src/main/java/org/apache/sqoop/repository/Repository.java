@@ -58,28 +58,29 @@ public abstract class Repository {
   public abstract RepositoryTransaction getTransaction();
 
   /**
-   * Create or update disk data structures.
+   * Create or update the repository schema structures.
    *
-   * This method will be called only if Sqoop server is enabled with changing
-   * repository on disk structures. Repository should not change its disk structures
-   * outside of this method. This method must be no-op in case that the structures
-   * do not need any maintenance.
+   * This method will be called from the Sqoop server if enabled via a config
+   * {@link RepoConfigurationConstants#SYSCFG_REPO_SCHEMA_IMMUTABLE} to enforce
+   * changing the repository schema structure or explicitly via the
+   * {@link UpgradeTool} Repository should not change its schema structure
+   * outside of this method. This method must be no-op in case that the schema
+   * structure do not need any upgrade.
    */
-  public abstract void createOrUpdateInternals();
+  public abstract void createOrUpgradeRepository();
 
   /**
    * Return true if internal repository structures exists and are suitable for use.
-   *
    * This method should return false in case that the structures do exists, but
-   * are not suitable for use or if they requires upgrade.
+   * are not suitable to use i.e corrupted as part of the upgrade
    *
    * @return Boolean values if internal structures are suitable for use
    */
-  public abstract boolean haveSuitableInternals();
+  public abstract boolean isRespositorySuitableForUse();
 
   /**
    * Registers given connector in the repository and return registered
-   * variant. This method might return an exception in case that
+   * variant.This method might return an exception in case that
    * given connector are already registered with different structure
    *
    * @param mConnector the connector to be registered
@@ -305,7 +306,7 @@ public abstract class Repository {
    * <tt>newConnector</tt>. Also Update all configs associated with this
    * connector in the repository with the configs specified in
    * <tt>mConnector</tt>. <tt>mConnector </tt> must
-   * minimally have the connectorID and all required configs (including ones
+   * minimally have the configurableID and all required configs (including ones
    * which may not have changed). After this operation the repository is
    * guaranteed to only have the new configs specified in this object.
    *
@@ -316,25 +317,25 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void updateConnector(MConnector newConnector, RepositoryTransaction tx);
+  protected abstract void upgradeConnector(MConnector newConnector, RepositoryTransaction tx);
 
   /**
-   * Update the driver with the new data supplied in the
-   * <tt>mDriverConfig</tt>. Also Update all configs associated with the driverConfig
+   * Upgrade the driver with the new data supplied in the
+   * <tt>mDriver</tt>. Also Update all configs associated with the driver
    * in the repository with the configs specified in
-   * <tt>mDriverConfig</tt>. <tt>mDriverConfig </tt> must
-   * minimally have the connectorID and all required configs (including ones
+   * <tt>mDriver</tt>. <tt>mDriver </tt> must
+   * minimally have the configurableID and all required configs (including ones
    * which may not have changed). After this operation the repository is
    * guaranteed to only have the new configs specified in this object.
    *
-   * @param mDriver The new data to be inserted into the repository for
+   * @param newDriver The new data to be inserted into the repository for
    *                     the driverConfig.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void updateDriver(MDriver mDriver, RepositoryTransaction tx);
+  protected abstract void upgradeDriver(MDriver newDriver, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a job
@@ -417,7 +418,7 @@ public abstract class Repository {
       tx = getTransaction();
       tx.begin();
       deletelinksAndJobs(linksByConnector, jobsByConnector, tx);
-      updateConnector(newConnector, tx);
+      upgradeConnector(newConnector, tx);
       for (MLink oldLink : linksByConnector) {
         // Make a new copy of the configs
         List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
@@ -495,8 +496,7 @@ public abstract class Repository {
     LOG.info("Upgrading driver");
     RepositoryTransaction tx = null;
     try {
-      RepositoryUpgrader driverConfigUpgrader = Driver.getInstance()
-        .getDriverConfigRepositoryUpgrader();
+      RepositoryUpgrader upgrader = Driver.getInstance().getDriverConfigRepositoryUpgrader();
       List<MJob> jobs = findJobs();
 
       Validator validator = Driver.getInstance().getValidator();
@@ -506,13 +506,13 @@ public abstract class Repository {
       tx = getTransaction();
       tx.begin();
       deleteJobs(jobs, tx);
-      updateDriver(driver, tx);
+      upgradeDriver(driver, tx);
 
       for (MJob job : jobs) {
         // Make a new copy of the configs
         MDriverConfig driverConfig = driver.getDriverConfig().clone(false);
         MDriver newDriver = new MDriver(driverConfig, DriverBean.CURRENT_DRIVER_VERSION);
-        driverConfigUpgrader.upgrade(job.getDriverConfig(), newDriver.getDriverConfig());
+        upgrader.upgrade(job.getDriverConfig(), newDriver.getDriverConfig());
         MJob newJob = new MJob(job, job.getFromJobConfig(), job.getToJobConfig(), newDriver.getDriverConfig());
 
         // Transform config structures to objects for validations

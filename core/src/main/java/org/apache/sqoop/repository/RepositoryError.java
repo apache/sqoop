@@ -30,7 +30,7 @@ public enum RepositoryError implements ErrorCode {
   REPO_0001("Invalid repository provider specified"),
 
   /** Repository on disk structures are not suitable for use */
-  REPO_0002("Repository structures are not initialized or requires upgrade"),
+  REPO_0002("Repository structures are not in suitable state, might require upgrade"),
 
   // JDBC Repository Errors: Prefix JDBCREP
 

@@ -89,35 +89,35 @@ public abstract class JdbcRepositoryHandler {
     Connection conn);
 
   /**
-   * Update the connector with the new data supplied in the <tt>newConnector</tt>.
-   * Also Update all forms associated with this connector in the repository
-   * with the forms specified in <tt>mConnector</tt>. <tt>mConnector </tt> must
-   * minimally have the connectorID and all required forms (including ones
+   * Upgrade the connector with the new data supplied in the <tt>newConnector</tt>.
+   * Also Update all configs associated with this connector in the repository
+   * with the configs specified in <tt>mConnector</tt>. <tt>mConnector </tt> must
+   * minimally have the configurableID and all required configs (including ones
    * which may not have changed). After this operation the repository is
-   * guaranteed to only have the new forms specified in this object.
+   * guaranteed to only have the new configs specified in this object.
    *
    * @param mConnector The new data to be inserted into the repository for
    *                     this connector.
    * @param conn JDBC link for querying repository
    */
 
-  public abstract void updateConnector(MConnector mConnector, Connection conn);
+  public abstract void upgradeConnector(MConnector mConnector, Connection conn);
 
 
   /**
-   * Update the driverConfig with the new data supplied in the
-   * <tt>mDriverConfig</tt>.
-   * Also Update all forms in the repository
-   * with the forms specified in <tt>mDriverConfig</tt>. <tt>mDriverConfig </tt> must
-   * minimally have the connectorID and all required forms (including ones
+   * Upgrade the driver with the new data supplied in the
+   * <tt>mDriver</tt>.
+   * Also Update all configs in the repository
+   * with the configs specified in <tt>mDriverConfig</tt>. <tt>mDriver </tt> must
+   * minimally have the configurableID and all required configs (including ones
    * which may not have changed). After this operation the repository is
-   * guaranteed to only have the new forms specified in this object.
+   * guaranteed to only have the new configs specified in this object.
    *
    * @param mDriver The new data to be inserted into the repository for
    *                     the driverConfig.
    * @param conn JDBC link for querying repository
    */
-  public abstract void updateDriver(MDriver mDriver, Connection conn);
+  public abstract void upgradeDriver(MDriver mDriver, Connection conn);
 
 
   /**
@@ -135,30 +135,32 @@ public abstract class JdbcRepositoryHandler {
    * Save driver config into repository. Driver config  should not be already
    * registered or present in the repository.
    *
-   * @param driverConfig Driver config that should be registered.
+   * @param mDriver Driver config that should be registered.
    * @param conn JDBC link for querying repository.
    */
-  public abstract void registerDriver(MDriver driverConfig, Connection conn);
+  public abstract void registerDriver(MDriver mDriver, Connection conn);
 
   /**
-   * Return true if repository tables exists and are suitable for use.
+   * Create or update the repository schema structures.
    *
-   * This method should return false in case that the tables do exists, but
-   * are not suitable for use or if they requires upgrade.
-   *
+   * This method will be called from the Sqoop server if enabled via a config
+   * {@link RepoConfigurationConstants#SYSCFG_REPO_SCHEMA_IMMUTABLE} to enforce
+   * changing the repository schema structure or explicitly via the
+   * {@link UpgradeTool} Repository should not change its schema structure
+   * outside of this method. This method must be no-op in case that the schema
+   * structure do not need any upgrade.
+   * @param conn JDBC link for querying repository
+   */
+  public abstract void createOrUpgradeRepository(Connection conn);
+
+  /**
+   * Return true if internal repository structures exists and are suitable for use.
+   * This method should return false in case that the structures do exists, but
+   * are not suitable to use i.e corrupted as part of the upgrade
+   * @param conn JDBC link for querying repository
    * @return Boolean values if internal structures are suitable for use
    */
-  public abstract boolean haveSuitableInternals(Connection conn);
-
-  /**
-   * Create or update tables in the repository.
-   *
-   * This method will be called only if Sqoop server is enabled with changing
-   * repository on disk structures. Repository should not change its disk structures
-   * outside of this method. This method must be no-op in case that the structures
-   * do not need any maintenance.
-   */
-  public abstract void createOrUpdateInternals(Connection conn);
+  public abstract boolean isRespositorySuitableForUse(Connection conn);
 
   /**
    * Termination callback for repository.
@@ -398,6 +400,5 @@ public abstract class JdbcRepositoryHandler {
    * @param conn Connection to the repository
    * @return Most recent submission
    */
-  public abstract MSubmission findSubmissionLastForJob(long jobId,
-    Connection conn);
+  public abstract MSubmission findSubmissionLastForJob(long jobId, Connection conn);
 }

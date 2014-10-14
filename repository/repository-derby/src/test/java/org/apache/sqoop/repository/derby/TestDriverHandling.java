@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test driver config methods on Derby repository.
+ * Test driver methods on Derby repository.
  */
 public class TestDriverHandling extends DerbyTestCase {
 
@@ -42,11 +42,9 @@ public class TestDriverHandling extends DerbyTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-
     handler = new DerbyRepositoryHandler();
-
     // We always needs schema for this test case
-    createSchema();
+    createOrUpgradeSchemaForLatestVersion();
   }
 
   @Test
@@ -54,7 +52,8 @@ public class TestDriverHandling extends DerbyTestCase {
     // On empty repository, no driverConfig should be there
     assertNull(handler.findDriver(getDerbyDatabaseConnection()));
     // Load Connector and DriverConfig into repository
-    loadConnectorLinkConfig();
+    // TODO(SQOOP-1582):FIX why load connector config for driver testing?
+    loadConnectorAndDriverConfig();
     // Retrieve it
     MDriver driver = handler.findDriver(getDerbyDatabaseConnection());
     assertNotNull(driver);
@@ -93,7 +92,7 @@ public class TestDriverHandling extends DerbyTestCase {
     try {
       preparedStmt =
         getDerbyDatabaseConnection().prepareStatement(frameworkVersionQuery);
-      preparedStmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
+      preparedStmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
       resultSet = preparedStmt.executeQuery();
       if(resultSet.next())
         retVal = resultSet.getString(1);
@@ -123,10 +122,10 @@ public class TestDriverHandling extends DerbyTestCase {
         .parseInt(DriverBean.CURRENT_DRIVER_VERSION) - 1);
     assertEquals(CURRENT_DRIVER_VERSION, getDriverVersion());
     runQuery("UPDATE SQOOP.SQ_SYSTEM SET SQM_VALUE='" + lowerVersion + "' WHERE SQM_KEY = '"
-        + DerbyRepoConstants.SYSKEY_DRIVER_VERSION + "'");
+        + DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION + "'");
     assertEquals(lowerVersion, getDriverVersion());
 
-    handler.updateDriver(driver, getDerbyDatabaseConnection());
+    handler.upgradeDriver(driver, getDerbyDatabaseConnection());
 
     assertEquals(CURRENT_DRIVER_VERSION, driver.getVersion());
 

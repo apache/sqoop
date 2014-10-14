@@ -91,8 +91,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    */
   private static final String CONNECTOR_HDFS = "hdfs-connector";
 
-  private static final String LINK_HDFS = "hdfs-link";
-
   private JdbcRepositoryContext repoContext;
 
   /**
@@ -288,12 +286,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Detect version of underlying database structures.
+   * Detect version of underlying database structures
    *
    * @param conn JDBC Connection
    * @return
    */
-  public int detectVersion(Connection conn) {
+  public int detectRepositoryVersion(Connection conn) {
     ResultSet rs = null;
     PreparedStatement stmt = null;
 
@@ -308,7 +306,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
       closeResultSets(rs);
 
-      LOG.debug("Detecting old version of repository");
+      LOG.debug("Detecting existing version of repository");
       boolean foundAll = true;
       for( String expectedTable : DerbySchemaConstants.tablesV1) {
         if(!tableNames.contains(expectedTable)) {
@@ -330,8 +328,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
     // Normal version detection, select and return the version
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
+      // NOTE: Since we can different types of version stored in system table, we renamed the
+      // key name for the repository version from "version" to "repository.version" for clarity
+      stmt = conn.prepareStatement(STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DERBY_REPOSITORY_VERSION);
+      stmt.setString(2, DerbyRepoConstants.SYSKEY_VERSION);
       rs = stmt.executeQuery();
 
       if(!rs.next()) {
@@ -359,7 +360,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(DerbySchemaQuery.STMT_SELECT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
       rs = stmt.executeQuery();
       if(!rs.next()) {
         return null;
@@ -384,12 +385,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     try {
       stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
       stmt.executeUpdate();
       closeStatements(stmt);
 
       stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_VERSION);
+      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
       stmt.setString(2, version);
       stmt.executeUpdate();
     } catch (SQLException e) {
@@ -405,85 +406,136 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void createOrUpdateInternals(Connection conn) {
-    int version = detectVersion(conn);
+  public void createOrUpgradeRepository(Connection conn) {
 
-    if(version <= 0) {
+    int repositoryVersion = detectRepositoryVersion(conn);
+    if(repositoryVersion <= 0) {
       runQuery(QUERY_CREATE_SCHEMA_SQOOP, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONFIG, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_FORM, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_INPUT, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_LINK, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_JOB, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_LINK_INPUT, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_COUNTER, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION, conn);
     }
-    if(version <= 1) {
+    if(repositoryVersion <= 1) {
       runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_ENABLED, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_CREATION_USER, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_UPDATE_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_CREATION_USER, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_UPDATE_USER, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER, conn);
     }
-    if(version <= 2) {
+    if(repositoryVersion <= 2) {
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64, conn);
     }
-    if(version <= 3) {
+    if(repositoryVersion <= 3) {
       // Schema modifications
       runQuery(QUERY_CREATE_TABLE_SQ_DIRECTION, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQ_LNK, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM, conn);
-      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_RENAME_COLUMN_SQF_OPERATION_TO_SQF_DIRECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_CONNECTION_TO_SQB_FROM_CONNECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_CONNECTION, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQN, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO, conn);
 
       // Data modifications only for non-fresh install.
-      if (version > 0) {
+      if (repositoryVersion > 0) {
         // Register HDFS connector
-        updteJobInternals(conn, registerHdfsConnector(conn));
+        updateJobRepositorySchemaAndData(conn, registerHdfsConnector(conn));
       }
-
-      // Change direction from VARCHAR to BIGINT + foreign key.
-      updateDirections(conn, insertDirections(conn));
 
       // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update data.
       // Data updates depend on knowledge of the type of job.
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE, conn);
 
-      // Add unique constraints on job and links.
+      // SQOOP-1498 rename entities
+      renameEntitiesForUpgrade(conn);
+      // Change direction from VARCHAR to BIGINT + foreign key.
+      updateDirections(conn, insertDirections(conn));
+    }
+    // Add unique constraints on job and links for version 4 onwards
+    if (repositoryVersion > 3) {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME, conn);
     }
+    // last step upgrade the repository version to the latest value in the code
+    upgradeRepositoryVersion(conn);
+  }
 
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
-      stmt.executeUpdate();
+  // SQOOP-1498 refactoring related upgrades for table and column names
+  void renameEntitiesForUpgrade(Connection conn) {
+    // LINK
+    // drop the constraint before rename
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_1, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_2, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_3, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_4, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_TO_SQ_LINK, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_2, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_3, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_4, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_5, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_6, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_7, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_8, conn);
 
-      closeStatements(stmt);
+    LOG.info("LINK TABLE altered");
 
-      stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_VERSION);
-      stmt.setString(2, "" + DerbyRepoConstants.VERSION);
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      LOG.error("Can't persist the repository version", e);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
-    }
+    // LINK_INPUT
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_TO_SQ_LINK_INPUT, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_2, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_3, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT, conn);
+
+    LOG.info("LINK_INPUT TABLE altered");
+
+    // CONFIG
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_TO_SQ_CONFIG, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_2, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_3, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_4, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_5, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_6, conn);
+
+    LOG.info("CONFIG TABLE altered");
+
+    // INPUT
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_INPUT_FORM_COLUMN, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_INPUT_CONSTRAINT, conn);
+
+    LOG.info("INPUT TABLE altered and constraints added");
+
+    // JOB
+
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_COLUMN_2, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_FROM, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_TO, conn);
+
+    LOG.info("JOB TABLE altered and constraints added");
+
+  }
+
+  private void upgradeRepositoryVersion(Connection conn) {
+    // remove the deprecated sys version
+    runQuery(STMT_DELETE_SYSTEM, conn, DerbyRepoConstants.SYSKEY_VERSION);
+    runQuery(STMT_DELETE_SYSTEM, conn, DerbyRepoConstants.SYSKEY_DERBY_REPOSITORY_VERSION);
+    runQuery(STMT_INSERT_SYSTEM, conn, DerbyRepoConstants.SYSKEY_DERBY_REPOSITORY_VERSION, ""
+        + DerbyRepoConstants.LATEST_DERBY_REPOSITORY_VERSION);
   }
 
   /**
@@ -626,52 +678,54 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *     Also update the relevant inputs as well.
    * @param conn
    */
-  private void updteJobInternals(Connection conn, long connectorId) {
+  // NOTE: This upgrade code happened before the SQOOP-1498 renaming, hence it uses the form/connection
+  // tables instead of the latest config/link tables
+  private void updateJobRepositorySchemaAndData(Connection conn, long connectorId) {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Updating existing data for generic connectors.");
     }
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION, conn,
         Direction.FROM.toString(), "IMPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION, conn,
         Direction.TO.toString(), "EXPORT");
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_CONNECTOR_HDFS_CONFIG_DIRECTION, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION, conn,
         Direction.FROM.toString(),
         "input");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_CONNECTOR_HDFS_CONFIG_DIRECTION, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION, conn,
         Direction.TO.toString(),
         "output");
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_CONNECTOR, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR, conn,
         new Long(connectorId), "input", "output");
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_CONFIG_INPUTS, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_FORM_INPUTS, conn,
         "IMPORT", "EXPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_REMOVE_EXTRA_CONFIG_INPUTS, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FORM_INPUTS, conn,
         "throttling", "EXPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_REMOVE_EXTRA_DRIVER_CONFIG, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_DRIVER_FORM, conn,
         "throttling", "EXPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_DIRECTION_TO_NULL, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DIRECTION_TO_NULL, conn,
         "throttling");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_DRIVER_INDEX, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DRIVER_INDEX, conn,
         new Long(0), "throttling");
 
-    Long linkId = createHdfsLink(conn, connectorId);
-    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK_COPY_SQB_FROM_LINK, conn,
+    Long linkId = createHdfsConnection(conn, connectorId);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
         "EXPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_LINK, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
         new Long(linkId), "EXPORT");
-    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION, conn,
         new Long(linkId), "IMPORT");
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_NAME, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
         "fromJobConfig", "table", Direction.FROM.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_TABLE_INPUT_NAMES, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
         Direction.FROM.toString().toLowerCase(), "fromJobConfig", Direction.FROM.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_NAME, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
         "toJobConfig", "table", Direction.TO.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_TABLE_INPUT_NAMES, conn,
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
         Direction.TO.toString().toLowerCase(), "toJobConfig", Direction.TO.toString());
 
     if (LOG.isTraceEnabled()) {
@@ -681,6 +735,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   /**
    * Pre-register HDFS Connector so that config upgrade will work.
+   * NOTE: This should be used only in the upgrade path
    */
   protected long registerHdfsConnector(Connection conn) {
     if (LOG.isTraceEnabled()) {
@@ -730,13 +785,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Create an HDFS link.
-   * Intended to be used when moving HDFS connector out of driverConfig
+   * Create an HDFS connection ( used only in version 2).
+   * Intended to be used when moving HDFS connector out of the sqoop driver
    * to its own connector.
    *
-   * NOTE: Upgrade path only!
+   * NOTE: Should be used only in the upgrade path!
    */
-  private Long createHdfsLink(Connection conn, Long connectorId) {
+  @Deprecated
+  private Long createHdfsConnection(Connection conn, Long connectorId) {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Creating HDFS link.");
     }
@@ -744,9 +800,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     int result;
     try {
-      stmt = conn.prepareStatement(STMT_INSERT_LINK,
+      stmt = conn.prepareStatement(STMT_INSERT_CONNECTION,
           Statement.RETURN_GENERATED_KEYS);
-      stmt.setString(1, LINK_HDFS);
+      stmt.setString(1, CONNECTOR_HDFS);
       stmt.setLong(2, connectorId);
       stmt.setBoolean(3, true);
       stmt.setNull(4, Types.VARCHAR);
@@ -759,7 +815,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0012,
             Integer.toString(result));
       }
-
       ResultSet rsetConnectionId = stmt.getGeneratedKeys();
 
       if (!rsetConnectionId.next()) {
@@ -767,7 +822,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
 
       if (LOG.isTraceEnabled()) {
-        LOG.trace("Created HDFS link.");
+        LOG.trace("Created HDFS connection.");
       }
 
       return rsetConnectionId.getLong(1);
@@ -782,15 +837,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean haveSuitableInternals(Connection conn) {
-    int version = detectVersion(conn);
-
-    if(version != DerbyRepoConstants.VERSION) {
-      return false;
-    }
-
+  public boolean isRespositorySuitableForUse(Connection conn) {
     // TODO(jarcec): Verify that all structures are present (e.g. something like corruption validation)
-    return true;
+    // NOTE: At this point is is just checking if the repo version matches the version
+    // in the upgraded code
+    return detectRepositoryVersion(conn) == DerbyRepoConstants.LATEST_DERBY_REPOSITORY_VERSION;
   }
 
   /**
@@ -807,7 +858,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       baseConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_BASE_CONNECTOR);
       baseConnectorFetchStmt.setString(1, shortName);
 
-      List<MConnector> connectors = loadConnectors(baseConnectorFetchStmt,conn);
+      List<MConnector> connectors = loadConnectors(baseConnectorFetchStmt, conn);
 
       if (connectors.size()==0) {
         LOG.debug("No connector found by name: " + shortName);
@@ -827,7 +878,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeStatements(baseConnectorFetchStmt);
     }
   }
-
 
   /**
    * {@inheritDoc}
@@ -980,7 +1030,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       closeStatements(stmt);
     }
   }
-
   /**
    * {@inheritDoc}
    */
@@ -1195,7 +1244,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void updateConnector(MConnector mConnector, Connection conn) {
+  public void upgradeConnector(MConnector mConnector, Connection conn) {
     PreparedStatement updateConnectorStatement = null;
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
@@ -1230,7 +1279,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void updateDriver(MDriver mDriver, Connection conn) {
+  public void upgradeDriver(MDriver mDriver, Connection conn) {
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
     try {
@@ -2299,7 +2348,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       baseInputStmt.setBoolean(5, input.isSensitive());
       // String specific column(s)
       if (input.getType().equals(MInputType.STRING)) {
-        MStringInput	strInput = (MStringInput) input;
+        MStringInput  strInput = (MStringInput) input;
         baseInputStmt.setShort(6, strInput.getMaxLength());
       } else {
         baseInputStmt.setNull(6, Types.INTEGER);

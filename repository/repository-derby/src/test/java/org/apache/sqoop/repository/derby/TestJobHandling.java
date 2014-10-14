@@ -17,6 +17,13 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +38,6 @@ import org.apache.sqoop.model.MStringInput;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Test job methods on Derby repository.
  */
@@ -44,17 +49,12 @@ public class TestJobHandling extends DerbyTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-
     derbyConnection = getDerbyDatabaseConnection();
     handler = new DerbyRepositoryHandler();
-
-    // We always needs schema for this test case
-    createSchema();
-
-    loadConnectorLinkConfig();
-
-    // We always needs connection metadata in place
-    loadLinks();
+    // We always needs create/ upgrade schema for this test case
+    createOrUpgradeSchemaForLatestVersion();
+    loadConnectorAndDriverConfig();
+    loadLinksForLatestVersion();
   }
 
   @Test
@@ -67,7 +67,7 @@ public class TestJobHandling extends DerbyTestCase {
       assertEquals(DerbyRepoError.DERBYREPO_0030, ex.getErrorCode());
     }
 
-    loadJobs();
+    loadJobsForLatestVersion();
 
     MJob firstJob = handler.findJob(1, derbyConnection);
     assertNotNull(firstJob);
@@ -104,7 +104,7 @@ public class TestJobHandling extends DerbyTestCase {
     // Load empty list on empty repository
     list = handler.findJobs(derbyConnection);
     assertEquals(0, list.size());
-    loadJobs();
+    loadJobsForLatestVersion();
 
     // Load all two connections on loaded repository
     list = handler.findJobs(derbyConnection);
@@ -128,7 +128,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertFalse(handler.existsJob(4, derbyConnection));
     assertFalse(handler.existsJob(5, derbyConnection));
 
-    loadJobs();
+    loadJobsForLatestVersion();
 
     assertTrue(handler.existsJob(1, derbyConnection));
     assertTrue(handler.existsJob(2, derbyConnection));
@@ -139,7 +139,7 @@ public class TestJobHandling extends DerbyTestCase {
 
   @Test
   public void testInUseJob() throws Exception {
-    loadJobs();
+    loadJobsForLatestVersion();
     loadSubmissions();
 
     assertTrue(handler.inUseJob(1, derbyConnection));
@@ -204,7 +204,7 @@ public class TestJobHandling extends DerbyTestCase {
 
   @Test
   public void testUpdateJob() throws Exception {
-    loadJobs();
+    loadJobsForLatestVersion();
 
     assertCountForTable("SQOOP.SQ_JOB", 4);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
@@ -256,7 +256,7 @@ public class TestJobHandling extends DerbyTestCase {
 
   @Test
   public void testEnableAndDisableJob() throws Exception {
-    loadJobs();
+    loadJobsForLatestVersion();
 
     // disable job 1
     handler.enableJob(1, false, derbyConnection);
@@ -275,7 +275,7 @@ public class TestJobHandling extends DerbyTestCase {
 
   @Test
   public void testDeleteJob() throws Exception {
-    loadJobs();
+    loadJobsForLatestVersion();
 
     handler.deleteJob(1, derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 3);

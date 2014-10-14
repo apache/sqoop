@@ -21,9 +21,14 @@ public final class DerbyRepoConstants {
 
   public static final String CONF_PREFIX_DERBY = "derby.";
 
+  @Deprecated
+  // use only for the upgrade code should be removed soon
   public static final String SYSKEY_VERSION = "version";
 
-  public static final String SYSKEY_DRIVER_VERSION = "driver.version";
+  public static final String SYSKEY_DERBY_REPOSITORY_VERSION = "version";
+
+  // TOOD(VB): SQOOP-1557 move the driver config version to the SQ_CONFIGURABLE, IT SHOULD NOT BE HERE, nor stored in SYSTEM table
+  public static final String SYSKEY_DRIVER_CONFIG_VERSION = "driver.config.version";
 
   /**
    * Expected version of the repository structures.
@@ -43,7 +48,7 @@ public final class DerbyRepoConstants {
    * 4 - Version 1.99.4
    *     Changed to FROM/TO design.
    */
-  public static final int VERSION = 4;
+  public static final int LATEST_DERBY_REPOSITORY_VERSION = 4;
 
   private DerbyRepoConstants() {
     // Disable explicit object creation

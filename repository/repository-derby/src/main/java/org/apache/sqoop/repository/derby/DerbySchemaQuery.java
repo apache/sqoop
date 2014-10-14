@@ -24,6 +24,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * queries create the following tables:
  * <p>
  * <strong>SQ_SYSTEM</strong>: Store for various state information
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_SYSTEM                  |
@@ -33,6 +34,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQM_VALUE: VARCHAR(64)     |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_DIRECTION</strong>: Directions.
@@ -41,12 +43,13 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_DIRECTION                          |
  *    +---------------------------------------+
  *    | SQD_ID: BIGINT PK AUTO-GEN            |
- *    | SQD_NAME: VARCHAR(64)                 | "FROM"|"TO"
+ *    | SQD_NAME: VARCHAR(64)                 |"FROM"|"TO"
  *    +---------------------------------------+
  * </pre>
  * </p>
  * <p>
  * <strong>SQ_CONNECTOR</strong>: Connector registration.
+ *
  * <pre>
  *    +-----------------------------+
  *    | SQ_CONNECTOR                |
@@ -65,21 +68,23 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_CONNECTOR_DIRECTIONS      |
  *    +------------------------------+
  *    | SQCD_ID: BIGINT PK AUTO-GEN  |
- *    | SQCD_CONNECTOR: BIGINT       | FK SQCD_CONNECTOR(SQC_ID)
- *    | SQCD_DIRECTION: BIGINT       | FK SQCD_DIRECTION(SQD_ID)
+ *    | SQCD_CONNECTOR: BIGINT       |FK SQCD_CONNECTOR(SQC_ID)
+ *    | SQCD_DIRECTION: BIGINT       |FK SQCD_DIRECTION(SQD_ID)
  *    +------------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_CONFIG</strong>: Config details.
+ *
  * <pre>
  *    +-------------------------------------+
  *    | SQ_CONFIG                           |
  *    +-------------------------------------+
  *    | SQ_CFG_ID: BIGINT PK AUTO-GEN       |
- *    | SQ_CFG_OWNER: BIGINT                | FK SQ_CFG_OWNER(SQC_ID),NULL for driver
+ *    | SQ_CFG_CONNECTOR: BIGINT            |FK SQ_CFG_CONNECTOR(SQC_ID),NULL for driver
  *    | SQ_CFG_NAME: VARCHAR(64)            |
- *    | SQ_CFG_TYPE: VARCHAR(32)            | "LINK"|"JOB"
+ *    | SQ_CFG_TYPE: VARCHAR(32)            |"LINK"|"JOB"
  *    | SQ_CFG_INDEX: SMALLINT              |
  *    +-------------------------------------+
  * </pre>
@@ -91,30 +96,34 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_CONNECTOR_DIRECTIONS      |
  *    +------------------------------+
  *    | SQCD_ID: BIGINT PK AUTO-GEN  |
- *    | SQCD_CONFIG: BIGINT          | FK SQCD_CONFIG(SQ_CFG_ID)
- *    | SQCD_DIRECTION: BIGINT       | FK SQCD_DIRECTION(SQD_ID)
+ *    | SQCD_CONFIG: BIGINT          |FK SQCD_CONFIG(SQ_CFG_ID)
+ *    | SQCD_DIRECTION: BIGINT       |FK SQCD_DIRECTION(SQD_ID)
  *    +------------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_INPUT</strong>: Input details
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_INPUT                   |
  *    +----------------------------+
  *    | SQI_ID: BIGINT PK AUTO-GEN |
  *    | SQI_NAME: VARCHAR(64)      |
- *    | SQI_CONFIG: BIGINT           | FK SQ_CONFIG(SQ_CFG_ID)
+ *    | SQI_CONFIG: BIGINT         |FK SQ_CONFIG(SQ_CFG_ID)
  *    | SQI_INDEX: SMALLINT        |
- *    | SQI_TYPE: VARCHAR(32)      | "STRING"|"MAP"
+ *    | SQI_TYPE: VARCHAR(32)      |"STRING"|"MAP"
  *    | SQI_STRMASK: BOOLEAN       |
  *    | SQI_STRLENGTH: SMALLINT    |
  *    | SQI_ENUMVALS: VARCHAR(100) |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
- * <strong>SQ_LINK</strong>: Stored connections
+ * <strong>SQ_LINK</strong>: Stored links
+ *
  * <pre>
  *    +--------------------------------+
  *    | SQ_LINK                  |
@@ -129,17 +138,19 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_LNK_ENABLED: BOOLEAN           |
  *    +--------------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_JOB</strong>: Stored jobs
+ *
  * <pre>
  *    +--------------------------------+
  *    | SQ_JOB                         |
  *    +--------------------------------+
  *    | SQB_ID: BIGINT PK AUTO-GEN     |
  *    | SQB_NAME: VARCHAR(64)          |
- *    | SQB_FROM_LINK: BIGINT    | FK SQ_LINK(SQ_LNK_ID)
- *    | SQB_TO_LINK: BIGINT      | FK SQ_LINK(SQ_LNK_ID)
+ *    | SQB_FROM_LINK: BIGINT          |FK SQ_LINK(SQ_LNK_ID)
+ *    | SQB_TO_LINK: BIGINT            |FK SQ_LINK(SQ_LNK_ID)
  *    | SQB_CREATION_USER: VARCHAR(32) |
  *    | SQB_CREATION_DATE: TIMESTAMP   |
  *    | SQB_UPDATE_USER: VARCHAR(32)   |
@@ -147,9 +158,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQB_ENABLED: BOOLEAN           |
  *    +--------------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_LINK_INPUT</strong>: N:M relationship link and input
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_LINK_INPUT              |
@@ -159,9 +172,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_LNKI_VALUE: LONG VARCHAR|
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_JOB_INPUT</strong>: N:M relationship job and input
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_JOB_INPUT               |
@@ -171,9 +186,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQBI_VALUE: LONG VARCHAR   |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_SUBMISSION</strong>: List of submissions
+ *
  * <pre>
  *    +-----------------------------------+
  *    | SQ_JOB_SUBMISSION                 |
@@ -191,9 +208,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQS_EXCEPTION_TRACE: VARCHAR(750) |
  *    +-----------------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_COUNTER_GROUP</strong>: List of counter groups
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_COUNTER_GROUP           |
@@ -202,9 +221,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQG_NAME: VARCHAR(75)      |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_COUNTER</strong>: List of counters
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_COUNTER                 |
@@ -213,9 +234,11 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQR_NAME: VARCHAR(75)      |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_COUNTER_SUBMISSION</strong>: N:M Relationship
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_COUNTER_SUBMISSION      |
@@ -226,17 +249,33 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQRS_VALUE: BIGINT         |
  *    +----------------------------+
  * </pre>
+ *
  * </p>
  */
+
+// NOTE: If you have signed yourself to modify the schema for the repository
+// such as a rename, change in table relationships or constraints, embrace yourself!
+// The following code is supposed to be a chronological order of how the
+// repository schema evolved. So do not ever change the following
+// code directly. Instead make sure the upgrade queries are written to reflect
+// the renames and changes in the table relationships or constraints
+// It would have been nicer and much cleaner
+// if this was not code but sql scripts. Having it in code it is very
+// easy and tempting to rename or make changes to it and easily miss
+// the upgrade code. Not to mention, make sure to
+// the update the tests to use the upgrade queries as well
+// Make sure to add a lot of comments to the upgrade code if there is an
+// ordering dependency to help future contributors to not lose their sleep over
+// enhancing this code
 public final class DerbySchemaQuery {
 
   // DDL: Create schema
   public static final String QUERY_CREATE_SCHEMA_SQOOP =
-      "CREATE SCHEMA " + SCHEMA_SQOOP;
+   "CREATE SCHEMA " + SCHEMA_SQOOP;
 
   public static final String QUERY_SYSSCHEMA_SQOOP =
-    "SELECT SCHEMAID FROM SYS.SYSSCHEMAS WHERE SCHEMANAME = '"
-    + SCHEMA_SQOOP + "'";
+   "SELECT SCHEMAID FROM SYS.SYSSCHEMAS WHERE SCHEMANAME = '"
+   + SCHEMA_SQOOP + "'";
 
   // DDL: Create table SQ_SYSTEM
   public static final String QUERY_CREATE_TABLE_SQ_SYSTEM =
@@ -248,10 +287,10 @@ public final class DerbySchemaQuery {
 
   // DDL: Create table SQ_DIRECTION
   public static final String QUERY_CREATE_TABLE_SQ_DIRECTION =
-      "CREATE TABLE " + TABLE_SQ_DIRECTION + " ("
-      + COLUMN_SQD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQD_NAME + " VARCHAR(64)"
-      + ")";
+   "CREATE TABLE " + TABLE_SQ_DIRECTION + " ("
+   + COLUMN_SQD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+   + COLUMN_SQD_NAME + " VARCHAR(64)"
+   + ")";
 
   // DDL: Create table SQ_CONNECTOR
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
@@ -276,283 +315,293 @@ public final class DerbySchemaQuery {
           + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
       + ")";
 
-  // DDL: Create table SQ_CONFIG ( It stores the configs defined by every connector), if connector is null then it is driver config
-  public static final String QUERY_CREATE_TABLE_SQ_CONFIG =
-      "CREATE TABLE " + TABLE_SQ_CONFIG + " ("
-      + COLUMN_SQ_CFG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQ_CFG_OWNER + " BIGINT, "
-      + COLUMN_SQ_CFG_OPERATION + " VARCHAR(32), "
-      + COLUMN_SQ_CFG_NAME + " VARCHAR(64), "
-      + COLUMN_SQ_CFG_TYPE + " VARCHAR(32), "
-      + COLUMN_SQ_CFG_INDEX + " SMALLINT, "
-      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_SQC + " "
-        + "FOREIGN KEY (" + COLUMN_SQ_CFG_OWNER + ") "
+   // DDL: Create table SQ_FORM
+  public static final String QUERY_CREATE_TABLE_SQ_FORM =
+      "CREATE TABLE " + TABLE_SQ_FORM + " ("
+      + COLUMN_SQF_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQF_CONNECTOR + " BIGINT, "
+      + COLUMN_SQF_OPERATION + " VARCHAR(32), "
+      + COLUMN_SQF_NAME + " VARCHAR(64), "
+      + COLUMN_SQF_TYPE + " VARCHAR(32), "
+      + COLUMN_SQF_INDEX + " SMALLINT, "
+      + "CONSTRAINT " + CONSTRAINT_SQF_SQC + " "
+        + "FOREIGN KEY (" + COLUMN_SQF_CONNECTOR + ") "
           + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
+  // DDL: Create table SQ_CONFIG_DIRECTIONS ( same as SQ_FORM_DIRECTIONS)
+  // Note: that the form was renamed to config at one point and this code was added after the rename
   // DDL: Create table SQ_CONFIG_DIRECTIONS
-  public static final String QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS =
-      "CREATE TABLE " + TABLE_SQ_CONFIG_DIRECTIONS + " ("
-      + COLUMN_SQ_CFG_DIR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQ_CFG_DIR_CONFIG + " BIGINT, "
-      + COLUMN_SQ_CFG_DIR_DIRECTION + " BIGINT, "
-      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_CONFIG + " "
-        + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_CONFIG + ") "
-          + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + "), "
-      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_DIRECTION + " "
-        + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_DIRECTION + ") "
-          + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
-      + ")";
+ public static final String QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS =
+     "CREATE TABLE " + TABLE_SQ_CONFIG_DIRECTIONS + " ("
+     + COLUMN_SQ_CFG_DIR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+     + COLUMN_SQ_CFG_DIR_CONFIG + " BIGINT, "
+     + COLUMN_SQ_CFG_DIR_DIRECTION + " BIGINT, "
+     + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_CONFIG + " "
+       + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_CONFIG + ") "
+         + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + "), "
+     + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_DIRECTION + " "
+       + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_DIRECTION + ") "
+         + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
+     + ")";
+
 
   // DDL: Create table SQ_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_INPUT =
       "CREATE TABLE " + TABLE_SQ_INPUT + " ("
       + COLUMN_SQI_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
       + COLUMN_SQI_NAME + " VARCHAR(64), "
-      + COLUMN_SQI_CONFIG + " BIGINT, "
+      + COLUMN_SQI_FORM + " BIGINT, "
       + COLUMN_SQI_INDEX + " SMALLINT, "
       + COLUMN_SQI_TYPE + " VARCHAR(32), "
       + COLUMN_SQI_STRMASK + " BOOLEAN, "
       + COLUMN_SQI_STRLENGTH + " SMALLINT, "
       + COLUMN_SQI_ENUMVALS + " VARCHAR(100),"
-      + "CONSTRAINT " + CONSTRAINT_SQI_SQ_CFG + " "
-        + "FOREIGN KEY (" + COLUMN_SQI_CONFIG + ") "
-          + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + ")"
+      + "CONSTRAINT " + CONSTRAINT_SQI_SQF + " "
+        + "FOREIGN KEY (" + COLUMN_SQI_FORM + ") "
+          + "REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
       + ")";
 
-  // DDL: Create table SQ_LINK
-  public static final String QUERY_CREATE_TABLE_SQ_LINK =
-      "CREATE TABLE " + TABLE_SQ_LINK + " ("
-      + COLUMN_SQ_LNK_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQ_LNK_CONNECTOR + " BIGINT, "
-      + COLUMN_SQ_LNK_NAME  + " VARCHAR(32),"
-      + COLUMN_SQ_LNK_CREATION_DATE + " TIMESTAMP,"
-      + COLUMN_SQ_LNK_UPDATE_DATE + " TIMESTAMP,"
-      + "CONSTRAINT " + CONSTRAINT_SQ_LNK_SQC + " "
-        + "FOREIGN KEY(" + COLUMN_SQ_LNK_CONNECTOR + ") "
+  // DDL: Create table SQ_CONNECTION
+  public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =
+      "CREATE TABLE " + TABLE_SQ_CONNECTION + " ("
+      + COLUMN_SQN_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + COLUMN_SQN_CONNECTOR + " BIGINT, "
+      + COLUMN_SQN_NAME  + " VARCHAR(32),"
+      + COLUMN_SQN_CREATION_DATE + " TIMESTAMP,"
+      + COLUMN_SQN_UPDATE_DATE + " TIMESTAMP,"
+      + "CONSTRAINT " + CONSTRAINT_SQN_SQC + " "
+        + "FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") "
           + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
       + ")";
 
-  // DDL: Add enabled column to table SQ_LINK
-  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_ENABLED =
-      "ALTER TABLE " + TABLE_SQ_LINK + " ADD "
-      + COLUMN_SQ_LNK_ENABLED + " BOOLEAN "
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_ENABLED =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_ENABLED + " BOOLEAN "
       + "DEFAULT TRUE";
 
-  // DDL: Add creation_user column to table SQ_LINK
-  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_CREATION_USER =
-      "ALTER TABLE " + TABLE_SQ_LINK + " ADD "
-      + COLUMN_SQ_LNK_CREATION_USER + " VARCHAR(32) "
+  // DDL: Add creation_user column to table SQ_CONNECTION
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_CREATION_USER =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_CREATION_USER + " VARCHAR(32) "
       + "DEFAULT NULL";
 
-  // DDL: Add update_user column to table SQ_LINK
-  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_COLUMN_UPDATE_USER =
-      "ALTER TABLE " + TABLE_SQ_LINK + " ADD "
-      + COLUMN_SQ_LNK_UPDATE_USER + " VARCHAR(32) "
+  // DDL: Add update_user column to table SQ_CONNECTION
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTION_ADD_COLUMN_UPDATE_USER =
+      "ALTER TABLE " + TABLE_SQ_CONNECTION + " ADD "
+      + COLUMN_SQN_UPDATE_USER + " VARCHAR(32) "
       + "DEFAULT NULL";
 
-  // DDL: Create table SQ_JOB
-  public static final String QUERY_CREATE_TABLE_SQ_JOB =
-      "CREATE TABLE " + TABLE_SQ_JOB + " ("
-      + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQB_LINK + " BIGINT, "
-      + COLUMN_SQB_NAME + " VARCHAR(64), "
-      + COLUMN_SQB_TYPE + " VARCHAR(64),"
-      + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
-      + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
-      + "CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK + " "
-        + "FOREIGN KEY(" + COLUMN_SQB_LINK + ") "
-          + "REFERENCES " + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")"
-      + ")";
+//DDL: Create table SQ_JOB
+ public static final String QUERY_CREATE_TABLE_SQ_JOB =
+     "CREATE TABLE " + TABLE_SQ_JOB + " ("
+     + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+     + COLUMN_SQB_CONNECTION + " BIGINT, "
+     + COLUMN_SQB_NAME + " VARCHAR(64), "
+     + COLUMN_SQB_TYPE + " VARCHAR(64),"
+     + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
+     + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
+     + "CONSTRAINT " + CONSTRAINT_SQB_SQN + " "
+       + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
+         + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
+     + ")";
 
-  // DDL: Add enabled column to table SQ_JOB
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
-      + COLUMN_SQB_ENABLED + " BOOLEAN "
-      + "DEFAULT TRUE";
 
-  // DDL: Add creation_user column to table SQ_JOB
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
-      + COLUMN_SQB_CREATION_USER + " VARCHAR(32) "
-      + "DEFAULT NULL";
+ // DDL: Add enabled column to table SQ_JOB
+ public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_ENABLED =
+     "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+     + COLUMN_SQB_ENABLED + " BOOLEAN "
+     + "DEFAULT TRUE";
 
-  // DDL: Add update_user column to table SQ_JOB
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
-      + COLUMN_SQB_UPDATE_USER + " VARCHAR(32) "
-      + "DEFAULT NULL";
+ // DDL: Add creation_user column to table SQ_JOB
+ public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_CREATION_USER =
+     "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+     + COLUMN_SQB_CREATION_USER + " VARCHAR(32) "
+     + "DEFAULT NULL";
 
-  // DDL: Create table SQ_LINK_INPUT
-  public static final String QUERY_CREATE_TABLE_SQ_LINK_INPUT =
-      "CREATE TABLE " + TABLE_SQ_LINK_INPUT + " ("
-      + COLUMN_SQ_LNKI_LINK + " BIGINT, "
-      + COLUMN_SQ_LNKI_INPUT + " BIGINT, "
-      + COLUMN_SQ_LNKI_VALUE + " LONG VARCHAR,"
-      + "PRIMARY KEY (" + COLUMN_SQ_LNKI_LINK + ", " + COLUMN_SQ_LNKI_INPUT + "), "
-      + "CONSTRAINT " + CONSTRAINT_SQ_LNKI_SQ_LNK + " "
-        + "FOREIGN KEY (" + COLUMN_SQ_LNKI_LINK + ") "
-          + "REFERENCES " + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + "),"
-      + "CONSTRAINT " + CONSTRAINT_SQ_LNKI_SQI + " "
-        + "FOREIGN KEY (" + COLUMN_SQ_LNKI_INPUT + ") "
+ // DDL: Add update_user column to table SQ_JOB
+ public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_UPDATE_USER =
+     "ALTER TABLE " + TABLE_SQ_JOB + " ADD "
+     + COLUMN_SQB_UPDATE_USER + " VARCHAR(32) "
+     + "DEFAULT NULL";
+
+  // DDL: Create table SQ_CONNECTION_INPUT
+  public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
+      "CREATE TABLE " + TABLE_SQ_CONNECTION_INPUT + " ("
+      + COLUMN_SQNI_CONNECTION + " BIGINT, "
+      + COLUMN_SQNI_INPUT + " BIGINT, "
+      + COLUMN_SQNI_VALUE + " LONG VARCHAR,"
+      + "PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "), "
+      + "CONSTRAINT " + CONSTRAINT_SQNI_SQN + " "
+        + "FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ") "
+          + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
+      + "CONSTRAINT " + CONSTRAINT_SQNI_SQI + " "
+        + "FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") "
           + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
       + ")";
 
-  // DDL: Create table SQ_JOB_INPUT
-  public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
-      "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
-      + COLUMN_SQBI_JOB + " BIGINT, "
-      + COLUMN_SQBI_INPUT + " BIGINT, "
-      + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
-      + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
-      + " CONSTRAINT " + CONSTRAINT_SQBI_SQB + " "
-        + "FOREIGN KEY (" + COLUMN_SQBI_JOB + ") "
-        +  "REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
-      + " CONSTRAINT " + CONSTRAINT_SQBI_SQI + " "
-        + "FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") "
-          + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
-      + ")";
+// DDL: Create table SQ_JOB_INPUT
+ public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
+     "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
+     + COLUMN_SQBI_JOB + " BIGINT, "
+     + COLUMN_SQBI_INPUT + " BIGINT, "
+     + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
+     + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
+     + " CONSTRAINT " + CONSTRAINT_SQBI_SQB + " "
+       + "FOREIGN KEY (" + COLUMN_SQBI_JOB + ") "
+       +  "REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
+     + " CONSTRAINT " + CONSTRAINT_SQBI_SQI + " "
+       + "FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") "
+         + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+     + ")";
 
-  // DDL: Create table SQ_SUBMISSION
-  public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
-    "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
-    + COLUMN_SQS_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-    + COLUMN_SQS_JOB + " BIGINT, "
-    + COLUMN_SQS_STATUS + " VARCHAR(20), "
-    + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
-    + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
-    + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
-    + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
-    + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
-    + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
-    + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
-    + "CONSTRAINT " + CONSTRAINT_SQS_SQB + " "
-      + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") "
-        + "REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
-    +  ")";
+ // DDL: Create table SQ_SUBMISSION
+ public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
+   "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
+   + COLUMN_SQS_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + COLUMN_SQS_JOB + " BIGINT, "
+   + COLUMN_SQS_STATUS + " VARCHAR(20), "
+   + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
+   + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
+   + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
+   + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
+   + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
+   + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
+   + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
+   + "CONSTRAINT " + CONSTRAINT_SQS_SQB + " "
+     + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") "
+       + "REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
+   +  ")";
 
-  // DDL: Add creation_user column to table SQ_SUBMISSION
-  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER =
-      "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
-      + COLUMN_SQS_CREATION_USER + " VARCHAR(32) "
-      + "DEFAULT NULL";
+ // DDL: Add creation_user column to table SQ_SUBMISSION
+ public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_CREATION_USER =
+     "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
+     + COLUMN_SQS_CREATION_USER + " VARCHAR(32) "
+     + "DEFAULT NULL";
 
-  // DDL: Add update_user column to table SQ_SUBMISSION
-  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER =
-      "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
-      + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) "
-      + "DEFAULT NULL";
+ // DDL: Add update_user column to table SQ_SUBMISSION
+ public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER =
+     "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ADD "
+     + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) "
+     + "DEFAULT NULL";
 
-  //DDL: Add update_user column to table SQ_SUBMISSION
-  public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50 =
-     "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ALTER COLUMN "
-     + COLUMN_SQS_EXTERNAL_ID + " SET DATA TYPE VARCHAR(50)";
+ //DDL: Add update_user column to table SQ_SUBMISSION
+ public static final String QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50 =
+    "ALTER TABLE " + TABLE_SQ_SUBMISSION + " ALTER COLUMN "
+    + COLUMN_SQS_EXTERNAL_ID + " SET DATA TYPE VARCHAR(50)";
 
-  // DDL: Create table SQ_COUNTER_GROUP
-  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
-    "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
-    + COLUMN_SQG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-    + COLUMN_SQG_NAME + " VARCHAR(75), "
-    + "PRIMARY KEY (" + COLUMN_SQG_ID + "),"
-    + "UNIQUE ( " + COLUMN_SQG_NAME + ")"
-    + ")";
+ // DDL: Create table SQ_COUNTER_GROUP
+ public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
+   "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
+   + COLUMN_SQG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + COLUMN_SQG_NAME + " VARCHAR(75), "
+   + "PRIMARY KEY (" + COLUMN_SQG_ID + "),"
+   + "UNIQUE ( " + COLUMN_SQG_NAME + ")"
+   + ")";
 
-  // DDL: Create table SQ_COUNTER
-  public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
-    "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
-    + COLUMN_SQR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-    + COLUMN_SQR_NAME + " VARCHAR(75), "
-    + "PRIMARY KEY (" + COLUMN_SQR_ID + "), "
-    + "UNIQUE ( " + COLUMN_SQR_NAME + ")"
-    + ")";
+ // DDL: Create table SQ_COUNTER
+ public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
+   "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
+   + COLUMN_SQR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + COLUMN_SQR_NAME + " VARCHAR(75), "
+   + "PRIMARY KEY (" + COLUMN_SQR_ID + "), "
+   + "UNIQUE ( " + COLUMN_SQR_NAME + ")"
+   + ")";
 
-  // DDL: Create table SQ_COUNTER_SUBMISSION
-  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION =
-    "CREATE TABLE " + TABLE_SQ_COUNTER_SUBMISSION + " ("
-    + COLUMN_SQRS_GROUP + " BIGINT, "
-    + COLUMN_SQRS_COUNTER + " BIGINT, "
-    + COLUMN_SQRS_SUBMISSION + " BIGINT, "
-    + COLUMN_SQRS_VALUE + " BIGINT, "
-    + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
-    + "CONSTRAINT " + CONSTRAINT_SQRS_SQG + " "
-      + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") "
-        + "REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
-    + "CONSTRAINT " + CONSTRAINT_SQRS_SQR + " "
-      + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") "
-        + "REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
-    + "CONSTRAINT " + CONSTRAINT_SQRS_SQS + " "
-      + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") "
-        + "REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
-    + ")";
+ // DDL: Create table SQ_COUNTER_SUBMISSION
+ public static final String QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION =
+   "CREATE TABLE " + TABLE_SQ_COUNTER_SUBMISSION + " ("
+   + COLUMN_SQRS_GROUP + " BIGINT, "
+   + COLUMN_SQRS_COUNTER + " BIGINT, "
+   + COLUMN_SQRS_SUBMISSION + " BIGINT, "
+   + COLUMN_SQRS_VALUE + " BIGINT, "
+   + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
+   + "CONSTRAINT " + CONSTRAINT_SQRS_SQG + " "
+     + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") "
+       + "REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
+   + "CONSTRAINT " + CONSTRAINT_SQRS_SQR + " "
+     + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") "
+       + "REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
+   + "CONSTRAINT " + CONSTRAINT_SQRS_SQS + " "
+     + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") "
+       + "REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
+   + ")";
 
-  // DML: Get system key
-  public static final String STMT_SELECT_SYSTEM =
-    "SELECT "
-    + COLUMN_SQM_VALUE
-    + " FROM " + TABLE_SQ_SYSTEM
-    + " WHERE " + COLUMN_SQM_KEY + " = ?";
+ // DML: Get system key
+ public static final String STMT_SELECT_SYSTEM =
+   "SELECT "
+   + COLUMN_SQM_VALUE
+   + " FROM " + TABLE_SQ_SYSTEM
+   + " WHERE " + COLUMN_SQM_KEY + " = ?";
 
-  // DML: Remove system key
-  public static final String STMT_DELETE_SYSTEM =
-    "DELETE FROM "  + TABLE_SQ_SYSTEM
-    + " WHERE " + COLUMN_SQM_KEY + " = ?";
+//DML: Get deprecated or the new repo version system key
+public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
+   "SELECT "
+   + COLUMN_SQM_VALUE + " FROM " + TABLE_SQ_SYSTEM
+   + " WHERE ( " + COLUMN_SQM_KEY + " = ? )"
+   + " OR  (" + COLUMN_SQM_KEY + " = ? )";
 
-  // DML: Insert new system key
-  public static final String STMT_INSERT_SYSTEM =
-    "INSERT INTO " + TABLE_SQ_SYSTEM + "("
-    + COLUMN_SQM_KEY + ", "
-    + COLUMN_SQM_VALUE + ") "
-    + "VALUES(?, ?)";
+ // DML: Remove system key
+ public static final String STMT_DELETE_SYSTEM =
+   "DELETE FROM "  + TABLE_SQ_SYSTEM
+   + " WHERE " + COLUMN_SQM_KEY + " = ?";
 
-  public static final String STMT_SELECT_SQD_ID_BY_SQD_NAME =
-      "SELECT " + COLUMN_SQD_ID + " FROM " + TABLE_SQ_DIRECTION
-          + " WHERE " + COLUMN_SQD_NAME + "=?";
+ // DML: Insert new system key
+ public static final String STMT_INSERT_SYSTEM =
+   "INSERT INTO " + TABLE_SQ_SYSTEM + "("
+   + COLUMN_SQM_KEY + ", "
+   + COLUMN_SQM_VALUE + ") "
+   + "VALUES(?, ?)";
 
-  public static final String STMT_SELECT_SQD_NAME_BY_SQD_ID =
-      "SELECT " + COLUMN_SQD_NAME + " FROM " + TABLE_SQ_DIRECTION
-          + " WHERE " + COLUMN_SQD_ID + "=?";
+ public static final String STMT_SELECT_SQD_ID_BY_SQD_NAME =
+     "SELECT " + COLUMN_SQD_ID + " FROM " + TABLE_SQ_DIRECTION
+         + " WHERE " + COLUMN_SQD_NAME + "=?";
 
-  // DML: Fetch connector Given Name
-  public static final String STMT_FETCH_BASE_CONNECTOR =
-      "SELECT "
-      + COLUMN_SQC_ID + ", "
-      + COLUMN_SQC_NAME + ", "
-      + COLUMN_SQC_CLASS + ", "
-      + COLUMN_SQC_VERSION
-      + " FROM " + TABLE_SQ_CONNECTOR
-      + " WHERE " + COLUMN_SQC_NAME + " = ?";
+ public static final String STMT_SELECT_SQD_NAME_BY_SQD_ID =
+     "SELECT " + COLUMN_SQD_NAME + " FROM " + TABLE_SQ_DIRECTION
+         + " WHERE " + COLUMN_SQD_ID + "=?";
 
-  // DML: Select all connectors
-  public static final String STMT_SELECT_CONNECTOR_ALL =
-    "SELECT "
-    + COLUMN_SQC_ID + ", "
-    + COLUMN_SQC_NAME + ", "
-    + COLUMN_SQC_CLASS + ", "
-    + COLUMN_SQC_VERSION
-    + " FROM " + TABLE_SQ_CONNECTOR;
+ // DML: Fetch connector Given Name
+ public static final String STMT_FETCH_BASE_CONNECTOR =
+     "SELECT "
+     + COLUMN_SQC_ID + ", "
+     + COLUMN_SQC_NAME + ", "
+     + COLUMN_SQC_CLASS + ", "
+     + COLUMN_SQC_VERSION
+     + " FROM " + TABLE_SQ_CONNECTOR
+     + " WHERE " + COLUMN_SQC_NAME + " = ?";
+
+ // DML: Select all connectors
+ public static final String STMT_SELECT_CONNECTOR_ALL =
+   "SELECT "
+   + COLUMN_SQC_ID + ", "
+   + COLUMN_SQC_NAME + ", "
+   + COLUMN_SQC_CLASS + ", "
+   + COLUMN_SQC_VERSION
+   + " FROM " + TABLE_SQ_CONNECTOR;
 
   // DML: Fetch all configs for a given connector
   public static final String STMT_FETCH_CONFIG_CONNECTOR =
       "SELECT "
       + COLUMN_SQ_CFG_ID + ", "
-      + COLUMN_SQ_CFG_OWNER + ", "
+      + COLUMN_SQ_CFG_CONNECTOR + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
       + " FROM " + TABLE_SQ_CONFIG
-      + " WHERE " + COLUMN_SQ_CFG_OWNER + " = ? "
+      + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " = ? "
       + " ORDER BY " + COLUMN_SQ_CFG_INDEX;
 
   // DML: Fetch all driver configs
   public static final String STMT_FETCH_CONFIG_DRIVER =
       "SELECT "
       + COLUMN_SQ_CFG_ID + ", "
-      + COLUMN_SQ_CFG_OWNER + ", "
+      + COLUMN_SQ_CFG_CONNECTOR + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
       + " FROM " + TABLE_SQ_CONFIG
-      + " WHERE " + COLUMN_SQ_CFG_OWNER + " IS NULL "
+      + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " IS NULL "
       + " ORDER BY " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_INDEX;
 
   // DML: Fetch inputs for a given config
@@ -629,7 +678,7 @@ public final class DerbySchemaQuery {
   // DML: Insert config base
   public static final String STMT_INSERT_CONFIG_BASE =
       "INSERT INTO " + TABLE_SQ_CONFIG + " ("
-      + COLUMN_SQ_CFG_OWNER + ", "
+      + COLUMN_SQ_CFG_CONNECTOR + ", "
       + COLUMN_SQ_CFG_NAME + ", "
       + COLUMN_SQ_CFG_TYPE + ", "
       + COLUMN_SQ_CFG_INDEX
@@ -650,7 +699,7 @@ public final class DerbySchemaQuery {
   // Delete all configs for a given connector
   public static final String STMT_DELETE_CONFIGS_FOR_CONNECTOR =
     "DELETE FROM " + TABLE_SQ_CONFIG
-    + " WHERE " + COLUMN_SQ_CFG_OWNER + " = ?";
+    + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " = ?";
 
   // Delete all inputs for a given connector
   public static final String STMT_DELETE_INPUTS_FOR_CONNECTOR =
@@ -661,7 +710,7 @@ public final class DerbySchemaQuery {
     + COLUMN_SQ_CFG_ID
     + " FROM " + TABLE_SQ_CONFIG
     + " WHERE "
-    + COLUMN_SQ_CFG_OWNER + " = ?)";
+    + COLUMN_SQ_CFG_CONNECTOR + " = ?)";
 
   // Delete all driver inputs
   public static final String STMT_DELETE_DRIVER_INPUTS =
@@ -672,13 +721,12 @@ public final class DerbySchemaQuery {
     + COLUMN_SQ_CFG_ID
     + " FROM " + TABLE_SQ_CONFIG
     + " WHERE "
-    + COLUMN_SQ_CFG_OWNER + " IS NULL)";
+    + COLUMN_SQ_CFG_CONNECTOR + " IS NULL)";
 
   // Delete all driver configs
   public static final String STMT_DELETE_DRIVER_CONFIGS =
     "DELETE FROM " + TABLE_SQ_CONFIG
-    + " WHERE " + COLUMN_SQ_CFG_OWNER + " IS NULL";
-
+    + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " IS NULL";
 
 
   // Update the connector
@@ -688,6 +736,18 @@ public final class DerbySchemaQuery {
     + COLUMN_SQC_CLASS + " = ?, "
     + COLUMN_SQC_VERSION + " = ? "
     + " WHERE " + COLUMN_SQC_ID + " = ?";
+
+  // DML: Insert new connection
+ @Deprecated // used only in upgrade path
+ public static final String STMT_INSERT_CONNECTION = 
+    "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
+     + COLUMN_SQN_NAME + ", "
+     + COLUMN_SQN_CONNECTOR + ","
+     + COLUMN_SQN_ENABLED + ", "
+     + COLUMN_SQN_CREATION_USER + ", "
+     + COLUMN_SQN_CREATION_DATE + ", "
+     + COLUMN_SQN_UPDATE_USER + ", " + COLUMN_SQN_UPDATE_DATE
+     + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new link
   public static final String STMT_INSERT_LINK =
@@ -1016,120 +1076,214 @@ public final class DerbySchemaQuery {
       + COLUMN_SQC_VERSION + " SET DATA TYPE VARCHAR(64)";
 
   // Version 4 Upgrade
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_LINK_TO_SQB_FROM_LINK =
-      "RENAME COLUMN " + TABLE_SQ_JOB + "." + COLUMN_SQB_LINK
-        + " TO " + COLUMN_SQB_FROM_LINK;
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_RENAME_COLUMN_SQB_CONNECTION_TO_SQB_FROM_CONNECTION =
+      "RENAME COLUMN " + TABLE_SQ_JOB + "." + COLUMN_SQB_CONNECTION
+        + " TO " + COLUMN_SQB_FROM_CONNECTION;
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_LINK =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD COLUMN " + COLUMN_SQB_TO_LINK
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_COLUMN_SQB_TO_CONNECTION =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD COLUMN " + COLUMN_SQB_TO_CONNECTION
         + " BIGINT";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQ_LNK =
-      "ALTER TABLE " + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK;
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_CONSTRAINT_SQB_SQN =
+      "ALTER TABLE " + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQN;
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_FROM =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK_FROM
-          + " FOREIGN KEY (" + COLUMN_SQB_FROM_LINK + ") REFERENCES "
-          + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")";
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQN_FROM
+          + " FOREIGN KEY (" + COLUMN_SQB_FROM_CONNECTION + ") REFERENCES "
+          + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQ_LNK_TO =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK_TO
-        + " FOREIGN KEY (" + COLUMN_SQB_TO_LINK + ") REFERENCES "
-        + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")";
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO =
+      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQN_TO
+        + " FOREIGN KEY (" + COLUMN_SQB_TO_CONNECTION + ") REFERENCES "
+        + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_RENAME_COLUMN_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION =
-    "RENAME COLUMN " + TABLE_SQ_CONFIG + "." + COLUMN_SQ_CFG_OPERATION
-      + " TO " + COLUMN_SQ_CFG_DIRECTION;
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_RENAME_COLUMN_SQF_OPERATION_TO_SQF_DIRECTION =
+    "RENAME COLUMN " + TABLE_SQ_FORM + "." + COLUMN_SQF_OPERATION
+      + " TO " + COLUMN_SQF_DIRECTION;
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_OPERATION_TO_SQ_CFG_DIRECTION =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET " + COLUMN_SQ_CFG_DIRECTION
-        + "=? WHERE " + COLUMN_SQ_CFG_DIRECTION + "=?"
-          + " AND " + COLUMN_SQ_CFG_OWNER + " IS NOT NULL";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION
+        + "=? WHERE " + COLUMN_SQF_DIRECTION + "=?"
+          + " AND " + COLUMN_SQF_CONNECTOR + " IS NOT NULL";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_CONNECTOR =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET " + COLUMN_SQ_CFG_OWNER + "= ?"
-          + " WHERE " + COLUMN_SQ_CFG_OWNER + " IS NULL AND "
-          + COLUMN_SQ_CFG_NAME + " IN (?, ?)";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_CONNECTOR + "= ?"
+          + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL AND "
+          + COLUMN_SQF_NAME + " IN (?, ?)";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_CONNECTOR_HDFS_CONFIG_DIRECTION =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET " + COLUMN_SQ_CFG_DIRECTION + "= ?"
-        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION + "= ?"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK_COPY_SQB_FROM_LINK =
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION =
       "UPDATE " + TABLE_SQ_JOB + " SET "
-        + COLUMN_SQB_TO_LINK + "=" + COLUMN_SQB_FROM_LINK
+        + COLUMN_SQB_TO_CONNECTION + "=" + COLUMN_SQB_FROM_CONNECTION
         + " WHERE " + COLUMN_SQB_TYPE + "= ?";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_LINK =
-      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_FROM_LINK + "=?"
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION =
+      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_FROM_CONNECTION + "=?"
         + " WHERE " + COLUMN_SQB_TYPE + "= ?";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_LINK =
-      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_TO_LINK + "=?"
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION =
+      "UPDATE " + TABLE_SQ_JOB + " SET " + COLUMN_SQB_TO_CONNECTION + "=?"
         + " WHERE " + COLUMN_SQB_TYPE + "= ?";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_SQ_CFG_NAME =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET "
-          + COLUMN_SQ_CFG_NAME + "= ?"
-          + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?"
-          + " AND " + COLUMN_SQ_CFG_DIRECTION + "= ?";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+          + COLUMN_SQF_NAME + "= ?"
+          + " WHERE " + COLUMN_SQF_NAME + "= ?"
+          + " AND " + COLUMN_SQF_DIRECTION + "= ?";
 
   /**
-   * Intended to rename configs based on direction.
-   * e.g. If SQ_CONFIG.SQ_CFG_NAME = 'table' and parameter 1 = 'from'
-   * then SQ_CONFIG.SQ_CFG_NAME = 'fromJobConfig'.
+   * Intended to rename forms based on direction.
+   * e.g. If SQ_FORM.SQF_NAME = 'table' and parameter 1 = 'from'
+   * then SQ_FORM.SQF_NAME = 'fromTable'.
    */
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_TABLE_INPUT_NAMES =
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES =
       "UPDATE " + TABLE_SQ_INPUT + " SET "
           + COLUMN_SQI_NAME + "=("
           + "? || UPPER(SUBSTR(" + COLUMN_SQI_NAME + ",1,1))"
           + " || SUBSTR(" + COLUMN_SQI_NAME + ",2) )"
-          + " WHERE " + COLUMN_SQI_CONFIG + " IN ("
-          + " SELECT " + COLUMN_SQ_CFG_ID + " FROM " + TABLE_SQ_CONFIG + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?"
-          + " AND " + COLUMN_SQ_CFG_DIRECTION + "= ?)";
+          + " WHERE " + COLUMN_SQI_FORM + " IN ("
+          + " SELECT " + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_NAME + "= ?"
+          + " AND " + COLUMN_SQF_DIRECTION + "= ?)";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_DIRECTION_TO_NULL =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET "
-        + COLUMN_SQ_CFG_DIRECTION + "= NULL"
-        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DIRECTION_TO_NULL =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+        + COLUMN_SQF_DIRECTION + "= NULL"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
 
-  public static final String QUERY_SELECT_THROTTLING_CONFIG_INPUT_IDS =
+  public static final String QUERY_SELECT_THROTTLING_FORM_INPUT_IDS =
       "SELECT SQI." + COLUMN_SQI_ID + " FROM " + TABLE_SQ_INPUT + " SQI"
-          + " INNER JOIN " + TABLE_SQ_CONFIG + " SQ_CFG ON SQI." + COLUMN_SQI_CONFIG + "=SQ_CFG." + COLUMN_SQ_CFG_ID
-          + " WHERE SQ_CFG." + COLUMN_SQ_CFG_NAME + "='throttling' AND SQ_CFG." + COLUMN_SQ_CFG_DIRECTION + "=?";
+          + " INNER JOIN " + TABLE_SQ_FORM + " SQF ON SQI." + COLUMN_SQI_FORM + "=SQF." + COLUMN_SQF_ID
+          + " WHERE SQF." + COLUMN_SQF_NAME + "='throttling' AND SQF." + COLUMN_SQF_DIRECTION + "=?";
 
   /**
    * Intended to change SQ_JOB_INPUT.SQBI_INPUT from EXPORT
-   * throttling config, to IMPORT throttling config.
+   * throttling form, to IMPORT throttling form.
    */
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_CONFIG_INPUTS =
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_FORM_INPUTS =
       "UPDATE " + TABLE_SQ_JOB_INPUT + " SQBI SET"
-        + " SQBI." + COLUMN_SQBI_INPUT + "=(" + QUERY_SELECT_THROTTLING_CONFIG_INPUT_IDS
+        + " SQBI." + COLUMN_SQBI_INPUT + "=(" + QUERY_SELECT_THROTTLING_FORM_INPUT_IDS
           + " AND SQI." + COLUMN_SQI_NAME + "=("
             + "SELECT SQI2." + COLUMN_SQI_NAME + " FROM " + TABLE_SQ_INPUT + " SQI2"
             + " WHERE SQI2." + COLUMN_SQI_ID + "=SQBI." + COLUMN_SQBI_INPUT + " FETCH FIRST 1 ROWS ONLY"
           +   "))"
-        + "WHERE SQBI." + COLUMN_SQBI_INPUT + " IN (" + QUERY_SELECT_THROTTLING_CONFIG_INPUT_IDS + ")";
+        + "WHERE SQBI." + COLUMN_SQBI_INPUT + " IN (" + QUERY_SELECT_THROTTLING_FORM_INPUT_IDS + ")";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_REMOVE_EXTRA_CONFIG_INPUTS =
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_FORM_INPUTS =
       "DELETE FROM " + TABLE_SQ_INPUT + " SQI"
-        + " WHERE SQI." + COLUMN_SQI_CONFIG + " IN ("
-          + "SELECT SQ_CFG." + COLUMN_SQ_CFG_ID + " FROM " + TABLE_SQ_CONFIG + " SQ_CFG "
-          + " WHERE SQ_CFG." + COLUMN_SQ_CFG_NAME + "= ?"
-          + " AND SQ_CFG." + COLUMN_SQ_CFG_DIRECTION + "= ?)";
+        + " WHERE SQI." + COLUMN_SQI_FORM + " IN ("
+          + "SELECT SQF." + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " SQF "
+          + " WHERE SQF." + COLUMN_SQF_NAME + "= ?"
+          + " AND SQF." + COLUMN_SQF_DIRECTION + "= ?)";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_REMOVE_EXTRA_DRIVER_CONFIG =
-      "DELETE FROM " + TABLE_SQ_CONFIG
-        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?"
-        + " AND " + COLUMN_SQ_CFG_DIRECTION + "= ?";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_REMOVE_EXTRA_DRIVER_FORM =
+      "DELETE FROM " + TABLE_SQ_FORM
+        + " WHERE " + COLUMN_SQF_NAME + "= ?"
+        + " AND " + COLUMN_SQF_DIRECTION + "= ?";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_UPDATE_DRIVER_INDEX =
-      "UPDATE " + TABLE_SQ_CONFIG + " SET "
-        + COLUMN_SQ_CFG_INDEX + "= ?"
-        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DRIVER_INDEX =
+      "UPDATE " + TABLE_SQ_FORM + " SET "
+        + COLUMN_SQF_INDEX + "= ?"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
 
   public static final String QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE =
       "ALTER TABLE " + TABLE_SQ_JOB + " DROP COLUMN " + COLUMN_SQB_TYPE;
+
+  // rename upgrades as part of the refactoring SQOOP-1498
+  // table rename for CONNECTION-> LINK
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_1 = "ALTER TABLE "
+      + TABLE_SQ_CONNECTION_INPUT + " DROP CONSTRAINT " + CONSTRAINT_SQNI_SQI;
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_2 = "ALTER TABLE "
+      + TABLE_SQ_CONNECTION_INPUT + " DROP CONSTRAINT " +   CONSTRAINT_SQNI_SQN;
+
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_3 = "ALTER TABLE "
+      + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQN_FROM;
+
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_4 = "ALTER TABLE "
+      + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQN_TO;
+
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_TO_SQ_LINK = "RENAME TABLE "
+      + TABLE_SQ_CONNECTION + " TO SQ_LINK";
+
+  // column only renames for SQ_CONNECTION
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_ID + " TO " + COLUMN_SQ_LNK_ID;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_2 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_NAME + " TO " + COLUMN_SQ_LNK_NAME;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_3 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_CONNECTOR + " TO " + COLUMN_SQ_LNK_CONNECTOR;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_4 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_CREATION_USER + " TO " + COLUMN_SQ_LNK_CREATION_USER;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_5 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_CREATION_DATE + " TO " + COLUMN_SQ_LNK_CREATION_DATE;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_6 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_UPDATE_USER + " TO " + COLUMN_SQ_LNK_UPDATE_USER;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_7 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_UPDATE_DATE + " TO " + COLUMN_SQ_LNK_UPDATE_DATE;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_8 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQN_ENABLED + " TO " + COLUMN_SQ_LNK_ENABLED;
+
+  // table rename for CONNECTION_INPUT -> LINK_INPUT
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_TO_SQ_LINK_INPUT = "RENAME TABLE "
+      + TABLE_SQ_CONNECTION_INPUT + " TO SQ_LINK_INPUT";
+  // column renames for SQ_CONNECTION_INPUT
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_LINK_INPUT + "." + COLUMN_SQNI_CONNECTION + " TO " + COLUMN_SQ_LNKI_LINK;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_2 = "RENAME COLUMN "
+      + TABLE_SQ_LINK_INPUT + "." + COLUMN_SQNI_INPUT + " TO " + COLUMN_SQ_LNKI_INPUT;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_3 = "RENAME COLUMN "
+      + TABLE_SQ_LINK_INPUT + "." + COLUMN_SQNI_VALUE + " TO " + COLUMN_SQ_LNKI_VALUE;
+  // add the dropped LINK table constraint to the LINK_INPUT
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_LINK_INPUT + " ADD CONSTRAINT " + CONSTRAINT_SQ_LNKI_SQ_LNK + " "
+      + "FOREIGN KEY (" + COLUMN_SQ_LNKI_LINK + ") " + "REFERENCES " + TABLE_SQ_LINK + " ("
+      + COLUMN_SQ_LNK_ID + ")";
+
+  // table rename for FORM-> CONFIG
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_INPUT + " DROP CONSTRAINT " + CONSTRAINT_SQI_SQF;
+
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_TO_SQ_CONFIG = "RENAME TABLE "
+      + TABLE_SQ_FORM + " TO SQ_CONFIG";
+
+  // column and constraint renames for SQ_FORM
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_ID + " TO " + COLUMN_SQ_CFG_ID;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_2 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_CONNECTOR + " TO " + COLUMN_SQ_CFG_CONNECTOR;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_3 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_DIRECTION + " TO " + COLUMN_SQ_CFG_DIRECTION;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_4 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_NAME + " TO " + COLUMN_SQ_CFG_NAME;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_5 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_TYPE + " TO " + COLUMN_SQ_CFG_TYPE;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_6 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQF_INDEX + " TO " + COLUMN_SQ_CFG_INDEX;
+
+
+  // column rename and constraint add for SQ_INPUT
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_INPUT_FORM_COLUMN = "RENAME COLUMN "
+      + TABLE_SQ_INPUT + "." + COLUMN_SQI_FORM + " TO " + COLUMN_SQI_CONFIG;
+
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_INPUT_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_INPUT + " ADD CONSTRAINT " + CONSTRAINT_SQI_SQ_CFG + " " + "FOREIGN KEY ("
+      + COLUMN_SQI_CONFIG + ") " + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + ")";
+
+  // column rename and constraint add for SQ_JOB ( from and to link)
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_JOB + "." + COLUMN_SQB_FROM_CONNECTION + " TO " + COLUMN_SQB_FROM_LINK;
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_COLUMN_2 = "RENAME COLUMN "
+      + TABLE_SQ_JOB + "." + COLUMN_SQB_TO_CONNECTION + " TO " + COLUMN_SQB_TO_LINK;
+
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_FROM = "ALTER TABLE "
+      + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK_FROM + " FOREIGN KEY ("
+      + COLUMN_SQB_FROM_LINK + ") REFERENCES " + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")";
+
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_TO = "ALTER TABLE "
+      + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK_TO + " FOREIGN KEY ("
+      + COLUMN_SQB_TO_LINK + ") REFERENCES " + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")";
 
   public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME =
       "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT "
