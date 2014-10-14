@@ -58,13 +58,12 @@ public class  ConfigUtils {
     return toConfigs(configuration.getClass(), configuration);
   }
 
-  public static List<MConfig> toConfigs(Class klass) {
+  public static List<MConfig> toConfigs(Class<?> klass) {
     return toConfigs(klass, null);
   }
 
-  @SuppressWarnings("unchecked")
-  public static List<MConfig> toConfigs(Class klass, Object configuration) {
-    Set<String> formNames = new HashSet<String>();
+  public static List<MConfig> toConfigs(Class<?> klass, Object configuration) {
+    Set<String> configNames = new HashSet<String>();
 
     ConfigurationClass configurationClass =
       (ConfigurationClass)klass.getAnnotation(ConfigurationClass.class);
@@ -83,12 +82,12 @@ public class  ConfigUtils {
 
       // Each field that should be part of user input should have Input
       // annotation.
-      Config formAnnotation = field.getAnnotation(Config.class);
+      Config configAnnotation = field.getAnnotation(Config.class);
 
-      if (formAnnotation != null) {
-        String formName = getFormName(field, formAnnotation, formNames);
+      if (configAnnotation != null) {
+        String configName = getConfigName(field, configAnnotation, configNames);
 
-        Class type = field.getType();
+        Class<?> type = field.getType();
 
         Object value = null;
         if(configuration != null) {
@@ -100,7 +99,7 @@ public class  ConfigUtils {
           }
         }
 
-        configs.add(toConfig(formName, type, value));
+        configs.add(toConfig(configName, type, value));
       }
     }
 
@@ -108,7 +107,7 @@ public class  ConfigUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static MConfig toConfig(String formName, Class klass, Object object) {
+  private static MConfig toConfig(String configName, Class klass, Object object) {
      ConfigClass global =
       (ConfigClass)klass.getAnnotation(ConfigClass.class);
 
@@ -126,7 +125,7 @@ public class  ConfigUtils {
       field.setAccessible(true);
 
       String fieldName = field.getName();
-      String inputName = formName + "." + fieldName;
+      String inputName = configName + "." + fieldName;
 
       // Each field that should be part of user input should have Input
       // annotation.
@@ -182,30 +181,30 @@ public class  ConfigUtils {
       }
     }
 
-    return new MConfig(formName, inputs);
+    return new MConfig(configName, inputs);
   }
 
   private static Field getFieldFromName(Class<?> klass, String name) {
-    Field formField;
+    Field configField;
     try {
-      formField = klass.getDeclaredField(name);
+      configField = klass.getDeclaredField(name);
     } catch (NoSuchFieldException e) {
-      // reverse lookup form field from custom form name
+      // reverse lookup config field from custom config name
       if (name != null) {
         for (Field field : klass.getDeclaredFields()) {
-          Config formAnnotation = field.getAnnotation(Config.class);
-          if (formAnnotation == null) {
+          Config configAnnotation = field.getAnnotation(Config.class);
+          if (configAnnotation == null) {
             continue;
           }
-          if (!StringUtils.isEmpty(formAnnotation.name()) && name.equals(formAnnotation.name())) {
+          if (!StringUtils.isEmpty(configAnnotation.name()) && name.equals(configAnnotation.name())) {
             return field;
           }
         }
       }
-      throw new SqoopException(ModelError.MODEL_006, "Missing field " + name + " on form class "
+      throw new SqoopException(ModelError.MODEL_006, "Missing field " + name + " on config class "
           + klass.getCanonicalName(), e);
     }
-    return formField;
+    return configField;
   }
 
   /**
@@ -214,6 +213,7 @@ public class  ConfigUtils {
    * @param configs Input config list
    * @param configuration Output configuration object
    */
+  @SuppressWarnings("unchecked")
   public static void fromConfigs(List<MConfig> configs, Object configuration) {
     Class klass = configuration.getClass();
 
@@ -226,10 +226,10 @@ public class  ConfigUtils {
           "Missing field " + config.getName() + " on config class " + klass.getCanonicalName(), e);
       }
 
-      Field formField = getFieldFromName(klass, config.getName());
+      configField = getFieldFromName(klass, config.getName());
       // We need to access this field even if it would be declared as private
       configField.setAccessible(true);
-      Class configClass = configField.getType();
+      Class<?> configClass = configField.getType();
       Object newValue = ClassUtils.instantiate(configClass);
 
       if (newValue == null) {
@@ -366,7 +366,7 @@ public class  ConfigUtils {
   @SuppressWarnings("unchecked")
   public static String toJson(Object configuration) {
     Class klass = configuration.getClass();
-    Set<String> formNames = new HashSet<String>();
+    Set<String> configNames = new HashSet<String>();
     ConfigurationClass configurationClass =
       (ConfigurationClass)klass.getAnnotation(ConfigurationClass.class);
 
@@ -379,37 +379,37 @@ public class  ConfigUtils {
     JSONObject jsonOutput = new JSONObject();
 
     // Iterate over all declared fields
-    for (Field formField : klass.getDeclaredFields()) {
-      formField.setAccessible(true);
+    for (Field configField : klass.getDeclaredFields()) {
+      configField.setAccessible(true);
 
       // We're processing only config validations
-      Config formAnnotation = formField.getAnnotation(Config.class);
-      if(formAnnotation == null) {
+      Config configAnnotation = configField.getAnnotation(Config.class);
+      if(configAnnotation == null) {
         continue;
       }
-      String formName = getFormName(formField, formAnnotation, formNames);
+      String configName = getConfigName(configField, configAnnotation, configNames);
 
-      Object formValue;
+      Object configValue;
       try {
-        formValue = formField.get(configuration);
+        configValue = configField.get(configuration);
       } catch (IllegalAccessException e) {
         throw new SqoopException(ModelError.MODEL_005, "Issue with field "
-            + formName, e);
+            + configName, e);
       }
 
       JSONObject jsonConfig = new JSONObject();
 
       // Now process each input on the config
-      for(Field inputField : formField.getType().getDeclaredFields()) {
+      for(Field inputField : configField.getType().getDeclaredFields()) {
         inputField.setAccessible(true);
         String inputName = inputField.getName();
 
         Object value;
         try {
-          value = inputField.get(formValue);
+          value = inputField.get(configValue);
         } catch (IllegalAccessException e) {
           throw new SqoopException(ModelError.MODEL_005, "Issue with field "
-              + formName + "." + inputName, e);
+              + configName + "." + inputName, e);
         }
 
         Input inputAnnotation = inputField.getAnnotation(Input.class);
@@ -421,7 +421,7 @@ public class  ConfigUtils {
           // We need to support NULL, so we do not support primitive types
           if (type.isPrimitive()) {
             throw new SqoopException(ModelError.MODEL_007,
-                "Detected primitive type " + type + " for field " + formName
+                "Detected primitive type " + type + " for field " + configName
                     + "." + inputName);
           }
 
@@ -441,12 +441,12 @@ public class  ConfigUtils {
             jsonConfig.put(inputName, value);
           }else {
             throw new SqoopException(ModelError.MODEL_004,
-              "Unsupported type " + type.getName() + " for input " + formName + "." + inputName);
+              "Unsupported type " + type.getName() + " for input " + configName + "." + inputName);
           }
         }
       }
 
-      jsonOutput.put(formName, jsonConfig);
+      jsonOutput.put(configName, jsonConfig);
     }
     return jsonOutput.toJSONString();
   }
@@ -458,10 +458,11 @@ public class  ConfigUtils {
    * @param json JSON representation of the configuration object
    * @param configuration ConfigurationGroup object to be filled
    */
+  @SuppressWarnings("unchecked")
   public static void fillValues(String json, Object configuration) {
-    Class klass = configuration.getClass();
+    Class<?> klass = configuration.getClass();
 
-    Set<String> formNames = new HashSet<String>();
+    Set<String> configNames = new HashSet<String>();
     JSONObject jsonConfigs = (JSONObject) JSONValue.parse(json);
 
     for(Field configField : klass.getDeclaredFields()) {
@@ -469,11 +470,11 @@ public class  ConfigUtils {
       String configName = configField.getName();
 
       // We're processing only config validations
-      Config formAnnotation = configField.getAnnotation(Config.class);
-      if(formAnnotation == null) {
+      Config configAnnotation = configField.getAnnotation(Config.class);
+      if(configAnnotation == null) {
         continue;
       }
-      String formName = getFormName(configField, formAnnotation, formNames);
+      configName = getConfigName(configField, configAnnotation, configNames);
 
       try {
         configField.set(configuration, configField.getType().newInstance());
@@ -511,7 +512,7 @@ public class  ConfigUtils {
           continue;
         }
 
-        Class type = inputField.getType();
+        Class<?> type = inputField.getType();
 
         try {
           if(type == String.class) {
@@ -541,38 +542,38 @@ public class  ConfigUtils {
     }
   }
 
-  private static String getFormName(Field member, Config annotation, Set<String> existingFormNames) {
+  private static String getConfigName(Field member, Config annotation, Set<String> existingConfigNames) {
     if (StringUtils.isEmpty(annotation.name())) {
       return member.getName();
     } else {
-      checkForValidFormName(existingFormNames, annotation.name());
-      existingFormNames.add(annotation.name());
+      checkForValidConfigName(existingConfigNames, annotation.name());
+      existingConfigNames.add(annotation.name());
       return annotation.name();
     }
   }
 
-  private static void checkForValidFormName(Set<String> existingFormNames,
-      String customFormName) {
+  private static void checkForValidConfigName(Set<String> existingConfigNames,
+      String customConfigName) {
     // uniqueness across fields check
-    if (existingFormNames.contains(customFormName)) {
+    if (existingConfigNames.contains(customConfigName)) {
       throw new SqoopException(ModelError.MODEL_012,
-          "Issue with field form name " + customFormName);
+          "Issue with field config name " + customConfigName);
     }
 
-    if (!Character.isJavaIdentifierStart(customFormName.toCharArray()[0])) {
+    if (!Character.isJavaIdentifierStart(customConfigName.toCharArray()[0])) {
       throw new SqoopException(ModelError.MODEL_013,
-          "Issue with field form name " + customFormName);
+          "Issue with field config name " + customConfigName);
     }
-    for (Character c : customFormName.toCharArray()) {
+    for (Character c : customConfigName.toCharArray()) {
       if (Character.isJavaIdentifierPart(c))
         continue;
       throw new SqoopException(ModelError.MODEL_013,
-          "Issue with field form name " + customFormName);
+          "Issue with field config name " + customConfigName);
     }
 
-    if (customFormName.length() > 30) {
+    if (customConfigName.length() > 30) {
       throw new SqoopException(ModelError.MODEL_014,
-          "Issue with field form name " + customFormName);
+          "Issue with field config name " + customConfigName);
 
     }
   }
@@ -633,5 +634,4 @@ public class  ConfigUtils {
       throw new SqoopException(ModelError.MODEL_015, e);
     }
   }
-
 }

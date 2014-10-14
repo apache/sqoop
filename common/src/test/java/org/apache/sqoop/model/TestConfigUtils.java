@@ -26,9 +26,6 @@ import junit.framework.TestCase;
 
 import org.apache.sqoop.common.SqoopException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 /**
  * Test config utils
  */
@@ -52,7 +49,7 @@ public class TestConfigUtils extends TestCase {
 
   public void testConfigsMissingAnnotation() {
     try {
-      ConfigUtils.toConfigs(ConfigWithout.class);
+      ConfigUtils.toConfigs(ConfigWithoutAnnotation.class);
     } catch(SqoopException ex) {
       assertEquals(ModelError.MODEL_003, ex.getErrorCode());
       return;
@@ -61,9 +58,9 @@ public class TestConfigUtils extends TestCase {
     fail("Correct exception wasn't thrown");
   }
 
-  public void testNonUniqueFormNameAttributes() {
+  public void testNonUniqueConfigNameAttributes() {
     try {
-      ConfigUtils.toConfigs(ConfigurationWithNonUniqueFormNameAttribute.class);
+      ConfigUtils.toConfigs(ConfigurationWithNonUniqueConfigNameAttribute.class);
     } catch (SqoopException ex) {
       assertEquals(ModelError.MODEL_012, ex.getErrorCode());
       return;
@@ -72,20 +69,19 @@ public class TestConfigUtils extends TestCase {
     fail("Correct exception wasn't thrown");
   }
 
-  public void testInvalidFormNameAttribute() {
+  public void testInvalidConfigNameAttribute() {
     try {
-      ConfigUtils.toConfigs(ConfigurationWithInvalidFormNameAttribute.class);
+      ConfigUtils.toConfigs(ConfigurationWithInvalidConfigNameAttribute.class);
     } catch (SqoopException ex) {
       assertEquals(ModelError.MODEL_013, ex.getErrorCode());
       return;
     }
-
     fail("Correct exception wasn't thrown");
   }
 
-  public void testInvalidFormNameAttributeLength() {
+  public void testInvalidConfigNameAttributeLength() {
     try {
-      ConfigUtils.toConfigs(ConfigurationWithInvalidFormNameAttributeLength.class);
+      ConfigUtils.toConfigs(ConfigurationWithInvalidConfigNameAttributeLength.class);
     } catch (SqoopException ex) {
       assertEquals(ModelError.MODEL_014, ex.getErrorCode());
       return;
@@ -196,36 +192,36 @@ public class TestConfigUtils extends TestCase {
   }
 
   @ConfigurationClass
-  public static class ConfigurationWithNonUniqueFormNameAttribute {
-    public ConfigurationWithNonUniqueFormNameAttribute() {
-      aForm = new InvalidConfig();
-      bForm = new InvalidConfig();
+  public static class ConfigurationWithNonUniqueConfigNameAttribute {
+    public ConfigurationWithNonUniqueConfigNameAttribute() {
+      aConfig = new InvalidConfig();
+      bConfig = new InvalidConfig();
     }
 
     @Config(name = "sameName")
-    InvalidConfig aForm;
+    InvalidConfig aConfig;
     @Config(name = "sameName")
-    InvalidConfig bForm;
+    InvalidConfig bConfig;
   }
 
   @ConfigurationClass
-  public static class ConfigurationWithInvalidFormNameAttribute {
-    public ConfigurationWithInvalidFormNameAttribute() {
-      invalidForm = new InvalidConfig();
+  public static class ConfigurationWithInvalidConfigNameAttribute {
+    public ConfigurationWithInvalidConfigNameAttribute() {
+      invalidConfig = new InvalidConfig();
     }
 
-    @Config(name = "#_form")
-    InvalidConfig invalidForm;
+    @Config(name = "#_config")
+    InvalidConfig invalidConfig;
   }
 
   @ConfigurationClass
-  public static class ConfigurationWithInvalidFormNameAttributeLength {
-    public ConfigurationWithInvalidFormNameAttributeLength() {
-      invalidLengthForm = new InvalidConfig();
+  public static class ConfigurationWithInvalidConfigNameAttributeLength {
+    public ConfigurationWithInvalidConfigNameAttributeLength() {
+      invalidLengthConfig = new InvalidConfig();
     }
 
-    @Config(name = "longest_form_more_than_30_characers")
-    InvalidConfig invalidLengthForm;
+    @Config(name = "longest_config_more_than_30_characers")
+    InvalidConfig invalidLengthConfig;
   }
 
   @ConfigurationClass
@@ -280,7 +276,7 @@ public class TestConfigUtils extends TestCase {
     @Input int value;
   }
 
-  public static class ConfigWithout {
+  public static class ConfigWithoutAnnotation {
   }
 
   enum Enumeration {
