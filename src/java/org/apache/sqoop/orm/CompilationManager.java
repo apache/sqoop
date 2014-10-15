@@ -349,8 +349,11 @@ public class CompilationManager {
       if (null != jstream) {
         try {
           jstream.close();
+          Thread.sleep(5000);
         } catch (IOException ioe) {
           LOG.warn("IOException closing jar stream: " + ioe.toString());
+        } catch (InterruptedException e) {
+          LOG.warn("InterruptedException during write jar file: " + e.toString());
         }
       }
 
