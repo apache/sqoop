@@ -44,6 +44,10 @@ fi
 MAPR_HOME=${MAPR_HOME:=/opt/mapr}
 . ${MAPR_HOME}/bin/versions.sh
 
+#MapR security environment
+env=${MAPR_HOME}/conf/env.sh
+[ -f $env ] && . $env
+
 # default HADOOP_VERSION & HBASE_VERSION is in versions.sh
 
 # Find paths to our dependency systems. If they are unset, use MapR defaults.
@@ -240,6 +244,14 @@ if [ ! -z "$SQOOP_USER_CLASSPATH" ]; then
   # Sqoop's own lib directories.
   export HADOOP_CLASSPATH="${SQOOP_USER_CLASSPATH}:${HADOOP_CLASSPATH}"
 fi
+
+if [ "$MAPR_SECURITY_STATUS" = "true" ]; then
+  MAPR_AUTH_CLIENT_OPTS="${HYBRID_LOGIN_OPTS} ${MAPR_SSL_OPTS} -Dmapr.library.flatclass"
+else
+  MAPR_AUTH_CLIENT_OPTS="${SIMPLE_LOGIN_OPTS} ${MAPR_SSL_OPTS} -Dmapr.library.flatclass"
+fi
+
+export HADOOP_OPTS="${HADOOP_OPTS} ${MAPR_AUTH_CLIENT_OPTS}"
 
 export SQOOP_CLASSPATH
 export SQOOP_CONF_DIR
