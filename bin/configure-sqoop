@@ -226,6 +226,15 @@ fi
 add_to_classpath ${SQOOP_JAR_DIR}
 
 HADOOP_CLASSPATH="${SQOOP_CLASSPATH}:${HADOOP_CLASSPATH}"
+
+#MapR-11365
+if [ -d ${MAPR_HOME}/hive ]; then
+  for f in ${MAPR_HOME}/hive/hive*/lib/libthrift*.jar; do
+    libthrift=$f
+  done
+  HADOOP_CLASSPATH="${libthrift}:${HADOOP_CLASSPATH}"
+fi
+
 if [ ! -z "$SQOOP_USER_CLASSPATH" ]; then
   # User has elements to prepend to the classpath, forcibly overriding
   # Sqoop's own lib directories.
