@@ -38,7 +38,28 @@ if [ -f "${SQOOP_CONF_DIR}/sqoop-env.sh" ]; then
   . "${SQOOP_CONF_DIR}/sqoop-env.sh"
 fi
 
-# Find paths to our dependency systems. If they are unset, use CDH defaults.
+# Find paths to our dependency systems. If they are unset, use defaults.
+
+#MapR changes
+MAPR_HOME=${MAPR_HOME:=/opt/mapr}
+. ${MAPR_HOME}/bin/versions.sh
+
+# default HADOOP_VERSION & HBASE_VERSION is in versions.sh
+
+# Find paths to our dependency systems. If they are unset, use MapR defaults.
+if [ -z "${HADOOP_HOME}" ]; then
+  HADOOP_HOME=${MAPR_HOME}/hadoop/hadoop-${HADOOP_VERSION}
+fi
+
+if [ -z "${HBASE_HOME}" ]; then
+  # Get HBase version from hbaseversion file
+  HBASE_VERSION_FILE=${MAPR_HOME}/hbase/hbaseversion
+  if [ -f ${HBASE_VERSION_FILE} ]; then
+    HBASE_VERSION=`cat ${HBASE_VERSION_FILE}`
+  fi
+
+  HBASE_HOME=${MAPR_HOME}/hbase/hbase-${HBASE_VERSION}
+fi
 
 if [ -z "${HADOOP_COMMON_HOME}" ]; then
   if [ -n "${HADOOP_HOME}" ]; then

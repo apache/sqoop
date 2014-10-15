@@ -40,11 +40,16 @@ under the License.
     <artifact conf="master"/>
   </publications>
   <dependencies>
-    <!-- Dependencies for Cloudera's Distribution for Hadoop -->
+    <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop-all.version}"
+     conf="common->default"/>
+   <dependency org="org.apache.hadoop" name="hadoop-test"
+     rev="${hadoop-test.version}" conf="common->default"/>
+
+    <!-- Dependencies for Cloudera's Distribution for Hadoop 
     <dependency org="com.cloudera.hadoop" name="hadoop-core"
       rev="${hadoop-core.cloudera.version}" conf="common->default"/>
     <dependency org="com.cloudera.hadoop" name="hadoop-test"
-      rev="${hadoop-core.cloudera.version}" conf="common->default"/>
+      rev="${hadoop-core.cloudera.version}" conf="common->default"/> -->
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="common->default"/>
     <dependency org="hsqldb" name="hsqldb" rev="${hsqldb.version}"

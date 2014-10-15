@@ -31,7 +31,10 @@ under the License.
           http://ibiblio.lsu.edu/main/pub/packages/maven2
           http://www.ibiblio.net/pub/packages/maven2
   -->
-  <property name="repo.maven.org" value="http://repo1.maven.org/maven2/"
+  <property name="repo.maven.org" value="${forivy.MAVEN_CENTRAL}"
+      override="false"/>
+  <property name="releases.mapr.com"
+    value="http://repository.mapr.com/maven/"
       override="false"/>
   <property name="snapshot.apache.org"
       value="https://repository.apache.org/content/repositories/snapshots/"
@@ -53,6 +56,8 @@ under the License.
   <settings defaultResolver="${resolvers}"/>
 
   <resolvers>
+    <ibiblio name="mapr-releases" root="${releases.mapr.com}"
+     pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="maven2" root="${repo.maven.org}"
         pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="datanucleus" root="${www.datanucleus.org}"
@@ -72,7 +77,8 @@ under the License.
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
       <resolver ref="fs"/>
-      <resolver ref="apache-snapshot"/>
+      <resolver ref="mapr-releases"/>
+      <resolver ref="apache-snapshot"/> 
       <resolver ref="datanucleus"/>
       <resolver ref="cloudera-releases"/>
       <resolver ref="cloudera-staging"/>

@@ -595,8 +595,8 @@ ant instead. You have been warned!
 
   <repositories>
     <repository>
-      <id>cloudera.release</id>
-      <url>https://repository.cloudera.com/content/repositories/releases/</url>
+      <id>mapr.release</id>
+      <url>http://repository.mapr.com/maven/<url>
       <releases>
         <enabled>true</enabled>
       </releases>

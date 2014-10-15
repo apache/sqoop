@@ -20,7 +20,7 @@
   limitations under the License.
 -->
 
-<project name="sqoop" default="jar-all"
+<project name="sqoop" default="package-all"
     xmlns:artifact="urn:maven-artifact-ant"
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
@@ -30,6 +30,16 @@
       <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
     </classpath>
   </taskdef>
+
+  <!-- Allow override of MAVEN CENTRAL form command line for ivy purposes -->
+  <property environment="env" />
+  <condition property="forivy.MAVEN_CENTRAL" value="${env.MAVEN_CENTRAL}">
+    <isset property="env.MAVEN_CENTRAL" />
+  </condition>
+  <property name="forivy.MAVEN_CENTRAL" value="http://repo1.maven.org/maven2/" />
+  <!-- Ivy library properties -->
+  <property name="ivy.dir" location="${basedir}/ivy" />
+  <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
 
   <!-- Set default Hadoop version if not set -->
   <if>
@@ -125,10 +135,10 @@
   <if>
     <equals arg1="${hadoopversion}" arg2="20" />
     <then>
-      <property name="hadoop.version" value="0.20.2-cdh3u1" />
-      <property name="hbase94.version" value="0.90.3-cdh3u1" />
-      <property name="zookeeper.version" value="3.3.3-cdh3u1" />
-      <property name="hadoop.version.full" value="0.20" />
+      <property name="hadoop.version" value="1.0.3-mapr-2.1.2.1" />
+      <property name="hbase.version" value="0.92.2-mapr-SNAPSHOT" />
+      <property name="zookeeper.version" value="3.3.6-cdh3u1" />
+      <property name="hadoop.version.full" value="1.0.3-mapr-2.1.2.1" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
       <property name="avrohadoopprofile" value="1" />
@@ -202,10 +212,10 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="1.4.5" />
+  <property name="version" value="1.4.5-mapr" />
 
   <!-- The last version released. -->
-  <property name="oldversion" value="1.4.4" />
+  <property name="oldversion" value="1.4.4-mapr" />
   <!-- The point when we branched for the previous release. -->
   <property name="prev.git.hash"
       value="166417fdb0afd3141c6fd0fdc50043b5e13c2a97" />
@@ -262,7 +272,7 @@
   <property name="relnotes.filename"
       location="${build.relnotes.dir}/sqoop-${version}.releasenotes.html" />
 
-  <property name="bin.artifact.name" value="${artifact.name}.bin__hadoop-${hadoop.version.full}" />
+  <property name="bin.artifact.name" value="${artifact.name}.hadoop-${hadoop.version.full}" />
   <property name="dist.dir" location="${build.dir}/${bin.artifact.name}" />
   <property name="tar.file" location="${build.dir}/${bin.artifact.name}.tar.gz" />
   <property name="build.docs.timestamp"
@@ -295,10 +305,10 @@
 
   <!-- maven -->
   <property name="mvn.build.dir" value="${build.dir}/m2" />
-  <property name="mvn.repo" value="snapshots" />
-  <property name="mvn.repo.id" value="cloudera.${mvn.repo}.repo" />
+  <!--property name="mvn.repo" value="snapshots" /-->
+  <property name="mvn.repo.id" value="mapr-snapshots" />
   <property name="mvn.deploy.url"
-      value="https://repository.cloudera.com/content/repositories/${mvn.repo}"/>
+            value="${env.MAPR_SNAPSHOTS_REPO}"/>
   <property name="sqoop.pom" value="${mvn.build.dir}/sqoop.pom" />
   <property name="sqooptest.pom" value="${mvn.build.dir}/sqoop-test.pom" />
 
@@ -456,6 +466,10 @@
     </fileset>
   </path>
 
+  <target name="package-all"
+     depends="init,mvn-prep,jar-all,srcjars"
+     description="Building All Packages"/>
+
   <!-- "init" target used for setup purposes. -->
   <target name="init">
     <!-- Path containing third-party libraries deployed directly with Sqoop.
@@ -474,7 +488,55 @@
       <path refid="${name}.hadooptest.classpath" />
       <path refid="compile.classpath" />
     </path>
+    <mkdir dir="${build.dir}" />
+    <antcall target="mapr-version" inheritRefs="true" inheritall="true"/>
+    <property file="${basedir}/mapr-build.properties"/>
   </target>
+
+  <target name="mapr-version">
+     <echo file="${build.dir}/mapr-version.sh">
+  #!/bin/bash
+  build_user=`whoami`
+  build_date=`date`
+  build_cwd=`pwd`
+  build_hostname=`hostname`
+
+  if git status &gt; /dev/null 2&gt;&amp;1 ; then
+    scm=git
+    build_revision=`git log -1 --pretty=format:&quot;%H&quot;`
+    build_url=`git config --get remote.origin.url`
+  elif hg st &gt; /dev/null 2&gt;&amp;1 ; then
+    scm=hg
+    build_revision=`hg ident -n | sed 's/[^0-9]//g'`
+    build_url=`hg paths | grep 'default' | sed 's/.*default[^=]*=\s*//g'`
+  elif svn info &gt; /dev/null 2&gt;&amp;1 ; then
+    scm=svn
+    build_revision=`svn info | sed -n -e 's/Last Changed Rev: \(.*\)/\1/p'`
+    build_url=`svn info | sed -n -e 's/URL: \(.*\)/\1/p'`
+  else
+    scm=file
+    build_revision=&quot;Unknown&quot;
+  fi
+
+  if [ &quot;${build_url}&quot; = &quot;&quot; ] ; then
+    build_url=&quot;${scm}://${build_hostname}${build_cwd}&quot;
+  fi
+
+  build_uname=`uname -a`
+  #MapR Version Info
+  cat &gt;mapr-build.properties &lt;&lt;EOF
+  mapr.buildurl=$build_url
+  mapr.builddate=$build_date
+  mapr.builduser=$build_user
+  mapr.builduname=$build_uname
+  mapr.buildhost=$build_hostname
+  mapr.buildversion=$build_revision
+  EOF
+     </echo>
+     <exec executable="sh" failonerror="true">
+      <arg line="${build.dir}/mapr-version.sh"/>
+     </exec>
+   </target>
 
   <!-- generate the version information class. -->
   <target name="gen-version" depends="init">
@@ -573,11 +635,33 @@
   </target>
 
   <target name="jar" depends="compile" description="Create main jar">
-    <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}" />
+    <jar jarfile="${build.dir}/${dest.jar}" basedir="${build.classes}">
+      <manifest>
+      <section name="org/apache/sqoop">
+      <attribute name="MapR-BuildDate" value="${mapr.builddate}"/>
+      <attribute name="MapR-BuildHost" value="${mapr.buildhost}"/>
+      <attribute name="MapR-BuildPlatform" value="${mapr.builduname}"/>
+      <attribute name="MapR-BuildRevision" value="${mapr.buildversion}"/>
+      <attribute name="MapR-BuildURL" value="${mapr.buildurl}"/>
+      <attribute name="MapR-BuildUser" value="${mapr.builduser}"/>
+      </section>
+      </manifest>
+      </jar>
   </target>
 
   <target name="jar-test" depends="compile-test" description="Create test jar">
-    <jar jarfile="${build.dir}/${test.jar}" basedir="${build.test.classes}" />
+    <jar jarfile="${build.dir}/${test.jar}" basedir="${build.test.classes}">
+      <manifest>
+      <section name="org/apache/sqoop">
+      <attribute name="MapR-BuildDate" value="${mapr.builddate}"/>
+      <attribute name="MapR-BuildHost" value="${mapr.buildhost}"/>
+      <attribute name="MapR-BuildPlatform" value="${mapr.builduname}"/>
+      <attribute name="MapR-BuildRevision" value="${mapr.buildversion}"/>
+      <attribute name="MapR-BuildURL" value="${mapr.buildurl}"/>
+      <attribute name="MapR-BuildUser" value="${mapr.builduser}"/>
+      </section>
+      </manifest>
+      </jar>
   </target>
 
   <!-- Ensure that all source code can be built -->
@@ -1138,10 +1222,30 @@
       description="Create source jars">
     <mkdir dir="${build.srcjar.dir}" />
     <jar jarfile="${build.srcjar.dir}/${artifact.name}-sources.jar">
+      <manifest>
+        <section name="org/apache/sqoop">
+        <attribute name="MapR-BuildDate" value="${mapr.builddate}"/>
+        <attribute name="MapR-BuildHost" value="${mapr.buildhost}"/>
+        <attribute name="MapR-BuildPlatform" value="${mapr.builduname}"/>
+        <attribute name="MapR-BuildRevision" value="${mapr.buildversion}"/>
+        <attribute name="MapR-BuildURL" value="${mapr.buildurl}"/>
+        <attribute name="MapR-BuildUser" value="${mapr.builduser}"/>
+        </section>
+        </manifest>
       <fileset dir="${src.dir}" />
       <fileset dir="${build.src.dir}" />
     </jar>
     <jar jarfile="${build.srcjar.dir}/${name}-test-${version}-sources.jar">
+      <manifest>
+        <section name="org/apache/sqoop">
+        <attribute name="MapR-BuildDate" value="${mapr.builddate}"/>
+        <attribute name="MapR-BuildHost" value="${mapr.buildhost}"/>
+        <attribute name="MapR-BuildPlatform" value="${mapr.builduname}"/>
+        <attribute name="MapR-BuildRevision" value="${mapr.buildversion}"/>
+        <attribute name="MapR-BuildURL" value="${mapr.buildurl}"/>
+        <attribute name="MapR-BuildUser" value="${mapr.builduser}"/>
+        </section>
+        </manifest>
       <fileset dir="${test.dir}" />
     </jar>
   </target>
