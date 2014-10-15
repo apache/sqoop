@@ -42,7 +42,12 @@ fi
 
 #MapR changes
 MAPR_HOME=${MAPR_HOME:=/opt/mapr}
-. ${MAPR_HOME}/bin/versions.sh
+HADOOP_VERSION=`readlink \`which hadoop\` | awk -F "/" '{print $5}'`
+if [ ${HADOOP_VERSION} == hadoop-0.20.2 ]; then
+    export HADOOP_HOME=${MAPR_HOME}/hadoop/hadoop-0.20.2/
+else
+    export HADOOP_HOME=${MAPR_HOME}/hadoop/${HADOOP_VERSION}/
+fi
 
 #MapR security environment
 env=${MAPR_HOME}/conf/env.sh
