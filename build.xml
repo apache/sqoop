@@ -702,8 +702,7 @@
         <java classname="com.cloudera.sqoop.Sqoop"
             fork="true"
             failonerror="true"
-            output="${build.dir}/tools-list"
-            error="/dev/null">
+            output="${build.dir}/tools-list">
           <jvmarg value="-Dhadoop.security.log.file=./build/security-audit.log" />
           <arg value="help" />
           <classpath refid="compile.classpath"/>
