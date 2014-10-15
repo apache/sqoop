@@ -104,7 +104,7 @@ under the License.
       conf="hadoop210->default"/>
     <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"
       conf="hadoop210->default"/>
-    <dependency org="com.mapr.hadoop" name="maprfs" rev="${hadoop.version}">
+    <dependency org="com.mapr.hadoop" name="maprfs" rev="${hadoop.version}" conf="common->default">
       <artifact name="maprfs" type="jar"/>
      </dependency>
 
