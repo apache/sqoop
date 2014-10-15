@@ -104,8 +104,8 @@ under the License.
       conf="hadoop210->default"/>
     <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"
       conf="hadoop210->default"/>
-    <dependency org="com.mapr.hadoop" name="mapr-core" rev="${hadoop.version}">
-      <artifact name="mapr-core" type="jar"/>
+    <dependency org="com.mapr.hadoop" name="maprfs" rev="${hadoop.version}">
+      <artifact name="maprfs" type="jar"/>
      </dependency>
 
     <!-- Dependencies for Hadoop 2.0.0 -->
