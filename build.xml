@@ -679,6 +679,8 @@
          the wrapper scripts to invoke each of these.
       -->
     <mkdir dir="${build.bin.dir}" />
+    <property name="exposedCompileClasspath" refid="compile.classpath"/>
+    <echo message="Running Sqoop with classpath: ${exposedCompileClasspath}"/>
     <if>
       <equals arg1="${windows}" arg2="true" />
       <then>
