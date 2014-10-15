@@ -773,7 +773,9 @@ public class HsqldbJobStorage extends JobStorage {
 
       Properties p = new Properties();
       while (rs.next()) {
-        p.setProperty(rs.getString(1), rs.getString(2));
+	  if (rs.getString(1)!=null && rs.getString(2)!=null){	      
+              p.setProperty(rs.getString(1), rs.getString(2));
+          }			
       }
 
       return p;
