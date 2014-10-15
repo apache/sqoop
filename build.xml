@@ -137,7 +137,7 @@
     <then>
       <property name="hadoop.version" value="1.0.3-mapr-3.1.0" />
       <property name="hbase94.version" value="0.94.13-mapr-1401" />
-      <property name="zookeeper.version" value="3.4.5" />
+      <property name="zookeeper.version" value="3.4.5-mapr-1401" />
       <property name="hadoop.version.full" value="1.0.3-mapr-3.1.0" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
@@ -173,10 +173,10 @@
     <elseif>
       <equals arg1="${hadoopversion}" arg2="200" />
       <then>
-        <property name="hadoop.version" value="2.0.4-alpha" />
-        <property name="hbase94.version" value="0.94.2" />
-        <property name="zookeeper.version" value="3.4.2" />
-        <property name="hadoop.version.full" value="2.0.4-alpha" />
+        <property name="hadoop.version" value="2.3.0-mapr-4.0.0-FCS" />
+        <property name="hbase94.version" value="0.94.17-mapr-1405-4.0.0-FCS" />
+        <property name="zookeeper.version" value="3.4.5-mapr-1406" />
+        <property name="hadoop.version.full" value="2.3.0-mapr-4.0.0-FCS" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
         <property name="avrohadoopprofile" value="2" />
