@@ -136,8 +136,8 @@
     <equals arg1="${hadoopversion}" arg2="20" />
     <then>
       <property name="hadoop.version" value="1.0.3-mapr-2.1.2.1" />
-      <property name="hbase.version" value="0.92.2-mapr-SNAPSHOT" />
-      <property name="zookeeper.version" value="3.3.6-cdh3u1" />
+      <property name="hbase.version" value="0.94.9-mapr" />
+      <property name="zookeeper.version" value="3.3.6" />
       <property name="hadoop.version.full" value="1.0.3-mapr-2.1.2.1" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
