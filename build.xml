@@ -135,10 +135,10 @@
   <if>
     <equals arg1="${hadoopversion}" arg2="20" />
     <then>
-      <property name="hadoop.version" value="1.0.3-mapr-2.1.2.1" />
-      <property name="hbase.version" value="0.94.9-mapr" />
-      <property name="zookeeper.version" value="3.3.6" />
-      <property name="hadoop.version.full" value="1.0.3-mapr-2.1.2.1" />
+      <property name="hadoop.version" value="1.0.3-mapr-3.1.0" />
+      <property name="hbase94.version" value="0.94.13-mapr-1401" />
+      <property name="zookeeper.version" value="3.4.5" />
+      <property name="hadoop.version.full" value="1.0.3-mapr-3.1.0" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
       <property name="avrohadoopprofile" value="1" />
@@ -148,8 +148,8 @@
       <equals arg1="${hadoopversion}" arg2="23" />
       <then>
         <property name="hadoop.version" value="0.23.1" />
-        <property name="hbase94.version" value="0.92.0" />
-        <property name="zookeeper.version" value="3.4.2" />
+        <property name="hbase94.version" value="0.94.13" />
+        <property name="zookeeper.version" value="3.4.5" />
         <property name="hadoop.version.full" value="0.23" />
         <property name="hcatalog.version" value="0.13.0" />
         <property name="hbasecompatprofile" value="2" />
@@ -308,7 +308,7 @@
   <!--property name="mvn.repo" value="snapshots" /-->
   <property name="mvn.repo.id" value="mapr-snapshots" />
   <property name="mvn.deploy.url"
-            value="${env.MAPR_SNAPSHOTS_REPO}"/>
+            value="${env.MAPR_RELEASES_REPO}"/>
   <property name="sqoop.pom" value="${mvn.build.dir}/sqoop.pom" />
   <property name="sqooptest.pom" value="${mvn.build.dir}/sqoop-test.pom" />
 
