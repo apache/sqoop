@@ -63,6 +63,7 @@ public class JobBase {
   protected final boolean isHCatJob;
 
   public static final String PROPERTY_HADOOP_JOB_HISTORY_USER_LOCATION = "hadoop.job.history.user.location";
+  public static final String PROPERTY_VERBOSE = "sqoop.verbose";
 
   public JobBase() {
     this(null);
