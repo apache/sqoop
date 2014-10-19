@@ -233,7 +233,7 @@ public class SqoopOutputFormatLoadExecutor {
 
         if (!isTest) {
           // Using the TO schema since the IDF returns data in TO schema
-          schema = MRConfigurationUtils.getConnectorSchema(Direction.TO, conf);
+          schema = matcher.getToSchema();
 
           subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
           configConnection = MRConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);
