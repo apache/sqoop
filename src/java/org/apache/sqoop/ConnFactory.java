@@ -218,20 +218,7 @@ public class ConnFactory {
       // The file format is actually Java properties-file syntax.
       r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
       Properties props = new Properties();
-      String line;
-      while ((line = r.readLine()) != null) {
-        if ("".equals(line.trim())) {
-          continue;
-        }
-        int separator = line.indexOf('=');
-        if (separator == -1) {
-          throw new IOException("the content of connector file must be "
-              + "in form of key=value");
-        }
-        String key = line.substring(0, separator).trim();
-        String value = line.substring(separator + 1).trim();
-        props.setProperty(key, value);
-      }
+      props.load(r);
 
       for (Map.Entry<Object, Object> entry : props.entrySet()) {
         // Each key is a ManagerFactory class name.
