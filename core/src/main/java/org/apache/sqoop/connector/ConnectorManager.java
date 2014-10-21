@@ -92,10 +92,10 @@ public class ConnectorManager implements Reconfigurable {
   private Map<String, ConnectorHandler> handlerMap =
       new HashMap<String, ConnectorHandler>();
 
-  public List<MConnector> getConnectorsMetadata() {
+  public List<MConnector> getConnectorConfigurables() {
     List<MConnector> connectors = new LinkedList<MConnector>();
     for(ConnectorHandler handler : handlerMap.values()) {
-      connectors.add(handler.getMetadata());
+      connectors.add(handler.getConnectorConfigurable());
     }
     return connectors;
   }
@@ -107,8 +107,8 @@ public class ConnectorManager implements Reconfigurable {
   public Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
     Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
     for(ConnectorHandler handler : handlerMap.values()) {
-      long id = handler.getMetadata().getPersistenceId();
-      ResourceBundle bundle = handler.getConnector().getBundle(locale);
+      long id = handler.getConnectorConfigurable().getPersistenceId();
+      ResourceBundle bundle = handler.getSqoopConnector().getBundle(locale);
       bundles.put(id, bundle);
     }
     return bundles;
@@ -116,25 +116,24 @@ public class ConnectorManager implements Reconfigurable {
 
   public ResourceBundle getResourceBundle(long connectorId, Locale locale) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
-    return handler.getConnector().getBundle(locale);
+    return handler.getSqoopConnector().getBundle(locale);
   }
 
-  public MConnector getConnectorConfig(long connectorId) {
+  public MConnector getConnectorConfigurable(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
     if(handler == null) {
       return null;
     }
-
-    return handler.getMetadata();
+    return handler.getConnectorConfigurable();
   }
 
-  public SqoopConnector getConnector(long connectorId) {
+  public SqoopConnector getSqoopConnector(long connectorId) {
     ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
-    return handler.getConnector();
+    return handler.getSqoopConnector();
   }
 
-  public SqoopConnector getConnector(String uniqueName) {
-    return handlerMap.get(uniqueName).getConnector();
+  public SqoopConnector getSqoopConnector(String uniqueName) {
+    return handlerMap.get(uniqueName).getSqoopConnector();
   }
 
   public synchronized void initialize() {
@@ -182,21 +181,21 @@ public class ConnectorManager implements Reconfigurable {
       rtx.begin();
       for (String name : handlerMap.keySet()) {
         ConnectorHandler handler = handlerMap.get(name);
-        MConnector connectorMetadata = handler.getMetadata();
+        MConnector connectorMetadata = handler.getConnectorConfigurable();
         MConnector registeredMetadata =
             repository.registerConnector(connectorMetadata, autoUpgrade);
 
         // Set registered metadata instead of connector metadata as they will
         // have filled persistent ids. We should be confident at this point that
         // there are no differences between those two structures.
-        handler.setMetadata(registeredMetadata);
+        handler.setConnectorConfigurable(registeredMetadata);
 
         String connectorName = handler.getUniqueName();
-        if (!handler.getMetadata().hasPersistenceId()) {
+        if (!handler.getConnectorConfigurable().hasPersistenceId()) {
           throw new SqoopException(ConnectorError.CONN_0010, connectorName);
         }
-        nameMap.put(handler.getMetadata().getPersistenceId(), connectorName);
-        LOG.debug("Registered connector: " + handler.getMetadata());
+        nameMap.put(handler.getConnectorConfigurable().getPersistenceId(), connectorName);
+        LOG.debug("Registered connector: " + handler.getConnectorConfigurable());
       }
       rtx.commit();
     } catch (Exception ex) {

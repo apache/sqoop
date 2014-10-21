@@ -22,12 +22,11 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.connector.spi.RepositoryUpgrader;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
-import org.apache.sqoop.driver.configuration.DriverConfiguration;
+import org.apache.sqoop.driver.configuration.JobConfiguration;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
@@ -105,25 +104,26 @@ public class Driver implements Reconfigurable {
   /**
    * Driver config upgrader instance
    */
-  private final RepositoryUpgrader driverConfigUpgrader;
+  private final DriverUpgrader driverUpgrader;
 
   /**
    * Default driver config auto upgrade option value
    */
   private static final boolean DEFAULT_AUTO_UPGRADE = false;
 
-  public Class getDriverConfigurationGroupClass() {
-      return DriverConfiguration.class;
+  @SuppressWarnings("rawtypes")
+  public Class getDriverJobConfigurationClass() {
+      return JobConfiguration.class;
   }
 
   public Driver() {
-    List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverConfigurationGroupClass());
+    List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
     mDriver = new MDriver(new MDriverConfig(driverConfig), DriverBean.CURRENT_DRIVER_VERSION);
 
     // Build validator
     driverValidator = new DriverConfigValidator();
     // Build upgrader
-    driverConfigUpgrader = new DriverConfigUpgrader();
+    driverUpgrader = new DriverUpgrader();
   }
 
   public synchronized void initialize() {
@@ -150,8 +150,8 @@ public class Driver implements Reconfigurable {
     return driverValidator;
   }
 
-  public RepositoryUpgrader getDriverConfigRepositoryUpgrader() {
-    return driverConfigUpgrader;
+  public DriverUpgrader getConfigurableUpgrader() {
+    return driverUpgrader;
   }
 
   public MDriver getDriver() {

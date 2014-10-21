@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.connector.hdfs;
 
 import org.apache.sqoop.configurable.ConfigurableUpgradeUtil;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
@@ -24,8 +24,8 @@ import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
 
-// NOTE: All config types have the similar upgrade path at this point
-public class GenericJdbcConnectorUpgrader extends ConnectorConfigurableUpgrader {
+//NOTE: All config types have the similar upgrade path at this point
+public class HdfsConnectorUpgrader extends ConnectorConfigurableUpgrader {
 
   @Override
   public void upgradeLinkConfig(MLinkConfig original, MLinkConfig upgradeTarget) {
@@ -41,4 +41,5 @@ public class GenericJdbcConnectorUpgrader extends ConnectorConfigurableUpgrader 
   public void upgradeToJobConfig(MToConfig original, MToConfig upgradeTarget) {
     ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
   }
+
 }

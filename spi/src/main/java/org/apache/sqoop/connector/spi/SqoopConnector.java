@@ -60,11 +60,13 @@ public abstract class SqoopConnector {
   /**
    * @return Get link configuration group class
    */
+  @SuppressWarnings("rawtypes")
   public abstract Class getLinkConfigurationClass();
 
   /**
    * @return Get job configuration group class per direction type or null if not supported
    */
+  @SuppressWarnings("rawtypes")
   public abstract Class getJobConfigurationClass(Direction direction);
 
   /**
@@ -85,11 +87,11 @@ public abstract class SqoopConnector {
   public abstract Validator getConfigValidator();
 
   /**
-   * Returns an {@linkplain RepositoryUpgrader} object that can upgrade the
+   * Returns an {@linkplain ConnectorConfigurableUpgrader} object that can upgrade the
    * configs related to the link and job
    * @return RespositoryUpgrader object
    */
-  public abstract RepositoryUpgrader getRepositoryUpgrader();
+  public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader();
 
   /**
    * Returns the {@linkplain IntermediateDataFormat} this connector

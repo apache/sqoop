@@ -164,10 +164,10 @@ public class JobRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MFromConfig fromConfig = ConnectorManager.getInstance()
-        .getConnectorConfig(job.getConnectorId(Direction.FROM))
+        .getConnectorConfigurable(job.getConnectorId(Direction.FROM))
         .getFromConfig();
     MToConfig toConfig = ConnectorManager.getInstance()
-        .getConnectorConfig(job.getConnectorId(Direction.TO))
+        .getConnectorConfigurable(job.getConnectorId(Direction.TO))
         .getToConfig();
     MDriverConfig driverConfig = Driver.getInstance().getDriver().getDriverConfig();
 
@@ -179,8 +179,8 @@ public class JobRequestHandler implements RequestHandler {
     }
 
     // Corresponding connectors for this
-    SqoopConnector fromConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.FROM));
-    SqoopConnector toConnector = ConnectorManager.getInstance().getConnector(job.getConnectorId(Direction.TO));
+    SqoopConnector fromConnector = ConnectorManager.getInstance().getSqoopConnector(job.getConnectorId(Direction.FROM));
+    SqoopConnector toConnector = ConnectorManager.getInstance().getSqoopConnector(job.getConnectorId(Direction.TO));
 
     if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
       throw new SqoopException(ServerError.SERVER_0004, "Connector " + fromConnector.getClass().getCanonicalName()
@@ -196,7 +196,7 @@ public class JobRequestHandler implements RequestHandler {
     Object fromConfigObject = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
     Object toConfigObject = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
 
-    Object driverConfigObject = ClassUtils.instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
+    Object driverConfigObject = ClassUtils.instantiate(Driver.getInstance().getDriverJobConfigurationClass());
 
     ConfigUtils.fromConfigs(job.getJobConfig(Direction.FROM).getConfigs(), fromConfigObject);
     ConfigUtils.fromConfigs(job.getJobConfig(Direction.TO).getConfigs(), toConfigObject);

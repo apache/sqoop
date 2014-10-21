@@ -15,20 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.driver.configuration;
-
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+package org.apache.sqoop.model;
 
 /**
- * Representing the core job configuration
+ * Marker class that identifies the Configurables in the Sqoop system
  */
-@ConfigurationClass
-public class DriverConfiguration {
-  @Config
-  public ThrottlingConfig throttlingConfig;
+public abstract class Configurable extends MPersistableEntity implements MClonable {
 
-  public DriverConfiguration() {
-    throttlingConfig = new ThrottlingConfig();
-  }
 }

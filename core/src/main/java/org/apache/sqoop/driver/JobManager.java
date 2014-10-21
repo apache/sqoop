@@ -30,7 +30,7 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
-import org.apache.sqoop.driver.configuration.DriverConfiguration;
+import org.apache.sqoop.driver.configuration.JobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.job.etl.Initializer;
@@ -306,9 +306,9 @@ public class JobManager implements Reconfigurable {
     MLink toConnection = getLink(job.getLinkId(Direction.TO));
 
     // get from/to connectors for the connection
-    SqoopConnector fromConnector = getConnector(fromConnection.getConnectorId());
+    SqoopConnector fromConnector = getSqoopConnector(fromConnection.getConnectorId());
     validateSupportedDirection(fromConnector, Direction.FROM);
-    SqoopConnector toConnector = getConnector(toConnection.getConnectorId());
+    SqoopConnector toConnector = getSqoopConnector(toConnection.getConnectorId());
     validateSupportedDirection(toConnector, Direction.TO);
 
     // link config for the FROM part of the job
@@ -329,7 +329,7 @@ public class JobManager implements Reconfigurable {
 
     // the only driver config for the job
     Object driverConfig = ClassUtils
-        .instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
+        .instantiate(Driver.getInstance().getDriverJobConfigurationClass());
     ConfigUtils.fromConfigs(job.getDriverConfig().getConfigs(), driverConfig);
 
 
@@ -402,8 +402,8 @@ public class JobManager implements Reconfigurable {
     return summary;
   }
 
-  SqoopConnector getConnector(long connnectorId) {
-    return ConnectorManager.getInstance().getConnector(connnectorId);
+  SqoopConnector getSqoopConnector(long connnectorId) {
+    return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
   }
 
   void validateSupportedDirection(SqoopConnector connector, Direction direction) {
@@ -480,7 +480,7 @@ public class JobManager implements Reconfigurable {
   }
 
   void prepareJob(JobRequest request) {
-    DriverConfiguration jobConfiguration = (DriverConfiguration) request.getDriverConfig();
+    JobConfiguration jobConfiguration = (JobConfiguration) request.getDriverConfig();
     // We're directly moving configured number of extractors and loaders to
     // underlying request object. In the future we might need to throttle this
     // count based on other running jobs to meet our SLAs.

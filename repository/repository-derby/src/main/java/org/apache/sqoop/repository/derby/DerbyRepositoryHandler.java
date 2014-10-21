@@ -138,7 +138,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * repository. The job and connector configs within <code>mc</code> will get
    * updated with the id of the configs when this function returns.
    * @param mc The connector to use for updating configs
-   * @param conn JDBC link to use for updating the configs
+   * @param conn JDBC connection to use for inserting the configs
    */
   private void insertConfigsForConnector (MConnector mc, Connection conn) {
     long connectorId = mc.getPersistenceId();
@@ -151,17 +151,18 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
         Statement.RETURN_GENERATED_KEYS);
 
-      // Register link type config
+      // Register link type config for connector
+      // NOTE: The direction is null for LINK type
       registerConfigs(connectorId, null, mc.getLinkConfig().getConfigs(),
         MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
 
-      // Register both from/to job type config
+      // Register both from/to job type config for connector
       if (mc.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
-        registerConfigs(connectorId, Direction.FROM, mc.getConfig(Direction.FROM).getConfigs(),
+        registerConfigs(connectorId, Direction.FROM, mc.getFromConfig().getConfigs(),
             MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
       }
       if (mc.getSupportedDirections().isDirectionSupported(Direction.TO)) {
-        registerConfigs(connectorId, Direction.TO, mc.getConfig(Direction.TO).getConfigs(),
+        registerConfigs(connectorId, Direction.TO, mc.getToConfig().getConfigs(),
             MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
       }
     } catch (SQLException ex) {
@@ -752,8 +753,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     for (URL url : connectorConfigs) {
       handler = new ConnectorHandler(url);
 
-      if (handler.getMetadata().getPersistenceId() != -1) {
-        return handler.getMetadata().getPersistenceId();
+      if (handler.getConnectorConfigurable().getPersistenceId() != -1) {
+        return handler.getConnectorConfigurable().getPersistenceId();
       }
 
       if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
@@ -761,8 +762,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
           PreparedStatement baseConnectorStmt = conn.prepareStatement(
               STMT_INSERT_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
               Statement.RETURN_GENERATED_KEYS);
-          baseConnectorStmt.setString(1, handler.getMetadata().getUniqueName());
-          baseConnectorStmt.setString(2, handler.getMetadata().getClassName());
+          baseConnectorStmt.setString(1, handler.getConnectorConfigurable().getUniqueName());
+          baseConnectorStmt.setString(2, handler.getConnectorConfigurable().getClassName());
           baseConnectorStmt.setString(3, "0");
           if (baseConnectorStmt.executeUpdate() == 1) {
             ResultSet rsetConnectorId = baseConnectorStmt.getGeneratedKeys();
@@ -1229,9 +1230,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     try {
       stmt = conn.prepareStatement(STMT_SELECT_LINK_FOR_CONNECTOR);
       stmt.setLong(1, connectorID);
-
       return loadLinks(stmt, conn);
-
     } catch (SQLException ex) {
       logException(ex, connectorID);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
@@ -1244,7 +1243,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void upgradeConnector(MConnector mConnector, Connection conn) {
+  public void upgradeConnectorConfigs(MConnector mConnector, Connection conn) {
+    updateConnectorAndDeleteConfigs(mConnector, conn);
+    insertConfigsForConnector(mConnector, conn);
+  }
+
+  private void updateConnectorAndDeleteConfigs(MConnector mConnector, Connection conn) {
     PreparedStatement updateConnectorStatement = null;
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
@@ -1271,15 +1275,19 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     } finally {
       closeStatements(updateConnectorStatement, deleteConfig, deleteInput);
     }
-    insertConfigsForConnector(mConnector, conn);
-
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void upgradeDriver(MDriver mDriver, Connection conn) {
+  public void upgradeDriverConfigs(MDriver mDriver, Connection conn) {
+    updateDriverAndDeleteConfigs(mDriver, conn);
+    createOrUpdateDriverSystemVersion(conn, mDriver.getVersion());
+    insertConfigsForDriver(mDriver, conn);
+  }
+
+  private void updateDriverAndDeleteConfigs(MDriver mDriver, Connection conn) {
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
     try {
@@ -1295,8 +1303,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     } finally {
       closeStatements(deleteConfig, deleteInput);
     }
-    createOrUpdateDriverSystemVersion(conn, mDriver.getVersion());
-    insertConfigsForDriver(mDriver, conn);
   }
 
   /**

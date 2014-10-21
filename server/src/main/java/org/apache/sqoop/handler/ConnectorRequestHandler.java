@@ -70,7 +70,7 @@ public class ConnectorRequestHandler implements RequestHandler {
     LOG.info("ConnectorRequestHandler handles cid: " + cid);
     if (cid.equals("all")) {
       // display all connectors
-      connectors = ConnectorManager.getInstance().getConnectorsMetadata();
+      connectors = ConnectorManager.getInstance().getConnectorConfigurables();
       bundles = ConnectorManager.getInstance().getResourceBundles(locale);
 
       AuditLoggerManager.getInstance()
@@ -87,7 +87,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       connectors = new LinkedList<MConnector>();
       bundles = new HashMap<Long, ResourceBundle>();
 
-      connectors.add(ConnectorManager.getInstance().getConnectorConfig(id));
+      connectors.add(ConnectorManager.getInstance().getConnectorConfigurable(id));
       bundles.put(id, ConnectorManager.getInstance().getResourceBundle(id, locale));
 
       AuditLoggerManager.getInstance()

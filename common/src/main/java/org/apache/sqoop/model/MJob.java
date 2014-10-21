@@ -139,6 +139,14 @@ public class MJob extends MAccountableEntity implements MClonable {
     }
   }
 
+  public long getFromConnectorId() {
+    return fromConnectorId;
+  }
+
+  public long getToConnectorId() {
+    return toConnectorId;
+  }
+
   public MConfigList getJobConfig(Direction type) {
     switch(type) {
       case FROM:

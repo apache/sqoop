@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.connector.spi.RepositoryUpgrader;
+import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
@@ -317,7 +317,7 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void upgradeConnector(MConnector newConnector, RepositoryTransaction tx);
+  protected abstract void upgradeConnectorConfigs(MConnector newConnector, RepositoryTransaction tx);
 
   /**
    * Upgrade the driver with the new data supplied in the
@@ -335,7 +335,7 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void upgradeDriver(MDriver newDriver, RepositoryTransaction tx);
+  protected abstract void upgradeDriverConfigs(MDriver newDriver, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a job
@@ -388,84 +388,88 @@ public abstract class Repository {
     LOG.info("Upgrading connector: " + oldConnector.getUniqueName());
     long connectorID = oldConnector.getPersistenceId();
     newConnector.setPersistenceId(connectorID);
-    /* Algorithms:
-     * 1. Get an upgrader for the connector.
-     * 2. Get all links associated with the connector.
-     * 3. Get all jobs associated with the connector.
-     * 4. Delete the inputs for all of the jobs and links (in that order)
-     * 5. Remove all inputs and configs associated with the connector, and
-     *    register the new configs and inputs.
-     * 6. Create new links and jobs with connector part being the ones
-     *    returned by the upgrader.
-     * 7. Validate new links and jobs with connector's validator
-     * 8. If any invalid links or jobs detected, throw an exception
-     *    and stop the bootup of Sqoop server
-     * 9. Otherwise, Insert the link inputs followed by job inputs (using
-     *    updateJob and updatelink)
-     */
+
     RepositoryTransaction tx = null;
     try {
-      SqoopConnector connector =
-        ConnectorManager.getInstance().getConnector(newConnector
-          .getUniqueName());
+      SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
+          newConnector.getUniqueName());
 
       Validator connectorConfigValidator = connector.getConfigValidator();
       boolean upgradeSuccessful = true;
-      RepositoryUpgrader upgrader = connector.getRepositoryUpgrader();
-      List<MLink> linksByConnector = findLinksForConnector(connectorID);
-      List<MJob> jobsByConnector = findJobsForConnector(connectorID);
+      // 1. Get an upgrader for the connector
+      ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
+      // 2. Get all links associated with the connector.
+      List<MLink> existingLinksByConnector = findLinksForConnector(connectorID);
+      // 3. Get all jobs associated with the connector.
+      List<MJob> existingJobsByConnector = findJobsForConnector(connectorID);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deletelinksAndJobs(linksByConnector, jobsByConnector, tx);
-      upgradeConnector(newConnector, tx);
-      for (MLink oldLink : linksByConnector) {
-        // Make a new copy of the configs
-        List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
-        MLinkConfig newLinkConfig = new MLinkConfig(linkConfig);
-        MLinkConfig oldLinkConfig = oldLink.getConnectorLinkConfig();
-        upgrader.upgrade(oldLinkConfig, newLinkConfig);
+      // 4. Delete the inputs for all of the jobs and links (in that order) for
+      // this connector
+      deletelinksAndJobs(existingLinksByConnector, existingJobsByConnector, tx);
+      // 5. Delete all inputs and configs associated with the connector, and
+      // insert the new configs and inputs for this connector
+      upgradeConnectorConfigs(newConnector, tx);
+      // 6. Run upgrade logic for the configs related to the link objects
+      // dont always rely on the repository implementation to return empty list for links
+      if (existingLinksByConnector != null) {
+        for (MLink link : existingLinksByConnector) {
+          // Make a new copy of the configs
+          List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
+          MLinkConfig newLinkConfig = new MLinkConfig(linkConfig);
+          MLinkConfig oldLinkConfig = link.getConnectorLinkConfig();
+          upgrader.upgradeLinkConfig(oldLinkConfig, newLinkConfig);
+          MLink newlink = new MLink(link, newLinkConfig);
 
-        MLink newlink = new MLink(oldLink, newLinkConfig);
-
-        Object newConfigurationObject = ClassUtils.instantiate(connector.getLinkConfigurationClass());
-        ConfigUtils.fromConfigs(newlink.getConnectorLinkConfig().getConfigs(), newConfigurationObject);
-
-        ConfigValidator configValidator = connectorConfigValidator.validateConfigForLink(newConfigurationObject);
-        if (configValidator.getStatus().canProceed()) {
-          updateLink(newlink, tx);
-        } else {
-          logInvalidModelObject("link", newlink, configValidator);
-          upgradeSuccessful = false;
+          Object newConfigurationObject = ClassUtils.instantiate(connector
+              .getLinkConfigurationClass());
+          ConfigUtils.fromConfigs(newlink.getConnectorLinkConfig().getConfigs(),
+              newConfigurationObject);
+          // 7. Run link config validation
+          ConfigValidator configValidator = connectorConfigValidator
+              .validateConfigForLink(newConfigurationObject);
+          if (configValidator.getStatus().canProceed()) {
+            updateLink(newlink, tx);
+          } else {
+            // If any invalid links or jobs detected, throw an exception
+            // and stop the bootup of Sqoop server
+            logInvalidModelObject("link", newlink, configValidator);
+            upgradeSuccessful = false;
+          }
         }
       }
-      for (MJob job : jobsByConnector) {
-        // Make a new copy of the configs
-        // else the values will get set in the configs in the connector for
-        // each job.
-        List<MConfig> fromConfig = newConnector.getConfig(Direction.FROM).clone(false).getConfigs();
-        List<MConfig> toConfig = newConnector.getConfig(Direction.TO).clone(false).getConfigs();
-
-        // New FROM direction configs, old TO direction configs.
-        if (job.getConnectorId(Direction.FROM) == newConnector.getPersistenceId()) {
-          MFromConfig newFromConfig = new MFromConfig(fromConfig);
-          MFromConfig oldFromCOnfig = job.getFromJobConfig();
-          upgrader.upgrade(oldFromCOnfig, newFromConfig);
-
-          MToConfig oldToConfig = job.getToJobConfig();
-          MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
-          updateJob(newJob, tx);
-        }
-
-        // Old FROM direction configs, new TO direction configs.
-        if (job.getConnectorId(Direction.TO) == newConnector.getPersistenceId()) {
-
-          MToConfig oldToConfig = job.getToJobConfig();
-          MToConfig newToConfig = new MToConfig(toConfig);
-          upgrader.upgrade(oldToConfig, newToConfig);
-          MFromConfig oldFromConfig = job.getFromJobConfig();
-          MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
-          updateJob(newJob, tx);
+      // 8. Run upgrade logic for the configs related to the job objects
+      if (existingJobsByConnector != null) {
+        for (MJob job : existingJobsByConnector) {
+          // every job has 2 parts, the FROM and the TO links and their
+          // corresponding connectors.
+          List<MConfig> fromConfig = newConnector.getFromConfig().clone(false).getConfigs();
+          if (job.getFromConnectorId() == newConnector.getPersistenceId()) {
+            MFromConfig newFromConfig = new MFromConfig(fromConfig);
+            MFromConfig oldFromCOnfig = job.getFromJobConfig();
+            upgrader.upgradeFromJobConfig(oldFromCOnfig, newFromConfig);
+            MToConfig oldToConfig = job.getToJobConfig();
+            // create a job with new FROM direction configs but old TO direction
+            // configs
+            MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
+            // TODO( jarcec) : will add the job config validation logic similar
+            // to the link config validation before updating job
+            updateJob(newJob, tx);
+          }
+          List<MConfig> toConfig = newConnector.getToConfig().clone(false).getConfigs();
+          if (job.getToConnectorId() == newConnector.getPersistenceId()) {
+            MToConfig oldToConfig = job.getToJobConfig();
+            MToConfig newToConfig = new MToConfig(toConfig);
+            upgrader.upgradeToJobConfig(oldToConfig, newToConfig);
+            MFromConfig oldFromConfig = job.getFromJobConfig();
+            // create a job with old FROM direction configs but new TO direction
+            // configs
+            MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
+            // TODO( jarcec) : will add the job config validation logic similar
+            // to the link config validation before updating job
+            updateJob(newJob, tx);
+          }
         }
       }
 
@@ -475,20 +479,20 @@ public abstract class Repository {
         throw new SqoopException(RepositoryError.JDBCREPO_0027);
       }
     } catch (SqoopException ex) {
-      if(tx != null) {
+      if (tx != null) {
         tx.rollback();
       }
       throw ex;
     } catch (Exception ex) {
-      if(tx != null) {
+      if (tx != null) {
         tx.rollback();
       }
       throw new SqoopException(RepositoryError.JDBCREPO_0000, ex);
     } finally {
-      if(tx != null) {
+      if (tx != null) {
         tx.close();
       }
-      LOG.info("Metadata upgrade finished for connector: " + oldConnector.getUniqueName());
+      LOG.info("Connector upgrade finished: " + oldConnector.getUniqueName());
     }
   }
 
@@ -496,31 +500,38 @@ public abstract class Repository {
     LOG.info("Upgrading driver");
     RepositoryTransaction tx = null;
     try {
-      RepositoryUpgrader upgrader = Driver.getInstance().getDriverConfigRepositoryUpgrader();
-      List<MJob> jobs = findJobs();
-
+      //1. find upgrader
+      DriverUpgrader upgrader = Driver.getInstance().getConfigurableUpgrader();
+      //2. find all jobs in the system
+      List<MJob> existingJobs = findJobs();
       Validator validator = Driver.getInstance().getValidator();
       boolean upgradeSuccessful = true;
 
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
-      deleteJobs(jobs, tx);
-      upgradeDriver(driver, tx);
+      //3. delete all jobs in the system
+      deleteJobs(existingJobs, tx);
+      // 4. Delete all inputs and configs associated with the driver, and
+      // insert the new configs and inputs for this driver
+      upgradeDriverConfigs(driver, tx);
 
-      for (MJob job : jobs) {
+      for (MJob job : existingJobs) {
         // Make a new copy of the configs
         MDriverConfig driverConfig = driver.getDriverConfig().clone(false);
         MDriver newDriver = new MDriver(driverConfig, DriverBean.CURRENT_DRIVER_VERSION);
-        upgrader.upgrade(job.getDriverConfig(), newDriver.getDriverConfig());
+        // At this point, the driver only supports JOB config type
+        upgrader.upgradeJobConfig(job.getDriverConfig(), newDriver.getDriverConfig());
+        // create a new job with old FROM and TO configs but new driver configs
         MJob newJob = new MJob(job, job.getFromJobConfig(), job.getToJobConfig(), newDriver.getDriverConfig());
 
-        // Transform config structures to objects for validations
-        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getDriverConfigurationGroupClass());
+        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getDriverJobConfigurationClass());
         ConfigUtils.fromConfigs(newJob.getDriverConfig().getConfigs(), newConfigurationObject);
 
+        // 5. validate configs
         ConfigValidator validation = validator.validateConfigForJob(newConfigurationObject);
         if (validation.getStatus().canProceed()) {
+          // 6. update job
           updateJob(newJob, tx);
         } else {
           logInvalidModelObject("job", newJob, validation);

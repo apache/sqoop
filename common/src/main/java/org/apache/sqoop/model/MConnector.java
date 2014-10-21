@@ -23,11 +23,11 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 
 /**
- * Connector entity supports the FROM/TO {@link Transferable} Includes unique id
+ * Connector entity supports the FROM/TO {@link  org.apache.sqoop.job.etl.Transfereable} Includes unique id
  * that identifies connector in the repository, unique human readable name,
  * corresponding name and all configs to support the from and to data sources
  */
-public final class MConnector extends MPersistableEntity implements MClonable {
+public final class MConnector extends Configurable {
 
   private final String uniqueName;
   private final String className;

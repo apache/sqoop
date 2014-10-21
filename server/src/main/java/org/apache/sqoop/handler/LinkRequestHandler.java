@@ -158,7 +158,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MLinkConfig linkConfig =
-      ConnectorManager.getInstance().getConnectorConfig(link.getConnectorId())
+      ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorId())
       .getLinkConfig();
     if(!linkConfig.equals(link.getConnectorLinkConfig())) {
       throw new SqoopException(ServerError.SERVER_0003,
@@ -166,7 +166,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     // Responsible connector for this session
-    SqoopConnector connector = ConnectorManager.getInstance().getConnector(link.getConnectorId());
+    SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(link.getConnectorId());
 
     // We need translate configs
     Object connectorLinkConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());

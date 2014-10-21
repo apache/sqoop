@@ -163,10 +163,6 @@ public class JdbcRepository extends Repository {
           handler.registerConnector(mConnector, conn);
           return mConnector;
         } else {
-          // Same connector, check if the version is the same.
-          // For now, use the "string" versions itself - later we should
-          // probably include a build number or something that is
-          // monotonically increasing.
           if (connectorResult.getUniqueName().equals(mConnector.getUniqueName()) &&
             mConnector.getVersion().compareTo(connectorResult.getVersion()) > 0) {
             if (autoUpgrade) {
@@ -652,23 +648,23 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  protected void upgradeConnector(final MConnector newConnector,
+  protected void upgradeConnectorConfigs(final MConnector newConnector,
     RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.upgradeConnector(newConnector, conn);
+        handler.upgradeConnectorConfigs(newConnector, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
   }
 
 
-  protected void upgradeDriver(final MDriver mDriver, RepositoryTransaction tx) {
+  protected void upgradeDriverConfigs(final MDriver mDriver, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.upgradeDriver(mDriver, conn);
+        handler.upgradeDriverConfigs(mDriver, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

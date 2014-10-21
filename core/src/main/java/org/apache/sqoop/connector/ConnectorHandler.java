@@ -43,15 +43,14 @@ public final class ConnectorHandler {
   private final String connectorUniqueName;
   private final SqoopConnector connector;
 
-  private MConnector mConnector;
+  private MConnector connectorConfigurable;
 
   public ConnectorHandler(URL configFileUrl) {
     connectorUrl = configFileUrl.toString();
     try {
       properties.load(configFileUrl.openStream());
     } catch (IOException ex) {
-      throw new SqoopException(ConnectorError.CONN_0003,
-          configFileUrl.toString(), ex);
+      throw new SqoopException(ConnectorError.CONN_0003, configFileUrl.toString(), ex);
     }
 
     LOG.debug("Connector configuration: " + properties);
@@ -64,12 +63,9 @@ public final class ConnectorHandler {
           ConfigurationConstants.CONPROP_PROVIDER_CLASS);
     }
 
+    connectorUniqueName = properties.getProperty(ConfigurationConstants.CONNPROP_CONNECTOR_NAME);
 
-    connectorUniqueName = properties.getProperty(
-        ConfigurationConstants.CONNPROP_CONNECTOR_NAME);
-
-    if (connectorUniqueName == null || connectorUniqueName.trim().length() == 0)
-    {
+    if (connectorUniqueName == null || connectorUniqueName.trim().length() == 0) {
       throw new SqoopException(ConnectorError.CONN_0008, connectorClassName);
     }
 
@@ -103,13 +99,11 @@ public final class ConnectorHandler {
           connector.getJobConfigurationClass(Direction.TO)));
     }
 
-    MLinkConfig connectionForms = new MLinkConfig(
+    MLinkConfig linkConfig = new MLinkConfig(
         ConfigUtils.toConfigs(connector.getLinkConfigurationClass()));
 
-    String connectorVersion = connector.getVersion();
-
-    mConnector = new MConnector(connectorUniqueName, connectorClassName, connectorVersion,
-        connectionForms, fromConfig, toConfig);
+    connectorConfigurable = new MConnector(connectorUniqueName, connectorClassName, connector.getVersion(),
+        linkConfig, fromConfig, toConfig);
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector [" + connectorClassName + "] initialized.");
@@ -133,15 +127,15 @@ public final class ConnectorHandler {
     return connectorUrl;
   }
 
-  public MConnector getMetadata() {
-    return mConnector;
+  public MConnector getConnectorConfigurable() {
+    return connectorConfigurable;
   }
 
-  public void setMetadata(MConnector connector) {
-    this.mConnector = connector;
+  public void setConnectorConfigurable(MConnector mConnector) {
+    this.connectorConfigurable = mConnector;
   }
 
-  public SqoopConnector getConnector() {
+  public SqoopConnector getSqoopConnector() {
     return connector;
   }
 }

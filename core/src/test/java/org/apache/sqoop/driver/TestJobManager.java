@@ -71,10 +71,10 @@ public class TestJobManager {
 
   @Test
   public void testGetConnector() {
-    when(connectorMgrMock.getConnector(123l)).thenReturn(sqoopConnectorMock);
+    when(connectorMgrMock.getSqoopConnector(123l)).thenReturn(sqoopConnectorMock);
     when(sqoopConnectorMock.getSupportedDirections()).thenReturn(getSupportedDirections());
-    assertEquals(jobManager.getConnector(123l), sqoopConnectorMock);
-    verify(connectorMgrMock, times(1)).getConnector(123l);
+    assertEquals(jobManager.getSqoopConnector(123l), sqoopConnectorMock);
+    verify(connectorMgrMock, times(1)).getSqoopConnector(123l);
   }
 
   @Test

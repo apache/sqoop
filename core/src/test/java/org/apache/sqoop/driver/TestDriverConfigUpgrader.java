@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MStringInput;
@@ -36,30 +37,31 @@ import org.junit.Test;
  */
 public class TestDriverConfigUpgrader {
 
-  DriverConfigUpgrader upgrader;
+  DriverUpgrader upgrader;
 
   @Before
   public void initializeUpgrader() {
-    upgrader = new DriverConfigUpgrader();
+    upgrader = new DriverUpgrader();
   }
+
   /**
-   * We take the same configs on input and output and we
-   * expect that all values will be correctly transferred.
+   * We take the same configs on input and output and we expect that all values
+   * will be correctly transferred.
    */
   @Test
   public void testJobConfigTyeUpgrade() {
-    MConfigList original = job();
-    MConfigList target = job();
+    MDriverConfig original = job();
+    MDriverConfig target = job();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
     original.getIntegerInput("f1.i").setValue(3);
 
-    upgrader.upgrade(original, target);
+    upgrader.upgradeJobConfig(original, target);
 
     assertEquals("A", target.getStringInput("f1.s1").getValue());
     assertEquals("B", target.getStringInput("f1.s2").getValue());
-    assertEquals(3, (long)target.getIntegerInput("f1.i").getValue());
+    assertEquals(3, (long) target.getIntegerInput("f1.i").getValue());
   }
 
   /**
@@ -67,54 +69,54 @@ public class TestDriverConfigUpgrader {
    */
   @Test
   public void testNonExistingInput() {
-    MConfigList original = job1();
-    MConfigList target = job2();
+    MDriverConfig original = job1();
+    MDriverConfig target = job2();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
     original.getIntegerInput("f1.i").setValue(3);
 
-    upgrader.upgrade(original, target);
+    upgrader.upgradeJobConfig(original, target);
 
     assertEquals("A", target.getStringInput("f1.s1").getValue());
     assertNull(target.getStringInput("f1.s2_").getValue());
-    assertEquals(3, (long)target.getIntegerInput("f1.i").getValue());
+    assertEquals(3, (long) target.getIntegerInput("f1.i").getValue());
   }
 
   /**
-   * Upgrade scenario when entire has been added in the target and
-   * therefore is missing in the original.
+   * Upgrade scenario when entire has been added in the target and therefore is
+   * missing in the original.
    */
   @Test
   public void testNonExistingConfig() {
-    MConfigList original = job1();
-    MConfigList target = job3();
+    MDriverConfig original = job1();
+    MDriverConfig target = job3();
 
     original.getStringInput("f1.s1").setValue("A");
     original.getStringInput("f1.s2").setValue("B");
     original.getIntegerInput("f1.i").setValue(3);
 
-    upgrader.upgrade(original, target);
+    upgrader.upgradeJobConfig(original, target);
 
     assertNull(target.getStringInput("f2.s1").getValue());
     assertNull(target.getStringInput("f2.s2").getValue());
     assertNull(target.getIntegerInput("f2.i").getValue());
   }
 
-  MConfigList job() {
-    return new MConfigList(configs1());
+  MDriverConfig job() {
+    return new MDriverConfig(configs1());
   }
 
-  MConfigList job1() {
-    return new MConfigList(configs1());
+  MDriverConfig job1() {
+    return new MDriverConfig(configs1());
   }
 
-  MConfigList job2() {
-    return new MConfigList(configs2());
+  MDriverConfig job2() {
+    return new MDriverConfig(configs2());
   }
 
-  MConfigList job3() {
-    return new MConfigList(configs3());
+  MDriverConfig job3() {
+    return new MDriverConfig(configs3());
   }
 
   List<MConfig> configs1() {
@@ -125,8 +127,8 @@ public class TestDriverConfigUpgrader {
 
   List<MInput<?>> inputs1(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
-    list.add(new MStringInput(formName + ".s1", false, (short)30));
-    list.add(new MStringInput(formName + ".s2", false, (short)30));
+    list.add(new MStringInput(formName + ".s1", false, (short) 30));
+    list.add(new MStringInput(formName + ".s2", false, (short) 30));
     list.add(new MIntegerInput(formName + ".i", false));
     return list;
   }
@@ -139,8 +141,8 @@ public class TestDriverConfigUpgrader {
 
   List<MInput<?>> inputs2(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
-    list.add(new MStringInput(formName + ".s1", false, (short)30));
-    list.add(new MStringInput(formName + ".s2_", false, (short)30));
+    list.add(new MStringInput(formName + ".s1", false, (short) 30));
+    list.add(new MStringInput(formName + ".s2_", false, (short) 30));
     list.add(new MIntegerInput(formName + ".i", false));
     return list;
   }

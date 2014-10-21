@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.driver;
 
-import org.apache.sqoop.driver.configuration.DriverConfiguration;
+import org.apache.sqoop.driver.configuration.JobConfiguration;
 import org.apache.sqoop.driver.configuration.ThrottlingConfig;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidator;
@@ -26,8 +26,8 @@ import org.apache.sqoop.validation.Validator;
 public class DriverConfigValidator extends Validator {
   @Override
   public ConfigValidator validateConfigForJob(Object jobConfiguration) {
-    ConfigValidator validation = new ConfigValidator(DriverConfiguration.class);
-    DriverConfiguration conf = (DriverConfiguration)jobConfiguration;
+    ConfigValidator validation = new ConfigValidator(JobConfiguration.class);
+    JobConfiguration conf = (JobConfiguration)jobConfiguration;
     validateThrottlingConfig(validation,conf.throttlingConfig);
 
     return validation;

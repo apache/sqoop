@@ -18,6 +18,14 @@
 
 package org.apache.sqoop.tools.tool;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -25,13 +33,15 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.connector.spi.RepositoryUpgrader;
+import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionBean;
@@ -50,16 +60,6 @@ import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.ConfigValidationRunner;
@@ -140,8 +140,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
    Repository repository = RepositoryManager.getInstance().getRepository();
 
    ConnectorManager.getInstance().initialize();
-   ConnectorManager connectorManager = ConnectorManager.getInstance();
-
+   
    LOG.info("Loading Connections");
 
    JSONObject jsonConns = (JSONObject) repo.get(JSONConstants.LINKS);
@@ -247,20 +246,21 @@ public class RepositoryLoadTool extends ConfiguredTool {
     //starting by pretending we have a brand new connection
     resetPersistenceId(link);
 
-    RepositoryUpgrader upgrader = Driver.getInstance().getDriverConfigRepositoryUpgrader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    MConnector mConnector = ConnectorManager.getInstance().getConnectorConfig(link.getConnectorId());
+    MConnector mConnector = ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorId());
+    ConnectorConfigurableUpgrader connectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mConnector.getUniqueName()).getConfigurableUpgrader();
+
     List<MConfig> connectorConfigs = mConnector.getLinkConfig().clone(false).getConfigs();
     MLinkConfig newLinkConfigs = new MLinkConfig(connectorConfigs);
 
-    // upgrading the forms to make sure they match the current repository
-    upgrader.upgrade(link.getConnectorLinkConfig(), newLinkConfigs);
+    // upgrading the configs to make sure they match the current repository
+    connectorConfigUpgrader.upgradeLinkConfig(link.getConnectorLinkConfig(), newLinkConfigs);
     MLink newLink = new MLink(link, newLinkConfigs);
 
     // Transform config structures to objects for validations
-    SqoopConnector connector =
-            ConnectorManager.getInstance().getConnector(link.getConnectorId());
+    SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
+        link.getConnectorId());
 
     Object connectorConfig = ClassUtils.instantiate(
         connector.getLinkConfigurationClass());
@@ -286,27 +286,32 @@ public class RepositoryLoadTool extends ConfiguredTool {
   private long loadJob(MJob job) {
     //starting by pretending we have a brand new job
     resetPersistenceId(job);
+    MConnector mFromConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getFromConnectorId());
+    MConnector mToConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getToConnectorId());
 
-    RepositoryUpgrader upgrader = Driver.getInstance().getDriverConfigRepositoryUpgrader();
+    MFromConfig fromConfig = job.getFromJobConfig();
+    MToConfig toConfig = job.getToJobConfig();
+
+    ConnectorConfigurableUpgrader fromConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mFromConnector.getUniqueName()).getConfigurableUpgrader();
+    ConnectorConfigurableUpgrader toConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mToConnector.getUniqueName()).getConfigurableUpgrader();
+
+    fromConnectorConfigUpgrader.upgradeFromJobConfig(job.getFromJobConfig(), fromConfig);
+
+    toConnectorConfigUpgrader.upgradeToJobConfig(job.getToJobConfig(), toConfig);
+
+    DriverUpgrader driverConfigUpgrader =  Driver.getInstance().getConfigurableUpgrader();
     MDriver driver = Driver.getInstance().getDriver();
-    Repository repository = RepositoryManager.getInstance().getRepository();
-
     MDriverConfig driverConfigs = driver.getDriverConfig();
-    MFromConfig fromConfigs = job.getFromJobConfig();
-    MToConfig toConfigs = job.getToJobConfig();
+    driverConfigUpgrader.upgradeJobConfig( job.getDriverConfig(), driverConfigs);
 
-    // upgrading the configs to make sure they match the current repository
-    upgrader.upgrade(job.getDriverConfig(), driverConfigs);
-    upgrader.upgrade(job.getFromJobConfig(), fromConfigs);
-    upgrader.upgrade(job.getToJobConfig(), toConfigs);
-    MJob newJob = new MJob(job, fromConfigs, toConfigs, driverConfigs);
+    MJob newJob = new MJob(job, fromConfig, toConfig, driverConfigs);
 
     // Transform config structures to objects for validations
     SqoopConnector fromConnector =
-        ConnectorManager.getInstance().getConnector(
+        ConnectorManager.getInstance().getSqoopConnector(
             job.getConnectorId(Direction.FROM));
     SqoopConnector toConnector =
-        ConnectorManager.getInstance().getConnector(
+        ConnectorManager.getInstance().getSqoopConnector(
             job.getConnectorId(Direction.TO));
 
     Object fromConnectorConfig = ClassUtils.instantiate(
@@ -314,7 +319,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
     Object toConnectorConfig = ClassUtils.instantiate(
         toConnector.getJobConfigurationClass(Direction.TO));
     Object driverConfig = ClassUtils.instantiate(
-            Driver.getInstance().getDriverConfigurationGroupClass());
+            Driver.getInstance().getDriverJobConfigurationClass());
 
     ConfigUtils.fromConfigs(
         job.getFromJobConfig().getConfigs(), fromConnectorConfig);
@@ -332,7 +337,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
         toConnectorConfigResult.getStatus(), driverConfigResult.getStatus());
 
     if (finalStatus.canProceed()) {
-      repository.createJob(newJob);
+      RepositoryManager.getInstance().getRepository().createJob(newJob);
 
     } else {
       LOG.error("Failed to load job:" + job.getName());

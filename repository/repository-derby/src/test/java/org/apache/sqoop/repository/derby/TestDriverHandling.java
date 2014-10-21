@@ -125,7 +125,7 @@ public class TestDriverHandling extends DerbyTestCase {
         + DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION + "'");
     assertEquals(lowerVersion, getDriverVersion());
 
-    handler.upgradeDriver(driver, getDerbyDatabaseConnection());
+    handler.upgradeDriverConfigs(driver, getDerbyDatabaseConnection());
 
     assertEquals(CURRENT_DRIVER_VERSION, driver.getVersion());
 

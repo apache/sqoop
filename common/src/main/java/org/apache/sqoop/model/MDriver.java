@@ -22,7 +22,7 @@ import java.sql.Driver;
 /**
  * Describes the configs associated with the {@link Driver} for executing sqoop jobs.
  */
-public class MDriver extends MPersistableEntity implements MClonable {
+public final class MDriver extends Configurable {
 
   private final MDriverConfig driverConfig;
   private final String version;

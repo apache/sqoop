@@ -16,29 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.jdbc;
+package org.apache.sqoop.driver;
 
 import org.apache.sqoop.configurable.ConfigurableUpgradeUtil;
-import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
-import org.apache.sqoop.model.MFromConfig;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MDriverConfig;
 
-// NOTE: All config types have the similar upgrade path at this point
-public class GenericJdbcConnectorUpgrader extends ConnectorConfigurableUpgrader {
+public class DriverUpgrader {
 
-  @Override
-  public void upgradeLinkConfig(MLinkConfig original, MLinkConfig upgradeTarget) {
-    ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
-  }
-
-  @Override
-  public void upgradeFromJobConfig(MFromConfig original, MFromConfig upgradeTarget) {
-    ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
-  }
-
-  @Override
-  public void upgradeToJobConfig(MToConfig original, MToConfig upgradeTarget) {
+  public void upgradeJobConfig(MDriverConfig original, MDriverConfig upgradeTarget) {
     ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
   }
 }

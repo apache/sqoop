@@ -139,7 +139,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
     while (iterator.hasNext()) {
       JSONObject result = iterator.next();
       Long connectorId = (Long) result.get(JSONConstants.CONNECTOR_ID);
-      result.put(JSONConstants.CONNECTOR_NAME,  connectorManager.getConnectorConfig(connectorId).getUniqueName());
+      result.put(JSONConstants.CONNECTOR_NAME,  connectorManager.getConnectorConfigurable(connectorId).getUniqueName());
     }
 
     return json;

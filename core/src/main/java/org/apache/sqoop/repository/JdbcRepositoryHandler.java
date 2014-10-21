@@ -101,7 +101,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn JDBC link for querying repository
    */
 
-  public abstract void upgradeConnector(MConnector mConnector, Connection conn);
+  public abstract void upgradeConnectorConfigs(MConnector mConnector, Connection conn);
 
 
   /**
@@ -117,7 +117,7 @@ public abstract class JdbcRepositoryHandler {
    *                     the driverConfig.
    * @param conn JDBC link for querying repository
    */
-  public abstract void upgradeDriver(MDriver mDriver, Connection conn);
+  public abstract void upgradeDriverConfigs(MDriver mDriver, Connection conn);
 
 
   /**
