@@ -181,6 +181,10 @@ public final class MConnector extends Configurable {
     return version;
   }
 
+  public MConfigurableType getType() {
+    return MConfigurableType.CONNECTOR;
+  }
+
   public SupportedDirections getSupportedDirections() {
     return new SupportedDirections(this.getConfig(Direction.FROM) != null,
         this.getConfig(Direction.TO) != null);

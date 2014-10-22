@@ -49,9 +49,14 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQD_NAME = "SQD_NAME";
 
   // SQ_CONNECTOR
+  @Deprecated // used only for upgrade
   public static final String TABLE_SQ_CONNECTOR_NAME = "SQ_CONNECTOR";
+  // SQ_CONFIGURABLE
+  public static final String TABLE_SQ_CONFIGURABLE_NAME = "SQ_CONFIGURABLE";
 
+  @Deprecated // used only for upgrade
   public static final String TABLE_SQ_CONNECTOR = SCHEMA_PREFIX + TABLE_SQ_CONNECTOR_NAME;
+  public static final String TABLE_SQ_CONFIGURABLE = SCHEMA_PREFIX + TABLE_SQ_CONFIGURABLE_NAME;
 
   public static final String COLUMN_SQC_ID = "SQC_ID";
 
@@ -60,6 +65,8 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQC_CLASS = "SQC_CLASS";
 
   public static final String COLUMN_SQC_VERSION = "SQC_VERSION";
+
+  public static final String COLUMN_SQC_TYPE = "SQC_TYPE";
 
   // SQ_CONNECTOR_DIRECTIONS
 
@@ -75,12 +82,10 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQCD_DIRECTION = "SQCD_DIRECTION";
 
   public static final String CONSTRAINT_SQCD_SQC_NAME = CONSTRAINT_PREFIX + "SQCD_SQC";
-
  // FK to the SQ_CONNECTOR table
   public static final String CONSTRAINT_SQCD_SQC = SCHEMA_PREFIX + CONSTRAINT_SQCD_SQC_NAME;
 
   public static final String CONSTRAINT_SQCD_SQD_NAME = CONSTRAINT_PREFIX + "SQCD_SQD";
-
   // FK to the SQ_DIRECTION able
   public static final String CONSTRAINT_SQCD_SQD = SCHEMA_PREFIX + CONSTRAINT_SQCD_SQD_NAME;
 
@@ -99,7 +104,10 @@ public final class DerbySchemaConstants {
 
   @Deprecated // used only for upgrade
   public static final String COLUMN_SQF_CONNECTOR = "SQF_CONNECTOR";
+  @Deprecated // used only for upgrade path
   public static final String COLUMN_SQ_CFG_CONNECTOR = "SQ_CFG_CONNECTOR";
+  // note this column was renamed again
+  public static final String COLUMN_SQ_CFG_CONFIGURABLE = "SQ_CFG_CONFIGURABLE";
 
   @Deprecated // used only for upgrade
   public static final String COLUMN_SQF_OPERATION = "SQF_OPERATION";
@@ -125,8 +133,8 @@ public final class DerbySchemaConstants {
   @Deprecated // used only for upgrade
   public static final String CONSTRAINT_SQF_SQC = SCHEMA_PREFIX + CONSTRAINT_SQF_SQC_NAME;
 
+  // FK constraint on configurable
   public static final String CONSTRAINT_SQ_CFG_SQC_NAME = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
-
   public static final String CONSTRAINT_SQ_CFG_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_SQC_NAME;
 
   // SQ_CONFIG_DIRECTIONS
@@ -202,7 +210,11 @@ public final class DerbySchemaConstants {
   public static final String COLUMN_SQ_LNK_NAME = "SQ_LNK_NAME";
   @Deprecated // used only for upgrade
   public static final String COLUMN_SQN_CONNECTOR = "SQN_CONNECTOR";
+  @Deprecated // used only for upgrade
   public static final String COLUMN_SQ_LNK_CONNECTOR = "SQ_LNK_CONNECTOR";
+  // Note this column has been renamed twice
+  public static final String COLUMN_SQ_LNK_CONFIGURABLE = "SQ_LNK_CONFIGURABLE";
+
   @Deprecated // used only for upgrade
   public static final String COLUMN_SQN_CREATION_USER = "SQN_CREATION_USER";
   public static final String COLUMN_SQ_LNK_CREATION_USER = "SQ_LNK_CREATION_USER";
@@ -225,10 +237,10 @@ public final class DerbySchemaConstants {
 
   @Deprecated
   public static final String CONSTRAINT_SQN_SQC = SCHEMA_PREFIX + CONSTRAINT_SQN_SQC_NAME;
+  // FK constraint on the connector configurable
   public static final String CONSTRAINT_SQ_LNK_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_LNK_SQC_NAME;
 
   public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME = CONSTRAINT_PREFIX + "SQ_LNK_NAME_UNIQUE";
-
   public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE = SCHEMA_PREFIX + CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME;
 
   // SQ_JOB
@@ -437,12 +449,12 @@ public final class DerbySchemaConstants {
   static {
     tablesV1 = new HashSet<String>();
     tablesV1.add(TABLE_SQ_CONNECTOR_NAME);
-    tablesV1.add(TABLE_SQ_LINK_NAME);
-    tablesV1.add(TABLE_SQ_LINK_INPUT_NAME);
+    tablesV1.add(TABLE_SQ_CONNECTION_NAME);
+    tablesV1.add(TABLE_SQ_CONNECTION_INPUT_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_GROUP_NAME);
     tablesV1.add(TABLE_SQ_COUNTER_SUBMISSION_NAME);
-    tablesV1.add(TABLE_SQ_CONFIG_NAME);
+    tablesV1.add(TABLE_SQ_FORM_NAME);
     tablesV1.add(TABLE_SQ_INPUT_NAME);
     tablesV1.add(TABLE_SQ_JOB_NAME);
     tablesV1.add(TABLE_SQ_JOB_INPUT_NAME);

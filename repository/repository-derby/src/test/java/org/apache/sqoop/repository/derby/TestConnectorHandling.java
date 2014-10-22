@@ -62,17 +62,17 @@ public class TestConnectorHandling extends DerbyTestCase {
   @Test
   public void testFindAllConnectors() throws Exception {
     // No connectors in an empty repository, we expect an empty list
-    assertEquals(handler.findConnectors(getDerbyDatabaseConnection()).size(),0);
-
+    assertEquals(handler.findConnectors(getDerbyDatabaseConnection()).size(), 0);
+    // add connector A
     loadConnectorAndDriverConfig();
-    addConnector();
-
+    // adding connector B
+    addConnectorB();
     // Retrieve connectors
     List<MConnector> connectors = handler.findConnectors(getDerbyDatabaseConnection());
     assertNotNull(connectors);
-    assertEquals(connectors.size(),2);
-    assertEquals(connectors.get(0).getUniqueName(),"A");
-    assertEquals(connectors.get(1).getUniqueName(),"B");
+    assertEquals(connectors.size(), 2);
+    assertEquals(connectors.get(0).getUniqueName(), "A");
+    assertEquals(connectors.get(1).getUniqueName(), "B");
   }
 
   @Test
@@ -83,7 +83,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 6);
     assertCountForTable("SQOOP.SQ_INPUT", 12);
 
@@ -92,6 +92,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertNotNull(retrieved);
     assertEquals(connector, retrieved);
   }
+
   @Test
   public void testFromDirection() throws Exception {
     MConnector connector = getConnector(true, false);
@@ -102,7 +103,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
     assertCountForTable("SQOOP.SQ_INPUT", 8);
 
@@ -122,7 +123,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
     assertCountForTable("SQOOP.SQ_INPUT", 8);
 
@@ -142,7 +143,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertCountForTable("SQOOP.SQ_CONNECTOR", 1);
+    assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 2);
     assertCountForTable("SQOOP.SQ_INPUT", 4);
 

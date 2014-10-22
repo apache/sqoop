@@ -119,6 +119,14 @@ public abstract class Repository {
   public abstract List<MConnector> findConnectors();
 
   /**
+   * Search for driver in the repository.
+   * @param shortName Driver unique name
+   * @return null if driver are not yet present in repository or
+   *  loaded representation.
+   */
+  public abstract MDriver findDriver(String shortName);
+
+  /**
    * Save given link to repository. This link must not be already
    * present in the repository otherwise exception will be thrown.
    *
@@ -317,7 +325,7 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void upgradeConnectorConfigs(MConnector newConnector, RepositoryTransaction tx);
+  protected abstract void upgradeConnectorAndConfigs(MConnector newConnector, RepositoryTransaction tx);
 
   /**
    * Upgrade the driver with the new data supplied in the
@@ -335,7 +343,7 @@ public abstract class Repository {
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void upgradeDriverConfigs(MDriver newDriver, RepositoryTransaction tx);
+  protected abstract void upgradeDriverAndConfigs(MDriver newDriver, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a job
@@ -410,7 +418,7 @@ public abstract class Repository {
       deletelinksAndJobs(existingLinksByConnector, existingJobsByConnector, tx);
       // 5. Delete all inputs and configs associated with the connector, and
       // insert the new configs and inputs for this connector
-      upgradeConnectorConfigs(newConnector, tx);
+      upgradeConnectorAndConfigs(newConnector, tx);
       // 6. Run upgrade logic for the configs related to the link objects
       // dont always rely on the repository implementation to return empty list for links
       if (existingLinksByConnector != null) {
@@ -514,7 +522,7 @@ public abstract class Repository {
       deleteJobs(existingJobs, tx);
       // 4. Delete all inputs and configs associated with the driver, and
       // insert the new configs and inputs for this driver
-      upgradeDriverConfigs(driver, tx);
+      upgradeDriverAndConfigs(driver, tx);
 
       for (MJob job : existingJobs) {
         // Make a new copy of the configs

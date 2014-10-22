@@ -167,10 +167,10 @@ public class TestJdbcRepository {
    */
   @Test
   public void testDriverConfigEnableAutoUpgrade() {
-    MDriver newDriverConfig = driver();
-    MDriver oldDriverConfig = anotherDriver();
+    MDriver newDriver = driver();
+    MDriver oldDriver = anotherDriver();
 
-    when(repoHandlerMock.findDriver(any(Connection.class))).thenReturn(oldDriverConfig);
+    when(repoHandlerMock.findDriver(anyString(), any(Connection.class))).thenReturn(oldDriver);
 
     // make the upgradeDriverConfig to throw an exception to prove that it has been called
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -178,10 +178,10 @@ public class TestJdbcRepository {
     doThrow(exception).when(repoHandlerMock).findJobs(any(Connection.class));
 
     try {
-      repoSpy.registerDriver(newDriverConfig, true);
+      repoSpy.registerDriver(newDriver, true);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
-      verify(repoHandlerMock, times(1)).findDriver(any(Connection.class));
+      verify(repoHandlerMock, times(1)).findDriver(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
@@ -195,16 +195,16 @@ public class TestJdbcRepository {
    */
   @Test
   public void testDriverConfigDisableAutoUpgrade() {
-    MDriver newDriverConfig = driver();
-    MDriver oldDriverConfig = anotherDriver();
+    MDriver newDriver = driver();
+    MDriver oldDriver = anotherDriver();
 
-    when(repoHandlerMock.findDriver(any(Connection.class))).thenReturn(oldDriverConfig);
+    when(repoHandlerMock.findDriver(anyString(), any(Connection.class))).thenReturn(oldDriver);
 
     try {
-      repoSpy.registerDriver(newDriverConfig, false);
+      repoSpy.registerDriver(newDriver, false);
     } catch (SqoopException ex) {
       assertEquals(ex.getErrorCode(), RepositoryError.JDBCREPO_0026);
-      verify(repoHandlerMock, times(1)).findDriver(any(Connection.class));
+      verify(repoHandlerMock, times(1)).findDriver(anyString(),any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -242,7 +242,7 @@ public class TestJdbcRepository {
     doReturn(jobList).when(repoSpy).findJobsForConnector(anyLong());
     doNothing().when(repoSpy).updateLink(any(MLink.class), any(RepositoryTransaction.class));
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-    doNothing().when(repoSpy).upgradeConnectorConfigs(any(MConnector.class), any(RepositoryTransaction.class));
+    doNothing().when(repoSpy).upgradeConnectorAndConfigs(any(MConnector.class), any(RepositoryTransaction.class));
 
     repoSpy.upgradeConnector(oldConnector, newConnector);
 
@@ -258,7 +258,7 @@ public class TestJdbcRepository {
     repoOrder.verify(repoSpy, times(1)).deleteJobInputs(2, repoTransactionMock);
     repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(1, repoTransactionMock);
     repoOrder.verify(repoSpy, times(1)).deleteLinkInputs(2, repoTransactionMock);
-    repoOrder.verify(repoSpy, times(1)).upgradeConnectorConfigs(any(MConnector.class), any(RepositoryTransaction.class));
+    repoOrder.verify(repoSpy, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(RepositoryTransaction.class));
     repoOrder.verify(repoSpy, times(2)).updateLink(any(MLink.class), any(RepositoryTransaction.class));
     repoOrder.verify(repoSpy, times(4)).updateJob(any(MJob.class), any(RepositoryTransaction.class));
     repoOrder.verifyNoMoreInteractions();
@@ -296,7 +296,7 @@ public class TestJdbcRepository {
     doReturn(jobList).when(repoSpy).findJobs();
     doNothing().when(repoSpy).updateLink(any(MLink.class), any(RepositoryTransaction.class));
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-    doNothing().when(repoSpy).upgradeDriverConfigs(any(MDriver.class), any(RepositoryTransaction.class));
+    doNothing().when(repoSpy).upgradeDriverAndConfigs(any(MDriver.class), any(RepositoryTransaction.class));
 
     repoSpy.upgradeDriver(newDriverConfig);
 
@@ -309,7 +309,7 @@ public class TestJdbcRepository {
     repoOrder.verify(repoSpy, times(1)).getTransaction();
     repoOrder.verify(repoSpy, times(1)).deleteJobInputs(1, repoTransactionMock);
     repoOrder.verify(repoSpy, times(1)).deleteJobInputs(2, repoTransactionMock);
-    repoOrder.verify(repoSpy, times(1)).upgradeDriverConfigs(any(MDriver.class), any(RepositoryTransaction.class));
+    repoOrder.verify(repoSpy, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(RepositoryTransaction.class));
     repoOrder.verify(repoSpy, times(2)).updateJob(any(MJob.class), any(RepositoryTransaction.class));
     repoOrder.verifyNoMoreInteractions();
     txOrder.verify(repoTransactionMock, times(1)).begin();
@@ -339,7 +339,7 @@ public class TestJdbcRepository {
 
     doReturn(jobList).when(repoSpy).findJobs();
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
-    doNothing().when(repoSpy).upgradeDriverConfigs(any(MDriver.class), any(RepositoryTransaction.class));
+    doNothing().when(repoSpy).upgradeDriverAndConfigs(any(MDriver.class), any(RepositoryTransaction.class));
 
     try {
       repoSpy.upgradeDriver(newDriverConfig);
@@ -355,7 +355,7 @@ public class TestJdbcRepository {
       repoOrder.verify(repoSpy, times(1)).getTransaction();
       repoOrder.verify(repoSpy, times(1)).deleteJobInputs(1, repoTransactionMock);
       repoOrder.verify(repoSpy, times(1)).deleteJobInputs(2, repoTransactionMock);
-      repoOrder.verify(repoSpy, times(1)).upgradeDriverConfigs(any(MDriver.class), any(RepositoryTransaction.class));
+      repoOrder.verify(repoSpy, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(RepositoryTransaction.class));
       repoOrder.verifyNoMoreInteractions();
       txOrder.verify(repoTransactionMock, times(1)).begin();
       txOrder.verify(repoTransactionMock, times(1)).rollback();
@@ -535,7 +535,7 @@ public class TestJdbcRepository {
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "update connector error.");
-    doThrow(exception).when(repoHandlerMock).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+    doThrow(exception).when(repoHandlerMock).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
 
     try {
       repoSpy.upgradeConnector(oldConnector, newConnector);
@@ -545,7 +545,7 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(1)).findJobsForConnector(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -577,7 +577,7 @@ public class TestJdbcRepository {
     doReturn(jobList).when(repoHandlerMock).findJobsForConnector(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+    doNothing().when(repoHandlerMock).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsLink(anyLong(), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -592,7 +592,7 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(1)).findJobsForConnector(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
       verify(repoHandlerMock, times(1)).existsLink(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(1)).updateLink(any(MLink.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
@@ -626,7 +626,7 @@ public class TestJdbcRepository {
     doReturn(jobList).when(repoHandlerMock).findJobsForConnector(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteLinkInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+    doNothing().when(repoHandlerMock).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
     doNothing().when(repoHandlerMock).updateLink(any(MLink.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsLink(anyLong(), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyLong(), any(Connection.class));
@@ -643,7 +643,7 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(1)).findJobsForConnector(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).upgradeConnectorConfigs(any(MConnector.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
       verify(repoHandlerMock, times(2)).existsLink(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(2)).updateLink(any(MLink.class), any(Connection.class));
       verify(repoHandlerMock, times(1)).existsJob(anyLong(), any(Connection.class));
@@ -731,7 +731,7 @@ public class TestJdbcRepository {
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
         "update driverConfig entity error.");
-    doThrow(exception).when(repoHandlerMock).upgradeDriverConfigs(any(MDriver.class), any(Connection.class));
+    doThrow(exception).when(repoHandlerMock).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
 
     try {
       repoSpy.upgradeDriver(newDriverConfig);
@@ -739,7 +739,7 @@ public class TestJdbcRepository {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).upgradeDriverConfigs(any(MDriver.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -764,7 +764,7 @@ public class TestJdbcRepository {
     List<MJob> jobList = jobs(job(1,1,1,1,1), job(2,1,1,2,1));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyLong(), any(Connection.class));
-    doNothing().when(repoHandlerMock).upgradeDriverConfigs(any(MDriver.class), any(Connection.class));
+    doNothing().when(repoHandlerMock).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyLong(), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -777,7 +777,7 @@ public class TestJdbcRepository {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyLong(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).upgradeDriverConfigs(any(MDriver.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
       verify(repoHandlerMock, times(1)).existsJob(anyLong(), any(Connection.class));
       verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);

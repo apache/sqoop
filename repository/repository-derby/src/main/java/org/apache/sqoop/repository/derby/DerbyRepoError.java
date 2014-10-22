@@ -188,8 +188,12 @@ public enum DerbyRepoError implements ErrorCode {
 
   DERBYREPO_0048("Could not register config direction"),
 
-  DERBYREPO_0049("Could not set connector direction")
-            ;
+  DERBYREPO_0049("Could not set connector direction"),
+
+  /** The system was unable to register driver due to a server error **/
+  DERBYREPO_0050("Registration of driver failed"),
+
+  ;
 
   private final String message;
 

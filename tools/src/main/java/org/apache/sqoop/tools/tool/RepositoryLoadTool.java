@@ -69,25 +69,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- * Load user-created content of Sqoop repository from a JSON formatted file
- * The loaded connector IDs will be modified to match existing connectors
+ * Load user-created content of Sqoop repository from a JSON formatted file The
+ * loaded connector IDs will be modified to match existing connectors
  */
 public class RepositoryLoadTool extends ConfiguredTool {
 
   public static final Logger LOG = Logger.getLogger(RepositoryLoadTool.class);
 
-
-
+  @SuppressWarnings("static-access")
   @Override
   public boolean runToolWithConfiguration(String[] arguments) {
 
-
     Options options = new Options();
-    options.addOption(OptionBuilder.isRequired()
-            .hasArg()
-            .withArgName("filename")
-            .withLongOpt("input")
-            .create('i'));
+    options.addOption(OptionBuilder.isRequired().hasArg().withArgName("filename")
+        .withLongOpt("input").create('i'));
 
     CommandLineParser parser = new GnuParser();
 
@@ -98,8 +93,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
       LOG.info("Reading JSON from file" + inputFileName);
       InputStream input = new FileInputStream(inputFileName);
       String jsonTxt = IOUtils.toString(input, Charsets.UTF_8);
-      JSONObject json =
-              (JSONObject) JSONValue.parse(jsonTxt);
+      JSONObject json = (JSONObject) JSONValue.parse(jsonTxt);
       boolean res = load(json);
       input.close();
       return res;
@@ -114,99 +108,101 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     } catch (ParseException e) {
       LOG.error("Error parsing command line arguments:", e);
-      System.out.println("Error parsing command line arguments. Please check Server logs for details.");
+      System.out
+          .println("Error parsing command line arguments. Please check Server logs for details.");
       return false;
     }
   }
 
-
   private boolean load(JSONObject repo) {
 
-   // Validate that loading JSON into repository is supported
-   JSONObject metadata = (JSONObject) repo.get(JSONConstants.METADATA);
+    // Validate that loading JSON into repository is supported
+    JSONObject metadata = (JSONObject) repo.get(JSONConstants.METADATA);
 
-   if (metadata == null) {
-     LOG.error("Malformed JSON. Key "+ JSONConstants.METADATA + " not found.");
-     return false;
-   }
-
-   if (!validateMetadata(metadata)){
-     LOG.error("Metadata of repository dump file failed validation (see error above for cause). Aborting repository load.");
-     return false;
-   }
-
-   // initialize repository as mutable
-   RepositoryManager.getInstance().initialize(false);
-   Repository repository = RepositoryManager.getInstance().getRepository();
-
-   ConnectorManager.getInstance().initialize();
-   
-   LOG.info("Loading Connections");
-
-   JSONObject jsonConns = (JSONObject) repo.get(JSONConstants.LINKS);
-
-   if (jsonConns == null) {
-     LOG.error("Malformed JSON file. Key "+ JSONConstants.LINKS + " not found.");
-     return false;
-   }
-
-   LinkBean linkBean = new LinkBean();
-   linkBean.restore(updateConnectorIDUsingName(jsonConns));
-
-   HashMap<Long,Long> connectionIds = new HashMap<Long, Long>();
-
-   for (MLink link : linkBean.getLinks()) {
-     long oldId = link.getPersistenceId();
-     long newId = loadLink(link);
-     if (newId == link.PERSISTANCE_ID_DEFAULT) {
-       LOG.error("loading connection " + link.getName() + " with previous ID " + oldId + " failed. Aborting repository load. Check log for details.");
-       return false;
-     }
-     connectionIds.put(oldId,newId);
-   }
-   LOG.info("Loaded " + connectionIds.size() + " connections");
-
-   LOG.info("Loading Jobs");
-   JSONObject jsonJobs = (JSONObject) repo.get(JSONConstants.JOBS);
-
-   if (jsonJobs == null) {
-     LOG.error("Malformed JSON file. Key "+ JSONConstants.JOBS + " not found.");
-     return false;
-   }
-
-   JobBean jobBean = new JobBean();
-   jobBean.restore(updateIdUsingMap(updateConnectorIDUsingName(jsonJobs), connectionIds,JSONConstants.LINK_ID));
-
-   HashMap<Long,Long> jobIds = new HashMap<Long, Long>();
-   for (MJob job: jobBean.getJobs()) {
-     long oldId = job.getPersistenceId();
-     long newId = loadJob(job);
-
-     if (newId == job.PERSISTANCE_ID_DEFAULT) {
-       LOG.error("loading job " + job.getName() + " failed. Aborting repository load. Check log for details.");
-       return false;
-     }
-     jobIds.put(oldId,newId);
-
-   }
-    LOG.info("Loaded " + jobIds.size() + " jobs");
-
-   LOG.info("Loading Submissions");
-   JSONObject jsonSubmissions = (JSONObject) repo.get(JSONConstants.SUBMISSIONS);
-
-    if (jsonSubmissions == null) {
-      LOG.error("Malformed JSON file. Key "+ JSONConstants.SUBMISSIONS + " not found.");
+    if (metadata == null) {
+      LOG.error("Malformed JSON. Key " + JSONConstants.METADATA + " not found.");
       return false;
     }
 
-   SubmissionBean submissionBean = new SubmissionBean();
-   submissionBean.restore(updateIdUsingMap(jsonSubmissions,jobIds,JSONConstants.JOB_ID));
-   int submissionCount = 0;
-   for (MSubmission submission: submissionBean.getSubmissions()) {
-     resetPersistenceId(submission);
-     repository.createSubmission(submission);
-     submissionCount++;
-   }
+    if (!validateMetadata(metadata)) {
+      LOG.error("Metadata of repository dump file failed validation (see error above for cause). Aborting repository load.");
+      return false;
+    }
+
+    // initialize repository as mutable
+    RepositoryManager.getInstance().initialize(false);
+    Repository repository = RepositoryManager.getInstance().getRepository();
+
+    ConnectorManager.getInstance().initialize();
+    LOG.info("Loading Connections");
+
+    JSONObject jsonConns = (JSONObject) repo.get(JSONConstants.LINKS);
+
+    if (jsonConns == null) {
+      LOG.error("Malformed JSON file. Key " + JSONConstants.LINKS + " not found.");
+      return false;
+    }
+
+    LinkBean linkBean = new LinkBean();
+    linkBean.restore(updateConnectorIDUsingName(jsonConns));
+
+    HashMap<Long, Long> connectionIds = new HashMap<Long, Long>();
+
+    for (MLink link : linkBean.getLinks()) {
+      long oldId = link.getPersistenceId();
+      long newId = loadLink(link);
+      if (newId == link.PERSISTANCE_ID_DEFAULT) {
+        LOG.error("loading connection " + link.getName() + " with previous ID " + oldId
+            + " failed. Aborting repository load. Check log for details.");
+        return false;
+      }
+      connectionIds.put(oldId, newId);
+    }
+    LOG.info("Loaded " + connectionIds.size() + " connections");
+
+    LOG.info("Loading Jobs");
+    JSONObject jsonJobs = (JSONObject) repo.get(JSONConstants.JOBS);
+
+    if (jsonJobs == null) {
+      LOG.error("Malformed JSON file. Key " + JSONConstants.JOBS + " not found.");
+      return false;
+    }
+
+    JobBean jobBean = new JobBean();
+    jobBean.restore(updateIdUsingMap(updateConnectorIDUsingName(jsonJobs), connectionIds,
+        JSONConstants.LINK_ID));
+
+    HashMap<Long, Long> jobIds = new HashMap<Long, Long>();
+    for (MJob job : jobBean.getJobs()) {
+      long oldId = job.getPersistenceId();
+      long newId = loadJob(job);
+
+      if (newId == job.PERSISTANCE_ID_DEFAULT) {
+        LOG.error("loading job " + job.getName()
+            + " failed. Aborting repository load. Check log for details.");
+        return false;
+      }
+      jobIds.put(oldId, newId);
+
+    }
+    LOG.info("Loaded " + jobIds.size() + " jobs");
+
+    LOG.info("Loading Submissions");
+    JSONObject jsonSubmissions = (JSONObject) repo.get(JSONConstants.SUBMISSIONS);
+
+    if (jsonSubmissions == null) {
+      LOG.error("Malformed JSON file. Key " + JSONConstants.SUBMISSIONS + " not found.");
+      return false;
+    }
+
+    SubmissionBean submissionBean = new SubmissionBean();
+    submissionBean.restore(updateIdUsingMap(jsonSubmissions, jobIds, JSONConstants.JOB_ID));
+    int submissionCount = 0;
+    for (MSubmission submission : submissionBean.getSubmissions()) {
+      resetPersistenceId(submission);
+      repository.createSubmission(submission);
+      submissionCount++;
+    }
     LOG.info("Loaded " + submissionCount + " submissions.");
     LOG.info("Repository load completed successfully.");
     return true;
@@ -216,12 +212,10 @@ public class RepositoryLoadTool extends ConfiguredTool {
     ent.setPersistenceId(ent.PERSISTANCE_ID_DEFAULT);
   }
 
-
-
   /**
-   * Even though the metadata contains version, revision, compile-date and compile-user
-   * We are only validating that version match for now.
-   * More interesting logic can be added later
+   * Even though the metadata contains version, revision, compile-date and
+   * compile-user We are only validating that version match for now. More
+   * interesting logic can be added later
    */
   private boolean validateMetadata(JSONObject metadata) {
     String jsonVersion = (String) metadata.get(JSONConstants.VERSION);
@@ -229,13 +223,14 @@ public class RepositoryLoadTool extends ConfiguredTool {
     String repoVersion = VersionInfo.getVersion();
 
     if (!jsonVersion.equals(repoVersion)) {
-      LOG.error("Repository version in file (" + jsonVersion + ") does not match this version of Sqoop (" + repoVersion + ")");
+      LOG.error("Repository version in file (" + jsonVersion
+          + ") does not match this version of Sqoop (" + repoVersion + ")");
       return false;
     }
 
     if (!includeSensitive) {
-      LOG.warn("Loading repository which was dumped without --include-sensitive=true. " +
-              "This means some sensitive information such as passwords is not included in the dump file and will need to be manually added later.");
+      LOG.warn("Loading repository which was dumped without --include-sensitive=true. "
+          + "This means some sensitive information such as passwords is not included in the dump file and will need to be manually added later.");
     }
 
     return true;
@@ -243,7 +238,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
   private long loadLink(MLink link) {
 
-    //starting by pretending we have a brand new connection
+    // starting by pretending we have a brand new connection
     resetPersistenceId(link);
 
     Repository repository = RepositoryManager.getInstance().getRepository();
@@ -262,11 +257,9 @@ public class RepositoryLoadTool extends ConfiguredTool {
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
         link.getConnectorId());
 
-    Object connectorConfig = ClassUtils.instantiate(
-        connector.getLinkConfigurationClass());
+    Object connectorConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());
 
-    ConfigUtils.fromConfigs(
-        link.getConnectorLinkConfig().getConfigs(), connectorConfig);
+    ConfigUtils.fromConfigs(link.getConnectorLinkConfig().getConfigs(), connectorConfig);
 
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
     ConfigValidationResult result = validationRunner.validate(connectorConfig);
@@ -284,7 +277,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
   }
 
   private long loadJob(MJob job) {
-    //starting by pretending we have a brand new job
+    // starting by pretending we have a brand new job
     resetPersistenceId(job);
     MConnector mFromConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getFromConnectorId());
     MConnector mToConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getToConnectorId());
@@ -329,7 +322,8 @@ public class RepositoryLoadTool extends ConfiguredTool {
         job.getDriverConfig().getConfigs(), driverConfig);
 
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
-    ConfigValidationResult fromConnectorConfigResult = validationRunner.validate(fromConnectorConfig);
+    ConfigValidationResult fromConnectorConfigResult = validationRunner
+        .validate(fromConnectorConfig);
     ConfigValidationResult toConnectorConfigResult = validationRunner.validate(toConnectorConfig);
     ConfigValidationResult driverConfigResult = validationRunner.validate(driverConfig);
 
@@ -341,17 +335,17 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
     } else {
       LOG.error("Failed to load job:" + job.getName());
-      LOG.error("Status of from connector configs:" + fromConnectorConfigResult.getStatus().toString());
+      LOG.error("Status of from connector configs:"
+          + fromConnectorConfigResult.getStatus().toString());
       LOG.error("Status of to connector configs:" + toConnectorConfigResult.getStatus().toString());
       LOG.error("Status of driver configs:" + driverConfigResult.getStatus().toString());
 
     }
     return newJob.getPersistenceId();
 
-
   }
 
-  private JSONObject updateConnectorIDUsingName( JSONObject json) {
+  private JSONObject updateConnectorIDUsingName(JSONObject json) {
     JSONArray array = (JSONArray) json.get(JSONConstants.ALL);
 
     Repository repository = RepositoryManager.getInstance().getRepository();
@@ -370,11 +364,10 @@ public class RepositoryLoadTool extends ConfiguredTool {
       long currentConnectorId = connectorMap.get(connectorName);
       String connectionName = (String) object.get(JSONConstants.NAME);
 
-
       // If a given connector now has a different ID, we need to update the ID
       if (connectorId != currentConnectorId) {
-        LOG.warn("Connection " + connectionName + " uses connector " + connectorName + ". " +
-                "Replacing previous ID " + connectorId + " with new ID " + currentConnectorId);
+        LOG.warn("Connection " + connectionName + " uses connector " + connectorName + ". "
+            + "Replacing previous ID " + connectorId + " with new ID " + currentConnectorId);
 
         object.put(JSONConstants.CONNECTOR_ID, currentConnectorId);
       }
@@ -382,7 +375,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
     return json;
   }
 
-  private JSONObject updateIdUsingMap(JSONObject json, HashMap<Long,Long> idMap, String fieldName) {
+  private JSONObject updateIdUsingMap(JSONObject json, HashMap<Long, Long> idMap, String fieldName) {
     JSONArray array = (JSONArray) json.get(JSONConstants.ALL);
 
     for (Object obj : array) {
@@ -393,7 +386,5 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
     return json;
   }
-
-
 
 }

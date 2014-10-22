@@ -32,6 +32,7 @@ import java.util.Map;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -298,7 +299,7 @@ public class TestJobHandling extends DerbyTestCase {
     return new MJob(1, 1, 1, 1,
       handler.findConnector("A", derbyConnection).getFromConfig(),
       handler.findConnector("A", derbyConnection).getToConfig(),
-      handler.findDriver(derbyConnection).getDriverConfig()
+      handler.findDriver(MDriver.DRIVER_NAME, derbyConnection).getDriverConfig()
     );
   }
 }

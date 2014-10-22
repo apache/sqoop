@@ -21,10 +21,10 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
 
 /**
@@ -41,7 +41,7 @@ public abstract class JdbcRepositoryHandler {
 
   /**
    * Search for connector with given name in repository.
-   * And return corresponding connector structure.
+   * And return corresponding connector entity.
    *
    * @param shortName Connector unique name
    * @param conn JDBC link for querying repository.
@@ -101,8 +101,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn JDBC link for querying repository
    */
 
-  public abstract void upgradeConnectorConfigs(MConnector mConnector, Connection conn);
-
+  public abstract void upgradeConnectorAndConfigs(MConnector mConnector, Connection conn);
 
   /**
    * Upgrade the driver with the new data supplied in the
@@ -117,17 +116,16 @@ public abstract class JdbcRepositoryHandler {
    *                     the driverConfig.
    * @param conn JDBC link for querying repository
    */
-  public abstract void upgradeDriverConfigs(MDriver mDriver, Connection conn);
-
+  public abstract void upgradeDriverAndConfigs(MDriver mDriver, Connection conn);
 
   /**
-   * Search for driverConfigin the repository.
-   *
+   * Search for driver in the repository.
+   * @params shortName the name for the driver
    * @param conn JDBC link for querying repository.
-   * @return null if driverConfig are not yet present in repository or
+   * @return null if driver are not yet present in repository or
    *  loaded representation.
    */
-  public abstract MDriver findDriver(Connection conn);
+  public abstract MDriver findDriver(String shortName, Connection conn);
 
   /**
    * Register driver config in repository.

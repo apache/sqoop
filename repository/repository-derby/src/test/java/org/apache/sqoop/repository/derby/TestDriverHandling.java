@@ -21,11 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.junit.Before;
@@ -48,15 +43,19 @@ public class TestDriverHandling extends DerbyTestCase {
   }
 
   @Test
-  public void testFindDriverConfig() throws Exception {
+  public void testFindDriver() throws Exception {
     // On empty repository, no driverConfig should be there
-    assertNull(handler.findDriver(getDerbyDatabaseConnection()));
+    assertNull(handler.findDriver(MDriver.DRIVER_NAME, getDerbyDatabaseConnection()));
     // Load Connector and DriverConfig into repository
     // TODO(SQOOP-1582):FIX why load connector config for driver testing?
+    // add a connector A and driver SqoopDriver
     loadConnectorAndDriverConfig();
     // Retrieve it
-    MDriver driver = handler.findDriver(getDerbyDatabaseConnection());
+    MDriver driver = handler.findDriver(MDriver.DRIVER_NAME, getDerbyDatabaseConnection());
     assertNotNull(driver);
+    assertNotNull(driver.getDriverConfig());
+    assertEquals("1.0-test", driver.getVersion());
+    assertEquals("1.0-test", driver.getVersion());
 
     // Get original structure
     MDriverConfig originalDriverConfig = getDriverConfig();
@@ -64,7 +63,7 @@ public class TestDriverHandling extends DerbyTestCase {
     assertEquals(originalDriverConfig, driver.getDriverConfig());
   }
 
-  public void testRegisterDriverAndConnectorConfig() throws Exception {
+  public void testRegisterDriver() throws Exception {
     MDriver driver = getDriver();
     handler.registerDriver(driver, getDerbyDatabaseConnection());
 
@@ -76,59 +75,22 @@ public class TestDriverHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONFIG", 2);
     assertCountForTable("SQOOP.SQ_INPUT", 4);
 
-    // Registered driver config should be easily recovered back
-    MDriver retrieved = handler.findDriver(getDerbyDatabaseConnection());
+    // Registered driver and config should be easily recovered back
+    MDriver retrieved = handler.findDriver(MDriver.DRIVER_NAME, getDerbyDatabaseConnection());
     assertNotNull(retrieved);
     assertEquals(driver, retrieved);
     assertEquals(driver.getVersion(), retrieved.getVersion());
   }
 
-  private String getDriverVersion() throws Exception {
-    final String frameworkVersionQuery =
-      "SELECT SQM_VALUE FROM SQOOP.SQ_SYSTEM WHERE SQM_KEY=?";
-    String retVal = null;
-    PreparedStatement preparedStmt = null;
-    ResultSet resultSet = null;
-    try {
-      preparedStmt =
-        getDerbyDatabaseConnection().prepareStatement(frameworkVersionQuery);
-      preparedStmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
-      resultSet = preparedStmt.executeQuery();
-      if(resultSet.next())
-        retVal = resultSet.getString(1);
-      return retVal;
-    } finally {
-      if(preparedStmt !=null) {
-        try {
-          preparedStmt.close();
-        } catch(SQLException e) {
-        }
-      }
-      if(resultSet != null) {
-        try {
-          resultSet.close();
-        } catch(SQLException e) {
-        }
-      }
-    }
-  }
 
   @Test
-  public void testDriverVersion() throws Exception {
+  public void testDriverVersionUpgrade() throws Exception {
     MDriver driver = getDriver();
     handler.registerDriver(driver, getDerbyDatabaseConnection());
-
-    final String lowerVersion = Integer.toString(Integer
-        .parseInt(DriverBean.CURRENT_DRIVER_VERSION) - 1);
-    assertEquals(CURRENT_DRIVER_VERSION, getDriverVersion());
-    runQuery("UPDATE SQOOP.SQ_SYSTEM SET SQM_VALUE='" + lowerVersion + "' WHERE SQM_KEY = '"
-        + DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION + "'");
-    assertEquals(lowerVersion, getDriverVersion());
-
-    handler.upgradeDriverConfigs(driver, getDerbyDatabaseConnection());
-
-    assertEquals(CURRENT_DRIVER_VERSION, driver.getVersion());
-
-    assertEquals(CURRENT_DRIVER_VERSION, getDriverVersion());
+    String registeredDriverVersion = handler.findDriver(MDriver.DRIVER_NAME, getDerbyDatabaseConnection()).getVersion();
+    assertEquals(CURRENT_DRIVER_VERSION, registeredDriverVersion);
+    driver.setVersion("2");
+    handler.upgradeDriverAndConfigs(driver, getDerbyDatabaseConnection());
+    assertEquals("2", driver.getVersion());
   }
 }

@@ -48,15 +48,16 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * </pre>
  * </p>
  * <p>
- * <strong>SQ_CONNECTOR</strong>: Connector registration.
+ * <strong>SQ_CONFIGURABLE</strong>: Configurable registration.
  *
  * <pre>
  *    +-----------------------------+
- *    | SQ_CONNECTOR                |
+ *    | SQ_CONFIGURABLE             |
  *    +-----------------------------+
  *    | SQC_ID: BIGINT PK AUTO-GEN  |
  *    | SQC_NAME: VARCHAR(64)       |
  *    | SQC_CLASS: VARCHAR(255)     |
+ *    | SQC_TYPE: VARCHAR(32)       |"CONNECTOR"|"DRIVER"
  *    | SQC_VERSION: VARCHAR(64)    |
  *    +-----------------------------+
  * </pre>
@@ -252,7 +253,6 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *
  * </p>
  */
-
 // NOTE: If you have signed yourself to modify the schema for the repository
 // such as a rename, change in table relationships or constraints, embrace yourself!
 // The following code is supposed to be a chronological order of how the
@@ -561,199 +561,184 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
      "SELECT " + COLUMN_SQD_NAME + " FROM " + TABLE_SQ_DIRECTION
          + " WHERE " + COLUMN_SQD_ID + "=?";
 
- // DML: Fetch connector Given Name
- public static final String STMT_FETCH_BASE_CONNECTOR =
+  //DML: Get configurable by given name
+  public static final String STMT_SELECT_FROM_CONFIGURABLE =
+    "SELECT "
+    + COLUMN_SQC_ID + ", "
+    + COLUMN_SQC_NAME + ", "
+    + COLUMN_SQC_CLASS + ", "
+    + COLUMN_SQC_VERSION
+    + " FROM " + TABLE_SQ_CONFIGURABLE
+    + " WHERE " + COLUMN_SQC_NAME + " = ?";
+
+  //DML: Get all configurables for a given type
+  public static final String STMT_SELECT_CONFIGURABLE_ALL_FOR_TYPE =
+  "SELECT "
+  + COLUMN_SQC_ID + ", "
+  + COLUMN_SQC_NAME + ", "
+  + COLUMN_SQC_CLASS + ", "
+  + COLUMN_SQC_VERSION
+  + " FROM " + TABLE_SQ_CONFIGURABLE
+  + " WHERE " + COLUMN_SQC_TYPE + " = ?";
+
+  // DML: Select all connectors
+  @Deprecated // used only for upgrade logic
+  public static final String STMT_SELECT_CONNECTOR_ALL =
+    "SELECT "
+    + COLUMN_SQC_ID + ", "
+    + COLUMN_SQC_NAME + ", "
+    + COLUMN_SQC_CLASS + ", "
+    + COLUMN_SQC_VERSION
+    + " FROM " + TABLE_SQ_CONNECTOR;
+
+  //DML: Get all configs for a given configurable
+  public static final String STMT_SELECT_CONFIG_FOR_CONFIGURABLE =
      "SELECT "
-     + COLUMN_SQC_ID + ", "
+     + COLUMN_SQ_CFG_ID + ", "
+     + COLUMN_SQ_CFG_CONFIGURABLE + ", "
+     + COLUMN_SQ_CFG_NAME + ", "
+     + COLUMN_SQ_CFG_TYPE + ", "
+     + COLUMN_SQ_CFG_INDEX
+     + " FROM " + TABLE_SQ_CONFIG
+     + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ? "
+     + " ORDER BY " + COLUMN_SQ_CFG_INDEX;
+
+   // DML: Get inputs for a given config
+  public static final String STMT_SELECT_INPUT =
+     "SELECT "
+     + COLUMN_SQI_ID + ", "
+     + COLUMN_SQI_NAME + ", "
+     + COLUMN_SQI_CONFIG + ", "
+     + COLUMN_SQI_INDEX + ", "
+     + COLUMN_SQI_TYPE + ", "
+     + COLUMN_SQI_STRMASK + ", "
+     + COLUMN_SQI_STRLENGTH + ", "
+     + COLUMN_SQI_ENUMVALS + ", "
+     + "cast(null as varchar(100))"
+     + " FROM " + TABLE_SQ_INPUT
+     + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
+     + " ORDER BY " + COLUMN_SQI_INDEX;
+
+  //DML: Get inputs and values for a given link
+  public static final String STMT_FETCH_LINK_INPUT =
+     "SELECT "
+     + COLUMN_SQI_ID + ", "
+     + COLUMN_SQI_NAME + ", "
+     + COLUMN_SQI_CONFIG + ", "
+     + COLUMN_SQI_INDEX + ", "
+     + COLUMN_SQI_TYPE + ", "
+     + COLUMN_SQI_STRMASK + ", "
+     + COLUMN_SQI_STRLENGTH + ","
+     + COLUMN_SQI_ENUMVALS + ", "
+     + COLUMN_SQ_LNKI_VALUE
+     + " FROM " + TABLE_SQ_INPUT
+     + " LEFT OUTER JOIN " + TABLE_SQ_LINK_INPUT
+       + " ON " + COLUMN_SQ_LNKI_INPUT + " = " + COLUMN_SQI_ID
+       + " AND " + COLUMN_SQ_LNKI_LINK + " = ?"
+     + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
+       + " AND (" + COLUMN_SQ_LNKI_LINK + " = ?" + " OR " + COLUMN_SQ_LNKI_LINK + " IS NULL)"
+     + " ORDER BY " + COLUMN_SQI_INDEX;
+
+  //DML: Fetch inputs and values for a given job
+  public static final String STMT_FETCH_JOB_INPUT =
+     "SELECT "
+     + COLUMN_SQI_ID + ", "
+     + COLUMN_SQI_NAME + ", "
+     + COLUMN_SQI_CONFIG + ", "
+     + COLUMN_SQI_INDEX + ", "
+     + COLUMN_SQI_TYPE + ", "
+     + COLUMN_SQI_STRMASK + ", "
+     + COLUMN_SQI_STRLENGTH + ", "
+     + COLUMN_SQI_ENUMVALS + ", "
+     + COLUMN_SQBI_VALUE
+     + " FROM " + TABLE_SQ_INPUT
+     + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT
+     + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
+     + " AND  " + COLUMN_SQBI_JOB + " = ?"
+     + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
+     + " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
+     + " ORDER BY " + COLUMN_SQI_INDEX;
+
+  //DML: Insert into configurable
+  public static final String STMT_INSERT_INTO_CONFIGURABLE =
+     "INSERT INTO " + TABLE_SQ_CONFIGURABLE + " ("
      + COLUMN_SQC_NAME + ", "
      + COLUMN_SQC_CLASS + ", "
-     + COLUMN_SQC_VERSION
-     + " FROM " + TABLE_SQ_CONNECTOR
-     + " WHERE " + COLUMN_SQC_NAME + " = ?";
+     + COLUMN_SQC_VERSION + ", "
+     + COLUMN_SQC_TYPE
+     + ") VALUES (?, ?, ?, ?)";
 
- // DML: Select all connectors
- public static final String STMT_SELECT_CONNECTOR_ALL =
-   "SELECT "
-   + COLUMN_SQC_ID + ", "
-   + COLUMN_SQC_NAME + ", "
-   + COLUMN_SQC_CLASS + ", "
-   + COLUMN_SQC_VERSION
-   + " FROM " + TABLE_SQ_CONNECTOR;
+  @Deprecated // used only in the upgrade path
+  public static final String STMT_INSERT_INTO_CONFIGURABLE_WITHOUT_SUPPORTED_DIRECTIONS =
+     "INSERT INTO " + TABLE_SQ_CONNECTOR+ " ("
+         + COLUMN_SQC_NAME + ", "
+         + COLUMN_SQC_CLASS + ", "
+         + COLUMN_SQC_VERSION
+         + ") VALUES (?, ?, ?)";
 
-  // DML: Fetch all configs for a given connector
-  public static final String STMT_FETCH_CONFIG_CONNECTOR =
-      "SELECT "
-      + COLUMN_SQ_CFG_ID + ", "
-      + COLUMN_SQ_CFG_CONNECTOR + ", "
-      + COLUMN_SQ_CFG_NAME + ", "
-      + COLUMN_SQ_CFG_TYPE + ", "
-      + COLUMN_SQ_CFG_INDEX
-      + " FROM " + TABLE_SQ_CONFIG
-      + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " = ? "
-      + " ORDER BY " + COLUMN_SQ_CFG_INDEX;
+  //DML: Insert into config
+  public static final String STMT_INSERT_INTO_CONFIG =
+     "INSERT INTO " + TABLE_SQ_CONFIG + " ("
+     + COLUMN_SQ_CFG_CONFIGURABLE + ", "
+     + COLUMN_SQ_CFG_NAME + ", "
+     + COLUMN_SQ_CFG_TYPE + ", "
+     + COLUMN_SQ_CFG_INDEX
+     + ") VALUES ( ?, ?, ?, ?)";
 
-  // DML: Fetch all driver configs
-  public static final String STMT_FETCH_CONFIG_DRIVER =
-      "SELECT "
-      + COLUMN_SQ_CFG_ID + ", "
-      + COLUMN_SQ_CFG_CONNECTOR + ", "
-      + COLUMN_SQ_CFG_NAME + ", "
-      + COLUMN_SQ_CFG_TYPE + ", "
-      + COLUMN_SQ_CFG_INDEX
-      + " FROM " + TABLE_SQ_CONFIG
-      + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " IS NULL "
-      + " ORDER BY " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_INDEX;
-
-  // DML: Fetch inputs for a given config
-  public static final String STMT_FETCH_INPUT =
-      "SELECT "
-      + COLUMN_SQI_ID + ", "
-      + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_CONFIG + ", "
-      + COLUMN_SQI_INDEX + ", "
-      + COLUMN_SQI_TYPE + ", "
-      + COLUMN_SQI_STRMASK + ", "
-      + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS + ", "
-      + "cast(null as varchar(100))"
-      + " FROM " + TABLE_SQ_INPUT
-      + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-      + " ORDER BY " + COLUMN_SQI_INDEX;
-
-  // DML: Fetch inputs and values for a given link
-  public static final String STMT_FETCH_LINK_INPUT =
-      "SELECT "
-      + COLUMN_SQI_ID + ", "
-      + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_CONFIG + ", "
-      + COLUMN_SQI_INDEX + ", "
-      + COLUMN_SQI_TYPE + ", "
-      + COLUMN_SQI_STRMASK + ", "
-      + COLUMN_SQI_STRLENGTH + ","
-      + COLUMN_SQI_ENUMVALS + ", "
-      + COLUMN_SQ_LNKI_VALUE
-      + " FROM " + TABLE_SQ_INPUT
-      + " LEFT OUTER JOIN " + TABLE_SQ_LINK_INPUT
-        + " ON " + COLUMN_SQ_LNKI_INPUT + " = " + COLUMN_SQI_ID
-        + " AND " + COLUMN_SQ_LNKI_LINK + " = ?"
-      + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-        + " AND (" + COLUMN_SQ_LNKI_LINK + " = ?" + " OR " + COLUMN_SQ_LNKI_LINK + " IS NULL)"
-      + " ORDER BY " + COLUMN_SQI_INDEX;
-
-  // DML: Fetch inputs and values for a given job
-  public static final String STMT_FETCH_JOB_INPUT =
-      "SELECT "
-      + COLUMN_SQI_ID + ", "
-      + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_CONFIG + ", "
-      + COLUMN_SQI_INDEX + ", "
-      + COLUMN_SQI_TYPE + ", "
-      + COLUMN_SQI_STRMASK + ", "
-      + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS + ", "
-      + COLUMN_SQBI_VALUE
-      + " FROM " + TABLE_SQ_INPUT
-      + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT
-      + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
-      + " AND  " + COLUMN_SQBI_JOB + " = ?"
-      + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-      + " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
-      + " ORDER BY " + COLUMN_SQI_INDEX;
-
-  // DML: Insert connector base
-  public static final String STMT_INSERT_CONNECTOR_BASE =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR + " ("
-      + COLUMN_SQC_NAME + ", "
-      + COLUMN_SQC_CLASS + ", "
-      + COLUMN_SQC_VERSION
-      + ") VALUES (?, ?, ?)";
-
-  public static final String STMT_INSERT_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR + " ("
-          + COLUMN_SQC_NAME + ", "
-          + COLUMN_SQC_CLASS + ", "
-          + COLUMN_SQC_VERSION
-          + ") VALUES (?, ?, ?)";
-
-  // DML: Insert config base
-  public static final String STMT_INSERT_CONFIG_BASE =
-      "INSERT INTO " + TABLE_SQ_CONFIG + " ("
-      + COLUMN_SQ_CFG_CONNECTOR + ", "
-      + COLUMN_SQ_CFG_NAME + ", "
-      + COLUMN_SQ_CFG_TYPE + ", "
-      + COLUMN_SQ_CFG_INDEX
-      + ") VALUES ( ?, ?, ?, ?)";
-
-  // DML: Insert config input
-  public static final String STMT_INSERT_INPUT_BASE =
-      "INSERT INTO " + TABLE_SQ_INPUT + " ("
-      + COLUMN_SQI_NAME + ", "
-      + COLUMN_SQI_CONFIG + ", "
-      + COLUMN_SQI_INDEX + ", "
-      + COLUMN_SQI_TYPE + ", "
-      + COLUMN_SQI_STRMASK + ", "
-      + COLUMN_SQI_STRLENGTH + ", "
-      + COLUMN_SQI_ENUMVALS
-      + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-  // Delete all configs for a given connector
-  public static final String STMT_DELETE_CONFIGS_FOR_CONNECTOR =
-    "DELETE FROM " + TABLE_SQ_CONFIG
-    + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " = ?";
-
-  // Delete all inputs for a given connector
-  public static final String STMT_DELETE_INPUTS_FOR_CONNECTOR =
-    "DELETE FROM " + TABLE_SQ_INPUT
-    + " WHERE "
-    + COLUMN_SQI_CONFIG
-    + " IN (SELECT "
-    + COLUMN_SQ_CFG_ID
-    + " FROM " + TABLE_SQ_CONFIG
-    + " WHERE "
-    + COLUMN_SQ_CFG_CONNECTOR + " = ?)";
-
-  // Delete all driver inputs
-  public static final String STMT_DELETE_DRIVER_INPUTS =
-    "DELETE FROM " + TABLE_SQ_INPUT
-    + " WHERE "
-    + COLUMN_SQI_CONFIG
-    + " IN (SELECT "
-    + COLUMN_SQ_CFG_ID
-    + " FROM " + TABLE_SQ_CONFIG
-    + " WHERE "
-    + COLUMN_SQ_CFG_CONNECTOR + " IS NULL)";
-
-  // Delete all driver configs
-  public static final String STMT_DELETE_DRIVER_CONFIGS =
-    "DELETE FROM " + TABLE_SQ_CONFIG
-    + " WHERE " + COLUMN_SQ_CFG_CONNECTOR + " IS NULL";
-
-
-  // Update the connector
-  public static final String STMT_UPDATE_CONNECTOR =
-    "UPDATE " + TABLE_SQ_CONNECTOR
-    + " SET " + COLUMN_SQC_NAME + " = ?, "
-    + COLUMN_SQC_CLASS + " = ?, "
-    + COLUMN_SQC_VERSION + " = ? "
-    + " WHERE " + COLUMN_SQC_ID + " = ?";
-
-  // DML: Insert new connection
- @Deprecated // used only in upgrade path
- public static final String STMT_INSERT_CONNECTION = 
-    "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
-     + COLUMN_SQN_NAME + ", "
-     + COLUMN_SQN_CONNECTOR + ","
-     + COLUMN_SQN_ENABLED + ", "
-     + COLUMN_SQN_CREATION_USER + ", "
-     + COLUMN_SQN_CREATION_DATE + ", "
-     + COLUMN_SQN_UPDATE_USER + ", " + COLUMN_SQN_UPDATE_DATE
+  //DML: Insert into config input
+  public static final String STMT_INSERT_INTO_INPUT =
+     "INSERT INTO " + TABLE_SQ_INPUT + " ("
+     + COLUMN_SQI_NAME + ", "
+     + COLUMN_SQI_CONFIG + ", "
+     + COLUMN_SQI_INDEX + ", "
+     + COLUMN_SQI_TYPE + ", "
+     + COLUMN_SQI_STRMASK + ", "
+     + COLUMN_SQI_STRLENGTH + ", "
+     + COLUMN_SQI_ENUMVALS
      + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+  //Delete all configs for a given configurable
+  public static final String STMT_DELETE_CONFIGS_FOR_CONFIGURABLE =
+   "DELETE FROM " + TABLE_SQ_CONFIG
+   + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ?";
+
+  //Delete all inputs for a given configurable
+  public static final String STMT_DELETE_INPUTS_FOR_CONFIGURABLE =
+   "DELETE FROM " + TABLE_SQ_INPUT
+   + " WHERE "
+   + COLUMN_SQI_CONFIG
+   + " IN (SELECT "
+   + COLUMN_SQ_CFG_ID
+   + " FROM " + TABLE_SQ_CONFIG
+   + " WHERE "
+   + COLUMN_SQ_CFG_CONFIGURABLE + " = ?)";
+
+  //Update the configurable
+  public static final String STMT_UPDATE_CONFIGURABLE =
+   "UPDATE " + TABLE_SQ_CONFIGURABLE
+   + " SET " + COLUMN_SQC_NAME + " = ?, "
+   + COLUMN_SQC_CLASS + " = ?, "
+   + COLUMN_SQC_VERSION + " = ?, "
+   + COLUMN_SQC_TYPE + " = ? "
+   + " WHERE " + COLUMN_SQC_ID + " = ?";
+
+  //DML: Insert new connection
+  @Deprecated // used only in upgrade path
+  public static final String STMT_INSERT_CONNECTION =
+   "INSERT INTO " + TABLE_SQ_CONNECTION + " ("
+    + COLUMN_SQN_NAME + ", "
+    + COLUMN_SQN_CONNECTOR + ","
+    + COLUMN_SQN_ENABLED + ", "
+    + COLUMN_SQN_CREATION_USER + ", "
+    + COLUMN_SQN_CREATION_DATE + ", "
+    + COLUMN_SQN_UPDATE_USER + ", " + COLUMN_SQN_UPDATE_DATE
+    + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new link
   public static final String STMT_INSERT_LINK =
     "INSERT INTO " + TABLE_SQ_LINK + " ("
     + COLUMN_SQ_LNK_NAME + ", "
-    + COLUMN_SQ_LNK_CONNECTOR + ", "
+    + COLUMN_SQ_LNK_CONFIGURABLE + ", "
     + COLUMN_SQ_LNK_ENABLED + ", "
     + COLUMN_SQ_LNK_CREATION_USER + ", "
     + COLUMN_SQ_LNK_CREATION_DATE + ", "
@@ -798,7 +783,7 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
     "SELECT "
     + COLUMN_SQ_LNK_ID + ", "
     + COLUMN_SQ_LNK_NAME + ", "
-    + COLUMN_SQ_LNK_CONNECTOR + ", "
+    + COLUMN_SQ_LNK_CONFIGURABLE + ", "
     + COLUMN_SQ_LNK_ENABLED + ", "
     + COLUMN_SQ_LNK_CREATION_USER + ", "
     + COLUMN_SQ_LNK_CREATION_DATE + ", "
@@ -807,12 +792,12 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
     + " FROM " + TABLE_SQ_LINK
     + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
 
-  // DML: Select all connections
+  // DML: Select all links
   public static final String STMT_SELECT_LINK_ALL =
     "SELECT "
     + COLUMN_SQ_LNK_ID + ", "
     + COLUMN_SQ_LNK_NAME + ", "
-    + COLUMN_SQ_LNK_CONNECTOR + ", "
+    + COLUMN_SQ_LNK_CONFIGURABLE + ", "
     + COLUMN_SQ_LNK_ENABLED + ", "
     + COLUMN_SQ_LNK_CREATION_USER + ", "
     + COLUMN_SQ_LNK_CREATION_DATE + ", "
@@ -820,19 +805,19 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
     + COLUMN_SQ_LNK_UPDATE_DATE
     + " FROM " + TABLE_SQ_LINK;
 
-  // DML: Select all connections for a specific connector.
-  public static final String STMT_SELECT_LINK_FOR_CONNECTOR =
+  // DML: Select all links for a specific connector.
+  public static final String STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE =
     "SELECT "
     + COLUMN_SQ_LNK_ID + ", "
     + COLUMN_SQ_LNK_NAME + ", "
-    + COLUMN_SQ_LNK_CONNECTOR + ", "
+    + COLUMN_SQ_LNK_CONFIGURABLE + ", "
     + COLUMN_SQ_LNK_ENABLED + ", "
     + COLUMN_SQ_LNK_CREATION_USER + ", "
     + COLUMN_SQ_LNK_CREATION_DATE + ", "
     + COLUMN_SQ_LNK_UPDATE_USER + ", "
     + COLUMN_SQ_LNK_UPDATE_DATE
     + " FROM " + TABLE_SQ_LINK
-    + " WHERE " + COLUMN_SQ_LNK_CONNECTOR + " = ?";
+    + " WHERE " + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
 
   // DML: Check if given link exists
   public static final String STMT_SELECT_LINK_CHECK_BY_ID =
@@ -897,34 +882,35 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
       + " ON " + COLUMN_SQB_FROM_LINK + " = " + COLUMN_SQ_LNK_ID
     + " WHERE " + COLUMN_SQ_LNK_ID + " = ? ";
 
-  // DML: Select all jobs
-  public static final String STMT_SELECT_JOB =
-    "SELECT "
-    + "FROM_LINK." + COLUMN_SQ_LNK_CONNECTOR + ", "
-    + "TO_LINK." + COLUMN_SQ_LNK_CONNECTOR + ", "
-    + "JOB." + COLUMN_SQB_ID + ", "
-    + "JOB." + COLUMN_SQB_NAME + ", "
-    + "JOB." + COLUMN_SQB_FROM_LINK + ", "
-    + "JOB." + COLUMN_SQB_TO_LINK + ", "
-    + "JOB." + COLUMN_SQB_ENABLED + ", "
-    + "JOB." + COLUMN_SQB_CREATION_USER + ", "
-    + "JOB." + COLUMN_SQB_CREATION_DATE + ", "
-    + "JOB." + COLUMN_SQB_UPDATE_USER + ", "
-    + "JOB." + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " JOB"
-      + " LEFT JOIN " + TABLE_SQ_LINK + " FROM_LINK"
-        + " ON " + COLUMN_SQB_FROM_LINK + " = FROM_LINK." + COLUMN_SQ_LNK_ID
-      + " LEFT JOIN " + TABLE_SQ_LINK + " TO_LINK"
-        + " ON " + COLUMN_SQB_TO_LINK + " = TO_LINK." + COLUMN_SQ_LNK_ID;
+ //DML: Select all jobs
+ public static final String STMT_SELECT_JOB =
+   "SELECT "
+   + "FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
+   + "TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
+   + "JOB." + COLUMN_SQB_ID + ", "
+   + "JOB." + COLUMN_SQB_NAME + ", "
+   + "JOB." + COLUMN_SQB_FROM_LINK + ", "
+   + "JOB." + COLUMN_SQB_TO_LINK + ", "
+   + "JOB." + COLUMN_SQB_ENABLED + ", "
+   + "JOB." + COLUMN_SQB_CREATION_USER + ", "
+   + "JOB." + COLUMN_SQB_CREATION_DATE + ", "
+   + "JOB." + COLUMN_SQB_UPDATE_USER + ", "
+   + "JOB." + COLUMN_SQB_UPDATE_DATE
+   + " FROM " + TABLE_SQ_JOB + " JOB"
+     + " LEFT JOIN " + TABLE_SQ_LINK + " FROM_CONNECTOR"
+       + " ON " + COLUMN_SQB_FROM_LINK + " = FROM_CONNECTOR." + COLUMN_SQ_LNK_ID
+     + " LEFT JOIN " + TABLE_SQ_LINK + " TO_CONNECTOR"
+       + " ON " + COLUMN_SQB_TO_LINK + " = TO_CONNECTOR." + COLUMN_SQ_LNK_ID;
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
       STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select all jobs for a Connector
-  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR = STMT_SELECT_JOB
-      + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONNECTOR + " = ? OR TO_LINK."
-      + COLUMN_SQ_LNK_CONNECTOR + " = ?";
+  public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
+      STMT_SELECT_JOB
+      + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONFIGURABLE + " = ? OR TO_LINK."
+      + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
 
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =
@@ -1196,7 +1182,7 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
   public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_1 = "ALTER TABLE "
       + TABLE_SQ_CONNECTION_INPUT + " DROP CONSTRAINT " + CONSTRAINT_SQNI_SQI;
   public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_2 = "ALTER TABLE "
-      + TABLE_SQ_CONNECTION_INPUT + " DROP CONSTRAINT " +   CONSTRAINT_SQNI_SQN;
+      + TABLE_SQ_CONNECTION_INPUT + " DROP CONSTRAINT " + CONSTRAINT_SQNI_SQN;
 
   public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_3 = "ALTER TABLE "
       + TABLE_SQ_JOB + " DROP CONSTRAINT " + CONSTRAINT_SQB_SQN_FROM;
@@ -1224,6 +1210,15 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
       + TABLE_SQ_LINK + "." + COLUMN_SQN_UPDATE_DATE + " TO " + COLUMN_SQ_LNK_UPDATE_DATE;
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_8 = "RENAME COLUMN "
       + TABLE_SQ_LINK + "." + COLUMN_SQN_ENABLED + " TO " + COLUMN_SQ_LNK_ENABLED;
+
+  // rename the constraint CONSTRAINT_SQF_SQC to CONSTRAINT_SQ_CFG_SQC
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONNECTOR_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_LINK + " DROP CONSTRAINT " + CONSTRAINT_SQN_SQC;
+
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONNECTOR_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_LINK + " ADD CONSTRAINT " + CONSTRAINT_SQ_LNK_SQC + " " + "FOREIGN KEY ("
+      + COLUMN_SQ_LNK_CONNECTOR + ") " + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID
+      + ")";
 
   // table rename for CONNECTION_INPUT -> LINK_INPUT
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_TO_SQ_LINK_INPUT = "RENAME TABLE "
@@ -1262,6 +1257,23 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_6 = "RENAME COLUMN "
       + TABLE_SQ_CONFIG + "." + COLUMN_SQF_INDEX + " TO " + COLUMN_SQ_CFG_INDEX;
 
+  // rename the constraint CONSTRAINT_SQF_SQC to CONSTRAINT_SQ_CFG_SQC
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONNECTOR_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONFIG + " DROP CONSTRAINT " + CONSTRAINT_SQF_SQC;
+
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONFIG
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_CFG_SQC
+      + " "
+      + "FOREIGN KEY ("
+      + COLUMN_SQ_CFG_CONNECTOR
+      + ") "
+      + "REFERENCES "
+      + TABLE_SQ_CONNECTOR
+      + " ("
+      + COLUMN_SQC_ID
+      + ")";
 
   // column rename and constraint add for SQ_INPUT
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_INPUT_FORM_COLUMN = "RENAME COLUMN "
@@ -1285,52 +1297,131 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
       + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_SQ_LNK_TO + " FOREIGN KEY ("
       + COLUMN_SQB_TO_LINK + ") REFERENCES " + TABLE_SQ_LINK + " (" + COLUMN_SQ_LNK_ID + ")";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME =
-      "ALTER TABLE " + TABLE_SQ_JOB + " ADD CONSTRAINT "
-          + CONSTRAINT_SQB_NAME_UNIQUE + " UNIQUE (" + COLUMN_SQB_NAME + ")";
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME = "ALTER TABLE "
+      + TABLE_SQ_JOB + " ADD CONSTRAINT " + CONSTRAINT_SQB_NAME_UNIQUE + " UNIQUE ("
+      + COLUMN_SQB_NAME + ")";
 
-  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME =
-      "ALTER TABLE " + TABLE_SQ_LINK + " ADD CONSTRAINT "
-          + CONSTRAINT_SQ_LNK_NAME_UNIQUE + " UNIQUE (" + COLUMN_SQ_LNK_NAME + ")";
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME = "ALTER TABLE "
+      + TABLE_SQ_LINK
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_LNK_NAME_UNIQUE
+      + " UNIQUE ("
+      + COLUMN_SQ_LNK_NAME + ")";
 
+  // SQOOP-1557 upgrade queries for table rename for CONNECTOR-> CONFIGURABLE
+
+  // drop the SQ_CONFIG FK for connector table
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONFIG + " DROP CONSTRAINT " + CONSTRAINT_SQ_CFG_SQC;
+
+  // drop the SQ_LINK FK for connector table
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_LINK_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_LINK + " DROP CONSTRAINT " + CONSTRAINT_SQ_LNK_SQC;
+
+  // drop the SQ_CONNECTOR_DIRECTION FK for connector table
+  public static final String QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONNECTOR_DIRECTIONS + " DROP CONSTRAINT " + CONSTRAINT_SQCD_SQC;
+
+  // rename
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTOR_TO_SQ_CONFIGURABLE = "RENAME TABLE "
+      + TABLE_SQ_CONNECTOR + " TO SQ_CONFIGURABLE";
+
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONFIG_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_CONFIG + "." + COLUMN_SQ_CFG_CONNECTOR + " TO " + COLUMN_SQ_CFG_CONFIGURABLE;
+
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_LINK_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_LINK + "." + COLUMN_SQ_LNK_CONNECTOR + " TO " + COLUMN_SQ_LNK_CONFIGURABLE;
+
+  // add a type column to the configurable
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_COLUMN_SQC_TYPE = "ALTER TABLE "
+      + TABLE_SQ_CONFIGURABLE + " ADD COLUMN " + COLUMN_SQC_TYPE + " VARCHAR(32)";
+
+  // add the constraints back for SQ_CONFIG
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONFIGURABLE_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONFIG
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_CFG_SQC
+      + " "
+      + "FOREIGN KEY ("
+      + COLUMN_SQ_CFG_CONFIGURABLE
+      + ") "
+      + "REFERENCES "
+      + TABLE_SQ_CONFIGURABLE
+      + " ("
+      + COLUMN_SQC_ID + ")";
+
+  // add the constraints back for SQ_LINK
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONFIGURABLE_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_LINK
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_LNK_SQC
+      + " "
+      + "FOREIGN KEY ("
+      + COLUMN_SQ_LNK_CONFIGURABLE
+      + ") "
+      + "REFERENCES "
+      + TABLE_SQ_CONFIGURABLE
+      + " ("
+      + COLUMN_SQC_ID + ")";
+
+  // add the constraints back for SQ_CONNECTOR_DIRECTION
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT = "ALTER TABLE "
+      + TABLE_SQ_CONNECTOR_DIRECTIONS
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQCD_SQC
+      + " "
+      + "FOREIGN KEY ("
+      + COLUMN_SQCD_CONNECTOR
+      + ") "
+      + "REFERENCES "
+      + TABLE_SQ_CONFIGURABLE
+      + " (" + COLUMN_SQC_ID + ")";
+
+ // add the constraints back for SQ_CONNECTOR_DIRECTION
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_CONNECTOR_DIRECTION_CONFIGURABLE_CONSTRAINT = "ALTER TABLE "
+     + TABLE_SQ_LINK + " ADD CONSTRAINT " + CONSTRAINT_SQCD_SQC + " "
+       + "FOREIGN KEY (" + COLUMN_SQCD_CONNECTOR + ") "
+         + "REFERENCES " + TABLE_SQ_CONFIGURABLE + " (" + COLUMN_SQC_ID + ")";
+
+ // Config and Connector directions
   public static final String STMT_INSERT_DIRECTION = "INSERT INTO " + TABLE_SQ_DIRECTION + " "
-      + "(" + COLUMN_SQD_NAME + ") VALUES (?)";
+     + "(" + COLUMN_SQD_NAME + ") VALUES (?)";
 
-  // DML: Fetch all configs
   public static final String STMT_FETCH_CONFIG_DIRECTIONS =
-      "SELECT "
-          + COLUMN_SQ_CFG_ID + ", "
-          + COLUMN_SQ_CFG_DIRECTION
-          + " FROM " + TABLE_SQ_CONFIG;
+     "SELECT "
+         + COLUMN_SQ_CFG_ID + ", "
+         + COLUMN_SQ_CFG_DIRECTION
+         + " FROM " + TABLE_SQ_CONFIG;
 
   public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR =
-      "ALTER TABLE " + TABLE_SQ_CONFIG + " DROP COLUMN " + COLUMN_SQ_CFG_DIRECTION;
+     "ALTER TABLE " + TABLE_SQ_CONFIG + " DROP COLUMN " + COLUMN_SQ_CFG_DIRECTION;
+
 
   public static final String STMT_INSERT_SQ_CONNECTOR_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR_DIRECTIONS + " "
-          + "(" + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION + ")"
-          + " VALUES (?, ?)";
+     "INSERT INTO " + TABLE_SQ_CONNECTOR_DIRECTIONS + " "
+         + "(" + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION + ")"
+         + " VALUES (?, ?)";
 
   public static final String STMT_INSERT_SQ_CONFIG_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONFIG_DIRECTIONS + " "
-          + "(" + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION + ")"
-          + " VALUES (?, ?)";
+     "INSERT INTO " + TABLE_SQ_CONFIG_DIRECTIONS + " "
+         + "(" + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION + ")"
+         + " VALUES (?, ?)";
 
   public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL =
-      "SELECT " + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION
-          + " FROM " + TABLE_SQ_CONNECTOR_DIRECTIONS;
+     "SELECT " + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION
+         + " FROM " + TABLE_SQ_CONNECTOR_DIRECTIONS;
 
   public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS =
-      STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL + " WHERE "
-          + COLUMN_SQCD_CONNECTOR + " = ?";
+     STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL + " WHERE "
+         + COLUMN_SQCD_CONNECTOR + " = ?";
 
   public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL =
-      "SELECT " + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION
-          + " FROM " + TABLE_SQ_CONFIG_DIRECTIONS;
+     "SELECT " + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION
+         + " FROM " + TABLE_SQ_CONFIG_DIRECTIONS;
 
   public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS =
-      STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
-          + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
+     STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
+         + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
 
   private DerbySchemaQuery() {
     // Disable explicit object creation

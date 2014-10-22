@@ -108,7 +108,7 @@ abstract public class DerbyTestCase {
     return nameToIdListMap;
   }
 
-  void renameEntities() throws Exception {
+  void renameEntitiesForConnectionAndForm() throws Exception {
     // SQ_LINK schema upgrades
     // drop the constraint before rename and add it back later
     runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_1);
@@ -124,6 +124,8 @@ abstract public class DerbyTestCase {
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_6);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_7);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_8);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONNECTOR_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONNECTOR_CONSTRAINT);
 
     // SQ_LINK_INPUT schema upgrades
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_TO_SQ_LINK_INPUT);
@@ -141,6 +143,8 @@ abstract public class DerbyTestCase {
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_4);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_5);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_6);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONNECTOR_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT);
 
     // SQ_INPUT schema upgrades
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_INPUT_FORM_COLUMN);
@@ -151,12 +155,30 @@ abstract public class DerbyTestCase {
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_COLUMN_2);
     runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_FROM);
     runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_TO);
+  }
+
+  void renameConnectorToConfigurable() throws Exception {
+
+    // SQ_CONNECTOR to SQ_CONFIGURABLE upgrade
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_LINK_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT);
+
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTOR_TO_SQ_CONFIGURABLE);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONFIG_COLUMN_1);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_LINK_COLUMN_1);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_COLUMN_SQC_TYPE);
+
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONFIGURABLE_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONFIGURABLE_CONSTRAINT);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT);
 
   }
 
   /**
-   * Create derby schema.
-   * FIX(SQOOP-1583): This code needs heavy refactoring. Details are in the ticket.
+   * Create derby schema. FIX(SQOOP-1583): This code needs heavy refactoring.
+   * Details are in the ticket.
+   *
    * @throws Exception
    */
   protected void createOrUpgradeSchema(int version) throws Exception {
@@ -196,11 +218,11 @@ abstract public class DerbyTestCase {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_FROM);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE);
-      // todo:rename entities code
-      renameEntities();
+      renameEntitiesForConnectionAndForm();
       // add the name constraints
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME);
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME);
+
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR);
       runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS);
       runQuery(QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS);
@@ -208,12 +230,13 @@ abstract public class DerbyTestCase {
       for (Direction direction : Direction.values()) {
         runQuery(STMT_INSERT_DIRECTION, direction.toString());
       }
+      renameConnectorToConfigurable();
     }
 
+    // deprecated repository version
     runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('version', '"  + version + "')");
-    // why the heck do we insert driver version here?
-    runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) " +
-        "VALUES('" + DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION + "', '1')");
+    // new repository version
+    runQuery("INSERT INTO SQOOP.SQ_SYSTEM(SQM_KEY, SQM_VALUE) VALUES('repository.version', '"  + version + "')");
 
   }
 
@@ -382,19 +405,17 @@ abstract public class DerbyTestCase {
 
   protected void loadConnectorAndDriverConfigVersion4() throws Exception {
     Long configId;
+    runQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
+        + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test', 'CONNECTOR')");
 
-    // Connector entry
-    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
-        + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test')");
-
-    for (String connector : new String[]{"1"}) {
+    for (String connector : new String[] { "1" }) {
       // Directions
       runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS(SQCD_CONNECTOR, SQCD_DIRECTION)"
           + "VALUES(" + connector + ", 1)");
       runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS(SQCD_CONNECTOR, SQCD_DIRECTION)"
           + "VALUES(" + connector + ", 2)");
 
-      // connector configs
+      // connector configs with connectorId as 1
       for (String direction : new String[]{null, "1", "2"}) {
 
         String type;
@@ -405,7 +426,7 @@ abstract public class DerbyTestCase {
         }
 
         configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
-            + "(SQ_CFG_CONNECTOR, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+            + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
             + "VALUES(" + connector + ", 'C1', '" + type + "', 0)");
 
         if (direction != null) {
@@ -415,7 +436,7 @@ abstract public class DerbyTestCase {
         }
 
         configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
-            + "(SQ_CFG_CONNECTOR, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+            + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
             + "VALUES(" + connector + ", 'C2', '" + type + "', 1)");
 
         if (direction != null) {
@@ -426,14 +447,18 @@ abstract public class DerbyTestCase {
       }
     }
 
-    // driver config
+    // insert a driver
+    runQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
+        + "VALUES('SqoopDriver', 'org.apache.sqoop.driver.Driver', '1.0-test', 'DRIVER')");
+
+    // driver config with driverId as 2
     for (String type : new String[]{"JOB"}) {
       runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_CONNECTOR, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-          + "VALUES(NULL" + ", 'C1', '" + type + "', 0)");
+          + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+          + "VALUES(2" + ", 'C1', '" + type + "', 0)");
       runQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_CONNECTOR, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-          + "VALUES(NULL" + ", 'C2', '" + type + "', 1)");
+          + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+          + "VALUES(2" + ", 'C2', '" + type + "', 1)");
     }
 
     // Input entries
@@ -442,7 +467,7 @@ abstract public class DerbyTestCase {
     // Connector job (TO) config: 8-11
     // Driver JOB config: 12-15
     for (int i = 0; i < 4; i++) {
-      // First config
+    // First config
       runQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
           + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30)");
@@ -459,6 +484,8 @@ abstract public class DerbyTestCase {
           + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30)");
     }
   }
+
+
 
   /**
    * Load testing connector and driver config into repository.
@@ -511,9 +538,9 @@ abstract public class DerbyTestCase {
 
       case 4:
         // Insert two links - CA and CB
-        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) "
             + "VALUES('CA', 1)");
-        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONNECTOR) "
+        runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) "
             + "VALUES('CB', 1)");
 
         for (String ci : new String[]{"1", "2"}) {
@@ -644,10 +671,10 @@ abstract public class DerbyTestCase {
   /**
    * Add a second connector for testing with multiple connectors
    */
-  public void addConnector() throws Exception {
+  public void addConnectorB() throws Exception {
     // Connector entry
-    Long connectorId = runInsertQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
-        + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test')");
+    Long connectorId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
+        + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES (" + connectorId + ", 1)");
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES (" + connectorId + ", 2)");
   }
@@ -745,18 +772,18 @@ abstract public class DerbyTestCase {
   }
 
   protected MToConfig getToConfig() {
-    return  new MToConfig(getConfigs());
+    return new MToConfig(getConfigs());
   }
-  
+
   protected MDriverConfig getDriverConfig() {
-    return  new MDriverConfig(getConfigs());
+    return new MDriverConfig(getConfigs());
   }
 
   protected List<MConfig> getConfigs() {
     List<MConfig> jobConfigs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput("I1", false, (short)30);
+    MInput input = new MStringInput("I1", false, (short) 30);
     inputs.add(input);
     input = new MMapInput("I2", false);
     inputs.add(input);

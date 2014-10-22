@@ -45,9 +45,11 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManagerUtils;
+import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
+import org.apache.sqoop.model.MConfigurableType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
@@ -102,7 +104,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0011,
         mc.getUniqueName());
     }
-    mc.setPersistenceId(getConnectorId(mc, conn));
+    mc.setPersistenceId(insertAndGetConnectorId(mc, conn));
     insertConfigsForConnector(mc, conn);
   }
 
@@ -116,10 +118,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try{
-      baseConfigStmt = conn.prepareStatement(STMT_INSERT_CONFIG_BASE,
+      baseConfigStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIG,
         Statement.RETURN_GENERATED_KEYS);
 
-      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
+      baseInputStmt = conn.prepareStatement(STMT_INSERT_INTO_INPUT,
         Statement.RETURN_GENERATED_KEYS);
 
       // Register the job config type, since driver config is per job
@@ -145,15 +147,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try{
-      baseConfigStmt = conn.prepareStatement(STMT_INSERT_CONFIG_BASE,
+      baseConfigStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIG,
         Statement.RETURN_GENERATED_KEYS);
 
-      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
+      baseInputStmt = conn.prepareStatement(STMT_INSERT_INTO_INPUT,
         Statement.RETURN_GENERATED_KEYS);
 
-      // Register link type config for connector
-      // NOTE: The direction is null for LINK type
-      registerConfigs(connectorId, null, mc.getLinkConfig().getConfigs(),
+      // Register link type config
+      registerConfigs(connectorId, null /* No direction for LINK type config*/, mc.getLinkConfig().getConfigs(),
         MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
 
       // Register both from/to job type config for connector
@@ -202,19 +203,20 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
-  private long getConnectorId(MConnector mc, Connection conn) {
+  private long insertAndGetConnectorId(MConnector mc, Connection conn) {
     PreparedStatement baseConnectorStmt = null;
     try {
-      baseConnectorStmt = conn.prepareStatement(STMT_INSERT_CONNECTOR_BASE,
-        Statement.RETURN_GENERATED_KEYS);
+      baseConnectorStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIGURABLE,
+          Statement.RETURN_GENERATED_KEYS);
       baseConnectorStmt.setString(1, mc.getUniqueName());
       baseConnectorStmt.setString(2, mc.getClassName());
       baseConnectorStmt.setString(3, mc.getVersion());
+      baseConnectorStmt.setString(4, mc.getType().name());
 
       int baseConnectorCount = baseConnectorStmt.executeUpdate();
       if (baseConnectorCount != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0012,
-          Integer.toString(baseConnectorCount));
+            Integer.toString(baseConnectorCount));
       }
 
       ResultSet rsetConnectorId = baseConnectorStmt.getGeneratedKeys();
@@ -222,16 +224,41 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       if (!rsetConnectorId.next()) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
       }
-
-      insertConnectorDirections(rsetConnectorId.getLong(1),
-          mc.getSupportedDirections(), conn);
-
+      // connector configurable also have directions
+      insertConnectorDirections(rsetConnectorId.getLong(1), mc.getSupportedDirections(), conn);
       return rsetConnectorId.getLong(1);
     } catch (SQLException ex) {
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0014,
-        mc.toString(), ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0014, mc.toString(), ex);
     } finally {
       closeStatements(baseConnectorStmt);
+    }
+  }
+
+  private long insertAndGetDriverId(MDriver mDriver, Connection conn) {
+    PreparedStatement baseDriverStmt = null;
+    try {
+      baseDriverStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIGURABLE,
+          Statement.RETURN_GENERATED_KEYS);
+      baseDriverStmt.setString(1, mDriver.getUniqueName());
+      baseDriverStmt.setString(2, Driver.getClassName());
+      baseDriverStmt.setString(3, mDriver.getVersion());
+      baseDriverStmt.setString(4, mDriver.getType().name());
+
+      int baseDriverCount = baseDriverStmt.executeUpdate();
+      if (baseDriverCount != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0012, Integer.toString(baseDriverCount));
+      }
+
+      ResultSet rsetDriverId = baseDriverStmt.getGeneratedKeys();
+
+      if (!rsetDriverId.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+      return rsetDriverId.getLong(1);
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0050, mDriver.toString(), ex);
+    } finally {
+      closeStatements(baseDriverStmt);
     }
   }
 
@@ -351,59 +378,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Detect version of the driver
-   *
-   * @param conn Connection to the repository
-   * @return Version of the Driver
-   */
-  private String detectDriverVersion (Connection conn) {
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(DerbySchemaQuery.STMT_SELECT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
-      rs = stmt.executeQuery();
-      if(!rs.next()) {
-        return null;
-      }
-      return rs.getString(1);
-    } catch (SQLException e) {
-      LOG.info("Can't fetch driver version.", e);
-      return null;
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
-    }
-  }
-
-  /**
-   * Create or update driver version
-   * @param conn Connection to the the repository
-   * @param mDriver
-   */
-  private void createOrUpdateDriverSystemVersion(Connection conn, String version) {
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
-      stmt.executeUpdate();
-      closeStatements(stmt);
-
-      stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
-      stmt.setString(1, DerbyRepoConstants.SYSKEY_DRIVER_CONFIG_VERSION);
-      stmt.setString(2, version);
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      logException(e);
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0044, e);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
-    }
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
@@ -460,9 +434,11 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE, conn);
 
       // SQOOP-1498 rename entities
-      renameEntitiesForUpgrade(conn);
+      renameEntitiesForConnectionAndForm(conn);
       // Change direction from VARCHAR to BIGINT + foreign key.
       updateDirections(conn, insertDirections(conn));
+
+      renameConnectorToConfigurable(conn);
     }
     // Add unique constraints on job and links for version 4 onwards
     if (repositoryVersion > 3) {
@@ -474,7 +450,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   // SQOOP-1498 refactoring related upgrades for table and column names
-  void renameEntitiesForUpgrade(Connection conn) {
+  void renameEntitiesForConnectionAndForm(Connection conn) {
     // LINK
     // drop the constraint before rename
     runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONSTRAINT_1, conn);
@@ -490,6 +466,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_6, conn);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_7, conn);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_8, conn);
+
+    // rename constraints
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTION_CONNECTOR_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONNECTOR_CONSTRAINT, conn);
 
     LOG.info("LINK TABLE altered");
 
@@ -511,6 +491,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_4, conn);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_5, conn);
     runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_6, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONNECTOR_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT, conn);
 
     LOG.info("CONFIG TABLE altered");
 
@@ -528,7 +510,24 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_JOB_CONSTRAINT_TO, conn);
 
     LOG.info("JOB TABLE altered and constraints added");
+  }
 
+  private void renameConnectorToConfigurable(Connection conn) {
+    // SQ_CONNECTOR to SQ_CONFIGURABLE upgrade
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONFIG_CONNECTOR_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_LINK_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_DROP_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT, conn);
+
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTOR_TO_SQ_CONFIGURABLE, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_CONFIG_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_LINK_COLUMN_1, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_COLUMN_SQC_TYPE, conn);
+
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONFIG_CONFIGURABLE_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_CONFIGURABLE_CONSTRAINT, conn);
+    runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_CONNECTOR_DIRECTION_CONSTRAINT, conn);
+
+    LOG.info("CONNECTOR TABLE altered and constraints added for CONFIGURABLE");
   }
 
   private void upgradeRepositoryVersion(Connection conn) {
@@ -538,7 +537,6 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(STMT_INSERT_SYSTEM, conn, DerbyRepoConstants.SYSKEY_DERBY_REPOSITORY_VERSION, ""
         + DerbyRepoConstants.LATEST_DERBY_REPOSITORY_VERSION);
   }
-
   /**
    * Insert directions: FROM and TO.
    * @param conn
@@ -643,6 +641,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+
   /**
    * Upgrade job data from IMPORT/EXPORT to FROM/TO.
    * Since the framework is no longer responsible for HDFS,
@@ -712,13 +711,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DRIVER_INDEX, conn,
         new Long(0), "throttling");
 
-    Long linkId = createHdfsConnection(conn, connectorId);
+    Long connectionId = createHdfsConnection(conn, connectorId);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
         "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
-        new Long(linkId), "EXPORT");
+        new Long(connectionId), "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION, conn,
-        new Long(linkId), "IMPORT");
+        new Long(connectionId), "IMPORT");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
         "fromJobConfig", "table", Direction.FROM.toString());
@@ -738,6 +737,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * Pre-register HDFS Connector so that config upgrade will work.
    * NOTE: This should be used only in the upgrade path
    */
+  @Deprecated
   protected long registerHdfsConnector(Connection conn) {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin HDFS Connector pre-loading.");
@@ -760,7 +760,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
         try {
           PreparedStatement baseConnectorStmt = conn.prepareStatement(
-              STMT_INSERT_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
+              STMT_INSERT_INTO_CONFIGURABLE_WITHOUT_SUPPORTED_DIRECTIONS,
               Statement.RETURN_GENERATED_KEYS);
           baseConnectorStmt.setString(1, handler.getConnectorConfigurable().getUniqueName());
           baseConnectorStmt.setString(2, handler.getConnectorConfigurable().getClassName());
@@ -854,21 +854,20 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       LOG.debug("Looking up connector: " + shortName);
     }
     MConnector mc = null;
-    PreparedStatement baseConnectorFetchStmt = null;
+    PreparedStatement connectorFetchStmt = null;
     try {
-      baseConnectorFetchStmt = conn.prepareStatement(STMT_FETCH_BASE_CONNECTOR);
-      baseConnectorFetchStmt.setString(1, shortName);
+      connectorFetchStmt = conn.prepareStatement(STMT_SELECT_FROM_CONFIGURABLE);
+      connectorFetchStmt.setString(1, shortName);
 
-      List<MConnector> connectors = loadConnectors(baseConnectorFetchStmt, conn);
+      List<MConnector> connectors = loadConnectors(connectorFetchStmt, conn);
 
-      if (connectors.size()==0) {
+      if (connectors.size() == 0) {
         LOG.debug("No connector found by name: " + shortName);
         return null;
-      }  else if (connectors.size()==1) {
+      } else if (connectors.size() == 1) {
         LOG.debug("Looking up connector: " + shortName + ", found: " + mc);
         return connectors.get(0);
-      }
-      else {
+      } else {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0005, shortName);
       }
 
@@ -876,7 +875,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       logException(ex, shortName);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0004, shortName, ex);
     } finally {
-      closeStatements(baseConnectorFetchStmt);
+      closeStatements(connectorFetchStmt);
     }
   }
 
@@ -887,7 +886,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   public List<MConnector> findConnectors(Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_CONNECTOR_ALL);
+      stmt = conn.prepareStatement(STMT_SELECT_CONFIGURABLE_ALL_FOR_TYPE);
+      stmt.setString(1, MConfigurableType.CONNECTOR.name());
+
       return loadConnectors(stmt,conn);
     } catch (SQLException ex) {
       logException(ex);
@@ -897,84 +898,101 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
-
    /**
    * {@inheritDoc}
    */
   @Override
   public void registerDriver(MDriver mDriver, Connection conn) {
     if (mDriver.hasPersistenceId()) {
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0011,
-        "Driver");
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0011, mDriver.getUniqueName());
     }
+    mDriver.setPersistenceId(insertAndGetDriverId(mDriver, conn));
+    insertConfigsforDriver(mDriver, conn);
+  }
 
+  private void insertConfigsforDriver(MDriver mDriver, Connection conn) {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try {
-      baseConfigStmt = conn.prepareStatement(STMT_INSERT_CONFIG_BASE,
+      baseConfigStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIG,
           Statement.RETURN_GENERATED_KEYS);
-      baseInputStmt = conn.prepareStatement(STMT_INSERT_INPUT_BASE,
+      baseInputStmt = conn.prepareStatement(STMT_INSERT_INTO_INPUT,
           Statement.RETURN_GENERATED_KEYS);
 
       // Register a driver config as a job type with no owner/connector and direction
-      registerConfigs(null/* owner*/, null /*direction*/, mDriver.getDriverConfig().getConfigs(),
+      registerConfigs(mDriver.getPersistenceId(), null /* no direction*/, mDriver.getDriverConfig().getConfigs(),
         MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
 
-      // We're using hardcoded value for driver config as they are
-      // represented as NULL in the database.
-      mDriver.setPersistenceId(1);
     } catch (SQLException ex) {
       logException(ex, mDriver);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0014, ex);
     } finally {
       closeStatements(baseConfigStmt, baseInputStmt);
     }
-    createOrUpdateDriverSystemVersion(conn, mDriver.getVersion());
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public MDriver findDriver(Connection conn) {
-    LOG.debug("Looking up Driver config to create a driver ");
-    MDriver mDriver = null;
+  public MDriver findDriver(String shortName, Connection conn) {
+    LOG.debug("Looking up Driver and config ");
+    PreparedStatement driverFetchStmt = null;
     PreparedStatement driverConfigFetchStmt = null;
     PreparedStatement driverConfigInputFetchStmt = null;
+
+    MDriver mDriver;
     try {
-      driverConfigFetchStmt = conn.prepareStatement(STMT_FETCH_CONFIG_DRIVER);
-      driverConfigInputFetchStmt = conn.prepareStatement(STMT_FETCH_INPUT);
+      driverFetchStmt = conn.prepareStatement(STMT_SELECT_FROM_CONFIGURABLE);
+      driverFetchStmt.setString(1, shortName);
+
+      ResultSet rsDriverSet = driverFetchStmt.executeQuery();
+      if (!rsDriverSet.next()) {
+        return null;
+      }
+      Long driverId = rsDriverSet.getLong(1);
+      String driverVersion = rsDriverSet.getString(4);
+
+      driverConfigFetchStmt = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      driverConfigFetchStmt.setLong(1, driverId);
+
+      driverConfigInputFetchStmt = conn.prepareStatement(STMT_SELECT_INPUT);
       List<MConfig> driverConfigs = new ArrayList<MConfig>();
       loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1);
 
-      if(driverConfigs.isEmpty()) {
+      if (driverConfigs.isEmpty()) {
         return null;
       }
-
-      mDriver = new MDriver(new MDriverConfig(driverConfigs), detectDriverVersion(conn));
-      mDriver.setPersistenceId(1);
+      mDriver = new MDriver(new MDriverConfig(driverConfigs), driverVersion);
+      mDriver.setPersistenceId(driverId);
 
     } catch (SQLException ex) {
-      throw new SqoopException(DerbyRepoError.DERBYREPO_0004,
-        "Driver config", ex);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0004, "Driver", ex);
     } finally {
       if (driverConfigFetchStmt != null) {
         try {
           driverConfigFetchStmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close config fetch statement", ex);
+          LOG.error("Unable to close driver config fetch statement", ex);
         }
       }
       if (driverConfigInputFetchStmt != null) {
         try {
           driverConfigInputFetchStmt.close();
         } catch (SQLException ex) {
-          LOG.error("Unable to close input fetch statement", ex);
+          LOG.error("Unable to close driver input fetch statement", ex);
+        }
+      }
+      if (driverFetchStmt != null) {
+        try {
+          driverFetchStmt.close();
+        } catch (SQLException ex) {
+          LOG.error("Unable to close driver fetch statement", ex);
         }
       }
     }
 
-    LOG.debug("Looking up Driver config and created driver:" + mDriver);
+    LOG.debug("Looked up Driver and config");
     return mDriver;
   }
 
@@ -1228,7 +1246,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   public List<MLink> findLinksForConnector(long connectorID, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_LINK_FOR_CONNECTOR);
+      stmt = conn.prepareStatement(STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE);
       stmt.setLong(1, connectorID);
       return loadLinks(stmt, conn);
     } catch (SQLException ex) {
@@ -1243,7 +1261,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void upgradeConnectorConfigs(MConnector mConnector, Connection conn) {
+  public void upgradeConnectorAndConfigs(MConnector mConnector, Connection conn) {
     updateConnectorAndDeleteConfigs(mConnector, conn);
     insertConfigsForConnector(mConnector, conn);
   }
@@ -1253,13 +1271,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
     try {
-      updateConnectorStatement = conn.prepareStatement(STMT_UPDATE_CONNECTOR);
-      deleteInput = conn.prepareStatement(STMT_DELETE_INPUTS_FOR_CONNECTOR);
-      deleteConfig = conn.prepareStatement(STMT_DELETE_CONFIGS_FOR_CONNECTOR);
+      updateConnectorStatement = conn.prepareStatement(STMT_UPDATE_CONFIGURABLE);
+      deleteInput = conn.prepareStatement(STMT_DELETE_INPUTS_FOR_CONFIGURABLE);
+      deleteConfig = conn.prepareStatement(STMT_DELETE_CONFIGS_FOR_CONFIGURABLE);
       updateConnectorStatement.setString(1, mConnector.getUniqueName());
       updateConnectorStatement.setString(2, mConnector.getClassName());
       updateConnectorStatement.setString(3, mConnector.getVersion());
-      updateConnectorStatement.setLong(4, mConnector.getPersistenceId());
+      updateConnectorStatement.setString(4, mConnector.getType().name());
+      updateConnectorStatement.setLong(5, mConnector.getPersistenceId());
 
       if (updateConnectorStatement.executeUpdate() != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0038);
@@ -1281,19 +1300,30 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void upgradeDriverConfigs(MDriver mDriver, Connection conn) {
+  public void upgradeDriverAndConfigs(MDriver mDriver, Connection conn) {
     updateDriverAndDeleteConfigs(mDriver, conn);
-    createOrUpdateDriverSystemVersion(conn, mDriver.getVersion());
     insertConfigsForDriver(mDriver, conn);
   }
 
   private void updateDriverAndDeleteConfigs(MDriver mDriver, Connection conn) {
+    PreparedStatement updateDriverStatement = null;
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
     try {
-      deleteInput = conn.prepareStatement(STMT_DELETE_DRIVER_INPUTS);
-      deleteConfig = conn.prepareStatement(STMT_DELETE_DRIVER_CONFIGS);
+      updateDriverStatement = conn.prepareStatement(STMT_UPDATE_CONFIGURABLE);
+      deleteInput = conn.prepareStatement(STMT_DELETE_INPUTS_FOR_CONFIGURABLE);
+      deleteConfig = conn.prepareStatement(STMT_DELETE_CONFIGS_FOR_CONFIGURABLE);
+      updateDriverStatement.setString(1, mDriver.getUniqueName());
+      updateDriverStatement.setString(2, Driver.getClassName());
+      updateDriverStatement.setString(3, mDriver.getVersion());
+      updateDriverStatement.setString(4, mDriver.getType().name());
+      updateDriverStatement.setLong(5, mDriver.getPersistenceId());
 
+      if (updateDriverStatement.executeUpdate() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0038);
+      }
+      deleteInput.setLong(1, mDriver.getPersistenceId());
+      deleteConfig.setLong(1, mDriver.getPersistenceId());
       deleteInput.executeUpdate();
       deleteConfig.executeUpdate();
 
@@ -1301,7 +1331,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       logException(e, mDriver);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0044, e);
     } finally {
-      closeStatements(deleteConfig, deleteInput);
+      closeStatements(updateDriverStatement, deleteConfig, deleteInput);
     }
   }
 
@@ -1557,7 +1587,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_ALL_JOBS_FOR_CONNECTOR);
+      stmt = conn.prepareStatement(STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE);
       stmt.setLong(1, connectorId);
       stmt.setLong(2, connectorId);
       return loadJobs(stmt, conn);
@@ -2080,8 +2110,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
     try {
       rsConnectors = stmt.executeQuery();
-      connectorConfigFetchStmt = conn.prepareStatement(STMT_FETCH_CONFIG_CONNECTOR);
-      connectorConfigInputFetchStmt = conn.prepareStatement(STMT_FETCH_INPUT);
+      connectorConfigFetchStmt = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      connectorConfigInputFetchStmt = conn.prepareStatement(STMT_SELECT_INPUT);
 
       while(rsConnectors.next()) {
         long connectorId = rsConnectors.getLong(1);
@@ -2116,9 +2146,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
     } finally {
       closeResultSets(rsConnectors);
-      closeStatements(connectorConfigFetchStmt,connectorConfigInputFetchStmt);
+      closeStatements(connectorConfigFetchStmt, connectorConfigInputFetchStmt);
     }
-
     return connectors;
   }
 
@@ -2134,7 +2163,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       rsConnection = stmt.executeQuery();
 
       //
-      connectorConfigFetchStatement = conn.prepareStatement(STMT_FETCH_CONFIG_CONNECTOR);
+      connectorConfigFetchStatement = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
       connectorConfigInputStatement = conn.prepareStatement(STMT_FETCH_LINK_INPUT);
 
       while(rsConnection.next()) {
@@ -2189,14 +2218,15 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
     try {
       rsJob = stmt.executeQuery();
-
-      fromConfigFetchStmt  = conn.prepareStatement(STMT_FETCH_CONFIG_CONNECTOR);
-      toConfigFetchStmt = conn.prepareStatement(STMT_FETCH_CONFIG_CONNECTOR);
-      driverConfigfetchStmt = conn.prepareStatement(STMT_FETCH_CONFIG_DRIVER);
+      // Note: Job does not hold a explicit reference to the driver since every
+      // job has the same driver
+      long driverId = this.findDriver(MDriver.DRIVER_NAME, conn).getPersistenceId();
+      fromConfigFetchStmt  = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      toConfigFetchStmt = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      driverConfigfetchStmt = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
       jobInputFetchStmt = conn.prepareStatement(STMT_FETCH_JOB_INPUT);
 
       while(rsJob.next()) {
-        // why use connector? why cant it be link id?
         long fromConnectorId = rsJob.getLong(1);
         long toConnectorId = rsJob.getLong(2);
         long id = rsJob.getLong(3);
@@ -2211,9 +2241,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
         fromConfigFetchStmt.setLong(1, fromConnectorId);
         toConfigFetchStmt.setLong(1,toConnectorId);
+        driverConfigfetchStmt.setLong(1, driverId);
 
         jobInputFetchStmt.setLong(1, id);
-        //inputFetchStmt.setLong(1, XXX); // Will be filled by loadFrameworkConfigs
         jobInputFetchStmt.setLong(3, id);
 
         // FROM entity configs
@@ -2283,7 +2313,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    * Use given prepared statements to create entire config structure in database.
    *
-   * @param connectorId
+   * @param configurableId
    * @param configs
    * @param type
    * @param baseConfigStmt
@@ -2292,17 +2322,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @return short number of configs registered.
    * @throws SQLException
    */
-  private short registerConfigs(Long connectorId, Direction direction,
+  private short registerConfigs(Long configurableId, Direction direction,
       List<MConfig> configs, String type, PreparedStatement baseConfigStmt,
       PreparedStatement baseInputStmt, Connection conn)
           throws SQLException {
     short configIndex = 0;
 
     for (MConfig config : configs) {
-      if(connectorId == null) {
+      if (configurableId == null) {
         baseConfigStmt.setNull(1, Types.BIGINT);
       } else {
-        baseConfigStmt.setLong(1, connectorId);
+        baseConfigStmt.setLong(1, configurableId);
       }
 
       baseConfigStmt.setString(2, config.getName());

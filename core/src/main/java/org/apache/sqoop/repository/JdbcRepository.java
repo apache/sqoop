@@ -23,10 +23,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
 
 public class JdbcRepository extends Repository {
@@ -220,7 +221,7 @@ public class JdbcRepository extends Repository {
     return (MDriver) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        MDriver existingDriverConfig = handler.findDriver(conn);
+        MDriver existingDriverConfig = handler.findDriver(mDriver.getUniqueName(), conn);
         if (existingDriverConfig == null) {
           handler.registerDriver(mDriver, conn);
           return mDriver;
@@ -233,11 +234,24 @@ public class JdbcRepository extends Repository {
               return mDriver;
             } else {
               throw new SqoopException(RepositoryError.JDBCREPO_0026,
-                "DriverConfig: " + mDriver.getPersistenceId());
+                "Driver: " + mDriver.getPersistenceId());
             }
           }
           return existingDriverConfig;
         }
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MDriver findDriver(final String shortName) {
+    return (MDriver) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findDriver(shortName, conn);
       }
     });
   }
@@ -648,23 +662,23 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  protected void upgradeConnectorConfigs(final MConnector newConnector,
+  protected void upgradeConnectorAndConfigs(final MConnector newConnector,
     RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.upgradeConnectorConfigs(newConnector, conn);
+        handler.upgradeConnectorAndConfigs(newConnector, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
   }
 
 
-  protected void upgradeDriverConfigs(final MDriver mDriver, RepositoryTransaction tx) {
+  protected void upgradeDriverAndConfigs(final MDriver mDriver, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.upgradeDriverConfigs(mDriver, conn);
+        handler.upgradeDriverAndConfigs(mDriver, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

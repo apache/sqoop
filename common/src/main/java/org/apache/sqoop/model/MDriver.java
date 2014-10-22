@@ -17,15 +17,17 @@
  */
 package org.apache.sqoop.model;
 
-import java.sql.Driver;
 
 /**
  * Describes the configs associated with the {@link Driver} for executing sqoop jobs.
  */
 public final class MDriver extends Configurable {
 
+  public static final String DRIVER_NAME = "SqoopDriver";
   private final MDriverConfig driverConfig;
-  private final String version;
+  private String version;
+  // Since there is only one Driver in the system, the name is not user specified
+  private static final String uniqueName = DRIVER_NAME;
 
   public MDriver(MDriverConfig driverConfig, String version) {
     this.driverConfig = driverConfig;
@@ -68,6 +70,14 @@ public final class MDriver extends Configurable {
     return driverConfig;
   }
 
+  public MConfigurableType getType() {
+    return MConfigurableType.DRIVER;
+  }
+
+  public String getUniqueName() {
+    return uniqueName;
+  }
+
   @Override
   public MDriver clone(boolean cloneWithValue) {
     cloneWithValue = false;
@@ -78,5 +88,9 @@ public final class MDriver extends Configurable {
 
   public String getVersion() {
     return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 }

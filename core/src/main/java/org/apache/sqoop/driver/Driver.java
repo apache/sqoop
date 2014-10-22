@@ -158,6 +158,10 @@ public class Driver implements Reconfigurable {
     return mDriver;
   }
 
+  public static String getClassName() {
+    return Driver.getInstance().getClass().getSimpleName();
+  }
+
   public ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(DriverConstants.DRIVER_CONFIG_BUNDLE, locale);
   }

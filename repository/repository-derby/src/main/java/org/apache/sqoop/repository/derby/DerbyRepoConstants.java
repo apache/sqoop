@@ -22,13 +22,9 @@ public final class DerbyRepoConstants {
   public static final String CONF_PREFIX_DERBY = "derby.";
 
   @Deprecated
-  // use only for the upgrade code should be removed soon
+  // use only for the upgrade code
   public static final String SYSKEY_VERSION = "version";
-
-  public static final String SYSKEY_DERBY_REPOSITORY_VERSION = "version";
-
-  // TOOD(VB): SQOOP-1557 move the driver config version to the SQ_CONFIGURABLE, IT SHOULD NOT BE HERE, nor stored in SYSTEM table
-  public static final String SYSKEY_DRIVER_CONFIG_VERSION = "driver.config.version";
+  public static final String SYSKEY_DERBY_REPOSITORY_VERSION = "repository.version";
 
   /**
    * Expected version of the repository structures.
