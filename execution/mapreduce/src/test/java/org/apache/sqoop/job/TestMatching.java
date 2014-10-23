@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -52,8 +55,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
@@ -193,9 +194,9 @@ public class TestMatching {
     }
   }
 
-  public static class DummyExtractor extends Extractor {
+  public static class DummyExtractor extends Extractor<EmptyConfiguration, EmptyConfiguration, Partition> {
     @Override
-    public void extract(ExtractorContext context, Object oc, Object oj, Object partition) {
+    public void extract(ExtractorContext context, EmptyConfiguration oc, EmptyConfiguration oj, Partition partition) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
         context.getDataWriter().writeArrayRecord(new Object[] {

@@ -15,15 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.hdfs.configuration;
+package org.apache.sqoop.connector.common;
 
-import org.apache.sqoop.model.ConfigClass;
-import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.ConfigurationClass;
 
-@ConfigClass
-public class LinkConfig {
- //Todo: Didn't find anything that belongs here...
- // Since empty forms don't work (DERBYREPO_0008:The config contains no input metadata), I'm putting a dummy config here
+/**
+ * Marker empty link configuration class with empty config
+ *
+**/
+@ConfigurationClass
+public class EmptyConfiguration {
 
-  @Input(size = 255) public String dummy;
 }

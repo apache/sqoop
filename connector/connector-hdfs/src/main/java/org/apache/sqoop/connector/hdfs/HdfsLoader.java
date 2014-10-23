@@ -17,13 +17,16 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import java.io.IOException;
+import java.util.UUID;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
@@ -34,10 +37,7 @@ import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.utils.ClassUtils;
 
-import java.io.IOException;
-import java.util.UUID;
-
-public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
+public class HdfsLoader extends Loader<EmptyConfiguration, ToJobConfiguration> {
   /**
    * Load data to target.
    *
@@ -47,7 +47,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
    * @throws Exception
    */
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception {
+  public void load(LoaderContext context, EmptyConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception {
 
     DataReader reader = context.getDataReader();
 

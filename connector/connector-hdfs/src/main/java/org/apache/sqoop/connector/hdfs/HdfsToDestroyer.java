@@ -17,20 +17,22 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.sqoop.connector.common.EmptyConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 
-public class HdfsDestroyer extends Destroyer {
+public class HdfsToDestroyer extends Destroyer<EmptyConfiguration, ToJobConfiguration> {
   /**
    * Callback to clean up after job execution.
    *
    * @param context Destroyer context
-   * @param o       Connection configuration object
-   * @param o2      Job configuration object
+   * @param linkConfig link configuration object
+   * @param jobConfig TO job configuration object
    */
   @Override
-  public void destroy(DestroyerContext context, Object o, Object o2) {
-    //TODO: Add a "success" flag?
-
+  public void destroy(DestroyerContext context, EmptyConfiguration linkConfig,
+      ToJobConfiguration jobConfig) {
+    // do nothing at this point
   }
 }

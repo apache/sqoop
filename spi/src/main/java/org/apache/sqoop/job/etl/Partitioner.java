@@ -20,10 +20,10 @@ package org.apache.sqoop.job.etl;
 import java.util.List;
 
 /**
- * This allows connector to define how input data to be partitioned.
+ * This allows connector to define how input data from the FROM source can be partitioned.
  * The number of data partitions also determines the degree of parallelism.
  */
-public abstract class Partitioner<LinkConfiguration, JobConfiguration> {
+public abstract class Partitioner<LinkConfiguration, FromJobConfiguration> {
 
   /**
    * Partition input data into partitions.
@@ -35,8 +35,6 @@ public abstract class Partitioner<LinkConfiguration, JobConfiguration> {
    * @param jobConfiguration job configuration object
    * @return
    */
-	public abstract List<Partition> getPartitions(PartitionerContext context,
-			LinkConfiguration linkConfiguration,
-			JobConfiguration jobConfiguration);
-
+  public abstract List<Partition> getPartitions(PartitionerContext context,
+      LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration);
 }

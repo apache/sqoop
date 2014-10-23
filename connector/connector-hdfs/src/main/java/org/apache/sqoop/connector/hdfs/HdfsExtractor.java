@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,23 +29,20 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
-import org.apache.log4j.Logger;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.common.PrefixContext;
-
-import java.io.IOException;
 
 /**
  * Extract from HDFS.
  * Default field delimiter of a record is comma.
  */
-public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> {
+public class HdfsExtractor extends Extractor<EmptyConfiguration, FromJobConfiguration, HdfsPartition> {
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
 
@@ -51,9 +51,8 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   private long rowRead = 0;
 
   @Override
-  public void extract(ExtractorContext context,
-      LinkConfiguration linkConfig,
-      FromJobConfiguration fromJobConfig, HdfsPartition partition) {
+  public void extract(ExtractorContext context, EmptyConfiguration linkConfig,
+      FromJobConfiguration jobConfig, HdfsPartition partition) {
 
     conf = ((PrefixContext) context.getContext()).getConfiguration();
     dataWriter = context.getDataWriter();
@@ -91,6 +90,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
    * @param length
    * @throws IOException
    */
+  @SuppressWarnings("deprecation")
   private void extractSequenceFile(Path file, long start, long length)
       throws IOException {
     LOG.info("Extracting sequence file");
@@ -123,6 +123,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
    * @param length
    * @throws IOException
    */
+  @SuppressWarnings("resource")
   private void extractTextFile(Path file, long start, long length)
       throws IOException {
     LOG.info("Extracting text file");
@@ -182,6 +183,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
    * @param file
    * @return boolean
    */
+  @SuppressWarnings("deprecation")
   private boolean isSequenceFile(Path file) {
     SequenceFile.Reader filereader = null;
     try {

@@ -21,36 +21,36 @@ package org.apache.sqoop.connector.hdfs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
+import org.apache.hadoop.net.NodeBase;
+import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
-import org.apache.sqoop.common.PrefixContext;
 
 /**
  * This class derives mostly from CombineFileInputFormat of Hadoop, i.e.
  * org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat.
  */
-public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
+public class HdfsPartitioner extends Partitioner<EmptyConfiguration, FromJobConfiguration> {
 
   public static final String SPLIT_MINSIZE_PERNODE =
       "mapreduce.input.fileinputformat.split.minsize.per.node";
@@ -68,7 +68,7 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,
-      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+      EmptyConfiguration emptyConfig, FromJobConfiguration fromJobConfig) {
 
     Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
 

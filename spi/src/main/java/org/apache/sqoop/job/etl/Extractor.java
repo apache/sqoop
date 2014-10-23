@@ -21,20 +21,20 @@ package org.apache.sqoop.job.etl;
  * This allows connector to extract data from a source system
  * based on each partition.
  */
-public abstract class Extractor<LinkConfiguration, JobConfiguration, Partition> {
+public abstract class Extractor<LinkConfiguration, FromJobConfiguration, SqoopPartition> {
 
   /**
    * Extract data from source and pass them into the Sqoop.
    *
    * @param context Extractor context object
    * @param linkConfiguration link configuration object
-   * @param jobConfiguration job configuration object
-   * @param partition Partition that this extract should work on
+   * @param jobConfiguration FROM job configuration object
+   * @param partition Partition that this extracter should work on
    */
   public abstract void extract(ExtractorContext context,
                                LinkConfiguration linkConfiguration,
-                               JobConfiguration jobConfiguration,
-                               Partition partition);
+                               FromJobConfiguration jobConfiguration,
+                               SqoopPartition partition);
 
   /**
    * Return the number of rows read by the last call to

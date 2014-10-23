@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -33,6 +35,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
@@ -56,8 +59,6 @@ import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class TestMapReduce {
 
@@ -170,9 +171,9 @@ public class TestMapReduce {
     }
   }
 
-  public static class DummyExtractor extends Extractor {
+  public static class DummyExtractor extends Extractor<EmptyConfiguration, EmptyConfiguration, DummyPartition> {
     @Override
-    public void extract(ExtractorContext context, Object oc, Object oj, Object partition) {
+    public void extract(ExtractorContext context, EmptyConfiguration oc, EmptyConfiguration oj, DummyPartition partition) {
       int id = ((DummyPartition)partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
         context.getDataWriter().writeArrayRecord(new Object[] {
@@ -250,12 +251,12 @@ public class TestMapReduce {
     }
   }
 
-  public static class DummyLoader extends Loader {
+  public static class DummyLoader extends Loader<EmptyConfiguration, EmptyConfiguration> {
     private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
     private Data expected = new Data();
 
     @Override
-    public void load(LoaderContext context, Object oc, Object oj) throws Exception{
+    public void load(LoaderContext context, EmptyConfiguration oc, EmptyConfiguration oj) throws Exception{
       String data;
       while ((data = context.getDataReader().readTextRecord()) != null) {
         expected.setContent(new Object[] {
@@ -269,22 +270,22 @@ public class TestMapReduce {
     }
   }
 
-  public static class DummyFromDestroyer extends Destroyer {
+  public static class DummyFromDestroyer extends Destroyer<EmptyConfiguration, EmptyConfiguration> {
 
     public static int count = 0;
 
     @Override
-    public void destroy(DestroyerContext context, Object o, Object o2) {
+    public void destroy(DestroyerContext context, EmptyConfiguration o, EmptyConfiguration o2) {
       count++;
     }
   }
 
-  public static class DummyToDestroyer extends Destroyer {
+  public static class DummyToDestroyer extends Destroyer<EmptyConfiguration,EmptyConfiguration> {
 
     public static int count = 0;
 
     @Override
-    public void destroy(DestroyerContext context, Object o, Object o2) {
+    public void destroy(DestroyerContext context, EmptyConfiguration o, EmptyConfiguration o2) {
       count++;
     }
   }

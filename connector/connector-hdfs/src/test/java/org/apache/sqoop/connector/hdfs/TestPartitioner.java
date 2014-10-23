@@ -17,12 +17,21 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.job.etl.Partition;
@@ -30,17 +39,9 @@ import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class TestPartitioner extends TestHdfsBase {
@@ -97,12 +98,12 @@ public class TestPartitioner extends TestHdfsBase {
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     PartitionerContext context = new PartitionerContext(prefixContext, 5, null);
-    LinkConfiguration connConf = new LinkConfiguration();
+    EmptyConfiguration linkConf = new EmptyConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     jobConf.fromJobConfig.inputDirectory = inputDirectory;
 
-    List<Partition> partitions = partitioner.getPartitions(context, connConf, jobConf);
+    List<Partition> partitions = partitioner.getPartitions(context, linkConf, jobConf);
 
     if (this.compressionClass == null) {
       assertEquals(5, partitions.size());

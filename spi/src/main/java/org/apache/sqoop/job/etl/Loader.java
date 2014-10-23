@@ -20,18 +20,17 @@ package org.apache.sqoop.job.etl;
 /**
  * This allows connector to load data into a target system.
  */
-public abstract class Loader<LinkConfiguration, JobConfiguration> {
+public abstract class Loader<LinkConfiguration, ToJobConfiguration> {
 
   /**
    * Load data to target.
    *
    * @param context Loader context object
    * @param linkConfiguration link configuration object
-   * @param jobConfiguration job configuration object
+   * @param jobConfiguration TO job configuration object
    * @throws Exception
    */
-	public abstract void load(LoaderContext context,
-			LinkConfiguration linkConfiguration,
-			JobConfiguration jobConfiguration) throws Exception;
+  public abstract void load(LoaderContext context, LinkConfiguration linkConfiguration,
+      ToJobConfiguration jobConfiguration) throws Exception;
 
 }

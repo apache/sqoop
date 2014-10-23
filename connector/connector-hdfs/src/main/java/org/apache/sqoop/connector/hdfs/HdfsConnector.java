@@ -18,10 +18,13 @@
 
 package org.apache.sqoop.connector.hdfs;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
@@ -30,21 +33,18 @@ import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.validation.Validator;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 public class HdfsConnector extends SqoopConnector {
 
   private static final From FROM = new From(
-          HdfsInitializer.class,
+          HdfsFromInitializer.class,
           HdfsPartitioner.class,
           HdfsExtractor.class,
-          HdfsDestroyer.class);
+          HdfsFromDestroyer.class);
 
   private static final To TO = new To(
-          HdfsInitializer.class,
+          HdfsToInitializer.class,
           HdfsLoader.class,
-          HdfsDestroyer.class);
+          HdfsToDestroyer.class);
 
   private static final HdfsValidator hdfsValidator = new HdfsValidator();
 
@@ -71,15 +71,17 @@ public class HdfsConnector extends SqoopConnector {
   /**
    * @return Get connection configuration class
    */
+  @SuppressWarnings("rawtypes")
   @Override
   public Class getLinkConfigurationClass() {
-    return LinkConfiguration.class;
+    return EmptyConfiguration.class;
   }
 
   /**
    * @param jobType
    * @return Get job configuration class for given type or null if not supported
    */
+  @SuppressWarnings("rawtypes")
   @Override
   public Class getJobConfigurationClass(Direction jobType) {
     switch (jobType) {

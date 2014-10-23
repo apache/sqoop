@@ -35,27 +35,39 @@ public abstract class Initializer<LinkConfiguration, JobConfiguration> {
    *
    * @param context Initializer context object
    * @param linkConfiguration link configuration object
-   * @param jobConfiguration job configuration object
+   * @param jobConfiguration job configuration object for the FROM and TO
+   *        In case of the FROM initializer this will represent the FROM job configuration
+   *        In case of the TO initializer this will represent the TO job configuration
    */
-	public abstract void initialize(InitializerContext context,
-			LinkConfiguration linkConfiguration,
-			JobConfiguration jobConfiguration);
+  public abstract void initialize(InitializerContext context, LinkConfiguration linkConfiguration,
+      JobConfiguration jobConfiguration);
 
-	/**
-	 * Return list of all jars that this particular connector needs to operate
-	 * on following job. This method will be called after running initialize
-	 * method.
-	 *
-	 * @return
-	 */
-	public List<String> getJars(InitializerContext context,
-			LinkConfiguration linkConfiguration,
-			JobConfiguration jobConfiguration) {
-		return new LinkedList<String>();
-	}
+  /**
+   * Return list of all jars that this particular connector needs to operate on
+   * following job. This method will be called after running initialize method.
+   * @param context Initializer context object
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object for the FROM and TO
+   *        In case of the FROM initializer this will represent the FROM job configuration
+   *        In case of the TO initializer this will represent the TO job configuration
+   * @return
+   */
+  public List<String> getJars(InitializerContext context, LinkConfiguration linkConfiguration,
+      JobConfiguration jobConfiguration) {
+    return new LinkedList<String>();
+  }
 
-	public abstract Schema getSchema(InitializerContext context,
-			LinkConfiguration linkConfiguration,
-			JobConfiguration jobConfiguration);
+  /**
+   * Return schema associated with the connector for FROM and TO
+   * @param context Initializer context object
+   * @param linkConfiguration link configuration object
+   * @param jobConfiguration job configuration object for the FROM and TO
+   *        In case of the FROM initializer this will represent the FROM job configuration
+   *        In case of the TO initializer this will represent the TO job configuration
+   * @return
+   */
+
+  public abstract Schema getSchema(InitializerContext context, LinkConfiguration linkConfiguration,
+      JobConfiguration jobConfiguration);
 
 }

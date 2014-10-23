@@ -17,28 +17,32 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.sqoop.connector.common.EmptyConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.schema.Schema;
 
 
-public class HdfsInitializer extends Initializer {
+public class HdfsFromInitializer extends Initializer<EmptyConfiguration, FromJobConfiguration> {
   /**
    * Initialize new submission based on given configuration properties. Any
    * needed temporary values might be saved to context object and they will be
    * promoted to all other part of the workflow automatically.
    *
    * @param context Initializer context object
-   * @param linkConfig       Connector's link configuration object
-   * @param jobConf      Connector's job configuration object
+   * @param linkConfig link configuration object
+   * @param jobConfig FROM job configuration object
    */
   @Override
-  public void initialize(InitializerContext context, Object linkConfig, Object jobConf) {
-
+  public void initialize(InitializerContext context, EmptyConfiguration linkConfig,
+      FromJobConfiguration jobConfig) {
+    // do nothing at this point
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, Object linkConfig, Object jobConfig) {
+  public Schema getSchema(InitializerContext context, EmptyConfiguration linkConfig,
+      FromJobConfiguration jobConfig) {
     return new Schema("HDFS file");
   }
 }

@@ -17,6 +17,16 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -27,7 +37,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToCompression;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
@@ -40,16 +50,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
 
 @RunWith(Parameterized.class)
 public class TestLoader extends TestHdfsBase {
@@ -121,25 +121,25 @@ public class TestLoader extends TestHdfsBase {
         return null;
       }
     }, null);
-    LinkConfiguration connConf = new LinkConfiguration();
+    EmptyConfiguration linkConf = new EmptyConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     jobConf.toJobConfig.outputDirectory = outputDirectory;
     jobConf.toJobConfig.compression = compression;
     jobConf.toJobConfig.outputFormat = outputFormat;
     Path outputPath = new Path(outputDirectory);
 
-    loader.load(context, connConf, jobConf);
+    loader.load(context, linkConf, jobConf);
     Assert.assertEquals(1, fs.listStatus(outputPath).length);
 
     for (FileStatus status : fs.listStatus(outputPath)) {
       verifyOutput(fs, status.getPath());
     }
 
-    loader.load(context, connConf, jobConf);
+    loader.load(context, linkConf, jobConf);
     Assert.assertEquals(2, fs.listStatus(outputPath).length);
-    loader.load(context, connConf, jobConf);
-    loader.load(context, connConf, jobConf);
-    loader.load(context, connConf, jobConf);
+    loader.load(context, linkConf, jobConf);
+    loader.load(context, linkConf, jobConf);
+    loader.load(context, linkConf, jobConf);
     Assert.assertEquals(5, fs.listStatus(outputPath).length);
   }
 

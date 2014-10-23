@@ -17,12 +17,20 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.etl.io.DataWriter;
@@ -35,14 +43,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
-
 @RunWith(Parameterized.class)
 public class TestExtractor extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
@@ -52,7 +52,7 @@ public class TestExtractor extends TestHdfsBase {
   private ToFormat outputFileType;
   private Class<? extends CompressionCodec> compressionClass;
   private final String inputDirectory;
-  private Extractor extractor;
+  private Extractor<EmptyConfiguration, FromJobConfiguration, HdfsPartition> extractor;
 
   public TestExtractor(ToFormat outputFileType,
                        Class<? extends CompressionCodec> compressionClass)
@@ -131,13 +131,11 @@ public class TestExtractor extends TestHdfsBase {
       }
     });
 
-    LinkConfiguration connConf = new LinkConfiguration();
-
-    FromJobConfiguration jobConf = new FromJobConfiguration();
-
+    EmptyConfiguration emptyLinkConfig = new EmptyConfiguration();
+    FromJobConfiguration emptyJobConfig = new FromJobConfiguration();
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));
 
-    extractor.extract(context, connConf, jobConf, partition);
+    extractor.extract(context, emptyLinkConfig, emptyJobConfig, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
       Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);

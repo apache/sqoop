@@ -28,7 +28,9 @@ public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
    *
    * @param context Destroyer context
    * @param linkConfiguration link configuration object
-   * @param jobConfiguration job configuration object
+   * @param jobConfiguration job configuration object for the FROM and TO
+   *        In case of the FROM initializer this will represent the FROM job configuration
+   *        In case of the TO initializer this will represent the TO job configuration
    */
   public abstract void destroy(DestroyerContext context,
                                LinkConfiguration linkConfiguration,

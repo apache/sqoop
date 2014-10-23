@@ -350,25 +350,25 @@ public class JobManager implements Reconfigurable {
     jobRequest.setJobName(job.getName());
     jobRequest.setJobId(job.getPersistenceId());
     jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
-    Class<? extends IntermediateDataFormat<?>> dataFormatClass =
-      fromConnector.getIntermediateDataFormat();
+    Class<? extends IntermediateDataFormat<?>> dataFormatClass = fromConnector
+        .getIntermediateDataFormat();
     jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat());
-
 
     jobRequest.setFrom(fromConnector.getFrom());
     jobRequest.setTo(toConnector.getTo());
 
+    // set all the jars
     addStandardJars(jobRequest);
     addConnectorJars(jobRequest, fromConnector, toConnector, dataFormatClass);
     addConnectorInitializerJars(jobRequest, Direction.FROM);
     addConnectorInitializerJars(jobRequest, Direction.TO);
 
-    Schema fromSchema = getSchemaFromConnector(jobRequest, Direction.FROM);
-    Schema toSchema = getSchemaFromConnector(jobRequest, Direction.TO);
+    // call the intialize method
+    initializeConnector(jobRequest, Direction.FROM);
+    initializeConnector(jobRequest, Direction.TO);
 
-
-    jobRequest.getSummary().setFromSchema(fromSchema);
-    jobRequest.getSummary().setToSchema(toSchema);
+    jobRequest.getSummary().setFromSchema(getSchemaForConnector(jobRequest, Direction.FROM));
+    jobRequest.getSummary().setToSchema(getSchemaForConnector(jobRequest, Direction.TO));
 
     LOG.debug("Using entities: " + jobRequest.getFrom() + ", " + jobRequest.getTo());
     return jobRequest;
@@ -435,21 +435,22 @@ public class JobManager implements Reconfigurable {
     }
     return job;
   }
-  
-  private Schema getSchemaFromConnector(JobRequest jobRequest, Direction direction) {
 
+  private void initializeConnector(JobRequest jobRequest, Direction direction) {
     Initializer initializer = getConnectorInitializer(jobRequest, direction);
-
-    // Initializer context
     InitializerContext initializerContext = getConnectorInitializerContext(jobRequest, direction);
 
     // Initialize submission from the connector perspective
     initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
         jobRequest.getJobConfig(direction));
+  }
 
+  private Schema getSchemaForConnector(JobRequest jobRequest, Direction direction) {
 
-    return initializer.getSchema(initializerContext,
-        jobRequest.getConnectorLinkConfig(direction),
+    Initializer initializer = getConnectorInitializer(jobRequest, direction);
+    InitializerContext initializerContext = getConnectorInitializerContext(jobRequest, direction);
+
+    return initializer.getSchema(initializerContext, jobRequest.getConnectorLinkConfig(direction),
         jobRequest.getJobConfig(direction));
   }
 
@@ -459,8 +460,7 @@ public class JobManager implements Reconfigurable {
     InitializerContext initializerContext = getConnectorInitializerContext(jobRequest, direction);
     // Add job specific jars to
     jobRequest.addJars(initializer.getJars(initializerContext,
-        jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getJobConfig(direction)));
+        jobRequest.getConnectorLinkConfig(direction), jobRequest.getJobConfig(direction)));
   }
 
   private Initializer getConnectorInitializer(JobRequest jobRequest, Direction direction) {
