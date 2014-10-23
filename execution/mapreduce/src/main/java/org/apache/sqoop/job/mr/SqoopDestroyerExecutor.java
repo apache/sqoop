@@ -20,8 +20,10 @@ package org.apache.sqoop.job.mr;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.connector.matcher.Matcher;
+import org.apache.sqoop.connector.matcher.MatcherFactory;
+import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.schema.Schema;
@@ -70,7 +72,11 @@ public class SqoopDestroyerExecutor {
     Object configJob = MRConfigurationUtils.getConnectorJobConfig(direction, configuration);
 
     // Propagate connector schema in every case for now
-    Schema schema = MRConfigurationUtils.getConnectorSchema(direction, configuration);
+    Matcher matcher = MatcherFactory.getMatcher(
+        MRConfigurationUtils.getConnectorSchema(Direction.FROM, configuration),
+        MRConfigurationUtils.getConnectorSchema(Direction.TO, configuration));
+    Schema schema = direction == Direction.FROM ?
+        matcher.getFromSchema() : matcher.getToSchema();
 
     DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
 
