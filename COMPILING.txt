@@ -119,7 +119,7 @@ jdbc:postgresql://localhost/
 
 === SQL Server
 
-Install SQL Server Express 2008 R2 and create a database instance and
+Install SQL Server Express 2012 and create a database instance and
 download the appropriate JDBC driver. Instructions for configuring the
 database can be found in SQLServerManagerImportManualTest.
 

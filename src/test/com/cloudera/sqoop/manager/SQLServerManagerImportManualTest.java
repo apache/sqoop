@@ -58,7 +58,7 @@ import com.cloudera.sqoop.util.FileListing;
  * into Apache's tree for licensing reasons).
  *
  * To set up your test environment:
- *   Install SQL Server Express 2008 R2
+ *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.

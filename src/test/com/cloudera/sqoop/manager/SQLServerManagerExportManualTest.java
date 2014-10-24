@@ -364,6 +364,21 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     checkSQLBinaryTableContent(expectedContent, escapeObjectName(DBO_BINARY_TABLE_NAME), conn);
   }
 
+  /** Make sure mixed update/insert export work correctly. */
+  public void testUpsertTextExport() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,400,sales",
+      "3,Fred,15,marketing",
+    });
+    // first time will be insert.
+    runExport(getArgv(SCH_TABLE_NAME, "--update-key", "id",
+              "--update-mode", "allowinsert"));
+    // second time will be update.
+    runExport(getArgv(SCH_TABLE_NAME, "--update-key", "id",
+              "--update-mode", "allowinsert"));
+    assertRowCount(2, escapeObjectName(SCH_TABLE_NAME), conn);
+  }
+
   public static void checkSQLBinaryTableContent(String[] expected, String tableName, Connection connection){
     Statement stmt = null;
     ResultSet rs = null;

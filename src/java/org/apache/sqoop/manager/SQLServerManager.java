@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
 import org.apache.sqoop.mapreduce.SQLServerResilientExportOutputFormat;
 import org.apache.sqoop.mapreduce.SQLServerResilientUpdateOutputFormat;
 import org.apache.sqoop.mapreduce.db.SQLServerDBInputFormat;
@@ -42,6 +43,7 @@ import com.cloudera.sqoop.util.ImportException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerInputFormat;
+import org.apache.sqoop.mapreduce.sqlserver.SqlServerUpsertOutputFormat;
 
 /**
  * Manages connections to SQLServer databases. Requires the SQLServer JDBC
@@ -201,6 +203,39 @@ public class SQLServerManager
         null, SQLServerResilientUpdateOutputFormat.class);
       configureConnectionRecoveryForUpdate(context);
       exportJob.runExport();
+    }
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+      throws IOException, ExportException {
+    context.setConnManager(this);
+
+    // Propagate table hints to job
+    Configuration configuration = context.getOptions().getConf();
+    if (tableHints != null) {
+      configuration.set(TABLE_HINTS_PROP, tableHints);
+    }
+
+    JdbcUpsertExportJob exportJob =
+        new JdbcUpsertExportJob(context, SqlServerUpsertOutputFormat.class);
+    exportJob.runExport();
+  }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void configureDbOutputColumns(SqoopOptions options) {
+    if (options.getUpdateMode() == SqoopOptions.UpdateMode.UpdateOnly) {
+      super.configureDbOutputColumns(options);
+    } else {
+      // We're in upsert mode. We need to explicitly set
+      // the database output column ordering in the codeGenerator.
+      options.setDbOutputColumns(getColumnNames(options.getTableName()));
     }
   }
 
