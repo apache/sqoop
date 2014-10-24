@@ -65,7 +65,7 @@ public class SqoopClient {
    */
   private Map<Long, MConnector> connectors;
   /**
-   * All cached bundles for all connectors.
+   * All cached config params for every registered connector in the sqoop system.
    */
   private Map<Long, ResourceBundle> connectorConfigBundles;
 
@@ -135,7 +135,6 @@ public class SqoopClient {
     if(connectors.containsKey(cid)) {
       return connectors.get(cid).clone(false);
     }
-
     retrieveConnector(cid);
     return connectors.get(cid).clone(false);
   }

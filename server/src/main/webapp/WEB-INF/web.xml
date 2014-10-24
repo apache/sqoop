@@ -39,30 +39,53 @@ limitations under the License.
     <url-pattern>/version</url-pattern>
   </servlet-mapping>
 
+   <!-- Generic Configurable servlet -->
+  <servlet>
+    <servlet-name>v1.ConfigurableServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.ConfigurableServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.ConfigurableServlet</servlet-name>
+    <url-pattern>/v1/configurable/*</url-pattern>
+  </servlet-mapping>
+
   <!-- Connector servlet -->
   <servlet>
     <servlet-name>v1.ConnectorServlet</servlet-name>
     <servlet-class>org.apache.sqoop.server.v1.ConnectorServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
-  
+
   <servlet-mapping>
     <servlet-name>v1.ConnectorServlet</servlet-name>
     <url-pattern>/v1/connector/*</url-pattern>
   </servlet-mapping>
 
-  <!-- Driver Config servlet -->
+  <!-- Connectors servlet -->
   <servlet>
-    <servlet-name>v1.DriverConfigServlet</servlet-name>
-    <servlet-class>org.apache.sqoop.server.v1.DriverConfigServlet</servlet-class>
+    <servlet-name>v1.ConnectorsServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.ConnectorServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>v1.DriverConfigServlet</servlet-name>
-    <url-pattern>/v1/config/driver/*</url-pattern>
+    <servlet-name>v1.ConnectorsServlet</servlet-name>
+    <url-pattern>/v1/connectors/*</url-pattern>
   </servlet-mapping>
 
+  <!-- Driver servlet -->
+  <servlet>
+    <servlet-name>v1.DriverServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.DriverServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.DriverServlet</servlet-name>
+    <url-pattern>/v1/driver/*</url-pattern>
+  </servlet-mapping>
 
   <!-- Link servlet -->
   <servlet>

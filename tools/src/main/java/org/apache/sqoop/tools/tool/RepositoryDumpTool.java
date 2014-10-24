@@ -17,29 +17,29 @@
  */
 package org.apache.sqoop.tools.tool;
 
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.OptionBuilder;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
-import org.apache.sqoop.common.VersionInfo;
-import static org.apache.sqoop.json.util.ConfigSerialization.ALL;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * Write user-created content of Sqoop repository to JSON formatted file
@@ -132,7 +132,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
   private JSONObject addConnectorName(JSONObject json) {
     ConnectorManager connectorManager = ConnectorManager.getInstance();
 
-    JSONArray results = (JSONArray) json.get(ALL);
+    JSONArray results = (JSONArray) json.get(JsonBean.ALL);
 
     Iterator<JSONObject> iterator = results.iterator();
 

@@ -17,11 +17,10 @@
  */
 package org.apache.sqoop.json;
 
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MConfig;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,10 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
-import static org.apache.sqoop.json.util.ConfigSerialization.*;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.*;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  * Link representation that is being send across the network between
@@ -101,25 +102,17 @@ public class LinkBean implements JsonBean {
       linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
       linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
       linkJsonObject.put(LINK_CONFIG,
-        extractConfigList(link.getConnectorLinkConfig().getConfigs(), skipSensitive));
+        extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
 
       linkArray.add(linkJsonObject);
     }
 
     JSONObject all = new JSONObject();
     all.put(ALL, linkArray);
-    if (!linkConfigBundles.isEmpty()) {
-      JSONObject bundles = new JSONObject();
-      for (Map.Entry<Long, ResourceBundle> entry : linkConfigBundles.entrySet()) {
-        bundles.put(entry.getKey().toString(), extractResourceBundle(entry.getValue()));
-      }
-      all.put(CONNECTOR_CONFIGS, bundles);
-    }
     return all;
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
     links = new ArrayList<MLink>();
 
@@ -144,15 +137,6 @@ public class LinkBean implements JsonBean {
       link.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
 
       links.add(link);
-    }
-
-    if(jsonObject.containsKey(CONNECTOR_CONFIGS)) {
-      JSONObject bundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
-      Set<Map.Entry<String, JSONObject>> entrySet = bundles.entrySet();
-      for (Map.Entry<String, JSONObject> entry : entrySet) {
-        linkConfigBundles.put(Long.parseLong(entry.getKey()),
-                             restoreResourceBundle(entry.getValue()));
-      }
     }
   }
 }

@@ -23,24 +23,16 @@ import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
-
 /**
- * Connector request handler is supporting following resources:
- *
- * GET v1/connector/all (remains for backward compatibility)
- *  Return all connectors registered in the sqoop system with their corresponding config params
- * GET /v1/connector/{cname}
- *  Return details about one particular connector with name {cname} with its config params
- * GET /v1/connector/{cid}
- *  Return details about one particular connector with id {cid} with its config params
- *
+ * Displays all connectors registered in sqoop
+ * GET v1/connectors
  */
 @SuppressWarnings("serial")
-public class ConnectorServlet extends SqoopProtocolServlet {
+public class ConnectorsServlet extends SqoopProtocolServlet {
 
   private RequestHandler connectorRequestHandler;
 
-  public ConnectorServlet() {
+  public ConnectorsServlet() {
     connectorRequestHandler = new ConnectorRequestHandler();
   }
 

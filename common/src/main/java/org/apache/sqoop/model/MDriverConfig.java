@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class MDriverConfig extends MConfigList {
   public MDriverConfig(List<MConfig> configs) {
-    super(configs);
+    super(configs, MConfigType.JOB);
   }
 
   @Override

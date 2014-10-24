@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class MFromConfig extends MConfigList {
   public MFromConfig(List<MConfig> configs) {
-    super(configs);
+    super(configs, MConfigType.JOB);
   }
 
   @Override

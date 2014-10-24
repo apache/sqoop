@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class MToConfig extends MConfigList {
   public MToConfig(List<MConfig> configs) {
-    super(configs);
+    super(configs, MConfigType.JOB);
   }
 
   @Override

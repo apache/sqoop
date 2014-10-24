@@ -21,6 +21,20 @@ import org.json.simple.JSONObject;
 
 public interface JsonBean {
 
+  // common JSON constants for the rest-api response
+  static final String CONFIGURABLE_VERSION = "version";
+  static final String ALL_CONFIGS = "all-configs";
+
+  static final String ALL = "all";
+  static final String ID = "id";
+  static final String NAME = "name";
+  static final String CLASS = "class";
+  static final String ENABLED = "enabled";
+  static final String CREATION_USER = "creation-user";
+  static final String CREATION_DATE = "creation-date";
+  static final String UPDATE_USER = "update-user";
+  static final String UPDATE_DATE = "update-date";
+
   JSONObject extract(boolean skipSensitive);
 
   void restore(JSONObject jsonObject);

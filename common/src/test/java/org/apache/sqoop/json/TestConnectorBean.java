@@ -45,8 +45,8 @@ public class TestConnectorBean {
   public void testSerialization() {
     // Create testing connector
     List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector("jdbc"));
-    connectors.add(getConnector("mysql"));
+    connectors.add(getConnector(1L, "jdbc"));
+    connectors.add(getConnector(2L, "mysql"));
 
     // Create testing bundles
     Map<Long, ResourceBundle> configBundles = new HashMap<Long, ResourceBundle>();
@@ -67,6 +67,7 @@ public class TestConnectorBean {
 
     assertEquals(connectors.size(), parsedConnectorBean.getConnectors().size());
     assertEquals(connectors.get(0), parsedConnectorBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), parsedConnectorBean.getConnectors().get(1));
 
     ResourceBundle retrievedBundle = parsedConnectorBean.getResourceBundles().get(1L);
     assertNotNull(retrievedBundle);
@@ -78,8 +79,8 @@ public class TestConnectorBean {
   public void testSingleDirection() {
     // Create testing connector
     List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector("jdbc", true, false));
-    connectors.add(getConnector("mysql", false, true));
+    connectors.add(getConnector(1L, "jdbc", true, false));
+    connectors.add(getConnector(2L, "mysql", false, true));
 
     // Create testing bundles
     Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
@@ -107,8 +108,8 @@ public class TestConnectorBean {
   public void testNoDirection() {
     // Create testing connector
     List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector("jdbc", false, false));
-    connectors.add(getConnector("mysql", false, false));
+    connectors.add(getConnector(1L, "jdbc", false, false));
+    connectors.add(getConnector(2L, "mysql", false, false));
 
     // Create testing bundles
     Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();

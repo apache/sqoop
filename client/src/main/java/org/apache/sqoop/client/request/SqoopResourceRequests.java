@@ -33,7 +33,7 @@ public class SqoopResourceRequests {
 
   private String serverUrl;
 
-  private DriverConfigResourceRequest driverConfigRequest;
+  private DriverResourceRequest driverRequest;
   private ConnectorResourceRequest connectorRequest;
   private LinkResourceRequest linkRequest;
   private JobResourceRequest jobRequest;
@@ -43,12 +43,12 @@ public class SqoopResourceRequests {
     this.serverUrl = serverUrl;
   }
 
-  public DriverConfigResourceRequest getDriverConfigResourceRequest() {
-    if (driverConfigRequest == null) {
-      driverConfigRequest = new DriverConfigResourceRequest();
+  public DriverResourceRequest getDriverResourceRequest() {
+    if (driverRequest == null) {
+      driverRequest = new DriverResourceRequest();
     }
 
-    return driverConfigRequest;
+    return driverRequest;
   }
 
   public ConnectorResourceRequest getConnectorResourceRequest() {
@@ -84,7 +84,7 @@ public class SqoopResourceRequests {
   }
 
   public DriverBean readDriver() {
-    return getDriverConfigResourceRequest().read(serverUrl);
+    return getDriverResourceRequest().read(serverUrl);
   }
 
   public ConnectorBean readConnector(Long cid) {

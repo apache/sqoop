@@ -29,9 +29,8 @@ public class DriverConfigValidator extends Validator {
     ConfigValidator validation = new ConfigValidator(JobConfiguration.class);
     JobConfiguration conf = (JobConfiguration)jobConfiguration;
     validateThrottlingConfig(validation,conf.throttlingConfig);
-
     return validation;
-  };
+  }
 
   private void validateThrottlingConfig(ConfigValidator validation, ThrottlingConfig throttlingConfig) {
     if(throttlingConfig.numExtractors != null && throttlingConfig.numExtractors < 1) {

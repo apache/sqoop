@@ -36,36 +36,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Convenient static methods for serializing config objects.
+ * Convenient static methods for serializing config and input objects.
  */
-public final class ConfigSerialization {
-
-  public static final String ALL = "all";
-  public static final String ID = "id";
-  public static final String NAME = "name";
-  public static final String VERSION = "version";
-  public static final String CLASS = "class";
-  public static final String ENABLED = "enabled";
-  public static final String CREATION_USER = "creation-user";
-  public static final String CREATION_DATE = "creation-date";
-  public static final String UPDATE_USER = "update-user";
-  public static final String UPDATE_DATE = "update-date";
-  // TODO(VB): Move these constants to connector bean
-  public static final String CONNECTOR_LINK_CONFIG = "link-config";
-  public static final String CONNECTOR_JOB_CONFIG = "job-config";
-  // TODO:move these configs to driver bean
-  public static final String DRIVER_VERSION = "driver-version";
-  public static final String DRIVER_CONFIG = "driver-config";
-
-  public static final String CONFIG_NAME = "name";
-  public static final String CONFIG_TYPE = "type";
-  public static final String CONFIG_INPUTS = "inputs";
-  public static final String CONFIG_INPUT_NAME = "name";
-  public static final String CONFIG_INPUT_TYPE = "type";
-  public static final String CONFIG_INPUT_SENSITIVE = "sensitive";
-  public static final String CONFIG_INPUT_SIZE = "size";
-  public static final String CONFIG_INPUT_VALUE = "value";
-  public static final String CONFIG_INPUT_VALUES = "values";
+public final class ConfigInputSerialization {
 
   /**
    * Transform given list of configs to JSON Array object.
@@ -74,13 +47,13 @@ public final class ConfigSerialization {
    * @return JSON object with serialized config of the list.
    */
   @SuppressWarnings("unchecked")
-  public static JSONArray extractConfigList(List<MConfig> mConfigs, boolean skipSensitive) {
+  public static JSONArray extractConfigList(List<MConfig> mConfigs, MConfigType type,
+      boolean skipSensitive) {
     JSONArray configs = new JSONArray();
 
     for (MConfig mConfig : mConfigs) {
-      configs.add(extractConfig(mConfig, skipSensitive));
+      configs.add(extractConfig(mConfig, type, skipSensitive));
     }
-
     return configs;
   }
 
@@ -92,30 +65,30 @@ public final class ConfigSerialization {
    * @return Serialized JSON object.
    */
   @SuppressWarnings("unchecked")
-  static JSONObject extractConfig(MConfig mConfig, boolean skipSensitive) {
+  static JSONObject extractConfig(MConfig mConfig, MConfigType type, boolean skipSensitive) {
     JSONObject config = new JSONObject();
-    config.put(ID, mConfig.getPersistenceId());
-    config.put(CONFIG_NAME, mConfig.getName());
-    config.put(CONFIG_TYPE, MConfigType.LINK.toString());
+    config.put(ConfigInputConstants.CONFIG_ID, mConfig.getPersistenceId());
+    config.put(ConfigInputConstants.CONFIG_NAME, mConfig.getName());
+    config.put(ConfigInputConstants.CONFIG_TYPE, type.name());
     JSONArray mInputs = new JSONArray();
-    config.put(CONFIG_INPUTS, mInputs);
+    config.put(ConfigInputConstants.CONFIG_INPUTS, mInputs);
 
     for (MInput<?> mInput : mConfig.getInputs()) {
       JSONObject input = new JSONObject();
-      input.put(ID, mInput.getPersistenceId());
-      input.put(CONFIG_INPUT_NAME, mInput.getName());
-      input.put(CONFIG_INPUT_TYPE, mInput.getType().toString());
-      input.put(CONFIG_INPUT_SENSITIVE, mInput.isSensitive());
+      input.put(ConfigInputConstants.CONFIG_ID, mInput.getPersistenceId());
+      input.put(ConfigInputConstants.CONFIG_INPUT_NAME, mInput.getName());
+      input.put(ConfigInputConstants.CONFIG_INPUT_TYPE, mInput.getType().toString());
+      input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE, mInput.isSensitive());
 
       // String specific serialization
       if (mInput.getType() == MInputType.STRING) {
-        input.put(CONFIG_INPUT_SIZE,
+        input.put(ConfigInputConstants.CONFIG_INPUT_SIZE,
             ((MStringInput)mInput).getMaxLength());
       }
 
       // Enum specific serialization
       if(mInput.getType() == MInputType.ENUM) {
-        input.put(CONFIG_INPUT_VALUES,
+        input.put(ConfigInputConstants.CONFIG_INPUT_VALUES,
           StringUtils.join(((MEnumInput)mInput).getValues(), ","));
       }
 
@@ -123,9 +96,9 @@ public final class ConfigSerialization {
       // Skip if sensitive
       if (!mInput.isEmpty() && !(skipSensitive && mInput.isSensitive())) {
         if (mInput.getType() == MInputType.MAP) {
-          input.put(CONFIG_INPUT_VALUE, mInput.getValue());
+          input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mInput.getValue());
         } else {
-          input.put(CONFIG_INPUT_VALUE, mInput.getUrlSafeValueString());
+          input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mInput.getUrlSafeValueString());
         }
       }
 
@@ -157,70 +130,74 @@ public final class ConfigSerialization {
    * @param config JSON representation of the MConfig.
    * @return Restored MConfig.
    */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   static MConfig restoreConfig(JSONObject config) {
-    JSONArray inputs = (JSONArray) config.get(CONFIG_INPUTS);
+    JSONArray inputs = (JSONArray) config.get(ConfigInputConstants.CONFIG_INPUTS);
 
     List<MInput<?>> mInputs = new ArrayList<MInput<?>>();
     for (int i = 0; i < inputs.size(); i++) {
       JSONObject input = (JSONObject) inputs.get(i);
       MInputType type =
-          MInputType.valueOf((String) input.get(CONFIG_INPUT_TYPE));
-      String name = (String) input.get(CONFIG_INPUT_NAME);
-      Boolean sensitive = (Boolean) input.get(CONFIG_INPUT_SENSITIVE);
+          MInputType.valueOf((String) input.get(ConfigInputConstants.CONFIG_INPUT_TYPE));
+      String name = (String) input.get(ConfigInputConstants.CONFIG_INPUT_NAME);
+      Boolean sensitive = (Boolean) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE);
       MInput mInput = null;
       switch (type) {
-        case STRING: {
-          long size = (Long) input.get(CONFIG_INPUT_SIZE);
-          mInput = new MStringInput(name, sensitive.booleanValue(), (short) size);
-          break;
-        }
-        case MAP: {
-          mInput = new MMapInput(name, sensitive.booleanValue());
-          break;
-        }
-        case INTEGER: {
-          mInput = new MIntegerInput(name, sensitive.booleanValue());
-          break;
-        }
-        case BOOLEAN: {
-          mInput = new MBooleanInput(name, sensitive.booleanValue());
-          break;
-        }
-        case ENUM: {
-          String values = (String) input.get(CONFIG_INPUT_VALUES);
-          mInput = new MEnumInput(name, sensitive.booleanValue(), values.split(","));
-          break;
-        }
+      case STRING: {
+        long size = (Long) input.get(ConfigInputConstants.CONFIG_INPUT_SIZE);
+        mInput = new MStringInput(name, sensitive.booleanValue(), (short) size);
+        break;
+      }
+      case MAP: {
+        mInput = new MMapInput(name, sensitive.booleanValue());
+        break;
+      }
+      case INTEGER: {
+        mInput = new MIntegerInput(name, sensitive.booleanValue());
+        break;
+      }
+      case BOOLEAN: {
+        mInput = new MBooleanInput(name, sensitive.booleanValue());
+        break;
+      }
+      case ENUM: {
+        String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_VALUES);
+        mInput = new MEnumInput(name, sensitive.booleanValue(), values.split(","));
+        break;
+      }
+      default:
+        // do nothing
+        break;
       }
 
       // Propagate config ID
-      mInput.setPersistenceId((Long)input.get(ID));
+      mInput.setPersistenceId((Long)input.get(ConfigInputConstants.INPUT_ID));
 
       // Propagate config optional value
-      if(input.containsKey(CONFIG_INPUT_VALUE)) {
+      if(input.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE)) {
         switch (type) {
         case MAP:
           try {
-            mInput.setValue((Map<String, String>)input.get(CONFIG_INPUT_VALUE));
+            mInput.setValue((Map<String, String>)input.get(ConfigInputConstants.CONFIG_INPUT_VALUE));
           } catch (ClassCastException e) {
             throw new SqoopException(SerializationError.SERIALIZATION_001, name + " requires a 'map' value.");
           }
           break;
         default:
           mInput.restoreFromUrlSafeValueString(
-              (String) input.get(CONFIG_INPUT_VALUE));
+              (String) input.get(ConfigInputConstants.CONFIG_INPUT_VALUE));
           break;
         }
       }
       mInputs.add(mInput);
     }
 
-    MConfig mConfig = new MConfig((String) config.get(CONFIG_NAME), mInputs);
-    mConfig.setPersistenceId((Long) config.get(ID));
+    MConfig mConfig = new MConfig((String) config.get(ConfigInputConstants.CONFIG_NAME), mInputs);
+    mConfig.setPersistenceId((Long) config.get(ConfigInputConstants.CONFIG_ID));
     return mConfig;
   }
 
-  private ConfigSerialization() {
+  private ConfigInputSerialization() {
     // Do not instantiate
   }
 }

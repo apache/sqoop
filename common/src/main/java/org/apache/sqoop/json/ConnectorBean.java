@@ -17,25 +17,16 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.util.ConfigSerialization.ALL;
-import static org.apache.sqoop.json.util.ConfigSerialization.CLASS;
-import static org.apache.sqoop.json.util.ConfigSerialization.ID;
-import static org.apache.sqoop.json.util.ConfigSerialization.CONNECTOR_JOB_CONFIG;
-import static org.apache.sqoop.json.util.ConfigSerialization.CONNECTOR_LINK_CONFIG;
-import static org.apache.sqoop.json.util.ConfigSerialization.NAME;
-import static org.apache.sqoop.json.util.ConfigSerialization.VERSION;
-import static org.apache.sqoop.json.util.ConfigSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigSerialization.restoreConfigList;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.CONNECTOR_CONFIGS;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.extractResourceBundle;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.restoreResourceBundle;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfig;
@@ -50,10 +41,14 @@ import org.json.simple.JSONObject;
  * Json representation of the connector object
  *
  */
-public class ConnectorBean implements JsonBean {
+public class ConnectorBean extends ConfigurableBean {
+
+  // to represent the config and inputs with values
+  public static final String CONNECTOR_LINK_CONFIG_VALUES = "link-config-values";
+  public static final String CONNECTOR_JOB_CONFIG_VALUES = "job-config-values";
+  private static final String CONNECTOR = "connector";
 
   private List<MConnector> connectors;
-
   private Map<Long, ResourceBundle> connectorConfigBundles;
 
   // for "extract"
@@ -77,53 +72,60 @@ public class ConnectorBean implements JsonBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
+    JSONArray connectorArray = extractConnectors(skipSensitive);
+    JSONObject connector = new JSONObject();
+    connector.put(CONNECTOR, connectorArray);
+    return connector;
+  }
 
+  @SuppressWarnings("unchecked")
+  protected JSONArray extractConnectors(boolean skipSensitive) {
     JSONArray connectorArray = new JSONArray();
-
     for (MConnector connector : connectors) {
       JSONObject connectorJsonObject = new JSONObject();
-
       connectorJsonObject.put(ID, connector.getPersistenceId());
       connectorJsonObject.put(NAME, connector.getUniqueName());
       connectorJsonObject.put(CLASS, connector.getClassName());
-      connectorJsonObject.put(VERSION, connector.getVersion());
-      connectorJsonObject.put(CONNECTOR_LINK_CONFIG,
-          extractConfigList(connector.getLinkConfig().getConfigs(), skipSensitive));
+      connectorJsonObject.put(CONFIGURABLE_VERSION, connector.getVersion());
+      connectorJsonObject.put(
+          CONNECTOR_LINK_CONFIG_VALUES,
+          extractConfigList(connector.getLinkConfig().getConfigs(), connector.getLinkConfig()
+              .getType(), skipSensitive));
 
-      connectorJsonObject.put(CONNECTOR_JOB_CONFIG, new JSONObject());
+      connectorJsonObject.put(CONNECTOR_JOB_CONFIG_VALUES, new JSONObject());
       // add sub fields to the job config for from and to
       if (connector.getFromConfig() != null) {
-        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(Direction.FROM,
-            extractConfigList(connector.getFromConfig().getConfigs(), skipSensitive));
+        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG_VALUES)).put(
+            Direction.FROM,
+            extractConfigList(connector.getFromConfig().getConfigs(), connector.getFromConfig()
+                .getType(), skipSensitive));
       }
       if (connector.getToConfig() != null) {
-        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(Direction.TO,
-            extractConfigList(connector.getToConfig().getConfigs(), skipSensitive));
+        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG_VALUES)).put(
+            Direction.TO,
+            extractConfigList(connector.getToConfig().getConfigs(), connector.getToConfig()
+                .getType(), skipSensitive));
+      }
+      // add the config-param inside each connector
+      connectorJsonObject.put(ALL_CONFIGS, new JSONObject());
+      if (connectorConfigBundles != null && !connectorConfigBundles.isEmpty()) {
+        connectorJsonObject.put(ALL_CONFIGS,
+            extractConfigParamBundle(connectorConfigBundles.get(connector.getPersistenceId())));
       }
       connectorArray.add(connectorJsonObject);
     }
-
-    JSONObject all = new JSONObject();
-    all.put(ALL, connectorArray);
-
-    if (connectorConfigBundles != null && !connectorConfigBundles.isEmpty()) {
-      JSONObject jsonBundles = new JSONObject();
-
-      for (Map.Entry<Long, ResourceBundle> entry : connectorConfigBundles.entrySet()) {
-        jsonBundles.put(entry.getKey().toString(), extractResourceBundle(entry.getValue()));
-      }
-      all.put(CONNECTOR_CONFIGS, jsonBundles);
-    }
-
-    return all;
+    return connectorArray;
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
-    connectors = new ArrayList<MConnector>();
+    JSONArray array = (JSONArray) jsonObject.get(CONNECTOR);
+    restoreConnectors(array);
+  }
 
-    JSONArray array = (JSONArray) jsonObject.get(ALL);
+  protected void restoreConnectors(JSONArray array) {
+    connectors = new ArrayList<MConnector>();
+    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
 
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;
@@ -131,12 +133,13 @@ public class ConnectorBean implements JsonBean {
       long connectorId = (Long) object.get(ID);
       String uniqueName = (String) object.get(NAME);
       String className = (String) object.get(CLASS);
-      String version = (String) object.get(VERSION);
+      String version = (String) object.get(CONFIGURABLE_VERSION);
 
-      List<MConfig> linkConfigs = restoreConfigList((JSONArray) object.get(CONNECTOR_LINK_CONFIG));
+      List<MConfig> linkConfigs = restoreConfigList((JSONArray) object
+          .get(CONNECTOR_LINK_CONFIG_VALUES));
 
-      // parent that encapsualtes both the from/to configs
-      JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG);
+      // parent that encapsulates both the from/to configs
+      JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG_VALUES);
       JSONArray fromJobConfigJson = (JSONArray) jobConfigJson.get(Direction.FROM.name());
       JSONArray toJobConfigJson = (JSONArray) jobConfigJson.get(Direction.TO.name());
 
@@ -158,18 +161,12 @@ public class ConnectorBean implements JsonBean {
           toConfig);
 
       connector.setPersistenceId(connectorId);
-      connectors.add(connector);
-    }
+      if (object.containsKey(ALL_CONFIGS)) {
 
-    if (jsonObject.containsKey(CONNECTOR_CONFIGS)) {
-      connectorConfigBundles = new HashMap<Long, ResourceBundle>();
-
-      JSONObject jsonBundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
-      Set<Map.Entry<String, JSONObject>> entrySet = jsonBundles.entrySet();
-      for (Map.Entry<String, JSONObject> entry : entrySet) {
-        connectorConfigBundles.put(Long.parseLong(entry.getKey()),
-            restoreResourceBundle(entry.getValue()));
+        JSONObject jsonConfigBundle = (JSONObject) object.get(ALL_CONFIGS);
+        connectorConfigBundles.put(connectorId, restoreConfigParamBundle(jsonConfigBundle));
       }
+      connectors.add(connector);
     }
   }
 }

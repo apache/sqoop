@@ -22,11 +22,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- * Provide CRUD semantics over RESTfull HTTP API for driverConfig
+ * Provide read semantics over RESTfull HTTP API for driver
  */
-public class DriverConfigResourceRequest extends ResourceRequest {
+public class DriverResourceRequest extends ResourceRequest {
 
-  public static final String RESOURCE = "v1/config/driver";
+  public static final String RESOURCE = "v1/driver/";
 
   public DriverBean read(String serverUrl) {
     String response = null;

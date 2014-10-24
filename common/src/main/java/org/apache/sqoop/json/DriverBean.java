@@ -17,14 +17,10 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.util.ConfigSerialization.DRIVER_CONFIG;
-import static org.apache.sqoop.json.util.ConfigSerialization.DRIVER_VERSION;
-import static org.apache.sqoop.json.util.ConfigSerialization.ID;
-import static org.apache.sqoop.json.util.ConfigSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigSerialization.restoreConfigList;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.CONFIGS;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.extractResourceBundle;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.restoreResourceBundle;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -36,20 +32,19 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 /**
  * Json representation of the driver
- *
  */
-public class DriverBean implements JsonBean {
+public class DriverBean extends ConfigurableBean {
 
   public static final String CURRENT_DRIVER_VERSION = "1";
+  static final String DRIVER_JOB_CONFIG_VALUES = "job-config-values";
 
   private MDriver driver;
-
-  private ResourceBundle bundle;
+  private ResourceBundle driverConfigBundle;
 
   // for "extract"
   public DriverBean(MDriver driver, ResourceBundle bundle) {
     this.driver = driver;
-    this.bundle = bundle;
+    this.driverConfigBundle = bundle;
   }
 
   // for "restore"
@@ -61,30 +56,30 @@ public class DriverBean implements JsonBean {
   }
 
   public ResourceBundle getDriverConfigResourceBundle() {
-    return bundle;
+    return driverConfigBundle;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
     JSONArray configs =
-      extractConfigList(driver.getDriverConfig().getConfigs(), skipSensitive);
+      extractConfigList(driver.getDriverConfig().getConfigs(), driver.getDriverConfig().getType(), skipSensitive);
 
     JSONObject result = new JSONObject();
     result.put(ID, driver.getPersistenceId());
-    result.put(DRIVER_VERSION, driver.getVersion());
-    result.put(DRIVER_CONFIG, configs);
-    result.put(CONFIGS, extractResourceBundle(bundle));
+    result.put(CONFIGURABLE_VERSION, driver.getVersion());
+    result.put(DRIVER_JOB_CONFIG_VALUES, configs);
+    result.put(ALL_CONFIGS, extractConfigParamBundle(driverConfigBundle));
     return result;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
     long id = (Long) jsonObject.get(ID);
-    String driverVersion = (String) jsonObject.get(DRIVER_VERSION);
-    List<MConfig> driverConfig = restoreConfigList((JSONArray) jsonObject.get(DRIVER_CONFIG));
+    String driverVersion = (String) jsonObject.get(CONFIGURABLE_VERSION);
+    List<MConfig> driverConfig = restoreConfigList((JSONArray) jsonObject.get(DRIVER_JOB_CONFIG_VALUES));
     driver = new MDriver(new MDriverConfig(driverConfig), driverVersion);
     driver.setPersistenceId(id);
-    bundle = restoreResourceBundle((JSONObject) jsonObject.get(CONFIGS));
+    driverConfigBundle = restoreConfigParamBundle((JSONObject) jsonObject.get(ALL_CONFIGS));
   }
 }

@@ -46,7 +46,7 @@ public class TestMConfigList {
     inputs.add(enumInput);
     configs.add(new MConfig("Config2", inputs));
 
-    MConfigList config = new MConfigList(configs);
+    MConfigList config = new MConfigList(configs, MConfigType.JOB);
     assertEquals(intInput, config.getIntegerInput("Config1.A"));
     assertEquals(mapInput, config.getMapInput("Config1.B"));
     assertEquals(stringInput, config.getStringInput("Config2.C"));

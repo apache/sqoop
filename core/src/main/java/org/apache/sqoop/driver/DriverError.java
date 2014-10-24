@@ -24,8 +24,6 @@ import org.apache.sqoop.common.ErrorCode;
  */
 public enum DriverError implements ErrorCode {
 
-  DRIVER_0000("Metadata are not registered in repository"),
-
   DRIVER_0001("Invalid submission engine"),
 
   DRIVER_0002("Given job is already running"),
@@ -44,9 +42,9 @@ public enum DriverError implements ErrorCode {
 
   DRIVER_0009("Job has been disabled. Cannot submit this job."),
 
-  DRIVER_0010("Connection for this job has been disabled. Cannot submit this job."),
+  DRIVER_0010("Link for this job has been disabled. Cannot submit this job."),
 
-  DRIVER_0011("Connector does not support direction. Cannot submit this job."),
+  DRIVER_0011("Connector does not support specified direction. Cannot submit this job."),
 
   ;
 

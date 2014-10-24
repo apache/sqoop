@@ -31,7 +31,6 @@ import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.json.util.ConfigSerialization;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
@@ -250,7 +249,7 @@ public class JobRequestHandler implements RequestHandler {
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    if (sjid.equals(ConfigSerialization.ALL)) {
+    if (sjid.equals(JsonBean.ALL)) {
 
       List<MJob> jobs = repository.findJobs();
       bean = new JobBean(jobs);
@@ -275,9 +274,8 @@ public class JobRequestHandler implements RequestHandler {
         ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
     }
 
-    // Sent framework resource bundle in all cases
+    // set driver config bundle
     bean.setDriverConfigBundle(Driver.getInstance().getBundle(locale));
-
     return bean;
   }
 
@@ -288,7 +286,6 @@ public class JobRequestHandler implements RequestHandler {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
     repository.enableJob(xid, enabled);
-
     return JsonBean.EMPTY_BEAN;
   }
 }

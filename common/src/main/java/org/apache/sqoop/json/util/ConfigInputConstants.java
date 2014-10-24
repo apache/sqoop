@@ -15,35 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.utils;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.ResourceBundle;
+package org.apache.sqoop.json.util;
 
 /**
- * Wrapper class to hold the resource bundle key-value pairs in a collections map object
+ * Constants related to the configs
  */
-public class MapResourceBundle extends ResourceBundle {
+public class ConfigInputConstants {
 
-  private Map<String, Object> bundle;
+  public static final String CONFIG_ID = "id";
+  public static final String INPUT_ID = "id";
+  public static final String CONFIG_NAME = "name";
+  public static final String CONFIG_TYPE = "type";
+  public static final String CONFIG_INPUTS = "inputs";
+  public static final String CONFIG_INPUT_NAME = "name";
+  public static final String CONFIG_INPUT_TYPE = "type";
+  public static final String CONFIG_INPUT_SENSITIVE = "sensitive";
+  public static final String CONFIG_INPUT_SIZE = "size";
+  public static final String CONFIG_INPUT_VALUE = "value";
+  public static final String CONFIG_INPUT_VALUES = "values";
 
-  public MapResourceBundle(Map<String, Object> bundle) {
-    this.bundle = bundle;
-  }
+  private ConfigInputConstants() {
 
-  @Override
-  protected Object handleGetObject(String key) {
-    if(!bundle.containsKey(key)) {
-      return null;
-    }
-
-    return bundle.get(key);
-  }
-
-  @Override
-  public Enumeration<String> getKeys() {
-    return Collections.enumeration(bundle.keySet());
   }
 }

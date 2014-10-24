@@ -132,18 +132,18 @@ public class Driver implements Reconfigurable {
   }
 
   public synchronized void initialize(boolean autoUpgrade) {
-    LOG.trace("Begin Driver Config initialization");
+    LOG.trace("Begin Driver initialization");
 
-    // Register driver config in repository
+    // Register driver in repository
     mDriver = RepositoryManager.getInstance().getRepository().registerDriver(mDriver, autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
-    LOG.info("Driver Config initialized: OK");
+    LOG.info("Driver initialized: OK");
   }
 
   public  synchronized void destroy() {
-    LOG.trace("Begin Driver Config destroy");
+    LOG.trace("Begin Driver destroy");
   }
 
   public Validator getValidator() {

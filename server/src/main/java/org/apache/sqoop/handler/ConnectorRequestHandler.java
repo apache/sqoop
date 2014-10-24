@@ -17,17 +17,6 @@
  */
 package org.apache.sqoop.handler;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.audit.AuditLoggerManager;
-import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.server.RequestContext;
-import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.server.common.ServerError;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,66 +24,68 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-/**
- * Connector request handler is supporting following resources:
- *
- * GET /v1/connector/:cid
- * Return details about one particular connector with id :cid or about all of
- * them if :cid equals to "all".
- *
- * Planned resources:
- *
- * GET /v1/connector
- * Get brief list of all connectors present in the system. This resource is not
- * yet implemented.
- *
- */
+import org.apache.log4j.Logger;
+import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.json.ConnectorsBean;
+import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.common.ServerError;
+
 public class ConnectorRequestHandler implements RequestHandler {
 
-  private static final Logger LOG =
-      Logger.getLogger(ConnectorRequestHandler.class);
+  private static final Logger LOG = Logger.getLogger(ConnectorRequestHandler.class);
+
+  private static final String CONNECTORS_PATH = "connectors";
 
   public ConnectorRequestHandler() {
     LOG.info("ConnectorRequestHandler initialized");
   }
 
-
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
     List<MConnector> connectors;
-    Map<Long, ResourceBundle> bundles;
+    Map<Long, ResourceBundle> configParamBundles;
     Locale locale = ctx.getAcceptLanguageHeader();
+    String cIdentifier = ctx.getLastURLElement();
 
-    String cid = ctx.getLastURLElement();
+    LOG.info("ConnectorRequestHandler handles cid: " + cIdentifier);
 
-    LOG.info("ConnectorRequestHandler handles cid: " + cid);
-    if (cid.equals("all")) {
-      // display all connectors
+    if (ctx.getPath().contains(CONNECTORS_PATH) || cIdentifier.equals("all")) {
       connectors = ConnectorManager.getInstance().getConnectorConfigurables();
-      bundles = ConnectorManager.getInstance().getResourceBundles(locale);
+      configParamBundles = ConnectorManager.getInstance().getResourceBundles(locale);
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "connector", "all");
+      return new ConnectorsBean(connectors, configParamBundles);
 
-      AuditLoggerManager.getInstance()
-          .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-          "get", "connector", "all");
     } else {
-      Long id = Long.parseLong(cid);
-
-      // Check that user is not asking for non existing connector id
-      if(!ConnectorManager.getInstance().getConnectorIds().contains(id)) {
-        throw new SqoopException(ServerError.SERVER_0004, "Invalid id " + id);
+      // NOTE: we now support using unique name as well as the connector id
+      boolean cIdNameIdentfierUsed = true;
+      Long cId = ConnectorManager.getInstance().getConnectorId(cIdentifier);
+      if (cId == null) {
+        // support for cId in the query
+        cIdNameIdentfierUsed = false;
+        cId = Long.parseLong(cIdentifier);
+      }
+      // Check that user is not asking for non existing connector id or non
+      // existing unique connector name
+      if (!cIdNameIdentfierUsed && !ConnectorManager.getInstance().getConnectorIds().contains(cId)) {
+        throw new SqoopException(ServerError.SERVER_0004, "Invalid connector id " + cId);
       }
 
       connectors = new LinkedList<MConnector>();
-      bundles = new HashMap<Long, ResourceBundle>();
+      configParamBundles = new HashMap<Long, ResourceBundle>();
 
-      connectors.add(ConnectorManager.getInstance().getConnectorConfigurable(id));
-      bundles.put(id, ConnectorManager.getInstance().getResourceBundle(id, locale));
+      connectors.add(ConnectorManager.getInstance().getConnectorConfigurable(cId));
+      configParamBundles.put(cId, ConnectorManager.getInstance().getResourceBundle(cId, locale));
 
-      AuditLoggerManager.getInstance()
-          .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-          "get", "connector", String.valueOf(id));
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
+      return new ConnectorBean(connectors, configParamBundles);
     }
-
-    return new ConnectorBean(connectors, bundles);
   }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 public class MLinkConfig extends MConfigList {
 
   public MLinkConfig(List<MConfig> configs) {
-    super(configs);
+    super(configs, MConfigType.LINK);
   }
 
   @Override

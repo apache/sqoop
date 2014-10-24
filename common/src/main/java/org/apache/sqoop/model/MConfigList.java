@@ -28,9 +28,11 @@ import java.util.List;
 public class MConfigList implements MClonable {
 
   private final List<MConfig> configObjects;
+  private final MConfigType type;
 
-  public MConfigList(List<MConfig> configObjects) {
+  public MConfigList(List<MConfig> configObjects, MConfigType type) {
     this.configObjects = configObjects;
+    this.type = type;
   }
 
   public List<MConfig> getConfigs() {
@@ -38,18 +40,21 @@ public class MConfigList implements MClonable {
   }
 
   public MConfig getConfig(String configName) {
-    for(MConfig config: configObjects) {
-      if(configName.equals(config.getName())) {
+    for (MConfig config : configObjects) {
+      if (configName.equals(config.getName())) {
         return config;
       }
     }
-
     throw new SqoopException(ModelError.MODEL_010, "config name: " + configName);
   }
 
+  public MConfigType getType() {
+    return type;
+  }
+
   public MInput getInput(String name) {
-    String []parts = name.split("\\.");
-    if(parts.length != 2) {
+    String[] parts = name.split("\\.");
+    if (parts.length != 2) {
       throw new SqoopException(ModelError.MODEL_009, name);
     }
 
@@ -57,68 +62,73 @@ public class MConfigList implements MClonable {
   }
 
   public MStringInput getStringInput(String name) {
-    return (MStringInput)getInput(name);
+    return (MStringInput) getInput(name);
   }
 
   public MEnumInput getEnumInput(String name) {
-    return (MEnumInput)getInput(name);
+    return (MEnumInput) getInput(name);
   }
 
   public MIntegerInput getIntegerInput(String name) {
-    return (MIntegerInput)getInput(name);
+    return (MIntegerInput) getInput(name);
   }
 
   public MMapInput getMapInput(String name) {
-    return (MMapInput)getInput(name);
+    return (MMapInput) getInput(name);
   }
 
   public MBooleanInput getBooleanInput(String name) {
-    return (MBooleanInput)getInput(name);
+    return (MBooleanInput) getInput(name);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof MConfigList)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MConfigList)) {
+      return false;
+    }
 
     MConfigList mConfigList = (MConfigList) o;
-
-    if (!configObjects.equals(mConfigList.configObjects)) return false;
-
+    if (!configObjects.equals(mConfigList.configObjects) || !type.equals(mConfigList.type)) {
+      return false;
+    }
     return true;
   }
 
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    for(MConfig config : configObjects) {
+    result = 31 * result + type.hashCode();
+    for (MConfig config : configObjects) {
       result = 31 * result + config.hashCode();
     }
-
     return result;
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Configs: ");
-    for(MConfig config : configObjects) {
+    for (MConfig config : configObjects) {
       sb.append(config.toString());
     }
+    sb.append("Type: " + type);
     return sb.toString();
   }
 
   @Override
   public MConfigList clone(boolean cloneWithValue) {
     List<MConfig> copyConfigs = null;
-    if(this.getConfigs() != null) {
+    if (this.getConfigs() != null) {
       copyConfigs = new ArrayList<MConfig>();
-      for(MConfig itr : this.getConfigs()) {
+      for (MConfig itr : this.getConfigs()) {
         MConfig newConfig = itr.clone(cloneWithValue);
         newConfig.setPersistenceId(itr.getPersistenceId());
         copyConfigs.add(newConfig);
       }
     }
-    MConfigList copyConfigList = new MConfigList(copyConfigs);
+    MConfigList copyConfigList = new MConfigList(copyConfigs, type);
     return copyConfigList;
   }
 }

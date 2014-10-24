@@ -18,16 +18,16 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.json.ConnectorsBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- * Provide Read semantics over RESTfull HTTP API for connectors. Only read
- * is supported as creation, update and delete might be done only directly on
+ * Provide Read semantics over RESTfull HTTP API for connectors. Only read is
+ * supported as creation, update and delete might be done only directly on
  * server side.
  */
-public class ConnectorResourceRequest extends ResourceRequest
-{
+public class ConnectorResourceRequest extends ResourceRequest {
   public static final String RESOURCE = "v1/connector/";
 
   public ConnectorBean read(String serverUrl, Long cid) {
@@ -37,9 +37,13 @@ public class ConnectorResourceRequest extends ResourceRequest
     } else {
       response = super.get(serverUrl + RESOURCE + cid);
     }
-    JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
-    ConnectorBean connectorBean = new ConnectorBean();
-    connectorBean.restore(jsonObject);
-    return connectorBean;
+    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    // defaults to all
+    ConnectorBean bean = new ConnectorsBean();
+    if (cid != null) {
+      bean = new ConnectorBean();
+    }
+    bean.restore(jsonObject);
+    return bean;
   }
 }

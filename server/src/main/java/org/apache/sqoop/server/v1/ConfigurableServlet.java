@@ -18,34 +18,40 @@
 package org.apache.sqoop.server.v1;
 
 import org.apache.sqoop.handler.ConnectorRequestHandler;
+import org.apache.sqoop.handler.DriverRequestHandler;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
-
 /**
- * Connector request handler is supporting following resources:
- *
- * GET v1/connector/all (remains for backward compatibility)
- *  Return all connectors registered in the sqoop system with their corresponding config params
- * GET /v1/connector/{cname}
- *  Return details about one particular connector with name {cname} with its config params
- * GET /v1/connector/{cid}
- *  Return details about one particular connector with id {cid} with its config params
- *
+ * Displays a given configurable registered in sqoop
+ * GET v1/configurable/connector/{cname}
+ *  Return a registered connector with  given name
+ * GET v1/configurable/connector/{cid}
+ *  Return a registered connector with given id
+ * GET v1/configurable/driver
+ *  Return the only driver registered in sqoop
  */
 @SuppressWarnings("serial")
-public class ConnectorServlet extends SqoopProtocolServlet {
+public class ConfigurableServlet extends SqoopProtocolServlet {
 
-  private RequestHandler connectorRequestHandler;
+  private RequestHandler configurableRequestHandler;
+  private static String CONNECTOR_CONFIGURABLE = "connector";
+  private static String DRIVER_CONFIGURABLE = "connector";
 
-  public ConnectorServlet() {
-    connectorRequestHandler = new ConnectorRequestHandler();
+  public ConfigurableServlet() {
+    // be default
+    configurableRequestHandler = new DriverRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return connectorRequestHandler.handleEvent(ctx);
+    if (ctx.getPath().contains(CONNECTOR_CONFIGURABLE)) {
+      configurableRequestHandler = new ConnectorRequestHandler();
+    } else if (ctx.getPath().contains(DRIVER_CONFIGURABLE)) {
+      configurableRequestHandler = new DriverRequestHandler();
+    }
+    return configurableRequestHandler.handleEvent(ctx);
   }
 }

@@ -17,17 +17,10 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.util.ConfigSerialization.CREATION_DATE;
-import static org.apache.sqoop.json.util.ConfigSerialization.CREATION_USER;
-import static org.apache.sqoop.json.util.ConfigSerialization.ENABLED;
-import static org.apache.sqoop.json.util.ConfigSerialization.UPDATE_DATE;
-import static org.apache.sqoop.json.util.ConfigSerialization.UPDATE_USER;
-import static org.apache.sqoop.json.util.ConfigSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigSerialization.restoreConfigList;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.CONNECTOR_CONFIGS;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.DRIVER_CONFIGS;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.extractResourceBundle;
-import static org.apache.sqoop.json.util.ResourceBundleSerialization.restoreResourceBundle;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
+import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,11 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
@@ -52,16 +43,13 @@ import org.json.simple.JSONObject;
  */
 public class JobBean implements JsonBean {
 
-  private static final String ALL = "all";
-  private static final String ID = "id";
-  private static final String NAME = "name";
-  private static final String FROM_LINK_ID = "from-link-id";
-  private static final String TO_LINK_ID = "to-link-id";
-  private static final String FROM_CONNECTOR_ID = "from-connector-id";
-  private static final String TO_CONNECTOR_ID = "to-connector-id";
-  private static final String FROM_CONFIG = "from-config";
-  private static final String TO_CONFIG = "to-config";
-  private static final String DRIVER_CONFIG = "driver-config";
+  static final String FROM_LINK_ID = "from-link-id";
+  static final String TO_LINK_ID = "to-link-id";
+  static final String FROM_CONNECTOR_ID = "from-connector-id";
+  static final String TO_CONNECTOR_ID = "to-connector-id";
+  static final String FROM_CONFIG = "from-config";
+  static final String TO_CONFIG = "to-config";
+  static final String DRIVER_CONFIG = "driver-config";
 
   // Required
   private List<MJob> jobs;
@@ -133,36 +121,22 @@ public class JobBean implements JsonBean {
       object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
       object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
       // job configs
-      object.put(FROM_CONFIG, extractConfigList(job
-          .getJobConfig(Direction.FROM).getConfigs(), skipSensitive));
-      object.put(TO_CONFIG,
-          extractConfigList(job.getJobConfig(Direction.TO).getConfigs(), skipSensitive));
-      object.put(DRIVER_CONFIG,
-          extractConfigList(job.getDriverConfig().getConfigs(), skipSensitive));
+      MFromConfig fromConfigList = job.getFromJobConfig();
+      object.put(FROM_CONFIG, extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
+      MToConfig toConfigList = job.getToJobConfig();
+      object.put(TO_CONFIG, extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
+      MDriverConfig driverConfigList = job.getDriverConfig();
+      object.put(DRIVER_CONFIG, extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(), skipSensitive));
 
     array.add(object);
     }
 
     JSONObject all = new JSONObject();
     all.put(ALL, array);
-
-    if(!connectorConfigBundles.isEmpty()) {
-      JSONObject bundles = new JSONObject();
-
-      for(Map.Entry<Long, ResourceBundle> entry : connectorConfigBundles.entrySet()) {
-        bundles.put(entry.getKey().toString(),
-                    extractResourceBundle(entry.getValue()));
-      }
-      all.put(CONNECTOR_CONFIGS, bundles);
-    }
-    if(driverConfigBundle != null) {
-      all.put(DRIVER_CONFIGS,extractResourceBundle(driverConfigBundle));
-    }
     return all;
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void restore(JSONObject jsonObject) {
     jobs = new ArrayList<MJob>();
 
@@ -202,19 +176,6 @@ public class JobBean implements JsonBean {
       job.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
 
       jobs.add(job);
-    }
-
-    if(jsonObject.containsKey(CONNECTOR_CONFIGS)) {
-      JSONObject bundles = (JSONObject) jsonObject.get(CONNECTOR_CONFIGS);
-      Set<Map.Entry<String, JSONObject>> entrySet = bundles.entrySet();
-      for (Map.Entry<String, JSONObject> entry : entrySet) {
-        connectorConfigBundles.put(Long.parseLong(entry.getKey()),
-                             restoreResourceBundle(entry.getValue()));
-      }
-    }
-    if(jsonObject.containsKey(DRIVER_CONFIGS)) {
-      driverConfigBundle = restoreResourceBundle(
-        (JSONObject) jsonObject.get(DRIVER_CONFIGS));
     }
   }
 }

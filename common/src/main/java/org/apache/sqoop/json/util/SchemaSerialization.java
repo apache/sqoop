@@ -60,6 +60,7 @@ public class SchemaSerialization {
   private static final String UNSIGNED = "unsigned";
   private static final String JDBC_TYPE = "jdbc-type";
 
+  @SuppressWarnings("unchecked")
   public static JSONObject extractSchema(Schema schema) {
     JSONObject object = new JSONObject();
     object.put(NAME, schema.getName());
@@ -67,15 +68,11 @@ public class SchemaSerialization {
     if(schema.getNote() != null) {
       object.put(NOTE, schema.getNote());
     }
-
     JSONArray columnArray = new JSONArray();
-
     for(Column column : schema.getColumns()) {
       columnArray.add(extractColumn(column));
     }
-
     object.put(COLUMNS, columnArray);
-
     return object;
   }
 
@@ -96,6 +93,7 @@ public class SchemaSerialization {
     return schema;
   }
 
+  @SuppressWarnings("unchecked")
   private static JSONObject extractColumn(Column column) {
     JSONObject ret = new JSONObject();
 

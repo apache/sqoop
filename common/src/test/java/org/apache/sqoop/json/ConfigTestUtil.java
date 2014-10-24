@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MInput;
@@ -41,11 +40,11 @@ import org.apache.sqoop.utils.MapResourceBundle;
  *
  */
 public class ConfigTestUtil {
-  public static MConnector getConnector(String name) {
-    return getConnector(name, true, true);
+  public static MConnector getConnector(Long id, String name) {
+    return getConnector(id, name, true, true);
   }
 
-  public static MConnector getConnector(String name, boolean from, boolean to) {
+  public static MConnector getConnector(Long id, String name, boolean from, boolean to) {
     MFromConfig fromConfig = null;
     MToConfig toConfig = null;
     if (from) {
@@ -54,17 +53,21 @@ public class ConfigTestUtil {
     if (to) {
       toConfig = getToConfig();
     }
-    return new MConnector(name, name + ".class", "1.0-test",
+
+    MConnector connector = new MConnector(name, name + ".class", "1.0-test",
       getLinkConfig(), fromConfig, toConfig);
+    // simulate a persistence id
+    connector.setPersistenceId(id);
+    return connector;
   }
 
 
   public static MLink getLink(String name) {
-    return new MLink(1, getConnector(name).getLinkConfig());
+    return new MLink(1, getConnector(1L, name).getLinkConfig());
   }
 
   public static MJob getJob(String name) {
-    return new MJob(1, 2, 1, 2, getConnector(name).getFromConfig(), getConnector(name)
+    return new MJob(1, 2, 1, 2, getConnector(1L, name).getFromConfig(), getConnector(1L, name)
         .getToConfig(), getDriverConfig());
   }
 

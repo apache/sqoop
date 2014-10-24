@@ -17,10 +17,19 @@
  */
 package org.apache.sqoop.json.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigType;
+import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
@@ -28,14 +37,6 @@ import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -57,7 +58,7 @@ public class TestConfigSerialization {
     config.getEnumInput("Enum").setValue("YES");
 
     // Serialize that into JSON
-    JSONObject jsonObject = ConfigSerialization.extractConfig(config, false);
+    JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB,  false);
     assertNotNull(jsonObject);
 
     // Exchange the data on string level
@@ -65,7 +66,7 @@ public class TestConfigSerialization {
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(serializedJson);
 
     // And retrieve back from JSON representation
-    MConfig retrieved = ConfigSerialization.restoreConfig(retrievedJson);
+    MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
 
     // Verify all expected values
     assertEquals("A", retrieved.getStringInput("String").getValue());
@@ -85,12 +86,12 @@ public class TestConfigSerialization {
     config.getMapInput("Map").setValue(map);
 
     // Serialize
-    JSONObject jsonObject = ConfigSerialization.extractConfig(config, false);
+    JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB, false);
     String serializedJson = jsonObject.toJSONString();
 
     // Deserialize
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(serializedJson);
-    MConfig retrieved = ConfigSerialization.restoreConfig(retrievedJson);
+    MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
     assertEquals(map, retrieved.getMapInput("Map").getValue());
   }
 
@@ -104,14 +105,14 @@ public class TestConfigSerialization {
     config.getMapInput("Map").setValue(map);
 
     // Serialize
-    JSONObject jsonObject = ConfigSerialization.extractConfig(config, false);
+    JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB, false);
     String serializedJson = jsonObject.toJSONString();
 
     // Replace map value with a fake string to force exception
     String badSerializedJson = serializedJson.replace("{\"A\":\"B\"}", "\"nonsensical string\"");
     System.out.println(badSerializedJson);
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(badSerializedJson);
-    ConfigSerialization.restoreConfig(retrievedJson);
+    ConfigInputSerialization.restoreConfig(retrievedJson);
   }
 
   protected MConfig getMapConfig() {

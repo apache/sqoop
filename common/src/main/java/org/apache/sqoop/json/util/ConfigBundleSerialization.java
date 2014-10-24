@@ -31,23 +31,20 @@ import java.util.ResourceBundle;
 /**
  *
  */
-public final class ResourceBundleSerialization {
-
-  public static final String CONFIGS = "configs";
-  public static final String CONNECTOR_CONFIGS = "connector-configs";
-  public static final String DRIVER_CONFIGS = "driver-configs";
+public final class ConfigBundleSerialization {
 
   @SuppressWarnings("unchecked")
-  public static JSONArray extractResourceBundles(List<ResourceBundle> bundles) {
+  public static JSONArray extractConfigParamBundles(List<ResourceBundle> bundles) {
     JSONArray array = new JSONArray();
     for (ResourceBundle bundle : bundles) {
-      array.add(extractResourceBundle(bundle));
+      array.add(extractConfigParamBundle(bundle));
     }
     return array;
   }
 
   @SuppressWarnings("unchecked")
-  public static JSONObject extractResourceBundle(ResourceBundle bundle) {
+  public static JSONObject extractConfigParamBundle(ResourceBundle bundle) {
+    // TODO:(SQOOP-1618) can we preserve the order of the config params and use jackson
     JSONObject json = new JSONObject();
     Enumeration<String> keys = bundle.getKeys();
     while(keys.hasMoreElements()) {
@@ -57,22 +54,22 @@ public final class ResourceBundleSerialization {
     return json;
   }
 
-  public static List<ResourceBundle> restoreResourceBundles(JSONArray array) {
+  public static List<ResourceBundle> restoreConfigParamBundles(JSONArray array) {
     List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
     for (Object item : array) {
-      bundles.add(restoreResourceBundle((JSONObject) item));
+      bundles.add(restoreConfigParamBundle((JSONObject) item));
     }
     return bundles;
   }
 
   @SuppressWarnings("unchecked")
-  public static ResourceBundle restoreResourceBundle(JSONObject json) {
+  public static ResourceBundle restoreConfigParamBundle(JSONObject json) {
     Map<String, Object> map = new HashMap<String, Object>();
     map.putAll(json);
     return new MapResourceBundle(map);
   }
 
-  private ResourceBundleSerialization() {
+  private ConfigBundleSerialization() {
     // Instantiation of this class is prohibited
   }
 }

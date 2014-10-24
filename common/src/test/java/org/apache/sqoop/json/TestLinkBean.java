@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
-import org.apache.sqoop.json.util.ConfigSerialization;
+import org.apache.sqoop.json.util.ConfigInputConstants;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
@@ -59,13 +59,13 @@ public class TestLinkBean {
     JSONObject json = linkBean.extract(false);
 
     // Check for sensitivity
-    JSONArray all = (JSONArray)json.get(ConfigSerialization.ALL);
+    JSONArray all = (JSONArray)json.get(JsonBean.ALL);
     JSONObject allItem = (JSONObject)all.get(0);
     JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     JSONObject connector = (JSONObject)connectors.get(0);
-    JSONArray inputs = (JSONArray)connector.get(ConfigSerialization.CONFIG_INPUTS);
+    JSONArray inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     for (Object input1 : inputs) {
-      assertTrue(((JSONObject)input1).containsKey(ConfigSerialization.CONFIG_INPUT_SENSITIVE));
+      assertTrue(((JSONObject)input1).containsKey(ConfigInputConstants.CONFIG_INPUT_SENSITIVE));
     }
 
     // "Move" it across network in text form
@@ -116,25 +116,25 @@ public class TestLinkBean {
     JSONObject jsonFiltered = bean.extract(true);
 
     // Sensitive values should exist
-    JSONArray all = (JSONArray)json.get(ConfigSerialization.ALL);
+    JSONArray all = (JSONArray)json.get(JsonBean.ALL);
     JSONObject allItem = (JSONObject)all.get(0);
     JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     JSONObject connector = (JSONObject)connectors.get(0);
-    JSONArray inputs = (JSONArray)connector.get(ConfigSerialization.CONFIG_INPUTS);
+    JSONArray inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());
     // Inputs are ordered when creating link
     JSONObject password = (JSONObject)inputs.get(2);
-    assertTrue(password.containsKey(ConfigSerialization.CONFIG_INPUT_VALUE));
+    assertTrue(password.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE));
 
     // Sensitive values should not exist
-    all = (JSONArray)jsonFiltered.get(ConfigSerialization.ALL);
+    all = (JSONArray)jsonFiltered.get(JsonBean.ALL);
     allItem = (JSONObject)all.get(0);
     connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     connector = (JSONObject)connectors.get(0);
-    inputs = (JSONArray)connector.get(ConfigSerialization.CONFIG_INPUTS);
+    inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());
     // Inputs are ordered when creating link
     password = (JSONObject)inputs.get(2);
-    assertFalse(password.containsKey(ConfigSerialization.CONFIG_INPUT_VALUE));
+    assertFalse(password.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE));
   }
 }

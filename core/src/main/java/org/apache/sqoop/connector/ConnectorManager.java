@@ -19,6 +19,7 @@ package org.apache.sqoop.connector;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -33,10 +34,10 @@ import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.repository.RepositoryTransaction;
-import org.apache.sqoop.model.MConnector;
 
 public class ConnectorManager implements Reconfigurable {
 
@@ -86,27 +87,31 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   // key: connector id, value: connector name
-  private Map<Long, String> nameMap = new HashMap<Long, String>();
+  private Map<Long, String> idToNameMap = new HashMap<Long, String>();
+  private Set<String> connectorNames = new HashSet<String>();
 
   // key: connector name, value: connector handler
-  private Map<String, ConnectorHandler> handlerMap =
-      new HashMap<String, ConnectorHandler>();
+  private Map<String, ConnectorHandler> handlerMap = new HashMap<String, ConnectorHandler>();
 
   public List<MConnector> getConnectorConfigurables() {
     List<MConnector> connectors = new LinkedList<MConnector>();
-    for(ConnectorHandler handler : handlerMap.values()) {
+    for (ConnectorHandler handler : handlerMap.values()) {
       connectors.add(handler.getConnectorConfigurable());
     }
     return connectors;
   }
 
   public Set<Long> getConnectorIds() {
-    return nameMap.keySet();
+    return idToNameMap.keySet();
+  }
+
+  public Set<String> getConnectorNames() {
+    return connectorNames;
   }
 
   public Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
     Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    for(ConnectorHandler handler : handlerMap.values()) {
+    for (ConnectorHandler handler : handlerMap.values()) {
       long id = handler.getConnectorConfigurable().getPersistenceId();
       ResourceBundle bundle = handler.getSqoopConnector().getBundle(locale);
       bundles.put(id, bundle);
@@ -115,20 +120,28 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public ResourceBundle getResourceBundle(long connectorId, Locale locale) {
-    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
     return handler.getSqoopConnector().getBundle(locale);
   }
 
   public MConnector getConnectorConfigurable(long connectorId) {
-    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
-    if(handler == null) {
+    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
+    if (handler == null) {
+      return null;
+    }
+    return handler.getConnectorConfigurable();
+  }
+
+  public MConnector getConnectorConfigurable(String connectorName) {
+    ConnectorHandler handler = handlerMap.get(connectorName);
+    if (handler == null) {
       return null;
     }
     return handler.getConnectorConfigurable();
   }
 
   public SqoopConnector getSqoopConnector(long connectorId) {
-    ConnectorHandler handler = handlerMap.get(nameMap.get(connectorId));
+    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
     return handler.getSqoopConnector();
   }
 
@@ -165,11 +178,18 @@ public class ConnectorManager implements Reconfigurable {
 
     registerConnectors(autoUpgrade);
 
-    SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
+    SqoopConfiguration.getInstance().getProvider()
+        .registerListener(new CoreConfigurationListener(this));
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connectors loaded: " + handlerMap);
     }
+  }
+
+  public synchronized Long getConnectorId(String connectorName) {
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    return repository.findConnector(connectorName) != null ? repository
+        .findConnector(connectorName).getPersistenceId() : null;
   }
 
   private synchronized void registerConnectors(boolean autoUpgrade) {
@@ -181,20 +201,17 @@ public class ConnectorManager implements Reconfigurable {
       rtx.begin();
       for (String name : handlerMap.keySet()) {
         ConnectorHandler handler = handlerMap.get(name);
-        MConnector connectorMetadata = handler.getConnectorConfigurable();
-        MConnector registeredMetadata =
-            repository.registerConnector(connectorMetadata, autoUpgrade);
-
-        // Set registered metadata instead of connector metadata as they will
-        // have filled persistent ids. We should be confident at this point that
-        // there are no differences between those two structures.
-        handler.setConnectorConfigurable(registeredMetadata);
+        MConnector newConnector = handler.getConnectorConfigurable();
+        MConnector registeredConnector = repository.registerConnector(newConnector, autoUpgrade);
+        // Set the registered connector in the database to the connector configurable instance
+        handler.setConnectorConfigurable(registeredConnector);
 
         String connectorName = handler.getUniqueName();
         if (!handler.getConnectorConfigurable().hasPersistenceId()) {
           throw new SqoopException(ConnectorError.CONN_0010, connectorName);
         }
-        nameMap.put(handler.getConnectorConfigurable().getPersistenceId(), connectorName);
+        idToNameMap.put(handler.getConnectorConfigurable().getPersistenceId(), connectorName);
+        connectorNames.add(connectorName);
         LOG.debug("Registered connector: " + handler.getConnectorConfigurable());
       }
       rtx.commit();
@@ -212,7 +229,7 @@ public class ConnectorManager implements Reconfigurable {
 
   public synchronized void destroy() {
       handlerMap = null;
-      nameMap = null;
+      idToNameMap = null;
   }
 
   @Override

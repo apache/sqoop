@@ -1,3 +1,4 @@
+package org.apache.sqoop.json;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -15,27 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.server.v1;
-
-import org.apache.sqoop.handler.DriverConfigRequestHandler;
-import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.server.RequestContext;
-import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.server.SqoopProtocolServlet;
 
 /**
- * Get driver config
+ * Marker class for the configurables supported in sqoop
  */
-@SuppressWarnings("serial")
-public class DriverConfigServlet extends SqoopProtocolServlet {
-  private RequestHandler driverConfigRequestHandler;
+public abstract class ConfigurableBean implements JsonBean {
 
-  public DriverConfigServlet() {
-    driverConfigRequestHandler = new DriverConfigRequestHandler();
-  }
-
-  @Override
-  protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return driverConfigRequestHandler.handleEvent(ctx);
-  }
 }

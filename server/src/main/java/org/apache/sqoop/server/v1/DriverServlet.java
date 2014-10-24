@@ -15,35 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.handler;
+package org.apache.sqoop.server.v1;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.audit.AuditLoggerManager;
-import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.handler.DriverRequestHandler;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.SqoopProtocolServlet;
 
 /**
- * Driver Config request handler is supporting following resources:
+ * Driver request handler is supporting following resources:
  *
+ * GET /v1/driver/
+ *  Return details about the registered driver and its configs
  */
-public class DriverConfigRequestHandler  implements RequestHandler {
+@SuppressWarnings("serial")
+public class DriverServlet extends SqoopProtocolServlet {
+  private RequestHandler driverRequestHandler;
 
-  private static final Logger LOG =
-      Logger.getLogger(DriverConfigRequestHandler.class);
-
-  public DriverConfigRequestHandler() {
-    LOG.info("DriverConfigRequestHandler initialized");
+  public DriverServlet() {
+    driverRequestHandler = new DriverRequestHandler();
   }
 
   @Override
-  public JsonBean handleEvent(RequestContext ctx) {
-    AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-        ctx.getRequest().getRemoteAddr(), "get", "driverConfig", "");
-
-    return new DriverBean(Driver.getInstance().getDriver(), Driver.getInstance()
-        .getBundle(ctx.getAcceptLanguageHeader()));
+  protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
+    return driverRequestHandler.handleEvent(ctx);
   }
 }
