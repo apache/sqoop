@@ -437,13 +437,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       renameEntitiesForConnectionAndForm(conn);
       // Change direction from VARCHAR to BIGINT + foreign key.
       updateDirections(conn, insertDirections(conn));
-
       renameConnectorToConfigurable(conn);
     }
     // Add unique constraints on job and links for version 4 onwards
     if (repositoryVersion > 3) {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME, conn);
     }
     // last step upgrade the repository version to the latest value in the code
     upgradeRepositoryVersion(conn);

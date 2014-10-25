@@ -219,8 +219,9 @@ abstract public class DerbyTestCase {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_CONSTRAINT_SQB_SQN_TO);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE);
       renameEntitiesForConnectionAndForm();
-      // add the name constraints
+      // add the name constraint for job
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME);
+      // add the name constraint for link
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME);
 
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR);
@@ -231,6 +232,8 @@ abstract public class DerbyTestCase {
         runQuery(STMT_INSERT_DIRECTION, direction.toString());
       }
       renameConnectorToConfigurable();
+      // add the name constraint for configurable
+      runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME);
     }
 
     // deprecated repository version
@@ -625,47 +628,55 @@ abstract public class DerbyTestCase {
     }
   }
 
+  /**
+   * testing job with non unique name objects into repository.
+   *
+   * @param version
+   *          system version 4
+   * @throws Exception
+   */
+  public void loadNonUniqueJobsInVersion4() throws Exception {
+    int index = 0;
+    // insert JAs
+    for (String name : new String[] { "JA", "JA", "JA", "JA" }) {
+      runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)" + " VALUES('"
+          + name + index + "', 1, 1)");
+    }
+  }
+
+  /**
+   * testing link with non unique name objects into repository.
+   *
+   * @param version
+   *          system version 4
+   * @throws Exception
+   */
+  public void loadNonUniqueLinksInVersion4() throws Exception {
+
+    // Insert two links - CA and CA
+    runInsertQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CA', 1)");
+    runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CA', 1)");
+  }
+
+  /**
+   * testing configurable with non unique name objects into repository.
+   *
+   * @param version
+   *          system version 4
+   * @throws Exception
+   */
+  public void loadNonUniqueConfigurablesInVersion4() throws Exception {
+
+    // Insert two configurable - CB and CB
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
+        + "VALUES('CB', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
+        + "VALUES('CB', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
+
+  }
+
   public void loadJobsForLatestVersion() throws Exception {
     loadJobs(DerbyRepoConstants.LATEST_DERBY_REPOSITORY_VERSION);
-  }
-
-  protected void removeDuplicateLinkNames(int version) throws Exception {
-    switch (version) {
-    case 2:
-      // nothing to do
-      break;
-    case 4:
-      Map<String, List<Long>> nameIdMap = getNameToIdListMap(getDerbyDatabaseConnection()
-          .prepareStatement("SELECT SQ_LNK_NAME, SQ_LNK_ID FROM SQOOP.SQ_LINK"));
-      for (String name : nameIdMap.keySet()) {
-        if (nameIdMap.get(name).size() > 1) {
-          for (Long id : nameIdMap.get(name)) {
-            runQuery("UPDATE SQOOP.SQ_LINK SET SQ_LNK_NAME=? WHERE SQ_LNK_ID=?", name + "-" + id,
-                id);
-          }
-        }
-      }
-      break;
-    }
-  }
-
-  protected void removeDuplicateJobNames(int version) throws Exception {
-    switch (version) {
-    case 2:
-      // nothing to do
-      break;
-    case 4:
-      Map<String, List<Long>> nameIdMap = getNameToIdListMap(getDerbyDatabaseConnection()
-          .prepareStatement("SELECT SQB_NAME, SQB_ID FROM SQOOP.SQ_JOB"));
-
-      for (String name : nameIdMap.keySet()) {
-        if (nameIdMap.get(name).size() > 1) {
-          for (Long id : nameIdMap.get(name)) {
-            runQuery("UPDATE SQOOP.SQ_JOB SET SQB_NAME=? WHERE SQB_ID=?", name + "-" + id, id);
-          }
-        }
-      }
-    }
   }
 
   /**

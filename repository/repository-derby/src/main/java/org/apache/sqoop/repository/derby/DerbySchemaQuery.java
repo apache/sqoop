@@ -1423,6 +1423,11 @@ public static final String STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION =
      STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
          + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
 
+  //add unique constraint on the configurable table
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME = "ALTER TABLE "
+      + TABLE_SQ_CONFIGURABLE + " ADD CONSTRAINT " + CONSTRAINT_SQ_CONFIGURABLE_UNIQUE + " UNIQUE ("
+      + COLUMN_SQC_NAME + ")";
+
   private DerbySchemaQuery() {
     // Disable explicit object creation
   }

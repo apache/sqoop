@@ -21,8 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.SQLIntegrityConstraintViolationException;
 
-import org.apache.sqoop.common.SqoopException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,42 +50,34 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
-  // TODO(VB): This should really test for a specific SQL exception that violates the constraints
-  @Test(expected=SqoopException.class)
-  public void testUpgradeVersion4WithLinkNameAndJobNameDuplicateFailure() throws Exception {
+  @Test(expected=SQLIntegrityConstraintViolationException.class)
+  public void testUpgradeVersion4WithNonUniqueJobNameFailure() throws Exception {
     super.createOrUpgradeSchema(4);
-    super.loadConnectorAndDriverConfig(4);
-    super.loadConnectionsOrLinks(4);
-    super.loadJobs(4);
-    // no removing of dupes for job name and link names, hence there should be a exception due to the unique name constraint
-    handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    // try loading duplicate job  names in version 4 and it should throw an exception
+    super.loadNonUniqueJobsInVersion4();
   }
-  // TODO: VB: follow up with the constraint code, which really does not test with examples that has
-  // duplicate names, the id list is always of size 1
-  //@Test
-  public void testUpgradeVersion4WithLinkNameAndJobNameWithNoDuplication() throws Exception {
+  @Test(expected=SQLIntegrityConstraintViolationException.class)
+  public void testUpgradeVersion4WithNonUniqueLinkNamesAdded() throws Exception {
     super.createOrUpgradeSchema(4);
-    super.loadConnectorAndDriverConfig(4);
-    super.loadConnectionsOrLinks(4);
-    super.loadJobs(4);
-    super.removeDuplicateLinkNames(4);
-    super.removeDuplicateJobNames(4);
-    //  removing duplicate job name and link name, hence there should be no exception with unique name constraint
-    handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    // try loading duplicate link names in version 4 and it should throw an exception
+    super.loadNonUniqueLinksInVersion4();
+  }
+
+  @Test(expected=SQLIntegrityConstraintViolationException.class)
+  public void testUpgradeVersion4WithNonUniqueConfigurableNamesAdded() throws Exception {
+    super.createOrUpgradeSchema(4);
+    // try loading duplicate configurable names in version 4 and it should throw an exception
+    super.loadNonUniqueConfigurablesInVersion4();
   }
 
   @Test
   public void testUpgradeRepoVersion2ToVersion4() throws Exception {
+    // in case of version 2 schema there is no unique job/ link constraint
     super.createOrUpgradeSchema(2);
     assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
     loadConnectorAndDriverConfig(2);
     super.loadConnectionsOrLinks(2);
     super.loadJobs(2);
-    super.removeDuplicateLinkNames(2);
-    super.removeDuplicateJobNames(2);
-    // in case of version 2 schema there is no unique job/ link constraint
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }
