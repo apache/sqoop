@@ -17,14 +17,13 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import org.apache.sqoop.connector.common.EmptyConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.schema.Schema;
 
-
-public class HdfsToInitializer extends Initializer<EmptyConfiguration, ToJobConfiguration> {
+public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
   /**
    * Initialize new submission based on given configuration properties. Any
    * needed temporary values might be saved to context object and they will be
@@ -35,13 +34,13 @@ public class HdfsToInitializer extends Initializer<EmptyConfiguration, ToJobConf
    * @param jobConfig TO job configuration object
    */
   @Override
-  public void initialize(InitializerContext context, EmptyConfiguration linkConfig,
+  public void initialize(InitializerContext context, LinkConfiguration linkConfig,
       ToJobConfiguration jobConfig) {
     // do nothing at this point
   }
 
   @Override
-  public Schema getSchema(InitializerContext context, EmptyConfiguration linkConfig,
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig,
       ToJobConfiguration jobConfig) {
     return new Schema("HDFS file");
   }

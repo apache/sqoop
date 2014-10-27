@@ -15,24 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.hdfs;
+package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
-import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.DestroyerContext;
+import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigurationClass;
 
-public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
-  /**
-   * Callback to clean up after job execution.
-   *
-   * @param context Destroyer context
-   * @param linkConfig link configuration object
-   * @param jobConfig TO job configuration object
-   */
-  @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) {
-    // do nothing at this point
+@ConfigurationClass
+public class LinkConfiguration {
+  @Config
+  public LinkConfig linkConfig;
+
+  public LinkConfiguration() {
+    linkConfig = new LinkConfig();
   }
 }

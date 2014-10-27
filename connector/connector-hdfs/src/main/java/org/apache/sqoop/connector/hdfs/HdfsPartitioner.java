@@ -40,8 +40,8 @@ import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.NodeBase;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
@@ -50,7 +50,7 @@ import org.apache.sqoop.job.etl.PartitionerContext;
  * This class derives mostly from CombineFileInputFormat of Hadoop, i.e.
  * org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat.
  */
-public class HdfsPartitioner extends Partitioner<EmptyConfiguration, FromJobConfiguration> {
+public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
 
   public static final String SPLIT_MINSIZE_PERNODE =
       "mapreduce.input.fileinputformat.split.minsize.per.node";
@@ -68,9 +68,10 @@ public class HdfsPartitioner extends Partitioner<EmptyConfiguration, FromJobConf
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context,
-      EmptyConfiguration emptyConfig, FromJobConfiguration fromJobConfig) {
+                                       LinkConfiguration linkConfiguration,
+                                       FromJobConfiguration fromJobConfig) {
 
-    Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
+    Configuration conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
 
     try {
       long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);

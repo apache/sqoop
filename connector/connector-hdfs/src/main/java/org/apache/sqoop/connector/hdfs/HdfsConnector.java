@@ -24,8 +24,8 @@ import java.util.ResourceBundle;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -75,7 +75,7 @@ public class HdfsConnector extends SqoopConnector {
   @SuppressWarnings("rawtypes")
   @Override
   public Class getLinkConfigurationClass() {
-    return EmptyConfiguration.class;
+    return LinkConfiguration.class;
   }
 
   /**

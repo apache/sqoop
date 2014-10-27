@@ -17,22 +17,27 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
-import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.DestroyerContext;
 
-public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
+/**
+ * Utilities for HDFS.
+ */
+public class HdfsUtils {
+
   /**
-   * Callback to clean up after job execution.
-   *
-   * @param context Destroyer context
-   * @param linkConfig link configuration object
-   * @param jobConfig TO job configuration object
+   * Configures the URI to connect to.
+   * @param conf Configuration object to be configured.
+   * @param linkConfiguration LinkConfiguration object that
+   *                          provides configuration.
+   * @return Configuration object.
    */
-  @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) {
-    // do nothing at this point
+  public static Configuration configureURI(Configuration conf, LinkConfiguration linkConfiguration) {
+    if (linkConfiguration.linkConfig.uri != null) {
+      conf.set("fs.default.name", linkConfiguration.linkConfig.uri);
+      conf.set("fs.defaultFS", linkConfiguration.linkConfig.uri);
+    }
+
+    return conf;
   }
 }

@@ -30,8 +30,8 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
@@ -52,7 +52,7 @@ public class TestExtractor extends TestHdfsBase {
   private ToFormat outputFileType;
   private Class<? extends CompressionCodec> compressionClass;
   private final String inputDirectory;
-  private Extractor<EmptyConfiguration, FromJobConfiguration, HdfsPartition> extractor;
+  private Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> extractor;
 
   public TestExtractor(ToFormat outputFileType,
                        Class<? extends CompressionCodec> compressionClass)
@@ -131,7 +131,7 @@ public class TestExtractor extends TestHdfsBase {
       }
     });
 
-    EmptyConfiguration emptyLinkConfig = new EmptyConfiguration();
+    LinkConfiguration emptyLinkConfig = new LinkConfiguration();
     FromJobConfiguration emptyJobConfig = new FromJobConfiguration();
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));
 

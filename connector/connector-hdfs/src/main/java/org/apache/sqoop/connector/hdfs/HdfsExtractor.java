@@ -32,8 +32,8 @@ import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -42,7 +42,7 @@ import org.apache.sqoop.job.etl.ExtractorContext;
  * Extract from HDFS.
  * Default field delimiter of a record is comma.
  */
-public class HdfsExtractor extends Extractor<EmptyConfiguration, FromJobConfiguration, HdfsPartition> {
+public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> {
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
 
@@ -51,10 +51,10 @@ public class HdfsExtractor extends Extractor<EmptyConfiguration, FromJobConfigur
   private long rowRead = 0;
 
   @Override
-  public void extract(ExtractorContext context, EmptyConfiguration linkConfig,
+  public void extract(ExtractorContext context, LinkConfiguration linkConfiguration,
       FromJobConfiguration jobConfig, HdfsPartition partition) {
 
-    conf = ((PrefixContext) context.getContext()).getConfiguration();
+    conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
     dataWriter = context.getDataWriter();
 
     try {

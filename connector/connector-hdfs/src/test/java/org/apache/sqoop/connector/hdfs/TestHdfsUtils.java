@@ -17,22 +17,28 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
-import org.apache.sqoop.job.etl.Destroyer;
-import org.apache.sqoop.job.etl.DestroyerContext;
+import org.junit.Test;
 
-public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
-  /**
-   * Callback to clean up after job execution.
-   *
-   * @param context Destroyer context
-   * @param linkConfig link configuration object
-   * @param jobConfig TO job configuration object
-   */
-  @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) {
-    // do nothing at this point
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class TestHdfsUtils {
+
+  @Test
+  public void testConfigureURI() throws Exception {
+    final String TEST_URI = "hdfs://argggg:1111";
+    LinkConfiguration linkConfiguration = new LinkConfiguration();
+    Configuration conf = new Configuration();
+
+    assertNotEquals(TEST_URI, conf.get("fs.default.name"));
+    assertNotEquals(TEST_URI, conf.get("fs.defaultFS"));
+
+    linkConfiguration.linkConfig.uri = TEST_URI;
+
+    assertEquals(conf, HdfsUtils.configureURI(conf, linkConfiguration));
+    assertEquals(TEST_URI, conf.get("fs.default.name"));
+    assertEquals(TEST_URI, conf.get("fs.defaultFS"));
   }
 }

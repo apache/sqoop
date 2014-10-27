@@ -31,8 +31,8 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.sqoop.common.PrefixContext;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
@@ -98,7 +98,7 @@ public class TestPartitioner extends TestHdfsBase {
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     PartitionerContext context = new PartitionerContext(prefixContext, 5, null);
-    EmptyConfiguration linkConf = new EmptyConfiguration();
+    LinkConfiguration linkConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 
     jobConf.fromJobConfig.inputDirectory = inputDirectory;

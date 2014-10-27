@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 
-public class HdfsFromDestroyer extends Destroyer<EmptyConfiguration, FromJobConfiguration> {
+public class HdfsFromDestroyer extends Destroyer<LinkConfiguration, FromJobConfiguration> {
   /**
    * Callback to clean up after job execution.
    *
@@ -31,7 +31,7 @@ public class HdfsFromDestroyer extends Destroyer<EmptyConfiguration, FromJobConf
    * @param jobConfig FROM job configuration object
    */
   @Override
-  public void destroy(DestroyerContext context, EmptyConfiguration linkConfig,
+  public void destroy(DestroyerContext context, LinkConfiguration linkConfig,
       FromJobConfiguration jobConfig) {
     // do nothing at this point
   }

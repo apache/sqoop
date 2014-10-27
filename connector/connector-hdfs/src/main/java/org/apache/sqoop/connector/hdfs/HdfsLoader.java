@@ -26,7 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.EmptyConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
@@ -37,22 +37,21 @@ import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.utils.ClassUtils;
 
-public class HdfsLoader extends Loader<EmptyConfiguration, ToJobConfiguration> {
+public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   /**
    * Load data to target.
    *
    * @param context Loader context object
-   * @param linkConfig       Link configuration
-   * @param toJobConfig      Job configuration
+   * @param linkConfiguration Link configuration
+   * @param toJobConfig Job configuration
    * @throws Exception
    */
   @Override
-  public void load(LoaderContext context, EmptyConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception {
+  public void load(LoaderContext context, LinkConfiguration linkConfiguration,
+                   ToJobConfiguration toJobConfig) throws Exception {
 
     DataReader reader = context.getDataReader();
-
-    Configuration conf = ((PrefixContext)context.getContext()).getConfiguration();
-
+    Configuration conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
     String directoryName = toJobConfig.toJobConfig.outputDirectory;
     String codecname = getCompressionCodecName(toJobConfig);
 
