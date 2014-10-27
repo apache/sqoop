@@ -120,9 +120,9 @@ public class RepositoryDumpTool extends ConfiguredTool {
 
   private JSONObject repoMetadata(boolean skipSensitive) {
     JSONObject metadata = new JSONObject();
-    metadata.put(JSONConstants.VERSION, VersionInfo.getVersion());
-    metadata.put(JSONConstants.REVISION, VersionInfo.getRevision());
-    metadata.put(JSONConstants.COMPILE_DATE, VersionInfo.getDate());
+    metadata.put(JSONConstants.VERSION, VersionInfo.getBuildVersion());
+    metadata.put(JSONConstants.REVISION, VersionInfo.getSourceRevision());
+    metadata.put(JSONConstants.COMPILE_DATE, VersionInfo.getBuildDate());
     metadata.put(JSONConstants.COMPILE_USER, VersionInfo.getUser());
     metadata.put(JSONConstants.INCLUDE_SENSITIVE,!skipSensitive );
 

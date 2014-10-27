@@ -220,7 +220,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
   private boolean validateMetadata(JSONObject metadata) {
     String jsonVersion = (String) metadata.get(JSONConstants.VERSION);
     Boolean includeSensitive = (Boolean) metadata.get(JSONConstants.INCLUDE_SENSITIVE);
-    String repoVersion = VersionInfo.getVersion();
+    String repoVersion = VersionInfo.getBuildVersion();
 
     if (!jsonVersion.equals(repoVersion)) {
       LOG.error("Repository version in file (" + jsonVersion

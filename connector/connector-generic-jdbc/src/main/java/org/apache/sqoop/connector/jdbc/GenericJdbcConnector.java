@@ -50,12 +50,12 @@ public class GenericJdbcConnector extends SqoopConnector {
   /**
    * {@inheritDoc}
    *
-   * As this is build-in connector it will return same version as rest of the
-   * Sqoop infrastructure.
+   * As this is built-in connector it will return same version as rest of the
+   * Sqoop code.
    */
   @Override
   public String getVersion() {
-    return VersionInfo.getVersion();
+    return VersionInfo.getBuildVersion();
   }
 
   @Override
@@ -64,11 +64,13 @@ public class GenericJdbcConnector extends SqoopConnector {
       GenericJdbcConnectorConstants.RESOURCE_BUNDLE_NAME, locale);
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Class getLinkConfigurationClass() {
     return LinkConfiguration.class;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Class getJobConfigurationClass(Direction jobType) {
     switch (jobType) {

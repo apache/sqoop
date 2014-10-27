@@ -49,13 +49,14 @@ public class HdfsConnector extends SqoopConnector {
   private static final HdfsValidator hdfsValidator = new HdfsValidator();
 
   /**
-   * Retrieve connector version.
+   * {@inheritDoc}
    *
-   * @return Version encoded as a string
+   * As this is built-in connector it will return same version as rest of the
+   * Sqoop code.
    */
   @Override
   public String getVersion() {
-    return VersionInfo.getVersion();
+    return VersionInfo.getBuildVersion();
   }
 
   /**
@@ -126,9 +127,9 @@ public class HdfsConnector extends SqoopConnector {
 
   /**
    * Returns an {@linkplain org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader} object that can upgrade the
-   * connection and job metadata.
+   * connection and job configs.
    *
-   * @return MetadataUpgrader object
+   * @return configurable upgrader object
    */
   @Override
   public ConnectorConfigurableUpgrader getConfigurableUpgrader() {

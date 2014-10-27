@@ -49,7 +49,7 @@ public class Constants {
   public static final String OPT_URL = "url";
   public static final String OPT_SERVER = "server";
   public static final String OPT_CLIENT = "client";
-  public static final String OPT_PROTOCOL = "protocol";
+  public static final String OPT_REST_API = "api";
   public static final String OPT_SYNCHRONOUS = "synchronous";
   public static final String OPT_POLL_TIMEOUT = "poll-timeout";
   public static final String OPT_DETAIL = "detail";
@@ -68,7 +68,7 @@ public class Constants {
   public static final char OPT_URL_CHAR = 'u';
   public static final char OPT_SERVER_CHAR = 's';
   public static final char OPT_CLIENT_CHAR = 'c';
-  public static final char OPT_PROTOCOL_CHAR = 'p';
+  public static final char OPT_API_CHAR = 'p';
   public static final char OPT_SYNCHRONOUS_CHAR = 's';
   public static final char OPT_POLL_TIMEOUT_CHAR = 'p';
   public static final char OPT_DETAIL_CHAR = 'd';
@@ -293,18 +293,18 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_VERSIONS =
       "show.prompt_display_all_versions";
-  public static final String RES_SHOW_PROMPT_DISPLAY_VERSION_SERVER =
+  public static final String RES_SHOW_PROMPT_DISPLAY_SERVER_VERSION =
       "show.prompt_display_version_server";
-  public static final String RES_SHOW_PROMPT_DISPLAY_VERSION_CLIENT =
+  public static final String RES_SHOW_PROMPT_DISPLAY_CLIENT_VERSION =
       "show.prompt_display_version_client";
-  public static final String RES_SHOW_PROMPT_DISPLAY_VERSION_PROTOCOL =
-      "show.prompt_display_version_protocol";
+  public static final String RES_SHOW_PROMPT_DISPLAY_REST_API_VERSION =
+      "show.prompt_display_version_api";
   public static final String RES_SHOW_VERSION_USAGE =
       "show.version_usage";
   public static final String RES_SHOW_PROMPT_VERSION_CLIENT_SERVER =
       "show.prompt_version_client_server";
-  public static final String RES_SHOW_PROMPT_VERSION_PROTOCOL =
-      "show.prompt_version_protocol";
+  public static final String RES_SHOW_PROMPT_API_VERSIONS =
+      "show.prompt_version_api";
 
   public static final String RES_PROMPT_SYNCHRONOUS =
       "start.prompt_synchronous";

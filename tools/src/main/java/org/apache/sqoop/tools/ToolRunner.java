@@ -41,9 +41,9 @@ public final class ToolRunner {
    */
   public static void main(String[] args) throws Exception {
     System.out.println("Sqoop tool executor:");
-    System.out.println("\tVersion: " + VersionInfo.getVersion());
-    System.out.println("\tRevision: " + VersionInfo.getRevision());
-    System.out.println("\tCompiled on " + VersionInfo.getDate() + " by " + VersionInfo.getUser());
+    System.out.println("\tVersion: " + VersionInfo.getBuildVersion());
+    System.out.println("\tRevision: " + VersionInfo.getSourceRevision());
+    System.out.println("\tCompiled on " + VersionInfo.getBuildDate() + " by " + VersionInfo.getUser());
 
     if(args.length < 1) {
       throw new IllegalArgumentException("Name of the tool is missing.");

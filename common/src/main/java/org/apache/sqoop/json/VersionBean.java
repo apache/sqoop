@@ -22,30 +22,30 @@ import org.json.simple.JSONObject;
 
 public class VersionBean implements JsonBean {
 
-  public static final String VERSION = "version";
-  public static final String REVISION = "revision";
-  public static final String DATE = "date";
-  public static final String USER = "user";
-  public static final String URL = "url";
-  public static final String PROTOCOLS = "protocols";
+  public static final String BUILD_VERSION = "build-version";
+  public static final String SOURCE_REVISION = "source-revision";
+  public static final String BUILD_DATE = "build-date";
+  public static final String SYSTEM_USER_NAME = "user";
+  public static final String SOURCE_URL = "source-url";
+  public static final String SUPPORTED_API_VERSIONS = "api-versions";
 
-  private String version;
-  private String revision;
-  private String date;
-  private String user;
-  private String url;
-  private String[] protocols;
+  private String buildVersion;
+  private String sourceRevision;
+  private String buildDate;
+  private String systemUser;
+  private String sourceUrl;
+  private String[] supportedRestAPIVersions;
 
   // for "extract"
-  public VersionBean(String version, String revision, String date,
-      String user, String url, String[] protocols) {
-    this.version = version;
-    this.revision = revision;
-    this.date = date;
-    this.user = user;
-    this.url = url;
-    this.protocols = new String[protocols.length];
-    System.arraycopy(protocols, 0, this.protocols, 0, protocols.length);
+  public VersionBean(String serverVersion, String sourceRevision, String buildDate,
+      String user, String sourceUrl, String[] supportedAPIVersions) {
+    this.buildVersion = serverVersion;
+    this.sourceRevision = sourceRevision;
+    this.buildDate = buildDate;
+    this.systemUser = user;
+    this.sourceUrl = sourceUrl;
+    this.supportedRestAPIVersions = new String[supportedAPIVersions.length];
+    System.arraycopy(supportedAPIVersions, 0, this.supportedRestAPIVersions, 0, supportedAPIVersions.length);
   }
 
   // for "restore"
@@ -56,56 +56,56 @@ public class VersionBean implements JsonBean {
   @Override
   public JSONObject extract(boolean skipSensitive) {
     JSONObject result = new JSONObject();
-    result.put(VERSION, version);
-    result.put(REVISION, revision);
-    result.put(DATE, date);
-    result.put(USER, user);
-    result.put(URL, url);
-    JSONArray protocolsArray = new JSONArray();
-    for (String protocol : protocols) {
-      protocolsArray.add(protocol);
+    result.put(BUILD_VERSION, buildVersion);
+    result.put(SOURCE_REVISION, sourceRevision);
+    result.put(BUILD_DATE, buildDate);
+    result.put(SYSTEM_USER_NAME, systemUser);
+    result.put(SOURCE_URL, sourceUrl);
+    JSONArray apiVersionsArray = new JSONArray();
+    for (String version : supportedRestAPIVersions) {
+      apiVersionsArray.add(version);
     }
-    result.put(PROTOCOLS, protocolsArray);
+    result.put(SUPPORTED_API_VERSIONS, apiVersionsArray);
     return result;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
-    this.version = (String)jsonObject.get(VERSION);
-    this.revision = (String)jsonObject.get(REVISION);
-    this.date = (String)jsonObject.get(DATE);
-    this.user = (String)jsonObject.get(USER);
-    this.url = (String)jsonObject.get(URL);
-    JSONArray protocolsArray = (JSONArray) jsonObject.get(PROTOCOLS);
-    int size = protocolsArray.size();
-    this.protocols = new String[size];
+    this.buildVersion = (String)jsonObject.get(BUILD_VERSION);
+    this.sourceRevision = (String)jsonObject.get(SOURCE_REVISION);
+    this.buildDate = (String)jsonObject.get(BUILD_DATE);
+    this.systemUser = (String)jsonObject.get(SYSTEM_USER_NAME);
+    this.sourceUrl = (String)jsonObject.get(SOURCE_URL);
+    JSONArray apiVersionsArray = (JSONArray) jsonObject.get(SUPPORTED_API_VERSIONS);
+    int size = apiVersionsArray.size();
+    this.supportedRestAPIVersions = new String[size];
     for (int i = 0; i<size; i++) {
-      protocols[i] = (String) protocolsArray.get(i);
+      supportedRestAPIVersions[i] = (String) apiVersionsArray.get(i);
     }
   }
 
-  public String getVersion() {
-    return this.version;
+  public String getBuildVersion() {
+    return this.buildVersion;
   }
 
-  public String getRevision() {
-    return this.revision;
+  public String getSourceRevision() {
+    return this.sourceRevision;
   }
 
-  public String getDate() {
-    return this.date;
+  public String getBuildDate() {
+    return this.buildDate;
   }
 
-  public String getUser() {
-    return this.user;
+  public String getSystemUser() {
+    return this.systemUser;
   }
 
-  public String getUrl() {
-    return this.url;
+  public String getSourceUrl() {
+    return this.sourceUrl;
   }
 
-  public String[] getProtocols() {
-    return this.protocols;
+  public String[] getSupportedAPIVersions() {
+    return this.supportedRestAPIVersions;
   }
 
 }

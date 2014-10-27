@@ -36,21 +36,19 @@ public class VersionRequestHandler implements RequestHandler {
   private static final Logger LOG =
       Logger.getLogger(VersionRequestHandler.class);
 
-  /** The API version supported by this server */
-  public static final String PROTOCOL_V1 = "1";
-
+  /** The latest API version supported by the server */
+  public static final String CURRENT_REST_API_VERSION = "v1";
 
   private final VersionBean versionBean;
 
   public VersionRequestHandler() {
-    String[] protocols = { PROTOCOL_V1 };
-    versionBean = new VersionBean(VersionInfo.getVersion(),
-        VersionInfo.getRevision(), VersionInfo.getDate(),
-        VersionInfo.getUser(), VersionInfo.getUrl(), protocols);
-
+    // this will hold all the possible API versions supported by sqoop
+    String[] apiVersions = { CURRENT_REST_API_VERSION };
+    versionBean = new VersionBean(VersionInfo.getBuildVersion(),
+        VersionInfo.getSourceRevision(), VersionInfo.getBuildDate(),
+        VersionInfo.getUser(), VersionInfo.getSourceUrl(), apiVersions);
     LOG.info("VersionRequestHandler initialized");
   }
-
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {

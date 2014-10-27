@@ -28,18 +28,18 @@ import java.lang.annotation.*;
 public @interface VersionAnnotation {
 
   /**
-   * Get the Hadoop version
+   * Get the sqoop build version
    * @return the version string (eg. "2.0.0")
    */
   String version();
 
   /**
-   * Get the username that compiled the code.
+   * Get the system username that compiled the code.
    */
   String user();
 
   /**
-   * Get the date when the code was compiled.
+   * Get the date when the code was compiled and built
    * @return the date in unix 'date' format
    */
   String date();

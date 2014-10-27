@@ -41,17 +41,17 @@ public class ShowVersionFunction extends SqoopFunction {
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_VERSION_SERVER))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_SERVER_VERSION))
         .withLongOpt(Constants.OPT_SERVER)
         .create(Constants.OPT_SERVER_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_VERSION_CLIENT))
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CLIENT_VERSION))
         .withLongOpt(Constants.OPT_CLIENT)
         .create(Constants.OPT_CLIENT_CHAR));
     this.addOption(OptionBuilder
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_VERSION_PROTOCOL))
-        .withLongOpt(Constants.OPT_PROTOCOL)
-        .create(Constants.OPT_PROTOCOL_CHAR));
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_REST_API_VERSION))
+        .withLongOpt(Constants.OPT_REST_API)
+        .create(Constants.OPT_API_CHAR));
   }
 
   @Override
@@ -65,27 +65,27 @@ public class ShowVersionFunction extends SqoopFunction {
       showVersion(true, true, true);
 
     } else {
-      boolean server = false, client = false, protocol = false;
+      boolean server = false, client = false, restApi = false;
       if (line.hasOption(Constants.OPT_SERVER)) {
         server = true;
       }
       if (line.hasOption(Constants.OPT_CLIENT)) {
         client = true;
       }
-      if (line.hasOption(Constants.OPT_PROTOCOL)) {
-        protocol = true;
+      if (line.hasOption(Constants.OPT_REST_API)) {
+        restApi = true;
       }
 
-      showVersion(server, client, protocol);
+      showVersion(server, client, restApi);
     }
 
     return Status.FINE;
   }
 
-  private void showVersion(boolean server, boolean client, boolean protocol) {
+  private void showVersion(boolean server, boolean client, boolean restApi) {
 
     // If no option has been given, print out client version as default
-    if (!client && !server && !protocol) {
+    if (!client && !server && !restApi) {
       client = true;
     }
 
@@ -93,15 +93,16 @@ public class ShowVersionFunction extends SqoopFunction {
     if (client) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,
         Constants.OPT_CLIENT,
-        VersionInfo.getVersion(),
-        VersionInfo.getRevision(),
+        // See SQOOP-1623 to understand how the client version is derived.
+        VersionInfo.getBuildVersion(),
+        VersionInfo.getSourceRevision(),
         VersionInfo.getUser(),
-        VersionInfo.getDate()
+        VersionInfo.getBuildDate()
       );
     }
 
     // If only client version was required we do not need to continue
-    if(!server && !protocol) {
+    if(!server && !restApi) {
       return;
     }
 
@@ -113,16 +114,16 @@ public class ShowVersionFunction extends SqoopFunction {
     if (server) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,
         Constants.OPT_SERVER,
-        versionBean.getVersion(),
-        versionBean.getRevision(),
-        versionBean.getUser(),
-        versionBean.getDate()
+        versionBean.getBuildVersion(),
+        versionBean.getSourceRevision(),
+        versionBean.getSystemUser(),
+        versionBean.getBuildDate()
       );
     }
 
-    if (protocol) {
-      printlnResource(Constants.RES_SHOW_PROMPT_VERSION_PROTOCOL,
-        Arrays.toString(versionBean.getProtocols())
+    if (restApi) {
+      printlnResource(Constants.RES_SHOW_PROMPT_API_VERSIONS,
+        Arrays.toString(versionBean.getSupportedAPIVersions())
       );
     }
   }

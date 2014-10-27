@@ -20,6 +20,7 @@ package org.apache.sqoop.common;
 public final class VersionInfo {
 
   private static Package myPackage;
+  // NOTE: The annotation details on generated on the fly during build step
   private static VersionAnnotation annotation;
 
   static {
@@ -32,10 +33,12 @@ public final class VersionInfo {
   }
 
   /**
-   * Get the version.
+   * Get the build version of the package
    * @return the version string, eg. "2.0.0"
+   * NOTE: Read here for some background on why we are using 2.0.0 to begin with
+   *       http://markmail.org/message/5jygqqy3oryxqdib
    */
-  public static String getVersion() {
+  public static String getBuildVersion() {
     return annotation != null ? annotation.version() : "Unknown";
   }
 
@@ -43,15 +46,15 @@ public final class VersionInfo {
    * Get the subversion revision number for the root directory
    * @return the revision number, eg. "451451"
    */
-  public static String getRevision() {
+  public static String getSourceRevision() {
     return annotation != null ? annotation.revision() : "Unknown";
   }
 
   /**
-   * The date that the code was compiled.
+   * The date that the code was compiled and built
    * @return the compilation date in unix date format
    */
-  public static String getDate() {
+  public static String getBuildDate() {
     return annotation != null ? annotation.date() : "Unknown";
   }
 
@@ -67,7 +70,7 @@ public final class VersionInfo {
    * Get the subversion URL for the root directory.
    * @return the url
    */
-  public static String getUrl() {
+  public static String getSourceUrl() {
     return annotation != null ? annotation.url() : "Unknown";
   }
 

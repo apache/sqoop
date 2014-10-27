@@ -35,11 +35,11 @@ public class VersionTest extends TomcatTestCase {
     VersionResourceRequest versionRequest = new VersionResourceRequest();
     VersionBean versionBean = versionRequest.read(getServerUrl());
 
-    assertEquals(versionBean.getVersion(), VersionInfo.getVersion());
-    assertEquals(versionBean.getDate(), VersionInfo.getDate());
-    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
-    assertEquals(versionBean.getUser(), VersionInfo.getUser());
-    assertEquals(versionBean.getRevision(), VersionInfo.getRevision());
+    assertEquals(versionBean.getBuildVersion(), VersionInfo.getBuildVersion());
+    assertEquals(versionBean.getBuildDate(), VersionInfo.getBuildDate());
+    assertEquals(versionBean.getSourceRevision(), VersionInfo.getSourceRevision());
+    assertEquals(versionBean.getSystemUser(), VersionInfo.getUser());
+    assertEquals(versionBean.getSourceRevision(), VersionInfo.getSourceRevision());
   }
 
 }
