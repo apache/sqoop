@@ -255,23 +255,33 @@ public class JobRequestHandler implements RequestHandler {
       bean = new JobBean(jobs);
 
       // Add associated resources into the bean
-      // @TODO(Abe): From/To.
       for( MJob job : jobs) {
-        long connectorId = job.getConnectorId(Direction.FROM);
-        if(!bean.hasConnectorConfigBundle(connectorId)) {
-          bean.addConnectorConfigBundle(connectorId,
-            ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
+        long fromConnectorId = job.getConnectorId(Direction.FROM);
+        long toConnectorId = job.getConnectorId(Direction.TO);
+        if(!bean.hasConnectorConfigBundle(fromConnectorId)) {
+          bean.addConnectorConfigBundle(fromConnectorId,
+            ConnectorManager.getInstance().getResourceBundle(fromConnectorId, locale));
+        }
+        if(!bean.hasConnectorConfigBundle(toConnectorId)) {
+          bean.addConnectorConfigBundle(toConnectorId,
+              ConnectorManager.getInstance().getResourceBundle(toConnectorId, locale));
         }
       }
     } else {
       long jid = Long.valueOf(sjid);
 
       MJob job = repository.findJob(jid);
-      // @TODO(Abe): From/To
-      long connectorId = job.getConnectorId(Direction.FROM);
+      long fromConnectorId = job.getConnectorId(Direction.FROM);
+      long toConnectorId = job.getConnectorId(Direction.TO);
       bean = new JobBean(job);
-      bean.addConnectorConfigBundle(connectorId,
-        ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
+      if(!bean.hasConnectorConfigBundle(fromConnectorId)) {
+        bean.addConnectorConfigBundle(fromConnectorId,
+            ConnectorManager.getInstance().getResourceBundle(fromConnectorId, locale));
+      }
+      if(!bean.hasConnectorConfigBundle(toConnectorId)) {
+        bean.addConnectorConfigBundle(toConnectorId,
+            ConnectorManager.getInstance().getResourceBundle(toConnectorId, locale));
+      }
     }
 
     // set driver config bundle

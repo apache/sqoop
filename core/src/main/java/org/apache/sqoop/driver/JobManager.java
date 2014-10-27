@@ -283,7 +283,6 @@ public class JobManager implements Reconfigurable {
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
         throw new SqoopException(DriverError.DRIVER_0002, "Job with id " + jobId);
       }
-      // TODO(Abe): Call multiple destroyers.
       // TODO(jarcec): We might need to catch all exceptions here to ensure
       // that Destroyer will be executed in all cases.
       // NOTE: the following is a blocking call
@@ -514,7 +513,6 @@ public class JobManager implements Reconfigurable {
           "Can't create toDestroyer instance: " + toDestroyerClass.getName());
     }
 
-    // TODO(Abe): Update context to manage multiple connectors. As well as summary.
     DestroyerContext fromDestroyerContext = new DestroyerContext(
       request.getConnectorContext(Direction.FROM), false, request.getSummary()
         .getFromSchema());

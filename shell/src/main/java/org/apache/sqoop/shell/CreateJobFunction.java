@@ -73,7 +73,6 @@ public class CreateJobFunction extends  SqoopFunction {
     ConsoleReader reader = new ConsoleReader();
     MJob job = client.createJob(fromLinkId, toLinkId);
 
-    // @TODO(Abe): From/To.
     ResourceBundle fromConfigBundle = client.getConnectorConfigBundle(
         job.getConnectorId(Direction.FROM));
     ResourceBundle toConfigBundle = client.getConnectorConfigBundle(

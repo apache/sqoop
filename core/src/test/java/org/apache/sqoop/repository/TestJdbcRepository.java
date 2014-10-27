@@ -273,7 +273,6 @@ public class TestJdbcRepository {
     upgraderOrder.verify(connectorUpgraderMock, times(1)).upgradeToJobConfig(any(MToConfig.class), any(MToConfig.class));
     upgraderOrder.verifyNoMoreInteractions();
     validatorOrder.verify(validatorMock, times(2)).validateConfigForLink(anyObject());
-    // @TODO(Abe): Re-enable job validation?
     validatorOrder.verify(validatorMock, times(0)).validateConfigForJob(anyObject());
     validatorOrder.verifyNoMoreInteractions();
   }

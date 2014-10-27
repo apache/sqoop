@@ -210,7 +210,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       MRConfigurationUtils.setConnectorJobConfig(Direction.TO, job, request.getJobConfig(Direction.TO));
 
       MRConfigurationUtils.setDriverConfig(job, request.getDriverConfig());
-      // @TODO(Abe): Persist TO schema.
       MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, request.getSummary().getFromSchema());
       MRConfigurationUtils.setConnectorSchema(Direction.TO, job, request.getSummary().getToSchema());
 
