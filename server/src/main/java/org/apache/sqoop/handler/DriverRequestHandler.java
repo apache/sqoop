@@ -19,11 +19,14 @@ package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.RequestContext.Method;
+import org.apache.sqoop.server.common.ServerError;
 
 public class DriverRequestHandler implements RequestHandler {
 
@@ -36,10 +39,15 @@ public class DriverRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    // driver only support GET requests
+    if (ctx.getMethod() != Method.GET) {
+      throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for driver:"
+          + ctx.getMethod());
+    }
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "get", "driver", "");
 
-    return new DriverBean(Driver.getInstance().getDriver(), Driver.getInstance()
-        .getBundle(ctx.getAcceptLanguageHeader()));
+    return new DriverBean(Driver.getInstance().getDriver(), Driver.getInstance().getBundle(
+        ctx.getAcceptLanguageHeader()));
   }
 }

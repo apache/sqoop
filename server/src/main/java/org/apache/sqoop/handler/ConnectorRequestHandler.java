@@ -33,6 +33,7 @@ import org.apache.sqoop.json.ConnectorsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 
@@ -48,6 +49,12 @@ public class ConnectorRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    // connector only support GET requests
+    if (ctx.getMethod() != Method.GET) {
+      throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for connector:"
+          + ctx.getMethod());
+    }
+
     List<MConnector> connectors;
     Map<Long, ResourceBundle> configParamBundles;
     Locale locale = ctx.getAcceptLanguageHeader();
@@ -59,7 +66,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       connectors = ConnectorManager.getInstance().getConnectorConfigurables();
       configParamBundles = ConnectorManager.getInstance().getResourceBundles(locale);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "connector", "all");
+          ctx.getRequest().getRemoteAddr(), "get", "connectors", "all");
       return new ConnectorsBean(connectors, configParamBundles);
 
     } else {

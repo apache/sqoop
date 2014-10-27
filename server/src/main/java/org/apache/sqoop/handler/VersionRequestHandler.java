@@ -18,13 +18,15 @@
 package org.apache.sqoop.handler;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
-
+import org.apache.sqoop.server.common.ServerError;
 /**
  * Version request handler is supporting following resources:
  *
@@ -52,6 +54,11 @@ public class VersionRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    // version only support GET requests
+    if (ctx.getMethod() != Method.GET) {
+      throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for version:"
+          + ctx.getMethod());
+    }
     AuditLoggerManager.getInstance()
         .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
         "show", "version", "");
