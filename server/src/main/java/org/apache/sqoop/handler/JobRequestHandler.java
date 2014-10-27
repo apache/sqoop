@@ -191,27 +191,24 @@ public class JobRequestHandler implements RequestHandler {
           + " does not support TO direction.");
     }
 
-    // We need translate configs
-    Object fromConfigObject = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
-    Object toConfigObject = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
+    // Validate user supplied data
+    ConfigValidationResult fromConfigValidator = ConfigUtils.validateConfigs(
+      job.getJobConfig(Direction.FROM).getConfigs(),
+      fromConnector.getJobConfigurationClass(Direction.FROM)
+    );
+    ConfigValidationResult toConfigValidator = ConfigUtils.validateConfigs(
+      job.getJobConfig(Direction.TO).getConfigs(),
+      toConnector.getJobConfigurationClass(Direction.TO)
+    );
+    ConfigValidationResult driverConfigValidator = ConfigUtils.validateConfigs(
+      job.getDriverConfig().getConfigs(),
+      Driver.getInstance().getDriverJobConfigurationClass()
+    );
 
-    Object driverConfigObject = ClassUtils.instantiate(Driver.getInstance().getDriverJobConfigurationClass());
-
-    ConfigUtils.fromConfigs(job.getJobConfig(Direction.FROM).getConfigs(), fromConfigObject);
-    ConfigUtils.fromConfigs(job.getJobConfig(Direction.TO).getConfigs(), toConfigObject);
-    ConfigUtils.fromConfigs(job.getDriverConfig().getConfigs(), driverConfigObject);
-
-    // Validate all configs
-    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
-    ConfigValidationResult fromConfigvalidator = validationRunner.validate(fromConfigObject);
-    ConfigValidationResult toConfigValidator = validationRunner.validate(toConfigObject);
-    ConfigValidationResult driverConfigValidator = validationRunner.validate(driverConfigObject);
-
-
-    Status finalStatus = Status.getWorstStatus(fromConfigvalidator.getStatus(), toConfigValidator.getStatus(), driverConfigValidator.getStatus());
+    Status finalStatus = Status.getWorstStatus(fromConfigValidator.getStatus(), toConfigValidator.getStatus(), driverConfigValidator.getStatus());
 
     // Return back validations in all cases
-    ValidationResultBean validationResultBean = new ValidationResultBean(fromConfigvalidator, toConfigValidator);
+    ValidationResultBean validationResultBean = new ValidationResultBean(fromConfigValidator, toConfigValidator);
 
     // If we're good enough let's perform the action
     if(finalStatus.canProceed()) {

@@ -168,22 +168,17 @@ public class LinkRequestHandler implements RequestHandler {
     // Responsible connector for this session
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(link.getConnectorId());
 
-    // We need translate configs
-    Object connectorLinkConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());
-
-    ConfigUtils.fromConfigs(link.getConnectorLinkConfig().getConfigs(), connectorLinkConfig);
-
-    // Validate both parts
-    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
-    ConfigValidationResult connectorLinkValidation = validationRunner.validate(connectorLinkConfig);
-
-    Status finalStatus = Status.getWorstStatus(connectorLinkValidation.getStatus());
+    // Validate user supplied data
+    ConfigValidationResult connectorLinkValidation = ConfigUtils.validateConfigs(
+      link.getConnectorLinkConfig().getConfigs(),
+      connector.getLinkConfigurationClass()
+    );
 
     // Return back validations in all cases
     ValidationResultBean outputBean = new ValidationResultBean(connectorLinkValidation);
 
     // If we're good enough let's perform the action
-    if(finalStatus.canProceed()) {
+    if(connectorLinkValidation.getStatus().canProceed()) {
       if(update) {
         AuditLoggerManager.getInstance()
             .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),

@@ -52,7 +52,9 @@ public enum ModelError implements ErrorCode {
 
   MODEL_014("Form name attribute cannot be more than 30 characters long"),
 
-  MODEL_015("Can't get value from object")
+  MODEL_015("Can't get value from object"),
+
+  MODEL_016("Can't instantiate class"),
 
   ;
 

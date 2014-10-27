@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.utils.ClassUtils;
+import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidator;
@@ -205,6 +206,38 @@ public class  ConfigUtils {
           + klass.getCanonicalName(), e);
     }
     return configField;
+  }
+
+  /**
+   * Convenience method to directly validate given model classes without the need to
+   * manually create the configuration instance.
+   *
+   * @param configs Model representation with filled values
+   * @param configClass Configuration class
+   * @return Validation result
+   */
+  public static ConfigValidationResult validateConfigs(List<MConfig> configs, Class configClass) {
+    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
+    Object configInstance = fromConfigs(configs, configClass);
+    return validationRunner.validate(configInstance);
+  }
+
+  /**
+   * Convenience method to convert given model structure into configuration object
+   * that will be created from given class.
+   *
+   * @param configs Model representation with filled values
+   * @param configClass Configuration class
+   * @return Created instance based on the class with filled values
+   */
+  public static Object fromConfigs(List<MConfig> configs, Class configClass) {
+    Object configInstance = ClassUtils.instantiate(configClass);
+    if(configInstance == null) {
+      throw new SqoopException(ModelError.MODEL_016, configClass.getCanonicalName());
+    }
+
+    fromConfigs(configs, configInstance);
+    return configInstance;
   }
 
   /**

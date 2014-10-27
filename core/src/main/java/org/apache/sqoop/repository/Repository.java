@@ -21,7 +21,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
@@ -41,9 +43,8 @@ import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
-import org.apache.sqoop.utils.ClassUtils;
-import org.apache.sqoop.validation.ConfigValidator;
-import org.apache.sqoop.validation.Validator;
+import org.apache.sqoop.validation.ConfigValidationResult;
+import org.apache.sqoop.validation.Message;
 
 
 /**
@@ -402,7 +403,6 @@ public abstract class Repository {
       SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
           newConnector.getUniqueName());
 
-      Validator connectorConfigValidator = connector.getConfigValidator();
       boolean upgradeSuccessful = true;
       // 1. Get an upgrader for the connector
       ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
@@ -430,19 +430,17 @@ public abstract class Repository {
           upgrader.upgradeLinkConfig(oldLinkConfig, newLinkConfig);
           MLink newlink = new MLink(link, newLinkConfig);
 
-          Object newConfigurationObject = ClassUtils.instantiate(connector
-              .getLinkConfigurationClass());
-          ConfigUtils.fromConfigs(newlink.getConnectorLinkConfig().getConfigs(),
-              newConfigurationObject);
           // 7. Run link config validation
-          ConfigValidator configValidator = connectorConfigValidator
-              .validateConfigForLink(newConfigurationObject);
-          if (configValidator.getStatus().canProceed()) {
+          ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+            newlink.getConnectorLinkConfig().getConfigs(),
+            connector.getLinkConfigurationClass()
+          );
+          if (validationResult.getStatus().canProceed()) {
             updateLink(newlink, tx);
           } else {
             // If any invalid links or jobs detected, throw an exception
             // and stop the bootup of Sqoop server
-            logInvalidModelObject("link", newlink, configValidator);
+            logInvalidModelObject("link", newlink, validationResult);
             upgradeSuccessful = false;
           }
         }
@@ -461,10 +459,20 @@ public abstract class Repository {
             // create a job with new FROM direction configs but old TO direction
             // configs
             MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
-            // TODO( jarcec) : will add the job config validation logic similar
-            // to the link config validation before updating job
-            updateJob(newJob, tx);
+
+            ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+              newJob.getFromJobConfig().getConfigs(),
+              connector.getJobConfigurationClass(Direction.FROM)
+            );
+
+            if(validationResult.getStatus().canProceed()) {
+              updateJob(newJob, tx);
+            } else {
+              logInvalidModelObject("job", newJob, validationResult);
+              upgradeSuccessful = false;
+            }
           }
+
           List<MConfig> toConfig = newConnector.getToConfig().clone(false).getConfigs();
           if (job.getToConnectorId() == newConnector.getPersistenceId()) {
             MToConfig oldToConfig = job.getToJobConfig();
@@ -474,9 +482,18 @@ public abstract class Repository {
             // create a job with old FROM direction configs but new TO direction
             // configs
             MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
-            // TODO( jarcec) : will add the job config validation logic similar
-            // to the link config validation before updating job
-            updateJob(newJob, tx);
+
+            ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+              newJob.getToJobConfig().getConfigs(),
+              connector.getJobConfigurationClass(Direction.TO)
+            );
+
+             if(validationResult.getStatus().canProceed()) {
+               updateJob(newJob, tx);
+             } else {
+               logInvalidModelObject("job", newJob, validationResult);
+               upgradeSuccessful = false;
+             }
           }
         }
       }
@@ -512,7 +529,6 @@ public abstract class Repository {
       DriverUpgrader upgrader = Driver.getInstance().getConfigurableUpgrader();
       //2. find all jobs in the system
       List<MJob> existingJobs = findJobs();
-      Validator validator = Driver.getInstance().getValidator();
       boolean upgradeSuccessful = true;
 
       // -- BEGIN TXN --
@@ -533,16 +549,16 @@ public abstract class Repository {
         // create a new job with old FROM and TO configs but new driver configs
         MJob newJob = new MJob(job, job.getFromJobConfig(), job.getToJobConfig(), newDriver.getDriverConfig());
 
-        Object newConfigurationObject = ClassUtils.instantiate(Driver.getInstance().getDriverJobConfigurationClass());
-        ConfigUtils.fromConfigs(newJob.getDriverConfig().getConfigs(), newConfigurationObject);
-
         // 5. validate configs
-        ConfigValidator validation = validator.validateConfigForJob(newConfigurationObject);
-        if (validation.getStatus().canProceed()) {
+        ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+          newJob.getDriverConfig().getConfigs(),
+          Driver.getInstance().getDriverJobConfigurationClass()
+        );
+        if (validationResult.getStatus().canProceed()) {
           // 6. update job
           updateJob(newJob, tx);
         } else {
-          logInvalidModelObject("job", newJob, validation);
+          logInvalidModelObject("job", newJob, validationResult);
           upgradeSuccessful = false;
         }
       }
@@ -570,11 +586,12 @@ public abstract class Repository {
     }
   }
 
-  private void logInvalidModelObject(String objectType, MPersistableEntity entity, ConfigValidator validation) {
-    LOG.error("Upgrader created invalid " + objectType + " with id" + entity.getPersistenceId());
+  private void logInvalidModelObject(String objectType, MPersistableEntity entity, ConfigValidationResult validation) {
+    LOG.error("Upgrader created invalid " + objectType + " with id " + entity.getPersistenceId());
+    LOG.error("Validation errors:");
 
-    for(Map.Entry<ConfigValidator.ConfigInput, ConfigValidator.Message> entry : validation.getMessages().entrySet()) {
-      LOG.error("\t" + entry.getKey() + ": " + entry.getValue());
+    for(Map.Entry<String, List<Message>> entry : validation.getMessages().entrySet()) {
+      LOG.error("\t" + entry.getKey() + ": " + StringUtils.join(entry.getValue(), ","));
     }
   }
 }

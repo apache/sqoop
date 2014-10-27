@@ -111,6 +111,15 @@ public class TestConfigUtils extends TestCase {
     assertEquals("value", config.aConfig.a1);
   }
 
+  public void testFromConfigWithClass() {
+    List<MConfig> configs = getConfigs();
+
+    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("value");
+
+    TestConfiguration config = (TestConfiguration) ConfigUtils.fromConfigs(configs, TestConfiguration.class);
+    assertEquals("value", config.aConfig.a1);
+  }
+
   public void testFillValuesObjectReuse() {
     List<MConfig> configs = getConfigs();
 
