@@ -33,7 +33,6 @@ import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.repository.RepositoryManager;
-import org.apache.sqoop.validation.Validator;
 
 /**
  * Sqoop driver that manages the job lifecyle
@@ -97,11 +96,6 @@ public class Driver implements Reconfigurable {
   private MDriver mDriver;
 
   /**
-   * Validator instance
-   */
-  private final Validator driverValidator;
-
-  /**
    * Driver config upgrader instance
    */
   private final DriverUpgrader driverUpgrader;
@@ -120,8 +114,6 @@ public class Driver implements Reconfigurable {
     List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
     mDriver = new MDriver(new MDriverConfig(driverConfig), DriverBean.CURRENT_DRIVER_VERSION);
 
-    // Build validator
-    driverValidator = new DriverConfigValidator();
     // Build upgrader
     driverUpgrader = new DriverUpgrader();
   }
@@ -144,10 +136,6 @@ public class Driver implements Reconfigurable {
 
   public  synchronized void destroy() {
     LOG.trace("Begin Driver destroy");
-  }
-
-  public Validator getValidator() {
-    return driverValidator;
   }
 
   public DriverUpgrader getConfigurableUpgrader() {
