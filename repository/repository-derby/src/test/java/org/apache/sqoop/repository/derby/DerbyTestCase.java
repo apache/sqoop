@@ -580,7 +580,7 @@ abstract public class DerbyTestCase {
         for(String type : new String[] {"IMPORT", "EXPORT"}) {
           for(String name : new String[] {"JA", "JB"} ) {
             runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_CONNECTION, SQB_TYPE)"
-                + " VALUES('" + name + "', 1, '" + type + "')");
+                + " VALUES('" + type + "_" + name + "', 1, '" + type + "')");
           }
         }
 
