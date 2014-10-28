@@ -22,8 +22,6 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Message;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.ConfigValidator;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -316,44 +314,6 @@ public class  ConfigUtils {
       }
     }
   }
-
-  /**
-   * Apply validations on the configs.
-   *
-   * @param configs Configs that should be updated
-   * @param validation Validation that we should apply
-   */
-  public static void applyValidation(List<MConfig> configs, ConfigValidator validation) {
-    Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages = validation.getMessages();
-
-    for(MConfig config : configs) {
-      applyValidation(config, messages);
-
-      for(MInput input : config.getInputs()) {
-        applyValidation(input, messages);
-      }
-    }
-  }
-
-  /**
-   * Apply validation on given validated element.
-   *
-   * @param element
-   *          Element on what we're applying the validations
-   * @param messages
-   *          Map of all validation messages
-   */
-  public static void applyValidation(MValidatedElement element, Map<ConfigValidator.ConfigInput, ConfigValidator.Message> messages) {
-    ConfigValidator.ConfigInput name = new ConfigValidator.ConfigInput(element.getName());
-
-    if(messages.containsKey(name)) {
-      ConfigValidator.Message message = messages.get(name);
-      element.addValidationMessage(new Message(message.getStatus(), message.getMessage()));
-    } else {
-      element.addValidationMessage(new Message(Status.getDefault(), null));
-    }
-  }
-
 
   /**
    * Apply given validations on list of configs.

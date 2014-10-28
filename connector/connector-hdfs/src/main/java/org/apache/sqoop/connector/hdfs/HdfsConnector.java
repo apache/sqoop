@@ -31,7 +31,6 @@ import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
-import org.apache.sqoop.validation.Validator;
 
 public class HdfsConnector extends SqoopConnector {
 
@@ -45,8 +44,6 @@ public class HdfsConnector extends SqoopConnector {
           HdfsToInitializer.class,
           HdfsLoader.class,
           HdfsToDestroyer.class);
-
-  private static final HdfsValidator hdfsValidator = new HdfsValidator();
 
   /**
    * {@inheritDoc}
@@ -111,18 +108,6 @@ public class HdfsConnector extends SqoopConnector {
   @Override
   public To getTo() {
     return TO;
-  }
-
-  /**
-   * Returns validation object that Sqoop can use to validate user
-   * supplied forms before accepting them. This object will be used both for
-   * connection and job forms.
-   *
-   * @return Validator object
-   */
-  @Override
-  public Validator getConfigValidator() {
-    return hdfsValidator;
   }
 
   /**

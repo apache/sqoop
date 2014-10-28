@@ -27,7 +27,6 @@ import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
-import org.apache.sqoop.validation.Validator;
 
 /**
  * Service provider interface for Sqoop Connectors.
@@ -78,13 +77,6 @@ public abstract class SqoopConnector {
    * @return an <tt>To</tt> that provides classes for performing export.n
    */
   public abstract To getTo();
-
-  /**
-   * Returns validation object that Sqoop can use to validate user
-   * supplied configs before accepting them. This object will be used both link and job configs
-   * @return Validator object
-   */
-  public abstract Validator getConfigValidator();
 
   /**
    * Returns an {@linkplain ConnectorConfigurableUpgrader} object that can upgrade the

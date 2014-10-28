@@ -29,11 +29,8 @@ import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.validation.Validator;
 
 public class GenericJdbcConnector extends SqoopConnector {
-
-  private static GenericJdbcValidator genericJdbcValidator = new GenericJdbcValidator();
 
   private static final From FROM = new From(
       GenericJdbcFromInitializer.class,
@@ -91,11 +88,6 @@ public class GenericJdbcConnector extends SqoopConnector {
   @Override
   public To getTo() {
     return TO;
-  }
-
-  @Override
-  public Validator getConfigValidator() {
-    return genericJdbcValidator;
   }
 
   @Override
