@@ -19,8 +19,6 @@ package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
 import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
-import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
-import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,8 +43,11 @@ public class LinkBean implements JsonBean {
 
   static final String CONNECTOR_ID = "connector-id";
   static final String LINK_CONFIG = "link-config";
+  static final String LINK = "link";
+
 
   // Required
+  // Stores all links for a given connector
   private List<MLink> links;
 
   // Optional
@@ -85,14 +86,20 @@ public class LinkBean implements JsonBean {
     return linkConfigBundles.get(id);
   }
 
-  @Override
   @SuppressWarnings("unchecked")
+  @Override
   public JSONObject extract(boolean skipSensitive) {
     JSONArray linkArray = new JSONArray();
+    extractLinks(skipSensitive, linkArray);
+    JSONObject all = new JSONObject();
+    all.put(LINK, linkArray);
+    return all;
+  }
 
+  @SuppressWarnings("unchecked")
+  protected void extractLinks(boolean skipSensitive, JSONArray linkArray) {
     for(MLink link : links) {
       JSONObject linkJsonObject = new JSONObject();
-
       linkJsonObject.put(ID, link.getPersistenceId());
       linkJsonObject.put(NAME, link.getName());
       linkJsonObject.put(ENABLED, link.getEnabled());
@@ -103,31 +110,24 @@ public class LinkBean implements JsonBean {
       linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
       linkJsonObject.put(LINK_CONFIG,
         extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
-
       linkArray.add(linkJsonObject);
     }
-
-    JSONObject all = new JSONObject();
-    all.put(ALL, linkArray);
-    return all;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
+    JSONArray array = (JSONArray) jsonObject.get(LINK);
+    restoreLinks(array);
+  }
+
+  protected void restoreLinks(JSONArray array) {
     links = new ArrayList<MLink>();
-
-    JSONArray array = (JSONArray) jsonObject.get(ALL);
-
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;
-
       long connectorId = (Long) object.get(CONNECTOR_ID);
       JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG);
-
       List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
-
       MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
-
       link.setPersistenceId((Long) object.get(ID));
       link.setName((String) object.get(NAME));
       link.setEnabled((Boolean) object.get(ENABLED));
@@ -135,7 +135,6 @@ public class LinkBean implements JsonBean {
       link.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
       link.setLastUpdateUser((String) object.get(UPDATE_USER));
       link.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
-
       links.add(link);
     }
   }

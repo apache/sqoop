@@ -18,6 +18,7 @@
 package org.apache.sqoop.handler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,6 +29,7 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
+import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MLink;
@@ -37,48 +39,19 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
-import org.apache.sqoop.utils.ClassUtils;
-import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidationResult;
-import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-/**
- * Connection request handler is supporting following resources:
- *
- * GET /v1/link/:xid
- * Return details about one particular link with id :xid or about all of
- * them if :xid equals to "all".
- *
- * POST /v1/link
- * Create new link
- *
- * PUT /v1/link/:xid
- * Update link with id :xid.
- *
- * PUT /v1/link/:xid/enable
- * Enable link with id :xid
- *
- * PUT /v1/link/:xid/disable
- * Disable link with id :xid
- *
- * DELETE /v1/link/:xid
- * Remove link with id :xid
- *
- * Planned resources:
- *
- * GET /v1/link
- * Get brief list of all links present in the system.
- *
- */
 public class LinkRequestHandler implements RequestHandler {
 
-  private static final Logger LOG =
-      Logger.getLogger(LinkRequestHandler.class);
+  private static final Logger LOG = Logger.getLogger(LinkRequestHandler.class);
 
-  private static final String ENABLE = "enable";
-  private static final String DISABLE = "disable";
+  static final String ENABLE = "enable";
+  static final String DISABLE = "disable";
+  static final String LINKS_PATH = "links";
+  static final String LINK_PATH = "link";
+  static final String CONNECTOR_NAME_QUERY_PARAM = "cname";
 
   public LinkRequestHandler() {
     LOG.info("LinkRequestHandler initialized");
@@ -87,163 +60,203 @@ public class LinkRequestHandler implements RequestHandler {
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
     switch (ctx.getMethod()) {
-      case GET:
-        return getLink(ctx);
-      case POST:
-          return createUpdateLink(ctx, false);
-      case PUT:
-        if (ctx.getLastURLElement().equals(ENABLE)) {
-          return enableLink(ctx, true);
-        } else if (ctx.getLastURLElement().equals(DISABLE)) {
-          return enableLink(ctx, false);
-        } else {
-          return createUpdateLink(ctx, true);
-        }
-      case DELETE:
-        return deleteLink(ctx);
+    case GET:
+      return getLinks(ctx);
+    case POST:
+      return createUpdateLink(ctx, true);
+    case PUT:
+      if (ctx.getLastURLElement().equals(ENABLE)) {
+        return enableLink(ctx, true);
+      } else if (ctx.getLastURLElement().equals(DISABLE)) {
+        return enableLink(ctx, false);
+      } else {
+        return createUpdateLink(ctx, false);
+      }
+    case DELETE:
+      return deleteLink(ctx);
     }
 
     return null;
   }
 
   /**
-   * Delete link from thes repository.
+   * Delete link in the repository.
    *
    * @param ctx Context object
    * @return Empty bean
    */
   private JsonBean deleteLink(RequestContext ctx) {
-    String sxid = ctx.getLastURLElement();
-    long xid = Long.valueOf(sxid);
-
-    AuditLoggerManager.getInstance()
-        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "delete", "link", sxid);
-
     Repository repository = RepositoryManager.getInstance().getRepository();
-    repository.deleteLink(xid);
+    String linkIdentifier = ctx.getLastURLElement();
+    // support linkName or linkId for the api
+    long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
 
+    AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+        ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
+
+    repository.deleteLink(linkId);
     return JsonBean.EMPTY_BEAN;
   }
 
   /**
-   * Update or create link in repository.
+   * Create or Update link in repository.
    *
    * @param ctx Context object
    * @return Validation bean object
    */
-  private JsonBean createUpdateLink(RequestContext ctx, boolean update) {
+  private JsonBean createUpdateLink(RequestContext ctx, boolean create) {
+
+    Repository repository = RepositoryManager.getInstance().getRepository();
 
     String username = ctx.getUserName();
-    LinkBean bean = new LinkBean();
+    LinkBean linkBean = new LinkBean();
     try {
-      JSONObject json =
-        (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
-
-      bean.restore(json);
+      JSONObject postData = (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
+      linkBean.restore(postData);
     } catch (IOException e) {
-      throw new SqoopException(ServerError.SERVER_0003,
-        "Can't read request content", e);
+      throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
     }
 
     // Get link object
-    List<MLink> links = bean.getLinks();
-
-    if(links.size() != 1) {
+    List<MLink> links = linkBean.getLinks();
+    if (links.size() != 1) {
       throw new SqoopException(ServerError.SERVER_0003,
-        "Expected one link but got " + links.size());
+          "Expected one link while parsing JSON request but got " + links.size());
     }
 
     MLink link = links.get(0);
-
-    // Verify that user is not trying to spoof us
-    MLinkConfig linkConfig =
-      ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorId())
-      .getLinkConfig();
-    if(!linkConfig.equals(link.getConnectorLinkConfig())) {
-      throw new SqoopException(ServerError.SERVER_0003,
-        "Detected incorrect config structure");
+    MLinkConfig linkConfig = ConnectorManager.getInstance()
+        .getConnectorConfigurable(link.getConnectorId()).getLinkConfig();
+    if (!linkConfig.equals(link.getConnectorLinkConfig())) {
+      throw new SqoopException(ServerError.SERVER_0003, "Detected incorrect link config structure");
     }
+    // if update get the link id from the request URI
+    if (!create) {
+      String linkIdentifier = ctx.getLastURLElement();
+      // support linkName or linkId for the api
+      long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
+      MLink existingLink = repository.findLink(linkId);
+      link.setConnectorId(existingLink.getConnectorId());
+    }
+    // Associated connector for this link
+    SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
+        link.getConnectorId());
 
-    // Responsible connector for this session
-    SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(link.getConnectorId());
-
-    // Validate user supplied data
-    ConfigValidationResult connectorLinkValidation = ConfigUtils.validateConfigs(
-      link.getConnectorLinkConfig().getConfigs(),
-      connector.getLinkConfigurationClass()
-    );
-
-    // Return back validations in all cases
-    ValidationResultBean outputBean = new ValidationResultBean(connectorLinkValidation);
+    // Validate user supplied config data
+    ConfigValidationResult connectorLinkConfigValidation = ConfigUtils.validateConfigs(link
+        .getConnectorLinkConfig().getConfigs(), connector.getLinkConfigurationClass());
+    // Return back link validation result bean
+    ValidationResultBean linkValidationBean = new ValidationResultBean(
+        connectorLinkConfigValidation);
 
     // If we're good enough let's perform the action
-    if(connectorLinkValidation.getStatus().canProceed()) {
-      if(update) {
-        AuditLoggerManager.getInstance()
-            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "update", "link", String.valueOf(link.getPersistenceId()));
-
-        link.setLastUpdateUser(username);
-        RepositoryManager.getInstance().getRepository().updateLink(link);
-      } else {
+    if (connectorLinkConfigValidation.getStatus().canProceed()) {
+      if (create) {
+        AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+            ctx.getRequest().getRemoteAddr(), "create", "link",
+            String.valueOf(link.getPersistenceId()));
         link.setCreationUser(username);
         link.setLastUpdateUser(username);
-        RepositoryManager.getInstance().getRepository().createLink(link);
-        outputBean.setId(link.getPersistenceId());
-
-        AuditLoggerManager.getInstance()
-            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "create", "link", String.valueOf(link.getPersistenceId()));
+        repository.createLink(link);
+        linkValidationBean.setId(link.getPersistenceId());
+      } else {
+        AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+            ctx.getRequest().getRemoteAddr(), "update", "link",
+            String.valueOf(link.getPersistenceId()));
+        link.setLastUpdateUser(username);
+        repository.updateLink(link);
       }
     }
 
-    return outputBean;
+    return linkValidationBean;
   }
 
-  private JsonBean getLink(RequestContext ctx) {
-    String sxid = ctx.getLastURLElement();
-    LinkBean bean;
-
-    AuditLoggerManager.getInstance()
-        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "get", "link", sxid);
-
+  private JsonBean getLinks(RequestContext ctx) {
+    String identifier = ctx.getLastURLElement();
+    LinkBean linkBean;
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    if (sxid.equals("all")) {
-
-      List<MLink> links = repository.findLinks();
-      bean = new LinkBean(links);
-
-      // Add associated resources into the bean
-      for( MLink link : links) {
-        long connectorId = link.getConnectorId();
-        if(!bean.hasConnectorConfigBundle(connectorId)) {
-          bean.addConnectorConfigBundle(connectorId,
-            ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
-        }
+    // links by connector
+    if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
+      identifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "linksByConnector", identifier);
+      if (repository.findConnector(identifier) != null) {
+        long connectorId = repository.findConnector(identifier).getPersistenceId();
+        linkBean = createLinksBean(repository.findLinksForConnector(connectorId), locale);
+      } else {
+        // this means name nor Id existed
+        throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
+            + " name for links given");
       }
-    } else {
-      long xid = Long.valueOf(sxid);
-
-      MLink link = repository.findLink(xid);
-      long connectorId = link.getConnectorId();
-
-      bean = new LinkBean(link);
-
-      bean.addConnectorConfigBundle(connectorId,
-        ConnectorManager.getInstance().getResourceBundle(connectorId, locale));
+    } else
+    // all links in the system
+    if (ctx.getPath().contains(LINKS_PATH)
+        || (ctx.getPath().contains(LINK_PATH) && identifier.equals("all"))) {
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "links", "all");
+      linkBean = createLinksBean(repository.findLinks(), locale);
     }
-    return bean;
+    // link by Id
+    else {
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
+
+      long linkId = getLinkIdFromIdentifier(identifier, repository);
+      List<MLink> linkList = new ArrayList<MLink>();
+      // a list of single element
+      linkList.add(repository.findLink(linkId));
+      linkBean = createLinkBean(linkList, locale);
+    }
+    return linkBean;
+  }
+
+  private long getLinkIdFromIdentifier(String identifier, Repository repository) {
+    // support linkName or linkId for the api
+    long linkId;
+    if (repository.findLink(identifier) != null) {
+      linkId = repository.findLink(identifier).getPersistenceId();
+    } else {
+      try {
+        linkId = Long.valueOf(identifier);
+      } catch (NumberFormatException ex) {
+        // this means name nor Id existed
+        throw new SqoopException(ServerError.SERVER_0005, "Invalid link: " + identifier
+            + " requested");
+      }
+    }
+    return linkId;
+  }
+
+  private LinkBean createLinkBean(List<MLink> links, Locale locale) {
+    LinkBean linkBean = new LinkBean(links);
+    addLink(links, locale, linkBean);
+    return linkBean;
+  }
+
+  private LinksBean createLinksBean(List<MLink> links, Locale locale) {
+    LinksBean linksBean = new LinksBean(links);
+    addLink(links, locale, linksBean);
+    return linksBean;
+  }
+
+  private void addLink(List<MLink> links, Locale locale, LinkBean bean) {
+    // Add associated resources into the bean
+    for (MLink link : links) {
+      long connectorId = link.getConnectorId();
+      if (!bean.hasConnectorConfigBundle(connectorId)) {
+        bean.addConnectorConfigBundle(connectorId, ConnectorManager.getInstance()
+            .getResourceBundle(connectorId, locale));
+      }
+    }
   }
 
   private JsonBean enableLink(RequestContext ctx, boolean enabled) {
-    String[] elements = ctx.getUrlElements();
-    String sLinkId = elements[elements.length - 2];
-    long linkId = Long.valueOf(sLinkId);
     Repository repository = RepositoryManager.getInstance().getRepository();
+    String[] elements = ctx.getUrlElements();
+    String linkIdentifier = elements[elements.length - 2];
+    long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
     repository.enableLink(linkId, enabled);
     return JsonBean.EMPTY_BEAN;
   }

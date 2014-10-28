@@ -17,28 +17,32 @@
  */
 package org.apache.sqoop.server.v1;
 
-import org.apache.sqoop.handler.DriverRequestHandler;
+import org.apache.sqoop.handler.LinkRequestHandler;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
 /**
- * Displays driver registered in sqoop
+ * Displays all or links per connector in sqoop
  *
- * GET /v1/driver/
- *  Return details about the registered driver and its configs
- */
+ * GET /v1/links
+ *  Return details about every link that exists in the sqoop system
+ * GET /v1/links?cname=
+ *  Return details about link(s) for a given connector name {cname}
+*/
 @SuppressWarnings("serial")
-public class DriverServlet extends SqoopProtocolServlet {
-  private RequestHandler driverRequestHandler;
+public class LinksServlet extends SqoopProtocolServlet {
 
-  public DriverServlet() {
-    driverRequestHandler = new DriverRequestHandler();
+  private RequestHandler linkRequestHandler;
+
+  public LinksServlet() {
+    linkRequestHandler = new LinkRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return driverRequestHandler.handleEvent(ctx);
+    return linkRequestHandler.handleEvent(ctx);
   }
+
 }

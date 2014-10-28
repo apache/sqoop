@@ -60,6 +60,7 @@ public class UpdateLinkFunction extends SqoopFunction {
 
     ConsoleReader reader = new ConsoleReader();
 
+    // TODO: why do we need 2 http calls for update?
     MLink link = client.getLink(linkId);
 
     ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());

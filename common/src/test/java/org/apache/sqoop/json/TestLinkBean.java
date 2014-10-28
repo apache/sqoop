@@ -59,7 +59,7 @@ public class TestLinkBean {
     JSONObject json = linkBean.extract(false);
 
     // Check for sensitivity
-    JSONArray all = (JSONArray)json.get(JsonBean.ALL);
+    JSONArray all = (JSONArray)json.get(LinkBean.LINK);
     JSONObject allItem = (JSONObject)all.get(0);
     JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     JSONObject connector = (JSONObject)connectors.get(0);
@@ -116,7 +116,7 @@ public class TestLinkBean {
     JSONObject jsonFiltered = bean.extract(true);
 
     // Sensitive values should exist
-    JSONArray all = (JSONArray)json.get(JsonBean.ALL);
+    JSONArray all = (JSONArray)json.get(LinkBean.LINK);
     JSONObject allItem = (JSONObject)all.get(0);
     JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     JSONObject connector = (JSONObject)connectors.get(0);
@@ -127,7 +127,7 @@ public class TestLinkBean {
     assertTrue(password.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE));
 
     // Sensitive values should not exist
-    all = (JSONArray)jsonFiltered.get(JsonBean.ALL);
+    all = (JSONArray)jsonFiltered.get(LinkBean.LINK);
     allItem = (JSONObject)all.get(0);
     connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
     connector = (JSONObject)connectors.get(0);

@@ -93,6 +93,14 @@ public class RequestContext {
   }
 
   /**
+   * Return a value for given query parameter name
+   */
+  public String getParameterValue(String name) {
+    String[] values = getRequest().getParameterValues(name);
+    return values != null ? values[0] : null;
+  }
+
+  /**
    * Get locale specified in accept-language HTTP header.
    *
    * @return First specified locale

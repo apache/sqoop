@@ -304,6 +304,21 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
      + " FROM " + TABLE_SQ_LINK
      + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
 
+
+   // DML: Select one specific link by name
+   public static final String STMT_SELECT_LINK_SINGLE_BY_NAME =
+     "SELECT "
+     + COLUMN_SQ_LNK_ID + ", "
+     + COLUMN_SQ_LNK_NAME + ", "
+     + COLUMN_SQ_LNK_CONFIGURABLE + ", "
+     + COLUMN_SQ_LNK_ENABLED + ", "
+     + COLUMN_SQ_LNK_CREATION_USER + ", "
+     + COLUMN_SQ_LNK_CREATION_DATE + ", "
+     + COLUMN_SQ_LNK_UPDATE_USER + ", "
+     + COLUMN_SQ_LNK_UPDATE_DATE
+     + " FROM " + TABLE_SQ_LINK
+     + " WHERE " + COLUMN_SQ_LNK_NAME + " = ?";
+
    // DML: Select all links
    public static final String STMT_SELECT_LINK_ALL =
      "SELECT "

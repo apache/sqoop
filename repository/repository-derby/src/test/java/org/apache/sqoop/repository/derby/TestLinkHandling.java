@@ -58,7 +58,7 @@ public class TestLinkHandling extends DerbyTestCase {
     try {
       handler.findLink(1, getDerbyDatabaseConnection());
       fail();
-    } catch(SqoopException ex) {
+    } catch (SqoopException ex) {
       assertEquals(DerbyRepoError.DERBYREPO_0024, ex.getErrorCode());
     }
 
@@ -66,6 +66,28 @@ public class TestLinkHandling extends DerbyTestCase {
     loadLinksForLatestVersion();
 
     MLink linkA = handler.findLink(1, getDerbyDatabaseConnection());
+    assertNotNull(linkA);
+    assertEquals(1, linkA.getPersistenceId());
+    assertEquals("CA", linkA.getName());
+
+    List<MConfig> configs;
+
+    // Check connector link config
+    configs = linkA.getConnectorLinkConfig().getConfigs();
+    assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
+    assertNull(configs.get(0).getInputs().get(1).getValue());
+    assertEquals("Value3", configs.get(1).getInputs().get(0).getValue());
+    assertNull(configs.get(1).getInputs().get(1).getValue());
+  }
+
+  @Test
+  public void testFindLinkByName() throws Exception {
+    // Let's try to find non existing link
+    assertNull(handler.findLink("non-existing", getDerbyDatabaseConnection()));
+    // Load prepared connections into database
+    loadLinksForLatestVersion();
+
+    MLink linkA = handler.findLink("CA", getDerbyDatabaseConnection());
     assertNotNull(linkA);
     assertEquals(1, linkA.getPersistenceId());
     assertEquals("CA", linkA.getName());
@@ -146,7 +168,7 @@ public class TestLinkHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_LINK_INPUT", 4);
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expected = SqoopException.class)
   public void testCreateDuplicateLink() throws Exception {
     MLink link = getLink();
     fillLink(link);
@@ -178,10 +200,10 @@ public class TestLinkHandling extends DerbyTestCase {
     List<MConfig> configs;
 
     configs = link.getConnectorLinkConfig().getConfigs();
-    ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
-    ((MStringInput)configs.get(1).getInputs().get(0)).setValue("Updated");
-    ((MMapInput)configs.get(1).getInputs().get(1)).setValue(null);
+    ((MStringInput) configs.get(0).getInputs().get(0)).setValue("Updated");
+    ((MMapInput) configs.get(0).getInputs().get(1)).setValue(null);
+    ((MStringInput) configs.get(1).getInputs().get(0)).setValue("Updated");
+    ((MMapInput) configs.get(1).getInputs().get(1)).setValue(null);
 
     link.setName("name");
 

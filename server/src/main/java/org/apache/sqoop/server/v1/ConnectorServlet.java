@@ -25,7 +25,7 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 
 
 /**
- * Connector request handler is supporting following resources:
+ * Displays connector(s) registered in sqoop
  *
  * GET v1/connector/all (remains for backward compatibility)
  *  Return all connectors registered in the sqoop system with their corresponding config params

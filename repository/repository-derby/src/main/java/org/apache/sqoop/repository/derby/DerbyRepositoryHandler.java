@@ -17,11 +17,9 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-
-
+import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -158,7 +156,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       // Register link type config
       registerConfigs(connectorId, null /* No direction for LINK type config*/, mc.getLinkConfig().getConfigs(),
-        MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
+      MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
 
       // Register both from/to job type config for connector
       if (mc.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
@@ -1196,27 +1194,51 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public MLink findLink(long id, Connection conn) {
-    PreparedStatement stmt = null;
+  public MLink findLink(long linkId, Connection conn) {
+    PreparedStatement linkFetchStmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_LINK_SINGLE);
-      stmt.setLong(1, id);
+      linkFetchStmt = conn.prepareStatement(STMT_SELECT_LINK_SINGLE);
+      linkFetchStmt.setLong(1, linkId);
 
-      List<MLink> connections = loadLinks(stmt, conn);
+      List<MLink> links = loadLinks(linkFetchStmt, conn);
 
-      if(connections.size() != 1) {
+      if(links.size() != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0024, "Couldn't find"
-          + " link with id " + id);
+          + " link with id " + linkId);
       }
 
-      // Return the first and only one link object
-      return connections.get(0);
+      // Return the first and only one link object with the given id
+      return links.get(0);
 
     } catch (SQLException ex) {
-      logException(ex, id);
+      logException(ex, linkId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(linkFetchStmt);
+    }
+  }
+
+  @Override
+  public MLink findLink(String linkName, Connection conn) {
+    PreparedStatement linkFetchStmt = null;
+    try {
+      linkFetchStmt = conn.prepareStatement(STMT_SELECT_LINK_SINGLE_BY_NAME);
+      linkFetchStmt.setString(1, linkName);
+
+      List<MLink> links = loadLinks(linkFetchStmt, conn);
+
+      if (links.size() != 1) {
+        return null;
+      }
+
+      // Return the first and only one link object with the given name
+      return links.get(0);
+
+    } catch (SQLException ex) {
+      logException(ex, linkName);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
+    } finally {
+      closeStatements(linkFetchStmt);
     }
   }
 
@@ -1225,17 +1247,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MLink> findLinks(Connection conn) {
-    PreparedStatement stmt = null;
+    PreparedStatement linksFetchStmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_LINK_ALL);
+      linksFetchStmt = conn.prepareStatement(STMT_SELECT_LINK_ALL);
 
-      return loadLinks(stmt, conn);
+      return loadLinks(linksFetchStmt, conn);
 
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(linksFetchStmt);
     }
   }
 
@@ -1246,17 +1268,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *
    */
   @Override
-  public List<MLink> findLinksForConnector(long connectorID, Connection conn) {
-    PreparedStatement stmt = null;
+  public List<MLink> findLinksForConnector(long connectorId, Connection conn) {
+    PreparedStatement linkByConnectorFetchStmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE);
-      stmt.setLong(1, connectorID);
-      return loadLinks(stmt, conn);
+      linkByConnectorFetchStmt = conn.prepareStatement(STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE);
+      linkByConnectorFetchStmt.setLong(1, connectorId);
+      return loadLinks(linkByConnectorFetchStmt, conn);
     } catch (SQLException ex) {
-      logException(ex, connectorID);
+      logException(ex, connectorId);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0023, ex);
     } finally {
-      closeStatements(stmt);
+      closeStatements(linkByConnectorFetchStmt);
     }
   }
 
@@ -2128,7 +2150,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConfig = new ArrayList<MConfig>();
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
-        loadConfigTypes(linkConfig, fromConfig, toConfig, connectorConfigFetchStmt,
+        loadConnectorConfigTypes(linkConfig, fromConfig, toConfig, connectorConfigFetchStmt,
             connectorConfigInputFetchStmt, 1, conn);
 
         SupportedDirections supportedDirections
@@ -2154,20 +2176,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     return connectors;
   }
 
-  private List<MLink> loadLinks(PreparedStatement stmt,
-                                            Connection conn)
-                                            throws SQLException {
+  private List<MLink> loadLinks(PreparedStatement linkFetchStmt, Connection conn) throws SQLException {
     List<MLink> links = new ArrayList<MLink>();
     ResultSet rsConnection = null;
-    PreparedStatement connectorConfigFetchStatement = null;
-    PreparedStatement connectorConfigInputStatement = null;
+    PreparedStatement connectorLinkConfigFetchStatement = null;
+    PreparedStatement connectorLinkConfigInputStatement = null;
 
     try {
-      rsConnection = stmt.executeQuery();
-
-      //
-      connectorConfigFetchStatement = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      connectorConfigInputStatement = conn.prepareStatement(STMT_FETCH_LINK_INPUT);
+      rsConnection = linkFetchStmt.executeQuery();
+      connectorLinkConfigFetchStatement = conn.prepareStatement(STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      connectorLinkConfigInputStatement = conn.prepareStatement(STMT_FETCH_LINK_INPUT);
 
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
@@ -2179,16 +2197,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         String updateUser = rsConnection.getString(7);
         Date lastUpdateDate = rsConnection.getTimestamp(8);
 
-        connectorConfigFetchStatement.setLong(1, connectorId);
-        connectorConfigInputStatement.setLong(1, id);
-        connectorConfigInputStatement.setLong(3, id);
+        connectorLinkConfigFetchStatement.setLong(1, connectorId);
+        connectorLinkConfigInputStatement.setLong(1, id);
+        connectorLinkConfigInputStatement.setLong(3, id);
 
         List<MConfig> connectorLinkConfig = new ArrayList<MConfig>();
         List<MConfig> fromConfig = new ArrayList<MConfig>();
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
-        loadConfigTypes(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
-            connectorConfigInputStatement, 2, conn);
+        loadConnectorConfigTypes(connectorLinkConfig, fromConfig, toConfig, connectorLinkConfigFetchStatement,
+            connectorLinkConfigInputStatement, 2, conn);
         MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig));
 
         link.setPersistenceId(id);
@@ -2203,7 +2221,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
     } finally {
       closeResultSets(rsConnection);
-      closeStatements(connectorConfigFetchStatement, connectorConfigInputStatement);
+      closeStatements(connectorLinkConfigFetchStatement, connectorLinkConfigInputStatement);
     }
 
     return links;
@@ -2254,7 +2272,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConnectorFromJobConfig = new ArrayList<MConfig>();
         List<MConfig> fromConnectorToJobConfig = new ArrayList<MConfig>();
 
-        loadConfigTypes(fromConnectorLinkConfig, fromConnectorFromJobConfig, fromConnectorToJobConfig,
+        loadConnectorConfigTypes(fromConnectorLinkConfig, fromConnectorFromJobConfig, fromConnectorToJobConfig,
             fromConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
         // TO entity configs
@@ -2265,7 +2283,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         // ?? dont we need 2 different driver configs for the from/to?
         List<MConfig> driverConfig = new ArrayList<MConfig>();
 
-        loadConfigTypes(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
+        loadConnectorConfigTypes(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
             toConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2);
@@ -2592,7 +2610,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Load configs and corresponding inputs from Derby database.
+   * Load configs and corresponding inputs related to a connector
    *
    * Use given prepared statements to load all configs and corresponding inputs
    * from Derby.
@@ -2605,7 +2623,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * @param conn Connection object that is used to find config direction.
    * @throws SQLException In case of any failure on Derby side
    */
-  public void loadConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig,
+  public void loadConnectorConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig,
       List<MConfig> toConfig, PreparedStatement configFetchStmt, PreparedStatement inputFetchStmt,
       int configPosition, Connection conn) throws SQLException {
 

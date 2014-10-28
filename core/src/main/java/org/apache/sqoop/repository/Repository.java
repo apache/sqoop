@@ -176,9 +176,17 @@ public abstract class Repository {
    * Find link with given id in repository.
    *
    * @param id Link id
-   * @return Deserialized config of the link that is saved in repository
+   * @return link that is saved in repository
    */
   public abstract MLink findLink(long id);
+
+  /**
+   * Find link with given id in repository.
+   *
+   * @param name unique link name
+   * @return link that is saved in repository or null if it does not exists
+   */
+  public abstract MLink findLink(String name);
 
   /**
    * Get all Link objects.
@@ -297,18 +305,18 @@ public abstract class Repository {
 
   /**
    * Retrieve links which use the given connector.
-   * @param connectorID Connector ID whose links should be fetched
+   * @param connectorId Connector ID whose links should be fetched
    * @return List of MLink that use <code>connectorID</code>.
    */
-  public abstract List<MLink> findLinksForConnector(long connectorID);
+  public abstract List<MLink> findLinksForConnector(long connectorId);
 
   /**
    * Retrieve jobs which use the given link.
    *
-   * @param connectorID Connector ID whose jobs should be fetched
+   * @param connectorId Connector ID whose jobs should be fetched
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnector(long connectorID);
+  public abstract List<MJob> findJobsForConnector(long connectorId);
 
   /**
    * Update the connector with the new data supplied in the

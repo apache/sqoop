@@ -71,22 +71,20 @@ public abstract class JdbcRepositoryHandler {
 
   /**
    * Retrieve links which use the given connector.
-   * @param connectorID Connector ID whose links should be fetched
+   * @param connectorId Connector ID whose links should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MLinks that use <code>connectorID</code>.
    */
-  public abstract List<MLink> findLinksForConnector(long
-    connectorID, Connection conn);
+  public abstract List<MLink> findLinksForConnector(long connectorId, Connection conn);
 
   /**
    * Retrieve jobs which use the given link.
    *
-   * @param connectorID Connector ID whose jobs should be fetched
+   * @param connectorId Connector ID whose jobs should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnector(long connectorID,
-    Connection conn);
+  public abstract List<MJob> findJobsForConnector(long c, Connection conn);
 
   /**
    * Upgrade the connector with the new data supplied in the <tt>newConnector</tt>.
@@ -234,18 +232,27 @@ public abstract class JdbcRepositoryHandler {
   /**
    * Delete the input values for the link with given id from the
    * repository.
-   * @param id Link object whose inputs should be removed from repository
+   * @param linkId Link object whose inputs should be removed from repository
    * @param conn Connection to the repository
    */
-  public abstract void deleteLinkInputs(long id, Connection conn);
+  public abstract void deleteLinkInputs(long linkId, Connection conn);
   /**
    * Find link with given id in repository.
    *
    * @param linkId Link id
    * @param conn Connection to the repository
-   * @return Deserialized config of the link that is saved in repository
+   * @return  the link that is saved in repository
    */
   public abstract MLink findLink(long linkId, Connection conn);
+
+  /**
+   * Find link with given name in repository.
+   *
+   * @param linkName unique link name
+   * @param conn Connection to the repository
+   * @return the link that is saved in repository or returns null if not found
+   */
+  public abstract MLink findLink(String linkName, Connection conn);
 
   /**
    * Get all link objects.

@@ -349,11 +349,24 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MLink findLink(final long connectionId) {
+  public MLink findLink(final long id) {
     return (MLink) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        return handler.findLink(connectionId, conn);
+        return handler.findLink(id, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MLink findLink(final String name) {
+    return (MLink) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findLink(name, conn);
       }
     });
   }
@@ -609,13 +622,13 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public List<MLink> findLinksForConnector(final long
-    connectorID) {
+  public List<MLink> findLinksForConnector(final long connectorId) {
     return (List<MLink>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findLinksForConnector(connectorID, conn);
+        return handler.findLinksForConnector(connectorId, conn);
       }
     });
   }
@@ -623,12 +636,13 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public List<MJob> findJobsForConnector(final long connectorID) {
+  public List<MJob> findJobsForConnector(final long connectorId) {
     return (List<MJob>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findJobsForConnector(connectorID, conn);
+        return handler.findJobsForConnector(connectorId, conn);
       }
     });
   }

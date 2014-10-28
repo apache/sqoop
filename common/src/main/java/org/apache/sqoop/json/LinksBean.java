@@ -15,43 +15,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.server.common;
+package org.apache.sqoop.json;
 
-import org.apache.sqoop.common.ErrorCode;
+import java.util.List;
 
-/**
- *
- */
-public enum ServerError implements ErrorCode {
+import org.apache.sqoop.model.MLink;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-  /** Unknown error on server side. */
-  SERVER_0001("Unknown server error"),
+public class LinksBean extends LinkBean {
 
-  /** Unknown error on server side. */
-  SERVER_0002("Unsupported HTTP method"),
+  static final String LINKS = "links";
 
-  /** We've received invalid HTTP request */
-  SERVER_0003("Invalid HTTP request"),
-
-  /** Invalid argument in HTTP request */
-  SERVER_0004("Invalid argument in HTTP request"),
-
-  /** Invalid entity requested */
-  SERVER_0005("Invalid entity requested"),
-
-  ;
-
-  private final String message;
-
-  private ServerError(String message) {
-    this.message = message;
+  public LinksBean(MLink link) {
+    super(link);
   }
 
-  public String getCode() {
-    return name();
+  public LinksBean(List<MLink> links) {
+    super(links);
   }
 
-  public String getMessage() {
-    return message;
+  // For "restore"
+  public LinksBean() {
+
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject extract(boolean skipSensitive) {
+    JSONArray linkArray = new JSONArray();
+    super.extractLinks(skipSensitive, linkArray);
+    JSONObject links = new JSONObject();
+    links.put(LINKS, linkArray);
+    return links;
+  }
+
+  @Override
+  public void restore(JSONObject jsonObject) {
+
+    JSONArray array = (JSONArray) jsonObject.get(LINKS);
+    super.restoreLinks(array);
   }
 }
