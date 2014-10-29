@@ -20,7 +20,6 @@ package org.apache.sqoop.repository.derby;
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
@@ -211,7 +210,10 @@ abstract public class DerbyTestCase {
       renameConnectorToConfigurable();
       // add the name constraint for configurable
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME);
+      // add sq_config uniqueness constraint
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIGURABLE_ID);
+      // add sq_input uniqueness constraint
+      runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIG_ID);
     }
 
     // deprecated repository version
@@ -698,7 +700,7 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing config with non unique nam/type objects into repository.
+   * testing config with non unique name/type objects into repository.
    * @throws Exception
    */
   public void loadNonUniqueConfigNameTypeInVersion4() throws Exception {
@@ -712,7 +714,24 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing config with non unique nam/type objects into repository.
+   * testing input with non unique name/type objects into repository.
+   * @throws Exception
+   */
+  public void loadNonUniqueInputNameTypeInVersion4() throws Exception {
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+        + "VALUES(1, 'C1', 'LINK', 0)");
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+        + " VALUES('I1', 1, 0, 'STRING', false, 30)");
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+        + " VALUES('I1', 1, 0, 'STRING', false, 30)");
+  }
+
+  /**
+   * testing config with non unique name/type objects into repository.
    * @throws Exception
    */
   public void loadNonUniqueConfigNameButUniqueTypeInVersion4() throws Exception {
@@ -736,7 +755,28 @@ abstract public class DerbyTestCase {
         + "VALUES(1, 'C1', 'LINK', 0)");
     runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
         + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
-        + "VALUES(2, 'C1', 'LINK', 0)");
+        + "VALUES(2, 'C1', 'LINK', 1)");
+  }
+
+  /**
+   * testing input with non unique name/type objects into repository.
+   * @throws Exception
+   */
+  public void loadNonUniqueInputNameAndTypeButUniqueConfigInVersion4() throws Exception {
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+        + "VALUES(1, 'C1', 'LINK', 0)");
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
+        + "VALUES(2, 'C2', 'LINK', 0)");
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+        + " VALUES('C1.A', 1, 0, 'STRING', false, 30)");
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
+        + " VALUES('C1.A', 2, 1, 'STRING', false, 30)");
   }
 
   public void loadJobsForLatestVersion() throws Exception {

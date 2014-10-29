@@ -436,6 +436,14 @@ public final class DerbySchemaUpgradeQuery {
       + " UNIQUE ("
       + COLUMN_SQ_CFG_NAME + ", " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_CONFIGURABLE + ")";
 
+  // add unique constraint on the input table for name and type and configId
+  public static final String QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIG_ID = "ALTER TABLE "
+      + TABLE_SQ_INPUT
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_INPUT_UNIQUE
+      + " UNIQUE ("
+      + COLUMN_SQI_NAME + ", " + COLUMN_SQI_TYPE + ", " + COLUMN_SQI_CONFIG + ")";
+
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }

@@ -140,7 +140,7 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQ_CFG_SQC_NAME = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
   public static final String CONSTRAINT_SQ_CFG_SQC = SCHEMA_PREFIX + CONSTRAINT_SQ_CFG_SQC_NAME;
 
-  // unique name constraint
+  // uniqueness constraint
   public static final String CONSTRAINT_SQ_CONFIG_UNIQUE_NAME_TYPE_CONFIGURABLE = CONSTRAINT_PREFIX + "SQ_CFG_NAME_TYPE_CONFIGURABLE_UNIQUE";
   public static final String CONSTRAINT_SQ_CONFIG_UNIQUE = SCHEMA_PREFIX + CONSTRAINT_SQ_CONFIG_UNIQUE_NAME_TYPE_CONFIGURABLE;
 
@@ -201,6 +201,11 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQI_SQ_CFG_NAME = CONSTRAINT_PREFIX + "SQI_SQ_CFG";
   public static final String CONSTRAINT_SQI_SQ_CFG = SCHEMA_PREFIX + CONSTRAINT_SQI_SQ_CFG_NAME;
 
+  // uniqueness constraint
+  public static final String CONSTRAINT_SQ_INPUT_UNIQUE_NAME_TYPE_CONFIG = CONSTRAINT_PREFIX + "SQI_NAME_TYPE_CONFIG_UNIQUE";
+  public static final String CONSTRAINT_SQ_INPUT_UNIQUE = SCHEMA_PREFIX + CONSTRAINT_SQ_INPUT_UNIQUE_NAME_TYPE_CONFIG;
+
+  // SQ_LINK
   @Deprecated // used only for upgrade
   public static final String TABLE_SQ_CONNECTION_NAME = "SQ_CONNECTION";
   public static final String TABLE_SQ_LINK_NAME = "SQ_LINK";

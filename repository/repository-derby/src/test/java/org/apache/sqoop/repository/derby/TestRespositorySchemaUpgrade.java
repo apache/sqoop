@@ -103,6 +103,26 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
     super.loadNonUniqueConfigNameAndTypeButUniqueConfigurableInVersion4();
   }
 
+  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  public void testUpgradeVersion4WithNonUniqueInputNameAndTypeAdded() throws Exception {
+    super.createOrUpgradeSchema(4);
+    super.addConnectorB();
+    // try loading duplicate input name and type for a config in version 4 and it should throw an
+    // exception
+    super.loadNonUniqueInputNameTypeInVersion4();
+  }
+
+  @Test
+  public void testUpgradeVersion4WithNonUniqueInputNameAndTypeButUniqueConfig()
+      throws Exception {
+    super.createOrUpgradeSchema(4);
+    super.addConnectorA();
+    super.addConnectorB();
+    // try loading duplicate input names and type but unique config, hence
+    // no exception
+    super.loadNonUniqueInputNameAndTypeButUniqueConfigInVersion4();
+  }
+
   @Test
   public void testUpgradeRepoVersion2ToVersion4() throws Exception {
     // in case of version 2 schema there is no unique job/ link constraint
