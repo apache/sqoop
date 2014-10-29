@@ -72,7 +72,8 @@ public class TestInputTypes extends DerbyTestCase {
     assertNotSame(connector.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     // Retrieve registered connector
-    MConnector retrieved = handler.findConnector(connector.getUniqueName(), getDerbyDatabaseConnection());
+    MConnector retrieved = handler.findConnector(connector.getUniqueName(),
+        getDerbyDatabaseConnection());
     assertNotNull(retrieved);
 
     // Original and retrieved connectors should be the same
@@ -97,12 +98,12 @@ public class TestInputTypes extends DerbyTestCase {
 
     // Connection object with all various values
     MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
-    MLinkConfig forms = link.getConnectorLinkConfig();
-    forms.getStringInput("f.String").setValue("A");
-    forms.getMapInput("f.Map").setValue(map);
-    forms.getIntegerInput("f.Integer").setValue(1);
-    forms.getBooleanInput("f.Boolean").setValue(true);
-    forms.getEnumInput("f.Enum").setValue("YES");
+    MLinkConfig linkConfig = link.getConnectorLinkConfig();
+    linkConfig.getStringInput("l1.String").setValue("A");
+    linkConfig.getMapInput("l1.Map").setValue(map);
+    linkConfig.getIntegerInput("l1.Integer").setValue(1);
+    linkConfig.getBooleanInput("l1.Boolean").setValue(true);
+    linkConfig.getEnumInput("l1.Enum").setValue("YES");
 
     // Create the link in repository
     handler.createLink(link, getDerbyDatabaseConnection());
@@ -110,12 +111,12 @@ public class TestInputTypes extends DerbyTestCase {
 
     // Retrieve created link
     MLink retrieved = handler.findLink(link.getPersistenceId(), getDerbyDatabaseConnection());
-    forms = retrieved.getConnectorLinkConfig();
-    assertEquals("A", forms.getStringInput("f.String").getValue());
-    assertEquals(map, forms.getMapInput("f.Map").getValue());
-    assertEquals(1, (int)forms.getIntegerInput("f.Integer").getValue());
-    assertEquals(true, (boolean)forms.getBooleanInput("f.Boolean").getValue());
-    assertEquals("YES", forms.getEnumInput("f.Enum").getValue());
+    linkConfig = retrieved.getConnectorLinkConfig();
+    assertEquals("A", linkConfig.getStringInput("l1.String").getValue());
+    assertEquals(map, linkConfig.getMapInput("l1.Map").getValue());
+    assertEquals(1, (int) linkConfig.getIntegerInput("l1.Integer").getValue());
+    assertEquals(true, (boolean) linkConfig.getBooleanInput("l1.Boolean").getValue());
+    assertEquals("YES", linkConfig.getEnumInput("l1.Enum").getValue());
   }
 
   /**
@@ -124,30 +125,30 @@ public class TestInputTypes extends DerbyTestCase {
    * @return Forms with all data types
    */
   @Override
-  protected List<MConfig> getConfigs() {
-    List<MConfig> forms = new LinkedList<MConfig>();
+  protected List<MConfig> getConfigs(String configName1, String configName2) {
+    List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs;
     MInput input;
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MStringInput("f.String", false, (short)30);
+    input = new MStringInput(configName1 + ".String", false, (short) 30);
     inputs.add(input);
 
-    input = new MMapInput("f.Map", false);
+    input = new MMapInput(configName1 + ".Map", false);
     inputs.add(input);
 
-    input = new MIntegerInput("f.Integer", false);
+    input = new MIntegerInput(configName1 + ".Integer", false);
     inputs.add(input);
 
-    input = new MBooleanInput("f.Boolean", false);
+    input = new MBooleanInput(configName1 + ".Boolean", false);
     inputs.add(input);
 
-    input = new MEnumInput("f.Enum", false, new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".Enum", false, new String[] { "YES", "NO" });
     inputs.add(input);
 
-    forms.add(new MConfig("f", inputs));
-    return forms;
+    configs.add(new MConfig(configName1, inputs));
+    return configs;
   }
 }

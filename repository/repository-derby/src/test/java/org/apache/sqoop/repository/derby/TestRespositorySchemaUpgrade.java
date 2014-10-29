@@ -39,7 +39,8 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
   @Test
   public void testHasLatestRepositoryVersion() throws Exception {
     assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
-    createOrUpgradeSchemaForLatestVersion(); // Test code is building the structures
+    createOrUpgradeSchemaForLatestVersion(); // Test code is building the
+                                             // structures
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
@@ -50,24 +51,56 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
-  @Test(expected=SQLIntegrityConstraintViolationException.class)
+  @Test(expected = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueJobNameFailure() throws Exception {
     super.createOrUpgradeSchema(4);
-    // try loading duplicate job  names in version 4 and it should throw an exception
+    // try loading duplicate job names in version 4 and it should throw an
+    // exception
     super.loadNonUniqueJobsInVersion4();
   }
-  @Test(expected=SQLIntegrityConstraintViolationException.class)
+
+  @Test(expected = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueLinkNamesAdded() throws Exception {
     super.createOrUpgradeSchema(4);
-    // try loading duplicate link names in version 4 and it should throw an exception
+    // try loading duplicate link names in version 4 and it should throw an
+    // exception
     super.loadNonUniqueLinksInVersion4();
   }
 
-  @Test(expected=SQLIntegrityConstraintViolationException.class)
+  @Test(expected = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueConfigurableNamesAdded() throws Exception {
     super.createOrUpgradeSchema(4);
-    // try loading duplicate configurable names in version 4 and it should throw an exception
+    // try loading duplicate configurable names in version 4 and it should throw
+    // an exception
     super.loadNonUniqueConfigurablesInVersion4();
+  }
+
+  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  public void testUpgradeVersion4WithNonUniqueConfigNameAndTypeAdded() throws Exception {
+    super.createOrUpgradeSchema(4);
+    super.addConnectorB();
+    // try loading duplicate config names in version 4 and it should throw an
+    // exception
+    super.loadNonUniqueConfigNameTypeInVersion4();
+  }
+
+  @Test
+  public void testUpgradeVersion4WithNonUniqueConfigNameButUniqueTypeAdded() throws Exception {
+    super.createOrUpgradeSchema(4);
+    super.addConnectorB();
+    // try loading duplicate config names but unique type, hence no exception
+    super.loadNonUniqueConfigNameButUniqueTypeInVersion4();
+  }
+
+  @Test
+  public void testUpgradeVersion4WithNonUniqueConfigNameAndTypeButUniqueConfigurable()
+      throws Exception {
+    super.createOrUpgradeSchema(4);
+    super.addConnectorA();
+    super.addConnectorB();
+    // try loading duplicate config names and type but unique connector, hence
+    // no exception
+    super.loadNonUniqueConfigNameAndTypeButUniqueConfigurableInVersion4();
   }
 
   @Test
@@ -88,7 +121,7 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
         runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
             + "VALUES('hdfs-connector', 'org.apache.sqoop.test.B', '1.0-test')");
         return 2L;
-      } catch(Exception e) {
+      } catch (Exception e) {
         return -1L;
       }
     }

@@ -421,12 +421,20 @@ public final class DerbySchemaUpgradeQuery {
   public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_DROP_COLUMN_SQ_CFG_DIRECTION_VARCHAR = "ALTER TABLE "
       + TABLE_SQ_CONFIG + " DROP COLUMN " + COLUMN_SQ_CFG_DIRECTION;
 
-  // add unique constraint on the configurable table
+  // add unique constraint on the configurable table for name
   public static final String QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME = "ALTER TABLE "
       + TABLE_SQ_CONFIGURABLE
       + " ADD CONSTRAINT "
       + CONSTRAINT_SQ_CONFIGURABLE_UNIQUE
       + " UNIQUE (" + COLUMN_SQC_NAME + ")";
+
+  // add unique constraint on the config table for name and type and configurableId
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIGURABLE_ID = "ALTER TABLE "
+      + TABLE_SQ_CONFIG
+      + " ADD CONSTRAINT "
+      + CONSTRAINT_SQ_CONFIG_UNIQUE
+      + " UNIQUE ("
+      + COLUMN_SQ_CFG_NAME + ", " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_CONFIGURABLE + ")";
 
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation

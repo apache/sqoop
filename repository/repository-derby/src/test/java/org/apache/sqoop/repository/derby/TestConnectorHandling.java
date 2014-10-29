@@ -46,10 +46,8 @@ public class TestConnectorHandling extends DerbyTestCase {
   public void testFindConnector() throws Exception {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
-    assertNull(handler.findConnector("B", getDerbyDatabaseConnection()));
     // Load connector into repository
-    loadConnectorAndDriverConfig();
-
+    addConnectorA();
     // Retrieve it
     MConnector connector = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(connector);
