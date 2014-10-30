@@ -81,7 +81,7 @@ public class GenericJdbcExecutor {
 
   public void migrateData(String fromTable, String toTable) {
     String insertQuery = "INSERT INTO " + toTable +
-      " ( SELECT * FROM " + fromTable + " )";
+      " SELECT * FROM " + fromTable;
     Statement stmt = null;
     Boolean oldAutoCommit = null;
     try {
