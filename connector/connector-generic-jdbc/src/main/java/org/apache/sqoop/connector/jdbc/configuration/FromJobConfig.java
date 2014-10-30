@@ -28,7 +28,7 @@ import org.apache.sqoop.validation.validators.NullOrContains;
 /**
  *
  */
-@ConfigClass( validators = {@Validator(FromJobConfig.ConfigValidator.class)})
+@ConfigClass(validators = { @Validator(FromJobConfig.ConfigValidator.class) })
 public class FromJobConfig {
   @Input(size = 50)
   public String schemaName;
@@ -36,7 +36,7 @@ public class FromJobConfig {
   @Input(size = 50)
   public String tableName;
 
-  @Input(size = 2000, validators = {@Validator(value = NullOrContains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN)})
+  @Input(size = 2000, validators = { @Validator(value = NullOrContains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN) })
   public String sql;
 
   @Input(size = 50)
@@ -54,13 +54,13 @@ public class FromJobConfig {
   public static class ConfigValidator extends AbstractValidator<FromJobConfig> {
     @Override
     public void validate(FromJobConfig config) {
-      if(config.tableName == null && config.sql == null) {
+      if (config.tableName == null && config.sql == null) {
         addMessage(Status.UNACCEPTABLE, "Either table name or SQL must be specified");
       }
-      if(config.tableName != null && config.sql != null) {
+      if (config.tableName != null && config.sql != null) {
         addMessage(Status.UNACCEPTABLE, "Both table name and SQL cannot be specified");
       }
-      if(config.schemaName != null && config.sql != null) {
+      if (config.schemaName != null && config.sql != null) {
         addMessage(Status.UNACCEPTABLE, "Both schema name and SQL cannot be specified");
       }
     }
