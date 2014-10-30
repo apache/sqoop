@@ -49,6 +49,7 @@ public class SqlTypesUtils {
       case Types.INTEGER:
         return new FixedPoint();
 
+      case Types.CLOB:
       case Types.VARCHAR:
       case Types.CHAR:
       case Types.LONGVARCHAR:
@@ -66,7 +67,6 @@ public class SqlTypesUtils {
       case Types.TIMESTAMP:
         return new DateTime();
 
-      case Types.CLOB:
       case Types.FLOAT:
       case Types.REAL:
       case Types.DOUBLE:
