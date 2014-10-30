@@ -128,8 +128,8 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     String schemaName = toJobConfig.toJobConfig.schemaName;
     String tableName = toJobConfig.toJobConfig.tableName;
     String stageTableName = toJobConfig.toJobConfig.stageTableName;
-    boolean clearStageTable = toJobConfig.toJobConfig.clearStageTable == null ?
-      false : toJobConfig.toJobConfig.clearStageTable;
+    boolean clearStageTable = toJobConfig.toJobConfig.shouldClearStageTable == null ?
+      false : toJobConfig.toJobConfig.shouldClearStageTable;
     final boolean stageEnabled =
       stageTableName != null && stageTableName.length() > 0;
     String tableSql = toJobConfig.toJobConfig.sql;

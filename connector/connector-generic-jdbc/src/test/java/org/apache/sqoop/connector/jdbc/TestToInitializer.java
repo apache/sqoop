@@ -288,7 +288,7 @@ public class TestToInitializer {
     //specifying clear stage table flag without specifying name of
     // the stage table
     jobConfig.toJobConfig.tableName = schemalessTableName;
-    jobConfig.toJobConfig.clearStageTable = false;
+    jobConfig.toJobConfig.shouldClearStageTable = false;
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
     ConfigValidationResult result = validationRunner.validate(jobConfig);
     assertEquals("User should not specify clear stage table flag without " +
@@ -298,7 +298,7 @@ public class TestToInitializer {
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
 
-    jobConfig.toJobConfig.clearStageTable = true;
+    jobConfig.toJobConfig.shouldClearStageTable = true;
     result = validationRunner.validate(jobConfig);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
@@ -339,7 +339,7 @@ public class TestToInitializer {
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.toJobConfig.tableName = schemalessTableName;
     jobConfig.toJobConfig.stageTableName = stageTableName;
-    jobConfig.toJobConfig.clearStageTable = true;
+    jobConfig.toJobConfig.shouldClearStageTable = true;
     createTable(fullStageTableName);
     executor.executeUpdate("INSERT INTO " + fullStageTableName +
       " VALUES(1, 1.1, 'one')");

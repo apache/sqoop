@@ -26,29 +26,42 @@ import org.apache.sqoop.validation.validators.AbstractValidator;
 /**
  *
  */
-@ConfigClass(validators = {@Validator(ToJobConfig.ConfigValidator.class)})
+@ConfigClass(validators = { @Validator(ToJobConfig.ConfigValidator.class) })
 public class ToJobConfig {
-  @Input(size = 50)   public String schemaName;
-  @Input(size = 2000) public String tableName;
-  @Input(size = 50)   public String sql;
-  @Input(size = 50)   public String columns;
-  @Input(size = 2000) public String stageTableName;
-  @Input              public Boolean clearStageTable;
+  @Input(size = 50)
+  public String schemaName;
+
+  @Input(size = 2000)
+  public String tableName;
+
+  @Input(size = 50)
+  public String sql;
+
+  @Input(size = 50)
+  public String columns;
+
+  @Input(size = 2000)
+  public String stageTableName;
+
+  @Input
+  public Boolean shouldClearStageTable;
 
   public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig config) {
-      if(config.tableName == null && config.sql == null) {
+      if (config.tableName == null && config.sql == null) {
         addMessage(Status.UNACCEPTABLE, "Either table name or SQL must be specified");
       }
-      if(config.tableName != null && config.sql != null) {
+      if (config.tableName != null && config.sql != null) {
         addMessage(Status.UNACCEPTABLE, "Both table name and SQL cannot be specified");
       }
-      if(config.tableName == null && config.stageTableName != null) {
-        addMessage(Status.UNACCEPTABLE, "Stage table name cannot be specified without specifying table name");
+      if (config.tableName == null && config.stageTableName != null) {
+        addMessage(Status.UNACCEPTABLE,
+            "Stage table name cannot be specified without specifying table name");
       }
-      if(config.stageTableName == null && config.clearStageTable != null) {
-        addMessage(Status.UNACCEPTABLE, "Clear stage table cannot be specified without specifying name of the stage table.");
+      if (config.stageTableName == null && config.shouldClearStageTable != null) {
+        addMessage(Status.UNACCEPTABLE,
+            "Should Clear stage table cannot be specified without specifying the name of the stage table.");
       }
     }
   }
