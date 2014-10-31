@@ -23,6 +23,7 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.security.AuthenticationManager;
 
 /**
  * Entry point for initializing and destroying Sqoop server
@@ -38,6 +39,7 @@ public class SqoopServer {
     ConnectorManager.getInstance().destroy();
     RepositoryManager.getInstance().destroy();
     AuditLoggerManager.getInstance().destroy();
+    AuthenticationManager.getInstance().destroy();
     SqoopConfiguration.getInstance().destroy();
     LOG.info("Sqoop server has been correctly terminated");
   }
@@ -46,6 +48,7 @@ public class SqoopServer {
     try {
       LOG.info("Booting up Sqoop server");
       SqoopConfiguration.getInstance().initialize();
+      AuthenticationManager.getInstance().initialize();
       AuditLoggerManager.getInstance().initialize();
       RepositoryManager.getInstance().initialize();
       ConnectorManager.getInstance().initialize();

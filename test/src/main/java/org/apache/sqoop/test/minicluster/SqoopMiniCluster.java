@@ -129,6 +129,7 @@ public abstract class SqoopMiniCluster {
     mapToProperties(sqoopProperties, getRepositoryConfiguration());
     mapToProperties(sqoopProperties, getSubmissionEngineConfiguration());
     mapToProperties(sqoopProperties, getExecutionEngineConfiguration());
+    mapToProperties(sqoopProperties, getSecurityConfiguration());
 
     FileUtils.writeLines(f, sqoopProperties);
 
@@ -194,6 +195,15 @@ public abstract class SqoopMiniCluster {
     Map<String, String> properties = new HashMap<String, String>();
 
     properties.put("org.apache.sqoop.execution.engine", "org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine");
+
+    return properties;
+  }
+
+  protected Map<String, String> getSecurityConfiguration() {
+    Map<String, String> properties = new HashMap<String, String>();
+
+    properties.put("org.apache.sqoop.authentication.type", "SIMPLE");
+    properties.put("org.apache.sqoop.authentication.handler", "org.apache.sqoop.security.SimpleAuthenticationHandler");
 
     return properties;
   }

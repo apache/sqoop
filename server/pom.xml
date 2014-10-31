@@ -49,6 +49,11 @@ limitations under the License.
     </dependency>
 
     <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-security</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.sqoop.submission</groupId>
       <artifactId>sqoop-submission-mapreduce</artifactId>
       <classifier>hadoop${hadoop.profile}</classifier>
