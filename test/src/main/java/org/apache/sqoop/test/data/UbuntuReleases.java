@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.test.data;
 
-import org.apache.sqoop.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.DatabaseProvider;
 
 /**
  * Releases of Ubuntu Linux.
