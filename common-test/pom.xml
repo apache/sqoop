@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>sqoop</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.apache.sqoop</groupId>
+  <artifactId>sqoop-common-test</artifactId>
+  <name>Sqoop Common Test Libraries</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbynet</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyclient</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+    <!-- Special JDBC Drivers -->
+
+    <!--
+      Oracle JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14  -Dversion=11.2.0.3 -Dpackaging=jar -Dfile=/path/to/the/jar/ojdbc6.jar
+      Usage: mvn integration-test -Djdbc.oracle
+    -->
+    <profile>
+      <id>jdbc-oracle</id>
+
+      <activation>
+        <property>
+          <name>jdbc.oracle</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>ojdbc14</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Microsoft SQL Server JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.microsoft -DartifactId=sqljdbc4  -Dversion=4.0 -Dpackaging=jar -Dfile=/path/to/the/jar/sqljdbc4.jar
+      Usage: mvn integration-test -Djdbc.sqlserver
+    -->
+    <profile>
+      <id>jdbc-sqlserver</id>
+
+      <activation>
+        <property>
+          <name>jdbc.sqlserver</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.microsoft</groupId>
+          <artifactId>sqljdbc4</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Teradata JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.teradata -DartifactId=tdgssconfig  -Dversion=14.00.00.21 -Dpackaging=jar -Dfile=/path/to/the/jar/tdgssconfig.jar
+               mvn install:install-file -DgroupId=com.teradata -DartifactId=terajdbc4  -Dversion=14.00.00.21 -Dpackaging=jar -Dfile=/path/to/the/jar/terajdbc4.jar
+      Usage: mvn integration-test -Djdbc.teradata
+    -->
+    <profile>
+      <id>jdbc-teradata</id>
+
+      <activation>
+        <property>
+          <name>jdbc.teradata</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.teradata</groupId>
+          <artifactId>tdgssconfig</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>com.teradata</groupId>
+          <artifactId>terajdbc4</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Netezza JDBC Driver
+      Install: mvn install:install-file -DgroupId=com.ibm.netezza -DartifactId=nzjdbc3 -Dversion=6.0 -Dpackaging=jar -Dfile=/path/to/the/jar/nzjdbc3.jar
+      Usage: mvn integration-test -Djdbc.netezza
+    -->
+    <profile>
+      <id>jdbc-netezza</id>
+
+      <activation>
+        <property>
+          <name>jdbc.netezza</name>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.ibm.netezza</groupId>
+          <artifactId>nzjdbc3</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+  </profiles>
+
+</project>
