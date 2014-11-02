@@ -70,7 +70,7 @@ Connectors can optionally override the following methods:
 The ``getFrom`` method returns From_ instance
 which is a placeholder for the modules needed to read from a data source.
 
-The ``getTo`` method returns Exporter_ instance
+The ``getTo`` method returns Extractor_ instance
 which is a placeholder for the modules needed to write to a data source.
 
 Methods such as ``getBundle`` , ``getConnectionConfigurationClass`` ,
@@ -170,11 +170,22 @@ Connectors can define the design of ``Partition`` on their own.
 
 Initializer and Destroyer
 -------------------------
+.. _Initializer:
+.. _Destroyer:
 
 Initializer is instantiated before the submission of MapReduce job
-for doing preparation such as adding dependent jar files.
+for doing preparation such as connecting to the data source, creating temporary tables or adding dependent jar files.
 
-Destroyer is instantiated after MapReduce job is finished for clean up.
+In addition to the Initialize() method where the preparation activities occur, the Initializer must implement a getSchema() method.
+This method is used by the framework to match the data extracted by the ``From`` connector with the data as the ``To`` connector expects it.
+In case of a relational database or columnar database, the returned Schema object will include collection of columns with their data types.
+If the data source is schema-less, such as a file, an empty Schema object can be returned (i.e a Schema object without any columns).
+
+Note that Sqoop2 currently does not support ETL between two schema-less sources. We expect for each job that either the connector providing
+the ``From`` instance or the connector providing the ``To`` instance will have a schema. If both instances have a schema, Sqoop2 will load data by column name.
+I.e, data in column "A" in data source will be loaded to column "A" in target.
+
+Destroyer is instantiated after MapReduce job is finished for clean up, for example dropping temporary tables and closing connections.
 
 
 To
@@ -226,10 +237,8 @@ Loader must iterate in the ``load`` method until the data from ``DataReader`` is
 Initializer and Destroyer
 -------------------------
 
-Initializer is instantiated before the submission of MapReduce job
-for doing preparation such as adding dependent jar files.
-
-Destroyer is instantiated after MapReduce job is finished for clean up.
+Initializer_ and Destroyer_ of a ``To`` instance are used in a similar way to those of a ``From`` instance.
+Refer to the previous section for more details.
 
 
 Connector Configurations
