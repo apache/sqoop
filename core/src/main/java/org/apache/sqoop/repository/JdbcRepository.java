@@ -388,6 +388,20 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MLink> findLinksForConnector(final long connectorId) {
+    return (List<MLink>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findLinksForConnector(connectorId, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void createJob(final MJob job) {
     doWithConnection(new DoWithConnection() {
@@ -460,13 +474,11 @@ public class JdbcRepository extends Repository {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsJob(id, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + id);
+        if (!handler.existsJob(id, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + id);
         }
-        if(handler.inUseJob(id, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0022,
-            "Id in use: " + id);
+        if (handler.inUseJob(id, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0022, "Id in use: " + id);
         }
 
         handler.deleteJob(id, conn);
@@ -505,6 +517,20 @@ public class JdbcRepository extends Repository {
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MJob> findJobsForConnector(final long connectorId) {
+    return (List<MJob>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findJobsForConnector(connectorId, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void createSubmission(final MSubmission submission) {
     doWithConnection(new DoWithConnection() {
@@ -513,7 +539,6 @@ public class JdbcRepository extends Repository {
         if(submission.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0023);
         }
-
         handler.createSubmission(submission, conn);
         return null;
       }
@@ -561,11 +586,11 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MSubmission> findSubmissionsUnfinished() {
+  public List<MSubmission> findUnfinishedSubmissions() {
     return (List<MSubmission>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        return handler.findSubmissionsUnfinished(conn);
+        return handler.findUnfinishedSubmissions(conn);
       }
     });
   }
@@ -606,43 +631,14 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MSubmission findSubmissionLastForJob(final long jobId) {
+  public MSubmission findLastSubmissionForJob(final long jobId) {
     return (MSubmission) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + jobId);
+        if (!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
         }
-        return handler.findSubmissionLastForJob(jobId, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<MLink> findLinksForConnector(final long connectorId) {
-    return (List<MLink>) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) throws Exception {
-        return handler.findLinksForConnector(connectorId, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<MJob> findJobsForConnector(final long connectorId) {
-    return (List<MJob>) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) throws Exception {
-        return handler.findJobsForConnector(connectorId, conn);
+        return handler.findLastSubmissionForJob(jobId, conn);
       }
     });
   }

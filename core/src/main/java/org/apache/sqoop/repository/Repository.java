@@ -115,7 +115,7 @@ public abstract class Repository {
   /**
    * Get all connectors in repository
    *
-   * @return List will all connectors in repository
+   * @return List with all connectors in repository
    */
   public abstract List<MConnector> findConnectors();
 
@@ -189,6 +189,13 @@ public abstract class Repository {
   public abstract MLink findLink(String name);
 
   /**
+   * Retrieve links which use the given connector.
+   * @param connectorId Connector id whose links should be fetched
+   * @return List of MLink that use <code>connectorId</code>.
+   */
+  public abstract List<MLink> findLinksForConnector(long connectorId);
+
+  /**
    * Get all Link objects.
    *
    * @return List will all saved link objects
@@ -242,7 +249,7 @@ public abstract class Repository {
    * Find job object with given id.
    *
    * @param id Job id
-   * @return Deserialized config of job loaded from repository
+   * @return job with given id loaded from repository
    */
   public abstract MJob findJob(long id);
 
@@ -252,6 +259,14 @@ public abstract class Repository {
    * @return List of all jobs in the repository
    */
   public abstract List<MJob> findJobs();
+
+  /**
+   * Retrieve jobs which use the given link.
+   *
+   * @param connectorId Connector ID whose jobs should be fetched
+   * @return List of MJobs that use <code>linkID</code>.
+   */
+  public abstract List<MJob> findJobsForConnector(long connectorId);
 
   /**
    * Create new submission record in repository.
@@ -279,7 +294,7 @@ public abstract class Repository {
    *
    * @return List of unfinished submissions
    */
-  public abstract List<MSubmission> findSubmissionsUnfinished();
+  public abstract List<MSubmission> findUnfinishedSubmissions();
 
   /**
    * Return all submissions from repository
@@ -301,22 +316,7 @@ public abstract class Repository {
    * @param jobId Job id
    * @return Most recent submission
    */
-  public abstract MSubmission findSubmissionLastForJob(long jobId);
-
-  /**
-   * Retrieve links which use the given connector.
-   * @param connectorId Connector ID whose links should be fetched
-   * @return List of MLink that use <code>connectorID</code>.
-   */
-  public abstract List<MLink> findLinksForConnector(long connectorId);
-
-  /**
-   * Retrieve jobs which use the given link.
-   *
-   * @param connectorId Connector ID whose jobs should be fetched
-   * @return List of MJobs that use <code>linkID</code>.
-   */
-  public abstract List<MJob> findJobsForConnector(long connectorId);
+  public abstract MSubmission findLastSubmissionForJob(long jobId);
 
   /**
    * Update the connector with the new data supplied in the

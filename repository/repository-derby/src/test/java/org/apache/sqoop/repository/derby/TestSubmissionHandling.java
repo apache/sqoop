@@ -60,13 +60,13 @@ public class TestSubmissionHandling extends DerbyTestCase {
   public void testFindSubmissionsUnfinished() throws Exception {
     List<MSubmission> submissions;
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
 
     loadSubmissions();
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
   }
@@ -123,7 +123,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
 
     List<MSubmission> submissions =
-      handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+      handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
 
@@ -179,7 +179,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
 
     List<MSubmission> submissions =
-      handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+      handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
 
@@ -188,7 +188,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
     handler.updateSubmission(submission, getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
   }
@@ -198,7 +198,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
     List<MSubmission> submissions;
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 5);
@@ -208,21 +208,21 @@ public class TestSubmissionHandling extends DerbyTestCase {
     calendar.set(2012, Calendar.JANUARY, 3, 5, 5, 5);
     handler.purgeSubmissions(calendar.getTime(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
 
     handler.purgeSubmissions(new Date(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
 
     handler.purgeSubmissions(new Date(), getDerbyDatabaseConnection());
 
-    submissions = handler.findSubmissionsUnfinished(getDerbyDatabaseConnection());
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);

@@ -330,7 +330,7 @@ public abstract class JdbcRepositoryHandler {
    *
    * @param jobId Job id
    * @param conn Connection to the repository
-   * @return Deserialized config of the job that is present in the repository
+   * @return job for a given id that is present in the repository
    */
   public abstract MJob findJob(long jobId, Connection conn);
 
@@ -343,7 +343,7 @@ public abstract class JdbcRepositoryHandler {
   public abstract List<MJob> findJobs(Connection conn);
 
   /**
-   * Save given submission in repository.
+   * Save given submission associates with a job in repository.
    *
    * @param submission Submission object
    * @param conn Connection to the repository
@@ -380,7 +380,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn Connection to the repository
    * @return List of unfinished submissions.
    */
-  public abstract List<MSubmission> findSubmissionsUnfinished(Connection conn);
+  public abstract List<MSubmission> findUnfinishedSubmissions(Connection conn);
 
   /**
    * Return list of all submissions from the repository.
@@ -405,5 +405,5 @@ public abstract class JdbcRepositoryHandler {
    * @param conn Connection to the repository
    * @return Most recent submission
    */
-  public abstract MSubmission findSubmissionLastForJob(long jobId, Connection conn);
+  public abstract MSubmission findLastSubmissionForJob(long jobId, Connection conn);
 }

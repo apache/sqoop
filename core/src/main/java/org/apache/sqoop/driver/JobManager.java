@@ -279,7 +279,7 @@ public class JobManager implements Reconfigurable {
     // only if it's not.
     synchronized (getClass()) {
       MSubmission lastSubmission = RepositoryManager.getInstance().getRepository()
-          .findSubmissionLastForJob(jobId);
+          .findLastSubmissionForJob(jobId);
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
         throw new SqoopException(DriverError.DRIVER_0002, "Job with id " + jobId);
       }
@@ -530,7 +530,7 @@ public class JobManager implements Reconfigurable {
   public MSubmission stop(long jobId, HttpEventContext ctx) {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission mSubmission = repository.findSubmissionLastForJob(jobId);
+    MSubmission mSubmission = repository.findLastSubmissionForJob(jobId);
 
     if (mSubmission == null || !mSubmission.getStatus().isRunning()) {
       throw new SqoopException(DriverError.DRIVER_0003, "Job with id " + jobId
@@ -549,7 +549,7 @@ public class JobManager implements Reconfigurable {
 
   public MSubmission status(long jobId) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission mSubmission = repository.findSubmissionLastForJob(jobId);
+    MSubmission mSubmission = repository.findLastSubmissionForJob(jobId);
 
     if (mSubmission == null) {
       return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
@@ -681,7 +681,7 @@ public class JobManager implements Reconfigurable {
           // Let's get all running submissions from repository to check them out
           List<MSubmission> unfinishedSubmissions =
             RepositoryManager.getInstance().getRepository()
-              .findSubmissionsUnfinished();
+              .findUnfinishedSubmissions();
 
           for (MSubmission submission : unfinishedSubmissions) {
             update(submission);

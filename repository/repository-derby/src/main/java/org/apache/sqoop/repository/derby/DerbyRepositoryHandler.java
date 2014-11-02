@@ -1205,9 +1205,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
 
-      if(links.size() != 1) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0024, "Couldn't find"
-          + " link with id " + linkId);
+      if (links.size() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0024, "Couldn't find link with id "
+            + linkId);
       }
 
       // Return the first and only one link object with the given id
@@ -1492,7 +1492,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   @Override
   public boolean inUseJob(long jobId, Connection conn) {
-    MSubmission submission = findSubmissionLastForJob(jobId, conn);
+    MSubmission submission = findLastSubmissionForJob(jobId, conn);
 
     // We have no submissions and thus job can't be in use
     if(submission == null) {
@@ -1573,9 +1573,9 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MJob> jobs = loadJobs(stmt, conn);
 
-      if(jobs.size() != 1) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0030, "Couldn't find"
-          + " job with id " + id);
+      if (jobs.size() != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0030, "Couldn't find job with id "
+            + id);
       }
 
       // Return the first and only one link object
@@ -1763,7 +1763,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MSubmission> findSubmissionsUnfinished(Connection conn) {
+  public List<MSubmission> findUnfinishedSubmissions(Connection conn) {
     List<MSubmission> submissions = new LinkedList<MSubmission>();
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -1852,7 +1852,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public MSubmission findSubmissionLastForJob(long jobId, Connection conn) {
+  public MSubmission findLastSubmissionForJob(long jobId, Connection conn) {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
