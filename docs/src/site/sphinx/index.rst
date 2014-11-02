@@ -59,7 +59,7 @@ Developer Guide
 - `Building Sqoop2 <BuildingSqoop2.html>`_
 - `Development Environment Setup <DevEnv.html>`_
 - `Java Client API Guide <ClientAPI.html>`_
-- `Developping Connector <ConnectorDevelopment.html>`_
+- `Developing a Connector <ConnectorDevelopment.html>`_
 - `REST API Guide <RESTAPI.html>`_
 
 Overview
