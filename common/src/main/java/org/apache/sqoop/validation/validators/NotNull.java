@@ -26,7 +26,7 @@ public class NotNull<T> extends AbstractValidator<T> {
   @Override
   public void validate(T instance) {
     if (instance == null) {
-      addMessage(Status.UNACCEPTABLE, "Can't be null");
+      addMessage(Status.ERROR, "Can't be null");
     }
   }
 }

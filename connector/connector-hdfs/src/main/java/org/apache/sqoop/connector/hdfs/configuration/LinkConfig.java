@@ -38,7 +38,7 @@ public class LinkConfig {
       if (config.uri != null) {
         Matcher matcher = URI_PATTERN.matcher(config.uri);
         if (!matcher.matches()) {
-          addMessage(Status.UNACCEPTABLE,
+          addMessage(Status.ERROR,
               "Invalid URI" + config.uri + ". URI must either be null or a valid URI. Here are a few valid example URIs:"
               + " hdfs://example.com:8020/, hdfs://example.com/, file:///, file:///tmp, file://localhost/tmp");
         }

@@ -88,6 +88,6 @@ public class StartJobFunction extends SqoopFunction {
       return null;
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 }

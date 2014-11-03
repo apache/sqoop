@@ -42,7 +42,7 @@ public class TestNotEmpty {
     validator.validate("");
     assertEquals(1, validator.getMessages().size());
     messages = validator.getMessages();
-    assertEquals(Status.UNACCEPTABLE, messages.get(0).getStatus());
+    assertEquals(Status.ERROR, messages.get(0).getStatus());
 
     validator.reset();
     assertEquals(0, validator.getMessages().size());
@@ -50,6 +50,6 @@ public class TestNotEmpty {
     validator.validate(null);
     assertEquals(1, validator.getMessages().size());
     messages = validator.getMessages();
-    assertEquals(Status.UNACCEPTABLE, messages.get(0).getStatus());
+    assertEquals(Status.ERROR, messages.get(0).getStatus());
   }
 }

@@ -75,7 +75,7 @@ public class ShowServerFunction extends SqoopFunction {
       showServer(host, port, webapp, version);
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showServer(boolean host, boolean port, boolean webapp, boolean version) {

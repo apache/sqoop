@@ -60,7 +60,7 @@ public class ShowSubmissionFunction extends SqoopFunction {
       }
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showSummary(Long jid) {

@@ -820,7 +820,7 @@ public final class ConfigFiller {
   }
 
   /**
-   * Print validation message in cases that it's not in state "FINE"
+   * Print validation message in cases that it's not in state "OK"
    *
    * @param element Validated element
    */
@@ -831,14 +831,14 @@ public final class ConfigFiller {
 
     for(Message message : element.getValidationMessages())
     switch (message.getStatus()) {
-      case UNACCEPTABLE:
+      case ERROR:
         if (includeInputPrefix) {
           errorMessage(element, message.getMessage());
         } else {
           errorMessage(message.getMessage());
         }
         break;
-      case ACCEPTABLE:
+      case WARNING:
         if (includeInputPrefix) {
           warningMessage(element, message.getMessage());
         } else {

@@ -30,8 +30,8 @@ public class TestValidator {
   public static class ValidatorImpl extends AbstractValidator<String> {
     @Override
     public void validate(String msg) {
-      addMessage(Status.FINE, msg);
-      addMessage(new Message(Status.UNACCEPTABLE, "Prefix: " + msg));
+      addMessage(Status.OK, msg);
+      addMessage(new Message(Status.ERROR, "Prefix: " + msg));
     }
   }
 
@@ -44,11 +44,11 @@ public class TestValidator {
     assertEquals(2, validator.getMessages().size());
 
     Message msg = validator.getMessages().get(0);
-    assertEquals(Status.FINE, msg.getStatus());
+    assertEquals(Status.OK, msg.getStatus());
     assertEquals("X", msg.getMessage());
 
     msg = validator.getMessages().get(1);
-    assertEquals(Status.UNACCEPTABLE, msg.getStatus());
+    assertEquals(Status.ERROR, msg.getStatus());
     assertEquals("Prefix: X", msg.getMessage());
 
     validator.reset();

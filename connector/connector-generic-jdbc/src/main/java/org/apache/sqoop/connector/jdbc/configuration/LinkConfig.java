@@ -57,7 +57,7 @@ public class LinkConfig {
       try {
         DriverManager.getConnection(linkConfig.connectionString, linkConfig.username, linkConfig.password);
       } catch (SQLException e) {
-        addMessage(Status.ACCEPTABLE, "Can't connect to the database with given credentials: " + e.getMessage());
+        addMessage(Status.WARNING, "Can't connect to the database with given credentials: " + e.getMessage());
       }
     }
   }

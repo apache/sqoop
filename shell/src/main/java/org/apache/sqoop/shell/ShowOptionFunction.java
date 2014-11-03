@@ -70,7 +70,7 @@ public class ShowOptionFunction extends SqoopFunction {
       return null;
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   /**

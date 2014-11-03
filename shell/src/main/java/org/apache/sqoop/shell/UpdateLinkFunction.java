@@ -65,7 +65,7 @@ public class UpdateLinkFunction extends SqoopFunction {
 
     ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
 
-    Status status = Status.FINE;
+    Status status = Status.OK;
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_LINK_CONFIG);

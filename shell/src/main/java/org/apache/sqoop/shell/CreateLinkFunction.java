@@ -64,7 +64,7 @@ public class CreateLinkFunction extends SqoopFunction {
 
     ResourceBundle connectorConfigBundle = client.getConnectorConfigBundle(connectorId);
 
-    Status status = Status.FINE;
+    Status status = Status.OK;
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_FILL_LINK_CONFIG);
 

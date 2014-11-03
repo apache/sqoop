@@ -58,7 +58,7 @@ public class ShowLinkFunction extends SqoopFunction {
       showSummary();
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showSummary() {

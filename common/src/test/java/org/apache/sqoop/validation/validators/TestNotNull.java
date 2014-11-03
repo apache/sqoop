@@ -46,6 +46,6 @@ public class TestNotNull {
 
     List<Message> messages = validator.getMessages();
     Message msg = messages.get(0);
-    assertEquals(Status.UNACCEPTABLE, msg.getStatus());
+    assertEquals(Status.ERROR, msg.getStatus());
   }
 }

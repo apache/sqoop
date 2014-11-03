@@ -50,17 +50,17 @@ public class ToJobConfig {
     @Override
     public void validate(ToJobConfig config) {
       if (config.tableName == null && config.sql == null) {
-        addMessage(Status.UNACCEPTABLE, "Either table name or SQL must be specified");
+        addMessage(Status.ERROR, "Either table name or SQL must be specified");
       }
       if (config.tableName != null && config.sql != null) {
-        addMessage(Status.UNACCEPTABLE, "Both table name and SQL cannot be specified");
+        addMessage(Status.ERROR, "Both table name and SQL cannot be specified");
       }
       if (config.tableName == null && config.stageTableName != null) {
-        addMessage(Status.UNACCEPTABLE,
+        addMessage(Status.ERROR,
             "Stage table name cannot be specified without specifying table name");
       }
       if (config.stageTableName == null && config.shouldClearStageTable != null) {
-        addMessage(Status.UNACCEPTABLE,
+        addMessage(Status.ERROR,
             "Should Clear stage table cannot be specified without specifying the name of the stage table.");
       }
     }

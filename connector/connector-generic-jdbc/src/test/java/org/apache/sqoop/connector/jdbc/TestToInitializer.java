@@ -293,7 +293,7 @@ public class TestToInitializer {
     ConfigValidationResult result = validationRunner.validate(jobConfig);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
-      Status.UNACCEPTABLE,
+      Status.ERROR,
         result.getStatus());
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
@@ -302,7 +302,7 @@ public class TestToInitializer {
     result = validationRunner.validate(jobConfig);
     assertEquals("User should not specify clear stage table flag without " +
       "specifying name of the stage table",
-      Status.UNACCEPTABLE,
+      Status.ERROR,
         result.getStatus());
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
@@ -322,7 +322,7 @@ public class TestToInitializer {
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
     ConfigValidationResult result = validationRunner.validate(jobConfig);
     assertEquals("Stage table name cannot be specified without specifying " +
-      "table name", Status.UNACCEPTABLE, result.getStatus());
+      "table name", Status.ERROR, result.getStatus());
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
   }

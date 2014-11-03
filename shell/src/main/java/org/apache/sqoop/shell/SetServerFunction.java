@@ -81,6 +81,6 @@ public class SetServerFunction extends SqoopFunction {
 
     printlnResource(Constants.RES_SET_SERVER_SUCCESSFUL);
 
-    return Status.FINE;
+    return Status.OK;
   }
 }

@@ -55,13 +55,13 @@ public class FromJobConfig {
     @Override
     public void validate(FromJobConfig config) {
       if (config.tableName == null && config.sql == null) {
-        addMessage(Status.UNACCEPTABLE, "Either table name or SQL must be specified");
+        addMessage(Status.ERROR, "Either table name or SQL must be specified");
       }
       if (config.tableName != null && config.sql != null) {
-        addMessage(Status.UNACCEPTABLE, "Both table name and SQL cannot be specified");
+        addMessage(Status.ERROR, "Both table name and SQL cannot be specified");
       }
       if (config.schemaName != null && config.sql != null) {
-        addMessage(Status.UNACCEPTABLE, "Both schema name and SQL cannot be specified");
+        addMessage(Status.ERROR, "Both schema name and SQL cannot be specified");
       }
     }
   }

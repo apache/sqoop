@@ -79,7 +79,7 @@ public class CreateJobFunction extends  SqoopFunction {
         job.getConnectorId(Direction.TO));
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
-    Status status = Status.FINE;
+    Status status = Status.OK;
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_FILL_JOB_CONFIG);

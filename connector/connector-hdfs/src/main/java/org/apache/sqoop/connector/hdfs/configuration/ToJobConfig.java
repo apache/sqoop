@@ -44,12 +44,12 @@ public class ToJobConfig {
       if(conf.customCompression != null &&
          conf.customCompression.trim().length() > 0 &&
          conf.compression != ToCompression.CUSTOM) {
-        addMessage(Status.UNACCEPTABLE, "Custom compression codec should be blank as " + conf.compression + " is being used");
+        addMessage(Status.ERROR, "Custom compression codec should be blank as " + conf.compression + " is being used");
       }
 
       if(conf.compression == ToCompression.CUSTOM &&
          (conf.customCompression == null || conf.customCompression.trim().length() == 0)) {
-        addMessage(Status.UNACCEPTABLE, "Custom compression field is blank.");
+        addMessage(Status.ERROR, "Custom compression field is blank.");
       }
     }
   }

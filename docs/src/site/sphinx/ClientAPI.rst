@@ -114,11 +114,11 @@ List of status code
 +------------------+------------------------------------------------------------------------------------------------------------+
 | Function         | Description                                                                                                |
 +==================+============================================================================================================+
-| ``FINE``         | There are no issues, no warnings.                                                                          |
+| ``OK``           | There are no issues, no warnings.                                                                          |
 +------------------+------------------------------------------------------------------------------------------------------------+
-| ``ACCEPTABLE``   | Validated entity is correct enough to be processed. There might be some warnings, but no errors.           |
+| ``WARNING``      | Validated entity is correct enough to be processed. There might be some warnings, but no errors.           |
 +------------------+------------------------------------------------------------------------------------------------------------+
-| ``UNACCEPTABLE`` | There are serious issues with validated entity. We can't proceed until reported issues will be resolved.   |
+| ``ERROR``        | There are serious issues with validated entity. We can't proceed until reported issues will be resolved.   |
 +------------------+------------------------------------------------------------------------------------------------------------+
 
 View Error or Warning message

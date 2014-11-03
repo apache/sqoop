@@ -70,7 +70,7 @@ public class UpdateJobFunction extends SqoopFunction {
 
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
-    Status status = Status.FINE;
+    Status status = Status.OK;
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_JOB_CONFIG);

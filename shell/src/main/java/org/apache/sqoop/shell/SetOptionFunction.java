@@ -67,7 +67,7 @@ public class SetOptionFunction extends SqoopFunction {
 
       setVerbose(newValue);
       printlnResource(Constants.RES_SET_VERBOSE_CHANGED, newValue);
-      return Status.FINE;
+      return Status.OK;
     }
 
     if (name.equals(Constants.OPT_POLL_TIMEOUT)) {
@@ -82,7 +82,7 @@ public class SetOptionFunction extends SqoopFunction {
 
       setPollTimeout(newValue);
       printlnResource(Constants.RES_SET_POLL_TIMEOUT_CHANGED, newValue);
-      return Status.FINE;
+      return Status.OK;
     }
 
     printlnResource(Constants.RES_SET_UNKNOWN_OPT_IGNORED, name);

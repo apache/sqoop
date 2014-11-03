@@ -44,10 +44,10 @@ public class TestValidationRunner {
       @Override
       public void validate(ConfigA config) {
         if(config.notNull == null) {
-          addMessage(Status.UNACCEPTABLE, "null");
+          addMessage(Status.ERROR, "null");
         }
         if("error".equals(config.notNull)) {
-          addMessage(Status.UNACCEPTABLE, "error");
+          addMessage(Status.ERROR, "error");
         }
       }
     }
@@ -62,21 +62,21 @@ public class TestValidationRunner {
     // Null string should fail on Input level and should not call config level validators
     config.notNull = null;
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("configName.notNull"));
 
     // String "error" should trigger config level error, but not Input level
     config.notNull = "error";
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("configName"));
 
     // Acceptable state
     config.notNull = "This is truly random string";
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(Status.OK, result.getStatus());
     assertEquals(0, result.getMessages().size());
   }
 
@@ -100,7 +100,7 @@ public class TestValidationRunner {
 
     config.str = null;
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("configName.str"));
     assertEquals(2, result.getMessages().get("configName.str").size());
@@ -115,14 +115,14 @@ public class TestValidationRunner {
     // Sub string not found
     config.str = "Mordor";
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("configName.str"));
 
     // Sub string found
     config.str = "Morfindmedor";
     result = runner.validateConfig("configName", config);
-    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(Status.OK, result.getStatus());
     assertEquals(0, result.getMessages().size());
   }
 
@@ -137,10 +137,10 @@ public class TestValidationRunner {
       @Override
       public void validate(ConfigurationA conf) {
         if("error".equals(conf.formA.notNull)) {
-          addMessage(Status.UNACCEPTABLE, "error");
+          addMessage(Status.ERROR, "error");
         }
         if("conf-error".equals(conf.formA.notNull)) {
-          addMessage(Status.UNACCEPTABLE, "conf-error");
+          addMessage(Status.ERROR, "conf-error");
         }
       }
     }
@@ -155,28 +155,28 @@ public class TestValidationRunner {
     // Null string should fail on Input level and should not call config nor class level validators
     conf.formA.notNull = null;
     result = runner.validate(conf);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("formA.notNull"));
 
     // String "error" should trigger config level error, but not Input nor class level
     conf.formA.notNull = "error";
     result = runner.validate(conf);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey("formA"));
 
     // String "conf-error" should trigger class level error, but not Input nor Config level
     conf.formA.notNull = "conf-error";
     result = runner.validate(conf);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
     assertEquals(1, result.getMessages().size());
     assertTrue(result.getMessages().containsKey(""));
 
     // Valid string
     conf.formA.notNull = "Valid string";
     result = runner.validate(conf);
-    assertEquals(Status.FINE, result.getStatus());
+    assertEquals(Status.OK, result.getStatus());
     assertEquals(0, result.getMessages().size());
   }
 }
