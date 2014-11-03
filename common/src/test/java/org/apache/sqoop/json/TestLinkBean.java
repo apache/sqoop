@@ -59,9 +59,9 @@ public class TestLinkBean {
     JSONObject json = linkBean.extract(false);
 
     // Check for sensitivity
-    JSONArray all = (JSONArray)json.get(LinkBean.LINK);
-    JSONObject allItem = (JSONObject)all.get(0);
-    JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
+    JSONArray linkArray = (JSONArray)json.get(LinkBean.LINK);
+    JSONObject linkItem = (JSONObject)linkArray.get(0);
+    JSONArray connectors = (JSONArray)linkItem.get(LinkBean.LINK_CONFIG);
     JSONObject connector = (JSONObject)connectors.get(0);
     JSONArray inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     for (Object input1 : inputs) {

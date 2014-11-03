@@ -34,6 +34,7 @@ import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.RequestContext;
@@ -51,7 +52,6 @@ public class LinkRequestHandler implements RequestHandler {
   static final String DISABLE = "disable";
   static final String LINKS_PATH = "links";
   static final String LINK_PATH = "link";
-  static final String CONNECTOR_NAME_QUERY_PARAM = "cname";
 
   public LinkRequestHandler() {
     LOG.info("LinkRequestHandler initialized");
@@ -124,10 +124,10 @@ public class LinkRequestHandler implements RequestHandler {
           "Expected one link while parsing JSON request but got " + links.size());
     }
 
-    MLink link = links.get(0);
+    MLink postedLink = links.get(0);
     MLinkConfig linkConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(link.getConnectorId()).getLinkConfig();
-    if (!linkConfig.equals(link.getConnectorLinkConfig())) {
+        .getConnectorConfigurable(postedLink.getConnectorId()).getLinkConfig();
+    if (!linkConfig.equals(postedLink.getConnectorLinkConfig())) {
       throw new SqoopException(ServerError.SERVER_0003, "Detected incorrect link config structure");
     }
     // if update get the link id from the request URI
@@ -135,15 +135,17 @@ public class LinkRequestHandler implements RequestHandler {
       String linkIdentifier = ctx.getLastURLElement();
       // support linkName or linkId for the api
       long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
-      MLink existingLink = repository.findLink(linkId);
-      link.setConnectorId(existingLink.getConnectorId());
+      if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
+        MLink existingLink = repository.findLink(linkId);
+        postedLink.setPersistenceId(existingLink.getPersistenceId());
+      }
     }
     // Associated connector for this link
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
-        link.getConnectorId());
+        postedLink.getConnectorId());
 
     // Validate user supplied config data
-    ConfigValidationResult connectorLinkConfigValidation = ConfigUtils.validateConfigs(link
+    ConfigValidationResult connectorLinkConfigValidation = ConfigUtils.validateConfigs(postedLink
         .getConnectorLinkConfig().getConfigs(), connector.getLinkConfigurationClass());
     // Return back link validation result bean
     ValidationResultBean linkValidationBean = new ValidationResultBean(
@@ -154,17 +156,17 @@ public class LinkRequestHandler implements RequestHandler {
       if (create) {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "create", "link",
-            String.valueOf(link.getPersistenceId()));
-        link.setCreationUser(username);
-        link.setLastUpdateUser(username);
-        repository.createLink(link);
-        linkValidationBean.setId(link.getPersistenceId());
+            String.valueOf(postedLink.getPersistenceId()));
+        postedLink.setCreationUser(username);
+        postedLink.setLastUpdateUser(username);
+        repository.createLink(postedLink);
+        linkValidationBean.setId(postedLink.getPersistenceId());
       } else {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "update", "link",
-            String.valueOf(link.getPersistenceId()));
-        link.setLastUpdateUser(username);
-        repository.updateLink(link);
+            String.valueOf(postedLink.getPersistenceId()));
+        postedLink.setLastUpdateUser(username);
+        repository.updateLink(postedLink);
       }
     }
 
@@ -214,6 +216,7 @@ public class LinkRequestHandler implements RequestHandler {
 
   private long getLinkIdFromIdentifier(String identifier, Repository repository) {
     // support linkName or linkId for the api
+    // NOTE: linkId is a fallback for older sqoop clients if any, since we want to primarily use unique linkNames
     long linkId;
     if (repository.findLink(identifier) != null) {
       linkId = repository.findLink(identifier).getPersistenceId();
@@ -221,7 +224,7 @@ public class LinkRequestHandler implements RequestHandler {
       try {
         linkId = Long.valueOf(identifier);
       } catch (NumberFormatException ex) {
-        // this means name nor Id existed
+        // this means name nor Id existed and we want to throw a user friendly message than a number format exception
         throw new SqoopException(ServerError.SERVER_0005, "Invalid link: " + identifier
             + " requested");
       }

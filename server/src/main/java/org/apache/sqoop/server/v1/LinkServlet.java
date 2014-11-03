@@ -27,30 +27,30 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  * Provides operations for link resource
  *
  * GET /v1/link/{lid}
- *  Return details about one particular link with id :lid
+ *  Return details about one particular link with id lid
  * GET /v1/link/{lname}
- *  Return details about one particular link with name :lname
+ *  Return details about one particular link with name lname
  *
  * POST /v1/link/ with {connector-id} and {link-config-id} in the post data
  *  Create link for connector with id connector-id
  * PUT /v1/link/ with {connector-id} and {link-config-id} in the post data
  *  Edit/Update link for connector with id connector-id
-
+ *
  * PUT /v1/link/{lid}
- *  Edit/Update details about one particular link with id :lid
+ *  Edit/Update details about one particular link with id lid
  * PUT /v1/link/{lname}
- *  Edit/Update details about one particular link with name :lname
+ *  Edit/Update details about one particular link with name lname
  *
  * DELETE /v1/link/{lid}
- *  Delete/Remove one particular link with id :lid
+ *  Delete/Remove one particular link with id lid
  * DELETE /v1/link/{lname}
- *  Delete/Remove one particular link with name :lname
+ *  Delete/Remove one particular link with name lname
  *
  * PUT /v1/link/{lname}/enable
- * Enable link with id :lname
+ * Enable link with name lname
  *
  * PUT /v1/link/{lname}/disable
- * Disable link with id :lname
+ * Disable link with name lname
  *
  */
 @SuppressWarnings("serial")
