@@ -81,7 +81,7 @@ public class TestValidationResultBean {
 
   public void verifyResultA(ConfigValidationResult result) {
     assertNotNull(result);
-    assertEquals(Status.UNACCEPTABLE, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus());
 
     Map<String, List<Message>> messages = result.getMessages();
     assertEquals(1, messages.size());
@@ -91,18 +91,18 @@ public class TestValidationResultBean {
     assertNotNull(messagesA);
     assertEquals(2, messagesA.size());
 
-    assertEquals(Status.ACCEPTABLE, messagesA.get(0).getStatus());
+    assertEquals(Status.WARNING, messagesA.get(0).getStatus());
     assertEquals("A", messagesA.get(0).getMessage());
 
-    assertEquals(Status.UNACCEPTABLE, messagesA.get(1).getStatus());
+    assertEquals(Status.ERROR, messagesA.get(1).getStatus());
     assertEquals("B", messagesA.get(1).getMessage());
   }
 
   public ConfigValidationResult getResultA() {
     ConfigValidationResult result = new ConfigValidationResult();
     List<Message> messages = new LinkedList<Message>();
-    messages.add(new Message(Status.ACCEPTABLE, "A"));
-    messages.add(new Message(Status.UNACCEPTABLE, "B"));
+    messages.add(new Message(Status.WARNING, "A"));
+    messages.add(new Message(Status.ERROR, "B"));
     result.addMessages("A", messages);
     return result;
   }

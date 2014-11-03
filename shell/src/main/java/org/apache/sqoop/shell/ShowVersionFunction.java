@@ -79,7 +79,7 @@ public class ShowVersionFunction extends SqoopFunction {
       showVersion(server, client, restApi);
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showVersion(boolean server, boolean client, boolean restApi) {

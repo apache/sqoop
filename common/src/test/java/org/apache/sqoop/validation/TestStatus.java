@@ -28,26 +28,26 @@ public class TestStatus {
   @Test
   public void testGetWorstStatus() {
     // Comparing itself with itself
-    assertEquals(Status.FINE,
-      Status.getWorstStatus(Status.FINE));
-    assertEquals(Status.FINE,
-      Status.getWorstStatus(Status.FINE, Status.FINE));
-    assertEquals(Status.ACCEPTABLE,
-      Status.getWorstStatus(Status.ACCEPTABLE, Status.ACCEPTABLE));
-    assertEquals(Status.UNACCEPTABLE,
-      Status.getWorstStatus(Status.UNACCEPTABLE, Status.UNACCEPTABLE));
+    assertEquals(Status.OK,
+      Status.getWorstStatus(Status.OK));
+    assertEquals(Status.OK,
+      Status.getWorstStatus(Status.OK, Status.OK));
+    assertEquals(Status.WARNING,
+      Status.getWorstStatus(Status.WARNING, Status.WARNING));
+    assertEquals(Status.ERROR,
+      Status.getWorstStatus(Status.ERROR, Status.ERROR));
 
     // Retriving the worst option
-    assertEquals(Status.UNACCEPTABLE,
-      Status.getWorstStatus(Status.FINE, Status.UNACCEPTABLE));
-    assertEquals(Status.ACCEPTABLE,
-      Status.getWorstStatus(Status.FINE, Status.ACCEPTABLE));
+    assertEquals(Status.ERROR,
+      Status.getWorstStatus(Status.OK, Status.ERROR));
+    assertEquals(Status.WARNING,
+      Status.getWorstStatus(Status.OK, Status.WARNING));
   }
 
   @Test
   public void testCanProceed() {
-    assertTrue(Status.FINE.canProceed());
-    assertTrue(Status.ACCEPTABLE.canProceed());
-    assertFalse(Status.UNACCEPTABLE.canProceed());
+    assertTrue(Status.OK.canProceed());
+    assertTrue(Status.WARNING.canProceed());
+    assertFalse(Status.ERROR.canProceed());
   }
 }

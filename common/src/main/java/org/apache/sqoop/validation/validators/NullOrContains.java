@@ -26,7 +26,7 @@ public class NullOrContains extends AbstractValidator<String> {
   @Override
   public void validate(String str) {
     if(str != null && !str.contains(getStringArgument())) {
-      addMessage(Status.UNACCEPTABLE, "String must contain substring: " + getStringArgument());
+      addMessage(Status.ERROR, "String must contain substring: " + getStringArgument());
     }
   }
 }

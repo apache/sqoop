@@ -51,6 +51,6 @@ public class DisableJobFunction extends SqoopFunction {
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     client.enableJob(getLong(line, Constants.OPT_JID), false);
-    return Status.FINE;
+    return Status.OK;
   }
 }

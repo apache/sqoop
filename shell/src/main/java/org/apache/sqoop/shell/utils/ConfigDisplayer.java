@@ -134,7 +134,7 @@ public final class ConfigDisplayer {
   }
 
   /**
-   * Method prints the warning message of ACCEPTABLE status
+   * Method prints the warning message of WARNING status
    * @param entity - link or job instance
    */
   public static void displayConfigWarning(MAccountableEntity entity) {
@@ -150,7 +150,7 @@ public final class ConfigDisplayer {
       configList.addAll(job.getJobConfig(Direction.TO).getConfigs());
     }
     for(MConfig config : configList) {
-      if(config.getValidationStatus() == Status.ACCEPTABLE) {
+      if(config.getValidationStatus() == Status.WARNING) {
         if(showMessage) {
           print("\n@|yellow %s|@\n", resourceString(Constants.RES_CONFIG_DISPLAYER_FORM_WARNING));
           showMessage = false;

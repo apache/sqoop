@@ -23,8 +23,6 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
@@ -58,7 +56,7 @@ public class ShowConnectorFunction extends SqoopFunction {
       showSummary();
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showSummary() {

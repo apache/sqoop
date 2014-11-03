@@ -51,6 +51,6 @@ public class StopJobFunction extends SqoopFunction {
       return null;
     }
 
-    return Status.FINE;
+    return Status.OK;
   }
 }

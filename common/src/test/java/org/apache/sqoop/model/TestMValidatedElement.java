@@ -35,7 +35,7 @@ public class TestMValidatedElement {
   public void testInitialization() {
     MValidatedElement input = new MIntegerInput("input", false);
     assertEquals("input", input.getName());
-    assertEquals(Status.FINE, input.getValidationStatus());
+    assertEquals(Status.OK, input.getValidationStatus());
   }
 
   /**
@@ -46,22 +46,22 @@ public class TestMValidatedElement {
     MValidatedElement input = new MIntegerInput("input", false);
 
     // Default status
-    assertEquals(Status.FINE, input.getValidationStatus());
+    assertEquals(Status.OK, input.getValidationStatus());
 
     // Add a message
-    input.addValidationMessage(new Message(Status.ACCEPTABLE, "MY_MESSAGE"));
-    assertEquals(Status.ACCEPTABLE, input.getValidationStatus());
+    input.addValidationMessage(new Message(Status.WARNING, "MY_MESSAGE"));
+    assertEquals(Status.WARNING, input.getValidationStatus());
     assertEquals(1, input.getValidationMessages().size());
     assertEquals("MY_MESSAGE", input.getValidationMessages().get(0).getMessage());
 
     // Reset
     input.resetValidationMessages();
-    assertEquals(Status.FINE, input.getValidationStatus());
+    assertEquals(Status.OK, input.getValidationStatus());
     assertEquals(0, input.getValidationMessages().size());
 
     // Set unacceptable status
-    input.addValidationMessage(new Message(Status.UNACCEPTABLE, "MY_MESSAGE"));
-    assertEquals(Status.UNACCEPTABLE, input.getValidationStatus());
+    input.addValidationMessage(new Message(Status.ERROR, "MY_MESSAGE"));
+    assertEquals(Status.ERROR, input.getValidationStatus());
     assertEquals(1, input.getValidationMessages().size());
     assertEquals("MY_MESSAGE", input.getValidationMessages().get(0).getMessage());
   }

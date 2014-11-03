@@ -45,7 +45,7 @@ public class ShowDriverFunction extends SqoopFunction {
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     showDriver();
-    return Status.FINE;
+    return Status.OK;
   }
 
   private void showDriver() {

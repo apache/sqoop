@@ -65,7 +65,7 @@ public class CloneLinkFunction extends SqoopFunction {
     // Remove persistent id as we're making a clone
     connection.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    Status status = Status.FINE;
+    Status status = Status.OK;
 
     ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(connection.getConnectorId());
 

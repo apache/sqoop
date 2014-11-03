@@ -219,7 +219,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param link
    */
   protected void saveLink(MLink link) {
-    assertEquals(Status.FINE, getClient().saveLink(link));
+    assertEquals(Status.OK, getClient().saveLink(link));
     assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, link.getPersistenceId());
   }
 
@@ -231,7 +231,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job
    */
  protected void saveJob(MJob job) {
-    assertEquals(Status.FINE, getClient().saveJob(job));
+    assertEquals(Status.OK, getClient().saveJob(job));
     assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
   }
 

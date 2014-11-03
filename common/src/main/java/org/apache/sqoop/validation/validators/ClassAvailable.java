@@ -29,7 +29,7 @@ public class ClassAvailable extends AbstractValidator<String> {
     try {
       Class.forName(klass);
     } catch (ClassNotFoundException e) {
-      addMessage(new Message(Status.UNACCEPTABLE, "Class not found"));
+      addMessage(new Message(Status.ERROR, "Class not found"));
     }
   }
 }

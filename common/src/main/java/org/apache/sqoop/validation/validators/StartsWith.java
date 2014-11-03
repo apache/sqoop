@@ -26,7 +26,7 @@ public class StartsWith extends AbstractValidator<String> {
   @Override
   public void validate(String str) {
     if(str == null || !str.startsWith(getStringArgument())) {
-      addMessage(Status.UNACCEPTABLE, "String must start with: " + getStringArgument());
+      addMessage(Status.ERROR, "String must start with: " + getStringArgument());
     }
   }
 }

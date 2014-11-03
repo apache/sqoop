@@ -28,7 +28,7 @@ public class NotEmpty extends AbstractValidator<String> {
   @Override
   public void validate(String instance) {
     if (instance == null || instance.isEmpty()) {
-      addMessage(Status.UNACCEPTABLE, "Can't be null nor empty");
+      addMessage(Status.ERROR, "Can't be null nor empty");
     }
   }
 }

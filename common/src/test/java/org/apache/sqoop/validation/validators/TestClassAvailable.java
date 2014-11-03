@@ -43,6 +43,6 @@ public class TestClassAvailable {
     validator.validate("net.jarcec.super.private.project.Main");
     assertEquals(1, validator.getMessages().size());
     messages = validator.getMessages();
-    assertEquals(Status.UNACCEPTABLE, messages.get(0).getStatus());
+    assertEquals(Status.ERROR, messages.get(0).getStatus());
   }
 }

@@ -20,39 +20,37 @@ package org.apache.sqoop.validation;
 /**
  * Severity of validation message.
  *
- * Fine:
+ * OK:
  * Everything is correct (default state).
  *
- * Warning:
+ * WARNING:
  * Warning is something suspicious, potentially wrong but something that
  * can be ignored. For example in case of JDBC URL element, warning would
  * be if specified host is not responding - it's warning because specified
  * URL might be wrong. However at the same time URL might be right as only
  * target host might be down.
  *
- * Error:
+ * ERROR:
  * Error represents unacceptable element content. For example in case of JDBC
  * URL path, error would be empty element or element containing invalid URL.
- *
- * TODO: This should really be renamed to "severity"
  */
 public enum Status {
   /**
    * There are no issues, no warnings. Everything is correct.
    */
-  FINE, // TODO: Rename to "OK"
+  OK,
 
   /**
    * Validated entity is correct enough to be processed. There might be some
    * warnings, but no errors.
    */
-  ACCEPTABLE, // TODO: Rename to "WARNING"
+  WARNING,
 
   /**
    * There are serious issues with validated entity. We can't proceed until
    * reported issues will be resolved.
    */
-  UNACCEPTABLE, // TODO: Rename to "ERROR"
+  ERROR,
 
   ;
 
@@ -63,7 +61,7 @@ public enum Status {
    * @return The worst status
    */
   public static Status getWorstStatus(Status ... statuses) {
-    Status finalStatus = FINE;
+    Status finalStatus = OK;
 
     for (Status status : statuses) {
       if (finalStatus.compareTo(status) < 1) {
@@ -80,7 +78,7 @@ public enum Status {
    * @return True if we can proceed with processing
    */
   public boolean canProceed() {
-    return this == FINE || this == ACCEPTABLE;
+    return this == OK || this == WARNING;
   }
 
   /**
@@ -89,6 +87,6 @@ public enum Status {
    * @return Default validation status
    */
   public static Status getDefault() {
-    return FINE;
+    return OK;
   }
 }

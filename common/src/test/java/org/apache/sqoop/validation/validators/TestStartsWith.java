@@ -34,40 +34,40 @@ public class TestStartsWith {
 
     // Default, no string argument set
     validator.validate("str");
-    assertEquals(Status.FINE, validator.getStatus());
+    assertEquals(Status.OK, validator.getStatus());
     assertEquals(0, validator.getMessages().size());
 
     // Searched substring is entire string
     validator.validate("str");
-    assertEquals(Status.FINE, validator.getStatus());
+    assertEquals(Status.OK, validator.getStatus());
     assertEquals(0, validator.getMessages().size());
 
     // Just starts with
     validator.reset();
     validator.setStringArgument("str");
     validator.validate("strstr");
-    assertEquals(Status.FINE, validator.getStatus());
+    assertEquals(Status.OK, validator.getStatus());
     assertEquals(0, validator.getMessages().size());
 
     // Null string
     validator.reset();
     validator.setStringArgument("str");
     validator.validate(null);
-    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
+    assertEquals(Status.ERROR, validator.getStatus());
     assertEquals(1, validator.getMessages().size());
 
     // Empty string
     validator.reset();
     validator.setStringArgument("str");
     validator.validate("");
-    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
+    assertEquals(Status.ERROR, validator.getStatus());
     assertEquals(1, validator.getMessages().size());
 
     // "Random" string
     validator.reset();
     validator.setStringArgument("str");
     validator.validate("Ahoj tady je meduza");
-    assertEquals(Status.UNACCEPTABLE, validator.getStatus());
+    assertEquals(Status.ERROR, validator.getStatus());
     assertEquals(1, validator.getMessages().size());
   }
 

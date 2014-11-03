@@ -800,7 +800,7 @@ public class TestJdbcRepository {
     public static class InternalValidator extends AbstractValidator {
       @Override
       public void validate(Object instance) {
-        addMessage(Status.UNACCEPTABLE, "Simply because.");
+        addMessage(Status.ERROR, "Simply because.");
       }
     }
   }
