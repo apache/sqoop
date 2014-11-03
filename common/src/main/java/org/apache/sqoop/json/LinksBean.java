@@ -43,8 +43,7 @@ public class LinksBean extends LinkBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray linkArray = new JSONArray();
-    super.extractLinks(skipSensitive, linkArray);
+    JSONArray linkArray = extractLinks(skipSensitive);
     JSONObject links = new JSONObject();
     links.put(LINKS, linkArray);
     return links;
@@ -52,7 +51,6 @@ public class LinksBean extends LinkBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-
     JSONArray array = (JSONArray) jsonObject.get(LINKS);
     super.restoreLinks(array);
   }

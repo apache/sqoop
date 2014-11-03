@@ -46,7 +46,6 @@ public class ConnectorsBean extends ConnectorBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-
     JSONArray connectorArray = extractConnectors(skipSensitive);
     JSONObject connectors = new JSONObject();
     connectors.put(CONNECTORS, connectorArray);

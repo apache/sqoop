@@ -73,10 +73,6 @@ public class MLink extends MAccountableEntity implements MClonable {
     return connectorId;
   }
 
-  public void setConnectorId(long connectorId) {
-    this.connectorId = connectorId;
-  }
-
   public MLinkConfig getConnectorLinkConfig() {
     return connectorLinkConfig;
   }

@@ -89,15 +89,15 @@ public class LinkBean implements JsonBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray linkArray = new JSONArray();
-    extractLinks(skipSensitive, linkArray);
-    JSONObject all = new JSONObject();
-    all.put(LINK, linkArray);
-    return all;
+    JSONArray linkArray = extractLinks(skipSensitive);
+    JSONObject link = new JSONObject();
+    link.put(LINK, linkArray);
+    return link;
   }
-
   @SuppressWarnings("unchecked")
-  protected void extractLinks(boolean skipSensitive, JSONArray linkArray) {
+  protected JSONArray extractLinks(boolean skipSensitive) {
+    JSONArray linkArray = new JSONArray();
+
     for(MLink link : links) {
       JSONObject linkJsonObject = new JSONObject();
       linkJsonObject.put(ID, link.getPersistenceId());
@@ -112,6 +112,7 @@ public class LinkBean implements JsonBean {
         extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
       linkArray.add(linkJsonObject);
     }
+    return linkArray;
   }
 
   @Override

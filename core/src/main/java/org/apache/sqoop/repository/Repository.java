@@ -403,8 +403,8 @@ public abstract class Repository {
    */
   public final void upgradeConnector(MConnector oldConnector, MConnector newConnector) {
     LOG.info("Upgrading connector: " + oldConnector.getUniqueName());
-    long connectorID = oldConnector.getPersistenceId();
-    newConnector.setPersistenceId(connectorID);
+    long connectorId = oldConnector.getPersistenceId();
+    newConnector.setPersistenceId(connectorId);
 
     RepositoryTransaction tx = null;
     try {
@@ -415,9 +415,9 @@ public abstract class Repository {
       // 1. Get an upgrader for the connector
       ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
       // 2. Get all links associated with the connector.
-      List<MLink> existingLinksByConnector = findLinksForConnector(connectorID);
+      List<MLink> existingLinksByConnector = findLinksForConnector(connectorId);
       // 3. Get all jobs associated with the connector.
-      List<MJob> existingJobsByConnector = findJobsForConnector(connectorID);
+      List<MJob> existingJobsByConnector = findJobsForConnector(connectorId);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();
