@@ -490,7 +490,7 @@ public class TestPartitioner {
 
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
-    jobConfig.fromJobConfig.partitionColumnNull = true;
+    jobConfig.fromJobConfig.allowNullValueInPartitionColumn = true;
 
     Partitioner partitioner = new GenericJdbcPartitioner();
     PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
