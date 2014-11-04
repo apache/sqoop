@@ -46,7 +46,7 @@ public class FromJobConfig {
   public String partitionColumn;
 
   @Input
-  public Boolean partitionColumnNull;
+  public Boolean allowNullValueInPartitionColumn;
 
   @Input(size = 50)
   public String boundaryQuery;
