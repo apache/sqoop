@@ -25,9 +25,9 @@ This page describes procedure that you need to take in order to upgrade Sqoop fr
 Upgrading Server
 ================
 
-As Sqoop server is using external repository for persisting connection and job objects, this repository needs to be updated in addition to updating the server bits. There are two ways how to upgrade Sqoop server metadata and it's structures, you can either execute upgrade tool or configure Server to perform all necessary changes on start up.
+As Sqoop server is using a database repository for persisting sqoop entities such as the connector configurables, driver configurable, links and jobs, the repository schema might need to be updated as part of the server upgrade. There are two ways how to upgrade Sqoop entities in the repository, you can either execute upgrade tool or configure the sqoop server to perform all necessary upgrades on start up.
 
-It's strongly advised to back up the repository before moving on to next steps. Backup instructions will vary depending on the repository implementation. For example, using MySQL as a repository will require a different back procedure than Apache Derby. Please follow the repositories' backup procedure
+It's strongly advised to back up the repository before moving on to next steps. Backup instructions will vary depending on the repository implementation. For example, using MySQL as a repository will require a different back procedure than Apache Derby. Please follow the repositories' backup procedure.
 
 Upgrading Server using upgrade tool
 -----------------------------------
@@ -49,21 +49,21 @@ In case of any failure, please take a look into `Upgrade Tool <Tools.html#upgrad
 Upgrading Server on start-up
 ----------------------------
 
-The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the upgrade procedure by stopping the server: ::
+The capability of performing the upgrade has been built-in to the server, however is disabled by default to avoid any unintentional changes to the repository. You can start the repository schema upgrade procedure by stopping the server: ::
 
   sqoop2-server stop
 
-Now you can update server bits. Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary during Sqoop Server boot up procedure. You need to set following properties in configuration file ``sqoop.properties``::
+Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary changes during Sqoop Server start up. You need to set the following properties in configuration file ``sqoop.properties``::
 
   org.apache.sqoop.repository.schema.immutable=false
   org.apache.sqoop.connector.autoupgrade=true
-  org.apache.sqoop.framework.autoupgrade=true
+  org.apache.sqoop.driver.autoupgrade=true
 
-When all properties are set, start server using following command::
+When all properties are set, start the sqoop server using the following command::
 
   sqoop2-server start
 
-All required actions will be performed automatically during the server bootstrap procedure. It's strongly advised to set all three properties to their original values once the server has been successfully started.
+All required actions will be performed automatically during the server bootstrap. It's strongly advised to set all three properties to their original values once the server has been successfully started and the upgrade has completed
 
 Upgrading Client
 ================
