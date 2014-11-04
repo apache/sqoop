@@ -153,11 +153,11 @@ public final class MRConfigurationUtils {
   }
 
   /**
-   * Retrieve Connector configuration object for connection.
+   * Retrieve Connector configuration object for link.
    * @param configuration MapReduce configuration object
    * @return Configuration object
    */
-  public static Object getConnectorConnectionConfig(Direction type, Configuration configuration) {
+  public static Object getConnectorLinkConfig(Direction type, Configuration configuration) {
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, MR_JOB_CONFIG_CLASS_FROM_CONNECTOR_LINK, MR_JOB_CONFIG_FROM_CONNECTOR_LINK_KEY);

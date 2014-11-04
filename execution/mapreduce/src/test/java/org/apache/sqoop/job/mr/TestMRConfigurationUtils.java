@@ -63,11 +63,11 @@ public class TestMRConfigurationUtils {
   public void testLinkConfiguration() throws Exception {
     MRConfigurationUtils.setConnectorLinkConfig(Direction.FROM, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorLinkConfig(Direction.FROM, jobConfSpy));
 
     MRConfigurationUtils.setConnectorLinkConfig(Direction.TO, job, getConfig());
     setUpHadoopJobConf();
-    assertEquals(getConfig(), MRConfigurationUtils.getConnectorConnectionConfig(Direction.TO, jobConfSpy));
+    assertEquals(getConfig(), MRConfigurationUtils.getConnectorLinkConfig(Direction.TO, jobConfSpy));
   }
 
   @Test

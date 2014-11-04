@@ -80,7 +80,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     // Objects that should be passed to the Executor execution
     PrefixContext subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object fromConfig = MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
+    Object fromConfig = MRConfigurationUtils.getConnectorLinkConfig(Direction.FROM, conf);
     Object fromJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
