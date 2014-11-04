@@ -61,13 +61,13 @@ public class UpdateJobFunction extends SqoopFunction {
 
     ConsoleReader reader = new ConsoleReader();
 
+    // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobId);
 
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
         job.getConnectorId(Direction.FROM));
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
         job.getConnectorId(Direction.TO));
-
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

@@ -123,16 +123,28 @@ limitations under the License.
     <url-pattern>/v1/job/*</url-pattern>
   </servlet-mapping>
 
-  <!-- Submission servlet -->
+  <!-- Jobs servlet -->
   <servlet>
-    <servlet-name>v1.SubmissionServlet</servlet-name>
-    <servlet-class>org.apache.sqoop.server.v1.SubmissionServlet</servlet-class>
+    <servlet-name>v1.JobsServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.JobsServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>v1.SubmissionServlet</servlet-name>
-    <url-pattern>/v1/submission/*</url-pattern>
+    <servlet-name>v1.JobsServlet</servlet-name>
+    <url-pattern>/v1/jobs/*</url-pattern>
+  </servlet-mapping>
+
+  <!-- Submissions servlet -->
+  <servlet>
+    <servlet-name>v1.SubmissionsServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.v1.SubmissionsServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>v1.SubmissionsServlet</servlet-name>
+    <url-pattern>/v1/submissions/*</url-pattern>
   </servlet-mapping>
 
 

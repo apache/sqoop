@@ -25,6 +25,7 @@ public interface JsonBean {
   static final String CONFIGURABLE_VERSION = "version";
   static final String ALL_CONFIGS = "all-configs";
 
+  @Deprecated // should not be used anymore in the rest api
   static final String ALL = "all";
   static final String ID = "id";
   static final String NAME = "name";

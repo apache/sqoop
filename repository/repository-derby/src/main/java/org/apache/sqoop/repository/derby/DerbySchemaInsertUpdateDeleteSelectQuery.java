@@ -435,6 +435,10 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
    public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
        STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
 
+// DML: Select one specific job
+   public static final String STMT_SELECT_JOB_SINGLE_BY_NAME =
+       STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_NAME + " = ?";
+
    // DML: Select all jobs for a Connector
    public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
        STMT_SELECT_JOB

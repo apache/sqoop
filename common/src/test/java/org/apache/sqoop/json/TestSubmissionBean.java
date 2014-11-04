@@ -457,13 +457,13 @@ public class TestSubmissionBean {
    * @return
    */
   private MSubmission transfer(MSubmission submission) {
-    SubmissionBean bean = new SubmissionBean(submission);
+    SubmissionsBean bean = new SubmissionsBean(submission);
     JSONObject json = bean.extract(false);
 
     String string = json.toString();
 
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    SubmissionBean retrievedBean = new SubmissionBean();
+    SubmissionsBean retrievedBean = new SubmissionsBean();
     retrievedBean.restore(retrievedJson);
 
     return retrievedBean.getSubmissions().get(0);
@@ -476,13 +476,13 @@ public class TestSubmissionBean {
    * @return
    */
   private List<MSubmission> transfer(List<MSubmission> submissions) {
-    SubmissionBean bean = new SubmissionBean(submissions);
+    SubmissionsBean bean = new SubmissionsBean(submissions);
     JSONObject json = bean.extract(false);
 
     String string = json.toString();
 
     JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    SubmissionBean retrievedBean = new SubmissionBean();
+    SubmissionsBean retrievedBean = new SubmissionsBean();
     retrievedBean.restore(retrievedJson);
 
     return retrievedBean.getSubmissions();

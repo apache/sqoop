@@ -23,7 +23,53 @@ import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
+
 /**
+ * Provides operations for job resource
+ *
+ * GET /v1/job/{jid}
+ * Return details about one particular job with id:jid or about all of
+ * them if jid equals to "all"
+ *
+ * POST /v1/job
+ * Create new job
+ * POST /v1/job/ with {from-link-id}, {to-link-id} and other job details in the post data
+ *  Create job with from and to link
+ * PUT /v1/link/ with {from-link-id}, {to-link-id} and other job details in the post data
+ *  Edit/Update job for the from and to link
+ *
+ * PUT /v1/job/{jid} and the job details in the post data
+ * Update job with id jid.
+ *
+ * PUT /v1/job/{jid}/enable
+ *  Enable job with id jid
+ * PUT /v1/job/{jname}s/disable
+ *  Enable job with name jname
+ *
+ * PUT /v1/job/{jid}/disable
+ *  Disable job with id jid
+ * PUT /v1/job/{jname}/disable
+ *  Disable job with name jname
+ *
+ * DELETE /v1/job/{jid}
+ *  Remove job with id jid
+ * DELETE /v1/job/{jname}
+ *  Remove job with name jname
+ *
+ * PUT /v1/job/{jid}/submit
+ *  Submit job with id jid to create a submission record
+ * PUT /v1/job/{jname}/submit
+ *  Submit job with name jname to create a submission record
+ *
+ * PUT /v1/job/{jid}/stop
+ *  Abort/Stop last running associated submission with job id jid
+ * PUT /v1/job/{jname}/stop
+ *  Abort/Stop last running associated submission with job name jname
+ *
+ * GET /v1/job/{jid}/status
+ *  get status of running job with job id jid
+ * GET /v1/job/{jname}/status
+ *  get status of running job with job name jname
  *
  */
 @SuppressWarnings("serial")

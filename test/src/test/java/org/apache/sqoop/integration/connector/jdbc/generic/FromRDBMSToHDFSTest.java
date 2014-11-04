@@ -101,14 +101,14 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
 
-    MSubmission submission = getClient().startSubmission(job.getPersistenceId());
+    MSubmission submission = getClient().startJob(job.getPersistenceId());
     assertTrue(submission.getStatus().isRunning());
 
     // Wait until the job finish - this active waiting will be removed once
     // Sqoop client API will get blocking support.
     do {
       Thread.sleep(5000);
-      submission = getClient().getSubmissionStatus(job.getPersistenceId());
+      submission = getClient().getJobStatus(job.getPersistenceId());
     } while(submission.getStatus().isRunning());
 
     // Assert correct output

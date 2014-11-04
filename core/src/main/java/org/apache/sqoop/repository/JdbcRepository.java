@@ -488,6 +488,20 @@ public class JdbcRepository extends Repository {
     });
   }
 
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MJob findJob(final String name) {
+    return (MJob) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        return handler.findJob(name, conn);
+      }
+    });
+  }
+
   /**
    * {@inheritDoc}
    */

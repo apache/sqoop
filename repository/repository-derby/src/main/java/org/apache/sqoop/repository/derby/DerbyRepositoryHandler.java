@@ -1590,6 +1590,33 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
+  public MJob findJob(String name, Connection conn) {
+    PreparedStatement stmt = null;
+    try {
+      stmt = conn.prepareStatement(STMT_SELECT_JOB_SINGLE_BY_NAME);
+      stmt.setString(1, name);
+
+      List<MJob> jobs = loadJobs(stmt, conn);
+
+      if (jobs.size() != 1) {
+        return null;
+      }
+
+      // Return the first and only one link object
+      return jobs.get(0);
+
+    } catch (SQLException ex) {
+      logException(ex, name);
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0031, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public List<MJob> findJobs(Connection conn) {
     PreparedStatement stmt = null;
     try {

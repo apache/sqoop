@@ -17,36 +17,32 @@
  */
 package org.apache.sqoop.server.v1;
 
-import org.apache.sqoop.handler.SubmissionRequestHandler;
+import org.apache.sqoop.handler.JobRequestHandler;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.SqoopProtocolServlet;
 
+
 /**
+ * Displays all or jobs per connector in sqoop
  *
- */
+ * GET /v1/jobs
+ *  Return details about every jobs that exists in the sqoop system
+ * GET /v1/jobs?cname=
+ *  Return details about job(s) for a given connector name {cname}
+*/
 @SuppressWarnings("serial")
-public class SubmissionServlet extends SqoopProtocolServlet {
+public class JobsServlet extends SqoopProtocolServlet {
 
-  private RequestHandler submissionRequestHandler;
+  private RequestHandler jobRequestHandler;
 
-  public SubmissionServlet() {
-    submissionRequestHandler = new SubmissionRequestHandler();
+  public JobsServlet() {
+    jobRequestHandler = new JobRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    return submissionRequestHandler.handleEvent(ctx);
-  }
-
-  @Override
-  protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
-    return submissionRequestHandler.handleEvent(ctx);
-  }
-
-  @Override
-  protected JsonBean handleDeleteRequest(RequestContext ctx) throws Exception {
-    return submissionRequestHandler.handleEvent(ctx);
+    return jobRequestHandler.handleEvent(ctx);
   }
 }

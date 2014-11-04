@@ -55,13 +55,13 @@ public class TestJobBean {
 
     // Serialize it to JSON object
     JobBean jobBean = new JobBean(job);
-    JSONObject jobJson = jobBean.extract(false);
+    JSONObject json = jobBean.extract(false);
 
     // "Move" it across network in text form
-    String jobJsonString = jobJson.toJSONString();
+    String jobJsonString = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedJobJson = (JSONObject)JSONValue.parseWithException(jobJsonString);
+    JSONObject parsedJobJson = (JSONObject)JSONValue.parse(jobJsonString);
     JobBean parsedJobBean = new JobBean();
     parsedJobBean.restore(parsedJobJson);
     MJob target = parsedJobBean.getJobs().get(0);

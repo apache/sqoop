@@ -242,7 +242,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @throws Exception
    */
   protected void executeJob(long jid) throws Exception {
-    getClient().startSubmission(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+    getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
   }
 
   /**

@@ -22,6 +22,8 @@ import org.apache.sqoop.common.ErrorCode;
 /**
  *
  */
+//TODO(https://issues.apache.org/jira/browse/SQOOP-1652): why is this called  Driver Error since it is used in JobManager?
+
 public enum DriverError implements ErrorCode {
 
   DRIVER_0001("Invalid submission engine"),
@@ -40,6 +42,7 @@ public enum DriverError implements ErrorCode {
 
   DRIVER_0008("Invalid combination of submission and execution engines"),
 
+  //TODO(https://issues.apache.org/jira/browse/SQOOP-1652): address the submit/start terminology difference
   DRIVER_0009("Job has been disabled. Cannot submit this job."),
 
   DRIVER_0010("Link for this job has been disabled. Cannot submit this job."),
