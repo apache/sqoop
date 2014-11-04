@@ -72,12 +72,12 @@ public class StartJobFunction extends SqoopFunction {
       };
 
       try {
-        client.startSubmission(getLong(line, Constants.OPT_JID), callback, pollTimeout);
+        client.startJob(getLong(line, Constants.OPT_JID), callback, pollTimeout);
       } catch (InterruptedException e) {
         throw new SqoopException(ShellError.SHELL_0007, e);
       }
     } else if (line.hasOption(Constants.OPT_JID)) {
-      MSubmission submission = client.startSubmission(getLong(line, Constants.OPT_JID));
+      MSubmission submission = client.startJob(getLong(line, Constants.OPT_JID));
       if(submission.getStatus().isFailure()) {
         SubmissionDisplayer.displayFooter(submission);
       } else {

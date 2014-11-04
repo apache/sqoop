@@ -254,6 +254,14 @@ public abstract class Repository {
   public abstract MJob findJob(long id);
 
   /**
+   * Find job object with given name.
+   *
+   * @param name unique name for the job
+   * @return job with given name loaded from repository or null if not present
+   */
+  public abstract MJob findJob(String name);
+
+  /**
    * Get all job objects.
    *
    * @return List of all jobs in the repository

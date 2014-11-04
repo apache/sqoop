@@ -269,11 +269,11 @@ public class JobManager implements Reconfigurable {
     LOG.info("Submission manager initialized: OK");
   }
 
-  public MSubmission submit(long jobId, HttpEventContext ctx) {
+  public MSubmission start(long jobId, HttpEventContext ctx) {
 
     MSubmission mSubmission = createJobSubmission(ctx, jobId);
     JobRequest jobRequest = createJobRequest(jobId, mSubmission);
-    // Bootstrap job to execute
+    // Bootstrap job to execute in the configured execution engine
     prepareJob(jobRequest);
     // Make sure that this job id is not currently running and submit the job
     // only if it's not.
@@ -283,14 +283,17 @@ public class JobManager implements Reconfigurable {
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
         throw new SqoopException(DriverError.DRIVER_0002, "Job with id " + jobId);
       }
-      // TODO(jarcec): We might need to catch all exceptions here to ensure
-      // that Destroyer will be executed in all cases.
       // NOTE: the following is a blocking call
       boolean success = submissionEngine.submit(jobRequest);
       if (!success) {
-        destroySubmission(jobRequest);
+        // TODO(jarcec): We might need to catch all exceptions here to ensure
+        // that Destroyer will be executed in all cases.
+        invokeDestroyerOnJobFailure(jobRequest);
         mSubmission.setStatus(SubmissionStatus.FAILURE_ON_SUBMIT);
       }
+      // persist submission record to repository.
+      // on failure we persist the FAILURE status, on success it is the SUCCESS
+      // status ( which is the default one)
       RepositoryManager.getInstance().getRepository().createSubmission(mSubmission);
     }
     return mSubmission;
@@ -435,6 +438,7 @@ public class JobManager implements Reconfigurable {
     return job;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private void initializeConnector(JobRequest jobRequest, Direction direction) {
     Initializer initializer = getConnectorInitializer(jobRequest, direction);
     InitializerContext initializerContext = getConnectorInitializerContext(jobRequest, direction);
@@ -444,6 +448,7 @@ public class JobManager implements Reconfigurable {
         jobRequest.getJobConfig(direction));
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private Schema getSchemaForConnector(JobRequest jobRequest, Direction direction) {
 
     Initializer initializer = getConnectorInitializer(jobRequest, direction);
@@ -453,6 +458,7 @@ public class JobManager implements Reconfigurable {
         jobRequest.getJobConfig(direction));
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private void addConnectorInitializerJars(JobRequest jobRequest, Direction direction) {
 
     Initializer initializer = getConnectorInitializer(jobRequest, direction);
@@ -462,6 +468,7 @@ public class JobManager implements Reconfigurable {
         jobRequest.getConnectorLinkConfig(direction), jobRequest.getJobConfig(direction)));
   }
 
+  @SuppressWarnings({ "rawtypes" })
   private Initializer getConnectorInitializer(JobRequest jobRequest, Direction direction) {
     Transferable transferable = direction.equals(Direction.FROM) ? jobRequest.getFrom() : jobRequest.getTo();
     Class<? extends Initializer> initializerClass = transferable.getInitializer();
@@ -494,7 +501,8 @@ public class JobManager implements Reconfigurable {
    * Callback that will be called only if we failed to submit the job to the
    * remote cluster.
    */
-  void destroySubmission(JobRequest request) {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  void invokeDestroyerOnJobFailure(JobRequest request) {
     Transferable from = request.getFrom();
     Transferable to = request.getTo();
 
@@ -520,7 +528,6 @@ public class JobManager implements Reconfigurable {
         request.getConnectorContext(Direction.TO), false, request.getSummary()
         .getToSchema());
 
-    // destroy submission from connector perspective
     fromDestroyer.destroy(fromDestroyerContext, request.getConnectorLinkConfig(Direction.FROM),
         request.getJobConfig(Direction.FROM));
     toDestroyer.destroy(toDestroyerContext, request.getConnectorLinkConfig(Direction.TO),
@@ -534,7 +541,7 @@ public class JobManager implements Reconfigurable {
 
     if (mSubmission == null || !mSubmission.getStatus().isRunning()) {
       throw new SqoopException(DriverError.DRIVER_0003, "Job with id " + jobId
-          + " is not running");
+          + " is not running hence cannot stop");
     }
     submissionEngine.stop(mSubmission.getExternalId());
 
@@ -554,8 +561,7 @@ public class JobManager implements Reconfigurable {
     if (mSubmission == null) {
       return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
     }
-
-    // If the submission is in running state, let's update it
+    // If the submission isin running state, let's update it
     if (mSubmission.getStatus().isRunning()) {
       update(mSubmission);
     }

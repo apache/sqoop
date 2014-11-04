@@ -29,10 +29,10 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.validation.Status;
 
 @SuppressWarnings("serial")
-public class StatusJobFunction extends SqoopFunction {
+public class ShowJobStatusFunction extends SqoopFunction {
 
   @SuppressWarnings("static-access")
-  public StatusJobFunction() {
+  public ShowJobStatusFunction() {
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
        .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
        .withLongOpt(Constants.OPT_JID)
@@ -42,7 +42,7 @@ public class StatusJobFunction extends SqoopFunction {
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_JID)) {
-      MSubmission submission = client.getSubmissionStatus(getLong(line, Constants.OPT_JID));
+      MSubmission submission = client.getJobStatus(getLong(line, Constants.OPT_JID));
       if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayFooter(submission);

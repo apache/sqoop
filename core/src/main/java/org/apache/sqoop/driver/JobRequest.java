@@ -91,7 +91,7 @@ public class JobRequest {
   MutableMapContext toConnectorContext;
 
   /**
-   * Framework context (submission specific configuration)
+   * Driver context (submission specific configuration)
    */
   MutableMapContext driverContext;
 

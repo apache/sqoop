@@ -81,6 +81,8 @@ public class SqoopClient {
   /**
    * Status flags used when updating the submission callback status
    */
+  //TODO(https://issues.apache.org/jira/browse/SQOOP-1652): Why do wee need a duplicate status enum in client when shell is using the server status?
+  // NOTE: the getStatus method is on the job resource and this needs to be revisited
   private enum SubmissionStatus {
     SUBMITTED,
     UPDATED,
@@ -438,8 +440,8 @@ public class SqoopClient {
    * @param jobId Job id
    * @return
    */
-  public MSubmission startSubmission(long jobId) {
-    return resourceRequests.createSubmission(jobId).getSubmissions().get(0);
+  public MSubmission startJob(long jobId) {
+    return resourceRequests.startJob(jobId).getSubmissions().get(0);
   }
 
   /**
@@ -452,24 +454,27 @@ public class SqoopClient {
    * @return MSubmission - Final status of job submission
    * @throws InterruptedException
    */
-  public MSubmission startSubmission(long jobId, SubmissionCallback callback, long pollTime)
+  public MSubmission startJob(long jobId, SubmissionCallback callback, long pollTime)
       throws InterruptedException {
     if(pollTime <= 0) {
       throw new SqoopException(ClientError.CLIENT_0002);
     }
+    //TODO(https://issues.apache.org/jira/browse/SQOOP-1652): address the submit/start/first terminology difference
+    // What does first even mean in s distributed client/server model?
     boolean first = true;
-    MSubmission submission = resourceRequests.createSubmission(jobId).getSubmissions().get(0);
+    MSubmission submission = resourceRequests.startJob(jobId).getSubmissions().get(0);
+    // what happens when the server fails, do we just say finished?
     while(submission.getStatus().isRunning()) {
       if(first) {
-        submissionCallback(callback, submission, SubmissionStatus.SUBMITTED);
+        invokeSubmissionCallback(callback, submission, SubmissionStatus.SUBMITTED);
         first = false;
       } else {
-        submissionCallback(callback, submission, SubmissionStatus.UPDATED);
+        invokeSubmissionCallback(callback, submission, SubmissionStatus.UPDATED);
       }
       Thread.sleep(pollTime);
-      submission = getSubmissionStatus(jobId);
+      submission = getJobStatus(jobId);
     }
-    submissionCallback(callback, submission, SubmissionStatus.FINISHED);
+    invokeSubmissionCallback(callback, submission, SubmissionStatus.FINISHED);
     return submission;
   }
 
@@ -480,7 +485,7 @@ public class SqoopClient {
    * @param submission
    * @param status
    */
-  private void submissionCallback(SubmissionCallback callback, MSubmission submission,
+  private void invokeSubmissionCallback(SubmissionCallback callback, MSubmission submission,
       SubmissionStatus status) {
     if (callback == null) {
       return;
@@ -494,17 +499,19 @@ public class SqoopClient {
       break;
     case FINISHED:
       callback.finished(submission);
+    default:
+      break;
     }
   }
 
   /**
-   * Stop job with given id.
+   * stop job with given id.
    *
    * @param jid Job id
    * @return
    */
-  public MSubmission stopSubmission(long jid) {
-    return resourceRequests.deleteSubmission(jid).getSubmissions().get(0);
+  public MSubmission stopJob(long jid) {
+    return resourceRequests.stopJob(jid).getSubmissions().get(0);
   }
 
   /**
@@ -513,8 +520,8 @@ public class SqoopClient {
    * @param jid Job id
    * @return
    */
-  public MSubmission getSubmissionStatus(long jid) {
-    return resourceRequests.readSubmission(jid).getSubmissions().get(0);
+  public MSubmission getJobStatus(long jid) {
+    return resourceRequests.getJobStatus(jid).getSubmissions().get(0);
   }
 
   /**
@@ -523,7 +530,7 @@ public class SqoopClient {
    * @return
    */
   public List<MSubmission> getSubmissions() {
-    return resourceRequests.readHistory(null).getSubmissions();
+    return resourceRequests.readSubmission(null).getSubmissions();
   }
 
   /**
@@ -533,7 +540,7 @@ public class SqoopClient {
    * @return
    */
   public List<MSubmission> getSubmissionsForJob(long jobId) {
-    return resourceRequests.readHistory(jobId).getSubmissions();
+    return resourceRequests.readSubmission(jobId).getSubmissions();
   }
 
   private Status applyLinkValidations(ValidationResultBean bean, MLink link) {
@@ -541,11 +548,12 @@ public class SqoopClient {
     // Apply validation results
     ConfigUtils.applyValidation(link.getConnectorLinkConfig().getConfigs(), linkConfig);
     Long id = bean.getId();
-    if(id != null) {
+    if (id != null) {
       link.setPersistenceId(id);
     }
     return Status.getWorstStatus(linkConfig.getStatus());
   }
+
 
   private Status applyJobValidations(ValidationResultBean bean, MJob job) {
     ConfigValidationResult fromConfig = bean.getValidationResults()[0];

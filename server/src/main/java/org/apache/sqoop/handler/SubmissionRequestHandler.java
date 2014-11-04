@@ -22,37 +22,19 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.driver.JobManager;
 import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.SubmissionBean;
+import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
-import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 
-/**
- * Submission request handler is supporting following resources:
- *
- * GET /v1/submission/action/:jid
- * Get status of last submission for job with id :jid
- *
- * POST /v1/submission/action/:jid
- * Create new submission for job with id :jid
- *
- * DELETE /v1/submission/action/:jid
- * Stop last submission for job with id :jid
- *
- * GET /v1/submission/notification/:jid
- * Notification endpoint to get job status outside normal interval
- *
- * Possible additions in the future: /v1/submission/history/* for history.
- */
 public class SubmissionRequestHandler implements RequestHandler {
 
-  private static final Logger LOG =
-    Logger.getLogger(SubmissionRequestHandler.class);
+  private static final Logger LOG = Logger.getLogger(SubmissionRequestHandler.class);
 
   public SubmissionRequestHandler() {
     LOG.info("SubmissionRequestHandler initialized");
@@ -60,110 +42,45 @@ public class SubmissionRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
-    String[] urlElements = ctx.getUrlElements();
-    if (urlElements.length < 2) {
-      throw new SqoopException(ServerError.SERVER_0003,
-        "Invalid URL, too few arguments for this servlet.");
+
+    // submission only support GET requests
+    if (ctx.getMethod() != Method.GET) {
+      throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for connector:"
+          + ctx.getMethod());
     }
-
-    // Let's check
-    int length = urlElements.length;
-    String action = urlElements[length - 2];
-
-    if(action.equals("action")) {
-      return handleActionEvent(ctx, urlElements[length - 1]);
-    }
-
-    if(action.equals("notification")) {
-      return handleNotification(ctx, urlElements[length - 1]);
-    }
-
-    if(action.equals("history")) {
-      return handleHistoryEvent(ctx, urlElements[length - 1]);
-    }
-
-    throw new SqoopException(ServerError.SERVER_0003,
-      "Do not know what to do.");
-  }
-
-  private JsonBean handleNotification(RequestContext ctx, String sjid) {
-    LOG.debug("Received notification request for job " + sjid);
-    JobManager.getInstance().status(Long.parseLong(sjid));
-    return JsonBean.EMPTY_BEAN;
-  }
-
-  private JsonBean handleActionEvent(RequestContext ctx, String sjid) {
-    long jid = Long.parseLong(sjid);
-
-    String username = ctx.getUserName();
-    HttpEventContext ectx = new HttpEventContext();
-    ectx.setUsername(username);
-
-    switch (ctx.getMethod()) {
-      case GET:
-        AuditLoggerManager.getInstance()
-            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "status", "submission", String.valueOf(jid));
-
-        return submissionStatus(jid);
-      case POST:
-        // TODO: This should be outsourced somewhere more suitable than here
-        if(JobManager.getInstance().getNotificationBaseUrl() == null) {
-          String url = ctx.getRequest().getRequestURL().toString();
-          JobManager.getInstance().setNotificationBaseUrl(
-            url.split("v1")[0] + "/v1/submission/notification/");
-        }
-
-        AuditLoggerManager.getInstance()
-            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "submit", "submission", String.valueOf(jid));
-
-        return submissionSubmit(jid, ectx);
-      case DELETE:
-        AuditLoggerManager.getInstance()
-            .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-            "stop", "submission", String.valueOf(jid));
-
-        return submissionStop(jid, ectx);
-    }
-
-    return null;
-  }
-
-  private JsonBean handleHistoryEvent(RequestContext ctx, String sjid) {
-    AuditLoggerManager.getInstance()
-        .logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(),
-        "get", "submission", sjid);
-
-    if (sjid.equals("all")) {
-      return getSubmissions();
+    String identifier = ctx.getLastURLElement();
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    // links by connector ordered by updated time
+    // hence the latest submission is on the top
+    if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
+      identifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "submissionsByJob", identifier);
+      if (repository.findJob(identifier) != null) {
+        long jobId = repository.findJob(identifier).getPersistenceId();
+        return getSubmissionsForJob(jobId);
+      } else {
+        // this means name nor Id existed
+        throw new SqoopException(ServerError.SERVER_0005, "Invalid job: " + identifier
+            + " name given");
+      }
     } else {
-      return getSubmissionsForJob(Long.parseLong(sjid));
+      // all submissions in the system
+      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
+          ctx.getRequest().getRemoteAddr(), "get", "submissions", "all");
+      return getSubmissions();
     }
-  }
-
-  private JsonBean submissionStop(long jid, HttpEventContext ctx) {
-    MSubmission submission = JobManager.getInstance().stop(jid, ctx);
-    return new SubmissionBean(submission);
-  }
-
-  private JsonBean submissionSubmit(long jid, HttpEventContext ctx) {
-    MSubmission submission = JobManager.getInstance().submit(jid, ctx);
-    return new SubmissionBean(submission);
-  }
-
-  private JsonBean submissionStatus(long jid) {
-    MSubmission submission = JobManager.getInstance().status(jid);
-    return new SubmissionBean(submission);
   }
 
   private JsonBean getSubmissions() {
-    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository().findSubmissions();
-    return new SubmissionBean(submissions);
+    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
+        .findSubmissions();
+    return new SubmissionsBean(submissions);
   }
 
   private JsonBean getSubmissionsForJob(long jid) {
-    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository().findSubmissionsForJob(jid);
-    return new SubmissionBean(submissions);
+    List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
+        .findSubmissionsForJob(jid);
+    return new SubmissionsBean(submissions);
   }
 }

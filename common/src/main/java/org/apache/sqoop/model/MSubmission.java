@@ -36,9 +36,6 @@ public class MSubmission extends MAccountableEntity {
   /**
    * Job id that this submission object belongs.
    *
-   * By transitivity of metadata structure you can get also connection and
-   * connector ids.
-   *
    * This property is required and will be always present.
    */
   private long jobId;

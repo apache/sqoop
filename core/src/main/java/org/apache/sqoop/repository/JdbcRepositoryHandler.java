@@ -335,6 +335,15 @@ public abstract class JdbcRepositoryHandler {
   public abstract MJob findJob(long jobId, Connection conn);
 
   /**
+   * Find job with given name in repository.
+   *
+   * @param name unique name for the job
+   * @param conn Connection to the repository
+   * @return job for a given name that is present in the repository or null if not present
+   */
+  public abstract MJob findJob(String name, Connection conn);
+
+  /**
    * Get all job objects.
    *
    * @param conn Connection to the repository

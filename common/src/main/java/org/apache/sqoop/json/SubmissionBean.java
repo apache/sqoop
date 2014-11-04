@@ -17,6 +17,15 @@
  */
 package org.apache.sqoop.json;
 
+import static org.apache.sqoop.json.util.SchemaSerialization.extractSchema;
+import static org.apache.sqoop.json.util.SchemaSerialization.restoreSchema;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -25,21 +34,12 @@ import org.apache.sqoop.submission.counter.Counters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.apache.sqoop.json.util.SchemaSerialization.extractSchema;
-import static org.apache.sqoop.json.util.SchemaSerialization.restoreSchema;
-
 /**
  *
  */
 public class SubmissionBean implements JsonBean {
 
-  private static final String ALL = "all";
+  private static final String SUBMISSION = "submission";
   private static final String JOB = "job";
   private static final String CREATION_USER = "creation-user";
   private static final String CREATION_DATE = "creation-date";
@@ -52,8 +52,8 @@ public class SubmissionBean implements JsonBean {
   private static final String EXCEPTION_TRACE = "exception-trace";
   private static final String PROGRESS = "progress";
   private static final String COUNTERS = "counters";
-  private static final String FROM_SCHEMA = "schema-from";
-  private static final String TO_SCHEMA = "schema-to";
+  private static final String FROM_SCHEMA = "from-schema";
+  private static final String TO_SCHEMA = "to-schema";
 
   private List<MSubmission> submissions;
 
@@ -80,79 +80,83 @@ public class SubmissionBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray array = new JSONArray();
+    JSONArray submissionArray = extractSubmissions();
+    JSONObject submission = new JSONObject();
+    submission.put(SUBMISSION, submissionArray);
+    return submission;
+  }
 
-    for(MSubmission submission : this.submissions) {
+  @SuppressWarnings("unchecked")
+  protected JSONArray extractSubmissions() {
+    JSONArray submissionsArray = new JSONArray();
+
+    for (MSubmission submission : this.submissions) {
       JSONObject object = new JSONObject();
 
       object.put(JOB, submission.getJobId());
       object.put(STATUS, submission.getStatus().name());
       object.put(PROGRESS, submission.getProgress());
 
-      if(submission.getCreationUser() != null) {
+      if (submission.getCreationUser() != null) {
         object.put(CREATION_USER, submission.getCreationUser());
       }
-      if(submission.getCreationDate() != null) {
+      if (submission.getCreationDate() != null) {
         object.put(CREATION_DATE, submission.getCreationDate().getTime());
       }
-      if(submission.getLastUpdateUser() != null) {
+      if (submission.getLastUpdateUser() != null) {
         object.put(LAST_UPDATE_USER, submission.getLastUpdateUser());
       }
-      if(submission.getLastUpdateDate() != null) {
+      if (submission.getLastUpdateDate() != null) {
         object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
       }
-      if(submission.getExternalId() != null) {
+      if (submission.getExternalId() != null) {
         object.put(EXTERNAL_ID, submission.getExternalId());
       }
-      if(submission.getExternalLink() != null) {
+      if (submission.getExternalLink() != null) {
         object.put(EXTERNAL_LINK, submission.getExternalLink());
       }
-      if(submission.getExceptionInfo() != null) {
+      if (submission.getExceptionInfo() != null) {
         object.put(EXCEPTION, submission.getExceptionInfo());
       }
-      if(submission.getExceptionStackTrace() != null) {
+      if (submission.getExceptionStackTrace() != null) {
         object.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
       }
-      if(submission.getCounters() != null) {
+      if (submission.getCounters() != null) {
         object.put(COUNTERS, extractCounters(submission.getCounters()));
       }
-      if(submission.getFromSchema() != null)  {
+      if (submission.getFromSchema() != null) {
         object.put(FROM_SCHEMA, extractSchema(submission.getFromSchema()));
       }
-      if(submission.getToSchema() != null) {
+      if (submission.getToSchema() != null) {
         object.put(TO_SCHEMA, extractSchema(submission.getToSchema()));
       }
-
-      array.add(object);
+      submissionsArray.add(object);
     }
-
-    JSONObject all = new JSONObject();
-    all.put(ALL, array);
-
-    return all;
+    return submissionsArray;
   }
 
   @SuppressWarnings("unchecked")
-  public JSONObject extractCounters(Counters counters) {
-    JSONObject ret = new JSONObject();
-    for(CounterGroup group : counters) {
+  private JSONObject extractCounters(Counters counters) {
+    JSONObject counterArray = new JSONObject();
+    for (CounterGroup group : counters) {
       JSONObject counterGroup = new JSONObject();
 
-      for(Counter counter : group) {
+      for (Counter counter : group) {
         counterGroup.put(counter.getName(), counter.getValue());
       }
-
-      ret.put(group.getName(), counterGroup);
+      counterArray.put(group.getName(), counterGroup);
     }
-    return ret;
+    return counterArray;
   }
 
   @Override
   public void restore(JSONObject json) {
+    JSONArray submissionArray = (JSONArray) json.get(SUBMISSION);
+    restoreSubmissions(submissionArray);
+  }
+
+  protected void restoreSubmissions(JSONArray array) {
     this.submissions = new ArrayList<MSubmission>();
-
-    JSONArray array = (JSONArray) json.get(ALL);
-
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;
       MSubmission submission = new MSubmission();
@@ -161,38 +165,38 @@ public class SubmissionBean implements JsonBean {
       submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
       submission.setProgress((Double) object.get(PROGRESS));
 
-      if(object.containsKey(CREATION_USER)) {
+      if (object.containsKey(CREATION_USER)) {
         submission.setCreationUser((String) object.get(CREATION_USER));
       }
-      if(object.containsKey(CREATION_DATE)) {
+      if (object.containsKey(CREATION_DATE)) {
         submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
       }
-      if(object.containsKey(LAST_UPDATE_USER)) {
+      if (object.containsKey(LAST_UPDATE_USER)) {
         submission.setLastUpdateUser((String) object.get(LAST_UPDATE_USER));
       }
-      if(object.containsKey(LAST_UPDATE_DATE)) {
+      if (object.containsKey(LAST_UPDATE_DATE)) {
         submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
       }
-      if(object.containsKey(EXTERNAL_ID)) {
+      if (object.containsKey(EXTERNAL_ID)) {
         submission.setExternalId((String) object.get(EXTERNAL_ID));
       }
-      if(object.containsKey(EXTERNAL_LINK)) {
+      if (object.containsKey(EXTERNAL_LINK)) {
         submission.setExternalLink((String) object.get(EXTERNAL_LINK));
       }
-      if(object.containsKey(EXCEPTION)) {
+      if (object.containsKey(EXCEPTION)) {
         submission.setExceptionInfo((String) object.get(EXCEPTION));
       }
-      if(object.containsKey(EXCEPTION_TRACE)) {
+      if (object.containsKey(EXCEPTION_TRACE)) {
         submission.setExceptionStackTrace((String) object.get(EXCEPTION_TRACE));
       }
-      if(object.containsKey(COUNTERS)) {
+      if (object.containsKey(COUNTERS)) {
         submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
       }
 
-      if(object.containsKey(FROM_SCHEMA)) {
+      if (object.containsKey(FROM_SCHEMA)) {
         submission.setFromSchema(restoreSchema((JSONObject) object.get(FROM_SCHEMA)));
       }
-      if(object.containsKey(TO_SCHEMA)) {
+      if (object.containsKey(TO_SCHEMA)) {
         submission.setToSchema(restoreSchema((JSONObject) object.get(TO_SCHEMA)));
       }
 
@@ -200,24 +204,20 @@ public class SubmissionBean implements JsonBean {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public Counters restoreCounters(JSONObject object) {
     Set<Map.Entry<String, JSONObject>> groupSet = object.entrySet();
     Counters counters = new Counters();
 
-    for(Map.Entry<String, JSONObject> groupEntry: groupSet) {
-
+    for (Map.Entry<String, JSONObject> groupEntry : groupSet) {
       CounterGroup group = new CounterGroup(groupEntry.getKey());
-
       Set<Map.Entry<String, Long>> counterSet = groupEntry.getValue().entrySet();
-
-      for(Map.Entry<String, Long> counterEntry: counterSet) {
+      for (Map.Entry<String, Long> counterEntry : counterSet) {
         Counter counter = new Counter(counterEntry.getKey(), counterEntry.getValue());
         group.addCounter(counter);
       }
-
       counters.addCounterGroup(group);
     }
-
     return counters;
   }
 }

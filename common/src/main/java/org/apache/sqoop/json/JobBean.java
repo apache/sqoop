@@ -19,8 +19,6 @@ package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
 import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
-import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
-import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,7 +37,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Json representation of the job config
+ * Json representation of the job
  */
 public class JobBean implements JsonBean {
 
@@ -50,6 +48,7 @@ public class JobBean implements JsonBean {
   static final String FROM_CONFIG = "from-config";
   static final String TO_CONFIG = "to-config";
   static final String DRIVER_CONFIG = "driver-config";
+  private static final String JOB = "job";
 
   // Required
   private List<MJob> jobs;
@@ -102,9 +101,16 @@ public class JobBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray array = new JSONArray();
+    JSONArray jobArray = extractJobs(skipSensitive);
+    JSONObject job = new JSONObject();
+    job.put(JOB, jobArray);
+    return job;
+  }
 
-    for(MJob job : jobs) {
+  @SuppressWarnings("unchecked")
+  protected JSONArray extractJobs(boolean skipSensitive) {
+    JSONArray jobArray = new JSONArray();
+    for (MJob job : jobs) {
       JSONObject object = new JSONObject();
 
       object.put(ID, job.getPersistenceId());
@@ -115,6 +121,7 @@ public class JobBean implements JsonBean {
       object.put(UPDATE_USER, job.getLastUpdateUser());
       object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
       // job link associated connectors
+      // TODO(SQOOP-1634): fix not to require the connectorIds in the post data
       object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
       object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
       // job associated links
@@ -122,25 +129,30 @@ public class JobBean implements JsonBean {
       object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
       // job configs
       MFromConfig fromConfigList = job.getFromJobConfig();
-      object.put(FROM_CONFIG, extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
+      object.put(FROM_CONFIG,
+          extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
       MToConfig toConfigList = job.getToJobConfig();
-      object.put(TO_CONFIG, extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
+      object.put(TO_CONFIG,
+          extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
       MDriverConfig driverConfigList = job.getDriverConfig();
-      object.put(DRIVER_CONFIG, extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(), skipSensitive));
+      object.put(
+          DRIVER_CONFIG,
+          extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(),
+              skipSensitive));
 
-    array.add(object);
+      jobArray.add(object);
     }
-
-    JSONObject all = new JSONObject();
-    all.put(ALL, array);
-    return all;
+    return jobArray;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
-    jobs = new ArrayList<MJob>();
+    JSONArray array = (JSONArray) jsonObject.get(JOB);
+    restoreJobs(array);
+  }
 
-    JSONArray array = (JSONArray) jsonObject.get(ALL);
+  protected void restoreJobs(JSONArray array) {
+    jobs = new ArrayList<MJob>();
 
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;

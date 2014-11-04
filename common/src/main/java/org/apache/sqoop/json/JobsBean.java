@@ -15,30 +15,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.client.request;
+package org.apache.sqoop.json;
 
-import org.apache.sqoop.json.SubmissionsBean;
+import java.util.List;
+
+import org.apache.sqoop.model.MJob;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
- * Provide CRD semantics over RESTfull HTTP API for submissions. Please note
- * that "update" is not supported as client can't update submission status.
+ * Json representation of the jobs
  */
-public class SubmissionResourceRequest extends  ResourceRequest {
+public class JobsBean extends JobBean {
 
-  public static final String RESOURCE = "v1/submissions/";
+  private static final String JOBS = "jobs";
 
-  public SubmissionsBean read(String serverUrl, Long jid) {
-    String response;
-    if (jid == null) {
-      response = super.get(serverUrl + RESOURCE);
-    } else {
-      response = super.get(serverUrl + RESOURCE + jid);
-    }
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
-    SubmissionsBean submissionBean = new SubmissionsBean();
-    submissionBean.restore(jsonObject);
-    return submissionBean;
+  public JobsBean(MJob job) {
+    super(job);
+  }
+
+  public JobsBean(List<MJob> jobs) {
+    super(jobs);
+  }
+
+  // For "restore"
+  public JobsBean() {
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public JSONObject extract(boolean skipSensitive) {
+    JSONArray jobArray = super.extractJobs(skipSensitive);
+    JSONObject jobs = new JSONObject();
+    jobs.put(JOBS, jobArray);
+    return jobs;
+  }
+
+  @Override
+  public void restore(JSONObject jsonObject) {
+    JSONArray array = (JSONArray) jsonObject.get(JOBS);
+    restoreJobs(array);
   }
 }

@@ -17,14 +17,15 @@
  */
 package org.apache.sqoop.client.request;
 
-import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionBean;
+import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 
 /**
  * Unified class for all request objects.
@@ -131,19 +132,19 @@ public class SqoopResourceRequests {
     getJobResourceRequest().delete(serverUrl, jid);
   }
 
-  public SubmissionBean readHistory(Long jid) {
-    return getSubmissionResourceRequest().readHistory(serverUrl, jid);
+  public SubmissionBean getJobStatus(Long jid) {
+    return getJobResourceRequest().status(serverUrl, jid);
   }
 
-  public SubmissionBean readSubmission(Long jid) {
+  public SubmissionBean startJob(Long jid) {
+    return getJobResourceRequest().start(serverUrl, jid);
+  }
+
+  public SubmissionBean stopJob(Long jid) {
+    return getJobResourceRequest().stop(serverUrl, jid);
+  }
+
+  public SubmissionsBean readSubmission(Long jid) {
     return getSubmissionResourceRequest().read(serverUrl, jid);
-  }
-
-  public SubmissionBean createSubmission(Long jid) {
-    return getSubmissionResourceRequest().create(serverUrl, jid);
-  }
-
-  public SubmissionBean deleteSubmission(Long jid) {
-    return getSubmissionResourceRequest().delete(serverUrl, jid);
   }
 }

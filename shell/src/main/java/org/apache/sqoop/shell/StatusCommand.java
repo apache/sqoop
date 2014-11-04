@@ -28,7 +28,7 @@ public class StatusCommand extends SqoopCommand {
       Constants.CMD_STATUS,
       Constants.CMD_STATUS_SC,
       new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StatusJobFunction.class)
+        .put(Constants.FN_JOB, ShowJobStatusFunction.class)
         .build()
       );
   }
