@@ -26,12 +26,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.job.io.SqoopWritable;
-import org.apache.sqoop.job.mr.SqoopFileOutputFormat;
-import org.apache.sqoop.job.mr.SqoopInputFormat;
-import org.apache.sqoop.job.mr.SqoopMapper;
-import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
-import org.junit.Assert;
 
 public class JobUtils {
 
