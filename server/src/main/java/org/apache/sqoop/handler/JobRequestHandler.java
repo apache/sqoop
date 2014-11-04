@@ -102,18 +102,19 @@ public class JobRequestHandler implements RequestHandler {
       return createUpdateJob(ctx, true);
     case PUT:
       JobAction action = JobAction.fromString(ctx.getLastURLElement());
-      switch (action) {
-      case ENABLE:
-        return enableJob(ctx, true);
-      case DISABLE:
-        return enableJob(ctx, false);
-      case START:
-        return startJob(ctx);
-      case STOP:
-        return stopJob(ctx);
-      default:
-        return createUpdateJob(ctx, false);
+      if (action != null) {
+        switch (action) {
+          case ENABLE:
+            return enableJob(ctx, true);
+          case DISABLE:
+            return enableJob(ctx, false);
+          case START:
+            return startJob(ctx);
+          case STOP:
+            return stopJob(ctx);
+        }
       }
+      return createUpdateJob(ctx, false);
     case DELETE:
       return deleteJob(ctx);
     }
