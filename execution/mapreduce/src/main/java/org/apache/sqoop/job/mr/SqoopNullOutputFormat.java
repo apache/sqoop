@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.job.mr;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -28,18 +30,14 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.io.SqoopWritable;
-
-import java.io.IOException;
 
 /**
  * An output format for MapReduce job.
  */
 public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWritable> {
 
-  public static final Logger LOG =
-    Logger.getLogger(SqoopNullOutputFormat.class);
+  public static final Logger LOG = Logger.getLogger(SqoopNullOutputFormat.class);
 
   @Override
   public void checkOutputSpecs(JobContext context) {
@@ -47,48 +45,50 @@ public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWrita
   }
 
   @Override
-  public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(
-      TaskAttemptContext context) {
-    SqoopOutputFormatLoadExecutor executor =
-        new SqoopOutputFormatLoadExecutor(context);
+  public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(TaskAttemptContext context) {
+    SqoopOutputFormatLoadExecutor executor = new SqoopOutputFormatLoadExecutor(context);
     return executor.getRecordWriter();
   }
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext context) {
-    return new DestroyerOutputCommitter();
+    return new SqoopDestroyerOutputCommitter();
   }
 
-  class DestroyerOutputCommitter extends OutputCommitter {
+  class SqoopDestroyerOutputCommitter extends OutputCommitter {
     @Override
-    public void setupJob(JobContext jobContext) { }
+    public void setupJob(JobContext jobContext) {
+    }
 
     @Override
     public void commitJob(JobContext jobContext) throws IOException {
       super.commitJob(jobContext);
-
-      Configuration config = jobContext.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(true, config, Direction.FROM);
-      SqoopDestroyerExecutor.executeDestroyer(true, config, Direction.TO);
+      invokeDestroyerExecutor(jobContext, true);
     }
 
     @Override
     public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException {
       super.abortJob(jobContext, state);
+      invokeDestroyerExecutor(jobContext, false);
+    }
 
+    private void invokeDestroyerExecutor(JobContext jobContext, boolean success) {
       Configuration config = jobContext.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(false, config, Direction.FROM);
-      SqoopDestroyerExecutor.executeDestroyer(false, config, Direction.TO);
+      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.FROM);
+      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.TO);
     }
 
     @Override
-    public void setupTask(TaskAttemptContext taskContext) { }
+    public void setupTask(TaskAttemptContext taskContext) {
+    }
 
     @Override
-    public void commitTask(TaskAttemptContext taskContext) { }
+    public void commitTask(TaskAttemptContext taskContext) {
+    }
 
     @Override
-    public void abortTask(TaskAttemptContext taskContext) { }
+    public void abortTask(TaskAttemptContext taskContext) {
+    }
 
     @Override
     public boolean needsTaskCommit(TaskAttemptContext taskContext) {

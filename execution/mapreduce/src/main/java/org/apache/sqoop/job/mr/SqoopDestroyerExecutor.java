@@ -68,7 +68,7 @@ public class SqoopDestroyerExecutor {
 
     // Objects that should be pass to the Destroyer execution
     PrefixContext subContext = new PrefixContext(configuration, prefixPropertyName);
-    Object configConnection = MRConfigurationUtils.getConnectorConnectionConfig(direction, configuration);
+    Object configConnection = MRConfigurationUtils.getConnectorLinkConfig(direction, configuration);
     Object configJob = MRConfigurationUtils.getConnectorJobConfig(direction, configuration);
 
     // Propagate connector schema in every case for now

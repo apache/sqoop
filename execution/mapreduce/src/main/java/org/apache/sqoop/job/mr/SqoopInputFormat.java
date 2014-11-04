@@ -63,7 +63,7 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Partitioner partitioner = (Partitioner) ClassUtils.instantiate(partitionerName);
 
     PrefixContext connectorContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
-    Object connectorConnection = MRConfigurationUtils.getConnectorConnectionConfig(Direction.FROM, conf);
+    Object connectorConnection = MRConfigurationUtils.getConnectorLinkConfig(Direction.FROM, conf);
     Object connectorJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
     Schema schema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 

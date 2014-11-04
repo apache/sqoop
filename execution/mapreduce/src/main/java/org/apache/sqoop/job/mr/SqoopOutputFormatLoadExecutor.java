@@ -236,7 +236,7 @@ public class SqoopOutputFormatLoadExecutor {
           schema = matcher.getToSchema();
 
           subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
-          configConnection = MRConfigurationUtils.getConnectorConnectionConfig(Direction.TO, conf);
+          configConnection = MRConfigurationUtils.getConnectorLinkConfig(Direction.TO, conf);
           configJob = MRConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
         }
 

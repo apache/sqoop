@@ -24,13 +24,13 @@ package org.apache.sqoop.job.etl;
 public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
 
   /**
-   * Callback to clean up after job execution.
+   * Callback to clean up after job execution
    *
    * @param context Destroyer context
    * @param linkConfiguration link configuration object
    * @param jobConfiguration job configuration object for the FROM and TO
-   *        In case of the FROM initializer this will represent the FROM job configuration
-   *        In case of the TO initializer this will represent the TO job configuration
+   *        In case of the FROM destroyer this will represent the FROM job configuration
+   *        In case of the TO destroyer this will represent the TO job configuration
    */
   public abstract void destroy(DestroyerContext context,
                                LinkConfiguration linkConfiguration,
