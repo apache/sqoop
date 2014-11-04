@@ -25,7 +25,9 @@ This page describes procedure that you need to take in order to upgrade Sqoop fr
 Upgrading Server
 ================
 
-As Sqoop server is using a database repository for persisting sqoop entities such as the connector configurables, driver configurable, links and jobs, the repository schema might need to be updated as part of the server upgrade. There are two ways how to upgrade Sqoop entities in the repository, you can either execute upgrade tool or configure the sqoop server to perform all necessary upgrades on start up.
+As Sqoop server is using a database repository for persisting sqoop entities such as the connector, driver, links and jobs the repository schema might need to be updated as part of the server upgrade. In addition the configs and inputs described by the various connectors and the driver may also change with a new server version and might need a data upgrade.
+
+There are two ways how to upgrade Sqoop entities in the repository, you can either execute upgrade tool or configure the sqoop server to perform all necessary upgrades on start up.
 
 It's strongly advised to back up the repository before moving on to next steps. Backup instructions will vary depending on the repository implementation. For example, using MySQL as a repository will require a different back procedure than Apache Derby. Please follow the repositories' backup procedure.
 
@@ -53,11 +55,22 @@ The capability of performing the upgrade has been built-in to the server, howeve
 
   sqoop2-server stop
 
-Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary changes during Sqoop Server start up. You need to set the following properties in configuration file ``sqoop.properties``::
+Before starting the server again you will need to enable the auto-upgrade feature that will perform all necessary changes during Sqoop Server start up.
 
-  org.apache.sqoop.repository.schema.immutable=false
-  org.apache.sqoop.connector.autoupgrade=true
-  org.apache.sqoop.driver.autoupgrade=true
+You need to set the following property in configuration file ``sqoop.properties`` for the repository schema upgrade.
+::
+
+   org.apache.sqoop.repository.schema.immutable=false
+
+You need to set the following property in configuration file ``sqoop.properties`` for the connector config data upgrade.
+::
+
+   org.apache.sqoop.connector.autoupgrade=true
+
+You need to set the following property in configuration file ``sqoop.properties`` for the driver config data upgrade.
+::
+
+   org.apache.sqoop.driver.autoupgrade=true
 
 When all properties are set, start the sqoop server using the following command::
 
