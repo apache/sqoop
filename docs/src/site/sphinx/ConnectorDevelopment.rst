@@ -26,7 +26,7 @@ different data sources. Each connector will primarily focus on a particular data
 What is a Sqoop Connector?
 ++++++++++++++++++++++++++
 
-The connector provides the facilities to interact with varied data sources that can be used as a means to transfer between them. The connector implementation will provide logic to read from and/or write to a data source that it represents. For instance the ( ``GenericJdbcConnector`` ) encapsulates the logic to read from and/or write to jdbc enabled relational data sources. The connector part that enables reading from a data source and transferring this data to internal Sqoop format is called the FROM and the part that enables writng data to a data source by transferring data from Sqoop format is called TO. In order to interact with these data sources, the connector will provide one or many config classes and input fields within it.
+Connectors provide the facility to interact with many data sources and thus can be used as a means to transfer data between them in Sqoop. The connector implementation will provide logic to read from and/or write to a data source that it represents. For instance the ( ``GenericJdbcConnector`` ) encapsulates the logic to read from and/or write to jdbc enabled relational data sources. The connector part that enables reading from a data source and transferring this data to internal Sqoop format is called the FROM and the part that enables writng data to a data source by transferring data from Sqoop format is called TO. In order to interact with these data sources, the connector will provide one or many config classes and input fields within it.
 
 Broadly we support two main config types for connectors, link type represented by the enum ``ConfigType.LINK`` and job type represented by the enum ``ConfigType.JOB``. Link config represents the properties to physically connect to the data source. Job config represent the properties that are required to invoke reading from and/or writing to particular dataset in the data source it connects to. If a connector supports both reading from and writing to, it will provide the ``FromJobConfig`` and ``ToJobConfig`` objects. Each of these config objects are custom to each connector and can have one or more inputs associated with each of the Link, FromJob and ToJob config types. Hence we call the connectors as configurables i.e an entity that can provide configs for interacting with the data source it represents. As the connectors evolve over time to support new features in their data sources, the configs and inputs will change as well. Thus the connector API also provides methods for upgrading the config and input names and data related to these data sources across different versions.
 
@@ -96,9 +96,8 @@ The ``getFrom`` method returns From_ instance which is a ``Transferable`` entity
         GenericJdbcPartitioner.class,
         GenericJdbcExtractor.class,
         GenericJdbcFromDestroyer.class);
-  
   ...
-  
+
   @Override
   public From getFrom() {
     return FROM;
@@ -117,7 +116,7 @@ Initializer is instantiated before the submission of sqoop job to the execution 
 
   public List<String> getJars(InitializerContext context, LinkConfiguration linkConfiguration,
       JobConfiguration jobConfiguration);
- 
+
   public abstract Schema getSchema(InitializerContext context, LinkConfiguration linkConfiguration,
       JobConfiguration jobConfiguration);
 
@@ -168,7 +167,7 @@ Extractor (E for ETL) extracts data from a given data source
 
 The ``extract`` method extracts data from the data source using the link and job configuration properties and writes it to the ``DataWriter`` (provided by the extractor context) as the default `Intermediate representation`_ .
 
-Extractors use Writer's provided by the ExtractorContext to send a record through the sqoop system. 
+Extractors use Writer's provided by the ExtractorContext to send a record through the sqoop system.
 ::
 
   context.getDataWriter().writeArrayRecord(array);
@@ -193,9 +192,8 @@ The ``getTo`` method returns ``TO`` instance which is a ``Transferable`` entity 
         GenericJdbcToInitializer.class,
         GenericJdbcLoader.class,
         GenericJdbcToDestroyer.class);
-  
   ...
-  
+
   @Override
   public To getTo() {
     return TO;
@@ -348,7 +346,7 @@ Validators validate the config objects and the inputs associated with the config
    @Input(size = 128, validators = {@Validator(value = StartsWith.class, strArg = "jdbc:")} )
 
    @Input(size = 255, validators = { @Validator(NotEmpty.class) })
-  
+
 Sqoop 2 provides a list of standard input validators that can be used by different connectors for the link and job type configuration inputs.
 
 ::
