@@ -251,6 +251,27 @@ public class TestCSVIntermediateDataFormat {
     }
   }
 
+  /**
+   * In ISO8601 "T" is used as date-time separator. Unfortunately in the real
+   * world, database (confirmed with mysql and postgres) might return a datatime
+   * string with a space as separator. The test case intends to check, whether
+   * such datatime string can be handled expectedly.
+   */
+  @Test
+  public void testDateTimeISO8601Alternative() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    data.setSchema(schema);
+
+    for (String dateTime : new String[]{
+        "2014-10-01 12:00:00",
+        "2014-10-01 12:00:00.000"
+    }) {
+      data.setTextData(dateTime);
+      assertEquals("2014-10-01T12:00:00.000", data.getObjectData()[0].toString());
+    }
+  }
+
   @Test
   public void testBit() {
     Schema schema = new Schema("test");
