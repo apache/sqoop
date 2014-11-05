@@ -186,7 +186,6 @@ public abstract class OraOopTestCase {
   protected int runImport(String tableName, Configuration sqoopConf,
       boolean sequenceFile) {
     Logger rootLogger = Logger.getRootLogger();
-    rootLogger.removeAllAppenders();
     StringWriter stringWriter = new StringWriter();
     Layout layout = new PatternLayout("%d{yy/MM/dd HH:mm:ss} %p %c{2}: %m%n");
     WriterAppender writerAppender = new WriterAppender(layout, stringWriter);
@@ -248,9 +247,6 @@ public abstract class OraOopTestCase {
       while (matcher.find()) {
         rowsImported = Integer.parseInt(matcher.group(2));
       }
-    }
-    if (retCode != 0 || rowsInTable != rowsImported) {
-      System.out.println(stringWriter.toString());
     }
     Assert.assertEquals("Incorrect number of rows imported", rowsInTable,
         rowsImported);
