@@ -118,7 +118,7 @@ public class Constants {
   public static final String FN_OPTION = "option";
   public static final String FN_CONNECTOR = "connector";
   public static final String FN_VERSION = "version";
-  public static final String FN_DRIVER_CONFIG = "driverConfig";
+  public static final String FN_DRIVER_CONFIG = "driver";
 
   public static final String PROP_HOMEDIR = "user.home";
   public static final String PROP_CURDIR = "user.dir";
@@ -253,10 +253,10 @@ public class Constants {
   public static final String RES_SHOW_PROMPT_CONNECTOR_INFO =
       "show.prompt_connector_info";
 
-  public static final String RES_SHOW_DRIVER_CONFIG_USAGE =
-      "show.driver_config_usage";
-  public static final String RES_SHOW_PROMPT_DRIVER_CONFIG_OPTS =
-      "show.prompt_driver_config_opts";
+  public static final String RES_SHOW_DRIVER_USAGE =
+      "show.driver_usage";
+  public static final String RES_SHOW_PROMPT_DRIVER_OPTS =
+      "show.prompt_driver_opts";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_JOBS =
       "show.prompt_display_all_jobs";

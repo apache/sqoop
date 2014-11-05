@@ -36,7 +36,7 @@ public class ShowDriverFunction extends SqoopFunction {
   @Override
   public boolean validateArgs(CommandLine line) {
     if (line.getArgs().length != 0) {
-      printlnResource(Constants.RES_SHOW_DRIVER_CONFIG_USAGE);
+      printlnResource(Constants.RES_SHOW_DRIVER_USAGE);
       return false;
     }
     return true;
@@ -49,7 +49,7 @@ public class ShowDriverFunction extends SqoopFunction {
   }
 
   private void showDriver() {
-    printlnResource(Constants.RES_SHOW_PROMPT_DRIVER_CONFIG_OPTS, client.getDriver().getPersistenceId());
+    printlnResource(Constants.RES_SHOW_PROMPT_DRIVER_OPTS, client.getDriver().getPersistenceId());
     displayDriverConfigDetails(client.getDriverConfig(), client.getDriverConfigBundle());
   }
 }
