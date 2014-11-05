@@ -220,7 +220,11 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
           out[i] = LocalDate.parse(fields[i]);
           break;
         case DATE_TIME:
-          out[i] = LocalDateTime.parse(fields[i]);
+          // A datetime string with a space as date-time separator will not be
+          // parsed expectedly. The expected separator is "T". See also:
+          // https://github.com/JodaOrg/joda-time/issues/11
+          String iso8601 = fields[i].replace(" ", "T");
+          out[i] = LocalDateTime.parse(iso8601);
           break;
         case BIT:
           out[i] = Boolean.valueOf(fields[i].equals("1")
