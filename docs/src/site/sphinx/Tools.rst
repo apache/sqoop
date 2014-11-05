@@ -24,6 +24,7 @@ In order to perform the maintenance task each tool is suppose to do, they need t
 
 
 .. note:: Running tools while the Sqoop Server is also running is not recommended as it might lead to a data corruption and service disruption.
+
 List of available tools:
 
 * verify
