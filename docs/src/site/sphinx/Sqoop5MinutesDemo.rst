@@ -18,9 +18,9 @@
 Sqoop 5 Minutes Demo
 ====================
 
-This page will walk you through basic usage of Sqoop. You need to have installed and configured Sqoop server and client in order to follow this guide. Installation procedure is described on `Installation page <Installation.html>`_. Please note that precise output shown in this page might differ from your as Sqoop develops. All major information should however remain the same.
+This page will walk you through the basic usage of Sqoop. You need to have installed and configured Sqoop server and client in order to follow this guide. Installation procedure is described on `Installation page <Installation.html>`_. Please note that exact output shown in this page might differ from yours as Sqoop evolves. All major information should however remain the same.
 
-Sqoop is using numerical identifiers to identify various meta data structures (connectors, connections, jobs). Each meta data structures have it's own pool of identifiers and thus it's perfectly valid when Sqoop have connector with id 1, connection with id 1 and job with id 1 at the same time.
+Sqoop uses unique names or persistent ids to identify connectors, links, jobs and configs. We support querying a entity by its unique name or by its perisent database Id.
 
 Starting Client
 ===============
@@ -36,124 +36,187 @@ Configure client to use your Sqoop server: ::
 Verify that connection is working by simple version checking: ::
 
   sqoop:000> show version --all
-  Server version:
-    Sqoop 2.0.0-SNAPSHOT revision Unknown
-    Compiled by jarcec on Wed Nov 21 16:15:51 PST 2012
-  Client version:
-    Sqoop 2.0.0-SNAPSHOT revision Unknown
-    Compiled by jarcec on Wed Nov 21 16:15:51 PST 2012
-  Protocol version:
-    [1]
+  client version:
+    Sqoop 2.0.0-SNAPSHOT source revision 418c5f637c3f09b94ea7fc3b0a4610831373a25f
+    Compiled by vbasavaraj on Mon Nov  3 08:18:21 PST 2014
+  server version:
+    Sqoop 2.0.0-SNAPSHOT source revision 418c5f637c3f09b94ea7fc3b0a4610831373a25f
+    Compiled by vbasavaraj on Mon Nov  3 08:18:21 PST 2014
+  API versions:
+    [v1]
 
-You should received similar output as shown describing versions of both your client and remote server as well as negotiated protocol version.
+You should received similar output as shown above describing the sqoop client build version, the server build version and the supported versions for the rest API.
 
-Creating Connection Object
+You can use the help command to check all the supported commands in the sqoop shell.
+
+::
+  sqoop:000> help
+  For information about Sqoop, visit: http://sqoop.apache.org/
+
+  Available commands:
+    exit    (\x  ) Exit the shell
+    history (\H  ) Display, manage and recall edit-line history
+    help    (\h  ) Display this help message
+    set     (\st ) Configure various client options and settings
+    show    (\sh ) Display various objects and configuration options
+    create  (\cr ) Create new object in Sqoop repository
+    delete  (\d  ) Delete existing object in Sqoop repository
+    update  (\up ) Update objects in Sqoop repository
+    clone   (\cl ) Create new object based on existing one
+    start   (\sta) Start job
+    stop    (\stp) Stop job
+    status  (\stu) Display status of a job
+    enable  (\en ) Enable object in Sqoop repository
+    disable (\di ) Disable object in Sqoop repository
+
+
+Creating Link Object
 ==========================
 
-Check what connectors are available on your Sqoop server: ::
+Check for the registered connectors on your Sqoop server: ::
 
   sqoop:000> show connector --all
-  1 connector(s) to show:
-  Connector with id 1:
-    Name: generic-jdbc-connector
-    Class: org.apache.sqoop.connector.jdbc.GenericJdbcConnector
-    Supported job types: [EXPORT, IMPORT]
-  ...
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
+  | Id |          Name          |    Version     |                        Class                         | Supported Directions |
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
+  | 1  | hdfs-connector         | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.hdfs.HdfsConnector        | FROM/TO              |
+  | 2  | generic-jdbc-connector | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.jdbc.GenericJdbcConnector | FROM/TO              |
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
 
-Our example contains one connector called ``generic-jdbc-connector``. This is basic connector that is relying on Java JDBC interface for doing data transfers. It should work on most common databases that are providing JDBC drivers. Please note that you must install JDBC drivers separately. They are not bundled in Sqoop due to incompatible licenses.
+Our example contains two connectors. The one with connector Id 2 is called the ``generic-jdbc-connector``. This is a basic connector relying on the Java JDBC interface for communicating with data sources. It should work with the most common databases that are providing JDBC drivers. Please note that you must install JDBC drivers separately. They are not bundled in Sqoop due to incompatible licenses.
 
-Generic JDBC Connector have in our example id 1 and we will use this value to create new connection object for this connector: ::
+Generic JDBC Connector in our example has a persistence Id 2 and we will use this value to create new link object for this connector. Note that the link name should be unique.
+::
 
-  sqoop:000> create connection --cid 1
-  Creating connection for connector with id 1
-  Please fill following values to create new connection object
-  Name: First connection
+  sqoop:000> create link --cid 2
+  Creating link for connector with id 2
+  Please fill following values to create new link object
+  Name: First Link
 
-  Configuration configuration
+  Link configuration
   JDBC Driver Class: com.mysql.jdbc.Driver
   JDBC Connection String: jdbc:mysql://mysql.server/database
   Username: sqoop
   Password: *****
   JDBC Connection Properties:
   There are currently 0 values in the map:
-  entry#
+  entry#protocol=tcp
+  New link was successfully created with validation status OK and persistent id 1
 
-  Security related configuration options
-  Max connections: 0
-  New connection was successfully created with validation status FINE and persistent id 1
+Our new link object was created with assigned id 1.
 
-Our new connection object was created with assigned id 1.
+In the ``show connector -all`` we see that there is a hdfs-connector registered in sqoop with the persistent id 1. Let us create another link object but this time for the  hdfs-connector instead.
+
+::
+  sqoop:000> create link --cid 1
+  Creating link for connector with id 1
+  Please fill following values to create new link object
+  Name: Second Link
+
+  Link configuration
+  HDFS URI: hdfs://nameservice1:8020/
+  New link was successfully created with validation status OK and persistent id 2
 
 Creating Job Object
 ===================
 
-Job objects have multiple types and each connector might not support all of them. Generic JDBC Connector supports job types ``import`` (importing data to Hadoop ecosystem) and ``export`` (exporting data from Hadoop ecosystem). List of supported job types for each connector might be seen in the output of ``show connector`` command: ::
+Connectors implement the ``From`` for reading data from and/or ``To`` for writing data to. Generic JDBC Connector supports both of them List of supported directions for each connector might be seen in the output of ``show connector -all`` command above. In order to create a job we need to specifiy the ``From`` and ``To`` parts of the job uniquely identified by their link Ids. We already have 2 links created in the system, you can verify the same with the following command
 
-  sqoop:000> show connector --all
-  ...
-    Name: generic-jdbc-connector
-  ...
-    Supported job types: [EXPORT, IMPORT]
-  ...
+::
+  sqoop:000> show links -all
+  2 link(s) to show:
+  link with id 1 and name First Link (Enabled: true, Created by root at 11/4/14 4:27 PM, Updated by root at 11/4/14 4:27 PM)
+  Using Connector id 2
+    Link configuration
+      JDBC Driver Class: com.mysql.jdbc.Driver
+      JDBC Connection String: jdbc:mysql://mysql.ent.cloudera.com/sqoop
+      Username: sqoop
+      Password:
+      JDBC Connection Properties:
+        protocol = tcp
+  link with id 2 and name Second Link (Enabled: true, Created by root at 11/4/14 4:38 PM, Updated by root at 11/4/14 4:38 PM)
+  Using Connector id 1
+    Link configuration
+      HDFS URI: hdfs://nameservice1:8020/
 
-Create import job for Connection object created in previous section: ::
+Next, we can use the two link Ids to associate the ``From`` and ``To`` for the job.
+::
 
-  sqoop:000> create job --xid 1 --type import
-  Creating job for connection with id 1
-  Please fill following values to create new job object
-  Name: First job
+   sqoop:000> create job -f 1 -t 2
+   Creating job for links with from id 1 and to id 2
+   Please fill following values to create new job object
+   Name: Sqoopy
 
-  Database configuration
-  Table name: users
-  Table SQL statement:
-  Table column names:
-  Partition column name:
-  Boundary query:
+   FromJob configuration
 
-  Output configuration
-  Storage type:
-    0 : HDFS
-  Choose: 0
-  Output directory: /user/jarcec/users
-  New job was successfully created with validation status FINE and persistent id 1
+    Schema name:(Required)sqoop
+    Table name:(Required)sqoop
+    Table SQL statement:(Optional)
+    Table column names:(Optional)
+    Partition column name:(Optional) id
+    Null value allowed for the partition column:(Optional)
+    Boundary query:(Optional)
+
+  ToJob configuration
+
+   Output format:
+    0 : TEXT_FILE
+    1 : SEQUENCE_FILE
+	Output format:
+	  0 : TEXT_FILE
+	  1 : SEQUENCE_FILE
+	Choose: 0
+	Compression format:
+	  0 : NONE
+	  1 : DEFAULT
+	  2 : DEFLATE
+	  3 : GZIP
+	  4 : BZIP2
+	  5 : LZO
+	  6 : LZ4
+	  7 : SNAPPY
+	  8 : CUSTOM
+	Choose: 0
+	Custom compression format:(Optional)
+	Output directory:(Required)/root/projects/sqoop
+
+	Driver Config
+
+	Extractors: 2
+	Loaders: 2
+	New job was successfully created with validation status OK  and persistent id 1
 
 Our new job object was created with assigned id 1.
 
-Moving Data
-===========
+Start Job ( a.k.a Data transfer )
+================================
 
-When all meta data objects are in place we can start moving data around. You can submit Hadoop job using ``submission start`` command: ::
+You can start a sqoop job with the following command: ::
 
-  sqoop:000> submission start --jid 1
+  sqoop:000> start job --jid 1
   Submission details
-  Job id: 1
-  Status: BOOTING
-  Creation date: 2012-12-23 13:20:34 PST
-  Last update date: 2012-12-23 13:20:34 PST
-  External Id: job_1353136146286_0004
-          http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
-  Progress: Progress is not available
+  Job ID: 1
+  Server URL: http://localhost:12000/sqoop/
+  Created by: root
+  Creation date: 2014-11-04 19:43:29 PST
+  Lastly updated by: root
+  External ID: job_1412137947693_0001
+    http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
+  2014-11-04 19:43:29 PST: BOOTING  - Progress is not available
 
-You can iteratively check your running job status with ``submission status`` command: ::
+You can iteratively check your running job status with ``status job`` command: ::
 
-  sqoop:000> submission status --jid 1
+  sqoop:000> status job --jid 1
   Submission details
-  Job id: 1
-  Status: RUNNING
-  Creation date: 2012-12-23 13:21:45 PST
-  Last update date: 2012-12-23 13:21:56 PST
-  External Id: job_1353136146286_0005
-          http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
-  Progress: 0.00 %
+  Job ID: 1
+  Server URL: http://localhost:12000/sqoop/
+  Created by: root
+  Creation date: 2014-11-04 19:43:29 PST
+  Lastly updated by: root
+  External ID: job_1412137947693_0001
+    http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
+  2014-11-04 20:09:16 PST: RUNNING  - 0.00 % 
 
-And finally you can stop running job at any time using ``submission stop`` command: ::
+And finally you can stop running the job at any time using ``stop job`` command: ::
 
-  sqoop:000> submission stop --jid 1
-  Submission details
-  Job id: 1
-  Status: FAILED
-  Creation date: 2012-12-23 13:22:39 PST
-  Last update date: 2012-12-23 13:22:42 PST
-  External Id: job_1353136146286_0006
-          http://hadoop.cluster.com:8088/proxy/application_1353136146286_0004/
-
+  sqoop:000> stop job --jid 1
