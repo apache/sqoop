@@ -15,10 +15,10 @@
 
 
 ===================
-Command Line Client
+Command Line Shell
 ===================
 
-Sqoop 2 provides command line client that is capable of communicating with Sqoop 2 server using REST interface. Client is able to run in two modes - interactive and batch mode. Commands ``create``, ``update`` and ``clone`` are not currently supported in batch mode. Interactive mode supports all available commands.
+Sqoop 2 provides command line shell that is capable of communicating with Sqoop 2 server using REST interface. Client is able to run in two modes - interactive and batch mode. Commands ``create``, ``update`` and ``clone`` are not currently supported in batch mode. Interactive mode supports all available commands.
 
 You can start Sqoop 2 client in interactive mode using command ``sqoop2-shell``::
 
@@ -34,7 +34,8 @@ Sqoop client script is expected to contain valid Sqoop client commands, empty li
   set server --host sqoop2.company.net
 
   # Executing given job
-  submission start --jid 1
+  start job  --jid 1
+
 
 .. contents:: Table of Contents
 
@@ -64,6 +65,26 @@ Auxiliary commands are commands that are improving user experience and are runni
 * ``exit`` Exit client immediately. This command can be also executed by sending EOT (end of transmission) character. It's CTRL+D on most common Linux shells like Bash or Zsh.
 * ``history`` Print out command history. Please note that Sqoop client is saving history from previous executions and thus you might see commands that you've executed in previous runs.
 * ``help`` Show all available commands with short in-shell documentation.
+::
+
+ sqoop:000> help
+ For information about Sqoop, visit: http://sqoop.apache.org/
+
+ Available commands:
+   exit    (\x  ) Exit the shell
+   history (\H  ) Display, manage and recall edit-line history
+   help    (\h  ) Display this help message
+   set     (\st ) Configure various client options and settings
+   show    (\sh ) Display various objects and configuration options
+   create  (\cr ) Create new object in Sqoop repository
+   delete  (\d  ) Delete existing object in Sqoop repository
+   update  (\up ) Update objects in Sqoop repository
+   clone   (\cl ) Create new object based on existing one
+   start   (\sta) Start job
+   stop    (\stp) Stop job
+   status  (\stu) Display status of a job
+   enable  (\en ) Enable object in Sqoop repository
+   disable (\di ) Disable object in Sqoop repository
 
 Set Command
 -----------
@@ -128,32 +149,32 @@ Example: ::
 Show Command
 ------------
 
-Show commands displays various information including server and protocol versions or all stored meta data.
+Show commands displays various information as described below.
 
 Available functions:
 
 +----------------+--------------------------------------------------------------------------------------------------------+
 | Function       | Description                                                                                            |
 +================+========================================================================================================+
-| ``server``     | Display connection information to the server (host, port, webapp)                                      |
+| ``server``     | Display connection information to the sqoop server (host, port, webapp)                                |
 +----------------+--------------------------------------------------------------------------------------------------------+
 | ``option``     | Display various client side options                                                                    |
 +----------------+--------------------------------------------------------------------------------------------------------+
-| ``version``    | Show version of both client and server (build numbers, supported protocols)                            |
+| ``version``    | Show client build version, with an option -all it shows server build version and supported api versions|
 +----------------+--------------------------------------------------------------------------------------------------------+
-| ``connector``  | Show connector meta data - set of parameters that connectors needs to create connections and jobs      |
+| ``connector``  | Show connector configurable and its related configs                                                    |
 +----------------+--------------------------------------------------------------------------------------------------------+
-| ``framework``  | Show framework meta data - set of parameters that Sqoop framework needs to create connections and jobs |
+| ``driver``     | Show driver configurable and its related configs                                                       |
 +----------------+--------------------------------------------------------------------------------------------------------+
-| ``connection`` | Show created connection meta data objects                                                              |
+| ``link``       | Show links in sqoop                                                                                    |
 +----------------+--------------------------------------------------------------------------------------------------------+
-| ``job``        | Show created job meta data objects                                                                     |
+| ``job``        | Show jobs in sqoop                                                                                     |
 +----------------+--------------------------------------------------------------------------------------------------------+
 
 Show Server Function
 ~~~~~~~~~~~~~~~~~~~~
 
-Show details about configuration connection to Sqoop server.
+Show details about connection to Sqoop server.
 
 +-----------------------+--------------------------------------------------------------+
 | Argument              |  Description                                                 |
@@ -191,18 +212,18 @@ Example: ::
 Show Version Function
 ~~~~~~~~~~~~~~~~~~~~~
 
-Show versions of both client and server as well as supported protocols.
+Show build versions of both client and server as well as the supported rest api versions.
 
 +------------------------+-----------------------------------------------+
 | Argument               |  Description                                  |
 +========================+===============================================+
-| ``-a``, ``--all``      | Show all versions (server, client, protocols) |
+| ``-a``, ``--all``      | Show all versions (server, client, api)       |
 +------------------------+-----------------------------------------------+
-| ``-c``, ``--client``   | Show client version                           |
+| ``-c``, ``--client``   | Show client build version                     |
 +------------------------+-----------------------------------------------+
-| ``-s``, ``--server``   | Show server version                           |
+| ``-s``, ``--server``   | Show server build version                     |
 +------------------------+-----------------------------------------------+
-| ``-p``, ``--protocol`` | Show protocol support on client or server     |
+| ``-p``, ``--api``      | Show supported api versions                   |
 +------------------------+-----------------------------------------------+
 
 Example: ::
@@ -212,7 +233,7 @@ Example: ::
 Show Connector Function
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Show connector meta data - parameters that connectors need in order to create new connection and job objects.
+Show persisted connector configurable and its related configs used in creating associated link and job objects
 
 +-----------------------+------------------------------------------------+
 | Argument              |  Description                                   |
@@ -224,35 +245,35 @@ Show connector meta data - parameters that connectors need in order to create ne
 
 Example: ::
 
-  show connector --all
+  show connector --all or show connector
 
-Show Framework Function
-~~~~~~~~~~~~~~~~~~~~~~~
+Show Driver Function
+~~~~~~~~~~~~~~~~~~~~
 
-Show framework meta data - parameters that Sqoop framework need in order to create new connection and job objects.
+Show persisted driver configurable and its related configs used in creating job objects
 
-This function do not have any extra arguments.
+This function do not have any extra arguments. There is only one registered driver in sqoop
 
 Example: ::
 
-  show framework
+  show driver
 
-Show Connection Function
-~~~~~~~~~~~~~~~~~~~~~~~~
+Show Link Function
+~~~~~~~~~~~~~~~~~~
 
-Show persisted connection objects.
+Show persisted link objects.
 
 +-----------------------+------------------------------------------------------+
 | Argument              |  Description                                         |
 +=======================+======================================================+
-| ``-a``, ``--all``     | Show all available connections from all connectors   |
+| ``-a``, ``--all``     | Show all available links                             |
 +-----------------------+------------------------------------------------------+
-| ``-x``, ``--xid <x>`` | Show connection with id ``<x>``                      |
+| ``-x``, ``--lid <x>`` | Show link with id ``<x>``                            |
 +-----------------------+------------------------------------------------------+
 
 Example: ::
 
-  show connection --all
+  show link --all or show link
 
 Show Job Function
 ~~~~~~~~~~~~~~~~~
@@ -262,26 +283,26 @@ Show persisted job objects.
 +-----------------------+----------------------------------------------+
 | Argument              |  Description                                 |
 +=======================+==============================================+
-| ``-a``, ``--all``     | Show all available jobs from all connectors  |
+| ``-a``, ``--all``     | Show all available jobs                      |
 +-----------------------+----------------------------------------------+
 | ``-j``, ``--jid <x>`` | Show job with id ``<x>``                     |
 +-----------------------+----------------------------------------------+
 
 Example: ::
 
-  show job --all
+  show job --all or show job
 
 Show Submission Function
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Show persisted submission objects.
+Show persisted job submission objects.
 
 +-----------------------+---------------------------------------------+
 | Argument              |  Description                                |
 +=======================+=============================================+
 | ``-j``, ``--jid <x>`` | Show available submissions for given job    |
 +-----------------------+---------------------------------------------+
-| ``-d``, ``--detail``  | Show jobs in full details                   |
+| ``-d``, ``--detail``  | Show job submissions in full details        |
 +-----------------------+---------------------------------------------+
 
 Example: ::
@@ -293,33 +314,33 @@ Example: ::
 Create Command
 --------------
 
-Creates new connection and job objects. This command is supported only in interactive mode. It will query user for all parameters that are required by specific connector and framework and persist them in Sqoop server for later use.
+Creates new link and job objects. This command is supported only in interactive mode. It will ask user to enter the link config and job configs for from /to and driver when creating link and job objects respectively.
 
 Available functions:
 
 +----------------+-------------------------------------------------+
 | Function       | Description                                     |
 +================+=================================================+
-| ``connection`` | Create new connection object                    |
+| ``link``       | Create new link object                          |
 +----------------+-------------------------------------------------+
 | ``job``        | Create new job object                           |
 +----------------+-------------------------------------------------+
 
-Create Connection Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create Link Function
+~~~~~~~~~~~~~~~~~~~~
 
-Create new connection object.
+Create new link object.
 
 +------------------------+-------------------------------------------------------------+
 | Argument               |  Description                                                |
 +========================+=============================================================+
-| ``-c``, ``--cid <x>``  |  Create new connection object for connector with id ``<x>`` |
+| ``-c``, ``--cid <x>``  |  Create new link object for connector with id ``<x>``       |
 +------------------------+-------------------------------------------------------------+
 
 
 Example: ::
 
-  create connection --cid 1
+  create link --cid 1 or create link -c 1
 
 Create Job Function
 ~~~~~~~~~~~~~~~~~~~
@@ -329,34 +350,34 @@ Create new job object.
 +------------------------+------------------------------------------------------------------+
 | Argument               |  Description                                                     |
 +========================+==================================================================+
-| ``-f``, ``--from <x>`` | Create new job object with a FROM connection with id ``<x>``     |
+| ``-f``, ``--from <x>`` | Create new job object with a FROM link with id ``<x>``           |
 +------------------------+------------------------------------------------------------------+
-| ``-t``, ``--to <t>``   | Create new job object with a TO connection with id ``<x>``       |
+| ``-t``, ``--to <t>``   | Create new job object with a TO link with id ``<x>``             |
 +------------------------+------------------------------------------------------------------+
 
 Example: ::
 
-  create job --from 1 --to 2
+  create job --from 1 --to 2 or create job --f 1 --t 2 
 
 Update Command
 --------------
 
-Update commands allows you to edit connection and job objects - change persisted meta data. This command is supported only in interactive mode.
+Update commands allows you to edit link and job objects. This command is supported only in interactive mode.
 
-Update Connection Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Update Link Function
+~~~~~~~~~~~~~~~~~~~~
 
-Update existing connection object.
+Update existing link object.
 
 +-----------------------+---------------------------------------------+
 | Argument              |  Description                                |
 +=======================+=============================================+
-| ``-x``, ``--xid <x>`` |  Update existing connection with id ``<x>`` |
+| ``-x``, ``--lid <x>`` |  Update existing link with id ``<x>``       |
 +-----------------------+---------------------------------------------+
 
 Example: ::
 
-  update connection --xid 1
+  update link --lid 1
 
 Update Job Function
 ~~~~~~~~~~~~~~~~~~~
@@ -377,22 +398,22 @@ Example: ::
 Delete Command
 --------------
 
-Deletes connection and job objects from Sqoop server.
+Deletes link and job objects from Sqoop server.
 
-Delete Connection Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Delete Link Function
+~~~~~~~~~~~~~~~~~~~~
 
-Delete existing connection object.
+Delete existing link object.
 
 +-----------------------+-------------------------------------------+
 | Argument              |  Description                              |
 +=======================+===========================================+
-| ``-x``, ``--xid <x>`` |  Delete connection object with id ``<x>`` |
+| ``-x``, ``--lid <x>`` |  Delete link object with id ``<x>``       |
 +-----------------------+-------------------------------------------+
 
 Example: ::
 
-  delete connection --xid 1
+  delete link --lid 1
 
 
 Delete Job Function
@@ -414,22 +435,22 @@ Example: ::
 Clone Command
 -------------
 
-Clone command will load existing connection or job object from Sqoop server and allow user in place changes that will result in creation of new connection or job object. This command is not supported in batch mode.
+Clone command will load existing link or job object from Sqoop server and allow user in place updates that will result in creation of new link or job object. This command is not supported in batch mode.
 
-Clone Connection Function
+Clone Link Function
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Clone existing connection object.
+Clone existing link object.
 
 +-----------------------+------------------------------------------+
 | Argument              |  Description                             |
 +=======================+==========================================+
-| ``-x``, ``--xid <x>`` |  Clone connection object with id ``<x>`` |
+| ``-x``, ``--lid <x>`` |  Clone link object with id ``<x>``       |
 +-----------------------+------------------------------------------+
 
 Example: ::
 
-  clone connection --xid 1
+  clone link --lid 1
 
 
 Clone Job Function
@@ -509,4 +530,3 @@ Retrieve last status for given job.
 Example: ::
 
   status job --jid 1
-
