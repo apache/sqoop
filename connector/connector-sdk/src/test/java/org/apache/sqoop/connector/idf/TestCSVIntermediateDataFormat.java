@@ -183,6 +183,34 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
+  public void testObjectWithNullInStringOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new FixedPoint("1"))
+        .addColumn(new FixedPoint("2"))
+        .addColumn(new Text("3"))
+        .addColumn(new Text("4"))
+        .addColumn(new Binary("5"))
+        .addColumn(new Text("6"));
+    data.setSchema(schema);
+
+    byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
+    Object[] in = new Object[6];
+    in[0] = new Long(10);
+    in[1] = new Long(34);
+    in[2] = null;
+    in[3] = "random data";
+    in[4] = byteFieldData;
+    in[5] = new String(new char[] { 0x0A });
+
+    data.setObjectData(in);
+
+    //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
+    String testData = "10,34,NULL,'random data'," +
+        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n'";
+    assertEquals(testData, data.getTextData());
+  }
+
+  @Test
   public void testStringFullRangeOfCharacters() {
     Schema schema = new Schema("test");
     schema.addColumn(new Text("1"));

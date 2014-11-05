@@ -45,6 +45,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   public static final char SEPARATOR_CHARACTER = ',';
   public static final char ESCAPE_CHARACTER = '\\';
   public static final char QUOTE_CHARACTER = '\'';
+  public static final String NULL_STRING = "NULL";
 
 
   private static final char[] originals = {
@@ -326,6 +327,10 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   private String escapeStrings(String orig) {
+    if (orig == null) {
+      return NULL_STRING;
+    }
+
     int j = 0;
     String replacement = orig;
     try {
