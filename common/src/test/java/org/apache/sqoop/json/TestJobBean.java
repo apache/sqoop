@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.ConfigTestUtil.getJob;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.json.util.BeanTestUtil;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
@@ -30,27 +30,19 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
-/**
- *
- */
 public class TestJobBean {
+
   @Test
-  public void testSerialization() throws ParseException {
+  public void testJobSerialization() throws ParseException {
     Date created = new Date();
     Date updated = new Date();
-    MJob job = getJob("ahoj");
-    job.setName("The big job");
-    job.setPersistenceId(666);
-    job.setCreationDate(created);
-    job.setLastUpdateDate(updated);
-    job.setEnabled(false);
+    MJob job = BeanTestUtil.createJob("ahoj", "The big Job", 22L, created, updated);
 
     // Fill some data at the beginning
-    MStringInput input = (MStringInput) job.getJobConfig(Direction.FROM)
-        .getConfigs().get(0).getInputs().get(0);
+    MStringInput input = (MStringInput) job.getJobConfig(Direction.FROM).getConfigs().get(0)
+        .getInputs().get(0);
     input.setValue("Hi there!");
-    input = (MStringInput) job.getJobConfig(Direction.TO)
-        .getConfigs().get(0).getInputs().get(0);
+    input = (MStringInput) job.getJobConfig(Direction.TO).getConfigs().get(0).getInputs().get(0);
     input.setValue("Hi there again!");
 
     // Serialize it to JSON object
@@ -61,28 +53,31 @@ public class TestJobBean {
     String jobJsonString = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedJobJson = (JSONObject)JSONValue.parse(jobJsonString);
+    JSONObject parsedJobJson = (JSONObject) JSONValue.parse(jobJsonString);
     JobBean parsedJobBean = new JobBean();
     parsedJobBean.restore(parsedJobJson);
     MJob target = parsedJobBean.getJobs().get(0);
 
     // Check id and name
-    assertEquals(666, target.getPersistenceId());
+    assertEquals(22L, target.getPersistenceId());
+    assertEquals("The big Job", target.getName());
+
     assertEquals(target.getLinkId(Direction.FROM), 1);
     assertEquals(target.getLinkId(Direction.TO), 2);
     assertEquals(target.getConnectorId(Direction.FROM), 1);
     assertEquals(target.getConnectorId(Direction.TO), 2);
-    assertEquals("The big job", target.getName());
     assertEquals(created, target.getCreationDate());
     assertEquals(updated, target.getLastUpdateDate());
     assertEquals(false, target.getEnabled());
 
     // Test that value was correctly moved
-    MStringInput targetInput = (MStringInput) target.getJobConfig(Direction.FROM)
-      .getConfigs().get(0).getInputs().get(0);
+    MStringInput targetInput = (MStringInput) target.getJobConfig(Direction.FROM).getConfigs()
+        .get(0).getInputs().get(0);
     assertEquals("Hi there!", targetInput.getValue());
-    targetInput = (MStringInput) target.getJobConfig(Direction.TO)
-        .getConfigs().get(0).getInputs().get(0);
+    targetInput = (MStringInput) target.getJobConfig(Direction.TO).getConfigs().get(0).getInputs()
+        .get(0);
     assertEquals("Hi there again!", targetInput.getValue());
   }
+
+
 }

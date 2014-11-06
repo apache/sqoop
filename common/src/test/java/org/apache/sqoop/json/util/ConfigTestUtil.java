@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.json;
+package org.apache.sqoop.json.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,52 +24,16 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.utils.MapResourceBundle;
 
-/**
- *
- */
 public class ConfigTestUtil {
-  public static MConnector getConnector(Long id, String name) {
-    return getConnector(id, name, true, true);
-  }
-
-  public static MConnector getConnector(Long id, String name, boolean from, boolean to) {
-    MFromConfig fromConfig = null;
-    MToConfig toConfig = null;
-    if (from) {
-      fromConfig = getFromConfig();
-    }
-    if (to) {
-      toConfig = getToConfig();
-    }
-
-    MConnector connector = new MConnector(name, name + ".class", "1.0-test",
-      getLinkConfig(), fromConfig, toConfig);
-    // simulate a persistence id
-    connector.setPersistenceId(id);
-    return connector;
-  }
-
-
-  public static MLink getLink(String name) {
-    return new MLink(1, getConnector(1L, name).getLinkConfig());
-  }
-
-  public static MJob getJob(String name) {
-    return new MJob(1, 2, 1, 2, getConnector(1L, name).getFromConfig(), getConnector(1L, name)
-        .getToConfig(), getDriverConfig());
-  }
 
   public static MDriverConfig getDriverConfig() {
     List<MInput<?>> inputs;

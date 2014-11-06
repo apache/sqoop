@@ -17,11 +17,11 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.ConfigTestUtil.getResourceBundle;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.json.util.ConfigTestUtil;
 import org.apache.sqoop.model.MDriver;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -41,7 +41,7 @@ public class TestDriverBean {
     MDriver driver = new MDriver(ConfigTestUtil.getDriverConfig(), DriverBean.CURRENT_DRIVER_VERSION);
 
     // Serialize it to JSON object
-    DriverBean bean = new DriverBean(driver, getResourceBundle());
+    DriverBean bean = new DriverBean(driver, ConfigTestUtil.getResourceBundle());
     JSONObject json = bean.extract(false);
 
     // "Move" it across network in text form
