@@ -23,7 +23,7 @@ public interface JsonBean {
 
   // common JSON constants for the rest-api response
   static final String CONFIGURABLE_VERSION = "version";
-  static final String ALL_CONFIGS = "all-configs";
+  static final String ALL_CONFIG_RESOURCES= "all-config-resources";
 
   @Deprecated // should not be used anymore in the rest api
   static final String ALL = "all";
