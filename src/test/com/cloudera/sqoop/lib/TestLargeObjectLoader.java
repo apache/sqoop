@@ -56,7 +56,7 @@ public class TestLargeObjectLoader extends TestCase {
     }
     fs.mkdirs(outDir);
 
-    loader = new LargeObjectLoader(conf);
+    loader = new LargeObjectLoader(conf, outDir);
   }
 
   public void testReadClobRef()

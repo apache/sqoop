@@ -48,8 +48,8 @@ public class LargeObjectLoader extends org.apache.sqoop.lib.LargeObjectLoader {
    * Create a new LargeObjectLoader.
    * @param conf the Configuration to use
    */
-  public LargeObjectLoader(Configuration conf)
+  public LargeObjectLoader(Configuration conf, Path workPath)
       throws IOException {
-    super(conf);
+    super(conf, workPath);
   }
 }

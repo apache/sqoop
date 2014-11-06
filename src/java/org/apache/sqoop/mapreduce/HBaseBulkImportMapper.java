@@ -54,7 +54,7 @@ public class HBaseBulkImportMapper
   protected void setup(Context context)
       throws IOException, InterruptedException {
     this.conf = context.getConfiguration();
-    this.lobLoader = new LargeObjectLoader(this.conf);
+    this.lobLoader = new LargeObjectLoader(this.conf, new Path( this.conf.get("sqoop.hbase.lob.extern.dir", "/tmp/sqoop-hbase-" + context.getTaskAttemptID())));
 
     // Get the implementation of PutTransformer to use.
     // By default, we call toString() on every non-null field.

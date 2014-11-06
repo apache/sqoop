@@ -70,10 +70,10 @@ public class LargeObjectLoader implements Closeable  {
    * Create a new LargeObjectLoader.
    * @param conf the Configuration to use
    */
-  public LargeObjectLoader(Configuration conf)
+  public LargeObjectLoader(Configuration conf, Path workPath)
       throws IOException {
     this.conf = conf;
-    this.workPath = new Path(System.getProperty("java.io.tmpdir"), "SQOOP");
+    this.workPath = workPath;
     this.fs = FileSystem.get(conf);
     this.curBlobWriter = null;
     this.curClobWriter = null;

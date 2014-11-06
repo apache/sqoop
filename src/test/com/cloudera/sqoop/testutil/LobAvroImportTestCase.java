@@ -207,8 +207,9 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
       + data.length() + ")";
 
-    assertTrue(returnVal.startsWith(expectedStart));
-    assertTrue(returnVal.endsWith(expectedEnd));
+    assertNotNull(returnVal);
+    assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
+    assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
 
     // Verify that blob data stored in the external lob file is correct.
     BlobRef br = BlobRef.parse(returnVal);
@@ -295,8 +296,9 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
       + data.length() + ")";
 
-    assertTrue(returnVal.startsWith(expectedStart));
-    assertTrue(returnVal.endsWith(expectedEnd));
+    assertNotNull(returnVal);
+    assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
+    assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
 
     // Verify that blob data stored in the external lob file is correct.
     BlobRef br = BlobRef.parse(returnVal);
