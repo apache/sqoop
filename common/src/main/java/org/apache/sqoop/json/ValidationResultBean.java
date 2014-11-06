@@ -33,10 +33,10 @@ import java.util.Set;
  */
 public class ValidationResultBean implements JsonBean {
 
-  private static final String ROOT = "ROOT";
-  private static final String ID = "ID";
-  private static final String STATUS = "STATUS";
-  private static final String TEXT = "TEXT";
+  private static final String VALIDATION_RESULT = "validation-result";
+  private static final String ID = "id";
+  private static final String STATUS = "status";
+  private static final String MESSAGE = "message";
 
   private ConfigValidationResult[] results;
   private Long id;
@@ -61,6 +61,7 @@ public class ValidationResultBean implements JsonBean {
     return id;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
     JSONArray array = new JSONArray();
@@ -71,16 +72,16 @@ public class ValidationResultBean implements JsonBean {
     }
 
     JSONObject object = new JSONObject();
-    object.put(ROOT, array);
+    object.put(VALIDATION_RESULT, array);
     if(id != null) {
       object.put(ID, id);
     }
     return object;
   }
 
+  @SuppressWarnings("unchecked")
   private JSONObject extractValidationResult(ConfigValidationResult result) {
     JSONObject ret = new JSONObject();
-
     for(Map.Entry<String, List<Message>> entry : result.getMessages().entrySet()) {
       ret.put(entry.getKey(), extractMessageList(entry.getValue()));
     }
@@ -88,6 +89,7 @@ public class ValidationResultBean implements JsonBean {
     return ret;
   }
 
+  @SuppressWarnings("unchecked")
   private Object extractMessageList(List<Message> messages) {
     JSONArray array = new JSONArray();
 
@@ -98,34 +100,32 @@ public class ValidationResultBean implements JsonBean {
     return array;
   }
 
+  @SuppressWarnings("unchecked")
   private Object extractMessage(Message message) {
     JSONObject ret = new JSONObject();
-
     ret.put(STATUS, message.getStatus().toString());
-    ret.put(TEXT, message.getMessage());
+    ret.put(MESSAGE, message.getMessage());
 
     return ret;
   }
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(ROOT);
+    JSONArray array = (JSONArray) jsonObject.get(VALIDATION_RESULT);
     results = new ConfigValidationResult[array.size()];
-
     int i = 0;
     for(Object item : array) {
       results[i++] = restoreValidationResult((JSONObject) item);
     }
-
     if(jsonObject.containsKey(ID)) {
       id = (Long) jsonObject.get(ID);
     }
   }
 
+  @SuppressWarnings("unchecked")
   private ConfigValidationResult restoreValidationResult(JSONObject item) {
     ConfigValidationResult result  = new ConfigValidationResult();
     Set<Map.Entry<String, JSONArray>> entrySet = item.entrySet();
-
     for(Map.Entry<String, JSONArray> entry : entrySet) {
       result.addMessages(entry.getKey(), restoreMessageList(entry.getValue()));
     }
@@ -136,18 +136,16 @@ public class ValidationResultBean implements JsonBean {
 
   private List<Message> restoreMessageList(JSONArray array) {
     List<Message> messages = new LinkedList<Message>();
-
     for(Object item : array) {
       messages.add(restoreMessage((JSONObject)item));
     }
-
     return messages;
   }
 
   private Message restoreMessage(JSONObject item) {
     return new Message(
       Status.valueOf((String) item.get(STATUS)),
-      (String) item.get(TEXT)
+      (String) item.get(MESSAGE)
     );
   }
 }
