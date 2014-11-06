@@ -61,7 +61,7 @@ public class TestLinkBean {
     // Check for sensitivity
     JSONArray linkArray = (JSONArray)json.get(LinkBean.LINK);
     JSONObject linkItem = (JSONObject)linkArray.get(0);
-    JSONArray connectors = (JSONArray)linkItem.get(LinkBean.LINK_CONFIG);
+    JSONArray connectors = (JSONArray)linkItem.get(LinkBean.LINK_CONFIG_VALUES);
     JSONObject connector = (JSONObject)connectors.get(0);
     JSONArray inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     for (Object input1 : inputs) {
@@ -118,7 +118,7 @@ public class TestLinkBean {
     // Sensitive values should exist
     JSONArray all = (JSONArray)json.get(LinkBean.LINK);
     JSONObject allItem = (JSONObject)all.get(0);
-    JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
+    JSONArray connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG_VALUES);
     JSONObject connector = (JSONObject)connectors.get(0);
     JSONArray inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());
@@ -129,7 +129,7 @@ public class TestLinkBean {
     // Sensitive values should not exist
     all = (JSONArray)jsonFiltered.get(LinkBean.LINK);
     allItem = (JSONObject)all.get(0);
-    connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG);
+    connectors = (JSONArray)allItem.get(LinkBean.LINK_CONFIG_VALUES);
     connector = (JSONObject)connectors.get(0);
     inputs = (JSONArray)connector.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());

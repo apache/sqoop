@@ -42,7 +42,7 @@ import org.json.simple.JSONObject;
 public class LinkBean implements JsonBean {
 
   static final String CONNECTOR_ID = "connector-id";
-  static final String LINK_CONFIG = "link-config";
+  static final String LINK_CONFIG_VALUES = "link-config-values";
   static final String LINK = "link";
 
 
@@ -108,7 +108,7 @@ public class LinkBean implements JsonBean {
       linkJsonObject.put(UPDATE_USER, link.getLastUpdateUser());
       linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
       linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
-      linkJsonObject.put(LINK_CONFIG,
+      linkJsonObject.put(LINK_CONFIG_VALUES,
         extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
       linkArray.add(linkJsonObject);
     }
@@ -126,7 +126,7 @@ public class LinkBean implements JsonBean {
     for (Object obj : array) {
       JSONObject object = (JSONObject) obj;
       long connectorId = (Long) object.get(CONNECTOR_ID);
-      JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG);
+      JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG_VALUES);
       List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
       MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
       link.setPersistenceId((Long) object.get(ID));

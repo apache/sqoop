@@ -44,8 +44,8 @@ import org.json.simple.JSONObject;
 public class ConnectorBean extends ConfigurableBean {
 
   // to represent the config and inputs with values
-  public static final String CONNECTOR_LINK_CONFIG_VALUES = "link-config-values";
-  public static final String CONNECTOR_JOB_CONFIG_VALUES = "job-config-values";
+  public static final String CONNECTOR_LINK_CONFIG = "link-config";
+  public static final String CONNECTOR_JOB_CONFIG = "job-config";
   private static final String CONNECTOR = "connector";
 
   private List<MConnector> connectors;
@@ -88,28 +88,28 @@ public class ConnectorBean extends ConfigurableBean {
       connectorJsonObject.put(CLASS, connector.getClassName());
       connectorJsonObject.put(CONFIGURABLE_VERSION, connector.getVersion());
       connectorJsonObject.put(
-          CONNECTOR_LINK_CONFIG_VALUES,
+          CONNECTOR_LINK_CONFIG,
           extractConfigList(connector.getLinkConfig().getConfigs(), connector.getLinkConfig()
               .getType(), skipSensitive));
 
-      connectorJsonObject.put(CONNECTOR_JOB_CONFIG_VALUES, new JSONObject());
+      connectorJsonObject.put(CONNECTOR_JOB_CONFIG, new JSONObject());
       // add sub fields to the job config for from and to
       if (connector.getFromConfig() != null) {
-        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG_VALUES)).put(
+        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(
             Direction.FROM,
             extractConfigList(connector.getFromConfig().getConfigs(), connector.getFromConfig()
                 .getType(), skipSensitive));
       }
       if (connector.getToConfig() != null) {
-        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG_VALUES)).put(
+        ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(
             Direction.TO,
             extractConfigList(connector.getToConfig().getConfigs(), connector.getToConfig()
                 .getType(), skipSensitive));
       }
       // add the config-param inside each connector
-      connectorJsonObject.put(ALL_CONFIGS, new JSONObject());
+      connectorJsonObject.put(ALL_CONFIG_RESOURCES, new JSONObject());
       if (connectorConfigBundles != null && !connectorConfigBundles.isEmpty()) {
-        connectorJsonObject.put(ALL_CONFIGS,
+        connectorJsonObject.put(ALL_CONFIG_RESOURCES,
             extractConfigParamBundle(connectorConfigBundles.get(connector.getPersistenceId())));
       }
       connectorArray.add(connectorJsonObject);
@@ -136,10 +136,10 @@ public class ConnectorBean extends ConfigurableBean {
       String version = (String) object.get(CONFIGURABLE_VERSION);
 
       List<MConfig> linkConfigs = restoreConfigList((JSONArray) object
-          .get(CONNECTOR_LINK_CONFIG_VALUES));
+          .get(CONNECTOR_LINK_CONFIG));
 
       // parent that encapsulates both the from/to configs
-      JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG_VALUES);
+      JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG);
       JSONArray fromJobConfigJson = (JSONArray) jobConfigJson.get(Direction.FROM.name());
       JSONArray toJobConfigJson = (JSONArray) jobConfigJson.get(Direction.TO.name());
 
@@ -161,9 +161,9 @@ public class ConnectorBean extends ConfigurableBean {
           toConfig);
 
       connector.setPersistenceId(connectorId);
-      if (object.containsKey(ALL_CONFIGS)) {
+      if (object.containsKey(ALL_CONFIG_RESOURCES)) {
 
-        JSONObject jsonConfigBundle = (JSONObject) object.get(ALL_CONFIGS);
+        JSONObject jsonConfigBundle = (JSONObject) object.get(ALL_CONFIG_RESOURCES);
         connectorConfigBundles.put(connectorId, restoreConfigParamBundle(jsonConfigBundle));
       }
       connectors.add(connector);

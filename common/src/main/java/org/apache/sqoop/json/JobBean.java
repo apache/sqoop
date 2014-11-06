@@ -45,9 +45,9 @@ public class JobBean implements JsonBean {
   static final String TO_LINK_ID = "to-link-id";
   static final String FROM_CONNECTOR_ID = "from-connector-id";
   static final String TO_CONNECTOR_ID = "to-connector-id";
-  static final String FROM_CONFIG = "from-config";
-  static final String TO_CONFIG = "to-config";
-  static final String DRIVER_CONFIG = "driver-config";
+  static final String FROM_CONFIG_VALUES = "from-config-values";
+  static final String TO_CONFIG_VALUES = "to-config-values";
+  static final String DRIVER_CONFIG_VALUES = "driver-config-values";
   private static final String JOB = "job";
 
   // Required
@@ -129,14 +129,14 @@ public class JobBean implements JsonBean {
       object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
       // job configs
       MFromConfig fromConfigList = job.getFromJobConfig();
-      object.put(FROM_CONFIG,
+      object.put(FROM_CONFIG_VALUES,
           extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
       MToConfig toConfigList = job.getToJobConfig();
-      object.put(TO_CONFIG,
+      object.put(TO_CONFIG_VALUES,
           extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
       MDriverConfig driverConfigList = job.getDriverConfig();
       object.put(
-          DRIVER_CONFIG,
+          DRIVER_CONFIG_VALUES,
           extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(),
               skipSensitive));
 
@@ -161,9 +161,9 @@ public class JobBean implements JsonBean {
       long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
       long fromConnectionId = (Long) object.get(FROM_LINK_ID);
       long toConnectionId = (Long) object.get(TO_LINK_ID);
-      JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG);
-      JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG);
-      JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG);
+      JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG_VALUES);
+      JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG_VALUES);
+      JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG_VALUES);
 
       List<MConfig> fromConfig = restoreConfigList(fromConfigJson);
       List<MConfig> toConfig = restoreConfigList(toConfigJson);
