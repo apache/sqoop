@@ -80,59 +80,62 @@ public class SubmissionBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray submissionArray = extractSubmissions();
     JSONObject submission = new JSONObject();
-    submission.put(SUBMISSION, submissionArray);
+    submission.put(SUBMISSION, extractSubmission(submissions.get(0)));
     return submission;
   }
 
   @SuppressWarnings("unchecked")
   protected JSONArray extractSubmissions() {
     JSONArray submissionsArray = new JSONArray();
-
-    for (MSubmission submission : this.submissions) {
-      JSONObject object = new JSONObject();
-
-      object.put(JOB, submission.getJobId());
-      object.put(STATUS, submission.getStatus().name());
-      object.put(PROGRESS, submission.getProgress());
-
-      if (submission.getCreationUser() != null) {
-        object.put(CREATION_USER, submission.getCreationUser());
-      }
-      if (submission.getCreationDate() != null) {
-        object.put(CREATION_DATE, submission.getCreationDate().getTime());
-      }
-      if (submission.getLastUpdateUser() != null) {
-        object.put(LAST_UPDATE_USER, submission.getLastUpdateUser());
-      }
-      if (submission.getLastUpdateDate() != null) {
-        object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
-      }
-      if (submission.getExternalId() != null) {
-        object.put(EXTERNAL_ID, submission.getExternalId());
-      }
-      if (submission.getExternalLink() != null) {
-        object.put(EXTERNAL_LINK, submission.getExternalLink());
-      }
-      if (submission.getExceptionInfo() != null) {
-        object.put(EXCEPTION, submission.getExceptionInfo());
-      }
-      if (submission.getExceptionStackTrace() != null) {
-        object.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
-      }
-      if (submission.getCounters() != null) {
-        object.put(COUNTERS, extractCounters(submission.getCounters()));
-      }
-      if (submission.getFromSchema() != null) {
-        object.put(FROM_SCHEMA, extractSchema(submission.getFromSchema()));
-      }
-      if (submission.getToSchema() != null) {
-        object.put(TO_SCHEMA, extractSchema(submission.getToSchema()));
-      }
-      submissionsArray.add(object);
+    for (MSubmission submission : submissions) {
+      submissionsArray.add(extractSubmission(submission));
     }
     return submissionsArray;
+  }
+
+  @SuppressWarnings("unchecked")
+  private JSONObject extractSubmission(MSubmission submission) {
+    JSONObject object = new JSONObject();
+
+    object.put(JOB, submission.getJobId());
+    object.put(STATUS, submission.getStatus().name());
+    object.put(PROGRESS, submission.getProgress());
+
+    if (submission.getCreationUser() != null) {
+      object.put(CREATION_USER, submission.getCreationUser());
+    }
+    if (submission.getCreationDate() != null) {
+      object.put(CREATION_DATE, submission.getCreationDate().getTime());
+    }
+    if (submission.getLastUpdateUser() != null) {
+      object.put(LAST_UPDATE_USER, submission.getLastUpdateUser());
+    }
+    if (submission.getLastUpdateDate() != null) {
+      object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
+    }
+    if (submission.getExternalId() != null) {
+      object.put(EXTERNAL_ID, submission.getExternalId());
+    }
+    if (submission.getExternalLink() != null) {
+      object.put(EXTERNAL_LINK, submission.getExternalLink());
+    }
+    if (submission.getExceptionInfo() != null) {
+      object.put(EXCEPTION, submission.getExceptionInfo());
+    }
+    if (submission.getExceptionStackTrace() != null) {
+      object.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
+    }
+    if (submission.getCounters() != null) {
+      object.put(COUNTERS, extractCounters(submission.getCounters()));
+    }
+    if (submission.getFromSchema() != null) {
+      object.put(FROM_SCHEMA, extractSchema(submission.getFromSchema()));
+    }
+    if (submission.getToSchema() != null) {
+      object.put(TO_SCHEMA, extractSchema(submission.getToSchema()));
+    }
+    return object;
   }
 
   @SuppressWarnings("unchecked")
@@ -151,57 +154,60 @@ public class SubmissionBean implements JsonBean {
 
   @Override
   public void restore(JSONObject json) {
-    JSONArray submissionArray = (JSONArray) json.get(SUBMISSION);
-    restoreSubmissions(submissionArray);
+    submissions = new ArrayList<MSubmission>();
+    JSONObject obj = (JSONObject) json.get(SUBMISSION);
+    submissions.add(restoreSubmission(obj));
   }
 
   protected void restoreSubmissions(JSONArray array) {
-    this.submissions = new ArrayList<MSubmission>();
+    submissions = new ArrayList<MSubmission>();
     for (Object obj : array) {
-      JSONObject object = (JSONObject) obj;
-      MSubmission submission = new MSubmission();
-
-      submission.setJobId((Long) object.get(JOB));
-      submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
-      submission.setProgress((Double) object.get(PROGRESS));
-
-      if (object.containsKey(CREATION_USER)) {
-        submission.setCreationUser((String) object.get(CREATION_USER));
-      }
-      if (object.containsKey(CREATION_DATE)) {
-        submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
-      }
-      if (object.containsKey(LAST_UPDATE_USER)) {
-        submission.setLastUpdateUser((String) object.get(LAST_UPDATE_USER));
-      }
-      if (object.containsKey(LAST_UPDATE_DATE)) {
-        submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
-      }
-      if (object.containsKey(EXTERNAL_ID)) {
-        submission.setExternalId((String) object.get(EXTERNAL_ID));
-      }
-      if (object.containsKey(EXTERNAL_LINK)) {
-        submission.setExternalLink((String) object.get(EXTERNAL_LINK));
-      }
-      if (object.containsKey(EXCEPTION)) {
-        submission.setExceptionInfo((String) object.get(EXCEPTION));
-      }
-      if (object.containsKey(EXCEPTION_TRACE)) {
-        submission.setExceptionStackTrace((String) object.get(EXCEPTION_TRACE));
-      }
-      if (object.containsKey(COUNTERS)) {
-        submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
-      }
-
-      if (object.containsKey(FROM_SCHEMA)) {
-        submission.setFromSchema(restoreSchema((JSONObject) object.get(FROM_SCHEMA)));
-      }
-      if (object.containsKey(TO_SCHEMA)) {
-        submission.setToSchema(restoreSchema((JSONObject) object.get(TO_SCHEMA)));
-      }
-
-      this.submissions.add(submission);
+      submissions.add(restoreSubmission(obj));
     }
+  }
+
+  private MSubmission restoreSubmission(Object obj) {
+    JSONObject object = (JSONObject) obj;
+    MSubmission submission = new MSubmission();
+    submission.setJobId((Long) object.get(JOB));
+    submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
+    submission.setProgress((Double) object.get(PROGRESS));
+
+    if (object.containsKey(CREATION_USER)) {
+      submission.setCreationUser((String) object.get(CREATION_USER));
+    }
+    if (object.containsKey(CREATION_DATE)) {
+      submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+    }
+    if (object.containsKey(LAST_UPDATE_USER)) {
+      submission.setLastUpdateUser((String) object.get(LAST_UPDATE_USER));
+    }
+    if (object.containsKey(LAST_UPDATE_DATE)) {
+      submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
+    }
+    if (object.containsKey(EXTERNAL_ID)) {
+      submission.setExternalId((String) object.get(EXTERNAL_ID));
+    }
+    if (object.containsKey(EXTERNAL_LINK)) {
+      submission.setExternalLink((String) object.get(EXTERNAL_LINK));
+    }
+    if (object.containsKey(EXCEPTION)) {
+      submission.setExceptionInfo((String) object.get(EXCEPTION));
+    }
+    if (object.containsKey(EXCEPTION_TRACE)) {
+      submission.setExceptionStackTrace((String) object.get(EXCEPTION_TRACE));
+    }
+    if (object.containsKey(COUNTERS)) {
+      submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
+    }
+
+    if (object.containsKey(FROM_SCHEMA)) {
+      submission.setFromSchema(restoreSchema((JSONObject) object.get(FROM_SCHEMA)));
+    }
+    if (object.containsKey(TO_SCHEMA)) {
+      submission.setToSchema(restoreSchema((JSONObject) object.get(TO_SCHEMA)));
+    }
+    return submission;
   }
 
   @SuppressWarnings("unchecked")

@@ -69,7 +69,7 @@ public class DriverBean extends ConfigurableBean {
     result.put(ID, driver.getPersistenceId());
     result.put(CONFIGURABLE_VERSION, driver.getVersion());
     result.put(DRIVER_JOB_CONFIG, configs);
-    result.put(ALL_CONFIG_RESOURCES, extractConfigParamBundle(driverConfigBundle));
+    result.put(ALL_CONFIGS, extractConfigParamBundle(driverConfigBundle));
     return result;
   }
 
@@ -80,6 +80,6 @@ public class DriverBean extends ConfigurableBean {
     List<MConfig> driverConfig = restoreConfigList((JSONArray) jsonObject.get(DRIVER_JOB_CONFIG));
     driver = new MDriver(new MDriverConfig(driverConfig), driverVersion);
     driver.setPersistenceId(id);
-    driverConfigBundle = restoreConfigParamBundle((JSONObject) jsonObject.get(ALL_CONFIG_RESOURCES));
+    driverConfigBundle = restoreConfigParamBundle((JSONObject) jsonObject.get(ALL_CONFIGS));
   }
 }

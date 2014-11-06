@@ -101,9 +101,8 @@ public class JobBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray jobArray = extractJobs(skipSensitive);
     JSONObject job = new JSONObject();
-    job.put(JOB, jobArray);
+    job.put(JOB, extractJob(skipSensitive, jobs.get(0)));
     return job;
   }
 
@@ -111,83 +110,89 @@ public class JobBean implements JsonBean {
   protected JSONArray extractJobs(boolean skipSensitive) {
     JSONArray jobArray = new JSONArray();
     for (MJob job : jobs) {
-      JSONObject object = new JSONObject();
-
-      object.put(ID, job.getPersistenceId());
-      object.put(NAME, job.getName());
-      object.put(ENABLED, job.getEnabled());
-      object.put(CREATION_USER, job.getCreationUser());
-      object.put(CREATION_DATE, job.getCreationDate().getTime());
-      object.put(UPDATE_USER, job.getLastUpdateUser());
-      object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
-      // job link associated connectors
-      // TODO(SQOOP-1634): fix not to require the connectorIds in the post data
-      object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
-      object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
-      // job associated links
-      object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
-      object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
-      // job configs
-      MFromConfig fromConfigList = job.getFromJobConfig();
-      object.put(FROM_CONFIG_VALUES,
-          extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
-      MToConfig toConfigList = job.getToJobConfig();
-      object.put(TO_CONFIG_VALUES,
-          extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
-      MDriverConfig driverConfigList = job.getDriverConfig();
-      object.put(
-          DRIVER_CONFIG_VALUES,
-          extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(),
-              skipSensitive));
-
-      jobArray.add(object);
+      jobArray.add(extractJob(skipSensitive, job));
     }
     return jobArray;
   }
 
+  @SuppressWarnings("unchecked")
+  private JSONObject extractJob(boolean skipSensitive, MJob job) {
+    JSONObject object = new JSONObject();
+    object.put(ID, job.getPersistenceId());
+    object.put(NAME, job.getName());
+    object.put(ENABLED, job.getEnabled());
+    object.put(CREATION_USER, job.getCreationUser());
+    object.put(CREATION_DATE, job.getCreationDate().getTime());
+    object.put(UPDATE_USER, job.getLastUpdateUser());
+    object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
+    // job link associated connectors
+    // TODO(SQOOP-1634): fix not to require the connectorIds in the post data
+    object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
+    object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
+    // job associated links
+    object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
+    object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
+    // job configs
+    MFromConfig fromConfigList = job.getFromJobConfig();
+    object.put(FROM_CONFIG_VALUES,
+        extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
+    MToConfig toConfigList = job.getToJobConfig();
+    object.put(TO_CONFIG_VALUES,
+        extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
+    MDriverConfig driverConfigList = job.getDriverConfig();
+    object.put(
+        DRIVER_CONFIG_VALUES,
+        extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(),
+            skipSensitive));
+
+    return object;
+  }
+
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(JOB);
-    restoreJobs(array);
+    jobs = new ArrayList<MJob>();
+    JSONObject obj = (JSONObject) jsonObject.get(JOB);
+    jobs.add(restoreJob(obj));
   }
 
   protected void restoreJobs(JSONArray array) {
     jobs = new ArrayList<MJob>();
-
     for (Object obj : array) {
-      JSONObject object = (JSONObject) obj;
-
-      long fromConnectorId = (Long) object.get(FROM_CONNECTOR_ID);
-      long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
-      long fromConnectionId = (Long) object.get(FROM_LINK_ID);
-      long toConnectionId = (Long) object.get(TO_LINK_ID);
-      JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG_VALUES);
-      JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG_VALUES);
-      JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG_VALUES);
-
-      List<MConfig> fromConfig = restoreConfigList(fromConfigJson);
-      List<MConfig> toConfig = restoreConfigList(toConfigJson);
-      List<MConfig> driverConfig = restoreConfigList(driverConfigJson);
-
-      MJob job = new MJob(
-        fromConnectorId,
-        toConnectorId,
-        fromConnectionId,
-        toConnectionId,
-        new MFromConfig(fromConfig),
-        new MToConfig(toConfig),
-        new MDriverConfig(driverConfig)
-      );
-
-      job.setPersistenceId((Long) object.get(ID));
-      job.setName((String) object.get(NAME));
-      job.setEnabled((Boolean) object.get(ENABLED));
-      job.setCreationUser((String) object.get(CREATION_USER));
-      job.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
-      job.setLastUpdateUser((String) object.get(UPDATE_USER));
-      job.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
-
-      jobs.add(job);
+      jobs.add(restoreJob(obj));
     }
+  }
+
+  private MJob restoreJob(Object obj) {
+    JSONObject object = (JSONObject) obj;
+    long fromConnectorId = (Long) object.get(FROM_CONNECTOR_ID);
+    long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
+    long fromConnectionId = (Long) object.get(FROM_LINK_ID);
+    long toConnectionId = (Long) object.get(TO_LINK_ID);
+    JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG_VALUES);
+    JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG_VALUES);
+    JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG_VALUES);
+
+    List<MConfig> fromConfig = restoreConfigList(fromConfigJson);
+    List<MConfig> toConfig = restoreConfigList(toConfigJson);
+    List<MConfig> driverConfig = restoreConfigList(driverConfigJson);
+
+    MJob job = new MJob(
+      fromConnectorId,
+      toConnectorId,
+      fromConnectionId,
+      toConnectionId,
+      new MFromConfig(fromConfig),
+      new MToConfig(toConfig),
+      new MDriverConfig(driverConfig)
+    );
+
+    job.setPersistenceId((Long) object.get(ID));
+    job.setName((String) object.get(NAME));
+    job.setEnabled((Boolean) object.get(ENABLED));
+    job.setCreationUser((String) object.get(CREATION_USER));
+    job.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+    job.setLastUpdateUser((String) object.get(UPDATE_USER));
+    job.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
+    return job;
   }
 }

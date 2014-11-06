@@ -34,10 +34,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Link representation that is being send across the network between
- * Sqoop server and client. Server might optionally send configs
- * associated with the links to spare client of sending another HTTP
- * requests to obtain them.
+ * Link representation that is being send across the network between Sqoop
+ * server and client. Server might optionally send configs associated with the
+ * links to spare client of sending another HTTP requests to obtain them.
  */
 public class LinkBean implements JsonBean {
 
@@ -89,54 +88,63 @@ public class LinkBean implements JsonBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray linkArray = extractLinks(skipSensitive);
     JSONObject link = new JSONObject();
-    link.put(LINK, linkArray);
+    link.put(LINK, extractLink(skipSensitive, links.get(0)));
     return link;
   }
+
   @SuppressWarnings("unchecked")
   protected JSONArray extractLinks(boolean skipSensitive) {
     JSONArray linkArray = new JSONArray();
-
-    for(MLink link : links) {
-      JSONObject linkJsonObject = new JSONObject();
-      linkJsonObject.put(ID, link.getPersistenceId());
-      linkJsonObject.put(NAME, link.getName());
-      linkJsonObject.put(ENABLED, link.getEnabled());
-      linkJsonObject.put(CREATION_USER, link.getCreationUser());
-      linkJsonObject.put(CREATION_DATE, link.getCreationDate().getTime());
-      linkJsonObject.put(UPDATE_USER, link.getLastUpdateUser());
-      linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
-      linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
-      linkJsonObject.put(LINK_CONFIG_VALUES,
-        extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
-      linkArray.add(linkJsonObject);
+    for (MLink link : links) {
+      linkArray.add(extractLink(skipSensitive, link));
     }
     return linkArray;
   }
 
+  @SuppressWarnings("unchecked")
+  private JSONObject extractLink(boolean skipSensitive, MLink link) {
+    JSONObject linkJsonObject = new JSONObject();
+    linkJsonObject.put(ID, link.getPersistenceId());
+    linkJsonObject.put(NAME, link.getName());
+    linkJsonObject.put(ENABLED, link.getEnabled());
+    linkJsonObject.put(CREATION_USER, link.getCreationUser());
+    linkJsonObject.put(CREATION_DATE, link.getCreationDate().getTime());
+    linkJsonObject.put(UPDATE_USER, link.getLastUpdateUser());
+    linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
+    linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
+    linkJsonObject.put(LINK_CONFIG_VALUES,
+      extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
+    return linkJsonObject;
+  }
+
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(LINK);
-    restoreLinks(array);
+    links = new ArrayList<MLink>();
+    JSONObject obj = (JSONObject) jsonObject.get(LINK);
+    links.add(restoreLink(obj));
   }
 
   protected void restoreLinks(JSONArray array) {
     links = new ArrayList<MLink>();
     for (Object obj : array) {
-      JSONObject object = (JSONObject) obj;
-      long connectorId = (Long) object.get(CONNECTOR_ID);
-      JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG_VALUES);
-      List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
-      MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
-      link.setPersistenceId((Long) object.get(ID));
-      link.setName((String) object.get(NAME));
-      link.setEnabled((Boolean) object.get(ENABLED));
-      link.setCreationUser((String) object.get(CREATION_USER));
-      link.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
-      link.setLastUpdateUser((String) object.get(UPDATE_USER));
-      link.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
-      links.add(link);
+      links.add(restoreLink(obj));
     }
+  }
+
+  private MLink restoreLink(Object obj) {
+    JSONObject object = (JSONObject) obj;
+    long connectorId = (Long) object.get(CONNECTOR_ID);
+    JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG_VALUES);
+    List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
+    MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
+    link.setPersistenceId((Long) object.get(ID));
+    link.setName((String) object.get(NAME));
+    link.setEnabled((Boolean) object.get(ENABLED));
+    link.setCreationUser((String) object.get(CREATION_USER));
+    link.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+    link.setLastUpdateUser((String) object.get(UPDATE_USER));
+    link.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
+    return link;
   }
 }

@@ -36,9 +36,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- *
- */
+// NOTE: This tests both the submission and submissions list bean
 public class TestSubmissionBean {
 
   private static final double EPSILON = 0.01;

@@ -17,9 +17,8 @@
  */
 package org.apache.sqoop.json;
 
-import static org.apache.sqoop.json.ConfigTestUtil.getConnector;
-import static org.apache.sqoop.json.ConfigTestUtil.getResourceBundle;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,14 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.json.util.BeanTestUtil;
+import org.apache.sqoop.json.util.ConfigTestUtil;
 import org.apache.sqoop.model.MConnector;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
-/**
- *
- */
 public class TestConnectorBean {
 
   /**
@@ -42,16 +40,14 @@ public class TestConnectorBean {
    * equal connector object.
    */
   @Test
-  public void testSerialization() {
+  public void testConnectorSerialization() {
     // Create testing connector
     List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector(1L, "jdbc"));
-    connectors.add(getConnector(2L, "mysql"));
+    connectors.add(BeanTestUtil.getConnector(1L, "jdbc"));
 
     // Create testing bundles
     Map<Long, ResourceBundle> configBundles = new HashMap<Long, ResourceBundle>();
-    configBundles.put(1L, getResourceBundle());
-    configBundles.put(2L, getResourceBundle());
+    configBundles.put(1L, ConfigTestUtil.getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorBean connectorBean = new ConnectorBean(connectors, configBundles);
@@ -61,75 +57,15 @@ public class TestConnectorBean {
     String connectorJSONString = connectorJSON.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedConnector = (JSONObject) JSONValue.parse(connectorJSONString);
+    JSONObject parsedConnectors = (JSONObject) JSONValue.parse(connectorJSONString);
     ConnectorBean parsedConnectorBean = new ConnectorBean();
-    parsedConnectorBean.restore(parsedConnector);
-
+    parsedConnectorBean.restore(parsedConnectors);
+    assertEquals(connectors.size(), 1);
     assertEquals(connectors.size(), parsedConnectorBean.getConnectors().size());
     assertEquals(connectors.get(0), parsedConnectorBean.getConnectors().get(0));
-    assertEquals(connectors.get(1), parsedConnectorBean.getConnectors().get(1));
-
     ResourceBundle retrievedBundle = parsedConnectorBean.getResourceBundles().get(1L);
     assertNotNull(retrievedBundle);
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));
-  }
-
-  @Test
-  public void testSingleDirection() {
-    // Create testing connector
-    List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector(1L, "jdbc", true, false));
-    connectors.add(getConnector(2L, "mysql", false, true));
-
-    // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, getResourceBundle());
-    bundles.put(2L, getResourceBundle());
-
-    // Serialize it to JSON object
-    ConnectorBean bean = new ConnectorBean(connectors, bundles);
-    JSONObject json = bean.extract(false);
-
-    // "Move" it across network in text form
-    String string = json.toJSONString();
-
-    // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectorBean retrievedBean = new ConnectorBean();
-    retrievedBean.restore(retrievedJson);
-
-    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
-    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
-    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
-  }
-
-  @Test
-  public void testNoDirection() {
-    // Create testing connector
-    List<MConnector> connectors = new LinkedList<MConnector>();
-    connectors.add(getConnector(1L, "jdbc", false, false));
-    connectors.add(getConnector(2L, "mysql", false, false));
-
-    // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, getResourceBundle());
-    bundles.put(2L, getResourceBundle());
-
-    // Serialize it to JSON object
-    ConnectorBean bean = new ConnectorBean(connectors, bundles);
-    JSONObject json = bean.extract(false);
-
-    // "Move" it across network in text form
-    String string = json.toJSONString();
-
-    // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
-    ConnectorBean retrievedBean = new ConnectorBean();
-    retrievedBean.restore(retrievedJson);
-
-    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
-    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
-    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
   }
 }
