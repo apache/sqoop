@@ -179,6 +179,13 @@ public final class SqoopHCatUtilities {
     public V get(Object key) {
       return super.get(((String) key).toLowerCase());
     }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends V> map) {
+      for(Map.Entry<? extends String, ? extends V> entry: map.entrySet()) {
+        put(entry.getKey(), entry.getValue());
+      }
+    }
   }
 
   /**
@@ -197,6 +204,13 @@ public final class SqoopHCatUtilities {
     @Override
     public V get(Object key) {
       return super.get(((String) key).toUpperCase());
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends V> map) {
+      for(Map.Entry<? extends String, ? extends V> entry: map.entrySet()) {
+        put(entry.getKey(), entry.getValue());
+      }
     }
   }
 
