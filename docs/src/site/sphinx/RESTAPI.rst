@@ -17,91 +17,89 @@
 Sqoop REST API Guide
 =========================
 
-This document will explain you how to use Sqoop Network API to allow external applications interacting with Sqoop server.
-The REST API is a lower level API than the `Sqoop client API <ClientAPI.html>`_, which gives you the freedom to execute commands in Sqoop
-server with any tools or programming language. Generally, the REST API is leveraged via HTTP requests and use ``JSON`` format to encode data content.
+This document will explain how you can use Sqoop REST API to build applications interacting with Sqoop server.
+The REST API covers all aspects of managing Sqoop jobs and allows you to build an app in any programming language using HTTP over JSON.
 
 .. contents:: Table of Contents
 
 Initialization
 =========================
 
-Before making any move, make sure that the Sqoop server is running.
+Before continuing further, make sure that the Sqoop server is running.
 
-Then find out three pieces of information about the Sqoop server: ``host``, ``port`` and ``webapp``, and keep them in mind.
+Then find out the details of the Sqoop server: ``host``, ``port`` and ``webapp``, and keep them in mind. Note that the sqoop server is running on Apache Tomcat. To exercise a REST API for Sqoop, you could assemble and send a HTTP request to an url corresponding to that API. Generally, the url contains the ``host`` on which the sqoop server is running, the ``port`` at which the sqoop server is listening to and ``webapp``, the context path at which the Sqoop server is registered in the Apache Tomcat engine.
 
-To execute a function of Sqoop, you could assemble and send a HTTP request to an url of that function in Sqoop. Generally, the url
-contain the ``host`` has the hostname, the ``port`` as the port number and ``webapp`` as the root directory of the url, which follows
-any functions available in this page.
+Certain requests might need to contain some additional query parameters and post data. These parameters could be given via
+the HTTP headers, request body or both. All the content in the HTTP body is in ``JSON`` format.
 
-The request and its response might need to contain some additional parameters and contents. These parameters could be given via
-HTTP header, body or both. All the content in the HTTP body is in ``JSON`` format.
-
-Understand Connector, Connection, Job and Framework
+Understand Connector, Driver, Link and Job
 ===========================================================
 
-To create and run a Sqoop task, we need to provide a bunch of parameters. All these parameters are provide via Input.
+To create and run a Sqoop Job, we need to provide config values for connecting to a data source and then processing the data in that data source. Processing might be either reading from or writing to the data source. Thus we have configurable entities such as the ``From`` and ``To`` parts of the connectors, the driver that each expose configs and one or more inputs within them.
 
-Some of these parameters are connector specific, which are needed for a connector. And the other parameters
-might be required all the times. Sqoop provides these specifications via forms, each of which is a list of inputs. Each connector claims its own
-forms. And the Sqoop framework claims global forms.
+For instance a connector that represents a relational data source such as MySQL will expose config classes for connecting to the database. Some of the relevant inputs are the connection string, driver class, the username and the password to connect to the database. These configs remain the same to read data from any of the tables within that database. Hence they are grouped under ``LinkConfiguration``.
 
-On the other hand, some of these parameters are stable for different jobs, like the url, the username and the password of database. And some
-of them are job specific. Therefore Sqoop categorizes these parameters into 2 groups, which are connection object and job object. So, for
-each connector and the framework, it has to provide forms for connection and job, respectively.
+Each connector can support Reading from a data source and/or writing/to a data source it represents. Reading from and writing to a data source are represented by From and To respectively. Specific configurations are required to peform the job of reading from or writing to the data source. These are grouped in the ``FromJobConfiguration`` and ``ToJobConfiguration`` objects of the connector.
+
+For instace, a connector that represents a relational data source such as MySQL will expose the table name to read from or the SQL query to use while reading data as a FromJobConfiguration. Similarly a connector that represents a data source such as HDFS, will expose the output directory to write to as a ToJobConfiguration.
+
 
 Objects
 ==============
 
-This section covers all the objects that might exist in the request or response.
+This section covers all the objects that might exist in an API request and/or API response.
 
-Form
-----------
+Configs and Inputs
+------------------
 
-Before creating any connection or job, the first thing to do is getting familiar with all forms in the connector and the framework, via Get Connector
-and Get Framework HTTP requests.
+Before creating any link for a connector or a job with associated ``From`` and ``To`` links, the first thing to do is getting familiar with all the configurations that the connector exposes.
 
-Each form is structured below:
+Each config consists of the following information
 
 +------------------+---------------------------------------------------------+
 |   Field          | Description                                             |
 +==================+=========================================================+
-| ``id``           | The id of this form                                     |
+| ``id``           | The id of this config                                   |
 +------------------+---------------------------------------------------------+
-| ``inputs``       | A array of input fields of this form                    |
+| ``inputs``       | A array of inputs of this config                        |
 +------------------+---------------------------------------------------------+
-| ``name``         | The name of this form                                   |
+| ``name``         | The unique name of this config per connector            |
 +------------------+---------------------------------------------------------+
-| ``type``         | The type of this form (CONNECTION/JOB)                  |
+| ``type``         | The type of this config (LINK/ JOB)                     |
 +------------------+---------------------------------------------------------+
 
-A typical form object is showing below:
+A typical config object is showing below:
 
 ::
 
-  {
-    "id":3,
-    "inputs":[
+   {
+    id:7,
+    inputs:[
       {
-        "id":13,
-        "name":"table.schemaName",
-        "type":"STRING",
-        "size":50,
-        "sensitive":false
-      }
+         id: 25,
+         name: "throttlingConfig.numExtractors",
+         type: "INTEGER",
+         sensitive: false
+      },
+      {
+         id: 26,
+         name: "throttlingConfig.numLoaders",
+         type: "INTEGER",
+         sensitive: false
+       }
     ],
-    "name":"table",
-    "type":"CONNECTION"
+    name: "throttlingConfig",
+    type: "JOB"
   }
 
-Each input object in a form is structured below:
+Each input object in a config is structured below:
 
 +------------------+---------------------------------------------------------+
 |   Field          | Description                                             |
 +==================+=========================================================+
 | ``id``           | The id of this input                                    |
 +------------------+---------------------------------------------------------+
-| ``name``         | The name of this input                                  |
+| ``name``         | The unique name of this input per config                |
 +------------------+---------------------------------------------------------+
 | ``type``         | The data type of this input field                       |
 +------------------+---------------------------------------------------------+
@@ -110,58 +108,40 @@ Each input object in a form is structured below:
 | ``sensitive``    | Whether this input contain sensitive information        |
 +------------------+---------------------------------------------------------+
 
-The connector and framework have both ``job-forms`` and ``conn-forms``, each of which is a array of forms. In ``job-forms``,
-there are 2 arrays of forms, for ``IMPORT`` and ``EXPORT``, job respectively.
 
-To send a filled form in the request, you should always use form id and input id to map the values to inputs. For example, the
-following request contains a input value ``com.mysql.jdbc.Driver`` for input ``1`` in form ``1`` of connector and an input value
-``10`` for input ``17`` in form ``4`` of framework.
+To send a filled config in the request, you should always use config id and input id to map the values to their correspondig names.
+For example, the following request contains an input value ``com.mysql.jdbc.Driver`` with input id ``7`` inside a config with id ``4`` that belongs to a link with id ``3``
 
 ::
 
-  {
-    "connector":[
-      {
-        "id":1,
-        "inputs":[
-          {
-            "id":1,
-            "name":"connection.jdbcDriver",
-            "value":"com.mysql.jdbc.Driver",
-            "type":"STRING",
-            "size":128,
-            "sensitive":false
-          },
-        ],
-        "name":"connection",
-        "type":"CONNECTION"
-      }
-    ],
-    "connector-id":1,
-    "framework":[
-      {
-        "id":4,
-        "inputs":[
-          {
-            "id":17,
-            "name":"security.maxConnections",
-            "value":"10",
-            "type":"INTEGER",
-            "sensitive":false
-          }
-        ],
-        "name":"security",
-        "type":"CONNECTION"
-      }
-    ]
-  }
+      link: {
+            id: 3,
+            enabled: true,
+            link-config-values: [{
+                id: 4,
+                inputs: [{
+                    id: 7,
+                    name: "linkConfig.jdbcDriver",
+                    value: "com.mysql.jdbc.Driver",
+                    type: "STRING",
+                    size: 128,
+                    sensitive: false
+                }, {
+                    id: 8,
+                    name: "linkConfig.connectionString",
+                    value: "jdbc%3Amysql%3A%2F%2Fmysql.ent.cloudera.com%2Fsqoop",
+                    type: "STRING",
+                    size: 128,
+                    sensitive: false
+                },
+                ...
+             }
+           }
 
-Exception
----------------
+Exception Response
+------------------
 
-Each operation on Sqoop server might return an exception in the Http response. Remember to take this into account.
-
-The exception code and message could be found in both the header and body of the response, if happens.
+Each operation on Sqoop server might return an exception in the Http response. Remember to take this into account.The exception code and message could be found in both the header and body of the response.
 
 Please jump to "Header Parameters" section to find how to get exception information from header.
 
@@ -212,46 +192,42 @@ In the body, the exception is expressed in ``JSON`` format. An example of the ex
     "class":"org.apache.sqoop.common.SqoopException"
   }
 
-Form Validation Status
----------------------------
+Config and Input Validation Status Response
+--------------------------------------------
 
-After submitting the forms of creating/updating connection/job, the server will validate these forms and send
-back feedbacks to show the validation status.
+The config and the inputs associated with the connectors also provide custom validation rules for the values given to these input fields. Sqoop applies these custom validators and its corresponding valdation logic when config values for the LINK and JOB are posted.
 
-There are 3 possible status:
 
-+------------------+---------------------------------------------------------+
-|   Status         | Description                                             |
-+==================+=========================================================+
-| ``FINE``         | No issues, no warnings. Everything is perfect           |
-+------------------+---------------------------------------------------------+
-| ``ACCEPTABLE``   | No issues, but might be some warnings. Good to go.      |
-+------------------+---------------------------------------------------------+
-| ``UNACCEPTABLE`` | The form has severe issues needed to be fixed           |
-+------------------+---------------------------------------------------------+
-
-An example of a good status is:
-
+An example of a OK status with the persisted ID:
 ::
 
-  {
-   "status":"FINE",
-   "messages":{}
-  }
+ {
+    "id": 3,
+    "validation-result": [
+        {}
+    ]
+ }
 
-A bad status might be:
-
+An example of ERROR status:
 ::
 
-  {
-    "message":"Can't load specified driver",
-    "status":"UNACCEPTABLE"
-  }
+   {
+     "validation-result": [
+       {
+        "linkConfig": [
+          {
+            "message": "Invalid URI. URI must either be null or a valid URI. Here are a few valid example URIs: hdfs://example.com:8020/, hdfs://example.com/, file:///, file:///tmp, file://localhost/tmp",
+            "status": "ERROR"
+          }
+        ]
+      }
+     ]
+   }
 
-Job Status
--------------------
+Job Submission Status Response
+------------------------------
 
-After submitting a job, you could look up the running status of it. There could be 7 possible status:
+After starting a job, you could look up the running status of it. There could be 7 possible status:
 
 +-----------------------------+---------------------------------------------------------+
 |   Status                    | Description                                             |
@@ -272,7 +248,7 @@ After submitting a job, you could look up the running status of it. There could 
 +-----------------------------+---------------------------------------------------------+
 
 Header Parameters
-======================
+=================
 
 For all Sqoop requests, the following header parameters are supported:
 
@@ -295,567 +271,354 @@ For all the responses, the following parameters in the HTTP message header are a
 So far, there are only these 2 parameters in the header of response message. They only exist when something bad happen in the server.
 And they always come along with an exception message in the response body.
 
-Functions
-==================
+REST APIs
+==========
 
-The section elaborates all the functions that are supported by the Sqoop server.
+The section elaborates all the rest apis that are supported by the Sqoop server.
 
 /version - [GET] - Get Sqoop Version
--------------------------------------------
+-------------------------------------
 
 Get all the version metadata of Sqoop software in the server side.
 
 * Method: ``GET``
 * Format: ``JSON``
 * Request Content: ``None``
+
 * Fields of Response:
 
-+---------------+---------------------------------------------------------+
-|   Field       | Description                                             |
-+===============+=========================================================+
-| ``revision``  | The revision number of Sqoop source code                |
-+---------------+---------------------------------------------------------+
-| ``protocols`` | The version of network protocol                         |
-+---------------+---------------------------------------------------------+
-| ``date``      | The Sqoop release date                                  |
-+---------------+---------------------------------------------------------+
-| ``user``      | The user who made the release                           |
-+---------------+---------------------------------------------------------+
-| ``url``       | The url of the source code trunk                        |
-+---------------+---------------------------------------------------------+
-| ``version``   | The version of Sqoop in the server side                 |
-+---------------+---------------------------------------------------------+
++--------------------+---------------------------------------------------------+
+|   Field            | Description                                             |
++====================+=========================================================+
+| ``source-revision``| The revision number of Sqoop source code                |
++--------------------+---------------------------------------------------------+
+| ``api-versions``   | The version of network protocol                         |
++--------------------+---------------------------------------------------------+
+| ``build-date``     | The Sqoop release date                                  |
++--------------------+---------------------------------------------------------+
+| ``user``           | The user who made the release                           |
++--------------------+---------------------------------------------------------+
+| ``source-url``     | The url of the source code trunk                        |
++--------------------+---------------------------------------------------------+
+| ``build-version``  | The version of Sqoop in the server side                 |
++--------------------+---------------------------------------------------------+
 
 
 * Response Example:
 
 ::
 
-  {
-    "revision":"e56c977b56f4dc32a4cad06a328bad11e0d0055b",
-    "protocols":["1"],
-    "date":"Wed Aug  7 13:31:36 PDT 2013",
-    "user":"mengwei.ding",
-    "url":"git:\/\/mding-MBP.local\/Users\/mengwei.ding\/Documents\/workspace\/sqoop2\/common",
-    "version":"2.0.0-SNAPSHOT"
-  }
+   {
+    source-url: "git://vbasavaraj.local/Users/vbasavaraj/Projects/SqoopRefactoring/sqoop2/common",
+    source-revision: "418c5f637c3f09b94ea7fc3b0a4610831373a25f",
+    build-version: "2.0.0-SNAPSHOT",
+    api-versions: [
+       "v1"
+     ],
+    user: "vbasavaraj",
+    build-date: "Mon Nov 3 08:18:21 PST 2014"
+   }
 
-/v1/connector/[cid] - [GET] - Get Connector
----------------------------------------------------
+/v1/connectors - [GET]  Get all Connectors
+-------------------------------------------
 
-Retrieve all the metadata of a given connector, such as its forms to be filled for jobs and connections, the explanation
-for each fields of these forms.
-
-Provide the id of the connector in the url ``[cid]`` part. If you provide ``all`` in the ``[cid]`` part in the url, you will
-get the metadata of all connectors.
+Get all the connectors registered in Sqoop
 
 * Method: ``GET``
 * Format: ``JSON``
 * Request Content: ``None``
+
+* Response Example
+
+::
+
+  {
+    connectors: [{
+        id: 1,
+        link-config: [],
+        job-config: {},
+        name: "hdfs-connector",
+        class: "org.apache.sqoop.connector.hdfs.HdfsConnector",
+        all-config-resources: {},
+        version: "2.0.0-SNAPSHOT"
+    }, {
+        id: 2,
+        link-config: [],
+        job-config: {},
+        name: "generic-jdbc-connector",
+        class: "org.apache.sqoop.connector.jdbc.GenericJdbcConnector",
+        all-config - resources: {},
+        version: "2.0.0-SNAPSHOT"
+    }]
+  }
+
+/v1/connector/[cname] or /v1/connector/[cid] - [GET] - Get Connector
+---------------------------------------------------------------------
+
+Provide the id or unique name of the connector in the url ``[cid]`` or ``[cname]`` part.
+
+* Method: ``GET``
+* Format: ``JSON``
+* Request Content: ``None``
+
 * Fields of Response:
 
-+--------------------------+--------------------------------------------------------------------------+
-|   Field                  | Description                                                              |
-+==========================+==========================================================================+
-| ``resources-connector``  | All resources for the given connector                                    |
-+--------------------------+--------------------------------------------------------------------------+
-| ``all``                  | All metadata about the given connector, such as id, name and all forms   |
-+--------------------------+--------------------------------------------------------------------------+
-
-If all connectors are retrieved, the ``resources-connector`` and ``all`` fields will become arrays and contain data for all connectors.
-
-So far, the resource contains only explanations for fields of forms. For example, in the IMPORT job form, you could find a field called
-``table.schemaName``. If you have no idea about what that field means, you could go the resource for help.
++--------------------------+----------------------------------------------------------------------------------------+
+|   Field                  | Description                                                                            |
++==========================+========================================================================================+
+| ``id``                   | The id for the connector ( registered as a configurable )                              |
++--------------------------+----------------------------------------------------------------------------------------+
+| ``job-config``           | Connector job config and inputs for both FROM and TO                                   |
++--------------------------+----------------------------------------------------------------------------------------+
+| ``link-config``          | Connector link config and inputs                                                       |
++--------------------------+----------------------------------------------------------------------------------------+
+| ``all-config-resources`` | All config inputs labels and description for the given connector                       |
++--------------------------+----------------------------------------------------------------------------------------+
+| ``version``              | The build version required for config and input data upgrades                          |
++--------------------------+----------------------------------------------------------------------------------------+
 
 * Response Example:
 
 ::
 
-  {
-    "resources-connector":{
-      "1":{
-        "ignored.label":"Ignored",
-        "table.partitionColumn.help":"A specific column for data partition",
-        "table.label":"Database configuration",
-        "table.boundaryQuery.label":"Boundary query",
-        "ignored.help":"This is completely ignored",
-        "ignored.ignored.label":"Ignored",
-        "connection.jdbcProperties.help":"Enter any JDBC properties that should be supplied during the creation of connection.",
-        "table.tableName.help":"Table name to process data in the remote database",
-        "connection.jdbcDriver.label":"JDBC Driver Class",
-        "connection.username.help":"Enter the username to be used for connecting to the database.",
-        "table.help":"You must supply the information requested in order to create a job object.",
-        "table.partitionColumn.label":"Partition column name",
-        "ignored.ignored.help":"This is completely ignored",
-        "table.partitionColumnNull.label":"Nulls in partition column",
-        "table.warehouse.label":"Data warehouse",
-        "table.boundaryQuery.help":"The boundary query for data partition",
-        "connection.username.label":"Username",
-        "connection.jdbcDriver.help":"Enter the fully qualified class name of the JDBC driver that will be used for establishing this connection.",
-        "connection.label":"Connection configuration",
-        "table.columns.label":"Table column names",
-        "table.dataDirectory.label":"Data directory",
-        "table.partitionColumnNull.help":"Whether there are null values in partition column",
-        "connection.password.label":"Password",
-        "table.warehouse.help":"The root directory for data",
-        "table.sql.label":"Table SQL statement",
-        "table.sql.help":"SQL statement to process data in the remote database",
-        "table.schemaName.help":"Schema name to process data in the remote database",
-        "connection.jdbcProperties.label":"JDBC Connection Properties",
-        "table.columns.help":"Specific columns of a table name or a table SQL",
-        "connection.connectionString.help":"Enter the value of JDBC connection string to be used by this connector for creating connections.",
-        "table.dataDirectory.help":"The sub-directory under warehouse for data",
-        "table.schemaName.label":"Schema name",
-        "connection.connectionString.label":"JDBC Connection String",
-        "connection.help":"You must supply the information requested in order to create a connection object.",
-        "connection.password.help":"Enter the password to be used for connecting to the database.",
-        "table.tableName.label":"Table name"
-      }
-    },
-    "all":[
-      {
-        "id":1,
-        "name":"generic-jdbc-connector",
-        "class":"org.apache.sqoop.connector.jdbc.GenericJdbcConnector",
-        "job-forms":{
-          "FROM":[
-            {
-              "id":2,
-              "inputs":[
-                {
-                  "id":6,
-                  "name":"table.schemaName",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":7,
-                  "name":"table.tableName",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":8,
-                  "name":"table.sql",
-                  "type":"STRING",
-                  "size":2000,
-                  "sensitive":false
-                },
-                {
-                  "id":9,
-                  "name":"table.columns",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":10,
-                  "name":"table.partitionColumn",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":11,
-                  "name":"table.partitionColumnNull",
-                  "type":"BOOLEAN",
-                  "sensitive":false
-                },
-                {
-                  "id":12,
-                  "name":"table.boundaryQuery",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                }
-              ],
-              "name":"table",
-              "type":"CONNECTION"
-            }
-          ],
-          "TO":[
-            {
-              "id":3,
-              "inputs":[
-                {
-                  "id":13,
-                  "name":"table.schemaName",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":14,
-                  "name":"table.tableName",
-                  "type":"STRING",
-                  "size":2000,
-                  "sensitive":false
-                },
-                {
-                  "id":15,
-                  "name":"table.sql",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                },
-                {
-                  "id":16,
-                  "name":"table.columns",
-                  "type":"STRING",
-                  "size":50,
-                  "sensitive":false
-                }
-              ],
-              "name":"table",
-              "type":"CONNECTION"
-            }
-          ]
+   {
+    connector: {
+        id: 1,
+        job-config: {
+            TO: [{
+                id: 3,
+                inputs: [{
+                    id: 3,
+                    values: "TEXT_FILE,SEQUENCE_FILE",
+                    name: "toJobConfig.outputFormat",
+                    type: "ENUM",
+                    sensitive: false
+                }, {
+                    id: 4,
+                    values: "NONE,DEFAULT,DEFLATE,GZIP,BZIP2,LZO,LZ4,SNAPPY,CUSTOM",
+                    name: "toJobConfig.compression",
+                    type: "ENUM",
+                    sensitive: false
+                }, {
+                    id: 5,
+                    name: "toJobConfig.customCompression",
+                    type: "STRING",
+                    size: 255,
+                    sensitive: false
+                }, {
+                    id: 6,
+                    name: "toJobConfig.outputDirectory",
+                    type: "STRING",
+                    size: 255,
+                    sensitive: false
+                }],
+                name: "toJobConfig",
+                type: "JOB"
+            }],
+            FROM: [{
+                id: 2,
+                inputs: [{
+                    id: 2,
+                    name: "fromJobConfig.inputDirectory",
+                    type: "STRING",
+                    size: 255,
+                    sensitive: false
+                }],
+                name: "fromJobConfig",
+                type: "JOB"
+            }]
         },
-        "con-forms":[
-          {
-            "id":1,
-            "inputs":[
-              {
-                "id":1,
-                "name":"connection.jdbcDriver",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":2,
-                "name":"connection.connectionString",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":3,
-                "name":"connection.username",
-                "type":"STRING",
-                "size":40,
-                "sensitive":false
-              },
-              {
-                "id":4,
-                "name":"connection.password",
-                "type":"STRING",
-                "size":40,
-                "sensitive":true
-              },
-              {
-                "id":5,
-                "name":"connection.jdbcProperties",
-                "type":"MAP",
-                "sensitive":false
-              }
-            ],
-            "name":"connection",
-            "type":"CONNECTION"
-          }
-        ],
-        "version":"2.0.0-SNAPSHOT"
-      }
-    ]
-  }
+        link-config: [{
+            id: 1,
+            inputs: [{
+                id: 1,
+                name: "linkConfig.uri",
+                type: "STRING",
+                size: 255,
+                sensitive: false
+            }],
+            name: "linkConfig",
+            type: "LINK"
+        }],
+        name: "hdfs-connector",
+        class: "org.apache.sqoop.connector.hdfs.HdfsConnector",
+        all-config-resources: {
+            fromJobConfig.label: "From Job configuration",
+                toJobConfig.ignored.label: "Ignored",
+                fromJobConfig.help: "Specifies information required to get data from Hadoop ecosystem",
+                toJobConfig.ignored.help: "This value is ignored",
+                toJobConfig.label: "ToJob configuration",
+                toJobConfig.storageType.label: "Storage type",
+                fromJobConfig.inputDirectory.label: "Input directory",
+                toJobConfig.outputFormat.label: "Output format",
+                toJobConfig.outputDirectory.label: "Output directory",
+                toJobConfig.outputDirectory.help: "Output directory for final data",
+                toJobConfig.compression.help: "Compression that should be used for the data",
+                toJobConfig.outputFormat.help: "Format in which data should be serialized",
+                toJobConfig.customCompression.label: "Custom compression format",
+                toJobConfig.compression.label: "Compression format",
+                linkConfig.label: "Link configuration",
+                toJobConfig.customCompression.help: "Full class name of the custom compression",
+                toJobConfig.storageType.help: "Target on Hadoop ecosystem where to store data",
+                linkConfig.help: "Here you supply information necessary to connect to HDFS",
+                linkConfig.uri.help: "HDFS URI used to connect to HDFS",
+                linkConfig.uri.label: "HDFS URI",
+                fromJobConfig.inputDirectory.help: "Directory that should be exported",
+                toJobConfig.help: "You must supply the information requested in order to get information where you want to store your data."
+        },
+        version: "2.0.0-SNAPSHOT"
+     }
+   }
 
 
-/v1/framework - [GET]- Get Sqoop Framework
+/v1/driver - [GET]- Get Sqoop Driver
 -----------------------------------------------
 
-Retrieve all metadata of Sqoop framework. The metadata include all the form fields that are required to all Sqoop objects, such as connection and jobs.
+Driver exposes configurations required for the job execution.
 
 * Method: ``GET``
 * Format: ``JSON``
 * Request Content: ``None``
+
 * Fields of Response:
 
 +--------------------------+----------------------------------------------------------------------------------------------------+
 |   Field                  | Description                                                                                        |
 +==========================+====================================================================================================+
-| ``id``                   | The id for Sqoop framework (It should be always be 1, since there is always 1 framework out there) |
+| ``id``                   | The id for the driver ( registered as a configurable )                                             |
 +--------------------------+----------------------------------------------------------------------------------------------------+
-| ``resources``            | All resources for Sqoop framework                                                                  |
+| ``job-config``           | Driver job config and inputs                                                                       |
 +--------------------------+----------------------------------------------------------------------------------------------------+
-| ``framework-version``    | The version of Sqoop framework                                                                     |
+| ``version``              | The build version of the driver                                                                    |
 +--------------------------+----------------------------------------------------------------------------------------------------+
-| ``job-forms``            | Framework's Job Configuration forms                                                                |
+| ``all-config-resources`` | Driver exposed config and input labels and description                                             |
 +--------------------------+----------------------------------------------------------------------------------------------------+
-| ``con-forms``            | Framework's connection configuration forms                                                         |
-+--------------------------+----------------------------------------------------------------------------------------------------+
-
-The framework and connector might contain several forms to be filled for job or connection object. Many parameters for job and connection
-are categorize into different classes, which are know as forms. Each form has its id and name. In job and connection objects, they use
-the id of the form to track these parameter inputs.
 
 * Response Example:
 
 ::
 
-  {
-    "id":1,
-    "resources":{
-      "output.label":"Output configuration",
-      "security.maxConnections.help":"Maximal number of connections that this connection object can use at one point in time",
-      "output.storageType.label":"Storage type",
-      "output.ignored.help":"This value is ignored",
-      "input.label":"Input configuration",
-      "security.help":"You must supply the information requested in order to create a job object.",
-      "output.storageType.help":"Target on Hadoop ecosystem where to store data",
-      "input.inputDirectory.help":"Directory that should be exported",
-      "output.outputFormat.label":"Output format",
-      "output.ignored.label":"Ignored",
-      "output.outputFormat.help":"Format in which data should be serialized",
-      "output.help":"You must supply the information requested in order to get information where you want to store your data.",
-      "throttling.help":"Set throttling boundaries to not overload your systems",
-      "input.inputDirectory.label":"Input directory",
-      "throttling.loaders.label":"Loaders",
-      "input.help":"Specifies information required to get data from Hadoop ecosystem",
-      "throttling.extractors.label":"Extractors",
-      "throttling.extractors.help":"Number of extractors that Sqoop will use",
-      "security.label":"Security related configuration options",
-      "throttling.label":"Throttling resources",
-      "throttling.loaders.help":"Number of loaders that Sqoop will use",
-      "output.outputDirectory.help":"Output directory for final data",
-      "security.maxConnections.label":"Max connections",
-      "output.outputDirectory.label":"Output directory"
+ {
+    id: 3,
+    job-config: [{
+        id: 7,
+        inputs: [{
+            id: 25,
+            name: "throttlingConfig.numExtractors",
+            type: "INTEGER",
+            sensitive: false
+        }, {
+            id: 26,
+            name: "throttlingConfig.numLoaders",
+            type: "INTEGER",
+            sensitive: false
+        }],
+        name: "throttlingConfig",
+        type: "JOB"
+    }],
+    all-config-resources: {
+        throttlingConfig.numExtractors.label: "Extractors",
+            throttlingConfig.numLoaders.help: "Number of loaders that Sqoop will use",
+            throttlingConfig.numLoaders.label: "Loaders",
+            throttlingConfig.label: "Throttling resources",
+            throttlingConfig.numExtractors.help: "Number of extractors that Sqoop will use",
+            throttlingConfig.help: "Set throttling boundaries to not overload your systems"
     },
-    "framework-version":"1",
-    "job-forms":{
-      "FROM":[
-        {
-          "id":6,
-          "inputs":[
-            {
-              "id":21,
-              "name":"throttling.extractors",
-              "type":"INTEGER",
-              "sensitive":false
-            },
-            {
-              "id":22,
-              "name":"throttling.loaders",
-              "type":"INTEGER",
-              "sensitive":false
-            }
-          ],
-          "name":"throttling",
-          "type":"CONNECTION"
-        }
-      ],
-      "TO":[
-        {
-          "id":1,
-          "inputs":[
-            {
-              "id":24,
-              "name":"throttling.extractors",
-              "type":"INTEGER",
-              "sensitive":false
-            },
-            {
-              "id":25,
-              "name":"throttling.loaders",
-              "type":"INTEGER",
-              "sensitive":false
-            }
-          ],
-          "name":"throttling",
-          "type":"CONNECTION"
-        }
-      ]
-    },
-    "con-forms":[
-      {
-        "id":4,
-        "inputs":[
-          {
-            "id":17,
-            "name":"security.maxConnections",
-            "type":"INTEGER",
-            "sensitive":false
-          }
-        ],
-        "name":"security",
-        "type":"CONNECTION"
-      }
-    ]
-  }
+    version: "1"
+ }
 
-/v1/connection/[xid] - [GET] - Get Connection
-----------------------------------------------------
+/v1/links/ - [GET]  Get all links
+-------------------------------------------
 
-Retrieve all the metadata of a given connection, such as its values for different fields of connector form and sqoop framework form.
-
-Provide the id of the connector in the url [xid] part. If you provide ``all`` in the [xid] part in the url, you will get the metadata of all connections.
+Get all the links created in Sqoop
 
 * Method: ``GET``
 * Format: ``JSON``
 * Request Content: ``None``
-* Fields of Response:
 
-+--------------------------+---------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                           |
-+==========================+=======================================================================================+
-| ``resources-connector``  | All resources for the given connector                                                 |
-+--------------------------+---------------------------------------------------------------------------------------+
-| ``resources-framework``  | All resources related with Sqoop framework                                            |
-+--------------------------+---------------------------------------------------------------------------------------+
-| ``all``                  | All metadata about the given connection, such as id, name and all form input values   |
-+--------------------------+---------------------------------------------------------------------------------------+
+* Response Example
+
+::
+
+  {
+    links: [
+      {
+        id: 1,
+        enabled: true,
+        update-user: "root",
+        link-config-values: [],
+        name: "First Link",
+        creation-date: 1415309361756,
+        connector-id: 1,
+        update-date: 1415309361756,
+        creation-user: "root"
+      },
+      {
+        id: 2,
+        enabled: true,
+        update-user: "root",
+        link-config-values: [],
+        name: "Second Link",
+        creation-date: 1415309390807,
+        connector-id: 2,
+        update-date: 1415309390807,
+        creation-user: "root"
+      }
+    ]
+  }
+
+
+/v1/links?cname=[cname] - [GET]  Get all links by Connector
+------------------------------------------------------------
+Get all the links for a given connector identified by ``[cname]`` part.
+
+
+/v1/link/[lname]  or /v1/link/[lid] - [GET] - Get Link
+-------------------------------------------------------------------------------
+
+Provide the id or unique name of the link in the url ``[lid]`` or ``[lname]`` part.
+
+Get all the details of the link including the id, name, type and the corresponding config input values for the link
+
+
+* Method: ``GET``
+* Format: ``JSON``
+* Request Content: ``None``
 
 * Response Example:
 
 ::
 
-  {
-    "resources-connector":{
-      "1":{
-        "ignored.label":"Ignored",
-        "table.partitionColumn.help":"A specific column for data partition",
-        "table.label":"Database configuration",
-        "table.boundaryQuery.label":"Boundary query",
-        "ignored.help":"This is completely ignored",
-        "ignored.ignored.label":"Ignored",
-        "connection.jdbcProperties.help":"Enter any JDBC properties that should be supplied during the creation of connection.",
-        "table.tableName.help":"Table name to process data in the remote database",
-        "connection.jdbcDriver.label":"JDBC Driver Class",
-        "connection.username.help":"Enter the username to be used for connecting to the database.",
-        "table.help":"You must supply the information requested in order to create a job object.",
-        "table.partitionColumn.label":"Partition column name",
-        "ignored.ignored.help":"This is completely ignored",
-        "table.partitionColumnNull.label":"Nulls in partition column",
-        "table.warehouse.label":"Data warehouse",
-        "table.boundaryQuery.help":"The boundary query for data partition",
-        "connection.username.label":"Username",
-        "connection.jdbcDriver.help":"Enter the fully qualified class name of the JDBC driver that will be used for establishing this connection.",
-        "connection.label":"Connection configuration",
-        "table.columns.label":"Table column names",
-        "table.dataDirectory.label":"Data directory",
-        "table.partitionColumnNull.help":"Whether there are null values in partition column",
-        "connection.password.label":"Password",
-        "table.warehouse.help":"The root directory for data",
-        "table.sql.label":"Table SQL statement",
-        "table.sql.help":"SQL statement to process data in the remote database",
-        "table.schemaName.help":"Schema name to process data in the remote database",
-        "connection.jdbcProperties.label":"JDBC Connection Properties",
-        "table.columns.help":"Specific columns of a table name or a table SQL",
-        "connection.connectionString.help":"Enter the value of JDBC connection string to be used by this connector for creating connections.",
-        "table.dataDirectory.help":"The sub-directory under warehouse for data",
-        "table.schemaName.label":"Schema name",
-        "connection.connectionString.label":"JDBC Connection String",
-        "connection.help":"You must supply the information requested in order to create a connection object.",
-        "connection.password.help":"Enter the password to be used for connecting to the database.",
-        "table.tableName.label":"Table name"
-      }
-    },
-    "resources-framework":{
-      "output.label":"Output configuration",
-      "security.maxConnections.help":"Maximal number of connections that this connection object can use at one point in time",
-      "output.storageType.label":"Storage type",
-      "output.ignored.help":"This value is ignored",
-      "input.label":"Input configuration",
-      "security.help":"You must supply the information requested in order to create a job object.",
-      "output.storageType.help":"Target on Hadoop ecosystem where to store data",
-      "input.inputDirectory.help":"Directory that should be exported",
-      "output.outputFormat.label":"Output format",
-      "output.ignored.label":"Ignored",
-      "output.outputFormat.help":"Format in which data should be serialized",
-      "output.help":"You must supply the information requested in order to get information where you want to store your data.",
-      "throttling.help":"Set throttling boundaries to not overload your systems",
-      "input.inputDirectory.label":"Input directory",
-      "throttling.loaders.label":"Loaders",
-      "input.help":"Specifies information required to get data from Hadoop ecosystem",
-      "throttling.extractors.label":"Extractors",
-      "throttling.extractors.help":"Number of extractors that Sqoop will use",
-      "security.label":"Security related configuration options",
-      "throttling.label":"Throttling resources",
-      "throttling.loaders.help":"Number of loaders that Sqoop will use",
-      "output.outputDirectory.help":"Output directory for final data",
-      "security.maxConnections.label":"Max connections",
-      "output.outputDirectory.label":"Output directory"
-    },
-    "all":[
-      {
-        "id":1,
-        "enabled":true,
-        "updated":1375912819893,
-        "created":1375912819893,
-        "name":"First connection",
-        "connector":[
-          {
-            "id":1,
-            "inputs":[
-              {
-                "id":1,
-                "name":"connection.jdbcDriver",
-                "value":"com.mysql.jdbc.Driver",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":2,
-                "name":"connection.connectionString",
-                "value":"jdbc%3Amysql%3A%2F%2Flocalhost%2Ftest",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":3,
-                "name":"connection.username",
-                "value":"root",
-                "type":"STRING",
-                "size":40,
-                "sensitive":false
-              },
-              {
-                "id":4,
-                "name":"connection.password",
-                "type":"STRING",
-                "size":40,
-                "sensitive":true
-              },
-              {
-                "id":5,
-                "name":"connection.jdbcProperties",
-                "type":"MAP",
-                "sensitive":false
-              }
-            ],
-            "name":"connection",
-            "type":"CONNECTION"
-          }
-        ],
-        "connector-id":1,
-        "framework":[
-          {
-            "id":4,
-            "inputs":[
-              {
-                "id":17,
-                "name":"security.maxConnections",
-                "value":"10",
-                "type":"INTEGER",
-                "sensitive":false
-              }
-            ],
-            "name":"security",
-            "type":"CONNECTION"
-          }
-        ]
-      }
-    ]
-  }
+ {
+    link: {
+        id: 1,
+        enabled: true,
+        link-config-values: [{
+            id: 1,
+            inputs: [{
+                id: 1,
+                name: "linkConfig.uri",
+                value: "hdfs%3A%2F%2Fnamenode%3A8090",
+                type: "STRING",
+                size: 255,
+                sensitive: false
+            }],
+            name: "linkConfig",
+            type: "LINK"
+        }],
+        update-user: "root",
+        name: "First Link",
+        creation-date: 1415287846371,
+        connector-id: 1,
+        update-date: 1415287846371,
+        creation-user: "root"
+    }
+ }
 
-/v1/connection - [POST] - Create Connection
+/v1/link - [POST] - Create Link
 ---------------------------------------------------------
 
-Create a new connection object. Try your best to provide values for as many as inputs of
-connection forms from both connectors and framework.
+Create a new link object. Provide values to the link config inputs for the ones that are required.
 
 * Method: ``POST``
 * Format: ``JSON``
@@ -864,463 +627,331 @@ connection forms from both connectors and framework.
 +--------------------------+--------------------------------------------------------------------------------------+
 |   Field                  | Description                                                                          |
 +==========================+======================================================================================+
-| ``all``                  | Request array, in which each element is an independent request                       |
+| ``link``                 | The root of the post data in JSON                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``id``                   | The id of the connection. Useless here, because we don't know the id before creation |
+| ``id``                   | The id of the link can be left blank in the post data                                |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``enabled``              | Whether to enable this connection (true/false)                                       |
+| ``enabled``              | Whether to enable this link (true/false)                                             |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``updated``              | The last updated time of this connection                                             |
+| ``update-date``          | The last updated time of this link                                                   |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``created``              | The creation time of this connection                                                 |
+| ``creation-date``        | The creation time of this link                                                       |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``name``                 | The name of this connection                                                          |
+| ``update-user``          | The user who updated this link                                                       |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``connector``            | Filled inputs for connector forms for this connection                                |
+| ``creation-user``        | The user who created this link                                                       |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``connector-id``         | The id of the connector used for this connection                                     |
+| ``name``                 | The name of this link                                                                |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | Filled inputs for framework forms for this connection                                |
+| ``link-config-values``   | Config input values for link config for the corresponding connector                  |
 +--------------------------+--------------------------------------------------------------------------------------+
-
+| ``connector-id``         | The id of the connector used for this link                                           |
++--------------------------+--------------------------------------------------------------------------------------+
 
 * Request Example:
 
 ::
 
   {
-    "all":[
-      {
-        "id":-1,
-        "enabled":true,
-        "updated":1375919952017,
-        "created":1375919952017,
-        "name":"First connection",
-        "connector":[
-          {
-            "id":1,
-            "inputs":[
-              {
-                "id":1,
-                "name":"connection.jdbcDriver",
-                "value":"com.mysql.jdbc.Driver",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":2,
-                "name":"connection.connectionString",
-                "value":"jdbc%3Amysql%3A%2F%2Flocalhost%2Ftest",
-                "type":"STRING",
-                "size":128,
-                "sensitive":false
-              },
-              {
-                "id":3,
-                "name":"connection.username",
-                "value":"root",
-                "type":"STRING",
-                "size":40,
-                "sensitive":false
-              },
-              {
-                "id":4,
-                "name":"connection.password",
-                "type":"STRING",
-                "size":40,
-                "sensitive":true
-              },
-              {
-                "id":5,
-                "name":"connection.jdbcProperties",
-                "type":"MAP",
-                "sensitive":false
-              }
-            ],
-            "name":"connection",
-            "type":"CONNECTION"
-          }
-        ],
-        "connector-id":1,
-        "framework":[
-          {
-            "id":4,
-            "inputs":[
-              {
-                "id":17,
-                "name":"security.maxConnections",
-                "value":"10",
-                "type":"INTEGER",
-                "sensitive":false
-              }
-            ],
-            "name":"security",
-            "type":"CONNECTION"
-          }
-        ]
-      }
-    ]
+    link: {
+        id: -1,
+        enabled: true,
+        link-config-values: [{
+            id: 1,
+            inputs: [{
+                id: 1,
+                name: "linkConfig.uri",
+                value: "hdfs%3A%2F%2Fvbsqoop-1.ent.cloudera.com%3A8020%2Fuser%2Froot%2Fjob1",
+                type: "STRING",
+                size: 255,
+                sensitive: false
+            }],
+            name: "testInput",
+            type: "LINK"
+        }],
+        update-user: "root",
+        name: "testLink",
+        creation-date: 1415202223048,
+        connector-id: 1,
+        update-date: 1415202223048,
+        creation-user: "root"
+    }
   }
 
 * Fields of Response:
 
-+--------------------------+--------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                          |
-+==========================+======================================================================================+
-| ``id``                   | The id assigned for this new created connection                                      |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``connector``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
++---------------------------+--------------------------------------------------------------------------------------+
+|   Field                   | Description                                                                          |
++===========================+======================================================================================+
+| ``id``                    | The id assigned for this new created link                                            |
++---------------------------+--------------------------------------------------------------------------------------+
+| ``validation-result``     | The validation status for the  link config inputs given in the post data             |
++---------------------------+--------------------------------------------------------------------------------------+
 
-* Response Example:
+* ERROR Response Example:
 
 ::
 
-  {
-    "id":1,
-    "connector":{
-      "status":"FINE",
-      "messages":{
+   {
+     "validation-result": [
+         {
+             "linkConfig": [
+                 {
+                     "message": "Invalid URI. URI must either be null or a valid URI. Here are a few valid example URIs: hdfs://example.com:8020/, hdfs://example.com/, file:///, file:///tmp, file://localhost/tmp",
+                     "status": "ERROR"
+                 }
+             ]
+         }
+     ]
+   }
 
-      }
-    },
-    "framework":{
-      "status":"FINE",
-      "messages":{
 
-      }
-    }
-  }
-
-/v1/connection/[xid] - [PUT] - Update Connection
+/v1/link/[lname]  or /v1/link/[lid] - [PUT] - Update Link
 ---------------------------------------------------------
 
-Update an existing connection object with id [xid]. To make the procedure of filling inputs easier, the general practice
-is get the connection first and then change some of the inputs.
+Update an existing link object with name [lname] or id [lid]. To make the procedure of filling inputs easier, the general practice
+is get the link first and then change some of the values for the inputs.
 
 * Method: ``PUT``
 * Format: ``JSON``
-* Fields of Request:
 
-The same as Create Connection.
-
-* Fields of Response:
-
-+--------------------------+--------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                          |
-+==========================+======================================================================================+
-| ``connector``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-
-* Response Example:
+* OK Response Example:
 
 ::
 
   {
-    "connector":{
-      "status":"FINE",
-      "messages":{
-
-      }
-    },
-    "framework":{
-      "status":"FINE",
-      "messages":{
-
-      }
-    }
+    "validation-result": [
+        {}
+    ]
   }
 
-/v1/connection/[xid] - [DELETE] - Delete Connection
----------------------------------------------------------
+/v1/link/[lname]  or /v1/link/[lid]  - [DELETE] - Delete Link
+-----------------------------------------------------------------
 
-Delete a connection with id ``xid``.
+Delete a link with name [lname] or id [lid]
 
 * Method: ``DELETE``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/connection/[xid]/enable - [PUT] - Enable Connection
----------------------------------------------------------
+/v1/link/[lid]/enable  or /v1/link/[lname]/enable  - [PUT] - Enable Link
+--------------------------------------------------------------------------------
 
-Enable a connection with id ``xid``.
-
-* Method: ``PUT``
-* Format: ``JSON``
-* Request Content: ``None``
-* Response Content: ``None``
-
-/v1/connection/[xid]/disable - [PUT] - Disable Connection
----------------------------------------------------------
-
-Disable a connection with id ``xid``.
+Enable a link with id ``lid`` or name ``lname``
 
 * Method: ``PUT``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/job/[jid] - [GET] - Get Job
-----------------------------------------
+/v1/link/[lid]/disable - [PUT] - Disable Link
+---------------------------------------------------------
 
-Retrieve all the metadata of a given job, such as its values for different fields of connector form and sqoop framework form.
+Disable a link with id ``lid`` or name ``lname``
 
-Provide the id of the job in the url [jid] part. If you provide ``all`` in the [jid] part in the url, you will get the metadata of all connections.
+* Method: ``PUT``
+* Format: ``JSON``
+* Request Content: ``None``
+* Response Content: ``None``
+
+/v1/jobs/ - [GET]  Get all jobs
+-------------------------------------------
+
+Get all the jobs created in Sqoop
 
 * Method: ``GET``
 * Format: ``JSON``
 * Request Content: ``None``
-* Fields of Response:
-
-+--------------------------+--------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                          |
-+==========================+======================================================================================+
-| ``resources-connector``  | All resources for the given connector                                                |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``resources-framework``  | All resources related with Sqoop framework                                           |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``all``                  | All metadata about the given job, such as id, name and all form input values         |
-+--------------------------+--------------------------------------------------------------------------------------+
 
 * Response Example:
 
 ::
 
   {
-    "resources-connector":{
-      "1":{
-        "ignored.label":"Ignored",
-        "table.partitionColumn.help":"A specific column for data partition",
-        "table.label":"Database configuration",
-        "table.boundaryQuery.label":"Boundary query",
-        "ignored.help":"This is completely ignored",
-        "ignored.ignored.label":"Ignored",
-        "connection.jdbcProperties.help":"Enter any JDBC properties that should be supplied during the creation of connection.",
-        "table.tableName.help":"Table name to process data in the remote database",
-        "connection.jdbcDriver.label":"JDBC Driver Class",
-        "connection.username.help":"Enter the username to be used for connecting to the database.",
-        "table.help":"You must supply the information requested in order to create a job object.",
-        "table.partitionColumn.label":"Partition column name",
-        "ignored.ignored.help":"This is completely ignored",
-        "table.partitionColumnNull.label":"Nulls in partition column",
-        "table.warehouse.label":"Data warehouse",
-        "table.boundaryQuery.help":"The boundary query for data partition",
-        "connection.username.label":"Username",
-        "connection.jdbcDriver.help":"Enter the fully qualified class name of the JDBC driver that will be used for establishing this connection.",
-        "connection.label":"Connection configuration",
-        "table.columns.label":"Table column names",
-        "table.dataDirectory.label":"Data directory",
-        "table.partitionColumnNull.help":"Whether there are null values in partition column",
-        "connection.password.label":"Password",
-        "table.warehouse.help":"The root directory for data",
-        "table.sql.label":"Table SQL statement",
-        "table.sql.help":"SQL statement to process data in the remote database",
-        "table.schemaName.help":"Schema name to process data in the remote database",
-        "connection.jdbcProperties.label":"JDBC Connection Properties",
-        "table.columns.help":"Specific columns of a table name or a table SQL",
-        "connection.connectionString.help":"Enter the value of JDBC connection string to be used by this connector for creating connections.",
-        "table.dataDirectory.help":"The sub-directory under warehouse for data",
-        "table.schemaName.label":"Schema name",
-        "connection.connectionString.label":"JDBC Connection String",
-        "connection.help":"You must supply the information requested in order to create a connection object.",
-        "connection.password.help":"Enter the password to be used for connecting to the database.",
-        "table.tableName.label":"Table name"
-      }
-    },
-    "resources-framework":{
-      "output.label":"Output configuration",
-      "security.maxConnections.help":"Maximal number of connections that this connection object can use at one point in time",
-      "output.storageType.label":"Storage type",
-      "output.ignored.help":"This value is ignored",
-      "input.label":"Input configuration",
-      "security.help":"You must supply the information requested in order to create a job object.",
-      "output.storageType.help":"Target on Hadoop ecosystem where to store data",
-      "input.inputDirectory.help":"Directory that should be exported",
-      "output.outputFormat.label":"Output format",
-      "output.ignored.label":"Ignored",
-      "output.outputFormat.help":"Format in which data should be serialized",
-      "output.help":"You must supply the information requested in order to get information where you want to store your data.",
-      "throttling.help":"Set throttling boundaries to not overload your systems",
-      "input.inputDirectory.label":"Input directory",
-      "throttling.loaders.label":"Loaders",
-      "input.help":"Specifies information required to get data from Hadoop ecosystem",
-      "throttling.extractors.label":"Extractors",
-      "throttling.extractors.help":"Number of extractors that Sqoop will use",
-      "security.label":"Security related configuration options",
-      "throttling.label":"Throttling resources",
-      "throttling.loaders.help":"Number of loaders that Sqoop will use",
-      "output.outputDirectory.help":"Output directory for final data",
-      "security.maxConnections.label":"Max connections",
-      "output.outputDirectory.label":"Output directory"
-    },
-    "all":[
-      {
-        "connection-id":1,
-        "id":1,
-        "enabled":true,
-        "updated":1375913231253,
-        "created":1375913231253,
-        "name":"First job",
-        "connector":[
-          {
-            "id":2,
-            "inputs":[
-              {
-                "id":6,
-                "name":"table.schemaName",
-                "value":"test",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":7,
-                "name":"table.tableName",
-                "value":"example",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":8,
-                "name":"table.sql",
-                "type":"STRING",
-                "size":2000,
-                "sensitive":false
-              },
-              {
-                "id":9,
-                "name":"table.columns",
-                "value":"id%2Cdata",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":10,
-                "name":"table.partitionColumn",
-                "value":"id",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":11,
-                "name":"table.partitionColumnNull",
-                "value":"true",
-                "type":"BOOLEAN",
-                "sensitive":false
-              },
-              {
-                "id":12,
-                "name":"table.boundaryQuery",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              }
-            ],
-            "name":"table",
-            "type":"CONNECTION"
-          }
-        ],
-        "connector-id":1,
-        "type":"FROM",
-        "framework":[
-          {
-            "id":5,
-            "inputs":[
-              {
-                "id":18,
-                "values":"HDFS",
-                "name":"output.storageType",
-                "value":"HDFS",
-                "type":"ENUM",
-                "sensitive":false
-              },
-              {
-                "id":19,
-                "values":"TEXT_FILE,SEQUENCE_FILE",
-                "name":"output.outputFormat",
-                "value":"TEXT_FILE",
-                "type":"ENUM",
-                "sensitive":false
-              },
-              {
-                "id":20,
-                "name":"output.outputDirectory",
-                "value":"%2Ftmp%2Foutput",
-                "type":"STRING",
-                "size":255,
-                "sensitive":false
-              }
-            ],
-            "name":"output",
-            "type":"CONNECTION"
-          },
-          {
-            "id":6,
-            "inputs":[
-              {
-                "id":21,
-                "name":"throttling.extractors",
-                "type":"INTEGER",
-                "sensitive":false
-              },
-              {
-                "id":22,
-                "name":"throttling.loaders",
-                "type":"INTEGER",
-                "sensitive":false
-              }
-            ],
-            "name":"throttling",
-            "type":"CONNECTION"
-          }
-        ]
-      }
-    ]
+     jobs: [{
+        driver-config-values: [],
+            enabled: true,
+            from-connector-id: 1,
+            update-user: "root",
+            to-config-values: [],
+            to-connector-id: 2,
+            creation-date: 1415310157618,
+            update-date: 1415310157618,
+            creation-user: "root",
+            id: 1,
+            to-link-id: 2,
+            from-config-values: [],
+            name: "First Job",
+            from-link-id: 1
+       },{
+        driver-config-values: [],
+            enabled: true,
+            from-connector-id: 2,
+            update-user: "root",
+            to-config-values: [],
+            to-connector-id: 1,
+            creation-date: 1415310650600,
+            update-date: 1415310650600,
+            creation-user: "root",
+            id: 2,
+            to-link-id: 1,
+            from-config-values: [],
+            name: "Second Job",
+            from-link-id: 2
+       }]
   }
+
+/v1/jobs?cname=[cname] - [GET]  Get all jobs by connector
+------------------------------------------------------------
+Get all the jobs for a given connector identified by ``[cname]`` part.
+
+
+/v1/job/[jname] or /v1/job/[jid] - [GET] - Get Job
+-----------------------------------------------------
+
+Provide the name or the id of the job in the url [jname]
+part or [jid] part.
+
+* Method: ``GET``
+* Format: ``JSON``
+* Request Content: ``None``
+
+* Response Example:
+
+::
+
+  {
+    job: {
+        driver-config-values: [{
+                id: 7,
+                inputs: [{
+                    id: 25,
+                    name: "throttlingConfig.numExtractors",
+                    value: "3",
+                    type: "INTEGER",
+                    sensitive: false
+                }, {
+                    id: 26,
+                    name: "throttlingConfig.numLoaders",
+                    value: "3",
+                    type: "INTEGER",
+                    sensitive: false
+                }],
+                name: "throttlingConfig",
+                type: "JOB"
+            }],
+            enabled: true,
+            from-connector-id: 1,
+            update-user: "root",
+            to-config-values: [{
+                id: 6,
+                inputs: [{
+                    id: 19,
+                    name: "toJobConfig.schemaName",
+                    type: "STRING",
+                    size: 50,
+                    sensitive: false
+                }, {
+                    id: 20,
+                    name: "toJobConfig.tableName",
+                    value: "text",
+                    type: "STRING",
+                    size: 2000,
+                    sensitive: false
+                }, {
+                    id: 21,
+                    name: "toJobConfig.sql",
+                    type: "STRING",
+                    size: 50,
+                    sensitive: false
+                }, {
+                    id: 22,
+                    name: "toJobConfig.columns",
+                    type: "STRING",
+                    size: 50,
+                    sensitive: false
+                }, {
+                    id: 23,
+                    name: "toJobConfig.stageTableName",
+                    type: "STRING",
+                    size: 2000,
+                    sensitive: false
+                }, {
+                    id: 24,
+                    name: "toJobConfig.shouldClearStageTable",
+                    type: "BOOLEAN",
+                    sensitive: false
+                }],
+                name: "toJobConfig",
+                type: "JOB"
+            }],
+            to-connector-id: 2,
+            creation-date: 1415310157618,
+            update-date: 1415310157618,
+            creation-user: "root",
+            id: 1,
+            to-link-id: 2,
+            from-config-values: [{
+                id: 2,
+                inputs: [{
+                    id: 2,
+                    name: "fromJobConfig.inputDirectory",
+                    value: "hdfs%3A%2F%2Fvbsqoop-1.ent.cloudera.com%3A8020%2Fuser%2Froot%2Fjob1",
+                    type: "STRING",
+                    size: 255,
+                    sensitive: false
+                }],
+                name: "fromJobConfig",
+                type: "JOB"
+            }],
+            name: "First Job",
+            from-link- id: 1
+    }
+ }
+
 
 /v1/job - [POST] - Create Job
 ---------------------------------------------------------
 
-Create a new job object. Try your best to provide values for as many as inputs of
-job forms from both connectors and framework.
+Create a new job object with the corresponding config values.
 
 * Method: ``POST``
 * Format: ``JSON``
+
 * Fields of Request:
+
 
 +--------------------------+--------------------------------------------------------------------------------------+
 |   Field                  | Description                                                                          |
 +==========================+======================================================================================+
-| ``all``                  | Request array, in which each element is an independent request                       |
+| ``job``                  | The root of the post data in JSON                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``connection-id``        | The id of the connection used for this job                                           |
+| ``from-link-id``         | The id of the from link for the job                                                  |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``id``                   | The id of the job. Useless here, because we don't know the id before creation        |
+| ``to-link-id``           | The id of the to link for the job                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``type``                 | The type of this job ("IMPORT"/"EXPORT")                                             |
+| ``id``                   | The id of the link can be left blank in the post data                                |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``enabled``              | Whether to enable this connection (true/false)                                       |
+| ``enabled``              | Whether to enable this job (true/false)                                              |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``updated``              | The last updated time of this connection                                             |
+| ``update-date``          | The last updated time of this job                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``created``              | The creation time of this connection                                                 |
+| ``creation-date``        | The creation time of this job                                                        |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``name``                 | The name of this connection                                                          |
+| ``update-user``          | The user who updated this job                                                        |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``connector``            | Filled inputs for connector forms for this connection                                |
+| ``creation-user``        | The uset who creates this job                                                        |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``connector-id``         | The id of the connector used for this connection                                     |
+| ``name``                 | The name of this job                                                                 |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | Filled inputs for framework forms for this connection                                |
+| ``from-config-values``   | Config input values for FROM part of the job                                         |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``to-config-values``     | Config input values for TO part of the job                                           |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``driver-config-values`` | Config input values for driver                                                       |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``connector-id``         | The id of the connector used for this link                                           |
 +--------------------------+--------------------------------------------------------------------------------------+
 
 
@@ -1328,166 +959,141 @@ job forms from both connectors and framework.
 
 ::
 
-  {
-    "all":[
-      {
-        "connection-id":1,
-        "id":-1,
-        "enabled":true,
-        "updated":1375920083970,
-        "created":1375920083970,
-        "name":"First job",
-        "connector":[
-          {
-            "id":2,
-            "inputs":[
-              {
-                "id":6,
-                "name":"table.schemaName",
-                "value":"test",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":7,
-                "name":"table.tableName",
-                "value":"example",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":8,
-                "name":"table.sql",
-                "type":"STRING",
-                "size":2000,
-                "sensitive":false
-              },
-              {
-                "id":9,
-                "name":"table.columns",
-                "value":"id%2Cdata",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":10,
-                "name":"table.partitionColumn",
-                "value":"id",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              },
-              {
-                "id":11,
-                "name":"table.partitionColumnNull",
-                "value":"true",
-                "type":"BOOLEAN",
-                "sensitive":false
-              },
-              {
-                "id":12,
-                "name":"table.boundaryQuery",
-                "type":"STRING",
-                "size":50,
-                "sensitive":false
-              }
-            ],
-            "name":"table",
-            "type":"CONNECTION"
-          }
-        ],
-        "connector-id":1,
-        "type":"IMPORT",
-        "framework":[
-          {
-            "id":5,
-            "inputs":[
-              {
-                "id":18,
-                "values":"HDFS",
-                "name":"output.storageType",
-                "value":"HDFS",
-                "type":"ENUM",
-                "sensitive":false
-              },
-              {
-                "id":19,
-                "values":"TEXT_FILE,SEQUENCE_FILE",
-                "name":"output.outputFormat",
-                "value":"TEXT_FILE",
-                "type":"ENUM",
-                "sensitive":false
-              },
-              {
-                "id":20,
-                "name":"output.outputDirectory",
-                "value":"%2Ftmp%2Foutput",
-                "type":"STRING",
-                "size":255,
-                "sensitive":false
-              }
-            ],
-            "name":"output",
-            "type":"CONNECTION"
-          },
-          {
-            "id":6,
-            "inputs":[
-              {
-                "id":21,
-                "name":"throttling.extractors",
-                "type":"INTEGER",
-                "sensitive":false
-              },
-              {
-                "id":22,
-                "name":"throttling.loaders",
-                "type":"INTEGER",
-                "sensitive":false
-              }
-            ],
-            "name":"throttling",
-            "type":"CONNECTION"
-          }
-        ]
-      }
-    ]
+ {
+   job: {
+     driver-config-values: [
+       {
+         id: 7,
+         inputs: [
+           {
+             id: 25,
+             name: "throttlingConfig.numExtractors",
+             value: "3",
+             type: "INTEGER",
+             sensitive: false
+           },
+           {
+             id: 26,
+             name: "throttlingConfig.numLoaders",
+             value: "3",
+             type: "INTEGER",
+             sensitive: false
+           }
+         ],
+         name: "throttlingConfig",
+         type: "JOB"
+       }
+     ],
+     enabled: true,
+     from-connector-id: 1,
+     update-user: "root",
+     to-config-values: [
+       {
+         id: 6,
+         inputs: [
+           {
+             id: 19,
+             name: "toJobConfig.schemaName",
+             type: "STRING",
+             size: 50,
+             sensitive: false
+           },
+           {
+             id: 20,
+             name: "toJobConfig.tableName",
+             value: "text",
+             type: "STRING",
+             size: 2000,
+             sensitive: false
+           },
+           {
+             id: 21,
+             name: "toJobConfig.sql",
+             type: "STRING",
+             size: 50,
+             sensitive: false
+           },
+           {
+             id: 22,
+             name: "toJobConfig.columns",
+             type: "STRING",
+             size: 50,
+             sensitive: false
+           },
+           {
+             id: 23,
+             name: "toJobConfig.stageTableName",
+             type: "STRING",
+             size: 2000,
+             sensitive: false
+           },
+           {
+             id: 24,
+             name: "toJobConfig.shouldClearStageTable",
+             type: "BOOLEAN",
+             sensitive: false
+           }
+         ],
+         name: "toJobConfig",
+         type: "JOB"
+       }
+     ],
+     to-connector-id: 2,
+     creation-date: 1415310157618,
+     update-date: 1415310157618,
+     creation-user: "root",
+     id: -1,
+     to-link-id: 2,
+     from-config-values: [
+       {
+         id: 2,
+         inputs: [
+           {
+             id: 2,
+             name: "fromJobConfig.inputDirectory",
+             value: "hdfs%3A%2F%2Fvbsqoop-1.ent.cloudera.com%3A8020%2Fuser%2Froot%2Fjob1",
+             type: "STRING",
+             size: 255,
+             sensitive: false
+           }
+         ],
+         name: "fromJobConfig",
+         type: "JOB"
+       }
+     ],
+     name: "Test Job",
+     from-link-id: 1
+    }
   }
 
 * Fields of Response:
 
-+--------------------------+--------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                          |
-+==========================+======================================================================================+
-| ``id``                   | The id assigned for this new created job                                             |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``connector``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | The validation status for the inputs of framework forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
++---------------------------+--------------------------------------------------------------------------------------+
+|   Field                   | Description                                                                          |
++===========================+======================================================================================+
+| ``id``                    | The id assigned for this new created job                                             |
++--------------------------+---------------------------------------------------------------------------------------+
+| ``validation-result``     | The validation status for the job config and driver config inputs in the post data   |
++---------------------------+--------------------------------------------------------------------------------------+
 
-* Response Example:
+
+* ERROR Response Example:
 
 ::
 
-  {
-    "id":1,
-    "connector":{
-      "status":"FINE",
-      "messages":{
+   {
+     "validation-result": [
+         {
+             "linkConfig": [
+                 {
+                     "message": "Invalid URI. URI must either be null or a valid URI. Here are a few valid example URIs: hdfs://example.com:8020/, hdfs://example.com/, file:///, file:///tmp, file://localhost/tmp",
+                     "status": "ERROR"
+                 }
+             ]
+         }
+     ]
+   }
 
-      }
-    },
-    "framework":{
-      "status":"FINE",
-      "messages":{
-
-      }
-    }
-  }
 
 /v1/job/[jid] - [PUT] - Update Job
 ---------------------------------------------------------
@@ -1497,38 +1103,19 @@ is get the existing job object first and then change some of the inputs.
 
 * Method: ``PUT``
 * Format: ``JSON``
-* Fields of Request:
 
 The same as Create Job.
 
-* Fields of Response:
-
-+--------------------------+--------------------------------------------------------------------------------------+
-|   Field                  | Description                                                                          |
-+==========================+======================================================================================+
-| ``connector``            | The validation status for the inputs of connector forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-| ``framework``            | The validation status for the inputs of framework forms, provided by the request     |
-+--------------------------+--------------------------------------------------------------------------------------+
-
-* Response Example:
+* OK Response Example:
 
 ::
 
   {
-    "connector":{
-      "status":"FINE",
-      "messages":{
-
-      }
-    },
-    "framework":{
-      "status":"FINE",
-      "messages":{
-
-      }
-    }
+    "validation-result": [
+        {}
+    ]
   }
+
 
 /v1/job/[jid] - [DELETE] - Delete Job
 ---------------------------------------------------------
@@ -1560,12 +1147,204 @@ Disable a job with id ``jid``.
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/submission/history/[jid] - [GET] - Get Job Submission History
+
+/v1/job/[jid]/start or /v1/job/[jname]/start - [PUT]- Start Job
+---------------------------------------------------------------------------------
+
+Start a job with name ``[jname]`` or with id ``[jid]`` to trigger the job execution
+
+* Method: ``POST``
+* Format: ``JSON``
+* Request Content: ``None``
+* Response Content: ``Submission Record``
+
+* BOOTING Response Example
+
+::
+
+  {
+    "submission": {
+      "progress": -1,
+      "last-update-date": 1415312531188,
+      "external-id": "job_1412137947693_0004",
+      "status": "BOOTING",
+      "job": 2,
+      "creation-date": 1415312531188,
+      "to-schema": {
+        "created": 1415312531426,
+        "name": "HDFS file",
+        "columns": []
+      },
+      "external-link": "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/",
+      "from-schema": {
+        "created": 1415312531342,
+        "name": "text",
+        "columns": [
+          {
+            "name": "id",
+            "nullable": true,
+            "unsigned": null,
+            "type": "FIXED_POINT",
+            "size": null
+          },
+          {
+            "name": "txt",
+            "nullable": true,
+            "type": "TEXT",
+            "size": null
+          }
+        ]
+      }
+    }
+  }
+
+* SUCCEEDED Response Example
+
+::
+
+   {
+     submission: {
+       progress: -1,
+       last-update-date: 1415312809485,
+       external-id: "job_1412137947693_0004",
+       status: "SUCCEEDED",
+       job: 2,
+       creation-date: 1415312531188,
+       external-link: "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/",
+       counters: {
+         org.apache.hadoop.mapreduce.JobCounter: {
+           SLOTS_MILLIS_MAPS: 373553,
+           MB_MILLIS_MAPS: 382518272,
+           TOTAL_LAUNCHED_MAPS: 10,
+           MILLIS_MAPS: 373553,
+           VCORES_MILLIS_MAPS: 373553,
+           OTHER_LOCAL_MAPS: 10
+         },
+         org.apache.hadoop.mapreduce.lib.output.FileOutputFormatCounter: {
+           BYTES_WRITTEN: 0
+         },
+         org.apache.hadoop.mapreduce.lib.input.FileInputFormatCounter: {
+           BYTES_READ: 0
+         },
+         org.apache.hadoop.mapreduce.TaskCounter: {
+           MAP_INPUT_RECORDS: 0,
+           MERGED_MAP_OUTPUTS: 0,
+           PHYSICAL_MEMORY_BYTES: 4065599488,
+           SPILLED_RECORDS: 0,
+           COMMITTED_HEAP_BYTES: 3439853568,
+           CPU_MILLISECONDS: 236900,
+           FAILED_SHUFFLE: 0,
+           VIRTUAL_MEMORY_BYTES: 15231422464,
+           SPLIT_RAW_BYTES: 1187,
+           MAP_OUTPUT_RECORDS: 1000000,
+           GC_TIME_MILLIS: 7282
+         },
+         org.apache.hadoop.mapreduce.FileSystemCounter: {
+           FILE_WRITE_OPS: 0,
+           FILE_READ_OPS: 0,
+           FILE_LARGE_READ_OPS: 0,
+           FILE_BYTES_READ: 0,
+           HDFS_BYTES_READ: 1187,
+           FILE_BYTES_WRITTEN: 1191230,
+           HDFS_LARGE_READ_OPS: 0,
+           HDFS_WRITE_OPS: 10,
+           HDFS_READ_OPS: 10,
+           HDFS_BYTES_WRITTEN: 276389736
+         },
+         org.apache.sqoop.submission.counter.SqoopCounters: {
+           ROWS_READ: 1000000
+         }
+       }
+     }
+   }
+
+
+* ERROR Response Example
+
+::
+
+  {
+    "submission": {
+      "progress": -1,
+      "last-update-date": 1415312390570,
+      "status": "FAILURE_ON_SUBMIT",
+      "exception": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
+      "job": 1,
+      "creation-date": 1415312390570,
+      "to-schema": {
+        "created": 1415312390797,
+        "name": "text",
+        "columns": [
+          {
+            "name": "id",
+            "nullable": true,
+            "unsigned": null,
+            "type": "FIXED_POINT",
+            "size": null
+          },
+          {
+            "name": "txt",
+            "nullable": true,
+            "type": "TEXT",
+            "size": null
+          }
+        ]
+      },
+      "from-schema": {
+        "created": 1415312390778,
+        "name": "HDFS file",
+        "columns": [
+        ]
+      },
+      "exception-trace": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_00"
+    }
+  }
+
+/v1/job/[jid]/stop or /v1/job/[jname]/stop  - [PUT]- Stop Job
+---------------------------------------------------------------------------------
+
+Stop a job with name ``[janme]`` or with id ``[jid]`` to abort the running job.
+
+* Method: ``PUT``
+* Format: ``JSON``
+* Request Content: ``None``
+* Response Content: ``Submission Record``
+
+/v1/job/[jid]/status or /v1/job/[jname]/status  - [GET]- Get Job Status
+---------------------------------------------------------------------------------
+
+Get status of the running job with name ``[janme]`` or with id ``[jid]``
+
+* Method: ``GET``
+* Format: ``JSON``
+* Request Content: ``None``
+* Response Content: ``Submission Record``
+
+::
+
+  {
+      "submission": {
+          "progress": 0.25,
+          "last-update-date": 1415312603838,
+          "external-id": "job_1412137947693_0004",
+          "status": "RUNNING",
+          "job": 2,
+          "creation-date": 1415312531188,
+          "external-link": "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/"
+      }
+  }
+
+/v1/submissions? - [GET] - Get all job Submissions
 ----------------------------------------------------------------------
 
-Retrieve all job submission history of a given job, such as the status, counters and links for those submissions.
+Get all the submissions for every job started in SQoop
 
-Provide the id of the job in the url [jid] part. If you provide ``all`` in the [jid] part in the url, you will get all job submission history of all jobs.
+/v1/submissions?jname=[jname] - [GET] - Get Submissions by Job
+----------------------------------------------------------------------
+
+Retrieve all job submissions in the past for the given job. Each submission record will have details such as the status, counters and urls for those submissions.
+
+Provide the name of the job in the url [jname] part.
 
 * Method: ``GET``
 * Format: ``JSON``
@@ -1595,130 +1374,68 @@ Provide the id of the job in the url [jid] part. If you provide ``all`` in the [
 ::
 
   {
-    "all":[
+    submissions: [
       {
-        "progress":-1.0,
-        "last-update-date":1375913666476,
-        "external-id":"job_201307221513_0009",
-        "status":"SUCCEEDED",
-        "job":1,
-        "creation-date":1375913630576,
-        "external-link":"http:\/\/localhost:50030\/jobdetails.jsp?jobid=job_201307221513_0009",
-        "counters":{
-          "org.apache.hadoop.mapreduce.JobCounter":{
-            "SLOTS_MILLIS_MAPS":59135,
-            "FALLOW_SLOTS_MILLIS_REDUCES":0,
-            "FALLOW_SLOTS_MILLIS_MAPS":0,
-            "TOTAL_LAUNCHED_MAPS":2,
-            "SLOTS_MILLIS_REDUCES":0
+        progress: -1,
+        last-update-date: 1415312809485,
+        external-id: "job_1412137947693_0004",
+        status: "SUCCEEDED",
+        job: 2,
+        creation-date: 1415312531188,
+        external-link: "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/",
+        counters: {
+          org.apache.hadoop.mapreduce.JobCounter: {
+            SLOTS_MILLIS_MAPS: 373553,
+            MB_MILLIS_MAPS: 382518272,
+            TOTAL_LAUNCHED_MAPS: 10,
+            MILLIS_MAPS: 373553,
+            VCORES_MILLIS_MAPS: 373553,
+            OTHER_LOCAL_MAPS: 10
           },
-          "org.apache.hadoop.mapreduce.TaskCounter":{
-            "MAP_INPUT_RECORDS":0,
-            "PHYSICAL_MEMORY_BYTES":231583744,
-            "SPILLED_RECORDS":0,
-            "COMMITTED_HEAP_BYTES":112721920,
-            "CPU_MILLISECONDS":20940,
-            "VIRTUAL_MEMORY_BYTES":1955266560,
-            "SPLIT_RAW_BYTES":223,
-            "MAP_OUTPUT_RECORDS":5
+          org.apache.hadoop.mapreduce.lib.output.FileOutputFormatCounter: {
+            BYTES_WRITTEN: 0
           },
-          "org.apache.hadoop.mapreduce.FileSystemCounter":{
-            "FILE_WRITE_OPS":0,
-            "FILE_READ_OPS":0,
-            "FILE_LARGE_READ_OPS":0,
-            "FILE_BYTES_READ":0,
-            "HDFS_BYTES_READ":223,
-            "FILE_BYTES_WRITTEN":386286,
-            "HDFS_LARGE_READ_OPS":0,
-            "HDFS_WRITE_OPS":2,
-            "HDFS_READ_OPS":3,
-            "HDFS_BYTES_WRITTEN":72
+          org.apache.hadoop.mapreduce.lib.input.FileInputFormatCounter: {
+            BYTES_READ: 0
           },
-          "org.apache.sqoop.submission.counter.SqoopCounters":{
-            "ROWS_READ":5
+          org.apache.hadoop.mapreduce.TaskCounter: {
+            MAP_INPUT_RECORDS: 0,
+            MERGED_MAP_OUTPUTS: 0,
+            PHYSICAL_MEMORY_BYTES: 4065599488,
+            SPILLED_RECORDS: 0,
+            COMMITTED_HEAP_BYTES: 3439853568,
+            CPU_MILLISECONDS: 236900,
+            FAILED_SHUFFLE: 0,
+            VIRTUAL_MEMORY_BYTES: 15231422464,
+            SPLIT_RAW_BYTES: 1187,
+            MAP_OUTPUT_RECORDS: 1000000,
+            GC_TIME_MILLIS: 7282
+          },
+          org.apache.hadoop.mapreduce.FileSystemCounter: {
+            FILE_WRITE_OPS: 0,
+            FILE_READ_OPS: 0,
+            FILE_LARGE_READ_OPS: 0,
+            FILE_BYTES_READ: 0,
+            HDFS_BYTES_READ: 1187,
+            FILE_BYTES_WRITTEN: 1191230,
+            HDFS_LARGE_READ_OPS: 0,
+            HDFS_WRITE_OPS: 10,
+            HDFS_READ_OPS: 10,
+            HDFS_BYTES_WRITTEN: 276389736
+          },
+          org.apache.sqoop.submission.counter.SqoopCounters: {
+            ROWS_READ: 1000000
           }
         }
       },
       {
-        "progress":-1.0,
-        "last-update-date":1375913554412,
-        "external-id":"job_201307221513_0008",
-        "status":"SUCCEEDED",
-        "job":1,
-        "creation-date":1375913501078,
-        "external-link":"http:\/\/localhost:50030\/jobdetails.jsp?jobid=job_201307221513_0008",
-        "counters":{
-          "org.apache.hadoop.mapreduce.JobCounter":{
-            "SLOTS_MILLIS_MAPS":54905,
-            "FALLOW_SLOTS_MILLIS_REDUCES":0,
-            "FALLOW_SLOTS_MILLIS_MAPS":0,
-            "TOTAL_LAUNCHED_MAPS":2,
-            "SLOTS_MILLIS_REDUCES":0
-          },
-          "org.apache.hadoop.mapreduce.TaskCounter":{
-            "MAP_INPUT_RECORDS":0,
-            "PHYSICAL_MEMORY_BYTES":218865664,
-            "SPILLED_RECORDS":0,
-            "COMMITTED_HEAP_BYTES":112918528,
-            "CPU_MILLISECONDS":2550,
-            "VIRTUAL_MEMORY_BYTES":1955266560,
-            "SPLIT_RAW_BYTES":223,
-            "MAP_OUTPUT_RECORDS":5
-          },
-          "org.apache.hadoop.mapreduce.FileSystemCounter":{
-            "FILE_WRITE_OPS":0,
-            "FILE_READ_OPS":0,
-            "FILE_LARGE_READ_OPS":0,
-            "FILE_BYTES_READ":0,
-            "HDFS_BYTES_READ":223,
-            "FILE_BYTES_WRITTEN":387362,
-            "HDFS_LARGE_READ_OPS":0,
-            "HDFS_WRITE_OPS":2,
-            "HDFS_READ_OPS":2,
-            "HDFS_BYTES_WRITTEN":72
-          },
-          "org.apache.sqoop.submission.counter.SqoopCounters":{
-            "ROWS_READ":5
-          }
-        }
+        progress: -1,
+        last-update-date: 1415312390570,
+        status: "FAILURE_ON_SUBMIT",
+        exception: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
+        job: 1,
+        creation-date: 1415312390570,
+        exception-trace: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner...."
       }
     ]
   }
-
-/v1/submission/action/[jid] - [GET]- Get The Latest Submission Of A Given Job
----------------------------------------------------------------------------------
-
-Retrieve the latest submission of a given job, such as the status, counters and links for those submissions.
-
-This function is similar to ``/v1/submission/history/[jid]`` except that it always return one submission object.
-
-* Method: ``GET``
-* Format: ``JSON``
-* Request Content: ``None``
-* Fields of Response:
-
-The same as ``/v1/submission/history/[jid]``
-
-* Response Example:
-
-The same as ``/v1/submission/history/[jid]``
-
-/v1/submission/action/[jid] - [POST]- Submit Job
----------------------------------------------------------------------------------
-
-Submit a job with id ``[jid]`` to make it run.
-
-* Method: ``POST``
-* Format: ``JSON``
-* Request Content: ``None``
-* Response Content: ``None``
-
-/v1/submission/action/[jid] - [DELETE]- Stop Job
----------------------------------------------------------------------------------
-
-Stop a job with id ``[jid]``.
-
-* Method: ``DELETE``
-* Format: ``JSON``
-* Request Content: ``None``
-* Response Content: ``None``
