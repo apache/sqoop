@@ -122,6 +122,25 @@ public class OraOopManagerFactory extends ManagerFactory {
                     result = oraOopConnManager; // <- OraOop accepts
                                                 // responsibility for this Sqoop
                                                 // job!
+                  } else {
+                    OraOopConstants.OraOopOracleDataChunkMethod method =
+                        OraOopUtilities.getOraOopOracleDataChunkMethod(
+                            sqoopOptions.getConf());
+                    if (method == OraOopConstants.
+                                      OraOopOracleDataChunkMethod.PARTITION) {
+                      result = oraOopConnManager;
+                    } else {
+                      LOG.info(String.format("%s will not process this Sqoop"
+                         + " connection, as the Oracle table %s is an"
+                         + " index-organized table. If the table is"
+                         + " partitioned, set "
+                         + OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD
+                         + " to "
+                         + OraOopConstants.OraOopOracleDataChunkMethod.PARTITION
+                         + ".",
+                         OraOopConstants.ORAOOP_PRODUCT_NAME,
+                         oraOopConnManager.getOracleTableContext().toString()));
+                    }
                   }
                 }
               } catch (SQLException ex) {
@@ -685,11 +704,6 @@ public class OraOopManagerFactory extends ManagerFactory {
       result =
           OraOopOracleQueries.isTableAnIndexOrganizedTable(connection,
               tableContext);
-      if (result) {
-        LOG.info(String.format("%s will not process this Sqoop connection, "
-            + "as the Oracle table %s is an index-organized table.",
-            OraOopConstants.ORAOOP_PRODUCT_NAME, tableContext.toString()));
-      }
       return result;
     } catch (SQLException ex) {
       LOG.warn(String.format(

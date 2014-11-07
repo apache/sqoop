@@ -51,9 +51,10 @@ AS
          (
             $COLUMN_LIST
          )
+         $TABLE_ORGANIZATION_CLAUSE
+         $PARTITION_CLAUSE
          NOLOGGING
-         PARALLEL
-         $PARTITION_CLAUSE';
+         PARALLEL';
    END;
 
    PROCEDURE prc_insert_data (i_degree NUMBER)

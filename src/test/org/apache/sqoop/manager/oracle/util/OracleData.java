@@ -47,10 +47,10 @@ public final class OracleData {
     }
   }
 
-  private static String getColumnList(List<OracleDataDefinition> columnList) {
+  private static String getColumnList(OracleTableDefinition tableDefinition) {
     StringBuilder result = new StringBuilder();
     String delim = "";
-    for (OracleDataDefinition column : columnList) {
+    for (OracleDataDefinition column : tableDefinition.getColumnList()) {
       result.append(delim).append(column.getColumnName()).append(" ").append(
           column.getDataType());
       delim = ",\n";
@@ -74,8 +74,7 @@ public final class OracleData {
         IOUtils.toString(classLoader.getResource(
             "oraoop/pkg_tst_product_gen.psk").openStream());
     pkgSql =
-        pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition
-            .getColumnList()));
+        pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition));
     pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
     PreparedStatement stmt = conn.prepareStatement(pkgSql);
     stmt.execute();
@@ -86,13 +85,22 @@ public final class OracleData {
     String pkgSql =
         IOUtils.toString(classLoader.getResource(
             "oraoop/pkg_tst_product_gen.pbk").openStream());
+    String columnList = getColumnList(tableDefinition);
+    if (tableDefinition.isIndexOrganizedTable()) {
+      columnList += "\n," + getKeyString(KeyType.PRIMARY, tableDefinition);
+    }
     pkgSql =
-        pkgSql.replaceAll("\\$COLUMN_LIST", getColumnList(tableDefinition
-            .getColumnList()));
+        pkgSql.replaceAll("\\$COLUMN_LIST", columnList);
     pkgSql = pkgSql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
     pkgSql =
         pkgSql.replaceAll("\\$DATA_EXPRESSION_LIST",
             getDataExpression(tableDefinition.getColumnList()));
+
+    pkgSql =
+        pkgSql.replaceAll("\\$TABLE_ORGANIZATION_CLAUSE",
+            tableDefinition.isIndexOrganizedTable()
+                ? "ORGANIZATION INDEX OVERFLOW NOLOGGING" : "");
+
     pkgSql =
         pkgSql.replaceAll("\\$PARTITION_CLAUSE", tableDefinition
             .getPartitionClause());
@@ -100,8 +108,9 @@ public final class OracleData {
     stmt.execute();
   }
 
-  private static void createKey(Connection conn, KeyType keyType,
-      OracleTableDefinition tableDefinition) throws Exception {
+  private static String getKeyColumns(KeyType keyType,
+      OracleTableDefinition tableDefinition) {
+    String result = null;
     List<String> columns = null;
     switch (keyType) {
       case PRIMARY:
@@ -120,16 +129,40 @@ public final class OracleData {
         keyColumnList.append(delim).append(column);
         delim = ",";
       }
-      String keySql =
-          "alter table \"$TABLE_NAME\" add constraint \"$TABLE_NAME_"
+      result = keyColumnList.toString();
+    }
+    return result;
+  }
+
+  private static String getKeyString(KeyType keyType,
+      OracleTableDefinition tableDefinition) {
+    String keySql = null;
+    String keyColumnList = getKeyColumns(keyType, tableDefinition);
+    if (keyColumnList!=null) {
+      keySql = "constraint \"$TABLE_NAME_"
               + ((keyType == KeyType.PRIMARY) ? "PK\" primary key"
-                  : "UK\" unique") + "($PK_COLUMN_LIST) "
-              + "using index (create unique index \"$TABLE_NAME_"
-              + ((keyType == KeyType.PRIMARY) ? "PK\"" : "UK\"")
-              + " on \"$TABLE_NAME\"($PK_COLUMN_LIST) " + "parallel nologging)";
+                  : "UK\" unique") + "($PK_COLUMN_LIST) ";
+
+      keySql = keySql.replaceAll("\\$PK_COLUMN_LIST", keyColumnList);
       keySql =
           keySql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
-      keySql = keySql.replaceAll("\\$PK_COLUMN_LIST", keyColumnList.toString());
+    }
+    return keySql;
+  }
+
+  private static void createKey(Connection conn, KeyType keyType,
+      OracleTableDefinition tableDefinition) throws Exception {
+    String keySql = getKeyString(keyType, tableDefinition);
+    String keyColumnList = getKeyColumns(keyType, tableDefinition);
+    if (keySql!=null) {
+      keySql = "alter table \"$TABLE_NAME\" add " + keySql
+             + " using index (create unique index \"$TABLE_NAME_"
+             + ((keyType == KeyType.PRIMARY) ? "PK\"" : "UK\"")
+             + " on \"$TABLE_NAME\"($PK_COLUMN_LIST) " + "parallel nologging)";
+      keySql = keySql.replaceAll("\\$PK_COLUMN_LIST", keyColumnList);
+      keySql =
+          keySql.replaceAll("\\$TABLE_NAME", tableDefinition.getTableName());
+
       PreparedStatement stmt = conn.prepareStatement(keySql);
       stmt.execute();
     }
@@ -178,7 +211,9 @@ public final class OracleData {
     procStmt.setInt(2, rowsPerSlave);
     procStmt.execute();
 
-    createKey(conn, KeyType.PRIMARY, tableDefinition);
+    if (!tableDefinition.isIndexOrganizedTable()) {
+      createKey(conn, KeyType.PRIMARY, tableDefinition);
+    }
     createKey(conn, KeyType.UNIQUE, tableDefinition);
   }
 

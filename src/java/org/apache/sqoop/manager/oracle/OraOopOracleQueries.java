@@ -288,11 +288,21 @@ public final class OraOopOracleQueries {
               + ") ";
     }
 
-    sql +=
-        "  ) pl, " + "  dba_segments s "
-            + "WHERE s.owner       =pl.table_owner "
-            + "AND s.segment_name  =pl.table_name "
-            + "AND s.partition_name=pl.partition_name ";
+    sql += "  ) pl, dba_tables t, dba_segments s "
+        + "WHERE t.owner=pl.table_owner "
+        + "AND t.table_name=pl.table_name "
+        + "AND ( "
+        + "     (t.iot_type='IOT' AND (s.owner,s.segment_name)= "
+        + "                          (SELECT c.index_owner,c.index_name "
+        + "                             FROM dba_constraints c "
+        + "                            WHERE c.owner=pl.table_owner "
+        + "                              AND c.table_name=pl.table_name "
+        + "                              AND c.constraint_type='P')) "
+        + "     OR (t.iot_type IS NULL "
+        + "         AND s.owner=t.owner "
+        + "         AND s.segment_name=t.table_name) "
+        + "    ) "
+        + "AND s.partition_name=pl.partition_name";
 
     PreparedStatement statement = connection.prepareStatement(sql);
     OraOopOracleQueries.setStringAtName(statement, "table_owner", table

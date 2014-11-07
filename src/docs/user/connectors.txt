@@ -522,7 +522,8 @@ with the following attributes:
 is a table.
 +
 NOTE: Data Connector for Oracle and Hadoop does not process index-organized
-tables.
+tables unless the table is partitioned and +oraoop.chunk.method+ is set
+to +PARTITION+
 
 - There are at least 2 mappers — Jobs where the Sqoop command-line does not
 include: +--num-mappers 1+
@@ -613,6 +614,7 @@ select_catalog_role role or all of the following object privileges:
 - +select on dba_objects+
 - +select on dba_extents+
 - +select on dba_segments+ — Required for Sqoop imports only
+- +select on dba_constraints+ — Required for Sqoop imports only
 - +select on v_$database+ — Required for Sqoop imports only
 - +select on v_$parameter+ — Required for Sqoop imports only
 

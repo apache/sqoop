@@ -238,4 +238,23 @@ public class ImportTest extends OraOopTestCase {
     }
   }
 
+  @Test
+  public void testProductPartIotImport() throws Exception {
+    setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_part");
+    createTable("table_tst_product_part_iot.xml");
+
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD,
+        OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
+
+    try {
+      int retCode = runImport("tst_product_part_iot", sqoopConf, false);
+      Assert.assertEquals("Return code should be 0", 0, retCode);
+
+    } finally {
+      cleanupFolders();
+      closeTestEnvConnection();
+    }
+  }
+
 }

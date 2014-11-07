@@ -40,6 +40,7 @@ public class OracleTableDefinition {
   private List<String> primaryKeyColumns = new ArrayList<String>();
   private List<String> uniqueKeyColumns = new ArrayList<String>();
   private String partitionClause;
+  private boolean indexOrganizedTable = false;
 
   public List<String> getUniqueKeyColumns() {
     return uniqueKeyColumns;
@@ -79,6 +80,14 @@ public class OracleTableDefinition {
 
   public void setPartitionClause(String newPartitionClause) {
     this.partitionClause = newPartitionClause;
+  }
+
+  public boolean isIndexOrganizedTable() {
+    return indexOrganizedTable;
+  }
+
+  public void setIndexOrganizedTable(boolean newIndexOrganizedTable) {
+    this.indexOrganizedTable = newIndexOrganizedTable;
   }
 
   public OracleTableDefinition() {
@@ -141,6 +150,14 @@ public class OracleTableDefinition {
       if (partitionClauseNode != null) {
         this.partitionClause =
             partitionClauseNode.getChildNodes().item(0).getNodeValue();
+      }
+
+      Node indexOrganizedTableNode =
+          table.getElementsByTagName("indexOrganizedTable").item(0);
+      if (indexOrganizedTableNode != null) {
+        String indexOrganizedTableStr =
+            indexOrganizedTableNode.getChildNodes().item(0).getNodeValue();
+        this.indexOrganizedTable = Boolean.parseBoolean(indexOrganizedTableStr);
       }
     } catch (Exception e) {
       throw new RuntimeException("Could not load table configuration", e);
