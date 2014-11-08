@@ -1,3 +1,229 @@
+Release 1.99.4
+
+  NEW FEATURE
+
+    SQOOP-777   Sqoop2: Implement intermediate data format representation policy
+
+    SQOOP-1232  Sqoop2: Provide tooling infrastructure for Sqoop2
+
+    SQOOP-1367  Sqoop2: From/To
+
+  IMPROVEMENT
+
+    SQOOP-773   Sqoop2: Batch execution support for client commands
+
+    SQOOP-1144  Sqoop2: Add fixVersion to PreCommit branch detection
+
+    SQOOP-1189  Sqoop2: Ensure that clone methods will correctly copy over all values from all parents
+
+    SQOOP-1196  Sqoop2: Add support for arbitrary compression codecs
+
+    SQOOP-1211  Sqoop2: Derby repo: Sync maximal length of versions
+
+    SQOOP-1225  Sqoop 2 documentation for connector development
+
+    SQOOP-1290  Sqoop2: Kill Tomcat in case that Sqoop Server fails to load
+
+    SQOOP-1509  Sqoop2: Sqoop2 Rest API refactoring
+
+    SQOOP-1547  Sqoop2: Connector API stabilization
+
+    SQOOP-1557  Sqoop2: SQ_CONFIGURABLE ( for entities who own configs)
+
+    SQOOP-1566  Sqoop2: Fix the upgrade logic for SQOOP-1498
+
+    SQOOP-1585  Sqoop2: Prefix mapreduce classes with MR ( no functionality change)
+
+    SQOOP-1586  Sqoop2: Rename leftovers from the SQOOP2 merge of 1367
+
+    SQOOP-1597  Sqoop2: Refactor DerbySchemaQuery into one for create/ update/ and then CRUD operarations
+
+    SQOOP-1620  Sqoop2: FileSystem should be configurable in HDFS connector
+
+  BUG
+
+    SQOOP-1208  Sqoop2: job ID column is too small
+
+    SQOOP-1218  Sqoop2: Upgrade Hadoop 2 to GA release 2.2.0
+
+    SQOOP-1233  Sqoop2: Remove unnecessary explicit call to MessageFormat
+
+    SQOOP-1247  Sqoop2: Distribution module is missing dependency on Tomcat module
+
+    SQOOP-1258  Sqoop2: FrameworkMetadataUpgrade can't handle new inputs
+
+    SQOOP-1263  Sqoop2: Using CATALINA_HOME as CATALINA_BASE
+
+    SQOOP-1264  Sqoop2: Remove unnecessary cd command calls from sqoop.sh
+
+    SQOOP-1285  Sqoop2: ToolRunner is not exiting with proper exit value on error
+
+    SQOOP-1288  Add mengwei to commiter list in our root pom.xml file
+
+    SQOOP-1291  Sqoop2: Binary package do not have top level commands executable
+
+    SQOOP-1296  Sqoop2: Revert SQOOP-1233
+
+    SQOOP-1308  Sqoop2: Database export with the Generic-JDBC-Connector loses rows
+
+    SQOOP-1320  Sqoop2: Log entire SQLExceptions chain in GenericJdbcExecutor
+
+    SQOOP-1331  Sqoop2: Add method "findConnectors" to repository API
+
+    SQOOP-1338  Sqoop2: Exclude intellij idea project files from git
+
+    SQOOP-1339  Synchronize .gitignore files
+
+    SQOOP-1354  Sqoop2: wrong maven-site-plugin version
+
+    SQOOP-1383  Sqoop2: MSSQL Export not working
+
+    SQOOP-1424  Sqoop2: Simplify SqoopCommand in shell package
+
+    SQOOP-1425  Sqoop2: Improve ClassUtils to enable use of primitive types and subclasses
+
+    SQOOP-1426  Sqoop2: ThrowableBean should correct reconstruct SqoopException
+
+    SQOOP-1436  Sqoop2: Support custom form name via the Form Annotation
+
+    SQOOP-1537  Sqoop2: File TestJobManager is missing proper license header
+
+    SQOOP-1578  Sqoop2: getJars should take from and to configurations
+
+    SQOOP-1581  Sqoop2: LoaderContext has the wrong Schema
+
+    SQOOP-1594  Sqoop2: DestroyerContext has the wrong Schema
+
+    SQOOP-1605  Sqoop2: Misc From/to cleanups
+
+    SQOOP-1619  Sqoop2: Enforce Unique constraint for name on configurable table
+
+    SQOOP-1623  Sqoop2: Derive the correct Client version for sqoop
+
+    SQOOP-1625  Repository upgrade issue
+
+    SQOOP-1629  Sqoop2: Add unique constraint on the Config table for name and type
+
+    SQOOP-1636  Sqoop2: Add unique constraint to the SQI_INPUT name per type per config
+
+    SQOOP-1639  Sqoop2: CLOB data type wrong type
+
+    SQOOP-1641  DOC: Sqoop 5 minute demo.rst update to reflect latest in code
+
+    SQOOP-1655  SQOOP2 DOC: Document getSchema() and its use in the connector dev guide
+
+    SQOOP-1660  DOC: Connector SDK docs + validation to be updated
+
+    SQOOP-1661  Sqoop2: Intermediate data format text null handling
+
+    SQOOP-1662  Sqoop2: allowNullValueInPartitionColumn should be partitionColumnNull
+
+    SQOOP-1664  Sqoop2: Remove the unused SqoopFileOutputFormat class
+
+    SQOOP-1665  Sqoop2: Misc Cleanup / rename lingering connection to link
+
+    SQOOP-1668  Sqoop2: Update existing job meets NPE ( regression from SQOOP 1510)
+
+    SQOOP-1669  Sqoop2: JDBC connector does not understand iso8610 representation using " " as separator
+
+    SQOOP-1671  Fix incorrect merge from SQOOP-1645
+
+    SQOOP-1673  DOC: Update Upgrade.rst to reflect the latest in the code
+
+    SQOOP-1674  DOC: index.rst updates for Sqoop
+
+    SQOOP-1675  Sqoop2: Update Upgrade.rst to to address Rb comments
+
+    SQOOP-1676  Sqoop2: clientAPI.rst changes to reflect latest code
+
+    SQOOP-1677  DOC: CommandLineClient.rst update to reflect latest in code
+
+    SQOOP-1679  Sqoop2: Fix inconsistent naming in shell for entity driver in sqoop2
+
+  TASK
+
+    SQOOP-1219  Sqoop2: Bump up Tomcat version to 6.0.37
+
+    SQOOP-1220  Sqoop2: Improve default catalina.properties file to work out of the box on both Hadoop 1 and 2
+
+    SQOOP-1234  Sqoop2: Clean up comments in MSubmission class
+
+    SQOOP-1235  Sqoop2: Repository should be immutable by default
+
+    SQOOP-1236  Sqoop2: Classpath generated by Submission engine should contain only unique elements
+
+    SQOOP-1266  Sqoop2: Introduce top level commands
+
+  SUB-TASK
+
+    SQOOP-927: Sqoop2: Integration: Mapreduce specific tests should be running on MiniCluster
+
+    SQOOP-1254: Sqoop2: Tool: Upgrade tool
+
+    SQOOP-1255: Sqoop2: Tool: Dump repository content to a repository independent format
+
+    SQOOP-1262: Sqoop2: Tool: Create user guide entry for the Tooling infrastructure
+
+    SQOOP-1376: Sqoop2: From/To: Refactor connector interface
+
+    SQOOP-1377: Sqoop2: From/To: Improve client/server communication
+
+    SQOOP-1379: Sqoop2: From/To: Disable tests
+
+    SQOOP-1380: Sqoop2: From/To: Refactor models
+
+    SQOOP-1381  Sqoop2: From/To: Refactor submission/execution engine
+
+    SQOOP-1444  Sqoop2: Validations: Remove all references to the original Validation infastructure
+
+    SQOOP-1469  Sqoop2: Validations: Rename constants in Status class
+
+    SQOOP-1499  Sqoop2: Refactor MJob to hold fromConfig, ToConfig and DriverConfig ( mandatory to create a job)
+
+    SQOOP-1500  Sqoop2: Rename Forms to Config, Create FromConfig and ToConfig
+
+    SQOOP-1501  Sqoop2: Refactor MConnector
+
+    SQOOP-1503  Sqoop2: Refactor MFramework (rename to MDriver) and add MDriverConfig
+
+    SQOOP-1504  Sqoop2: Refactor MConnection (rename to MLink)
+
+    SQOOP-1505  Sqoop2: Rename the repository schema objects to adhere to the model objects
+
+    SQOOP-1510  Sqoop2: Refactor JobRequestHandler for submit/abort job and SubmissionHandler for get operation only
+
+    SQOOP-1513  Sqoop2: Refactor LinkRequestHandler
+
+    SQOOP-1515  Sqoop2: VersionRequestHandler - fixes
+
+    SQOOP-1518  Sqoop2: Update the Rest API documentation
+
+    SQOOP-1542  Sqoop2: From/To: MConnector should handle null forms
+
+    SQOOP-1550  Sqoop2: Remove the indirection in MDriverConfig, let it extend the MConfig instead of has-a MConfig
+
+    SQOOP-1551  Sqoop2: Repository Upgrader api - Extensibility
+
+    SQOOP-1554  Sqoop2: Add NullConfigurationClass/ EmptyConfigurationClass to support use cases that do not have a particular type of config
+
+    SQOOP-1575  Sqoop2: Validations: Migrate HDFS connector to new validators
+
+    SQOOP-1576  Sqoop2: Validations: Migrate Repository upgrade to the new validator infrastructure
+
+    SQOOP-1628  Sqoop2: Ensure Connector/Driver/Version only support GET method
+
+    SQOOP-1637  Sqoop2: Validations: Update documentation with the new Validator infrastructure
+
+    SQOOP-1645  Sqoop2: Update label text and (optional) required info for the generic jdbc connector config properties
+
+    SQOOP-1653  Sqoop2: Link and connector handler minor fixes
+
+    SQOOP-1686  Sqoop2: Fix the JSON names for config and config values
+
+    SQOOP-1687  Sqoop2: Single resource in JSON should not be a list
+
+    SQOOP-1688  Sqoop2: Fix the Validation Response JSON for configs
+
 Release 1.99.3
 
   SUB-TASK
@@ -86,13 +312,13 @@ Release 1.99.3
 
     SQOOP-1039: Sqoop2: show version with no args should show something
 
-    SQOOP-1040: Sqoop2: NPE in TableDisplayer 
+    SQOOP-1040: Sqoop2: NPE in TableDisplayer
 
     SQOOP-1041: Sqoop2: Framework upgrade in JdbcRepository returns the outdated value
 
     SQOOP-1046: Sqoop2: Importing single row using decimal splitter will not import anything
 
-    SQOOP-1048: Sqoop2: NPE when importing NULL value 
+    SQOOP-1048: Sqoop2: NPE when importing NULL value
 
     SQOOP-1049: Sqoop2: Record not imported if partition column value is NULL
 
@@ -198,7 +424,7 @@ Release 1.99.3
 
     SQOOP-1075: Sqoop2: Persist Framework metadata version in repository
 
-    SQOOP-1111: Sqoop2: Implement version detection and structure updates into Derby repository 
+    SQOOP-1111: Sqoop2: Implement version detection and structure updates into Derby repository
 
     SQOOP-1141: Sqoop2: Provide ability to enable/disable connections and jobs
 
@@ -226,7 +452,7 @@ Release 1.99.3
 
     SQOOP-672: Unify logger usage across entire code base
 
-    SQOOP-744: Sqoop2: Supply log4j configuration for generated mapreduce job 
+    SQOOP-744: Sqoop2: Supply log4j configuration for generated mapreduce job
 
     SQOOP-745: Sqoop2: Change &quot;submit&quot; client command to &quot;submission&quot;
 
@@ -578,7 +804,7 @@ Release 1.99.1
 
     SQOOP-525: Enable dist package build by default
 
-    SQOOP-534: Add ability to find out if MPersistableEntity do already have persistent ID 
+    SQOOP-534: Add ability to find out if MPersistableEntity do already have persistent ID
 
     SQOOP-545: Add IntelliJ IDEA files to RAT exclude
 
@@ -722,5 +948,5 @@ Release 1.99.1
 
     SQOOP-733: Remove unnecessary version repetition in Sqoop 2 pom files
 
-    SQOOP-747: Sqoop 1.99.1 release preparation 
+    SQOOP-747: Sqoop 1.99.1 release preparation
 
