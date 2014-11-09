@@ -159,7 +159,11 @@ public class TestLoader extends TestHdfsBase {
             break;
 
           case DEFAULT:
-            Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Deflate") != -1);
+            if(org.apache.hadoop.util.VersionInfo.getVersion().matches("\\b1\\.\\d\\.\\d")) {
+              Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Default") != -1);
+            } else {
+              Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Deflate") != -1);
+            }
             break;
 
           case NONE:
