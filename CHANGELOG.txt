@@ -1,3 +1,4 @@
+
 Release 1.99.4
 
   NEW FEATURE
@@ -142,6 +143,10 @@ Release 1.99.4
 
     SQOOP-1694  Sqoop2: Fix broken Hadoop100 build
 
+    SQOOP-1696  Sqoop2: TestMapReduce.testOutputFormat is failing on Hadoop 1 profile
+
+    SQOOP-1697  Sqoop2: HDFS Connector TestLoader.verifyOutput have invalid default value for Hadoop 1
+
   TASK
 
     SQOOP-1219  Sqoop2: Bump up Tomcat version to 6.0.37
@@ -158,21 +163,21 @@ Release 1.99.4
 
   SUB-TASK
 
-    SQOOP-927: Sqoop2: Integration: Mapreduce specific tests should be running on MiniCluster
+    SQOOP-927   Sqoop2: Integration: Mapreduce specific tests should be running on MiniCluster
 
-    SQOOP-1254: Sqoop2: Tool: Upgrade tool
+    SQOOP-1254  Sqoop2: Tool: Upgrade tool
 
-    SQOOP-1255: Sqoop2: Tool: Dump repository content to a repository independent format
+    SQOOP-1255  Sqoop2: Tool: Dump repository content to a repository independent format
 
-    SQOOP-1262: Sqoop2: Tool: Create user guide entry for the Tooling infrastructure
+    SQOOP-1262  Sqoop2: Tool: Create user guide entry for the Tooling infrastructure
 
-    SQOOP-1376: Sqoop2: From/To: Refactor connector interface
+    SQOOP-1376  Sqoop2: From/To: Refactor connector interface
 
-    SQOOP-1377: Sqoop2: From/To: Improve client/server communication
+    SQOOP-1377  Sqoop2: From/To: Improve client/server communication
 
-    SQOOP-1379: Sqoop2: From/To: Disable tests
+    SQOOP-1379  Sqoop2: From/To: Disable tests
 
-    SQOOP-1380: Sqoop2: From/To: Refactor models
+    SQOOP-1380  Sqoop2: From/To: Refactor models
 
     SQOOP-1381  Sqoop2: From/To: Refactor submission/execution engine
 
@@ -194,9 +199,15 @@ Release 1.99.4
 
     SQOOP-1510  Sqoop2: Refactor JobRequestHandler for submit/abort job and SubmissionHandler for get operation only
 
+    SQOOP-1512  Refactor ConnectionRequestHandler and add ConfigurableRequestHandler
+
     SQOOP-1513  Sqoop2: Refactor LinkRequestHandler
 
+    SQOOP-1514  Refactor FrameworkRequestHandler to DriverRequestHandler
+
     SQOOP-1515  Sqoop2: VersionRequestHandler - fixes
+
+    SQOOP-1517  Test CommandLineClient  to accomodate the JSON API refactoring
 
     SQOOP-1518  Sqoop2: Update the Rest API documentation
 
