@@ -140,6 +140,8 @@ Release 1.99.4
 
     SQOOP-1679  Sqoop2: Fix inconsistent naming in shell for entity driver in sqoop2
 
+    SQOOP-1694  Sqoop2: Fix broken Hadoop100 build
+
   TASK
 
     SQOOP-1219  Sqoop2: Bump up Tomcat version to 6.0.37
