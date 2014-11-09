@@ -23,10 +23,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.SqoopSplit;
+import org.apache.sqoop.utils.ClassUtils;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class JobUtils {
 
@@ -44,7 +50,40 @@ public class JobUtils {
     job.setOutputKeyClass(SqoopWritable.class);
     job.setOutputValueClass(NullWritable.class);
 
-    return job.waitForCompletion(true);
+    boolean ret = job.waitForCompletion(true);
+
+    // Hadoop 1.0 (and 0.20) have nasty bug when job committer is not called in LocalJobRuner
+    if (isHadoop1()) {
+      callOutputCommitter(job, output);
+    }
+
+    return ret;
+  }
+
+  /**
+   * Call output format on given job manually.
+   */
+  private static void callOutputCommitter(Job job, Class<? extends OutputFormat<SqoopWritable, NullWritable>> outputFormat) throws IOException, InterruptedException {
+    OutputCommitter committer = ((OutputFormat)ClassUtils.instantiate(outputFormat)).getOutputCommitter(null);
+
+    JobContext jobContext = mock(JobContext.class);
+    when(jobContext.getConfiguration()).thenReturn(job.getConfiguration());
+
+    committer.commitJob(jobContext);
+  }
+
+  /**
+   * Detect Hadoop 1.0 installation
+   *
+   * @return True if and only if this is Hadoop 1 and below
+   */
+  public static boolean isHadoop1() {
+    String version = org.apache.hadoop.util.VersionInfo.getVersion();
+    if (version.matches("\\b0\\.20\\..+\\b")
+      || version.matches("\\b1\\.\\d\\.\\d")) {
+      return true;
+    }
+    return false;
   }
 
   private JobUtils() {
