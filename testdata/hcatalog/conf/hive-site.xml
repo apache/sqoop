@@ -1,5 +1,9 @@
 <configuration>
   <property>
+    <name>kite.hive.allow-local-metastore</name>
+    <value>true</value>
+  </property>
+  <property>
     <name>hive.metastore.local</name>
     <value>true</value>
   </property>
