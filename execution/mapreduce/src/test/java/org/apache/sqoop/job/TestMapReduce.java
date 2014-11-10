@@ -37,6 +37,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.job.etl.Extractor;
@@ -46,17 +47,13 @@ import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
-import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.FixedPoint;
-import org.apache.sqoop.schema.type.FloatingPoint;
-import org.apache.sqoop.schema.type.Text;
+import org.apache.sqoop.job.util.MRJobTestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -67,11 +64,10 @@ public class TestMapReduce {
   private static final int NUMBER_OF_ROWS_PER_PARTITION = 10;
 
   @Test
-  public void testInputFormat() throws Exception {
+  public void testSqoopInputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
-    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
-      CSVIntermediateDataFormat.class.getName());
+    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
     Job job = new Job(conf);
 
     SqoopInputFormat inputformat = new SqoopInputFormat();
@@ -79,51 +75,47 @@ public class TestMapReduce {
     assertEquals(9, splits.size());
 
     for (int id = START_PARTITION; id <= NUMBER_OF_PARTITIONS; id++) {
-      SqoopSplit split = (SqoopSplit)splits.get(id-1);
-      DummyPartition partition = (DummyPartition)split.getPartition();
+      SqoopSplit split = (SqoopSplit) splits.get(id - 1);
+      DummyPartition partition = (DummyPartition) split.getPartition();
       assertEquals(id, partition.getId());
     }
   }
 
   @Test
-  public void testMapper() throws Exception {
+  public void testSqoopMapper() throws Exception {
     Configuration conf = new Configuration();
     conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(MRJobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
-    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
-      CSVIntermediateDataFormat.class.getName());
-    Schema schema = new Schema("Test");
-    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
-      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
-
+    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
     Job job = new Job(conf);
-    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, schema);
-    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, schema);
-    boolean success = JobUtils.runJob(job.getConfiguration(),
-        SqoopInputFormat.class, SqoopMapper.class, DummyOutputFormat.class);
+    // from and to have the same schema in this test case
+    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, MRJobTestUtil.getTestSchema());
+    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, MRJobTestUtil.getTestSchema());
+    boolean success = MRJobTestUtil.runJob(job.getConfiguration(),
+                                      SqoopInputFormat.class,
+                                      SqoopMapper.class,
+                                      DummyOutputFormat.class);
     Assert.assertEquals("Job failed!", true, success);
   }
 
   @Test
-  public void testOutputFormat() throws Exception {
+  public void testNullOutputFormat() throws Exception {
     Configuration conf = new Configuration();
     conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(MRJobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(MRJobConstants.JOB_ETL_LOADER, DummyLoader.class.getName());
     conf.set(MRJobConstants.JOB_ETL_FROM_DESTROYER, DummyFromDestroyer.class.getName());
     conf.set(MRJobConstants.JOB_ETL_TO_DESTROYER, DummyToDestroyer.class.getName());
-    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
-      CSVIntermediateDataFormat.class.getName());
-    Schema schema = new Schema("Test");
-    schema.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
-      .addColumn(new Text("3"));
+    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
 
     Job job = new Job(conf);
-    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, schema);
-    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, schema);
-    boolean success = JobUtils.runJob(job.getConfiguration(),
-        SqoopInputFormat.class, SqoopMapper.class,
-        SqoopNullOutputFormat.class);
+    // from and to have the same schema in this test case
+    MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, MRJobTestUtil.getTestSchema());
+    MRConfigurationUtils.setConnectorSchema(Direction.TO, job, MRJobTestUtil.getTestSchema());
+    boolean success = MRJobTestUtil.runJob(job.getConfiguration(),
+                                     SqoopInputFormat.class,
+                                     SqoopMapper.class,
+                                     SqoopNullOutputFormat.class);
     Assert.assertEquals("Job failed!", true, success);
 
     // Make sure both destroyers get called.
@@ -171,15 +163,17 @@ public class TestMapReduce {
     }
   }
 
-  public static class DummyExtractor extends Extractor<EmptyConfiguration, EmptyConfiguration, DummyPartition> {
+  public static class DummyExtractor extends
+      Extractor<EmptyConfiguration, EmptyConfiguration, DummyPartition> {
     @Override
-    public void extract(ExtractorContext context, EmptyConfiguration oc, EmptyConfiguration oj, DummyPartition partition) {
-      int id = ((DummyPartition)partition).getId();
+    public void extract(ExtractorContext context, EmptyConfiguration oc, EmptyConfiguration oj,
+        DummyPartition partition) {
+      int id = ((DummyPartition) partition).getId();
       for (int row = 0; row < NUMBER_OF_ROWS_PER_PARTITION; row++) {
-        context.getDataWriter().writeArrayRecord(new Object[] {
-            id * NUMBER_OF_ROWS_PER_PARTITION + row,
-            (double) (id * NUMBER_OF_ROWS_PER_PARTITION + row),
-            String.valueOf(id*NUMBER_OF_ROWS_PER_PARTITION+row)});
+        context.getDataWriter().writeArrayRecord(
+            new Object[] { id * NUMBER_OF_ROWS_PER_PARTITION + row,
+                (double) (id * NUMBER_OF_ROWS_PER_PARTITION + row),
+                String.valueOf(id * NUMBER_OF_ROWS_PER_PARTITION + row) });
       }
     }
 
@@ -189,16 +183,14 @@ public class TestMapReduce {
     }
   }
 
-  public static class DummyOutputFormat
-      extends OutputFormat<SqoopWritable, NullWritable> {
+  public static class DummyOutputFormat extends OutputFormat<SqoopWritable, NullWritable> {
     @Override
     public void checkOutputSpecs(JobContext context) {
       // do nothing
     }
 
     @Override
-    public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(
-        TaskAttemptContext context) {
+    public RecordWriter<SqoopWritable, NullWritable> getRecordWriter(TaskAttemptContext context) {
       return new DummyRecordWriter();
     }
 
@@ -207,22 +199,17 @@ public class TestMapReduce {
       return new DummyOutputCommitter();
     }
 
-    public static class DummyRecordWriter
-        extends RecordWriter<SqoopWritable, NullWritable> {
-      private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
-      private Data data = new Data();
+    public static class DummyRecordWriter extends RecordWriter<SqoopWritable, NullWritable> {
+      private int index = START_PARTITION * NUMBER_OF_ROWS_PER_PARTITION;
+      // should I use a dummy IDF for testing?
+      private IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
 
       @Override
       public void write(SqoopWritable key, NullWritable value) {
-
-        data.setContent(new Object[] {
-          index,
-          (double) index,
-          String.valueOf(index)},
-          Data.ARRAY_RECORD);
+        String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
+        dataFormat.setTextData(testData);
         index++;
-
-        assertEquals(data.toString(), key.toString());
+        assertEquals(dataFormat.getTextData().toString(), key.toString());
       }
 
       @Override
@@ -233,16 +220,20 @@ public class TestMapReduce {
 
     public static class DummyOutputCommitter extends OutputCommitter {
       @Override
-      public void setupJob(JobContext jobContext) { }
+      public void setupJob(JobContext jobContext) {
+      }
 
       @Override
-      public void setupTask(TaskAttemptContext taskContext) { }
+      public void setupTask(TaskAttemptContext taskContext) {
+      }
 
       @Override
-      public void commitTask(TaskAttemptContext taskContext) { }
+      public void commitTask(TaskAttemptContext taskContext) {
+      }
 
       @Override
-      public void abortTask(TaskAttemptContext taskContext) { }
+      public void abortTask(TaskAttemptContext taskContext) {
+      }
 
       @Override
       public boolean needsTaskCommit(TaskAttemptContext taskContext) {
@@ -251,39 +242,34 @@ public class TestMapReduce {
     }
   }
 
+  // it is writing to the target.
   public static class DummyLoader extends Loader<EmptyConfiguration, EmptyConfiguration> {
-    private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
-    private Data expected = new Data();
+    private int index = START_PARTITION * NUMBER_OF_ROWS_PER_PARTITION;
+    private IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
 
     @Override
-    public void load(LoaderContext context, EmptyConfiguration oc, EmptyConfiguration oj) throws Exception{
+    public void load(LoaderContext context, EmptyConfiguration oc, EmptyConfiguration oj)
+        throws Exception {
       String data;
       while ((data = context.getDataReader().readTextRecord()) != null) {
-        expected.setContent(new Object[] {
-          index,
-          (double) index,
-          String.valueOf(index)},
-          Data.ARRAY_RECORD);
+        String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
+        dataFormat.setTextData(testData);
         index++;
-        assertEquals(expected.toString(), data);
+        assertEquals(dataFormat.getTextData().toString(), data);
       }
     }
   }
 
   public static class DummyFromDestroyer extends Destroyer<EmptyConfiguration, EmptyConfiguration> {
-
     public static int count = 0;
-
     @Override
     public void destroy(DestroyerContext context, EmptyConfiguration o, EmptyConfiguration o2) {
       count++;
     }
   }
 
-  public static class DummyToDestroyer extends Destroyer<EmptyConfiguration,EmptyConfiguration> {
-
+  public static class DummyToDestroyer extends Destroyer<EmptyConfiguration, EmptyConfiguration> {
     public static int count = 0;
-
     @Override
     public void destroy(DestroyerContext context, EmptyConfiguration o, EmptyConfiguration o2) {
       count++;

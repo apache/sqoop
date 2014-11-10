@@ -41,11 +41,11 @@ public class TestCSVIntermediateDataFormat {
 
   private final String BYTE_FIELD_ENCODING = "ISO-8859-1";
 
-  private IntermediateDataFormat<?> data;
+  private IntermediateDataFormat<?> dataFormat;
 
   @Before
   public void setUp() {
-    data = new CSVIntermediateDataFormat();
+    dataFormat = new CSVIntermediateDataFormat();
   }
 
   private String getByteFieldString(byte[] byteFieldData) {
@@ -61,8 +61,8 @@ public class TestCSVIntermediateDataFormat {
   public void testStringInStringOut() {
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
       + ",'" + String.valueOf(0x0A) + "'";
-    data.setTextData(testData);
-    assertEquals(testData, data.getTextData());
+    dataFormat.setTextData(testData);
+    assertEquals(testData, dataFormat.getTextData());
   }
 
   @Test
@@ -74,10 +74,10 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
-    data.setTextData(null);
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData(null);
 
-    Object[] out = data.getObjectData();
+    Object[] out = dataFormat.getObjectData();
 
     assertNull(out);
   }
@@ -91,10 +91,10 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
-    data.setTextData("");
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("");
 
-    data.getObjectData();
+    dataFormat.getObjectData();
   }
 
   @Test
@@ -111,10 +111,10 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
 
-    data.setSchema(schema);
-    data.setTextData(testData);
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData(testData);
 
-    Object[] out = data.getObjectData();
+    Object[] out = dataFormat.getObjectData();
 
     assertEquals(new Long(10),out[0]);
     assertEquals(new Long(34),out[1]);
@@ -134,7 +134,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
     Object[] in = new Object[6];
@@ -145,12 +145,12 @@ public class TestCSVIntermediateDataFormat {
     in[4] = byteFieldData;
     in[5] = new String(new char[] { 0x0A });
 
-    data.setObjectData(in);
+    dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,'54','random data'," +
         getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n'";
-    assertEquals(testData, data.getTextData());
+    assertEquals(testData, dataFormat.getTextData());
   }
 
   @Test
@@ -164,7 +164,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     Object[] in = new Object[6];
     in[0] = new Long(10);
@@ -177,9 +177,9 @@ public class TestCSVIntermediateDataFormat {
     System.arraycopy(in,0,inCopy,0,in.length);
 
     // Modifies the input array, so we use the copy to confirm
-    data.setObjectData(in);
+    dataFormat.setObjectData(in);
 
-    assertTrue(Arrays.deepEquals(inCopy, data.getObjectData()));
+    assertTrue(Arrays.deepEquals(inCopy, dataFormat.getObjectData()));
   }
 
   @Test
@@ -191,7 +191,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
     Object[] in = new Object[6];
@@ -202,12 +202,12 @@ public class TestCSVIntermediateDataFormat {
     in[4] = byteFieldData;
     in[5] = new String(new char[] { 0x0A });
 
-    data.setObjectData(in);
+    dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,NULL,'random data'," +
         getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n'";
-    assertEquals(testData, data.getTextData());
+    assertEquals(testData, dataFormat.getTextData());
   }
 
   @Test
@@ -215,7 +215,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Text("1"));
 
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     char[] allCharArr = new char[256];
     for(int i = 0; i < allCharArr.length; ++i) {
@@ -228,17 +228,17 @@ public class TestCSVIntermediateDataFormat {
     System.arraycopy(in, 0, inCopy, 0, in.length);
 
     // Modifies the input array, so we use the copy to confirm
-    data.setObjectData(in);
+    dataFormat.setObjectData(in);
 
-    assertEquals(strData, data.getObjectData()[0]);
-    assertTrue(Arrays.deepEquals(inCopy, data.getObjectData()));
+    assertEquals(strData, dataFormat.getObjectData()[0]);
+    assertTrue(Arrays.deepEquals(inCopy, dataFormat.getObjectData()));
   }
 
   @Test
   public void testByteArrayFullRangeOfCharacters() {
     Schema schema = new Schema("test");
     schema.addColumn(new Binary("1"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     byte[] allCharByteArr = new byte[256];
     for (int i = 0; i < allCharByteArr.length; ++i) {
@@ -250,32 +250,32 @@ public class TestCSVIntermediateDataFormat {
     System.arraycopy(in, 0, inCopy, 0, in.length);
 
     // Modifies the input array, so we use the copy to confirm
-    data.setObjectData(in);
-    assertTrue(Arrays.deepEquals(inCopy, data.getObjectData()));
+    dataFormat.setObjectData(in);
+    assertTrue(Arrays.deepEquals(inCopy, dataFormat.getObjectData()));
   }
 
   @Test
   public void testDate() {
     Schema schema = new Schema("test");
     schema.addColumn(new Date("1"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
-    data.setTextData("2014-10-01");
-    assertEquals("2014-10-01", data.getObjectData()[0].toString());
+    dataFormat.setTextData("2014-10-01");
+    assertEquals("2014-10-01", dataFormat.getObjectData()[0].toString());
   }
 
   @Test
   public void testDateTime() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     for (String dateTime : new String[]{
         "2014-10-01T12:00:00",
         "2014-10-01T12:00:00.000"
     }) {
-      data.setTextData(dateTime);
-      assertEquals("2014-10-01T12:00:00.000", data.getObjectData()[0].toString());
+      dataFormat.setTextData(dateTime);
+      assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
     }
   }
 
@@ -289,14 +289,14 @@ public class TestCSVIntermediateDataFormat {
   public void testDateTimeISO8601Alternative() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     for (String dateTime : new String[]{
         "2014-10-01 12:00:00",
         "2014-10-01 12:00:00.000"
     }) {
-      data.setTextData(dateTime);
-      assertEquals("2014-10-01T12:00:00.000", data.getObjectData()[0].toString());
+      dataFormat.setTextData(dateTime);
+      assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
     }
   }
 
@@ -304,20 +304,20 @@ public class TestCSVIntermediateDataFormat {
   public void testBit() {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1"));
-    data.setSchema(schema);
+    dataFormat.setSchema(schema);
 
     for (String trueBit : new String[]{
         "true", "TRUE", "1"
     }) {
-      data.setTextData(trueBit);
-      assertTrue((Boolean) data.getObjectData()[0]);
+      dataFormat.setTextData(trueBit);
+      assertTrue((Boolean) dataFormat.getObjectData()[0]);
     }
 
     for (String falseBit : new String[]{
         "false", "FALSE", "0"
     }) {
-      data.setTextData(falseBit);
-      assertFalse((Boolean) data.getObjectData()[0]);
+      dataFormat.setTextData(falseBit);
+      assertFalse((Boolean) dataFormat.getObjectData()[0]);
     }
   }
 
@@ -326,9 +326,23 @@ public class TestCSVIntermediateDataFormat {
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
         + ",'\\n'";
     Schema schema = new Schema("Test");
-    data.setSchema(schema);
-    data.setTextData(testData);
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData(testData);
 
-    Object[] out = data.getObjectData();
+    @SuppressWarnings("unused")
+    Object[] out = dataFormat.getObjectData();
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testNullSchema() {
+    dataFormat.setSchema(null);
+    @SuppressWarnings("unused")
+    Object[] out = dataFormat.getObjectData();
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testNotSettingSchema() {
+    @SuppressWarnings("unused")
+    Object[] out = dataFormat.getObjectData();
   }
 }

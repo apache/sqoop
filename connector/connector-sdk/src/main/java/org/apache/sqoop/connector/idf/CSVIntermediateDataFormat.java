@@ -67,8 +67,14 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   private final List<Integer> stringFieldIndices = new ArrayList<Integer>();
   private final List<Integer> byteFieldIndices = new ArrayList<Integer>();
-
   private Schema schema;
+
+  public CSVIntermediateDataFormat() {
+  }
+
+  public CSVIntermediateDataFormat(Schema schema) {
+    setSchema(schema);
+  }
 
   /**
    * {@inheritDoc}
@@ -166,7 +172,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    */
   @Override
   public Object[] getObjectData() {
-    if (schema.isEmpty()) {
+    if (schema == null || schema.isEmpty()) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0006);
     }
 

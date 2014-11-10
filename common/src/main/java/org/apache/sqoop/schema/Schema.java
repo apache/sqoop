@@ -122,12 +122,7 @@ public class Schema {
   }
 
   public boolean isEmpty() {
-    if (columns.size()==0) {
-      return true;
-    } else {
-      return false;
-    }
-
+    return columns.size() == 0;
   }
 
   public String toString() {

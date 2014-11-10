@@ -38,16 +38,17 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
-import org.apache.sqoop.job.io.Data;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
+import org.apache.sqoop.job.util.MRJobTestUtil;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
@@ -121,6 +122,7 @@ public class TestMatching {
     return parameters;
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testSchemaMatching() throws Exception {
     Configuration conf = new Configuration();
@@ -132,9 +134,9 @@ public class TestMatching {
     Job job = new Job(conf);
     MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, from);
     MRConfigurationUtils.setConnectorSchema(Direction.TO, job, to);
-    JobUtils.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
+    MRJobTestUtil.runJob(job.getConfiguration(), SqoopInputFormat.class, SqoopMapper.class,
         DummyOutputFormat.class);
-    boolean success = JobUtils.runJob(job.getConfiguration(),
+    boolean success = MRJobTestUtil.runJob(job.getConfiguration(),
         SqoopInputFormat.class, SqoopMapper.class,
         DummyOutputFormat.class);
     if (from.getName().split("-")[1].equals("EMPTY")) {
@@ -233,19 +235,14 @@ public class TestMatching {
     public static class DummyRecordWriter
         extends RecordWriter<SqoopWritable, NullWritable> {
       private int index = START_PARTITION*NUMBER_OF_ROWS_PER_PARTITION;
-      private Data data = new Data();
+      private IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
 
       @Override
       public void write(SqoopWritable key, NullWritable value) {
-
-        data.setContent(new Object[] {
-                index,
-                (double) index,
-                String.valueOf(index)},
-            Data.ARRAY_RECORD);
+        String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
+        dataFormat.setTextData(testData);
         index++;
-
-        assertEquals(data.toString(), key.toString());
+        assertEquals(dataFormat.getTextData().toString(), key.toString());
       }
 
       @Override

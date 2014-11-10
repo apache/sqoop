@@ -18,8 +18,6 @@
  */
 package org.apache.sqoop.job.io;
 
-import com.google.common.base.Charsets;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -29,13 +27,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.apache.sqoop.job.MRJobConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class SqoopWritableTest {
+public class TestSqoopWritable {
 
   private final SqoopWritable writable = new SqoopWritable();
 
@@ -49,7 +44,6 @@ public class SqoopWritableTest {
   @Test
   public void testDataWritten() throws IOException {
     String testData = "One ring to rule them all";
-    byte[] testDataBytes = testData.getBytes(Charsets.UTF_8);
     writable.setString(testData);
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(ostream);
