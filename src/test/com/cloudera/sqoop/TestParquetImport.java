@@ -27,6 +27,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Datasets;
@@ -75,13 +76,24 @@ public class TestParquetImport extends ImportJobTestCase {
     return args.toArray(new String[args.size()]);
   }
 
-  public void testParquetImport() throws IOException {
+  public void testSnappyCompression() throws IOException {
+    runParquetImportTest("snappy");
+  }
+
+  public void testDeflateCompression() throws IOException {
+    runParquetImportTest("deflate");
+  }
+
+  private void runParquetImportTest(String codec) throws IOException {
     String[] types = {"BIT", "INTEGER", "BIGINT", "REAL", "DOUBLE", "VARCHAR(6)",
         "VARBINARY(2)",};
     String[] vals = {"true", "100", "200", "1.0", "2.0", "'s'", "'0102'", };
     createTableWithColTypes(types, vals);
 
-    runImport(getOutputArgv(true, null));
+    String [] extraArgs = { "--compression-codec", codec};
+    runImport(getOutputArgv(true, extraArgs));
+
+    assertEquals(CompressionType.forName(codec), getCompressionType());
 
     Schema schema = getSchema();
     assertEquals(Type.RECORD, schema.getType());
@@ -175,6 +187,10 @@ public class TestParquetImport extends ImportJobTestCase {
     } finally {
       reader.close();
     }
+  }
+
+  private CompressionType getCompressionType() {
+    return getDataset().getDescriptor().getCompressionType();
   }
 
   private Schema getSchema() {
