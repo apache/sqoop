@@ -61,6 +61,11 @@ limitations under the License.
 
     <dependency>
       <groupId>org.apache.sqoop.repository</groupId>
+      <artifactId>sqoop-repository-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.sqoop.repository</groupId>
       <artifactId>sqoop-repository-derby</artifactId>
     </dependency>
 

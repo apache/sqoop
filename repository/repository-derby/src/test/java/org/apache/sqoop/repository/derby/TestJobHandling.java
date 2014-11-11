@@ -36,6 +36,7 @@ import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.repository.common.CommonRepositoryError;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -65,7 +66,7 @@ public class TestJobHandling extends DerbyTestCase {
       handler.findJob(1, derbyConnection);
       fail();
     } catch(SqoopException ex) {
-      assertEquals(DerbyRepoError.DERBYREPO_0030, ex.getErrorCode());
+      assertEquals(CommonRepositoryError.COMMON_0027, ex.getErrorCode());
     }
 
     loadJobsForLatestVersion();

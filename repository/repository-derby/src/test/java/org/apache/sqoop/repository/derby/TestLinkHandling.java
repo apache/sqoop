@@ -31,6 +31,7 @@ import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.repository.common.CommonRepositoryError;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,8 +59,8 @@ public class TestLinkHandling extends DerbyTestCase {
     try {
       handler.findLink(1, getDerbyDatabaseConnection());
       fail();
-    } catch (SqoopException ex) {
-      assertEquals(DerbyRepoError.DERBYREPO_0024, ex.getErrorCode());
+    } catch(SqoopException ex) {
+      assertEquals(CommonRepositoryError.COMMON_0021, ex.getErrorCode());
     }
 
     // Load prepared connections into database

@@ -24,7 +24,6 @@ public final class DerbyRepoConstants {
   @Deprecated
   // use only for the upgrade code
   public static final String SYSKEY_VERSION = "version";
-  public static final String SYSKEY_DERBY_REPOSITORY_VERSION = "repository.version";
 
   /**
    * Expected version of the repository structures.

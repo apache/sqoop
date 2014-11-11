@@ -138,7 +138,7 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
   private class TestDerbyRepositoryHandler extends DerbyRepositoryHandler {
     protected long registerHdfsConnector(Connection conn) {
       try {
-        runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+        TestRespositorySchemaUpgrade.this.runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
             + "VALUES('hdfs-connector', 'org.apache.sqoop.test.B', '1.0-test')");
         return 2L;
       } catch (Exception e) {
