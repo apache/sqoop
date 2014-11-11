@@ -18,9 +18,9 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * All data types supported by Sqoop.
+ * All {@link #Column} types supported by Sqoop.
  */
-public enum Type {
+public enum ColumnType {
   ARRAY,
   BINARY,
   BIT,

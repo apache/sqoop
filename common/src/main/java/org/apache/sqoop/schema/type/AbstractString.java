@@ -22,7 +22,7 @@ package org.apache.sqoop.schema.type;
  */
 public abstract class AbstractString extends Column {
 
-  private Long size;
+  private Long length;
 
   protected AbstractString() {
   }
@@ -31,33 +31,33 @@ public abstract class AbstractString extends Column {
     super(name);
   }
 
-  protected AbstractString(String name, Long size) {
+  protected AbstractString(String name, Long length) {
     super(name);
-    this.size = size;
+    this.length = length;
   }
 
   protected AbstractString(String name, Boolean nullable) {
     super(name, nullable);
   }
 
-  protected AbstractString(String name, Boolean nullable, Long size) {
+  protected AbstractString(String name, Boolean nullable, Long length) {
     super(name, nullable);
-    this.size = size;
+    this.length = length;
   }
 
-  public Long getSize() {
-    return size;
+  public Long getLength() {
+    return length;
   }
 
-  public AbstractString setSize(Long size) {
-    this.size = size;
+  public AbstractString setLength(Long length) {
+    this.length = length;
     return this;
   }
 
   @Override
   public String toString() {
     return new StringBuilder(super.toString())
-      .append(",size=").append(size)
+      .append(",length=").append(length)
       .toString();
   }
 
@@ -69,7 +69,7 @@ public abstract class AbstractString extends Column {
 
     AbstractString that = (AbstractString) o;
 
-    if (size != null ? !size.equals(that.size) : that.size != null)
+    if (length != null ? !length.equals(that.length) : that.length != null)
       return false;
 
     return true;
@@ -78,7 +78,7 @@ public abstract class AbstractString extends Column {
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    result = 31 * result + (size != null ? size.hashCode() : 0);
+    result = 31 * result + (length != null ? length.hashCode() : 0);
     return result;
   }
 }

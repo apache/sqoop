@@ -18,7 +18,7 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Parent of all Sqoop types.
+ * Base class for all the supported types in the Sqoop {@link #Schema}
  */
 public abstract class Column {
 
@@ -28,12 +28,12 @@ public abstract class Column {
   String name;
 
   /**
-   * Whether NULL is allowed or not.
+   * Whether the column value can be empty/null
    */
   Boolean nullable;
 
   /**
-   * By default columns are empty name and are nullable
+   * By default a column has empty name and is nullable
    */
   public Column() {
     this("", true);
@@ -53,7 +53,7 @@ public abstract class Column {
    *
    * @return Type of the column
    */
-  public abstract Type getType();
+  public abstract ColumnType getType();
 
   public Column setName(String name) {
     this.name = name;
@@ -76,7 +76,8 @@ public abstract class Column {
   public String toString() {
     return new StringBuilder()
       .append("name=").append(name).append(",")
-      .append("nullable=").append(nullable)
+      .append("nullable=").append(nullable).append(",")
+      .append("type=").append(getType())
       .toString();
   }
 
@@ -104,7 +105,7 @@ public abstract class Column {
   }
 
   public boolean validate(Object o) {
-    // TODO: Implement this in all subclasses!
+    // TODO(SQOOP-1707)
     return true;
   }
 }

@@ -18,7 +18,7 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Multiple values of the same type.
+ * Unique values of the same type.
  *
  * JDBC Types: set
  */
@@ -37,8 +37,8 @@ public class Set extends AbstractComplexType {
   }
 
   @Override
-  public Type getType() {
-    return Type.SET;
+  public ColumnType getType() {
+    return ColumnType.SET;
   }
 
   @Override

@@ -57,8 +57,8 @@ public class FloatingPoint extends AbstractNumber {
   }
 
   @Override
-  public Type getType() {
-    return Type.FLOATING_POINT;
+  public ColumnType getType() {
+    return ColumnType.FLOATING_POINT;
   }
 
   @Override

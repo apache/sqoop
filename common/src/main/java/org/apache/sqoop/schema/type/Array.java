@@ -37,8 +37,8 @@ public class Array extends AbstractComplexType {
   }
 
   @Override
-  public Type getType() {
-    return Type.ARRAY;
+  public ColumnType getType() {
+    return ColumnType.ARRAY;
   }
 
   @Override

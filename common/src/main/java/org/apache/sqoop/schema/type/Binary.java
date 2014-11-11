@@ -31,7 +31,7 @@ public class Binary extends AbstractString {
     super(name);
   }
 
-  public Binary(String name, Long size) {
+  public Binary(String name, Long length) {
     super(name);
   }
 
@@ -40,13 +40,13 @@ public class Binary extends AbstractString {
     super(name, nullable);
   }
 
-  public Binary(String name, Boolean nullable, Long size) {
-    super(name, nullable, size);
+  public Binary(String name, Boolean nullable, Long length) {
+    super(name, nullable, length);
   }
 
   @Override
-  public Type getType() {
-    return Type.BINARY;
+  public ColumnType getType() {
+    return ColumnType.BINARY;
   }
 
   @Override

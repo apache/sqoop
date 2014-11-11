@@ -26,7 +26,7 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
-import org.apache.sqoop.schema.type.Type;
+import org.apache.sqoop.schema.type.ColumnType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -104,9 +104,9 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     List<Column> columns = schema.getColumns();
     int i = 0;
     for(Column col : columns) {
-      if(col.getType() == Type.TEXT) {
+      if(col.getType() == ColumnType.TEXT) {
         stringFieldIndices.add(i);
-      } else if(col.getType() == Type.BINARY) {
+      } else if(col.getType() == ColumnType.BINARY) {
         byteFieldIndices.add(i);
       }
       i++;
@@ -190,7 +190,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     Object[] out = new Object[fields.length];
     Column[] cols = schema.getColumns().toArray(new Column[fields.length]);
     for (int i = 0; i < fields.length; i++) {
-      Type colType = cols[i].getType();
+      ColumnType colType = cols[i].getType();
       if (fields[i].equals("NULL")) {
         out[i] = null;
         continue;

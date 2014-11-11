@@ -34,7 +34,7 @@ import org.apache.sqoop.schema.type.Map;
 import org.apache.sqoop.schema.type.Set;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
-import org.apache.sqoop.schema.type.Type;
+import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.Unsupported;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -111,7 +111,7 @@ public class SchemaSerialization {
         break;
       case BINARY:
       case TEXT:
-        ret.put(SIZE, ((AbstractString)column).getSize());
+        ret.put(SIZE, ((AbstractString)column).getLength());
         break;
       case DATE_TIME:
         ret.put(FRACTION, ((DateTime)column).getFraction());
@@ -166,14 +166,14 @@ public class SchemaSerialization {
     Boolean unsigned = (Boolean)obj.get(UNSIGNED);
     Long jdbcType = (Long)obj.get(JDBC_TYPE);
 
-    Type type = Type.valueOf((String) obj.get(TYPE));
+    ColumnType type = ColumnType.valueOf((String) obj.get(TYPE));
     Column output = null;
     switch (type) {
       case ARRAY:
         output = new Array(key);
         break;
       case BINARY:
-        output = new Binary().setSize(size);
+        output = new Binary().setLength(size);
         break;
       case BIT:
         output = new Bit();
@@ -203,7 +203,7 @@ public class SchemaSerialization {
         output = new Set(key);
         break;
       case TEXT:
-        output = new Text().setSize(size);
+        output = new Text().setLength(size);
         break;
       case TIME:
         output = new Time().setFraction(fraction);

@@ -37,8 +37,8 @@ public class Enum extends AbstractComplexType {
   }
 
   @Override
-  public Type getType() {
-    return Type.ENUM;
+  public ColumnType getType() {
+    return ColumnType.ENUM;
   }
 
   @Override

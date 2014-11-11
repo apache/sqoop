@@ -42,8 +42,8 @@ public class Map extends AbstractComplexType {
   }
 
   @Override
-  public Type getType() {
-    return Type.MAP;
+  public ColumnType getType() {
+    return ColumnType.MAP;
   }
 
   public Column getValue() {

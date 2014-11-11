@@ -31,8 +31,8 @@ public class Text extends AbstractString {
     super(name);
   }
 
-  public Text(String name, Long size) {
-    super(name, size);
+  public Text(String name, Long length) {
+    super(name, length);
   }
 
   public Text(String name, Boolean nullable) {
@@ -44,8 +44,8 @@ public class Text extends AbstractString {
   }
 
   @Override
-  public Type getType() {
-    return Type.TEXT;
+  public ColumnType getType() {
+    return ColumnType.TEXT;
   }
 
   @Override

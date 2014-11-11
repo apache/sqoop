@@ -36,8 +36,8 @@ public class Bit extends Column {
   }
 
   @Override
-  public Type getType() {
-    return Type.BIT;
+  public ColumnType getType() {
+    return ColumnType.BIT;
   }
 
   @Override

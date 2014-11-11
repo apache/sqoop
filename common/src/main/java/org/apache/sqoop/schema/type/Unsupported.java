@@ -28,8 +28,8 @@ public class Unsupported extends Binary {
   Long jdbcType;
 
   @Override
-  public Type getType() {
-    return Type.UNSUPPORTED;
+  public ColumnType getType() {
+    return ColumnType.UNSUPPORTED;
   }
 
   public Long getJdbcType() {

@@ -71,8 +71,8 @@ public class FixedPoint extends AbstractNumber {
   }
 
   @Override
-  public Type getType() {
-    return Type.FIXED_POINT;
+  public ColumnType getType() {
+    return ColumnType.FIXED_POINT;
   }
 
   @Override

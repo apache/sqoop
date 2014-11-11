@@ -77,8 +77,8 @@ public class DateTime extends AbstractDateTime {
   }
 
   @Override
-  public Type getType() {
-    return Type.DATE_TIME;
+  public ColumnType getType() {
+    return ColumnType.DATE_TIME;
   }
 
   @Override

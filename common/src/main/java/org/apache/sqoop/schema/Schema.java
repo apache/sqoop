@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Schema represents data that are being transferred.
+ * Schema represents the data fields that are transferred between {@link #From} and {@link #To}
  */
 public class Schema {
 
@@ -43,7 +43,7 @@ public class Schema {
   private String note;
 
   /**
-   * Generation date.
+   * Creation date.
    */
   private Date creationDate;
 

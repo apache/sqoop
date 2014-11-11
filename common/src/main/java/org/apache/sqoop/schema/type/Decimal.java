@@ -77,8 +77,8 @@ public class Decimal extends AbstractNumber {
   }
 
   @Override
-  public Type getType() {
-    return Type.DECIMAL;
+  public ColumnType getType() {
+    return ColumnType.DECIMAL;
   }
 
   @Override
