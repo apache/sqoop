@@ -33,8 +33,8 @@ public enum AuthenticationError implements ErrorCode {
   /** The system was not able to login using Kerberos keytab and principal in sqoop configuration. */
   AUTH_0003("Unable to login using Kerberos keytab and principal"),
 
-  /** Invalid FileSystemAccess security mode {simple, Kerberos}. */
-  AUTH_0004("Invalid FileSystemAccess security mode");
+  /** Invalid authentication type {simple, Kerberos}. */
+  AUTH_0004("Invalid authentication type");
 
   private final String message;
 

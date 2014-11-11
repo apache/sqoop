@@ -81,7 +81,7 @@ public class KerberosAuthenticationHandler extends AuthenticationHandler {
     } catch (IOException ex) {
       throw new SqoopException(AuthenticationError.AUTH_0003);
     }
-    LOG.info("Using FileSystemAccess Kerberos authentication, principal ["
+    LOG.info("Using Kerberos authentication, principal ["
             + principal + "] keytab [" + keytab + "]");
   }
 }

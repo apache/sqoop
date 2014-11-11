@@ -35,7 +35,7 @@ public class SimpleAuthenticationHandler extends AuthenticationHandler {
     conf.set(get_hadoop_security_authentication(),
             AuthenticationConstants.TYPE.SIMPLE.name());
     UserGroupInformation.setConfiguration(conf);
-    LOG.info("Using FileSystemAccess simple/pseudo authentication, principal ["
+    LOG.info("Using simple/pseudo authentication, principal ["
             + System.getProperty("user.name") + "]");
   }
 }
