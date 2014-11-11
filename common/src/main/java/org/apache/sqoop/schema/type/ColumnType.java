@@ -34,6 +34,6 @@ public enum ColumnType {
   SET,
   TEXT,
   TIME,
-  UNSUPPORTED,
+  UNKNOWN,
   ;
 }

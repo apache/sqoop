@@ -31,7 +31,7 @@ import org.apache.sqoop.schema.type.Map;
 import org.apache.sqoop.schema.type.Set;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
-import org.apache.sqoop.schema.type.Unsupported;
+import org.apache.sqoop.schema.type.Unknown;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
@@ -123,7 +123,7 @@ public class TestSchemaSerialization {
 
   @Test
   public void testUnsupported() {
-    Schema t = new Schema("t").addColumn(new Unsupported("u", 4L));
+    Schema t = new Schema("t").addColumn(new Unknown("u", 4L));
     transferAndAssert(t);
   }
   @Test
@@ -148,7 +148,7 @@ public class TestSchemaSerialization {
       .addColumn(new Set("k", new Text()))
       .addColumn(new Text("l"))
       .addColumn(new Time("m"))
-      .addColumn(new Unsupported("u"))
+      .addColumn(new Unknown("u"))
     ;
     transferAndAssert(allTypes);
   }

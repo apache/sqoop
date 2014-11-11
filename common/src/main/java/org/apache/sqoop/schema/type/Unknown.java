@@ -18,9 +18,10 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Unsupported data type (internally encoded as binary).
+ * Unknown column type (internally encoded as binary)
+ *
  */
-public class Unsupported extends Binary {
+public class Unknown extends Binary {
 
   /**
    * Optional JDBC type that is unknown.
@@ -29,39 +30,39 @@ public class Unsupported extends Binary {
 
   @Override
   public ColumnType getType() {
-    return ColumnType.UNSUPPORTED;
+    return ColumnType.UNKNOWN;
   }
 
   public Long getJdbcType() {
     return jdbcType;
   }
 
-  public Unsupported setJdbcType(Long jdbcType) {
+  public Unknown setJdbcType(Long jdbcType) {
     this.jdbcType = jdbcType;
     return this;
   }
 
-  public Unsupported() {
+  public Unknown() {
   }
 
-  public Unsupported(Long jdbcType) {
+  public Unknown(Long jdbcType) {
     setJdbcType(jdbcType);
   }
 
-  public Unsupported(String name) {
+  public Unknown(String name) {
     super(name);
   }
 
-  public Unsupported(String name, Long jdbcType) {
+  public Unknown(String name, Long jdbcType) {
     super(name);
     setJdbcType(jdbcType);
   }
 
-  public Unsupported(String name, Boolean nullable) {
+  public Unknown(String name, Boolean nullable) {
     super(name, nullable);
   }
 
-  public Unsupported(String name, Boolean nullable, Long jdbcType) {
+  public Unknown(String name, Boolean nullable, Long jdbcType) {
     super(name, nullable);
     setJdbcType(jdbcType);
   }

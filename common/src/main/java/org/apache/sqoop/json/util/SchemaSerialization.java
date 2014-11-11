@@ -35,7 +35,7 @@ import org.apache.sqoop.schema.type.Set;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
 import org.apache.sqoop.schema.type.ColumnType;
-import org.apache.sqoop.schema.type.Unsupported;
+import org.apache.sqoop.schema.type.Unknown;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -131,8 +131,8 @@ public class SchemaSerialization {
       case TIME:
         ret.put(FRACTION, ((Time)column).getFraction());
         break;
-      case UNSUPPORTED:
-        ret.put(JDBC_TYPE, ((Unsupported) column).getJdbcType());
+      case UNKNOWN:
+        ret.put(JDBC_TYPE, ((Unknown) column).getJdbcType());
         break;
       case DATE:
       case BIT:
@@ -208,8 +208,8 @@ public class SchemaSerialization {
       case TIME:
         output = new Time().setFraction(fraction);
         break;
-      case UNSUPPORTED:
-        output = new Unsupported().setJdbcType(jdbcType);
+      case UNKNOWN:
+        output = new Unknown().setJdbcType(jdbcType);
         break;
       default:
         // TODO(Jarcec): Throw an exception of unsupported type?

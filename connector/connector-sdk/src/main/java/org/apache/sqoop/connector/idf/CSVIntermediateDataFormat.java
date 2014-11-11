@@ -202,6 +202,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
           out[i] = unescapeStrings(fields[i]);
           break;
         case BINARY:
+        // Unknown is treated as a binary type
+        case UNKNOWN:
           out[i] = unescapeByteArray(fields[i]);
           break;
         case FIXED_POINT:

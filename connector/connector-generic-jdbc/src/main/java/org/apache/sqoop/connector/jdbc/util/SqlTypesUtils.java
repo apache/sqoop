@@ -27,7 +27,7 @@ import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
-import org.apache.sqoop.schema.type.Unsupported;
+import org.apache.sqoop.schema.type.Unknown;
 
 import java.sql.Types;
 
@@ -88,7 +88,7 @@ public class SqlTypesUtils {
         return new Binary();
 
       default:
-        return new Unsupported((long)sqlType);
+        return new Unknown((long)sqlType);
     }
   }
 
