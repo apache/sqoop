@@ -25,6 +25,7 @@ package org.apache.sqoop.schema.type;
 public class Bit extends Column {
 
   public Bit() {
+    super();
   }
 
   public Bit(String name) {

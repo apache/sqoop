@@ -24,11 +24,22 @@ package org.apache.sqoop.schema.type;
  */
 public class FixedPoint extends AbstractNumber {
 
+  /**
+   This field will come handy in connectors that might require to use the
+   size information to do additional type mappings in their data source
+   For example in Hive.
+   Default: bigint
+   if size < 1 then tinyint
+   if size < 2 then smallint
+   if size < 4 then int
+   Read more: https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
+   */
   private Long byteSize;
 
   private Boolean unsigned;
 
   public FixedPoint() {
+    super();
   }
 
   public FixedPoint(String name) {

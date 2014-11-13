@@ -18,63 +18,24 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Complex types that are incorporating primitive types.
+ * Complex types that can have nested data as a map or list structure
  */
-public abstract  class AbstractComplexType extends Column {
+public abstract class AbstractComplexType extends Column {
 
-  /**
-   * Incorporated type
-   */
-  private Column key;
-
-  public AbstractComplexType(Column key) {
-    setKey(key);
+  public AbstractComplexType() {
+    super();
   }
 
-  public AbstractComplexType(String name, Column key) {
+  public AbstractComplexType(String name) {
     super(name);
-    setKey(key);
   }
 
-  public AbstractComplexType(String name, Boolean nullable, Column key) {
+  public AbstractComplexType(String name, Boolean nullable) {
     super(name, nullable);
-    setKey(key);
   }
 
-  public Column getKey() {
-    return key;
+  public AbstractComplexType(String name, Boolean nullable, long size) {
+    super(name, nullable);
   }
 
-  public void setKey(Column key) {
-    assert key != null;
-
-    this.key = key;
-  }
-
-  @Override
-  public String toString() {
-    return new StringBuilder(super.toString())
-      .append(",key=").append(key.toString())
-      .toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof AbstractComplexType)) return false;
-    if (!super.equals(o)) return false;
-
-    AbstractComplexType that = (AbstractComplexType) o;
-
-    if (key != null ? !key.equals(that.key) : that.key != null) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (key != null ? key.hashCode() : 0);
-    return result;
-  }
 }

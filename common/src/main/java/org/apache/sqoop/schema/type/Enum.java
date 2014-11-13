@@ -18,22 +18,23 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Enum can contain one value from predefined list.
+ * Enum is a set of predefined values of its own type
  *
  * JDBC Types: enum
  */
-public class Enum extends AbstractComplexType {
 
-  public Enum(Column key) {
-    super(key);
+public class Enum extends AbstractComplexListType {
+
+  public Enum(Column listType) {
+    super(listType);
   }
 
-  public Enum(String name, Column key) {
-    super(name, key);
+  public Enum(String name, Column listType) {
+    super(name, listType);
   }
 
-  public Enum(String name, Boolean nullable, Column key) {
-    super(name, nullable, key);
+  public Enum(String name, Boolean nullable, Column listType) {
+    super(name, nullable, listType);
   }
 
   @Override
@@ -44,8 +45,7 @@ public class Enum extends AbstractComplexType {
   @Override
   public String toString() {
     return new StringBuilder("Enum{")
-      .append(super.toString())
-      .append("}")
-      .toString();
+             .append(super.toString())
+             .append("}").toString();
   }
 }

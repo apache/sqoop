@@ -25,14 +25,15 @@ package org.apache.sqoop.schema.type;
 public class Text extends AbstractString {
 
   public Text() {
+    super();
   }
 
   public Text(String name) {
     super(name);
   }
 
-  public Text(String name, Long length) {
-    super(name, length);
+  public Text(String name, Long size) {
+    super(name, size);
   }
 
   public Text(String name, Boolean nullable) {

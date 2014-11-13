@@ -18,65 +18,54 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Array contains multiple values of the same type.
- *
- * JDBC Types: array
+ * Complex types that can have nested data as a map or list structure
  */
-public class Array extends AbstractComplexListType {
+public abstract class AbstractComplexListType extends AbstractComplexType {
 
-  /**
-   * Represents the size for the column type and will be handy for connectors to
-   * map this info to the native data sources they represent
-   * https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
-   * NOTE : only certain data sources such as Postgres support size attribute for arrays
-   */
-  private Long size;
+  // represents the type of the list elements
+  Column listType;
 
-  public Array(Column listType) {
-    super(listType);
+  public AbstractComplexListType(Column listType) {
+    super();
+    setListType(listType);
   }
 
-  public Array(String name, Column listType) {
-    super(name, listType);
+  public AbstractComplexListType(String name, Column listType) {
+    super(name);
+    setListType(listType);
   }
 
-  public Array(String name, Boolean nullable, Column listType) {
-    super(name, nullable, listType);
+  public AbstractComplexListType(String name, Boolean nullable, Column listType) {
+    super(name, nullable);
+    setListType(listType);
   }
 
-  public Long getSize() {
-    return size;
+  private void setListType(Column listType) {
+    assert listType != null;
+    this.listType = listType;
   }
 
-  public Array setSize(Long size) {
-    this.size = size;
-    return this;
-  }
-
-  @Override
-  public ColumnType getType() {
-    return ColumnType.ARRAY;
+  public Column getListType() {
+    return listType;
   }
 
   @Override
   public String toString() {
-    return new StringBuilder("Array{").
-         append(super.toString()).
-         append("}").toString();
+    return new StringBuilder(super.toString()).append(",listType=").append(listType).toString();
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (!(o instanceof Array))
+    if (!(o instanceof AbstractComplexListType))
       return false;
     if (!super.equals(o))
       return false;
 
-    Array that = (Array) o;
+    AbstractComplexListType that = (AbstractComplexListType) o;
 
-    if (size != null ? !size.equals(that.size) : that.size != null)
+    if (listType != null ? !listType.equals(that.listType) : that.listType != null)
       return false;
 
     return true;
@@ -85,7 +74,7 @@ public class Array extends AbstractComplexListType {
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    result = 31 * result + (size != null ? size.hashCode() : 0);
+    result = 31 * result + (listType != null ? listType.hashCode() : 0);
     return result;
   }
 

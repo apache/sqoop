@@ -18,12 +18,14 @@
 package org.apache.sqoop.json.util;
 
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.AbstractComplexType;
+import org.apache.sqoop.schema.type.AbstractComplexListType;
+import org.apache.sqoop.schema.type.AbstractPrimitiveType;
 import org.apache.sqoop.schema.type.AbstractString;
-import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
+import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.Date;
 import org.apache.sqoop.schema.type.DateTime;
 import org.apache.sqoop.schema.type.Decimal;
@@ -34,7 +36,6 @@ import org.apache.sqoop.schema.type.Map;
 import org.apache.sqoop.schema.type.Set;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
-import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.Unknown;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,15 +45,27 @@ import org.json.simple.JSONObject;
  */
 public class SchemaSerialization {
 
+  // common attributes of all column types
   private static final String NAME = "name";
   private static final String CREATION_DATE = "created";
   private static final String NOTE = "note";
   private static final String COLUMNS = "columns";
   private static final String TYPE = "type";
   private static final String NULLABLE = "nullable";
+  // size attribute is relevant to String and Array type only
+  private static final String SIZE = "size";
+  // maps and enum attributes
+  private static final String MAP = "map";
   private static final String KEY = "key";
   private static final String VALUE = "value";
-  private static final String SIZE = "size";
+  // arrays and set attribute
+  private static final String LIST = "list";
+  private static final String LIST_TYPE = "listType";
+  // number attribute
+  private static final String BYTE_SIZE = "byteSize";
+  // string attribute
+  private static final String CHAR_SIZE = "charSize";
+
   private static final String FRACTION = "fraction";
   private static final String TIMEZONE = "timezone";
   private static final String PRECISION = "precision";
@@ -65,11 +78,11 @@ public class SchemaSerialization {
     JSONObject object = new JSONObject();
     object.put(NAME, schema.getName());
     object.put(CREATION_DATE, schema.getCreationDate().getTime());
-    if(schema.getNote() != null) {
+    if (schema.getNote() != null) {
       object.put(NOTE, schema.getNote());
     }
     JSONArray columnArray = new JSONArray();
-    for(Column column : schema.getColumns()) {
+    for (Column column : schema.getColumns()) {
       columnArray.add(extractColumn(column));
     }
     object.put(COLUMNS, columnArray);
@@ -77,17 +90,15 @@ public class SchemaSerialization {
   }
 
   public static Schema restoreSchema(JSONObject jsonObject) {
-    String name = (String)jsonObject.get(NAME);
-    String note = (String)jsonObject.get(NOTE);
-    java.util.Date date = new java.util.Date((Long)jsonObject.get(CREATION_DATE));
+    String name = (String) jsonObject.get(NAME);
+    String note = (String) jsonObject.get(NOTE);
+    java.util.Date date = new java.util.Date((Long) jsonObject.get(CREATION_DATE));
 
-    Schema schema = new Schema(name)
-      .setNote(note)
-      .setCreationDate(date);
+    Schema schema = new Schema(name).setNote(note).setCreationDate(date);
 
-    JSONArray columnsArray = (JSONArray)jsonObject.get(COLUMNS);
+    JSONArray columnsArray = (JSONArray) jsonObject.get(COLUMNS);
     for (Object obj : columnsArray) {
-      schema.addColumn(restoreColumn((JSONObject)obj));
+      schema.addColumn(restoreColumn((JSONObject) obj));
     }
 
     return schema;
@@ -102,117 +113,145 @@ public class SchemaSerialization {
     ret.put(TYPE, column.getType().name());
 
     switch (column.getType()) {
-      case MAP:
-        ret.put(VALUE, extractColumn(((Map)column).getValue()));
-      case ARRAY:
-      case ENUM:
-      case SET:
-        ret.put(KEY, extractColumn(((AbstractComplexType) column).getKey()));
-        break;
-      case BINARY:
-      case TEXT:
-        ret.put(SIZE, ((AbstractString)column).getLength());
-        break;
-      case DATE_TIME:
-        ret.put(FRACTION, ((DateTime)column).getFraction());
-        ret.put(TIMEZONE, ((DateTime)column).getTimezone());
-        break;
-      case DECIMAL:
-        ret.put(PRECISION, ((Decimal)column).getPrecision());
-        ret.put(SCALE, ((Decimal)column).getScale());
-        break;
-      case FIXED_POINT:
-        ret.put(SIZE, ((FixedPoint) column).getByteSize());
-        ret.put(UNSIGNED, ((FixedPoint)column).getUnsigned());
-        break;
-      case FLOATING_POINT:
-        ret.put(SIZE, ((FloatingPoint) column).getByteSize());
-        break;
-      case TIME:
-        ret.put(FRACTION, ((Time)column).getFraction());
-        break;
-      case UNKNOWN:
-        ret.put(JDBC_TYPE, ((Unknown) column).getJdbcType());
-        break;
-      case DATE:
-      case BIT:
-        // Nothing to do extra
-        break;
-      default:
-        // TODO(jarcec): Throw an exception of unsupported type?
+    case MAP:
+      JSONObject map = new JSONObject();
+      ret.put(MAP, map);
+      map.put(KEY, extractColumn(((Map) column).getKey()));
+      map.put(VALUE, extractColumn(((Map) column).getValue()));
+      break;
+    case ENUM:
+    case SET:
+      JSONObject list = new JSONObject();
+      ret.put(LIST, list);
+      list.put(LIST_TYPE, extractColumn(((AbstractComplexListType) column).getListType()));
+      break;
+    case ARRAY:
+      JSONObject arrayList = new JSONObject();
+      ret.put(LIST, arrayList);
+      arrayList.put(SIZE, ((Array) column).getSize());
+      arrayList.put(LIST_TYPE, extractColumn(((Array) column).getListType()));
+      break;
+    case BINARY:
+    case TEXT:
+      ret.put(CHAR_SIZE, ((AbstractString) column).getCharSize());
+      break;
+    case DATE_TIME:
+      ret.put(FRACTION, ((DateTime) column).getFraction());
+      ret.put(TIMEZONE, ((DateTime) column).getTimezone());
+      break;
+    case DECIMAL:
+      ret.put(PRECISION, ((Decimal) column).getPrecision());
+      ret.put(SCALE, ((Decimal) column).getScale());
+      break;
+    case FIXED_POINT:
+      ret.put(BYTE_SIZE, ((FixedPoint) column).getByteSize());
+      ret.put(UNSIGNED, ((FixedPoint) column).getUnsigned());
+      break;
+    case FLOATING_POINT:
+      ret.put(BYTE_SIZE, ((FloatingPoint) column).getByteSize());
+      break;
+    case TIME:
+      ret.put(FRACTION, ((Time) column).getFraction());
+      break;
+    case UNKNOWN:
+      ret.put(JDBC_TYPE, ((Unknown) column).getJdbcType());
+      break;
+    case DATE:
+    case BIT:
+      // Nothing to do extra
+      break;
+    default:
+      // TODO(jarcec): Throw an exception of unsupported type?
     }
 
     return ret;
   }
 
-
   private static Column restoreColumn(JSONObject obj) {
     String name = (String) obj.get(NAME);
 
     Boolean nullable = (Boolean) obj.get(NULLABLE);
-    Column key = null;
-    if(obj.containsKey(KEY)) {
-      key = restoreColumn((JSONObject) obj.get(KEY));
-    }
+    AbstractPrimitiveType key = null;
     Column value = null;
-    if(obj.containsKey(VALUE)) {
-      value = restoreColumn((JSONObject) obj.get(VALUE));
+    Long arraySize = null;
+    Column listType = null;
+    // complex type attribute
+    if (obj.containsKey(MAP)) {
+      JSONObject map = (JSONObject) obj.get(MAP);
+
+      if (map.containsKey(KEY)) {
+        key = (AbstractPrimitiveType) restoreColumn((JSONObject) map.get(KEY));
+      }
+      if (map.containsKey(VALUE)) {
+        value = restoreColumn((JSONObject) map.get(VALUE));
+      }
     }
-    Long size = (Long)obj.get(SIZE);
-    Boolean fraction = (Boolean)obj.get(FRACTION);
-    Boolean timezone = (Boolean)obj.get(TIMEZONE);
-    Long precision = (Long)obj.get(PRECISION);
-    Long scale = (Long)obj.get(SCALE);
-    Boolean unsigned = (Boolean)obj.get(UNSIGNED);
-    Long jdbcType = (Long)obj.get(JDBC_TYPE);
+    if (obj.containsKey(LIST)) {
+      JSONObject list = (JSONObject) obj.get(LIST);
+      if (list.containsKey(LIST_TYPE)) {
+        listType = restoreColumn((JSONObject) list.get(LIST_TYPE));
+      }
+      arraySize = (Long) list.get(SIZE);
+    }
 
     ColumnType type = ColumnType.valueOf((String) obj.get(TYPE));
     Column output = null;
     switch (type) {
-      case ARRAY:
-        output = new Array(key);
-        break;
-      case BINARY:
-        output = new Binary().setLength(size);
-        break;
-      case BIT:
-        output = new Bit();
-        break;
-      case DATE:
-        output = new Date();
-        break;
-      case DATE_TIME:
-        output = new DateTime().setFraction(fraction).setTimezone(timezone);
-        break;
-      case DECIMAL:
-        output = new Decimal().setPrecision(precision).setScale(scale);
-        break;
-      case ENUM:
-        output = new Enum(key);
-        break;
-      case FIXED_POINT:
-        output = new FixedPoint().setByteSize(size).setUnsigned(unsigned);
-        break;
-      case FLOATING_POINT:
-        output = new FloatingPoint().setByteSize(size);
-        break;
-      case MAP:
-        output = new Map(key, value);
-        break;
-      case SET:
-        output = new Set(key);
-        break;
-      case TEXT:
-        output = new Text().setLength(size);
-        break;
-      case TIME:
-        output = new Time().setFraction(fraction);
-        break;
-      case UNKNOWN:
-        output = new Unknown().setJdbcType(jdbcType);
-        break;
-      default:
-        // TODO(Jarcec): Throw an exception of unsupported type?
+    case ARRAY:
+      output = new Array(listType).setSize(arraySize);
+      break;
+    case BINARY:
+      Long charSize = (Long) obj.get(CHAR_SIZE);
+      output = new Binary().setCharSize(charSize);
+      break;
+    case BIT:
+      output = new Bit();
+      break;
+    case DATE:
+      output = new Date();
+      break;
+    case DATE_TIME:
+      Boolean fraction = (Boolean) obj.get(FRACTION);
+      Boolean timezone = (Boolean) obj.get(TIMEZONE);
+      output = new DateTime().setFraction(fraction).setTimezone(timezone);
+      break;
+    case DECIMAL:
+      Long precision = (Long) obj.get(PRECISION);
+      Long scale = (Long) obj.get(SCALE);
+      output = new Decimal().setPrecision(precision).setScale(scale);
+      break;
+    case ENUM:
+      output = new Enum(listType);
+      break;
+    case FIXED_POINT:
+      Boolean unsigned = (Boolean) obj.get(UNSIGNED);
+      Long fixedPointByteSize = (Long) obj.get(BYTE_SIZE);
+      output = new FixedPoint().setByteSize(fixedPointByteSize).setUnsigned(unsigned);
+      break;
+    case FLOATING_POINT:
+      Long floatingPointByteSize = (Long) obj.get(BYTE_SIZE);
+      output = new FloatingPoint().setByteSize(floatingPointByteSize);
+      break;
+    case MAP:
+      output = new Map(key, value);
+      break;
+    case SET:
+      output = new Set(listType);
+      break;
+    case TEXT:
+      charSize = (Long) obj.get(CHAR_SIZE);
+      output = new Text().setCharSize(charSize);
+      break;
+    case TIME:
+      Boolean timeFraction = (Boolean) obj.get(FRACTION);
+      output = new Time().setFraction(timeFraction);
+      break;
+    case UNKNOWN:
+      Long jdbcType = (Long) obj.get(JDBC_TYPE);
+      output = new Unknown().setJdbcType(jdbcType);
+      break;
+    default:
+      // TODO(Jarcec): Throw an exception of unsupported type?
     }
 
     output.setName(name);

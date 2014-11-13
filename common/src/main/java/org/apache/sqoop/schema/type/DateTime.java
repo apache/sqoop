@@ -35,6 +35,7 @@ public class DateTime extends AbstractDateTime {
   private Boolean timezone;
 
   public DateTime() {
+    super();
   }
 
   public DateTime(String name) {

@@ -18,22 +18,22 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Unique values of the same type.
+ * Set contains unique values in a collection of a given type
  *
  * JDBC Types: set
  */
-public class Set extends AbstractComplexType {
+public class Set extends AbstractComplexListType {
 
-  public Set(Column key) {
-    super(key);
+  public Set(Column listType) {
+    super(listType);
   }
 
-  public Set(String name, Column key) {
-    super(name, key);
+  public Set(String name, Column listType) {
+    super(name, listType);
   }
 
-  public Set(String name, Boolean nullable, Column key) {
-    super(name, nullable, key);
+  public Set(String name, Boolean nullable, Column listType) {
+    super(name, nullable, listType);
   }
 
   @Override
@@ -43,9 +43,8 @@ public class Set extends AbstractComplexType {
 
   @Override
   public String toString() {
-    return new StringBuilder("Set{")
-      .append(super.toString())
-      .append("}")
-      .toString();
+    return new StringBuilder("Set{").
+              append(super.toString()).
+              append("}").toString();
   }
 }

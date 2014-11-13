@@ -23,6 +23,7 @@ package org.apache.sqoop.schema.type;
 public abstract class AbstractDateTime extends Column {
 
   protected AbstractDateTime() {
+    super();
   }
 
   protected AbstractDateTime(String name) {

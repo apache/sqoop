@@ -45,7 +45,8 @@ public class TestSchemaSerialization {
 
   @Test
   public void testArray() {
-    Schema array = new Schema("array").addColumn(new Array("a", new Decimal()));
+    // create an array type containing decimals
+    Schema array = new Schema("array").addColumn(new Array("a", new Decimal()).setSize(1L));
     transferAndAssert(array);
   }
 
@@ -122,7 +123,7 @@ public class TestSchemaSerialization {
   }
 
   @Test
-  public void testUnsupported() {
+  public void testUnknown() {
     Schema t = new Schema("t").addColumn(new Unknown("u", 4L));
     transferAndAssert(t);
   }
@@ -156,7 +157,7 @@ public class TestSchemaSerialization {
   @Test
   public void testComplex() {
     Schema complex = new Schema("complex")
-      .addColumn(new Map(new Array(new Enum(new Text())), new Set(new Array(new Text()))).setName("a"))
+      .addColumn(new Map(new Text(), new Set(new Array(new Text()))).setName("a"))
     ;
     transferAndAssert(complex);
   }

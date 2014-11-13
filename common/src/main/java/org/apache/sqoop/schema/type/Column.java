@@ -23,7 +23,7 @@ package org.apache.sqoop.schema.type;
 public abstract class Column {
 
   /**
-   * Name of the column.
+   * Name of the column. It is optional
    */
   String name;
 
@@ -104,8 +104,4 @@ public abstract class Column {
     return result;
   }
 
-  public boolean validate(Object o) {
-    // TODO(SQOOP-1707)
-    return true;
-  }
 }

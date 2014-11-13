@@ -43,6 +43,7 @@ public class Unknown extends Binary {
   }
 
   public Unknown() {
+    super();
   }
 
   public Unknown(Long jdbcType) {

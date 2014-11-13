@@ -35,6 +35,7 @@ public class Decimal extends AbstractNumber {
   private Long scale;
 
   public Decimal() {
+    super();
   }
 
   public Decimal(String name) {

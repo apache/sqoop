@@ -27,6 +27,7 @@ public class Time extends AbstractDateTime {
   private Boolean fraction;
 
   public Time() {
+    super();
   }
 
   public Time(String name) {

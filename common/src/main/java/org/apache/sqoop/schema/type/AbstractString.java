@@ -20,44 +20,50 @@ package org.apache.sqoop.schema.type;
 /**
  * Any type that is encoding character (or byte) array.
  */
-public abstract class AbstractString extends Column {
+public abstract class AbstractString extends AbstractPrimitiveType {
 
-  private Long length;
+  /**
+   * Represents the size for the column type and will be handy for connectors
+   * to map this info to the native data sources they represent
+   * https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
+   */
+  private Long charSize;
 
   protected AbstractString() {
+    super();
   }
 
   protected AbstractString(String name) {
     super(name);
   }
 
-  protected AbstractString(String name, Long length) {
+  protected AbstractString(String name, Long size) {
     super(name);
-    this.length = length;
+    this.charSize = size;
   }
 
   protected AbstractString(String name, Boolean nullable) {
     super(name, nullable);
   }
 
-  protected AbstractString(String name, Boolean nullable, Long length) {
+  protected AbstractString(String name, Boolean nullable, Long size) {
     super(name, nullable);
-    this.length = length;
+    this.charSize = size;
   }
 
-  public Long getLength() {
-    return length;
+  public Long getCharSize() {
+    return charSize;
   }
 
-  public AbstractString setLength(Long length) {
-    this.length = length;
+  public AbstractString setCharSize(Long size) {
+    this.charSize = size;
     return this;
   }
 
   @Override
   public String toString() {
     return new StringBuilder(super.toString())
-      .append(",length=").append(length)
+      .append(",charSize=").append(charSize)
       .toString();
   }
 
@@ -69,7 +75,7 @@ public abstract class AbstractString extends Column {
 
     AbstractString that = (AbstractString) o;
 
-    if (length != null ? !length.equals(that.length) : that.length != null)
+    if (charSize != null ? !charSize.equals(that.charSize) : that.charSize != null)
       return false;
 
     return true;
@@ -78,7 +84,7 @@ public abstract class AbstractString extends Column {
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    result = 31 * result + (length != null ? length.hashCode() : 0);
+    result = 31 * result + (charSize != null ? charSize.hashCode() : 0);
     return result;
   }
 }

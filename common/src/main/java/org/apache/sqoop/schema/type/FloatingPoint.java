@@ -24,9 +24,15 @@ package org.apache.sqoop.schema.type;
  */
 public class FloatingPoint extends AbstractNumber {
 
+  /**
+  This field will come handy in connector that might require to use the
+  size information on the schema object to do additional type mappings in their source
+  Read more infomration : https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
+  */
   private Long byteSize;
 
   public FloatingPoint() {
+    super();
   }
 
   public FloatingPoint(String name) {

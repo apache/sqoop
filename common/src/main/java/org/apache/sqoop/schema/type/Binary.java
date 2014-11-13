@@ -25,13 +25,14 @@ package org.apache.sqoop.schema.type;
 public class Binary extends AbstractString {
 
   public Binary() {
+    super();
   }
 
   public Binary(String name) {
     super(name);
   }
 
-  public Binary(String name, Long length) {
+  public Binary(String name, Long size) {
     super(name);
   }
 
@@ -40,8 +41,8 @@ public class Binary extends AbstractString {
     super(name, nullable);
   }
 
-  public Binary(String name, Boolean nullable, Long length) {
-    super(name, nullable, length);
+  public Binary(String name, Boolean nullable, Long size) {
+    super(name, nullable, size);
   }
 
   @Override

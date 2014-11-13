@@ -18,19 +18,18 @@
 package org.apache.sqoop.schema.type;
 
 /**
- * Any type related to number.
+ * Primitive type for column
  */
-public abstract class AbstractNumber extends AbstractPrimitiveType {
-
-  protected AbstractNumber() {
+public abstract class AbstractPrimitiveType extends Column {
+  protected AbstractPrimitiveType() {
     super();
   }
 
-  protected AbstractNumber(String name) {
+  protected AbstractPrimitiveType(String name) {
     super(name);
   }
 
-  protected AbstractNumber(String name, Boolean nullable) {
+  protected AbstractPrimitiveType(String name, Boolean nullable) {
     super(name, nullable);
   }
 

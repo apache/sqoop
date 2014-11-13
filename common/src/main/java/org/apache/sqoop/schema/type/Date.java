@@ -25,6 +25,7 @@ package org.apache.sqoop.schema.type;
 public class Date extends AbstractDateTime {
 
   public Date() {
+    super();
   }
 
   public Date(String name) {
