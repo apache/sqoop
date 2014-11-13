@@ -1294,11 +1294,14 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
   private void updateConnectorAndDeleteConfigs(MConnector mConnector, Connection conn) {
     PreparedStatement updateConnectorStatement = null;
     PreparedStatement deleteConfig = null;
+    PreparedStatement deleteConfigDirection = null;
     PreparedStatement deleteInput = null;
     try {
       updateConnectorStatement = conn.prepareStatement(STMT_UPDATE_CONFIGURABLE);
       deleteInput = conn.prepareStatement(STMT_DELETE_INPUTS_FOR_CONFIGURABLE);
+      deleteConfigDirection = conn.prepareStatement(STMT_DELETE_DIRECTIONS_FOR_CONFIGURABLE);
       deleteConfig = conn.prepareStatement(STMT_DELETE_CONFIGS_FOR_CONFIGURABLE);
+      
       updateConnectorStatement.setString(1, mConnector.getUniqueName());
       updateConnectorStatement.setString(2, mConnector.getClassName());
       updateConnectorStatement.setString(3, mConnector.getVersion());
@@ -1309,15 +1312,17 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0038);
       }
       deleteInput.setLong(1, mConnector.getPersistenceId());
+      deleteConfigDirection.setLong(1, mConnector.getPersistenceId());
       deleteConfig.setLong(1, mConnector.getPersistenceId());
       deleteInput.executeUpdate();
+      deleteConfigDirection.executeUpdate();
       deleteConfig.executeUpdate();
 
     } catch (SQLException e) {
       logException(e, mConnector);
       throw new SqoopException(DerbyRepoError.DERBYREPO_0038, e);
     } finally {
-      closeStatements(updateConnectorStatement, deleteConfig, deleteInput);
+      closeStatements(updateConnectorStatement, deleteConfig, deleteConfigDirection, deleteInput);
     }
   }
 
