@@ -108,17 +108,44 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(0, list.size());
     loadJobsForLatestVersion();
 
-    // Load all two connections on loaded repository
+    // Load all two links on loaded repository
     list = handler.findJobs(derbyConnection);
     assertEquals(4, list.size());
 
     assertEquals("JA0", list.get(0).getName());
-
     assertEquals("JB0", list.get(1).getName());
-
     assertEquals("JC0", list.get(2).getName());
-
     assertEquals("JD0", list.get(3).getName());
+  }
+
+  @Test
+  public void testFindJobsByConnector() throws Exception {
+    List<MJob> list;
+    // Load empty list on empty repository
+    list = handler.findJobs(derbyConnection);
+    assertEquals(0, list.size());
+    loadJobsForLatestVersion();
+
+    // Load all 4 jobs on loaded repository
+    list = handler.findJobsForConnector(1, derbyConnection);
+    assertEquals(4, list.size());
+
+    assertEquals("JA0", list.get(0).getName());
+    assertEquals("JB0", list.get(1).getName());
+    assertEquals("JC0", list.get(2).getName());
+    assertEquals("JD0", list.get(3).getName());
+  }
+
+  @Test
+  public void testFindJobsForNonExistingConnector() throws Exception {
+    List<MJob> list;
+    // Load empty list on empty repository
+    list = handler.findJobs(derbyConnection);
+    assertEquals(0, list.size());
+    loadJobsForLatestVersion();
+
+    list = handler.findJobsForConnector(11, derbyConnection);
+    assertEquals(0, list.size());
   }
 
   @Test

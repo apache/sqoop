@@ -149,7 +149,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE);
+      stmt = conn
+          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE);
       stmt.setLong(1, connectorId);
       stmt.setLong(2, connectorId);
       return loadJobs(stmt, conn);
@@ -894,10 +895,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MJob> findJobs(Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB);
-
+      stmt = conn
+          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB_ALL);
       return loadJobs(stmt, conn);
-
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);

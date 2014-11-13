@@ -19,6 +19,8 @@ package org.apache.sqoop.repository.derby;
 
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
+import static org.apache.sqoop.repository.common.CommonRepositoryInsertUpdateDeleteSelectQuery.*;
+
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import java.net.URL;
 import java.sql.Connection;

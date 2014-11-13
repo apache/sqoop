@@ -83,28 +83,6 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
      + COLUMN_SQN_UPDATE_USER + ", " + COLUMN_SQN_UPDATE_DATE
      + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-  /**********JOB TABLE **************/
-  //DML: Select all jobs
-  public static final String STMT_SELECT_JOB =
-    "SELECT "
-    + "FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-    + "TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-    + "JOB." + COLUMN_SQB_ID + ", "
-    + "JOB." + COLUMN_SQB_NAME + ", "
-    + "JOB." + COLUMN_SQB_FROM_LINK + ", "
-    + "JOB." + COLUMN_SQB_TO_LINK + ", "
-    + "JOB." + COLUMN_SQB_ENABLED + ", "
-    + "JOB." + COLUMN_SQB_CREATION_USER + ", "
-    + "JOB." + COLUMN_SQB_CREATION_DATE + ", "
-    + "JOB." + COLUMN_SQB_UPDATE_USER + ", "
-    + "JOB." + COLUMN_SQB_UPDATE_DATE
-    + " FROM " + TABLE_SQ_JOB + " JOB"
-      + " LEFT JOIN " + TABLE_SQ_LINK + " FROM_CONNECTOR"
-        + " ON " + COLUMN_SQB_FROM_LINK + " = FROM_CONNECTOR." + COLUMN_SQ_LNK_ID
-      + " LEFT JOIN " + TABLE_SQ_LINK + " TO_CONNECTOR"
-        + " ON " + COLUMN_SQB_TO_LINK + " = TO_CONNECTOR." + COLUMN_SQ_LNK_ID;
-
-
   /******* CONFIG and CONNECTOR DIRECTIONS ****/
   public static final String STMT_INSERT_DIRECTION = "INSERT INTO " + TABLE_SQ_DIRECTION + " "
        + "(" + COLUMN_SQD_NAME + ") VALUES (?)";
@@ -114,16 +92,6 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
            + COLUMN_SQ_CFG_ID + ", "
            + COLUMN_SQ_CFG_DIRECTION
            + " FROM " + TABLE_SQ_CONFIG;
-
-  public static final String STMT_INSERT_SQ_CONNECTOR_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR_DIRECTIONS + " "
-          + "(" + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION + ")"
-          + " VALUES (?, ?)";
-
-  public static final String STMT_INSERT_SQ_CONFIG_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONFIG_DIRECTIONS + " "
-          + "(" + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION + ")"
-          + " VALUES (?, ?)";
 
   private DerbySchemaInsertUpdateDeleteSelectQuery() {
     // Disable explicit object creation

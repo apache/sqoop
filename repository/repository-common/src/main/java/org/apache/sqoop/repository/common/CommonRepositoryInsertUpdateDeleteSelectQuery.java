@@ -343,7 +343,7 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " WHERE " + COLUMN_SQ_LNK_ID + " = ? ";
 
   //DML: Select all jobs
-  public static final String STMT_SELECT_JOB =
+  public static final String STMT_SELECT_JOB_ALL =
       "SELECT "
           + "FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
           + "TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
@@ -364,17 +364,19 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
-      STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_ID + " = ?";
+      STMT_SELECT_JOB_ALL +
+      " WHERE " + COLUMN_SQB_ID + " = ?";
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_NAME =
-      STMT_SELECT_JOB + " WHERE " + COLUMN_SQB_NAME + " = ?";
+      STMT_SELECT_JOB_ALL +
+      " WHERE " + COLUMN_SQB_NAME + " = ?";
 
   // DML: Select all jobs for a Connector
   public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
-      STMT_SELECT_JOB
-          + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONFIGURABLE + " = ? OR TO_LINK."
-          + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
+      STMT_SELECT_JOB_ALL +
+       " WHERE FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + " = ?" +
+       " OR TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
 
   /**********SUBMISSION TABLE **************/
   // DML: Insert new submission

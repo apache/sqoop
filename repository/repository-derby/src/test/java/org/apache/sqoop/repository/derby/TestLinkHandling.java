@@ -63,7 +63,7 @@ public class TestLinkHandling extends DerbyTestCase {
       assertEquals(CommonRepositoryError.COMMON_0021, ex.getErrorCode());
     }
 
-    // Load prepared connections into database
+    // Load prepared links into database
     loadLinksForLatestVersion();
 
     MLink linkA = handler.findLink(1, getDerbyDatabaseConnection());
@@ -85,7 +85,7 @@ public class TestLinkHandling extends DerbyTestCase {
   public void testFindLinkByName() throws Exception {
     // Let's try to find non existing link
     assertNull(handler.findLink("non-existing", getDerbyDatabaseConnection()));
-    // Load prepared connections into database
+    // Load prepared links into database
     loadLinksForLatestVersion();
 
     MLink linkA = handler.findLink("CA", getDerbyDatabaseConnection());
@@ -113,12 +113,43 @@ public class TestLinkHandling extends DerbyTestCase {
 
     loadLinksForLatestVersion();
 
-    // Load all two connections on loaded repository
+    // Load all two links on loaded repository
     list = handler.findLinks(getDerbyDatabaseConnection());
     assertEquals(2, list.size());
 
     assertEquals("CA", list.get(0).getName());
     assertEquals("CB", list.get(1).getName());
+  }
+
+  @Test
+  public void testFindLinksByConnector() throws Exception {
+    List<MLink> list;
+
+    // Load empty list on empty repository
+    list = handler.findLinks(getDerbyDatabaseConnection());
+    assertEquals(0, list.size());
+
+    loadLinksForLatestVersion();
+
+    // Load all two links on loaded repository
+    list = handler.findLinksForConnector(1, getDerbyDatabaseConnection());
+    assertEquals(2, list.size());
+
+    assertEquals("CA", list.get(0).getName());
+    assertEquals("CB", list.get(1).getName());
+  }
+
+  public void testFindLinksByNonExistingConnector() throws Exception {
+    List<MLink> list;
+
+    // Load empty list on empty repository
+    list = handler.findLinks(getDerbyDatabaseConnection());
+    assertEquals(0, list.size());
+
+    loadLinksForLatestVersion();
+
+    list = handler.findLinksForConnector(2, getDerbyDatabaseConnection());
+    assertEquals(0, list.size());
   }
 
   @Test
