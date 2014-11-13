@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.json.util;
 
+import static org.junit.Assert.assertEquals;
+
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
@@ -36,12 +39,23 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  *
  */
 public class TestSchemaSerialization {
+
+  @Test
+  public void testSchemaNull() {
+    // a null schema is treated as a NullSchema
+    JSONObject extractJson = SchemaSerialization.extractSchema(null);
+    JSONObject restoreJson = (JSONObject) JSONValue.parse(extractJson.toJSONString());
+    assertEquals(NullSchema.getInstance(), SchemaSerialization.restoreSchema(restoreJson));
+  }
+
+  @Test
+  public void testNullSchemaObject() {
+    transferAndAssert(NullSchema.getInstance());
+  }
 
   @Test
   public void testArray() {
@@ -157,8 +171,7 @@ public class TestSchemaSerialization {
   @Test
   public void testComplex() {
     Schema complex = new Schema("complex")
-      .addColumn(new Map(new Text(), new Set(new Array(new Text()))).setName("a"))
-    ;
+      .addColumn(new Map(new Text(), new Set(new Array(new Text()))).setName("a"));
     transferAndAssert(complex);
   }
 
@@ -169,9 +182,7 @@ public class TestSchemaSerialization {
 
   protected Schema transfer(Schema schema) {
     JSONObject extractJson = SchemaSerialization.extractSchema(schema);
-
     String transferredString = extractJson.toJSONString();
-
     JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
     return SchemaSerialization.restoreSchema(restoreJson);
   }

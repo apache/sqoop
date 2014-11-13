@@ -21,7 +21,6 @@ import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
-import org.apache.sqoop.schema.Schema;
 
 
 public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobConfiguration> {
@@ -38,11 +37,5 @@ public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobC
   public void initialize(InitializerContext context, LinkConfiguration linkConfig,
       FromJobConfiguration jobConfig) {
     // do nothing at this point
-  }
-
-  @Override
-  public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig,
-      FromJobConfiguration jobConfig) {
-    return new Schema("HDFS file");
   }
 }

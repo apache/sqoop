@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.AbstractPrimitiveType;
@@ -76,31 +77,36 @@ public class SchemaSerialization {
   @SuppressWarnings("unchecked")
   public static JSONObject extractSchema(Schema schema) {
     JSONObject object = new JSONObject();
-    object.put(NAME, schema.getName());
-    object.put(CREATION_DATE, schema.getCreationDate().getTime());
-    if (schema.getNote() != null) {
-      object.put(NOTE, schema.getNote());
+    // just a defensive check
+    if (schema != null) {
+      object.put(NAME, schema.getName());
+      object.put(CREATION_DATE, schema.getCreationDate().getTime());
+      if (schema.getNote() != null) {
+        object.put(NOTE, schema.getNote());
+      }
+      JSONArray columnArray = new JSONArray();
+      for (Column column : schema.getColumns()) {
+        columnArray.add(extractColumn(column));
+      }
+      object.put(COLUMNS, columnArray);
     }
-    JSONArray columnArray = new JSONArray();
-    for (Column column : schema.getColumns()) {
-      columnArray.add(extractColumn(column));
-    }
-    object.put(COLUMNS, columnArray);
     return object;
   }
 
   public static Schema restoreSchema(JSONObject jsonObject) {
+    // if the object is empty return a empty schema
+    if (jsonObject == null || jsonObject.isEmpty()) {
+      return NullSchema.getInstance();
+    }
     String name = (String) jsonObject.get(NAME);
     String note = (String) jsonObject.get(NOTE);
     java.util.Date date = new java.util.Date((Long) jsonObject.get(CREATION_DATE));
 
     Schema schema = new Schema(name).setNote(note).setCreationDate(date);
-
     JSONArray columnsArray = (JSONArray) jsonObject.get(COLUMNS);
     for (Object obj : columnsArray) {
       schema.addColumn(restoreColumn((JSONObject) obj));
     }
-
     return schema;
   }
 
@@ -158,7 +164,6 @@ public class SchemaSerialization {
       break;
     case DATE:
     case BIT:
-      // Nothing to do extra
       break;
     default:
       // TODO(jarcec): Throw an exception of unsupported type?
@@ -193,7 +198,6 @@ public class SchemaSerialization {
       }
       arraySize = (Long) list.get(SIZE);
     }
-
     ColumnType type = ColumnType.valueOf((String) obj.get(TYPE));
     Column output = null;
     switch (type) {

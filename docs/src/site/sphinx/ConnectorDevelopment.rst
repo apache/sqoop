@@ -115,12 +115,18 @@ Initializer is instantiated before the submission of sqoop job to the execution 
       JobConfiguration jobConfiguration);
 
   public List<String> getJars(InitializerContext context, LinkConfiguration linkConfiguration,
-      JobConfiguration jobConfiguration);
+      JobConfiguration jobConfiguration){
+       return new LinkedList<String>();
+      }
 
   public abstract Schema getSchema(InitializerContext context, LinkConfiguration linkConfiguration,
-      JobConfiguration jobConfiguration);
+      JobConfiguration jobConfiguration) {
+         return new NullSchema();
+      }
 
-In addition to the initialize() method where the job execution preparation activities occur, the ``Initializer`` must also implement the getSchema() method for the direction it supports. The getSchema() method is used by the sqoop system to match the data extracted/read by the ``From`` instance of connector data source with the data loaded/written to the ``To`` instance of the connector data source. In case of a relational database or columnar database, the returned Schema object will include collection of columns with their data types. If the data source is schema-less, such as a file, an empty Schema can be returned (i.e a Schema object without any columns).
+In addition to the initialize() method where the job execution preparation activities occur, the ``Initializer`` can also implement the getSchema() method for the directions ``FROM`` and ``TO`` that it supports.
+
+The getSchema() method is used by the sqoop system to match the data extracted/read by the ``From`` instance of connector data source with the data loaded/written to the ``To`` instance of the connector data source. In case of a relational database or columnar database, the returned Schema object will include collection of columns with their data types. If the data source is schema-less, such as a file, a default ``NullSchema`` will be used (i.e a Schema object without any columns).
 
 NOTE: Sqoop 2 currently does not support extract and load between two connectors that represent schema-less data sources. We expect that atleast the ``From`` instance of the connector or the ``To`` instance of the connector in the sqoop job will have a schema. If both ``From`` and ``To`` have a associated non empty schema, Sqoop 2 will load data by column name, i.e, data in column "A" in ``From`` instance of the connector for the job will be loaded to column "A" in the ``To`` instance of the connector for that job.
 

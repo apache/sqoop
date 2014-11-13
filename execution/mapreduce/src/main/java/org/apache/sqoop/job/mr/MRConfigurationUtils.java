@@ -139,7 +139,6 @@ public final class MRConfigurationUtils {
    * @param schema Schema
    */
   public static void setConnectorSchema(Direction type, Job job, Schema schema) {
-    if(schema != null) {
       String jsonSchema =  SchemaSerialization.extractSchema(schema).toJSONString();
       switch (type) {
         case FROM:
@@ -148,7 +147,6 @@ public final class MRConfigurationUtils {
         case TO:
           job.getCredentials().addSecretKey(SCHEMA_TO_KEY, jsonSchema.getBytes());
           return;
-      }
     }
   }
 

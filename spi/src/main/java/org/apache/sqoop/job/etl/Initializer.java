@@ -20,6 +20,7 @@ package org.apache.sqoop.job.etl;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 
 /**
@@ -59,6 +60,7 @@ public abstract class Initializer<LinkConfiguration, JobConfiguration> {
 
   /**
    * Return schema associated with the connector for FROM and TO
+   * By default we assume a null schema. Override the method if there a custom schema to provide either for FROM or TO
    * @param context Initializer context object
    * @param linkConfiguration link configuration object
    * @param jobConfiguration job configuration object for the FROM and TO
@@ -67,7 +69,9 @@ public abstract class Initializer<LinkConfiguration, JobConfiguration> {
    * @return
    */
 
-  public abstract Schema getSchema(InitializerContext context, LinkConfiguration linkConfiguration,
-      JobConfiguration jobConfiguration);
+  public Schema getSchema(InitializerContext context, LinkConfiguration linkConfiguration,
+      JobConfiguration jobConfiguration) {
+    return NullSchema.getInstance();
+  }
 
 }

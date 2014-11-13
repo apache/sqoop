@@ -18,17 +18,17 @@
 package org.apache.sqoop.job.mr;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Config;
 import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Text;
 import org.junit.Before;
@@ -100,10 +100,12 @@ public class TestMRConfigurationUtils {
   @Test
   public void testConnectorSchemaNull() throws Exception {
     MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, null);
-    assertNull(MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
+    assertEquals(NullSchema.getInstance(),
+        MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
 
     MRConfigurationUtils.setConnectorSchema(Direction.TO, job, null);
-    assertNull(MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
+    assertEquals(NullSchema.getInstance(),
+        MRConfigurationUtils.getConnectorSchema(Direction.FROM, jobConfSpy));
   }
 
   private Schema getSchema(String name) {
