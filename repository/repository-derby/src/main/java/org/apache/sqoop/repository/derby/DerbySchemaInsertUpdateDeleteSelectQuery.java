@@ -442,7 +442,7 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
    // DML: Select all jobs for a Connector
    public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
        STMT_SELECT_JOB
-       + " WHERE FROM_LINK." + COLUMN_SQ_LNK_CONFIGURABLE + " = ? OR TO_LINK."
+       + " WHERE FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + " = ? OR TO_CONNECTOR."
        + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
 
    /**********SUBMISSION TABLE **************/
