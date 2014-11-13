@@ -27,12 +27,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class TestSqoopWritable {
 
-  private final SqoopWritable writable = new SqoopWritable();
+  private final SqoopWritable writable = new SqoopWritable(new CSVIntermediateDataFormat());
 
   @Test
   public void testStringInStringOut() {
@@ -78,7 +79,7 @@ public class TestSqoopWritable {
 
     //Don't test what the data is, test that SqoopWritable can read it.
     InputStream instream = new ByteArrayInputStream(written);
-    SqoopWritable newWritable = new SqoopWritable();
+    SqoopWritable newWritable = new SqoopWritable(new CSVIntermediateDataFormat());
     DataInput in = new DataInputStream(instream);
     newWritable.readFields(in);
     Assert.assertEquals(testData, newWritable.getString());

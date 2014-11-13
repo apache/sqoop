@@ -107,13 +107,17 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     }
   }
 
+  // There are two IDF objects we carry around in memory during the sqoop job execution.
+  // The fromDataFormat has the fromSchema in it, the toDataFormat has the toSchema in it.
+  // Before we do the writing to the toDatFormat object we do the matching process to negotiate between 
+  // the two schemas and their corresponding column types before we write the data to the toDataFormat object
   private class SqoopMapDataWriter extends DataWriter {
     private Context context;
     private SqoopWritable writable;
 
     public SqoopMapDataWriter(Context context) {
       this.context = context;
-      this.writable = new SqoopWritable();
+      this.writable = new SqoopWritable(toDataFormat);
     }
 
     @Override
@@ -139,10 +143,10 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
         if (LOG.isDebugEnabled()) {
           LOG.debug("Extracted data: " + fromDataFormat.getTextData());
         }
-
-        toDataFormat.setObjectData( matcher.getMatchingData( fromDataFormat.getObjectData() ) );
-
-        writable.setString(toDataFormat.getTextData());
+        // NOTE: The fromDataFormat and the corresponding fromSchema is used only for the matching process
+        // The output of the mappers is finally written to the toDataFormat object after the matching process
+        // since the writable encapsulates the toDataFormat ==> new SqoopWritable(toDataFormat)
+        toDataFormat.setObjectData(matcher.getMatchingData(fromDataFormat.getObjectData()));
         context.write(writable, NullWritable.get());
       } catch (Exception e) {
         throw new SqoopException(MRExecutionError.MAPRED_EXEC_0013, e);

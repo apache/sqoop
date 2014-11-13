@@ -63,6 +63,7 @@ public class SqoopOutputFormatLoadExecutor {
   private volatile boolean isTest = false;
   private String loaderName;
 
+  // NOTE: This method is only exposed for test cases and hence assumes CSVIntermediateDataFormat
   SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName){
     this.isTest = isTest;
     this.loaderName = loaderName;
@@ -79,6 +80,7 @@ public class SqoopOutputFormatLoadExecutor {
         MRConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration()));
     dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
         .getConfiguration().get(MRJobConstants.INTERMEDIATE_DATA_FORMAT));
+    // Using the TO schema since the SqoopDataWriter in the SqoopMapper encapsulates the toDataFormat
     dataFormat.setSchema(matcher.getToSchema());
   }
 
@@ -99,6 +101,7 @@ public class SqoopOutputFormatLoadExecutor {
     public void write(SqoopWritable key, NullWritable value) throws InterruptedException {
       free.acquire();
       checkIfConsumerThrew();
+      // NOTE: this is the place where data written from SqoopMapper writable is available to the SqoopOutputFormat
       dataFormat.setTextData(key.getString());
       filled.release();
     }
@@ -227,24 +230,23 @@ public class SqoopOutputFormatLoadExecutor {
 
         // Objects that should be pass to the Executor execution
         PrefixContext subContext = null;
-        Object configConnection = null;
-        Object configJob = null;
+        Object connectorLinkConfig = null;
+        Object connectorToJobConfig = null;
         Schema schema = null;
 
         if (!isTest) {
-          // Using the TO schema since the IDF returns data in TO schema
+          // Using the TO schema since the SqoopDataWriter in the SqoopMapper encapsulates the toDataFormat
           schema = matcher.getToSchema();
-
           subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
-          configConnection = MRConfigurationUtils.getConnectorLinkConfig(Direction.TO, conf);
-          configJob = MRConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
+          connectorLinkConfig = MRConfigurationUtils.getConnectorLinkConfig(Direction.TO, conf);
+          connectorToJobConfig = MRConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
         }
 
         // Create loader context
         LoaderContext loaderContext = new LoaderContext(subContext, reader, schema);
 
         LOG.info("Running loader class " + loaderName);
-        loader.load(loaderContext, configConnection, configJob);
+        loader.load(loaderContext, connectorLinkConfig, connectorToJobConfig);
         LOG.info("Loader has finished");
       } catch (Throwable t) {
         readerFinished = true;

@@ -132,11 +132,10 @@ public class TestSqoopOutputFormatLoadExecutor {
         SqoopOutputFormatLoadExecutor(true, ThrowingLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
-    SqoopWritable writable = new SqoopWritable();
+    SqoopWritable writable = new SqoopWritable(dataFormat);
     try {
       for (int count = 0; count < 100; count++) {
         dataFormat.setTextData(String.valueOf(count));
-        writable.setString(dataFormat.getTextData());
         writer.write(writable, null);
       }
     } catch (SqoopException ex) {
@@ -151,7 +150,7 @@ public class TestSqoopOutputFormatLoadExecutor {
         SqoopOutputFormatLoadExecutor(true, GoodContinuousLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
-    SqoopWritable writable = new SqoopWritable();
+    SqoopWritable writable = new SqoopWritable(dataFormat);
     for (int i = 0; i < 10; i++) {
       StringBuilder builder = new StringBuilder();
       for (int count = 0; count < 100; count++) {
@@ -161,7 +160,6 @@ public class TestSqoopOutputFormatLoadExecutor {
         }
       }
       dataFormat.setTextData(builder.toString());
-      writable.setString(dataFormat.getTextData());
       writer.write(writable, null);
     }
     writer.close(null);
@@ -173,7 +171,7 @@ public class TestSqoopOutputFormatLoadExecutor {
         SqoopOutputFormatLoadExecutor(true, GoodLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
-    SqoopWritable writable = new SqoopWritable();
+    SqoopWritable writable = new SqoopWritable(dataFormat);
     StringBuilder builder = new StringBuilder();
     for (int count = 0; count < 100; count++) {
       builder.append(String.valueOf(count));
@@ -182,7 +180,6 @@ public class TestSqoopOutputFormatLoadExecutor {
       }
     }
     dataFormat.setTextData(builder.toString());
-    writable.setString(dataFormat.getTextData());
     writer.write(writable, null);
 
     //Allow writer to complete.
@@ -198,7 +195,7 @@ public class TestSqoopOutputFormatLoadExecutor {
         SqoopOutputFormatLoadExecutor(true, ThrowingContinuousLoader.class.getName());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
-    SqoopWritable writable = new SqoopWritable();
+    SqoopWritable writable = new SqoopWritable(dataFormat);
     try {
       for (int i = 0; i < 10; i++) {
         StringBuilder builder = new StringBuilder();
@@ -209,7 +206,6 @@ public class TestSqoopOutputFormatLoadExecutor {
           }
         }
         dataFormat.setTextData(builder.toString());
-        writable.setString(dataFormat.getTextData());
         writer.write(writable, null);
       }
       writer.close(null);
