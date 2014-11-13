@@ -65,6 +65,7 @@ Auxiliary commands are commands that are improving user experience and are runni
 * ``exit`` Exit client immediately. This command can be also executed by sending EOT (end of transmission) character. It's CTRL+D on most common Linux shells like Bash or Zsh.
 * ``history`` Print out command history. Please note that Sqoop client is saving history from previous executions and thus you might see commands that you've executed in previous runs.
 * ``help`` Show all available commands with short in-shell documentation.
+
 ::
 
  sqoop:000> help
