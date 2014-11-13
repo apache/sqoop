@@ -2609,6 +2609,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         }
         driverConfig.add(mDriverConfig);
         break;
+      //added for connector upgrade path
+      case CONNECTION:
+        // do nothing since we do not support it
+        break;
       default:
         throw new SqoopException(DerbyRepoError.DERBYREPO_0007,
             "connector-" + fromConnectorId + ":" + configType);
@@ -2737,6 +2741,8 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       MConfigType mConfigType = MConfigType.valueOf(configType);
       switch (mConfigType) {
+        //added for connector upgrade path
+        case CONNECTION:
         case LINK:
           if (linkConfig.size() != configIndex) {
             throw new SqoopException(DerbyRepoError.DERBYREPO_0010,
