@@ -34,17 +34,8 @@ public class DateTime extends AbstractDateTime {
    */
   private Boolean timezone;
 
-  public DateTime() {
-    super();
-  }
-
   public DateTime(String name) {
     super(name);
-  }
-
-  public DateTime(Boolean fraction, Boolean timezone) {
-    this.fraction = fraction;
-    this.timezone = timezone;
   }
 
   public DateTime(String name, Boolean fraction, Boolean timezone) {

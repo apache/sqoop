@@ -24,8 +24,8 @@ package org.apache.sqoop.schema.type;
  */
 public class Set extends AbstractComplexListType {
 
-  public Set(Column listType) {
-    super(listType);
+  public Set(String name) {
+    super(name);
   }
 
   public Set(String name, Column listType) {

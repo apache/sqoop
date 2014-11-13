@@ -21,15 +21,12 @@ package org.apache.sqoop.schema.type;
  * Primitive type for column
  */
 public abstract class AbstractPrimitiveType extends Column {
-  protected AbstractPrimitiveType() {
-    super();
-  }
 
-  protected AbstractPrimitiveType(String name) {
+  public AbstractPrimitiveType(String name) {
     super(name);
   }
 
-  protected AbstractPrimitiveType(String name, Boolean nullable) {
+  public AbstractPrimitiveType(String name, Boolean nullable) {
     super(name, nullable);
   }
 

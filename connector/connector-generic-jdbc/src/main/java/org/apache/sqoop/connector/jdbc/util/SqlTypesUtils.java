@@ -40,14 +40,16 @@ public class SqlTypesUtils {
    * Convert given java.sql.Types number into internal data type.
    *
    * @param sqlType java.sql.Types constant
+   * @param columnName column name
+   *
    * @return Concrete Column implementation
    */
-  public static Column sqlTypeToAbstractType(int sqlType) {
+  public static Column sqlTypeToSchemaType(int sqlType, String columnName) {
     switch (sqlType) {
       case Types.SMALLINT:
       case Types.TINYINT:
       case Types.INTEGER:
-        return new FixedPoint();
+        return new FixedPoint(columnName);
 
       case Types.CLOB:
       case Types.VARCHAR:
@@ -56,39 +58,39 @@ public class SqlTypesUtils {
       case Types.NVARCHAR:
       case Types.NCHAR:
       case Types.LONGNVARCHAR:
-        return new Text();
+        return new Text(columnName);
 
       case Types.DATE:
-        return new Date();
+        return new Date(columnName);
 
       case Types.TIME:
-        return new Time();
+        return new Time(columnName);
 
       case Types.TIMESTAMP:
-        return new DateTime();
+        return new DateTime(columnName);
 
       case Types.FLOAT:
       case Types.REAL:
       case Types.DOUBLE:
-        return new FloatingPoint();
+        return new FloatingPoint(columnName);
 
       case Types.NUMERIC:
       case Types.DECIMAL:
       case Types.BIGINT:
-        return new Decimal();
+        return new Decimal(columnName);
 
       case Types.BIT:
       case Types.BOOLEAN:
-        return new Bit();
+        return new Bit(columnName);
 
       case Types.BINARY:
       case Types.VARBINARY:
       case Types.BLOB:
       case Types.LONGVARBINARY:
-        return new Binary();
+        return new Binary(columnName);
 
       default:
-        return new Unknown((long)sqlType);
+        return new Unknown(columnName,(long)sqlType);
     }
   }
 

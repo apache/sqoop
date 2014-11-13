@@ -32,10 +32,6 @@ public class Array extends AbstractComplexListType {
    */
   private Long size;
 
-  public Array(Column listType) {
-    super(listType);
-  }
-
   public Array(String name, Column listType) {
     super(name, listType);
   }

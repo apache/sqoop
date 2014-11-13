@@ -60,7 +60,7 @@ public class TestSchemaSerialization {
   @Test
   public void testArray() {
     // create an array type containing decimals
-    Schema array = new Schema("array").addColumn(new Array("a", new Decimal()).setSize(1L));
+    Schema array = new Schema("array").addColumn(new Array("a", new Decimal("a1")).setSize(1L));
     transferAndAssert(array);
   }
 
@@ -96,7 +96,7 @@ public class TestSchemaSerialization {
 
   @Test
   public void testEnum() {
-    Schema e = new Schema("e").addColumn(new Enum("e", new Text()));
+    Schema e = new Schema("e").addColumn(new Enum("e", new Text("e1")));
     transferAndAssert(e);
   }
 
@@ -114,13 +114,13 @@ public class TestSchemaSerialization {
 
   @Test
   public void testMap() {
-    Schema m = new Schema("m").addColumn(new Map("m", new Text(), new Decimal()));
+    Schema m = new Schema("m").addColumn(new Map("m", new Text("m1"), new Decimal("m2")));
     transferAndAssert(m);
   }
 
   @Test
   public void testSet() {
-    Schema s = new Schema("s").addColumn(new Set("b", new Binary()));
+    Schema s = new Schema("s").addColumn(new Set("b", new Binary("b1")));
     transferAndAssert(s);
   }
 
@@ -150,17 +150,17 @@ public class TestSchemaSerialization {
   @Test
   public void testAllTypes() {
     Schema allTypes = new Schema("all-types")
-      .addColumn(new Array("a", new Text()))
+      .addColumn(new Array("a", new Text("a1")))
       .addColumn(new Binary("b"))
       .addColumn(new Bit("c"))
       .addColumn(new Date("d"))
       .addColumn(new DateTime("e"))
       .addColumn(new Decimal("f"))
-      .addColumn(new Enum("g", new Text()))
+      .addColumn(new Enum("g", new Text("g1")))
       .addColumn(new FixedPoint("h"))
       .addColumn(new FloatingPoint("i"))
-      .addColumn(new Map("j", new Text(), new Text()))
-      .addColumn(new Set("k", new Text()))
+      .addColumn(new Map("j", new Text("j1"), new Text("j2")))
+      .addColumn(new Set("k", new Text("k1")))
       .addColumn(new Text("l"))
       .addColumn(new Time("m"))
       .addColumn(new Unknown("u"))
@@ -171,7 +171,7 @@ public class TestSchemaSerialization {
   @Test
   public void testComplex() {
     Schema complex = new Schema("complex")
-      .addColumn(new Map(new Text(), new Set(new Array(new Text()))).setName("a"));
+      .addColumn(new Map("a", new Text("a1"), new Set("a2", new Array("a3", new Text("a4")))));
     transferAndAssert(complex);
   }
 

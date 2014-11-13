@@ -82,17 +82,16 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
       rsmt = rs.getMetaData();
       for (int i = 1 ; i <= rsmt.getColumnCount(); i++) {
-        Column column = SqlTypesUtils.sqlTypeToAbstractType(rsmt.getColumnType(i));
-
         String columnName = rsmt.getColumnName(i);
-        if (columnName == null || columnName.equals("")) {
+
+        if (StringUtils.isEmpty(columnName)) {
           columnName = rsmt.getColumnLabel(i);
-          if (null == columnName) {
+          if (StringUtils.isEmpty(columnName)) {
             columnName = "Column " + i;
           }
         }
 
-        column.setName(columnName);
+        Column column = SqlTypesUtils.sqlTypeToSchemaType(rsmt.getColumnType(i), columnName);
         schema.addColumn(column);
       }
 

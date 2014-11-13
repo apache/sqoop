@@ -24,10 +24,6 @@ package org.apache.sqoop.schema.type;
  */
 public class Binary extends AbstractString {
 
-  public Binary() {
-    super();
-  }
-
   public Binary(String name) {
     super(name);
   }

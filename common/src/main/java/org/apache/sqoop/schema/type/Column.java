@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Base class for all the supported types in the Sqoop {@link #Schema}
  */
@@ -33,18 +35,15 @@ public abstract class Column {
   Boolean nullable;
 
   /**
-   * By default a column has empty name and is nullable
+   * By default a column is nullable
    */
-  public Column() {
-    this("", true);
-  }
-
-  public Column(String name) {
+   public Column(String name) {
     this(name, true);
   }
 
   public Column(String name, Boolean nullable) {
-    setName(name);
+    assert !StringUtils.isEmpty(name);
+    this.name = name;
     setNullable(nullable);
   }
 
@@ -54,11 +53,6 @@ public abstract class Column {
    * @return Type of the column
    */
   public abstract ColumnType getType();
-
-  public Column setName(String name) {
-    this.name = name;
-    return this;
-  }
 
   public Column setNullable(Boolean nullable) {
     this.nullable = nullable;

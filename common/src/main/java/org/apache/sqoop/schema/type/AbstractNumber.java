@@ -22,10 +22,6 @@ package org.apache.sqoop.schema.type;
  */
 public abstract class AbstractNumber extends AbstractPrimitiveType {
 
-  protected AbstractNumber() {
-    super();
-  }
-
   protected AbstractNumber(String name) {
     super(name);
   }

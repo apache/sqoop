@@ -29,11 +29,6 @@ public class Map extends AbstractComplexType {
   // The value inside the map can be either a primitive or a complex column type
   private Column value;
 
-  public Map(AbstractPrimitiveType key, Column value) {
-    super();
-    setKeyValue(key, value);
-  }
-
   public Map(String name, AbstractPrimitiveType key, Column value) {
     super(name);
     setKeyValue(key, value);

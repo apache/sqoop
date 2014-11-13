@@ -29,10 +29,6 @@ public abstract class AbstractString extends AbstractPrimitiveType {
    */
   private Long charSize;
 
-  protected AbstractString() {
-    super();
-  }
-
   protected AbstractString(String name) {
     super(name);
   }

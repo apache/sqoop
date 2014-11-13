@@ -22,10 +22,6 @@ package org.apache.sqoop.schema.type;
  */
 public abstract class AbstractComplexType extends Column {
 
-  public AbstractComplexType() {
-    super();
-  }
-
   public AbstractComplexType(String name) {
     super(name);
   }

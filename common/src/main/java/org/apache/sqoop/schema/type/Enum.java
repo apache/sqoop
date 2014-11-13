@@ -25,8 +25,8 @@ package org.apache.sqoop.schema.type;
 
 public class Enum extends AbstractComplexListType {
 
-  public Enum(Column listType) {
-    super(listType);
+  public Enum(String name) {
+    super(name);
   }
 
   public Enum(String name, Column listType) {

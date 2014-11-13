@@ -42,14 +42,6 @@ public class Unknown extends Binary {
     return this;
   }
 
-  public Unknown() {
-    super();
-  }
-
-  public Unknown(Long jdbcType) {
-    setJdbcType(jdbcType);
-  }
-
   public Unknown(String name) {
     super(name);
   }

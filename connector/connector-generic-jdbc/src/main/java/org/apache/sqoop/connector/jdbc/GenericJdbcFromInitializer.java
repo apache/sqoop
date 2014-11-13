@@ -27,8 +27,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.util.SqlTypesUtils;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
@@ -58,9 +58,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
   @Override
   public List<String> getJars(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     List<String> jars = new LinkedList<String>();
-
     jars.add(ClassUtils.jarForClass(linkConfig.linkConfig.jdbcDriver));
-
     return jars;
   }
 
@@ -86,17 +84,14 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
       rsmt = rs.getMetaData();
       for (int i = 1 ; i <= rsmt.getColumnCount(); i++) {
-        Column column = SqlTypesUtils.sqlTypeToAbstractType(rsmt.getColumnType(i));
-
         String columnName = rsmt.getColumnName(i);
-        if (columnName == null || columnName.equals("")) {
+        if (StringUtils.isEmpty(columnName)) {
           columnName = rsmt.getColumnLabel(i);
-          if (null == columnName) {
+          if (StringUtils.isEmpty(columnName)) {
             columnName = "Column " + i;
           }
         }
-
-        column.setName(columnName);
+        Column column = SqlTypesUtils.sqlTypeToSchemaType(rsmt.getColumnType(i), columnName);
         schema.addColumn(column);
       }
 

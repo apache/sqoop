@@ -25,9 +25,8 @@ public abstract class AbstractComplexListType extends AbstractComplexType {
   // represents the type of the list elements
   Column listType;
 
-  public AbstractComplexListType(Column listType) {
-    super();
-    setListType(listType);
+  public AbstractComplexListType(String name) {
+    super(name);
   }
 
   public AbstractComplexListType(String name, Column listType) {
@@ -40,9 +39,10 @@ public abstract class AbstractComplexListType extends AbstractComplexType {
     setListType(listType);
   }
 
-  private void setListType(Column listType) {
+  public AbstractComplexListType setListType(Column listType) {
     assert listType != null;
     this.listType = listType;
+    return this;
   }
 
   public Column getListType() {

@@ -38,17 +38,8 @@ public class FixedPoint extends AbstractNumber {
 
   private Boolean unsigned;
 
-  public FixedPoint() {
-    super();
-  }
-
   public FixedPoint(String name) {
     super(name);
-  }
-
-  public FixedPoint(Long byteSize, Boolean unsigned) {
-    this.byteSize = byteSize;
-    this.unsigned = unsigned;
   }
 
   public FixedPoint(String name, Long byteSize, Boolean unsigned) {

@@ -24,10 +24,6 @@ package org.apache.sqoop.schema.type;
  */
 public class Text extends AbstractString {
 
-  public Text() {
-    super();
-  }
-
   public Text(String name) {
     super(name);
   }

@@ -34,17 +34,8 @@ public class Decimal extends AbstractNumber {
    */
   private Long scale;
 
-  public Decimal() {
-    super();
-  }
-
   public Decimal(String name) {
     super(name);
-  }
-
-  public Decimal(Long precision, Long scale) {
-    this.precision = precision;
-    this.scale = scale;
   }
 
   public Decimal(String name, Long precision, Long scale) {

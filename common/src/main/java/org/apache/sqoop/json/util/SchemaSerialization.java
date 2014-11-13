@@ -202,63 +202,61 @@ public class SchemaSerialization {
     Column output = null;
     switch (type) {
     case ARRAY:
-      output = new Array(listType).setSize(arraySize);
+      output = new Array(name, listType).setSize(arraySize);
       break;
     case BINARY:
       Long charSize = (Long) obj.get(CHAR_SIZE);
-      output = new Binary().setCharSize(charSize);
+      output = new Binary(name).setCharSize(charSize);
       break;
     case BIT:
-      output = new Bit();
+      output = new Bit(name);
       break;
     case DATE:
-      output = new Date();
+      output = new Date(name);
       break;
     case DATE_TIME:
       Boolean fraction = (Boolean) obj.get(FRACTION);
       Boolean timezone = (Boolean) obj.get(TIMEZONE);
-      output = new DateTime().setFraction(fraction).setTimezone(timezone);
+      output = new DateTime(name).setFraction(fraction).setTimezone(timezone);
       break;
     case DECIMAL:
       Long precision = (Long) obj.get(PRECISION);
       Long scale = (Long) obj.get(SCALE);
-      output = new Decimal().setPrecision(precision).setScale(scale);
+      output = new Decimal(name).setPrecision(precision).setScale(scale);
       break;
     case ENUM:
-      output = new Enum(listType);
+      output = new Enum(name).setListType(listType);
       break;
     case FIXED_POINT:
       Boolean unsigned = (Boolean) obj.get(UNSIGNED);
       Long fixedPointByteSize = (Long) obj.get(BYTE_SIZE);
-      output = new FixedPoint().setByteSize(fixedPointByteSize).setUnsigned(unsigned);
+      output = new FixedPoint(name).setByteSize(fixedPointByteSize).setUnsigned(unsigned);
       break;
     case FLOATING_POINT:
       Long floatingPointByteSize = (Long) obj.get(BYTE_SIZE);
-      output = new FloatingPoint().setByteSize(floatingPointByteSize);
+      output = new FloatingPoint(name).setByteSize(floatingPointByteSize);
       break;
     case MAP:
-      output = new Map(key, value);
+      output = new Map(name, key, value);
       break;
     case SET:
-      output = new Set(listType);
+      output = new Set(name).setListType(listType);
       break;
     case TEXT:
       charSize = (Long) obj.get(CHAR_SIZE);
-      output = new Text().setCharSize(charSize);
+      output = new Text(name).setCharSize(charSize);
       break;
     case TIME:
       Boolean timeFraction = (Boolean) obj.get(FRACTION);
-      output = new Time().setFraction(timeFraction);
+      output = new Time(name).setFraction(timeFraction);
       break;
     case UNKNOWN:
       Long jdbcType = (Long) obj.get(JDBC_TYPE);
-      output = new Unknown().setJdbcType(jdbcType);
+      output = new Unknown(name).setJdbcType(jdbcType);
       break;
     default:
       // TODO(Jarcec): Throw an exception of unsupported type?
     }
-
-    output.setName(name);
     output.setNullable(nullable);
 
     return output;

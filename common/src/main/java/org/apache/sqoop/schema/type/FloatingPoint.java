@@ -31,18 +31,9 @@ public class FloatingPoint extends AbstractNumber {
   */
   private Long byteSize;
 
-  public FloatingPoint() {
-    super();
-  }
-
   public FloatingPoint(String name) {
     super(name);
   }
-
-  public FloatingPoint(Long byteSize) {
-    this.byteSize = byteSize;
-  }
-
   public FloatingPoint(String name, Long byteSize) {
     super(name);
     this.byteSize = byteSize;
