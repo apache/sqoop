@@ -25,6 +25,10 @@ public enum MConfigType {
   /** Unknown config type */
   OTHER,
 
+  @Deprecated
+  // NOTE: only exists to support the connector data upgrade path
+  CONNECTION,
+
   /** link config type */
   LINK,
 

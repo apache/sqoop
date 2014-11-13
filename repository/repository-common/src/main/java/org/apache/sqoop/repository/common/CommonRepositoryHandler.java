@@ -1979,6 +1979,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           }
           driverConfig.add(mDriverConfig);
           break;
+        case CONNECTION:
+          // do nothing
+           break;
         default:
           throw new SqoopException(CommonRepositoryError.COMMON_0004,
               "connector-" + fromConnectorId + ":" + configType);
@@ -2107,6 +2110,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       MConfigType mConfigType = MConfigType.valueOf(configType);
       switch (mConfigType) {
+        case CONNECTION:
         case LINK:
           if (linkConfig.size() != configIndex) {
             throw new SqoopException(CommonRepositoryError.COMMON_0007,
