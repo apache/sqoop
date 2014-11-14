@@ -119,6 +119,28 @@ public final class DerbySchemaUpgradeQuery {
     "RENAME COLUMN " + TABLE_SQ_FORM + "." + COLUMN_SQF_OPERATION
       + " TO " + COLUMN_SQF_DIRECTION;
 
+  //DML: Insert into form
+  public static final String STMT_INSERT_INTO_FORM =
+     "INSERT INTO " + TABLE_SQ_FORM+ " ("
+     + COLUMN_SQF_CONNECTOR + ", "
+     + COLUMN_SQF_NAME + ", "
+     + COLUMN_SQF_TYPE + ", "
+     + COLUMN_SQF_INDEX
+     + ") VALUES ( ?, ?, ?, ?)";
+
+  // DML: Insert into inpu with form name
+  public static final String STMT_INSERT_INTO_INPUT_WITH_FORM =
+     "INSERT INTO " + TABLE_SQ_INPUT + " ("
+     + COLUMN_SQI_NAME + ", "
+     + COLUMN_SQI_FORM + ", "
+     + COLUMN_SQI_INDEX + ", "
+     + COLUMN_SQI_TYPE + ", "
+     + COLUMN_SQI_STRMASK + ", "
+     + COLUMN_SQI_STRLENGTH + ", "
+     + COLUMN_SQI_ENUMVALS
+     + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+
   public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION =
       "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION
         + "=? WHERE " + COLUMN_SQF_DIRECTION + "=?"
@@ -128,6 +150,10 @@ public final class DerbySchemaUpgradeQuery {
       "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_CONNECTOR + "= ?"
           + " WHERE " + COLUMN_SQF_CONNECTOR + " IS NULL AND "
           + COLUMN_SQF_NAME + " IN (?, ?)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_NAME =
+      "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_NAME + "= ?"
+        + " WHERE " + COLUMN_SQF_NAME + "= ?";
 
   public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_DIRECTION =
       "UPDATE " + TABLE_SQ_FORM + " SET " + COLUMN_SQF_DIRECTION + "= ?"
@@ -152,16 +178,20 @@ public final class DerbySchemaUpgradeQuery {
           + " WHERE " + COLUMN_SQF_NAME + "= ?"
           + " AND " + COLUMN_SQF_DIRECTION + "= ?";
 
-  /**
-   * Intended to rename forms based on direction.
-   * e.g. If SQ_FORM.SQF_NAME = 'table' and parameter 1 = 'from'
-   * then SQ_FORM.SQF_NAME = 'fromTable'.
-   */
-  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES =
+  // remove "input" from the prefix of the name for hdfs configs
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_FROM_JOB_INPUT_NAMES =
       "UPDATE " + TABLE_SQ_INPUT + " SET "
           + COLUMN_SQI_NAME + "=("
-          + "? || UPPER(SUBSTR(" + COLUMN_SQI_NAME + ",1,1))"
-          + " || SUBSTR(" + COLUMN_SQI_NAME + ",2) )"
+          + "? || SUBSTR(" + COLUMN_SQI_NAME + ", 6) )"
+          + " WHERE " + COLUMN_SQI_FORM + " IN ("
+          + " SELECT " + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_NAME + "= ?"
+          + " AND " + COLUMN_SQF_DIRECTION + "= ?)";
+
+  // remove output from the prefix of the name for hdfs configs
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_TO_JOB_INPUT_NAMES =
+      "UPDATE " + TABLE_SQ_INPUT + " SET "
+          + COLUMN_SQI_NAME + "=("
+          + "? || SUBSTR(" + COLUMN_SQI_NAME + ", 7) )"
           + " WHERE " + COLUMN_SQI_FORM + " IN ("
           + " SELECT " + COLUMN_SQF_ID + " FROM " + TABLE_SQ_FORM + " WHERE " + COLUMN_SQF_NAME + "= ?"
           + " AND " + COLUMN_SQF_DIRECTION + "= ?)";

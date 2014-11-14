@@ -20,6 +20,7 @@ package org.apache.sqoop.repository.derby;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
+
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -426,11 +427,16 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       // Data modifications only for non-fresh install.
       if (repositoryVersion > 0) {
-        // Register HDFS connector
-        updateJobRepositorySchemaAndData(conn, registerHdfsConnector(conn));
+        LOG.info("Force registering the HDFS connector as a new configurable");
+        long hdfsConnectorId = registerHdfsConnector(conn);
+        LOG.info("Finished Force registering the HDFS connector as a new configurable");
+
+        LOG.info("Updating config and inputs for the hdfs connector.");
+        updateJobConfigInputForHdfsConnector(conn, hdfsConnectorId);
+        LOG.info("Finished Updating config and inputs for the hdfs connector.");
       }
 
-      // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update data.
+      // Wait to remove SQB_TYPE (IMPORT/EXPORT) until we update all the job data.
       // Data updates depend on knowledge of the type of job.
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_REMOVE_COLUMN_SQB_TYPE, conn);
 
@@ -645,13 +651,10 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
   /**
    * Upgrade job data from IMPORT/EXPORT to FROM/TO.
-   * Since the framework is no longer responsible for HDFS,
+   * Since Sqoop is no longer responsible for HDFS,
    * the HDFS connector/link must be added.
-   * Also, the framework configs are moved around such that
-   * they belong to the added HDFS connector. Any extra configs
-   * are removed.
    * NOTE: Connector configs should have a direction (FROM/TO),
-   * but framework configs should not.
+   * but link configs should not.
    *
    * Here's a brief list describing the data migration process.
    * 1. Change SQ_CONFIG.SQ_CFG_DIRECTION from IMPORT to FROM.
@@ -663,28 +666,23 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
    *    This should affect connectors only since Connector configs
    *    should have had a value for SQ_CFG_OPERATION.
    * 5. Add HDFS connector for jobs to reference.
-   * 6. Set 'input' and 'output' configs connector.
-   *    to HDFS connector.
-   * 7. Throttling config was originally the second config in
-   *    the framework. It should now be the first config.
+   * 6. Set 'fromJobConfig' and 'toJobConfig' configs for HDFS connector.
+   * 7. Add 'linkConfig' and 'linkConfig.uri' to the configs for the hdfs
    * 8. Remove the EXPORT throttling config and ensure all of
    *    its dependencies point to the IMPORT throttling config.
    *    Then make sure the throttling config does not have a direction.
-   *    Framework configs should not have a direction.
    * 9. Create an HDFS link to reference and update
    *    jobs to reference that link. IMPORT jobs
    *    should have TO HDFS connector, EXPORT jobs should have
    *    FROM HDFS connector.
-   * 10. Update 'table' config names to 'fromJobConfig' and 'toTable'.
+   * 10. Update 'table' config names to 'fromJobConfig' and 'toJobConfig'.
    *     Also update the relevant inputs as well.
    * @param conn
    */
   // NOTE: This upgrade code happened before the SQOOP-1498 renaming, hence it uses the form/connection
   // tables instead of the latest config/link tables
-  private void updateJobRepositorySchemaAndData(Connection conn, long connectorId) {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Updating existing data for generic connectors.");
-    }
+  @Deprecated
+  private void updateJobConfigInputForHdfsConnector(Connection conn, long hdfsConnectorId) {
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_OPERATION_TO_SQF_DIRECTION, conn,
         Direction.FROM.toString(), "IMPORT");
@@ -699,7 +697,21 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
         "output");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR, conn,
-        new Long(connectorId), "input", "output");
+        new Long(hdfsConnectorId), "input", "output");
+    //update the names of the configs
+    // 1. input ==> fromJobConfig
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_NAME, conn,
+       "fromJobConfig",
+        "input");
+    // 2. output ===> toJobConfig
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_NAME, conn,
+        "toJobConfig",
+        "output");
+
+    // create the link config
+    Long linkFormId = createHdfsLinkForm(conn, hdfsConnectorId);
+    // create the link config input
+    runQuery(STMT_INSERT_INTO_INPUT_WITH_FORM, conn, "linkConfig.uri", linkFormId, 0, MInputType.STRING.name(), false, 255, null);
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_UPDATE_THROTTLING_FORM_INPUTS, conn,
         "IMPORT", "EXPORT");
@@ -712,7 +724,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DRIVER_INDEX, conn,
         new Long(0), "throttling");
 
-    Long connectionId = createHdfsConnection(conn, connectorId);
+    Long connectionId = createHdfsConnection(conn, hdfsConnectorId);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
         "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
@@ -720,19 +732,12 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION, conn,
         new Long(connectionId), "IMPORT");
 
-    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
-        "fromJobConfig", "table", Direction.FROM.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
-        Direction.FROM.toString().toLowerCase(), "fromJobConfig", Direction.FROM.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_SQF_NAME, conn,
-        "toJobConfig", "table", Direction.TO.toString());
-    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_INPUT_NAMES, conn,
-        Direction.TO.toString().toLowerCase(), "toJobConfig", Direction.TO.toString());
-
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Updated existing data for generic connectors.");
-    }
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_FROM_JOB_INPUT_NAMES, conn,
+        "fromJobConfig", "fromJobConfig", Direction.FROM.toString());
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_TO_JOB_INPUT_NAMES, conn,
+        "toJobConfig", "toJobConfig", Direction.TO.toString());
   }
+
 
   /**
    * Pre-register HDFS Connector so that config upgrade will work.
@@ -761,7 +766,7 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
         try {
           PreparedStatement baseConnectorStmt = conn.prepareStatement(
-              STMT_INSERT_INTO_CONFIGURABLE_WITHOUT_SUPPORTED_DIRECTIONS,
+              STMT_INSERT_INTO_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
               Statement.RETURN_GENERATED_KEYS);
           baseConnectorStmt.setString(1, handler.getConnectorConfigurable().getUniqueName());
           baseConnectorStmt.setString(2, handler.getConnectorConfigurable().getClassName());
@@ -814,13 +819,13 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
 
       result = stmt.executeUpdate();
       if (result != 1) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0012,
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0003,
             Integer.toString(result));
       }
       ResultSet rsetConnectionId = stmt.getGeneratedKeys();
 
       if (!rsetConnectionId.next()) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
       }
 
       if (LOG.isTraceEnabled()) {
@@ -828,6 +833,49 @@ public class DerbyRepositoryHandler extends JdbcRepositoryHandler {
       }
 
       return rsetConnectionId.getLong(1);
+    } catch (SQLException ex) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0005, ex);
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+
+  /**
+   * We are creating the LINK FORM for HDFS and later it the schema will
+   * be renamed to LINK CONFIG
+   * NOTE: Should be used only in the upgrade path!
+   */
+  @Deprecated
+  private Long createHdfsLinkForm(Connection conn, Long connectorId) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Creating HDFS link.");
+    }
+
+    PreparedStatement stmt = null;
+    int result;
+    try {
+      short index = 0;
+      stmt = conn.prepareStatement(STMT_INSERT_INTO_FORM, Statement.RETURN_GENERATED_KEYS);
+      stmt.setLong(1, connectorId);
+      stmt.setString(2, "linkConfig");
+      // it could also be set to the deprecated "CONNECTION"
+      stmt.setString(3, MConfigType.LINK.name());
+      stmt.setShort(4, index);
+      result = stmt.executeUpdate();
+      if (result != 1) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0012, Integer.toString(result));
+      }
+      ResultSet rsetFormId = stmt.getGeneratedKeys();
+
+      if (!rsetFormId.next()) {
+        throw new SqoopException(DerbyRepoError.DERBYREPO_0013);
+      }
+
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Created HDFS connector link FORM.");
+      }
+      return rsetFormId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0019, ex);
     } finally {

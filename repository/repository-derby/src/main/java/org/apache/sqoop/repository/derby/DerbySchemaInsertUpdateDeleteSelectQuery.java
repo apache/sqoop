@@ -103,7 +103,7 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
       + ") VALUES (?, ?, ?, ?)";
 
    @Deprecated // used only in the upgrade path
-   public static final String STMT_INSERT_INTO_CONFIGURABLE_WITHOUT_SUPPORTED_DIRECTIONS =
+   public static final String STMT_INSERT_INTO_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS =
       "INSERT INTO " + TABLE_SQ_CONNECTOR+ " ("
           + COLUMN_SQC_NAME + ", "
           + COLUMN_SQC_CLASS + ", "
