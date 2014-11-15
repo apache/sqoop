@@ -79,6 +79,7 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
     super.loadConnectionsOrLinks(2);
     super.loadJobs(2);
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
+    handler.findDriver("SqoopDriver", getDerbyDatabaseConnection());
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 

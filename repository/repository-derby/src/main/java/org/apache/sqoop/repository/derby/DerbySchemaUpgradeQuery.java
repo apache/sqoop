@@ -200,6 +200,32 @@ public final class DerbySchemaUpgradeQuery {
       "UPDATE " + TABLE_SQ_FORM + " SET "
         + COLUMN_SQF_DIRECTION + "= NULL"
         + " WHERE " + COLUMN_SQF_NAME + "= ?";
+
+   /** Intended for force driver creation and its related upgrades*/
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_NAME_FOR_DRIVER =
+      "UPDATE " + TABLE_SQ_CONFIG + " SET "
+        + COLUMN_SQ_CFG_NAME + "= ?"
+        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_CONFIGURABLE_ID_FOR_DRIVER =
+      "UPDATE " + TABLE_SQ_CONFIG + " SET "
+        + COLUMN_SQ_CFG_CONFIGURABLE + "= ?"
+        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIG_REMOVE_SECURITY_CONFIG_FOR_DRIVER =
+      "DELETE FROM " + TABLE_SQ_CONFIG
+        + " WHERE " + COLUMN_SQ_CFG_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_INPUT_REMOVE_SECURITY_CONFIG_INPUT_FOR_DRIVER =
+      "DELETE FROM " + TABLE_SQ_INPUT
+        + " WHERE " + COLUMN_SQI_NAME + "= ?";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_INPUT_UPDATE_CONFIG_INPUT_FOR_DRIVER =
+      "UPDATE " + TABLE_SQ_INPUT + " SET "
+          + COLUMN_SQI_NAME + "= ?"
+          + " WHERE " + COLUMN_SQI_NAME + "= ?";
+
   /**
    * Intended to change SQ_JOB_INPUT.SQBI_INPUT from EXPORT
    * throttling form, to IMPORT throttling form.
