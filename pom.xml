@@ -191,6 +191,16 @@ limitations under the License.
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.2.version}</version>
             <scope>provided</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+              </exclusion>
+            </exclusions>
           </dependency>
 
           <dependency>
@@ -210,6 +220,12 @@ limitations under the License.
           <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-minicluster</artifactId>
+            <version>${hadoop.2.version}</version>
+          </dependency>
+
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-auth</artifactId>
             <version>${hadoop.2.version}</version>
           </dependency>
 

@@ -86,25 +86,28 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     List<String> extraClassPath = new LinkedList<String>();
     String []classpath = System.getProperty("java.class.path").split(":");
     for(String jar : classpath) {
-      if(jar.contains("hadoop-")  || // Hadoop jars
-         jar.contains("commons-") || // Apache Commons libraries
-         jar.contains("log4j-")   || // Log4j
-         jar.contains("slf4j-")   || // Slf4j
-         jar.contains("jackson-") || // Jackson
-         jar.contains("derby")    || // Derby drivers
-         jar.contains("avro-")    || // Avro
-         jar.contains("mysql")    || // MySQL JDBC driver
-         jar.contains("postgre")  || // PostgreSQL JDBC driver
-         jar.contains("oracle")   || // Oracle driver
-         jar.contains("terajdbc") || // Teradata driver
-         jar.contains("tdgs")     || // Teradata driver
-         jar.contains("nzjdbc")   || // Netezza driver
-         jar.contains("sqljdbc")  || // Microsoft SQL Server driver
-         jar.contains("google")      // Google libraries (guava, ...)
+      if(jar.contains("hadoop-")      || // Hadoop jars
+         jar.contains("commons-")     || // Apache Commons libraries
+         jar.contains("httpcore-")    || // Apache Http Core libraries
+         jar.contains("httpclient-")  || // Apache Http Client libraries
+         jar.contains("log4j-")       || // Log4j
+         jar.contains("slf4j-")       || // Slf4j
+         jar.contains("jackson-")     || // Jackson
+         jar.contains("derby")        || // Derby drivers
+         jar.contains("avro-")        || // Avro
+         jar.contains("mysql")        || // MySQL JDBC driver
+         jar.contains("postgre")      || // PostgreSQL JDBC driver
+         jar.contains("oracle")       || // Oracle driver
+         jar.contains("terajdbc")     || // Teradata driver
+         jar.contains("tdgs")         || // Teradata driver
+         jar.contains("nzjdbc")       || // Netezza driver
+         jar.contains("sqljdbc")      || // Microsoft SQL Server driver
+         jar.contains("google")          // Google libraries (guava, ...)
        ) {
         extraClassPath.add(jar);
       }
     }
+
     container.setExtraClasspath(extraClassPath.toArray(new String[extraClassPath.size()]));
 
     // Finally deploy Sqoop server war file
