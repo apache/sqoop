@@ -1,4 +1,3 @@
-
 Release 1.99.4
 
   NEW FEATURE
@@ -146,6 +145,28 @@ Release 1.99.4
     SQOOP-1696  Sqoop2: TestMapReduce.testOutputFormat is failing on Hadoop 1 profile
 
     SQOOP-1697  Sqoop2: HDFS Connector TestLoader.verifyOutput have invalid default value for Hadoop 1
+
+    SQOOP-1718  Sqoop2: CommandLineClient doc error
+
+    SQOOP-1721  Sqoop2: common jars missing for MR job
+
+    SQOOP-1723  Sqoop2: findJobsByConnector fails
+
+    SQOOP-1724  Sqoop2: Support old config types for backward compatibility in connector data upgrade
+
+    SQOOP-1725  Sqoop2: Connector upgrade in 1.99.4 fails with delete configs
+
+    SQOOP-1728  Sqoop2: Force HDFS connector as a configurable fixes
+
+    SQOOP-1729  Sqoop2: The existing genericJDBC connector code upgrade logic  is incomplete.
+
+    SQOOP-1731  Sqoop2: Generic JDBC upgrade from 1.99.3 to 1.99.4
+
+    SQOOP-1736  Sqoop2: Driver missing during upgrade
+
+    SQOOP-1740  Sqoop2:The sqoop.properties should say driver.autoupgrade
+
+    SQOOP-1742  Sqoop2: Add type to connectors during upgrade
 
   TASK
 
