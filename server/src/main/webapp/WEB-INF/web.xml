@@ -27,6 +27,17 @@ limitations under the License.
     <listener-class>org.apache.sqoop.server.ServerInitializer</listener-class>
   </listener>
 
+  <!-- Filter -->
+  <filter>
+    <filter-name>authFilter</filter-name>
+    <filter-class>org.apache.sqoop.filter.SqoopAuthenticationFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>authFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <!-- Version servlet -->
   <servlet>
     <servlet-name>VersionServlet</servlet-name>

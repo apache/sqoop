@@ -34,7 +34,13 @@ public enum AuthenticationError implements ErrorCode {
   AUTH_0003("Unable to login using Kerberos keytab and principal"),
 
   /** Invalid authentication type {simple, Kerberos}. */
-  AUTH_0004("Invalid authentication type");
+  AUTH_0004("Invalid authentication type"),
+
+  /** The system was not able to find Kerberos keytab for http in sqoop configuration. */
+  AUTH_0005("Unable to find Kerberos keytab for http"),
+
+  /** The system was not able to find Kerberos principal for http in sqoop configuration. */
+  AUTH_0006("Unable to find Kerberos principal for http");
 
   private final String message;
 

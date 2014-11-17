@@ -68,6 +68,27 @@ public final class AuthenticationConstants {
   public static final String AUTHENTICATION_KERBEROS_KEYTAB =
     PREFIX_AUTHENTICATION_KERBEROS_CONFIG + "keytab";
 
+  /**
+   * All kerberos authentication for http related configuration is prefixed with this:
+   * <tt>org.apache.sqoop.authentication.kerberos.http.</tt>
+   */
+  public static final String PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG =
+          PREFIX_AUTHENTICATION_KERBEROS_CONFIG + "http.";
+
+  /**
+   * The config specifies the kerberos principal for http.
+   * <tt>org.apache.sqoop.authentication.kerberos.http.principal</tt>.
+   */
+  public static final String AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL =
+          PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "principal";
+
+  /**
+   * The config specifies the kerberos keytab for http.
+   * <tt>org.apache.sqoop.authentication.kerberos.http.principal</tt>.
+   */
+  public static final String AUTHENTICATION_KERBEROS_HTTP_KEYTAB =
+          PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "keytab";
+
   public static enum TYPE {SIMPLE, KERBEROS}
 
   private AuthenticationConstants() {

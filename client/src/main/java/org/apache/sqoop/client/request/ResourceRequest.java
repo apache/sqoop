@@ -17,15 +17,9 @@
  */
 package org.apache.sqoop.client.request;
 
-import javax.ws.rs.core.MediaType;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.filter.ClientFilter;
-
+import org.apache.hadoop.security.authentication.client.AuthenticatedURL;
+import org.apache.hadoop.security.authentication.client.AuthenticationException;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
@@ -33,81 +27,132 @@ import org.apache.sqoop.json.ThrowableBean;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Locale;
+
 /**
  * Represents the sqoop REST resource requests
- *
  */
-public class ResourceRequest
-{
-  private static ServerExceptionFilter serverExceptionFilter;
+public class ResourceRequest {
+  private static final Logger LOG = Logger.getLogger(ResourceRequest.class);
 
-  static {
-    serverExceptionFilter = new ServerExceptionFilter();
+  protected String doHttpRequest(String strURL, String method) {
+    return doHttpRequest(strURL, method, "");
   }
 
-  protected Builder getBuilder(String url) {
-    Client client = Client.create();
-    WebResource resource = client.resource(url);
+  protected String doHttpRequest(String strURL, String method, String data) {
+    DataOutputStream wr = null;
+    BufferedReader reader = null;
+    try {
+      AuthenticatedURL.Token token = new AuthenticatedURL.Token();
+      URL url = new URL(strURL);
+      HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
 
-    // Provide filter that will rebuild exception that is sent from server
-    resource.addFilter(serverExceptionFilter);
+      conn.setRequestMethod(method);
+//      Provide name of user executing request
+      conn.setRequestProperty(SqoopProtocolConstants.HEADER_SQOOP_USERNAME, System.getProperty("user.name"));
+//      Sqoop is using JSON for data transfers
+      conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
+//      Transfer client locale to return client specific data
+      conn.setRequestProperty("Accept-Language", Locale.getDefault().toString());
+      if (method.equalsIgnoreCase(HttpMethod.PUT) || method.equalsIgnoreCase(HttpMethod.POST)) {
+        conn.setDoOutput(true);
+        data = data == null ? "" : data;
+        conn.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
+//        Send request
+        wr = new DataOutputStream(conn.getOutputStream());
+        wr.writeBytes(data);
+        wr.flush();
+        wr.close();
+      }
 
-    return resource
-    // Provide name of user executing request.
-        .header(SqoopProtocolConstants.HEADER_SQOOP_USERNAME, System.getProperty("user.name"))
-        // Sqoop is using JSON for data transfers
-        .accept(MediaType.APPLICATION_JSON_TYPE)
-        // Transfer client locale to return client specific data
-        .acceptLanguage(Locale.getDefault());
-  }
+      LOG.debug("Status code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
+      StringBuilder result = new StringBuilder();
+      int responseCode = conn.getResponseCode();
 
-  public String get(String url) {
-    return getBuilder(url).get(String.class);
-  }
-
-  public String post(String url, String data) {
-    return getBuilder(url).post(String.class, data);
-  }
-
-  public String put(String url, String data) {
-    return getBuilder(url).put(String.class, data);
-  }
-
-  public String delete(String url) {
-    return getBuilder(url).delete(String.class);
-  }
-
-  /**
-   * Client filter to intercepting exceptions sent by sqoop server and
-   * recreating them on client side. Current implementation will create new
-   * instance of SqoopException and will attach original error code and message.
-   */
-  private static class ServerExceptionFilter extends ClientFilter {
-    @Override
-    public ClientResponse handle(ClientRequest cr) {
-      ClientResponse resp = getNext().handle(cr);
-
-      // Special handling for 500 internal server error in case that server
-      // has sent us it's exception correctly. We're using default route
-      // for all other 500 occurrences.
-      if(resp.getClientResponseStatus()
-        == ClientResponse.Status.INTERNAL_SERVER_ERROR) {
-
-        if(resp.getHeaders().containsKey(
-          SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_CODE)) {
+      if (responseCode == HttpURLConnection.HTTP_OK) {
+        reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String line = reader.readLine();
+        while (line != null) {
+          result.append(line);
+          line = reader.readLine();
+        }
+        reader.close();
+      } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+        /**
+         * Client filter to intercepting exceptions sent by sqoop server and
+         * recreating them on client side. Current implementation will create new
+         * instance of SqoopException and will attach original error code and message.
+         *
+         * Special handling for 500 internal server error in case that server
+         * has sent us it's exception correctly. We're using default route
+         * for all other 500 occurrences.
+         */
+        if (conn.getHeaderFields().keySet().contains(
+                SqoopProtocolConstants.HEADER_SQOOP_INTERNAL_ERROR_CODE)) {
 
           ThrowableBean ex = new ThrowableBean();
 
-          String responseText = resp.getEntity(String.class);
-          JSONObject json = (JSONObject) JSONValue.parse(responseText);
+          result = new StringBuilder();
+          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+          String line = reader.readLine();
+          while (line != null) {
+            result.append(line);
+            line = reader.readLine();
+          }
+          reader.close();
+
+          JSONObject json = (JSONObject) JSONValue.parse(result.toString());
           ex.restore(json);
 
           throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());
         }
       }
-
-      return resp;
+      return result.toString();
+    } catch (IOException ex) {
+      LOG.trace("ERROR: ", ex);
+      return "";
+    } catch (AuthenticationException ex) {
+      LOG.trace("ERROR: ", ex);
+      return "";
+    } finally {
+      try {
+        if (wr != null) {
+          wr.close();
+        }
+      } catch (IOException e) {
+        LOG.trace("Cannot close DataOutputStream.", e);
+      }
+      try {
+        if (reader != null) {
+          reader.close();
+        }
+      } catch (IOException e) {
+        LOG.trace("Cannot close BufferReader.", e);
+      }
     }
+  }
+
+  public String get(String url) {
+    return doHttpRequest(url, HttpMethod.GET);
+  }
+
+  public String post(String url, String data) {
+    return doHttpRequest(url, HttpMethod.POST, data);
+  }
+
+  public String put(String url, String data) {
+    return doHttpRequest(url, HttpMethod.PUT, data);
+  }
+
+  public String delete(String url) {
+    return doHttpRequest(url, HttpMethod.DELETE);
   }
 }
