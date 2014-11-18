@@ -36,6 +36,7 @@ limitations under the License.
     <module>connector-sdk</module>
     <module>connector-generic-jdbc</module>
     <module>connector-hdfs</module>
+    <module>connector-kite</module>
       <!-- Uncomment and finish connectors after sqoop framework will become stable
       <module>connector-mysql-jdbc</module>
       <module>connector-mysql-fastpath</module>

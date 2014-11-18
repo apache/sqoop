@@ -79,6 +79,11 @@ limitations under the License.
       <artifactId>sqoop-connector-hdfs</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.sqoop.connector</groupId>
+      <artifactId>sqoop-connector-kite</artifactId>
+    </dependency>
+
 <!--
     <dependency>
       <groupId>org.apache.sqoop.connector</groupId>

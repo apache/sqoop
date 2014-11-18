@@ -1,0 +1,167 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.sqoop.connector.kite;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Closeables;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.kite.util.KiteDataTypeUtil;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.Format;
+import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * The class arranges to perform dataset operations (without thread safety
+ * guarantee).
+ */
+public class KiteDatasetExecutor {
+
+  private final Dataset<GenericRecord> dataset;
+
+  private DatasetWriter<GenericRecord> writer;
+
+  /**
+   * Creates a new dataset.
+   */
+  public KiteDatasetExecutor(String uri, org.apache.sqoop.schema.Schema schema,
+      FileFormat format) {
+    Schema datasetSchema = KiteDataTypeUtil.createAvroSchema(schema);
+    Format datasetFormat = KiteDataTypeUtil.toFormat(format);
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .property("kite.allow.csv", "true")
+        .schema(datasetSchema)
+        .format(datasetFormat)
+        .build();
+    dataset = Datasets.create(uri, descriptor);
+  }
+
+  @VisibleForTesting
+  protected KiteDatasetExecutor(Dataset<GenericRecord> dataset) {
+    this.dataset = dataset;
+  }
+
+  /**
+   * Writes a data record into dataset.
+   *
+   * Note that `closeWriter()` should be called explicitly, when no more data is
+   * going to be written.
+   */
+  public void writeRecord(Object[] data) {
+    Schema schema = dataset.getDescriptor().getSchema();
+    GenericRecord record = KiteDataTypeUtil.createGenericRecord(data, schema);
+    getOrNewWriter().write(record);
+  }
+
+  private DatasetWriter<GenericRecord> getOrNewWriter() {
+    if (writer == null) {
+      writer = dataset.newWriter();
+    }
+    return writer;
+  }
+
+  @VisibleForTesting
+  protected boolean isWriterClosed() {
+    return writer == null || !writer.isOpen();
+  }
+
+  /**
+   * Closes the writer and releases any system resources.
+   */
+  public void closeWriter() {
+    if (writer != null) {
+      Closeables.closeQuietly(writer);
+      writer = null;
+    }
+  }
+
+  /**
+   * Checks the existence by a specified dataset URI.
+   */
+  public static boolean datasetExists(String uri) {
+    return Datasets.exists(uri);
+  }
+
+  /**
+   * Deletes current dataset physically.
+   */
+  public void deleteDataset() {
+    deleteDataset(dataset.getUri().toString());
+  }
+
+  /**
+   * Deletes particular dataset physically.
+   */
+  public static boolean deleteDataset(String uri) {
+    return Datasets.delete(uri);
+  }
+
+  /**
+   * Merges a dataset into this.
+   */
+  public void mergeDataset(String uri) {
+    FileSystemDataset<GenericRecord> update = Datasets.load(uri);
+    if (dataset instanceof FileSystemDataset) {
+      ((FileSystemDataset<GenericRecord>) dataset).merge(update);
+    } else {
+      throw new SqoopException(
+          KiteConnectorError.GENERIC_KITE_CONNECTOR_0000, uri);
+    }
+  }
+
+  private static final String TEMPORARY_DATASET_PREFIX = "/temp_";
+
+  /**
+   * Workaround for managing temporary datasets.
+   */
+  public static String suggestTemporaryDatasetUri(String uri) {
+    if (uri.startsWith("dataset:hdfs:")) {
+      return uri + TEMPORARY_DATASET_PREFIX + UUID.randomUUID();
+    } else {
+      throw new SqoopException(
+          KiteConnectorError.GENERIC_KITE_CONNECTOR_0000, uri);
+    }
+  }
+
+  /**
+   * Workaround for managing temporary datasets.
+   */
+  public static String[] listTemporaryDatasetUris(String uri) {
+    String repo = URIBuilder.REPO_SCHEME +
+        uri.substring(URIBuilder.DATASET_SCHEME.length());
+    List<String> result = new ArrayList<String>();
+    for (URI match : Datasets.list(repo)) {
+      if (match.toString().contains(TEMPORARY_DATASET_PREFIX)) {
+        result.add(match.toString());
+      }
+    }
+    return result.toArray(new String[result.size()]);
+  }
+
+}
