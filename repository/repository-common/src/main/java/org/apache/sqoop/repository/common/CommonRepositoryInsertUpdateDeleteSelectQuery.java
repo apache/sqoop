@@ -549,4 +549,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS =
       STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
           + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
+
+  // Delete the config directions for a connector
+  public static final String STMT_DELETE_DIRECTIONS_FOR_CONFIGURABLE =
+      "DELETE FROM " + TABLE_SQ_CONFIG_DIRECTIONS
+          + " WHERE " + COLUMN_SQ_CFG_DIR_CONFIG
+          + " IN (SELECT " + COLUMN_SQ_CFG_ID + " FROM " + TABLE_SQ_CONFIG
+              + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ?)";
 }
