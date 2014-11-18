@@ -79,7 +79,7 @@ public class KerberosAuthenticationHandler extends AuthenticationHandler {
       String hostPrincipal = SecurityUtil.getServerPrincipal(principal, "0.0.0.0");
       UserGroupInformation.loginUserFromKeytab(hostPrincipal, keytab);
     } catch (IOException ex) {
-      throw new SqoopException(AuthenticationError.AUTH_0003);
+      throw new SqoopException(AuthenticationError.AUTH_0003, ex);
     }
     LOG.info("Using Kerberos authentication, principal ["
             + principal + "] keytab [" + keytab + "]");
