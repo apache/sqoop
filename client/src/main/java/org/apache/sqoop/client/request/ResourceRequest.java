@@ -114,14 +114,16 @@ public class ResourceRequest {
 
           throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());
         }
+      } else {
+        throw new SqoopException(ClientError.CLIENT_0000);
       }
       return result.toString();
     } catch (IOException ex) {
       LOG.trace("ERROR: ", ex);
-      return "";
+      throw new SqoopException(ClientError.CLIENT_0000, ex);
     } catch (AuthenticationException ex) {
       LOG.trace("ERROR: ", ex);
-      return "";
+      throw new SqoopException(ClientError.CLIENT_0004, ex);
     } finally {
       try {
         if (wr != null) {

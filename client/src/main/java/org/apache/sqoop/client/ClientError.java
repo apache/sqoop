@@ -32,6 +32,9 @@ public enum ClientError implements ErrorCode {
 
   /** Given connector is not known to the server **/
   CLIENT_0003("Connector do not exists"),
+
+  /** The system was not able to find valid Kerberos tikcet cache (kinit). */
+  CLIENT_0004("Unable to find valid Kerberos ticket cache (kinit)");
   ;
 
   private final String message;
