@@ -19,6 +19,10 @@ package org.apache.sqoop.json.util;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -96,7 +100,9 @@ public class TestSchemaSerialization {
 
   @Test
   public void testEnum() {
-    Schema e = new Schema("e").addColumn(new Enum("e", new Text("e1")));
+    Schema e = new Schema("e").addColumn(new Enum("e", Collections
+        .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "A", "B" }))), new Text(
+        "e1")));
     transferAndAssert(e);
   }
 
@@ -156,7 +162,7 @@ public class TestSchemaSerialization {
       .addColumn(new Date("d"))
       .addColumn(new DateTime("e"))
       .addColumn(new Decimal("f"))
-      .addColumn(new Enum("g", new Text("g1")))
+      .addColumn(new Enum("g", Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "X", "Y" }))), new Text("g1")))
       .addColumn(new FixedPoint("h"))
       .addColumn(new FloatingPoint("i"))
       .addColumn(new Map("j", new Text("j1"), new Text("j2")))

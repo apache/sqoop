@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json.util;
 
+import java.util.HashSet;
+
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
@@ -62,6 +64,9 @@ public class SchemaSerialization {
   // arrays and set attribute
   private static final String LIST = "list";
   private static final String LIST_TYPE = "listType";
+  // enum attribute
+  private static final String ENUM_OPTIONS = "options";
+
   // number attribute
   private static final String BYTE_SIZE = "byteSize";
   // string attribute
@@ -126,10 +131,17 @@ public class SchemaSerialization {
       map.put(VALUE, extractColumn(((Map) column).getValue()));
       break;
     case ENUM:
+      JSONObject enumList = new JSONObject();
+      ret.put(LIST, enumList);
+      enumList.put(LIST_TYPE, extractColumn(((AbstractComplexListType) column).getListType()));
+      JSONArray optionsArray = new JSONArray();
+      optionsArray.addAll(((Enum)column).getOptions());
+      enumList.put(ENUM_OPTIONS, optionsArray);
+      break;
     case SET:
-      JSONObject list = new JSONObject();
-      ret.put(LIST, list);
-      list.put(LIST_TYPE, extractColumn(((AbstractComplexListType) column).getListType()));
+      JSONObject set = new JSONObject();
+      ret.put(LIST, set);
+      set.put(LIST_TYPE, extractColumn(((AbstractComplexListType) column).getListType()));
       break;
     case ARRAY:
       JSONObject arrayList = new JSONObject();
@@ -180,6 +192,8 @@ public class SchemaSerialization {
     Column value = null;
     Long arraySize = null;
     Column listType = null;
+    java.util.Set<String> options = new HashSet<String>();
+
     // complex type attribute
     if (obj.containsKey(MAP)) {
       JSONObject map = (JSONObject) obj.get(MAP);
@@ -197,6 +211,12 @@ public class SchemaSerialization {
         listType = restoreColumn((JSONObject) list.get(LIST_TYPE));
       }
       arraySize = (Long) list.get(SIZE);
+      if (list.containsKey(ENUM_OPTIONS)) {
+        JSONArray optionsArray = (JSONArray) list.get(ENUM_OPTIONS);
+        for (int n = 0; n < optionsArray.size(); n++) {
+          options.add((String) optionsArray.get(n));
+        }
+      }
     }
     ColumnType type = ColumnType.valueOf((String) obj.get(TYPE));
     Column output = null;
@@ -225,7 +245,7 @@ public class SchemaSerialization {
       output = new Decimal(name).setPrecision(precision).setScale(scale);
       break;
     case ENUM:
-      output = new Enum(name).setListType(listType);
+      output = new Enum(name, options).setListType(listType);
       break;
     case FIXED_POINT:
       Boolean unsigned = (Boolean) obj.get(UNSIGNED);
