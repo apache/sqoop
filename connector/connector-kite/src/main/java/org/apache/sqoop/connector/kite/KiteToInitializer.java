@@ -43,6 +43,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
   private static final Pattern[] JAR_NAME_PATTERNS = {
       Pattern.compile("/kite-"),
       Pattern.compile("/jackson-(annotations|core|databind)-\\d+"),
+      Pattern.compile("/opencsv-"),
   };
 
   @Override
