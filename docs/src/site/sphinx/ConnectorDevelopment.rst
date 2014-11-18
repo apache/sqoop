@@ -171,7 +171,8 @@ Extractor (E for ETL) extracts data from a given data source
                                JobConfiguration jobConfiguration,
                                SqoopPartition partition);
 
-The ``extract`` method extracts data from the data source using the link and job configuration properties and writes it to the ``DataWriter`` (provided by the extractor context) as the default `Intermediate representation`_ .
+The ``extract`` method extracts data from the data source using the link and job configuration properties and writes it to the ``SqoopMapDataWriter`` (provided in the extractor context given to the extract method).
+The ``SqoopMapDataWriter`` has the ``SqoopWritable`` thats holds the data read from the data source in the `Intermediate Data Format representation`_
 
 Extractors use Writer's provided by the ExtractorContext to send a record through the sqoop system.
 ::
@@ -225,7 +226,7 @@ A loader (L for ETL) receives data from the ``From`` instance of the sqoop conne
                             ConnectionConfiguration connectionConfiguration,
                             JobConfiguration jobConfiguration) throws Exception;
 
-The ``load`` method reads data from ``DataReader`` (provided by context) in the default `Intermediate representation`_ and loads it to data source.
+The ``load`` method reads data from ``SqoopOutputFormatDataReader`` (provided in the loader context of the load methods). It reads the data in the `Intermediate Data Format representation`_ and loads it to the data source.
 
 Loader must iterate in the ``load`` method until the data from ``DataReader`` is exhausted.
 ::
@@ -414,15 +415,15 @@ The diagram below describes the map phase of a job.
             |      extract        |                    |
             |-------------------->|                    |
             |                     |                    |
-           read from DB           |                    |
+           read from Data Source  |                    |
   <-------------------------------|      write*        |
             |                     |------------------->|
-            |                     |                    |           ,----.
-            |                     |                    |---------->|Data|
-            |                     |                    |           `-+--'
-            |                     |                    |
-            |                     |                    |      context.write
-            |                     |                    |-------------------------->
+            |                     |                    |           ,-------------.
+            |                     |                    |---------->|SqoopWritable|
+            |                     |                    |           `----+--------'
+            |                     |                    |                |
+            |                     |                    |                |  context.write(writable, ..)
+            |                     |                    |                |---------------------------->
 
 The diagram below decribes the reduce phase of a job.
 ``OutputFormat`` invokes ``To`` connector's loader's ``load`` method (via ``SqoopOutputFormatLoadExecutor`` ).
@@ -433,30 +434,29 @@ The diagram below decribes the reduce phase of a job.
     `---+--------'  `----------+----------'
         |                 |   ,-----------------------------.
         |                 |-> |SqoopOutputFormatLoadExecutor|
-        |                 |   `--------------+--------------'        ,----.
-        |                 |                  |---------------------> |Data|
-        |                 |                  |                       `-+--'
-        |                 |                  |   ,-----------------.   |
-        |                 |                  |-> |SqoopRecordWriter|   |
-      getRecordWriter     |                  |   `--------+--------'   |
-  ----------------------->| getRecordWriter  |            |            |
-        |                 |----------------->|            |            |     ,--------------.
-        |                 |                  |-----------------------------> |ConsumerThread|
-        |                 |                  |            |            |     `------+-------'
-        |                 |<- - - - - - - - -|            |            |            |    ,------.
-  <- - - - - - - - - - - -|                  |            |            |            |--->|Loader|
-        |                 |                  |            |            |            |    `--+---'
-        |                 |                  |            |            |            |       |
-        |                 |                  |            |            |            | load  |
-   run  |                 |                  |            |            |            |------>|
-  ----->|                 |     write        |            |            |            |       |
-        |------------------------------------------------>| setContent |            | read* |
-        |                 |                  |            |----------->| getContent |<------|
-        |                 |                  |            |            |<-----------|       |
-        |                 |                  |            |            |            | - - ->|
-        |                 |                  |            |            |            |       | write into DB
-        |                 |                  |            |            |            |       |-------------->
+        |                 |   `--------------+--------------'              |
+        |                 |                  |                             |
+        |                 |                  |   ,-----------------.   ,-------------.
+        |                 |                  |-> |SqoopRecordWriter|-->|SqoopWritable|
+      getRecordWriter     |                  |   `--------+--------'   `---+---------'
+  ----------------------->| getRecordWriter  |            |                |
+        |                 |----------------->|            |                |     ,--------------.
+        |                 |                  |---------------------------------->|ConsumerThread|
+        |                 |                  |            |                |     `------+-------'
+        |                 |<- - - - - - - - -|            |                |            |    ,------.
+  <- - - - - - - - - - - -|                  |            |                |            |--->|Loader|
+        |                 |                  |            |                |            |    `--+---'
+        |                 |                  |            |                |            |       |
+        |                 |                  |            |                |            | load  |
+   run  |                 |                  |            |                |            |------>|
+  ----->|                 |     write        |            |                |            |       |
+        |------------------------------------------------>| setContent     |            | read* |
+        |                 |                  |            |--------------->| getContent |<------|
+        |                 |                  |            |                |<-----------|       |
+        |                 |                  |            |                |            | - - ->|
+        |                 |                  |            |                |            |       | write into Data Source
+        |                 |                  |            |                |            |       |----------------------->
 
 
 
-.. _`Intermediate representation`: https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation
+.. _`Intermediate Data Format representation`: https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation
