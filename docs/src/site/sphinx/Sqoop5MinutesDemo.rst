@@ -48,8 +48,8 @@ Verify that connection is working by simple version checking: ::
 You should received similar output as shown above describing the sqoop client build version, the server build version and the supported versions for the rest API.
 
 You can use the help command to check all the supported commands in the sqoop shell.
-
 ::
+
   sqoop:000> help
   For information about Sqoop, visit: http://sqoop.apache.org/
 
@@ -108,6 +108,7 @@ Our new link object was created with assigned id 1.
 In the ``show connector -all`` we see that there is a hdfs-connector registered in sqoop with the persistent id 1. Let us create another link object but this time for the  hdfs-connector instead.
 
 ::
+
   sqoop:000> create link --cid 1
   Creating link for connector with id 1
   Please fill following values to create new link object
@@ -123,6 +124,7 @@ Creating Job Object
 Connectors implement the ``From`` for reading data from and/or ``To`` for writing data to. Generic JDBC Connector supports both of them List of supported directions for each connector might be seen in the output of ``show connector -all`` command above. In order to create a job we need to specifiy the ``From`` and ``To`` parts of the job uniquely identified by their link Ids. We already have 2 links created in the system, you can verify the same with the following command
 
 ::
+
   sqoop:000> show links -all
   2 link(s) to show:
   link with id 1 and name First Link (Enabled: true, Created by root at 11/4/14 4:27 PM, Updated by root at 11/4/14 4:27 PM)
@@ -189,9 +191,10 @@ Next, we can use the two link Ids to associate the ``From`` and ``To`` for the j
 Our new job object was created with assigned id 1.
 
 Start Job ( a.k.a Data transfer )
-================================
+=================================
 
-You can start a sqoop job with the following command: ::
+You can start a sqoop job with the following command:
+::
 
   sqoop:000> start job --jid 1
   Submission details
@@ -204,7 +207,9 @@ You can start a sqoop job with the following command: ::
     http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
   2014-11-04 19:43:29 PST: BOOTING  - Progress is not available
 
-You can iteratively check your running job status with ``status job`` command: ::
+You can iteratively check your running job status with ``status job`` command:
+
+::
 
   sqoop:000> status job --jid 1
   Submission details
