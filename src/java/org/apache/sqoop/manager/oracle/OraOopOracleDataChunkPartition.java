@@ -30,21 +30,21 @@ import org.apache.hadoop.io.Text;
 public class OraOopOracleDataChunkPartition extends OraOopOracleDataChunk {
 
   private boolean isSubPartition;
-  private int blocks;
+  private long blocks;
 
   OraOopOracleDataChunkPartition() {
 
   }
 
   OraOopOracleDataChunkPartition(String partitionName, boolean isSubPartition,
-      int blocks) {
+      long blocks) {
     this.setId(partitionName);
     this.isSubPartition = isSubPartition;
     this.blocks = blocks;
   }
 
   @Override
-  public int getNumberOfBlocks() {
+  public long getNumberOfBlocks() {
     return this.blocks;
   }
 
@@ -52,14 +52,14 @@ public class OraOopOracleDataChunkPartition extends OraOopOracleDataChunk {
   public void write(DataOutput output) throws IOException {
     Text.writeString(output, this.getId());
     output.writeBoolean(this.isSubPartition);
-    output.writeInt(this.blocks);
+    output.writeLong(this.blocks);
   }
 
   @Override
   public void readFields(DataInput input) throws IOException {
     this.setId(Text.readString(input));
     this.isSubPartition = input.readBoolean();
-    this.blocks = input.readInt();
+    this.blocks = input.readLong();
   }
 
   @Override

@@ -324,7 +324,7 @@ public final class OraOopOracleQueries {
       OraOopOracleDataChunkPartition dataChunk =
           new OraOopOracleDataChunkPartition(resultSet
               .getString("partition_name"), resultSet
-              .getBoolean("is_subpartition"), resultSet.getInt("blocks"));
+              .getBoolean("is_subpartition"), resultSet.getLong("blocks"));
       result.add(dataChunk);
     }
     resultSet.close();
@@ -417,8 +417,8 @@ public final class OraOopOracleQueries {
       OraOopOracleDataChunkExtent dataChunk =
           new OraOopOracleDataChunkExtent(dataChunkId, resultSet
               .getInt("data_object_id"), resultSet.getInt("relative_fno"),
-              resultSet.getInt("start_block_id"), resultSet
-                  .getInt("end_block_id"));
+              resultSet.getLong("start_block_id"), resultSet
+                  .getLong("end_block_id"));
       result.add(dataChunk);
     }
 

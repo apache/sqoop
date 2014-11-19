@@ -51,4 +51,12 @@ public class OraOopOracleQueriesTest extends OraOopTestCase {
     }
   }
 
+  @Test
+  public void testLongBlockId() {
+    OraOopOracleDataChunkExtent chunk =
+        new OraOopOracleDataChunkExtent("1", 100, 1, 2147483648L, 4294967295L);
+    String whereClause = chunk.getWhereClause();
+    Assert.assertNotNull(whereClause);
+  }
+
 }

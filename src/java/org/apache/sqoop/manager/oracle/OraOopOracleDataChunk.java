@@ -29,7 +29,7 @@ public abstract class OraOopOracleDataChunk implements Writable {
 
   private String id;
 
-  public abstract int getNumberOfBlocks();
+  public abstract long getNumberOfBlocks();
 
   public String getWhereClause() {
     return "1=1";

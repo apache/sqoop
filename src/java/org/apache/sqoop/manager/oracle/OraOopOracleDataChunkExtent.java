@@ -30,15 +30,16 @@ public class OraOopOracleDataChunkExtent extends OraOopOracleDataChunk {
 
   private int oracleDataObjectId;
   private int relativeDatafileNumber;
-  private int startBlockNumber;
-  private int finishBlockNumber;
+  private long startBlockNumber;
+  private long finishBlockNumber;
 
   OraOopOracleDataChunkExtent() {
 
   }
 
   OraOopOracleDataChunkExtent(String id, int oracleDataObjectId,
-      int relativeDatafileNumber, int startBlockNumber, int finishBlockNumber) {
+      int relativeDatafileNumber, long startBlockNumber,
+      long finishBlockNumber) {
 
     this.setId(id);
     this.oracleDataObjectId = oracleDataObjectId;
@@ -67,8 +68,8 @@ public class OraOopOracleDataChunkExtent extends OraOopOracleDataChunk {
     Text.writeString(output, this.getId());
     output.writeInt(this.oracleDataObjectId);
     output.writeInt(this.relativeDatafileNumber);
-    output.writeInt(this.startBlockNumber);
-    output.writeInt(this.finishBlockNumber);
+    output.writeLong(this.startBlockNumber);
+    output.writeLong(this.finishBlockNumber);
   }
 
   @Override
@@ -76,17 +77,16 @@ public class OraOopOracleDataChunkExtent extends OraOopOracleDataChunk {
     this.setId(Text.readString(input));
     this.oracleDataObjectId = input.readInt();
     this.relativeDatafileNumber = input.readInt();
-    this.startBlockNumber = input.readInt();
-    this.finishBlockNumber = input.readInt();
+    this.startBlockNumber = input.readLong();
+    this.finishBlockNumber = input.readLong();
   }
 
   @Override
-  public int getNumberOfBlocks() {
-
-    if (this.finishBlockNumber == 0 && this.startBlockNumber == 0) {
+  public long getNumberOfBlocks() {
+    if (this.finishBlockNumber == 0L && this.startBlockNumber == 0L) {
       return 0;
     } else {
-      return (this.finishBlockNumber - this.startBlockNumber) + 1;
+      return (this.finishBlockNumber - this.startBlockNumber) + 1L;
     }
   }
 
