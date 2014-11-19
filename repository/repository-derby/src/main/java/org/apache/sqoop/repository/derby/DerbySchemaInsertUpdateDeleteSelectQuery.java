@@ -63,8 +63,8 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery {
      + COLUMN_SQC_VERSION
      + " FROM " + TABLE_SQ_CONNECTOR;
 
-  @Deprecated // used only in the upgrade path
-  public static final String STMT_INSERT_INTO_CONFIGURABLE_WITHOUT_SUPPORTED_DIRECTIONS =
+   @Deprecated // used only in the upgrade path
+   public static final String STMT_INSERT_INTO_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS =
       "INSERT INTO " + TABLE_SQ_CONNECTOR+ " ("
           + COLUMN_SQC_NAME + ", "
           + COLUMN_SQC_CLASS + ", "

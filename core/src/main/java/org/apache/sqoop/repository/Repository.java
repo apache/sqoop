@@ -412,6 +412,7 @@ public abstract class Repository {
   public final void upgradeConnector(MConnector oldConnector, MConnector newConnector) {
     LOG.info("Upgrading connector: " + oldConnector.getUniqueName());
     long connectorId = oldConnector.getPersistenceId();
+    String connectorName = oldConnector.getUniqueName();
     newConnector.setPersistenceId(connectorId);
 
     RepositoryTransaction tx = null;
@@ -439,6 +440,7 @@ public abstract class Repository {
       // dont always rely on the repository implementation to return empty list for links
       if (existingLinksByConnector != null) {
         for (MLink link : existingLinksByConnector) {
+          LOG.info(" Link upgrade for link:" + link.getName() + " for connector:" + connectorName);
           // Make a new copy of the configs
           List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
           MLinkConfig newLinkConfig = new MLinkConfig(linkConfig);
@@ -458,14 +460,17 @@ public abstract class Repository {
             // and stop the bootup of Sqoop server
             logInvalidModelObject("link", newlink, validationResult);
             upgradeSuccessful = false;
+            LOG.info(" LINK config upgrade FAILED for link: " + link.getName() + " for connector:" + connectorName);
           }
         }
       }
+      LOG.info(" All Link and configs for this connector processed");
       // 8. Run upgrade logic for the configs related to the job objects
       if (existingJobsByConnector != null) {
         for (MJob job : existingJobsByConnector) {
           // every job has 2 parts, the FROM and the TO links and their
           // corresponding connectors.
+          LOG.info(" Job upgrade for job:" + job.getName()+ " for connector:" + connectorName);
           List<MConfig> fromConfig = newConnector.getFromConfig().clone(false).getConfigs();
           if (job.getFromConnectorId() == newConnector.getPersistenceId()) {
             MFromConfig newFromConfig = new MFromConfig(fromConfig);
@@ -484,8 +489,9 @@ public abstract class Repository {
             if(validationResult.getStatus().canProceed()) {
               updateJob(newJob, tx);
             } else {
-              logInvalidModelObject("job", newJob, validationResult);
+              logInvalidModelObject("fromJob", newJob, validationResult);
               upgradeSuccessful = false;
+              LOG.error(" From JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
             }
           }
 
@@ -507,17 +513,18 @@ public abstract class Repository {
              if(validationResult.getStatus().canProceed()) {
                updateJob(newJob, tx);
              } else {
-               logInvalidModelObject("job", newJob, validationResult);
+               logInvalidModelObject("toJob", newJob, validationResult);
                upgradeSuccessful = false;
+               LOG.error(" TO JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
              }
           }
         }
       }
-
+      LOG.info(" All Job and configs for this connector processed");
       if (upgradeSuccessful) {
         tx.commit();
       } else {
-        throw new SqoopException(RepositoryError.JDBCREPO_0027);
+        throw new SqoopException(RepositoryError.JDBCREPO_0027, " for connector:" + connectorName);
       }
     } catch (SqoopException ex) {
       if (tx != null) {
@@ -533,7 +540,7 @@ public abstract class Repository {
       if (tx != null) {
         tx.close();
       }
-      LOG.info("Connector upgrade finished: " + oldConnector.getUniqueName());
+      LOG.info("Connector upgrade finished for: " + connectorName);
     }
   }
 
@@ -582,7 +589,7 @@ public abstract class Repository {
       if (upgradeSuccessful) {
         tx.commit();
       } else {
-        throw new SqoopException(RepositoryError.JDBCREPO_0027);
+        throw new SqoopException(RepositoryError.JDBCREPO_0027, " Driver");
       }
     } catch (SqoopException ex) {
       if(tx != null) {
