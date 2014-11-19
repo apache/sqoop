@@ -547,6 +547,8 @@ public class TestIncrementalImport extends TestCase {
     args.add(SOURCE_DB_URL);
     args.add("--query");
     args.add(query);
+    args.add("--class-name");
+    args.add(directoryName);
     args.add("--target-dir");
     args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR
       + System.getProperty("file.separator") + directoryName);
