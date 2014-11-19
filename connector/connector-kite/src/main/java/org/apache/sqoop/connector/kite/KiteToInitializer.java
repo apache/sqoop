@@ -19,15 +19,16 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.JarUtil;
+import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.utils.ClassUtils;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * This class allows connector to define initialization work for execution.
@@ -38,13 +39,6 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
     ToJobConfiguration> {
 
   private static final Logger LOG = Logger.getLogger(KiteToInitializer.class);
-
-  // Minimal dependencies for the MR job
-  private static final Pattern[] JAR_NAME_PATTERNS = {
-      Pattern.compile("/kite-"),
-      Pattern.compile("/jackson-(annotations|core|databind)-\\d+"),
-      Pattern.compile("/opencsv-"),
-  };
 
   @Override
   public void initialize(InitializerContext context,
@@ -59,15 +53,19 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
   public List<String> getJars(InitializerContext context,
       LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
     List<String> jars = super.getJars(context, linkConfig, jobConfig);
-    jars.addAll(JarUtil.getMatchedJars(JAR_NAME_PATTERNS));
+    jars.add(ClassUtils.jarForClass("org.kitesdk.data.Formats"));
+    jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
+    jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
+    if (FileFormat.CSV.equals(linkConfig.linkConfig.fileFormat)) {
+      jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
+    }
     return jars;
   }
 
   @Override
   public Schema getSchema(InitializerContext context,
       LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
-    // TO-direction does not have a schema, so return a dummy schema.
-    return new Schema("Kite dataset");
+    return NullSchema.getInstance();
   }
 
 }
