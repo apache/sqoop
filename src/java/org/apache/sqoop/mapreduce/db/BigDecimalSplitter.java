@@ -102,7 +102,7 @@ public class BigDecimalSplitter implements DBSplitter  {
     try {
       return numerator.divide(denominator);
     } catch (ArithmeticException ae) {
-      return numerator.divide(denominator, BigDecimal.ROUND_HALF_UP);
+      return numerator.divide(denominator, BigDecimal.ROUND_UP);
     }
   }
 
