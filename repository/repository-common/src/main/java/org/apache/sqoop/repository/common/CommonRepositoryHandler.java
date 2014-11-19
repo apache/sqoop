@@ -263,7 +263,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       baseInputStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT,
           Statement.RETURN_GENERATED_KEYS);
 
-      // Register the job config type, since driver config is per job
+      // Register a driver config as a job type with no direction
       registerConfigs(null, null, mDriver.getDriverConfig().getConfigs(),
           MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
 

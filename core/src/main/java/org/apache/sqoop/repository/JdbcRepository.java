@@ -220,14 +220,14 @@ public class JdbcRepository extends Repository {
     return (MDriver) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        MDriver existingDriverConfig = handler.findDriver(mDriver.getUniqueName(), conn);
-        if (existingDriverConfig == null) {
+        MDriver existingDriver = handler.findDriver(mDriver.getUniqueName(), conn);
+        if (existingDriver == null) {
           handler.registerDriver(mDriver, conn);
           return mDriver;
         } else {
           // We're currently not serializing version into repository
           // so let's just compare the structure to see if we need upgrade.
-          if(!mDriver.equals(existingDriverConfig)) {
+          if(!mDriver.equals(existingDriver)) {
             if (autoUpgrade) {
               upgradeDriver(mDriver);
               return mDriver;
@@ -236,7 +236,7 @@ public class JdbcRepository extends Repository {
                 "Driver: " + mDriver.getPersistenceId());
             }
           }
-          return existingDriverConfig;
+          return existingDriver;
         }
       }
     });

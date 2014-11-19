@@ -38,11 +38,11 @@ public class UpgradeTool extends ConfiguredTool {
       LOG.info("Initializing the RepositoryManager with immutable option turned off.");
       RepositoryManager.getInstance().initialize(false);
 
-      LOG.info("Initializing the Driver with upgrade option turned on.");
-      Driver.getInstance().initialize(true);
-
       LOG.info("Initializing the Connection Manager with upgrade option turned on.");
       ConnectorManager.getInstance().initialize(true);
+
+      LOG.info("Initializing the Driver with upgrade option turned on.");
+      Driver.getInstance().initialize(true);
 
       LOG.info("Upgrade completed successfully.");
 

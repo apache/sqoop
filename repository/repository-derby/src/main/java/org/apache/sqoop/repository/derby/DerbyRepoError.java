@@ -53,6 +53,9 @@ public enum DerbyRepoError implements ErrorCode {
   /** Can't get ID of direction **/
   DERBYREPO_0008("Could not get ID of recently added direction"),
 
+  /** The system was unable to register driver due to a server error **/
+  DERBYREPO_0009("Registration of driver failed"),
+
   ;
 
   private final String message;
