@@ -260,7 +260,7 @@ public class SchemaSerialization {
       output = new Map(name, key, value);
       break;
     case SET:
-      output = new Set(name).setListType(listType);
+      output = new Set(name, listType);
       break;
     case TEXT:
       charSize = (Long) obj.get(CHAR_SIZE);

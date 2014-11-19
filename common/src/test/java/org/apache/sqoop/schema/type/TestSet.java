@@ -17,30 +17,33 @@
  */
 package org.apache.sqoop.schema.type;
 
-/**
- * Set contains unique values in a collection of a given type
- *
- * JDBC Types: set
- */
-public class Set extends AbstractComplexListType {
+import static org.junit.Assert.*;
 
-  public Set(String name, Column listType) {
-    super(name, listType);
+import org.junit.Test;
+
+public class TestSet {
+
+  @Test
+  public void testSetWithSameListType() {
+    Set a1 = new Set("A", new Text("T"));
+    Set a2 = new Set("A", new Text("T"));
+    assertTrue(a1.equals(a2));
+    assertEquals(a1.toString(), a2.toString());
   }
 
-  public Set(String name, Boolean nullable, Column listType) {
-    super(name, nullable, listType);
+  @Test
+  public void testSetWithDifferentName() {
+    Set a1 = new Set("A", new Text("T"));
+    Set a2 = new Set("B", new Text("T"));
+    assertFalse(a1.equals(a2));
+    assertNotEquals(a1.toString(), a2.toString());
   }
 
-  @Override
-  public ColumnType getType() {
-    return ColumnType.SET;
-  }
-
-  @Override
-  public String toString() {
-    return new StringBuilder("Set{").
-              append(super.toString()).
-              append("}").toString();
+  @Test
+  public void testSetWithDifferentListType() {
+    Set a1 = new Set("A", new Text("T"));
+    Set a2 = new Set("A", new Binary("B"));
+    assertFalse(a1.equals(a2));
+    assertNotEquals(a1.toString(), a2.toString());
   }
 }

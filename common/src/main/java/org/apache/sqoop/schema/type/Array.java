@@ -58,6 +58,8 @@ public class Array extends AbstractComplexListType {
   public String toString() {
     return new StringBuilder("Array{").
          append(super.toString()).
+         append(", size=").
+         append(size).
          append("}").toString();
   }
 

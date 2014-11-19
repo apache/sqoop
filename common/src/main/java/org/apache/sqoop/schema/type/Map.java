@@ -66,30 +66,34 @@ public class Map extends AbstractComplexType {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof Map))
-      return false;
-    if (!super.equals(o))
-      return false;
-
-    Map map = (Map) o;
-
-    if (key != null ? !key.equals(map.key) : map.key != null)
-      return false;
-
-    if (value != null ? !value.equals(map.value) : map.value != null)
-      return false;
-
-    return true;
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((key == null) ? 0 : key.hashCode());
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    return result;
   }
 
   @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (key != null ? key.hashCode() : 0);
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    return result;
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Map other = (Map) obj;
+    if (key == null) {
+      if (other.key != null)
+        return false;
+    } else if (!key.equals(other.key))
+      return false;
+    if (value == null) {
+      if (other.value != null)
+        return false;
+    } else if (!value.equals(other.value))
+      return false;
+    return true;
   }
+
 }

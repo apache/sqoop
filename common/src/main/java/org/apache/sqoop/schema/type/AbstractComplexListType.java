@@ -23,6 +23,7 @@ package org.apache.sqoop.schema.type;
 public abstract class AbstractComplexListType extends AbstractComplexType {
 
   // represents the type of the list elements
+  // NOTE: required for Array/Set, optional for Enum
   Column listType;
 
   public AbstractComplexListType(String name) {
@@ -55,27 +56,28 @@ public abstract class AbstractComplexListType extends AbstractComplexType {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof AbstractComplexListType))
-      return false;
-    if (!super.equals(o))
-      return false;
-
-    AbstractComplexListType that = (AbstractComplexListType) o;
-
-    if (listType != null ? !listType.equals(that.listType) : that.listType != null)
-      return false;
-
-    return true;
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((listType == null) ? 0 : listType.hashCode());
+    return result;
   }
 
   @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (listType != null ? listType.hashCode() : 0);
-    return result;
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    AbstractComplexListType other = (AbstractComplexListType) obj;
+    if (listType == null) {
+      if (other.listType != null)
+        return false;
+    } else if (!listType.equals(other.listType))
+      return false;
+    return true;
   }
 
 }
