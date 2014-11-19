@@ -75,7 +75,7 @@ Creating Link Object
 
 Check for the registered connectors on your Sqoop server: ::
 
-  sqoop:000> show connector --all
+  sqoop:000> show connector
   +----+------------------------+----------------+------------------------------------------------------+----------------------+
   | Id |          Name          |    Version     |                        Class                         | Supported Directions |
   +----+------------------------+----------------+------------------------------------------------------+----------------------+
@@ -88,7 +88,7 @@ Our example contains two connectors. The one with connector Id 2 is called the `
 Generic JDBC Connector in our example has a persistence Id 2 and we will use this value to create new link object for this connector. Note that the link name should be unique.
 ::
 
-  sqoop:000> create link --cid 2
+  sqoop:000> create link -c 2
   Creating link for connector with id 2
   Please fill following values to create new link object
   Name: First Link
@@ -109,7 +109,7 @@ In the ``show connector -all`` we see that there is a hdfs-connector registered 
 
 ::
 
-  sqoop:000> create link --cid 1
+  sqoop:000> create link -c 1
   Creating link for connector with id 1
   Please fill following values to create new link object
   Name: Second Link
@@ -125,7 +125,7 @@ Connectors implement the ``From`` for reading data from and/or ``To`` for writin
 
 ::
 
-  sqoop:000> show links -all
+  sqoop:000> show link --all
   2 link(s) to show:
   link with id 1 and name First Link (Enabled: true, Created by root at 11/4/14 4:27 PM, Updated by root at 11/4/14 4:27 PM)
   Using Connector id 2
@@ -161,32 +161,28 @@ Next, we can use the two link Ids to associate the ``From`` and ``To`` for the j
 
   ToJob configuration
 
-   Output format:
-    0 : TEXT_FILE
-    1 : SEQUENCE_FILE
-	Output format:
-	  0 : TEXT_FILE
-	  1 : SEQUENCE_FILE
-	Choose: 0
-	Compression format:
-	  0 : NONE
-	  1 : DEFAULT
-	  2 : DEFLATE
-	  3 : GZIP
-	  4 : BZIP2
-	  5 : LZO
-	  6 : LZ4
-	  7 : SNAPPY
-	  8 : CUSTOM
-	Choose: 0
-	Custom compression format:(Optional)
-	Output directory:(Required)/root/projects/sqoop
+    Output format:
+     0 : TEXT_FILE
+     1 : SEQUENCE_FILE
+    Choose: 0
+    Compression format:
+     0 : NONE
+     1 : DEFAULT
+     2 : DEFLATE
+     3 : GZIP
+     4 : BZIP2
+     5 : LZO
+     6 : LZ4
+     7 : SNAPPY
+     8 : CUSTOM
+    Choose: 0
+    Custom compression format:(Optional)
+    Output directory:(Required)/root/projects/sqoop
 
-	Driver Config
-
-	Extractors: 2
-	Loaders: 2
-	New job was successfully created with validation status OK  and persistent id 1
+    Driver Config
+    Extractors:(Optional) 2
+    Loaders:(Optional) 2
+    New job was successfully created with validation status OK  and persistent id 1
 
 Our new job object was created with assigned id 1.
 
@@ -196,7 +192,7 @@ Start Job ( a.k.a Data transfer )
 You can start a sqoop job with the following command:
 ::
 
-  sqoop:000> start job --jid 1
+  sqoop:000> start job -j 1
   Submission details
   Job ID: 1
   Server URL: http://localhost:12000/sqoop/
@@ -211,7 +207,7 @@ You can iteratively check your running job status with ``status job`` command:
 
 ::
 
-  sqoop:000> status job --jid 1
+  sqoop:000> status job -j 1
   Submission details
   Job ID: 1
   Server URL: http://localhost:12000/sqoop/
@@ -222,6 +218,23 @@ You can iteratively check your running job status with ``status job`` command:
     http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
   2014-11-04 20:09:16 PST: RUNNING  - 0.00 % 
 
+Alternatively you can start a sqoop job and observe job running status with the following command:
+
+::
+
+  sqoop:000> start job -j 1 -s
+  Submission details
+  Job ID: 1
+  Server URL: http://localhost:12000/sqoop/
+  Created by: root
+  Creation date: 2014-11-04 19:43:29 PST
+  Lastly updated by: root
+  External ID: job_1412137947693_0001
+    http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
+  2014-11-04 19:43:29 PST: BOOTING  - Progress is not available
+  2014-11-04 19:43:39 PST: RUNNING  - 0.00 %
+  2014-11-04 19:43:49 PST: RUNNING  - 10.00 %
+
 And finally you can stop running the job at any time using ``stop job`` command: ::
 
-  sqoop:000> stop job --jid 1
+  sqoop:000> stop job -j 1
