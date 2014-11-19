@@ -66,6 +66,10 @@ public class DefaultManagerFactory
       return new OracleManager(options);
     } else if (scheme.startsWith("jdbc:sqlserver:")) {
       return new SQLServerManager(options);
+    } else if (scheme.startsWith("jdbc:jtds:sqlserver:")) {
+      return new SQLServerManager(
+        "net.sourceforge.jtds.jdbc.Driver",
+        options);
     } else if (scheme.startsWith("jdbc:db2:")) {
       return new Db2Manager(options);
     } else if (scheme.startsWith("jdbc:netezza:")) {

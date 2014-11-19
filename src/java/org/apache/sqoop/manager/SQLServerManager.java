@@ -91,7 +91,11 @@ public class SQLServerManager
   private boolean identityInserts;
 
   public SQLServerManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    this(DRIVER_CLASS, opts);
+  }
+
+  public SQLServerManager(final String driver, final SqoopOptions opts) {
+    super(driver, opts);
 
     // Try to parse extra arguments
     try {
