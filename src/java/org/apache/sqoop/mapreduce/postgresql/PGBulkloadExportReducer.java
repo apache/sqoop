@@ -79,7 +79,6 @@ public class PGBulkloadExportReducer
                                           + " ( SELECT * FROM " + value + " )");
         stmt.executeUpdate("DROP TABLE " + value);
       }
-      conn.commit();
     } catch (SQLException ex) {
       LoggingUtils.logAll(LOG, "Unable to execute create query.", ex);
       throw new IOException(ex);
@@ -98,6 +97,7 @@ public class PGBulkloadExportReducer
   protected void cleanup(Context context)
     throws IOException, InterruptedException {
     try {
+      conn.commit();
       conn.close();
     } catch (SQLException ex) {
       LoggingUtils.logAll(LOG, "Unable to load JDBC driver class", ex);

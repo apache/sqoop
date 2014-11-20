@@ -187,53 +187,18 @@ public class PGBulkloadManagerManualTest extends TestExport {
 
 
   public void testMultiReduceExport() throws IOException, SQLException {
-    String[] genericargs = newStrArray(null, "-Dmapred.reduce.tasks=2");
-    multiFileTestWithGenericArgs(2, 10, 2, genericargs);
+    multiFileTest(2, 10, 2, "-D", "mapred.reduce.tasks=2");
   }
 
 
-  public void testMultiReduceExportWithNewProp() throws IOException, SQLException {
-    String[] genericargs = newStrArray(null, "-Dmapreduce.job.reduces=2");
-    multiFileTestWithGenericArgs(2, 10, 2, genericargs);
+  public void testMultiReduceExportWithNewProp()
+      throws IOException, SQLException {
+    multiFileTest(2, 10, 2, "-D", "mapreduce.job.reduces=2");
   }
 
 
   public void testExportWithTablespace() throws IOException, SQLException {
-    String[] genericargs =
-      newStrArray(null, "-Dpgbulkload.staging.tablespace=" + TABLESPACE);
-    multiFileTestWithGenericArgs(1, 10, 1, genericargs);
-  }
-
-
-  protected void multiFileTestWithGenericArgs(int numFiles,
-                                              int recordsPerMap,
-                                              int numMaps,
-                                              String[] genericargs,
-                                              String... argv)
-    throws IOException, SQLException {
-
-    final int TOTAL_RECORDS = numFiles * recordsPerMap;
-
-    try {
-      LOG.info("Beginning test: numFiles=" + numFiles + "; recordsPerMap="
-               + recordsPerMap + "; numMaps=" + numMaps);
-      LOG.info("  with genericargs: ");
-      for (String arg : genericargs) {
-        LOG.info("    " + arg);
-      }
-
-      for (int i = 0; i < numFiles; i++) {
-        createTextFile(i, recordsPerMap, false);
-      }
-
-      createTable();
-
-      runExport(getArgv(true, 10, 10,
-                        newStrArray(newStrArray(genericargs, argv),
-                                    "-m", "" + numMaps)));
-      verifyExport(TOTAL_RECORDS);
-    } finally {
-      LOG.info("multi-reduce test complete");
-    }
+    multiFileTest(1, 10, 1,
+                  "-D", "pgbulkload.staging.tablespace=" + TABLESPACE);
   }
 }

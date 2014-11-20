@@ -32,7 +32,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.mapreduce.ExportJobBase;
