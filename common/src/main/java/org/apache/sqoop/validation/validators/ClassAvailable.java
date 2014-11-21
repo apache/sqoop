@@ -26,10 +26,14 @@ import org.apache.sqoop.validation.Status;
 public class ClassAvailable extends AbstractValidator<String> {
   @Override
   public void validate(String klass) {
-    try {
-      Class.forName(klass);
-    } catch (ClassNotFoundException e) {
-      addMessage(new Message(Status.ERROR, "Class not found"));
+    if (klass == null) {
+      addMessage(new Message(Status.ERROR, "Class cannot be null"));
+    } else {
+      try {
+        Class.forName(klass);
+      } catch (ClassNotFoundException e) {
+        addMessage(new Message(Status.ERROR, "Class not found"));
+      }
     }
   }
 }

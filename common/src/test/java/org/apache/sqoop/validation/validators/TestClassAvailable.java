@@ -44,5 +44,10 @@ public class TestClassAvailable {
     assertEquals(1, validator.getMessages().size());
     messages = validator.getMessages();
     assertEquals(Status.ERROR, messages.get(0).getStatus());
+
+    validator.validate(null);
+    assertEquals(2, validator.getMessages().size());
+    messages = validator.getMessages();
+    assertEquals(Status.ERROR, messages.get(1).getStatus());
   }
 }
