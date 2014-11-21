@@ -48,6 +48,13 @@ public final class AuthenticationConstants {
           PREFIX_AUTHENTICATION_CONFIG + "handler";
 
   /**
+   * The config enables or disables anonymous authentication.
+   * <tt>org.apache.sqoop.authentication.anonymous</tt>.
+   */
+  public static final String AUTHENTICATION_ANONYMOUS =
+      PREFIX_AUTHENTICATION_CONFIG + "anonymous";
+
+  /**
    * All kerberos authentication related configuration is prefixed with this:
    * <tt>org.apache.sqoop.authentication.kerberos.</tt>
    */

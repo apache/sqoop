@@ -71,6 +71,8 @@ public class SqoopAuthenticationFilter extends AuthenticationFilter {
       properties.setProperty(KerberosAuthenticationHandler.KEYTAB, keytab);
     } else if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.SIMPLE.name())) {
       properties.setProperty(AUTH_TYPE, PseudoAuthenticationHandler.class.getName());
+      properties.setProperty(PseudoAuthenticationHandler.ANONYMOUS_ALLOWED,
+          mapContext.getString(AuthenticationConstants.AUTHENTICATION_ANONYMOUS, "true").trim());
     } else {
       throw new SqoopException(AuthenticationError.AUTH_0004, type);
     }
