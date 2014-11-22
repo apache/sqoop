@@ -102,17 +102,24 @@ public class DataDrivenImportJob extends ImportJobBase {
       // An Avro schema is required for creating a dataset that manages
       // Parquet data records. The import will fail, if schema is invalid.
       Schema schema = generateAvroSchema(tableName);
-      String uri;
-      if (options.doHiveImport()) {
-        uri = "dataset:hive?dataset=" + options.getHiveTableName();
-      } else {
-        FileSystem fs = FileSystem.get(conf);
-        uri = "dataset:" + fs.makeQualified(getContext().getDestination());
-      }
+      String uri = getKiteUri(conf, tableName);
       ParquetJob.configureImportJob(conf, schema, uri, options.isAppendMode());
     }
 
     job.setMapperClass(getMapperClass());
+  }
+
+  private String getKiteUri(Configuration conf, String tableName) throws IOException {
+    if (options.doHiveImport()) {
+      String hiveDatabase = options.getHiveDatabaseName() == null ? "default" :
+          options.getHiveDatabaseName();
+      String hiveTable = options.getHiveTableName() == null ? tableName :
+          options.getHiveTableName();
+      return String.format("dataset:hive:/%s/%s", hiveDatabase, hiveTable);
+    } else {
+      FileSystem fs = FileSystem.get(conf);
+      return "dataset:" + fs.makeQualified(getContext().getDestination());
+    }
   }
 
   private Schema generateAvroSchema(String tableName) throws IOException {
