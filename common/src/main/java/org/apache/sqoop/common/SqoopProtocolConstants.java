@@ -18,8 +18,6 @@
 package org.apache.sqoop.common;
 
 public final class SqoopProtocolConstants {
-  public static final String HEADER_SQOOP_USERNAME = "sqoop-user-name";
-
   public static final String HEADER_SQOOP_ERROR_CODE = "sqoop-error-code";
 
   public static final String HEADER_SQOOP_ERROR_MESSAGE = "sqoop-error-message";

@@ -56,8 +56,6 @@ public class ResourceRequest {
       HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
 
       conn.setRequestMethod(method);
-//      Provide name of user executing request
-      conn.setRequestProperty(SqoopProtocolConstants.HEADER_SQOOP_USERNAME, System.getProperty("user.name"));
 //      Sqoop is using JSON for data transfers
       conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
 //      Transfer client locale to return client specific data
