@@ -63,6 +63,9 @@ public class FromJobConfig {
       if (config.schemaName != null && config.sql != null) {
         addMessage(Status.ERROR, "Both schema name and SQL cannot be specified");
       }
+      if (config.sql != null && config.partitionColumn == null) {
+        addMessage(Status.ERROR, "Partition column is required on query based import.");
+      }
     }
   }
 }
