@@ -153,7 +153,6 @@ public class JobRequestHandler implements RequestHandler {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    String username = ctx.getUserName();
     JobBean bean = new JobBean();
 
     try {
@@ -162,6 +161,8 @@ public class JobRequestHandler implements RequestHandler {
     } catch (IOException e) {
       throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
     }
+
+    String username = ctx.getUserName();
 
     // Get job object
     List<MJob> jobs = bean.getJobs();

@@ -108,7 +108,6 @@ public class LinkRequestHandler implements RequestHandler {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    String username = ctx.getUserName();
     LinkBean linkBean = new LinkBean();
     try {
       JSONObject postData = (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
@@ -116,6 +115,8 @@ public class LinkRequestHandler implements RequestHandler {
     } catch (IOException e) {
       throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
     }
+
+    String username = ctx.getUserName();
 
     // Get link object
     List<MLink> links = linkBean.getLinks();
