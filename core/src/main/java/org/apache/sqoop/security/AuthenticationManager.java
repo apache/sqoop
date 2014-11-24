@@ -28,6 +28,11 @@ public class AuthenticationManager implements Reconfigurable {
 
   private static final Logger LOG = Logger.getLogger(AuthenticationManager.class);
 
+  /**
+   * Default authentication handler
+   */
+  public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.SimpleAuthenticationHandler";
+
 
   /**
    * Default authentication auto upgrade option value
@@ -86,7 +91,9 @@ public class AuthenticationManager implements Reconfigurable {
       LOG.trace("Begin authentication manager initialization");
     }
 
-    String handler = SqoopConfiguration.getInstance().getContext().getString(AuthenticationConstants.AUTHENTICATION_HANDLER.trim());
+    String handler = SqoopConfiguration.getInstance().getContext().getString(
+        AuthenticationConstants.AUTHENTICATION_HANDLER,
+        DEFAULT_AUTHENTICATION_HANDLER).trim();
     authenticationHandler = AuthenticationHandlerFactory.getAuthenticationHandler(handler);
     authenticationHandler.doInitialize();
     authenticationHandler.secureLogin();

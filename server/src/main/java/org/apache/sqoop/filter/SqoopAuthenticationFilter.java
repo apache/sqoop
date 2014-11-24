@@ -40,7 +40,8 @@ public class SqoopAuthenticationFilter extends AuthenticationFilter {
     Properties properties = super.getConfiguration(configPrefix, filterConfig);
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String type = mapContext.getString(
-            AuthenticationConstants.AUTHENTICATION_TYPE).trim();
+        AuthenticationConstants.AUTHENTICATION_TYPE,
+        AuthenticationConstants.TYPE.SIMPLE.name()).trim();
 
     if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.KERBEROS.name())) {
       properties.setProperty(AUTH_TYPE, AuthenticationConstants.TYPE.KERBEROS.name().toLowerCase());
