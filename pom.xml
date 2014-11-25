@@ -610,7 +610,7 @@ limitations under the License.
             <forkMode>always</forkMode>
             <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <argLine>-Xms256m -Xmx1g</argLine>
+            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m</argLine>
           </configuration>
         </plugin>
 
