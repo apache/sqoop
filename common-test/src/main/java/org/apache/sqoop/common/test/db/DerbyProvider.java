@@ -17,8 +17,10 @@
  */
 package org.apache.sqoop.common.test.db;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.sqoop.common.test.utils.LoggerWriter;
 
 import java.net.InetAddress;
 
@@ -40,7 +42,12 @@ public class DerbyProvider extends DatabaseProvider {
     // Start embedded server
     try {
       server = new NetworkServerControl(InetAddress.getByName("localhost"), 1527);
-      server.start(null);
+      server.start(new LoggerWriter(LOG, Level.INFO));
+
+      // Start won't thrown an exception in case that it fails to start, one
+      // have to explicitly call ping() in order to verify if the server is
+      // up. Check DERBY-1465 for more details.
+      server.ping();
     } catch (Exception e) {
       LOG.error("Can't start Derby network server", e);
       throw new RuntimeException("Can't derby server", e);
