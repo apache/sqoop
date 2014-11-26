@@ -201,7 +201,7 @@ public class TestMainframeDatasetFTPRecordReader {
     conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, DummySqoopRecord.class,
         DBWritable.class);
 
-    Job job = Job.getInstance(conf);
+    Job job = new Job(conf);
     mfDIS = new MainframeDatasetInputSplit();
     mfDIS.addDataset("test1");
     mfDIS.addDataset("test2");

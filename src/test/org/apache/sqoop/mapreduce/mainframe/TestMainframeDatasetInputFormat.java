@@ -96,7 +96,7 @@ public class TestMainframeDatasetInputFormat {
 
     String dsName = "dsName1";
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME, dsName);
-    Job job = Job.getInstance(conf);
+    Job job = new Job(conf);
     format.getSplits(job);
 
     List<InputSplit> splits = new ArrayList<InputSplit>();

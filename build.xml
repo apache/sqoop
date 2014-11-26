@@ -125,9 +125,9 @@
   <if>
     <equals arg1="${hadoopversion}" arg2="20" />
     <then>
-      <property name="hadoop.version" value="0.20.2-cdh3u1" />
-      <property name="hbase94.version" value="0.90.3-cdh3u1" />
-      <property name="zookeeper.version" value="3.3.3-cdh3u1" />
+      <property name="hadoop.version" value="0.20.2-cdh3u5" />
+      <property name="hbase94.version" value="0.90.6-cdh3u5" />
+      <property name="zookeeper.version" value="3.3.3-cdh3u5" />
       <property name="hadoop.version.full" value="0.20" />
       <property name="hcatalog.version" value="0.13.0" />
       <property name="hbasecompatprofile" value="1" />
@@ -150,7 +150,7 @@
     <elseif>
       <equals arg1="${hadoopversion}" arg2="100" />
       <then>
-        <property name="hadoop.version" value="1.0.0" />
+        <property name="hadoop.version" value="1.0.4" />
         <property name="hbase94.version" value="0.92.0" />
         <property name="zookeeper.version" value="3.4.2" />
         <property name="hadoop.version.full" value="1.0.0" />
