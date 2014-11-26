@@ -226,8 +226,7 @@ public class JobRequestHandler implements RequestHandler {
     Status finalStatus = Status.getWorstStatus(fromConfigValidator.getStatus(),
         toConfigValidator.getStatus(), driverConfigValidator.getStatus());
     // Return back validations in all cases
-    ValidationResultBean validationResultBean = new ValidationResultBean(fromConfigValidator,
-        toConfigValidator);
+    ValidationResultBean validationResultBean = new ValidationResultBean(fromConfigValidator, toConfigValidator, driverConfigValidator);
 
     // If we're good enough let's perform the action
     if (finalStatus.canProceed()) {

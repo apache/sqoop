@@ -558,8 +558,7 @@ public class SqoopClient {
   private Status applyJobValidations(ValidationResultBean bean, MJob job) {
     ConfigValidationResult fromConfig = bean.getValidationResults()[0];
     ConfigValidationResult toConfig = bean.getValidationResults()[1];
-    // TODO(VB): fix this as part of SQOOP 1509
-    //ConfigValidationResult driverConfig = bean.getValidationResults()[2];
+    ConfigValidationResult driver = bean.getValidationResults()[2];
 
     ConfigUtils.applyValidation(
         job.getJobConfig(Direction.FROM).getConfigs(),
@@ -567,14 +566,16 @@ public class SqoopClient {
     ConfigUtils.applyValidation(
         job.getJobConfig(Direction.TO).getConfigs(),
         toConfig);
-    //ConfigUtils.applyValidation(job.getDriverConfig().getSelf().getConfigs(), driverConfig);
+    ConfigUtils.applyValidation(
+      job.getDriverConfig().getConfigs(),
+      driver
+    );
 
     Long id = bean.getId();
     if(id != null) {
       job.setPersistenceId(id);
     }
 
-    return Status.getWorstStatus(fromConfig.getStatus(), toConfig.getStatus());
-       // driverConfig.getStatus());
+    return Status.getWorstStatus(fromConfig.getStatus(), toConfig.getStatus(), driver.getStatus());
   }
 }
