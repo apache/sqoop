@@ -101,8 +101,7 @@ public class TestSchemaSerialization {
   @Test
   public void testEnum() {
     Schema e = new Schema("e").addColumn(new Enum("e", Collections
-        .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "A", "B" }))), new Text(
-        "e1")));
+        .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "A", "B" })))));
     transferAndAssert(e);
   }
 
@@ -162,7 +161,7 @@ public class TestSchemaSerialization {
       .addColumn(new Date("d"))
       .addColumn(new DateTime("e"))
       .addColumn(new Decimal("f"))
-      .addColumn(new Enum("g", Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "X", "Y" }))), new Text("g1")))
+      .addColumn(new Enum("g", Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "X", "Y" })))))
       .addColumn(new FixedPoint("h"))
       .addColumn(new FloatingPoint("i"))
       .addColumn(new Map("j", new Text("j1"), new Text("j2")))

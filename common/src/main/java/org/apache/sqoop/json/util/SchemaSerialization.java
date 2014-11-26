@@ -133,7 +133,6 @@ public class SchemaSerialization {
     case ENUM:
       JSONObject enumList = new JSONObject();
       ret.put(LIST, enumList);
-      enumList.put(LIST_TYPE, extractColumn(((AbstractComplexListType) column).getListType()));
       JSONArray optionsArray = new JSONArray();
       optionsArray.addAll(((Enum)column).getOptions());
       enumList.put(ENUM_OPTIONS, optionsArray);
@@ -245,7 +244,7 @@ public class SchemaSerialization {
       output = new Decimal(name).setPrecision(precision).setScale(scale);
       break;
     case ENUM:
-      output = new Enum(name, options).setListType(listType);
+      output = new Enum(name, options);
       break;
     case FIXED_POINT:
       Boolean unsigned = (Boolean) obj.get(UNSIGNED);

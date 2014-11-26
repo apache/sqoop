@@ -55,13 +55,4 @@ public class TestEnum {
     assertEquals(e1.toString(), e2.toString());
   }
 
-  @Test
-  public void testEnumWithDifferentListType() {
-    Enum e1 = new Enum("A");
-    e1.setListType(new Text("T"));
-    Enum e2 = new Enum("A");
-    e2.setListType(new Binary("B"));
-    assertFalse(e1.equals(e2));
-    assertNotEquals(e1.toString(), e2.toString());
-  }
 }

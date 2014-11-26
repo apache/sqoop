@@ -26,7 +26,7 @@ import java.util.HashSet;
  * JDBC Types: enum
  */
 
-public class Enum extends AbstractComplexListType {
+public class Enum extends Column {
 
   // The options set contains the possible values for the Enum
   private Set<String> options;
@@ -38,16 +38,6 @@ public class Enum extends AbstractComplexListType {
 
   public Enum(String name, Set<String> options) {
     super(name);
-    setOptions(options);
-  }
-
-  public Enum(String name, Set<String> options, Column listType) {
-    super(name, listType);
-    setOptions(options);
-  }
-
-  public Enum(String name, Boolean nullable, Set<String> options, Column listType) {
-    super(name, nullable, listType);
     setOptions(options);
   }
 
