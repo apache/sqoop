@@ -29,7 +29,6 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 public class TestLinkBean {
@@ -62,7 +61,7 @@ public class TestLinkBean {
     String linkJsonString = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedLinkJson = (JSONObject) JSONValue.parse(linkJsonString);
+    JSONObject parsedLinkJson = JSONUtils.parse(linkJsonString);
     LinkBean retrievedBean = new LinkBean();
     retrievedBean.restore(parsedLinkJson);
     MLink retrievedLink = retrievedBean.getLinks().get(0);

@@ -30,7 +30,6 @@ import org.apache.sqoop.json.util.BeanTestUtil;
 import org.apache.sqoop.json.util.ConfigTestUtil;
 import org.apache.sqoop.model.MConnector;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 public class TestConnectorsBean {
@@ -55,7 +54,7 @@ public class TestConnectorsBean {
     String connectorsJSONString = connectorsJSON.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedConnectors = (JSONObject) JSONValue.parse(connectorsJSONString);
+    JSONObject parsedConnectors = JSONUtils.parse(connectorsJSONString);
     ConnectorsBean parsedConnectorsBean = new ConnectorsBean();
     parsedConnectorsBean.restore(parsedConnectors);
 
@@ -89,7 +88,7 @@ public class TestConnectorsBean {
     String string = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     ConnectorsBean retrievedBean = new ConnectorsBean();
     retrievedBean.restore(retrievedJson);
 
@@ -118,7 +117,7 @@ public class TestConnectorsBean {
     String string = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     ConnectorsBean retrievedBean = new ConnectorsBean();
     retrievedBean.restore(retrievedJson);
 

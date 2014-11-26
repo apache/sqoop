@@ -42,6 +42,7 @@ import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionBean;
@@ -66,7 +67,6 @@ import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Load user-created content of Sqoop repository from a JSON formatted file The
@@ -93,7 +93,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
       LOG.info("Reading JSON from file" + inputFileName);
       InputStream input = new FileInputStream(inputFileName);
       String jsonTxt = IOUtils.toString(input, Charsets.UTF_8);
-      JSONObject json = (JSONObject) JSONValue.parse(jsonTxt);
+      JSONObject json = JSONUtils.parse(jsonTxt);
       boolean res = load(json);
       input.close();
       return res;

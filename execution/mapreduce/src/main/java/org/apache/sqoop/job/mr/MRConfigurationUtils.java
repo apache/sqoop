@@ -24,12 +24,12 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.MRJobConstants;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.util.SchemaSerialization;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -228,7 +228,7 @@ public final class MRConfigurationUtils {
       return null;
     }
 
-    JSONObject jsonSchema = (JSONObject) JSONValue.parse(new String(bytes));
+    JSONObject jsonSchema = JSONUtils.parse(new String(bytes));
     return SchemaSerialization.restoreSchema(jsonSchema);
   }
 

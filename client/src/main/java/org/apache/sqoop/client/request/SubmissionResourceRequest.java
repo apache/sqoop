@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Provide CRD semantics over RESTfull HTTP API for submissions. Please note
@@ -36,7 +36,7 @@ public class SubmissionResourceRequest extends  ResourceRequest {
     } else {
       response = super.get(serverUrl + RESOURCE + jid);
     }
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
     SubmissionsBean submissionBean = new SubmissionsBean();
     submissionBean.restore(jsonObject);
     return submissionBean;

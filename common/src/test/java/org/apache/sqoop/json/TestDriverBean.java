@@ -24,7 +24,6 @@ import java.util.ResourceBundle;
 import org.apache.sqoop.json.util.ConfigTestUtil;
 import org.apache.sqoop.model.MDriver;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 /**
@@ -48,7 +47,7 @@ public class TestDriverBean {
     String string = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     DriverBean retrievedBean = new DriverBean();
     retrievedBean.restore(retrievedJson);
 

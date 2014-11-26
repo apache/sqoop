@@ -20,7 +20,6 @@ package org.apache.sqoop.json;
 import org.apache.sqoop.json.util.TestSchemaSerialization;
 import org.apache.sqoop.schema.Schema;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Run the same tests as TestSchemaSerialization, but using the SchamaBean
@@ -41,7 +40,7 @@ public class TestSchemaBean extends TestSchemaSerialization {
 
     String transferredString = extractJson.toJSONString();
 
-    JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
+    JSONObject restoreJson = JSONUtils.parse(transferredString);
     SchemaBean restoreBean = new SchemaBean();
     restoreBean.restore(restoreJson);
 

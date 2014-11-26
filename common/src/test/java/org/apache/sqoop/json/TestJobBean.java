@@ -26,7 +26,6 @@ import org.apache.sqoop.json.util.BeanTestUtil;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
@@ -53,7 +52,7 @@ public class TestJobBean {
     String jobJsonString = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject parsedJobJson = (JSONObject) JSONValue.parse(jobJsonString);
+    JSONObject parsedJobJson = JSONUtils.parse(jobJsonString);
     JobBean parsedJobBean = new JobBean();
     parsedJobBean.restore(parsedJobJson);
     MJob target = parsedJobBean.getJobs().get(0);

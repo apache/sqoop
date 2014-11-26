@@ -23,6 +23,8 @@ public enum SerializationError implements ErrorCode {
 
   SERIALIZATION_001("Attempt to pass a non-map object to MAP type."),
 
+  SERIALIZATION_002("Invalid JSON"),
+
   ;
 
   private final String message;

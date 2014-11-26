@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MLink;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Provide CRUD semantics over RESTfull HTTP API for links. All operations
@@ -42,7 +42,7 @@ public class LinkResourceRequest extends ResourceRequest {
     } else {
       response = super.get(serverUrl + LINK_RESOURCE + linkId);
     }
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     LinkBean bean = new LinksBean();
     if (linkId != null) {
@@ -58,7 +58,7 @@ public class LinkResourceRequest extends ResourceRequest {
     JSONObject linkJson = linkBean.extract(false);
     String response = super.post(serverUrl + LINK_RESOURCE, linkJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
+    validationBean.restore(JSONUtils.parse(response));
     return validationBean;
   }
 
@@ -68,7 +68,7 @@ public class LinkResourceRequest extends ResourceRequest {
     JSONObject linkJson = linkBean.extract(false);
     String response = super.put(serverUrl + LINK_RESOURCE + link.getPersistenceId(), linkJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
+    validationBean.restore(JSONUtils.parse(response));
     return validationBean;
   }
 

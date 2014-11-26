@@ -27,6 +27,7 @@ import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
@@ -42,7 +43,6 @@ import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 public class LinkRequestHandler implements RequestHandler {
 
@@ -110,7 +110,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     LinkBean linkBean = new LinkBean();
     try {
-      JSONObject postData = (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
+      JSONObject postData = JSONUtils.parse(ctx.getRequest().getReader());
       linkBean.restore(postData);
     } catch (IOException e) {
       throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);

@@ -18,8 +18,8 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.json.JSONUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Provide read semantics over RESTfull HTTP API for driver
@@ -31,7 +31,7 @@ public class DriverResourceRequest extends ResourceRequest {
   public DriverBean read(String serverUrl) {
     String response = null;
     response = super.get(serverUrl + RESOURCE);
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
     DriverBean driverBean = new DriverBean();
     driverBean.restore(jsonObject);
     return driverBean;

@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MJob;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Provide CRUD semantics over RESTfull HTTP API for jobs. All operations are
@@ -46,7 +46,7 @@ public class JobResourceRequest extends ResourceRequest {
     } else {
       response = super.get(serverUrl + RESOURCE + jobId);
     }
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     JobBean bean = new JobsBean();
     if (jobId != null) {
@@ -62,7 +62,7 @@ public class JobResourceRequest extends ResourceRequest {
     JSONObject jobJson = jobBean.extract(false);
     String response = super.post(serverUrl + RESOURCE, jobJson.toJSONString());
     ValidationResultBean validationResultBean = new ValidationResultBean();
-    validationResultBean.restore((JSONObject) JSONValue.parse(response));
+    validationResultBean.restore(JSONUtils.parse(response));
     return validationResultBean;
   }
 
@@ -73,7 +73,7 @@ public class JobResourceRequest extends ResourceRequest {
     String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
         jobJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
-    validationBean.restore((JSONObject) JSONValue.parse(response));
+    validationBean.restore(JSONUtils.parse(response));
     return validationBean;
   }
 
@@ -106,7 +106,7 @@ public class JobResourceRequest extends ResourceRequest {
 
   private SubmissionBean createJobSubmissionResponse(String response) {
     SubmissionBean submissionBean = new SubmissionBean();
-    submissionBean.restore((JSONObject) JSONValue.parse(response));
+    submissionBean.restore(JSONUtils.parse(response));
     return submissionBean;
   }
 }

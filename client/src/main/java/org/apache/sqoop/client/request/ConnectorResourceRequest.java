@@ -19,8 +19,8 @@ package org.apache.sqoop.client.request;
 
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.ConnectorsBean;
+import org.apache.sqoop.json.JSONUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Provide Read semantics over RESTfull HTTP API for connectors. Only read is
@@ -37,7 +37,7 @@ public class ConnectorResourceRequest extends ResourceRequest {
     } else {
       response = super.get(serverUrl + RESOURCE + cid);
     }
-    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     ConnectorBean bean = new ConnectorsBean();
     if (cid != null) {

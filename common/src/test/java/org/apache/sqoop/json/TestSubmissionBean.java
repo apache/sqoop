@@ -26,7 +26,6 @@ import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -460,7 +459,7 @@ public class TestSubmissionBean {
 
     String string = json.toString();
 
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     SubmissionsBean retrievedBean = new SubmissionsBean();
     retrievedBean.restore(retrievedJson);
 
@@ -479,7 +478,7 @@ public class TestSubmissionBean {
 
     String string = json.toString();
 
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     SubmissionsBean retrievedBean = new SubmissionsBean();
     retrievedBean.restore(retrievedJson);
 

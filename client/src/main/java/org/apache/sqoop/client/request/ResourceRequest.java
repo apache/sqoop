@@ -23,9 +23,9 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.ThrowableBean;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
@@ -107,7 +107,7 @@ public class ResourceRequest {
           }
           reader.close();
 
-          JSONObject json = (JSONObject) JSONValue.parse(result.toString());
+          JSONObject json = JSONUtils.parse(result.toString());
           ex.restore(json);
 
           throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());

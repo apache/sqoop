@@ -21,7 +21,6 @@ import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 import java.util.LinkedList;
@@ -115,7 +114,7 @@ public class TestValidationResultBean {
 
     String string = json.toString();
 
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     ValidationResultBean retrievedBean = new ValidationResultBean();
     retrievedBean.restore(retrievedJson);
 
@@ -128,7 +127,7 @@ public class TestValidationResultBean {
 
     String string = json.toString();
 
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     ValidationResultBean retrievedBean = new ValidationResultBean();
     retrievedBean.restore(retrievedJson);
 

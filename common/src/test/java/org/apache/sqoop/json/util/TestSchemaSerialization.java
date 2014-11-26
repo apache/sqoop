@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -40,7 +41,6 @@ import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
 import org.apache.sqoop.schema.type.Unknown;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 /**
@@ -52,7 +52,7 @@ public class TestSchemaSerialization {
   public void testSchemaNull() {
     // a null schema is treated as a NullSchema
     JSONObject extractJson = SchemaSerialization.extractSchema(null);
-    JSONObject restoreJson = (JSONObject) JSONValue.parse(extractJson.toJSONString());
+    JSONObject restoreJson = JSONUtils.parse(extractJson.toJSONString());
     assertEquals(NullSchema.getInstance(), SchemaSerialization.restoreSchema(restoreJson));
   }
 
@@ -189,7 +189,7 @@ public class TestSchemaSerialization {
   protected Schema transfer(Schema schema) {
     JSONObject extractJson = SchemaSerialization.extractSchema(schema);
     String transferredString = extractJson.toJSONString();
-    JSONObject restoreJson = (JSONObject) JSONValue.parse(transferredString);
+    JSONObject restoreJson = JSONUtils.parse(transferredString);
     return SchemaSerialization.restoreSchema(restoreJson);
   }
 }

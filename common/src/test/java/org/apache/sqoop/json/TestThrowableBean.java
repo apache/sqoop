@@ -20,7 +20,6 @@ package org.apache.sqoop.json;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.util.SerializationError;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -68,7 +67,7 @@ public class TestThrowableBean {
     String string = json.toJSONString();
 
     // Retrieved transferred object
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(string);
+    JSONObject retrievedJson = JSONUtils.parse(string);
     ThrowableBean retrievedBean = new ThrowableBean();
     retrievedBean.restore(retrievedJson);
     return retrievedBean.getThrowable();

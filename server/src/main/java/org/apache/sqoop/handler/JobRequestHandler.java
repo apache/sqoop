@@ -30,6 +30,7 @@ import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.JsonBean;
@@ -51,7 +52,6 @@ import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 public class JobRequestHandler implements RequestHandler {
 
@@ -156,7 +156,7 @@ public class JobRequestHandler implements RequestHandler {
     JobBean bean = new JobBean();
 
     try {
-      JSONObject json = (JSONObject) JSONValue.parse(ctx.getRequest().getReader());
+      JSONObject json = JSONUtils.parse(ctx.getRequest().getReader());
       bean.restore(json);
     } catch (IOException e) {
       throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);

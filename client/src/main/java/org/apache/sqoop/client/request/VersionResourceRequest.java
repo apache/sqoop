@@ -17,15 +17,15 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.VersionBean;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 public class VersionResourceRequest extends ResourceRequest
 {
   public VersionBean read(String serverUrl) {
     String response = super.get(serverUrl + "version");
-    JSONObject jsonObject = (JSONObject)JSONValue.parse(response);
+    JSONObject jsonObject = JSONUtils.parse(response);
 
     VersionBean versionBean = new VersionBean();
     versionBean.restore(jsonObject);

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
@@ -35,7 +36,6 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.Test;
 
 /**
@@ -63,7 +63,7 @@ public class TestConfigSerialization {
 
     // Exchange the data on string level
     String serializedJson = jsonObject.toJSONString();
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(serializedJson);
+    JSONObject retrievedJson = JSONUtils.parse(serializedJson);
 
     // And retrieve back from JSON representation
     MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
@@ -90,7 +90,7 @@ public class TestConfigSerialization {
     String serializedJson = jsonObject.toJSONString();
 
     // Deserialize
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(serializedJson);
+    JSONObject retrievedJson = JSONUtils.parse(serializedJson);
     MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
     assertEquals(map, retrieved.getMapInput("Map").getValue());
   }
@@ -111,7 +111,7 @@ public class TestConfigSerialization {
     // Replace map value with a fake string to force exception
     String badSerializedJson = serializedJson.replace("{\"A\":\"B\"}", "\"nonsensical string\"");
     System.out.println(badSerializedJson);
-    JSONObject retrievedJson = (JSONObject) JSONValue.parse(badSerializedJson);
+    JSONObject retrievedJson = JSONUtils.parse(badSerializedJson);
     ConfigInputSerialization.restoreConfig(retrievedJson);
   }
 

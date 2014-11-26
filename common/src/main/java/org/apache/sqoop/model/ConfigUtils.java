@@ -19,12 +19,12 @@ package org.apache.sqoop.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -456,7 +456,7 @@ public class  ConfigUtils {
     Class<?> klass = configuration.getClass();
 
     Set<String> configNames = new HashSet<String>();
-    JSONObject jsonConfigs = (JSONObject) JSONValue.parse(json);
+    JSONObject jsonConfigs = JSONUtils.parse(json);
 
     for(Field configField : klass.getDeclaredFields()) {
       configField.setAccessible(true);
