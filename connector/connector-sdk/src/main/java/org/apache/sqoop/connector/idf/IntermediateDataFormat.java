@@ -107,9 +107,9 @@ public abstract class IntermediateDataFormat<T> {
   public abstract void setObjectData(Object[] data);
 
   /**
-   * Set the schema for reading data.
+   * Set the schema for serializing/de-serializing  data.
    *
-   * @param schema - the schema used for reading data
+   * @param schema - the schema used for serializing/de-serializing  data
    */
   public abstract void setSchema(Schema schema);
 

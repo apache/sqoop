@@ -39,7 +39,9 @@ public enum IntermediateDataFormatError implements ErrorCode {
   /** Number of fields. */
   INTERMEDIATE_DATA_FORMAT_0005("Wrong number of fields."),
 
-  INTERMEDIATE_DATA_FORMAT_0006("Schema missing.")
+  INTERMEDIATE_DATA_FORMAT_0006("Schema missing."),
+
+  INTERMEDIATE_DATA_FORMAT_0008("JSON parse internal error."),
 
   ;
 

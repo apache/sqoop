@@ -24,7 +24,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
@@ -57,16 +61,10 @@ public class TestCSVIntermediateDataFormat {
     }
   }
 
-  @Test
-  public void testStringInStringOut() {
-    String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
-      + ",'" + String.valueOf(0x0A) + "'";
-    dataFormat.setTextData(testData);
-    assertEquals(testData, dataFormat.getTextData());
-  }
+  //**************test cases for null and empty input*******************
 
   @Test
-  public void testNullStringInObjectOut() {
+  public void testNullInputAsCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
@@ -76,14 +74,12 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("6"));
     dataFormat.setSchema(schema);
     dataFormat.setTextData(null);
-
     Object[] out = dataFormat.getObjectData();
-
     assertNull(out);
   }
 
   @Test(expected=SqoopException.class)
-  public void testEmptyStringInObjectOut() {
+  public void testEmptyInputAsCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
@@ -93,12 +89,21 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("6"));
     dataFormat.setSchema(schema);
     dataFormat.setTextData("");
-
     dataFormat.getObjectData();
   }
 
+  //**************test cases for primitive types( text, number, bytearray)*******************
+
   @Test
-  public void testStringInObjectOut() {
+  public void testInputAsCSVTextInCSVTextOut() {
+    String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
+      + ",'" + String.valueOf(0x0A) + "'";
+    dataFormat.setTextData(testData);
+    assertEquals(testData, dataFormat.getTextData());
+  }
+
+  @Test
+  public void testInputAsCSVTextInObjectOut() {
 
     //byte[0] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
@@ -126,7 +131,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
-  public void testObjectInStringOut() {
+  public void testInputAsObjectArayInCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
@@ -154,7 +159,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
-  public void testObjectInObjectOut() {
+  public void testObjectArrayInObjectArrayOut() {
     //Test escapable sequences too.
     //byte[0] = -112, byte[1] = 54 - 2's complements
     Schema schema = new Schema("test");
@@ -183,7 +188,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
-  public void testObjectWithNullInStringOut() {
+  public void testObjectArrayWithNullInCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
@@ -254,6 +259,8 @@ public class TestCSVIntermediateDataFormat {
     assertTrue(Arrays.deepEquals(inCopy, dataFormat.getObjectData()));
   }
 
+  //**************test cases for date/datetime*******************
+
   @Test
   public void testDate() {
     Schema schema = new Schema("test");
@@ -321,6 +328,246 @@ public class TestCSVIntermediateDataFormat {
     }
   }
 
+  //**************test cases for arrays*******************
+  @Test
+  public void testArrayOfStringWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new Text("text")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { "A", "B" };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfStringWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new Text("text")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { "A", "B" };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "text";
+    String testData = "'[\"A\",\"B\"]','text'";
+    dataFormat.setTextData(testData);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfStringWithObjectArrayInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new Text("text")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { "A", "B" };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "text";
+    String testData = "'[\"A\",\"B\"]','text'";
+    dataFormat.setObjectData(data);
+    assertEquals(testData, dataFormat.getTextData());
+  }
+
+  @Test
+  public void testArrayOfStringWithCSVTextInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new Text("text")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    String testData = "'[\"A\",\"B\"]','text'";
+    dataFormat.setTextData(testData);
+    assertEquals(testData, dataFormat.getTextData());
+  }
+
+  @Test
+  public void testArrayOfComplexStrings() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new Text("text")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { "A''\"ssss", "Bss###''" };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "tex''t";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
+    assertEquals("tex''t", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfIntegers() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new FixedPoint("fn")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { 1, 2 };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testListOfIntegers() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1", new FixedPoint("fn")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    List<Integer> givenList = new ArrayList<Integer>();
+    givenList.add(1);
+    givenList.add(1);
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenList.toArray();
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(givenList.toString(), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  public void testSetOfIntegers() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Set("1", new FixedPoint("fn")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Set<Integer> givenSet = new HashSet<Integer>();
+    givenSet.add(1);
+    givenSet.add(3);
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenSet.toArray();
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(givenSet.toString(), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfDecimals() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
+        new org.apache.sqoop.schema.type.Decimal("deci")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArray = { 1.22, 2.444 };
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenArray;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfObjectsWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
+        new org.apache.sqoop.schema.type.Array("array", new FixedPoint("ft"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArrayOne = { 11, 12 };
+    Object[] givenArrayTwo = { 14, 15 };
+
+    Object[] arrayOfArrays = new Object[2];
+    arrayOfArrays[0] = givenArrayOne;
+    arrayOfArrays[1] = givenArrayTwo;
+
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = arrayOfArrays;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(2, expectedArray.length);
+    assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.deepToString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfObjectsWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
+        new org.apache.sqoop.schema.type.Array("array", new FixedPoint("ft"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArrayOne = { 11, 12 };
+    Object[] givenArrayTwo = { 14, 15 };
+
+    Object[] arrayOfArrays = new Object[2];
+    arrayOfArrays[0] = givenArrayOne;
+    arrayOfArrays[1] = givenArrayTwo;
+
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = arrayOfArrays;
+    data[1] = "text";
+    dataFormat.setTextData("'[\"[11, 12]\",\"[14, 15]\"]','text'");
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(2, expectedArray.length);
+    assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.deepToString(expectedArray));
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testArrayOfObjectsWithCSVTextInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
+        new org.apache.sqoop.schema.type.Array("array", new FixedPoint("ft"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    String input = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
+    dataFormat.setTextData(input);
+    Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
+    assertEquals(2, expectedArray.length);
+    assertEquals(input, dataFormat.getTextData());
+  }
+
+  @Test
+  public void testArrayOfObjectsWithObjectArrayInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
+        new org.apache.sqoop.schema.type.Array("array", new FixedPoint("ft"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Object[] givenArrayOne = { 11, 12 };
+    Object[] givenArrayTwo = { 14, 15 };
+
+    Object[] arrayOfArrays = new Object[2];
+    arrayOfArrays[0] = givenArrayOne;
+    arrayOfArrays[1] = givenArrayTwo;
+
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = arrayOfArrays;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    String expected = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
+    assertEquals(expected, dataFormat.getTextData());
+  }
+
+  //**************test cases for schema*******************
   @Test(expected=SqoopException.class)
   public void testEmptySchema() {
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
