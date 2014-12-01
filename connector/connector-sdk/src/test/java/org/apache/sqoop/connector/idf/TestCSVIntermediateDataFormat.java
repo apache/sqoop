@@ -26,12 +26,15 @@ import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
 import org.apache.sqoop.schema.type.Date;
@@ -43,8 +46,6 @@ import org.junit.Test;
 
 public class TestCSVIntermediateDataFormat {
 
-  private final String BYTE_FIELD_ENCODING = "ISO-8859-1";
-
   private IntermediateDataFormat<?> dataFormat;
 
   @Before
@@ -54,8 +55,10 @@ public class TestCSVIntermediateDataFormat {
 
   private String getByteFieldString(byte[] byteFieldData) {
     try {
-      return new StringBuilder("'").append(new String(byteFieldData, BYTE_FIELD_ENCODING)).append("'").toString();
-    } catch(UnsupportedEncodingException e) {
+      return new StringBuilder("'")
+          .append(new String(byteFieldData, CSVIntermediateDataFormat.BYTE_FIELD_CHARSET))
+          .append("'").toString();
+    } catch (UnsupportedEncodingException e) {
       // Should never get to this point because ISO-8859-1 is a standard codec.
       return null;
     }
@@ -566,7 +569,162 @@ public class TestCSVIntermediateDataFormat {
     String expected = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
     assertEquals(expected, dataFormat.getTextData());
   }
+  //**************test cases for map**********************
 
+  @Test
+  public void testMapWithSimpleValueWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Text("value")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> map = new HashMap<Object, Object>();
+    map.put("testKey", "testValue");
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = map;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(map, expectedMap);
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testMapWithComplexIntegerListValueWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Array("value",
+        new FixedPoint("number"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    List<Integer> intList = new ArrayList<Integer>();
+    intList.add(11);
+    intList.add(12);
+    givenMap.put("testKey", intList);
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(givenMap.toString(), expectedMap.toString());
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testMapWithComplexStringListValueWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Array("value",
+        new Text("text"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    List<String> stringList = new ArrayList<String>();
+    stringList.add("A");
+    stringList.add("A");
+    givenMap.put("testKey", stringList);
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(givenMap.toString(), expectedMap.toString());
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testMapWithComplexMapValueWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Array("value",
+        new Text("text"))));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    List<String> stringList = new ArrayList<String>();
+    stringList.add("A");
+    stringList.add("A");
+    Map<String, List<String>> anotherMap = new HashMap<String, List<String>>();
+    anotherMap.put("anotherKey", stringList);
+    givenMap.put("testKey", anotherMap);
+    // create an array inside the object array
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    dataFormat.setObjectData(data);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(givenMap.toString(), expectedMap.toString());
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+ @Test
+  public void testMapWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Text("value")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    givenMap.put("testKey", "testValue");
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    String testData = "'{\"testKey\":\"testValue\"}','text'";
+    dataFormat.setTextData(testData);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(givenMap, expectedMap);
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testMapWithComplexValueWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Text("value")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    givenMap.put("testKey", "testValue");
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    String testData = "'{\"testKey\":\"testValue\"}','text'";
+    dataFormat.setTextData(testData);
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
+    assertEquals(givenMap, expectedMap);
+    assertEquals("text", dataFormat.getObjectData()[1]);
+  }
+
+  @Test
+  public void testMapWithObjectArrayInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Text("value")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    Map<Object, Object> givenMap = new HashMap<Object, Object>();
+    givenMap.put("testKey", "testValue");
+    Object[] data = new Object[2];
+    data[0] = givenMap;
+    data[1] = "text";
+    String testData = "'{\"testKey\":\"testValue\"}','text'";
+    dataFormat.setObjectData(data);
+    assertEquals(testData, dataFormat.getTextData());
+  }
+
+  @Test
+  public void testMapWithCSVTextInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new org.apache.sqoop.schema.type.Map("1", new Text("key"), new Text("value")));
+    schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
+    dataFormat.setSchema(schema);
+    String testData = "'{\"testKey\":\"testValue\"}','text'";
+    dataFormat.setTextData(testData);
+    assertEquals(testData, dataFormat.getTextData());
+  }
   //**************test cases for schema*******************
   @Test(expected=SqoopException.class)
   public void testEmptySchema() {

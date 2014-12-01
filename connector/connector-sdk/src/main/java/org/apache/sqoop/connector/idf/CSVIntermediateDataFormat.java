@@ -30,6 +30,7 @@ import org.apache.sqoop.schema.type.FloatingPoint;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.DataInput;
@@ -39,8 +40,11 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 
@@ -85,6 +89,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   private final List<Integer> stringTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> byteTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> listTypeColumnIndices = new ArrayList<Integer>();
+  private final List<Integer> mapTypeColumnIndices = new ArrayList<Integer>();
 
   private Schema schema;
 
@@ -129,6 +134,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         byteTypeColumnIndices.add(i);
       } else if (isColumnListType(col)) {
         listTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.MAP) {
+        mapTypeColumnIndices.add(i);
       }
       i++;
     }
@@ -147,7 +154,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
     boolean quoted = false;
     boolean escaped = false;
-    boolean insideJSON = false;
 
     List<String> parsedData = new LinkedList<String>();
     StringBuilder builder = new StringBuilder();
@@ -167,7 +173,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         escaped = !escaped;
         break;
       case SEPARATOR_CHARACTER:
-        if (quoted || insideJSON) {
+        if (quoted) {
           builder.append(c);
         } else {
           parsedData.add(builder.toString());
@@ -217,12 +223,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         objectArray[i] = null;
         continue;
       }
-      objectArray[i] = parseStringArrayElement(fieldStringArray[i], columnArray[i]);
+      objectArray[i] = parseCSVStringArrayElement(fieldStringArray[i], columnArray[i]);
     }
     return objectArray;
   }
 
-  private Object parseStringArrayElement(String fieldString, Column column) {
+  private Object parseCSVStringArrayElement(String fieldString, Column column) {
     Object returnValue = null;
 
     switch (column.getType()) {
@@ -271,6 +277,9 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     case SET:
       returnValue = parseListElementFromJSON(fieldString);
       break;
+    case MAP:
+      returnValue = parseMapElementFromJSON(fieldString);
+      break;
     default:
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
           "Column type from schema was not recognized for " + column.getType());
@@ -287,9 +296,58 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0008, e);
     }
     if (array != null) {
-     return array.toArray();
+      return array.toArray();
     }
     return null;
+  }
+
+  private Map<Object, Object> parseMapElementFromJSON(String fieldString) {
+
+    JSONObject object = null;
+    try {
+      object = (JSONObject) new JSONParser().parse(removeQuotes(fieldString));
+    } catch (org.json.simple.parser.ParseException e) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0008, e);
+    }
+    if (object != null) {
+      return toMap(object);
+    }
+    return null;
+  }
+
+  private List<Object> toList(JSONArray array) {
+    List<Object> list = new ArrayList<Object>();
+    for (int i = 0; i < array.size(); i++) {
+      Object value = array.get(i);
+      if (value instanceof JSONArray) {
+        value = toList((JSONArray) value);
+      }
+
+      else if (value instanceof JSONObject) {
+        value = toMap((JSONObject) value);
+      }
+      list.add(value);
+    }
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<Object, Object> toMap(JSONObject object) {
+    Map<Object, Object> elementMap = new HashMap<Object, Object>();
+    Set<Map.Entry<Object, Object>> entries = object.entrySet();
+    for (Map.Entry<Object, Object> entry : entries) {
+      Object value = entry.getValue();
+
+      if (value instanceof JSONArray) {
+        value = toList((JSONArray) value);
+      }
+
+      else if (value instanceof JSONObject) {
+        value = toMap((JSONObject) value);
+      }
+      elementMap.put(entry.getKey(), value);
+    }
+    return elementMap;
   }
 
   /**
@@ -351,6 +409,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    *
    * @param stringArray
    */
+  @SuppressWarnings("unchecked")
   private void encodeCSVStringElements(Object[] stringArray, Column[] columnArray) {
     for (int i : stringTypeColumnIndices) {
       stringArray[i] = escapeString((String) stringArray[i]);
@@ -361,6 +420,16 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     for (int i : listTypeColumnIndices) {
       stringArray[i] = encodeList((Object[]) stringArray[i], columnArray[i]);
     }
+    for (int i : mapTypeColumnIndices) {
+      stringArray[i] = encodeMap((Map<Object, Object>) stringArray[i], columnArray[i]);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private String encodeMap(Map<Object, Object> map, Column column) {
+    JSONObject object = new JSONObject();
+    object.putAll(map);
+    return encloseWithQuote(object.toJSONString());
   }
 
   @SuppressWarnings("unchecked")
