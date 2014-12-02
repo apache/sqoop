@@ -128,7 +128,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     List<Column> columns = schema.getColumns();
     int i = 0;
     for (Column col : columns) {
-      if (col.getType() == ColumnType.TEXT) {
+      if (isColumnStringType(col) ) {
         stringTypeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.BINARY) {
         byteTypeColumnIndices.add(i);
@@ -232,6 +232,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     Object returnValue = null;
 
     switch (column.getType()) {
+    case ENUM:
     case TEXT:
       returnValue = unescapeString(fieldString);
       break;
@@ -451,6 +452,11 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   private boolean isColumnListType(Column listType) {
     return listType.getType().equals(ColumnType.ARRAY) || listType.getType().equals(ColumnType.SET);
+  }
+
+  private boolean isColumnStringType(Column stringType) {
+    return stringType.getType().equals(ColumnType.TEXT)
+        || stringType.getType().equals(ColumnType.ENUM);
   }
 
   private String escapeByteArrays(byte[] bytes) {

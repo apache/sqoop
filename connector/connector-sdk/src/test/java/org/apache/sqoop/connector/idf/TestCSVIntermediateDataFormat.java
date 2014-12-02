@@ -99,7 +99,7 @@ public class TestCSVIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInCSVTextOut() {
-    String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
+    String testData = "'ENUM',10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
       + ",'" + String.valueOf(0x0A) + "'";
     dataFormat.setTextData(testData);
     assertEquals(testData, dataFormat.getTextData());
@@ -110,14 +110,15 @@ public class TestCSVIntermediateDataFormat {
 
     //byte[0] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
-      + ",'\\n'";
+      + ",'\\n','TEST_ENUM'";
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
         .addColumn(new Text("3"))
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
-        .addColumn(new Text("6"));
+        .addColumn(new Text("6"))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("7"));
 
     dataFormat.setSchema(schema);
     dataFormat.setTextData(testData);
@@ -131,6 +132,7 @@ public class TestCSVIntermediateDataFormat {
     assertEquals(-112, ((byte[]) out[4])[0]);
     assertEquals(54, ((byte[])out[4])[1]);
     assertEquals("\n", out[5].toString());
+    assertEquals("TEST_ENUM", out[6].toString());
   }
 
   @Test
@@ -141,23 +143,25 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("3"))
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
-        .addColumn(new Text("6"));
+        .addColumn(new Text("6"))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("7"));
     dataFormat.setSchema(schema);
 
     byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
-    Object[] in = new Object[6];
+    Object[] in = new Object[7];
     in[0] = new Long(10);
     in[1] = new Long(34);
     in[2] = "54";
     in[3] = "random data";
     in[4] = byteFieldData;
     in[5] = new String(new char[] { 0x0A });
+    in[6] = "TEST_ENUM";
 
     dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,'54','random data'," +
-        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n'";
+        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
     assertEquals(testData, dataFormat.getTextData());
   }
 
@@ -171,17 +175,20 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("3"))
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
-        .addColumn(new Text("6"));
+        .addColumn(new Text("6"))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("7"));
+
     dataFormat.setSchema(schema);
 
-    Object[] in = new Object[6];
+    Object[] in = new Object[7];
     in[0] = new Long(10);
     in[1] = new Long(34);
     in[2] = "54";
     in[3] = "random data";
     in[4] = new byte[] { (byte) -112, (byte) 54};
     in[5] = new String(new char[] { 0x0A });
-    Object[] inCopy = new Object[6];
+    in[6] = "TEST_ENUM";
+    Object[] inCopy = new Object[7];
     System.arraycopy(in,0,inCopy,0,in.length);
 
     // Modifies the input array, so we use the copy to confirm
@@ -198,23 +205,26 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Text("3"))
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
-        .addColumn(new Text("6"));
+        .addColumn(new Text("6"))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("7"));
+
     dataFormat.setSchema(schema);
 
     byte[] byteFieldData = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54};
-    Object[] in = new Object[6];
+    Object[] in = new Object[7];
     in[0] = new Long(10);
     in[1] = new Long(34);
     in[2] = null;
     in[3] = "random data";
     in[4] = byteFieldData;
     in[5] = new String(new char[] { 0x0A });
+    in[6] = "TEST_ENUM";
 
     dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,NULL,'random data'," +
-        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n'";
+        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
     assertEquals(testData, dataFormat.getTextData());
   }
 
