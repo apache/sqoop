@@ -226,11 +226,17 @@ def find_all_files(top):
             yield os.path.join(root, f)
 
 def mvn_test(result, output_dir):
-  rc = execute("mvn test 1>%s/test.txt 2>&1" % output_dir)
+  run_mvn_test("test", "unit", result, output_dir)
+
+def mvn_integration(result, output_dir):
+  run_mvn_test("integration-test -pl test", "integration", result, output_dir)
+
+def run_mvn_test(command, test_type, result, output_dir):
+  rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_type))
   if rc == 0:
-    result.success("All tests passed")
+    result.success("All %s tests passed" % test_type)
   else:
-    result.error("mvn test exited %d" % (rc))
+    result.error("Some %s tests failed" % (test_type))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
@@ -242,8 +248,8 @@ def mvn_test(result, output_dir):
             if matcher:
               failed_tests += [ matcher.groups()[0] ]
         fd.close()
-    for failed_test in failed_tests:
-      result.error("Failed: %s" % (failed_test))
+    for failed_test in set(failed_tests):
+      result.error("Failed %s test: {{%s}}" % (test_type, failed_test))
 
 def clean_folder(folder):
   for the_file in os.listdir(folder):
@@ -412,6 +418,7 @@ static_test(result, patch_file, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
   mvn_test(result, output_dir)
+  mvn_integration(result, output_dir)
 else:
   result.info("patch applied and built but tests did not execute")
 
