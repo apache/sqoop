@@ -69,8 +69,8 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_CONNECTOR_DIRECTIONS      |
  *    +------------------------------+
  *    | SQCD_ID: BIGINT PK AUTO-GEN  |
- *    | SQCD_CONNECTOR: BIGINT       |FK SQCD_CONNECTOR(SQC_ID)
- *    | SQCD_DIRECTION: BIGINT       |FK SQCD_DIRECTION(SQD_ID)
+ *    | SQCD_CONNECTOR: BIGINT       |FK SQ_CONFIGURABLE(SQC_ID)
+ *    | SQCD_DIRECTION: BIGINT       |FK SQ_DIRECTION(SQD_ID)
  *    +------------------------------+
  * </pre>
  *
@@ -83,7 +83,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_CONFIG                           |
  *    +-------------------------------------+
  *    | SQ_CFG_ID: BIGINT PK AUTO-GEN       |
- *    | SQ_CFG_CONNECTOR: BIGINT            |FK SQ_CFG_CONNECTOR(SQC_ID),NULL for driver
+ *    | SQ_CFG_CONNECTOR: BIGINT            |FK SQ_CONFIGURABLE(SQC_ID), NULL for driver
  *    | SQ_CFG_NAME: VARCHAR(64)            |
  *    | SQ_CFG_TYPE: VARCHAR(32)            |"LINK"|"JOB"
  *    | SQ_CFG_INDEX: SMALLINT              |
@@ -97,8 +97,8 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_CONNECTOR_DIRECTIONS      |
  *    +------------------------------+
  *    | SQCD_ID: BIGINT PK AUTO-GEN  |
- *    | SQCD_CONFIG: BIGINT          |FK SQCD_CONFIG(SQ_CFG_ID)
- *    | SQCD_DIRECTION: BIGINT       |FK SQCD_DIRECTION(SQD_ID)
+ *    | SQCD_CONFIG: BIGINT          |FK SQ_CONFIG(SQ_CFG_ID)
+ *    | SQCD_DIRECTION: BIGINT       |FK SQ_DIRECTION(SQD_ID)
  *    +------------------------------+
  * </pre>
  *
@@ -126,18 +126,18 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <strong>SQ_LINK</strong>: Stored links
  *
  * <pre>
- *    +--------------------------------+
- *    | SQ_LINK                  |
- *    +--------------------------------+
+ *    +-----------------------------------+
+ *    | SQ_LINK                           |
+ *    +-----------------------------------+
  *    | SQ_LNK_ID: BIGINT PK AUTO-GEN     |
  *    | SQ_LNK_NAME: VARCHAR(64)          |
- *    | SQ_LNK_CONNECTOR: BIGINT          | FK SQ_CONNECTOR(SQC_ID)
+ *    | SQ_LNK_CONNECTOR: BIGINT          | FK SQ_CONFIGURABLE(SQC_ID)
  *    | SQ_LNK_CREATION_USER: VARCHAR(32) |
  *    | SQ_LNK_CREATION_DATE: TIMESTAMP   |
  *    | SQ_LNK_UPDATE_USER: VARCHAR(32)   |
  *    | SQ_LNK_UPDATE_DATE: TIMESTAMP     |
  *    | SQ_LNK_ENABLED: BOOLEAN           |
- *    +--------------------------------+
+ *    +-----------------------------------+
  * </pre>
  *
  * </p>
