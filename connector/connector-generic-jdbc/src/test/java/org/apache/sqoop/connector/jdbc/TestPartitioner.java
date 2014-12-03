@@ -477,7 +477,7 @@ public class TestPartitioner {
   }
 
   @Test
-  public void testPatitionWithNullValues() throws Exception {
+  public void testPartitionWithNullValues() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNNAME, "VCCOL");

@@ -54,6 +54,7 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     return new SqoopRecordReader();
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public List<InputSplit> getSplits(JobContext context)
       throws IOException, InterruptedException {
@@ -65,10 +66,10 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     PrefixContext connectorContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
     Object connectorLinkConfig = MRConfigurationUtils.getConnectorLinkConfig(Direction.FROM, conf);
     Object connectorFromJobConfig = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
-    Schema schema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+    Schema fromSchema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 
     long maxPartitions = conf.getLong(MRJobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
-    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, schema);
+    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, fromSchema);
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connectorLinkConfig, connectorFromJobConfig);
     List<InputSplit> splits = new LinkedList<InputSplit>();

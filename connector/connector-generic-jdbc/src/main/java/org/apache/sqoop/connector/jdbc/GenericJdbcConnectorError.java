@@ -81,7 +81,10 @@ public enum GenericJdbcConnectorError implements ErrorCode {
 
   GENERIC_JDBC_CONNECTOR_0019("Table name extraction not supported."),
 
-  GENERIC_JDBC_CONNECTOR_0020("Unknown direction.")
+  GENERIC_JDBC_CONNECTOR_0020("Unknown direction."),
+
+  GENERIC_JDBC_CONNECTOR_0021("Schema column size do not match the result set column size"),
+
   ;
 
   private final String message;

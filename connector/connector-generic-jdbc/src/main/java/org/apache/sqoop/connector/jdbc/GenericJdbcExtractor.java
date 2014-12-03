@@ -20,13 +20,20 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
-import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Column;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+
 
 public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, GenericJdbcPartition> {
 
@@ -50,14 +57,41 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
     rowsRead = 0;
     ResultSet resultSet = executor.executeQuery(query);
 
+    Schema schema = context.getSchema();
+    Column[] schemaColumns = schema.getColumns().toArray(new Column[schema.getColumns().size()]);
     try {
       ResultSetMetaData metaData = resultSet.getMetaData();
-      int column = metaData.getColumnCount();
+      int columnCount = metaData.getColumnCount();
+      if (schemaColumns.length != columnCount) {
+        throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0021, schemaColumns.length + ":" + columnCount);
+      }
       while (resultSet.next()) {
-        Object[] array = new Object[column];
-        for (int i = 0; i< column; i++) {
-          array[i] = resultSet.getObject(i + 1) == null ? GenericJdbcConnectorConstants.SQL_NULL_VALUE
-              : resultSet.getObject(i + 1);
+        Object[] array = new Object[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+          // check type of the column
+          Column schemaColumn = schemaColumns[i];
+          if(resultSet.getObject(i + 1) == null) {
+            array[i] = GenericJdbcConnectorConstants.SQL_NULL_VALUE ;
+            continue;
+          }
+          switch (schemaColumn.getType()) {
+          case DATE:
+            // convert the sql date to JODA time as prescribed the Sqoop IDF spec
+            array[i] = LocalDate.fromDateFields((java.sql.Date)resultSet.getObject(i + 1));
+            break;
+          case DATE_TIME:
+            // convert the sql date time to JODA time as prescribed the Sqoop IDF spec
+            array[i] = LocalDateTime.fromDateFields((java.sql.Date)resultSet.getObject(i + 1));
+            break;
+          case TIME:
+            // convert the sql time to JODA time as prescribed the Sqoop IDF spec
+            array[i] = LocalTime.fromDateFields((java.sql.Date)resultSet.getObject(i + 1));
+            break;
+          default:
+            //for anything else
+            array[i] = resultSet.getObject(i + 1);
+
+          }
         }
         context.getDataWriter().writeArrayRecord(array);
         rowsRead++;

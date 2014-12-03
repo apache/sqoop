@@ -28,9 +28,9 @@ import org.apache.sqoop.schema.Schema;
  */
 public class LoaderContext extends TransferableContext {
 
-  private DataReader reader;
+  private final DataReader reader;
 
-  private Schema schema;
+  private final Schema schema;
 
   public LoaderContext(ImmutableContext context, DataReader reader, Schema schema) {
     super(context);
@@ -48,7 +48,7 @@ public class LoaderContext extends TransferableContext {
   }
 
   /**
-   * Return schema associated with this step.
+   * Return schema associated with TO.
    *
    * @return
    */

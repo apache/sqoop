@@ -38,6 +38,7 @@ import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.io.SqoopWritable;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -59,6 +60,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
   private IntermediateDataFormat<String> toDataFormat = null;
   private Matcher matcher;
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void run(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
@@ -66,16 +68,14 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     String extractorName = conf.get(MRJobConstants.JOB_ETL_EXTRACTOR);
     Extractor extractor = (Extractor) ClassUtils.instantiate(extractorName);
 
-    matcher = MatcherFactory.getMatcher(
-        MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf),
-        MRConfigurationUtils.getConnectorSchema(Direction.TO, conf));
+    Schema fromSchema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
+    Schema toSchema = MRConfigurationUtils.getConnectorSchema(Direction.TO, conf);
+    matcher = MatcherFactory.getMatcher(fromSchema, toSchema);
 
     String intermediateDataFormatName = conf.get(MRJobConstants.INTERMEDIATE_DATA_FORMAT);
-    fromDataFormat = (IntermediateDataFormat<String>) ClassUtils
-        .instantiate(intermediateDataFormatName);
+    fromDataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(intermediateDataFormatName);
     fromDataFormat.setSchema(matcher.getFromSchema());
-    toDataFormat = (IntermediateDataFormat<String>) ClassUtils
-        .instantiate(intermediateDataFormatName);
+    toDataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(intermediateDataFormatName);
     toDataFormat.setSchema(matcher.getToSchema());
 
     // Objects that should be passed to the Executor execution
@@ -84,7 +84,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Object fromJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
-    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context));
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), fromSchema);
 
     try {
       LOG.info("Starting progress service");
@@ -93,14 +93,13 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
       LOG.info("Running extractor class " + extractorName);
       extractor.extract(extractorContext, fromConfig, fromJob, split.getPartition());
       LOG.info("Extractor has finished");
-      context.getCounter(SqoopCounters.ROWS_READ)
-              .increment(extractor.getRowsRead());
+      context.getCounter(SqoopCounters.ROWS_READ).increment(extractor.getRowsRead());
     } catch (Exception e) {
       throw new SqoopException(MRExecutionError.MAPRED_EXEC_0017, e);
     } finally {
       LOG.info("Stopping progress service");
       progressService.shutdown();
-      if(!progressService.awaitTermination(5, TimeUnit.SECONDS)) {
+      if (!progressService.awaitTermination(5, TimeUnit.SECONDS)) {
         LOG.info("Stopping progress service with shutdownNow");
         progressService.shutdownNow();
       }
