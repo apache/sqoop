@@ -29,6 +29,7 @@ import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
@@ -83,12 +84,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     new String(new char[] { ESCAPE_CHARACTER, '\''})
   };
 
-  // ISO-8859-1 is an 8-bit codec that is supported in every java
-  // implementation.
+  // ISO-8859-1 is an 8-bit codec that is supported in every java implementation.
   static final String BYTE_FIELD_CHARSET = "ISO-8859-1";
-  //http://www.joda.org/joda-time/key_format.html provides details on the formatter token
-  static final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS'Z'");
+  // http://www.joda.org/joda-time/key_format.html provides details on the formatter token
+  static final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZ");
   static final DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd");
+  static final DateTimeFormatter tf = DateTimeFormat.forPattern("HH:mm:ss.SSSSSSZ");
 
   private final List<Integer> stringTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> byteTypeColumnIndices = new ArrayList<Integer>();
@@ -96,6 +97,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   private final List<Integer> mapTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> dateTimeTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> dateTypeColumnIndices = new ArrayList<Integer>();
+  private final List<Integer> timeColumnIndices = new ArrayList<Integer>();
 
   private Schema schema;
 
@@ -138,6 +140,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         stringTypeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.DATE) {
         dateTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.TIME) {
+        timeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.DATE_TIME) {
         dateTimeTypeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.BINARY) {
@@ -272,6 +276,9 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       break;
     case DATE:
       returnValue = LocalDate.parse(removeQuotes(fieldString));
+      break;
+    case TIME:
+      returnValue = LocalTime.parse(removeQuotes(fieldString));
       break;
     case DATE_TIME:
       // A datetime string with a space as date-time separator will not be
@@ -435,6 +442,10 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     for (int i : dateTypeColumnIndices) {
       org.joda.time.LocalDate date = (org.joda.time.LocalDate) stringArray[i];
       stringArray[i] = encloseWithQuote(df.print(date));
+    }
+    for (int i : timeColumnIndices) {
+      org.joda.time.LocalTime date = (org.joda.time.LocalTime) stringArray[i];
+      stringArray[i] = encloseWithQuote(tf.print(date));
     }
     for (int i : byteTypeColumnIndices) {
       stringArray[i] = escapeByteArrays((byte[]) stringArray[i]);
