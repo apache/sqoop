@@ -272,38 +272,111 @@ public class TestCSVIntermediateDataFormat {
     assertTrue(Arrays.deepEquals(inCopy, dataFormat.getObjectData()));
   }
 
-  //**************test cases for date/datetime*******************
+  // **************test cases for date*******************
 
   @Test
-  public void testDate() {
+  public void testDateWithCSVTextInCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new Date("1"));
     dataFormat.setSchema(schema);
-
-    dataFormat.setTextData("2014-10-01");
-    assertEquals("2014-10-01", dataFormat.getObjectData()[0].toString());
+    dataFormat.setTextData("'2014-10-01'");
+    assertEquals("'2014-10-01'", dataFormat.getTextData());
   }
 
   @Test
-  public void testDateTime() {
+  public void testDateWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Date("1"));
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("'2014-10-01'");
+    org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
+    assertEquals(date.toString(), dataFormat.getObjectData()[0].toString());
+  }
+
+  @Test
+  public void testDateWithObjectArrayInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Date("1")).addColumn(new Text("2"));
+    dataFormat.setSchema(schema);
+    org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
+    Object[] in = { date, "test" };
+    dataFormat.setObjectData(in);
+    assertEquals("'2014-10-01','test'", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testDateWithObjectArrayInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Date("1"));
+    dataFormat.setSchema(schema);
+    org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
+    Object[] in = { date };
+    dataFormat.setObjectData(in);
+    assertEquals(date.toString(), dataFormat.getObjectData()[0].toString());
+  }
+
+  // **************test cases for dateTime*******************
+
+  @Test
+  public void testDateTimeWithCSVTextInCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1"));
     dataFormat.setSchema(schema);
 
-    for (String dateTime : new String[]{
-        "2014-10-01T12:00:00",
-        "2014-10-01T12:00:00.000"
-    }) {
+    dataFormat.setTextData("'2014-10-01 12:00:00'");
+    assertEquals("'2014-10-01 12:00:00'", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testDateTimeWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    dataFormat.setSchema(schema);
+
+    dataFormat.setTextData("'2014-10-01 12:00:00'");
+    assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
+  }
+
+  @Test
+  public void testDateTimeWithObjectInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    dataFormat.setSchema(schema);
+    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 0);
+    Object[] in = { dateTime };
+    dataFormat.setObjectData(in);
+    assertEquals("'2014-10-01 12:00:00.000Z'", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testLocalDateTimeWithObjectInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    dataFormat.setSchema(schema);
+    org.joda.time.LocalDateTime dateTime = new org.joda.time.LocalDateTime(2014, 10, 01, 12, 0, 0,
+        0);
+    Object[] in = { dateTime };
+    dataFormat.setObjectData(in);
+    assertEquals("'2014-10-01 12:00:00.000Z'", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testDateTimePrecisionWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1"));
+    dataFormat.setSchema(schema);
+
+    for (String dateTime : new String[] { "'2014-10-01 12:00:00.000'" }) {
       dataFormat.setTextData(dateTime);
-      assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
+      assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
     }
   }
 
   /**
    * In ISO8601 "T" is used as date-time separator. Unfortunately in the real
-   * world, database (confirmed with mysql and postgres) might return a datatime
+   * world, database (confirmed with mysql and postgres) might return a datetime
    * string with a space as separator. The test case intends to check, whether
-   * such datatime string can be handled expectedly.
+   * such datetime string can be handled expectedly.
    */
   @Test
   public void testDateTimeISO8601Alternative() {
@@ -311,12 +384,9 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new DateTime("1"));
     dataFormat.setSchema(schema);
 
-    for (String dateTime : new String[]{
-        "2014-10-01 12:00:00",
-        "2014-10-01 12:00:00.000"
-    }) {
+    for (String dateTime : new String[] { "'2014-10-01 12:00:00'", "'2014-10-01 12:00:00.000'" }) {
       dataFormat.setTextData(dateTime);
-      assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
+      assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
     }
   }
 

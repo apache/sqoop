@@ -47,8 +47,10 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.utils.ClassUtils;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.json.simple.JSONValue;
 
 public class JobManager implements Reconfigurable {
@@ -397,8 +399,11 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(executionEngine.getClass());
     // Extra libraries that Sqoop code requires
     jobRequest.addJarForClass(JSONValue.class);
+    // Add JODA classes for IDF date/time handling
     jobRequest.addJarForClass(LocalDate.class);
     jobRequest.addJarForClass(LocalDateTime.class);
+    jobRequest.addJarForClass(DateTime.class);
+    jobRequest.addJarForClass(LocalTime.class);
   }
 
   MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
