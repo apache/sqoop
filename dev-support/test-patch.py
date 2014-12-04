@@ -25,6 +25,7 @@
 #
 import sys, os, re, urllib2, base64, subprocess, tempfile, shutil
 import json
+import datetime
 from optparse import OptionParser
 
 tmp_dir = None
@@ -85,8 +86,7 @@ def jira_get_defect(result, defect, username, password):
   return jira_request(result, url, username, password, None, {}).read()
 
 def jira_generate_comment(result, branch):
-  body = [ "Here are the results of testing the latest attachment" ]
-  body += [ "%s against branch %s." % (result.attachment, branch) ]
+  body =  [ "Testing file [%s|%s] against branch %s took %s." % (result.attachment.split('/')[-1] , result.attachment, branch, datetime.datetime.now() - result.start_time) ]
   body += [ "" ]
   if result._fatal:
     result._error = [ result._fatal ] + result._error
@@ -107,7 +107,7 @@ def jira_generate_comment(result, branch):
     body += [ "{color:green}SUCCESS:{color} %s" % (success.replace("\n", "\\n")) ]
   if "BUILD_URL" in os.environ:
     body += [ "" ]
-    body += [ "Console output: %sconsole" % (os.environ['BUILD_URL']) ]
+    body += [ "Console output is available [here|%sconsole]." % (os.environ['BUILD_URL']) ]
   body += [ "" ]
   body += [ "This message is automatically generated." ]
   return "\\n".join(body)
@@ -268,6 +268,7 @@ class Result(object):
     self._fatal = None
     self.exit_handler = None
     self.attachment = "Not Found"
+    self.start_time = datetime.datetime.now()
   def error(self, msg):
     self._error.append(msg)
   def info(self, msg):
