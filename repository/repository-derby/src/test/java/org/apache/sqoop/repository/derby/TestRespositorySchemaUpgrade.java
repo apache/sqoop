@@ -45,8 +45,20 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
   }
 
   @Test
-  public void testCreateorUpdateRepositorySchema() throws Exception {
+  public void testCreatorUpdateRepositorySchema() throws Exception {
     assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
+    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+  }
+
+  @Test
+  public void testDoubleUpdateRepositorySchema() throws Exception {
+    // Setup
+    assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
+    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+
+    // Exercise and verify
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
     assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
   }

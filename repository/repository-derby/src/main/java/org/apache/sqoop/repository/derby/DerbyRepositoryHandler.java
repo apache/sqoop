@@ -204,8 +204,11 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
    */
   @Override
   public void createOrUpgradeRepository(Connection conn) {
-
     int repositoryVersion = detectRepositoryVersion(conn);
+    if (repositoryVersion == DerbyRepoConstants.LATEST_DERBY_REPOSITORY_VERSION) {
+      return;
+    }
+
     if(repositoryVersion <= 0) {
       runQuery(QUERY_CREATE_SCHEMA_SQOOP, conn);
       runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR, conn);
