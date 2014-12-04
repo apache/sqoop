@@ -33,7 +33,6 @@ import java.util.LinkedList;
  */
 public class HdfsUtils {
 
-  @SuppressWarnings("unused")
   private static final Logger LOG = Logger.getLogger(HdfsUtils.class);
 
   private static final char PATH_SEPARATOR = '/';
@@ -49,6 +48,7 @@ public class HdfsUtils {
   public static Path [] getOutputMapreduceFiles(FileSystem fs, String directory) throws FileNotFoundException, IOException {
     LinkedList<Path> files = new LinkedList<Path>();
     for (FileStatus fileStatus : fs.listStatus(new Path(directory))) {
+      LOG.debug("Found mapreduce output file: " + fileStatus.getPath() + " with size " + fileStatus.getLen());
       files.add(fileStatus.getPath());
     }
     return files.toArray(new Path[files.size()]);
