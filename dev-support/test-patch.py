@@ -137,7 +137,7 @@ def jira_post_comment(result, defect, branch, username, password):
 # hack (from hadoop) but REST api doesn't list attachments?
 def jira_get_attachment(result, defect, username, password):
   html = jira_get_defect_html(result, defect, username, password)
-  pattern = "(/secure/attachment/[0-9]+/(bug)?%s[0-9\-]*((\.|-)[0-9]+)?\.(patch|txt|patch\.txt))" % (re.escape(defect))
+  pattern = "(/secure/attachment/[0-9]+/(bug)?%s[0-9\-]*((\.|-)v?[0-9]+)?\.(patch|txt|patch\.txt))" % (re.escape(defect))
   matches = []
   for match in re.findall(pattern, html, re.IGNORECASE):
     matches += [ match[0] ]
