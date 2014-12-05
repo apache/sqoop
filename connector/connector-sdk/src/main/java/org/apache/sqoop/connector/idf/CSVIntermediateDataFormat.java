@@ -44,6 +44,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -89,15 +90,21 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   // http://www.joda.org/joda-time/key_format.html provides details on the formatter token
   static final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZ");
   static final DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd");
-  static final DateTimeFormatter tf = DateTimeFormat.forPattern("HH:mm:ss.SSSSSSZ");
+  static final DateTimeFormatter tf = DateTimeFormat.forPattern("HH:mm:ss.SSSSSS");
 
   private final List<Integer> stringTypeColumnIndices = new ArrayList<Integer>();
+  private final List<Integer> bitTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> byteTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> listTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> mapTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> dateTimeTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> dateTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> timeColumnIndices = new ArrayList<Integer>();
+
+  static final String[] TRUE_BIT_VALUES = new String[] { "1", "true", "TRUE" };
+  static final Set<String> TRUE_BIT_SET = new HashSet<String>(Arrays.asList(TRUE_BIT_VALUES));
+  static final String[] FALSE_BIT_VALUES = new String[] { "0", "false", "FALSE" };
+  static final Set<String> FALSE_BIT_SET = new HashSet<String>(Arrays.asList(FALSE_BIT_VALUES));
 
   private Schema schema;
 
@@ -138,6 +145,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     for (Column col : columns) {
       if (isColumnStringType(col)) {
         stringTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.BIT) {
+        bitTypeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.DATE) {
         dateTypeColumnIndices.add(i);
       } else if (col.getType() == ColumnType.TIME) {
@@ -288,8 +297,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       returnValue = DateTime.parse(dateTime);
       break;
     case BIT:
-      returnValue = Boolean.valueOf(fieldString.equals("1")
-          || fieldString.toLowerCase().equals("true"));
+      if ((TRUE_BIT_SET.contains(fieldString)) || (FALSE_BIT_SET.contains(fieldString))) {
+        returnValue = TRUE_BIT_SET.contains(fieldString);
+      } else {
+        // throw an exception for any unsupported value for BITs
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + fieldString);
+      }
       break;
     case ARRAY:
     case SET:
@@ -425,36 +438,44 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   /**
    * Sanitize every element of the CSV string based on the column type
    *
-   * @param stringArray
+   * @param objectArray
    */
   @SuppressWarnings("unchecked")
-  private void encodeCSVStringElements(Object[] stringArray, Column[] columnArray) {
+  private void encodeCSVStringElements(Object[] objectArray, Column[] columnArray) {
+    for (int i : bitTypeColumnIndices) {
+      String bitStringValue = objectArray[i].toString();
+      if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
+        objectArray[i] = bitStringValue;
+      } else {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + objectArray[i]);
+      }
+    }
     for (int i : stringTypeColumnIndices) {
-      stringArray[i] = escapeString((String) stringArray[i]);
+      objectArray[i] = escapeString((String) objectArray[i]);
     }
     for (int i : dateTimeTypeColumnIndices) {
-      if (stringArray[i] instanceof org.joda.time.DateTime) {
-        stringArray[i] = encloseWithQuote(dtf.print((org.joda.time.DateTime) stringArray[i]));
-      } else if (stringArray[i] instanceof org.joda.time.LocalDateTime) {
-        stringArray[i] = encloseWithQuote(dtf.print((org.joda.time.LocalDateTime) stringArray[i]));
+      if (objectArray[i] instanceof org.joda.time.DateTime) {
+        objectArray[i] = encloseWithQuote(dtf.print((org.joda.time.DateTime) objectArray[i]));
+      } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
+        objectArray[i] = encloseWithQuote(dtf.print((org.joda.time.LocalDateTime) objectArray[i]));
       }
     }
     for (int i : dateTypeColumnIndices) {
-      org.joda.time.LocalDate date = (org.joda.time.LocalDate) stringArray[i];
-      stringArray[i] = encloseWithQuote(df.print(date));
+      org.joda.time.LocalDate date = (org.joda.time.LocalDate) objectArray[i];
+      objectArray[i] = encloseWithQuote(df.print(date));
     }
     for (int i : timeColumnIndices) {
-      org.joda.time.LocalTime date = (org.joda.time.LocalTime) stringArray[i];
-      stringArray[i] = encloseWithQuote(tf.print(date));
+      org.joda.time.LocalTime date = (org.joda.time.LocalTime) objectArray[i];
+      objectArray[i] = encloseWithQuote(tf.print(date));
     }
     for (int i : byteTypeColumnIndices) {
-      stringArray[i] = escapeByteArrays((byte[]) stringArray[i]);
+      objectArray[i] = escapeByteArrays((byte[]) objectArray[i]);
     }
     for (int i : listTypeColumnIndices) {
-      stringArray[i] = encodeList((Object[]) stringArray[i], columnArray[i]);
+      objectArray[i] = encodeList((Object[]) objectArray[i], columnArray[i]);
     }
     for (int i : mapTypeColumnIndices) {
-      stringArray[i] = encodeMap((Map<Object, Object>) stringArray[i], columnArray[i]);
+      objectArray[i] = encodeMap((Map<Object, Object>) objectArray[i], columnArray[i]);
     }
   }
 

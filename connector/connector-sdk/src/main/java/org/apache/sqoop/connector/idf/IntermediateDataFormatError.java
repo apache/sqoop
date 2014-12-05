@@ -36,12 +36,17 @@ public enum IntermediateDataFormatError implements ErrorCode {
   /** Column type isn't known by Intermediate Data Format. */
   INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
 
-  /** Number of fields. */
-  INTERMEDIATE_DATA_FORMAT_0005("Wrong number of fields."),
+  /** Number of columns in schema does not match the data set. */
+  INTERMEDIATE_DATA_FORMAT_0005("Wrong number of columns."),
 
+  /** Schema is missing in the IDF. */
   INTERMEDIATE_DATA_FORMAT_0006("Schema missing."),
 
+  /** For arrays and maps we use JSON representation and incorrect representation results in parse exception*/
   INTERMEDIATE_DATA_FORMAT_0008("JSON parse internal error."),
+
+  /** Unsupported bit values */
+  INTERMEDIATE_DATA_FORMAT_0009("Unsupported bit value."),
 
   ;
 

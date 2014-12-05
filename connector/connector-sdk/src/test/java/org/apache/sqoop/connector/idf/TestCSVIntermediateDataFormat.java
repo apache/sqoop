@@ -442,28 +442,118 @@ public class TestCSVIntermediateDataFormat {
     }
   }
 
+  // **************test cases for BIT*******************
+
   @Test
-  public void testBit() {
+  public void testBitTrueFalseWithCSVTextInAndCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1"));
     dataFormat.setSchema(schema);
 
-    for (String trueBit : new String[]{
-        "true", "TRUE", "1"
-    }) {
+    for (String trueBit : new String[] { "true", "TRUE" }) {
+      dataFormat.setTextData(trueBit);
+      assertTrue(Boolean.valueOf(dataFormat.getTextData()));
+    }
+
+    for (String falseBit : new String[] { "false", "FALSE" }) {
+      dataFormat.setTextData(falseBit);
+      assertFalse(Boolean.valueOf(dataFormat.getTextData()));
+    }
+  }
+
+  @Test
+  public void testBitWithCSVTextInAndCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1"));
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("1");
+    assertEquals("1", dataFormat.getTextData());
+    dataFormat.setTextData("0");
+    assertEquals("0", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testBitWithObjectArrayInAndCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
+    dataFormat.setSchema(schema);
+    Object[] data = new Object[2];
+    data[0] = Boolean.TRUE;
+    data[1] = Boolean.FALSE;
+    dataFormat.setObjectData(data);
+    assertEquals("true,false", dataFormat.getTextData());
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testUnsupportedBitWithObjectArrayInAndCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
+    dataFormat.setSchema(schema);
+    Object[] data = new Object[2];
+    data[0] = "1";
+    data[1] = "2";
+    dataFormat.setObjectData(data);
+    assertEquals("1,2", dataFormat.getTextData());
+  }
+
+  @Test
+  public void testBitWithObjectArrayInAndObjectOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
+    dataFormat.setSchema(schema);
+    Object[] data = new Object[2];
+    data[0] = Boolean.TRUE;
+    data[1] = Boolean.FALSE;
+    dataFormat.setObjectData(data);
+    assertEquals(true, dataFormat.getObjectData()[0]);
+    assertEquals(false, dataFormat.getObjectData()[1]);
+    data[0] = "1";
+    data[1] = "0";
+    dataFormat.setObjectData(data);
+    assertEquals(true, dataFormat.getObjectData()[0]);
+    assertEquals(false, dataFormat.getObjectData()[1]);
+  }
+
+  public void testBitWithCSVTextInAndObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1"));
+    dataFormat.setSchema(schema);
+
+    for (String trueBit : new String[] { "true", "TRUE", "1" }) {
       dataFormat.setTextData(trueBit);
       assertTrue((Boolean) dataFormat.getObjectData()[0]);
     }
 
-    for (String falseBit : new String[]{
-        "false", "FALSE", "0"
-    }) {
+    for (String falseBit : new String[] { "false", "FALSE", "0" }) {
       dataFormat.setTextData(falseBit);
       assertFalse((Boolean) dataFormat.getObjectData()[0]);
     }
   }
 
-  //**************test cases for arrays*******************
+  @Test(expected = SqoopException.class)
+  public void testUnsupportedBitWithObjectArrayInAndObjectOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
+    dataFormat.setSchema(schema);
+    Object[] data = new Object[2];
+    data[0] = "1";
+    data[1] = "2";
+    dataFormat.setObjectData(data);
+    assertEquals(true, dataFormat.getObjectData()[0]);
+    assertEquals(false, dataFormat.getObjectData()[1]);
+  }
+
+  @Test(expected = SqoopException.class)
+  public void testUnsupportedBitWithCSVTextInAndObjectOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("1,3");
+    assertEquals(true, dataFormat.getObjectData()[0]);
+    assertEquals(false, dataFormat.getObjectData()[1]);
+  }
+
+  // **************test cases for arrays*******************
   @Test
   public void testArrayOfStringWithObjectArrayInObjectArrayOut() {
     Schema schema = new Schema("test");
