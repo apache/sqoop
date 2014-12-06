@@ -572,28 +572,19 @@ limitations under the License.
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <version>0.8</version>
-          <executions>
-            <execution>
-              <id>header-check</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-              <configuration>
-                <excludes>
-                  <exclude>.git/</exclude>
-                  <exclude>.gitignore</exclude>
-                  <exclude>.idea/</exclude>
-                  <exclude>**/*.iml</exclude>
-                  <exclude>*.log</exclude>
-                  <exclude>**/nb-configuration.xml</exclude>
-                  <exclude>**.patch</exclude>
-                  <exclude>patch-process/*</exclude>
-                  <exclude>.metadata/</exclude>
-                </excludes>
-              </configuration>
-            </execution>
-          </executions>
+          <configuration>
+            <excludes>
+              <exclude>.git/</exclude>
+              <exclude>.gitignore</exclude>
+              <exclude>.idea/</exclude>
+              <exclude>**/*.iml</exclude>
+              <exclude>*.log</exclude>
+              <exclude>**/nb-configuration.xml</exclude>
+              <exclude>**.patch</exclude>
+              <exclude>patch-process/*</exclude>
+              <exclude>.metadata/</exclude>
+            </excludes>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
