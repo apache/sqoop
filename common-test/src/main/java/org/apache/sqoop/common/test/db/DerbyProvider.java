@@ -21,6 +21,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.sqoop.common.test.utils.LoggerWriter;
+import org.apache.sqoop.common.test.utils.NetworkUtils;
 
 import java.net.InetAddress;
 
@@ -35,13 +36,19 @@ public class DerbyProvider extends DatabaseProvider {
 
   public static final String DRIVER = "org.apache.derby.jdbc.ClientDriver";
 
+  // Used port for this instance
+  int port;
+
   NetworkServerControl server = null;
 
   @Override
   public void start() {
     // Start embedded server
     try {
-      server = new NetworkServerControl(InetAddress.getByName("localhost"), 1527);
+      port = NetworkUtils.findAvailablePort();
+      LOG.info("Will bind to port " + port);
+
+      server = new NetworkServerControl(InetAddress.getByName("localhost"), port);
       server.start(new LoggerWriter(LOG, Level.INFO));
 
       // Start won't thrown an exception in case that it fails to start, one
@@ -99,7 +106,7 @@ public class DerbyProvider extends DatabaseProvider {
 
   @Override
   public String getConnectionUrl() {
-    return "jdbc:derby://localhost:1527/memory:sqoop;create=true";
+    return "jdbc:derby://localhost:" + port + "/memory:sqoop;create=true";
   }
 
   @Override
