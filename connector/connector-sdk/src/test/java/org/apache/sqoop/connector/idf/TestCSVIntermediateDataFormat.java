@@ -421,25 +421,11 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new DateTime("1"));
     dataFormat.setSchema(schema);
     dataFormat.setTextData("'2014-10-01 12:00:00.000'");
+    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 0);
+    assertEquals(dateTime, dataFormat.getObjectData()[0]);
+    // NOTE: string representation will have the T added, it is an
+    // implementation quirk of using JODA
     assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
-  }
-
-  /**
-   * In ISO8601 "T" is used as date-time separator. Unfortunately in the real
-   * world, database (confirmed with mysql and postgres) might return a datetime
-   * string with a space as separator. The test case intends to check, whether
-   * such datetime string can be handled expectedly.
-   */
-  @Test
-  public void testDateTimeISO8601Alternative() {
-    Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
-    dataFormat.setSchema(schema);
-
-    for (String dateTime : new String[] { "'2014-10-01 12:00:00'", "'2014-10-01 12:00:00.000'" }) {
-      dataFormat.setTextData(dateTime);
-      assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
-    }
   }
 
   // **************test cases for BIT*******************
