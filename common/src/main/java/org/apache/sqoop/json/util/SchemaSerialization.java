@@ -153,8 +153,8 @@ public class SchemaSerialization {
       ret.put(CHAR_SIZE, ((AbstractString) column).getCharSize());
       break;
     case DATE_TIME:
-      ret.put(FRACTION, ((DateTime) column).getFraction());
-      ret.put(TIMEZONE, ((DateTime) column).getTimezone());
+      ret.put(FRACTION, ((DateTime) column).hasFraction());
+      ret.put(TIMEZONE, ((DateTime) column).hasTimezone());
       break;
     case DECIMAL:
       ret.put(PRECISION, ((Decimal) column).getPrecision());
@@ -168,7 +168,7 @@ public class SchemaSerialization {
       ret.put(BYTE_SIZE, ((FloatingPoint) column).getByteSize());
       break;
     case TIME:
-      ret.put(FRACTION, ((Time) column).getFraction());
+      ret.put(FRACTION, ((Time) column).hasFraction());
       break;
     case UNKNOWN:
       ret.put(JDBC_TYPE, ((Unknown) column).getJdbcType());
@@ -234,9 +234,9 @@ public class SchemaSerialization {
       output = new Date(name);
       break;
     case DATE_TIME:
-      Boolean fraction = (Boolean) obj.get(FRACTION);
-      Boolean timezone = (Boolean) obj.get(TIMEZONE);
-      output = new DateTime(name).setFraction(fraction).setTimezone(timezone);
+      Boolean hasFraction = (Boolean) obj.get(FRACTION);
+      Boolean hasTimezone = (Boolean) obj.get(TIMEZONE);
+      output = new DateTime(name, hasFraction, hasTimezone);
       break;
     case DECIMAL:
       Long precision = (Long) obj.get(PRECISION);
@@ -266,8 +266,8 @@ public class SchemaSerialization {
       output = new Text(name).setCharSize(charSize);
       break;
     case TIME:
-      Boolean timeFraction = (Boolean) obj.get(FRACTION);
-      output = new Time(name).setFraction(timeFraction);
+      Boolean hasTimeFraction = (Boolean) obj.get(FRACTION);
+      output = new Time(name, hasTimeFraction);
       break;
     case UNKNOWN:
       Long jdbcType = (Long) obj.get(JDBC_TYPE);

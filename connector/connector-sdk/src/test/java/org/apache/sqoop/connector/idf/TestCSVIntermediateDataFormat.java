@@ -42,6 +42,7 @@ import org.apache.sqoop.schema.type.DateTime;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -278,7 +279,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testTimeWithCSVTextInCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new Time("1"));
+    schema.addColumn(new Time("1", false));
     dataFormat.setSchema(schema);
     dataFormat.setTextData("'12:00:00'");
     assertEquals("'12:00:00'", dataFormat.getTextData());
@@ -287,7 +288,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testTimeWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new Time("1"));
+    schema.addColumn(new Time("1", false));
     dataFormat.setSchema(schema);
     dataFormat.setTextData("'12:59:59'");
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(12, 59, 59);
@@ -297,7 +298,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testTimeWithObjectArrayInCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new Time("1")).addColumn(new Text("2"));
+    schema.addColumn(new Time("1", true)).addColumn(new Text("2"));
     dataFormat.setSchema(schema);
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(15, 0, 0);
     Object[] in = { time, "test" };
@@ -308,7 +309,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testTimeWithObjectArrayInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new Time("1"));
+    schema.addColumn(new Time("1", true));
     dataFormat.setSchema(schema);
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(2, 23, 33);
     Object[] in = { time };
@@ -364,7 +365,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testDateTimeWithCSVTextInCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", false, false));
     dataFormat.setSchema(schema);
 
     dataFormat.setTextData("'2014-10-01 12:00:00'");
@@ -372,61 +373,121 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
-  public void testDateTimeWithMilliSecsWithCSVTextInCSVTextOut() {
+  public void testDateTimeWithFractionNoTimezoneWithCSVTextInCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", true, false));
     dataFormat.setSchema(schema);
-
     dataFormat.setTextData("'2014-10-01 12:00:00.000'");
     assertEquals("'2014-10-01 12:00:00.000'", dataFormat.getTextData());
   }
 
-  @Test
-  public void testDateTimeWithCSVTextInObjectArrayOut() {
+  public void testDateTimeNoFractionNoTimezoneWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", false, false));
     dataFormat.setSchema(schema);
-
     dataFormat.setTextData("'2014-10-01 12:00:00'");
-    assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
+    // NOTE: string representation will have the T added, it is an
+    // implementation quirk of using JODA
+    assertEquals("2014-10-01T12:00:00", dataFormat.getObjectData()[0].toString());
   }
 
   @Test
-  public void testDateTimeWithObjectInCSVTextOut() {
+  public void testDateTimeWithFractionNoTimezoneWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", true, false));
     dataFormat.setSchema(schema);
-    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 1);
+    dataFormat.setTextData("'2014-10-01 12:00:00.000'");
+    // NOTE: string representation will have the T added, it is an
+    // implementation quirk of using JODA
+    assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
+  }
+
+  // since date is not quoted
+  @Test(expected = Exception.class)
+  public void testDateTimeNoQuotesWithFractionTimezoneWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1", true, true));
+    dataFormat.setSchema(schema);
+    DateTimeZone zone = DateTimeZone.forID("America/New_York");
+    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(zone);
+    dataFormat.setTextData(dateTime.toString());
+    dataFormat.getObjectData()[0].toString();
+  }
+
+  // since date is not in expected format
+  @Test(expected = Exception.class)
+  public void testDateTimeIncorrectFormatWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1", true, true));
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("'2014-3310-01 12:00:00.000'");
+    dataFormat.getObjectData()[0].toString();
+  }
+
+  @Test
+  public void testCurrentDateTime2WithFractionNoTimezoneWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1", true, false));
+    dataFormat.setSchema(schema);
+    // current date time
+    org.joda.time.DateTime dateTime = new org.joda.time.DateTime();
+    String dateTimeString = CSVIntermediateDataFormat.dtfWithFractionNoTimeZone.print(dateTime);
+    dataFormat.setTextData("'" + dateTimeString + "'");
+    assertEquals(dateTimeString.replace(" ", "T"), dataFormat.getObjectData()[0].toString());
+  }
+
+  @Test
+  public void testDateTimeWithFractionAndTimeZoneWithCSVTextInObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1", true, true));
+    dataFormat.setSchema(schema);
+    dataFormat.setTextData("'2014-10-01 12:00:00.000-0400'");
+    // NOTE: string representation will have the T added, it is an
+    // implementation quirk of using JODA
+    assertEquals("2014-10-01T12:00:00.000-04:00", dataFormat.getObjectData()[0].toString());
+  }
+
+  @Test
+  public void testDateTimeWithFractionAndTimeZoneObjectInCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new DateTime("1", true, true));
+    dataFormat.setSchema(schema);
+    DateTimeZone zone = DateTimeZone.forID("America/New_York");
+    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 1, zone);
     Object[] in = { dateTime };
     dataFormat.setObjectData(in);
     // Note: DateTime has the timezone info
-    assertEquals("'2014-10-01 12:00:00.001000-0700'", dataFormat.getTextData());
+    assertEquals("'2014-10-01 12:00:00.001-0400'", dataFormat.getTextData());
   }
 
   @Test
   public void testLocalDateTimeWithObjectInCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", true, false));
     dataFormat.setSchema(schema);
     org.joda.time.LocalDateTime dateTime = new org.joda.time.LocalDateTime(2014, 10, 01, 12, 0, 0, 2);
     Object[] in = { dateTime };
     dataFormat.setObjectData(in);
-    // Note: LocalDateTime is missing the timezone info
-    assertEquals("'2014-10-01 12:00:00.002000'", dataFormat.getTextData());
+    // Note: LocalDateTime will not have the timezone info
+    assertEquals("'2014-10-01 12:00:00.002'", dataFormat.getTextData());
   }
 
   @Test
-  public void testDateTimePrecisionWithCSVTextInObjectArrayOut() {
+  public void testDateTimeFractionAndTimezoneWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new DateTime("1"));
+    schema.addColumn(new DateTime("1", true, true));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00.000'");
-    org.joda.time.DateTime dateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 0);
-    assertEquals(dateTime, dataFormat.getObjectData()[0]);
+    dataFormat.setTextData("'2014-10-01 12:00:00.000-04:00'");
+    DateTimeZone zone = DateTimeZone.forID("America/New_York");
+    org.joda.time.DateTime edateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 0, zone);
+    org.joda.time.DateTime dateTime = (org.joda.time.DateTime) dataFormat.getObjectData()[0];
+    assertEquals(edateTime.toString(), dateTime.toString());
     // NOTE: string representation will have the T added, it is an
     // implementation quirk of using JODA
-    assertEquals("2014-10-01T12:00:00.000-07:00", dataFormat.getObjectData()[0].toString());
+    assertEquals("2014-10-01T12:00:00.000-04:00", dataFormat.getObjectData()[0].toString());
   }
+
+  // **************test cases for BIT*******************
 
   // **************test cases for BIT*******************
 

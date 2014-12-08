@@ -24,28 +24,27 @@ package org.apache.sqoop.schema.type;
  */
 public class Time extends AbstractDateTime {
 
-  private Boolean fraction;
+  /**
+   * The column can contain fractions of seconds (a.k.a nanos)
+   */
+  private Boolean hasFraction;
 
-  public Time(String name) {
+  public Time(String name, Boolean hasFraction) {
     super(name);
-  }
-
-  public Time(String name, Boolean fraction) {
-    super(name);
-    this.fraction = fraction;
+    this.hasFraction = hasFraction;
   }
 
   public Time(String name, Boolean nullable, Boolean fraction) {
     super(name, nullable);
-    this.fraction = fraction;
+    this.hasFraction = fraction;
   }
 
-  public Boolean getFraction() {
-    return fraction;
+  public Boolean hasFraction() {
+    return hasFraction;
   }
 
   public Time setFraction(Boolean fraction) {
-    this.fraction = fraction;
+    this.hasFraction = fraction;
     return this;
   }
 
@@ -58,7 +57,7 @@ public class Time extends AbstractDateTime {
   public String toString() {
     return new StringBuilder("Time{")
       .append(super.toString())
-      .append(",fraction=").append(fraction)
+      .append(",hasFraction=").append(hasFraction)
       .append("}")
       .toString();
   }
@@ -71,7 +70,7 @@ public class Time extends AbstractDateTime {
 
     Time time = (Time) o;
 
-    if (fraction != null ? !fraction.equals(time.fraction) : time.fraction != null)
+    if (hasFraction != null ? !hasFraction.equals(time.hasFraction) : time.hasFraction != null)
       return false;
 
     return true;
@@ -80,7 +79,7 @@ public class Time extends AbstractDateTime {
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    result = 31 * result + (fraction != null ? fraction.hashCode() : 0);
+    result = 31 * result + (hasFraction != null ? hasFraction.hashCode() : 0);
     return result;
   }
 }

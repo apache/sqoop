@@ -27,7 +27,6 @@ import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -88,9 +87,17 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   // ISO-8859-1 is an 8-bit codec that is supported in every java implementation.
   static final String BYTE_FIELD_CHARSET = "ISO-8859-1";
   // http://www.joda.org/joda-time/key_format.html provides details on the formatter token
-  static final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZ");
+  // can have fraction and or timezone
+  static final DateTimeFormatter dtfWithFractionAndTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
+  static final DateTimeFormatter dtfWithNoFractionAndTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+  static final DateTimeFormatter dtfWithFractionNoTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");
+  static final DateTimeFormatter dtfWithNoFractionWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ");
+
+  // only date, no time
   static final DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd");
-  static final DateTimeFormatter tf = DateTimeFormat.forPattern("HH:mm:ss.SSSSSS");
+  // time with fraction only, no timezone
+  static final DateTimeFormatter tfWithFraction = DateTimeFormat.forPattern("HH:mm:ss.SSSSSS");
+  static final DateTimeFormatter tfWithNoFraction = DateTimeFormat.forPattern("HH:mm:ss");
 
   private final List<Integer> stringTypeColumnIndices = new ArrayList<Integer>();
   private final List<Integer> bitTypeColumnIndices = new ArrayList<Integer>();
@@ -290,11 +297,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       returnValue = LocalTime.parse(removeQuotes(fieldString));
       break;
     case DATE_TIME:
-      // A datetime string with a space as date-time separator will not be
-      // parsed expectedly. The expected separator is "T". See also:
-      // https://github.com/JodaOrg/joda-time/issues/11
-      String dateTime = removeQuotes(fieldString).replace(" ", "T");
-      returnValue = DateTime.parse(dateTime);
+      returnValue = parseDateTime(fieldString, column);
       break;
     case BIT:
       if ((TRUE_BIT_SET.contains(fieldString)) || (FALSE_BIT_SET.contains(fieldString))) {
@@ -314,6 +317,27 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     default:
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
           "Column type from schema was not recognized for " + column.getType());
+    }
+    return returnValue;
+  }
+
+  private Object parseDateTime(String fieldString, Column column) {
+    Object returnValue;
+    String dateTime = removeQuotes(fieldString);
+    org.apache.sqoop.schema.type.DateTime col = ((org.apache.sqoop.schema.type.DateTime) column);
+    if (col.hasFraction() && col.hasTimezone()) {
+      // After calling withOffsetParsed method, a string
+      // '2004-06-09T10:20:30-08:00' will create a datetime with a zone of
+      // -08:00 (a fixed zone, with no daylight savings rules)
+      returnValue = dtfWithFractionAndTimeZone.withOffsetParsed().parseDateTime(dateTime);
+    } else if (col.hasFraction() && !col.hasTimezone()) {
+      // we use local date time explicitly to not include the timezone
+      returnValue = dtfWithFractionNoTimeZone.parseLocalDateTime(dateTime);
+    } else if (col.hasTimezone()) {
+      returnValue = dtfWithNoFractionWithTimeZone.withOffsetParsed().parseDateTime(dateTime);
+    } else {
+      // we use local date time explicitly to not include the timezone
+      returnValue = dtfWithNoFractionAndTimeZone.parseLocalDateTime(dateTime);
     }
     return returnValue;
   }
@@ -454,10 +478,14 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       objectArray[i] = escapeString((String) objectArray[i]);
     }
     for (int i : dateTimeTypeColumnIndices) {
+      Column col = columnArray[i];
       if (objectArray[i] instanceof org.joda.time.DateTime) {
-        objectArray[i] = encloseWithQuote(dtf.print((org.joda.time.DateTime) objectArray[i]));
+        org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
+        // check for fraction and time zone and then use the right formatter
+        formatDateTime(objectArray, i, col, dateTime);
       } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
-        objectArray[i] = encloseWithQuote(dtf.print((org.joda.time.LocalDateTime) objectArray[i]));
+        org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
+        formatLocalDateTime(objectArray, i, col, localDateTime);
       }
     }
     for (int i : dateTypeColumnIndices) {
@@ -465,8 +493,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       objectArray[i] = encloseWithQuote(df.print(date));
     }
     for (int i : timeColumnIndices) {
-      org.joda.time.LocalTime date = (org.joda.time.LocalTime) objectArray[i];
-      objectArray[i] = encloseWithQuote(tf.print(date));
+      Column col = columnArray[i];
+      if (((org.apache.sqoop.schema.type.Time) col).hasFraction()) {
+        objectArray[i] = encloseWithQuote(tfWithFraction.print((org.joda.time.LocalTime) objectArray[i]));
+      } else {
+        objectArray[i] = encloseWithQuote(tfWithNoFraction.print((org.joda.time.LocalTime) objectArray[i]));
+      }
     }
     for (int i : byteTypeColumnIndices) {
       objectArray[i] = escapeByteArrays((byte[]) objectArray[i]);
@@ -476,6 +508,28 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     }
     for (int i : mapTypeColumnIndices) {
       objectArray[i] = encodeMap((Map<Object, Object>) objectArray[i], columnArray[i]);
+    }
+  }
+
+  private void formatLocalDateTime(Object[] objectArray, int i, Column col, org.joda.time.LocalDateTime localDateTime) {
+    org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
+    if (column.hasFraction()) {
+      objectArray[i] = encloseWithQuote(dtfWithFractionNoTimeZone.print(localDateTime));
+    } else {
+      objectArray[i] = encloseWithQuote(dtfWithNoFractionAndTimeZone.print(localDateTime));
+    }
+  }
+
+  private void formatDateTime(Object[] objectArray, int i, Column col, org.joda.time.DateTime dateTime) {
+    org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
+    if (column.hasFraction() && column.hasTimezone()) {
+      objectArray[i] = encloseWithQuote(dtfWithFractionAndTimeZone.print(dateTime));
+    } else if (column.hasFraction() && !column.hasTimezone()) {
+      objectArray[i] = encloseWithQuote(dtfWithFractionNoTimeZone.print(dateTime));
+    } else if (column.hasTimezone()) {
+      objectArray[i] = encloseWithQuote(dtfWithNoFractionWithTimeZone.print(dateTime));
+    } else {
+      objectArray[i] = encloseWithQuote(dtfWithNoFractionAndTimeZone.print(dateTime));
     }
   }
 

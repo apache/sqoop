@@ -25,47 +25,38 @@ package org.apache.sqoop.schema.type;
 public class DateTime extends AbstractDateTime {
 
   /**
-   * The column can contain fractions of seconds.
+   * The column can contain fractions of seconds (a.k.a nanos)
    */
-  private Boolean fraction;
+  private Boolean hasFraction;
 
   /**
    * The column do have encoded timezone.
    */
-  private Boolean timezone;
+  private Boolean hasTimezone;
 
-  public DateTime(String name) {
+  public DateTime(String name, Boolean hasFraction, Boolean hasTimezone) {
     super(name);
+    this.hasFraction = hasFraction;
+    this.hasTimezone = hasTimezone;
   }
 
-  public DateTime(String name, Boolean fraction, Boolean timezone) {
-    super(name);
-    this.fraction = fraction;
-    this.timezone = timezone;
-  }
-
-  public DateTime(String name, Boolean nullable, Boolean fraction, Boolean timezone) {
+  public DateTime(String name, Boolean nullable, Boolean hasFraction, Boolean hasTimezone) {
     super(name, nullable);
-    this.fraction = fraction;
-    this.timezone = timezone;
+    this.hasFraction = hasFraction;
+    this.hasTimezone = hasTimezone;
   }
 
-  public Boolean getFraction() {
-    return fraction;
+  public Boolean hasFraction() {
+    return hasFraction;
   }
 
   public DateTime setFraction(Boolean fraction) {
-    this.fraction = fraction;
+    this.hasFraction = fraction;
     return this;
   }
 
-  public Boolean getTimezone() {
-    return timezone;
-  }
-
-  public DateTime setTimezone(Boolean timezone) {
-    this.timezone = timezone;
-    return this;
+  public Boolean hasTimezone() {
+    return hasTimezone;
   }
 
   @Override
@@ -77,8 +68,8 @@ public class DateTime extends AbstractDateTime {
   public String toString() {
     return new StringBuilder("Date{")
       .append(super.toString())
-      .append(",fraction=").append(fraction)
-      .append(",timezone=").append(timezone)
+      .append(",hasFraction=").append(hasFraction)
+      .append(",hasTimezone=").append(hasTimezone)
       .append("}")
       .toString();
   }
@@ -91,9 +82,9 @@ public class DateTime extends AbstractDateTime {
 
     DateTime dateTime = (DateTime) o;
 
-    if (fraction != null ? !fraction.equals(dateTime.fraction) : dateTime.fraction != null)
+    if (hasFraction != null ? !hasFraction.equals(dateTime.hasFraction) : dateTime.hasFraction != null)
       return false;
-    if (timezone != null ? !timezone.equals(dateTime.timezone) : dateTime.timezone != null)
+    if (hasTimezone != null ? !hasTimezone.equals(dateTime.hasTimezone) : dateTime.hasTimezone != null)
       return false;
 
     return true;
@@ -102,8 +93,8 @@ public class DateTime extends AbstractDateTime {
   @Override
   public int hashCode() {
     int result = super.hashCode();
-    result = 31 * result + (fraction != null ? fraction.hashCode() : 0);
-    result = 31 * result + (timezone != null ? timezone.hashCode() : 0);
+    result = 31 * result + (hasFraction != null ? hasFraction.hashCode() : 0);
+    result = 31 * result + (hasTimezone != null ? hasTimezone.hashCode() : 0);
     return result;
   }
 }

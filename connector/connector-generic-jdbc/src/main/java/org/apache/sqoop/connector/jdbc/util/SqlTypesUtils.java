@@ -64,10 +64,10 @@ public class SqlTypesUtils {
         return new Date(columnName);
 
       case Types.TIME:
-        return new Time(columnName);
+        return new Time(columnName, true);
 
       case Types.TIMESTAMP:
-        return new DateTime(columnName);
+        return new DateTime(columnName, true, false);
 
       case Types.FLOAT:
       case Types.REAL:

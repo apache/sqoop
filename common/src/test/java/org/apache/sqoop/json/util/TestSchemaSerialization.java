@@ -159,7 +159,7 @@ public class TestSchemaSerialization {
       .addColumn(new Binary("b"))
       .addColumn(new Bit("c"))
       .addColumn(new Date("d"))
-      .addColumn(new DateTime("e"))
+      .addColumn(new DateTime("e", true, true))
       .addColumn(new Decimal("f"))
       .addColumn(new Enum("g", Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "X", "Y" })))))
       .addColumn(new FixedPoint("h"))
@@ -167,7 +167,7 @@ public class TestSchemaSerialization {
       .addColumn(new Map("j", new Text("j1"), new Text("j2")))
       .addColumn(new Set("k", new Text("k1")))
       .addColumn(new Text("l"))
-      .addColumn(new Time("m"))
+      .addColumn(new Time("m", true))
       .addColumn(new Unknown("u"))
     ;
     transferAndAssert(allTypes);
