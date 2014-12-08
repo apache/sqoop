@@ -24,6 +24,11 @@ import org.apache.sqoop.common.test.utils.LoggerWriter;
 import org.apache.sqoop.common.test.utils.NetworkUtils;
 
 import java.net.InetAddress;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of database provider that is based on embedded derby server.
@@ -41,6 +46,13 @@ public class DerbyProvider extends DatabaseProvider {
 
   NetworkServerControl server = null;
 
+  // We've observed several cases where Derby did not start properly
+  // from various reasons without any Exception being raised and any
+  // subsequent call to server.ping() or server.stop() got the process
+  // into zombie state waiting forever. Hence we're having boolean
+  // variable that is guarding potentially dangerous calls.
+  boolean started = false;
+
   @Override
   public void start() {
     // Start embedded server
@@ -54,7 +66,22 @@ public class DerbyProvider extends DatabaseProvider {
       // Start won't thrown an exception in case that it fails to start, one
       // have to explicitly call ping() in order to verify if the server is
       // up. Check DERBY-1465 for more details.
-      server.ping();
+      //
+      // In addition we've observed that in some scenarios ping() can get into
+      // deadlock waiting on remote server forever and hence we're having
+      // our own timeout handling around it.
+      ExecutorService executorService = Executors.newSingleThreadExecutor();
+      Future future = executorService.submit(new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          server.ping();
+          return null;
+        }
+      });
+      future.get(10, TimeUnit.SECONDS);
+
+      // Server successfully started at this point
+      started = true;
     } catch (Exception e) {
       LOG.error("Can't start Derby network server", e);
       throw new RuntimeException("Can't derby server", e);
@@ -69,7 +96,9 @@ public class DerbyProvider extends DatabaseProvider {
 
     // Shutdown embedded server
     try {
-      server.shutdown();
+      if(started) {
+        server.shutdown();
+      }
     } catch (Exception e) {
       LOG.info("Can't shut down embedded server", e);
     }
