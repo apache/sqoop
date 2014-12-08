@@ -34,6 +34,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
@@ -242,7 +243,14 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @throws Exception
    */
   protected void executeJob(long jid) throws Exception {
-    getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+    MSubmission finalSubmission = getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+
+    if(finalSubmission.getStatus().isFailure()) {
+      LOG.error("Submission has failed: " + finalSubmission.getExceptionInfo());
+      LOG.error("Corresponding stack trace: " + finalSubmission.getExceptionStackTrace());
+    }
+
+    assertEquals("Submission has failed with " + finalSubmission.getExceptionInfo(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
   }
 
   /**
