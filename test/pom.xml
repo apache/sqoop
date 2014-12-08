@@ -137,7 +137,9 @@ limitations under the License.
           <excludes>
             <exclude>**/integration/**</exclude>
           </excludes>
-
+          <systemPropertyVariables>
+            <sqoop.integration.tmpdir>${project.build.directory}</sqoop.integration.tmpdir>
+          </systemPropertyVariables>
         </configuration>
         <executions>
           <execution>
@@ -153,9 +155,6 @@ limitations under the License.
               <includes>
                 <include>**/integration/**</include>
               </includes>
-              <systemPropertyVariables>
-                <sqoop.integration.tmpdir>${project.build.directory}</sqoop.integration.tmpdir>
-              </systemPropertyVariables>
             </configuration>
           </execution>
         </executions>
