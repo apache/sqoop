@@ -74,7 +74,17 @@ public class DerbyProvider extends DatabaseProvider {
       Future future = executorService.submit(new Callable<Object>() {
         @Override
         public Object call() throws Exception {
-          server.ping();
+          while (true) {
+            try {
+              server.ping();
+              break;
+            } catch (Exception e) {
+              LOG.warn("Could not ping derby server on port " + port, e);
+            }
+
+            Thread.sleep(1000);
+          }
+
           return null;
         }
       });
