@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector;
+package org.apache.sqoop.configurable;
 
 import org.apache.sqoop.common.ErrorCode;
 

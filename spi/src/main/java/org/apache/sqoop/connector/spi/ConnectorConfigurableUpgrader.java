@@ -19,7 +19,7 @@
 package org.apache.sqoop.connector.spi;
 
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConfigurableError;
+import org.apache.sqoop.configurable.ConfigurableError;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
