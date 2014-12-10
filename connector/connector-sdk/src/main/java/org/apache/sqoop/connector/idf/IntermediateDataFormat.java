@@ -25,27 +25,15 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 /**
- * Abstract class representing a pluggable intermediate data format the Sqoop
- * driver will use to move data to/from the connector. All intermediate
+ * Abstract class representing a pluggable intermediate data format Sqoop
+ * will use to move data between the FROM and TO connectors. All intermediate
  * data formats are expected to have an internal/native implementation,
- * but also should minimally be able to return a text (CSV) version of the
- * data. The data format should also be able to return the data as an object
- * array - each array representing one row.
+ * but also should minimally be able to return CSV text version as specified by
+ * Sqoop spec. The data format in addition should also be able to return the data
+ * as an object array as represented by the object model - each array represents one row.
  * <p/>
- * Why a "native" internal format and then return text too?
- * Imagine a connector that moves data from a system that stores data as a
- * serialization format called FooFormat. If I also need the data to be
- * written into HDFS as FooFormat, the additional cycles burnt in converting
- * the FooFormat to text and back is useless - so plugging in an intermediate
- * format that can store the data as FooFormat saves those cycles!
- * <p/>
- * Most fast access mechanisms, like mysqldump or pgsqldump write the data
- * out as CSV, and most often the destination data is also represented as CSV
- * - so having a minimal CSV support is important, so we can easily pull the
- * data out as text.
- * <p/>
- * Any conversion to the final format from the native or text format is to be
- * done by the connector or OutputFormat classes.
+ * Any conversion to the format dictated by the corresponding data source from the native or  CSV text format
+ * has to be done by the connector themselves both in FROM and TO
  *
  * @param <T> - Each data format may have a native representation of the
  *            data, represented by the parameter.
@@ -58,15 +46,6 @@ public abstract class IntermediateDataFormat<T> {
     return data.hashCode();
   }
 
-  /**
-   * Set one row of data. If validate is set to true, the data is validated
-   * against the schema.
-   *
-   * @param data - A single row of data to be moved.
-   */
-  public void setData(T data) {
-    this.data = data;
-  }
 
   /**
    * Get one row of data.
@@ -79,22 +58,45 @@ public abstract class IntermediateDataFormat<T> {
   }
 
   /**
-   * Get one row of data as CSV.
+   * Set one row of data. If validate is set to true, the data is validated
+   * against the schema.
    *
-   * @return - String representing the data in CSV, according to the "FROM" schema.
-   * No schema conversion is done on textData, to keep it as "high performance" option.
+   * @param data - A single row of data to be moved.
    */
-  public abstract String getTextData();
+  public void setData(T data) {
+    this.data = data;
+  }
+  /**
+   * Get one row of data as CSV text. Use SqoopDataUtils for reading and writing
+   * into the sqoop specified CSV text format for each {@link #ColumnType} field in the row
+   * Why a "native" internal format and then return CSV text too?
+   * Imagine a connector that moves data from a system that stores data as a
+   * serialization format called FooFormat. If I also need the data to be
+   * written into HDFS as FooFormat, the additional cycles burnt in converting
+   * the FooFormat to text and back is useless - so using the sqoop specified
+   * CSV text format saves those extra cycles
+   * <p/>
+   * Most fast access mechanisms, like mysqldump or pgsqldump write the data
+   * out as CSV, and most often the source data is also represented as CSV
+   * - so having a minimal CSV support is mandated for all IDF, so we can easily read the
+   * data out as text and write as text.
+   * <p/>
+   * @return - String representing the data in CSV text format.
+   */
+  public abstract String getCSVTextData();
 
   /**
    * Set one row of data as CSV.
    *
    */
-  public abstract void setTextData(String text);
+  public abstract void setCSVTextData(String csvText);
 
   /**
-   * Get one row of data as an Object array.
-   *
+   * Get one row of data as an Object array. Sqoop uses defined object representation
+   * for each column type. For instance org.joda.time to represent date.Use SqoopDataUtils
+   * for reading and writing into the sqoop specified object format
+   * for each {@link #ColumnType} field in the row
+   * </p>
    * @return - String representing the data as an Object array
    * If FROM and TO schema exist, we will use SchemaMatcher to get the data according to "TO" schema
    */

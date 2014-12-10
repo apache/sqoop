@@ -207,9 +207,9 @@ public class TestMapReduce {
       @Override
       public void write(SqoopWritable key, NullWritable value) {
         String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
-        dataFormat.setTextData(testData);
+        dataFormat.setCSVTextData(testData);
         index++;
-        assertEquals(dataFormat.getTextData().toString(), key.toString());
+        assertEquals(dataFormat.getCSVTextData().toString(), key.toString());
       }
 
       @Override
@@ -253,9 +253,9 @@ public class TestMapReduce {
       String data;
       while ((data = context.getDataReader().readTextRecord()) != null) {
         String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
-        dataFormat.setTextData(testData);
+        dataFormat.setCSVTextData(testData);
         index++;
-        assertEquals(dataFormat.getTextData().toString(), data);
+        assertEquals(dataFormat.getCSVTextData().toString(), data);
       }
     }
   }

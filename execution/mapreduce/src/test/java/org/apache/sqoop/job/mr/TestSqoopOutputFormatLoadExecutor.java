@@ -135,7 +135,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     SqoopWritable writable = new SqoopWritable(dataFormat);
     try {
       for (int count = 0; count < 100; count++) {
-        dataFormat.setTextData(String.valueOf(count));
+        dataFormat.setCSVTextData(String.valueOf(count));
         writer.write(writable, null);
       }
     } catch (SqoopException ex) {
@@ -159,7 +159,7 @@ public class TestSqoopOutputFormatLoadExecutor {
           builder.append(",");
         }
       }
-      dataFormat.setTextData(builder.toString());
+      dataFormat.setCSVTextData(builder.toString());
       writer.write(writable, null);
     }
     writer.close(null);
@@ -179,7 +179,7 @@ public class TestSqoopOutputFormatLoadExecutor {
         builder.append(",");
       }
     }
-    dataFormat.setTextData(builder.toString());
+    dataFormat.setCSVTextData(builder.toString());
     writer.write(writable, null);
 
     //Allow writer to complete.
@@ -205,7 +205,7 @@ public class TestSqoopOutputFormatLoadExecutor {
             builder.append(",");
           }
         }
-        dataFormat.setTextData(builder.toString());
+        dataFormat.setCSVTextData(builder.toString());
         writer.write(writable, null);
       }
       writer.close(null);

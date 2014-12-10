@@ -126,7 +126,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * {@inheritDoc}
    */
   @Override
-  public String getTextData() {
+  public String getCSVTextData() {
     return data;
   }
 
@@ -134,7 +134,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * {@inheritDoc}
    */
   @Override
-  public void setTextData(String text) {
+  public void setCSVTextData(String text) {
     this.data = text;
   }
 
@@ -230,7 +230,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   @Override
   public Object[] getObjectData() {
     if (schema == null || schema.isEmpty()) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0006);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006);
     }
 
     // fieldStringArray represents the csv fields parsed into string array
@@ -241,8 +241,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     }
 
     if (fieldStringArray.length != schema.getColumns().size()) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
-          "The data " + getTextData() + " has the wrong number of fields.");
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005,
+          "The data " + getCSVTextData() + " has the wrong number of fields.");
     }
 
     Object[] objectArray = new Object[fieldStringArray.length];
@@ -304,7 +304,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         returnValue = TRUE_BIT_SET.contains(fieldString);
       } else {
         // throw an exception for any unsupported value for BITs
-        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + fieldString);
+        throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + fieldString);
       }
       break;
     case ARRAY:
@@ -315,7 +315,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       returnValue = parseMapElementFromJSON(fieldString);
       break;
     default:
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0004,
           "Column type from schema was not recognized for " + column.getType());
     }
     return returnValue;
@@ -348,7 +348,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     try {
       array = (JSONArray) new JSONParser().parse(removeQuotes(fieldString));
     } catch (org.json.simple.parser.ParseException e) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0008, e);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0008, e);
     }
     if (array != null) {
       return array.toArray();
@@ -362,7 +362,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     try {
       object = (JSONObject) new JSONParser().parse(removeQuotes(fieldString));
     } catch (org.json.simple.parser.ParseException e) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0008, e);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0008, e);
     }
     if (object != null) {
       return toMap(object);
@@ -456,7 +456,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       throw new IllegalStateException("Expected Data to be instance of "
           + "CSVIntermediateFormat, but was an instance of " + o.getClass().getName());
     }
-    return data.compareTo(o.getTextData());
+    return data.compareTo(o.getCSVTextData());
   }
 
   /**
@@ -471,7 +471,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
         objectArray[i] = bitStringValue;
       } else {
-        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + objectArray[i]);
+        throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + objectArray[i]);
       }
     }
     for (int i : stringTypeColumnIndices) {
@@ -572,7 +572,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     } catch (UnsupportedEncodingException e) {
       // We should never hit this case.
       // This character set should be distributed with Java.
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0001,
           "The character set " + BYTE_FIELD_CHARSET + " is not available.");
     }
   }
@@ -598,7 +598,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
             Matcher.quoteReplacement(replacements[j]));
       }
     } catch (Exception e) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0002, orig
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, orig
           + "  " + replacement + "  " + String.valueOf(j) + "  " + e.getMessage());
     }
     return encloseWithQuote(replacement);
@@ -620,7 +620,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
             Matcher.quoteReplacement(String.valueOf(originals[j])));
       }
     } catch (Exception e) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0003, orig
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, orig
           + "  " + String.valueOf(j) + e.getMessage());
     }
 
@@ -638,7 +638,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     } catch (UnsupportedEncodingException e) {
       // Should never hit this case.
       // This character set should be distributed with Java.
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0001,
           "The character set " + BYTE_FIELD_CHARSET + " is not available.");
     }
   }

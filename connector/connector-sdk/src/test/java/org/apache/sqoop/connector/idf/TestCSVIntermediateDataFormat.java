@@ -78,7 +78,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData(null);
+    dataFormat.setCSVTextData(null);
     Object[] out = dataFormat.getObjectData();
     assertNull(out);
   }
@@ -93,7 +93,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("");
+    dataFormat.setCSVTextData("");
     dataFormat.getObjectData();
   }
 
@@ -103,8 +103,8 @@ public class TestCSVIntermediateDataFormat {
   public void testInputAsCSVTextInCSVTextOut() {
     String testData = "'ENUM',10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
       + ",'" + String.valueOf(0x0A) + "'";
-    dataFormat.setTextData(testData);
-    assertEquals(testData, dataFormat.getTextData());
+    dataFormat.setCSVTextData(testData);
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -123,7 +123,7 @@ public class TestCSVIntermediateDataFormat {
         .addColumn(new org.apache.sqoop.schema.type.Enum("7"));
 
     dataFormat.setSchema(schema);
-    dataFormat.setTextData(testData);
+    dataFormat.setCSVTextData(testData);
 
     Object[] out = dataFormat.getObjectData();
 
@@ -164,7 +164,7 @@ public class TestCSVIntermediateDataFormat {
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,'54','random data'," +
         getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
-    assertEquals(testData, dataFormat.getTextData());
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -227,7 +227,7 @@ public class TestCSVIntermediateDataFormat {
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     String testData = "10,34,NULL,'random data'," +
         getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
-    assertEquals(testData, dataFormat.getTextData());
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -281,8 +281,8 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Time("1", false));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'12:00:00'");
-    assertEquals("'12:00:00'", dataFormat.getTextData());
+    dataFormat.setCSVTextData("'12:00:00'");
+    assertEquals("'12:00:00'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -290,7 +290,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Time("1", false));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'12:59:59'");
+    dataFormat.setCSVTextData("'12:59:59'");
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(12, 59, 59);
     assertEquals(time.toString(), dataFormat.getObjectData()[0].toString());
   }
@@ -303,7 +303,7 @@ public class TestCSVIntermediateDataFormat {
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(15, 0, 0);
     Object[] in = { time, "test" };
     dataFormat.setObjectData(in);
-    assertEquals("'15:00:00.000000','test'", dataFormat.getTextData());
+    assertEquals("'15:00:00.000000','test'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -324,8 +324,8 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Date("1"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01'");
-    assertEquals("'2014-10-01'", dataFormat.getTextData());
+    dataFormat.setCSVTextData("'2014-10-01'");
+    assertEquals("'2014-10-01'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -333,7 +333,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Date("1"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01'");
+    dataFormat.setCSVTextData("'2014-10-01'");
     org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
     assertEquals(date.toString(), dataFormat.getObjectData()[0].toString());
   }
@@ -346,7 +346,7 @@ public class TestCSVIntermediateDataFormat {
     org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
     Object[] in = { date, "test" };
     dataFormat.setObjectData(in);
-    assertEquals("'2014-10-01','test'", dataFormat.getTextData());
+    assertEquals("'2014-10-01','test'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -368,8 +368,8 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new DateTime("1", false, false));
     dataFormat.setSchema(schema);
 
-    dataFormat.setTextData("'2014-10-01 12:00:00'");
-    assertEquals("'2014-10-01 12:00:00'", dataFormat.getTextData());
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00'");
+    assertEquals("'2014-10-01 12:00:00'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -377,15 +377,15 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, false));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00.000'");
-    assertEquals("'2014-10-01 12:00:00.000'", dataFormat.getTextData());
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00.000'");
+    assertEquals("'2014-10-01 12:00:00.000'", dataFormat.getCSVTextData());
   }
 
   public void testDateTimeNoFractionNoTimezoneWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", false, false));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00'");
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00'");
     // NOTE: string representation will have the T added, it is an
     // implementation quirk of using JODA
     assertEquals("2014-10-01T12:00:00", dataFormat.getObjectData()[0].toString());
@@ -396,7 +396,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, false));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00.000'");
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00.000'");
     // NOTE: string representation will have the T added, it is an
     // implementation quirk of using JODA
     assertEquals("2014-10-01T12:00:00.000", dataFormat.getObjectData()[0].toString());
@@ -410,7 +410,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setSchema(schema);
     DateTimeZone zone = DateTimeZone.forID("America/New_York");
     org.joda.time.DateTime dateTime = new org.joda.time.DateTime(zone);
-    dataFormat.setTextData(dateTime.toString());
+    dataFormat.setCSVTextData(dateTime.toString());
     dataFormat.getObjectData()[0].toString();
   }
 
@@ -420,7 +420,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, true));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-3310-01 12:00:00.000'");
+    dataFormat.setCSVTextData("'2014-3310-01 12:00:00.000'");
     dataFormat.getObjectData()[0].toString();
   }
 
@@ -432,7 +432,7 @@ public class TestCSVIntermediateDataFormat {
     // current date time
     org.joda.time.DateTime dateTime = new org.joda.time.DateTime();
     String dateTimeString = CSVIntermediateDataFormat.dtfWithFractionNoTimeZone.print(dateTime);
-    dataFormat.setTextData("'" + dateTimeString + "'");
+    dataFormat.setCSVTextData("'" + dateTimeString + "'");
     assertEquals(dateTimeString.replace(" ", "T"), dataFormat.getObjectData()[0].toString());
   }
 
@@ -441,7 +441,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, true));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00.000-0400'");
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00.000-0400'");
     // NOTE: string representation will have the T added, it is an
     // implementation quirk of using JODA
     assertEquals("2014-10-01T12:00:00.000-04:00", dataFormat.getObjectData()[0].toString());
@@ -457,7 +457,7 @@ public class TestCSVIntermediateDataFormat {
     Object[] in = { dateTime };
     dataFormat.setObjectData(in);
     // Note: DateTime has the timezone info
-    assertEquals("'2014-10-01 12:00:00.001-0400'", dataFormat.getTextData());
+    assertEquals("'2014-10-01 12:00:00.001-0400'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -469,7 +469,7 @@ public class TestCSVIntermediateDataFormat {
     Object[] in = { dateTime };
     dataFormat.setObjectData(in);
     // Note: LocalDateTime will not have the timezone info
-    assertEquals("'2014-10-01 12:00:00.002'", dataFormat.getTextData());
+    assertEquals("'2014-10-01 12:00:00.002'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -477,7 +477,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, true));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("'2014-10-01 12:00:00.000-04:00'");
+    dataFormat.setCSVTextData("'2014-10-01 12:00:00.000-04:00'");
     DateTimeZone zone = DateTimeZone.forID("America/New_York");
     org.joda.time.DateTime edateTime = new org.joda.time.DateTime(2014, 10, 01, 12, 0, 0, 0, zone);
     org.joda.time.DateTime dateTime = (org.joda.time.DateTime) dataFormat.getObjectData()[0];
@@ -498,13 +498,13 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setSchema(schema);
 
     for (String trueBit : new String[] { "true", "TRUE" }) {
-      dataFormat.setTextData(trueBit);
-      assertTrue(Boolean.valueOf(dataFormat.getTextData()));
+      dataFormat.setCSVTextData(trueBit);
+      assertTrue(Boolean.valueOf(dataFormat.getCSVTextData()));
     }
 
     for (String falseBit : new String[] { "false", "FALSE" }) {
-      dataFormat.setTextData(falseBit);
-      assertFalse(Boolean.valueOf(dataFormat.getTextData()));
+      dataFormat.setCSVTextData(falseBit);
+      assertFalse(Boolean.valueOf(dataFormat.getCSVTextData()));
     }
   }
 
@@ -513,10 +513,10 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("1");
-    assertEquals("1", dataFormat.getTextData());
-    dataFormat.setTextData("0");
-    assertEquals("0", dataFormat.getTextData());
+    dataFormat.setCSVTextData("1");
+    assertEquals("1", dataFormat.getCSVTextData());
+    dataFormat.setCSVTextData("0");
+    assertEquals("0", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -528,7 +528,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = Boolean.TRUE;
     data[1] = Boolean.FALSE;
     dataFormat.setObjectData(data);
-    assertEquals("true,false", dataFormat.getTextData());
+    assertEquals("true,false", dataFormat.getCSVTextData());
   }
 
   @Test(expected = SqoopException.class)
@@ -540,7 +540,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = "1";
     data[1] = "2";
     dataFormat.setObjectData(data);
-    assertEquals("1,2", dataFormat.getTextData());
+    assertEquals("1,2", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -567,12 +567,12 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setSchema(schema);
 
     for (String trueBit : new String[] { "true", "TRUE", "1" }) {
-      dataFormat.setTextData(trueBit);
+      dataFormat.setCSVTextData(trueBit);
       assertTrue((Boolean) dataFormat.getObjectData()[0]);
     }
 
     for (String falseBit : new String[] { "false", "FALSE", "0" }) {
-      dataFormat.setTextData(falseBit);
+      dataFormat.setCSVTextData(falseBit);
       assertFalse((Boolean) dataFormat.getObjectData()[0]);
     }
   }
@@ -595,7 +595,7 @@ public class TestCSVIntermediateDataFormat {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
     dataFormat.setSchema(schema);
-    dataFormat.setTextData("1,3");
+    dataFormat.setCSVTextData("1,3");
     assertEquals(true, dataFormat.getObjectData()[0]);
     assertEquals(false, dataFormat.getObjectData()[1]);
   }
@@ -630,7 +630,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = givenArray;
     data[1] = "text";
     String testData = "'[\"A\",\"B\"]','text'";
-    dataFormat.setTextData(testData);
+    dataFormat.setCSVTextData(testData);
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(Arrays.toString(givenArray), Arrays.toString(expectedArray));
     assertEquals("text", dataFormat.getObjectData()[1]);
@@ -649,7 +649,7 @@ public class TestCSVIntermediateDataFormat {
     data[1] = "text";
     String testData = "'[\"A\",\"B\"]','text'";
     dataFormat.setObjectData(data);
-    assertEquals(testData, dataFormat.getTextData());
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -659,8 +659,8 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
     dataFormat.setSchema(schema);
     String testData = "'[\"A\",\"B\"]','text'";
-    dataFormat.setTextData(testData);
-    assertEquals(testData, dataFormat.getTextData());
+    dataFormat.setCSVTextData(testData);
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -795,7 +795,7 @@ public class TestCSVIntermediateDataFormat {
     Object[] data = new Object[2];
     data[0] = arrayOfArrays;
     data[1] = "text";
-    dataFormat.setTextData("'[\"[11, 12]\",\"[14, 15]\"]','text'");
+    dataFormat.setCSVTextData("'[\"[11, 12]\",\"[14, 15]\"]','text'");
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(2, expectedArray.length);
     assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.deepToString(expectedArray));
@@ -810,10 +810,10 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
     dataFormat.setSchema(schema);
     String input = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
-    dataFormat.setTextData(input);
+    dataFormat.setCSVTextData(input);
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(2, expectedArray.length);
-    assertEquals(input, dataFormat.getTextData());
+    assertEquals(input, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -836,7 +836,7 @@ public class TestCSVIntermediateDataFormat {
     data[1] = "text";
     dataFormat.setObjectData(data);
     String expected = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
-    assertEquals(expected, dataFormat.getTextData());
+    assertEquals(expected, dataFormat.getCSVTextData());
   }
   //**************test cases for map**********************
 
@@ -942,7 +942,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = givenMap;
     data[1] = "text";
     String testData = "'{\"testKey\":\"testValue\"}','text'";
-    dataFormat.setTextData(testData);
+    dataFormat.setCSVTextData(testData);
     @SuppressWarnings("unchecked")
     Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
     assertEquals(givenMap, expectedMap);
@@ -961,7 +961,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = givenMap;
     data[1] = "text";
     String testData = "'{\"testKey\":\"testValue\"}','text'";
-    dataFormat.setTextData(testData);
+    dataFormat.setCSVTextData(testData);
     @SuppressWarnings("unchecked")
     Map<Object, Object> expectedMap = (Map<Object, Object>) dataFormat.getObjectData()[0];
     assertEquals(givenMap, expectedMap);
@@ -981,7 +981,7 @@ public class TestCSVIntermediateDataFormat {
     data[1] = "text";
     String testData = "'{\"testKey\":\"testValue\"}','text'";
     dataFormat.setObjectData(data);
-    assertEquals(testData, dataFormat.getTextData());
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
 
   @Test
@@ -991,8 +991,8 @@ public class TestCSVIntermediateDataFormat {
     schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
     dataFormat.setSchema(schema);
     String testData = "'{\"testKey\":\"testValue\"}','text'";
-    dataFormat.setTextData(testData);
-    assertEquals(testData, dataFormat.getTextData());
+    dataFormat.setCSVTextData(testData);
+    assertEquals(testData, dataFormat.getCSVTextData());
   }
   //**************test cases for schema*******************
   @Test(expected=SqoopException.class)
@@ -1001,7 +1001,7 @@ public class TestCSVIntermediateDataFormat {
         + ",'\\n'";
     Schema schema = new Schema("Test");
     dataFormat.setSchema(schema);
-    dataFormat.setTextData(testData);
+    dataFormat.setCSVTextData(testData);
 
     @SuppressWarnings("unused")
     Object[] out = dataFormat.getObjectData();

@@ -127,7 +127,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
 
     @Override
     public void writeStringRecord(String text) {
-      fromDataFormat.setTextData(text);
+      fromDataFormat.setCSVTextData(text);
       writeContent();
     }
 
@@ -140,7 +140,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     private void writeContent() {
       try {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Extracted data: " + fromDataFormat.getTextData());
+          LOG.debug("Extracted data: " + fromDataFormat.getCSVTextData());
         }
         // NOTE: The fromDataFormat and the corresponding fromSchema is used only for the matching process
         // The output of the mappers is finally written to the toDataFormat object after the matching process

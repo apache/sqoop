@@ -102,7 +102,7 @@ public class SqoopOutputFormatLoadExecutor {
       free.acquire();
       checkIfConsumerThrew();
       // NOTE: this is the place where data written from SqoopMapper writable is available to the SqoopOutputFormat
-      dataFormat.setTextData(key.getString());
+      dataFormat.setCSVTextData(key.getString());
       filled.release();
     }
 
@@ -172,7 +172,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return dataFormat.getTextData();
+        return dataFormat.getCSVTextData();
       } finally {
         releaseSema();
       }
