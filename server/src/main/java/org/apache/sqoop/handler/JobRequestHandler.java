@@ -92,6 +92,7 @@ public class JobRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
+    LOG.info("Got job request");
     switch (ctx.getMethod()) {
     case GET:
       if (STATUS.equals(ctx.getLastURLElement())) {
