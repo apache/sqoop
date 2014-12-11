@@ -111,10 +111,10 @@ public class TestSubmissionHandling extends DerbyTestCase {
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(creationDate);
     submission.setLastUpdateDate(updateDate);
-    submission.setExternalId("job-x");
+    submission.setExternalJobId("job-x");
     submission.setExternalLink("http://somewhere");
-    submission.setExceptionInfo("RuntimeException");
-    submission.setExceptionStackTrace("Yeah it happens");
+    submission.getError().setErrorSummary("RuntimeException");
+    submission.getError().setErrorDetails("Yeah it happens");
     submission.setCounters(counters);
 
     handler.createSubmission(submission, getDerbyDatabaseConnection());
@@ -133,10 +133,10 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
     assertEquals(creationDate, submission.getCreationDate());
     assertEquals(updateDate, submission.getLastUpdateDate());
-    assertEquals("job-x", submission.getExternalId());
+    assertEquals("job-x", submission.getExternalJobId());
     assertEquals("http://somewhere", submission.getExternalLink());
-    assertEquals("RuntimeException", submission.getExceptionInfo());
-    assertEquals("Yeah it happens", submission.getExceptionStackTrace());
+    assertEquals("RuntimeException", submission.getError().getErrorSummary());
+    assertEquals("Yeah it happens", submission.getError().getErrorDetails());
 
     CounterGroup group;
     Counter counter;

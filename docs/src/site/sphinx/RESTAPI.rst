@@ -41,7 +41,7 @@ For instance a connector that represents a relational data source such as MySQL 
 
 Each connector can support Reading from a data source and/or writing/to a data source it represents. Reading from and writing to a data source are represented by From and To respectively. Specific configurations are required to peform the job of reading from or writing to the data source. These are grouped in the ``FromJobConfiguration`` and ``ToJobConfiguration`` objects of the connector.
 
-For instace, a connector that represents a relational data source such as MySQL will expose the table name to read from or the SQL query to use while reading data as a FromJobConfiguration. Similarly a connector that represents a data source such as HDFS, will expose the output directory to write to as a ToJobConfiguration.
+For instance, a connector that represents a relational data source such as MySQL will expose the table name to read from or the SQL query to use while reading data as a FromJobConfiguration. Similarly a connector that represents a data source such as HDFS, will expose the output directory to write to as a ToJobConfiguration.
 
 
 Objects
@@ -1268,7 +1268,7 @@ Start a job with name ``[jname]`` or with id ``[jid]`` to trigger the job execut
       "progress": -1,
       "last-update-date": 1415312390570,
       "status": "FAILURE_ON_SUBMIT",
-      "exception": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
+      "error-summary": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
       "job": 1,
       "creation-date": 1415312390570,
       "to-schema": {
@@ -1296,7 +1296,7 @@ Start a job with name ``[jname]`` or with id ``[jid]`` to trigger the job execut
         "columns": [
         ]
       },
-      "exception-trace": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_00"
+      "error-details": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_00"
     }
   }
 
@@ -1432,10 +1432,10 @@ Provide the name of the job in the url [jname] part.
         progress: -1,
         last-update-date: 1415312390570,
         status: "FAILURE_ON_SUBMIT",
-        exception: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
+        error-summary: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
         job: 1,
         creation-date: 1415312390570,
-        exception-trace: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner...."
+        error-details: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner...."
       }
     ]
   }

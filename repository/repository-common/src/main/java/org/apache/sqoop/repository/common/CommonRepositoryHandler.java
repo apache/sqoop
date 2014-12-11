@@ -24,6 +24,7 @@ import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
@@ -927,10 +928,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       stmt.setTimestamp(4, new Timestamp(submission.getCreationDate().getTime()));
       stmt.setString(5, submission.getLastUpdateUser());
       stmt.setTimestamp(6, new Timestamp(submission.getLastUpdateDate().getTime()));
-      stmt.setString(7, submission.getExternalId());
+      stmt.setString(7, submission.getExternalJobId());
       stmt.setString(8, submission.getExternalLink());
-      stmt.setString(9, submission.getExceptionInfo());
-      stmt.setString(10, submission.getExceptionStackTrace());
+      stmt.setString(9, submission.getError().getErrorSummary());
+      stmt.setString(10, submission.getError().getErrorDetails());
 
       result = stmt.executeUpdate();
       if (result != 1) {
@@ -999,8 +1000,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       stmt.setString(1, submission.getStatus().name());
       stmt.setString(2, submission.getLastUpdateUser());
       stmt.setTimestamp(3, new Timestamp(submission.getLastUpdateDate().getTime()));
-      stmt.setString(4, submission.getExceptionInfo());
-      stmt.setString(5, submission.getExceptionStackTrace());
+      stmt.setString(4, submission.getError().getErrorSummary());
+      stmt.setString(5, submission.getError().getErrorDetails());
 
       stmt.setLong(6, submission.getPersistenceId());
       stmt.executeUpdate();
@@ -1441,11 +1442,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     submission.setCreationDate(rs.getTimestamp(5));
     submission.setLastUpdateUser(rs.getString(6));
     submission.setLastUpdateDate(rs.getTimestamp(7));
-    submission.setExternalId(rs.getString(8));
+    submission.setExternalJobId(rs.getString(8));
     submission.setExternalLink(rs.getString(9));
-    submission.setExceptionInfo(rs.getString(10));
-    submission.setExceptionStackTrace(rs.getString(11));
-
+    SubmissionError error = new SubmissionError();
+    error.setErrorSummary(rs.getString(10));
+    error.setErrorDetails(rs.getString(11));
+    submission.setError(error);
     Counters counters = loadCountersSubmission(rs.getLong(1), conn);
     submission.setCounters(counters);
 

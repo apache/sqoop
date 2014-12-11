@@ -246,11 +246,10 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     MSubmission finalSubmission = getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
 
     if(finalSubmission.getStatus().isFailure()) {
-      LOG.error("Submission has failed: " + finalSubmission.getExceptionInfo());
-      LOG.error("Corresponding stack trace: " + finalSubmission.getExceptionStackTrace());
+      LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
+      LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
-
-    assertEquals("Submission has failed with " + finalSubmission.getExceptionInfo(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
+    assertEquals("Submission has failed with " + finalSubmission.getError().getErrorSummary(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
   }
 
   /**

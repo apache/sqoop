@@ -84,7 +84,7 @@ public class ShowSubmissionFunction extends SqoopFunction {
 
     for (MSubmission submission : submissions) {
       jids.add(String.valueOf(submission.getJobId()));
-      eids.add(String.valueOf(submission.getExternalId()));
+      eids.add(String.valueOf(submission.getExternalJobId()));
       status.add(submission.getStatus().toString());
       dates.add(submission.getLastUpdateDate().toString());
     }

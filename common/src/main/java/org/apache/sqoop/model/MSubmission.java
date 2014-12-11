@@ -21,8 +21,6 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 
 /**
@@ -48,12 +46,13 @@ public class MSubmission extends MAccountableEntity {
   SubmissionStatus status;
 
   /**
-   * Any valid external id associated with this submission.
+   * Any valid external id associated with this job submission.
+   * For instance: in the case of MR execution engine, this will refer to the MR job Id
    *
    * This property is optional and might be NULL in case that the job has not
    * yet been submitted to the external system (JobTracker, ResourceManager, ...).
    */
-  String externalId;
+  String externalJobId;
 
   /**
    * Progress in the job.
@@ -83,18 +82,11 @@ public class MSubmission extends MAccountableEntity {
   String externalLink;
 
   /**
-   * Associated exception info with this job (if any).
+   * Associated error (exception or failure) with this job (if any).
    *
    * This property is optional.
    */
-  String exceptionInfo;
-
-  /**
-   * Associated exception stacktrace with this job (if any).
-   *
-   * This property is optional.
-   */
-  String exceptionStackTrace;
+  SubmissionError error;
 
   /**
    * Schema for the FROM part of the job submission
@@ -129,7 +121,7 @@ public class MSubmission extends MAccountableEntity {
   public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
                      String externalId) {
     this(jobId, creationDate, status);
-    this.externalId = externalId;
+    this.externalJobId = externalId;
   }
 
   public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
@@ -155,12 +147,12 @@ public class MSubmission extends MAccountableEntity {
     return status;
   }
 
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
+  public void setExternalJobId(String externalJobId) {
+    this.externalJobId = externalJobId;
   }
 
-  public String getExternalId() {
-    return externalId;
+  public String getExternalJobId() {
+    return externalJobId;
   }
 
   public void setProgress(double progress) {
@@ -187,31 +179,15 @@ public class MSubmission extends MAccountableEntity {
     return externalLink;
   }
 
-  public void setExceptionInfo(String exceptionInfo) {
-    this.exceptionInfo = exceptionInfo;
+  public void setError(SubmissionError error) {
+    this.error = error;
   }
 
-  public String getExceptionInfo() {
-    return exceptionInfo;
-  }
-
-  public void setExceptionStackTrace(String stackTrace) {
-    this.exceptionStackTrace = stackTrace;
-  }
-
-  public String getExceptionStackTrace() {
-    return exceptionStackTrace;
-  }
-
-  public void setException(Throwable e) {
-    // Exception info
-    this.setExceptionInfo(e.toString());
-
-    // Exception stack trace
-    StringWriter writer = new StringWriter();
-    e.printStackTrace(new PrintWriter(writer));
-    writer.flush();
-    this.setExceptionStackTrace(writer.toString());
+  public SubmissionError getError() {
+    if(this.error == null) {
+      this.error = new SubmissionError();
+    }
+    return this.error;
   }
 
   public Schema getFromSchema() {
@@ -232,21 +208,11 @@ public class MSubmission extends MAccountableEntity {
 
   @Override
   public String toString() {
-    return "MSubmission{" +
-      "jobId=" + jobId +
-      ", creationDate=" + getCreationDate() +
-      ", lastUpdateDate=" + getLastUpdateDate() +
-      ", status=" + status +
-      ", externalId='" + externalId + '\'' +
-      ", progress=" + progress +
-      ", counters=" + counters +
-      ", externalLink='" + externalLink + '\'' +
-      ", exceptionInfo='" + exceptionInfo + '\'' +
-      ", exceptionStackTrace='" + exceptionStackTrace + '\'' +
-      ", fromSchema='" + fromSchema + '\'' +
-      ", toSchema='" + toSchema + '\'' +
-      '}';
+    return "MSubmission [jobId=" + jobId + ", status=" + status + ", externalId=" + externalJobId
+        + ", progress=" + progress + ", counters=" + counters + ", externalLink=" + externalLink
+        + ", error=" + error + ", fromSchema=" + fromSchema + ", toSchema=" + toSchema + "]";
   }
 
   public static MSubmission UNKNOWN = new MSubmission();
+
 }

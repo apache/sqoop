@@ -48,8 +48,8 @@ public class SubmissionBean implements JsonBean {
   private static final String STATUS = "status";
   private static final String EXTERNAL_ID = "external-id";
   private static final String EXTERNAL_LINK = "external-link";
-  private static final String EXCEPTION = "exception";
-  private static final String EXCEPTION_TRACE = "exception-trace";
+  private static final String ERROR_SUMMARY = "error-summary";
+  private static final String ERROR_DETAILS = "error-details";
   private static final String PROGRESS = "progress";
   private static final String COUNTERS = "counters";
   private static final String FROM_SCHEMA = "from-schema";
@@ -114,17 +114,17 @@ public class SubmissionBean implements JsonBean {
     if (submission.getLastUpdateDate() != null) {
       object.put(LAST_UPDATE_DATE, submission.getLastUpdateDate().getTime());
     }
-    if (submission.getExternalId() != null) {
-      object.put(EXTERNAL_ID, submission.getExternalId());
+    if (submission.getExternalJobId() != null) {
+      object.put(EXTERNAL_ID, submission.getExternalJobId());
     }
     if (submission.getExternalLink() != null) {
       object.put(EXTERNAL_LINK, submission.getExternalLink());
     }
-    if (submission.getExceptionInfo() != null) {
-      object.put(EXCEPTION, submission.getExceptionInfo());
+    if (submission.getError().getErrorSummary() != null) {
+      object.put(ERROR_SUMMARY, submission.getError().getErrorSummary());
     }
-    if (submission.getExceptionStackTrace() != null) {
-      object.put(EXCEPTION_TRACE, submission.getExceptionStackTrace());
+    if (submission.getError().getErrorDetails() != null) {
+      object.put(ERROR_DETAILS, submission.getError().getErrorDetails());
     }
     if (submission.getCounters() != null) {
       object.put(COUNTERS, extractCounters(submission.getCounters()));
@@ -186,16 +186,16 @@ public class SubmissionBean implements JsonBean {
       submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
     }
     if (object.containsKey(EXTERNAL_ID)) {
-      submission.setExternalId((String) object.get(EXTERNAL_ID));
+      submission.setExternalJobId((String) object.get(EXTERNAL_ID));
     }
     if (object.containsKey(EXTERNAL_LINK)) {
       submission.setExternalLink((String) object.get(EXTERNAL_LINK));
     }
-    if (object.containsKey(EXCEPTION)) {
-      submission.setExceptionInfo((String) object.get(EXCEPTION));
+    if (object.containsKey(ERROR_SUMMARY)) {
+      submission.getError().setErrorSummary((String) object.get(ERROR_SUMMARY));
     }
-    if (object.containsKey(EXCEPTION_TRACE)) {
-      submission.setExceptionStackTrace((String) object.get(EXCEPTION_TRACE));
+    if (object.containsKey(ERROR_DETAILS)) {
+      submission.getError().setErrorDetails((String) object.get(ERROR_DETAILS));
     }
     if (object.containsKey(COUNTERS)) {
       submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));

@@ -18,6 +18,7 @@
 package org.apache.sqoop.driver;
 
 import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.submission.SubmissionStatus;
 
@@ -58,22 +59,30 @@ public abstract class SubmissionEngine {
    *
    * @return Return true if we were able to submit job to remote cluster.
    */
-  public abstract boolean submit(JobRequest submission);
+  public abstract boolean submit(JobRequest jobRequest);
 
   /**
    * Hard stop for given submission.
    *
-   * @param submissionId Submission internal id.
+   * @param externalJobId Submission external job id.
    */
-  public abstract void stop(String submissionId);
+  public abstract void stop(String externalJobId);
 
   /**
    * Return status of given submission.
    *
-   * @param submissionId Submission internal id.
+   * @param externalJobId Submission external job id.
    * @return Current submission status.
    */
-  public abstract SubmissionStatus status(String submissionId);
+  public abstract SubmissionStatus status(String externalJobId);
+
+  /**
+   * Return failure info if the job status is FAILED
+   *
+   * @param submissionId Submission internal id.
+   * @return Current failure info
+   */
+  public abstract SubmissionError error(String externalJobId);
 
   /**
    * Return submission progress.
@@ -82,10 +91,10 @@ public abstract class SubmissionEngine {
    * has gone or -1 in case that this submission engine do not supports
    * progress reporting.
    *
-   * @param submissionId Submission internal id.
+   * @param externalJobId Submission external job id.
    * @return {-1} union <0, 1>
    */
-  public double progress(String submissionId) {
+  public double progress(String externalJobId) {
     return -1;
   }
 
@@ -95,21 +104,21 @@ public abstract class SubmissionEngine {
    * Sqoop will call counters only for submission in state SUCCEEDED,
    * it's consider exceptional state to call this method for other states.
    *
-   * @param submissionId Submission internal id.
+   * @param externalJobId Submission external job id.
    * @return Submission statistics
    */
-  public Counters counters(String submissionId) {
+  public Counters counters(String externalJobId) {
     return null;
   }
 
   /**
    * Return link to external web page with given submission.
    *
-   * @param submissionId Submission internal id.
+   * @param externalJobId Submission external job id.
    * @return Null in case that external page is not supported or available or
    *  HTTP link to given submission.
    */
-  public String externalLink(String submissionId) {
+  public String externalLink(String externalJobId) {
     return null;
   }
 }

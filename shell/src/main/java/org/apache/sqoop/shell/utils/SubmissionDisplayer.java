@@ -57,7 +57,7 @@ public final class SubmissionDisplayer {
     print(resourceString(Constants.RES_SUBMISSION_UPDATE_USER) + ": ");
     println(submission.getLastUpdateUser());
 
-    String externalId = submission.getExternalId();
+    String externalId = submission.getExternalJobId();
     if(externalId != null) {
       print(resourceString(Constants.RES_SUBMISSION_EXTERNAL_ID)+": ");
       println(externalId);
@@ -130,13 +130,13 @@ public final class SubmissionDisplayer {
         println(dateFormat.format(submission.getLastUpdateDate())+": "+submission.getStatus());
       }
       // Exception handling
-      if (submission.getExceptionInfo() != null) {
+      if (submission.getError().getErrorSummary() != null) {
         print("@|red Exception: |@");
-        println(submission.getExceptionInfo());
+        println(submission.getError().getErrorSummary());
 
-        if (isVerbose() && submission.getExceptionStackTrace() != null) {
+        if (isVerbose() && submission.getError().getErrorDetails() != null) {
           print("@|bold Stack trace: |@");
-          println(submission.getExceptionStackTrace());
+          println(submission.getError().getErrorDetails());
         }
       }
     }

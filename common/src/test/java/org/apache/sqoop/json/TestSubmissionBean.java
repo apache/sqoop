@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Decimal;
@@ -199,24 +200,24 @@ public class TestSubmissionBean {
   @Test
   public void testTransferExternalId() {
     MSubmission source = new MSubmission();
-    source.setExternalId("Job-x");
+    source.setExternalJobId("Job-x");
 
     MSubmission target = transfer(source);
-    assertEquals("Job-x", target.getExternalId());
+    assertEquals("Job-x", target.getExternalJobId());
 
     List<MSubmission> sources = new ArrayList<MSubmission>();
     MSubmission sourcex = new MSubmission();
-    sourcex.setExternalId("Job-y");
+    sourcex.setExternalJobId("Job-y");
     sources.add(sourcex);
     MSubmission sourcey = new MSubmission();
-    sourcey.setExternalId("Job-z");
+    sourcey.setExternalJobId("Job-z");
     sources.add(sourcey);
 
     List<MSubmission> targets = transfer(sources);
     assertNotNull(targets.get(0));
-    assertEquals("Job-y", targets.get(0).getExternalId());
+    assertEquals("Job-y", targets.get(0).getExternalJobId());
     assertNotNull(targets.get(1));
-    assertEquals("Job-z", targets.get(1).getExternalId());
+    assertEquals("Job-z", targets.get(1).getExternalJobId());
   }
 
   @Test
@@ -243,49 +244,54 @@ public class TestSubmissionBean {
   }
 
   @Test
-  public void testTransferException() {
+  public void testTransferErrorSummary() {
+    SubmissionError error = new SubmissionError();
     MSubmission source = new MSubmission();
-    source.setExceptionInfo("EndOfTheWorldException");
-
+    error.setErrorSummary("EndOfTheWorldException");
+    source.setError(error);
     MSubmission target = transfer(source);
-    assertEquals("EndOfTheWorldException", target.getExceptionInfo());
+    assertEquals("EndOfTheWorldException", target.getError().getErrorSummary());
 
     List<MSubmission> sources = new ArrayList<MSubmission>();
     MSubmission sourcex = new MSubmission();
-    sourcex.setExceptionInfo("TheNewEraException");
+    SubmissionError errorx= new SubmissionError();
+    errorx.setErrorSummary("TheNewEraException");
+    sourcex.setError(errorx);
     sources.add(sourcex);
     MSubmission sourcey = new MSubmission();
-    sourcey.setExceptionInfo("EndOfTheWorldAgainException");
+    SubmissionError errory= new SubmissionError();
+    errory.setErrorSummary("EndOfTheWorldAgainException");
+    sourcey.setError(errory);
     sources.add(sourcey);
 
     List<MSubmission> targets = transfer(sources);
     assertNotNull(targets.get(0));
-    assertEquals("TheNewEraException", targets.get(0).getExceptionInfo());
+    assertEquals("TheNewEraException", targets.get(0).getError().getErrorSummary());
     assertNotNull(targets.get(1));
-    assertEquals("EndOfTheWorldAgainException", targets.get(1).getExceptionInfo());
+    assertEquals("EndOfTheWorldAgainException", targets.get(1).getError().getErrorSummary());
   }
 
   @Test
-  public void testTransferExceptionTrace() {
+  public void testTransferErrorDetails() {
     MSubmission source = new MSubmission();
-    source.setExceptionStackTrace("void.java(3): line infinity");
+    source.getError().setErrorDetails("void.java(3): line infinity");
 
     MSubmission target = transfer(source);
-    assertEquals("void.java(3): line infinity", target.getExceptionStackTrace());
+    assertEquals("void.java(3): line infinity", target.getError().getErrorDetails());
 
     List<MSubmission> sources = new ArrayList<MSubmission>();
     MSubmission sourcex = new MSubmission();
-    sourcex.setExceptionStackTrace("void.java(4): segment fault in Java");
+    sourcex.getError().setErrorDetails("void.java(4): segment fault in Java");
     sources.add(sourcex);
     MSubmission sourcey = new MSubmission();
-    sourcey.setExceptionStackTrace("void.java(5): core dumps in Java");
+    sourcey.getError().setErrorDetails("void.java(5): core dumps in Java");
     sources.add(sourcey);
 
     List<MSubmission> targets = transfer(sources);
     assertNotNull(targets.get(0));
-    assertEquals("void.java(4): segment fault in Java", targets.get(0).getExceptionStackTrace());
+    assertEquals("void.java(4): segment fault in Java", targets.get(0).getError().getErrorDetails());
     assertNotNull(targets.get(1));
-    assertEquals("void.java(5): core dumps in Java", targets.get(1).getExceptionStackTrace());
+    assertEquals("void.java(5): core dumps in Java", targets.get(1).getError().getErrorDetails());
   }
 
   @Test

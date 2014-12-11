@@ -38,9 +38,9 @@ import java.util.List;
 public class JobRequest {
 
   /**
-   * Submission summary
+   * Job Submission
    */
-  MSubmission summary;
+  MSubmission jobSubmission;
 
   /**
    * Original job name
@@ -129,12 +129,12 @@ public class JobRequest {
     this.driverConfig = null;
   }
 
-  public MSubmission getSummary() {
-    return summary;
+  public MSubmission getJobSubmission() {
+    return jobSubmission;
   }
 
-  public void setSummary(MSubmission summary) {
-    this.summary = summary;
+  public void setSummary(MSubmission submission) {
+    this.jobSubmission = submission;
   }
 
   public String getJobName() {

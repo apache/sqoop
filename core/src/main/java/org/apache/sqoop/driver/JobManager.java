@@ -37,6 +37,7 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.job.etl.Transferable;
 import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
@@ -373,8 +374,8 @@ public class JobManager implements Reconfigurable {
     initializeConnector(jobRequest, Direction.FROM);
     initializeConnector(jobRequest, Direction.TO);
 
-    jobRequest.getSummary().setFromSchema(getSchemaForConnector(jobRequest, Direction.FROM));
-    jobRequest.getSummary().setToSchema(getSchemaForConnector(jobRequest, Direction.TO));
+    jobRequest.getJobSubmission().setFromSchema(getSchemaForConnector(jobRequest, Direction.FROM));
+    jobRequest.getJobSubmission().setToSchema(getSchemaForConnector(jobRequest, Direction.TO));
 
     LOG.debug("Using entities: " + jobRequest.getFrom() + ", " + jobRequest.getTo());
     return jobRequest;
@@ -531,10 +532,10 @@ public class JobManager implements Reconfigurable {
     }
 
     DestroyerContext fromDestroyerContext = new DestroyerContext(
-      request.getConnectorContext(Direction.FROM), false, request.getSummary()
+      request.getConnectorContext(Direction.FROM), false, request.getJobSubmission()
         .getFromSchema());
     DestroyerContext toDestroyerContext = new DestroyerContext(
-        request.getConnectorContext(Direction.TO), false, request.getSummary()
+        request.getConnectorContext(Direction.TO), false, request.getJobSubmission()
         .getToSchema());
 
     fromDestroyer.destroy(fromDestroyerContext, request.getConnectorLinkConfig(Direction.FROM),
@@ -552,7 +553,7 @@ public class JobManager implements Reconfigurable {
       throw new SqoopException(DriverError.DRIVER_0003, "Job with id " + jobId
           + " is not running hence cannot stop");
     }
-    submissionEngine.stop(mSubmission.getExternalId());
+    submissionEngine.stop(mSubmission.getExternalJobId());
 
     mSubmission.setLastUpdateUser(ctx.getUsername());
 
@@ -581,17 +582,19 @@ public class JobManager implements Reconfigurable {
   private void update(MSubmission submission) {
     double progress = -1;
     Counters counters = null;
-    String externalId = submission.getExternalId();
-    SubmissionStatus newStatus = submissionEngine.status(externalId);
-    String externalLink = submissionEngine.externalLink(externalId);
+    String externalJobId = submission.getExternalJobId();
+    SubmissionStatus newStatus = submissionEngine.status(externalJobId);
+    SubmissionError error = submissionEngine.error(externalJobId);
+    String externalLink = submissionEngine.externalLink(externalJobId);
 
     if (newStatus.isRunning()) {
-      progress = submissionEngine.progress(externalId);
+      progress = submissionEngine.progress(externalJobId);
     } else {
-      counters = submissionEngine.counters(externalId);
+      counters = submissionEngine.counters(externalJobId);
     }
 
     submission.setStatus(newStatus);
+    submission.setError(error);
     submission.setProgress(progress);
     submission.setCounters(counters);
     submission.setExternalLink(externalLink);
