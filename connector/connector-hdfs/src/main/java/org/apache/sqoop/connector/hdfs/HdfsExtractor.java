@@ -52,7 +52,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   @Override
   public void extract(ExtractorContext context, LinkConfiguration linkConfiguration,
-      FromJobConfiguration jobConfig, HdfsPartition partition) {
+      FromJobConfiguration jobConfiguration, HdfsPartition partition) {
 
     conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
     dataWriter = context.getDataWriter();
@@ -62,14 +62,16 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
       LOG.info("Working on partition: " + p);
       int numFiles = p.getNumberOfFiles();
       for (int i = 0; i < numFiles; i++) {
-        extractFile(p.getFile(i), p.getOffset(i), p.getLength(i));
+        extractFile(linkConfiguration, jobConfiguration, p.getFile(i), p.getOffset(i), p.getLength(i));
       }
     } catch (IOException e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0001, e);
     }
   }
 
-  private void extractFile(Path file, long start, long length)
+  private void extractFile(LinkConfiguration linkConfiguration,
+                           FromJobConfiguration fromJobCOnfiguration,
+                           Path file, long start, long length)
       throws IOException {
     long end = start + length;
     LOG.info("Extracting file " + file);
@@ -77,9 +79,9 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     LOG.info("\t to offset " + end);
     LOG.info("\t of length " + length);
     if(isSequenceFile(file)) {
-      extractSequenceFile(file, start, length);
+      extractSequenceFile(linkConfiguration, fromJobCOnfiguration, file, start, length);
     } else {
-      extractTextFile(file, start, length);
+      extractTextFile(linkConfiguration, fromJobCOnfiguration, file, start, length);
     }
   }
 
@@ -91,7 +93,9 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
    * @throws IOException
    */
   @SuppressWarnings("deprecation")
-  private void extractSequenceFile(Path file, long start, long length)
+  private void extractSequenceFile(LinkConfiguration linkConfiguration,
+                                   FromJobConfiguration fromJobConfiguration,
+                                   Path file, long start, long length)
       throws IOException {
     LOG.info("Extracting sequence file");
     long end = start + length;
@@ -106,7 +110,11 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     boolean hasNext = filereader.next(line);
     while (hasNext) {
       rowRead++;
-      dataWriter.writeStringRecord(line.toString());
+      if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
+        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
+      } else {
+        dataWriter.writeStringRecord(line.toString());
+      }
       line = new Text();
       hasNext = filereader.next(line);
       if (filereader.getPosition() >= end && filereader.syncSeen()) {
@@ -124,7 +132,9 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
    * @throws IOException
    */
   @SuppressWarnings("resource")
-  private void extractTextFile(Path file, long start, long length)
+  private void extractTextFile(LinkConfiguration linkConfiguration,
+                               FromJobConfiguration fromJobConfiguration,
+                               Path file, long start, long length)
       throws IOException {
     LOG.info("Extracting text file");
     long end = start + length;
@@ -167,7 +177,11 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
         next = fileseeker.getPos();
       }
       rowRead++;
-      dataWriter.writeStringRecord(line.toString());
+      if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
+        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
+      } else {
+        dataWriter.writeStringRecord(line.toString());
+      }
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
     filestream.close();

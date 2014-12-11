@@ -48,10 +48,17 @@ public class TestHdfsBase {
     return new HdfsPartition(paths, offsets, lengths, locations);
   }
 
+  protected String formatRow(String format, int index) {
+    String row = format.replaceAll("\\%s", "'" + index + "'");
+    row = row.replaceAll("\\%d", Integer.toString(index));
+    return row.replaceAll("\\%f", Double.toString((double)index));
+  }
+
   protected void createTextInput(String indir,
                                 Class<? extends CompressionCodec> clz,
                                 int numberOfFiles,
-                                int numberOfRows)
+                                int numberOfRows,
+                                String format)
       throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
 
@@ -80,8 +87,7 @@ public class TestHdfsBase {
       }
 
       for (int ri = 0; ri < numberOfRows; ri++) {
-        String row = index + "," + (double)index + ",'" + index + "'";
-        filewriter.write(row + HdfsConstants.DEFAULT_RECORD_DELIMITER);
+        filewriter.write(formatRow(format, index) + HdfsConstants.DEFAULT_RECORD_DELIMITER);
         index++;
       }
 
@@ -89,10 +95,19 @@ public class TestHdfsBase {
     }
   }
 
+  protected void createTextInput(String indir,
+                                 Class<? extends CompressionCodec> clz,
+                                 int numberOfFiles,
+                                 int numberOfRows)
+      throws IOException, InstantiationException, IllegalAccessException {
+    createTextInput(indir, clz, numberOfFiles, numberOfRows, "%d,%f,%s");
+  }
+
   protected void createSequenceInput(String indir,
                                     Class<? extends CompressionCodec> clz,
                                     int numberOfFiles,
-                                    int numberOfRows)
+                                    int numberOfRows,
+                                    String format)
       throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
 
@@ -119,13 +134,20 @@ public class TestHdfsBase {
 
       Text text = new Text();
       for (int ri = 0; ri < numberOfRows; ri++) {
-        String row = index + "," + (double)index + ",'" + index + "'";
-        text.set(row);
+        text.set(formatRow(format, index));
         filewriter.append(text, NullWritable.get());
         index++;
       }
 
       filewriter.close();
     }
+  }
+
+  protected void createSequenceInput(String indir,
+                                     Class<? extends CompressionCodec> clz,
+                                     int numberOfFiles,
+                                     int numberOfRows)
+      throws IOException, InstantiationException, IllegalAccessException {
+    createSequenceInput(indir, clz, numberOfFiles, numberOfRows, "%d,%f,%s");
   }
 }

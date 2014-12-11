@@ -143,7 +143,64 @@ public class TestLoader extends TestHdfsBase {
     Assert.assertEquals(5, fs.listStatus(outputPath).length);
   }
 
-  private void verifyOutput(FileSystem fs, Path file) throws IOException {
+  @Test
+  public void testOverrideNull() throws Exception {
+    FileSystem fs = FileSystem.get(new Configuration());
+
+    Configuration conf = new Configuration();
+    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
+    LoaderContext context = new LoaderContext(prefixContext, new DataReader() {
+      private long index = 0L;
+
+      @Override
+      public Object[] readArrayRecord() {
+        if (index++ < NUMBER_OF_ROWS_PER_FILE) {
+          return new Object[]{
+              index,
+              (double)index,
+              null,
+              "'" + index + "'"
+          };
+        } else {
+          return null;
+        }
+      }
+
+      @Override
+      public String readTextRecord() {
+        throw new AssertionError("should not be at readTextRecord");
+      }
+
+      @Override
+      public Object readContent() {
+        throw new AssertionError("should not be at readContent");
+      }
+    }, null);
+    LinkConfiguration linkConf = new LinkConfiguration();
+    ToJobConfiguration jobConf = new ToJobConfiguration();
+    jobConf.toJobConfig.outputDirectory = outputDirectory;
+    jobConf.toJobConfig.compression = compression;
+    jobConf.toJobConfig.outputFormat = outputFormat;
+    jobConf.toJobConfig.overrideNullValue = true;
+    jobConf.toJobConfig.nullValue = "\\N";
+    Path outputPath = new Path(outputDirectory);
+
+    loader.load(context, linkConf, jobConf);
+    Assert.assertEquals(1, fs.listStatus(outputPath).length);
+
+    for (FileStatus status : fs.listStatus(outputPath)) {
+      verifyOutput(fs, status.getPath(), "%d,%f,\\N,%s");
+    }
+
+    loader.load(context, linkConf, jobConf);
+    Assert.assertEquals(2, fs.listStatus(outputPath).length);
+    loader.load(context, linkConf, jobConf);
+    loader.load(context, linkConf, jobConf);
+    loader.load(context, linkConf, jobConf);
+    Assert.assertEquals(5, fs.listStatus(outputPath).length);
+  }
+
+  private void verifyOutput(FileSystem fs, Path file, String format) throws IOException {
     Configuration conf = new Configuration();
     FSDataInputStream fsin = fs.open(file);
     CompressionCodec codec;
@@ -181,7 +238,7 @@ public class TestLoader extends TestHdfsBase {
         BufferedReader textReader = new BufferedReader(in);
 
         for (int i = 1; i <= NUMBER_OF_ROWS_PER_FILE; ++i) {
-          Assert.assertEquals(i + "," + (double)i + ",'" + i + "'", textReader.readLine());
+          Assert.assertEquals(formatRow(format, i), textReader.readLine());
         }
         break;
 
@@ -208,10 +265,14 @@ public class TestLoader extends TestHdfsBase {
         Text line = new Text();
         int index = 1;
         while (sequenceReader.next(line)) {
-          Assert.assertEquals(index + "," + (double)index + ",'" + index++ + "'", line.toString());
+          Assert.assertEquals(formatRow(format, index++), line.toString());
           line = new Text();
         }
         break;
     }
+  }
+
+  private void verifyOutput(FileSystem fs, Path file) throws IOException {
+    verifyOutput(fs, file, "%d,%f,%s");
   }
 }

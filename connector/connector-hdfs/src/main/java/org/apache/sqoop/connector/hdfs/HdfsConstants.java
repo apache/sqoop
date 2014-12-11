@@ -26,6 +26,8 @@ public final class HdfsConstants extends Constants {
   public static final String RESOURCE_BUNDLE_NAME =
           "hdfs-connector-config";
 
+  public static final char DEFAULT_FIELD_DELIMITER = ',';
+
   public static final char DEFAULT_RECORD_DELIMITER = '\n';
 
 }

@@ -81,10 +81,18 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
       filewriter.initialize(filepath,conf,codec);
 
-      String csv;
+      if (HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig)) {
+        Object[] record;
 
-      while ((csv = reader.readTextRecord()) != null) {
-        filewriter.write(csv);
+        while ((record = reader.readArrayRecord()) != null) {
+          filewriter.write(HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record));
+        }
+      } else {
+        String record;
+
+        while ((record = reader.readTextRecord()) != null) {
+          filewriter.write(record);
+        }
       }
       filewriter.destroy();
 

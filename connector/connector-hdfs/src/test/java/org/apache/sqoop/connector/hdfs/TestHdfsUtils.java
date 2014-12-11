@@ -18,11 +18,12 @@
 package org.apache.sqoop.connector.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 public class TestHdfsUtils {
 
@@ -40,5 +41,45 @@ public class TestHdfsUtils {
     assertEquals(conf, HdfsUtils.configureURI(conf, linkConfiguration));
     assertEquals(TEST_URI, conf.get("fs.default.name"));
     assertEquals(TEST_URI, conf.get("fs.defaultFS"));
+  }
+
+  @Test
+   public void testIsModifiable() throws Exception {
+    LinkConfiguration linkConfiguration = new LinkConfiguration();
+    FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();
+    ToJobConfiguration toJobConfiguration = new ToJobConfiguration();
+
+    // No configuration
+    assertFalse(HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration));
+    assertFalse(HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfiguration));
+
+    // Without override
+    fromJobConfiguration.fromJobConfig.nullValue = "\0";
+    toJobConfiguration.toJobConfig.nullValue = "\0";
+    assertFalse(HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration));
+    assertFalse(HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfiguration));
+
+    // With override
+    fromJobConfiguration.fromJobConfig.overrideNullValue = true;
+    toJobConfiguration.toJobConfig.overrideNullValue = true;
+    assertTrue(HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration));
+    assertTrue(HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfiguration));
+  }
+
+  @Test
+  public void testTransformRecord() throws Exception {
+    LinkConfiguration linkConfiguration = new LinkConfiguration();
+    FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();
+    ToJobConfiguration toJobConfiguration = new ToJobConfiguration();
+    final String record = "'Abe',\0,'test'";
+    final Object[] arrayRecord = new Object[]{
+      "'Abe'",
+      "\0",
+      "'test'"
+    };
+
+    // No transformations
+    assertArrayEquals(arrayRecord, HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, record));
+    assertEquals(record, HdfsUtils.formatRecord(linkConfiguration, toJobConfiguration, arrayRecord));
   }
 }

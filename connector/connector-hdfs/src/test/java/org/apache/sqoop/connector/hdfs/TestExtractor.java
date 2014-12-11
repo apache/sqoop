@@ -79,11 +79,11 @@ public class TestExtractor extends TestHdfsBase {
     FileUtils.mkdirs(inputDirectory);
     switch (this.outputFileType) {
       case TEXT_FILE:
-        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE);
+        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
         break;
 
       case SEQUENCE_FILE:
-        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE);
+        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
         break;
     }
   }
@@ -108,10 +108,10 @@ public class TestExtractor extends TestHdfsBase {
       public void writeStringRecord(String text) {
         int index;
         String[] components = text.split(",");
-        Assert.assertEquals(3, components.length);
+        Assert.assertEquals(5, components.length);
 
-        // Value should take on the form <integer>,<float>,'<integer>'
-        // for a single index. IE: 1,1.0,'1'.
+        // Value should take on the form <integer>,<float>,NULL,'<integer>'
+        // for a single index. IE: 1,1.0,NULL,'1'.
         try {
           index = Integer.parseInt(components[0]);
         } catch (NumberFormatException e) {
@@ -119,8 +119,10 @@ public class TestExtractor extends TestHdfsBase {
         }
 
         Assert.assertFalse(visited[index - 1]);
-        Assert.assertEquals(String.valueOf((double)index), components[1]);
-        Assert.assertEquals("'" + index + "'", components[2]);
+        Assert.assertEquals(String.valueOf((double) index), components[1]);
+        Assert.assertEquals("NULL", components[2]);
+        Assert.assertEquals("'" + index + "'", components[3]);
+        Assert.assertEquals("\\N", components[4]);
 
         visited[index - 1] = true;
       }
@@ -136,6 +138,59 @@ public class TestExtractor extends TestHdfsBase {
     HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));
 
     extractor.extract(context, emptyLinkConfig, emptyJobConfig, partition);
+
+    for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
+      Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+    }
+  }
+
+  @Test
+  public void testOverrideNull() throws Exception {
+    Configuration conf = new Configuration();
+    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
+    final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
+    ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
+      @Override
+      public void writeArrayRecord(Object[] array) {
+        int index;
+        Assert.assertEquals(5, array.length);
+
+        // Value should take on the form <integer>,<float>,NULL,'<integer>'
+        // for a single index. IE: 1,1.0,NULL,'1'.
+        try {
+          index = Integer.parseInt(array[0].toString());
+        } catch (NumberFormatException e) {
+          throw new AssertionError("Could not parse int for " + array[0]);
+        }
+
+        Assert.assertFalse(visited[index - 1]);
+        Assert.assertEquals(String.valueOf((double) index), array[1]);
+        Assert.assertEquals("NULL", array[2]);
+        Assert.assertEquals("'" + index + "'", array[3]);
+        Assert.assertNull(array[4]);
+
+        visited[index - 1] = true;
+      }
+
+      @Override
+      public void writeStringRecord(String text) {
+        throw new AssertionError("Should not be writing string.");
+      }
+
+      @Override
+      public void writeRecord(Object obj) {
+        throw new AssertionError("Should not be writing object.");
+      }
+    }, null);
+
+    LinkConfiguration emptyLinkConfig = new LinkConfiguration();
+    FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();
+    fromJobConfiguration.fromJobConfig.overrideNullValue = true;
+    // Should skip "NULL" values
+    fromJobConfiguration.fromJobConfig.nullValue = "\\N";
+    HdfsPartition partition = createPartition(FileUtils.listDir(inputDirectory));
+
+    extractor.extract(context, emptyLinkConfig, fromJobConfiguration, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
       Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);

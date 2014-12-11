@@ -29,4 +29,8 @@ import org.apache.sqoop.validation.validators.NotEmpty;
 public class FromJobConfig {
 
   @Input(size = 255, validators = { @Validator(NotEmpty.class) }) public String inputDirectory;
+
+  @Input(size = 255) public Boolean overrideNullValue;
+
+  @Input(size = 255) public String nullValue;
 }
