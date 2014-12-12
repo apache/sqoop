@@ -192,9 +192,10 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
     with open(output_file) as fh:
       output = fh.read()
   if rc == 0:
-    result.success("Patch applied correctly")
     if output:
-      print output
+      result.success("Patch applied, but there has been warnings:\n{code}%s{code}\n" % (output))
+    else:
+      result.success("Patch applied correctly")
   else:
     result.fatal("failed to apply patch (exit code %d):\n{code}%s{code}\n" % (rc, output))
 
