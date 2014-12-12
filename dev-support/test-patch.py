@@ -214,6 +214,13 @@ def mvn_clean(result, output_dir):
   else:
     result.fatal("failed to clean project (exit code %d)" % (rc))
 
+def mvn_rat(result, output_dir):
+  rc = execute("mvn apache-rat:check 1>%s/rat.txt 2>&1" % output_dir)
+  if rc == 0:
+    result.success("License check passed")
+  else:
+    result.fatal("Failed to run license check (exit code %d)" % (rc))
+
 def mvn_install(result, output_dir):
   rc = execute("mvn install -DskipTests 1>%s/install.txt 2>&1" % output_dir)
   if rc == 0:
@@ -417,6 +424,7 @@ mvn_clean(result, output_dir)
 git_checkout(result, branch)
 git_apply(result, patch_cmd, patch_file, strip, output_dir)
 static_test(result, patch_file, output_dir)
+mvn_rat(result, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
   mvn_test(result, output_dir)
