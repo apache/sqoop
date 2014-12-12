@@ -67,7 +67,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   public static final char ESCAPE_CHARACTER = '\\';
   public static final char QUOTE_CHARACTER = '\'';
 
-  public static final String NULL_STRING = "NULL";
+  public static final String NULL_VALUE = "NULL";
 
   private static final char[] originals = {
     0x5C,0x00,0x0A,0x0D,0x1A,0x22,0x27
@@ -249,7 +249,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     Column[] columnArray = schema.getColumns().toArray(new Column[fieldStringArray.length]);
     for (int i = 0; i < fieldStringArray.length; i++) {
       // check for NULL field and bail out immediately
-      if (fieldStringArray[i].equals("NULL")) {
+      if (fieldStringArray[i].equals(NULL_VALUE)) {
         objectArray[i] = null;
         continue;
       }
@@ -410,8 +410,17 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    */
   @Override
   public void setObjectData(Object[] data) {
+   Set<Integer> nullValueIndices = new HashSet<Integer>();
     Column[] columnArray = schema.getColumns().toArray(new Column[data.length]);
-    encodeCSVStringElements(data, columnArray);
+    // check for null
+    for (int i = 0; i < data.length; i++) {
+      if (data[i] == null) {
+        nullValueIndices.add(i);
+        data[i] = NULL_VALUE;
+      }
+    }
+    // ignore the null values while encoding the object array into csv string
+    encodeCSVStringElements(data, columnArray, nullValueIndices);
     this.data = StringUtils.join(data, SEPARATOR_CHARACTER);
   }
 
@@ -465,49 +474,66 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * @param objectArray
    */
   @SuppressWarnings("unchecked")
-  private void encodeCSVStringElements(Object[] objectArray, Column[] columnArray) {
+  private void encodeCSVStringElements(Object[] objectArray, Column[] columnArray, Set<Integer> nullValueIndices) {
     for (int i : bitTypeColumnIndices) {
-      String bitStringValue = objectArray[i].toString();
-      if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
-        objectArray[i] = bitStringValue;
-      } else {
-        throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + objectArray[i]);
+      if (!nullValueIndices.contains(i)) {
+        String bitStringValue = objectArray[i].toString();
+        if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
+          objectArray[i] = bitStringValue;
+        } else {
+          throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: "
+              + objectArray[i]);
+        }
       }
     }
     for (int i : stringTypeColumnIndices) {
-      objectArray[i] = escapeString((String) objectArray[i]);
+      if (!nullValueIndices.contains(i)) {
+        objectArray[i] = escapeString((String) objectArray[i]);
+      }
     }
     for (int i : dateTimeTypeColumnIndices) {
-      Column col = columnArray[i];
-      if (objectArray[i] instanceof org.joda.time.DateTime) {
-        org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
-        // check for fraction and time zone and then use the right formatter
-        formatDateTime(objectArray, i, col, dateTime);
-      } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
-        org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
-        formatLocalDateTime(objectArray, i, col, localDateTime);
+      if (!nullValueIndices.contains(i)) {
+        Column col = columnArray[i];
+        if (objectArray[i] instanceof org.joda.time.DateTime) {
+          org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
+          // check for fraction and time zone and then use the right formatter
+          formatDateTime(objectArray, i, col, dateTime);
+        } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
+          org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
+          formatLocalDateTime(objectArray, i, col, localDateTime);
+        }
       }
     }
     for (int i : dateTypeColumnIndices) {
-      org.joda.time.LocalDate date = (org.joda.time.LocalDate) objectArray[i];
-      objectArray[i] = encloseWithQuote(df.print(date));
+      if (!nullValueIndices.contains(i)) {
+        org.joda.time.LocalDate date = (org.joda.time.LocalDate) objectArray[i];
+        objectArray[i] = encloseWithQuote(df.print(date));
+      }
     }
     for (int i : timeColumnIndices) {
       Column col = columnArray[i];
-      if (((org.apache.sqoop.schema.type.Time) col).hasFraction()) {
-        objectArray[i] = encloseWithQuote(tfWithFraction.print((org.joda.time.LocalTime) objectArray[i]));
-      } else {
-        objectArray[i] = encloseWithQuote(tfWithNoFraction.print((org.joda.time.LocalTime) objectArray[i]));
+      if (!nullValueIndices.contains(i)) {
+        if (((org.apache.sqoop.schema.type.Time) col).hasFraction()) {
+          objectArray[i] = encloseWithQuote(tfWithFraction.print((org.joda.time.LocalTime) objectArray[i]));
+        } else {
+          objectArray[i] = encloseWithQuote(tfWithNoFraction.print((org.joda.time.LocalTime) objectArray[i]));
+        }
       }
     }
     for (int i : byteTypeColumnIndices) {
-      objectArray[i] = escapeByteArrays((byte[]) objectArray[i]);
+      if (!nullValueIndices.contains(i)) {
+        objectArray[i] = escapeByteArrays((byte[]) objectArray[i]);
+      }
     }
     for (int i : listTypeColumnIndices) {
-      objectArray[i] = encodeList((Object[]) objectArray[i], columnArray[i]);
+      if (!nullValueIndices.contains(i)) {
+        objectArray[i] = encodeList((Object[]) objectArray[i], columnArray[i]);
+      }
     }
     for (int i : mapTypeColumnIndices) {
-      objectArray[i] = encodeMap((Map<Object, Object>) objectArray[i], columnArray[i]);
+      if (!nullValueIndices.contains(i)) {
+        objectArray[i] = encodeMap((Map<Object, Object>) objectArray[i], columnArray[i]);
+      }
     }
   }
 
@@ -562,8 +588,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   private boolean isColumnStringType(Column stringType) {
-    return stringType.getType().equals(ColumnType.TEXT)
-        || stringType.getType().equals(ColumnType.ENUM);
+    return stringType.getType().equals(ColumnType.TEXT) || stringType.getType().equals(ColumnType.ENUM);
   }
 
   private String escapeByteArrays(byte[] bytes) {
@@ -586,10 +611,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   private String escapeString(String orig) {
-    if (orig == null) {
-      return NULL_STRING;
-    }
-
     int j = 0;
     String replacement = orig;
     try {

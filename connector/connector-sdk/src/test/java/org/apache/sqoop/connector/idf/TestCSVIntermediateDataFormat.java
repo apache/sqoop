@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -39,6 +40,7 @@ import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
 import org.apache.sqoop.schema.type.Date;
 import org.apache.sqoop.schema.type.DateTime;
+import org.apache.sqoop.schema.type.Decimal;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
@@ -83,18 +85,106 @@ public class TestCSVIntermediateDataFormat {
     assertNull(out);
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expected = SqoopException.class)
   public void testEmptyInputAsCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1"))
-        .addColumn(new FixedPoint("2"))
-        .addColumn(new Text("3"))
-        .addColumn(new Text("4"))
-        .addColumn(new Binary("5"))
-        .addColumn(new Text("6"));
+    schema.addColumn(new FixedPoint("1")).addColumn(new FixedPoint("2")).addColumn(new Text("3")).addColumn(new Text("4"))
+        .addColumn(new Binary("5")).addColumn(new Text("6"));
     dataFormat.setSchema(schema);
     dataFormat.setCSVTextData("");
     dataFormat.getObjectData();
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new Decimal("2")).addColumn(new Text("3"))
+        .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
+        .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
+        .addColumn(new org.apache.sqoop.schema.type.Time("9", false)).addColumn(new org.apache.sqoop.schema.type.Date("10"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("11"))
+        .addColumn(new org.apache.sqoop.schema.type.Set("12", new Text("t4")))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("13")).addColumn(new org.apache.sqoop.schema.type.Unknown("14"));
+
+    dataFormat.setSchema(schema);
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null, null };
+    dataFormat.setObjectData(in);
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    for (String text : textValues) {
+      assertEquals(text, CSVIntermediateDataFormat.NULL_VALUE);
+    }
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new Decimal("2")).addColumn(new Text("3"))
+        .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
+        .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
+        .addColumn(new org.apache.sqoop.schema.type.Time("9", false)).addColumn(new org.apache.sqoop.schema.type.Date("10"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("11"))
+        .addColumn(new org.apache.sqoop.schema.type.Set("12", new Text("t4")))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("13")).addColumn(new org.apache.sqoop.schema.type.Unknown("14"));
+
+    dataFormat.setSchema(schema);
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null, null };
+    dataFormat.setObjectData(in);
+
+    Object[] out = dataFormat.getObjectData();
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndObjectArrayOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new Decimal("2")).addColumn(new Text("3"))
+        .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
+        .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
+        .addColumn(new org.apache.sqoop.schema.type.Time("9", false)).addColumn(new org.apache.sqoop.schema.type.Date("10"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("11"))
+        .addColumn(new org.apache.sqoop.schema.type.Set("12", new Text("t4")))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("13")).addColumn(new org.apache.sqoop.schema.type.Unknown("14"));
+
+    dataFormat.setSchema(schema);
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+
+    Object[] out = dataFormat.getObjectData();
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndCSVTextOut() {
+    Schema schema = new Schema("test");
+    schema.addColumn(new FixedPoint("1")).addColumn(new Decimal("2")).addColumn(new Text("3"))
+        .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
+        .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
+        .addColumn(new org.apache.sqoop.schema.type.Time("9", false)).addColumn(new org.apache.sqoop.schema.type.Date("10"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("11"))
+        .addColumn(new org.apache.sqoop.schema.type.Set("12", new Text("t4")))
+        .addColumn(new org.apache.sqoop.schema.type.Enum("13")).addColumn(new org.apache.sqoop.schema.type.Unknown("14"));
+
+    dataFormat.setSchema(schema);
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    for (String text : textValues) {
+      assertEquals(text, CSVIntermediateDataFormat.NULL_VALUE);
+    }
   }
 
   //**************test cases for primitive types( text, number, bytearray)*******************
