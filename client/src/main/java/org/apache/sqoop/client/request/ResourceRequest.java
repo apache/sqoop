@@ -111,6 +111,17 @@ public class ResourceRequest {
           ex.restore(json);
 
           throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());
+        } else {
+          result = new StringBuilder();
+          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+          String line;
+          while ((line = reader.readLine()) != null) {
+            result.append(line);
+            result.append('\n');
+          }
+          reader.close();
+
+          throw new SqoopException(ClientError.CLIENT_0001, result.toString());
         }
       } else {
         throw new SqoopException(ClientError.CLIENT_0000);
