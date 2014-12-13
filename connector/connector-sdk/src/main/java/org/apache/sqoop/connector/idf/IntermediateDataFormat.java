@@ -23,6 +23,8 @@ import org.apache.sqoop.schema.Schema;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Abstract class representing a pluggable intermediate data format Sqoop
@@ -133,4 +135,13 @@ public abstract class IntermediateDataFormat<T> {
    * @throws IOException
    */
   public abstract void read(DataInput in) throws IOException;
+
+  /**
+   * Provide the external jars that the IDF depends on
+   * @return list of jars
+   */
+  public List<String> getJars() {
+    return new LinkedList<String>();
+  }
+
 }

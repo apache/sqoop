@@ -23,10 +23,24 @@ import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
+import org.apache.sqoop.utils.ClassUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -381,4 +395,22 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   public String toString() {
     return data;
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<String> getJars() {
+
+    List<String> jars = super.getJars();
+    // Add JODA classes for IDF date/time handling
+    jars.add(ClassUtils.jarForClass(LocalDate.class));
+    jars.add(ClassUtils.jarForClass(LocalDateTime.class));
+    jars.add(ClassUtils.jarForClass(DateTime.class));
+    jars.add(ClassUtils.jarForClass(LocalTime.class));
+    // Add JSON parsing jar
+    jars.add(ClassUtils.jarForClass(JSONValue.class));
+    return jars;
+  }
+
 }

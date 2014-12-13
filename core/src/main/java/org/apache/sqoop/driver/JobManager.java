@@ -48,11 +48,6 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.utils.ClassUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.json.simple.JSONValue;
 
 public class JobManager implements Reconfigurable {
   /**
@@ -291,8 +286,6 @@ public class JobManager implements Reconfigurable {
       // NOTE: the following is a blocking call
       boolean success = submissionEngine.submit(jobRequest);
       if (!success) {
-        // TODO(jarcec): We might need to catch all exceptions here to ensure
-        // that Destroyer will be executed in all cases.
         invokeDestroyerOnJobFailure(jobRequest);
         mSubmission.setStatus(SubmissionStatus.FAILURE_ON_SUBMIT);
       }
@@ -359,7 +352,7 @@ public class JobManager implements Reconfigurable {
     jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
     Class<? extends IntermediateDataFormat<?>> dataFormatClass = fromConnector
         .getIntermediateDataFormat();
-    jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat());
+    jobRequest.setIntermediateDataFormat(dataFormatClass);
 
     jobRequest.setFrom(fromConnector.getFrom());
     jobRequest.setTo(toConnector.getTo());
@@ -369,6 +362,7 @@ public class JobManager implements Reconfigurable {
     addConnectorJars(jobRequest, fromConnector, toConnector, dataFormatClass);
     addConnectorInitializerJars(jobRequest, Direction.FROM);
     addConnectorInitializerJars(jobRequest, Direction.TO);
+    addIDFJars(jobRequest);
 
     // call the intialize method
     initializeConnector(jobRequest, Direction.FROM);
@@ -398,13 +392,6 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(SqoopConnector.class);
     // Execution engine jar
     jobRequest.addJarForClass(executionEngine.getClass());
-    // Extra libraries that Sqoop code requires
-    jobRequest.addJarForClass(JSONValue.class);
-    // Add JODA classes for IDF date/time handling
-    jobRequest.addJarForClass(LocalDate.class);
-    jobRequest.addJarForClass(LocalDateTime.class);
-    jobRequest.addJarForClass(DateTime.class);
-    jobRequest.addJarForClass(LocalTime.class);
   }
 
   MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
@@ -466,6 +453,14 @@ public class JobManager implements Reconfigurable {
 
     return initializer.getSchema(initializerContext, jobRequest.getConnectorLinkConfig(direction),
         jobRequest.getJobConfig(direction));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  // TODO:SQOOP-1882 , should add the FROM and TO connector IDF jars
+  private void addIDFJars(JobRequest jobRequest) {
+    Class<? extends IntermediateDataFormat> idfClass = jobRequest.getIntermediateDataFormat();
+    IntermediateDataFormat idf = (IntermediateDataFormat) ClassUtils.instantiate(idfClass);
+    jobRequest.addJars(idf.getJars());
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
