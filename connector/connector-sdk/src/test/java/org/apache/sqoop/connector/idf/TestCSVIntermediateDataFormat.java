@@ -22,8 +22,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
+import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,16 +58,6 @@ public class TestCSVIntermediateDataFormat {
     dataFormat = new CSVIntermediateDataFormat();
   }
 
-  private String getByteFieldString(byte[] byteFieldData) {
-    try {
-      return new StringBuilder("'")
-          .append(new String(byteFieldData, CSVIntermediateDataFormat.BYTE_FIELD_CHARSET))
-          .append("'").toString();
-    } catch (UnsupportedEncodingException e) {
-      // Should never get to this point because ISO-8859-1 is a standard codec.
-      return null;
-    }
-  }
 
   //**************test cases for null and empty input*******************
 
@@ -114,7 +105,7 @@ public class TestCSVIntermediateDataFormat {
     String csvText = dataFormat.getCSVTextData();
     String[] textValues = csvText.split(",");
     for (String text : textValues) {
-      assertEquals(text, CSVIntermediateDataFormat.NULL_VALUE);
+      assertEquals(text, NULL_VALUE);
     }
   }
 
@@ -183,7 +174,7 @@ public class TestCSVIntermediateDataFormat {
     String csvText = dataFormat.getCSVTextData();
     String[] textValues = csvText.split(",");
     for (String text : textValues) {
-      assertEquals(text, CSVIntermediateDataFormat.NULL_VALUE);
+      assertEquals(text, NULL_VALUE);
     }
   }
 
@@ -252,8 +243,8 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
-    String testData = "10,34,'54','random data'," +
-        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
+    String testData = "10,34,'54','random data'," + getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r")
+        + ",'\\n','TEST_ENUM'";
     assertEquals(testData, dataFormat.getCSVTextData());
   }
 
@@ -315,8 +306,8 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setObjectData(in);
 
     //byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
-    String testData = "10,34,NULL,'random data'," +
-        getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r") + ",'\\n','TEST_ENUM'";
+    String testData = "10,34,NULL,'random data'," + getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r")
+        + ",'\\n','TEST_ENUM'";
     assertEquals(testData, dataFormat.getCSVTextData());
   }
 
@@ -521,7 +512,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setSchema(schema);
     // current date time
     org.joda.time.DateTime dateTime = new org.joda.time.DateTime();
-    String dateTimeString = CSVIntermediateDataFormat.dtfWithFractionNoTimeZone.print(dateTime);
+    String dateTimeString = dtfWithFractionNoTimeZone.print(dateTime);
     dataFormat.setCSVTextData("'" + dateTimeString + "'");
     assertEquals(dateTimeString.replace(" ", "T"), dataFormat.getObjectData()[0].toString());
   }

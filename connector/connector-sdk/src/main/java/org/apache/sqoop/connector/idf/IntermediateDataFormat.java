@@ -67,7 +67,7 @@ public abstract class IntermediateDataFormat<T> {
     this.data = data;
   }
   /**
-   * Get one row of data as CSV text. Use SqoopDataUtils for reading and writing
+   * Get one row of data as CSV text. Use {@link #SqoopIDFUtils} for reading and writing
    * into the sqoop specified CSV text format for each {@link #ColumnType} field in the row
    * Why a "native" internal format and then return CSV text too?
    * Imagine a connector that moves data from a system that stores data as a
@@ -93,7 +93,7 @@ public abstract class IntermediateDataFormat<T> {
 
   /**
    * Get one row of data as an Object array. Sqoop uses defined object representation
-   * for each column type. For instance org.joda.time to represent date.Use SqoopDataUtils
+   * for each column type. For instance org.joda.time to represent date.Use {@link #SqoopIDFUtils}
    * for reading and writing into the sqoop specified object format
    * for each {@link #ColumnType} field in the row
    * </p>
