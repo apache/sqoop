@@ -27,8 +27,10 @@ import org.apache.sqoop.job.etl.Transferable;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Submission details class is used when creating new submission and contains
@@ -111,9 +113,14 @@ public class JobRequest {
   Integer loaders;
 
   /**
-   * The intermediate data format this submission should use.
+   * The intermediate data format this submission should use to read/extract.
    */
-  Class<? extends IntermediateDataFormat> intermediateDataFormat;
+  Class<? extends IntermediateDataFormat<?>> fromIDF;
+
+  /**
+   * The intermediate data format this submission should use to write/load.
+   */
+  Class<? extends IntermediateDataFormat<?>> toIDF;
 
   public JobRequest() {
     this.jars = new LinkedList<String>();
@@ -191,7 +198,7 @@ public class JobRequest {
     }
   }
 
-  public void addJarForClass(Class klass) {
+  public void addJarForClass(Class<?> klass) {
     addJar(ClassUtils.jarForClass(klass));
   }
 
@@ -318,12 +325,16 @@ public class JobRequest {
     this.loaders = loaders;
   }
 
-  public Class<? extends IntermediateDataFormat> getIntermediateDataFormat() {
-    return intermediateDataFormat;
+  public Class<? extends IntermediateDataFormat<?>> getIntermediateDataFormat(Direction direction) {
+    return direction.equals(Direction.FROM) ? fromIDF : toIDF;
   }
 
-  public void setIntermediateDataFormat(Class<? extends IntermediateDataFormat> intermediateDataFormat) {
-    this.intermediateDataFormat = intermediateDataFormat;
+  public void setIntermediateDataFormat(Class<? extends IntermediateDataFormat<? extends Object>> intermediateDataFormat, Direction direction) {
+    if (direction.equals(Direction.FROM)) {
+      fromIDF = intermediateDataFormat;
+    } else if (direction.equals(Direction.TO)) {
+      toIDF = intermediateDataFormat;
+    }
   }
 
 }

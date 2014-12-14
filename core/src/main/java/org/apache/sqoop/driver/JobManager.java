@@ -332,7 +332,6 @@ public class JobManager implements Reconfigurable {
         .instantiate(Driver.getInstance().getDriverJobConfigurationClass());
     ConfigUtils.fromConfigs(job.getDriverConfig().getConfigs(), driverConfig);
 
-
     // Create a job request for submit/execution
     JobRequest jobRequest = executionEngine.createJobRequest();
     // Save important variables to the job request
@@ -350,19 +349,23 @@ public class JobManager implements Reconfigurable {
     jobRequest.setJobName(job.getName());
     jobRequest.setJobId(job.getPersistenceId());
     jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
-    Class<? extends IntermediateDataFormat<?>> dataFormatClass = fromConnector
-        .getIntermediateDataFormat();
-    jobRequest.setIntermediateDataFormat(dataFormatClass);
+    jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat(), Direction.FROM);
+    jobRequest.setIntermediateDataFormat(toConnector.getIntermediateDataFormat(), Direction.TO);
 
     jobRequest.setFrom(fromConnector.getFrom());
     jobRequest.setTo(toConnector.getTo());
 
     // set all the jars
     addStandardJars(jobRequest);
-    addConnectorJars(jobRequest, fromConnector, toConnector, dataFormatClass);
+    addConnectorClass(jobRequest, fromConnector);
+    addConnectorClass(jobRequest, toConnector);
+    addConnectorIDFClass(jobRequest, fromConnector.getIntermediateDataFormat());
+    addConnectorIDFClass(jobRequest, toConnector.getIntermediateDataFormat());
+
     addConnectorInitializerJars(jobRequest, Direction.FROM);
     addConnectorInitializerJars(jobRequest, Direction.TO);
-    addIDFJars(jobRequest);
+    addIDFDependentJars(jobRequest, Direction.FROM);
+    addIDFDependentJars(jobRequest, Direction.TO);
 
     // call the intialize method
     initializeConnector(jobRequest, Direction.FROM);
@@ -375,11 +378,12 @@ public class JobManager implements Reconfigurable {
     return jobRequest;
   }
 
-  private void addConnectorJars(JobRequest jobRequest, SqoopConnector fromConnector,
-      SqoopConnector toConnector, Class<? extends IntermediateDataFormat<?>> dataFormatClass) {
-    jobRequest.addJarForClass(fromConnector.getClass());
-    jobRequest.addJarForClass(toConnector.getClass());
-    jobRequest.addJarForClass(dataFormatClass);
+  private void addConnectorClass(final JobRequest jobRequest, final SqoopConnector connector) {
+    jobRequest.addJarForClass(connector.getClass());
+  }
+
+  private void addConnectorIDFClass(final JobRequest jobRequest, Class<? extends IntermediateDataFormat<?>>  idfClass) {
+    jobRequest.addJarForClass(idfClass);
   }
 
   private void addStandardJars(JobRequest jobRequest) {
@@ -455,11 +459,10 @@ public class JobManager implements Reconfigurable {
         jobRequest.getJobConfig(direction));
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  // TODO:SQOOP-1882 , should add the FROM and TO connector IDF jars
-  private void addIDFJars(JobRequest jobRequest) {
-    Class<? extends IntermediateDataFormat> idfClass = jobRequest.getIntermediateDataFormat();
-    IntermediateDataFormat idf = (IntermediateDataFormat) ClassUtils.instantiate(idfClass);
+  @SuppressWarnings("unchecked")
+  private void addIDFDependentJars(JobRequest jobRequest, Direction direction) {
+    Class<? extends IntermediateDataFormat<?>> idfClass = jobRequest.getIntermediateDataFormat(direction);
+    IntermediateDataFormat<?> idf = ((IntermediateDataFormat<?>) ClassUtils.instantiate(idfClass));
     jobRequest.addJars(idf.getJars());
   }
 

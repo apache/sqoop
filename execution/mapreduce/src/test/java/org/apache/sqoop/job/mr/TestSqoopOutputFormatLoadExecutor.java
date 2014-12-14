@@ -121,7 +121,7 @@ public class TestSqoopOutputFormatLoadExecutor {
   @Before
   public void setUp() {
     conf = new Configuration();
-    conf.setIfUnset(MRJobConstants.INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
+    conf.setIfUnset(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
 
   }
 
@@ -129,7 +129,7 @@ public class TestSqoopOutputFormatLoadExecutor {
   public void testWhenLoaderThrows() throws Throwable {
     conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
-        SqoopOutputFormatLoadExecutor(true, ThrowingLoader.class.getName());
+        SqoopOutputFormatLoadExecutor(true, ThrowingLoader.class.getName(), new CSVIntermediateDataFormat());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
     SqoopWritable writable = new SqoopWritable(dataFormat);
@@ -147,7 +147,7 @@ public class TestSqoopOutputFormatLoadExecutor {
   public void testSuccessfulContinuousLoader() throws Throwable {
     conf.set(MRJobConstants.JOB_ETL_LOADER, GoodContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
-        SqoopOutputFormatLoadExecutor(true, GoodContinuousLoader.class.getName());
+        SqoopOutputFormatLoadExecutor(true, GoodContinuousLoader.class.getName(), new CSVIntermediateDataFormat());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
     SqoopWritable writable = new SqoopWritable(dataFormat);
@@ -168,7 +168,7 @@ public class TestSqoopOutputFormatLoadExecutor {
   @Test (expected = SqoopException.class)
   public void testSuccessfulLoader() throws Throwable {
     SqoopOutputFormatLoadExecutor executor = new
-        SqoopOutputFormatLoadExecutor(true, GoodLoader.class.getName());
+        SqoopOutputFormatLoadExecutor(true, GoodLoader.class.getName(), new CSVIntermediateDataFormat());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
     SqoopWritable writable = new SqoopWritable(dataFormat);
@@ -192,7 +192,7 @@ public class TestSqoopOutputFormatLoadExecutor {
   public void testThrowingContinuousLoader() throws Throwable {
     conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new
-        SqoopOutputFormatLoadExecutor(true, ThrowingContinuousLoader.class.getName());
+        SqoopOutputFormatLoadExecutor(true, ThrowingContinuousLoader.class.getName(), new CSVIntermediateDataFormat());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
     IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
     SqoopWritable writable = new SqoopWritable(dataFormat);

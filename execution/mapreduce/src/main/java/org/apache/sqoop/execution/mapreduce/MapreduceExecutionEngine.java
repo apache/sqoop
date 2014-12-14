@@ -18,6 +18,7 @@
 package org.apache.sqoop.execution.mapreduce;
 
 import org.apache.hadoop.io.NullWritable;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.driver.ExecutionEngine;
 import org.apache.sqoop.driver.JobRequest;
@@ -69,8 +70,10 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     context.setString(MRJobConstants.JOB_ETL_LOADER, to.getLoader().getName());
     context.setString(MRJobConstants.JOB_ETL_FROM_DESTROYER, from.getDestroyer().getName());
     context.setString(MRJobConstants.JOB_ETL_TO_DESTROYER, to.getDestroyer().getName());
-    context.setString(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
-        mrJobRequest.getIntermediateDataFormat().getName());
+    context.setString(MRJobConstants.FROM_INTERMEDIATE_DATA_FORMAT,
+        mrJobRequest.getIntermediateDataFormat(Direction.FROM).getName());
+    context.setString(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT,
+        mrJobRequest.getIntermediateDataFormat(Direction.TO).getName());
 
     if(mrJobRequest.getExtractors() != null) {
       context.setInteger(MRJobConstants.JOB_ETL_EXTRACTOR_NUM, mrJobRequest.getExtractors());

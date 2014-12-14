@@ -128,8 +128,8 @@ public class TestMatching {
     Configuration conf = new Configuration();
     conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
     conf.set(MRJobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
-    conf.set(MRJobConstants.INTERMEDIATE_DATA_FORMAT,
-        CSVIntermediateDataFormat.class.getName());
+    conf.set(MRJobConstants.FROM_INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
+    conf.set(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
 
     Job job = new Job(conf);
     MRConfigurationUtils.setConnectorSchema(Direction.FROM, job, from);

@@ -23,24 +23,16 @@ import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
-import org.apache.sqoop.schema.type.FixedPoint;
-import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.utils.ClassUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -319,20 +311,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     return data.equals(((CSVIntermediateDataFormat) other).data);
   }
 
-  public int compareTo(IntermediateDataFormat<?> o) {
-    if (this == o) {
-      return 0;
-    }
-    if (this.equals(o)) {
-      return 0;
-    }
-    if (!(o instanceof CSVIntermediateDataFormat)) {
-      throw new IllegalStateException("Expected Data to be instance of "
-          + "CSVIntermediateFormat, but was an instance of " + o.getClass().getName());
-    }
-    return data.compareTo(o.getCSVTextData());
-  }
-
  /**
   * Encode to the sqoop prescribed CSV String for every element in the objet array
   * @param objectArray
@@ -390,10 +368,6 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         objectArray[i] = encodeToCSVMap((Map<Object, Object>) objectArray[i], columnArray[i]);
       }
     }
-  }
-
-  public String toString() {
-    return data;
   }
 
   /**

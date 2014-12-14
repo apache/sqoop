@@ -63,10 +63,10 @@ public abstract class IntermediateDataFormat<T> {
    * Set one row of data. If validate is set to true, the data is validated
    * against the schema.
    *
-   * @param data - A single row of data to be moved.
+   * @param obj - A single row of data to be moved.
    */
-  public void setData(T data) {
-    this.data = data;
+  public void setData(T obj) {
+    this.data = obj;
   }
   /**
    * Get one row of data as CSV text. Use {@link #SqoopIDFUtils} for reading and writing

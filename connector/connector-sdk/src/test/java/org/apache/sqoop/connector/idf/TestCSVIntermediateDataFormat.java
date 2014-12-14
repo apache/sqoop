@@ -51,7 +51,7 @@ import org.junit.Test;
 
 public class TestCSVIntermediateDataFormat {
 
-  private IntermediateDataFormat<?> dataFormat;
+  private CSVIntermediateDataFormat dataFormat;
 
   @Before
   public void setUp() {

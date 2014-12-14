@@ -21,7 +21,6 @@ package org.apache.sqoop.job.io;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparable;
-
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.utils.ClassUtils;
@@ -30,8 +29,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * Writable used to load the data to the {@link #Transferable} entity TO
+ */
+
 public class SqoopWritable implements Configurable, WritableComparable<SqoopWritable> {
-  private IntermediateDataFormat<?> dataFormat;
+  private IntermediateDataFormat<?> toIDF;
   private Configuration conf;
 
   public SqoopWritable() {
@@ -39,22 +42,22 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
   }
 
   public SqoopWritable(IntermediateDataFormat<?> dataFormat) {
-    this.dataFormat = dataFormat;
+    this.toIDF = dataFormat;
   }
 
   public void setString(String data) {
-    this.dataFormat.setCSVTextData(data);
+    this.toIDF.setCSVTextData(data);
   }
 
-  public String getString() { return dataFormat.getCSVTextData(); }
+  public String getString() { return toIDF.getCSVTextData(); }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeUTF(dataFormat.getCSVTextData());
+    out.writeUTF(toIDF.getCSVTextData());
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException { dataFormat.setCSVTextData(in.readUTF()); }
+  public void readFields(DataInput in) throws IOException { toIDF.setCSVTextData(in.readUTF()); }
 
   @Override
   public int compareTo(SqoopWritable o) { return getString().compareTo(o.getString()); }
@@ -68,9 +71,9 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
   public void setConf(Configuration conf) {
     this.conf = conf;
 
-    if (dataFormat == null) {
-      String intermediateDataFormatName = conf.get(MRJobConstants.INTERMEDIATE_DATA_FORMAT);
-      this.dataFormat = (IntermediateDataFormat<?>) ClassUtils.instantiate(intermediateDataFormatName);
+    if (toIDF == null) {
+      String toIDFClass = conf.get(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT);
+      this.toIDF = (IntermediateDataFormat<?>) ClassUtils.instantiate(toIDFClass);
     }
   }
 

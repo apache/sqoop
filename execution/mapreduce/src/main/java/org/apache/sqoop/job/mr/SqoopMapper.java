@@ -56,8 +56,8 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
    * Service for reporting progress to mapreduce.
    */
   private final ScheduledExecutorService progressService = Executors.newSingleThreadScheduledExecutor();
-  private IntermediateDataFormat<String> fromDataFormat = null;
-  private IntermediateDataFormat<String> toDataFormat = null;
+  private IntermediateDataFormat<Object> fromIDF = null;
+  private IntermediateDataFormat<Object> toIDF = null;
   private Matcher matcher;
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -72,11 +72,12 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Schema toSchema = MRConfigurationUtils.getConnectorSchema(Direction.TO, conf);
     matcher = MatcherFactory.getMatcher(fromSchema, toSchema);
 
-    String intermediateDataFormatName = conf.get(MRJobConstants.INTERMEDIATE_DATA_FORMAT);
-    fromDataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(intermediateDataFormatName);
-    fromDataFormat.setSchema(matcher.getFromSchema());
-    toDataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(intermediateDataFormatName);
-    toDataFormat.setSchema(matcher.getToSchema());
+    String fromIDFClass = conf.get(MRJobConstants.FROM_INTERMEDIATE_DATA_FORMAT);
+    fromIDF = (IntermediateDataFormat<Object>) ClassUtils.instantiate(fromIDFClass);
+    fromIDF.setSchema(matcher.getFromSchema());
+    String toIDFClass = conf.get(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT);
+    toIDF = (IntermediateDataFormat<Object>) ClassUtils.instantiate(toIDFClass);
+    toIDF.setSchema(matcher.getToSchema());
 
     // Objects that should be passed to the Executor execution
     PrefixContext subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_FROM_CONTEXT);
@@ -107,45 +108,46 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
   }
 
   // There are two IDF objects we carry around in memory during the sqoop job execution.
-  // The fromDataFormat has the fromSchema in it, the toDataFormat has the toSchema in it.
-  // Before we do the writing to the toDatFormat object we do the matching process to negotiate between 
-  // the two schemas and their corresponding column types before we write the data to the toDataFormat object
+  // The fromIDF has the fromSchema in it, the toIDF has the toSchema in it.
+  // Before we do the writing to the toIDF object we do the matching process to negotiate between
+  // the two schemas and their corresponding column types before we write the data to the toIDF object
   private class SqoopMapDataWriter extends DataWriter {
     private Context context;
     private SqoopWritable writable;
 
     public SqoopMapDataWriter(Context context) {
       this.context = context;
-      this.writable = new SqoopWritable(toDataFormat);
+      this.writable = new SqoopWritable(toIDF);
     }
 
     @Override
     public void writeArrayRecord(Object[] array) {
-      fromDataFormat.setObjectData(array);
+      fromIDF.setObjectData(array);
       writeContent();
     }
 
     @Override
     public void writeStringRecord(String text) {
-      fromDataFormat.setCSVTextData(text);
+      fromIDF.setCSVTextData(text);
       writeContent();
     }
 
     @Override
     public void writeRecord(Object obj) {
-      fromDataFormat.setData(obj.toString());
+      fromIDF.setData(obj);
       writeContent();
     }
 
     private void writeContent() {
       try {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Extracted data: " + fromDataFormat.getCSVTextData());
+          LOG.debug("Extracted data: " + fromIDF.getCSVTextData());
         }
-        // NOTE: The fromDataFormat and the corresponding fromSchema is used only for the matching process
-        // The output of the mappers is finally written to the toDataFormat object after the matching process
-        // since the writable encapsulates the toDataFormat ==> new SqoopWritable(toDataFormat)
-        toDataFormat.setObjectData(matcher.getMatchingData(fromDataFormat.getObjectData()));
+        // NOTE: The fromIDF and the corresponding fromSchema is used only for the matching process
+        // The output of the mappers is finally written to the toIDF object after the matching process
+        // since the writable encapsulates the toIDF ==> new SqoopWritable(toIDF)
+        toIDF.setObjectData(matcher.getMatchingData(fromIDF.getObjectData()));
+        // NOTE: We do not use the reducer to do the writing (a.k.a LOAD in ETL). Hence the mapper sets up the writable
         context.write(writable, NullWritable.get());
       } catch (Exception e) {
         throw new SqoopException(MRExecutionError.MAPRED_EXEC_0013, e);

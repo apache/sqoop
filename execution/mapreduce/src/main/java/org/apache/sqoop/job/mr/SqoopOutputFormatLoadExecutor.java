@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.concurrent.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -32,7 +33,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.matcher.Matcher;
 import org.apache.sqoop.connector.matcher.MatcherFactory;
@@ -53,7 +53,7 @@ public class SqoopOutputFormatLoadExecutor {
 
   private volatile boolean readerFinished = false;
   private volatile boolean writerFinished = false;
-  private volatile IntermediateDataFormat<String> dataFormat;
+  private volatile IntermediateDataFormat<? extends Object> toDataFormat;
   private Matcher matcher;
   private JobContext context;
   private SqoopRecordWriter writer;
@@ -63,11 +63,11 @@ public class SqoopOutputFormatLoadExecutor {
   private volatile boolean isTest = false;
   private String loaderName;
 
-  // NOTE: This method is only exposed for test cases and hence assumes CSVIntermediateDataFormat
-  SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName){
+  // NOTE: This method is only exposed for test cases
+  SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName, IntermediateDataFormat<?> idf) {
     this.isTest = isTest;
     this.loaderName = loaderName;
-    dataFormat = new CSVIntermediateDataFormat();
+    toDataFormat = idf;
     writer = new SqoopRecordWriter();
     matcher = null;
   }
@@ -78,10 +78,10 @@ public class SqoopOutputFormatLoadExecutor {
     matcher = MatcherFactory.getMatcher(
         MRConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()),
         MRConfigurationUtils.getConnectorSchema(Direction.TO, context.getConfiguration()));
-    dataFormat = (IntermediateDataFormat<String>) ClassUtils.instantiate(context
-        .getConfiguration().get(MRJobConstants.INTERMEDIATE_DATA_FORMAT));
+    toDataFormat = (IntermediateDataFormat<?>) ClassUtils.instantiate(context
+        .getConfiguration().get(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT));
     // Using the TO schema since the SqoopDataWriter in the SqoopMapper encapsulates the toDataFormat
-    dataFormat.setSchema(matcher.getToSchema());
+    toDataFormat.setSchema(matcher.getToSchema());
   }
 
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
@@ -102,7 +102,7 @@ public class SqoopOutputFormatLoadExecutor {
       free.acquire();
       checkIfConsumerThrew();
       // NOTE: this is the place where data written from SqoopMapper writable is available to the SqoopOutputFormat
-      dataFormat.setCSVTextData(key.getString());
+      toDataFormat.setCSVTextData(key.getString());
       filled.release();
     }
 
@@ -158,7 +158,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return dataFormat.getObjectData();
+        return toDataFormat.getObjectData();
       } finally {
         releaseSema();
       }
@@ -172,7 +172,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return dataFormat.getCSVTextData();
+        return toDataFormat.getCSVTextData();
       } finally {
         releaseSema();
       }
@@ -185,7 +185,7 @@ public class SqoopOutputFormatLoadExecutor {
         return null;
       }
       try {
-        return dataFormat.getData();
+        return toDataFormat.getData();
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Caught exception e while getting content ", t);
@@ -215,6 +215,7 @@ public class SqoopOutputFormatLoadExecutor {
 
   private class ConsumerThread implements Runnable {
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void run() {
       LOG.info("SqoopOutputFormatLoadExecutor consumer thread is starting");

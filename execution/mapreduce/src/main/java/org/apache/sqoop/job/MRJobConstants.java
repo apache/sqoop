@@ -72,8 +72,11 @@ public final class MRJobConstants extends Constants {
   public static final String HADOOP_COMPRESS_CODEC =
     "mapred.output.compression.codec";
 
-  public static final String INTERMEDIATE_DATA_FORMAT =
-    DriverConstants.PREFIX_EXECUTION_CONFIG + "intermediate.format";
+  public static final String FROM_INTERMEDIATE_DATA_FORMAT =
+    DriverConstants.PREFIX_EXECUTION_CONFIG + "from.intermediate.format";
+
+  public static final String TO_INTERMEDIATE_DATA_FORMAT =
+      DriverConstants.PREFIX_EXECUTION_CONFIG + "to.intermediate.format";
 
   private MRJobConstants() {
     // Disable explicit object creation
