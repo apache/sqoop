@@ -31,8 +31,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.json.DriverBean;
@@ -546,6 +544,7 @@ abstract public class DerbyTestCase {
       break;
 
     case 4:
+    case 5:
       loadConnectorAndDriverConfigVersion4();
       break;
 
@@ -580,6 +579,7 @@ abstract public class DerbyTestCase {
       break;
 
     case 4:
+    case 5:
       // Insert two links - CA and CB
       runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CA', 1)");
       runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CB', 1)");
@@ -636,6 +636,7 @@ abstract public class DerbyTestCase {
       break;
 
     case 4:
+    case 5:
       for (String name : new String[] { "JA", "JB", "JC", "JD" }) {
         runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)" + " VALUES('"
             + name + index + "', 1, 1)");

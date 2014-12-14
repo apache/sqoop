@@ -156,7 +156,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn JDBC link for querying repository
    * @return Boolean values if internal structures are suitable for use
    */
-  public abstract boolean isRespositorySuitableForUse(Connection conn);
+  public abstract boolean isRepositorySuitableForUse(Connection conn);
 
   /**
    * Termination callback for repository.

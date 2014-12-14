@@ -290,7 +290,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       }
     }
 
-    if (repositoryVersion <= 4) {
+    if (repositoryVersion < 5) {
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIGURABLE_ID,
           conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIG_ID, conn);
@@ -809,7 +809,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean isRespositorySuitableForUse(Connection conn) {
+  public boolean isRepositorySuitableForUse(Connection conn) {
     // TODO(jarcec): Verify that all structures are present (e.g. something like corruption validation)
     // NOTE: At this point is is just checking if the repo version matches the version
     // in the upgraded code

@@ -42,8 +42,9 @@ public final class DerbyRepoConstants {
    *     Increased size of SQ_CONNECTOR.SQC_VERSION to 64
    * 4 - Version 1.99.4
    *     Changed to FROM/TO design.
+   * 5 - Version 1.99.5
    */
-  public static final int LATEST_DERBY_REPOSITORY_VERSION = 4;
+  public static final int LATEST_DERBY_REPOSITORY_VERSION = 5;
 
   private DerbyRepoConstants() {
     // Disable explicit object creation

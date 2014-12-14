@@ -142,7 +142,7 @@ public class JdbcRepository extends Repository {
     return (Boolean) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.isRespositorySuitableForUse(conn);
+        return handler.isRepositorySuitableForUse(conn);
       }
     });
   }

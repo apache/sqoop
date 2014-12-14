@@ -26,7 +26,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestRespositorySchemaUpgrade extends DerbyTestCase {
+public class TestRepositoryUpgrade extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
@@ -38,29 +38,29 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
 
   @Test
   public void testHasLatestRepositoryVersion() throws Exception {
-    assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertFalse(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
     createOrUpgradeSchemaForLatestVersion(); // Test code is building the
                                              // structures
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
   @Test
   public void testCreatorUpdateRepositorySchema() throws Exception {
-    assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertFalse(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
   @Test
   public void testDoubleUpdateRepositorySchema() throws Exception {
     // Setup
-    assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertFalse(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
 
     // Exercise and verify
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
   @Test(expected = SQLIntegrityConstraintViolationException.class)
@@ -139,18 +139,18 @@ public class TestRespositorySchemaUpgrade extends DerbyTestCase {
   public void testUpgradeRepoVersion2ToVersion4() throws Exception {
     // in case of version 2 schema there is no unique job/ link constraint
     super.createOrUpgradeSchema(2);
-    assertFalse(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertFalse(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
     loadConnectorAndDriverConfig(2);
     super.loadConnectionsOrLinks(2);
     super.loadJobs(2);
     handler.createOrUpgradeRepository(getDerbyDatabaseConnection());
-    assertTrue(handler.isRespositorySuitableForUse(getDerbyDatabaseConnection()));
+    assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
   private class TestDerbyRepositoryHandler extends DerbyRepositoryHandler {
     protected long registerHdfsConnector(Connection conn) {
       try {
-        TestRespositorySchemaUpgrade.this.runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
+        TestRepositoryUpgrade.this.runQuery("INSERT INTO SQOOP.SQ_CONNECTOR(SQC_NAME, SQC_CLASS, SQC_VERSION)"
             + "VALUES('hdfs-connector', 'org.apache.sqoop.test.B', '1.0-test')");
         return 2L;
       } catch (Exception e) {
