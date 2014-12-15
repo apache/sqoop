@@ -93,6 +93,7 @@ limitations under the License.
     <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-lang.version>2.5</commons-lang.version>
     <commons-io.version>2.4</commons-io.version>
+    <commons-compress.version>1.9</commons-compress.version>
     <derby.version>10.8.2.2</derby.version>
     <hadoop.1.version>1.0.3</hadoop.1.version>
     <hadoop.2.version>2.5.1</hadoop.2.version>
@@ -388,6 +389,11 @@ limitations under the License.
         <groupId>com.googlecode.json-simple</groupId>
         <artifactId>json-simple</artifactId>
         <version>${json-simple.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>${commons-compress.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>

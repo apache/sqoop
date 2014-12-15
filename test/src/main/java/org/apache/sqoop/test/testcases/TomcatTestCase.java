@@ -17,8 +17,10 @@
  */
 package org.apache.sqoop.test.testcases;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -104,10 +106,12 @@ abstract public class TomcatTestCase {
   public void startServer() throws Exception {
     // Get and set temporary path in hadoop cluster.
     tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name.getMethodName());
+    FileUtils.deleteDirectory(new File(tmpPath));
+
     LOG.debug("Temporary Directory: " + tmpPath);
 
     // Start server
-    cluster = new TomcatSqoopMiniCluster(tmpPath, hadoopCluster.getConfiguration());
+    cluster = createSqoopMiniCluster();
     cluster.start();
 
     // Initialize Sqoop Client API
@@ -125,6 +129,17 @@ abstract public class TomcatTestCase {
   }
 
   /**
+   * Create Sqoop MiniCluster instance that should be used for this test.
+   *
+   * This method will be executed only once prior each test execution.
+   *
+   * @return New instance of test mini cluster
+   */
+  public TomcatSqoopMiniCluster createSqoopMiniCluster() throws Exception {
+    return new TomcatSqoopMiniCluster(getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
+  }
+
+  /**
    * Return SqoopClient configured to talk to testing server.
    *
    * @return
@@ -135,6 +150,10 @@ abstract public class TomcatTestCase {
 
   public String getTemporaryPath() {
     return tmpPath;
+  }
+
+  public String getSqoopMiniClusterTemporaryPath() {
+    return HdfsUtils.joinPathFragments(tmpPath, "sqoop-mini-cluster");
   }
 
   /**
