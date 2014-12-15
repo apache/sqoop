@@ -24,7 +24,7 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.utils.ClassUtils;
 
-import java.util.List;
+import java.util.Set;
 
 public class KafkaToInitializer extends Initializer<LinkConfiguration,ToJobConfiguration> {
 
@@ -37,9 +37,9 @@ public class KafkaToInitializer extends Initializer<LinkConfiguration,ToJobConfi
 
 
   @Override
-  public List<String> getJars(InitializerContext context, LinkConfiguration
+  public Set<String> getJars(InitializerContext context, LinkConfiguration
           linkConfiguration, ToJobConfiguration toJobConfiguration) {
-    List<String> jars = super.getJars(context, linkConfiguration, toJobConfiguration);
+    Set<String> jars = super.getJars(context, linkConfiguration, toJobConfiguration);
     // Jars for Kafka, Scala and Yammer (required by Kafka)
     jars.add(ClassUtils.jarForClass("kafka.javaapi.producer.Producer"));
     jars.add(ClassUtils.jarForClass("scala.collection.immutable.StringLike"));

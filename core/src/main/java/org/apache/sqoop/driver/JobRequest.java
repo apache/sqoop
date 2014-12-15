@@ -61,9 +61,9 @@ public class JobRequest {
   SqoopConnector toConnector;
 
   /**
-   * List of required local jars for the job
+   * Set of required local jars for the job
    */
-  List<String> jars;
+  Set<String> jars;
 
   /**
    * From entity
@@ -123,7 +123,7 @@ public class JobRequest {
   Class<? extends IntermediateDataFormat<?>> toIDF;
 
   public JobRequest() {
-    this.jars = new LinkedList<String>();
+    this.jars = new HashSet<String>();
     this.fromConnectorContext = new MutableMapContext();
     this.toConnectorContext = new MutableMapContext();
     this.driverContext = new MutableMapContext();
@@ -188,7 +188,7 @@ public class JobRequest {
     }
   }
 
-  public List<String> getJars() {
+  public Set<String> getJars() {
     return jars;
   }
 
@@ -202,7 +202,7 @@ public class JobRequest {
     addJar(ClassUtils.jarForClass(klass));
   }
 
-  public void addJars(List<String> jars) {
+  public void addJars(Set<String> jars) {
     for(String j : jars) {
       addJar(j);
     }

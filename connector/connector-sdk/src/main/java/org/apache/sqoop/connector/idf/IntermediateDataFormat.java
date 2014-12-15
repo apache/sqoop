@@ -23,8 +23,8 @@ import org.apache.sqoop.schema.Schema;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Abstract class representing a pluggable intermediate data format Sqoop
@@ -138,10 +138,10 @@ public abstract class IntermediateDataFormat<T> {
 
   /**
    * Provide the external jars that the IDF depends on
-   * @return list of jars
+   * @return set of jars
    */
-  public List<String> getJars() {
-    return new LinkedList<String>();
+  public Set<String> getJars() {
+    return new HashSet<String>();
   }
 
 }

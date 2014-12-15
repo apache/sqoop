@@ -18,6 +18,8 @@
 package org.apache.sqoop.driver;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.sqoop.driver.JobRequest;
 import org.apache.sqoop.utils.ClassUtils;
@@ -27,9 +29,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 public class TestJobRequest {
 
   private JobRequest jobRequest;
@@ -46,8 +45,8 @@ public class TestJobRequest {
     jobRequest.addJar("A");
 
     assertEquals(2, jobRequest.getJars().size());
-    assertEquals("A", jobRequest.getJars().get(0));
-    assertEquals("B", jobRequest.getJars().get(1));
+    assertTrue(jobRequest.getJars().contains("A"));
+    assertTrue(jobRequest.getJars().contains("B"));
   }
 
   @Test
@@ -59,12 +58,16 @@ public class TestJobRequest {
 
   @Test
   public void testAddJars() {
-    jobRequest.addJars(Arrays.asList("A", "B"));
-    jobRequest.addJars(Arrays.asList("B", "C"));
+    Set<String> set = new HashSet<String>();
+    set.addAll(Arrays.asList("A", "B"));
+    jobRequest.addJars(set);
+    set = new HashSet<String>();
+    set.addAll(Arrays.asList("B", "C"));
+    jobRequest.addJars(set);
 
     assertEquals(3, jobRequest.getJars().size());
-    assertEquals("A", jobRequest.getJars().get(0));
-    assertEquals("B", jobRequest.getJars().get(1));
-    assertEquals("C", jobRequest.getJars().get(2));
+    assertTrue(jobRequest.getJars().contains("A"));
+    assertTrue(jobRequest.getJars().contains("A"));
+    assertTrue(jobRequest.getJars().contains("C"));
   }
 }

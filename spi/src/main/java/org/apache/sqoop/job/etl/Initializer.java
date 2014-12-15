@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
@@ -53,9 +53,9 @@ public abstract class Initializer<LinkConfiguration, JobConfiguration> {
    *        In case of the TO initializer this will represent the TO job configuration
    * @return
    */
-  public List<String> getJars(InitializerContext context, LinkConfiguration linkConfiguration,
+  public Set<String> getJars(InitializerContext context, LinkConfiguration linkConfiguration,
       JobConfiguration jobConfiguration) {
-    return new LinkedList<String>();
+    return new HashSet<String>();
   }
 
   /**

@@ -28,7 +28,7 @@ import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * This class allows connector to define initialization work for execution.
@@ -50,9 +50,9 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
   }
 
   @Override
-  public List<String> getJars(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
-    List<String> jars = super.getJars(context, linkConfig, jobConfig);
+  public Set<String> getJars(InitializerContext context,
+      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    Set<String> jars = super.getJars(context, linkConfig, toJobConfig);
     jars.add(ClassUtils.jarForClass("org.kitesdk.data.Formats"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));

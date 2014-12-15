@@ -372,9 +372,9 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * {@inheritDoc}
    */
   @Override
-  public List<String> getJars() {
+  public Set<String> getJars() {
 
-    List<String> jars = super.getJars();
+    Set<String> jars = super.getJars();
     // Add JODA classes for IDF date/time handling
     jars.add(ClassUtils.jarForClass(LocalDate.class));
     jars.add(ClassUtils.jarForClass(LocalDateTime.class));

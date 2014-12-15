@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -53,8 +54,8 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
   }
 
   @Override
-  public List<String> getJars(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    List<String> jars = new LinkedList<String>();
+  public Set<String> getJars(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    Set<String> jars = super.getJars(context, linkConfig, toJobConfig);
     jars.add(ClassUtils.jarForClass(linkConfig.linkConfig.jdbcDriver));
     return jars;
   }
