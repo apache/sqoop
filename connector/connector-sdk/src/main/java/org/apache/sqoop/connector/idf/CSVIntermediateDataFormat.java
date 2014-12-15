@@ -37,7 +37,6 @@ import org.json.simple.JSONValue;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,14 +56,14 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   public static final Logger LOG = Logger.getLogger(CSVIntermediateDataFormat.class);
 
-  private final List<Integer> stringTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> bitTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> byteTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> listTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> mapTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> dateTimeTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> dateTypeColumnIndices = new ArrayList<Integer>();
-  private final List<Integer> timeColumnIndices = new ArrayList<Integer>();
+  private final Set<Integer> stringTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> bitTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> byteTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> listTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> mapTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> dateTimeTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> dateTypeColumnIndices = new HashSet<Integer>();
+  private final Set<Integer> timeColumnIndices = new HashSet<Integer>();
 
 
   private Schema schema;
@@ -126,12 +125,11 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   /**
-   * Custom CSV parser that honors quoting and escaped quotes. All other
-   * escaping is handled elsewhere.
+   * Custom CSV Text parser that honors quoting and escaped quotes.
    *
    * @return String[]
    */
-  private String[] getFieldStringArray() {
+  private String[] parseCSVString() {
     if (data == null) {
       return null;
     }
@@ -188,7 +186,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     }
 
     // fieldStringArray represents the csv fields parsed into string array
-    String[] fieldStringArray = getFieldStringArray();
+    String[] fieldStringArray = parseCSVString();
 
     if (fieldStringArray == null) {
       return null;
@@ -207,12 +205,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         objectArray[i] = null;
         continue;
       }
-      objectArray[i] = parseCSVStringArrayElement(fieldStringArray[i], columnArray[i]);
+      objectArray[i] = toObject(fieldStringArray[i], columnArray[i]);
     }
     return objectArray;
   }
 
-  private Object parseCSVStringArrayElement(String csvString, Column column) {
+  private Object toObject(String csvString, Column column) {
     Object returnValue = null;
 
     switch (column.getType()) {
