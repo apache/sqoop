@@ -49,18 +49,26 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
     this.toIDF.setCSVTextData(data);
   }
 
-  public String getString() { return toIDF.getCSVTextData(); }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeUTF(toIDF.getCSVTextData());
+  public String getString() {
+    return toIDF.getCSVTextData();
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException { toIDF.setCSVTextData(in.readUTF()); }
+  public void write(DataOutput out) throws IOException {
+    //delegate
+    toIDF.write(out);
+  }
 
   @Override
-  public int compareTo(SqoopWritable o) { return getString().compareTo(o.getString()); }
+  public void readFields(DataInput in) throws IOException {
+    //delegate
+    toIDF.read(in);
+  }
+
+  @Override
+  public int compareTo(SqoopWritable o) {
+    return getString().compareTo(o.getString());
+  }
 
   @Override
   public String toString() {
