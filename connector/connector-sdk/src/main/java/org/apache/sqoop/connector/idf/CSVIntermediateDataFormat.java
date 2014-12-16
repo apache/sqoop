@@ -100,7 +100,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       return;
     }
     this.schema = schema;
-    List<Column> columns = schema.getColumns();
+    Column[] columns = schema.getColumnsArray();
     int i = 0;
     for (Column col : columns) {
       if (isColumnStringType(col)) {
@@ -192,13 +192,13 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       return null;
     }
 
-    if (fieldStringArray.length != schema.getColumns().size()) {
+    if (fieldStringArray.length != schema.getColumnsArray().length) {
       throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005,
           "The data " + getCSVTextData() + " has the wrong number of fields.");
     }
 
     Object[] objectArray = new Object[fieldStringArray.length];
-    Column[] columnArray = schema.getColumns().toArray(new Column[fieldStringArray.length]);
+    Column[] columnArray = schema.getColumnsArray();
     for (int i = 0; i < fieldStringArray.length; i++) {
       // check for NULL field and bail out immediately
       if (fieldStringArray[i].equals(NULL_VALUE)) {
@@ -266,7 +266,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   @Override
   public void setObjectData(Object[] data) {
    Set<Integer> nullValueIndices = new HashSet<Integer>();
-    Column[] columnArray = schema.getColumns().toArray(new Column[data.length]);
+    Column[] columnArray = schema.getColumnsArray();
     // check for null
     for (int i = 0; i < data.length; i++) {
       if (data[i] == null) {

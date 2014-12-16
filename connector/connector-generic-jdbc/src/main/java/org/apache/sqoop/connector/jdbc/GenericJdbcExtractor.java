@@ -58,7 +58,7 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
     ResultSet resultSet = executor.executeQuery(query);
 
     Schema schema = context.getSchema();
-    Column[] schemaColumns = schema.getColumns().toArray(new Column[schema.getColumns().size()]);
+    Column[] schemaColumns = schema.getColumnsArray();
     try {
       ResultSetMetaData metaData = resultSet.getMetaData();
       int columnCount = metaData.getColumnCount();

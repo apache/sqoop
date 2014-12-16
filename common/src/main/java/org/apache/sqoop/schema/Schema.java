@@ -117,7 +117,11 @@ public class Schema {
     return this;
   }
 
-  public List<Column> getColumns() {
+  public Column[] getColumnsArray() {
+    return columns.toArray(new Column[columns.size()]);
+  }
+
+  public List<Column> getColumnsList() {
     return columns;
   }
 

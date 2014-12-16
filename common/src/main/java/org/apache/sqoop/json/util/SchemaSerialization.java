@@ -90,7 +90,7 @@ public class SchemaSerialization {
         object.put(NOTE, schema.getNote());
       }
       JSONArray columnArray = new JSONArray();
-      for (Column column : schema.getColumns()) {
+      for (Column column : schema.getColumnsArray()) {
         columnArray.add(extractColumn(column));
       }
       object.put(COLUMNS, columnArray);

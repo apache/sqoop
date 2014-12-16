@@ -59,7 +59,7 @@ public class KiteDataTypeUtil {
     Schema schema = Schema.createRecord(name, doc, namespace, false);
 
     List<Schema.Field> fields = new ArrayList<Schema.Field>();
-    for (Column column : sqoopSchema.getColumns()) {
+    for (Column column : sqoopSchema.getColumnsArray()) {
       Schema.Field field = new Schema.Field(column.getName(),
           createAvroFieldSchema(column), null, null);
       field.addProp(SQOOP_TYPE, column.getType().toString());

@@ -35,21 +35,21 @@ public class NameMatcher extends Matcher {
 
   @Override
   public Object[] getMatchingData(Object[] fields) {
-    Object[] out = new Object[getToSchema().getColumns().size()];
+    Object[] out = new Object[getToSchema().getColumnsArray().length];
 
     HashMap<String,Column> colNames = new HashMap<String, Column>();
 
-    for (Column fromCol: getFromSchema().getColumns()) {
+    for (Column fromCol: getFromSchema().getColumnsArray()) {
       colNames.put(fromCol.getName(), fromCol);
     }
 
     int toIndex = 0;
 
-    for (Column toCol: getToSchema().getColumns()) {
+    for (Column toCol: getToSchema().getColumnsArray()) {
       Column fromCol = colNames.get(toCol.getName());
 
       if (fromCol != null) {
-        int fromIndex = getFromSchema().getColumns().indexOf(fromCol);
+        int fromIndex = getFromSchema().getColumnsList().indexOf(fromCol);
         if (isNull(fields[fromIndex])) {
           out[toIndex] = null;
         } else {
