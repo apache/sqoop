@@ -556,7 +556,7 @@ public class JobManager implements Reconfigurable {
     mSubmission.setLastUpdateUser(ctx.getUsername());
 
     // Fetch new information to verify that the stop command has actually worked
-    update(mSubmission);
+    submissionEngine.update(mSubmission);
 
     // Return updated structure
     return mSubmission;
@@ -571,35 +571,10 @@ public class JobManager implements Reconfigurable {
     }
     // If the submission isin running state, let's update it
     if (mSubmission.getStatus().isRunning()) {
-      update(mSubmission);
+      submissionEngine.update(mSubmission);
     }
 
     return mSubmission;
-  }
-
-  private void update(MSubmission submission) {
-    double progress = -1;
-    Counters counters = null;
-    String externalJobId = submission.getExternalJobId();
-    SubmissionStatus newStatus = submissionEngine.status(externalJobId);
-    SubmissionError error = submissionEngine.error(externalJobId);
-    String externalLink = submissionEngine.externalLink(externalJobId);
-
-    if (newStatus.isRunning()) {
-      progress = submissionEngine.progress(externalJobId);
-    } else {
-      counters = submissionEngine.counters(externalJobId);
-    }
-
-    submission.setStatus(newStatus);
-    submission.setError(error);
-    submission.setProgress(progress);
-    submission.setCounters(counters);
-    submission.setExternalLink(externalLink);
-    submission.setLastUpdateDate(new Date());
-
-    RepositoryManager.getInstance().getRepository()
-      .updateSubmission(submission);
   }
 
   @Override
@@ -700,7 +675,7 @@ public class JobManager implements Reconfigurable {
               .findUnfinishedSubmissions();
 
           for (MSubmission submission : unfinishedSubmissions) {
-            update(submission);
+            submissionEngine.update(submission);
           }
 
           Thread.sleep(updateSleep);

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -43,7 +44,9 @@ import org.apache.sqoop.execution.mapreduce.MapreduceExecutionEngine;
 import org.apache.sqoop.driver.JobRequest;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.mr.MRConfigurationUtils;
+import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.SubmissionError;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -286,13 +289,8 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public SubmissionStatus status(String externalJobId) {
+  private SubmissionStatus status(RunningJob runningJob) {
     try {
-      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
       if(runningJob == null) {
         return SubmissionStatus.UNKNOWN;
       }
@@ -306,13 +304,8 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
   }
 
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public SubmissionError error(String externalJobId) {
+  private SubmissionError error(RunningJob runningJob) {
     try {
-      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
       if (runningJob == null) {
         return null;
       }
@@ -323,43 +316,30 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         error.setErrorDetails(runningJob.getFailureInfo());
         return error;
       }
-
     } catch (IOException e) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
     }
     return null;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public double progress(String externalJobId) {
+  private double progress(RunningJob runningJob) {
     try {
-      // Get some reasonable approximation of map-reduce job progress
-      // TODO(jarcec): What if we're running without reducers?
-      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
       if(runningJob == null) {
         // Return default value
-        return super.progress(externalJobId);
+        return -1;
       }
-
       return (runningJob.mapProgress() + runningJob.reduceProgress()) / 2;
     } catch (IOException e) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public Counters counters(String externalJobId) {
+
+  private Counters counters(RunningJob runningJob) {
     try {
-      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
       if(runningJob == null) {
         // Return default value
-        return super.counters(externalJobId);
+        return null;
       }
 
       return convertMapreduceCounters(runningJob.getCounters());
@@ -368,21 +348,12 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String externalLink(String externalJobId) {
-    try {
-      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
-      if(runningJob == null) {
-        return null;
-      }
-
-      return runningJob.getTrackingURL();
-    } catch (IOException e) {
-      throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
+  private String externalLink(RunningJob runningJob) {
+    if (runningJob == null) {
+      return null;
     }
+
+    return runningJob.getTrackingURL();
   }
 
   /**
@@ -392,7 +363,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
    * @param status Map-reduce job constant
    * @return Equivalent submission status
    */
-  protected SubmissionStatus convertMapreduceState(int status) {
+  private SubmissionStatus convertMapreduceState(int status) {
     if(status == JobStatus.PREP) {
       return SubmissionStatus.BOOTING;
     } else if (status == JobStatus.RUNNING) {
@@ -435,6 +406,39 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
     return sqoopCounters;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void update(MSubmission submission) {
+    double progress = -1;
+    Counters counters = null;
+    String externalJobId = submission.getExternalJobId();
+    try {
+      RunningJob runningJob = jobClient.getJob(JobID.forName(externalJobId));
+
+      SubmissionStatus newStatus = status(runningJob);
+      SubmissionError error = error(runningJob);
+      String externalLink = externalLink(runningJob);
+
+      if (newStatus.isRunning()) {
+        progress = progress(runningJob);
+      } else {
+        counters = counters(runningJob);
+      }
+
+      submission.setStatus(newStatus);
+      submission.setError(error);
+      submission.setProgress(progress);
+      submission.setCounters(counters);
+      submission.setExternalLink(externalLink);
+      submission.setLastUpdateDate(new Date());
+
+      RepositoryManager.getInstance().getRepository().updateSubmission(submission);
+    } catch (IOException e) {
+      throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
+    }
+  }
   /**
    * Detect MapReduce local mode.
    *

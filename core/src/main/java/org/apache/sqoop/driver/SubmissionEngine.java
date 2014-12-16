@@ -18,9 +18,7 @@
 package org.apache.sqoop.driver;
 
 import org.apache.sqoop.common.MapContext;
-import org.apache.sqoop.model.SubmissionError;
-import org.apache.sqoop.submission.counter.Counters;
-import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.model.MSubmission;
 
 /**
  * Submission engine is responsible in conveying the information about the
@@ -69,56 +67,9 @@ public abstract class SubmissionEngine {
   public abstract void stop(String externalJobId);
 
   /**
-   * Return status of given submission.
-   *
-   * @param externalJobId Submission external job id.
-   * @return Current submission status.
+   * Update the given submission
+   * @param submission record to update
    */
-  public abstract SubmissionStatus status(String externalJobId);
+  public abstract void update(MSubmission submission);
 
-  /**
-   * Return failure info if the job status is FAILED
-   *
-   * @param submissionId Submission internal id.
-   * @return Current failure info
-   */
-  public abstract SubmissionError error(String externalJobId);
-
-  /**
-   * Return submission progress.
-   *
-   * Expected is number from interval <0, 1> denoting how far the processing
-   * has gone or -1 in case that this submission engine do not supports
-   * progress reporting.
-   *
-   * @param externalJobId Submission external job id.
-   * @return {-1} union <0, 1>
-   */
-  public double progress(String externalJobId) {
-    return -1;
-  }
-
-  /**
-   * Return statistics for given submission id.
-   *
-   * Sqoop will call counters only for submission in state SUCCEEDED,
-   * it's consider exceptional state to call this method for other states.
-   *
-   * @param externalJobId Submission external job id.
-   * @return Submission statistics
-   */
-  public Counters counters(String externalJobId) {
-    return null;
-  }
-
-  /**
-   * Return link to external web page with given submission.
-   *
-   * @param externalJobId Submission external job id.
-   * @return Null in case that external page is not supported or available or
-   *  HTTP link to given submission.
-   */
-  public String externalLink(String externalJobId) {
-    return null;
-  }
 }
