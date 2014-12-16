@@ -48,6 +48,7 @@ If you are excited to start using Sqoop you can follow the links below to get a 
 - `Sqoop 5 Minute Demo <Sqoop5MinutesDemo.html>`_
 - `Command Line Shell Usage Guide <CommandLineClient.html>`_
 - `Connectors <Connectors.html>`_
+- `Security Guide <SecurityGuideOnSqoop2.html>`_
 
 Developer Guide
 -----------------
