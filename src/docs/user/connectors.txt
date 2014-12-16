@@ -294,8 +294,6 @@ Argument                                 Description
 +\--table <table-name>+                  Table to populate
 +\--input-null-string <null-string>+     The string to be interpreted as\
                                          null for string columns
-+\--clear-staging-table+                 Indicates that any data present in\
-                                         the staging table can be deleted.
 ---------------------------------------------------------------------------------
 
 There are additional configuration for pg_bulkload execution
@@ -306,34 +304,36 @@ it must preceed any export control arguments.
 
 .Supported export control properties:
 [grid="all"]
-`-----------------------------`----------------------------------------------
-Property                      Description
+`------------------------------`----------------------------------------------
+Property                       Description
 -----------------------------------------------------------------------------
-mapred.reduce.tasks           Number of reduce tasks for staging. \
-                              The defalt value is 1. \
-                              Each tasks do staging in a single transaction.
-pgbulkload.bin                Path of the pg_bulkoad binary \
-                              installed on each slave nodes.
-pgbulkload.check.constraints  Specify whether CHECK constraints are checked \
-                              during the loading. \
-                              The default value is YES.
-pgbulkload.parse.errors       The maximum mumber of ingored records \
-                              that cause errors during parsing, \
-                              encoding, filtering, constraints checking, \
-                              and data type conversion. \
-                              Error records are recorded \
-                              in the PARSE BADFILE.  \
-                              The default value is INFINITE.
-pgbulkload.duplicate.errors   Number of ingored records \
-                              that violate unique constraints. \
-                              Duplicated records are recorded in the \
-                              DUPLICATE BADFILE on DB server. \
-                              The default value is INFINITE.
-pgbulkload.filter             Specify the filter function \
-                              to convert each row in the input file.  \
-                              See the pg_bulkload documentation to know \
-                              how to write FILTER functions.
------------------------------------------------------------------------------
+mapred.reduce.tasks            Number of reduce tasks for staging. \
+                               The defalt value is 1. \
+                               Each tasks do staging in a single transaction.
+pgbulkload.bin                 Path of the pg_bulkoad binary \
+                               installed on each slave nodes.
+pgbulkload.check.constraints   Specify whether CHECK constraints are checked \
+                               during the loading. \
+                               The default value is YES.
+pgbulkload.parse.errors        The maximum mumber of ingored records \
+                               that cause errors during parsing, \
+                               encoding, filtering, constraints checking, \
+                               and data type conversion. \
+                               Error records are recorded \
+                               in the PARSE BADFILE.  \
+                               The default value is INFINITE.
+pgbulkload.duplicate.errors    Number of ingored records \
+                               that violate unique constraints. \
+                               Duplicated records are recorded in the \
+                               DUPLICATE BADFILE on DB server. \
+                               The default value is INFINITE.
+pgbulkload.filter              Specify the filter function \
+                               to convert each row in the input file.  \
+                               See the pg_bulkload documentation to know \
+                               how to write FILTER functions.
+pgbulkload.clear.staging.table Indicates that any data present in\
+                               the staging table can be dropped.
+------------------------------------------------------------------------------
 
 Here is a example of complete command line.
 ----
