@@ -65,6 +65,7 @@ public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
     protected Map<String, String> getRepositoryConfiguration() {
       Map<String, String> properties = new HashMap<String, String>();
 
+      properties.put("org.apache.sqoop.repository.schema.immutable", "false");
       properties.put("org.apache.sqoop.repository.provider", "org.apache.sqoop.repository.JdbcRepositoryProvider");
       properties.put("org.apache.sqoop.repository.jdbc.handler", "org.apache.sqoop.repository.derby.DerbyRepositoryHandler");
       properties.put("org.apache.sqoop.repository.jdbc.transaction.isolation", "READ_COMMITTED");
