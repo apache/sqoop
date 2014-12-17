@@ -62,15 +62,14 @@ public final class ConfigDisplayer {
         resourceString(Constants.RES_CONFIG_DISPLAYER_LINK),
         bundle);
 
-    displayConfig(
-        connector.getConfig(Direction.FROM).getConfigs(),
-        Direction.FROM.toString() + " " + resourceString(Constants.RES_CONFIG_DISPLAYER_JOB),
-        bundle);
-
-    displayConfig(
-        connector.getConfig(Direction.TO).getConfigs(),
-        Direction.TO.toString() + " " + resourceString(Constants.RES_CONFIG_DISPLAYER_JOB),
-        bundle);
+    for (Direction direction : new Direction[] {Direction.FROM, Direction.TO}) {
+      if (connector.getSupportedDirections().isDirectionSupported(direction)) {
+        displayConfig(
+            connector.getConfig(direction).getConfigs(),
+            direction.toString() + " " + resourceString(Constants.RES_CONFIG_DISPLAYER_JOB),
+            bundle);
+      }
+    }
   }
 
    private static void displayConfig(List<MConfig> configs,
