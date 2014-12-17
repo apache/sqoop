@@ -249,7 +249,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
       LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
-    assertEquals("Submission has failed with " + finalSubmission.getError().getErrorSummary(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
+    assertEquals("Submission finished with error: " + finalSubmission.getError().getErrorSummary(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
   }
 
   /**

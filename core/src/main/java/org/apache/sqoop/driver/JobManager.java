@@ -335,7 +335,7 @@ public class JobManager implements Reconfigurable {
     // Create a job request for submit/execution
     JobRequest jobRequest = executionEngine.createJobRequest();
     // Save important variables to the job request
-    jobRequest.setSummary(submission);
+    jobRequest.setJobSubmission(submission);
     jobRequest.setConnector(Direction.FROM, fromConnector);
     jobRequest.setConnector(Direction.TO, toConnector);
 

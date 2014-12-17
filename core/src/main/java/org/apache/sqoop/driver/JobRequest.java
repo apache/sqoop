@@ -28,8 +28,6 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -140,7 +138,7 @@ public class JobRequest {
     return jobSubmission;
   }
 
-  public void setSummary(MSubmission submission) {
+  public void setJobSubmission(MSubmission submission) {
     this.jobSubmission = submission;
   }
 
