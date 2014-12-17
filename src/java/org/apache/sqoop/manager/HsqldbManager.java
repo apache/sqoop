@@ -61,6 +61,11 @@ public class HsqldbManager
   }
 
   @Override
+  public String escapeTableName(String tableName) {
+    return '"' + tableName + '"';
+  }
+
+  @Override
   /**
    * {@inheritDoc}
    */

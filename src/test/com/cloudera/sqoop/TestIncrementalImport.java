@@ -93,7 +93,7 @@ public class TestIncrementalImport extends TestCase {
     PreparedStatement s = null;
     ResultSet rs = null;
     try {
-      s = c.prepareStatement("SELECT COUNT(*) FROM " + table);
+      s = c.prepareStatement("SELECT COUNT(*) FROM " + manager.escapeTableName(table));
       rs = s.executeQuery();
       if (!rs.next()) {
         fail("No resultset");
@@ -131,7 +131,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("INSERT INTO " + tableName + " VALUES(?)");
+      s = c.prepareStatement("INSERT INTO " + manager.escapeTableName(tableName) + " VALUES(?)");
       for (int i = low; i < hi; i++) {
         s.setInt(1, i);
         s.executeUpdate();
@@ -139,7 +139,9 @@ public class TestIncrementalImport extends TestCase {
 
       c.commit();
     } finally {
-      s.close();
+      if(s != null) {
+        s.close();
+      }
     }
   }
 
@@ -156,7 +158,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("INSERT INTO " + tableName + " VALUES(?,?)");
+      s = c.prepareStatement("INSERT INTO " + manager.escapeTableName(tableName) + " VALUES(?,?)");
       for (int i = low; i < hi; i++) {
         s.setInt(1, i);
         s.setTimestamp(2, ts);
@@ -182,7 +184,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("INSERT INTO " + tableName + " VALUES(?)");
+      s = c.prepareStatement("INSERT INTO " + manager.escapeTableName(tableName) + " VALUES(?)");
       for (int i = low; i < hi; i++) {
         s.setString(1, Integer.toString(i));
         s.executeUpdate();
@@ -204,7 +206,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("CREATE TABLE " + tableName + "(id INT NOT NULL)");
+      s = c.prepareStatement("CREATE TABLE " + manager.escapeTableName(tableName) + "(id INT NOT NULL)");
       s.executeUpdate();
       c.commit();
       insertIdRows(tableName, 0, insertRows);
@@ -225,7 +227,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("CREATE TABLE " + tableName + "(id INT NOT NULL, "
+      s = c.prepareStatement("CREATE TABLE " + manager.escapeTableName(tableName) + "(id INT NOT NULL, "
           + "last_modified TIMESTAMP)");
       s.executeUpdate();
       c.commit();
@@ -246,8 +248,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("CREATE TABLE " + tableName
-          + "(id varchar(20) NOT NULL)");
+      s = c.prepareStatement("CREATE TABLE " + manager.escapeTableName(tableName) + "(id varchar(20) NOT NULL)");
       s.executeUpdate();
       c.commit();
       insertIdVarcharRows(tableName, 0, insertRows);
@@ -719,7 +720,7 @@ public class TestIncrementalImport extends TestCase {
     createIdTable(TABLE_NAME, 0);
     clearDir(TABLE_NAME);
 
-    final String QUERY = "SELECT id FROM withQuery WHERE $CONDITIONS";
+    final String QUERY = "SELECT id FROM \"withQuery\" WHERE $CONDITIONS";
 
     List<String> args = getArgListForQuery(QUERY, TABLE_NAME,
       false, true, false);
@@ -945,8 +946,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("UPDATE " + TABLE_NAME
-          + " SET id=?, last_modified=? WHERE id=?");
+      s = c.prepareStatement("UPDATE " + manager.escapeTableName(TABLE_NAME) + " SET id=?, last_modified=? WHERE id=?");
       s.setInt(1, 4000); // the first row should have '4000' in it now.
       s.setTimestamp(2, new Timestamp(rowsAddedTime));
       s.setInt(3, 0);
@@ -991,8 +991,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("UPDATE " + TABLE_NAME
-          + " SET id=?, last_modified=? WHERE id=?");
+      s = c.prepareStatement("UPDATE " + manager.escapeTableName(TABLE_NAME) + " SET id=?, last_modified=? WHERE id=?");
       s.setInt(1, 4000); // the first row should have '4000' in it now.
       s.setTimestamp(2, new Timestamp(rowsAddedTime));
       s.setInt(3, 0);
@@ -1022,7 +1021,7 @@ public class TestIncrementalImport extends TestCase {
     Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
     createTimestampTable(TABLE_NAME, 10, thePast);
 
-    final String QUERY = "SELECT id, last_modified FROM UpdateModifyWithTimestampWithQuery WHERE $CONDITIONS";
+    final String QUERY = "SELECT id, last_modified FROM \"UpdateModifyWithTimestampWithQuery\" WHERE $CONDITIONS";
 
     List<String> args = getArgListForQuery(QUERY, TABLE_NAME,
         true, false, false);
@@ -1045,8 +1044,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("UPDATE " + TABLE_NAME
-          + " SET id=?, last_modified=? WHERE id=?");
+      s = c.prepareStatement("UPDATE " + manager.escapeTableName(TABLE_NAME) + " SET id=?, last_modified=? WHERE id=?");
       s.setInt(1, 4000); // the first row should have '4000' in it now.
       s.setTimestamp(2, new Timestamp(rowsAddedTime));
       s.setInt(3, 0);
@@ -1096,8 +1094,7 @@ public class TestIncrementalImport extends TestCase {
     Connection c = manager.getConnection();
     PreparedStatement s = null;
     try {
-      s = c.prepareStatement("UPDATE " + TABLE_NAME
-          + " SET id=?, last_modified=? WHERE id=?");
+      s = c.prepareStatement("UPDATE " + manager.escapeTableName(TABLE_NAME) + " SET id=?, last_modified=? WHERE id=?");
       s.setInt(1, 4000); // the first row should have '4000' in it now.
       s.setTimestamp(2, new Timestamp(rowsAddedTime));
       s.setInt(3, 0);
@@ -1219,5 +1216,21 @@ public class TestIncrementalImport extends TestCase {
     runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
+
+  // SQOOP-1890
+  public void testTableNameWithSpecialCharacters() throws Exception {
+    // Table name with special characters to verify proper table name escaping
+    final String TABLE_NAME = "my-table.ext";
+    createIdTable(TABLE_NAME, 0);
+
+    // Now add some rows.
+    insertIdRows(TABLE_NAME, 0, 10);
+
+    List<String> args = getArgListForTable(TABLE_NAME, false, true);
+    createJob("emptyJob", args);
+    runJob("emptyJob");
+    assertDirOfNumbers(TABLE_NAME, 10);
+  }
+
 }
 

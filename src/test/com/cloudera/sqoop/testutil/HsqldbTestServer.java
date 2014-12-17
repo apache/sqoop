@@ -147,9 +147,8 @@ public class HsqldbTestServer {
       connection = getConnection();
 
       st = connection.createStatement();
-      st.executeUpdate("DROP TABLE " + DUMMY_TABLE_NAME + " IF EXISTS");
-      st.executeUpdate("CREATE TABLE " + DUMMY_TABLE_NAME
-          + "(intField1 INT, intField2 INT)");
+      st.executeUpdate("DROP TABLE \"" + DUMMY_TABLE_NAME + "\" IF EXISTS");
+      st.executeUpdate("CREATE TABLE \"" + DUMMY_TABLE_NAME + "\"(intField1 INT, intField2 INT)");
 
       connection.commit();
     } finally {
@@ -182,10 +181,10 @@ public class HsqldbTestServer {
       connection = getConnection();
 
       st = connection.createStatement();
-      st.executeUpdate("INSERT INTO " + DUMMY_TABLE_NAME + " VALUES(1, 8)");
-      st.executeUpdate("INSERT INTO " + DUMMY_TABLE_NAME + " VALUES(3, 6)");
-      st.executeUpdate("INSERT INTO " + DUMMY_TABLE_NAME + " VALUES(5, 4)");
-      st.executeUpdate("INSERT INTO " + DUMMY_TABLE_NAME + " VALUES(7, 2)");
+      st.executeUpdate("INSERT INTO \"" + DUMMY_TABLE_NAME + "\" VALUES(1, 8)");
+      st.executeUpdate("INSERT INTO \"" + DUMMY_TABLE_NAME + "\" VALUES(3, 6)");
+      st.executeUpdate("INSERT INTO \"" + DUMMY_TABLE_NAME + "\" VALUES(5, 4)");
+      st.executeUpdate("INSERT INTO \"" + DUMMY_TABLE_NAME + "\" VALUES(7, 2)");
 
       connection.commit();
     } finally {
@@ -209,18 +208,13 @@ public class HsqldbTestServer {
       connection = getConnection();
 
       st = connection.createStatement();
-      st.executeUpdate("DROP TABLE " + EMPLOYEE_TABLE_NAME + " IF EXISTS");
-      st.executeUpdate("CREATE TABLE " + EMPLOYEE_TABLE_NAME
-          + "(emp_id INT NOT NULL PRIMARY KEY, name VARCHAR(64))");
+      st.executeUpdate("DROP TABLE \"" + EMPLOYEE_TABLE_NAME + "\" IF EXISTS");
+      st.executeUpdate("CREATE TABLE \"" + EMPLOYEE_TABLE_NAME + "\"(emp_id INT NOT NULL PRIMARY KEY, name VARCHAR(64))");
 
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
-          + " VALUES(1, 'Aaron')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
-          + " VALUES(2, 'Joe')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
-          + " VALUES(3, 'Jim')");
-      st.executeUpdate("INSERT INTO " + EMPLOYEE_TABLE_NAME
-          + " VALUES(4, 'Lisa')");
+      st.executeUpdate("INSERT INTO \"" + EMPLOYEE_TABLE_NAME + "\" VALUES(1, 'Aaron')");
+      st.executeUpdate("INSERT INTO \"" + EMPLOYEE_TABLE_NAME + "\" VALUES(2, 'Joe')");
+      st.executeUpdate("INSERT INTO \"" + EMPLOYEE_TABLE_NAME + "\" VALUES(3, 'Jim')");
+      st.executeUpdate("INSERT INTO \"" + EMPLOYEE_TABLE_NAME + "\" VALUES(4, 'Lisa')");
 
       connection.commit();
     } finally {
@@ -245,7 +239,7 @@ public class HsqldbTestServer {
       for (String table : tables) {
         Statement s = conn.createStatement();
         try {
-          s.executeUpdate("DROP TABLE " + table);
+          s.executeUpdate("DROP TABLE \"" + table + "\"");
           conn.commit();
         } finally {
           s.close();

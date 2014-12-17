@@ -76,7 +76,7 @@ public class TestSavedJobs extends TestCase {
     try {
       String [] tables = manager.listTables();
       for (String table : tables) {
-        s.executeUpdate("DROP TABLE " + table);
+        s.executeUpdate("DROP TABLE " + manager.escapeTableName(table));
       }
 
       c.commit();

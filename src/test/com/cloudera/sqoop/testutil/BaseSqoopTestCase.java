@@ -281,7 +281,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
   protected void dropTableIfExists(String table) throws SQLException {
     Connection conn = getManager().getConnection();
     PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE " + table + " IF EXISTS",
+        "DROP TABLE \"" + table + "\" IF EXISTS",
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();
@@ -322,8 +322,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
           }
         }
 
-        createTableStr = "CREATE TABLE " + getTableName()
-            + "(" + columnDefStr + ")";
+        createTableStr = "CREATE TABLE \"" + getTableName() + "\"(" + columnDefStr + ")";
         LOG.info("Creating table: " + createTableStr);
         statement = conn.prepareStatement(
             createTableStr,
@@ -357,8 +356,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
           }
         }
         try {
-          String insertValsStr = "INSERT INTO " + getTableName()
-              + "(" + columnListStr + ")"
+          String insertValsStr = "INSERT INTO \"" + getTableName() + "\"(" + columnListStr + ")"
               + " VALUES(" + valueListStr + ")";
           LOG.info("Inserting values: " + insertValsStr);
           statement = conn.prepareStatement(

@@ -92,32 +92,28 @@ public class TestMerge extends BaseSqoopTestCase {
   }
 
   protected void createTable() throws SQLException {
-    PreparedStatement s = conn.prepareStatement("DROP TABLE " + TABLE_NAME
-        + " IF EXISTS");
+    PreparedStatement s = conn.prepareStatement("DROP TABLE \"" + TABLE_NAME + "\" IF EXISTS");
     try {
       s.executeUpdate();
     } finally {
       s.close();
     }
 
-    s = conn.prepareStatement("CREATE TABLE " + TABLE_NAME
-        + " (id INT NOT NULL PRIMARY KEY, val INT, lastmod TIMESTAMP)");
+    s = conn.prepareStatement("CREATE TABLE \"" + TABLE_NAME + "\" (id INT NOT NULL PRIMARY KEY, val INT, lastmod TIMESTAMP)");
     try {
       s.executeUpdate();
     } finally {
       s.close();
     }
 
-    s = conn.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES ("
-        + "0, 0, NOW())");
+    s = conn.prepareStatement("INSERT INTO \"" + TABLE_NAME + "\" VALUES (0, 0, NOW())");
     try {
       s.executeUpdate();
     } finally {
       s.close();
     }
 
-    s = conn.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES ("
-        + "1, 42, NOW())");
+    s = conn.prepareStatement("INSERT INTO \"" + TABLE_NAME + "\" VALUES (1, 42, NOW())");
     try {
       s.executeUpdate();
     } finally {
@@ -178,8 +174,7 @@ public class TestMerge extends BaseSqoopTestCase {
     Thread.sleep(25);
 
     // Modify the data in the warehouse.
-    PreparedStatement s = conn.prepareStatement("UPDATE " + TABLE_NAME
-        + " SET val=43, lastmod=NOW() WHERE id=1");
+    PreparedStatement s = conn.prepareStatement("UPDATE \"" + TABLE_NAME + "\" SET val=43, lastmod=NOW() WHERE id=1");
     try {
       s.executeUpdate();
       conn.commit();
@@ -187,8 +182,7 @@ public class TestMerge extends BaseSqoopTestCase {
       s.close();
     }
 
-    s = conn.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES ("
-        + "3,313,NOW())");
+    s = conn.prepareStatement("INSERT INTO \"" + TABLE_NAME + "\" VALUES (3,313,NOW())");
     try {
       s.executeUpdate();
       conn.commit();
