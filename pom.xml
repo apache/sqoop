@@ -119,6 +119,9 @@ limitations under the License.
     <slf4j.version>1.6.1</slf4j.version>
     <zookeeper.version>3.4.6</zookeeper.version>
     <kafka.version>0.8.1.1</kafka.version>
+    <jackson.core.version>2.2.2</jackson.core.version>
+    <jackson.databind.version>2.2.2</jackson.databind.version>
+    <jackson.annotations.version>2.2.2</jackson.annotations.version>
   </properties>
 
   <dependencies>
@@ -555,6 +558,21 @@ limitations under the License.
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka_2.10</artifactId>
         <version>${kafka.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.annotations.version}</version>
+      </dependency>
+       <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.databind.version}</version>
       </dependency>
    </dependencies>
   </dependencyManagement>
