@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.matcher;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.Schema;
 
 public abstract class Matcher {
@@ -27,7 +28,8 @@ public abstract class Matcher {
 
   public Matcher(Schema fromSchema, Schema toSchema) {
     if (fromSchema.isEmpty() && toSchema.isEmpty()) {
-      throw new SqoopException(MatcherError.MATCHER_0000, "Neither a FROM or TO schemas been provided.");
+      this.fromSchema = ByteArraySchema.getInstance();
+      this.toSchema = ByteArraySchema.getInstance();
     } else if (toSchema.isEmpty()) {
       this.fromSchema = fromSchema;
       this.toSchema = fromSchema;

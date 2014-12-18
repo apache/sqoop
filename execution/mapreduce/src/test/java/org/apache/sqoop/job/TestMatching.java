@@ -17,11 +17,14 @@
  */
 package org.apache.sqoop.job;
 
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.BYTE_FIELD_CHARSET;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
 import static org.junit.Assert.assertEquals;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -39,6 +42,8 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
+import org.apache.sqoop.connector.matcher.Matcher;
+import org.apache.sqoop.connector.matcher.MatcherFactory;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.job.etl.Partition;
@@ -49,6 +54,7 @@ import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.util.MRJobTestUtil;
+import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
@@ -154,6 +160,39 @@ public class TestMatching {
         Assert.assertEquals("Job succeeded!", false, success);
       }
     }
+  }
+
+
+  @Test
+  public void testSchemalessFromAndTo() throws UnsupportedEncodingException {
+    CSVIntermediateDataFormat dataFormat = new CSVIntermediateDataFormat();
+    String testData = "\"This is the data you are looking for. It has no structure.\"";
+    Object[] testObject = new Object[] {testData.getBytes(BYTE_FIELD_CHARSET)};
+    Object[] testObjectCopy = new Object[1];
+    System.arraycopy(testObject,0,testObjectCopy,0,testObject.length);
+
+    Matcher matcher = MatcherFactory.getMatcher(NullSchema.getInstance(),
+            NullSchema.getInstance());
+    // Checking FROM side only because currently that is the only IDF that is used
+    dataFormat.setSchema(matcher.getFromSchema());
+
+    // Setting data as CSV and validating getting CSV and object
+    dataFormat.setCSVTextData(testData);
+
+    String validateCSV = dataFormat.getCSVTextData();
+    Object[] validateObj = dataFormat.getObjectData();
+
+    assertEquals(testData, validateCSV);
+    assertEquals(testObject, validateObj);
+
+    // Setting data as Object
+    dataFormat.setObjectData(testObject);
+
+    validateCSV = toText(dataFormat.getCSVTextData());
+    validateObj = dataFormat.getObjectData();
+
+    assertEquals(testData, validateCSV);
+    assertEquals(testObjectCopy, validateObj);
   }
 
   public static class DummyPartition extends Partition {

@@ -32,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
+
 public class KafkaConnectorTestCase extends ConnectorTestCase {
   private static TestUtil testUtil = TestUtil.getInstance();
   private static final String TOPIC = "mytopic";
@@ -72,7 +74,7 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
       MessageAndMetadata<byte[],byte[]> fetchedMsg =
               testUtil.getNextMessageFromConsumer(TOPIC);
       Assert.assertEquals(str,
-              new String(fetchedMsg.message(), "UTF-8"));
+              toText(new String(fetchedMsg.message(), "UTF-8")));
     }
   }
 }
