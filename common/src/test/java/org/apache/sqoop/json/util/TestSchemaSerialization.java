@@ -23,7 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JSONUtils;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -59,6 +61,35 @@ public class TestSchemaSerialization {
   @Test
   public void testNullSchemaObject() {
     transferAndAssert(NullSchema.getInstance());
+  }
+
+  @SuppressWarnings("unused")
+  @Test(expected = SqoopException.class)
+  public void testEmptySchemaName() {
+    Schema schema = new Schema("");
+  }
+
+  @SuppressWarnings("unused")
+  @Test(expected = SqoopException.class)
+  public void testNullSchemaName() {
+    Schema schema = new Schema(null);
+  }
+
+  @SuppressWarnings("unused")
+  @Test(expected = SqoopException.class)
+  public void testSchemaWithNullColumnName() {
+    Schema schema = new Schema("test").addColumn(new Text(null));
+  }
+
+  @SuppressWarnings("unused")
+  @Test(expected = SqoopException.class)
+  public void testSchemaWithEmptyColumnName() {
+    Schema schema = new Schema("test").addColumn(new Text(""));
+  }
+
+  @Test
+  public void testByteArraySchemaObject() {
+    transferAndAssert(ByteArraySchema.getInstance());
   }
 
   @Test

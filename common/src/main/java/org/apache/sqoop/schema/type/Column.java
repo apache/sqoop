@@ -18,6 +18,8 @@
 package org.apache.sqoop.schema.type;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.schema.SchemaError;
 
 /**
  * Base class for all the supported types in the Sqoop {@link #Schema}
@@ -42,7 +44,9 @@ public abstract class Column {
   }
 
   public Column(String name, Boolean nullable) {
-    assert !StringUtils.isEmpty(name);
+    if (StringUtils.isEmpty(name)) {
+      throw new SqoopException(SchemaError.SCHEMA_0001, "Column name: " + name);
+    }
     this.name = name;
     setNullable(nullable);
   }

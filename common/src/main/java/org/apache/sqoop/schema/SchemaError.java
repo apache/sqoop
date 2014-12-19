@@ -34,7 +34,9 @@ public enum SchemaError implements ErrorCode {
 
   SCHEMA_0004("Non-null target column has no matching source column"),
 
-  SCHEMA_0005("No matching method available for source and target schemas")
+  SCHEMA_0005("No matching method available for source and target schemas"),
+
+  SCHEMA_0006("Schema without name"),
 
   ;
 

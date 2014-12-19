@@ -19,6 +19,7 @@ package org.apache.sqoop.schema;
 
 public class NullSchema extends Schema {
 
+  private static final String NULL_SCHEMA_NAME = "NullSchema";
   public static final NullSchema instance = new NullSchema();
 
   public static NullSchema getInstance() {
@@ -27,6 +28,6 @@ public class NullSchema extends Schema {
 
   private NullSchema() {
     // empty string is the name
-    super("");
+    super(NULL_SCHEMA_NAME);
   }
 }

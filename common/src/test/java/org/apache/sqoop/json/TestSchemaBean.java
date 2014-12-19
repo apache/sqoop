@@ -37,13 +37,10 @@ public class TestSchemaBean extends TestSchemaSerialization {
   protected Schema transfer(Schema schema) {
     SchemaBean extractBean = new SchemaBean(schema);
     JSONObject extractJson = extractBean.extract(true);
-
     String transferredString = extractJson.toJSONString();
-
     JSONObject restoreJson = JSONUtils.parse(transferredString);
     SchemaBean restoreBean = new SchemaBean();
     restoreBean.restore(restoreJson);
-
     return restoreBean.getSchema();
   }
 }

@@ -65,7 +65,9 @@ public class Schema {
 
   public Schema(String name) {
     this();
-    assert name != null;
+    if (StringUtils.isEmpty(name)) {
+      throw new SqoopException(SchemaError.SCHEMA_0006, "Schema: " + name);
+    }
     this.name = name;
   }
 
@@ -80,10 +82,6 @@ public class Schema {
    * @return a reference to this object
    */
   public Schema addColumn(Column column) {
-    if(column.getName() == null) {
-      throw new SqoopException(SchemaError.SCHEMA_0001, "Column: " + column);
-    }
-
     if(columNames.contains(column.getName())) {
       throw new SqoopException(SchemaError.SCHEMA_0002, "Column: " + column);
     }

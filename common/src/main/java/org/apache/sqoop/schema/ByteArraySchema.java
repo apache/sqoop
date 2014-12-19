@@ -20,14 +20,16 @@ package org.apache.sqoop.schema;
 import org.apache.sqoop.schema.type.Binary;
 
 /***
- * Schema holding a single field of Binary data
- * Used to support connectors to schemaless / unstructured systems
- * Such as HDFS or Kafka
+ * Schema holding a single field of Binary data Used to support connectors to
+ * schemaless / unstructured systems Such as HDFS or Kafka
  */
 public class ByteArraySchema extends Schema {
 
+  private static final String BYTE_ARRAY_SCHEMA_NAME = "ByteArraySchema";
+  private static final String BYTE_ARRAY_COLUMN_NAME = "ByteArraySchema_Bytes";
+
   public static final ByteArraySchema instance = (ByteArraySchema) new ByteArraySchema()
-          .addColumn(new Binary("ByteArraySchema_Bytes"));
+      .addColumn(new Binary(BYTE_ARRAY_COLUMN_NAME));
 
   public static ByteArraySchema getInstance() {
     return instance;
@@ -35,6 +37,6 @@ public class ByteArraySchema extends Schema {
 
   // To avoid instantiation
   private ByteArraySchema() {
-    super("ByteArraySchema");
+    super(BYTE_ARRAY_SCHEMA_NAME);
   }
 }
