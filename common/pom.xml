@@ -33,6 +33,10 @@ limitations under the License.
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-common-test</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>

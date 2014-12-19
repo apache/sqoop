@@ -54,7 +54,7 @@ Maven target ``package`` can be used to create Sqoop packages similar to the one
 Running tests
 -------------
 
-Sqoop supports two different sets of tests. First smaller and much faster set is called unit tests and will be executed on maven target ``test``. Second larger set of integration tests will be executed on maven target ``integration-test``. Please note that integration tests might require manual steps for installing various JDBC drivers into your local maven cache.
+Sqoop supports two different sets of tests. First smaller and much faster set is called **unit tests** and will be executed on maven target ``test``. Second larger set of **integration tests** will be executed on maven target ``integration-test``. Please note that integration tests might require manual steps for installing various JDBC drivers into your local maven cache.
 
 Example for running unit tests:
 
@@ -67,3 +67,10 @@ Example for running integration tests:
 ::
 
   mvn integration-test
+
+For the **unit tests**, there are two helpful profiles: **fast** and **slow**. The **fast** unit tests do not start or use any services. The **slow** unit tests, may start services or use an external service (ie. MySQL).
+
+::
+
+  mvn test -Pfast,hadoop200
+  mvn test -Pslow,hadoop200
