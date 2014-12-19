@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
-
 
 // NOTE: If you have signed yourself to modify the schema for the repository
 // such as a rename, change in table relationships or constraints, embrace yourself!

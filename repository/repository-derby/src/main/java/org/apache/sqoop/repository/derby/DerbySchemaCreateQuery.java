@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.repository.derby;
 
+
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
 
 /**

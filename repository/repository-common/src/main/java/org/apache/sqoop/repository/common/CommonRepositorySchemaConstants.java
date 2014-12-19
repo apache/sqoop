@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.repository.common;
 
+// NOTE: This contains and should only contain common repo constants
+// PLEASE DO NOT ADD SPECIFIC REPO CONSTANTS HERE
 public final class CommonRepositorySchemaConstants {
 
   public static final String SCHEMA_SQOOP = "SQOOP";
 
-  private static final String SCHEMA_PREFIX = SCHEMA_SQOOP + ".";
+  public static final String SCHEMA_PREFIX = SCHEMA_SQOOP + ".";
+
+  public static final String CONSTRAINT_PREFIX = "FK_";
 
   // SQ_DIRECTION
 
@@ -55,6 +59,8 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_CONNECTOR_DIRECTIONS = SCHEMA_PREFIX
       + TABLE_SQ_CONNECTOR_DIRECTIONS_NAME;
+
+  public static final String COLUMN_SQCD_ID = "SQCD_ID";
 
   public static final String COLUMN_SQCD_CONNECTOR = "SQCD_CONNECTOR";
 
