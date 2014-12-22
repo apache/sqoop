@@ -390,8 +390,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + COLUMN_SQS_UPDATE_DATE + ", "
           + COLUMN_SQS_EXTERNAL_ID + ", "
           + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_EXCEPTION + ", "
-          + COLUMN_SQS_EXCEPTION_TRACE + ") "
+          + COLUMN_SQS_ERROR_SUMMARY + ", "
+          + COLUMN_SQS_ERROR_DETAILS + ") "
           + " VALUES(?, ?, ?, ?, ?, ?, ?, substr(?, 1, 150) , substr(?, 1, 150), substr(?, 1, 750))";
 
   // DML: Update existing submission
@@ -400,8 +400,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + COLUMN_SQS_STATUS + " = ?, "
           + COLUMN_SQS_UPDATE_USER + " = ?, "
           + COLUMN_SQS_UPDATE_DATE + " = ?, "
-          + COLUMN_SQS_EXCEPTION + " = ?, "
-          + COLUMN_SQS_EXCEPTION_TRACE + " = ?"
+          + COLUMN_SQS_ERROR_SUMMARY+ " = substr(?, 1, 150), "
+          + COLUMN_SQS_ERROR_DETAILS + " = substr(?, 1, 750)"
           + " WHERE " + COLUMN_SQS_ID + " = ?";
 
   // DML: Check if given submission exists
@@ -428,8 +428,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + COLUMN_SQS_UPDATE_DATE + ", "
           + COLUMN_SQS_EXTERNAL_ID + ", "
           + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_EXCEPTION + ", "
-          + COLUMN_SQS_EXCEPTION_TRACE
+          + COLUMN_SQS_ERROR_SUMMARY + ", "
+          + COLUMN_SQS_ERROR_DETAILS
           + " FROM " + TABLE_SQ_SUBMISSION
           + " WHERE " + COLUMN_SQS_STATUS + " = ?";
 
@@ -445,8 +445,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + COLUMN_SQS_UPDATE_DATE + ", "
           + COLUMN_SQS_EXTERNAL_ID + ", "
           + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_EXCEPTION + ", "
-          + COLUMN_SQS_EXCEPTION_TRACE
+          + COLUMN_SQS_ERROR_SUMMARY + ", "
+          + COLUMN_SQS_ERROR_DETAILS
           + " FROM " + TABLE_SQ_SUBMISSION
           + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";
 
@@ -462,8 +462,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + COLUMN_SQS_UPDATE_DATE + ", "
           + COLUMN_SQS_EXTERNAL_ID + ", "
           + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_EXCEPTION + ", "
-          + COLUMN_SQS_EXCEPTION_TRACE
+          + COLUMN_SQS_ERROR_SUMMARY + ", "
+          + COLUMN_SQS_ERROR_DETAILS
           + " FROM " + TABLE_SQ_SUBMISSION
           + " WHERE " + COLUMN_SQS_JOB + " = ?"
           + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";

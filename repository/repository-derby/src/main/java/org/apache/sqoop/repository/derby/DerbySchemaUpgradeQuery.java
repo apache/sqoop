@@ -500,6 +500,14 @@ public final class DerbySchemaUpgradeQuery {
       + " UNIQUE ("
       + COLUMN_SQI_NAME + ", " + COLUMN_SQI_TYPE + ", " + COLUMN_SQI_CONFIG + ")";
 
+  // rename exception to error_summary
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_1 = "RENAME COLUMN "
+      + TABLE_SQ_SUBMISSION + "." + COLUMN_SQS_EXCEPTION + " TO " + COLUMN_SQS_ERROR_SUMMARY;
+
+  //rename exception_trace to error_details
+  public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_2 = "RENAME COLUMN "
+      + TABLE_SQ_SUBMISSION + "." + COLUMN_SQS_EXCEPTION_TRACE + " TO " + COLUMN_SQS_ERROR_DETAILS;
+
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }

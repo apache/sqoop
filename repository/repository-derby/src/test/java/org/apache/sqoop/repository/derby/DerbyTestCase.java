@@ -212,6 +212,9 @@ abstract public class DerbyTestCase {
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIGURABLE_ID);
       // add sq_input uniqueness constraint
       runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIG_ID);
+      // add submission table column name renames
+      runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_1);
+      runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_2);
     }
 
     // deprecated repository version
@@ -808,7 +811,7 @@ abstract public class DerbyTestCase {
 
     runQuery("INSERT INTO SQOOP.SQ_SUBMISSION"
         + "(SQS_JOB, SQS_STATUS, SQS_CREATION_DATE, SQS_UPDATE_DATE,"
-        + " SQS_EXTERNAL_ID, SQS_EXTERNAL_LINK, SQS_EXCEPTION," + " SQS_EXCEPTION_TRACE)"
+        + " SQS_EXTERNAL_ID, SQS_EXTERNAL_LINK, SQS_ERROR_SUMMARY," + " SQS_ERROR_DETAILS)"
         + "VALUES " + "(1, 'RUNNING', '2012-01-01 01:01:01', '2012-01-01 01:01:01', 'job_1',"
         + "NULL, NULL, NULL),"
         + "(2, 'SUCCEEDED', '2012-01-01 01:01:01', '2012-01-02 01:01:01', 'job_2',"

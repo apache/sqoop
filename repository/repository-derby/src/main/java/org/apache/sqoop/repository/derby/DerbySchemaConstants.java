@@ -327,6 +327,13 @@ public final class DerbySchemaConstants {
 
   public static final String CONSTRAINT_SQS_SQB = SCHEMA_PREFIX + CONSTRAINT_SQS_SQB_NAME;
 
+  @Deprecated
+ // used only for upgrade
+  public static final String COLUMN_SQS_EXCEPTION = "SQS_EXCEPTION";
+  @Deprecated
+ // used only for upgrade
+  public static final String COLUMN_SQS_EXCEPTION_TRACE = "SQS_EXCEPTION_TRACE";
+
   // SQ_COUNTER_SUBMISSION
   // constraints relevant only in derby
   public static final String CONSTRAINT_SQRS_SQG_NAME = CONSTRAINT_PREFIX + "SQRS_SQG";

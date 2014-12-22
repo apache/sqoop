@@ -122,8 +122,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(1, submission.getPersistenceId());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
 
-    List<MSubmission> submissions =
-      handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
+    List<MSubmission> submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
 
@@ -166,8 +165,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(400, counter.getValue());
 
     // Let's create second (simpler) connection
-    submission =
-      new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
+    submission = new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
     handler.createSubmission(submission, getDerbyDatabaseConnection());
 
     assertEquals(2, submission.getPersistenceId());
@@ -175,11 +173,10 @@ public class TestSubmissionHandling extends DerbyTestCase {
   }
 
   @Test
-  public void testUpdateConnection() throws Exception {
+  public void testUpdateSubmission() throws Exception {
     loadSubmissions();
 
-    List<MSubmission> submissions =
-      handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
+    List<MSubmission> submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(2, submissions.size());
 
@@ -191,6 +188,78 @@ public class TestSubmissionHandling extends DerbyTestCase {
     submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
+  }
+
+  @Test
+  public void testCreateSubmissionExceptionDetailsMoreThanMaxLimit() throws Exception {
+
+    String externalLink = "http://somewheresomewheresomewheresomewheresomewheresomewheresomewheresomewheresomewheresomewheresomewheresom"
+        + "ewheresomewheresomewheresomewheresomewher";
+
+    String errorSummary = "RuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptions"
+        + "RuntimeExceptionRuntimeExceptionRuntimeExceptiontests";
+    String errorDetail = "Yeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah"
+        + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it hap"
+        + "pensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYea"
+        + "h it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it ha"
+        + "ppensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah"
+        + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happe"
+        + "nsYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happens";
+    MSubmission submission = new MSubmission();
+    submission.setJobId(1);
+    submission.setStatus(SubmissionStatus.RUNNING);
+    submission.setCreationDate(new Date());
+    submission.setLastUpdateDate(new Date());
+    submission.setExternalJobId("job-x");
+    submission.setExternalLink(externalLink + "more than 150");
+    submission.getError().setErrorSummary("RuntimeException");
+    submission.getError().setErrorDetails(errorDetail + "morethan750");
+    submission.getError().setErrorSummary(errorSummary + "morethan150");
+
+    handler.createSubmission(submission, getDerbyDatabaseConnection());
+    List<MSubmission> submissions = handler.findSubmissionsForJob(1, getDerbyDatabaseConnection());
+    assertNotNull(submissions);
+
+    assertEquals(errorDetail, submissions.get(0).getError().getErrorDetails());
+    assertEquals(errorSummary, submissions.get(0).getError().getErrorSummary());
+    assertEquals(externalLink, submissions.get(0).getExternalLink());
+
+  }
+
+  @Test
+  public void testUpdateSubmissionExceptionDetailsMoreThanMaxLimit() throws Exception {
+    loadSubmissions();
+
+    List<MSubmission> submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
+    assertNotNull(submissions);
+    assertEquals(2, submissions.size());
+
+    String errorSummary = "RuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptionRuntimeExceptions"
+        + "RuntimeExceptionRuntimeExceptionRuntimeExceptiontests";
+
+    String errorDetail = "Yeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah"
+        + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it hap"
+        + "pensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYea"
+        + "h it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it ha"
+        + "ppensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah"
+        + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happe"
+        + "nsYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happens";
+    MSubmission submission = submissions.get(0);
+    String externalLink = submission.getExternalLink();
+    submission.getError().setErrorDetails(errorDetail + "morethan750");
+    submission.getError().setErrorSummary(errorSummary + "morethan150");
+    submission.setExternalLink("cantupdate");
+
+    handler.updateSubmission(submission, getDerbyDatabaseConnection());
+
+    submissions = handler.findUnfinishedSubmissions(getDerbyDatabaseConnection());
+
+    assertNotNull(submissions);
+    assertEquals(errorDetail, submissions.get(0).getError().getErrorDetails());
+    assertEquals(errorSummary, submissions.get(0).getError().getErrorSummary());
+    // note we dont allow external link update
+    assertEquals(externalLink, submissions.get(0).getExternalLink());
+
   }
 
   @Test
