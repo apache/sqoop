@@ -31,12 +31,16 @@ import java.io.IOException;
 
 /**
  * Writable used to load the data to the {@link #Transferable} entity TO
+ * It is used for the map output key class and the outputFormat key class in the MR engine
+ * For instance: job.setMapOutputKeyClass(..,) and  job.setOutputKeyClass(...);
  */
 
 public class SqoopWritable implements Configurable, WritableComparable<SqoopWritable> {
   private IntermediateDataFormat<?> toIDF;
   private Configuration conf;
 
+  // NOTE: You have to provide an empty default constructor in your key class
+  // Hadoop is using reflection and it can not guess any parameters to feed
   public SqoopWritable() {
     this(null);
   }
@@ -45,12 +49,9 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
     this.toIDF = dataFormat;
   }
 
-  public void setString(String data) {
+  // default/package visibility for testing
+  void setString(String data) {
     this.toIDF.setCSVTextData(data);
-  }
-
-  public String getString() {
-    return toIDF.getCSVTextData();
   }
 
   @Override
@@ -67,12 +68,12 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
 
   @Override
   public int compareTo(SqoopWritable o) {
-    return getString().compareTo(o.getString());
+    return toString().compareTo(o.toString());
   }
 
   @Override
   public String toString() {
-    return getString();
+    return toIDF.getCSVTextData();
   }
 
   @Override

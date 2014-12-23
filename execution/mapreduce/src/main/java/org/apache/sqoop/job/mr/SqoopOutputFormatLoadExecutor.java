@@ -102,7 +102,7 @@ public class SqoopOutputFormatLoadExecutor {
       free.acquire();
       checkIfConsumerThrew();
       // NOTE: this is the place where data written from SqoopMapper writable is available to the SqoopOutputFormat
-      toDataFormat.setCSVTextData(key.getString());
+      toDataFormat.setCSVTextData(key.toString());
       filled.release();
     }
 

@@ -18,6 +18,11 @@
  */
 package org.apache.sqoop.job.io;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -28,61 +33,72 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
-import org.junit.Assert;
+import org.apache.sqoop.connector.idf.IntermediateDataFormat;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TestSqoopWritable {
 
-  private final SqoopWritable writable = new SqoopWritable(new CSVIntermediateDataFormat());
+  private SqoopWritable writable;
+  private IntermediateDataFormat<?> idfMock;
+
+  @Before
+  public void setUp() {
+    idfMock = mock(IntermediateDataFormat.class);
+    writable = new SqoopWritable(idfMock);
+  }
 
   @Test
   public void testStringInStringOut() {
     String testData = "Live Long and prosper";
     writable.setString(testData);
-    Assert.assertEquals(testData,writable.getString());
+    verify(idfMock, times(1)).setCSVTextData(testData);
+    writable.toString();
+    verify(idfMock, times(1)).getCSVTextData();
   }
 
   @Test
-  public void testDataWritten() throws IOException {
+  public void testWrite() throws IOException {
     String testData = "One ring to rule them all";
-    writable.setString(testData);
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+    ostream.write(testData.getBytes());
     DataOutput out = new DataOutputStream(ostream);
     writable.write(out);
-    byte[] written = ostream.toByteArray();
-    InputStream instream = new ByteArrayInputStream(written);
-    DataInput in = new DataInputStream(instream);
-    String readData = in.readUTF();
-    Assert.assertEquals(testData, readData);
+    // verify that the idf method is called, that is all the test should test
+    verify(idfMock, times(1)).write(out);
+    ostream.close();
   }
 
   @Test
-  public void testDataRead() throws IOException {
+  public void testReadFields() throws IOException {
     String testData = "Brandywine Bridge - 20 miles!";
-    ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-    DataOutput out = new DataOutputStream(ostream);
-    out.writeUTF(testData);
-    InputStream instream = new ByteArrayInputStream(ostream.toByteArray());
+    InputStream instream = new ByteArrayInputStream(testData.getBytes());
     DataInput in = new DataInputStream(instream);
     writable.readFields(in);
-    Assert.assertEquals(testData, writable.getString());
+    // verify that the idf method is called, that is all the test should test
+    verify(idfMock, times(1)).read(in);
+    instream.close();
   }
 
+  // NOTE: This test is testing that the write and readFields methods work
+  // and not really testing anything about SqoopWritable. Have kept this test since
+  // it existed before.
   @Test
-  public void testWriteReadUsingStream() throws IOException {
+  public void testWriteAndReadFields() throws IOException {
     String testData = "You shall not pass";
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(ostream);
-    writable.setString(testData);
-    writable.write(out);
+    SqoopWritable writableOne = new SqoopWritable(new CSVIntermediateDataFormat());
+    writableOne.setString(testData);
+    writableOne.write(out);
     byte[] written = ostream.toByteArray();
 
-    //Don't test what the data is, test that SqoopWritable can read it.
+    // Don't test what the data is, test that SqoopWritable can read it.
     InputStream instream = new ByteArrayInputStream(written);
-    SqoopWritable newWritable = new SqoopWritable(new CSVIntermediateDataFormat());
+    SqoopWritable writableTwo = new SqoopWritable(new CSVIntermediateDataFormat());
     DataInput in = new DataInputStream(instream);
-    newWritable.readFields(in);
-    Assert.assertEquals(testData, newWritable.getString());
+    writableTwo.readFields(in);
+    assertEquals(writableOne.toString(), writableTwo.toString());
     ostream.close();
     instream.close();
   }

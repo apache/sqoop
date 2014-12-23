@@ -44,16 +44,16 @@ public class MRJobTestUtil {
 
   @SuppressWarnings("deprecation")
   public static boolean runJob(Configuration conf,
-      Class<? extends InputFormat<SqoopSplit, NullWritable>> input,
-      Class<? extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable>> mapper,
-      Class<? extends OutputFormat<SqoopWritable, NullWritable>> output) throws IOException,
+      Class<? extends InputFormat<SqoopSplit, NullWritable>> inputFormatClass,
+      Class<? extends Mapper<SqoopSplit, NullWritable, SqoopWritable, NullWritable>> mapperClass,
+      Class<? extends OutputFormat<SqoopWritable, NullWritable>> outputFormatClass) throws IOException,
       InterruptedException, ClassNotFoundException {
     Job job = new Job(conf);
-    job.setInputFormatClass(input);
-    job.setMapperClass(mapper);
+    job.setInputFormatClass(inputFormatClass);
+    job.setMapperClass(mapperClass);
     job.setMapOutputKeyClass(SqoopWritable.class);
     job.setMapOutputValueClass(NullWritable.class);
-    job.setOutputFormatClass(output);
+    job.setOutputFormatClass(outputFormatClass);
     job.setOutputKeyClass(SqoopWritable.class);
     job.setOutputValueClass(NullWritable.class);
 
@@ -62,7 +62,7 @@ public class MRJobTestUtil {
     // Hadoop 1.0 (and 0.20) have nasty bug when job committer is not called in
     // LocalJobRuner
     if (isHadoop1()) {
-      callOutputCommitter(job, output);
+      callOutputCommitter(job, outputFormatClass);
     }
 
     return ret;
