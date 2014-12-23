@@ -219,7 +219,20 @@ def mvn_rat(result, output_dir):
   if rc == 0:
     result.success("License check passed")
   else:
-    result.fatal("Failed to run license check (exit code %d)" % (rc))
+    incorrect_files = []
+    for path in list(find_all_files(".")):
+      file_name = os.path.basename(path)
+      if file_name == "rat.txt":
+        fd = open(path)
+        for line in fd:
+          if "!?????" in line:
+            matcher = re.search("\!\?\?\?\?\? (.*)$", line)
+            if matcher:
+              incorrect_files += [ matcher.groups()[0] ]
+        fd.close()
+    for incorrect_file in set(incorrect_files):
+      result.error("File {{%s}} have missing licence header" % (incorrect_file))
+    result.error("Failed to run license check (exit code %d)" % (rc))
 
 def mvn_install(result, output_dir):
   rc = execute("mvn install -DskipTests 1>%s/install.txt 2>&1" % output_dir)
