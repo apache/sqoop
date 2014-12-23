@@ -38,6 +38,9 @@ import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
+
+  private long rowsWritten = 0;
+
   /**
    * Load data to target.
    *
@@ -79,19 +82,21 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
       GenericHdfsWriter filewriter = getWriter(toJobConfig);
 
-      filewriter.initialize(filepath,conf,codec);
+      filewriter.initialize(filepath, conf, codec);
 
       if (HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig)) {
         Object[] record;
 
         while ((record = reader.readArrayRecord()) != null) {
           filewriter.write(HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record));
+          rowsWritten++;
         }
       } else {
         String record;
 
         while ((record = reader.readTextRecord()) != null) {
           filewriter.write(record);
+          rowsWritten++;
         }
       }
       filewriter.destroy();
@@ -140,6 +145,14 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
     if (codec == null)
       return ".txt";
     return codec.getDefaultExtension();
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.sqoop.job.etl.Loader#getRowsWritten()
+   */
+  @Override
+  public long getRowsWritten() {
+    return rowsWritten;
   }
 
 }

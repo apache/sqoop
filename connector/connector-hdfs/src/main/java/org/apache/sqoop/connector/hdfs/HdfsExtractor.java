@@ -48,7 +48,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   private Configuration conf;
   private DataWriter dataWriter;
-  private long rowRead = 0;
+  private long rowsRead = 0;
 
   @Override
   public void extract(ExtractorContext context, LinkConfiguration linkConfiguration,
@@ -109,7 +109,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     Text line = new Text();
     boolean hasNext = filereader.next(line);
     while (hasNext) {
-      rowRead++;
+      rowsRead++;
       if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
         dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
       } else {
@@ -176,7 +176,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
       } else {
         next = fileseeker.getPos();
       }
-      rowRead++;
+      rowsRead++;
       if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
         dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
       } else {
@@ -189,7 +189,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   @Override
   public long getRowsRead() {
-    return rowRead;
+    return rowsRead;
   }
 
   /**

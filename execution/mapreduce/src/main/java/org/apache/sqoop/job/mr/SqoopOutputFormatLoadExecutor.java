@@ -42,7 +42,7 @@ import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.etl.io.DataReader;
-import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.utils.ClassUtils;
 
@@ -60,20 +60,20 @@ public class SqoopOutputFormatLoadExecutor {
   private Future<?> consumerFuture;
   private Semaphore filled = new Semaphore(0, true);
   private Semaphore free = new Semaphore(1, true);
-  private volatile boolean isTest = false;
   private String loaderName;
 
   // NOTE: This method is only exposed for test cases
-  SqoopOutputFormatLoadExecutor(boolean isTest, String loaderName, IntermediateDataFormat<?> idf) {
-    this.isTest = isTest;
+  SqoopOutputFormatLoadExecutor(JobContext jobctx, String loaderName, IntermediateDataFormat<?> toDataFormat, Matcher matcher) {
+    context = jobctx;
     this.loaderName = loaderName;
-    toDataFormat = idf;
+    this.matcher = matcher;
+    this.toDataFormat = toDataFormat;
     writer = new SqoopRecordWriter();
-    matcher = null;
   }
 
   public SqoopOutputFormatLoadExecutor(JobContext jobctx) {
     context = jobctx;
+    loaderName = context.getConfiguration().get(MRJobConstants.JOB_ETL_LOADER);
     writer = new SqoopRecordWriter();
     matcher = MatcherFactory.getMatcher(
         MRConfigurationUtils.getConnectorSchema(Direction.FROM, context.getConfiguration()),
@@ -87,12 +87,12 @@ public class SqoopOutputFormatLoadExecutor {
   public RecordWriter<SqoopWritable, NullWritable> getRecordWriter() {
     consumerFuture = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat
         ("OutputFormatLoader-consumer").build()).submit(
-            new ConsumerThread());
+            new ConsumerThread(context));
     return writer;
   }
 
   /*
-   * This is a producer-consumer problem and can be solved
+   * This is a reader-writer problem and can be solved
    * with two semaphores.
    */
   private class SqoopRecordWriter extends RecordWriter<SqoopWritable, NullWritable> {
@@ -215,40 +215,43 @@ public class SqoopOutputFormatLoadExecutor {
 
   private class ConsumerThread implements Runnable {
 
+    /**
+     * Context class that we should use for reporting counters.
+     */
+    private final JobContext jobctx;
+
+    public ConsumerThread(final JobContext context) {
+      jobctx = context;
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void run() {
       LOG.info("SqoopOutputFormatLoadExecutor consumer thread is starting");
       try {
         DataReader reader = new SqoopOutputFormatDataReader();
-
-        Configuration conf = null;
-        if (!isTest) {
-          conf = context.getConfiguration();
-          loaderName = conf.get(MRJobConstants.JOB_ETL_LOADER);
-        }
+        Configuration conf = context.getConfiguration();
         Loader loader = (Loader) ClassUtils.instantiate(loaderName);
 
-        // Objects that should be pass to the Executor execution
-        PrefixContext subContext = null;
-        Object connectorLinkConfig = null;
-        Object connectorToJobConfig = null;
-        Schema schema = null;
-
-        if (!isTest) {
-          // Using the TO schema since the SqoopDataWriter in the SqoopMapper encapsulates the toDataFormat
-          schema = matcher.getToSchema();
-          subContext = new PrefixContext(conf, MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
-          connectorLinkConfig = MRConfigurationUtils.getConnectorLinkConfig(Direction.TO, conf);
-          connectorToJobConfig = MRConfigurationUtils.getConnectorJobConfig(Direction.TO, conf);
-        }
+        // Objects that should be passed to the Loader
+        PrefixContext subContext = new PrefixContext(conf,
+            MRJobConstants.PREFIX_CONNECTOR_TO_CONTEXT);
+        Object connectorLinkConfig = MRConfigurationUtils
+            .getConnectorLinkConfig(Direction.TO, conf);
+        Object connectorToJobConfig = MRConfigurationUtils
+            .getConnectorJobConfig(Direction.TO, conf);
+        // Using the TO schema since the SqoopDataWriter in the SqoopMapper
+        // encapsulates the toDataFormat
 
         // Create loader context
-        LoaderContext loaderContext = new LoaderContext(subContext, reader, schema);
+        LoaderContext loaderContext = new LoaderContext(subContext, reader, matcher.getToSchema());
 
         LOG.info("Running loader class " + loaderName);
         loader.load(loaderContext, connectorLinkConfig, connectorToJobConfig);
         LOG.info("Loader has finished");
+        ((TaskAttemptContext) jobctx).getCounter(SqoopCounters.ROWS_WRITTEN).increment(
+            loader.getRowsWritten());
+
       } catch (Throwable t) {
         readerFinished = true;
         LOG.error("Error while loading data out of MR job.", t);

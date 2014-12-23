@@ -38,6 +38,7 @@ public class KafkaLoader extends Loader<LinkConfiguration,ToJobConfiguration> {
   private List<KeyedMessage<String, String>> messageList =
           new ArrayList<KeyedMessage<String, String>>(KafkaConstants.DEFAULT_BATCH_SIZE);
   private Producer producer;
+  private long rowsWritten = 0;
 
   @Override
   public void load(LoaderContext context,LinkConfiguration linkConfiguration, ToJobConfiguration jobConfiguration) throws
@@ -58,6 +59,7 @@ public class KafkaLoader extends Loader<LinkConfiguration,ToJobConfiguration> {
       if (messageList.size() >= KafkaConstants.DEFAULT_BATCH_SIZE) {
         sendToKafka(messageList);
       }
+      rowsWritten ++;
     }
 
     if (messageList.size() > 0) {
@@ -102,5 +104,13 @@ public class KafkaLoader extends Loader<LinkConfiguration,ToJobConfiguration> {
             KafkaConstants.DEFAULT_REQUIRED_ACKS);
     props.put(KafkaConstants.PRODUCER_TYPE,KafkaConstants.DEFAULT_PRODUCER_TYPE);
     return props;
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.sqoop.job.etl.Loader#getRowsWritten()
+   */
+  @Override
+  public long getRowsWritten() {
+    return rowsWritten;
   }
 }

@@ -34,6 +34,7 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
   private static final Logger LOG = Logger.getLogger(KiteLoader.class);
 
+  private long rowsWritten = 0;
   @VisibleForTesting
   protected KiteDatasetExecutor getExecutor(String uri, Schema schema,
       FileFormat format) {
@@ -57,14 +58,13 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
     DataReader reader = context.getDataReader();
     Object[] array;
     boolean success = false;
-    long count = 0L;
 
     try {
       while ((array = reader.readArrayRecord()) != null) {
         executor.writeRecord(array);
-        count++;
+        rowsWritten++;
       }
-      LOG.info(count + " data record(s) have been written into dataset.");
+      LOG.info(rowsWritten + " data record(s) have been written into dataset.");
       success = true;
     } finally {
       executor.closeWriter();
@@ -74,6 +74,14 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
         executor.deleteDataset();
       }
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.sqoop.job.etl.Loader#getRowsWritten()
+   */
+  @Override
+  public long getRowsWritten() {
+    return rowsWritten;
   }
 
 }

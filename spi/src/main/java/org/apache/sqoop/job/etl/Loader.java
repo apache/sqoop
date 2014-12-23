@@ -33,4 +33,16 @@ public abstract class Loader<LinkConfiguration, ToJobConfiguration> {
   public abstract void load(LoaderContext context, LinkConfiguration linkConfiguration,
       ToJobConfiguration jobConfiguration) throws Exception;
 
+  /**
+   * Return the number of rows witten by the last call to
+   * {@linkplain Loader#load(org.apache.sqoop.job.etl.LoaderContext, java.lang.Object) }
+   * method. This method returns only the number of rows written in the last call,
+   * and not a cumulative total of the number of rows written by this Loader
+   * since its creation.
+   *
+   * @return the number of rows written by the last call to
+   * {@linkplain Loader#load(org.apache.sqoop.job.etl.LoaderContext, java.lang.Object) }
+   */
+  public abstract long getRowsWritten();
+
 }

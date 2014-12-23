@@ -251,6 +251,7 @@ public class TestMapReduce {
   public static class DummyLoader extends Loader<EmptyConfiguration, EmptyConfiguration> {
     private int index = START_PARTITION * NUMBER_OF_ROWS_PER_PARTITION;
     private IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
+    private long rowsWritten = 0;
 
     @Override
     public void load(LoaderContext context, EmptyConfiguration oc, EmptyConfiguration oj)
@@ -260,8 +261,17 @@ public class TestMapReduce {
         String testData = "" + index + "," +  (double) index + ",'" + String.valueOf(index) + "'";
         dataFormat.setCSVTextData(testData);
         index++;
+        rowsWritten ++;
         assertEquals(dataFormat.getCSVTextData().toString(), data);
       }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.sqoop.job.etl.Loader#getRowsWritten()
+     */
+    @Override
+    public long getRowsWritten() {
+      return rowsWritten;
     }
   }
 

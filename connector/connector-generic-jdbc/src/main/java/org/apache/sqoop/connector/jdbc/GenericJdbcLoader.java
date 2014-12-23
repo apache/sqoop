@@ -28,6 +28,7 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
   public static final int DEFAULT_BATCHES_PER_TRANSACTION = 100;
   private int rowsPerBatch = DEFAULT_ROWS_PER_BATCH;
   private int batchesPerTransaction = DEFAULT_BATCHES_PER_TRANSACTION;
+  private long rowsWritten = 0;
 
   @Override
   public void load(LoaderContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception{
@@ -41,27 +42,28 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
     String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL);
     executor.beginBatch(sql);
     try {
-      int numberOfRows = 0;
-      int numberOfBatches = 0;
+      int numberOfRowsPerBatch = 0;
+      int numberOfBatchesPerTransaction = 0;
       Object[] array;
 
       while ((array = context.getDataReader().readArrayRecord()) != null) {
-        numberOfRows++;
+        numberOfRowsPerBatch++;
         executor.addBatch(array);
 
-        if (numberOfRows == rowsPerBatch) {
-          numberOfBatches++;
-          if (numberOfBatches == batchesPerTransaction) {
+        if (numberOfRowsPerBatch == rowsPerBatch) {
+          numberOfBatchesPerTransaction++;
+          if (numberOfBatchesPerTransaction == batchesPerTransaction) {
             executor.executeBatch(true);
-            numberOfBatches = 0;
+            numberOfBatchesPerTransaction = 0;
           } else {
             executor.executeBatch(false);
           }
-          numberOfRows = 0;
+          numberOfRowsPerBatch = 0;
         }
+        rowsWritten ++;
       }
 
-      if (numberOfRows != 0 || numberOfBatches != 0) {
+      if (numberOfRowsPerBatch != 0 || numberOfBatchesPerTransaction != 0) {
         // execute and commit the remaining rows
         executor.executeBatch(true);
       }
@@ -71,6 +73,14 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
     } finally {
       executor.close();
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.sqoop.job.etl.Loader#getRowsWritten()
+   */
+  @Override
+  public long getRowsWritten() {
+    return rowsWritten;
   }
 
 }

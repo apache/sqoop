@@ -21,5 +21,6 @@ package org.apache.sqoop.submission.counter;
  *
  */
 public enum SqoopCounters {
-  ROWS_READ;
+  ROWS_READ,
+  ROWS_WRITTEN
 }
