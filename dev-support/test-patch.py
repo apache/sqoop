@@ -69,6 +69,15 @@ def execute(cmd, log=True):
     print "INFO: Executing %s" % (cmd)
   return subprocess.call(cmd, shell=True)
 
+def jenkins_link_for_jira(name, endpoint):
+  if "BUILD_URL" in os.environ:
+    return "[%s|%s%s]" % (name, os.environ['BUILD_URL'], endpoint)
+  else:
+    return name
+
+def jenkins_file_link_for_jira(name, file):
+  return jenkins_link_for_jira(name, "artifact/patch-process/%s" % file)
+
 def jira_request(result, url, username, password, data, headers):
   request = urllib2.Request(url, data, headers)
   print "INFO: URL = %s, Username = %s, data = %s, headers = %s" % (url, username, data, str(headers))
@@ -107,7 +116,7 @@ def jira_generate_comment(result, branch):
     body += [ "{color:green}SUCCESS:{color} %s" % (success.replace("\n", "\\n")) ]
   if "BUILD_URL" in os.environ:
     body += [ "" ]
-    body += [ "Console output is available [here|%sconsole]." % (os.environ['BUILD_URL']) ]
+    body += [ "Console output is available %s." % (jenkins_link_for_jira("here", "console")) ]
   body += [ "" ]
   body += [ "This message is automatically generated." ]
   return "\\n".join(body)
@@ -212,7 +221,7 @@ def mvn_clean(result, output_dir):
   if rc == 0:
     result.success("Clean was successful")
   else:
-    result.fatal("failed to clean project (exit code %d)" % (rc))
+    result.fatal("failed to clean project (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "clean.txt")))
 
 def mvn_rat(result, output_dir):
   rc = execute("mvn apache-rat:check 1>%s/rat.txt 2>&1" % output_dir)
@@ -232,14 +241,14 @@ def mvn_rat(result, output_dir):
         fd.close()
     for incorrect_file in set(incorrect_files):
       result.error("File {{%s}} have missing licence header" % (incorrect_file))
-    result.error("Failed to run license check (exit code %d)" % (rc))
+    result.error("Failed to run license check (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "rat.txt")))
 
 def mvn_install(result, output_dir):
   rc = execute("mvn install -DskipTests 1>%s/install.txt 2>&1" % output_dir)
   if rc == 0:
     result.success("Patch compiled")
   else:
-    result.fatal("failed to build with patch (exit code %d)" % (rc))
+    result.fatal("failed to build with patch (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "install.txt")))
 
 def find_all_files(top):
     for root, dirs, files in os.walk(top):
@@ -257,7 +266,7 @@ def run_mvn_test(command, test_type, result, output_dir):
   if rc == 0:
     result.success("All %s tests passed" % test_type)
   else:
-    result.error("Some %s tests failed" % (test_type))
+    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test%s.txt" % test_type)))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
