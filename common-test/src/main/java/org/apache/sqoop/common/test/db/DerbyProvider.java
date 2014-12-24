@@ -93,8 +93,9 @@ public class DerbyProvider extends DatabaseProvider {
       // Server successfully started at this point
       started = true;
     } catch (Exception e) {
-      LOG.error("Can't start Derby network server", e);
-      throw new RuntimeException("Can't derby server", e);
+      String message = "Can't start embedded Derby server";
+      LOG.fatal(message, e);
+      throw new RuntimeException(message, e);
     }
 
     super.start();
@@ -110,7 +111,9 @@ public class DerbyProvider extends DatabaseProvider {
         server.shutdown();
       }
     } catch (Exception e) {
-      LOG.info("Can't shut down embedded server", e);
+      String message = "Can't shut down embedded Derby server";
+      LOG.fatal(message, e);
+      throw new RuntimeException(message, e);
     }
   }
 
