@@ -92,8 +92,7 @@ public class KiteConnector extends SqoopConnector {
 
   @Override
   public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
-    // TODO: SQOOP-1624
-    return null;
+    return new KiteConnectorUpgrader();
   }
 
 }

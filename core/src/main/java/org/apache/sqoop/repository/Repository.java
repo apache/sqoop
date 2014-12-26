@@ -471,52 +471,57 @@ public abstract class Repository {
           // every job has 2 parts, the FROM and the TO links and their
           // corresponding connectors.
           LOG.info(" Job upgrade for job:" + job.getName()+ " for connector:" + connectorName);
-          List<MConfig> fromConfig = newConnector.getFromConfig().clone(false).getConfigs();
-          if (job.getFromConnectorId() == newConnector.getPersistenceId()) {
-            MFromConfig newFromConfig = new MFromConfig(fromConfig);
-            MFromConfig oldFromCOnfig = job.getFromJobConfig();
-            upgrader.upgradeFromJobConfig(oldFromCOnfig, newFromConfig);
-            MToConfig oldToConfig = job.getToJobConfig();
-            // create a job with new FROM direction configs but old TO direction
-            // configs
-            MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
 
-            ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
-              newJob.getFromJobConfig().getConfigs(),
-              connector.getJobConfigurationClass(Direction.FROM)
-            );
+          if (newConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
+            List<MConfig> fromConfig = newConnector.getFromConfig().clone(false).getConfigs();
+            if (job.getFromConnectorId() == newConnector.getPersistenceId()) {
+              MFromConfig newFromConfig = new MFromConfig(fromConfig);
+              MFromConfig oldFromConfig = job.getFromJobConfig();
+              upgrader.upgradeFromJobConfig(oldFromConfig, newFromConfig);
+              MToConfig oldToConfig = job.getToJobConfig();
+              // create a job with new FROM direction configs but old TO direction
+              // configs
+              MJob newJob = new MJob(job, newFromConfig, oldToConfig, job.getDriverConfig());
 
-            if(validationResult.getStatus().canProceed()) {
-              updateJob(newJob, tx);
-            } else {
-              logInvalidModelObject("fromJob", newJob, validationResult);
-              upgradeSuccessful = false;
-              LOG.error(" From JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
+              ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+                  newJob.getFromJobConfig().getConfigs(),
+                  connector.getJobConfigurationClass(Direction.FROM)
+              );
+
+              if (validationResult.getStatus().canProceed()) {
+                updateJob(newJob, tx);
+              } else {
+                logInvalidModelObject("fromJob", newJob, validationResult);
+                upgradeSuccessful = false;
+                LOG.error(" From JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
+              }
             }
           }
 
-          List<MConfig> toConfig = newConnector.getToConfig().clone(false).getConfigs();
-          if (job.getToConnectorId() == newConnector.getPersistenceId()) {
-            MToConfig oldToConfig = job.getToJobConfig();
-            MToConfig newToConfig = new MToConfig(toConfig);
-            upgrader.upgradeToJobConfig(oldToConfig, newToConfig);
-            MFromConfig oldFromConfig = job.getFromJobConfig();
-            // create a job with old FROM direction configs but new TO direction
-            // configs
-            MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
+          if (newConnector.getSupportedDirections().isDirectionSupported(Direction.TO)) {
+            List<MConfig> toConfig = newConnector.getToConfig().clone(false).getConfigs();
+            if (job.getToConnectorId() == newConnector.getPersistenceId()) {
+              MToConfig oldToConfig = job.getToJobConfig();
+              MToConfig newToConfig = new MToConfig(toConfig);
+              upgrader.upgradeToJobConfig(oldToConfig, newToConfig);
+              MFromConfig oldFromConfig = job.getFromJobConfig();
+              // create a job with old FROM direction configs but new TO direction
+              // configs
+              MJob newJob = new MJob(job, oldFromConfig, newToConfig, job.getDriverConfig());
 
-            ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
-              newJob.getToJobConfig().getConfigs(),
-              connector.getJobConfigurationClass(Direction.TO)
-            );
+              ConfigValidationResult validationResult = ConfigUtils.validateConfigs(
+                  newJob.getToJobConfig().getConfigs(),
+                  connector.getJobConfigurationClass(Direction.TO)
+              );
 
-             if(validationResult.getStatus().canProceed()) {
-               updateJob(newJob, tx);
-             } else {
-               logInvalidModelObject("toJob", newJob, validationResult);
-               upgradeSuccessful = false;
-               LOG.error(" TO JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
-             }
+              if (validationResult.getStatus().canProceed()) {
+                updateJob(newJob, tx);
+              } else {
+                logInvalidModelObject("toJob", newJob, validationResult);
+                upgradeSuccessful = false;
+                LOG.error(" TO JOB config upgrade FAILED for job: " + job.getName() + " for connector:" + connectorName);
+              }
+            }
           }
         }
       }
