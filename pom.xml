@@ -96,7 +96,7 @@ limitations under the License.
     <commons-compress.version>1.9</commons-compress.version>
     <derby.version>10.8.2.2</derby.version>
     <hadoop.1.version>1.0.3</hadoop.1.version>
-    <hadoop.2.version>2.5.1</hadoop.2.version>
+    <hadoop.2.version>2.6.0</hadoop.2.version>
     <guava.version>11.0.2</guava.version>
     <json-simple.version>1.1</json-simple.version>
     <junit.version>4.11</junit.version>

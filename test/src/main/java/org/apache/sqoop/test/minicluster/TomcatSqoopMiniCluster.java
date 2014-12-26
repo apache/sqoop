@@ -90,6 +90,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
          jar.contains("commons-")     || // Apache Commons libraries
          jar.contains("httpcore-")    || // Apache Http Core libraries
          jar.contains("httpclient-")  || // Apache Http Client libraries
+         jar.contains("htrace-")      || // htrace-core libraries, new added in Hadoop 2.6.0
          jar.contains("log4j-")       || // Log4j
          jar.contains("slf4j-")       || // Slf4j
          jar.contains("jackson-")     || // Jackson
