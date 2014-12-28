@@ -19,6 +19,8 @@ package org.apache.sqoop.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ImmutableContext implementation based on (Hash)Map.
@@ -71,7 +73,7 @@ public class MapContext implements ImmutableContext {
    */
   @Override
   public long getLong(String key, long defaultValue) {
-    if(!options.containsKey(key)) {
+    if (!options.containsKey(key)) {
       return defaultValue;
     }
 
@@ -85,7 +87,7 @@ public class MapContext implements ImmutableContext {
    */
   @Override
   public int getInt(String key, int defaultValue) {
-    if(!options.containsKey(key)) {
+    if (!options.containsKey(key)) {
       return defaultValue;
     }
 
@@ -109,5 +111,26 @@ public class MapContext implements ImmutableContext {
     }
 
     return subProps;
+  }
+
+  /**
+   * get keys matching the the regex
+   *
+   * @param regex
+   * @return Map<String,String> with matching keys
+   */
+  public Map<String, String> getValByRegex(String regex) {
+    Pattern p = Pattern.compile(regex);
+
+    Map<String, String> result = new HashMap<String, String>();
+    Matcher m;
+
+    for (String item : options.keySet()) {
+      m = p.matcher(item);
+      if (m.find()) { // match
+        result.put(item, getString(item));
+      }
+    }
+    return result;
   }
 }

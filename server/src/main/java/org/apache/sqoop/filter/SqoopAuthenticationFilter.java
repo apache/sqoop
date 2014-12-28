@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.filter;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 import org.apache.hadoop.security.authentication.server.KerberosAuthenticationHandler;
 import org.apache.hadoop.security.authentication.server.PseudoAuthenticationHandler;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticationFilter;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticationHandler;
+import org.apache.hadoop.security.token.delegation.web.KerberosDelegationTokenAuthenticationHandler;
+import org.apache.hadoop.security.token.delegation.web.PseudoDelegationTokenAuthenticationHandler;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.SqoopConfiguration;
@@ -30,21 +35,22 @@ import org.apache.sqoop.security.AuthenticationError;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
-public class SqoopAuthenticationFilter extends AuthenticationFilter {
+public class SqoopAuthenticationFilter extends DelegationTokenAuthenticationFilter {
 
   @Override
   protected Properties getConfiguration(String configPrefix,
                                         FilterConfig filterConfig) throws ServletException {
-    Properties properties = super.getConfiguration(configPrefix, filterConfig);
+    Properties properties = new Properties();
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String type = mapContext.getString(
         AuthenticationConstants.AUTHENTICATION_TYPE,
         AuthenticationConstants.TYPE.SIMPLE.name()).trim();
 
     if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.KERBEROS.name())) {
-      properties.setProperty(AUTH_TYPE, AuthenticationConstants.TYPE.KERBEROS.name().toLowerCase());
+      properties.setProperty(AUTH_TYPE, KerberosDelegationTokenAuthenticationHandler.class.getName());
 
       String keytab = mapContext.getString(
               AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_KEYTAB).trim();
@@ -71,13 +77,26 @@ public class SqoopAuthenticationFilter extends AuthenticationFilter {
       properties.setProperty(KerberosAuthenticationHandler.PRINCIPAL, hostPrincipal);
       properties.setProperty(KerberosAuthenticationHandler.KEYTAB, keytab);
     } else if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.SIMPLE.name())) {
-      properties.setProperty(AUTH_TYPE, PseudoAuthenticationHandler.class.getName());
+      properties.setProperty(AUTH_TYPE, PseudoDelegationTokenAuthenticationHandler.class.getName());
       properties.setProperty(PseudoAuthenticationHandler.ANONYMOUS_ALLOWED,
           mapContext.getString(AuthenticationConstants.AUTHENTICATION_ANONYMOUS, "true").trim());
     } else {
       throw new SqoopException(AuthenticationError.AUTH_0004, type);
     }
 
+    properties.setProperty(DelegationTokenAuthenticationHandler.TOKEN_KIND,
+            AuthenticationConstants.TOKEN_KIND);
+
     return properties;
+  }
+
+  protected Configuration getProxyuserConfiguration(FilterConfig filterConfig) {
+    MapContext mapContext = SqoopConfiguration.getInstance().getContext();
+    Map<String, String> proxyuserConf = mapContext.getValByRegex("org\\.apache\\.sqoop\\.authentication\\.proxyuser");
+    Configuration conf = new Configuration(false);
+    for (Map.Entry<String, String> entry : proxyuserConf.entrySet()) {
+      conf.set(entry.getKey().substring("org.apache.sqoop.authentication.proxyuser.".length()), entry.getValue());
+    }
+    return conf;
   }
 }

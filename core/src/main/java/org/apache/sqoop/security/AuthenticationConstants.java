@@ -96,6 +96,11 @@ public final class AuthenticationConstants {
   public static final String AUTHENTICATION_KERBEROS_HTTP_KEYTAB =
           PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "keytab";
 
+  /**
+   * The config specifies the token kind in delegation token.
+   */
+  public static final String TOKEN_KIND = "sqoop_token_kind";
+
   public static enum TYPE {SIMPLE, KERBEROS}
 
   private AuthenticationConstants() {

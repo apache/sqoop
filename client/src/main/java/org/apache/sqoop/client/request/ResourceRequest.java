@@ -17,8 +17,13 @@
  */
 package org.apache.sqoop.client.request;
 
-import org.apache.hadoop.security.authentication.client.AuthenticatedURL;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.security.Credentials;
+import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
+import org.apache.hadoop.security.authentication.client.ConnectionConfigurator;
+import org.apache.hadoop.security.token.Token;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
@@ -34,6 +39,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.Locale;
 
@@ -42,6 +48,8 @@ import java.util.Locale;
  */
 public class ResourceRequest {
   private static final Logger LOG = Logger.getLogger(ResourceRequest.class);
+  private DelegationTokenAuthenticatedURL.Token authToken;
+  private String strURL;
 
   protected String doHttpRequest(String strURL, String method) {
     return doHttpRequest(strURL, method, "");
@@ -51,9 +59,10 @@ public class ResourceRequest {
     DataOutputStream wr = null;
     BufferedReader reader = null;
     try {
-      AuthenticatedURL.Token token = new AuthenticatedURL.Token();
+      this.authToken = new DelegationTokenAuthenticatedURL.Token();
+      this.strURL = strURL;
       URL url = new URL(strURL);
-      HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
+      HttpURLConnection conn = new DelegationTokenAuthenticatedURL().openConnection(url, authToken);
 
       conn.setRequestMethod(method);
 //      Sqoop is using JSON for data transfers
@@ -165,5 +174,42 @@ public class ResourceRequest {
 
   public String delete(String url) {
     return doHttpRequest(url, HttpMethod.DELETE);
+  }
+
+  public Token<?>[] addDelegationTokens(String renewer,
+                                        Credentials credentials) throws IOException {
+    Token<?>[] tokens = null;
+    Text dtService = getDelegationTokenService();
+    Token<?> token = credentials.getToken(dtService);
+    if (token == null) {
+      URL url = new URL(strURL);
+      DelegationTokenAuthenticatedURL authUrl =
+              new DelegationTokenAuthenticatedURL(new ConnectionConfigurator() {
+                @Override
+                public HttpURLConnection configure(HttpURLConnection conn) throws IOException {
+                  return conn;
+                }
+              });
+      try {
+        token = authUrl.getDelegationToken(url, authToken, renewer);
+        if (token != null) {
+          credentials.addToken(token.getService(), token);
+          tokens = new Token<?>[]{token};
+        } else {
+          throw new IOException("Got NULL as delegation token");
+        }
+      } catch (AuthenticationException ex) {
+        throw new IOException(ex);
+      }
+    }
+    return tokens;
+  }
+
+  private Text getDelegationTokenService() throws IOException {
+    URL url = new URL(strURL);
+    InetSocketAddress addr = new InetSocketAddress(url.getHost(),
+            url.getPort());
+    Text dtService = SecurityUtil.buildTokenService(addr);
+    return dtService;
   }
 }
