@@ -90,4 +90,36 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
   public Configuration getConf() {
     return conf;
   }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((toIDF == null) ? 0 : toIDF.hashCode());
+    return result;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    SqoopWritable other = (SqoopWritable) obj;
+    if (toIDF == null) {
+      if (other.toIDF != null)
+        return false;
+    } else if (!toIDF.equals(other.toIDF))
+      return false;
+    return true;
+  }
+
 }
