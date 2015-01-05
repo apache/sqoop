@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.test.utils.NetworkUtils;
 import org.codehaus.cargo.container.ContainerType;
 import org.codehaus.cargo.container.InstalledLocalContainer;
 import org.codehaus.cargo.container.configuration.ConfigurationType;
@@ -31,6 +33,7 @@ import org.codehaus.cargo.container.configuration.LocalConfiguration;
 import org.codehaus.cargo.container.deployable.WAR;
 import org.codehaus.cargo.container.installer.Installer;
 import org.codehaus.cargo.container.installer.ZipURLInstaller;
+import org.codehaus.cargo.container.property.ServletPropertySet;
 import org.codehaus.cargo.generic.DefaultContainerFactory;
 import org.codehaus.cargo.generic.configuration.DefaultConfigurationFactory;
 
@@ -42,15 +45,20 @@ import org.codehaus.cargo.generic.configuration.DefaultConfigurationFactory;
 public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
 
   private InstalledLocalContainer container = null;
+  private Integer port;
+
+  private static final Logger LOG = Logger.getLogger(TomcatSqoopMiniCluster.class);
 
   /** {@inheritDoc} */
   public TomcatSqoopMiniCluster(String temporaryPath) throws Exception {
     super(temporaryPath);
+    port = NetworkUtils.findAvailablePort();
   }
 
   /** {@inheritDoc} */
   public TomcatSqoopMiniCluster(String temporaryPath, Configuration configuration) throws Exception {
     super(temporaryPath, configuration);
+    port = NetworkUtils.findAvailablePort();
   }
 
   /** {@inheritDoc} */
@@ -116,7 +124,11 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     // Finally deploy Sqoop server war file
     configuration.addDeployable(new WAR("../server/target/sqoop.war"));
 
+    // Random port
+    configuration.setProperty(ServletPropertySet.PORT, port.toString());
+
     // Start Sqoop server
+    LOG.info("Starting tomcat server on port " + port);
     container.start();
   }
 
@@ -157,6 +169,6 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
    */
   public String getServerUrl() {
     // We're not doing any changes, so return default URL
-    return "http://localhost:8080/sqoop/";
+    return "http://localhost:" + port + "/sqoop/";
   }
 }
