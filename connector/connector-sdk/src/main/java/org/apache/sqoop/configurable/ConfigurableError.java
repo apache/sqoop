@@ -40,4 +40,3 @@ public enum ConfigurableError implements ErrorCode {
     return message;
   }
 }
-

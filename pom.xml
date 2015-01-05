@@ -319,11 +319,6 @@ limitations under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.sqoop</groupId>
-        <artifactId>sqoop-spi</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.sqoop.repository</groupId>
         <artifactId>sqoop-repository-common</artifactId>
         <version>${project.version}</version>
@@ -604,7 +599,6 @@ limitations under the License.
   <modules>
     <module>common</module>
     <module>common-test</module>
-    <module>spi</module>
     <module>core</module>
     <module>repository</module>
     <module>server</module>

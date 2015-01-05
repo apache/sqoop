@@ -32,10 +32,6 @@ limitations under the License.
   <dependencies>
     <dependency>
       <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
       <artifactId>connector-sdk</artifactId>
     </dependency>
     <dependency>
