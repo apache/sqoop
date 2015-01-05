@@ -22,28 +22,10 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.CSVURIValidator;
 
 @ConfigClass
 public class LinkConfig {
   @Input(size=1024, validators = { @Validator(CSVURIValidator.class) }) public String brokerList;
   @Input(size=255, validators = { @Validator(CSVURIValidator.class) })  public String zookeeperConnect;
-
-  public static class CSVURIValidator extends AbstractValidator<String> {
-
-    // validate that given string is a comma-separated list of host:port
-    @Override
-    public void validate(String str) {
-      if(str == null || str !="") {
-        String[] pairs = str.split("\\s*,\\s*");
-        for (String pair: pairs) {
-          String[] parts = pair.split("\\s*:\\s*");
-          if (parts.length == 1) {
-            addMessage(Status.ERROR,"can't parse into host:port pairs");
-          }
-        }
-      } else {
-        addMessage(Status.ERROR, "Can't be null nor empty");
-      }
-    }
-  }
 }
