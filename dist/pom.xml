@@ -80,8 +80,9 @@ limitations under the License.
                         <exclude name="**/target/**" />
                         <exclude name=".git/**" />
                         <exclude name="tags" />
-                        <exclude name=".project" />
-                        <exclude name=".classpath" />
+                        <exclude name="**/.project" />
+                        <exclude name="**/.classpath" />
+                        <exclude name="**/.settings/**" />
                       </fileset>
                     </copy>
 
@@ -138,8 +139,9 @@ limitations under the License.
                         <exclude name="**/target/**" />
                         <exclude name=".git/**" />
                         <exclude name="tags" />
-                        <exclude name=".project" />
-                        <exclude name=".classpath" />
+                        <exclude name="**/.project" />
+                        <exclude name="**/.classpath" />
+                        <exclude name="**/.settings/**" />
                       </fileset>
                     </copy>
 
