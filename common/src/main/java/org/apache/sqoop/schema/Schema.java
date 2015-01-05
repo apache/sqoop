@@ -21,9 +21,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.Column;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +59,7 @@ public class Schema {
 
   private Schema() {
     creationDate = new Date();
-    columns = new LinkedList<Column>();
+    columns = new ArrayList<Column>();
     columNames = new HashSet<String>();
   }
 
@@ -121,6 +121,10 @@ public class Schema {
 
   public List<Column> getColumnsList() {
     return columns;
+  }
+
+  public int getColumnsCount() {
+    return columns.size();
   }
 
   public boolean isEmpty() {

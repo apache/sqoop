@@ -42,7 +42,7 @@ public class LocationMatcher extends Matcher {
   @Override
   public Object[] getMatchingData(Object[] fields) {
 
-    Object[] out = new Object[getToSchema().getColumnsArray().length];
+    Object[] out = new Object[getToSchema().getColumnsCount()];
 
     int i = 0;
 

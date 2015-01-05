@@ -35,7 +35,7 @@ public class NameMatcher extends Matcher {
 
   @Override
   public Object[] getMatchingData(Object[] fields) {
-    Object[] out = new Object[getToSchema().getColumnsArray().length];
+    Object[] out = new Object[getToSchema().getColumnsCount()];
 
     HashMap<String,Column> colNames = new HashMap<String, Column>();
 

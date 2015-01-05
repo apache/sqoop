@@ -192,7 +192,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       return null;
     }
 
-    if (fieldStringArray.length != schema.getColumnsArray().length) {
+    if (fieldStringArray.length != schema.getColumnsCount()) {
       throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005,
           "The data " + getCSVTextData() + " has the wrong number of fields.");
     }
