@@ -2196,9 +2196,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   /**
-   * Execute given query on database.
+   * Execute given query via a PreparedStatement.
+   * A list of args can be passed to the query.
+   *
+   * Example: runQuery("SELECT * FROM example WHERE test = ?", "test");
    *
    * @param query Query that should be executed
+   * @param args Long, String, or Object arguments
    */
   protected void runQuery(String query, Connection conn, Object... args) {
     PreparedStatement stmt = null;

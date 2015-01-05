@@ -236,6 +236,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn Connection to the repository
    */
   public abstract void deleteLinkInputs(long linkId, Connection conn);
+
   /**
    * Find link with given id in repository.
    *

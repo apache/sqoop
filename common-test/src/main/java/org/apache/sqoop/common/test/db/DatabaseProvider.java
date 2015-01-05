@@ -349,6 +349,25 @@ abstract public class DatabaseProvider {
   }
 
   /**
+   * Drop schema.
+   *
+   * Any exceptions will be ignored.
+   *
+   * @param schemaName
+   */
+  public void dropSchema(String schemaName) {
+    StringBuilder sb = new StringBuilder("DROP SCHEMA ");
+    sb.append(escapeTableName(schemaName));
+    sb.append(" CASCADE");
+
+    try {
+      executeUpdate(sb.toString());
+    } catch(RuntimeException e) {
+      LOG.info("Ignoring exception: " + e);
+    }
+  }
+
+  /**
    * Return number of rows from given table.
    *
    * @param tableName Table name

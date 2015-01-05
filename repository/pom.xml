@@ -35,6 +35,7 @@ limitations under the License.
   <modules>
     <module>repository-common</module>
     <module>repository-derby</module>
+    <module>repository-postgresql</module>
   </modules>
 
 </project>
