@@ -235,15 +235,18 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
-  private void doImportAndVerify(boolean isDirect, String [] expectedResults,
+  private void doImportAndVerify(boolean isDirect, String[] expectedResults,
       String tableName, String... extraArgs) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, tableName);
-    Path filePath = new Path(tablePath, "part-m-00000");
+
+    // if importing with merge step, directory should exist and output should be from a reducer
+    boolean isMerge = Arrays.asList(extraArgs).contains("--merge-key");
+    Path filePath = new Path(tablePath, isMerge ? "part-r-00000" : "part-m-00000");
 
     File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
+    if (tableFile.exists() && tableFile.isDirectory() && !isMerge) {
       // remove the directory before running the import.
       FileListing.recursiveDeleteDir(tableFile);
     }
@@ -327,6 +330,34 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     };
 
     doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
+  }
+
+  public void testDirectIncrementalImport() throws IOException {
+    String [] expectedResults = { };
+
+    String [] extraArgs = { "--incremental", "lastmodified",
+            "--check-column", "start_date",
+    };
+
+    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+  }
+
+  public void testDirectIncrementalImportMerge() throws IOException {
+    String [] expectedResults = { };
+
+    String [] extraArgs = { "--incremental", "lastmodified",
+            "--check-column", "start_date",
+    };
+
+    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+
+    extraArgs = new String[] { "--incremental", "lastmodified",
+            "--check-column", "start_date",
+            "--merge-key", "id",
+            "--last-value", "2009-04-20"
+    };
+
+    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
   }
 
  @Test

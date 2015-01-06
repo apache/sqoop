@@ -348,6 +348,8 @@ public class DirectPostgresqlManager
   public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
     throws IOException, ImportException {
 
+    context.setConnManager(this);
+
     String tableName = context.getTableName();
     SqoopOptions options = context.getOptions();
 
