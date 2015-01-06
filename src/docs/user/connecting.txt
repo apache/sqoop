@@ -60,6 +60,15 @@ $ sqoop import --connect jdbc:mysql://database.example.com/employees \
     --username venkatesh --password-file ${user.home}/.password
 ----
 
+WARNING: Sqoop will read entire content of the password file and use it as
+a password. This will include any trailing white space characters such as
+new line characters that are added by default by most of the text editors.
+You need to make sure that your password file contains only characters
+that belongs to your password. On the command line you can use command
++echo+ with switch +-n+ to store password without any trailing white space
+characters. For example to store password +secret+ you would call
++echo -n "secret" > password.file+.
+
 Another way of supplying passwords is using the +-P+ argument which will
 read a password from a console prompt.
 
