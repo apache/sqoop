@@ -175,5 +175,18 @@ public class TestSqoopIDFUtils {
     String encodedText = encodeToCSVMap(map, mapCol);
     assertEquals(encodedText, "'{\"A\":[\"A\",\"B\"]}'");
   }
+  
+  @Test
+  public void testParseCSVString() {
+
+    String csv= "'hello, world','34',45";
+    String[] arr = parseCSVString(csv);
+    assertEquals(arr.length, 3);
+    assertEquals(arr[0], "'hello, world'");
+    assertEquals(arr[1], "'34'");
+    assertEquals(arr[2], "45");
+    
+  }
+
 
 }

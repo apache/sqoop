@@ -197,6 +197,19 @@ public class TestCSVIntermediateDataFormat {
     assertEquals(testData, dataFormat.getData());
   }
 
+  @Test
+  public void testInputAsCSVTextInObjectOutWithSingleColumn() {
+
+    String testData = "'\"hello, world\"'";
+    Schema schema = new Schema("test");
+    schema.addColumn(new Text("text"));
+
+    dataFormat.setSchema(schema);
+    dataFormat.setCSVTextData(testData);
+
+    Object[] out = dataFormat.getObjectData();
+    assertEquals("\"hello, world\"",out[0]);
+  }
 
   @Test
   public void testInputAsCSVTextInObjectOut() {
