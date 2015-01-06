@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
@@ -39,23 +40,23 @@ public class KiteToDestroyer extends Destroyer<LinkConfiguration,
 
   @Override
   public void destroy(DestroyerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     LOG.info("Running Kite connector destroyer");
-    String[] uris = KiteDatasetExecutor.listTemporaryDatasetUris(
-        jobConfig.toJobConfig.uri);
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, toJobConfig.toJobConfig);
+    String[] tempUris = KiteDatasetExecutor.listTemporaryDatasetUris(uri);
     if (context.isSuccess()) {
       KiteDatasetExecutor executor = getExecutor(
-          jobConfig.toJobConfig.uri, context.getSchema(),
-          linkConfig.linkConfig.fileFormat);
-      for (String uri : uris) {
-        executor.mergeDataset(uri);
-        LOG.info(String.format("Temporary dataset %s has been merged", uri));
+          uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
+      for (String tempUri : tempUris) {
+        executor.mergeDataset(tempUri);
+        LOG.info(String.format("Temporary dataset %s has been merged", tempUri));
       }
     } else {
-      for (String uri : uris) {
-        KiteDatasetExecutor.deleteDataset(uri);
+      for (String tempUri : tempUris) {
+        KiteDatasetExecutor.deleteDataset(tempUri);
         LOG.warn(String.format("Failed to import. " +
-            "Temporary dataset %s has been deleted", uri));
+            "Temporary dataset %s has been deleted", tempUri));
       }
     }
   }

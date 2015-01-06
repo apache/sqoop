@@ -17,14 +17,33 @@
  */
 package org.apache.sqoop.connector.kite.configuration;
 
-import org.apache.sqoop.connector.common.FileFormat;
+import com.google.common.base.Strings;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.HostAndPortValidator;
 
-@ConfigClass
+@ConfigClass(validators = {@Validator(LinkConfig.ConfigValidator.class)})
 public class LinkConfig {
 
-  @Input
-  public FileFormat fileFormat = FileFormat.AVRO;
+  @Input(size = 255)
+  public String hdfsHostAndPort;
+
+  public static class ConfigValidator extends AbstractValidator<LinkConfig> {
+
+    @Override
+    public void validate(LinkConfig config) {
+      // TODO: There is no way to declare it as optional (SQOOP-1643), we cannot validate it directly using HostAndPortValidator.
+      if (!Strings.isNullOrEmpty(config.hdfsHostAndPort)) {
+        HostAndPortValidator validator = new HostAndPortValidator();
+        validator.validate(config.hdfsHostAndPort);
+        if (!validator.getStatus().equals(Status.OK)) {
+          addMessage(validator.getStatus(), getMessages().toString());
+        }
+      }
+    }
+  }
 
 }

@@ -32,7 +32,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.Mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -45,11 +44,11 @@ public class TestKiteToDestroyer {
 
   private LinkConfiguration linkConfig;
 
-  private ToJobConfiguration jobConfig;
+  private ToJobConfiguration toJobConfig;
 
   private final String[] expectedUris = new String[]{"a", "b"};
 
-  @Mock
+  @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
   @Before
@@ -66,20 +65,20 @@ public class TestKiteToDestroyer {
     };
 
     linkConfig = new LinkConfiguration();
-    linkConfig.linkConfig.fileFormat = FileFormat.AVRO;
-    jobConfig = new ToJobConfiguration();
-    jobConfig.toJobConfig.uri = "dataset:file:/foo/bar";
+    toJobConfig = new ToJobConfiguration();
+    toJobConfig.toJobConfig.uri = "dataset:file:/foo/bar";
+    toJobConfig.toJobConfig.fileFormat = FileFormat.AVRO;
   }
 
   @Test
   public void testDestroyForSuccessfulJob() {
     // setup
     DestroyerContext context = new DestroyerContext(null, true, null);
-    when(KiteDatasetExecutor.listTemporaryDatasetUris(jobConfig.toJobConfig.uri))
+    when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
 
     // exercise
-    destroyer.destroy(context, linkConfig, jobConfig);
+    destroyer.destroy(context, linkConfig, toJobConfig);
 
     // verify
     for (String uri : expectedUris) {
@@ -91,14 +90,14 @@ public class TestKiteToDestroyer {
   public void testDestroyForFailedJob() {
     // setup
     DestroyerContext context = new DestroyerContext(null, false, null);
-    when(KiteDatasetExecutor.listTemporaryDatasetUris(jobConfig.toJobConfig.uri))
+    when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
     for (String uri : expectedUris) {
       when(KiteDatasetExecutor.deleteDataset(uri)).thenReturn(true);
     }
 
     // exercise
-    destroyer.destroy(context, linkConfig, jobConfig);
+    destroyer.destroy(context, linkConfig, toJobConfig);
 
     // verify
     for (String uri : expectedUris) {

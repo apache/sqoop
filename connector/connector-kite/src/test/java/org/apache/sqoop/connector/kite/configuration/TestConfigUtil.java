@@ -17,20 +17,27 @@
  */
 package org.apache.sqoop.connector.kite.configuration;
 
-import org.apache.sqoop.connector.common.FileFormat;
-import org.apache.sqoop.model.ConfigClass;
-import org.apache.sqoop.model.Input;
-import org.apache.sqoop.model.Validator;
-import org.apache.sqoop.validation.validators.DatasetURIValidator;
-import org.apache.sqoop.validation.validators.NotNull;
+import org.junit.Test;
 
-@ConfigClass
-public class ToJobConfig {
+import static org.junit.Assert.assertEquals;
 
-  @Input(size = 255, validators = {@Validator(DatasetURIValidator.class)})
-  public String uri;
+/**
+ * Test configuration objects.
+ */
+public class TestConfigUtil {
 
-  @Input(validators = {@Validator(NotNull.class)})
-  public FileFormat fileFormat;
+  @Test
+  public void testBuildDatasetUri() {
+    String actual = ConfigUtil.buildDatasetUri("namenode:8020",
+        "dataset:hdfs:/path/to/ds");
+    assertEquals("dataset:hdfs://namenode:8020/path/to/ds", actual);
+  }
+
+  @Test
+  public void testBuildDatasetUriHdfsHostPortIgnored() {
+    String expected = "dataset:hdfs://namenode2:8020/path/to/ds";
+    String actual = ConfigUtil.buildDatasetUri("namenode:8020", expected);
+    assertEquals(expected, actual);
+  }
 
 }

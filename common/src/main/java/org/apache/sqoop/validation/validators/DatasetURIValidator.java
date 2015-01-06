@@ -15,25 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.kite.util;
+package org.apache.sqoop.validation.validators;
+
+import com.google.common.base.Strings;
+import org.apache.sqoop.validation.Status;
 
 import java.util.regex.Pattern;
 
 /**
- * The helper class arranges to validate user inputs.
+ * Ensure that given string represents a Kite dataset uri.
  */
-public class InputValidation {
+public class DatasetURIValidator extends AbstractValidator<String> {
 
-  private static Pattern DATASET_URI_PATTERN = Pattern
+  private static final Pattern DATASET_URI_PATTERN = Pattern
       .compile("^dataset:(hive|hdfs|file):.*$");
 
-  /**
-   * Validates the correctness of user input dataset uri.
-   */
-  public static void validateDatasetUriScheme(String uri)
-      throws IllegalArgumentException {
+  @Override
+  public void validate(String uri) {
+    if (Strings.isNullOrEmpty(uri)) {
+      addMessage(Status.ERROR, "Cannot be null nor empty");
+      return;
+    }
+
     if (!DATASET_URI_PATTERN.matcher(uri).matches()) {
-      throw new IllegalArgumentException("Invalid dataset URI: " + uri);
+      addMessage(Status.ERROR, "Invalid dataset URI: " + uri);
     }
   }
 

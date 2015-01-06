@@ -31,14 +31,13 @@ import org.junit.Test;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.Mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TestKiteLoader {
 
   private KiteLoader loader;
 
-  @Mock
+  @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
   @Before
@@ -84,10 +83,10 @@ public class TestKiteLoader {
     };
     LoaderContext context = new LoaderContext(null, reader, schema);
     LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
+    ToJobConfiguration toJobConfig = new ToJobConfiguration();
 
     // exercise
-    loader.load(context, linkConfig, jobConfig);
+    loader.load(context, linkConfig, toJobConfig);
 
     // verify
     verify(executorMock, times(NUMBER_OF_ROWS)).writeRecord(

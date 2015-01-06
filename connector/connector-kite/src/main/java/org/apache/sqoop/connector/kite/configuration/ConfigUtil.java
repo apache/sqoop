@@ -17,20 +17,30 @@
  */
 package org.apache.sqoop.connector.kite.configuration;
 
-import org.apache.sqoop.connector.common.FileFormat;
-import org.apache.sqoop.model.ConfigClass;
-import org.apache.sqoop.model.Input;
-import org.apache.sqoop.model.Validator;
-import org.apache.sqoop.validation.validators.DatasetURIValidator;
-import org.apache.sqoop.validation.validators.NotNull;
+import com.google.common.base.Strings;
 
-@ConfigClass
-public class ToJobConfig {
+public class ConfigUtil {
 
-  @Input(size = 255, validators = {@Validator(DatasetURIValidator.class)})
-  public String uri;
+  /**
+   * Returns a dataset uri, including the filesystem location part, if it is
+   * provided separated,
+   */
+  public static String buildDatasetUri(String fsLocation, String uri) {
+    if (!Strings.isNullOrEmpty(fsLocation) && !uri.contains("://")) {
+      // Add fsLocation after the second colon
+      int p = uri.indexOf(":", uri.indexOf(":") + 1);
+      return uri.substring(0, p + 1) + "//" + fsLocation + uri.substring(p + 1);
+    }
+    return uri;
+  }
 
-  @Input(validators = {@Validator(NotNull.class)})
-  public FileFormat fileFormat;
+  /**
+   * Returns a dataset uri, including the filesystem location part, if it is
+   * provided separated,
+   */
+  public static String buildDatasetUri(LinkConfig linkConfig,
+      ToJobConfig toJobConfig) {
+    return buildDatasetUri(linkConfig.hdfsHostAndPort, toJobConfig.uri);
+  }
 
 }

@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
@@ -50,9 +51,11 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
   @Override
   public void load(LoaderContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) throws Exception {
-    KiteDatasetExecutor executor = getExecutor(jobConfig.toJobConfig.uri,
-        context.getSchema(), linkConfig.linkConfig.fileFormat);
+      ToJobConfiguration toJobConfig) throws Exception {
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, toJobConfig.toJobConfig);
+    KiteDatasetExecutor executor = getExecutor(
+        uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
     LOG.info("Temporary dataset created.");
 
     DataReader reader = context.getDataReader();

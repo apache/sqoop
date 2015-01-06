@@ -19,6 +19,7 @@
 package org.apache.sqoop.connector.kite;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.schema.Schema;
 import org.junit.Before;
@@ -30,7 +31,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.Mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
@@ -40,7 +40,7 @@ public class TestKiteToInitializer {
 
   private KiteToInitializer initializer;
 
-  @Mock
+  @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
   @Before
@@ -54,25 +54,27 @@ public class TestKiteToInitializer {
   @Test
   public void testInitializePassed() {
     // setup
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-    jobConfig.toJobConfig.uri = "dataset:file:/ds/not/exist";
-    when(KiteDatasetExecutor.datasetExists(jobConfig.toJobConfig.uri))
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    ToJobConfiguration toJobConfig = new ToJobConfiguration();
+    toJobConfig.toJobConfig.uri = "dataset:file:/ds/not/exist";
+    when(KiteDatasetExecutor.datasetExists(toJobConfig.toJobConfig.uri))
         .thenReturn(false);
 
     // exercise
-    initializer.initialize(null, null, jobConfig);
+    initializer.initialize(null, linkConfig, toJobConfig);
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expected = SqoopException.class)
   public void testInitializeFailed() {
     // setup
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-    jobConfig.toJobConfig.uri = "dataset:file:/ds/exist";
-    when(KiteDatasetExecutor.datasetExists(jobConfig.toJobConfig.uri))
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    ToJobConfiguration toJobConfig = new ToJobConfiguration();
+    toJobConfig.toJobConfig.uri = "dataset:file:/ds/exist";
+    when(KiteDatasetExecutor.datasetExists(toJobConfig.toJobConfig.uri))
         .thenReturn(true);
 
     // exercise
-    initializer.initialize(null, null, jobConfig);
+    initializer.initialize(null, linkConfig, toJobConfig);
   }
 
   @Test

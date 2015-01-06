@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
@@ -42,8 +43,10 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
 
   @Override
   public void initialize(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
-    if (KiteDatasetExecutor.datasetExists(jobConfig.toJobConfig.uri)) {
+      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, toJobConfig.toJobConfig);
+    if (KiteDatasetExecutor.datasetExists(uri)) {
       LOG.error("Overwrite an existing dataset is not expected in new create mode.");
       throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0001);
     }
@@ -56,7 +59,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
     jars.add(ClassUtils.jarForClass("org.kitesdk.data.Formats"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
-    if (FileFormat.CSV.equals(linkConfig.linkConfig.fileFormat)) {
+    if (FileFormat.CSV.equals(toJobConfig.toJobConfig.fileFormat)) {
       jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
     }
     return jars;
@@ -64,7 +67,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
 
   @Override
   public Schema getSchema(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     return NullSchema.getInstance();
   }
 
