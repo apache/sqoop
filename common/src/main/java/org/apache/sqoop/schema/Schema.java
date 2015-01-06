@@ -23,12 +23,15 @@ import org.apache.sqoop.schema.type.Column;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Schema represents the data fields that are transferred between {@link #From} and {@link #To}
+ * Schema represents the data fields that are transferred between {@link #From}
+ * and {@link #To}
  */
 public class Schema {
 
@@ -57,10 +60,22 @@ public class Schema {
    */
   private Set<String> columNames;
 
+  /**
+   * Helper map to map column name to index
+   */
+  private Map<String, Integer> nameToIndexMap;
+
+  /**
+   * column global index
+   */
+
+  int columnIndex;
+
   private Schema() {
     creationDate = new Date();
     columns = new ArrayList<Column>();
     columNames = new HashSet<String>();
+    nameToIndexMap = new HashMap<String, Integer>();
   }
 
   public Schema(String name) {
@@ -85,11 +100,10 @@ public class Schema {
     if(columNames.contains(column.getName())) {
       throw new SqoopException(SchemaError.SCHEMA_0002, "Column: " + column);
     }
-
     columNames.add(column.getName());
-
     columns.add(column);
-
+    nameToIndexMap.put(column.getName(), columnIndex);
+    columnIndex ++;
     return this;
   }
 
@@ -125,6 +139,13 @@ public class Schema {
 
   public int getColumnsCount() {
     return columns.size();
+  }
+
+  public Integer getColumnNameIndex(String name) {
+    if (columNames.contains(name)) {
+      return nameToIndexMap.get(name);
+    }
+    throw new SqoopException(SchemaError.SCHEMA_0007, "Column: " + name);
   }
 
   public boolean isEmpty() {

@@ -16,40 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.sqoop.connector.idf;
 
 import org.apache.sqoop.common.ErrorCode;
 
-public enum CSVIntermediateDataFormatError implements ErrorCode {
+public enum JSONIntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
+  JSON_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
 
-  /** An encoding is missing in the Java native libraries. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0001("Native character set error."),
+  JSON_INTERMEDIATE_DATA_FORMAT_0001("JSON array parse error."),
 
-  /** Error while escaping a row. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0002("An error has occurred while escaping a row."),
+  JSON_INTERMEDIATE_DATA_FORMAT_0002("JSON object parse error."),
 
-  /** Error while escaping a row. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0003("An error has occurred while unescaping a row."),
-
-  /** Column type isn't known by Intermediate Data Format. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
-
-  /**
-   * For arrays and maps we use JSON representation and incorrect representation
-   * results in parse exception
-   */
-  CSV_INTERMEDIATE_DATA_FORMAT_0005("JSON parse internal error."),
-
-  /** Unsupported bit values */
-  CSV_INTERMEDIATE_DATA_FORMAT_0006("Unsupported bit value."),
+  JSON_INTERMEDIATE_DATA_FORMAT_0003("Missing key in the JSON object."),
 
   ;
 
   private final String message;
 
-  private CSVIntermediateDataFormatError(String message) {
+  private JSONIntermediateDataFormatError(String message) {
     this.message = message;
   }
 

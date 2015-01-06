@@ -18,12 +18,21 @@
  */
 package org.apache.sqoop.connector.idf;
 
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
+
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.AbstractComplexListType;
+import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.schema.type.ColumnType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,9 +53,16 @@ public abstract class IntermediateDataFormat<T> {
 
   protected volatile T data;
 
-  public int hashCode() {
-    return data.hashCode();
-  }
+  protected Schema schema;
+
+  protected final Set<Integer> stringTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> bitTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> byteTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> listTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> mapTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> dateTimeTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> dateTypeColumnIndices = new HashSet<Integer>();
+  protected final Set<Integer> timeTypeColumnIndices = new HashSet<Integer>();
 
 
   /**
@@ -68,6 +84,7 @@ public abstract class IntermediateDataFormat<T> {
   public void setData(T obj) {
     this.data = obj;
   }
+
   /**
    * Get one row of data as CSV text. Use {@link #SqoopIDFUtils} for reading and writing
    * into the sqoop specified CSV text format for each {@link #ColumnType} field in the row
@@ -89,33 +106,66 @@ public abstract class IntermediateDataFormat<T> {
 
   /**
    * Set one row of data as CSV.
-   *
    */
   public abstract void setCSVTextData(String csvText);
 
   /**
-   * Get one row of data as an Object array. Sqoop uses defined object representation
-   * for each column type. For instance org.joda.time to represent date.Use {@link #SqoopIDFUtils}
-   * for reading and writing into the sqoop specified object format
-   * for each {@link #ColumnType} field in the row
+   * Get one row of data as an Object array.
+   * Sqoop uses defined object representation
+   * for each column type. For instance org.joda.time to represent date.
+   * Use {@link #SqoopIDFUtils} for reading and writing into the sqoop
+   * specified object format for each {@link #ColumnType} field in the row
    * </p>
    * @return - String representing the data as an Object array
    * If FROM and TO schema exist, we will use SchemaMatcher to get the data according to "TO" schema
    */
   public abstract Object[] getObjectData();
 
-  /**
-   * Set one row of data as an Object array.
-   *
-   */
+ /**
+  * Set one row of data as an Object array.
+  * It also should construct the data representation
+  * that the IDF represents so that the object is ready to
+  * consume when getData is invoked. Custom implementations
+  * will override this method to convert form object array
+  * to the data format
+  */
   public abstract void setObjectData(Object[] data);
 
   /**
-   * Set the schema for serializing/de-serializing  data.
+   * Set the schema for serializing/de-serializing data.
    *
-   * @param schema - the schema used for serializing/de-serializing  data
+   * @param schema
+   *          - the schema used for serializing/de-serializing data
    */
-  public abstract void setSchema(Schema schema);
+  public void setSchema(Schema schema) {
+    if (schema == null) {
+      // TODO(SQOOP-1956): throw an exception since working without a schema is dangerous
+      return;
+    }
+    this.schema = schema;
+    Column[] columns = schema.getColumnsArray();
+    int i = 0;
+    for (Column col : columns) {
+      if (isColumnStringType(col)) {
+        stringTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.BIT) {
+        bitTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.DATE) {
+        dateTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.TIME) {
+        timeTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.DATE_TIME) {
+        dateTimeTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.BINARY) {
+        byteTypeColumnIndices.add(i);
+      } else if (isColumnListType(col)) {
+        listTypeColumnIndices.add(i);
+      } else if (col.getType() == ColumnType.MAP) {
+        mapTypeColumnIndices.add(i);
+      }
+      i++;
+    }
+  }
 
   /**
    * Serialize the fields of this object to <code>out</code>.
@@ -135,13 +185,43 @@ public abstract class IntermediateDataFormat<T> {
    * @throws IOException
    */
   public abstract void read(DataInput in) throws IOException;
-
   /**
    * Provide the external jars that the IDF depends on
    * @return set of jars
    */
   public Set<String> getJars() {
     return new HashSet<String>();
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((data == null) ? 0 : data.hashCode());
+    result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IntermediateDataFormat<?> other = (IntermediateDataFormat<?>) obj;
+    if (data == null) {
+      if (other.data != null)
+        return false;
+    } else if (!data.equals(other.data))
+      return false;
+    if (schema == null) {
+      if (other.schema != null)
+        return false;
+    } else if (!schema.equals(other.schema))
+      return false;
+    return true;
   }
 
 }

@@ -94,6 +94,7 @@ limitations under the License.
     <commons-lang.version>2.5</commons-lang.version>
     <commons-io.version>2.4</commons-io.version>
     <commons-compress.version>1.9</commons-compress.version>
+    <commons-codec.version>1.9</commons-codec.version>
     <derby.version>10.8.2.2</derby.version>
     <hadoop.1.version>1.0.3</hadoop.1.version>
     <hadoop.2.version>2.6.0</hadoop.2.version>
@@ -444,11 +445,16 @@ limitations under the License.
         <artifactId>commons-cli</artifactId>
         <version>${commons-cli.version}</version>
       </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-        </dependency>
+       <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec.version}</version>
+      </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>

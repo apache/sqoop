@@ -26,7 +26,6 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
-import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.utils.ClassUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -38,8 +37,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,25 +53,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   public static final Logger LOG = Logger.getLogger(CSVIntermediateDataFormat.class);
 
-  private final Set<Integer> stringTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> bitTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> byteTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> listTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> mapTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> dateTimeTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> dateTypeColumnIndices = new HashSet<Integer>();
-  private final Set<Integer> timeColumnIndices = new HashSet<Integer>();
-
-
-  private Schema schema;
-
   public CSVIntermediateDataFormat() {
   }
 
   public CSVIntermediateDataFormat(Schema schema) {
     setSchema(schema);
   }
-
   /**
    * {@inheritDoc}
    */
@@ -87,128 +71,44 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    * {@inheritDoc}
    */
   @Override
-  public void setCSVTextData(String text) {
-    this.data = text;
+  public void setCSVTextData(String csvText) {
+    this.data = csvText;
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void setSchema(Schema schema) {
-    if (schema == null) {
-      return;
-    }
-    this.schema = schema;
-    Column[] columns = schema.getColumnsArray();
-    int i = 0;
-    for (Column col : columns) {
-      if (isColumnStringType(col)) {
-        stringTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.BIT) {
-        bitTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.DATE) {
-        dateTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.TIME) {
-        timeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.DATE_TIME) {
-        dateTimeTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.BINARY) {
-        byteTypeColumnIndices.add(i);
-      } else if (isColumnListType(col)) {
-        listTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.MAP) {
-        mapTypeColumnIndices.add(i);
-      }
-      i++;
-    }
-  }
-
-  /**
-   * Custom CSV Text parser that honors quoting and escaped quotes.
-   *
-   * @return String[]
-   */
-  private String[] parseCSVString() {
-    if (data == null) {
-      return null;
-    }
-
-    boolean quoted = false;
-    boolean escaped = false;
-
-    List<String> parsedData = new LinkedList<String>();
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < data.length(); ++i) {
-      char c = data.charAt(i);
-      switch (c) {
-      case QUOTE_CHARACTER:
-        builder.append(c);
-        if (escaped) {
-          escaped = false;
-        } else {
-          quoted = !quoted;
-        }
-        break;
-      case ESCAPE_CHARACTER:
-        builder.append(ESCAPE_CHARACTER);
-        escaped = !escaped;
-        break;
-      case CSV_SEPARATOR_CHARACTER:
-        if (quoted) {
-          builder.append(c);
-        } else {
-          parsedData.add(builder.toString());
-          builder = new StringBuilder();
-        }
-        break;
-      default:
-        if (escaped) {
-          escaped = false;
-        }
-        builder.append(c);
-        break;
-      }
-    }
-    parsedData.add(builder.toString());
-
-    return parsedData.toArray(new String[parsedData.size()]);
-  }
-
-  /**
-   * Converts the CSV String array into actual object array based on its
-   * corresponding column type {@inheritDoc}
-   */
-  @Override
   public Object[] getObjectData() {
     if (schema == null || schema.isEmpty()) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006);
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0002);
     }
 
     // fieldStringArray represents the csv fields parsed into string array
-    String[] fieldStringArray = parseCSVString();
+    String[] csvStringArray = parseCSVString(this.data);
 
-    if (fieldStringArray == null) {
+    if (csvStringArray == null) {
       return null;
     }
 
-    if (fieldStringArray.length != schema.getColumnsCount()) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005,
-          "The data " + getCSVTextData() + " has the wrong number of fields.");
+    if (csvStringArray.length != schema.getColumnsArray().length) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + getCSVTextData()
+          + " has the wrong number of fields.");
     }
 
-    Object[] objectArray = new Object[fieldStringArray.length];
+    Object[] objectArray = new Object[csvStringArray.length];
     Column[] columnArray = schema.getColumnsArray();
-    for (int i = 0; i < fieldStringArray.length; i++) {
+    for (int i = 0; i < csvStringArray.length; i++) {
       // check for NULL field and bail out immediately
-      if (fieldStringArray[i].equals(NULL_VALUE)) {
+      if (csvStringArray[i].equals(NULL_VALUE)) {
         objectArray[i] = null;
         continue;
       }
-      objectArray[i] = toObject(fieldStringArray[i], columnArray[i]);
+      objectArray[i] = toObject(csvStringArray[i], columnArray[i]);
     }
     return objectArray;
   }
+
 
   private Object toObject(String csvString, Column column) {
     Object returnValue = null;
@@ -242,7 +142,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       returnValue = toDateTime(csvString, column);
       break;
     case BIT:
-      returnValue = toBit(csvString, returnValue);
+      returnValue = toBit(csvString);
       break;
     case ARRAY:
     case SET:
@@ -258,14 +158,12 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     return returnValue;
   }
 
- 
-
   /**
-   * Appends the actual java objects into CSV string {@inheritDoc}
+   * {@inheritDoc}
    */
   @Override
   public void setObjectData(Object[] data) {
-   Set<Integer> nullValueIndices = new HashSet<Integer>();
+    Set<Integer> nullValueIndices = new HashSet<Integer>();
     Column[] columnArray = schema.getColumnsArray();
     // check for null
     for (int i = 0; i < data.length; i++) {
@@ -277,6 +175,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     // ignore the null values while encoding the object array into csv string
     encodeToCSVText(data, columnArray, nullValueIndices);
     this.data = StringUtils.join(data, CSV_SEPARATOR_CHARACTER);
+
   }
 
   /**
@@ -288,6 +187,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   /**
+   *
    * {@inheritDoc}
    */
   @Override
@@ -296,30 +196,18 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   }
 
   /**
-   * {@inheritDoc}
+   * Encode to the sqoop prescribed CSV String for every element in the object
+   * array
+   *
+   * @param objectArray
+   * @param columnArray
+   * @param nullValueIndices
    */
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (other == null || !(other instanceof CSVIntermediateDataFormat)) {
-      return false;
-    }
-    return data.equals(((CSVIntermediateDataFormat) other).data);
-  }
-
- /**
-  * Encode to the sqoop prescribed CSV String for every element in the objet array
-  * @param objectArray
-  * @param columnArray
-  * @param nullValueIndices
-  */
   @SuppressWarnings("unchecked")
   private void encodeToCSVText(Object[] objectArray, Column[] columnArray, Set<Integer> nullValueIndices) {
     for (int i : bitTypeColumnIndices) {
       if (!nullValueIndices.contains(i)) {
-        encodeToCSVBit(objectArray, i);
+        objectArray[i] = encodeToCSVBit(objectArray[i]);
       }
     }
     for (int i : stringTypeColumnIndices) {
@@ -333,22 +221,22 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
         if (objectArray[i] instanceof org.joda.time.DateTime) {
           org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
           // check for fraction and time zone and then use the right formatter
-          encodeToCSVDateTime(objectArray, i, col, dateTime);
+          objectArray[i] = encodeToCSVDateTime(dateTime, col);
         } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
           org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
-          encodeToCSVLocalDateTime(objectArray, i, col, localDateTime);
+          objectArray[i] = encodeToCSVLocalDateTime(localDateTime, col);
         }
       }
     }
     for (int i : dateTypeColumnIndices) {
       if (!nullValueIndices.contains(i)) {
-        encodeToCSVDate(objectArray, i);
+        objectArray[i] = encodeToCSVDate(objectArray[i]);
       }
     }
-    for (int i : timeColumnIndices) {
+    for (int i : timeTypeColumnIndices) {
       Column col = columnArray[i];
       if (!nullValueIndices.contains(i)) {
-        encodeToCSVTime(objectArray, i, col);
+        objectArray[i] = encodeToCSVTime(objectArray[i], col);
       }
     }
     for (int i : byteTypeColumnIndices) {
@@ -358,7 +246,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     }
     for (int i : listTypeColumnIndices) {
       if (!nullValueIndices.contains(i)) {
-        objectArray[i] = encodeToCSVList((Object[]) objectArray[i], (AbstractComplexListType)columnArray[i]);
+        objectArray[i] = encodeToCSVList((Object[]) objectArray[i], (AbstractComplexListType) columnArray[i]);
       }
     }
     for (int i : mapTypeColumnIndices) {
@@ -384,5 +272,4 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     jars.add(ClassUtils.jarForClass(JSONValue.class));
     return jars;
   }
-
 }

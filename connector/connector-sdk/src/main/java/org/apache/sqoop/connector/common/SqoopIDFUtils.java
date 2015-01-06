@@ -19,6 +19,7 @@ package org.apache.sqoop.connector.common;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormatError;
+import org.apache.sqoop.connector.idf.IntermediateDataFormatError;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,15 +89,24 @@ public class SqoopIDFUtils {
   // only date, no time
   public static final DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd");
   // time with fraction only, no timezone
-  public static final DateTimeFormatter tfWithFraction = DateTimeFormat.forPattern("HH:mm:ss.SSSSSS");
+  public static final DateTimeFormatter tfWithFraction = DateTimeFormat.forPattern("HH:mm:ss.SSS");
   public static final DateTimeFormatter tfWithNoFraction = DateTimeFormat.forPattern("HH:mm:ss");
 
-  static final String[] TRUE_BIT_VALUES = new String[] { "1", "true", "TRUE" };
-  static final Set<String> TRUE_BIT_SET = new HashSet<String>(Arrays.asList(TRUE_BIT_VALUES));
-  static final String[] FALSE_BIT_VALUES = new String[] { "0", "false", "FALSE" };
-  static final Set<String> FALSE_BIT_SET = new HashSet<String>(Arrays.asList(FALSE_BIT_VALUES));
+  public static final String[] TRUE_BIT_VALUES = new String[] { "1", "true", "TRUE" };
+  public static final Set<String> TRUE_BIT_SET = new HashSet<String>(Arrays.asList(TRUE_BIT_VALUES));
+  public static final String[] FALSE_BIT_VALUES = new String[] { "0", "false", "FALSE" };
+  public static final Set<String> FALSE_BIT_SET = new HashSet<String>(Arrays.asList(FALSE_BIT_VALUES));
 
   // ******** Number Column Type utils***********
+
+  public static String encodeToCSVFixedPoint(Object obj, Column column) {
+    Long byteSize = ((FixedPoint) column).getByteSize();
+    if (byteSize != null && byteSize <= Integer.SIZE) {
+      return ((Integer) obj).toString();
+    } else {
+      return ((Long) obj).toString();
+    }
+  }
 
   public static Object toFixedPoint(String csvString, Column column) {
     Object returnValue;
@@ -106,6 +117,15 @@ public class SqoopIDFUtils {
       returnValue = Long.valueOf(csvString);
     }
     return returnValue;
+  }
+
+  public static String encodeToCSVFloatingPoint(Object obj, Column column) {
+    Long byteSize = ((FloatingPoint) column).getByteSize();
+    if (byteSize != null && byteSize <= Float.SIZE) {
+      return ((Float) obj).toString();
+    } else {
+      return ((Double) obj).toString();
+    }
   }
 
   public static Object toFloatingPoint(String csvString, Column column) {
@@ -119,43 +139,44 @@ public class SqoopIDFUtils {
     return returnValue;
   }
 
+  public static String encodeToCSVDecimal(Object obj) {
+     return ((BigDecimal)obj).toString();
+  }
   public static Object toDecimal(String csvString, Column column) {
     return new BigDecimal(csvString);
   }
 
   // ********** BIT Column Type utils******************
-  public static void encodeToCSVBit(Object[] objectArray, int i) {
-    String bitStringValue = objectArray[i].toString();
+  public static String encodeToCSVBit(Object obj) {
+    String bitStringValue = obj.toString();
     if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
-      objectArray[i] = bitStringValue;
+      return bitStringValue;
     } else {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: "
-          + objectArray[i]);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006, " given bit value: " + bitStringValue);
     }
   }
 
-  public static Object toBit(String csvString, Object returnValue) {
+  public static Object toBit(String csvString) {
     if ((TRUE_BIT_SET.contains(csvString)) || (FALSE_BIT_SET.contains(csvString))) {
-      returnValue = TRUE_BIT_SET.contains(csvString);
+      return TRUE_BIT_SET.contains(csvString);
     } else {
       // throw an exception for any unsupported value for BITs
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0009, " given bit value: " + csvString);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006, " given bit value: " + csvString);
     }
-    return returnValue;
   }
 
   // *********** DATE and TIME Column Type utils **********
 
-  public static void encodeToCSVDate(Object[] objectArray, int i) {
-    org.joda.time.LocalDate date = (org.joda.time.LocalDate) objectArray[i];
-    objectArray[i] = encloseWithQuote(df.print(date));
+  public static String encodeToCSVDate(Object obj) {
+    org.joda.time.LocalDate date = (org.joda.time.LocalDate) obj;
+    return encloseWithQuote(df.print(date));
   }
 
-  public static void encodeToCSVTime(Object[] objectArray, int i, Column col) {
+  public static String encodeToCSVTime(Object obj, Column col) {
     if (((org.apache.sqoop.schema.type.Time) col).hasFraction()) {
-      objectArray[i] = encloseWithQuote(tfWithFraction.print((org.joda.time.LocalTime) objectArray[i]));
+      return encloseWithQuote(tfWithFraction.print((org.joda.time.LocalTime) obj));
     } else {
-      objectArray[i] = encloseWithQuote(tfWithNoFraction.print((org.joda.time.LocalTime) objectArray[i]));
+      return encloseWithQuote(tfWithNoFraction.print((org.joda.time.LocalTime) obj));
     }
   }
 
@@ -169,31 +190,34 @@ public class SqoopIDFUtils {
 
   // *********** DATE TIME Column Type utils **********
 
-  public static void encodeToCSVLocalDateTime(Object[] objectArray, int i, Column col, org.joda.time.LocalDateTime localDateTime) {
+  public static String encodeToCSVLocalDateTime(Object obj, Column col) {
+    org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) obj;
     org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
     if (column.hasFraction()) {
-      objectArray[i] = encloseWithQuote(dtfWithFractionNoTimeZone.print(localDateTime));
+      return encloseWithQuote(dtfWithFractionNoTimeZone.print(localDateTime));
     } else {
-      objectArray[i] = encloseWithQuote(dtfWithNoFractionAndTimeZone.print(localDateTime));
+      return encloseWithQuote(dtfWithNoFractionAndTimeZone.print(localDateTime));
     }
   }
 
-  public static void encodeToCSVDateTime(Object[] objectArray, int i, Column col, org.joda.time.DateTime dateTime) {
+
+  public static String encodeToCSVDateTime(Object obj, Column col) {
+    org.joda.time.DateTime dateTime = (org.joda.time.DateTime) obj;
     org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
     if (column.hasFraction() && column.hasTimezone()) {
-      objectArray[i] = encloseWithQuote(dtfWithFractionAndTimeZone.print(dateTime));
+      return encloseWithQuote(dtfWithFractionAndTimeZone.print(dateTime));
     } else if (column.hasFraction() && !column.hasTimezone()) {
-      objectArray[i] = encloseWithQuote(dtfWithFractionNoTimeZone.print(dateTime));
+      return encloseWithQuote(dtfWithFractionNoTimeZone.print(dateTime));
     } else if (column.hasTimezone()) {
-      objectArray[i] = encloseWithQuote(dtfWithNoFractionWithTimeZone.print(dateTime));
+      return encloseWithQuote(dtfWithNoFractionWithTimeZone.print(dateTime));
     } else {
-      objectArray[i] = encloseWithQuote(dtfWithNoFractionAndTimeZone.print(dateTime));
+      return encloseWithQuote(dtfWithNoFractionAndTimeZone.print(dateTime));
     }
   }
 
-  public static Object toDateTime(String fieldString, Column column) {
+  public static Object toDateTime(String csvString, Column column) {
     Object returnValue;
-    String dateTime = removeQuotes(fieldString);
+    String dateTime = removeQuotes(csvString);
     org.apache.sqoop.schema.type.DateTime col = ((org.apache.sqoop.schema.type.DateTime) column);
     if (col.hasFraction() && col.hasTimezone()) {
       // After calling withOffsetParsed method, a string
@@ -227,7 +251,7 @@ public class SqoopIDFUtils {
     try {
       object = (JSONObject) new JSONParser().parse(removeQuotes(csvString));
     } catch (org.json.simple.parser.ParseException e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0008, e);
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0003, e);
     }
     if (object != null) {
       return toMap(object);
@@ -235,7 +259,7 @@ public class SqoopIDFUtils {
     return null;
   }
 
-  private static List<Object> toList(JSONArray array) {
+  public static List<Object> toList(JSONArray array) {
     List<Object> list = new ArrayList<Object>();
     for (int i = 0; i < array.size(); i++) {
       Object value = array.get(i);
@@ -252,7 +276,7 @@ public class SqoopIDFUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<Object, Object> toMap(JSONObject object) {
+  public static Map<Object, Object> toMap(JSONObject object) {
     Map<Object, Object> elementMap = new HashMap<Object, Object>();
     Set<Map.Entry<Object, Object>> entries = object.entrySet();
     for (Map.Entry<Object, Object> entry : entries) {
@@ -273,13 +297,18 @@ public class SqoopIDFUtils {
   // ************ LIST Column Type utils*********
 
   @SuppressWarnings("unchecked")
-  public static String encodeToCSVList(Object[] list, AbstractComplexListType column) {
+  public static String encodeToCSVList(Object[] list, Column column) {
     List<Object> elementList = new ArrayList<Object>();
     for (int n = 0; n < list.length; n++) {
       Column listType = ((AbstractComplexListType) column).getListType();
+      //2 level nesting supported
       if (isColumnListType(listType)) {
         Object[] listElements = (Object[]) list[n];
-        elementList.add((Arrays.deepToString(listElements)));
+        JSONArray subArray = new JSONArray();
+        for (int i = 0; i < listElements.length; i++) {
+          subArray.add(listElements[i]);
+        }
+        elementList.add(subArray);
       } else {
         elementList.add(list[n]);
       }
@@ -295,7 +324,7 @@ public class SqoopIDFUtils {
     try {
       array = (JSONArray) new JSONParser().parse(removeQuotes(csvString));
     } catch (org.json.simple.parser.ParseException e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0008, e);
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0003, e);
     }
     if (array != null) {
       return array.toArray();
@@ -321,31 +350,32 @@ public class SqoopIDFUtils {
         replacement = replacement.replaceAll(getRegExp(originals[j]), Matcher.quoteReplacement(replacements[j]));
       }
     } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, string + "  " + replacement
-          + "  " + String.valueOf(j) + "  " + e.getMessage());
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, string + "  " + replacement + "  "
+          + String.valueOf(j) + "  " + e.getMessage());
     }
     return encloseWithQuote(replacement);
   }
 
-  public static String toText(String csvString) {
+  public static String toText(String string) {
     // Remove the trailing and starting quotes.
-    csvString = removeQuotes(csvString);
+    string = removeQuotes(string);
     int j = 0;
     try {
       for (j = 0; j < replacements.length; j++) {
-        csvString = csvString.replaceAll(getRegExp(replacements[j]), Matcher.quoteReplacement(String.valueOf(originals[j])));
+        string = string.replaceAll(getRegExp(replacements[j]), Matcher.quoteReplacement(String.valueOf(originals[j])));
       }
     } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, csvString + "  "
-          + String.valueOf(j) + e.getMessage());
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, string + "  " + String.valueOf(j)
+          + e.getMessage());
     }
 
-    return csvString;
+    return string;
   }
 
   // ************ BINARY Column type utils*********
 
-  public static String encodeToCSVByteArray(byte[] bytes) {
+  public static String encodeToCSVByteArray(Object obj) {
+    byte[] bytes = (byte[]) obj;
     try {
       return encodeToCSVString(new String(bytes, BYTE_FIELD_CHARSET));
     } catch (UnsupportedEncodingException e) {
@@ -391,6 +421,58 @@ public class SqoopIDFUtils {
 
   public static boolean isColumnStringType(Column stringType) {
     return stringType.getType().equals(ColumnType.TEXT) || stringType.getType().equals(ColumnType.ENUM);
+  }
+
+  // ******* parse sqoop CSV ********
+  /**
+   * Custom CSV Text parser that honors quoting and escaped quotes.
+   *
+   * @return String[]
+   */
+  public static String[] parseCSVString(String csvText) {
+    if (csvText == null) {
+      return null;
+    }
+
+    boolean quoted = false;
+    boolean escaped = false;
+
+    List<String> parsedData = new LinkedList<String>();
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < csvText.length(); ++i) {
+      char c = csvText.charAt(i);
+      switch (c) {
+      case QUOTE_CHARACTER:
+        builder.append(c);
+        if (escaped) {
+          escaped = false;
+        } else {
+          quoted = !quoted;
+        }
+        break;
+      case ESCAPE_CHARACTER:
+        builder.append(ESCAPE_CHARACTER);
+        escaped = !escaped;
+        break;
+      case CSV_SEPARATOR_CHARACTER:
+        if (quoted) {
+          builder.append(c);
+        } else {
+          parsedData.add(builder.toString());
+          builder = new StringBuilder();
+        }
+        break;
+      default:
+        if (escaped) {
+          escaped = false;
+        }
+        builder.append(c);
+        break;
+      }
+    }
+    parsedData.add(builder.toString());
+
+    return parsedData.toArray(new String[parsedData.size()]);
   }
 
 }

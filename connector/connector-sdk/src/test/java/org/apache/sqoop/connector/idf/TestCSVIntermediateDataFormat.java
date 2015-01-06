@@ -188,6 +188,16 @@ public class TestCSVIntermediateDataFormat {
     assertEquals(testData, dataFormat.getCSVTextData());
   }
 
+
+  @Test
+  public void testInputAsCSVTextInAndDataOut() {
+    String testData = "'ENUM',10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
+      + ",'" + String.valueOf(0x0A) + "'";
+    dataFormat.setCSVTextData(testData);
+    assertEquals(testData, dataFormat.getData());
+  }
+
+
   @Test
   public void testInputAsCSVTextInObjectOut() {
 
@@ -219,7 +229,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   @Test
-  public void testInputAsObjectArayInCSVTextOut() {
+  public void testInputAsObjectArayInCSVTextOrDataOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1"))
         .addColumn(new FixedPoint("2"))
@@ -246,6 +256,7 @@ public class TestCSVIntermediateDataFormat {
     String testData = "10,34,'54','random data'," + getByteFieldString(byteFieldData).replaceAll("\r", "\\\\r")
         + ",'\\n','TEST_ENUM'";
     assertEquals(testData, dataFormat.getCSVTextData());
+    assertEquals(testData, dataFormat.getData());
   }
 
   @Test
@@ -384,7 +395,7 @@ public class TestCSVIntermediateDataFormat {
     org.joda.time.LocalTime time = new org.joda.time.LocalTime(15, 0, 0);
     Object[] in = { time, "test" };
     dataFormat.setObjectData(in);
-    assertEquals("'15:00:00.000000','test'", dataFormat.getCSVTextData());
+    assertEquals("'15:00:00.000','test'", dataFormat.getCSVTextData());
   }
 
   @Test
@@ -854,7 +865,8 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setObjectData(data);
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(2, expectedArray.length);
-    assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.deepToString(expectedArray));
+    String arrayOfArraysString = "[[11,12], [14,15]]";
+    assertEquals(arrayOfArraysString, Arrays.toString(expectedArray));
     assertEquals("text", dataFormat.getObjectData()[1]);
   }
 
@@ -879,7 +891,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setCSVTextData("'[\"[11, 12]\",\"[14, 15]\"]','text'");
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(2, expectedArray.length);
-    assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.deepToString(expectedArray));
+    assertEquals(Arrays.deepToString(arrayOfArrays), Arrays.toString(expectedArray));
     assertEquals("text", dataFormat.getObjectData()[1]);
   }
 
@@ -890,7 +902,7 @@ public class TestCSVIntermediateDataFormat {
         new org.apache.sqoop.schema.type.Array("array", new FixedPoint("ft"))));
     schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
     dataFormat.setSchema(schema);
-    String input = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
+    String input = "'[[11, 12],[14, 15]]','text'";
     dataFormat.setCSVTextData(input);
     Object[] expectedArray = (Object[]) dataFormat.getObjectData()[0];
     assertEquals(2, expectedArray.length);
@@ -916,7 +928,7 @@ public class TestCSVIntermediateDataFormat {
     data[0] = arrayOfArrays;
     data[1] = "text";
     dataFormat.setObjectData(data);
-    String expected = "'[\"[11, 12]\",\"[14, 15]\"]','text'";
+    String expected = "'[[11,12],[14,15]]','text'";
     assertEquals(expected, dataFormat.getCSVTextData());
   }
   //**************test cases for map**********************

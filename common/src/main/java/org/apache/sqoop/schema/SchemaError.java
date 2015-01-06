@@ -38,6 +38,8 @@ public enum SchemaError implements ErrorCode {
 
   SCHEMA_0006("Schema without name"),
 
+  SCHEMA_0007("Unknown column name"),
+
   ;
 
   private final String message;
