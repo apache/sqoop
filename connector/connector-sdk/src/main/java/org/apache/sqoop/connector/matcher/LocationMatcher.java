@@ -17,23 +17,17 @@
  */
 package org.apache.sqoop.connector.matcher;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.SchemaError;
 import org.apache.sqoop.schema.type.Column;
 
-
 /**
- * Convert data according to FROM schema to data according to TO schema
- * This is done based on column location
- * So data in first column in FROM goes into first column in TO, etc
- * If TO schema has more fields and they are "nullable", the value will be set to null
- * If TO schema has extra non-null fields, we'll throw an exception
+ * Convert data according to FROM schema to data according to TO schema. This is
+ * done based on column location, Data in first column in FROM goes into first
+ * column in TO, etc., if TO schema has more fields and they are "nullable",
+ * their values will be set to null. If TO schema has extra non-null fields, we
+ * will throw an exception.
  */
 public class LocationMatcher extends Matcher {
-
-  public static final Logger LOG = Logger.getLogger(LocationMatcher.class);
 
   public LocationMatcher(Schema from, Schema to) {
     super(from, to);
@@ -41,38 +35,26 @@ public class LocationMatcher extends Matcher {
 
   @Override
   public Object[] getMatchingData(Object[] fields) {
-
-    Object[] out = new Object[getToSchema().getColumnsCount()];
-
-    int i = 0;
-
     if (getToSchema().isEmpty()) {
-      // If there's no destination schema, no need to convert anything
-      // Just use the original data
+      // No destination schema found. No need to convert anything.
       return fields;
     }
 
-    for (Column col: getToSchema().getColumnsArray()) {
+    Object[] out = new Object[getToSchema().getColumnsCount()];
+    int i = 0;
+
+    for (Column col : getToSchema().getColumnsList()) {
       if (i < fields.length) {
-        if (isNull(fields[i])) {
-          out[i] = null;
-        } else {
-          out[i] = fields[i];
-        }
+        Object value = fields[i];
+        out[i] = isNull(value) ? null : value;
       }
       // We ran out of fields before we ran out of schema
       else {
-        if (!col.getNullable()) {
-          throw new SqoopException(SchemaError.SCHEMA_0004,"target column " + col + " didn't match with any source column and cannot be null");
-        } else {
-          LOG.warn("Column " + col + " has no matching source column. Will be ignored. ");
-          out[i] = null;
-        }
+        tryFillNullInArrayForUnexpectedColumn(col, out, i);
       }
       i++;
     }
     return out;
   }
-
 
 }

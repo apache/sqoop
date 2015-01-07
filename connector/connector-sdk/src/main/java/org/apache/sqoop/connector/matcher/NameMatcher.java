@@ -17,58 +17,59 @@
  */
 package org.apache.sqoop.connector.matcher;
 
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.SchemaError;
 import org.apache.sqoop.schema.type.Column;
 
 import java.util.HashMap;
 
+/**
+ * Convert data according to FROM schema to data according to TO schema. This is
+ * done based on column name, If TO schema has more fields and they are
+ * "nullable", their values will be set to null. If TO schema has extra non-null
+ * fields, we will throw an exception.
+ */
 public class NameMatcher extends Matcher {
 
-  public static final Logger LOG = Logger.getLogger(NameMatcher.class);
+  private HashMap<String, Integer> fromColNameIndexMap;
 
   public NameMatcher(Schema from, Schema to) {
     super(from, to);
+
+    fromColNameIndexMap = new HashMap<String, Integer>();
+    int fromIndex = 0;
+
+    for (Column fromCol : getFromSchema().getColumnsList()) {
+      fromColNameIndexMap.put(fromCol.getName(), fromIndex);
+      fromIndex++;
+    }
   }
 
   @Override
   public Object[] getMatchingData(Object[] fields) {
-    Object[] out = new Object[getToSchema().getColumnsCount()];
-
-    HashMap<String,Column> colNames = new HashMap<String, Column>();
-
-    for (Column fromCol: getFromSchema().getColumnsArray()) {
-      colNames.put(fromCol.getName(), fromCol);
+    if (getToSchema().isEmpty()) {
+      // No destination schema found. No need to convert anything.
+      return fields;
     }
 
-    int toIndex = 0;
+    Object[] out = new Object[getToSchema().getColumnsCount()];
+    int i = 0;
 
-    for (Column toCol: getToSchema().getColumnsArray()) {
-      Column fromCol = colNames.get(toCol.getName());
-
-      if (fromCol != null) {
-        int fromIndex = getFromSchema().getColumnsList().indexOf(fromCol);
-        if (isNull(fields[fromIndex])) {
-          out[toIndex] = null;
-        } else {
-          out[toIndex] = fields[fromIndex];
-        }
-      } else {
-        //column exists in TO schema but not in FROM schema
-        if (toCol.getNullable() == false) {
-          throw new SqoopException(SchemaError.SCHEMA_0004,"target column " + toCol + " didn't match with any source column and cannot be null");
-        } else {
-          LOG.warn("Column " + toCol + " has no matching source column. Will be ignored. ");
-          out[toIndex] = null;
+    for (Column toCol : getToSchema().getColumnsList()) {
+      boolean assigned = false;
+      if (fromColNameIndexMap.containsKey(toCol.getName())) {
+        int fromIndex = fromColNameIndexMap.get(toCol.getName());
+        if (fromIndex < fields.length) {
+          Object value = fields[fromIndex];
+          out[i] = isNull(value) ? null : value;
+          assigned = true;
         }
       }
-
-      toIndex++;
+      if (!assigned) {
+        tryFillNullInArrayForUnexpectedColumn(toCol, out, i);
+      }
+      i++;
     }
-
-  return out;
+    return out;
   }
 
 }

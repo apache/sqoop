@@ -17,12 +17,16 @@
  */
 package org.apache.sqoop.connector.matcher;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.SchemaError;
+import org.apache.sqoop.schema.type.Column;
 
 public abstract class Matcher {
 
+  private static final Logger LOG = Logger.getLogger(Matcher.class);
   private final Schema fromSchema;
   private final Schema toSchema;
 
@@ -67,5 +71,16 @@ public abstract class Matcher {
     return false;
   }
 
+  protected void tryFillNullInArrayForUnexpectedColumn(Column column,
+      Object[] array, int index) throws SqoopException {
+    if (!column.getNullable()) {
+      throw new SqoopException(SchemaError.SCHEMA_0004, "Target column " +
+          column + " didn't match with any source column and cannot be null.");
+    }
+
+    LOG.warn("Column " + column +
+        " has no matching source column. Will be ignored.");
+    array[index] = null;
+  }
 
 }
