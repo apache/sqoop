@@ -62,7 +62,7 @@ def sqoop_guess_branch(versions):
 
 # Verify supported branch
 def sqoop_verify_branch(branch):
-  return branch in {"sqoop2", "SQOOP-1082", "SQOOP-1367"}
+  return branch in ("sqoop2", "SQOOP-1082", "SQOOP-1367",)
 
 def execute(cmd, log=True):
   if log:
