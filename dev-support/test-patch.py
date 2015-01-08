@@ -266,7 +266,7 @@ def run_mvn_test(command, test_type, result, output_dir):
   if rc == 0:
     result.success("All %s tests passed" % test_type)
   else:
-    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test%s.txt" % test_type)))
+    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_type)))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
