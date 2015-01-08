@@ -19,57 +19,50 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.common.FileFormat;
-import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
+import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
+import org.apache.sqoop.connector.common.AvroDataTypeUtil;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
-import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Datasets;
 
 import java.util.Set;
 
 /**
  * This class allows connector to define initialization work for execution.
- *
- * It will check whether dataset exists in destination already.
  */
-public class KiteToInitializer extends Initializer<LinkConfiguration,
-    ToJobConfiguration> {
+public class KiteFromInitializer extends Initializer<LinkConfiguration,
+    FromJobConfiguration> {
 
-  private static final Logger LOG = Logger.getLogger(KiteToInitializer.class);
+  private static final Logger LOG = Logger.getLogger(KiteFromInitializer.class);
 
   @Override
   public void initialize(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    String uri = ConfigUtil.buildDatasetUri(
-        linkConfig.linkConfig, toJobConfig.toJobConfig);
-    if (Datasets.exists(uri)) {
-      LOG.error("Overwrite an existing dataset is not expected in new create mode.");
-      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0001);
+      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    if (!Datasets.exists(fromJobConfig.fromJobConfig.uri)) {
+      LOG.error("Dataset does not exist");
+      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0002);
     }
   }
-
   @Override
   public Set<String> getJars(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    Set<String> jars = super.getJars(context, linkConfig, toJobConfig);
-    jars.add(ClassUtils.jarForClass("org.kitesdk.data.Formats"));
+      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    Set<String> jars = super.getJars(context, linkConfig, fromJobConfig);
+    jars.add(ClassUtils.jarForClass("org.kitesdk.data.Datasets"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
-    if (FileFormat.CSV.equals(toJobConfig.toJobConfig.fileFormat)) {
-      jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
-    }
     return jars;
   }
 
   @Override
   public Schema getSchema(InitializerContext context,
-      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    return NullSchema.getInstance();
+      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
+    Dataset dataset = Datasets.load(fromJobConfig.fromJobConfig.uri);
+    org.apache.avro.Schema avroSchema = dataset.getDescriptor().getSchema();
+    return AvroDataTypeUtil.createSqoopSchema(avroSchema);
   }
 
 }

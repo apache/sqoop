@@ -19,9 +19,7 @@
 package org.apache.sqoop.connector.kite;
 
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
-import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,60 +27,44 @@ import org.kitesdk.data.Datasets;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Datasets.class)
-public class TestKiteToInitializer {
+public class TestKiteFromInitializer {
 
-  private KiteToInitializer initializer;
+  private KiteFromInitializer initializer;
 
   @Before
   public void setUp() {
     initMocks(this);
     mockStatic(Datasets.class);
 
-    initializer = new KiteToInitializer();
+    initializer = new KiteFromInitializer();
   }
 
   @Test
   public void testInitializePassed() {
     // setup
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration toJobConfig = new ToJobConfiguration();
-    toJobConfig.toJobConfig.uri = "dataset:file:/ds/not/exist";
-    when(Datasets.exists(toJobConfig.toJobConfig.uri))
-        .thenReturn(false);
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+    jobConfig.fromJobConfig.uri = "dataset:file:/ds/exist";
+    when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(true);
 
     // exercise
-    initializer.initialize(null, linkConfig, toJobConfig);
+    initializer.initialize(null, null, jobConfig);
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expected=SqoopException.class)
   public void testInitializeFailed() {
     // setup
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration toJobConfig = new ToJobConfiguration();
-    toJobConfig.toJobConfig.uri = "dataset:file:/ds/exist";
-    when(Datasets.exists(toJobConfig.toJobConfig.uri))
-        .thenReturn(true);
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+    jobConfig.fromJobConfig.uri = "dataset:file:/ds/not/exist";
+    when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(false);
 
     // exercise
-    initializer.initialize(null, linkConfig, toJobConfig);
-  }
-
-  @Test
-  public void testGetSchema() {
-    // exercise
-    Schema schema = initializer.getSchema(null, null, null);
-
-    // verify
-    assertNotNull(schema);
-    assertTrue(schema.isEmpty());
+    initializer.initialize(null, null, jobConfig);
   }
 
 }

@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.kite;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
@@ -27,6 +28,7 @@ import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.schema.Schema;
+import org.kitesdk.data.Dataset;
 
 /**
  * This class allows Kite connector to load data into a target system.
@@ -36,8 +38,9 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   private static final Logger LOG = Logger.getLogger(KiteLoader.class);
 
   private long rowsWritten = 0;
+
   @VisibleForTesting
-  protected KiteDatasetExecutor getExecutor(String uri, Schema schema,
+  KiteDatasetExecutor getExecutor(String uri, Schema schema,
       FileFormat format) {
     // Note that instead of creating a dataset at destination, we create a
     // temporary dataset by every KiteLoader instance. They will be merged when
@@ -45,8 +48,9 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
     // not able to pass the temporary dataset uri to KiteToDestroyer. So we
     // delegate KiteDatasetExecutor to manage name convention for datasets.
     uri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
-
-    return new KiteDatasetExecutor(uri, schema, format);
+    Dataset<GenericRecord> dataset =
+        KiteDatasetExecutor.createDataset(uri, schema, format);
+    return new KiteDatasetExecutor(dataset);
   }
 
   @Override

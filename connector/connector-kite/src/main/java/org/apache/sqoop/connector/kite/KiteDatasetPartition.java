@@ -15,38 +15,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.sqoop.connector.kite;
 
-import org.apache.sqoop.common.ErrorCode;
+import org.apache.sqoop.job.etl.Partition;
 
-public enum KiteConnectorError implements ErrorCode {
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-  /** Unsupported dataset URI scheme */
-  GENERIC_KITE_CONNECTOR_0000("Unsupported dataset URI scheme"),
+/**
+ * A part of the input data partitioned by the Partitioner.
+ */
+public class KiteDatasetPartition extends Partition {
 
-  /** Target dataset is not empty */
-  GENERIC_KITE_CONNECTOR_0001("Dataset is not empty"),
+  /** The uri to the dataset */
+  private String uri;
 
-  /** Dataset does not exist */
-  GENERIC_KITE_CONNECTOR_0002("Dataset does not exist"),
-
-  /** Error occurred while creating partitions */
-  GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
-
-  ;
-
-  private final String message;
-
-  private KiteConnectorError(String message) {
-    this.message = message;
+  public KiteDatasetPartition() {
   }
 
-  public String getCode() {
-    return name();
+  public String getUri() {
+    return uri;
   }
 
-  public String getMessage() {
-    return message;
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    uri = in.readUTF();
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeUTF(uri);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("{uri=%s}", uri);
   }
 
 }

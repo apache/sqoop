@@ -15,38 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.kite;
+package org.apache.sqoop.connector.kite.configuration;
 
-import org.apache.sqoop.common.ErrorCode;
+import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.validators.DatasetURIValidator;
 
-public enum KiteConnectorError implements ErrorCode {
+@ConfigClass
+public class FromJobConfig {
 
-  /** Unsupported dataset URI scheme */
-  GENERIC_KITE_CONNECTOR_0000("Unsupported dataset URI scheme"),
-
-  /** Target dataset is not empty */
-  GENERIC_KITE_CONNECTOR_0001("Dataset is not empty"),
-
-  /** Dataset does not exist */
-  GENERIC_KITE_CONNECTOR_0002("Dataset does not exist"),
-
-  /** Error occurred while creating partitions */
-  GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
-
-  ;
-
-  private final String message;
-
-  private KiteConnectorError(String message) {
-    this.message = message;
-  }
-
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
-  }
+  @Input(size = 255, validators = {@Validator(DatasetURIValidator.class)})
+  public String uri;
 
 }

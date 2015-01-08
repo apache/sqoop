@@ -23,9 +23,11 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.common.AvroDataTypeUtil;
 import org.apache.sqoop.connector.kite.util.KiteDataTypeUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Format;
@@ -47,10 +49,12 @@ public class KiteDatasetExecutor {
 
   private DatasetWriter<GenericRecord> writer;
 
+  private DatasetReader<GenericRecord> reader;
+
   /**
    * Creates a new dataset.
    */
-  public KiteDatasetExecutor(String uri, org.apache.sqoop.schema.Schema schema,
+  public static Dataset<GenericRecord> createDataset(String uri, org.apache.sqoop.schema.Schema schema,
       FileFormat format) {
     Schema datasetSchema = KiteDataTypeUtil.createAvroSchema(schema);
     Format datasetFormat = KiteDataTypeUtil.toFormat(format);
@@ -59,11 +63,10 @@ public class KiteDatasetExecutor {
         .schema(datasetSchema)
         .format(datasetFormat)
         .build();
-    dataset = Datasets.create(uri, descriptor);
+    return Datasets.create(uri, descriptor);
   }
 
-  @VisibleForTesting
-  protected KiteDatasetExecutor(Dataset<GenericRecord> dataset) {
+  public KiteDatasetExecutor(Dataset<GenericRecord> dataset) {
     this.dataset = dataset;
   }
 
@@ -87,7 +90,7 @@ public class KiteDatasetExecutor {
   }
 
   @VisibleForTesting
-  protected boolean isWriterClosed() {
+  boolean isWriterClosed() {
     return writer == null || !writer.isOpen();
   }
 
@@ -101,25 +104,38 @@ public class KiteDatasetExecutor {
     }
   }
 
-  /**
-   * Checks the existence by a specified dataset URI.
-   */
-  public static boolean datasetExists(String uri) {
-    return Datasets.exists(uri);
+  public Object[] readRecord() {
+    if (getOrNewReader().hasNext()) {
+      GenericRecord record = getOrNewReader().next();
+      return AvroDataTypeUtil.extractGenericRecord(record);
+    }
+    return null;
+  }
+
+  private DatasetReader<GenericRecord> getOrNewReader() {
+    if (reader == null) {
+      reader = dataset.newReader();
+    }
+    return reader;
+  }
+
+  @VisibleForTesting
+  boolean isReaderClosed() {
+    return reader == null || !reader.isOpen();
+  }
+
+  public void closeReader() {
+    if (reader != null) {
+      Closeables.closeQuietly(reader);
+      reader = null;
+    }
   }
 
   /**
    * Deletes current dataset physically.
    */
   public void deleteDataset() {
-    deleteDataset(dataset.getUri().toString());
-  }
-
-  /**
-   * Deletes particular dataset physically.
-   */
-  public static boolean deleteDataset(String uri) {
-    return Datasets.delete(uri);
+    Datasets.delete(dataset.getUri().toString());
   }
 
   /**

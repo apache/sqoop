@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.kite;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
@@ -26,6 +27,8 @@ import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.schema.Schema;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.Datasets;
 
 /**
  * This classes allows connector to define work to complete execution.
@@ -54,7 +57,7 @@ public class KiteToDestroyer extends Destroyer<LinkConfiguration,
       }
     } else {
       for (String tempUri : tempUris) {
-        KiteDatasetExecutor.deleteDataset(tempUri);
+        Datasets.delete(tempUri);
         LOG.warn(String.format("Failed to import. " +
             "Temporary dataset %s has been deleted", tempUri));
       }
@@ -62,9 +65,11 @@ public class KiteToDestroyer extends Destroyer<LinkConfiguration,
   }
 
   @VisibleForTesting
-  protected KiteDatasetExecutor getExecutor(String uri, Schema schema,
+  KiteDatasetExecutor getExecutor(String uri, Schema schema,
       FileFormat format) {
-    return new KiteDatasetExecutor(uri, schema, format);
+    Dataset<GenericRecord> dataset =
+        KiteDatasetExecutor.createDataset(uri, schema, format);
+    return new KiteDatasetExecutor(dataset);
   }
 
 }

@@ -15,38 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.kite;
+package org.apache.sqoop.connector.kite.configuration;
 
-import org.apache.sqoop.common.ErrorCode;
+import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigurationClass;
 
-public enum KiteConnectorError implements ErrorCode {
+@ConfigurationClass
+public class FromJobConfiguration {
 
-  /** Unsupported dataset URI scheme */
-  GENERIC_KITE_CONNECTOR_0000("Unsupported dataset URI scheme"),
+  @Config public FromJobConfig fromJobConfig;
 
-  /** Target dataset is not empty */
-  GENERIC_KITE_CONNECTOR_0001("Dataset is not empty"),
-
-  /** Dataset does not exist */
-  GENERIC_KITE_CONNECTOR_0002("Dataset does not exist"),
-
-  /** Error occurred while creating partitions */
-  GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
-
-  ;
-
-  private final String message;
-
-  private KiteConnectorError(String message) {
-    this.message = message;
-  }
-
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
+  public FromJobConfiguration() {
+    fromJobConfig = new FromJobConfig();
   }
 
 }

@@ -17,36 +17,20 @@
  */
 package org.apache.sqoop.connector.kite;
 
-import org.apache.sqoop.common.ErrorCode;
+import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 
-public enum KiteConnectorError implements ErrorCode {
+/**
+ * This classes allows connector to define work to complete execution.
+ */
+public class KiteFromDestroyer extends Destroyer<LinkConfiguration,
+    FromJobConfiguration> {
 
-  /** Unsupported dataset URI scheme */
-  GENERIC_KITE_CONNECTOR_0000("Unsupported dataset URI scheme"),
-
-  /** Target dataset is not empty */
-  GENERIC_KITE_CONNECTOR_0001("Dataset is not empty"),
-
-  /** Dataset does not exist */
-  GENERIC_KITE_CONNECTOR_0002("Dataset does not exist"),
-
-  /** Error occurred while creating partitions */
-  GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
-
-  ;
-
-  private final String message;
-
-  private KiteConnectorError(String message) {
-    this.message = message;
-  }
-
-  public String getCode() {
-    return name();
-  }
-
-  public String getMessage() {
-    return message;
+  @Override
+  public void destroy(DestroyerContext context,
+      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
   }
 
 }

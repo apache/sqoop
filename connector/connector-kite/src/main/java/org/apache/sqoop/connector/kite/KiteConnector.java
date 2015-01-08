@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
+import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
@@ -27,8 +28,6 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -43,6 +42,12 @@ public class KiteConnector extends SqoopConnector {
           KiteToInitializer.class,
           KiteLoader.class,
           KiteToDestroyer.class);
+
+  private static final From FROM = new From(
+      KiteFromInitializer.class,
+      KiteDatasetPartitioner.class,
+      KiteExtractor.class,
+      KiteFromDestroyer.class);
 
   @Override
   public String getVersion() {
@@ -64,8 +69,7 @@ public class KiteConnector extends SqoopConnector {
   public Class getJobConfigurationClass(Direction jobType) {
     switch (jobType) {
       case FROM:
-        // TODO: SQOOP-1647
-        return null;
+        return FromJobConfiguration.class;
       case TO:
         return ToJobConfiguration.class;
       default:
@@ -74,15 +78,8 @@ public class KiteConnector extends SqoopConnector {
   }
 
   @Override
-  public List<Direction> getSupportedDirections() {
-    // TODO: No need to override, when SQOOP-1647 is done
-    return Arrays.asList(Direction.TO);
-  }
-
-  @Override
   public From getFrom() {
-    // TODO: SQOOP-1647
-    return null;
+    return FROM;
   }
 
   @Override

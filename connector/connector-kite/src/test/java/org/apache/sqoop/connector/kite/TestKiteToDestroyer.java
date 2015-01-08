@@ -26,6 +26,7 @@ import org.apache.sqoop.schema.Schema;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kitesdk.data.Datasets;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -37,7 +38,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(KiteDatasetExecutor.class)
+@PrepareForTest({KiteDatasetExecutor.class, Datasets.class})
 public class TestKiteToDestroyer {
 
   private KiteToDestroyer destroyer;
@@ -55,6 +56,7 @@ public class TestKiteToDestroyer {
   public void setUp() {
     initMocks(this);
     mockStatic(KiteDatasetExecutor.class);
+    mockStatic(Datasets.class);
 
     destroyer = new KiteToDestroyer() {
       @Override
@@ -93,7 +95,7 @@ public class TestKiteToDestroyer {
     when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
     for (String uri : expectedUris) {
-      when(KiteDatasetExecutor.deleteDataset(uri)).thenReturn(true);
+      when(Datasets.delete(uri)).thenReturn(true);
     }
 
     // exercise
@@ -102,7 +104,7 @@ public class TestKiteToDestroyer {
     // verify
     for (String uri : expectedUris) {
       verifyStatic(times(1));
-      KiteDatasetExecutor.deleteDataset(uri);
+      Datasets.delete(uri);
     }
   }
 
