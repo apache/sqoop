@@ -189,8 +189,8 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
       returnValue = Boolean.valueOf(removeQuotes(csvString));
       break;
     default:
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0004,
- "Column type from schema was not recognized for " + column.getType());
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
+          "Column type from schema was not recognized for " + column.getType());
     }
     return returnValue;
   }
@@ -259,19 +259,6 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     }
 
     return object;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static JSONArray toJSONArray(Object[] objectArray) {
-    JSONArray jsonArray = new JSONArray();
-    for (int i = 0; i < objectArray.length; i++) {
-      Object value = objectArray[i];
-      if (value instanceof Object[]) {
-        value = toJSONArray((Object[]) value);
-      }
-      jsonArray.add(value);
-    }
-    return jsonArray;
   }
 
   private String toCSV(JSONObject json) {

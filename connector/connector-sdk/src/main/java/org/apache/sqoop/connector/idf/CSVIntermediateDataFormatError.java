@@ -33,17 +33,14 @@ public enum CSVIntermediateDataFormatError implements ErrorCode {
   /** Error while escaping a row. */
   CSV_INTERMEDIATE_DATA_FORMAT_0003("An error has occurred while unescaping a row."),
 
-  /** Column type isn't known by Intermediate Data Format. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
-
   /**
    * For arrays and maps we use JSON representation and incorrect representation
    * results in parse exception
    */
-  CSV_INTERMEDIATE_DATA_FORMAT_0005("JSON parse internal error."),
+  CSV_INTERMEDIATE_DATA_FORMAT_0004("JSON parse internal error."),
 
   /** Unsupported bit values */
-  CSV_INTERMEDIATE_DATA_FORMAT_0006("Unsupported bit value."),
+  CSV_INTERMEDIATE_DATA_FORMAT_0005("Unsupported bit value."),
 
   ;
 

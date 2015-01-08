@@ -18,11 +18,10 @@
  */
 package org.apache.sqoop.connector.idf;
 
-import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.isColumnListType;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.isColumnStringType;
 
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
 
@@ -30,9 +29,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

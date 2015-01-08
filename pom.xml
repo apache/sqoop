@@ -123,6 +123,7 @@ limitations under the License.
     <jackson.core.version>2.2.2</jackson.core.version>
     <jackson.databind.version>2.2.2</jackson.databind.version>
     <jackson.annotations.version>2.2.2</jackson.annotations.version>
+    <avro.version>1.7.7</avro.version>
   </properties>
 
   <dependencies>
@@ -599,6 +600,11 @@ limitations under the License.
         <artifactId>hadoop-common</artifactId>
         <version>${hadoop.2.version}</version>
       </dependency>
+      <dependency>
+       <groupId>org.apache.avro</groupId>
+       <artifactId>avro</artifactId>
+       <version>${avro.version}</version>
+     </dependency>
    </dependencies>
   </dependencyManagement>
 

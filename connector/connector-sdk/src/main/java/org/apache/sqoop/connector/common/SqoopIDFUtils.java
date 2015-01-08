@@ -68,15 +68,10 @@ public class SqoopIDFUtils {
   public static final char QUOTE_CHARACTER = '\'';
 
   // string related replacements
-  private static final String[] replacements = {
-      new String(new char[] { ESCAPE_CHARACTER, '\\' }),
-      new String(new char[] { ESCAPE_CHARACTER, '0' }),
-      new String(new char[] { ESCAPE_CHARACTER, 'n' }),
-      new String(new char[] { ESCAPE_CHARACTER, 'r' }),
-      new String(new char[] { ESCAPE_CHARACTER, 'Z' }),
-      new String(new char[] { ESCAPE_CHARACTER, '\"' }),
-      new String(new char[] { ESCAPE_CHARACTER, '\'' })
-      };
+  private static final String[] replacements = { new String(new char[] { ESCAPE_CHARACTER, '\\' }),
+      new String(new char[] { ESCAPE_CHARACTER, '0' }), new String(new char[] { ESCAPE_CHARACTER, 'n' }),
+      new String(new char[] { ESCAPE_CHARACTER, 'r' }), new String(new char[] { ESCAPE_CHARACTER, 'Z' }),
+      new String(new char[] { ESCAPE_CHARACTER, '\"' }), new String(new char[] { ESCAPE_CHARACTER, '\'' }) };
 
   // http://www.joda.org/joda-time/key_format.html provides details on the
   // formatter token
@@ -140,8 +135,9 @@ public class SqoopIDFUtils {
   }
 
   public static String encodeToCSVDecimal(Object obj) {
-     return ((BigDecimal)obj).toString();
+    return ((BigDecimal) obj).toString();
   }
+
   public static Object toDecimal(String csvString, Column column) {
     return new BigDecimal(csvString);
   }
@@ -152,7 +148,8 @@ public class SqoopIDFUtils {
     if ((TRUE_BIT_SET.contains(bitStringValue)) || (FALSE_BIT_SET.contains(bitStringValue))) {
       return bitStringValue;
     } else {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006, " given bit value: " + bitStringValue);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005, " given bit value: "
+          + bitStringValue);
     }
   }
 
@@ -161,7 +158,7 @@ public class SqoopIDFUtils {
       return TRUE_BIT_SET.contains(csvString);
     } else {
       // throw an exception for any unsupported value for BITs
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0006, " given bit value: " + csvString);
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0005, " given bit value: " + csvString);
     }
   }
 
@@ -200,7 +197,6 @@ public class SqoopIDFUtils {
     }
   }
 
-
   public static String encodeToCSVDateTime(Object obj, Column col) {
     org.joda.time.DateTime dateTime = (org.joda.time.DateTime) obj;
     org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
@@ -232,6 +228,27 @@ public class SqoopIDFUtils {
     } else {
       // we use local date time explicitly to not include the timezone
       returnValue = dtfWithNoFractionAndTimeZone.parseLocalDateTime(dateTime);
+    }
+    return returnValue;
+  }
+
+  public static Long toDateTimeInMillis(String csvString, Column column) {
+    long returnValue;
+    String dateTime = removeQuotes(csvString);
+    org.apache.sqoop.schema.type.DateTime col = ((org.apache.sqoop.schema.type.DateTime) column);
+    if (col.hasFraction() && col.hasTimezone()) {
+      // After calling withOffsetParsed method, a string
+      // '2004-06-09T10:20:30-08:00' will create a datetime with a zone of
+      // -08:00 (a fixed zone, with no daylight savings rules)
+      returnValue = dtfWithFractionAndTimeZone.withOffsetParsed().parseDateTime(dateTime).toDate().getTime();
+    } else if (col.hasFraction() && !col.hasTimezone()) {
+      // we use local date time explicitly to not include the timezone
+      returnValue = dtfWithFractionNoTimeZone.parseLocalDateTime(dateTime).toDate().getTime();
+    } else if (col.hasTimezone()) {
+      returnValue = dtfWithNoFractionWithTimeZone.withOffsetParsed().parseDateTime(dateTime).toDate().getTime();
+    } else {
+      // we use local date time explicitly to not include the timezone
+      returnValue = dtfWithNoFractionAndTimeZone.parseLocalDateTime(dateTime).toDate().getTime();
     }
     return returnValue;
   }
@@ -301,7 +318,7 @@ public class SqoopIDFUtils {
     List<Object> elementList = new ArrayList<Object>();
     for (int n = 0; n < list.length; n++) {
       Column listType = ((AbstractComplexListType) column).getListType();
-      //2 level nesting supported
+      // 2 level nesting supported
       if (isColumnListType(listType)) {
         Object[] listElements = (Object[]) list[n];
         JSONArray subArray = new JSONArray();
@@ -332,6 +349,44 @@ public class SqoopIDFUtils {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
+  public static JSONArray toJSONArray(Object[] objectArray) {
+    JSONArray jsonArray = new JSONArray();
+    for (int i = 0; i < objectArray.length; i++) {
+      Object value = objectArray[i];
+      if (value instanceof Object[]) {
+        value = toJSONArray((Object[]) value);
+      }
+      jsonArray.add(value);
+    }
+    return jsonArray;
+  }
+
+  public static List<Object> toList(Object[] objectArray) {
+    List<Object> objList = new ArrayList<Object>();
+    for (int i = 0; i < objectArray.length; i++) {
+      Object value = objectArray[i];
+      if (value instanceof Object[]) {
+        value = toList((Object[]) value);
+      }
+      objList.add(value);
+    }
+    return objList;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Object[] toObjectArray(List<Object> list) {
+    Object[] array = new Object[list.size()];
+    for (int i = 0; i < list.size(); i++) {
+      Object value = list.get(i);
+      if (value instanceof List) {
+        value = toObjectArray((List<Object>) value);
+      }
+      array[i] = value;
+    }
+    return array;
+  }
+
   // ************ TEXT Column Type utils*********
 
   private static String getRegExp(char character) {
@@ -350,8 +405,8 @@ public class SqoopIDFUtils {
         replacement = replacement.replaceAll(getRegExp(originals[j]), Matcher.quoteReplacement(replacements[j]));
       }
     } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, string + "  " + replacement + "  "
-          + String.valueOf(j) + "  " + e.getMessage());
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, string + "  " + replacement
+          + "  " + String.valueOf(j) + "  " + e.getMessage());
     }
     return encloseWithQuote(replacement);
   }
@@ -365,8 +420,8 @@ public class SqoopIDFUtils {
         string = string.replaceAll(getRegExp(replacements[j]), Matcher.quoteReplacement(String.valueOf(originals[j])));
       }
     } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, string + "  " + String.valueOf(j)
-          + e.getMessage());
+      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, string + "  "
+          + String.valueOf(j) + e.getMessage());
     }
 
     return string;

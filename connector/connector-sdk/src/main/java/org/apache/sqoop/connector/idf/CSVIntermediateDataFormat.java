@@ -152,7 +152,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
       returnValue = toMap(csvString);
       break;
     default:
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0004,
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
           "Column type from schema was not recognized for " + column.getType());
     }
     return returnValue;
