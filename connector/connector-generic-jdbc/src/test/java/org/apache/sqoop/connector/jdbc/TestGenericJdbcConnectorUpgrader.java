@@ -28,12 +28,12 @@ import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MToConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.LinkedList;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * Test upgrader.
@@ -42,7 +42,7 @@ public class TestGenericJdbcConnectorUpgrader {
 
   private GenericJdbcConnectorUpgrader upgrader;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     upgrader = new GenericJdbcConnectorUpgrader();
   }

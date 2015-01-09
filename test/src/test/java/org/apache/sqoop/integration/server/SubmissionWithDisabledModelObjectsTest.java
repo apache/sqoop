@@ -26,39 +26,37 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.Test;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Ensure that server will reject starting job when either job itself
  * or corresponding link is disabled.
  */
-@RunWith(Parameterized.class)
 public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
-
-  @Parameterized.Parameters(name = "con({0}) job({1})")
-  public static Iterable<Object[]> data() {
-    return Arrays.asList(new Object[][]{
-        {true, false},
-        {false, true},
-        {false, false},
-    });
-  }
 
   private boolean enabledLink;
   private boolean enabledJob;
 
+  @Factory(dataProvider="submission-with-disable-model-objects-integration-test")
   public SubmissionWithDisabledModelObjectsTest(boolean enabledLink, boolean enabledJob) {
     this.enabledLink = enabledLink;
     this.enabledJob = enabledJob;
+  }
+
+  @DataProvider(name="submission-with-disable-model-objects-integration-test", parallel=true)
+  public static Object[][] data() {
+    return new Object[][]{
+        {true, false},
+        {false, true},
+        {false, false},
+    };
   }
 
   @Test

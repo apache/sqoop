@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
@@ -27,7 +27,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  * Import simple table with various configurations.

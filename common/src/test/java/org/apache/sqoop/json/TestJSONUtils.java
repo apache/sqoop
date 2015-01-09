@@ -19,12 +19,12 @@ package org.apache.sqoop.json;
 
 import org.apache.sqoop.common.SqoopException;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  */
@@ -36,12 +36,12 @@ public class TestJSONUtils {
     assertEquals((long)3, object.get("id"));
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testStringInvalid() {
     JSONUtils.parse("{");
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expectedExceptions = NullPointerException.class)
   public void testStringNull() {
     JSONUtils.parse((String)null);
   }
@@ -52,12 +52,12 @@ public class TestJSONUtils {
     assertEquals((long)3, object.get("id"));
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testReaderInvalid() {
     JSONUtils.parse(new StringReader("{"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expectedExceptions = NullPointerException.class)
   public void testReaderNull() {
     JSONUtils.parse((Reader)null);
   }

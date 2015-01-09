@@ -23,7 +23,7 @@ import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 
-public class KafkaToDestroyer extends Destroyer<LinkConfiguration,ToJobConfiguration> {
+public class KafkaToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
 
   private static final Logger LOG = Logger.getLogger(KafkaToDestroyer.class);
 

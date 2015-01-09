@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.test.testcases;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotSame;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
@@ -40,8 +40,8 @@ import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 /**
  * Base test case suitable for connector testing.

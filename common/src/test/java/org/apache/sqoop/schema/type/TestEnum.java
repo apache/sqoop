@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.schema.type;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class TestEnum {
 

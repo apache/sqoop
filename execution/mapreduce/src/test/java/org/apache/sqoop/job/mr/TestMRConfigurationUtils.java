@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.job.mr;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -31,8 +31,8 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Text;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Current tests are using mockito to propagate credentials from hadoop Job object
@@ -44,7 +44,7 @@ public class TestMRConfigurationUtils {
   Job job;
   JobConf jobConfSpy;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     setUpHadoopJob();
     setUpHadoopJobConf();

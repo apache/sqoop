@@ -21,9 +21,9 @@ import org.apache.sqoop.client.request.VersionResourceRequest;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.json.VersionBean;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * Basic test to check that server is working and returning correct version info.

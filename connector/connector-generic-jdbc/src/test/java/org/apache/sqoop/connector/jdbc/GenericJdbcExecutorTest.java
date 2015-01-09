@@ -17,10 +17,10 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class GenericJdbcExecutorTest {
   private final String table;
@@ -37,7 +37,7 @@ public class GenericJdbcExecutorTest {
       GenericJdbcTestConstants.URL, null, null);
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     if(executor.existTable(emptyTable)) {
       executor.executeUpdate("DROP TABLE " + emptyTable);

@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
+import com.google.common.collect.Iterables;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MDriverConfig;
@@ -25,15 +26,15 @@ import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.Test;
+import org.testng.ITest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
 /**
  *
  */
-@RunWith(Parameterized.class)
-public class PartitionerTest extends ConnectorTestCase {
+public class PartitionerTest extends ConnectorTestCase implements ITest {
 
   /**
    * Columns that we will use as partition column with maximal number of
@@ -54,19 +55,25 @@ public class PartitionerTest extends ConnectorTestCase {
     3, 5, 10, 13,
   };
 
-  @Parameterized.Parameters(name = "{0}-{1}-{2}")
-  public static Iterable<Object[]> data() {
-    return ParametrizedUtils.crossProduct(COLUMNS, EXTRACTORS);
-  }
-
   private String partitionColumn;
   private int maxOutputFiles;
   private int extractors;
 
+  @Factory(dataProvider="partitioner-integration-test")
   public PartitionerTest(String partitionColumn, int expectedOutputFiles, int extractors) {
     this.partitionColumn = partitionColumn;
     this.maxOutputFiles = expectedOutputFiles;
     this.extractors = extractors;
+  }
+
+  @Override
+  public String getTestName() {
+    return "PartitionerTest-" + this.partitionColumn + "-" + this.maxOutputFiles + "-" + this.extractors;
+  }
+
+  @DataProvider(name="partitioner-integration-test", parallel=true)
+  public static Object[][] data() {
+    return Iterables.toArray(ParametrizedUtils.crossProduct(COLUMNS, EXTRACTORS), Object[].class);
   }
 
   @Test

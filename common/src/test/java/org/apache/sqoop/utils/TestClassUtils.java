@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.utils;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertArrayEquals;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  *

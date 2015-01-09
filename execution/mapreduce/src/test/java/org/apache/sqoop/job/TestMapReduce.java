@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.job;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -54,8 +54,7 @@ import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
 import org.apache.sqoop.job.mr.SqoopSplit;
 import org.apache.sqoop.job.util.MRJobTestUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class TestMapReduce {
 
@@ -99,7 +98,7 @@ public class TestMapReduce {
                                       SqoopInputFormat.class,
                                       SqoopMapper.class,
                                       DummyOutputFormat.class);
-    Assert.assertEquals("Job failed!", true, success);
+    assertEquals("Job failed!", true, success);
   }
 
   @Test
@@ -121,7 +120,7 @@ public class TestMapReduce {
                                      SqoopInputFormat.class,
                                      SqoopMapper.class,
                                      SqoopNullOutputFormat.class);
-    Assert.assertEquals("Job failed!", true, success);
+    assertEquals("Job failed!", true, success);
 
     // Make sure both destroyers get called.
     assertEquals(1, DummyFromDestroyer.count);

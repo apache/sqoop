@@ -24,8 +24,8 @@ import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.PropertiesConfigurationProvider;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.TestUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class TestRepositoryManager {
 

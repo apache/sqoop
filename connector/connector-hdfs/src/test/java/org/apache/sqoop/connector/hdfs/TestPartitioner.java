@@ -19,11 +19,10 @@ package org.apache.sqoop.connector.hdfs;
 
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -37,13 +36,12 @@ import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
-@RunWith(Parameterized.class)
 public class TestPartitioner extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_FILES = 5;
@@ -55,13 +53,14 @@ public class TestPartitioner extends TestHdfsBase {
 
   private final String inputDirectory;
 
+  @Factory(dataProvider="test-hdfs-partitioner")
   public TestPartitioner(ToFormat outputFileType, Class<? extends CompressionCodec> compressionClass) {
     this.inputDirectory = INPUT_ROOT + getClass().getSimpleName();
     this.outputFileType = outputFileType;
     this.compressionClass = compressionClass;
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     partitioner = new HdfsPartitioner();
     FileUtils.mkdirs(inputDirectory);
@@ -77,20 +76,20 @@ public class TestPartitioner extends TestHdfsBase {
     }
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws IOException {
     FileUtils.delete(inputDirectory);
   }
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
+  @DataProvider(name="test-hdfs-partitioner")
+  public static Object[][] data() {
     List<Object[]> parameters = new ArrayList<Object[]>();
     for (Class<?> compressionClass : new Class<?>[]{null, DefaultCodec.class, BZip2Codec.class}) {
       for (Object outputFileType : new Object[]{TEXT_FILE, SEQUENCE_FILE}) {
         parameters.add(new Object[]{outputFileType, compressionClass});
       }
     }
-    return parameters;
+    return parameters.toArray(new Object[0][]);
   }
 
   @Test

@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.model;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class TestMConfigList {
   @Test

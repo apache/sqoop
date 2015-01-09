@@ -20,16 +20,16 @@ package org.apache.sqoop.connector.matcher;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class TestNameMatcher {
 
   private NameMatcher matcher;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     matcher = null;
   }
@@ -99,7 +99,7 @@ public class TestNameMatcher {
    * If TO schema has more fields than FROM schema, and NOT all of the extra
    * fields are "nullable", a SqoopException is expected.
    */
-  @Test (expected = SqoopException.class)
+  @Test (expectedExceptions = SqoopException.class)
   public void testConvertWhenToSchemaIsLongerThanFromSchemaFail() {
     Schema from = SchemaFixture.createSchema("from",
         new String[]{"text1", "text2"});

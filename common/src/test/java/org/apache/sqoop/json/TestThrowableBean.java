@@ -20,11 +20,11 @@ package org.apache.sqoop.json;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.util.SerializationError;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  *

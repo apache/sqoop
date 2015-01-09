@@ -18,8 +18,6 @@
 package org.apache.sqoop.connector.jdbc;
 
 import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.Collection;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
@@ -28,17 +26,15 @@ import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.fail;
 
-@RunWith(Parameterized.class)
 public class TestLoader {
 
   private final String tableName;
@@ -49,17 +45,18 @@ public class TestLoader {
 
   private int numberOfRows;
 
-  @Parameters
-  public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][] {{50}, {100}, {101}, {150}, {200}});
+  @DataProvider(name="test-jdbc-loader")
+  public static Object[][] data() {
+    return new Object[][] {{50}, {100}, {101}, {150}, {200}};
   }
 
+  @Factory(dataProvider="test-jdbc-loader")
   public TestLoader(int numberOfRows) {
     this.numberOfRows = numberOfRows;
-    tableName = getClass().getSimpleName().toUpperCase();
+    this.tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -73,7 +70,7 @@ public class TestLoader {
     }
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     executor.close();
   }

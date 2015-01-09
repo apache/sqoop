@@ -20,7 +20,7 @@ package org.apache.sqoop.connector.idf;
 
 import static org.apache.sqoop.connector.common.SqoopAvroUtils.createEnumSchema;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -34,8 +34,8 @@ import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.joda.time.LocalDateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class TestAVROIntermediateDataFormat {
   private final static org.joda.time.LocalTime time = new org.joda.time.LocalTime(12, 59, 59);
   private final static org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     createAvroIDF();
   }

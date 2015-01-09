@@ -19,7 +19,7 @@
 package org.apache.sqoop.connector.idf;
 
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.schema.Schema;
@@ -31,8 +31,8 @@ import org.apache.sqoop.schema.type.Text;
 import org.joda.time.LocalDateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class TestJSONIntermediateDataFormat {
   private final static String dateTime = "'2014-10-01 12:00:00.000'";
   private final static String time = "'12:59:59'";
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     createJSONIDF();
   }

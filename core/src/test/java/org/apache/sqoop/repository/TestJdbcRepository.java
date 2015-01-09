@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -62,8 +62,8 @@ import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.mockito.InOrder;
 
 public class TestJdbcRepository {
@@ -76,7 +76,7 @@ public class TestJdbcRepository {
   private ConnectorConfigurableUpgrader connectorUpgraderMock;
   private DriverUpgrader driverUpgraderMock;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     repoTransactionMock = mock(JdbcRepositoryTransaction.class);
     connectorMgrMock = mock(ConnectorManager.class);

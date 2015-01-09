@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,15 +45,15 @@ import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.utils.MapResourceBundle;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestSqoopClient {
 
   SqoopResourceRequests resourceRequests;
   SqoopClient client;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     resourceRequests = mock(SqoopResourceRequests.class);
     client = new SqoopClient("my-cool-server");
@@ -199,7 +199,7 @@ public class TestSqoopClient {
   /**
    * Link for non-existing connector can't be created.
    */
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testCreateLink() {
     when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connector(1)));
     client.createLink("non existing connector");

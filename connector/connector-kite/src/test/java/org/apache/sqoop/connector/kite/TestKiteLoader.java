@@ -25,8 +25,8 @@ import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Text;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
@@ -40,7 +40,7 @@ public class TestKiteLoader {
   @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
 

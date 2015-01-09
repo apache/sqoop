@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.utils;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  *

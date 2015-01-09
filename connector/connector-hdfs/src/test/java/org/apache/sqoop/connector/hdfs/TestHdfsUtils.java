@@ -21,9 +21,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class TestHdfsUtils {
 

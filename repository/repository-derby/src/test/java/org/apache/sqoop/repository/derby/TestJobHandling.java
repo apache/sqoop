@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.common.CommonRepositoryError;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Test job methods on Derby repository.
@@ -48,7 +48,7 @@ public class TestJobHandling extends DerbyTestCase {
   DerbyRepositoryHandler handler;
   Connection derbyConnection;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     derbyConnection = getDerbyDatabaseConnection();
@@ -218,7 +218,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expectedExceptions=SqoopException.class)
   public void testCreateDuplicateJob() throws Exception {
     // Duplicate jobs
     MJob job = getJob();

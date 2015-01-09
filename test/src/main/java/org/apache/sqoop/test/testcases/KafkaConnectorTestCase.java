@@ -22,9 +22,9 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.testng.annotations.AfterClass;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.apache.sqoop.common.test.kafka.TestUtil;
 
 import java.io.IOException;

@@ -20,7 +20,7 @@ package org.apache.sqoop.repository.derby;
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -46,8 +46,8 @@ import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MToConfig;
-import org.junit.After;
-import org.junit.Before;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 /**
  * Abstract class with convenience methods for testing derby repository.
@@ -60,14 +60,14 @@ abstract public class DerbyTestCase {
 
   private Connection connection;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     // Create link to the database
     Class.forName(DERBY_DRIVER).newInstance();
     connection = DriverManager.getConnection(getStartJdbcUrl());
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     // Close active link
     if (connection != null) {

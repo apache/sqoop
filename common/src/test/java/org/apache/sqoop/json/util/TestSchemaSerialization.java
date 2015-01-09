@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,7 +43,7 @@ import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
 import org.apache.sqoop.schema.type.Unknown;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -64,25 +64,25 @@ public class TestSchemaSerialization {
   }
 
   @SuppressWarnings("unused")
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testEmptySchemaName() {
     Schema schema = new Schema("");
   }
 
   @SuppressWarnings("unused")
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testNullSchemaName() {
     Schema schema = new Schema(null);
   }
 
   @SuppressWarnings("unused")
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testSchemaWithNullColumnName() {
     Schema schema = new Schema("test").addColumn(new Text(null));
   }
 
   @SuppressWarnings("unused")
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testSchemaWithEmptyColumnName() {
     Schema schema = new Schema("test").addColumn(new Text(""));
   }

@@ -44,14 +44,13 @@ import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.testng.annotations.AfterMethod;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
-@RunWith(Parameterized.class)
 public class TestLoader extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
@@ -61,6 +60,7 @@ public class TestLoader extends TestHdfsBase {
   private final String outputDirectory;
   private Loader loader;
 
+  @Factory(dataProvider="test-hdfs-loader")
   public TestLoader(ToFormat outputFormat,
                     ToCompression compression)
       throws Exception {
@@ -70,8 +70,8 @@ public class TestLoader extends TestHdfsBase {
     this.loader = new HdfsLoader();
   }
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
+  @DataProvider(name="test-hdfs-loader")
+  public static Object[][] data() {
     List<Object[]> parameters = new ArrayList<Object[]>();
     for (ToCompression compression : new ToCompression[]{
         ToCompression.DEFAULT,
@@ -82,13 +82,13 @@ public class TestLoader extends TestHdfsBase {
         parameters.add(new Object[]{outputFileType, compression});
       }
     }
-    return parameters;
+    return parameters.toArray(new Object[0][]);
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {}
 
-  @After
+  @AfterMethod
   public void tearDown() throws IOException {
     FileUtils.delete(outputDirectory);
   }

@@ -18,14 +18,14 @@
 package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.model.MConnector;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * Test connector methods on Derby repository.
@@ -34,7 +34,7 @@ public class TestConnectorHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     handler = new DerbyRepositoryHandler();

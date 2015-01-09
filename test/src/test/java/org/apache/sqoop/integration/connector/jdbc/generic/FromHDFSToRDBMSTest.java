@@ -23,9 +23,9 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  *

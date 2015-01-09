@@ -19,6 +19,7 @@ package org.apache.sqoop.test.testcases;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,12 +32,10 @@ import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.test.hadoop.HadoopLocalRunner;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in external Tomcat
@@ -45,7 +44,7 @@ import org.junit.rules.TestName;
 abstract public class TomcatTestCase {
   private static final Logger LOG = Logger.getLogger(TomcatTestCase.class);
 
-  @Rule public TestName name = new TestName();
+  public String name;
 
   /**
    * Temporary base path that will be used for tests.
@@ -102,10 +101,15 @@ abstract public class TomcatTestCase {
     LOG.debug("HDFS Client: " + hdfsClient);
   }
 
-  @Before
+  @BeforeMethod
+  public void findMethodName(Method method) {
+    name = method.getName();
+  }
+
+  @BeforeMethod
   public void startServer() throws Exception {
     // Get and set temporary path in hadoop cluster.
-    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name.getMethodName());
+    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name);
     FileUtils.deleteDirectory(new File(tmpPath));
 
     LOG.debug("Temporary Directory: " + tmpPath);
@@ -118,7 +122,7 @@ abstract public class TomcatTestCase {
     client = new SqoopClient(getServerUrl());
   }
 
-  @After
+  @AfterMethod
   public void stopServer() throws Exception {
     cluster.stop();
   }
@@ -171,7 +175,7 @@ abstract public class TomcatTestCase {
    * @return
    */
   public String getMapreduceDirectory() {
-    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), name.getMethodName());
+    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), name);
   }
 
   /**

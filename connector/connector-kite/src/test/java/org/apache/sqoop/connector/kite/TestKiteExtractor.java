@@ -24,9 +24,9 @@ import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Text;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
@@ -56,7 +56,7 @@ public class TestKiteExtractor {
     }
   };
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
 

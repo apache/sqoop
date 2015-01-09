@@ -17,14 +17,14 @@
  */
 package org.apache.sqoop.json;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.json.util.ConfigTestUtil;
 import org.apache.sqoop.model.MDriver;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  *

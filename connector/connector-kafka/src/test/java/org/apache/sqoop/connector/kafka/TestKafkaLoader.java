@@ -18,23 +18,21 @@
 package org.apache.sqoop.connector.kafka;
 
 import kafka.message.MessageAndMetadata;
-import org.apache.sqoop.common.test.categories.SlowTests;
 import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
 import org.apache.sqoop.common.test.kafka.TestUtil;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.LoaderContext;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.testng.annotations.AfterClass;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Category({ SlowTests.class })
+@Test(groups="slow")
 public class TestKafkaLoader {
 
   private static TestUtil testUtil = TestUtil.getInstance();

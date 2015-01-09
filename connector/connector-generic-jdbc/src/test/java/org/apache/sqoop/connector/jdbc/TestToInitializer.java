@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
@@ -31,9 +31,9 @@ import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Status;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestToInitializer {
   private final String schemaName;
@@ -57,7 +57,7 @@ public class TestToInitializer {
     tableColumns = "ICOL,VCOL";
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -74,7 +74,7 @@ public class TestToInitializer {
     }
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     executor.close();
   }

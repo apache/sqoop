@@ -23,12 +23,12 @@ import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.schema.Schema;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kitesdk.data.Datasets;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,9 +37,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({KiteDatasetExecutor.class, Datasets.class})
-public class TestKiteToDestroyer {
+@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
+public class TestKiteToDestroyer extends PowerMockTestCase {
 
   private KiteToDestroyer destroyer;
 
@@ -52,7 +52,7 @@ public class TestKiteToDestroyer {
   @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
     mockStatic(KiteDatasetExecutor.class);

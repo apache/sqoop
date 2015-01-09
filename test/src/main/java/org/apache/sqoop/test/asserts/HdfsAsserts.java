@@ -32,8 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * Assert methods suitable for checking HDFS files and directories.

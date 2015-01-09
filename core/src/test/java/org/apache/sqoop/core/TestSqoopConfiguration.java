@@ -20,13 +20,13 @@ package org.apache.sqoop.core;
 import java.util.Properties;
 
 import org.apache.sqoop.common.SqoopException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestSqoopConfiguration {
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     // Unset any configuration dir if it is set by another test
     System.getProperties().remove(ConfigurationConstants.SYSPROP_CONFIG_DIR);

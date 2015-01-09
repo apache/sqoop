@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.json;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Date;
 
@@ -27,7 +27,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class TestJobBean {
 

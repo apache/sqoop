@@ -40,9 +40,9 @@ import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.util.MRJobTestUtil;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.submission.counter.SqoopCounters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.BrokenBarrierException;
@@ -149,7 +149,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     return new CSVIntermediateDataFormat();
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     conf = new Configuration();
     conf.setIfUnset(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT,
@@ -161,7 +161,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     when(jobContextMock.getConfiguration()).thenReturn(testConf);
   }
 
-  @Test(expected = BrokenBarrierException.class)
+  @Test(expectedExceptions = BrokenBarrierException.class)
   public void testWhenLoaderThrows() throws Throwable {
     conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new SqoopOutputFormatLoadExecutor(jobContextMock,
@@ -205,7 +205,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     verify(jobContextMock, times(1)).getCounter(SqoopCounters.ROWS_WRITTEN);
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testSuccessfulLoader() throws Throwable {
     SqoopOutputFormatLoadExecutor executor = new SqoopOutputFormatLoadExecutor(jobContextMock,
         GoodLoader.class.getName(), getIDF(), getMatcher());
@@ -230,7 +230,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     verify(jobContextMock, times(1)).getCounter(SqoopCounters.ROWS_WRITTEN);
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test(expectedExceptions = ConcurrentModificationException.class)
   public void testThrowingContinuousLoader() throws Throwable {
     conf.set(MRJobConstants.JOB_ETL_LOADER, ThrowingContinuousLoader.class.getName());
     SqoopOutputFormatLoadExecutor executor = new SqoopOutputFormatLoadExecutor(jobContextMock,

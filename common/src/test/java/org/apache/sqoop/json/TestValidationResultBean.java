@@ -21,16 +21,16 @@ import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  */

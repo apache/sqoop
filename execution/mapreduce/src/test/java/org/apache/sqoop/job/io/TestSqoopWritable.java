@@ -18,10 +18,10 @@
  */
 package org.apache.sqoop.job.io;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,15 +34,15 @@ import java.io.InputStream;
 
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestSqoopWritable {
 
   private SqoopWritable writable;
   private IntermediateDataFormat<?> idfMock;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     idfMock = mock(IntermediateDataFormat.class);
     writable = new SqoopWritable(idfMock);

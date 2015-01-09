@@ -18,10 +18,10 @@
 package org.apache.sqoop.connector.hdfs;
 
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfig;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class TestLinkConfig {
   @Test

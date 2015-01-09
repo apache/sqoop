@@ -41,8 +41,8 @@ limitations under the License.
       <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
 

@@ -23,7 +23,7 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.KafkaConnectorTestCase;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 
 public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {

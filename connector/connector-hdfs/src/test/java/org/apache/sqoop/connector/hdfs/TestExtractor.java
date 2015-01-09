@@ -19,6 +19,7 @@ package org.apache.sqoop.connector.hdfs;
 
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,14 +37,13 @@ import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.testng.annotations.AfterMethod;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
-@RunWith(Parameterized.class)
 public class TestExtractor extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_FILES = 5;
@@ -54,6 +54,7 @@ public class TestExtractor extends TestHdfsBase {
   private final String inputDirectory;
   private Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> extractor;
 
+  @Factory(dataProvider="test-hdfs-extractor")
   public TestExtractor(ToFormat outputFileType,
                        Class<? extends CompressionCodec> compressionClass)
       throws Exception {
@@ -63,18 +64,18 @@ public class TestExtractor extends TestHdfsBase {
     this.extractor = new HdfsExtractor();
   }
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
+  @DataProvider(name="test-hdfs-extractor")
+  public static Object[][] data() {
     List<Object[]> parameters = new ArrayList<Object[]>();
     for (Class<?> compressionClass : new Class<?>[]{null, DefaultCodec.class, BZip2Codec.class}) {
       for (Object outputFileType : new Object[]{TEXT_FILE, SEQUENCE_FILE}) {
         parameters.add(new Object[]{outputFileType, compressionClass});
       }
     }
-    return parameters;
+    return parameters.toArray(new Object[0][]);
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     FileUtils.mkdirs(inputDirectory);
     switch (this.outputFileType) {
@@ -88,7 +89,7 @@ public class TestExtractor extends TestHdfsBase {
     }
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws IOException {
     FileUtils.delete(inputDirectory);
   }
@@ -140,7 +141,7 @@ public class TestExtractor extends TestHdfsBase {
     extractor.extract(context, emptyLinkConfig, emptyJobConfig, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
-      Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+      assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
     }
   }
 
@@ -193,7 +194,7 @@ public class TestExtractor extends TestHdfsBase {
     extractor.extract(context, emptyLinkConfig, fromJobConfiguration, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
-      Assert.assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+      assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
     }
   }
 }

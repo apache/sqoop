@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -32,12 +31,12 @@ import org.apache.sqoop.schema.type.Decimal;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.joda.time.LocalDate;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.fail;
 
 
 public class TestExtractor {
@@ -55,7 +54,7 @@ public class TestExtractor {
     tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -74,7 +73,7 @@ public class TestExtractor {
     }
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     executor.close();
   }
@@ -159,7 +158,7 @@ public class TestExtractor {
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testIncorrectSchemaColumnSize() throws Exception {
     MutableContext context = new MutableMapContext();
 

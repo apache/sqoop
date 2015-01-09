@@ -22,16 +22,16 @@ import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.test.utils.CompressionUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import org.apache.log4j.Logger;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Abstract test case for testing upgrade from previous version to the "most recent one".

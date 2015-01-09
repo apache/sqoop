@@ -22,26 +22,26 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
 import org.apache.sqoop.schema.Schema;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kitesdk.data.Datasets;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest(Datasets.class)
-public class TestKiteToInitializer {
+@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
+public class TestKiteToInitializer extends PowerMockTestCase {
 
   private KiteToInitializer initializer;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
     mockStatic(Datasets.class);
@@ -62,7 +62,7 @@ public class TestKiteToInitializer {
     initializer.initialize(null, linkConfig, toJobConfig);
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testInitializeFailed() {
     // setup
     LinkConfiguration linkConfig = new LinkConfiguration();

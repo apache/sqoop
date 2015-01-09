@@ -17,14 +17,14 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Test driver methods on Derby repository.
@@ -34,7 +34,7 @@ public class TestDriverHandling extends DerbyTestCase {
   private static final Object CURRENT_DRIVER_VERSION = "1";
   DerbyRepositoryHandler handler;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     handler = new DerbyRepositoryHandler();

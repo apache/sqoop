@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.json.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,7 +36,7 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -72,7 +72,7 @@ public class TestConfigSerialization {
     assertEquals("A", retrieved.getStringInput("String").getValue());
     assertEquals(map, retrieved.getMapInput("Map").getValue());
     assertEquals(1, (int)retrieved.getIntegerInput("Integer").getValue());
-    assertEquals(true, retrieved.getBooleanInput("Boolean").getValue());
+    assertEquals(true, retrieved.getBooleanInput("Boolean").getValue().booleanValue());
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
   }
 
@@ -95,7 +95,7 @@ public class TestConfigSerialization {
     assertEquals(map, retrieved.getMapInput("Map").getValue());
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expectedExceptions=SqoopException.class)
   public void testMapDataTypeException() {
     MConfig config = getMapConfig();
 

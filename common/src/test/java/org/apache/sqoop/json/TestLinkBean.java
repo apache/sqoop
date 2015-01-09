@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 
@@ -29,7 +29,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class TestLinkBean {
 

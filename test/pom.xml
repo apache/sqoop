@@ -31,8 +31,8 @@ limitations under the License.
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
     </dependency>
 
     <dependency>

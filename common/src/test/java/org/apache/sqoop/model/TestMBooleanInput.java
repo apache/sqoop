@@ -17,12 +17,12 @@
  */
 package org.apache.sqoop.model;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test class for org.apache.sqoop.model.MBooleanInput
@@ -67,7 +67,7 @@ public class TestMBooleanInput {
   public void testValue() {
     MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true);
     input1.setValue(true);
-    assertEquals(true, input1.getValue());
+    assertEquals(true, input1.getValue().booleanValue());
     input1.setEmpty();
     assertNull(input1.getValue());
   }
@@ -83,7 +83,7 @@ public class TestMBooleanInput {
     String tmp = input1.getUrlSafeValueString();
     // Restore to actual value
     input1.restoreFromUrlSafeValueString(tmp);
-    assertEquals(true, input1.getValue());
+    assertEquals(true, input1.getValue().booleanValue());
   }
 
   /**

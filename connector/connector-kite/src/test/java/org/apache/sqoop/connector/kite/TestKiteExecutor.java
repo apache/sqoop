@@ -20,24 +20,24 @@ package org.apache.sqoop.connector.kite;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.testng.AssertJUnit;
+import org.testng.IObjectFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.ObjectFactory;
+import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class TestKiteExecutor {
 
@@ -55,7 +55,12 @@ public class TestKiteExecutor {
 
   private KiteDatasetExecutor executor;
 
-  @Before
+  @ObjectFactory
+  public IObjectFactory getObjectFactory() {
+    return new org.powermock.modules.testng.PowerMockObjectFactory();
+  }
+
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
     when(datasetMock.newWriter()).thenReturn(writerMock);
@@ -68,7 +73,7 @@ public class TestKiteExecutor {
     executor = new KiteDatasetExecutor(datasetMock);
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     executor.closeWriter();
     executor.closeReader();
@@ -117,14 +122,14 @@ public class TestKiteExecutor {
     // exercise & verify
     for (int i = 0; i < NUMBER_OF_ROWS; i++) {
       Object[] actual = executor.readRecord();
-      assertNotNull(actual);
-      assertEquals(2, actual.length);
-      assertEquals(1, actual[0]);
-      assertEquals("foo", actual[1]);
+      AssertJUnit.assertNotNull(actual);
+      AssertJUnit.assertEquals(2, actual.length);
+      AssertJUnit.assertEquals(1, actual[0]);
+      AssertJUnit.assertEquals("foo", actual[1]);
     }
     when(readerMock.hasNext()).thenReturn(false);
     Object[] actual = executor.readRecord();
-    assertNull(actual);
+    AssertJUnit.assertNull(actual);
   }
 
   @Test

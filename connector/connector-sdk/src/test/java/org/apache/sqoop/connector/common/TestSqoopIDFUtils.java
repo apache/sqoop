@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.connector.common;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Text;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

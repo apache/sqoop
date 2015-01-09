@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.sqoop.json.DriverBean;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class TestMDriver {
 

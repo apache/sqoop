@@ -20,8 +20,8 @@ package org.apache.sqoop.driver;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,8 +38,8 @@ import org.apache.sqoop.repository.JdbcRepository;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestJobManager {
   private JobManager jobManager;
@@ -48,7 +48,7 @@ public class TestJobManager {
   private RepositoryManager repositoryManagerMock;
   private Repository jdbcRepoMock;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     jobManager = new JobManager();
     connectorMgrMock = mock(ConnectorManager.class);

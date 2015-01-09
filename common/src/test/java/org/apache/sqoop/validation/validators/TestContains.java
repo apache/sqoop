@@ -18,9 +18,9 @@
 package org.apache.sqoop.validation.validators;
 
 import org.apache.sqoop.validation.Status;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  */

@@ -17,13 +17,13 @@
  */
 package org.apache.sqoop.submission;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test class for org.apache.sqoop.submission.SubmissionStatus

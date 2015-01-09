@@ -22,14 +22,14 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  *
@@ -38,7 +38,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
 
@@ -130,8 +130,8 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
     assertEquals(1, submission.getJobId());
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
-    assertEquals(creationDate, submission.getCreationDate());
-    assertEquals(updateDate, submission.getLastUpdateDate());
+    assertEquals(creationDate.getTime(), submission.getCreationDate().getTime());
+    assertEquals(updateDate.getTime(), submission.getLastUpdateDate().getTime());
     assertEquals("job-x", submission.getExternalJobId());
     assertEquals("http://somewhere", submission.getExternalLink());
     assertEquals("RuntimeException", submission.getError().getErrorSummary());

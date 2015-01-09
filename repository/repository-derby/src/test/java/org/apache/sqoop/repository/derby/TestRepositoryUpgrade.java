@@ -17,20 +17,20 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.SQLIntegrityConstraintViolationException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestRepositoryUpgrade extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     handler = new TestDerbyRepositoryHandler();
@@ -63,7 +63,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
     assertTrue(handler.isRepositorySuitableForUse(getDerbyDatabaseConnection()));
   }
 
-  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  @Test(expectedExceptions = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueJobNameFailure() throws Exception {
     super.createOrUpgradeSchema(4);
     // try loading duplicate job names in version 4 and it should throw an
@@ -71,7 +71,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
     super.loadNonUniqueJobsInVersion4();
   }
 
-  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  @Test(expectedExceptions = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueLinkNamesAdded() throws Exception {
     super.createOrUpgradeSchema(4);
     // try loading duplicate link names in version 4 and it should throw an
@@ -79,7 +79,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
     super.loadNonUniqueLinksInVersion4();
   }
 
-  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  @Test(expectedExceptions = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueConfigurableNamesAdded() throws Exception {
     super.createOrUpgradeSchema(4);
     // try loading duplicate configurable names in version 4 and it should throw
@@ -87,7 +87,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
     super.loadNonUniqueConfigurablesInVersion4();
   }
 
-  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  @Test(expectedExceptions = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueConfigNameAndTypeAdded() throws Exception {
     super.createOrUpgradeSchema(4);
     super.addConnectorB();
@@ -115,7 +115,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
     super.loadNonUniqueConfigNameAndTypeButUniqueConfigurableInVersion4();
   }
 
-  @Test(expected = SQLIntegrityConstraintViolationException.class)
+  @Test(expectedExceptions = SQLIntegrityConstraintViolationException.class)
   public void testUpgradeVersion4WithNonUniqueInputNameAndTypeAdded() throws Exception {
     super.createOrUpgradeSchema(4);
     super.addConnectorB();

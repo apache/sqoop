@@ -21,9 +21,9 @@ import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Status;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class TestConfiguration {
   @Test

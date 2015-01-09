@@ -19,14 +19,14 @@ package org.apache.sqoop.job;
 
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.BYTE_FIELD_CHARSET;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,13 +58,11 @@ import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
 
-@RunWith(Parameterized.class)
 public class TestMatching {
   private static final int START_PARTITION = 1;
   private static final int NUMBER_OF_PARTITIONS = 1;
@@ -73,17 +71,14 @@ public class TestMatching {
   private Schema from;
   private Schema to;
 
-  public TestMatching(Schema from,
-                       Schema to)
-      throws Exception {
+  @Factory(dataProvider="test-matching-data")
+  public TestMatching(Schema from, Schema to) {
     this.from = from;
     this.to = to;
-
-    System.out.println("Testing with Schemas\n\tFROM: " + this.from + "\n\tTO: " + this.to);
   }
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
+  @DataProvider(name="test-matching-data", parallel=true)
+  public static Object[][] data() {
     List<Object[]> parameters = new ArrayList<Object[]>();
 
     Schema emptyFrom = new Schema("FROM-EMPTY");
@@ -125,7 +120,7 @@ public class TestMatching {
         to2
     });
 
-    return parameters;
+    return parameters.toArray(new Object[0][]);
   }
 
   @SuppressWarnings("deprecation")
@@ -147,17 +142,17 @@ public class TestMatching {
         DummyOutputFormat.class);
     if (from.getName().split("-")[1].equals("EMPTY")) {
       if (to.getName().split("-")[1].equals("EMPTY")) {
-        Assert.assertEquals("Job succeeded!", false, success);
+        assertEquals("Job succeeded!", false, success);
       } else {
-        Assert.assertEquals("Job failed!", true, success);
+        assertEquals("Job failed!", true, success);
       }
     } else {
       if (to.getName().split("-")[1].equals("EMPTY")) {
-        Assert.assertEquals("Job failed!", true, success);
+        assertEquals("Job failed!", true, success);
       } else if (from.getName().split("-")[1].equals(to.getName().split("-")[1])) {
-        Assert.assertEquals("Job failed!", true, success);
+        assertEquals("Job failed!", true, success);
       } else {
-        Assert.assertEquals("Job succeeded!", false, success);
+        assertEquals("Job succeeded!", false, success);
       }
     }
   }
@@ -183,7 +178,7 @@ public class TestMatching {
     Object[] validateObj = dataFormat.getObjectData();
 
     assertEquals(testData, validateCSV);
-    assertEquals(testObject, validateObj);
+    assertArrayEquals(testObject, validateObj);
 
     // Setting data as Object
     dataFormat.setObjectData(testObject);
@@ -192,7 +187,7 @@ public class TestMatching {
     validateObj = dataFormat.getObjectData();
 
     assertEquals(testData, validateCSV);
-    assertEquals(testObjectCopy, validateObj);
+    assertArrayEquals(testObjectCopy, validateObj);
   }
 
   public static class DummyPartition extends Partition {

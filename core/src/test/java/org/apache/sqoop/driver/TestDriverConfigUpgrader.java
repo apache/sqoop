@@ -18,8 +18,8 @@
  */
 package org.apache.sqoop.driver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,8 +30,8 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MStringInput;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  */
@@ -39,7 +39,7 @@ public class TestDriverConfigUpgrader {
 
   DriverUpgrader upgrader;
 
-  @Before
+  @BeforeMethod
   public void initializeUpgrader() {
     upgrader = new DriverUpgrader();
   }

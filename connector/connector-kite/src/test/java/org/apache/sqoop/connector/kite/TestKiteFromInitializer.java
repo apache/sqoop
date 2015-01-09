@@ -20,24 +20,24 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kitesdk.data.Datasets;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest(Datasets.class)
-public class TestKiteFromInitializer {
+@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
+public class TestKiteFromInitializer extends PowerMockTestCase {
 
   private KiteFromInitializer initializer;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     initMocks(this);
     mockStatic(Datasets.class);
@@ -56,7 +56,7 @@ public class TestKiteFromInitializer {
     initializer.initialize(null, null, jobConfig);
   }
 
-  @Test(expected=SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testInitializeFailed() {
     // setup
     FromJobConfiguration jobConfig = new FromJobConfiguration();

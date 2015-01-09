@@ -19,10 +19,10 @@ package org.apache.sqoop.repository.postgresql;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.PostgreSQLProvider;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.testng.SkipException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Abstract class with convenience methods for testing postgresql repository.
@@ -33,25 +33,25 @@ abstract public class PostgresqlTestCase {
   public static PostgresqlTestUtils utils;
   public PostgresqlRepositoryHandler handler;
 
-  @BeforeClass
+  @Test
   public static void setUpClass() {
     provider = new PostgreSQLProvider();
     utils = new PostgresqlTestUtils(provider);
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     try {
       provider.start();
     } catch (RuntimeException e) {
-      Assume.assumeTrue(false);
+      throw new SkipException("Cannot connect to provider.", e);
     }
 
     handler = new PostgresqlRepositoryHandler();
     handler.createOrUpgradeRepository(provider.getConnection());
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     provider.dropSchema("sqoop");
     provider.stop();

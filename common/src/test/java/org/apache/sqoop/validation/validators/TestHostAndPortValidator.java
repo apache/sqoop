@@ -18,16 +18,16 @@
 package org.apache.sqoop.validation.validators;
 
 import org.apache.sqoop.validation.Status;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class TestHostAndPortValidator {
 
   AbstractValidator<String> validator = new HostAndPortValidator();
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     validator.reset();
     assertEquals(0, validator.getMessages().size());

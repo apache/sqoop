@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  * Test connector methods on PostgreSQL repository.

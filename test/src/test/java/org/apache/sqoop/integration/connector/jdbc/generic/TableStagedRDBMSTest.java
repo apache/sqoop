@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfigList;
@@ -25,7 +25,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  *

@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.submission.counter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * Test class for org.apache.sqoop.submission.counter.Counter

@@ -18,10 +18,10 @@
  */
 package org.apache.sqoop.connector.idf;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 
@@ -46,14 +46,14 @@ import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.schema.type.Time;
 import org.joda.time.DateTimeZone;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class TestCSVIntermediateDataFormat {
 
   private CSVIntermediateDataFormat dataFormat;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     dataFormat = new CSVIntermediateDataFormat();
   }
@@ -76,7 +76,7 @@ public class TestCSVIntermediateDataFormat {
     assertNull(out);
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testEmptyInputAsCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new FixedPoint("1")).addColumn(new FixedPoint("2")).addColumn(new Text("3")).addColumn(new Text("4"))
@@ -508,7 +508,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   // since date is not quoted
-  @Test(expected = Exception.class)
+  @Test(expectedExceptions = Exception.class)
   public void testDateTimeNoQuotesWithFractionTimezoneWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, true));
@@ -520,7 +520,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
   // since date is not in expected format
-  @Test(expected = Exception.class)
+  @Test(expectedExceptions = Exception.class)
   public void testDateTimeIncorrectFormatWithCSVTextInObjectArrayOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new DateTime("1", true, true));
@@ -636,7 +636,7 @@ public class TestCSVIntermediateDataFormat {
     assertEquals("true,false", dataFormat.getCSVTextData());
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testUnsupportedBitWithObjectArrayInAndCSVTextOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
@@ -682,7 +682,7 @@ public class TestCSVIntermediateDataFormat {
     }
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testUnsupportedBitWithObjectArrayInAndObjectOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
@@ -695,7 +695,7 @@ public class TestCSVIntermediateDataFormat {
     assertEquals(false, dataFormat.getObjectData()[1]);
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testUnsupportedBitWithCSVTextInAndObjectOut() {
     Schema schema = new Schema("test");
     schema.addColumn(new Bit("1")).addColumn(new Bit("2"));
@@ -1101,7 +1101,7 @@ public class TestCSVIntermediateDataFormat {
     assertEquals(testData, dataFormat.getCSVTextData());
   }
   //**************test cases for schema*******************
-  @Test(expected=SqoopException.class)
+  @Test(expectedExceptions=SqoopException.class)
   public void testEmptySchema() {
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
         + ",'\\n'";
@@ -1113,14 +1113,14 @@ public class TestCSVIntermediateDataFormat {
     Object[] out = dataFormat.getObjectData();
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testNullSchema() {
     dataFormat.setSchema(null);
     @SuppressWarnings("unused")
     Object[] out = dataFormat.getObjectData();
   }
 
-  @Test(expected = SqoopException.class)
+  @Test(expectedExceptions = SqoopException.class)
   public void testNotSettingSchema() {
     @SuppressWarnings("unused")
     Object[] out = dataFormat.getObjectData();

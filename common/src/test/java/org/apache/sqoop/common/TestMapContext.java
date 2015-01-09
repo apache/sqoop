@@ -20,8 +20,8 @@ package org.apache.sqoop.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * Test class for org.apache.sqoop.common.MapContext

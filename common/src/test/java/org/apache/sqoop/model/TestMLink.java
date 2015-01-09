@@ -20,9 +20,9 @@ package org.apache.sqoop.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class TestMLink {
 

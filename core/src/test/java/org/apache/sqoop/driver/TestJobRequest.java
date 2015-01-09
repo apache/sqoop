@@ -23,17 +23,17 @@ import java.util.Set;
 
 import org.apache.sqoop.driver.JobRequest;
 import org.apache.sqoop.utils.ClassUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class TestJobRequest {
 
   private JobRequest jobRequest;
 
-  @Before
+  @BeforeMethod
   public void initializeSubmissionRequest() {
     jobRequest = new JobRequest();
   }

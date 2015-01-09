@@ -30,11 +30,11 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class TestFromInitializer {
 
@@ -59,7 +59,7 @@ public class TestFromInitializer {
     tableColumns = "ICOL,VCOL";
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -108,7 +108,7 @@ public class TestFromInitializer {
     ;
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     executor.close();
   }
