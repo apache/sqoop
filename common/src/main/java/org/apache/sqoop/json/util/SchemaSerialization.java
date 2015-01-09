@@ -120,7 +120,7 @@ public class SchemaSerialization {
     JSONObject ret = new JSONObject();
 
     ret.put(NAME, column.getName());
-    ret.put(NULLABLE, column.getNullable());
+    ret.put(NULLABLE, column.isNullable());
     ret.put(TYPE, column.getType().name());
 
     switch (column.getType()) {

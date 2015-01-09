@@ -73,7 +73,7 @@ public abstract class Matcher {
 
   protected void tryFillNullInArrayForUnexpectedColumn(Column column,
       Object[] array, int index) throws SqoopException {
-    if (!column.getNullable()) {
+    if (!column.isNullable()) {
       throw new SqoopException(SchemaError.SCHEMA_0004, "Target column " +
           column + " didn't match with any source column and cannot be null.");
     }

@@ -71,7 +71,7 @@ public class KiteDataTypeUtil {
 
   private static Schema createAvroFieldSchema(Column column) {
     Schema.Type type = toAvroType(column.getType());
-    if (!column.getNullable()) {
+    if (!column.isNullable()) {
       return Schema.create(type);
     } else {
       List<Schema> union = new ArrayList<Schema>();

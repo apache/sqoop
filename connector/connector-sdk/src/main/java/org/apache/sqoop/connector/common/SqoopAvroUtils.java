@@ -56,7 +56,7 @@ public class SqoopAvroUtils {
 
   public static Schema createAvroFieldSchema(Column column) {
     Schema schema = toAvroFieldType(column);
-    if (!column.getNullable()) {
+    if (!column.isNullable()) {
       return schema;
     } else {
       List<Schema> union = new ArrayList<Schema>();

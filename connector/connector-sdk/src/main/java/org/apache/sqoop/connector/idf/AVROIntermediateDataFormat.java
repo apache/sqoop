@@ -153,7 +153,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     for (int i = 0; i < csvStringArray.length; i++) {
       // check for NULL field and assume this field is nullable as per the sqoop
       // schema
-      if (csvStringArray[i].equals(NULL_VALUE) && columnArray[i].getNullable()) {
+      if (csvStringArray[i].equals(NULL_VALUE) && columnArray[i].isNullable()) {
         avroObject.put(columnArray[i].getName(), null);
         continue;
       }

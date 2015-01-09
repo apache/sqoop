@@ -63,7 +63,7 @@ public abstract class Column {
     return this;
   }
 
-  public Boolean getNullable() {
+  public Boolean isNullable() {
     return nullable;
   }
 
