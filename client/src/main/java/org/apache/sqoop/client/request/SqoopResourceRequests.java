@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JobBean;
@@ -39,6 +40,11 @@ public class SqoopResourceRequests {
   private LinkResourceRequest linkRequest;
   private JobResourceRequest jobRequest;
   private SubmissionResourceRequest submissionRequest;
+  private DelegationTokenAuthenticatedURL.Token authToken;
+
+  public SqoopResourceRequests(){
+    authToken = new DelegationTokenAuthenticatedURL.Token();
+  }
 
   public void setServerUrl(String serverUrl) {
     this.serverUrl = serverUrl;
@@ -46,7 +52,7 @@ public class SqoopResourceRequests {
 
   public DriverResourceRequest getDriverResourceRequest() {
     if (driverRequest == null) {
-      driverRequest = new DriverResourceRequest();
+      driverRequest = new DriverResourceRequest(authToken);
     }
 
     return driverRequest;
@@ -54,7 +60,7 @@ public class SqoopResourceRequests {
 
   public ConnectorResourceRequest getConnectorResourceRequest() {
     if (connectorRequest == null) {
-      connectorRequest = new ConnectorResourceRequest();
+      connectorRequest = new ConnectorResourceRequest(authToken);
     }
 
     return connectorRequest;
@@ -62,7 +68,7 @@ public class SqoopResourceRequests {
 
   public LinkResourceRequest getLinkResourceRequest() {
     if (linkRequest == null) {
-      linkRequest = new LinkResourceRequest();
+      linkRequest = new LinkResourceRequest(authToken);
     }
 
     return linkRequest;
@@ -70,7 +76,7 @@ public class SqoopResourceRequests {
 
   public JobResourceRequest getJobResourceRequest() {
     if (jobRequest == null) {
-      jobRequest = new JobResourceRequest();
+      jobRequest = new JobResourceRequest(authToken);
     }
 
     return jobRequest;
@@ -78,7 +84,7 @@ public class SqoopResourceRequests {
 
   public SubmissionResourceRequest getSubmissionResourceRequest() {
     if (submissionRequest == null) {
-      submissionRequest = new SubmissionResourceRequest();
+      submissionRequest = new SubmissionResourceRequest(authToken);
     }
 
     return submissionRequest;

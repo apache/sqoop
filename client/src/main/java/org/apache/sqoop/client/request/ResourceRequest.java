@@ -51,6 +51,14 @@ public class ResourceRequest {
   private DelegationTokenAuthenticatedURL.Token authToken;
   private String strURL;
 
+  public ResourceRequest() {
+    this.authToken = new DelegationTokenAuthenticatedURL.Token();
+  }
+
+  public ResourceRequest(DelegationTokenAuthenticatedURL.Token token) {
+    this.authToken = token == null ? new DelegationTokenAuthenticatedURL.Token() : token;
+  }
+
   protected String doHttpRequest(String strURL, String method) {
     return doHttpRequest(strURL, method, "");
   }
@@ -59,7 +67,6 @@ public class ResourceRequest {
     DataOutputStream wr = null;
     BufferedReader reader = null;
     try {
-      this.authToken = new DelegationTokenAuthenticatedURL.Token();
       this.strURL = strURL;
       URL url = new URL(strURL);
       HttpURLConnection conn = new DelegationTokenAuthenticatedURL().openConnection(url, authToken);
@@ -211,5 +218,9 @@ public class ResourceRequest {
             url.getPort());
     Text dtService = SecurityUtil.buildTokenService(addr);
     return dtService;
+  }
+
+  public DelegationTokenAuthenticatedURL.Token getAuthToken() {
+    return authToken;
   }
 }

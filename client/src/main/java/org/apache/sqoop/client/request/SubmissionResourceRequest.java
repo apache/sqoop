@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.json.simple.JSONObject;
@@ -28,6 +29,14 @@ import org.json.simple.JSONObject;
 public class SubmissionResourceRequest extends  ResourceRequest {
 
   public static final String RESOURCE = "v1/submissions/";
+
+  public SubmissionResourceRequest(){
+    super();
+  }
+
+  public SubmissionResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
 
   public SubmissionsBean read(String serverUrl, Long jid) {
     String response;

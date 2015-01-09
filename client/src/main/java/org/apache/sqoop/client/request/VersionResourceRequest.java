@@ -17,12 +17,21 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.VersionBean;
 import org.json.simple.JSONObject;
 
 public class VersionResourceRequest extends ResourceRequest
 {
+  public VersionResourceRequest(){
+    super();
+  }
+
+  public VersionResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
+
   public VersionBean read(String serverUrl) {
     String response = super.get(serverUrl + "version");
     JSONObject jsonObject = JSONUtils.parse(response);

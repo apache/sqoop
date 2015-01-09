@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JSONUtils;
 import org.json.simple.JSONObject;
@@ -27,6 +28,14 @@ import org.json.simple.JSONObject;
 public class DriverResourceRequest extends ResourceRequest {
 
   public static final String RESOURCE = "v1/driver/";
+
+  public DriverResourceRequest(){
+    super();
+  }
+
+  public DriverResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
 
   public DriverBean read(String serverUrl) {
     String response = null;

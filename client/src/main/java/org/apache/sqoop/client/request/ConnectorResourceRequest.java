@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.ConnectorsBean;
 import org.apache.sqoop.json.JSONUtils;
@@ -29,6 +30,14 @@ import org.json.simple.JSONObject;
  */
 public class ConnectorResourceRequest extends ResourceRequest {
   public static final String RESOURCE = "v1/connector/";
+
+  public ConnectorResourceRequest(){
+    super();
+  }
+
+  public ConnectorResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
 
   public ConnectorBean read(String serverUrl, Long cid) {
     String response;

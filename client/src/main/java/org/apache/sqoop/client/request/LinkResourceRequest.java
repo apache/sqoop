@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
@@ -34,6 +35,14 @@ public class LinkResourceRequest extends ResourceRequest {
 
   private static final String ENABLE = "/enable";
   private static final String DISABLE = "/disable";
+
+  public LinkResourceRequest(){
+    super();
+  }
+
+  public LinkResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
 
   public LinkBean read(String serverUrl, Long linkId) {
     String response;

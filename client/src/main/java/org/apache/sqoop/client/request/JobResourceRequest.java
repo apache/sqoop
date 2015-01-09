@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.JobsBean;
@@ -38,6 +39,14 @@ public class JobResourceRequest extends ResourceRequest {
   private static final String START = "/start";
   private static final String STOP = "/stop";
   private static final String STATUS = "/status";
+
+  public JobResourceRequest(){
+    super();
+  }
+
+  public JobResourceRequest(DelegationTokenAuthenticatedURL.Token token){
+    super(token);
+  }
 
   public JobBean read(String serverUrl, Long jobId) {
     String response;
