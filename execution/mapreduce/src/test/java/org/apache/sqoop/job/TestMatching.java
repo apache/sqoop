@@ -88,12 +88,12 @@ public class TestMatching {
     Schema from2 = new Schema("FROM-2");
     Schema to2 = new Schema("TO-2");
 
-    from1.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+    from1.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"))
         .addColumn(new org.apache.sqoop.schema.type.Text("3"));
-    to1.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"))
+    to1.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"))
       .addColumn(new org.apache.sqoop.schema.type.Text("3"));
-    from2.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"));
-    to2.addColumn(new FixedPoint("1")).addColumn(new FloatingPoint("2"));
+    from2.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"));
+    to2.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"));
 
     parameters.add(new Object[]{
         emptyFrom,
@@ -160,7 +160,6 @@ public class TestMatching {
 
   @Test
   public void testSchemalessFromAndTo() throws UnsupportedEncodingException {
-    CSVIntermediateDataFormat dataFormat = new CSVIntermediateDataFormat();
     String testData = "\"This is the data you are looking for. It has no structure.\"";
     Object[] testObject = new Object[] {testData.getBytes(BYTE_FIELD_CHARSET)};
     Object[] testObjectCopy = new Object[1];
@@ -169,8 +168,7 @@ public class TestMatching {
     Matcher matcher = MatcherFactory.getMatcher(NullSchema.getInstance(),
             NullSchema.getInstance());
     // Checking FROM side only because currently that is the only IDF that is used
-    dataFormat.setSchema(matcher.getFromSchema());
-
+    CSVIntermediateDataFormat dataFormat = new CSVIntermediateDataFormat(matcher.getFromSchema());
     // Setting data as CSV and validating getting CSV and object
     dataFormat.setCSVTextData(testData);
 

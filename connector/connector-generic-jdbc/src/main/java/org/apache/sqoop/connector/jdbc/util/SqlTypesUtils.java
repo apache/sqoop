@@ -49,7 +49,7 @@ public class SqlTypesUtils {
       case Types.SMALLINT:
       case Types.TINYINT:
       case Types.INTEGER:
-        return new FixedPoint(columnName);
+        return new FixedPoint(columnName).setByteSize(2L);
 
       case Types.CLOB:
       case Types.VARCHAR:

@@ -34,6 +34,8 @@ import java.io.InputStream;
 
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Text;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -85,17 +87,18 @@ public class TestSqoopWritable {
   // it existed before.
   @Test
   public void testWriteAndReadFields() throws IOException {
+    Schema schema = new Schema("test").addColumn(new Text("t"));
     String testData = "You shall not pass";
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(ostream);
-    SqoopWritable writableOne = new SqoopWritable(new CSVIntermediateDataFormat());
+    SqoopWritable writableOne = new SqoopWritable(new CSVIntermediateDataFormat(schema));
     writableOne.setString(testData);
     writableOne.write(out);
     byte[] written = ostream.toByteArray();
 
     // Don't test what the data is, test that SqoopWritable can read it.
     InputStream instream = new ByteArrayInputStream(written);
-    SqoopWritable writableTwo = new SqoopWritable(new CSVIntermediateDataFormat());
+    SqoopWritable writableTwo = new SqoopWritable(new CSVIntermediateDataFormat(schema));
     DataInput in = new DataInputStream(instream);
     writableTwo.readFields(in);
     assertEquals(writableOne.toString(), writableTwo.toString());

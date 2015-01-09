@@ -45,7 +45,7 @@ public class TestSqoopIDFUtils {
   @Test
   public void testEncloseStringWithQuotes() {
     String test = "test";
-    String quotedText = encloseWithQuote(test);
+    String quotedText = encloseWithQuotes(test);
     assertEquals(quotedText, "'test'");
 
   }
@@ -53,7 +53,7 @@ public class TestSqoopIDFUtils {
   @Test
   public void testStringWithQuotesToEncloseStringWithQuotes() {
     String test = "'test'";
-    String quotedText = encloseWithQuote(test);
+    String quotedText = encloseWithQuotes(test);
     assertEquals(quotedText, "''test''");
 
   }
@@ -82,28 +82,28 @@ public class TestSqoopIDFUtils {
   @Test
   public void testExample1EncodeToCSVString() {
     String test = "test";
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'test'");
   }
 
   @Test
   public void testExample2EncodeToCSVString() {
     String test = "test,test1";
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'test,test1'");
   }
 
   @Test
   public void testExample3EncodeToCSVString() {
     String test = "test,'test1";
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'test,\\'test1'");
   }
 
   @Test
   public void testExample4EncodeToCSVString() {
     String test = "test,\"test1";
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'test,\\\"test1'");
   }
 
@@ -117,7 +117,7 @@ public class TestSqoopIDFUtils {
 
   public void testExample5EncodeToCSVString() {
     String test = new String(new char[] { 0x0A });
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'\\n'");
   }
 
@@ -130,7 +130,7 @@ public class TestSqoopIDFUtils {
 
   public void testExample6EncodeToCSVString() {
     String test = new String(new char[] { 0x0D });
-    String encodedText = encodeToCSVString(test);
+    String encodedText = toCSVString(test);
     assertEquals(encodedText, "'\\r'");
   }
 
@@ -138,7 +138,7 @@ public class TestSqoopIDFUtils {
   public void testEncodeByteToCSVString() {
     // byte[0] = \r byte[1] = -112, byte[1] = 54 - 2's complements
     byte[] bytes = new byte[] { (byte) 0x0D, (byte) -112, (byte) 54 };
-    String encodedText = encodeToCSVByteArray(bytes);
+    String encodedText = toCSVByteArray(bytes);
     String expectedText = getByteFieldString(bytes).replaceAll("\r", "\\\\r");
     assertEquals(encodedText, expectedText);
   }
@@ -149,7 +149,7 @@ public class TestSqoopIDFUtils {
     list.add(1);
     list.add(2);
     AbstractComplexListType array = new Array("a", new Text("t"));
-    String encodedText = encodeToCSVList(list.toArray(), array);
+    String encodedText = toCSVList(list.toArray(), array);
     assertEquals(encodedText, "'[1,2]'");
   }
 
@@ -159,7 +159,7 @@ public class TestSqoopIDFUtils {
     list.add("A");
     list.add("B");
     AbstractComplexListType array = new Array("a", new Text("t"));
-    String encodedText = encodeToCSVList(list.toArray(), array);
+    String encodedText = toCSVList(list.toArray(), array);
     assertEquals(encodedText, "'[\"A\",\"B\"]'");
   }
 
@@ -172,7 +172,7 @@ public class TestSqoopIDFUtils {
     map.put("A", list);
     org.apache.sqoop.schema.type.Map mapCol = new org.apache.sqoop.schema.type.Map("a", new Text("t"), new Array("r", new Text(
         "tr")));
-    String encodedText = encodeToCSVMap(map, mapCol);
+    String encodedText = toCSVMap(map, mapCol);
     assertEquals(encodedText, "'{\"A\":[\"A\",\"B\"]}'");
   }
   

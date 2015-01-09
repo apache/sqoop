@@ -18,12 +18,14 @@
  */
 package org.apache.sqoop.connector.idf;
 
-import static org.apache.sqoop.connector.common.SqoopIDFUtils.isColumnListType;
-import static org.apache.sqoop.connector.common.SqoopIDFUtils.isColumnStringType;
-
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.Column;
-import org.apache.sqoop.schema.type.ColumnType;
+import org.apache.sqoop.utils.ClassUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.json.simple.JSONValue;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -50,16 +52,6 @@ public abstract class IntermediateDataFormat<T> {
   protected volatile T data;
 
   protected Schema schema;
-
-  protected final Set<Integer> stringTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> bitTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> byteTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> listTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> mapTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> dateTimeTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> dateTypeColumnIndices = new HashSet<Integer>();
-  protected final Set<Integer> timeTypeColumnIndices = new HashSet<Integer>();
-
 
   /**
    * Get one row of data.
@@ -134,32 +126,13 @@ public abstract class IntermediateDataFormat<T> {
    *          - the schema used for serializing/de-serializing data
    */
   public void setSchema(Schema schema) {
-    if (schema == null) {
-      // TODO(SQOOP-1956): throw an exception since working without a schema is dangerous
-      return;
-    }
+    validateSchema(schema);
     this.schema = schema;
-    Column[] columns = schema.getColumnsArray();
-    int i = 0;
-    for (Column col : columns) {
-      if (isColumnStringType(col)) {
-        stringTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.BIT) {
-        bitTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.DATE) {
-        dateTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.TIME) {
-        timeTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.DATE_TIME) {
-        dateTimeTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.BINARY) {
-        byteTypeColumnIndices.add(i);
-      } else if (isColumnListType(col)) {
-        listTypeColumnIndices.add(i);
-      } else if (col.getType() == ColumnType.MAP) {
-        mapTypeColumnIndices.add(i);
-      }
-      i++;
+  }
+
+  protected void validateSchema(Schema schema) {
+    if (schema == null) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0002);
     }
   }
 
@@ -186,7 +159,15 @@ public abstract class IntermediateDataFormat<T> {
    * @return set of jars
    */
   public Set<String> getJars() {
-    return new HashSet<String>();
+    Set<String> jars = new  HashSet<String>();
+    // Add JODA classes for IDF date/time handling
+    jars.add(ClassUtils.jarForClass(LocalDate.class));
+    jars.add(ClassUtils.jarForClass(LocalDateTime.class));
+    jars.add(ClassUtils.jarForClass(DateTime.class));
+    jars.add(ClassUtils.jarForClass(LocalTime.class));
+    // Add JSON parsing jar
+    jars.add(ClassUtils.jarForClass(JSONValue.class));
+    return jars;
   }
 
   @Override

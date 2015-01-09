@@ -39,6 +39,8 @@ import org.apache.sqoop.job.etl.LoaderContext;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.job.util.MRJobTestUtil;
 import org.apache.sqoop.schema.NullSchema;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -145,8 +147,12 @@ public class TestSqoopOutputFormatLoadExecutor {
 
   }
   // TODO:SQOOP-1873: Mock objects instead
-  private IntermediateDataFormat<?> getIDF(){
-    return new CSVIntermediateDataFormat();
+  private IntermediateDataFormat<?> getIDF() {
+    return new CSVIntermediateDataFormat(getSchema());
+  }
+
+  private Schema getSchema() {
+    return new Schema("test").addColumn(new Text("t"));
   }
 
   @BeforeMethod

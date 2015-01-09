@@ -41,6 +41,10 @@ import java.util.Set;
  */
 public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObject> {
 
+  // need this default constructor for reflection magic used in execution engine
+  public JSONIntermediateDataFormat() {
+  }
+
   // We need schema at all times
   public JSONIntermediateDataFormat(Schema schema) {
     setSchema(schema);
@@ -110,6 +114,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
 
     Set<String> jars = super.getJars();
     jars.add(ClassUtils.jarForClass(JSONObject.class));
+    jars.add(ClassUtils.jarForClass(JSONArray.class));
     return jars;
   }
 
@@ -241,16 +246,16 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
       // stored in JSON as the same format as csv strings in the joda time
       // format
       case DATE_TIME:
-        object.put(cols[i].getName(), removeQuotes(encodeToCSVDateTime(data[i], cols[i])));
+        object.put(cols[i].getName(), removeQuotes(toCSVDateTime(data[i], cols[i])));
         break;
       case TIME:
-        object.put(cols[i].getName(), removeQuotes(encodeToCSVTime(data[i], cols[i])));
+        object.put(cols[i].getName(), removeQuotes(toCSVTime(data[i], cols[i])));
         break;
       case DATE:
-        object.put(cols[i].getName(), removeQuotes(encodeToCSVDate(data[i])));
+        object.put(cols[i].getName(), removeQuotes(toCSVDate(data[i])));
         break;
       case BIT:
-        object.put(cols[i].getName(), Boolean.valueOf(encodeToCSVBit(data[i])));
+        object.put(cols[i].getName(), Boolean.valueOf(toCSVBit(data[i])));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
@@ -278,40 +283,40 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
       case SET:
         // stored as JSON array
         JSONArray array = (JSONArray) obj;
-        csvString.append(encloseWithQuote(array.toJSONString()));
+        csvString.append(encloseWithQuotes(array.toJSONString()));
         break;
       case MAP:
         // stored as JSON object
-        csvString.append(encloseWithQuote((((JSONObject) obj).toJSONString())));
+        csvString.append(encloseWithQuotes((((JSONObject) obj).toJSONString())));
         break;
       case ENUM:
       case TEXT:
-        csvString.append(encodeToCSVString(obj.toString()));
+        csvString.append(toCSVString(obj.toString()));
         break;
       case BINARY:
       case UNKNOWN:
-        csvString.append(encodeToCSVByteArray(Base64.decodeBase64(obj.toString())));
+        csvString.append(toCSVByteArray(Base64.decodeBase64(obj.toString())));
         break;
       case FIXED_POINT:
-        csvString.append(encodeToCSVFixedPoint(obj, cols[i]));
+        csvString.append(toCSVFixedPoint(obj, cols[i]));
         break;
       case FLOATING_POINT:
-        csvString.append(encodeToCSVFloatingPoint(obj, cols[i]));
+        csvString.append(toCSVFloatingPoint(obj, cols[i]));
         break;
       case DECIMAL:
-        csvString.append(encodeToCSVDecimal(obj));
+        csvString.append(toCSVDecimal(obj));
         break;
       // stored in JSON as strings in the joda time format
       case DATE:
       case TIME:
       case DATE_TIME:
-        csvString.append(encloseWithQuote(obj.toString()));
+        csvString.append(encloseWithQuotes(obj.toString()));
         break;
       // 0/1 will be stored as they are in JSON, even though valid values in
       // JSON
       // are true/false
       case BIT:
-        csvString.append(encodeToCSVBit(obj));
+        csvString.append(toCSVBit(obj));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,

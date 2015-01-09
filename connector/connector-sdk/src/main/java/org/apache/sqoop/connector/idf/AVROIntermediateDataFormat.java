@@ -302,47 +302,47 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
       case ARRAY:
       case SET:
         List<Object> objList = (List<Object>) obj;
-        csvString.append(encodeToCSVList(toObjectArray(objList), cols[i]));
+        csvString.append(toCSVList(toObjectArray(objList), cols[i]));
         break;
       case MAP:
         Map<Object, Object> objMap = (Map<Object, Object>) obj;
-        csvString.append(encodeToCSVMap(objMap, cols[i]));
+        csvString.append(toCSVMap(objMap, cols[i]));
         break;
       case ENUM:
       case TEXT:
-        csvString.append(encodeToCSVString(obj.toString()));
+        csvString.append(toCSVString(obj.toString()));
         break;
       case BINARY:
       case UNKNOWN:
-        csvString.append(encodeToCSVByteArray(getBytesFromByteBuffer(obj)));
+        csvString.append(toCSVByteArray(getBytesFromByteBuffer(obj)));
         break;
       case FIXED_POINT:
-        csvString.append(encodeToCSVFixedPoint(obj, cols[i]));
+        csvString.append(toCSVFixedPoint(obj, cols[i]));
         break;
       case FLOATING_POINT:
-        csvString.append(encodeToCSVFloatingPoint(obj, cols[i]));
+        csvString.append(toCSVFloatingPoint(obj, cols[i]));
         break;
       case DECIMAL:
         // stored as string
-        csvString.append(encodeToCSVDecimal(obj));
+        csvString.append(toCSVDecimal(obj));
         break;
       case DATE:
         // stored as long
         Long dateInMillis = (Long) obj;
-        csvString.append(encodeToCSVDate(new org.joda.time.LocalDate(dateInMillis)));
+        csvString.append(toCSVDate(new org.joda.time.LocalDate(dateInMillis)));
         break;
       case TIME:
         // stored as long
         Long timeInMillis = (Long) obj;
-        csvString.append(encodeToCSVTime(new org.joda.time.LocalTime(timeInMillis), cols[i]));
+        csvString.append(toCSVTime(new org.joda.time.LocalTime(timeInMillis), cols[i]));
         break;
       case DATE_TIME:
         // stored as long
         Long dateTimeInMillis = (Long) obj;
-        csvString.append(encodeToCSVDateTime(new org.joda.time.DateTime(dateTimeInMillis), cols[i]));
+        csvString.append(toCSVDateTime(new org.joda.time.DateTime(dateTimeInMillis), cols[i]));
         break;
       case BIT:
-        csvString.append(encodeToCSVBit(obj));
+        csvString.append(toCSVBit(obj));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
