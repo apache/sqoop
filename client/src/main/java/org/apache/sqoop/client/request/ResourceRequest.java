@@ -49,7 +49,6 @@ import java.util.Locale;
 public class ResourceRequest {
   private static final Logger LOG = Logger.getLogger(ResourceRequest.class);
   private DelegationTokenAuthenticatedURL.Token authToken;
-  private String strURL;
 
   public ResourceRequest() {
     this.authToken = new DelegationTokenAuthenticatedURL.Token();
@@ -58,7 +57,6 @@ public class ResourceRequest {
   public ResourceRequest(DelegationTokenAuthenticatedURL.Token token) {
     this.authToken = token == null ? new DelegationTokenAuthenticatedURL.Token() : token;
   }
-
   protected String doHttpRequest(String strURL, String method) {
     return doHttpRequest(strURL, method, "");
   }
@@ -67,7 +65,6 @@ public class ResourceRequest {
     DataOutputStream wr = null;
     BufferedReader reader = null;
     try {
-      this.strURL = strURL;
       URL url = new URL(strURL);
       HttpURLConnection conn = new DelegationTokenAuthenticatedURL().openConnection(url, authToken);
 
@@ -183,10 +180,10 @@ public class ResourceRequest {
     return doHttpRequest(url, HttpMethod.DELETE);
   }
 
-  public Token<?>[] addDelegationTokens(String renewer,
+  public Token<?>[] addDelegationTokens(String strURL, String renewer,
                                         Credentials credentials) throws IOException {
     Token<?>[] tokens = null;
-    Text dtService = getDelegationTokenService();
+    Text dtService = getDelegationTokenService(strURL);
     Token<?> token = credentials.getToken(dtService);
     if (token == null) {
       URL url = new URL(strURL);
@@ -212,7 +209,7 @@ public class ResourceRequest {
     return tokens;
   }
 
-  private Text getDelegationTokenService() throws IOException {
+  private Text getDelegationTokenService(String strURL) throws IOException {
     URL url = new URL(strURL);
     InetSocketAddress addr = new InetSocketAddress(url.getHost(),
             url.getPort());
