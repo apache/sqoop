@@ -345,8 +345,8 @@ public class PostgresqlSchemaCreateQuery {
           + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) DEFAULT NULL, "
           + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
           + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
-          + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
-          + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750)"
+          + COLUMN_SQS_ERROR_SUMMARY + " VARCHAR(150), "
+          + COLUMN_SQS_ERROR_DETAILS + " VARCHAR(750)"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =

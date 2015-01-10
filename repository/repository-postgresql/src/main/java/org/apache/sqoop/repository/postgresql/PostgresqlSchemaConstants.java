@@ -231,9 +231,9 @@ public class PostgresqlSchemaConstants {
 
   public static final String COLUMN_SQS_EXTERNAL_LINK = "SQS_EXTERNAL_LINK";
 
-  public static final String COLUMN_SQS_EXCEPTION = "SQS_EXCEPTION";
+  public static final String COLUMN_SQS_ERROR_DETAILS = "SQS_ERROR_DETAILS";
 
-  public static final String COLUMN_SQS_EXCEPTION_TRACE = "SQS_EXCEPTION_TRACE";
+  public static final String COLUMN_SQS_ERROR_SUMMARY = "SQS_ERROR_SUMMARY";
 
   // SQ_COUNTER_GROUP
 
