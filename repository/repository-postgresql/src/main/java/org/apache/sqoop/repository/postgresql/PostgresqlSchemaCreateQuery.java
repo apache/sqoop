@@ -337,7 +337,7 @@ public class PostgresqlSchemaCreateQuery {
   public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
       "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
           + COLUMN_SQS_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQS_JOB + " BIGINT REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ")" + ", "
+          + COLUMN_SQS_JOB + " BIGINT REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE, "
           + COLUMN_SQS_STATUS + " VARCHAR(20), "
           + COLUMN_SQS_CREATION_DATE + " TIMESTAMP, "
           + COLUMN_SQS_CREATION_USER + " VARCHAR(32) DEFAULT NULL, "
