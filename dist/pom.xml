@@ -49,11 +49,11 @@ limitations under the License.
   </dependencies>
 
   <profiles>
-    <!-- Build source distribution (activated by default) -->
+    <!-- Build source distribution (activated by -Psource) -->
     <profile>
       <id>source</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <build>
         <plugins>
@@ -111,6 +111,9 @@ limitations under the License.
     <!-- Build binary distribution (activated by -Pbinary) -->
     <profile>
       <id>binary</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
       <build>
         <plugins>
           <plugin>
