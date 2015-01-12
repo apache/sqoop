@@ -30,7 +30,7 @@ Modify Sqoop configuration file, normally in <Sqoop Folder>/server/config/sqoop.
 ::
 
   org.apache.sqoop.authentication.type=SIMPLE
-  org.apache.sqoop.authentication.handler=org.apache.sqoop.security.SimpleAuthenticationHandler
+  org.apache.sqoop.authentication.handler=org.apache.sqoop.security.Authentication.SimpleAuthenticationHandler
   org.apache.sqoop.anonymous=true
 
 -	Simple authentication is used by default. Commenting out authentication configuration will yield the use of simple authentication.
@@ -88,7 +88,7 @@ Modify Sqoop configuration file, normally in <Sqoop Folder>/server/config/sqoop.
 ::
 
   org.apache.sqoop.authentication.type=KERBEROS
-  org.apache.sqoop.authentication.handler=org.apache.sqoop.security.KerberosAuthenticationHandler
+  org.apache.sqoop.authentication.handler=org.apache.sqoop.security.Authentication.KerberosAuthenticationHandler
   org.apache.sqoop.authentication.kerberos.principal=sqoop/_HOST@<REALM>
   org.apache.sqoop.authentication.kerberos.keytab=/home/kerberos/sqoop.keytab
   org.apache.sqoop.authentication.kerberos.http.principal=HTTP/_HOST@<REALM>
@@ -132,7 +132,7 @@ If the Sqoop server has started successfully with Kerberos authentication, the f
 
 ::
 
-  2014-12-04 15:02:58,038 INFO  security.KerberosAuthenticationHandler [org.apache.sqoop.security.KerberosAuthenticationHandler.secureLogin(KerberosAuthenticationHandler.java:84)] Using Kerberos authentication, principal [sqoop/_HOST@HADOOP.COM] keytab [/home/kerberos/sqoop.keytab]
+  2014-12-04 15:02:58,038 INFO  security.KerberosAuthenticationHandler [org.apache.sqoop.security.Authentication.KerberosAuthenticationHandler.secureLogin(KerberosAuthenticationHandler.java:84)] Using Kerberos authentication, principal [sqoop/_HOST@HADOOP.COM] keytab [/home/kerberos/sqoop.keytab]
 
 If the Sqoop client was able to communicate with the Sqoop server, the following will be in <Sqoop Folder>/server/log/catalina.out:
 

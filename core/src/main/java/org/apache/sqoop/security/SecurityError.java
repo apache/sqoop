@@ -19,7 +19,7 @@ package org.apache.sqoop.security;
 
 import org.apache.sqoop.common.ErrorCode;
 
-public enum AuthenticationError implements ErrorCode {
+public enum SecurityError implements ErrorCode {
 
   /** An unknown error has occurred. */
   AUTH_0000("An unknown error has occurred"),
@@ -44,7 +44,7 @@ public enum AuthenticationError implements ErrorCode {
 
   private final String message;
 
-  private AuthenticationError(String message) {
+  private SecurityError(String message) {
     this.message = message;
   }
 

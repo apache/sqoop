@@ -22,19 +22,24 @@ import org.apache.sqoop.core.ConfigurationConstants;
 /**
  * Constants that are used in authentication module.
  */
-public final class AuthenticationConstants {
-
+public final class SecurityConstants {
+  /**
+   * All security related configuration is prefixed with this:
+   * <tt>org.apache.sqoop.security.</tt>
+   */
+  public static final String PREFIX_SECURITY_CONFIG =
+          ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "security.";
   /**
    * All authentication related configuration is prefixed with this:
-   * <tt>org.apache.sqoop.authentication.</tt>
+   * <tt>org.apache.sqoop.security.authentication.</tt>
    */
   public static final String PREFIX_AUTHENTICATION_CONFIG =
-    ConfigurationConstants.PREFIX_GLOBAL_CONFIG + "authentication.";
+    PREFIX_SECURITY_CONFIG + "authentication.";
 
   /**
    * The config specifies the sqoop authentication type (SIMPLE, KERBEROS).
    * The default type is SIMPLE
-   * <tt>org.apache.sqoop.authentication.type</tt>.
+   * <tt>org.apache.sqoop.security.authentication.type</tt>.
    */
   public static final String AUTHENTICATION_TYPE =
     PREFIX_AUTHENTICATION_CONFIG + "type";
@@ -42,56 +47,56 @@ public final class AuthenticationConstants {
   /**
    * The config specifies the sqoop authentication handler class.
    * The default type is org.apache.sqoop.security.SimpleAuthenticationHandler
-   * <tt>org.apache.sqoop.authentication.handler</tt>.
+   * <tt>org.apache.sqoop.security.authentication.handler</tt>.
    */
   public static final String AUTHENTICATION_HANDLER =
           PREFIX_AUTHENTICATION_CONFIG + "handler";
 
   /**
    * The config enables or disables anonymous authentication.
-   * <tt>org.apache.sqoop.authentication.anonymous</tt>.
+   * <tt>org.apache.sqoop.security.authentication.anonymous</tt>.
    */
   public static final String AUTHENTICATION_ANONYMOUS =
       PREFIX_AUTHENTICATION_CONFIG + "anonymous";
 
   /**
    * All kerberos authentication related configuration is prefixed with this:
-   * <tt>org.apache.sqoop.authentication.kerberos.</tt>
+   * <tt>org.apache.security.sqoop.authentication.kerberos.</tt>
    */
   public static final String PREFIX_AUTHENTICATION_KERBEROS_CONFIG =
           PREFIX_AUTHENTICATION_CONFIG + "kerberos.";
 
   /**
    * The config specifies the kerberos principal.
-   * <tt>org.apache.sqoop.authentication.kerberos.principal</tt>.
+   * <tt>org.apache.sqoop.security.authentication.kerberos.principal</tt>.
    */
   public static final String AUTHENTICATION_KERBEROS_PRINCIPAL =
     PREFIX_AUTHENTICATION_KERBEROS_CONFIG + "principal";
 
   /**
    * The config specifies the kerberos keytab.
-   * <tt>org.apache.sqoop.authentication.kerberos.principal</tt>.
+   * <tt>org.apache.sqoop.security.authentication.kerberos.principal</tt>.
    */
   public static final String AUTHENTICATION_KERBEROS_KEYTAB =
     PREFIX_AUTHENTICATION_KERBEROS_CONFIG + "keytab";
 
   /**
    * All kerberos authentication for http related configuration is prefixed with this:
-   * <tt>org.apache.sqoop.authentication.kerberos.http.</tt>
+   * <tt>org.apache.sqoop.security.authentication.kerberos.http.</tt>
    */
   public static final String PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG =
           PREFIX_AUTHENTICATION_KERBEROS_CONFIG + "http.";
 
   /**
    * The config specifies the kerberos principal for http.
-   * <tt>org.apache.sqoop.authentication.kerberos.http.principal</tt>.
+   * <tt>org.apache.sqoop.security.authentication.kerberos.http.principal</tt>.
    */
   public static final String AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL =
           PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "principal";
 
   /**
    * The config specifies the kerberos keytab for http.
-   * <tt>org.apache.sqoop.authentication.kerberos.http.principal</tt>.
+   * <tt>org.apache.sqoop.security.authentication.kerberos.http.principal</tt>.
    */
   public static final String AUTHENTICATION_KERBEROS_HTTP_KEYTAB =
           PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "keytab";
@@ -103,7 +108,7 @@ public final class AuthenticationConstants {
 
   public static enum TYPE {SIMPLE, KERBEROS}
 
-  private AuthenticationConstants() {
+  private SecurityConstants() {
     // Instantiation of this class is prohibited
   }
 }

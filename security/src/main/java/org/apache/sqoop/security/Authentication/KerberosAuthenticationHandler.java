@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.security;
+package org.apache.sqoop.security.Authentication;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
@@ -24,6 +24,9 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.security.AuthenticationHandler;
+import org.apache.sqoop.security.SecurityConstants;
+import org.apache.sqoop.security.SecurityError;
 
 import java.io.IOException;
 
@@ -56,30 +59,30 @@ public class KerberosAuthenticationHandler extends AuthenticationHandler {
   public void secureLogin() {
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String keytab = mapContext.getString(
-            AuthenticationConstants.AUTHENTICATION_KERBEROS_KEYTAB).trim();
+            SecurityConstants.AUTHENTICATION_KERBEROS_KEYTAB).trim();
     if (keytab.length() == 0) {
-      throw new SqoopException(AuthenticationError.AUTH_0001,
-              AuthenticationConstants.AUTHENTICATION_KERBEROS_KEYTAB);
+      throw new SqoopException(SecurityError.AUTH_0001,
+              SecurityConstants.AUTHENTICATION_KERBEROS_KEYTAB);
     }
     keytabFile = keytab;
 
     String principal = mapContext.getString(
-            AuthenticationConstants.AUTHENTICATION_KERBEROS_PRINCIPAL).trim();
+            SecurityConstants.AUTHENTICATION_KERBEROS_PRINCIPAL).trim();
     if (principal.length() == 0) {
-      throw new SqoopException(AuthenticationError.AUTH_0002,
-              AuthenticationConstants.AUTHENTICATION_KERBEROS_PRINCIPAL);
+      throw new SqoopException(SecurityError.AUTH_0002,
+              SecurityConstants.AUTHENTICATION_KERBEROS_PRINCIPAL);
     }
     keytabPrincipal = principal;
 
     Configuration conf = new Configuration();
     conf.set(get_hadoop_security_authentication(),
-            AuthenticationConstants.TYPE.KERBEROS.name());
+            SecurityConstants.TYPE.KERBEROS.name());
     UserGroupInformation.setConfiguration(conf);
     try {
       String hostPrincipal = SecurityUtil.getServerPrincipal(principal, "0.0.0.0");
       UserGroupInformation.loginUserFromKeytab(hostPrincipal, keytab);
     } catch (IOException ex) {
-      throw new SqoopException(AuthenticationError.AUTH_0003, ex);
+      throw new SqoopException(SecurityError.AUTH_0003, ex);
     }
     LOG.info("Using Kerberos authentication, principal ["
             + principal + "] keytab [" + keytab + "]");

@@ -15,11 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.security;
+package org.apache.sqoop.security.Authentication;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.security.AuthenticationHandler;
+import org.apache.sqoop.security.SecurityConstants;
 
 public class SimpleAuthenticationHandler extends AuthenticationHandler {
 
@@ -33,7 +35,7 @@ public class SimpleAuthenticationHandler extends AuthenticationHandler {
     //no secureLogin, just set configurations
     Configuration conf = new Configuration();
     conf.set(get_hadoop_security_authentication(),
-            AuthenticationConstants.TYPE.SIMPLE.name());
+            SecurityConstants.TYPE.SIMPLE.name());
     UserGroupInformation.setConfiguration(conf);
     LOG.info("Using simple/pseudo authentication, principal ["
             + System.getProperty("user.name") + "]");

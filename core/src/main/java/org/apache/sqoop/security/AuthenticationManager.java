@@ -31,7 +31,7 @@ public class AuthenticationManager implements Reconfigurable {
   /**
    * Default authentication handler
    */
-  public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.SimpleAuthenticationHandler";
+  public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.Authentication.SimpleAuthenticationHandler";
 
 
   /**
@@ -92,9 +92,9 @@ public class AuthenticationManager implements Reconfigurable {
     }
 
     String handler = SqoopConfiguration.getInstance().getContext().getString(
-        AuthenticationConstants.AUTHENTICATION_HANDLER,
+        SecurityConstants.AUTHENTICATION_HANDLER,
         DEFAULT_AUTHENTICATION_HANDLER).trim();
-    authenticationHandler = AuthenticationHandlerFactory.getAuthenticationHandler(handler);
+    authenticationHandler = SecurityFactory.getAuthenticationHandler(handler);
     authenticationHandler.doInitialize();
     authenticationHandler.secureLogin();
 

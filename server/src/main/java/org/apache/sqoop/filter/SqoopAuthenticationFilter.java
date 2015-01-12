@@ -19,7 +19,6 @@ package org.apache.sqoop.filter;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
-import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 import org.apache.hadoop.security.authentication.server.KerberosAuthenticationHandler;
 import org.apache.hadoop.security.authentication.server.PseudoAuthenticationHandler;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticationFilter;
@@ -29,8 +28,8 @@ import org.apache.hadoop.security.token.delegation.web.PseudoDelegationTokenAuth
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.SqoopConfiguration;
-import org.apache.sqoop.security.AuthenticationConstants;
-import org.apache.sqoop.security.AuthenticationError;
+import org.apache.sqoop.security.SecurityConstants;
+import org.apache.sqoop.security.SecurityError;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -46,46 +45,46 @@ public class SqoopAuthenticationFilter extends DelegationTokenAuthenticationFilt
     Properties properties = new Properties();
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String type = mapContext.getString(
-        AuthenticationConstants.AUTHENTICATION_TYPE,
-        AuthenticationConstants.TYPE.SIMPLE.name()).trim();
+        SecurityConstants.AUTHENTICATION_TYPE,
+        SecurityConstants.TYPE.SIMPLE.name()).trim();
 
-    if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.KERBEROS.name())) {
+    if (type.equalsIgnoreCase(SecurityConstants.TYPE.KERBEROS.name())) {
       properties.setProperty(AUTH_TYPE, KerberosDelegationTokenAuthenticationHandler.class.getName());
 
       String keytab = mapContext.getString(
-              AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_KEYTAB).trim();
+              SecurityConstants.AUTHENTICATION_KERBEROS_HTTP_KEYTAB).trim();
       if (keytab.length() == 0) {
-        throw new SqoopException(AuthenticationError.AUTH_0005,
-                AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_KEYTAB);
+        throw new SqoopException(SecurityError.AUTH_0005,
+                SecurityConstants.AUTHENTICATION_KERBEROS_HTTP_KEYTAB);
       }
 
       String principal = mapContext.getString(
-              AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL).trim();
+              SecurityConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL).trim();
       if (principal.length() == 0) {
-        throw new SqoopException(AuthenticationError.AUTH_0006,
-                AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL);
+        throw new SqoopException(SecurityError.AUTH_0006,
+                SecurityConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL);
       }
 
       String hostPrincipal = "";
       try {
         hostPrincipal = SecurityUtil.getServerPrincipal(principal, "0.0.0.0");
       } catch (IOException e) {
-        throw new SqoopException(AuthenticationError.AUTH_0006,
-                AuthenticationConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL);
+        throw new SqoopException(SecurityError.AUTH_0006,
+                SecurityConstants.AUTHENTICATION_KERBEROS_HTTP_PRINCIPAL);
       }
 
       properties.setProperty(KerberosAuthenticationHandler.PRINCIPAL, hostPrincipal);
       properties.setProperty(KerberosAuthenticationHandler.KEYTAB, keytab);
-    } else if (type.equalsIgnoreCase(AuthenticationConstants.TYPE.SIMPLE.name())) {
+    } else if (type.equalsIgnoreCase(SecurityConstants.TYPE.SIMPLE.name())) {
       properties.setProperty(AUTH_TYPE, PseudoDelegationTokenAuthenticationHandler.class.getName());
       properties.setProperty(PseudoAuthenticationHandler.ANONYMOUS_ALLOWED,
-          mapContext.getString(AuthenticationConstants.AUTHENTICATION_ANONYMOUS, "true").trim());
+          mapContext.getString(SecurityConstants.AUTHENTICATION_ANONYMOUS, "true").trim());
     } else {
-      throw new SqoopException(AuthenticationError.AUTH_0004, type);
+      throw new SqoopException(SecurityError.AUTH_0004, type);
     }
 
     properties.setProperty(DelegationTokenAuthenticationHandler.TOKEN_KIND,
-            AuthenticationConstants.TOKEN_KIND);
+            SecurityConstants.TOKEN_KIND);
 
     return properties;
   }

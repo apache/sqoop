@@ -23,14 +23,14 @@ import org.apache.sqoop.utils.ClassUtils;
 /**
  * Create authentication manager.
  */
-public class AuthenticationHandlerFactory {
+public class SecurityFactory {
 
   public static AuthenticationHandler getAuthenticationHandler(String handler) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 
     Class<?> handlerClass = ClassUtils.loadClass(handler);
 
     if (handlerClass == null) {
-      throw new SqoopException(AuthenticationError.AUTH_0004,
+      throw new SqoopException(SecurityError.AUTH_0004,
               "Authentication Handler Class: " + handler);
     }
 
@@ -38,7 +38,7 @@ public class AuthenticationHandlerFactory {
     try {
       newHandler = (AuthenticationHandler) handlerClass.newInstance();
     } catch (Exception ex) {
-      throw new SqoopException(AuthenticationError.AUTH_0004,
+      throw new SqoopException(SecurityError.AUTH_0004,
               "Authentication Handler Class: " + handler, ex);
     }
     return newHandler;
