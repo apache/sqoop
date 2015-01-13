@@ -1143,8 +1143,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.getData();
   }
 
-  //SQOOP-1936 to enable schema validation after we use compareTo
-  @Test
+  @Test(expectedExceptions = SqoopException.class)
   public void testNotSettingSchemaAndGetCSVData() {
     dataFormat = new CSVIntermediateDataFormat();
     dataFormat.getCSVTextData();

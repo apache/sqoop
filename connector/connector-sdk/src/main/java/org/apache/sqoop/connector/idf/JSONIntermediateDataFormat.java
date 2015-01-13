@@ -419,4 +419,8 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     return object;
   }
 
+  @Override
+  public String toString() {
+    return this.data.toJSONString();
+  }
 }

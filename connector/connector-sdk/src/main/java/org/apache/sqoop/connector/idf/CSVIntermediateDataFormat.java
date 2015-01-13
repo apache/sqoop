@@ -58,8 +58,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    */
   @Override
   public String getCSVTextData() {
-    // TODO:SQOOP-1936 to enable schema validation after we use compareTo
-    return this.data;
+    return super.getData();
   }
 
   /**
@@ -81,14 +80,14 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     if (csvStringArray == null) {
       return null;
     }
+    Column[] columns = schema.getColumnsArray();
 
-    if (csvStringArray.length != schema.getColumnsArray().length) {
+    if (csvStringArray.length != columns.length) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
           "The data " + getCSVTextData() + " has the wrong number of fields.");
     }
 
     Object[] objectArray = new Object[csvStringArray.length];
-    Column[] columns = schema.getColumnsArray();
     for (int i = 0; i < csvStringArray.length; i++) {
       if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,

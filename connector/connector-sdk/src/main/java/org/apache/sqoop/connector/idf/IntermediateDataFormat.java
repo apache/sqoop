@@ -44,10 +44,13 @@ import java.util.Set;
  * Any conversion to the format dictated by the corresponding data source from the native or  CSV text format
  * has to be done by the connector themselves both in FROM and TO
  *
+ * NOTE: we cannot use the generic for comparable, since the comparison can be arbitrary for instance,
+ * purely based on text format
  * @param <T> - Each data format may have a native representation of the
  *            data, represented by the parameter.
  */
-public abstract class IntermediateDataFormat<T> {
+@SuppressWarnings("rawtypes")
+public abstract class IntermediateDataFormat<T> implements Comparable {
 
   protected volatile T data;
 
@@ -201,6 +204,17 @@ public abstract class IntermediateDataFormat<T> {
     } else if (!schema.equals(other.schema))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return this.data.toString();
+  }
+
+  @Override
+  public int compareTo(Object o) {
+    IntermediateDataFormat<?> idf = (IntermediateDataFormat<?>) o;
+    return toString().compareTo(idf.toString());
   }
 
 }

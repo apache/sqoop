@@ -68,12 +68,12 @@ public class SqoopWritable implements Configurable, WritableComparable<SqoopWrit
 
   @Override
   public int compareTo(SqoopWritable o) {
-    return toString().compareTo(o.toString());
+    return toIDF.compareTo(o.toIDF);
   }
 
   @Override
   public String toString() {
-    return toIDF.getCSVTextData();
+    return toIDF.toString();
   }
 
   @Override

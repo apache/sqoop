@@ -51,15 +51,6 @@ public class TestSqoopWritable {
   }
 
   @Test
-  public void testStringInStringOut() {
-    String testData = "Live Long and prosper";
-    writable.setString(testData);
-    verify(idfMock, times(1)).setCSVTextData(testData);
-    writable.toString();
-    verify(idfMock, times(1)).getCSVTextData();
-  }
-
-  @Test
   public void testWrite() throws IOException {
     String testData = "One ring to rule them all";
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
