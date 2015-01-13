@@ -58,7 +58,7 @@ public class TestCSVIntermediateDataFormat {
   }
 
 
-  //**************test cases for null and empty input*******************
+  //**************test cases for null input*******************
 
   @Test
   public void testNullInputAsCSVTextInObjectArrayOut() {
@@ -1112,7 +1112,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat.setCSVTextData(testData);
     assertEquals(testData, dataFormat.getCSVTextData());
   }
-  //**************test cases for schema*******************
+  //**************test cases for null and empty schema*******************
   @Test(expectedExceptions=SqoopException.class)
   public void testEmptySchema() {
     String testData = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54})
@@ -1128,14 +1128,52 @@ public class TestCSVIntermediateDataFormat {
   @Test(expectedExceptions = SqoopException.class)
   public void testNullSchema() {
     dataFormat = new CSVIntermediateDataFormat(null);
-    @SuppressWarnings("unused")
-    Object[] out = dataFormat.getObjectData();
+    dataFormat.getObjectData();
   }
 
   @Test(expectedExceptions = SqoopException.class)
-  public void testNotSettingSchema() {
+  public void testNotSettingSchemaAndGetObjectData() {
     dataFormat = new CSVIntermediateDataFormat();
-    @SuppressWarnings("unused")
-    Object[] out = dataFormat.getObjectData();
+    dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetData() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.getData();
+  }
+
+  //SQOOP-1936 to enable schema validation after we use compareTo
+  @Test
+  public void testNotSettingSchemaAndGetCSVData() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.getCSVTextData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetObjectData() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.setObjectData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetData() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.setData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetCSVData() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.setCSVTextData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testSchemaNotNullable() {
+    dataFormat = new CSVIntermediateDataFormat();
+    dataFormat.setSchema(new Schema("Test").addColumn(new Text("t").setNullable(false)));
+    Object[] out = new Object[1];
+    out[0] = null;
+    dataFormat.setObjectData(out);
   }
 }

@@ -25,8 +25,6 @@ public enum AVROIntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
   AVRO_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
 
-  AVRO_INTERMEDIATE_DATA_FORMAT_0001("Missing key in the AVRO object.")
-
   ;
 
   private final String message;

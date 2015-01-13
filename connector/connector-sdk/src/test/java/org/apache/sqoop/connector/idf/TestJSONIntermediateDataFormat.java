@@ -18,9 +18,13 @@
  */
 package org.apache.sqoop.connector.idf;
 
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
+import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertEquals;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -55,15 +59,23 @@ public class TestJSONIntermediateDataFormat {
 
   private void createJSONIDF() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1")).addColumn(new FixedPoint("2", 2L, false)).addColumn(new Text("3"))
-        .addColumn(new Text("4")).addColumn(new Binary("5")).addColumn(new Text("6"))
+    schema
+        .addColumn(new FixedPoint("1"))
+        .addColumn(new FixedPoint("2", 2L, false))
+        .addColumn(new Text("3"))
+        .addColumn(new Text("4"))
+        .addColumn(new Binary("5"))
+        .addColumn(new Text("6"))
         .addColumn(new org.apache.sqoop.schema.type.Enum("7"))
         .addColumn(new Array("8", new Array("array", new FixedPoint("ft"))))
-        .addColumn(new org.apache.sqoop.schema.type.Map("9", new Text("t1"), new Text("t2"))).addColumn(new Bit("10"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("9", new Text("t1"), new Text("t2")))
+        .addColumn(new Bit("10"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("11", true, false))
-        .addColumn(new org.apache.sqoop.schema.type.Time("12", false)).addColumn(new org.apache.sqoop.schema.type.Date("13"))
+        .addColumn(new org.apache.sqoop.schema.type.Time("12", false))
+        .addColumn(new org.apache.sqoop.schema.type.Date("13"))
         .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("14"))
-        .addColumn(new org.apache.sqoop.schema.type.Set("15", new Array("set", new FixedPoint("ftw"))));
+        .addColumn(
+            new org.apache.sqoop.schema.type.Set("15", new Array("set", new FixedPoint("ftw"))));
     dataFormat = new JSONIntermediateDataFormat(schema);
   }
 
@@ -73,9 +85,10 @@ public class TestJSONIntermediateDataFormat {
   @Test
   public void testInputAsCSVTextInAndDataOut() {
 
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date + ",13.44,"
-        + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
+        + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     String jsonExpected = "{\"15\":[[11,12],[14,15]],\"13\":\"2014-10-01\",\"14\":13.44,\"11\":\"2014-10-01 12:00:00.000\","
         + "\"12\":\"12:59:59\",\"3\":\"54\",\"2\":34,\"1\":10,\"10\":true,\"7\":\"ENUM\",\"6\":\"10\",\"5\":\"kDY=\",\"4\":\"random data\","
@@ -85,9 +98,10 @@ public class TestJSONIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInAndObjectArrayOut() {
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date + ",13.44,"
-        + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
+        + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     assertEquals(dataFormat.getObjectData().length, 15);
     assertObjectArray();
@@ -145,9 +159,10 @@ public class TestJSONIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInCSVTextOut() {
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date + ",13.44,"
-        + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
+        + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     assertEquals(csvText, dataFormat.getCSVTextData());
   }
@@ -159,7 +174,10 @@ public class TestJSONIntermediateDataFormat {
     json.put("2", 34);
     json.put("3", "54");
     json.put("4", "random data");
-    json.put("5", org.apache.commons.codec.binary.Base64.encodeBase64String(new byte[] { (byte) -112, (byte) 54 }));
+    json.put(
+        "5",
+        org.apache.commons.codec.binary.Base64.encodeBase64String(new byte[] { (byte) -112,
+            (byte) 54 }));
     json.put("6", String.valueOf(0x0A));
     json.put("7", "ENUM");
     JSONArray givenArrayOne = new JSONArray();
@@ -206,9 +224,10 @@ public class TestJSONIntermediateDataFormat {
   @Test
   public void testInputAsDataInAndCSVOut() {
 
-    String csvExpected = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date + ",13.44,"
-        + csvSet;
+    String csvExpected = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
+        + ",13.44," + csvSet;
     dataFormat.setData(createJSONObject());
     assertEquals(csvExpected, dataFormat.getCSVTextData());
   }
@@ -294,9 +313,10 @@ public class TestJSONIntermediateDataFormat {
   public void testInputAsObjectArrayInAndCSVOut() {
     Object[] out = createObjectArray();
     dataFormat.setObjectData(out);
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date + ",13.44,"
-        + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
+        + ",13.44," + csvSet;
     assertEquals(csvText, dataFormat.getCSVTextData());
   }
 
@@ -306,4 +326,196 @@ public class TestJSONIntermediateDataFormat {
     dataFormat.setObjectData(out);
     assertObjectArray();
   }
+
+  // **************test cases for empty and null schema*******************
+  @Test(expectedExceptions = SqoopException.class)
+  public void testEmptySchema() {
+    String testData = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'\\n'";
+    // no coumns
+    Schema schema = new Schema("Test");
+    dataFormat = new JSONIntermediateDataFormat(schema);
+    dataFormat.setCSVTextData(testData);
+
+    @SuppressWarnings("unused")
+    Object[] out = dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNullSchema() {
+    dataFormat = new JSONIntermediateDataFormat(null);
+    dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetObjectData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.getData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetCSVData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.getCSVTextData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetObjectData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setObjectData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetCSVData() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setCSVTextData(null);
+  }
+
+  // **************test cases for null input*******************
+
+  @Test
+  public void testNullInputAsCSVTextInObjectArrayOut() {
+
+    dataFormat.setCSVTextData(null);
+    Object[] out = dataFormat.getObjectData();
+    assertNull(out);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testEmptyInputAsCSVTextInObjectArrayOut() {
+    dataFormat.setCSVTextData("");
+    dataFormat.getObjectData();
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndCSVTextOut() {
+
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null,
+        null, null };
+    dataFormat.setObjectData(in);
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndObjectArrayOut() {
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null,
+        null, null };
+    dataFormat.setObjectData(in);
+
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndObjectArrayOut() {
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL", "NULL", "NULL", "NULL", "NULL", "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndCSVTextOut() {
+
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL", "NULL", "NULL", "NULL", "NULL", "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testNullValueAsDataInAndCSVTextOut() {
+
+    JSONObject json = new JSONObject();
+    for (int i = 1; i <= 15; i++) {
+      json.put(String.valueOf(i), null);
+    }
+    dataFormat.setData(json);
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testNullValueAsDataInAndObjectArrayOut() {
+
+    JSONObject json = new JSONObject();
+    for (int i = 1; i <= 15; i++) {
+      json.put(String.valueOf(i), null);
+    }
+    dataFormat.setData(json);
+
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testSchemaNotNullableWithObjectArray() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setSchema(new Schema("Test").addColumn(new Text("t").setNullable(false)));
+    Object[] out = new Object[1];
+    out[0] = null;
+    dataFormat.setObjectData(out);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testSchemaNotNullableWithCSV() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setSchema(new Schema("Test").addColumn(new Text("t").setNullable(false)));
+    dataFormat.setCSVTextData(NULL_VALUE);
+  }
+
+  @SuppressWarnings("unchecked")
+  // no validation happens when the setJSON and getJSON is used
+  @Test
+  public void testSchemaNotNullableWithJSON() {
+    dataFormat = new JSONIntermediateDataFormat();
+    dataFormat.setSchema(new Schema("Test").addColumn(new Text("t").setNullable(false)));
+    JSONObject json = new JSONObject();
+    json.put("test", null);
+    dataFormat.setData(json);
+    dataFormat.getData();
+  }
+
 }

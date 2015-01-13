@@ -60,6 +60,7 @@ public abstract class IntermediateDataFormat<T> {
    *         the intermediate data format implementation.
    */
   public T getData() {
+    validateSchema(schema);
     return data;
   }
 
@@ -70,6 +71,7 @@ public abstract class IntermediateDataFormat<T> {
    * @param obj - A single row of data to be moved.
    */
   public void setData(T obj) {
+    validateSchema(schema);
     this.data = obj;
   }
 

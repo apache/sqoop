@@ -28,12 +28,15 @@ public enum IntermediateDataFormatError implements ErrorCode {
   INTERMEDIATE_DATA_FORMAT_0001("Wrong number of columns."),
 
   /** Schema is missing in the IDF. */
-  INTERMEDIATE_DATA_FORMAT_0002("Schema missing."),
+  INTERMEDIATE_DATA_FORMAT_0002("Schema is null."),
 
   INTERMEDIATE_DATA_FORMAT_0003("JSON parse error"),
 
   /** Column type isn't known by Intermediate Data Format. */
   INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
+
+  /** Column value cannot be null. */
+  INTERMEDIATE_DATA_FORMAT_0005("Column value cannot be null"),
 
   ;
 

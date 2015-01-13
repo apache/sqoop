@@ -19,12 +19,16 @@
 package org.apache.sqoop.connector.idf;
 
 import static org.apache.sqoop.connector.common.SqoopAvroUtils.createEnumSchema;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
+import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertEquals;
 
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopAvroUtils;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
@@ -58,7 +62,8 @@ public class TestAVROIntermediateDataFormat {
   private final static String csvTime = "'12:59:59'";
   private Column enumCol;
   // no time zone
-  private final static LocalDateTime dateTime = new org.joda.time.LocalDateTime(2014, 10, 01, 12, 0, 0);
+  private final static LocalDateTime dateTime = new org.joda.time.LocalDateTime(2014, 10, 01, 12,
+      0, 0);
   private final static org.joda.time.LocalTime time = new org.joda.time.LocalTime(12, 59, 59);
   private final static org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
 
@@ -73,15 +78,23 @@ public class TestAVROIntermediateDataFormat {
     options.add("ENUM");
     options.add("NUME");
     enumCol = new org.apache.sqoop.schema.type.Enum("seven").setOptions(options);
-    sqoopSchema.addColumn(new FixedPoint("one")).addColumn(new FixedPoint("two", 2L, false)).addColumn(new Text("three"))
-        .addColumn(new Text("four")).addColumn(new Binary("five")).addColumn(new Text("six")).addColumn(enumCol)
+    sqoopSchema
+        .addColumn(new FixedPoint("one"))
+        .addColumn(new FixedPoint("two", 2L, false))
+        .addColumn(new Text("three"))
+        .addColumn(new Text("four"))
+        .addColumn(new Binary("five"))
+        .addColumn(new Text("six"))
+        .addColumn(enumCol)
         .addColumn(new Array("eight", new Array("array", new FixedPoint("ft"))))
-        .addColumn(new org.apache.sqoop.schema.type.Map("nine", new Text("t1"), new Text("t2"))).addColumn(new Bit("ten"))
+        .addColumn(new org.apache.sqoop.schema.type.Map("nine", new Text("t1"), new Text("t2")))
+        .addColumn(new Bit("ten"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("eleven", true, false))
         .addColumn(new org.apache.sqoop.schema.type.Time("twelve", false))
         .addColumn(new org.apache.sqoop.schema.type.Date("thirteen"))
         .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("fourteen"))
-        .addColumn(new org.apache.sqoop.schema.type.Set("fifteen", new Array("set", new FixedPoint("ftw"))));
+        .addColumn(
+            new org.apache.sqoop.schema.type.Set("fifteen", new Array("set", new FixedPoint("ftw"))));
     dataFormat = new AVROIntermediateDataFormat(sqoopSchema);
     avroSchema = SqoopAvroUtils.createAvroSchema(sqoopSchema);
   }
@@ -92,9 +105,10 @@ public class TestAVROIntermediateDataFormat {
   @Test
   public void testInputAsCSVTextInAndDataOut() {
 
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + "," + csvDate
-        + ",13.44," + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
+        + csvDate + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     GenericRecord avroObject = createAvroGenericRecord();
     assertEquals(avroObject.toString(), dataFormat.getData().toString());
@@ -102,9 +116,10 @@ public class TestAVROIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInAndObjectArrayOut() {
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + "," + csvDate
-        + ",13.44," + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
+        + csvDate + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     assertEquals(dataFormat.getObjectData().length, 15);
     assertObjectArray();
@@ -158,9 +173,10 @@ public class TestAVROIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInCSVTextOut() {
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + "," + csvDate
-        + ",13.44," + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
+        + csvDate + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
     assertEquals(csvText, dataFormat.getCSVTextData());
   }
@@ -219,9 +235,10 @@ public class TestAVROIntermediateDataFormat {
   @Test
   public void testInputAsDataInAndCSVOut() {
 
-    String csvExpected = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + "," + csvDate
-        + ",13.44," + csvSet;
+    String csvExpected = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
+        + csvDate + ",13.44," + csvSet;
     dataFormat.setData(createAvroGenericRecord());
     assertEquals(csvExpected, dataFormat.getCSVTextData());
   }
@@ -295,7 +312,8 @@ public class TestAVROIntermediateDataFormat {
     Object[] out = createObjectArray();
     dataFormat.setObjectData(out);
     GenericRecord avroObject = createAvroGenericRecord();
-    // SQOOP-SQOOP-1975: direct object compare will fail unless we use the Avro complex types
+    // SQOOP-SQOOP-1975: direct object compare will fail unless we use the Avro
+    // complex types
     assertEquals(avroObject.toString(), dataFormat.getData().toString());
 
   }
@@ -304,9 +322,10 @@ public class TestAVROIntermediateDataFormat {
   public void testInputAsObjectArrayInAndCSVOut() {
     Object[] out = createObjectArray();
     dataFormat.setObjectData(out);
-    String csvText = "10,34,'54','random data'," + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'"
-        + String.valueOf(0x0A) + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + "," + csvDate
-        + ",13.44," + csvSet;
+    String csvText = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
+        + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
+        + csvDate + ",13.44," + csvSet;
     assertEquals(csvText, dataFormat.getCSVTextData());
   }
 
@@ -316,4 +335,212 @@ public class TestAVROIntermediateDataFormat {
     dataFormat.setObjectData(out);
     assertObjectArray();
   }
+
+  // **************test cases for empty and null schema*******************
+  @Test(expectedExceptions = SqoopException.class)
+  public void testEmptySchema() {
+    String testData = "10,34,'54','random data',"
+        + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'\\n'";
+    // no coumns
+    Schema schema = new Schema("Test");
+    dataFormat = new AVROIntermediateDataFormat(schema);
+    dataFormat.setCSVTextData(testData);
+
+    @SuppressWarnings("unused")
+    Object[] out = dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNullSchema() {
+    dataFormat = new AVROIntermediateDataFormat(null);
+    dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetObjectData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.getObjectData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.getData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndGetCSVData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.getCSVTextData();
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetObjectData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.setObjectData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.setData(null);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNotSettingSchemaAndSetCSVData() {
+    dataFormat = new AVROIntermediateDataFormat();
+    dataFormat.setCSVTextData(null);
+  }
+
+  // **************test cases for null and empty input*******************
+
+  @Test
+  public void testNullInputAsCSVTextInObjectArrayOut() {
+
+    dataFormat.setCSVTextData(null);
+    Object[] out = dataFormat.getObjectData();
+    assertNull(out);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testEmptyInputAsCSVTextInObjectArrayOut() {
+    dataFormat.setCSVTextData("");
+    dataFormat.getObjectData();
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndCSVTextOut() {
+
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null,
+        null, null };
+    dataFormat.setObjectData(in);
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @Test
+  public void testNullValueAsObjectArrayInAndObjectArrayOut() {
+    Object[] in = { null, null, null, null, null, null, null, null, null, null, null, null, null,
+        null, null };
+    dataFormat.setObjectData(in);
+
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndObjectArrayOut() {
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL", "NULL", "NULL", "NULL", "NULL", "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+  }
+
+  @Test
+  public void testNullValueAsCSVTextInAndCSVTextOut() {
+
+    String[] test = { "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
+        "NULL", "NULL", "NULL", "NULL", "NULL", "NULL" };
+    dataFormat.setCSVTextData(StringUtils.join(test, ","));
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @Test
+  public void testNullValueAsDataInAndCSVTextOut() {
+
+    GenericRecord avroObject = new GenericData.Record(avroSchema);
+    avroObject = setAvroRecordWithNulls();
+    dataFormat.setData(avroObject);
+
+    String csvText = dataFormat.getCSVTextData();
+    String[] textValues = csvText.split(",");
+    assertEquals(15, textValues.length);
+    for (String text : textValues) {
+      assertEquals(text, NULL_VALUE);
+    }
+  }
+
+  @Test
+  public void testNullValueAsDataInAndObjectArrayOut() {
+    GenericRecord avroObject = new GenericData.Record(avroSchema);
+    avroObject = setAvroRecordWithNulls();
+    dataFormat.setData(avroObject);
+
+    Object[] out = dataFormat.getObjectData();
+    assertEquals(15, out.length);
+    for (Object obj : out) {
+      assertEquals(obj, null);
+    }
+
+  }
+
+  private GenericRecord setAvroRecordWithNulls() {
+    GenericRecord avroObject = new GenericData.Record(avroSchema);
+    avroObject.put("one", null);
+    avroObject.put("two", null);
+    avroObject.put("three", null);
+    avroObject.put("four", null);
+    avroObject.put("five", null);
+    avroObject.put("six", null);
+    avroObject.put("seven", null);
+
+    avroObject.put("eight", null);
+    avroObject.put("nine", null);
+    avroObject.put("ten", null);
+
+    // expect dates as strings
+    avroObject.put("eleven", null);
+    avroObject.put("twelve", null);
+    avroObject.put("thirteen", null);
+    avroObject.put("fourteen", null);
+
+    avroObject.put("fifteen", null);
+    return avroObject;
+  }
+  @Test(expectedExceptions = SqoopException.class)
+  public void testSchemaNotNullableWithObjectArray() {
+    Schema overrideSchema = new Schema("Test").addColumn(new Text("t").setNullable(false));
+    AVROIntermediateDataFormat dataFormat = new AVROIntermediateDataFormat(overrideSchema);
+    Object[] out = new Object[1];
+    out[0] = null;
+    dataFormat.setObjectData(out);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testSchemaNotNullableWithCSV() {
+    Schema overrideSchema = new Schema("Test").addColumn(new Text("one").setNullable(false));
+    AVROIntermediateDataFormat dataFormat = new AVROIntermediateDataFormat(overrideSchema);
+    dataFormat.setCSVTextData(NULL_VALUE);
+  }
+
+  // no validation happens when the setAvro and getAvro is used
+  @Test
+  public void testSchemaNotNullableWithAvro() {
+    Schema overrideSchema = new Schema("Test").addColumn(new Text("one").setNullable(false));
+    AVROIntermediateDataFormat dataFormat = new AVROIntermediateDataFormat(overrideSchema);
+    org.apache.avro.Schema avroSchema = SqoopAvroUtils.createAvroSchema(overrideSchema);
+    GenericRecord avroObject = new GenericData.Record(avroSchema);
+    avroObject.put("one", null);
+    dataFormat.setData(avroObject);
+    dataFormat.getData();
+  }
+
 }

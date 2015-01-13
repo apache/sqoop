@@ -73,6 +73,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
    */
   @Override
   public void setCSVTextData(String text) {
+    super.validateSchema(schema);
     // convert the CSV text to avro
     this.data = toAVRO(text);
   }
@@ -82,6 +83,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
    */
   @Override
   public String getCSVTextData() {
+    super.validateSchema(schema);
     // convert avro to sqoop CSV
     return toCSV(data);
   }
@@ -91,6 +93,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
    */
   @Override
   public void setObjectData(Object[] data) {
+    super.validateSchema(schema);
     // convert the object array to avro
     this.data = toAVRO(data);
   }
@@ -100,6 +103,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
    */
   @Override
   public Object[] getObjectData() {
+    super.validateSchema(schema);
     // convert avro to object array
     return toObject(data);
   }
@@ -143,21 +147,22 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     if (csvStringArray == null) {
       return null;
     }
-
-    if (csvStringArray.length != schema.getColumnsArray().length) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + csv
-          + " has the wrong number of fields.");
+    Column[] columns = schema.getColumnsArray();
+    if (csvStringArray.length != columns.length) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+          "The data " + csv + " has the wrong number of fields.");
     }
     GenericRecord avroObject = new GenericData.Record(avroSchema);
-    Column[] columnArray = schema.getColumnsArray();
     for (int i = 0; i < csvStringArray.length; i++) {
-      // check for NULL field and assume this field is nullable as per the sqoop
-      // schema
-      if (csvStringArray[i].equals(NULL_VALUE) && columnArray[i].isNullable()) {
-        avroObject.put(columnArray[i].getName(), null);
+      if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (csvStringArray[i].equals(NULL_VALUE)) {
+        avroObject.put(columns[i].getName(), null);
         continue;
       }
-      avroObject.put(columnArray[i].getName(), toAVRO(csvStringArray[i], columnArray[i]));
+      avroObject.put(columns[i].getName(), toAVRO(csvStringArray[i], columns[i]));
     }
     return avroObject;
   }
@@ -219,66 +224,80 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     return returnValue;
   }
 
-  private GenericRecord toAVRO(Object[] data) {
+  private GenericRecord toAVRO(Object[] objectArray) {
 
-    if (data == null) {
+    if (objectArray == null) {
       return null;
     }
+    Column[] columns = schema.getColumnsArray();
 
-    if (data.length != schema.getColumnsArray().length) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + data.toString()
-          + " has the wrong number of fields.");
+    if (objectArray.length != columns.length) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+          "The data " + objectArray.toString() + " has the wrong number of fields.");
     }
     // get avro schema from sqoop schema
     GenericRecord avroObject = new GenericData.Record(avroSchema);
-    Column[] cols = schema.getColumnsArray();
-    for (int i = 0; i < data.length; i++) {
-      switch (cols[i].getType()) {
+    for (int i = 0; i < objectArray.length; i++) {
+      if (objectArray[i] == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (objectArray[i] == null) {
+        avroObject.put(columns[i].getName(), null);
+        continue;
+      }
+
+      switch (columns[i].getType()) {
       case ARRAY:
       case SET:
-        avroObject.put(cols[i].getName(), toList((Object[]) data[i]));
+        avroObject.put(columns[i].getName(), toList((Object[]) objectArray[i]));
         break;
       case MAP:
-        avroObject.put(cols[i].getName(), data[i]);
+        avroObject.put(columns[i].getName(), objectArray[i]);
         break;
       case ENUM:
-        GenericData.EnumSymbol enumValue = new GenericData.EnumSymbol(createEnumSchema(cols[i]), (String) data[i]);
-        avroObject.put(cols[i].getName(), enumValue);
+        GenericData.EnumSymbol enumValue = new GenericData.EnumSymbol(createEnumSchema(columns[i]),
+            (String) objectArray[i]);
+        avroObject.put(columns[i].getName(), enumValue);
         break;
       case TEXT:
-        avroObject.put(cols[i].getName(), new Utf8((String) data[i]));
+        avroObject.put(columns[i].getName(), new Utf8((String) objectArray[i]));
         break;
       case BINARY:
       case UNKNOWN:
-        avroObject.put(cols[i].getName(), ByteBuffer.wrap((byte[]) data[i]));
+        avroObject.put(columns[i].getName(), ByteBuffer.wrap((byte[]) objectArray[i]));
         break;
       case FIXED_POINT:
       case FLOATING_POINT:
-        avroObject.put(cols[i].getName(), data[i]);
+        avroObject.put(columns[i].getName(), objectArray[i]);
         break;
       case DECIMAL:
         // TODO: store as FIXED in SQOOP-16161
-        avroObject.put(cols[i].getName(), ((BigDecimal) data[i]).toPlainString());
+        avroObject.put(columns[i].getName(), ((BigDecimal) objectArray[i]).toPlainString());
         break;
       case DATE_TIME:
-        if (data[i] instanceof org.joda.time.DateTime) {
-          avroObject.put(cols[i].getName(), ((org.joda.time.DateTime) data[i]).toDate().getTime());
-        } else if (data[i] instanceof org.joda.time.LocalDateTime) {
-          avroObject.put(cols[i].getName(), ((org.joda.time.LocalDateTime) data[i]).toDate().getTime());
+        if (objectArray[i] instanceof org.joda.time.DateTime) {
+          avroObject.put(columns[i].getName(), ((org.joda.time.DateTime) objectArray[i]).toDate()
+              .getTime());
+        } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
+          avroObject.put(columns[i].getName(), ((org.joda.time.LocalDateTime) objectArray[i])
+              .toDate().getTime());
         }
         break;
       case TIME:
-        avroObject.put(cols[i].getName(), ((org.joda.time.LocalTime) data[i]).toDateTimeToday().getMillis());
+        avroObject.put(columns[i].getName(), ((org.joda.time.LocalTime) objectArray[i])
+            .toDateTimeToday().getMillis());
         break;
       case DATE:
-        avroObject.put(cols[i].getName(), ((org.joda.time.LocalDate) data[i]).toDate().getTime());
+        avroObject.put(columns[i].getName(), ((org.joda.time.LocalDate) objectArray[i]).toDate()
+            .getTime());
         break;
       case BIT:
-        avroObject.put(cols[i].getName(), Boolean.valueOf((Boolean) data[i]));
+        avroObject.put(columns[i].getName(), Boolean.valueOf((Boolean) objectArray[i]));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
+            "Column type from schema was not recognized for " + columns[i].getType());
       }
     }
 
@@ -287,68 +306,72 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
 
   @SuppressWarnings("unchecked")
   private String toCSV(GenericRecord record) {
-    Column[] cols = this.schema.getColumnsArray();
+    Column[] columns = this.schema.getColumnsArray();
 
     StringBuilder csvString = new StringBuilder();
-    for (int i = 0; i < cols.length; i++) {
+    for (int i = 0; i < columns.length; i++) {
 
-      Object obj = record.get(cols[i].getName());
-
+      Object obj = record.get(columns[i].getName());
+      if (obj == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
       if (obj == null) {
-        throw new SqoopException(AVROIntermediateDataFormatError.AVRO_INTERMEDIATE_DATA_FORMAT_0001, " for " + cols[i].getName());
-      }
+        csvString.append(NULL_VALUE);
+      } else {
 
-      switch (cols[i].getType()) {
-      case ARRAY:
-      case SET:
-        List<Object> objList = (List<Object>) obj;
-        csvString.append(toCSVList(toObjectArray(objList), cols[i]));
-        break;
-      case MAP:
-        Map<Object, Object> objMap = (Map<Object, Object>) obj;
-        csvString.append(toCSVMap(objMap, cols[i]));
-        break;
-      case ENUM:
-      case TEXT:
-        csvString.append(toCSVString(obj.toString()));
-        break;
-      case BINARY:
-      case UNKNOWN:
-        csvString.append(toCSVByteArray(getBytesFromByteBuffer(obj)));
-        break;
-      case FIXED_POINT:
-        csvString.append(toCSVFixedPoint(obj, cols[i]));
-        break;
-      case FLOATING_POINT:
-        csvString.append(toCSVFloatingPoint(obj, cols[i]));
-        break;
-      case DECIMAL:
-        // stored as string
-        csvString.append(toCSVDecimal(obj));
-        break;
-      case DATE:
-        // stored as long
-        Long dateInMillis = (Long) obj;
-        csvString.append(toCSVDate(new org.joda.time.LocalDate(dateInMillis)));
-        break;
-      case TIME:
-        // stored as long
-        Long timeInMillis = (Long) obj;
-        csvString.append(toCSVTime(new org.joda.time.LocalTime(timeInMillis), cols[i]));
-        break;
-      case DATE_TIME:
-        // stored as long
-        Long dateTimeInMillis = (Long) obj;
-        csvString.append(toCSVDateTime(new org.joda.time.DateTime(dateTimeInMillis), cols[i]));
-        break;
-      case BIT:
-        csvString.append(toCSVBit(obj));
-        break;
-      default:
-        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
+        switch (columns[i].getType()) {
+        case ARRAY:
+        case SET:
+          List<Object> objList = (List<Object>) obj;
+          csvString.append(toCSVList(toObjectArray(objList), columns[i]));
+          break;
+        case MAP:
+          Map<Object, Object> objMap = (Map<Object, Object>) obj;
+          csvString.append(toCSVMap(objMap, columns[i]));
+          break;
+        case ENUM:
+        case TEXT:
+          csvString.append(toCSVString(obj.toString()));
+          break;
+        case BINARY:
+        case UNKNOWN:
+          csvString.append(toCSVByteArray(getBytesFromByteBuffer(obj)));
+          break;
+        case FIXED_POINT:
+          csvString.append(toCSVFixedPoint(obj, columns[i]));
+          break;
+        case FLOATING_POINT:
+          csvString.append(toCSVFloatingPoint(obj, columns[i]));
+          break;
+        case DECIMAL:
+          // stored as string
+          csvString.append(toCSVDecimal(obj));
+          break;
+        case DATE:
+          // stored as long
+          Long dateInMillis = (Long) obj;
+          csvString.append(toCSVDate(new org.joda.time.LocalDate(dateInMillis)));
+          break;
+        case TIME:
+          // stored as long
+          Long timeInMillis = (Long) obj;
+          csvString.append(toCSVTime(new org.joda.time.LocalTime(timeInMillis), columns[i]));
+          break;
+        case DATE_TIME:
+          // stored as long
+          Long dateTimeInMillis = (Long) obj;
+          csvString.append(toCSVDateTime(new org.joda.time.DateTime(dateTimeInMillis), columns[i]));
+          break;
+        case BIT:
+          csvString.append(toCSVBit(obj));
+          break;
+        default:
+          throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+              "Column type from schema was not recognized for " + columns[i].getType());
+        }
       }
-      if (i < cols.length - 1) {
+      if (i < columns.length - 1) {
         csvString.append(CSV_SEPARATOR_CHARACTER);
       }
 
@@ -360,19 +383,25 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
   @SuppressWarnings("unchecked")
   private Object[] toObject(GenericRecord record) {
 
-    if (data == null) {
+    if (record == null) {
       return null;
     }
-    Column[] cols = schema.getColumnsArray();
-    Object[] object = new Object[cols.length];
+    Column[] columns = schema.getColumnsArray();
+    Object[] object = new Object[columns.length];
 
-    for (int i = 0; i < cols.length; i++) {
-      Object obj = record.get(cols[i].getName());
-      if (obj == null) {
-        throw new SqoopException(AVROIntermediateDataFormatError.AVRO_INTERMEDIATE_DATA_FORMAT_0001, " for " + cols[i].getName());
+    for (int i = 0; i < columns.length; i++) {
+      Object obj = record.get(columns[i].getName());
+      Integer nameIndex = schema.getColumnNameIndex(columns[i].getName());
+      Column column = columns[nameIndex];
+      // null is a possible value
+      if (obj == null && !column.isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            column.getName() + " does not support null values");
       }
-      Integer nameIndex = schema.getColumnNameIndex(cols[i].getName());
-      Column column = cols[nameIndex];
+      if (obj == null) {
+        object[nameIndex] = null;
+        continue;
+      }
       switch (column.getType()) {
       case ARRAY:
       case SET:
@@ -422,7 +451,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
+            "Column type from schema was not recognized for " + column.getType());
       }
 
     }

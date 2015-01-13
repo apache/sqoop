@@ -29,8 +29,6 @@ public enum JSONIntermediateDataFormatError implements ErrorCode {
 
   JSON_INTERMEDIATE_DATA_FORMAT_0002("JSON object parse error."),
 
-  JSON_INTERMEDIATE_DATA_FORMAT_0003("Missing key in the JSON object."),
-
   ;
 
   private final String message;

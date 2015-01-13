@@ -55,6 +55,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
    */
   @Override
   public void setCSVTextData(String text) {
+    super.validateSchema(schema);
     // convert the CSV text to JSON
     this.data = toJSON(text);
   }
@@ -64,6 +65,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
    */
   @Override
   public String getCSVTextData() {
+    super.validateSchema(schema);
     // convert JSON to sqoop CSV
     return toCSV(data);
   }
@@ -73,6 +75,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
    */
   @Override
   public void setObjectData(Object[] data) {
+    super.validateSchema(schema);
     // convert the object Array to JSON
     this.data = toJSON(data);
   }
@@ -82,6 +85,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
    */
   @Override
   public Object[] getObjectData() {
+    super.validateSchema(schema);
     // convert JSON to object array
     return toObject(data);
   }
@@ -126,20 +130,24 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     if (csvStringArray == null) {
       return null;
     }
+    Column[] columns = schema.getColumnsArray();
 
-    if (csvStringArray.length != schema.getColumnsArray().length) {
+    if (csvStringArray.length != columns.length) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + csv
           + " has the wrong number of fields.");
     }
     JSONObject object = new JSONObject();
-    Column[] columnArray = schema.getColumnsArray();
     for (int i = 0; i < csvStringArray.length; i++) {
+      if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
       // check for NULL field and bail out immediately
       if (csvStringArray[i].equals(NULL_VALUE)) {
-        object.put(columnArray[i].getName(), null);
+        object.put(columns[i].getName(), null);
         continue;
       }
-      object.put(columnArray[i].getName(), toJSON(csvStringArray[i], columnArray[i]));
+      object.put(columns[i].getName(), toJSON(csvStringArray[i], columns[i]));
 
     }
     return object;
@@ -161,7 +169,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
       try {
         returnValue = (JSONObject) new JSONParser().parse(removeQuotes(csvString));
       } catch (ParseException e) {
-        throw new SqoopException(JSONIntermediateDataFormatError.JSON_INTERMEDIATE_DATA_FORMAT_0003, e);
+        throw new SqoopException(JSONIntermediateDataFormatError.JSON_INTERMEDIATE_DATA_FORMAT_0002, e);
       }
       break;
     case ENUM:
@@ -201,128 +209,138 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject toJSON(Object[] data) {
+  private JSONObject toJSON(Object[] objectArray) {
 
-    if (data == null) {
+    if (objectArray == null) {
       return null;
     }
+    Column[] columns = schema.getColumnsArray();
 
-    if (data.length != schema.getColumnsArray().length) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + data.toString()
+    if (objectArray.length != columns.length) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + objectArray.toString()
           + " has the wrong number of fields.");
     }
-    JSONObject object = new JSONObject();
-    Column[] cols = schema.getColumnsArray();
-    for (int i = 0; i < data.length; i++) {
-      switch (cols[i].getType()) {
+    JSONObject json = new JSONObject();
+    for (int i = 0; i < objectArray.length; i++) {
+      if (objectArray[i] == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (objectArray[i] == null) {
+        json.put(columns[i].getName(), null);
+        continue;
+      }
+      switch (columns[i].getType()) {
       case ARRAY:
       case SET:
         // store as JSON array
-        Object[] objArray = (Object[]) data[i];
+        Object[] objArray = (Object[]) objectArray[i];
         JSONArray jsonArray = toJSONArray(objArray);
-        object.put(cols[i].getName(), jsonArray);
+        json.put(columns[i].getName(), jsonArray);
         break;
       case MAP:
         // store as JSON object
-        Map<Object, Object> map = (Map<Object, Object>) data[i];
+        Map<Object, Object> map = (Map<Object, Object>) objectArray[i];
         JSONObject jsonObject = new JSONObject();
         jsonObject.putAll(map);
-        object.put(cols[i].getName(), jsonObject);
+        json.put(columns[i].getName(), jsonObject);
         break;
       case ENUM:
       case TEXT:
-        object.put(cols[i].getName(), data[i]);
+        json.put(columns[i].getName(), objectArray[i]);
         break;
       case BINARY:
       case UNKNOWN:
-        object.put(cols[i].getName(), Base64.encodeBase64String((byte[]) data[i]));
+        json.put(columns[i].getName(), Base64.encodeBase64String((byte[]) objectArray[i]));
         break;
       case FIXED_POINT:
       case FLOATING_POINT:
       case DECIMAL:
         // store a object
-        object.put(cols[i].getName(), data[i]);
+        json.put(columns[i].getName(), objectArray[i]);
         break;
       // stored in JSON as the same format as csv strings in the joda time
       // format
       case DATE_TIME:
-        object.put(cols[i].getName(), removeQuotes(toCSVDateTime(data[i], cols[i])));
+        json.put(columns[i].getName(), removeQuotes(toCSVDateTime(objectArray[i], columns[i])));
         break;
       case TIME:
-        object.put(cols[i].getName(), removeQuotes(toCSVTime(data[i], cols[i])));
+        json.put(columns[i].getName(), removeQuotes(toCSVTime(objectArray[i], columns[i])));
         break;
       case DATE:
-        object.put(cols[i].getName(), removeQuotes(toCSVDate(data[i])));
+        json.put(columns[i].getName(), removeQuotes(toCSVDate(objectArray[i])));
         break;
       case BIT:
-        object.put(cols[i].getName(), Boolean.valueOf(toCSVBit(data[i])));
+        json.put(columns[i].getName(), Boolean.valueOf(toCSVBit(objectArray[i])));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
+            "Column type from schema was not recognized for " + columns[i].getType());
       }
     }
 
-    return object;
+    return json;
   }
 
   private String toCSV(JSONObject json) {
-    Column[] cols = this.schema.getColumnsArray();
+    Column[] columns = this.schema.getColumnsArray();
 
     StringBuilder csvString = new StringBuilder();
-    for (int i = 0; i < cols.length; i++) {
-
-      // or we can to json.entrySet();
-      Object obj = json.get(cols[i].getName());
+    for (int i = 0; i < columns.length; i++) {
+      Object obj = json.get(columns[i].getName());
+      if (obj == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
       if (obj == null) {
-        throw new SqoopException(JSONIntermediateDataFormatError.JSON_INTERMEDIATE_DATA_FORMAT_0003, " for " + cols[i].getName());
+        csvString.append(NULL_VALUE);
+      } else {
+        switch (columns[i].getType()) {
+        case ARRAY:
+        case SET:
+          // stored as JSON array
+          JSONArray array = (JSONArray) obj;
+          csvString.append(encloseWithQuotes(array.toJSONString()));
+          break;
+        case MAP:
+          // stored as JSON object
+          csvString.append(encloseWithQuotes((((JSONObject) obj).toJSONString())));
+          break;
+        case ENUM:
+        case TEXT:
+          csvString.append(toCSVString(obj.toString()));
+          break;
+        case BINARY:
+        case UNKNOWN:
+          csvString.append(toCSVByteArray(Base64.decodeBase64(obj.toString())));
+          break;
+        case FIXED_POINT:
+          csvString.append(toCSVFixedPoint(obj, columns[i]));
+          break;
+        case FLOATING_POINT:
+          csvString.append(toCSVFloatingPoint(obj, columns[i]));
+          break;
+        case DECIMAL:
+          csvString.append(toCSVDecimal(obj));
+          break;
+        // stored in JSON as strings in the joda time format
+        case DATE:
+        case TIME:
+        case DATE_TIME:
+          csvString.append(encloseWithQuotes(obj.toString()));
+          break;
+        // 0/1 will be stored as they are in JSON, even though valid values in
+        // JSON
+        // are true/false
+        case BIT:
+          csvString.append(toCSVBit(obj));
+          break;
+        default:
+          throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+              "Column type from schema was not recognized for " + columns[i].getType());
+        }
       }
-
-      switch (cols[i].getType()) {
-      case ARRAY:
-      case SET:
-        // stored as JSON array
-        JSONArray array = (JSONArray) obj;
-        csvString.append(encloseWithQuotes(array.toJSONString()));
-        break;
-      case MAP:
-        // stored as JSON object
-        csvString.append(encloseWithQuotes((((JSONObject) obj).toJSONString())));
-        break;
-      case ENUM:
-      case TEXT:
-        csvString.append(toCSVString(obj.toString()));
-        break;
-      case BINARY:
-      case UNKNOWN:
-        csvString.append(toCSVByteArray(Base64.decodeBase64(obj.toString())));
-        break;
-      case FIXED_POINT:
-        csvString.append(toCSVFixedPoint(obj, cols[i]));
-        break;
-      case FLOATING_POINT:
-        csvString.append(toCSVFloatingPoint(obj, cols[i]));
-        break;
-      case DECIMAL:
-        csvString.append(toCSVDecimal(obj));
-        break;
-      // stored in JSON as strings in the joda time format
-      case DATE:
-      case TIME:
-      case DATE_TIME:
-        csvString.append(encloseWithQuotes(obj.toString()));
-        break;
-      // 0/1 will be stored as they are in JSON, even though valid values in
-      // JSON
-      // are true/false
-      case BIT:
-        csvString.append(toCSVBit(obj));
-        break;
-      default:
-        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
-      }
-      if (i < cols.length - 1) {
+      if (i < columns.length - 1) {
         csvString.append(CSV_SEPARATOR_CHARACTER);
       }
 
@@ -332,21 +350,29 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
   }
 
   @SuppressWarnings("unchecked")
-  private Object[] toObject(JSONObject data) {
+  private Object[] toObject(JSONObject json) {
 
-    if (data == null) {
+    if (json == null) {
       return null;
     }
-    Column[] cols = schema.getColumnsArray();
-    Object[] object = new Object[cols.length];
+    Column[] columns = schema.getColumnsArray();
+    Object[] object = new Object[columns.length];
 
-    Set<String> keys = data.keySet();
-    int i = 0;
-    for (String key : keys) {
+    Set<String> jsonKeyNames = json.keySet();
+    for (String name : jsonKeyNames) {
+      Integer nameIndex = schema.getColumnNameIndex(name);
+      Column column = columns[nameIndex];
 
-      Integer nameIndex = schema.getColumnNameIndex(key);
-      Object obj = data.get(key);
-      Column column = cols[nameIndex];
+      Object obj = json.get(name);
+      // null is a possible value
+      if (obj == null && !column.isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            column.getName() + " does not support null values");
+      }
+      if (obj == null) {
+        object[nameIndex] = null;
+        continue;
+      }
       switch (column.getType()) {
       case ARRAY:
       case SET:
@@ -387,9 +413,8 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-            "Column type from schema was not recognized for " + cols[i].getType());
+            "Column type from schema was not recognized for " + column.getType());
       }
-
     }
     return object;
   }

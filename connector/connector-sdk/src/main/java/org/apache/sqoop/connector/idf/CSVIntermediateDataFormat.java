@@ -58,7 +58,8 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    */
   @Override
   public String getCSVTextData() {
-    return data;
+    // TODO:SQOOP-1936 to enable schema validation after we use compareTo
+    return this.data;
   }
 
   /**
@@ -66,7 +67,7 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
    */
   @Override
   public void setCSVTextData(String csvText) {
-    this.data = csvText;
+    super.setData(csvText);
   }
 
   /**
@@ -87,13 +88,17 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
     }
 
     Object[] objectArray = new Object[csvStringArray.length];
-    Column[] columnArray = schema.getColumnsArray();
+    Column[] columns = schema.getColumnsArray();
     for (int i = 0; i < csvStringArray.length; i++) {
+      if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
       if (csvStringArray[i].equals(NULL_VALUE)) {
         objectArray[i] = null;
         continue;
       }
-      objectArray[i] = toObject(csvStringArray[i], columnArray[i]);
+      objectArray[i] = toObject(csvStringArray[i], columns[i]);
     }
     return objectArray;
   }
@@ -183,65 +188,68 @@ public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
   @SuppressWarnings("unchecked")
   private String toCSV(Object[] objectArray) {
 
-    Column[] columnArray = schema.getColumnsArray();
+    Column[] columns = schema.getColumnsArray();
 
     StringBuilder csvString = new StringBuilder();
-    for (int i = 0; i < columnArray.length; i++) {
-      Object obj = objectArray[i];
-      if (obj == null) {
+    for (int i = 0; i < columns.length; i++) {
+      if (objectArray[i] == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (objectArray[i] == null) {
         csvString.append(NULL_VALUE);
       } else {
-        switch (columnArray[i].getType()) {
+        switch (columns[i].getType()) {
         case ARRAY:
         case SET:
-          csvString.append(toCSVList((Object[]) obj, (AbstractComplexListType) columnArray[i]));
+          csvString.append(toCSVList((Object[]) objectArray[i], (AbstractComplexListType) columns[i]));
           break;
         case MAP:
-          csvString.append(toCSVMap((Map<Object, Object>) obj, columnArray[i]));
+          csvString.append(toCSVMap((Map<Object, Object>) objectArray[i], columns[i]));
           break;
         case ENUM:
         case TEXT:
-          csvString.append(toCSVString(obj.toString()));
+          csvString.append(toCSVString(objectArray[i].toString()));
           break;
         case BINARY:
         case UNKNOWN:
-          csvString.append(toCSVByteArray((byte[]) obj));
+          csvString.append(toCSVByteArray((byte[]) objectArray[i]));
           break;
         case FIXED_POINT:
-          csvString.append(toCSVFixedPoint(obj, columnArray[i]));
+          csvString.append(toCSVFixedPoint(objectArray[i], columns[i]));
           break;
         case FLOATING_POINT:
-          csvString.append(toCSVFloatingPoint(obj, columnArray[i]));
+          csvString.append(toCSVFloatingPoint(objectArray[i], columns[i]));
           break;
         case DECIMAL:
-          csvString.append(toCSVDecimal(obj));
+          csvString.append(toCSVDecimal(objectArray[i]));
           break;
         // stored in JSON as strings in the joda time format
         case DATE:
-          csvString.append(toCSVDate(obj));
+          csvString.append(toCSVDate(objectArray[i]));
           break;
         case TIME:
-          csvString.append(toCSVTime(obj, columnArray[i]));
+          csvString.append(toCSVTime(objectArray[i], columns[i]));
           break;
         case DATE_TIME:
           if (objectArray[i] instanceof org.joda.time.DateTime) {
-            org.joda.time.DateTime dateTime = (org.joda.time.DateTime) obj;
+            org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
             // check for fraction and time zone and then use the right formatter
-            csvString.append(toCSVDateTime(dateTime, columnArray[i]));
+            csvString.append(toCSVDateTime(dateTime, columns[i]));
           } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
-            org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) obj;
-            csvString.append(toCSVLocalDateTime(localDateTime, columnArray[i]));
+            org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
+            csvString.append(toCSVLocalDateTime(localDateTime, columns[i]));
           }
           break;
         case BIT:
-          csvString.append(toCSVBit(obj));
+          csvString.append(toCSVBit(objectArray[i]));
           break;
         default:
           throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-              "Column type from schema was not recognized for " + columnArray[i].getType());
+              "Column type from schema was not recognized for " + columns[i].getType());
         }
       }
-      if (i < columnArray.length - 1) {
+      if (i < columns.length - 1) {
         csvString.append(CSV_SEPARATOR_CHARACTER);
       }
 
