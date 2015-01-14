@@ -47,6 +47,21 @@ public class KiteToDestroyer extends Destroyer<LinkConfiguration,
     LOG.info("Running Kite connector destroyer");
     String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, toJobConfig.toJobConfig);
+
+    if (ConfigUtil.isHBaseJob(toJobConfig.toJobConfig)) {
+      destroyHBaseJob(context, uri, toJobConfig);
+    } else {
+      destroyHdfsJob(context, uri, toJobConfig);
+    }
+  }
+
+  private void destroyHBaseJob(DestroyerContext context, String uri,
+      ToJobConfiguration toJobConfig) {
+    // TODO: SQOOP-1948
+  }
+
+  private void destroyHdfsJob(DestroyerContext context, String uri,
+      ToJobConfiguration toJobConfig) {
     String[] tempUris = KiteDatasetExecutor.listTemporaryDatasetUris(uri);
     if (context.isSuccess()) {
       KiteDatasetExecutor executor = getExecutor(

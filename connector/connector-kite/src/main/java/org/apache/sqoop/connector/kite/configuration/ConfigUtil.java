@@ -43,4 +43,11 @@ public class ConfigUtil {
     return buildDatasetUri(linkConfig.hdfsHostAndPort, toJobConfig.uri);
   }
 
+  /**
+   * Indicates whether the given job is a HBase job.
+   */
+  public static boolean isHBaseJob(ToJobConfig toJobConfig) {
+    return toJobConfig.uri.startsWith("dataset:hbase:");
+  }
+
 }
