@@ -48,7 +48,7 @@ public class TestJobManager {
   private RepositoryManager repositoryManagerMock;
   private Repository jdbcRepoMock;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     jobManager = new JobManager();
     connectorMgrMock = mock(ConnectorManager.class);

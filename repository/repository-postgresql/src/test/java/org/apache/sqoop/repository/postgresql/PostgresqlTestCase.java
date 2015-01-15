@@ -21,8 +21,8 @@ import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.PostgreSQLProvider;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  * Abstract class with convenience methods for testing postgresql repository.
@@ -33,13 +33,13 @@ abstract public class PostgresqlTestCase {
   public static PostgresqlTestUtils utils;
   public PostgresqlRepositoryHandler handler;
 
-  @Test
-  public static void setUpClass() {
+  @BeforeClass(alwaysRun = true)
+  public void setUpClass() {
     provider = new PostgreSQLProvider();
     utils = new PostgresqlTestUtils(provider);
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     try {
       provider.start();
@@ -51,7 +51,7 @@ abstract public class PostgresqlTestCase {
     handler.createOrUpgradeRepository(provider.getConnection());
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() throws Exception {
     provider.dropSchema("sqoop");
     provider.stop();

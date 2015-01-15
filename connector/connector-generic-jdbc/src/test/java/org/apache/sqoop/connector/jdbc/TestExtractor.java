@@ -54,7 +54,7 @@ public class TestExtractor {
     tableName = getClass().getSimpleName().toUpperCase();
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -73,7 +73,7 @@ public class TestExtractor {
     }
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() {
     executor.close();
   }

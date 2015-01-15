@@ -56,7 +56,7 @@ public class TestKiteExtractor {
     }
   };
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     initMocks(this);
 

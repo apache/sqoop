@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 
 public class TestSqoopConfiguration {
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     // Unset any configuration dir if it is set by another test
     System.getProperties().remove(ConfigurationConstants.SYSPROP_CONFIG_DIR);

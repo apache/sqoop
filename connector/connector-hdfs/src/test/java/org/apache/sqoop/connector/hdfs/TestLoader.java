@@ -85,10 +85,10 @@ public class TestLoader extends TestHdfsBase {
     return parameters.toArray(new Object[0][]);
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {}
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() throws IOException {
     FileUtils.delete(outputDirectory);
   }

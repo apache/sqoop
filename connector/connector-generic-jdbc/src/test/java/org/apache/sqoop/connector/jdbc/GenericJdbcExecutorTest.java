@@ -37,7 +37,7 @@ public class GenericJdbcExecutorTest {
       GenericJdbcTestConstants.URL, null, null);
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     if(executor.existTable(emptyTable)) {
       executor.executeUpdate("DROP TABLE " + emptyTable);

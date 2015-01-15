@@ -60,7 +60,7 @@ public class TestPartitioner extends TestHdfsBase {
     this.compressionClass = compressionClass;
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     partitioner = new HdfsPartitioner();
     FileUtils.mkdirs(inputDirectory);
@@ -76,7 +76,7 @@ public class TestPartitioner extends TestHdfsBase {
     }
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() throws IOException {
     FileUtils.delete(inputDirectory);
   }

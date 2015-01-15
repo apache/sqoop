@@ -38,7 +38,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     super.setUp();
 

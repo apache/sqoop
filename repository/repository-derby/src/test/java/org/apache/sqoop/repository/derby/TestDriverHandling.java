@@ -34,7 +34,7 @@ public class TestDriverHandling extends DerbyTestCase {
   private static final Object CURRENT_DRIVER_VERSION = "1";
   DerbyRepositoryHandler handler;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     super.setUp();
     handler = new DerbyRepositoryHandler();

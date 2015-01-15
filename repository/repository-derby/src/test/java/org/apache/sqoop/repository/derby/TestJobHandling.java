@@ -48,7 +48,7 @@ public class TestJobHandling extends DerbyTestCase {
   DerbyRepositoryHandler handler;
   Connection derbyConnection;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     super.setUp();
     derbyConnection = getDerbyDatabaseConnection();

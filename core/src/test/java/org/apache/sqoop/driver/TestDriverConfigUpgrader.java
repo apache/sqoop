@@ -39,7 +39,7 @@ public class TestDriverConfigUpgrader {
 
   DriverUpgrader upgrader;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void initializeUpgrader() {
     upgrader = new DriverUpgrader();
   }

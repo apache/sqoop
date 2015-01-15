@@ -34,6 +34,7 @@ import org.testng.annotations.Test;
 /**
  *
  */
+@Test(groups = "slow")
 public class PartitionerTest extends ConnectorTestCase implements ITest {
 
   /**

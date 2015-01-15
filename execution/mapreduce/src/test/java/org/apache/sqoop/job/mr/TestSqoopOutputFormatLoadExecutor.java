@@ -155,7 +155,7 @@ public class TestSqoopOutputFormatLoadExecutor {
     return new Schema("test").addColumn(new Text("t"));
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     conf = new Configuration();
     conf.setIfUnset(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT,

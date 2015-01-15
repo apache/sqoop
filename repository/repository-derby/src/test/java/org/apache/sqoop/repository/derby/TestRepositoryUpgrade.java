@@ -30,7 +30,7 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
 
   DerbyRepositoryHandler handler;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     super.setUp();
     handler = new TestDerbyRepositoryHandler();

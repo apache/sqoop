@@ -40,7 +40,7 @@ public class TestKiteLoader {
   @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     initMocks(this);
 

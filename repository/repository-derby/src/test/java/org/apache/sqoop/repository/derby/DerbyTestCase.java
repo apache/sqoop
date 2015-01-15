@@ -60,14 +60,14 @@ abstract public class DerbyTestCase {
 
   private Connection connection;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     // Create link to the database
     Class.forName(DERBY_DRIVER).newInstance();
     connection = DriverManager.getConnection(getStartJdbcUrl());
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() throws Exception {
     // Close active link
     if (connection != null) {

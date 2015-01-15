@@ -44,7 +44,7 @@ public class TestMRConfigurationUtils {
   Job job;
   JobConf jobConfSpy;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     setUpHadoopJob();
     setUpHadoopJobConf();

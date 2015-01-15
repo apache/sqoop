@@ -53,7 +53,7 @@ public class TestSqoopClient {
   SqoopResourceRequests resourceRequests;
   SqoopClient client;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     resourceRequests = mock(SqoopResourceRequests.class);
     client = new SqoopClient("my-cool-server");

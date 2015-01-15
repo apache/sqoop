@@ -40,7 +40,7 @@ public class TestKafkaLoader {
   private static KafkaLoader loader;
   private static String TOPIC = "mytopic";
 
-  @BeforeClass
+  @BeforeClass(alwaysRun = true)
   public static void setup() throws IOException {
     testUtil.prepare();
     List<String> topics = new ArrayList<String>(1);
@@ -49,7 +49,7 @@ public class TestKafkaLoader {
     loader = new KafkaLoader();
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public static void tearDown() throws IOException {
     testUtil.tearDown();
   }

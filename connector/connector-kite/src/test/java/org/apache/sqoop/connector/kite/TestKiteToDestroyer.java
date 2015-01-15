@@ -52,7 +52,7 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
   @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     initMocks(this);
     mockStatic(KiteDatasetExecutor.class);

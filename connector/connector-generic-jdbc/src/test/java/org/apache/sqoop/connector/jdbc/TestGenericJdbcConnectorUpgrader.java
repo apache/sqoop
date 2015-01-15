@@ -42,7 +42,7 @@ public class TestGenericJdbcConnectorUpgrader {
 
   private GenericJdbcConnectorUpgrader upgrader;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     upgrader = new GenericJdbcConnectorUpgrader();
   }

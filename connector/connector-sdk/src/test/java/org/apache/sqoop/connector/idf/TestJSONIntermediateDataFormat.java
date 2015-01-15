@@ -52,7 +52,7 @@ public class TestJSONIntermediateDataFormat {
   private final static String dateTime = "'2014-10-01 12:00:00.000'";
   private final static String time = "'12:59:59'";
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     createJSONIDF();
   }

@@ -67,7 +67,7 @@ public class TestAVROIntermediateDataFormat {
   private final static org.joda.time.LocalTime time = new org.joda.time.LocalTime(12, 59, 59);
   private final static org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     createAvroIDF();
   }

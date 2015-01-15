@@ -60,7 +60,7 @@ public class TestKiteExecutor {
     return new org.powermock.modules.testng.PowerMockObjectFactory();
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     initMocks(this);
     when(datasetMock.newWriter()).thenReturn(writerMock);
@@ -73,7 +73,7 @@ public class TestKiteExecutor {
     executor = new KiteDatasetExecutor(datasetMock);
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() {
     executor.closeWriter();
     executor.closeReader();

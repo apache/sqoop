@@ -41,7 +41,7 @@ public class TestKiteToInitializer extends PowerMockTestCase {
 
   private KiteToInitializer initializer;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     initMocks(this);
     mockStatic(Datasets.class);

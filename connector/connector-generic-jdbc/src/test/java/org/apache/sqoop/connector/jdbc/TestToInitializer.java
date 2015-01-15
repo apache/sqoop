@@ -57,7 +57,7 @@ public class TestToInitializer {
     tableColumns = "ICOL,VCOL";
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
         GenericJdbcTestConstants.URL, null, null);
@@ -74,7 +74,7 @@ public class TestToInitializer {
     }
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() {
     executor.close();
   }

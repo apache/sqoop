@@ -38,13 +38,13 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
   private static TestUtil testUtil = TestUtil.getInstance();
   private static final String TOPIC = "mytopic";
 
-  @BeforeClass
+  @BeforeClass(alwaysRun = true)
   public static void startKafka() throws IOException {
     // starts Kafka server and its dependent zookeeper
     testUtil.prepare();
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public static void stopKafka() throws IOException {
     testUtil.tearDown();
   }

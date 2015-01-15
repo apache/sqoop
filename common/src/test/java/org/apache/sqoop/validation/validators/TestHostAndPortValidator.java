@@ -27,7 +27,7 @@ public class TestHostAndPortValidator {
 
   AbstractValidator<String> validator = new HostAndPortValidator();
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     validator.reset();
     assertEquals(0, validator.getMessages().size());

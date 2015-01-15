@@ -75,7 +75,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     }
   };
 
-  @BeforeClass
+  @BeforeClass(alwaysRun = true)
   public static void startHadoop() throws Exception {
     // Start Hadoop Clusters
     hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopMiniClusterRunner.class);
@@ -88,14 +88,14 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     LOG.debug("HDFS Client: " + hdfsClient);
   }
 
-  @BeforeClass
+  @BeforeClass(alwaysRun = true)
   public static void startProvider() throws Exception {
     provider = DatabaseProviderFactory.getProvider(System.getProperties());
     LOG.info("Starting database provider: " + provider.getClass().getName());
     provider.start();
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public static void stopProvider() {
     LOG.info("Stopping database provider: " + provider.getClass().getName());
     provider.stop();

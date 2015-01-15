@@ -44,7 +44,7 @@ public class TestSqoopWritable {
   private SqoopWritable writable;
   private IntermediateDataFormat<?> idfMock;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     idfMock = mock(IntermediateDataFormat.class);
     writable = new SqoopWritable(idfMock);

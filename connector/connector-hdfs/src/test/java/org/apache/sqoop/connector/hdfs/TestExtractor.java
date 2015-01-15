@@ -75,7 +75,7 @@ public class TestExtractor extends TestHdfsBase {
     return parameters.toArray(new Object[0][]);
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     FileUtils.mkdirs(inputDirectory);
     switch (this.outputFileType) {
@@ -89,7 +89,7 @@ public class TestExtractor extends TestHdfsBase {
     }
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void tearDown() throws IOException {
     FileUtils.delete(inputDirectory);
   }

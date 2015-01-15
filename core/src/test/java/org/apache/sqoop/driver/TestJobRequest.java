@@ -33,7 +33,7 @@ public class TestJobRequest {
 
   private JobRequest jobRequest;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void initializeSubmissionRequest() {
     jobRequest = new JobRequest();
   }

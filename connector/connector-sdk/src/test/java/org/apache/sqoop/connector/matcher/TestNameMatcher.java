@@ -29,7 +29,7 @@ public class TestNameMatcher {
 
   private NameMatcher matcher;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
     matcher = null;
   }

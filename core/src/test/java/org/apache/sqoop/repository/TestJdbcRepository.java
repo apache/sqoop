@@ -76,7 +76,7 @@ public class TestJdbcRepository {
   private ConnectorConfigurableUpgrader connectorUpgraderMock;
   private DriverUpgrader driverUpgraderMock;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     repoTransactionMock = mock(JdbcRepositoryTransaction.class);
     connectorMgrMock = mock(ConnectorManager.class);

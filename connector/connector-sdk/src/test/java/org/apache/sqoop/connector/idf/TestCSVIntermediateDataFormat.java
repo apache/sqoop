@@ -53,7 +53,7 @@ public class TestCSVIntermediateDataFormat {
 
   private CSVIntermediateDataFormat dataFormat;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void setUp() {
   }
 

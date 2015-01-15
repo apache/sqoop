@@ -88,7 +88,7 @@ abstract public class TomcatTestCase {
    */
   private SqoopClient client;
 
-  @BeforeClass
+  @BeforeClass(alwaysRun = true)
   public static void startHadoop() throws Exception {
     // Start Hadoop Clusters
     hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopLocalRunner.class);
@@ -101,12 +101,12 @@ abstract public class TomcatTestCase {
     LOG.debug("HDFS Client: " + hdfsClient);
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void findMethodName(Method method) {
     name = method.getName();
   }
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void startServer() throws Exception {
     // Get and set temporary path in hadoop cluster.
     tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name);
@@ -122,12 +122,12 @@ abstract public class TomcatTestCase {
     client = new SqoopClient(getServerUrl());
   }
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void stopServer() throws Exception {
     cluster.stop();
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public static void stopHadoop() throws Exception {
     hadoopCluster.stop();
   }
