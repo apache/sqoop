@@ -48,8 +48,9 @@ public class SqlTypesUtils {
     switch (sqlType) {
       case Types.SMALLINT:
       case Types.TINYINT:
-      case Types.INTEGER:
         return new FixedPoint(columnName).setByteSize(2L);
+      case Types.INTEGER:
+        return new FixedPoint(columnName).setByteSize(4L);
 
       case Types.CLOB:
       case Types.VARCHAR:
