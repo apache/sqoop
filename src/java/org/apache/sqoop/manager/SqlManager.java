@@ -150,6 +150,7 @@ public abstract class SqlManager
           }
         }
         columns.add(colName);
+        LOG.debug("Found column " + colName);
       }
       return columns.toArray(new String[0]);
     } catch (SQLException sqlException) {
@@ -300,6 +301,7 @@ public abstract class SqlManager
         info.add(precision);
         info.add(scale);
         colInfo.put(colName, info);
+        LOG.debug("Found column " + colName + " of type " + info);
       }
 
       return colInfo;
@@ -358,6 +360,7 @@ public abstract class SqlManager
         }
 
         colTypeNames.put(colName, colTypeName);
+        LOG.debug("Found column " + colName + " of type " + colTypeName);
       }
 
       return colTypeNames;
