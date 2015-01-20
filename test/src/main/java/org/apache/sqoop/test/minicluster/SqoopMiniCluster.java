@@ -132,6 +132,7 @@ public abstract class SqoopMiniCluster {
     mapToProperties(sqoopProperties, getSecurityConfiguration());
     mapToProperties(sqoopProperties, getConnectorManagerConfiguration());
     mapToProperties(sqoopProperties, getDriverManagerConfiguration());
+    mapToProperties(sqoopProperties, getExternalConnectorLoadPathConfiguration());
 
     FileUtils.writeLines(f, sqoopProperties);
 
@@ -212,17 +213,19 @@ public abstract class SqoopMiniCluster {
 
   protected Map<String, String> getConnectorManagerConfiguration() {
     Map<String, String> properties = new HashMap<String, String>();
-
-    properties.put("org.apache.sqoop.connector.autoupgrade", "true");
-
+    properties.put(ConfigurationConstants.CONNECTOR_AUTO_UPGRADE, "true");
     return properties;
   }
 
   protected Map<String, String> getDriverManagerConfiguration() {
     Map<String, String> properties = new HashMap<String, String>();
+    properties.put(ConfigurationConstants.DRIVER_AUTO_UPGRADE, "true");
+    return properties;
+  }
 
-    properties.put("org.apache.sqoop.driver.autoupgrade", "true");
-
+  protected Map<String, String> getExternalConnectorLoadPathConfiguration() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put(ConfigurationConstants.EXTERNAL_CONNECTOR_LOAD_PATH, "");
     return properties;
   }
 }

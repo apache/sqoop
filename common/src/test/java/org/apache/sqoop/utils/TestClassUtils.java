@@ -29,7 +29,7 @@ import static org.testng.Assert.assertNull;
  */
 public class TestClassUtils {
 
-  @Test
+  @Test(expectedExceptions = Exception.class)
   public void testLoadClass() {
     assertNull(ClassUtils.loadClass("A"));
     assertEquals(A.class, ClassUtils.loadClass(A.class.getName()));

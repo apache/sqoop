@@ -31,6 +31,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.utils.ClassUtils;
 
 public final class ConnectorHandler {
 
@@ -71,8 +72,8 @@ public final class ConnectorHandler {
 
     Class<?> connectorClass = null;
     try {
-      connectorClass = Class.forName(connectorClassName);
-    } catch (ClassNotFoundException ex) {
+      connectorClass = ClassUtils.loadClass(connectorClassName);
+    } catch (Exception ex) {
       throw new SqoopException(ConnectorError.CONN_0005,
               connectorClassName, ex);
     }

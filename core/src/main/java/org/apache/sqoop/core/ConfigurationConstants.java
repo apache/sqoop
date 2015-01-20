@@ -77,6 +77,13 @@ public final class ConfigurationConstants {
       "org.apache.sqoop.driver.autoupgrade";
 
   /**
+   # Support loading external connector jars only
+   # The loader will look for sqoopconnector.properties file in the jar before loading
+   # "/path/to/external/connectors/": Add all the connector JARs in the specified folder
+   */
+  public static final String EXTERNAL_CONNECTOR_LOAD_PATH = "org.apache.sqoop.connector.external.loadpath";
+
+  /**
    * Enable Sqoop App to kill Tomcat in case that it will fail to load.
    */
   public static final String KILL_TOMCAT_ON_FAILURE = "sqoop.kill_tomcat_on_load_failure";

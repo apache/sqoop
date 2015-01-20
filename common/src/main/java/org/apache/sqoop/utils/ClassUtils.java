@@ -57,6 +57,8 @@ public final class ClassUtils {
           klass = ctxLoader.loadClass(className);
         } catch (ClassNotFoundException ex) {
           LOG.debug("Exception while load class: " + className, ex);
+          // wrapping it in runtime, to avoid chainging the signature of methods currently invoking this method
+          throw new RuntimeException(ex);
         }
       }
     }
