@@ -102,6 +102,37 @@ public final class SecurityConstants {
           PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "keytab";
 
   /**
+   * All authorization related configuration is prefixed with this:
+   * <tt>org.apache.sqoop.security.authorization.</tt>
+   */
+  public static final String PREFIX_AUTHORIZATION_CONFIG =
+          PREFIX_SECURITY_CONFIG + "authorization.";
+
+  /**
+   * The config specifies the sqoop authorization handler class.
+   * The default type is org.apache.sqoop.security.DefaultAuthorizationHandler
+   * <tt>org.apache.sqoop.security.authorization.handler</tt>.
+   */
+  public static final String AUTHORIZATION_HANDLER =
+          PREFIX_AUTHORIZATION_CONFIG + "handler";
+
+  /**
+   * The config specifies the sqoop authorization access controller class.
+   * The default type is org.apache.sqoop.security.DefaultAuthorizationAccessController
+   * <tt>org.apache.sqoop.security.authorization.AccessController</tt>.
+   */
+  public static final String AUTHORIZATION_ACCESS_CONTROLLER =
+          PREFIX_AUTHORIZATION_CONFIG + "access_controller";
+
+  /**
+   * The config specifies the sqoop authorization validator class.
+   * The default type is org.apache.sqoop.security.DefaultAuthorizationValidator
+   * <tt>org.apache.sqoop.security.authorization.Validator</tt>.
+   */
+  public static final String AUTHORIZATION_VALIDATOR =
+          PREFIX_AUTHORIZATION_CONFIG + "validator";
+
+  /**
    * The config specifies the token kind in delegation token.
    */
   public static final String TOKEN_KIND = "sqoop_token_kind";

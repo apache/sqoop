@@ -31,7 +31,7 @@ public class SecurityFactory {
 
     if (handlerClass == null) {
       throw new SqoopException(SecurityError.AUTH_0004,
-              "Authentication Handler Class: " + handler);
+              "Authentication Handler Class is null: " + handler);
     }
 
     AuthenticationHandler newHandler;
@@ -39,8 +39,65 @@ public class SecurityFactory {
       newHandler = (AuthenticationHandler) handlerClass.newInstance();
     } catch (Exception ex) {
       throw new SqoopException(SecurityError.AUTH_0004,
-              "Authentication Handler Class: " + handler, ex);
+              "Authentication Handler Class Exception: " + handler, ex);
     }
     return newHandler;
+  }
+
+  public static AuthorizationHandler getAuthorizationHandler(String handler) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+
+    Class<?> handlerClass = ClassUtils.loadClass(handler);
+
+    if (handlerClass == null) {
+      throw new SqoopException(SecurityError.AUTH_0007,
+              "Authorization Handler Class is null: " + handler);
+    }
+
+    AuthorizationHandler newHandler;
+    try {
+      newHandler = (AuthorizationHandler) handlerClass.newInstance();
+    } catch (Exception ex) {
+      throw new SqoopException(SecurityError.AUTH_0007,
+              "Authorization Handler Class Exception: " + handler, ex);
+    }
+    return newHandler;
+  }
+
+  public static AuthorizationAccessController getAuthorizationAccessController(String accessController) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+
+    Class<?> accessControllerClass = ClassUtils.loadClass(accessController);
+
+    if (accessControllerClass == null) {
+      throw new SqoopException(SecurityError.AUTH_0008,
+              "Authorization Access Controller Class is null: " + accessController);
+    }
+
+    AuthorizationAccessController newAccessController;
+    try {
+      newAccessController = (AuthorizationAccessController) accessControllerClass.newInstance();
+    } catch (Exception ex) {
+      throw new SqoopException(SecurityError.AUTH_0008,
+              "Authorization Access Controller Class Exception: " + accessController, ex);
+    }
+    return newAccessController;
+  }
+
+  public static AuthorizationValidator getAuthorizationValidator(String validator) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+
+    Class<?> validatorClass = ClassUtils.loadClass(validator);
+
+    if (validatorClass == null) {
+      throw new SqoopException(SecurityError.AUTH_0009,
+              "Authorization Validator Class is null: " + validator);
+    }
+
+    AuthorizationValidator newValidator;
+    try {
+      newValidator = (AuthorizationValidator) validatorClass.newInstance();
+    } catch (Exception ex) {
+      throw new SqoopException(SecurityError.AUTH_0009,
+              "Authorization Validator Class Exception: " + validator, ex);
+    }
+    return newValidator;
   }
 }

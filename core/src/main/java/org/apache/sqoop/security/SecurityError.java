@@ -40,7 +40,16 @@ public enum SecurityError implements ErrorCode {
   AUTH_0005("Unable to find Kerberos keytab for http"),
 
   /** The system was not able to find Kerberos principal for http in sqoop configuration. */
-  AUTH_0006("Unable to find Kerberos principal for http");
+  AUTH_0006("Unable to find Kerberos principal for http"),
+
+  /** The system was not able to find authorization handler. */
+  AUTH_0007("Unable to find authorization handler"),
+
+  /** The system was not able to find authorization access controller. */
+  AUTH_0008("Unable to find authorization access controller"),
+
+  /** The system was not able to find authorization validator. */
+  AUTH_0009("Unable to find authorization validator");
 
   private final String message;
 
