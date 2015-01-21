@@ -62,6 +62,19 @@ Connectors can optionally override the following methods:
   public List<Direction> getSupportedDirections();
   public Class<? extends IntermediateDataFormat<?>> getIntermediateDataFormat()
 
+The ``getVersion`` method returns the current version of the connector
+It is important to provide a unique identifier every time a connector jar is released externally.
+In case of the Sqoop built-in connectors, the version refers to the Sqoop build/release version. External
+connectors can also use the same or similar mechanism to set this version. The version number is critical for
+the connector upgrade logic used in Sqoop
+
+::
+
+   @Override
+    public String getVersion() {
+     return VersionInfo.getBuildVersion();
+    }
+
 
 The ``getFrom`` method returns From_ instance
 which is a ``Transferable`` entity that encapsulates the operations
@@ -237,6 +250,72 @@ Loader must iterate in the ``load`` method until the data from ``DataReader`` is
 
 NOTE: we do not yet support a stage for connector developers to control how to balance the loading/writitng of data across the mutiple loaders. In future we may be adding this to the connector API to have custom logic to balance the loading across multiple reducers.
 
+Sqoop Connector Identifier : sqoopconnector.properties
+======================================================
+
+Every Sqoop 2 connector needs to have a sqoopconnector.properties in the packaged jar to be identified by Sqoop.
+A typical ``sqoopconnector.properties`` for a sqoop2 connector looks like below
+
+::
+
+ # Sqoop Foo Connector Properties
+ org.apache.sqoop.connector.class = org.apache.sqoop.connector.foo.FooConnector
+ org.apache.sqoop.connector.name = sqoop-foo-connector
+
+If the above file does not exist, then Sqoop will not load this jar and thus cannot be registered into Sqoop repository for creating Sqoop jobs
+
+
+Sqoop Connector Build-time Dependencies
+=======================================
+
+Sqoop provides the connector-sdk module identified by the package:``org.apache.sqoop.connector`` It provides the public facing apis for the external connectors
+to extend from. It also provides common utilities that the connectors can utilize for converting data to and from the sqoop intermediate data format
+
+The common-test module identified by the package  ``org.apache.sqoop.common.test`` provides utilities used related to the built-in connectors such as the JDBC, HDFS,
+and Kafka connectors that can be used by the external connectors for creating the end-end integration test for sqoop jobs
+
+The test module identified by the package ``org.apache.sqoop.test`` provides various minicluster utilites the integration tests can extend from to run
+ a sqoop job with the given sqoop connector either using it as a ``FROM`` or ``TO`` data-source
+
+Hence the pom.xml for the sqoop kite connector built using the kite-sdk  might look something like below
+
+::
+
+   <dependencies>
+    <!-- Sqoop modules -->
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>connector-sdk</artifactId>
+    </dependency>
+
+    <!-- Testing specified modules -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+       <groupId>org.apache.sqoop</groupId>
+       <artifactId>sqoop-common-test</artifactId>
+     </dependency>
+
+     <dependency>
+       <groupId>org.apache.sqoop</groupId>
+       <artifactId>test</artifactId>
+     </dependency>
+    <!-- Connector required modules -->
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+    </dependency>
+    ....
+  </dependencies>
+
 Configurables
 +++++++++++++
 
@@ -370,6 +449,27 @@ Sqoop 2 provides a list of standard input validators that can be used by differe
 The validation logic is executed when users creating the sqoop jobs input values for the link and job configs associated with the ``From`` and ``To`` instances of the connectors associated with the job.
 
 
+Loading External Connectors
++++++++++++++++++++++++++++
+
+Loading new connector say sqoop-foo-connector to the sqoop2, here are the steps to follow
+
+1. Create a ``sqoop-foo-connector.jar``. Make sure the jar contains the ``sqoopconnector.properties`` for it to be picked up by Sqoop
+
+2. Add this jar to the a folder on your installation machine and update the path to this folder in the sqoop.properties located under the ``server/conf`` directory under the Sqoop2  for the key ``org.apache.sqoop.connector.external.loadpath``
+
+::
+
+ #
+ # External connectors load path
+ # "/path/to/external/connectors/": Add all the connector JARs in the specified folder
+ #
+ org.apache.sqoop.connector.external.loadpath=/path/to/connector
+
+3. Start the Sqoop 2 server and while initializing the server this jar should be loaded into the Sqoop 2's class path and registered into the Sqoop 2 repository
+
+
+
 Sqoop 2 MapReduce Job Execution Lifecycle with Connector API
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -457,6 +557,8 @@ The diagram below decribes the reduce phase of a job.
         |                 |                  |            |                |            |       | write into Data Source
         |                 |                  |            |                |            |       |----------------------->
 
+More details can be found in `Sqoop MR Execution Engine`_
 
+.. _`Sqoop MR Execution Engine`: https://cwiki.apache.org/confluence/display/SQOOP/Sqoop+MR+Execution+Engine
 
 .. _`Intermediate Data Format representation`: https://cwiki.apache.org/confluence/display/SQOOP/Sqoop2+Intermediate+representation

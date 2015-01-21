@@ -57,7 +57,7 @@ If you are keen on contributing to Sqoop and get your hands dirty building conne
 
 - `Building Sqoop 2 <BuildingSqoop2.html>`_
 - `Sqoop Development Environment Setup <DevEnv.html>`_
-- `Developing a Sqoop Connector with Connection API <ConnectorDevelopment.html>`_
+- `Developing a Sqoop Connector with Connector API <ConnectorDevelopment.html>`_
 - `Developing Sqoop application with REST API <RESTAPI.html>`_
 - `Developing Sqoop application using Sqoop Java Client API <ClientAPI.html>`_
 
