@@ -250,14 +250,6 @@ After starting a job, you could look up the running status of it. There could be
 Header Parameters
 =================
 
-For all Sqoop requests, the following header parameters are supported:
-
-+---------------------------+----------+---------------------------------------------------------+
-|   Parameter               | Required | Description                                             |
-+===========================+==========+=========================================================+
-| ``sqoop-user-name``       | true     | The name of the user who makes the requests             |
-+---------------------------+----------+---------------------------------------------------------+
-
 For all the responses, the following parameters in the HTTP message header are available:
 
 +---------------------------+----------+------------------------------------------------------------------------------+
@@ -275,6 +267,15 @@ REST APIs
 ==========
 
 The section elaborates all the rest apis that are supported by the Sqoop server.
+
+For all Sqoop requests, the following request parameters will be added automatically. However, this user name is only in simple mode. In Kerberos mode, this user name will be ignored by Sqoop server and user name in UGI which is authenticated by Kerberos server will be used instead.
+
++---------------------------+---------------------------------------------------------+
+|   Parameter               | Description                                             |
++===========================+=========================================================+
+| ``user.name``             | The name of the user who makes the requests             |
++---------------------------+---------------------------------------------------------+
+
 
 /version - [GET] - Get Sqoop Version
 -------------------------------------
