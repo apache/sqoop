@@ -21,6 +21,8 @@ package org.apache.sqoop.connector.idf;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
@@ -39,6 +41,8 @@ import java.util.Set;
 /**
  * IDF representing the intermediate format in JSON
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObject> {
 
   // need this default constructor for reflection magic used in execution engine

@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Model describing the link object and its corresponding configs
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MLink extends MAccountableEntity implements MClonable {
   private long connectorId;
   // NOTE: we hold this in the model for easy access to the link config object, it might as well be retrieved on the fly using the connectorId

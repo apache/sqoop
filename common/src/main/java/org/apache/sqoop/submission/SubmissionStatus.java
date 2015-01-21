@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.submission;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * List of states where the submission might be.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum SubmissionStatus {
 
   /**

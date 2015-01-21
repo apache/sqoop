@@ -18,12 +18,16 @@
 package org.apache.sqoop.schema.type;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.SchemaError;
 
 /**
  * Base class for all the supported types in the Sqoop {@link #Schema}
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class Column {
 
   /**

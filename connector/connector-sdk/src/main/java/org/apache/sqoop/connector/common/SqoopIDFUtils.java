@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormatError;
 import org.apache.sqoop.connector.idf.IntermediateDataFormatError;
@@ -52,7 +54,8 @@ import java.util.regex.Matcher;
  * +Format+API
  *
  */
-
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SqoopIDFUtils {
 
   public static final String NULL_VALUE = "NULL";

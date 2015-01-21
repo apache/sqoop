@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MConnector;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,6 +31,8 @@ import org.json.simple.JSONObject;
  * Json representation of the connectors object
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class ConnectorsBean extends ConnectorBean {
 
   // to represent the config and inputs with values

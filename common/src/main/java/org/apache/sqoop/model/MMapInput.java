@@ -21,8 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.utils.UrlSafeUtils;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class MMapInput extends MInput<Map<String, String>> {
 
   public MMapInput(String name, boolean sensitive) {

@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.connector.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.LinkedList;
@@ -26,6 +29,8 @@ import java.util.regex.Pattern;
 /**
  * The helper class provides methods for loading jars.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class JarUtil {
 
   /**

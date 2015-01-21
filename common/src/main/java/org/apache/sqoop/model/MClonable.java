@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public interface MClonable {
   /**
    * Clone object

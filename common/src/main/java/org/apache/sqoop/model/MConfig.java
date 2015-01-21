@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ import java.util.List;
  * input gathering process to be broken down into multiple steps that can be
  * then paged through by the user interface.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class MConfig extends MValidatedElement implements MClonable {
 
   private final List<MInput<?>> inputs;

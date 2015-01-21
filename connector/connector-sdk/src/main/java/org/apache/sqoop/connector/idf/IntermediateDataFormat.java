@@ -18,6 +18,8 @@
  */
 package org.apache.sqoop.connector.idf;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
@@ -49,6 +51,8 @@ import java.util.Set;
  * @param <T> - Each data format may have a native representation of the
  *            data, represented by the parameter.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 @SuppressWarnings("rawtypes")
 public abstract class IntermediateDataFormat<T> implements Comparable {
 

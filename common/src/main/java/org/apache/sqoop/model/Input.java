@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,6 +29,8 @@ import java.lang.annotation.Target;
  * Field annotation. Each field that user might change in configuration object
  * need to have this annotation.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Input {

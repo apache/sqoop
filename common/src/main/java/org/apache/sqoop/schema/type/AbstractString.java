@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Any type that is encoding character (or byte) array.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class AbstractString extends AbstractPrimitiveType {
 
   /**

@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.matcher;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.ByteArraySchema;
@@ -24,6 +26,8 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.SchemaError;
 import org.apache.sqoop.schema.type.Column;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class Matcher {
 
   private static final Logger LOG = Logger.getLogger(Matcher.class);

@@ -25,6 +25,8 @@ import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfig
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
@@ -33,6 +35,8 @@ import org.json.simple.JSONObject;
 /**
  * Json representation of the driver
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class DriverBean extends ConfigurableBean {
 
   public static final String CURRENT_DRIVER_VERSION = "1";

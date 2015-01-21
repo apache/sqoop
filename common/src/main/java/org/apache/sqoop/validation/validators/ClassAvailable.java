@@ -17,12 +17,16 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
 /**
  * Ensure that given String Input is a class that is available to this JVM.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class ClassAvailable extends AbstractValidator<String> {
   @Override
   public void validate(String klass) {

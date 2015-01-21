@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This specifies classes that perform connector-defined steps
  * within import execution:
@@ -26,6 +29,8 @@ package org.apache.sqoop.job.etl;
  * -> (Sqoop-defined steps)
  * -> Destroyer
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public class From extends Transferable {
 
   private Class<? extends Partitioner> partitioner;

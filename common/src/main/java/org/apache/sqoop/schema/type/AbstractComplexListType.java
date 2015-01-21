@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Complex types that can have nested data as a map or list structure
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class AbstractComplexListType extends AbstractComplexType {
 
   // represents the type of the list elements

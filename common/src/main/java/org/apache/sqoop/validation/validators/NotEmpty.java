@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 /**
@@ -24,6 +26,8 @@ import org.apache.sqoop.validation.Status;
  *
  * Will also ensure that the string is not null.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class NotEmpty extends AbstractValidator<String> {
   @Override
   public void validate(String instance) {

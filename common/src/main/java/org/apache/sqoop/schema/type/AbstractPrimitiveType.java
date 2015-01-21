@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Primitive type for column
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class AbstractPrimitiveType extends Column {
 
   public AbstractPrimitiveType(String name) {

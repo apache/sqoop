@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -37,6 +39,8 @@ import org.json.simple.JSONObject;
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class SubmissionBean implements JsonBean {
 
   private static final String SUBMISSION = "submission";

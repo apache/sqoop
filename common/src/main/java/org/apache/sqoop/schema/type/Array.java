@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Array contains multiple values of the same type.
  *
  * JDBC Types: array
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Array extends AbstractComplexListType {
 
   /**

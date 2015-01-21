@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Validation message.
  *
  * Validation message have always two parts - severity and textual information about what
  * is wrong. It can be associated with Input, Config or ConfigurationGroup class.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Message {
   private Status status;
   private String message;

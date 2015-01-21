@@ -18,6 +18,8 @@
  */
 package org.apache.sqoop.connector.spi;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.configurable.ConfigurableError;
 import org.apache.sqoop.model.MFromConfig;
@@ -32,6 +34,8 @@ import org.apache.sqoop.model.MToConfig;
  * versions
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class ConnectorConfigurableUpgrader {
 
   /**
@@ -63,11 +67,11 @@ public abstract class ConnectorConfigurableUpgrader {
    * @param upgradeTarget - the instance that will be filled in with the
    *                      upgraded config
    */
-
   public void upgradeFromJobConfig(MFromConfig original, MFromConfig upgradeTarget) {
     // see above for the reasoning behind the exception
     throw new SqoopException(ConfigurableError.CONFIGURABLE_0002);
   }
+
   /**
    * Upgrade the original TO job config for the given config type and fill into the upgradeTarget. Note
    * that any data already in {@code upgradeTarget} maybe overwritten.

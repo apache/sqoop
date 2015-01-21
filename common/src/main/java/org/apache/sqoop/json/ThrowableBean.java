@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONArray;
@@ -28,6 +30,8 @@ import java.util.List;
 /**
  * Transfer throwable instance as a throwable bean.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class ThrowableBean implements JsonBean {
 
   public static final String MESSAGE = "message";

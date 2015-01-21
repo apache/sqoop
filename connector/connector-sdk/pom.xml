@@ -45,16 +45,14 @@ limitations under the License.
       <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-common</artifactId>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
-
   </dependencies>
 
 </project>

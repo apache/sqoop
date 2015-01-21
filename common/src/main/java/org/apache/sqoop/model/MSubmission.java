@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
@@ -29,6 +31,8 @@ import java.util.Date;
  * Please note that not all properties are persisted in repository at the
  * moment.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MSubmission extends MAccountableEntity {
 
   /**

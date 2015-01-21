@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Config;
@@ -44,6 +46,8 @@ import java.util.Map;
  * unless all configs will pass validators.
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class ConfigValidationRunner {
 
   /**

@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.submission.counter;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class Counter {
   private final String name;
   private long value;

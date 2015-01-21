@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents a parameter input used by the connector for creating a link
  * or a job object.
  * @param <T> the value type associated with this parameter
  * @param boolean whether or not the field contains sensitive information
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class MInput<T> extends MValidatedElement implements MClonable {
   private final boolean sensitive;
 

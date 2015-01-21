@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 /**
  * Validate a string takes on the form: host:port,host:port,...
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class CSVURIValidator extends AbstractValidator<String> {
 
   // validate that given string is a comma-separated list of host:port

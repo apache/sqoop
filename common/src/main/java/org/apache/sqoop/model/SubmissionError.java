@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  *Represents the job submission error
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SubmissionError {
 
   /**

@@ -20,6 +20,8 @@ package org.apache.sqoop.connector.idf;
 
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.Schema;
@@ -41,6 +43,8 @@ import java.util.Set;
  * {@link #Schema} and its {@link #Column} types.
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class CSVIntermediateDataFormat extends IntermediateDataFormat<String> {
 
   public static final Logger LOG = Logger.getLogger(CSVIntermediateDataFormat.class);

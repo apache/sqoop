@@ -18,8 +18,12 @@
  */
 package org.apache.sqoop.connector.matcher;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum MatcherError implements ErrorCode {
   MATCHER_0000("To few Schemas provided."),
 

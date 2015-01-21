@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class VersionInfo {
 
   private static Package myPackage;

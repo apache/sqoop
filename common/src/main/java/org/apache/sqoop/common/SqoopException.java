@@ -18,12 +18,17 @@
 package org.apache.sqoop.common;
 
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Base exception for Sqoop driver. This exception requires the specification
  * of an error code for reference purposes. Where necessary the appropriate
  * constructor can be used to pass in additional message beyond what is
  * specified by the error code and/or the causal exception.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 @SuppressWarnings("serial")
 public class SqoopException extends RuntimeException {
 

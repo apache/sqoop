@@ -18,6 +18,8 @@
 package org.apache.sqoop.connector.common;
 
 import org.apache.avro.Schema;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.idf.IntermediateDataFormatError;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
@@ -30,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SqoopAvroUtils {
 
   public static final String COLUMN_TYPE = "columnType";

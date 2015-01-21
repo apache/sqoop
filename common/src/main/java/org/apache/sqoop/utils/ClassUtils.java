@@ -22,8 +22,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.log4j.Logger;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class ClassUtils {
 
   private static final Logger LOG = Logger.getLogger(ClassUtils.class);

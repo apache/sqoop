@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Connectors will have configurations for FROM and TO.
  * If the connector is being used to extract data FROM,
@@ -24,6 +27,8 @@ package org.apache.sqoop.common;
  * is being used to load data TO, then the connector type
  * will be TO.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public enum Direction {
   FROM,
   TO

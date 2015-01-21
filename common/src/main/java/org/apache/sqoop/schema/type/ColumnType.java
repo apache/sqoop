@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * All {@link #Column} types supported by Sqoop.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum ColumnType {
   ARRAY,
   BINARY,

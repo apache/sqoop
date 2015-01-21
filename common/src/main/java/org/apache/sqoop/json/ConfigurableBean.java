@@ -17,9 +17,14 @@ package org.apache.sqoop.json;
  * limitations under the License.
  */
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Marker class for the configurables supported in sqoop
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class ConfigurableBean implements JsonBean {
 
 }

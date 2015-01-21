@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 /**
  * Ensure that given object is never null.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class NotNull<T> extends AbstractValidator<T> {
   @Override
   public void validate(T instance) {

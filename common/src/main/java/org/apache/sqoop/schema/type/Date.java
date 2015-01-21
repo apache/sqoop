@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Date (year, month, day).
  *
  * JDBC Types: date
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Date extends AbstractDateTime {
 
   public Date(String name) {

@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents an element of metadata used by the connector.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class MNamedElement extends MPersistableEntity {
   private static final String LABEL_KEY_SUFFIX = ".label";
   private static final String HELP_KEY_SUFFIX = ".help";

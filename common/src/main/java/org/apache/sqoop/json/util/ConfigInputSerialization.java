@@ -18,6 +18,8 @@
 package org.apache.sqoop.json.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
@@ -38,6 +40,8 @@ import java.util.Map;
 /**
  * Convenient static methods for serializing config and input objects.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public final class ConfigInputSerialization {
 
   /**

@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This specifies classes that perform connector-defined steps
  * within export execution:
@@ -25,6 +28,8 @@ package org.apache.sqoop.job.etl;
  * -> Loader
  * -> Destroyer
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public class To extends Transferable {
 
   private Class<? extends Loader> loader;

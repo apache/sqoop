@@ -20,6 +20,8 @@ package org.apache.sqoop.job.etl;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 
@@ -27,6 +29,8 @@ import org.apache.sqoop.schema.Schema;
  * This allows connector to define initialization work for execution,
  * for example, context configuration.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Initializer<LinkConfiguration, JobConfiguration> {
 
   /**

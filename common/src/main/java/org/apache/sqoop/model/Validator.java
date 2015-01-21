@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.lang.annotation.Retention;
@@ -31,6 +33,8 @@ import java.lang.annotation.RetentionPolicy;
  * To specify string parameter call:
  * @Validator(value = ClassName.class, strArg = "Hello World!")
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Validator {
   /**

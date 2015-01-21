@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
@@ -26,6 +28,8 @@ import java.util.List;
 /**
  * Element that can have associated validation messages (0..N).
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class MValidatedElement extends MNamedElement {
 
   /**

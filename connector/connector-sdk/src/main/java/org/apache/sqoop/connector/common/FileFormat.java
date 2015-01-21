@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.connector.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Various supported file formats to write
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum FileFormat {
 
   /**

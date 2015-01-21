@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Constants related to the configs
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class ConfigInputConstants {
 
   public static final String CONFIG_ID = "id";

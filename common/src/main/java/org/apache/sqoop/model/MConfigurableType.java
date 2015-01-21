@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents the sqoop entities that can own configs
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum MConfigurableType {
 
   /** Connector as a owner of config keys */

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
@@ -38,6 +40,8 @@ import org.json.simple.JSONObject;
  * server and client. Server might optionally send configs associated with the
  * links to spare client of sending another HTTP requests to obtain them.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class LinkBean implements JsonBean {
 
   static final String CONNECTOR_ID = "connector-id";

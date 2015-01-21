@@ -21,11 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MInput;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class ConfigurableUpgradeUtil {
 
   private static final Logger LOG = Logger.getLogger(ConfigurableUpgradeUtil.class);

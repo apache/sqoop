@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import java.util.List;
 /**
  * Arbitrary list of config objects.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MConfigList implements MClonable {
 
   private final List<MConfig> configObjects;

@@ -17,8 +17,12 @@
  */
 package org.apache.sqoop.configurable;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum ConfigurableError implements ErrorCode {
 
   /** An unknown error has occurred. */

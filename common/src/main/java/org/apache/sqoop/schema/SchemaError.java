@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.schema;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
 /**
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum SchemaError implements ErrorCode {
 
   SCHEMA_0000("Unknown error"),

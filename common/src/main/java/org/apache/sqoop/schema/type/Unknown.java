@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Unknown column type (internally encoded as binary)
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Unknown extends Binary {
 
   /**

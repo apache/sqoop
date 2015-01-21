@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.List;
 
 /**
  * This allows connector to define how input data from the FROM source can be partitioned.
  * The number of data partitions also determines the degree of parallelism.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Partitioner<LinkConfiguration, FromJobConfiguration> {
 
   /**

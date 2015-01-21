@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.MutableContext;
 
 /**
@@ -25,6 +27,8 @@ import org.apache.sqoop.common.MutableContext;
  *
  * This class is returning mutable context instead of immutable.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class InitializerContext extends TransferableContext {
 
   public InitializerContext(MutableContext context) {

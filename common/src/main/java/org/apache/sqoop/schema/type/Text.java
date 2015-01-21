@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * String.
  *
  * JDBC Types: char, varchar, nchar, clob
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Text extends AbstractString {
 
   public Text(String name) {

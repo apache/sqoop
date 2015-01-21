@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.Date;
 
 /**
  * Accountable entity provides additional fields that might help with identifying
  * what and when has happened.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 abstract public class MAccountableEntity extends MValidatedElement {
 
   private final boolean DEFAULT_ENABLED = true;

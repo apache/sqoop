@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.SqoopException;
@@ -25,6 +27,8 @@ import org.apache.sqoop.common.SqoopException;
  * Model describing entire job object including the from/to and driver config information
  * to execute the job
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MJob extends MAccountableEntity implements MClonable {
   /**
    * NOTE :  Job object do not immediately depend on connector as there is indirect

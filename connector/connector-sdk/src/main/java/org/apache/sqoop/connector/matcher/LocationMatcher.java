@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.matcher;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 
@@ -27,6 +29,8 @@ import org.apache.sqoop.schema.type.Column;
  * their values will be set to null. If TO schema has extra non-null fields, we
  * will throw an exception.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class LocationMatcher extends Matcher {
 
   public LocationMatcher(Schema from, Schema to) {

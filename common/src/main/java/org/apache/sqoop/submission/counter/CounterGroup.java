@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.submission.counter;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,6 +27,8 @@ import java.util.Map;
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class CounterGroup implements Iterable<Counter> {
 
   private final String name;

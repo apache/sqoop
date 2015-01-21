@@ -19,6 +19,8 @@ package org.apache.sqoop.json;
 
 import java.util.List;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MJob;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,6 +28,8 @@ import org.json.simple.JSONObject;
 /**
  * Json representation of the jobs
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class JobsBean extends JobBean {
 
   private static final String JOBS = "jobs";

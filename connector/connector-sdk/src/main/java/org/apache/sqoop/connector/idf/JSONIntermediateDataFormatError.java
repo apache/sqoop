@@ -19,8 +19,12 @@
 
 package org.apache.sqoop.connector.idf;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum JSONIntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
   JSON_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),

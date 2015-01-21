@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.util.SerializationError;
 import org.json.simple.JSONObject;
@@ -28,6 +30,8 @@ import java.io.Reader;
 
 /**
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class JSONUtils {
 
   /**

@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents a <tt>Boolean</tt> input.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MBooleanInput extends MInput<Boolean> {
 
   public MBooleanInput(String name, boolean sensitive) {

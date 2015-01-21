@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,6 +27,8 @@ import java.util.Map;
 /**
  * Mutable variant of context class for "special" usage
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MutableMapContext extends MapContext implements Iterable<Map.Entry<String, String>>, MutableContext {
 
   public MutableMapContext(Map<String, String> options) {

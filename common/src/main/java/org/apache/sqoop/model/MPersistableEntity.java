@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents a persistable metadata entity.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class MPersistableEntity {
 
   public static final long PERSISTANCE_ID_DEFAULT = -1L;

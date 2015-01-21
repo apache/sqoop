@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Mutable addition to immutable context.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public interface MutableContext extends ImmutableContext {
 
   /**

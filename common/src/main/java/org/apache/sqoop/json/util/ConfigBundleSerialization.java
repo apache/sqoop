@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.utils.MapResourceBundle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -31,6 +33,8 @@ import java.util.ResourceBundle;
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public final class ConfigBundleSerialization {
 
   @SuppressWarnings("unchecked")

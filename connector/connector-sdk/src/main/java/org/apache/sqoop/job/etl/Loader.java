@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This allows connector to load data into a target system.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Loader<LinkConfiguration, ToJobConfiguration> {
 
   /**

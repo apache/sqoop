@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.Set;
 import java.util.HashSet;
 
@@ -25,7 +28,8 @@ import java.util.HashSet;
  *
  * JDBC Types: enum
  */
-
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Enum extends Column {
 
   // The options set contains the possible values for the Enum

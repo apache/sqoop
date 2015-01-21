@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
 /**
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum ConfigValidationError implements ErrorCode {
 
   VALIDATION_0000("Unknown error"),

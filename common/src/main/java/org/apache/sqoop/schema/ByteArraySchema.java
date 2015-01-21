@@ -17,12 +17,16 @@
  */
 package org.apache.sqoop.schema;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.type.Binary;
 
 /***
  * Schema holding a single field of Binary data Used to support connectors to
  * schemaless / unstructured systems Such as HDFS or Kafka
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class ByteArraySchema extends Schema {
 
   private static final String BYTE_ARRAY_SCHEMA_NAME = "ByteArraySchema";

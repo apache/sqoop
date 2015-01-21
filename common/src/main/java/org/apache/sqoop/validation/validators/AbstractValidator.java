@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
@@ -28,6 +30,8 @@ import java.util.List;
  *
  * Can be used to validate inputs, forms and configuration classes.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 abstract public class AbstractValidator<T> {
 
   /**

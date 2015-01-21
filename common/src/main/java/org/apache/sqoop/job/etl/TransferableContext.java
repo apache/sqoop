@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ImmutableContext;
 
 /**
  * Base context class for the {@link Transferable} components
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class TransferableContext {
 
   ImmutableContext context;

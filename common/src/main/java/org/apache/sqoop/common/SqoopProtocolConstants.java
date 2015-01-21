@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public final class SqoopProtocolConstants {
   public static final String HEADER_SQOOP_ERROR_CODE = "sqoop-error-code";
 

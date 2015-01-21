@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This allows connector to define work to complete execution, for example,
  * resource cleaning.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
 
   /**

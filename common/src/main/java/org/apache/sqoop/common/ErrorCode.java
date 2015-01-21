@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Defines an error-code contract. Sqoop exceptions use the error code to
  * communicate error information where possible. Each error code is associated
  * with default message that identifies the high level information related to
  * the underlying error condition.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public interface ErrorCode {
 
   /**

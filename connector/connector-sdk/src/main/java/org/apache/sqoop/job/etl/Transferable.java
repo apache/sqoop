@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This entity encapsulates the workflow for data transfer via the
  * {@link SqoopConnector}.It basically acts as an adapter between the data-source
  * imported from or exported to.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Transferable {
 
   private Class<? extends Initializer> initializer;

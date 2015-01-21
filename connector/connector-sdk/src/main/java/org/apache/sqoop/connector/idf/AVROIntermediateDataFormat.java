@@ -33,6 +33,8 @@ import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
@@ -54,6 +56,8 @@ import java.util.Set;
 /**
  * IDF representing the intermediate format in Avro object
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRecord> {
 
   private Schema avroSchema;

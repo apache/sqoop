@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.schema.Schema;
 
@@ -25,6 +27,8 @@ import org.apache.sqoop.schema.Schema;
  *
  * This class is wrapping information if the run was successful or not.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class DestroyerContext extends TransferableContext {
 
   private boolean success;

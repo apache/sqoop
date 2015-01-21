@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.utils;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -24,6 +27,8 @@ import java.net.URLEncoder;
 /**
  * Miscellaneous utility methods that help in URL-safe communication over HTTP.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public final class UrlSafeUtils {
 
   public static final String ENCODING_UTF8 = "UTF-8";

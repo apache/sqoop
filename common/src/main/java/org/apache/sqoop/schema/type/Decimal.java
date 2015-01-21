@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Fixed point number with configurable precision and scale.
  *
  * JDBC Types: numeric, decimal
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Decimal extends AbstractNumber {
 
   /**

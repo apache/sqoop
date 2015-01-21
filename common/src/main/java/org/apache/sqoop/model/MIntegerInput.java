@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Integer base user input.
  *
  * This input is able to process empty (NULL) value.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MIntegerInput extends MInput<Integer> {
 
   public MIntegerInput(String name, boolean sensitive) {

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.idf.CSVIntermediateDataFormat;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
@@ -31,6 +33,8 @@ import org.apache.sqoop.job.etl.To;
 /**
  * Service provider interface for Sqoop Connectors.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class SqoopConnector {
 
   /**

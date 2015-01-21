@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Floating point represented as IEEE norm.
  *
  * JDBC Types: double, float, real
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class FloatingPoint extends AbstractNumber {
 
   /**

@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents which Directions are supported.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SupportedDirections implements Comparable<SupportedDirections> {
   private static final char SUPPORTED_DIRECTIONS_SEPARATOR = '/';
 

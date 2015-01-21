@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Any type related to number.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class AbstractNumber extends AbstractPrimitiveType {
 
   protected AbstractNumber(String name) {

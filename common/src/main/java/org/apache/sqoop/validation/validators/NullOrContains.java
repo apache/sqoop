@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 /**
  * String validator to verify presence of a sub string (provided as a String argument)
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class NullOrContains extends AbstractValidator<String> {
   @Override
   public void validate(String str) {

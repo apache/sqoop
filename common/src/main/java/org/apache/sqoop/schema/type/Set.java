@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Set contains unique values in a collection of a given type
  *
  * JDBC Types: set
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Set extends AbstractComplexListType {
 
   public Set(String name, Column listType) {

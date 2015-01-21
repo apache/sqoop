@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.schema;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class NullSchema extends Schema {
 
   private static final String NULL_SCHEMA_NAME = "NullSchema";

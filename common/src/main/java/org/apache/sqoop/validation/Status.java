@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Severity of validation message.
  *
@@ -34,6 +37,8 @@ package org.apache.sqoop.validation;
  * Error represents unacceptable element content. For example in case of JDBC
  * URL path, error would be empty element or element containing invalid URL.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum Status {
   /**
    * There are no issues, no warnings. Everything is correct.

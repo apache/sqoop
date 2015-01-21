@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.utils.UrlSafeUtils;
 
 /**
@@ -25,6 +27,8 @@ import org.apache.sqoop.utils.UrlSafeUtils;
  * from user-view. This is helpful for creating input strings that represent
  * sensitive information such as passwords.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class MStringInput extends MInput<String> {
 
   private final short maxLength;

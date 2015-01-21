@@ -17,8 +17,12 @@
  */
 package org.apache.sqoop.json.util;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum SerializationError implements ErrorCode {
 
   SERIALIZATION_001("Attempt to pass a non-map object to MAP type."),

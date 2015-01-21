@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriverConfig;
@@ -39,6 +41,8 @@ import org.json.simple.JSONObject;
 /**
  * Json representation of the job
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class JobBean implements JsonBean {
 
   static final String FROM_LINK_ID = "from-link-id";

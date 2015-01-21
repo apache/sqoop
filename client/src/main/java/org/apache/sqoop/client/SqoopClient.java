@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.client.request.SqoopResourceRequests;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
@@ -49,6 +51,8 @@ import org.apache.sqoop.validation.Status;
  * (Resources, Connector structures). Volatile structures (Links, Jobs)
  * are not cached.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SqoopClient {
 
   /**

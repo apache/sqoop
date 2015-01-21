@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 /**
  * String validator to verify if Input starts with given string (String argument).
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class StartsWith extends AbstractValidator<String> {
   @Override
   public void validate(String str) {

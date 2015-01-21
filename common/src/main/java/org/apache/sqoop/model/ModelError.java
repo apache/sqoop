@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ErrorCode;
 
 /**
  *
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public enum ModelError implements ErrorCode {
 
   MODEL_001("Attempt to pass two different set of MConfigs for single job type."),

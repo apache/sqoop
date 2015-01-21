@@ -18,6 +18,8 @@
 package org.apache.sqoop.schema;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.Column;
 
@@ -33,6 +35,8 @@ import java.util.Set;
  * Schema represents the data fields that are transferred between {@link #From}
  * and {@link #To}
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Schema {
 
   /**

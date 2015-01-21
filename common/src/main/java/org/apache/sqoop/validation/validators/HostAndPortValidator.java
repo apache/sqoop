@@ -18,6 +18,8 @@
 package org.apache.sqoop.validation.validators;
 
 import com.google.common.base.Strings;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 import java.net.URI;
@@ -26,6 +28,8 @@ import java.net.URISyntaxException;
 /**
  * Ensure that given string represents a hostname or hostname:port.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class HostAndPortValidator extends AbstractValidator<String> {
 
   @Override

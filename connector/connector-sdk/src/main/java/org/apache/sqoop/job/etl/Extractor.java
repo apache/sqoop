@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * This allows connector to extract data from a source system
  * based on each partition.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Extractor<LinkConfiguration, FromJobConfiguration, SqoopPartition> {
 
   /**

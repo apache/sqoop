@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.common.ImmutableContext;
 
@@ -25,6 +27,8 @@ import org.apache.sqoop.common.ImmutableContext;
  * object. Each context property is prefixed with special prefix and loaded
  * directly.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class PrefixContext implements ImmutableContext {
 
   Configuration configuration;

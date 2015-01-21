@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Marker class that identifies the Configurables in the Sqoop system
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class Configurable extends MPersistableEntity implements MClonable {
 
 }

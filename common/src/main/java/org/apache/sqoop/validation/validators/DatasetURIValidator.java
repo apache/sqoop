@@ -18,6 +18,8 @@
 package org.apache.sqoop.validation.validators;
 
 import com.google.common.base.Strings;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
 
 import java.util.regex.Pattern;
@@ -25,6 +27,8 @@ import java.util.regex.Pattern;
 /**
  * Ensure that given string represents a Kite dataset uri.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class DatasetURIValidator extends AbstractValidator<String> {
 
   private static final Pattern DATASET_URI_PATTERN = Pattern

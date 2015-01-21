@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.job.etl;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -24,6 +27,8 @@ import java.io.IOException;
 /**
  * A part of the input data partitioned by the Partitioner.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 public abstract class Partition {
 
   /**

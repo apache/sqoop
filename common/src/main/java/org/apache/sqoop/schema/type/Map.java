@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Associative array.
  *
  * JDBC Types: map
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Map extends AbstractComplexType {
 
   // They key can be either a string or number

@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Immutable context interface for key value pairs.
  *
  * Useful for configuration objects that are not allowed to change.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public interface ImmutableContext {
 
   /**

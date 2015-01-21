@@ -17,9 +17,13 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class VersionBean implements JsonBean {
 
   public static final String BUILD_VERSION = "build-version";

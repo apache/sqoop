@@ -18,6 +18,8 @@
 package org.apache.sqoop.model;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.utils.ClassUtils;
@@ -41,6 +43,8 @@ import java.util.Set;
  *
  * TODO: This class should see some overhaul into more reusable code, especially expose and re-use the methods at the end.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class  ConfigUtils {
 
   /**

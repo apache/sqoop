@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.utils;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
@@ -25,6 +28,8 @@ import java.util.ResourceBundle;
 /**
  * Wrapper class to hold the resource bundle key-value pairs in a collections map object
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class MapResourceBundle extends ResourceBundle {
 
   private Map<String, Object> bundle;

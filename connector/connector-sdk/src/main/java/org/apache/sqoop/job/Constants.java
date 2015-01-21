@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.job;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class Constants {
 
   /**

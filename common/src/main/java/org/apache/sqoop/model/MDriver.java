@@ -18,9 +18,14 @@
 package org.apache.sqoop.model;
 
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Describes the configs associated with the {@link Driver} for executing sqoop jobs.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public final class MDriver extends Configurable {
 
   public static final String DRIVER_NAME = "SqoopDriver";

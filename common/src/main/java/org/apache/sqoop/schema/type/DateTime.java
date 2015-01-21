@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Date and time information together.
  *
  * JDBC Types: datetime, timestamp
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class DateTime extends AbstractDateTime {
 
   /**

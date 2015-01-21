@@ -19,6 +19,8 @@ package org.apache.sqoop.connector.common;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
 import org.apache.sqoop.schema.type.Column;
@@ -33,6 +35,8 @@ import java.util.List;
  * The helper class provides methods to convert Sqoop data types to Avro
  * supported data types.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class AvroDataTypeUtil {
 
   public static org.apache.sqoop.schema.Schema createSqoopSchema(

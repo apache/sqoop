@@ -19,6 +19,8 @@ package org.apache.sqoop.json.util;
 
 import java.util.HashSet;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
@@ -46,6 +48,8 @@ import org.json.simple.JSONObject;
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class SchemaSerialization {
 
   // common attributes of all column types

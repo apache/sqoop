@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,6 +30,8 @@ import java.lang.annotation.Target;
  * Each class that is used a configuration group object, the connector developer
  * is expected to provide the inputs needed for this annotation
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ConfigurationClass {

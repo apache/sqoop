@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Represents the various input types supported by the system.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum MInputType {
 
   /** Unknown input type */

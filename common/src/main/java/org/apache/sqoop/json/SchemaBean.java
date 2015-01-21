@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.json.util.SchemaSerialization;
 import org.apache.sqoop.schema.Schema;
 import org.json.simple.JSONObject;
@@ -24,6 +26,8 @@ import org.json.simple.JSONObject;
 /**
  *
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class SchemaBean implements JsonBean {
 
   private Schema schema;

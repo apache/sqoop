@@ -19,10 +19,14 @@ package org.apache.sqoop.json;
 
 import java.util.List;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.model.MSubmission;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class SubmissionsBean extends SubmissionBean {
 
   private static final String SUBMISSIONS = "submissions";

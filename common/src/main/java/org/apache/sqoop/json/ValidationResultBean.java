@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.json;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.ConfigValidationResult;
@@ -31,6 +33,8 @@ import java.util.Set;
 /**
  * Serialize and transfer validation results (0..N).
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public class ValidationResultBean implements JsonBean {
 
   private static final String VALIDATION_RESULT = "validation-result";

@@ -17,10 +17,15 @@
  */
 package org.apache.sqoop.etl.io;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * An intermediate layer for passing data from the execution engine
  * to the ETL engine.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class DataReader {
 
   /**

@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Binary type can contain any binary value (images, text, ...).
  *
  * JDBC Types: blob, binary, varbinary
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Binary extends AbstractString {
 
   public Binary(String name) {

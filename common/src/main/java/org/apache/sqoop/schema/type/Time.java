@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Time (hours, minutes, seconds).
  *
  * JDBC Types: time
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Time extends AbstractDateTime {
 
   /**

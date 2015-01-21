@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.validation;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.util.HashMap;
@@ -26,6 +28,8 @@ import java.util.Map;
 /**
  * Result of validation execution.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class ConfigValidationResult {
 
   /**

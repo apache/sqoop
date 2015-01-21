@@ -17,6 +17,11 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum SqoopResponseCode {
 
   SQOOP_1000("1000", "OK"),

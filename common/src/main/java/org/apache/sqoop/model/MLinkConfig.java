@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.List;
 
 /**
@@ -24,6 +27,8 @@ import java.util.List;
  * NOTE: It extends a config list since {@link MLink} could consist of a related config groups
  *       In future this could be simplified to hold a single list of all configs for the link object
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MLinkConfig extends MConfigList {
 
   public MLinkConfig(List<MConfig> configs) {

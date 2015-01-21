@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Denote config in Configuration class
  */
+@InterfaceAudience.Public
+@InterfaceStability.Evolving
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Config {
   /**

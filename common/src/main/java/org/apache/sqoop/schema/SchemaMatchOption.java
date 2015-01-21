@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.schema;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * The order of the matching options here indicates an order of preference
  * if it is possible to use both NAME and LOCATION matching options, we will prefer NAME
@@ -31,6 +34,8 @@ package org.apache.sqoop.schema;
  *
  * USER_DEFINED - not implemented yet.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public enum SchemaMatchOption {
     NAME,
     LOCATION,

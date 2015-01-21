@@ -17,14 +17,18 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.util.List;
 
 /**
  * Config describing all required information to build the TO part of the job
  * NOTE: It extends a config list since {@link MToConfig} could consist of a related config groups
  *       In future this could be simplified to hold a single list of all configs for the TO object
-
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class MToConfig extends MConfigList {
   public MToConfig(List<MConfig> configs) {
     super(configs, MConfigType.JOB);

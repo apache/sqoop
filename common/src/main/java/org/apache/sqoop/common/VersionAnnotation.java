@@ -17,12 +17,17 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 import java.lang.annotation.*;
 
 /**
  * A package attribute that captures the version that was compiled.
  * Copied down from hadoop.  All is same except name of interface.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PACKAGE)
 public @interface VersionAnnotation {

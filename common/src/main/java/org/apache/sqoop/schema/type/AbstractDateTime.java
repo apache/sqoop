@@ -17,9 +17,14 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * Any time or date related data type.
  */
+@InterfaceAudience.Private
+@InterfaceStability.Unstable
 public abstract class AbstractDateTime extends Column {
 
   protected AbstractDateTime(String name) {

@@ -17,11 +17,16 @@
  */
 package org.apache.sqoop.schema.type;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * True/False value.
  *
  * JDBC Types: bit, boolean
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class Bit extends Column {
 
   public Bit(String name) {
